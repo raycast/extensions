@@ -1,0 +1,62 @@
+# Action Panel
+
+## API Reference
+
+### ActionPanel
+
+Represents a list of actions in the user interface, accessible through the action panel.
+
+| Prop | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| children | [`ActionPanelChildren`](action-panel.md#actionpanelchildren) | No | - | Sections or items. If [ActionPanel.Item](action-panel.md#actionpanel-item) elements are specified, a default section is automatically created. |
+| title | `string` | No | - | The title displayed at the top of the panel |
+
+### ActionPanel.Item
+
+Represents a context-specific action that can be selected in the user interface or triggered through an assigned keyboard shortcut on the respective view.
+
+| Prop | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| icon | [`ImageLike`](icons-and-images.md#imagelike) | No | - | The icon displayed for the action. |
+| id | [`ID`](https://github.com/raycast/api-docs/tree/321f849e249b8db494717dccaf744773ff492d89/api-reference/user-interface.md#id) | No | - | ID of the item. |
+| shortcut | [`KeyboardShortcut`](https://github.com/raycast/api-docs/tree/321f849e249b8db494717dccaf744773ff492d89/api-reference/keyboard.md#keyboardshortcut) | No | - | The keyboard shortcut for the item. |
+| title | `string` | Yes | - | The title displayed for the item. |
+| onAction | `() => void` | No | - |  |
+
+### ActionPanel.Section
+
+Visually separated group of items. Use sections to group related menu items together.
+
+| Prop | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| children | [`ActionPanelSectionChildren`](action-panel.md#actionpanelsectionchildren) | No | - | The item elements of the section. When used for the action panel, the first item in the list is the _primary_ action that will be triggered by the default shortcut \(ENTER\), while the second item is the _secondary_ action triggered by CMD + ENTER. |
+| title | `string` | No | - | Title displayed above the section |
+
+### ActionPanel.Submenu
+
+Represents a context-specific action that can be selected in the user interface or triggered through an assigned keyboard shortcut on the respective view.
+
+| Prop | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| children | [`ActionPanelChildren`](action-panel.md#actionpanelchildren) | No | - | Items of the submenu. |
+| icon | [`ImageLike`](icons-and-images.md#imagelike) | No | - | The icon displayed for the submenu. |
+| id | [`ID`](https://github.com/raycast/api-docs/tree/321f849e249b8db494717dccaf744773ff492d89/api-reference/user-interface.md#id) | No | - | ID of the submenu. Make sure to assign each section a unique ID or a UUID will be auto-generated. |
+| shortcut | [`KeyboardShortcut`](https://github.com/raycast/api-docs/tree/321f849e249b8db494717dccaf744773ff492d89/api-reference/keyboard.md#keyboardshortcut) | No | - | The keyboard shortcut for the submenu. |
+| title | `string` | Yes | - | The title displayed for submenu. |
+
+### ActionPanelChildren
+
+```typescript
+ActionPanelChildren: ActionPanel.Section | ActionPanel.Section[] | ActionPanelSectionChildren | null
+```
+
+Supported children for the [ActionPanel](action-panel.md#actionpanel) and [ActionPanelSubmenu](action-panel.md#actionpanel-submenu) components.
+
+### ActionPanelSectionChildren
+
+```typescript
+ActionPanelSectionChildren: ActionPanel.Item | ActionPanel.Item[] | ReactElement<ActionPanelSubmenuProps> | ReactElement<ActionPanelSubmenuProps>[] | null
+```
+
+Supported children for the [ActionPanelSection](action-panel.md#actionpanel-section) component.
+
