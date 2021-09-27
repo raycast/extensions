@@ -19,7 +19,7 @@ Represents a context-specific action that can be selected in the user interface 
 | :--- | :--- | :--- | :--- | :--- |
 | icon | `ImageLike` | No | - | The icon displayed for the action. |
 | id | `string` | No | - | ID of the item. |
-| shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the item. |
+| shortcut | `KeyboardShortcutTest` | No | - | The keyboard shortcut for the item. |
 | title | `string` | Yes | - | The title displayed for the item. |
 | onAction | <code>() => void</code> | No | - |  |
 
