@@ -18,7 +18,7 @@ To share your extension with others, you need to open a pull request in our [rep
 
 ### Waiting for review
 
-After you opened a pull request, we'll review your changes. Once accepted, the pull request is merged and your extension will be automatically published to the [Raycast Store](https://raycast.com/store).
+After you opened a pull request, we'll review your extension and request changes when required. Once accepted, the pull request is merged and your extension will be automatically published to the [Raycast Store](https://raycast.com/store).
 
 {% hint style="info" %}
 We're still figuring things out and update our guidelines. If something is unclear, please tell us in [our community](https://raycast.com/community).
