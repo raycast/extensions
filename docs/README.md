@@ -20,7 +20,7 @@ The Raycast platform is currently in public beta. We stabilised it during a priv
 
 * **Powerful and familiar tooling:** Extensions are built with JavaScript/TypeScript, React and Node. Leverage npm's ecosystem to quickly build what you imagine.
 * **No-brainer to build UI:** You concentrate on the logic, we push the pixels. Use our built-in UI components to be consistent with all our extensions. 
-* **Collaborate with our community:** Build your extension, share it with others to iterate on it and get inspired by our community members.
+* **Collaborate with our community:** Build your extension, share it with our community and get inspired by others.
 * **Developer experience front and foremost:** A strongly typed API, hot-reloading and familiar tooling make it a blessing to extend Raycast your way.
 
 ### Overview

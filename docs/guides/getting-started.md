@@ -11,6 +11,7 @@ Before you can create your first extension, make sure you have the following pre
 * You have Raycast 1.23.0 or higher installed and [activated early access to the Raycast platform](getting-started.md#activate-early-access).
 * You have [Node.js](https://nodejs.org/) 16.0 or higher installed. We recommend [nvm](https://github.com/nvm-sh/nvm) to install Node.
 * You have [npm](http://npmjs.com) 7.0 or higher installed. If you used nvm to install Node, this is the case.
+* You are familiar with [React](https://reactjs.org) and [TypeScript](https://www.typescriptlang.org). Don't worry, you don't need to be an expert. If you need some help with the basics, check out TypeScript's [Handbook](https://www.typescriptlang.org/docs/handbook/intro.html) and React's [Getting Started](https://reactjs.org/docs/getting-started.html) guide.
 
 ### Activate early access
 

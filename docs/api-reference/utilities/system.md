@@ -20,7 +20,7 @@ async function getApplications(path: PathLike): Promise<Application[]>
 
 #### Return
 
-An array of [Application](../utilities/system.md#application),
+An array of [Application](system.md#application),
 
 ### getDefaultApplication
 
@@ -40,7 +40,7 @@ async function getDefaultApplication(path: PathLike): Promise<Application>
 
 #### Return
 
-The default [Application](../utilities/system.md#application) that would open the file. Throws an error if no application was found.
+The default [Application](system.md#application) that would open the file. Throws an error if no application was found.
 
 ### showInFinder
 
@@ -101,3 +101,4 @@ An object that represents a locally installed application on the system.
 | bundleId | `string` | No | The bundle identifier of the application, e.g. `com.raycast.macos`. |
 | name | `string` | Yes | The display name of the application. |
 | path | `string` | Yes | The absolute path to the application bundle, e.g. `/Applications/Raycast.app`, |
+

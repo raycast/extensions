@@ -28,7 +28,13 @@ To make changes to your extension, open the `./src/index.tsx` file in your exten
 
 ### Use your extension
 
-Now, you can stop `npm run dev` in your terminal. The extension stays in Raycast and you can find it's commands in the root search. Don't forget to run [`npm run dev`](../information/cli.md#development) again when you want to change your extension.
+Now, you can press `⌃` `C` in your terminal to stop `npm run dev`. The extension stays in Raycast and you can find it's commands in the root when searching for "Hello World". 
 
 🎉 Congratulations! You built your first extension. 
+
+{% hint style="info" %}
+Don't forget to run [`npm run dev`](../information/cli.md#development) again when you want to change something in your extension.
+{% endhint %}
+
+
 

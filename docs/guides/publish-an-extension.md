@@ -1,29 +1,32 @@
+---
+description: Learn how to share your extension with our community.
+---
+
 # Publish an extension
 
-Now we have Extension Store where you can install extensions built by others. Search for "Extension Store" command in Raycast app or browse it [via web](https://raycast.com/featured) \(you need to be logged in\).
+### Prepare your extension for publishing
 
-![Search extension in the Raycast Store](../.gitbook/assets/124125322-63798500-da71-11eb-836f-c900bcbd05b4.png)
+Open your terminal, navigate to your extension directory and run `npm run build` to verify your extension. The command should complete without any errors.
 
-### Publish extension
-
-All extensions from [extensions](https://github.com/raycast-api/api-alpha/blob/main/extensions) directory are automatically published by CI on new commits to `main`. So in order to publish new extension or an update, you need to create a Pull Request. We will review your changes and suggest if anything needs an update. Once accepted, we will merge your PR and it will automatically be published to the store.
-
-Quick note for those who haven't created PRs before:
-
-1. Fork this repository
-2. Make changes in your forked repo
-3. Push changes to your forked repo
-4. In GitHub Web UI press Contribute -&gt; Open Pull Request
-
-### Prepare for publishing
-
-To avoid build failures during the publishing step, please run `npm run build` script for your extension. Under the hood it calls `ray build -e dist` and should give same errors as CI.
-
-### Extension review
-
-We are still in the process of figuring out what should be guidelines so expect constant changes around that topic. We will make sure to communicate all the changes with the alpha testers group.
-
-{% hint style="warning" %}
-We are still in the testing phase and we might remove extensions from the store from time to time or break something. Also, there is high chance that once we are getting closer to the public launch we'll have more strict guidelines and we might completely reset the store.
+{% hint style="info" %}
+`npm run build` validates your extension for distribution without publishing it to the store. Read more about it [here](../information/cli.md#build).
 {% endhint %}
+
+### Publish your extension
+
+To share your extension with others, you need to open a pull request in our [repository](https://github.com/raycast/extensions). For this, [fork our repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo), add your extension to the forked repository, push your changes to your fork and open a pull request via the GitHub web interface against the `main` branch.
+
+### Waiting for review
+
+After you opened a pull request, we'll review your changes. Once accepted, the pull request is merged and your extension will be automatically published to the [Raycast Store](https://raycast.com/store).
+
+{% hint style="info" %}
+We're still figuring things out and update our guidelines. If something is unclear, please tell us in [our community](https://raycast.com/community).
+{% endhint %}
+
+### Share your extension
+
+Once your extension is published in the Rayast Store, you can share it with our community. Open the Manage Extensions command, search for your extension and press `⌘` `⌥` `.` to copy the link. 
+
+🚀 Now it's time to share your work! Tweet about your extension, share it with our [Slack community](https://raycast.com/community) or send it to your teammates. 
 
