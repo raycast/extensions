@@ -1,0 +1,23 @@
+name: Generate API Reference
+on: 
+  push:
+    paths:
+      - "docs/api-reference.json"
+    branches: [main]
+jobs:
+  generate-api-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Generate
+        run: cd scripts && ./generate-api-reference.js
+
+      - name: Commit
+        run: |
+          git config --global user.email "bot@raycast.com"
+          git config --global user.name "raycastbot"
+          git add .
+          git commit --message "Docs: Generate API reference"
+          git push
