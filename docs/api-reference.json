@@ -5582,7 +5582,7 @@
 					"type": {
 						"type": "reference",
 						"id": 42,
-						"name": "KeyboardShortcutTest"
+						"name": "KeyboardShortcut"
 					}
 				},
 				{
