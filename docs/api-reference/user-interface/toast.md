@@ -36,9 +36,9 @@ async function showToast(style: ToastStyle, title: string, message: string): Pro
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| style | [`ToastStyle`](toast.md#toaststyle) | Yes | The visual style of the Toast. |
+| style | `ToastStyle` | Yes | The visual style of the Toast. |
 | title | `string` | Yes | The title that will be displayed in the Toast. |
-| message | `string` | No | The message that will be displayed in the Toast. |
+| message | `string` | No | The message that will be displayed in the Toast.  |
 
 #### Return
 
@@ -46,39 +46,40 @@ A promise that resolves with the shown toast. The toast can be used to change or
 
 ### Toast
 
-A Toast with a certain style, title, and message. Use [showToast](toast.md#showtoast) as shortcut for creating and showing a Toast.
+A Toast with a certain style, title, and message.
+Use [showToast](../user-interface/toast.md#showtoast) as shortcut for creating and showing a Toast.
 
 #### Constructors
 
 | Name | Type | Description |
 | :--- | :--- | :--- |
-| constructor | `(options: ToastOptions) =>` [`Toast`](toast.md#toast) |  |
+| constructor | <code>(options: ToastOptions) => Toast</code> |  |
 
 #### Accessors
 
 | Name | Type | Description |
 | :--- | :--- | :--- |
 | message | `undefined` or `string` |  |
-| style | [`ToastStyle`](toast.md#toaststyle) |  |
+| style | `ToastStyle` |  |
 | title | `string` |  |
 
 #### Methods
 
 | Name | Type | Description |
 | :--- | :--- | :--- |
-| hide | `() => Promise<void>` | Hides the Toast. |
-| show | `() => Promise<void>` | Shows the Toast. |
+| hide | <code>() => Promise<void></code> | Hides the Toast. |
+| show | <code>() => Promise<void></code> | Shows the Toast. |
 
 ### ToastOptions
 
-The options to create a [Toast](toast.md#toast).
+The options to create a [Toast](../user-interface/toast.md#toast).
 
 #### Properties
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | message | `string` | No |  |
-| style | [`ToastStyle`](toast.md#toaststyle) | Yes |  |
+| style | `ToastStyle` | Yes |  |
 | title | `string` | Yes |  |
 
 ### ToastStyle
@@ -92,4 +93,3 @@ Defines the visual style of the Toast.
 | Animated | "ANIMATED" |
 | Failure | "FAILURE" |
 | Success | "SUCCESS" |
-

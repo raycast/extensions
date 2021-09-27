@@ -61,4 +61,3 @@ async function popToRoot(options: { clearSearchBar: boolean }): Promise<void>
 #### Return
 
 A promise that resolves when Raycast popped to root.
-

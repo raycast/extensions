@@ -91,7 +91,7 @@ async function setLocalStorageItem(key: string, value: LocalStorageValue): Promi
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | key | `string` | Yes | The key you want to create or update the value of. |
-| value | [`LocalStorageValue`](https://github.com/raycast/api-docs/tree/321f849e249b8db494717dccaf744773ff492d89/storage.md#localstoragevalue) | Yes | The value you want to create or update for the given key. |
+| value | `LocalStorageValue` | Yes | The value you want to create or update for the given key. |
 
 #### Return
 
@@ -104,4 +104,3 @@ LocalStorageValue: string | number | boolean
 ```
 
 Supported storage value types.
-
