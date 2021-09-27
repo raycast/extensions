@@ -16,7 +16,6 @@ jobs:
         run: ./generate-api-reference.js
 
       - name: Commit
-        working-directory: scripts
         run: |
           git config --global user.email "bot@raycast.com"
           git config --global user.name "raycastbot"
