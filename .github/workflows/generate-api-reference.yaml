@@ -4,6 +4,7 @@ on:
     paths:
       - "docs/api-reference.json"
     branches: [main]
+  workflow_dispatch:
 jobs:
   generate-api-reference:
     runs-on: ubuntu-latest
