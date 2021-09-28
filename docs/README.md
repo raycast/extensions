@@ -14,23 +14,27 @@ The Raycast Platform consists of two parts:
 * **Store:** This allows developers to share their extensions with all Raycast users. You'll learn how to [publish your extension](basics/publish-an-extension.md).
 
 {% hint style="info" %}
-The Raycast platform is currently in public beta. We stabilised it during a private alpha with our community. We'll continue to work together to nail the nail the developer experience. Join us in our [Slack workspace](https://raycast.com/community).
+The Raycast platform is currently in public beta. We've stabilised it during a private alpha with our community. We'll continue to work together to nail the developer experience. Join us in our [Slack workspace](https://raycast.com/community).
 {% endhint %}
 
 ### Key features
 
-* **Powerful and familiar tooling:** Extensions are built with JavaScript/TypeScript, React and Node. Leverage npm's ecosystem to quickly build what you imagine.
+Here are a few points what makes our ecosystem special:
+
+* **Powerful and familiar tooling:** Extensions are built with TypeScript, React and Node. Leverage npm's ecosystem to quickly build what you imagine.
 * **No-brainer to build UI:** You concentrate on the logic, we push the pixels. Use our built-in UI components to be consistent with all our extensions. 
-* **Collaborate with our community:** Build your extension, share it with our community and get inspired by others.
-* **Developer experience front and foremost:** A strongly typed API, hot-reloading and familiar tooling make it a blessing to extend Raycast your way.
+* **Collaborate with our community:** Build your extension, share it with our community and get inspired by others. 
+* **Developer experience front and foremost:** A strongly typed API, hot-reloading and modern tooling that make it a blast to work with.
+* **Easy to start, flexible to scale:** Start with a simple script, add a static UI or use React to go wilde. Anything goes.
 
 ### Overview
 
-A quick overview about where to find what in our docs.
+A quick overview about where to find what in our docs: 
 
-Learn how to build extensions in our step-by-step [guides](basics/getting-started.md).
+* \*\*\*\*[**Basics:**](basics/getting-started.md) Go over this section to learn how to build extensions in our step-by-step guides.
+* \*\*\*\*[**Examples:**](examples/todo-list.md) Kickstart your extension by using an open source example and learn as you go.
+* \*\*\*\*[**Information:**](information/cli.md) ****Get the background information to master your understanding of our platform.
+* \*\*\*\*[**API Reference:**](api-reference/clipboard.md) Go into details wit hthe API reference that includes code snippets.
 
-Kickstart your extension by using an open source example.
-
-Go into details with the API reference that includes code snippets.
+Now, let's build 💪
 
