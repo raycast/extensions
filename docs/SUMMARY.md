@@ -12,6 +12,8 @@
 
 ## Examples
 
+* [Hello world](examples/hello-world.md)
+* [Script](examples/script.md)
 * [Todo list](examples/todo-list.md)
 
 ## Information
