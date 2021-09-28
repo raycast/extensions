@@ -7,9 +7,8 @@
 * [Getting started](basics/getting-started.md)
 * [Create your first extension](basics/create-your-first-extension.md)
 * [Publish an extension](basics/publish-an-extension.md)
-* [Install an extension](basics/install-an-extension.md)
 * [Debug an extension](basics/debug-an-extension.md)
-* [Contribute to an extension](basics/contribute-to-an-extension.md)
+* [Install an extension](basics/install-an-extension.md)
 
 ## Examples
 
