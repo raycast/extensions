@@ -25,6 +25,7 @@
   * [Manifest](information/extension-lifecycle/manifest.md)
 * [Review process](information/review-process.md)
 * [Store](information/store.md)
+* [Terminology](information/terminology.md)
 
 ## API Reference
 
@@ -49,4 +50,8 @@
   * [Application](api-reference/utilities/application.md)
   * [ID](api-reference/utilities/id.md)
   * [System](api-reference/utilities/system.md)
+
+---
+
+* [FAQ](faq.md)
 
