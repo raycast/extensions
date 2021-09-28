@@ -580,10 +580,7 @@ async function parseCategory(docs, title, children) {
   for (const id of children) {
     const item = findById(docs, id);
     if (item) {
-      let subcategory = getSubcategory(item);
-      if (!subcategory && ["User Interface", "Utilities"].includes(title)) {
-        subcategory = "No Sub Category";
-      }
+      const subcategory = getSubcategory(item);
       subCategoryMap.set(subcategory, [...(subCategoryMap.get(subcategory) || []), item]);
     }
   }
@@ -593,10 +590,14 @@ async function parseCategory(docs, title, children) {
   }
 }
 
+const SKIP_CATEGORIES = ["Other"];
+
 async function main() {
   const docs = await readDocsJson();
   for (const category of docs.categories) {
-    await parseCategory(docs, category.title, category.children);
+    if (!SKIP_CATEGORIES.includes(category.title)) {
+      await parseCategory(docs, category.title, category.children);
+    }
   }
 }
 
