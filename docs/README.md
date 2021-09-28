@@ -19,7 +19,7 @@ The Raycast platform is currently in public beta. We've stabilised it during a p
 
 ### Key features
 
-Here are a few points what makes our ecosystem special:
+Here are a few points that make our ecosystem special:
 
 * **Powerful and familiar tooling:** Extensions are built with TypeScript, React and Node. Leverage npm's ecosystem to quickly build what you imagine.
 * **No-brainer to build UI:** You concentrate on the logic, we push the pixels. Use our built-in UI components to be consistent with all our extensions. 
