@@ -6,5 +6,7 @@ description: Answers to the most frequently asked questions.
 
 ## What's the difference between [script commands](https://github.com/raycast/script-commands) and extensions?
 
+## Why can I not use `react-dom`?
+
 
 
