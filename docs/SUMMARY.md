@@ -19,8 +19,10 @@
 * [Changelog](information/changelog.md)
 * [CLI](information/cli.md)
 * [Community](https://raycast.com/community)
-* [Extension structure](information/extension-structure.md)
-* [Extension lifecycle](information/extension-lifecycle.md)
+* [Extensions](information/extension-lifecycle/README.md)
+  * [File structure](information/extension-lifecycle/file-structure.md)
+  * [Lifecycle](information/extension-lifecycle/lifecycle.md)
+  * [Manifest](information/extension-lifecycle/manifest.md)
 * [Review process](information/review-process.md)
 * [Store](information/store.md)
 

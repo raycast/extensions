@@ -1,4 +1,4 @@
-# Extension lifecycle
+# Lifecycle
 
 When a command is opened in Raycast, the command code is executed right away. If the extension exports a default function, this function will automatically be called. You can then [render](file:///Users/mann/Developer/api-alpha/documentation/modules.html#render) a user interface or just perform logic and use other API methods. For commands with their `mode` property set to `default` \(instead of `view`\) in the package manifest, no user interface will be rendered when the command is performed in Raycast.
 
