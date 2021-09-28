@@ -21,6 +21,7 @@
 * [Community](https://raycast.com/community)
 * [Extension structure](information/extension-structure.md)
 * [Extension lifecycle](information/extension-lifecycle.md)
+* [Review process](information/review-process.md)
 * [Store](information/store.md)
 
 ## API Reference

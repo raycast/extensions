@@ -4,7 +4,9 @@ description: Learn how to share your extension with our community.
 
 # Publish an extension
 
-### Prepare your extension for publishing
+Before you publish your extension, take a look at the [review process](../information/review-process.md). Making sure you follow the guidelines is the best way to help your extension pass the review. 
+
+### Validate your extension
 
 Open your terminal, navigate to your extension directory and run `npm run build` to verify your extension. The command should complete without any errors.
 
@@ -14,7 +16,7 @@ Open your terminal, navigate to your extension directory and run `npm run build`
 
 ### Publish your extension
 
-To share your extension with others, you need to open a pull request in our [repository](https://github.com/raycast/extensions). For this, [fork our repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo), add your extension to the forked repository, push your changes to your fork and open a pull request [via the GitHub web interface](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork) into our `main` branch.
+To share your extension with others, you need to open a pull request in our [repository](https://github.com/raycast/extensions). For this, [fork our repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo), add your extension to your fork, push your changes and open a pull request [via the GitHub web interface](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork) into our `main` branch.
 
 ### Waiting for review
 
