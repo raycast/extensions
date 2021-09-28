@@ -34,7 +34,7 @@ A quick overview about where to find what in our docs:
 * \*\*\*\*[**Basics:**](basics/getting-started.md) Go over this section to learn how to build extensions in our step-by-step guides.
 * \*\*\*\*[**Examples:**](examples/todo-list.md) Kickstart your extension by using an open source example and learn as you go.
 * \*\*\*\*[**Information:**](information/cli.md) ****Get the background knowledge to master your understanding of our platform.
-* \*\*\*\*[**API Reference:**](api-reference/clipboard.md) Go into details with the API reference that includes code snippets.
+* \*\*\*\*[**API Reference:**](api-reference/clipboard.md) Go into details wit hthe API reference that includes code snippets.
 
 Now, let's build 💪
 
