@@ -44,7 +44,6 @@
   * [Utilities](api-reference/user-interface/utilities.md)
   * [Window & Search Bar](api-reference/user-interface/window-and-search-bar.md)
 * [Utilities](api-reference/utilities/README.md)
-  * [Application](api-reference/utilities/application.md)
   * [ID](api-reference/utilities/id.md)
   * [System](api-reference/utilities/system.md)
 

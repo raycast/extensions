@@ -6,15 +6,16 @@ description: Start building your perfect tools with the Raycast API.
 
 Welcome, developers! Our docs cover guides, examples, references and more to help you build extensions and share them with our community.
 
-This API enables you to create a custom Raycast extension using our TypeScript API. Your extension can be installed in Raycast and its commands will appear in Raycast root search. Using our CLI dev tool, the TypeScript code is compiled into a package containing JavaScript and then loaded into Raycast at runtime. Each command runs in its own isolated environment on the Node.js runtime and can interact with Raycast and the host environment through the API. Commands can define a user interface that will be rendered with native components \(no web view\).
+![](.gitbook/assets/cleanshot-2021-09-28-at-3.07.26-2x.png)
 
-Over time, and as this API will is being further developed, more and more features will become available. Our mission is to build a rich API that will cover many use cases for your custom productivity tools, and later allow distribution, sharing, and discovery of commands through a store.
+The Raycast Platform consists of two parts:
 
-Let's get started!
+* **API:** This allows developers to build rich extensions with React, Node.js and TypeScript. The docs explain how to use the API to build top-notch experiences.
+* **Store:** This allows developers to share their extensions with all Raycast users. You'll learn how to [publish your extension](basics/publish-an-extension.md).
 
-### Public beta
-
-The Raycast platform is currently in public beta. We stabilised it during a private alpha and continue to work closely with our community together to absolutely nail it. If you want to have a saying in what we should build next, join our [Slack workspace](https://raycast.com/community) and meet other productivity nerds.
+{% hint style="info" %}
+The Raycast platform is currently in public beta. We stabilised it during a private alpha with our community. We'll continue to work together to nail the nail the developer experience. Join us in our [Slack workspace](https://raycast.com/community).
+{% endhint %}
 
 ### Key features
 
