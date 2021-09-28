@@ -2,13 +2,13 @@
 
 * [Introduction](README.md)
 
-## Guides
+## Basics
 
-* [Getting started](guides/getting-started.md)
-* [Create your first extension](guides/create-your-first-extension.md)
-* [Publish an extension](guides/publish-an-extension.md)
-* [Debug an extension](guides/debug-an-extension.md)
-* [Install an extension](guides/install-an-extension.md)
+* [Getting started](basics/getting-started.md)
+* [Create your first extension](basics/create-your-first-extension.md)
+* [Publish an extension](basics/publish-an-extension.md)
+* [Debug an extension](basics/debug-an-extension.md)
+* [Install an extension](basics/install-an-extension.md)
 
 ## Examples
 
@@ -16,9 +16,7 @@
 
 ## Information
 
-* [Changelog](information/changelog.md)
 * [CLI](information/cli.md)
-* [Community](https://raycast.com/community)
 * [Extensions](information/extension-lifecycle/README.md)
   * [File structure](information/extension-lifecycle/file-structure.md)
   * [Lifecycle](information/extension-lifecycle/lifecycle.md)
@@ -53,5 +51,7 @@
 
 ---
 
+* [Changelog](changelog.md)
+* [Community](https://raycast.com/community)
 * [FAQ](faq.md)
 

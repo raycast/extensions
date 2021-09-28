@@ -27,7 +27,7 @@ The Raycast platform is currently in public beta. We stabilised it during a priv
 
 A quick overview about where to find what in our docs.
 
-Learn how to build extensions in our step-by-step [guides](guides/getting-started.md).
+Learn how to build extensions in our step-by-step [guides](basics/getting-started.md).
 
 Kickstart your extension by using an open source example.
 
