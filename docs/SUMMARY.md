@@ -31,7 +31,6 @@
 * [Environment](api-reference/environment.md)
 * [Preferences](api-reference/preferences.md)
 * [Storage](api-reference/storage.md)
-* [Types](api-reference/types.md)
 * [User Interface](api-reference/user-interface/README.md)
   * [Action Panel](api-reference/user-interface/action-panel.md)
   * [Actions](api-reference/user-interface/actions.md)
