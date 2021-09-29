@@ -13407,6 +13407,10 @@
 						"shortText": "Represents an item within a list section.",
 						"tags": [
 							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { Icon, List } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <List>\n      <List.Item icon={Icon.Star} title=\"Augustiner Helles\" subtitle=\"0,5 Liter\" accessoryTitle=\"Germany\" />\n    </List>\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "List\n"
 							}
