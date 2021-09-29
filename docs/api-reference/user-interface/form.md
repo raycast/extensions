@@ -14,7 +14,7 @@ Shows a list of form items such as FormViewTextField, FormViewCheckbox or FormVi
 | isLoading | `boolean` | No | - | Indicates whether a loading bar should be shown or hidden below the search bar |
 | navigationTitle | `string` | No | - | The main title for that view displayed in Raycast |
 | submitTitle | `string` | No | - | The title of the submit action button. If no title is set, Raycast displays a default title. |
-| onSubmit | `(input: Values) => void` | Yes | - |  |
+| onSubmit | <code>(input: Values) => void</code> | Yes | - |  |
 
 ### Form.Checkbox
 
@@ -28,7 +28,7 @@ A form item with a checkbox.
 | storeValue | `boolean` | No | - | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. |
 | title | `string` | No | - | The title displayed on the left side of the item. |
 | value | `boolean` | No | - | The current value of the item. |
-| onChange | `(newValue: Value) => void` | No | - |  |
+| onChange | <code>(newValue: Value) => void</code> | No | - |  |
 
 ### Form.DatePicker
 
@@ -36,13 +36,13 @@ A form item with a date picker.
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| dateFormat | `string` | No | - | The date format string to be used for FormViewDatePicker.value. The default format is ISO 8601 \("yyyy-MM-dd'T'HH:mm:ssXXXXX"\). |
+| dateFormat | `string` | No | - | The date format string to be used for FormViewDatePicker.value. The default format is ISO 8601 ("yyyy-MM-dd'T'HH:mm:ssXXXXX"). |
 | defaultValue | `string` | No | - | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
 | id | `string` | Yes | - | ID of the form item. Make sure to assign each form item a unique id. |
 | storeValue | `boolean` | No | - | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. |
 | title | `string` | No | - | The title displayed on the left side of the item. |
 | value | `string` | No | - | The current value of the item. |
-| onChange | `(newValue: Value) => void` | No | - |  |
+| onChange | <code>(newValue: Value) => void</code> | No | - |  |
 
 ### Form.Dropdown
 
@@ -50,13 +50,13 @@ A form item with a dropdown menu.
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | `null` or `Form.DropdownSection` or `Form.DropdownSection[]` or `Form.DropdownItem` or `Form.DropdownItem[]` | No | - | Sections or items. If [FormDropdownItem](form.md#formdropdownitem) elements are specified, a default section is automatically created. |
+| children | `null` or `Form.DropdownSection` or `Form.DropdownSection[]` or `Form.DropdownItem` or `Form.DropdownItem[]` | No | - | Sections or items. If [FormDropdownItem](../user-interface/form.md#formdropdownitem) elements are specified, a default section is automatically created. |
 | defaultValue | `string` | No | - | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
 | id | `string` | Yes | - | ID of the form item. Make sure to assign each form item a unique id. |
 | storeValue | `boolean` | No | - | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. |
 | title | `string` | No | - | The title displayed on the left side of the item. |
 | value | `string` | No | - | The current value of the item. |
-| onChange | `(newValue: Value) => void` | No | - |  |
+| onChange | <code>(newValue: Value) => void</code> | No | - |  |
 
 ### Form.DropdownItem
 
@@ -64,22 +64,24 @@ Represents a context-specific action that can be selected in the user interface 
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | `ImageLike` | No | - | A optional icon displayed for the item. See [ImageLike](icons-and-images.md#imagelike) for the supported formats and types. |
+| icon | `ImageLike` | No | - | A optional icon displayed for the item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
 | title | `string` | Yes | - | The title displayed for the item. |
 | value | `string` | Yes | - | Value of the dropdown item. Make sure to assign each unique value for each item. |
 
 ### Form.DropdownSection
 
-Visually separated group of items. Use sections to group related menu items together.
+Visually separated group of items.
+Use sections to group related menu items together.
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | `null` or `Form.DropdownItem` or `Form.DropdownItem[]` | No | - | The item elements of the section. When used for the action panel, the first item in the list is the _primary_ action that will be triggered by the default shortcut \(ENTER\), while the second item is the _secondary_ action triggered by CMD + ENTER. |
+| children | `null` or `Form.DropdownItem` or `Form.DropdownItem[]` | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
 | title | `string` | No | - | Title displayed above the section |
 
 ### Form.Separator
 
-A form item that shows a separator line. Use for grouping and visually separating form items.
+A form item that shows a separator line.
+Use for grouping and visually separating form items.
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -98,11 +100,11 @@ A form item with a tag picker that allows the user to select multiple items.
 | storeValue | `boolean` | No | - | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. |
 | title | `string` | No | - | The title displayed on the left side of the item. |
 | value | `string[]` | No | - | The current value of the item. |
-| onChange | `(newValue: Value) => void` | No | - |  |
+| onChange | <code>(newValue: Value) => void</code> | No | - |  |
 
 ### Form.TagPickerItem
 
-A tag picker item in a [FormTagPicker](form.md#formtagpicker).
+A tag picker item in a [FormTagPicker](../user-interface/form.md#formtagpicker).
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -112,7 +114,8 @@ A tag picker item in a [FormTagPicker](form.md#formtagpicker).
 
 ### Form.TextArea
 
-A form item with a text area for input. The item supports multiline text entry.
+A form item with a text area for input.
+The item supports multiline text entry.
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -122,7 +125,7 @@ A form item with a text area for input. The item supports multiline text entry.
 | storeValue | `boolean` | No | - | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. |
 | title | `string` | No | - | The title displayed on the left side of the item. |
 | value | `string` | No | - | The current value of the item. |
-| onChange | `(newValue: Value) => void` | No | - |  |
+| onChange | <code>(newValue: Value) => void</code> | No | - |  |
 
 ### Form.TextField
 
@@ -136,7 +139,7 @@ A form item with a text field for input.
 | storeValue | `boolean` | No | - | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. |
 | title | `string` | No | - | The title displayed on the left side of the item. |
 | value | `string` | No | - | The current value of the item. |
-| onChange | `(newValue: Value) => void` | No | - |  |
+| onChange | <code>(newValue: Value) => void</code> | No | - |  |
 
 ### FormValues
 
@@ -146,7 +149,7 @@ Values of items in the form.
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| \[item: string\] | `any` | Yes | The form value of a given item. |
+| [item: string] | `any` | Yes | The form value of a given item. |
 
 ### FormValue
 
@@ -155,4 +158,3 @@ FormValue: string | number | boolean | string[] | number[] | null
 ```
 
 A possible form item value that will be used as an input for the submit callback of a form.
-

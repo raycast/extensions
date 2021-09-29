@@ -104,4 +104,3 @@ LocalStorageValue: string | number | boolean
 ```
 
 Supported storage value types.
-

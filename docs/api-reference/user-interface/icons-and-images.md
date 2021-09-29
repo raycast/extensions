@@ -36,9 +36,9 @@ const icon = { source: { light: "icon-light.png", dark: "icon-dark.png" }}
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| mask | `ImageMask` | No | A [ImageMask](icons-and-images.md#imagemask) to apply to the image. |
+| mask | `ImageMask` | No | A [ImageMask](../user-interface/icons-and-images.md#imagemask) to apply to the image. |
 | source | `ImageSource` | Yes | The source of the image. |
-| tintColor | `string` | No | A [ColorLike](colors.md#colorlike) to tint all the non-transparent pixels of the image. |
+| tintColor | `string` | No | A [ColorLike](../user-interface/colors.md#colorlike) to tint all the non-transparent pixels of the image. |
 
 ### Icon
 
@@ -122,5 +122,5 @@ Union type for the supported image types.
 ImageSource: string | Icon | { dark: string; light: string }
 ```
 
-The source of an [Image](icons-and-images.md#image). Can be either a remote URL, a local file resource, a built-in [Icon](icons-and-images.md#icon) or a single emoji.
-
+The source of an [Image](../user-interface/icons-and-images.md#image). Can be either a remote URL, a local file resource, a built-in [Icon](../user-interface/icons-and-images.md#icon) or
+a single emoji.
