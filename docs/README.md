@@ -11,7 +11,7 @@ Welcome, developers! Our docs cover guides, examples, references and more to hel
 The Raycast Platform consists of two parts:
 
 * **API:** This allows developers to build rich extensions with React, Node.js and TypeScript. The docs explain how to use the API to build top-notch experiences.
-* **Store:** This allows developers to share their extensions with all Raycast users. You'll learn how to [publish your extension](basics/publish-an-extension.md).
+* **Store:** This lets developers share their extensions with all Raycast users. You'll learn how to [publish your extension](basics/publish-an-extension.md).
 
 {% hint style="info" %}
 The Raycast platform is currently in public beta. We've stabilised it during a private alpha with our community. We'll continue to work together to nail the developer experience. Join us in our [Slack workspace](https://raycast.com/community).
@@ -31,10 +31,10 @@ Here are a few points that make our ecosystem special:
 
 A quick overview about where to find what in our docs:
 
-* \*\*\*\*[**Basics:**](basics/getting-started.md) Go over this section to learn how to build extensions in our step-by-step guides.
-* \*\*\*\*[**Examples:**](examples/todo-list.md) Kickstart your extension by using an open source example and learn as you go.
-* \*\*\*\*[**Information:**](information/cli.md) _\*\*_Get the background knowledge to master your understanding of our platform.
-* \*\*\*\*[**API Reference:**](api-reference/clipboard.md) Go into details wit hthe API reference that includes code snippets.
+* [**Basics:**](basics/getting-started.md) Go over this section to learn how to build extensions in our step-by-step guides.
+* [**Examples:**](examples/todo-list.md) Kickstart your extension by using an open source example and learn as you go.
+* [**Information:**](information/cli.md) Get the background knowledge to master your understanding of our platform.
+* [**API Reference:**](api-reference/clipboard.md) Go into details wit hthe API reference that includes code snippets.
 
 Now, let's build 💪
 
