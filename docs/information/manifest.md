@@ -54,7 +54,7 @@ All properties for a command.
 
 ### Preference properties
 
-All properties for extension or command specific preferences. Also see the [Preferences API Reference](../../api-reference/preferences.md#preference) for more details.
+All properties for extension or command specific preferences. Also see the [Preferences API Reference](../api-reference/preferences.md#preference) for more details.
 
 | Property | Description |
 | :--- | :--- |

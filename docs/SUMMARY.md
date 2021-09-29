@@ -19,12 +19,10 @@
 ## Information
 
 * [CLI](information/cli.md)
-* [Extensions](information/extension-lifecycle/README.md)
-  * [File structure](information/extension-lifecycle/file-structure.md)
-  * [Lifecycle](information/extension-lifecycle/lifecycle.md)
-  * [Manifest](information/extension-lifecycle/manifest.md)
+* [File structure](information/file-structure.md)
+* [Lifecycle](information/lifecycle.md)
+* [Manifest](information/manifest.md)
 * [Review process](information/review-process.md)
-* [Store](information/store.md)
 * [Terminology](information/terminology.md)
 
 ## API Reference
