@@ -33,8 +33,8 @@ All Raycast related properties for an extension.
 | description | The full description of the extension shown in the Store. |
 | icon | A reference to an icon file in the assets folder. Use png format with a size of at least 256 x 256 pixels. |
 | keywords | An optional array of keywords for which the extension can be searched for in Raycast.  |
-| commands | An array of commands exposed by the extension, see [Command Properties](file:///Users/mann/Developer/api-alpha/documentation/index.html#command-properties). |
-| preferences | Extensions can contribute preferences that are shown in Raycast Preferences &gt; Extensions. You can use preferences for configuration values and passwords or personal access tokens, see [Preference Properties](file:///Users/mann/Developer/api-alpha/documentation/index.html#preference-properties). |
+| commands | An array of commands exposed by the extension, see [Command Properties](#command-properties). |
+| preferences | Extensions can contribute preferences that are shown in Raycast Preferences &gt; Extensions. You can use preferences for configuration values and passwords or personal access tokens, see [Preference Properties](#preference-properties). |
 | external | Optional array of package or file names that should be excluded from the build. The package will not be bundled but the import is preserved and will be evaluated at runtime. |
 
 ### Command properties
@@ -50,7 +50,7 @@ All properties for a command.
 | icon | An optional reference to an icon file in the assets folder. Use png format with a size of at least 256 x 256 pixels. If no icon is specified, the extension icon will be used. |
 | mode | A value of `view` indicates that the command will show a main view when performed. `no-view` means that the command does not push a view to the main navigation stack in Raycast. Latter is handy for directly opening URL or other API functionality that doesn't require a user interface. |
 | keywords | An optional array of keywords for which the command can be searched in Raycast. |
-| preferences | Commands can optionally contribute preferences that are shown in Raycast Preferences &gt; Extensions when selecting the command. You can use preferences for configuration values and passwords or personal access tokens, see [Preference Properties](file:///Users/mann/Developer/api-alpha/documentation/index.html#preference-properties). Commands automatically "inherit" extension preferences and can also override entries with the same `name`. |
+| preferences | Commands can optionally contribute preferences that are shown in Raycast Preferences &gt; Extensions when selecting the command. You can use preferences for configuration values and passwords or personal access tokens, see [Preference Properties](#preference-properties). Commands automatically "inherit" extension preferences and can also override entries with the same `name`. |
 
 ### Preference properties
 

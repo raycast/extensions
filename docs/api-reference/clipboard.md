@@ -2,7 +2,7 @@
 
 ## Overview
 
-You can write contents to the clipboard through {@link writeTextToClipboard} and clear it through [clearClipboard](file:///Users/mann/Developer/api-alpha/documentation/modules.html#clearClipboard). We also provide convenience actions such as [CopyToClipboardAction](file:///Users/mann/Developer/api-alpha/documentation/modules.html#CopyToClipboardAction) or [OpenInBrowserAction](file:///Users/mann/Developer/api-alpha/documentation/modules.html#OpenInBrowserAction) for standard [ActionPanel](file:///Users/mann/Developer/api-alpha/documentation/modules.html#ActionPanel)operations.
+You can write contents to the clipboard through {@link writeTextToClipboard} and clear it through [clearClipboard](#clearclipboard). We also provide convenience actions such as [CopyToClipboardAction](../api-reference/user-interface/actions.md#CopyToClipboardAction).
 
 ## API Reference
 
