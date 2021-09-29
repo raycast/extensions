@@ -1,7 +1,7 @@
 {
 	"id": 0,
 	"name": "@raycast/api",
-	"kind": 1,
+	"kind": 0,
 	"kindString": "Project",
 	"flags": {},
 	"originalName": "",
@@ -9,7 +9,7 @@
 		{
 			"id": 76,
 			"name": "ActionPanel",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -133,7 +133,7 @@
 		{
 			"id": 95,
 			"name": "ActionPanelItem",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -618,7 +618,7 @@
 		{
 			"id": 68,
 			"name": "ActionPanelRoot",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -694,7 +694,7 @@
 		{
 			"id": 87,
 			"name": "ActionPanelSection",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -770,7 +770,7 @@
 		{
 			"id": 122,
 			"name": "ActionPanelSubmenu",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -1199,7 +1199,7 @@
 		{
 			"id": 166,
 			"name": "Detail",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -1313,7 +1313,7 @@
 		{
 			"id": 183,
 			"name": "Form",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -1643,7 +1643,7 @@
 		{
 			"id": 241,
 			"name": "FormCheckbox",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -1870,7 +1870,7 @@
 		{
 			"id": 258,
 			"name": "FormDatePicker",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -2097,7 +2097,7 @@
 		{
 			"id": 279,
 			"name": "FormDropdown",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -2337,7 +2337,7 @@
 		{
 			"id": 305,
 			"name": "FormDropdownItem",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -2665,7 +2665,7 @@
 		{
 			"id": 297,
 			"name": "FormDropdownSection",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -2741,7 +2741,7 @@
 		{
 			"id": 274,
 			"name": "FormSeparator",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -2770,7 +2770,7 @@
 		{
 			"id": 324,
 			"name": "FormTagPicker",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -3045,7 +3045,7 @@
 		{
 			"id": 342,
 			"name": "FormTagPickerItem",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -3373,7 +3373,7 @@
 		{
 			"id": 224,
 			"name": "FormTextArea",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -3600,7 +3600,7 @@
 		{
 			"id": 207,
 			"name": "FormTextField",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -3827,7 +3827,7 @@
 		{
 			"id": 457,
 			"name": "List",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -4085,7 +4085,7 @@
 		{
 			"id": 487,
 			"name": "ListItem",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -4486,7 +4486,7 @@
 		{
 			"id": 477,
 			"name": "ListSection",
-			"kind": 4,
+			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -4600,7 +4600,7 @@
 		{
 			"id": 686,
 			"name": "Color",
-			"kind": 8,
+			"kind": 4,
 			"kindString": "Enumeration",
 			"flags": {},
 			"comment": {
@@ -4720,7 +4720,7 @@
 		{
 			"id": 701,
 			"name": "Icon",
-			"kind": 8,
+			"kind": 4,
 			"kindString": "Enumeration",
 			"flags": {},
 			"comment": {
@@ -5178,7 +5178,7 @@
 		{
 			"id": 761,
 			"name": "ImageMask",
-			"kind": 8,
+			"kind": 4,
 			"kindString": "Enumeration",
 			"flags": {},
 			"comment": {
@@ -5228,7 +5228,7 @@
 		{
 			"id": 799,
 			"name": "ToastStyle",
-			"kind": 8,
+			"kind": 4,
 			"kindString": "Enumeration",
 			"flags": {},
 			"comment": {
@@ -6857,7 +6857,6 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 380,
 										"name": "Value"
 									}
 								}
@@ -7087,7 +7086,6 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 380,
 										"name": "Value"
 									}
 								}
@@ -7522,7 +7520,6 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 380,
 										"name": "Value"
 									}
 								}
@@ -7747,7 +7744,6 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 380,
 						"name": "Value"
 					}
 				},
@@ -7810,7 +7806,6 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 380,
 						"name": "Value"
 					}
 				},
@@ -7841,7 +7836,6 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 380,
 										"name": "Value"
 									}
 								}
@@ -8116,7 +8110,6 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 370,
 										"name": "Values"
 									}
 								}
@@ -8516,7 +8509,6 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 380,
 										"name": "Value"
 									}
 								}
@@ -8750,7 +8742,6 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 380,
 										"name": "Value"
 									}
 								}
@@ -8980,7 +8971,6 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 380,
 										"name": "Value"
 									}
 								}
@@ -10075,7 +10065,7 @@
 									"kindString": "Parameter",
 									"flags": {},
 									"comment": {
-										"shortText": "The React component to push to the navigation stack.\n"
+										"text": "The React component to push to the navigation stack.\n"
 									},
 									"type": {
 										"type": "reference",
@@ -10779,6 +10769,9 @@
 					"flags": {
 						"isOptional": true
 					},
+					"comment": {
+						"shortText": "The data that is used for dropdowns."
+					},
 					"type": {
 						"type": "array",
 						"elementType": {
@@ -10795,6 +10788,9 @@
 					"flags": {
 						"isOptional": true
 					},
+					"comment": {
+						"shortText": "The default value of the preference if there is no `value` specified."
+					},
 					"type": {
 						"type": "intrinsic",
 						"name": "unknown"
@@ -10806,6 +10802,15 @@
 					"kind": 1024,
 					"kindString": "Property",
 					"flags": {},
+					"comment": {
+						"shortText": "The description of the preference.",
+						"tags": [
+							{
+								"tag": "remarks",
+								"text": "\nThe description is shown in the Raycast preferences as well as in the\nonboarding view for required preferences.\n"
+							}
+						]
+					},
 					"type": {
 						"type": "intrinsic",
 						"name": "string"
@@ -10818,6 +10823,9 @@
 					"kindString": "Property",
 					"flags": {
 						"isOptional": true
+					},
+					"comment": {
+						"shortText": "A label that is used for checkboxes."
 					},
 					"type": {
 						"type": "intrinsic",
@@ -10832,6 +10840,15 @@
 					"flags": {
 						"isOptional": true
 					},
+					"comment": {
+						"shortText": "A link for further information about the preference.",
+						"tags": [
+							{
+								"tag": "remarks",
+								"text": "\nThis is useful for preferneces that need additional setup. F.e. an API token\nthat a user needs to generate. The link should open the website where the\nuser can find it's tokens or to a description how to get one if it's more\ncomplicated.\n"
+							}
+						]
+					},
 					"type": {
 						"type": "intrinsic",
 						"name": "string"
@@ -10843,6 +10860,9 @@
 					"kind": 1024,
 					"kindString": "Property",
 					"flags": {},
+					"comment": {
+						"shortText": "The name of the preference."
+					},
 					"type": {
 						"type": "intrinsic",
 						"name": "string"
@@ -10856,6 +10876,9 @@
 					"flags": {
 						"isOptional": true
 					},
+					"comment": {
+						"shortText": "A placeholder that is used for textfields and passwords."
+					},
 					"type": {
 						"type": "intrinsic",
 						"name": "string"
@@ -10867,6 +10890,19 @@
 					"kind": 1024,
 					"kindString": "Property",
 					"flags": {},
+					"comment": {
+						"shortText": "Specifies if the preference is required.",
+						"tags": [
+							{
+								"tag": "remarks",
+								"text": "\nIf the preference is required, an onboarding view is shown when the\nextension is opened for the first time.\n"
+							},
+							{
+								"tag": "default",
+								"text": "false\n"
+							}
+						]
+					},
 					"type": {
 						"type": "intrinsic",
 						"name": "boolean"
@@ -10878,6 +10914,15 @@
 					"kind": 1024,
 					"kindString": "Property",
 					"flags": {},
+					"comment": {
+						"shortText": "The title of the preference.",
+						"tags": [
+							{
+								"tag": "remarks",
+								"text": "\nThe title is also shown in the Raycast preferences.\n"
+							}
+						]
+					},
 					"type": {
 						"type": "intrinsic",
 						"name": "string"
@@ -10889,6 +10934,9 @@
 					"kind": 1024,
 					"kindString": "Property",
 					"flags": {},
+					"comment": {
+						"shortText": "The type of the preference."
+					},
 					"type": {
 						"type": "union",
 						"types": [
@@ -10918,6 +10966,9 @@
 					"kindString": "Property",
 					"flags": {
 						"isOptional": true
+					},
+					"comment": {
+						"shortText": "The value of the preference."
 					},
 					"type": {
 						"type": "intrinsic",
@@ -12243,7 +12294,9 @@
 			"name": "environment",
 			"kind": 32,
 			"kindString": "Variable",
-			"flags": {},
+			"flags": {
+				"isConst": true
+			},
 			"comment": {
 				"shortText": "Contains environment values such as the Raycast version, extension info, and paths."
 			},
@@ -12259,7 +12312,9 @@
 			"name": "preferences",
 			"kind": 32,
 			"kindString": "Variable",
-			"flags": {},
+			"flags": {
+				"isConst": true
+			},
 			"comment": {
 				"shortText": "Contains the preference values (entered in Raycast Preferences) that have been passed to the command."
 			},
@@ -12632,7 +12687,6 @@
 								"typeArguments": [
 									{
 										"type": "reference",
-										"id": 181,
 										"name": "Values"
 									}
 								],
@@ -12649,7 +12703,6 @@
 								"typeArguments": [
 									{
 										"type": "reference",
-										"id": 181,
 										"name": "Values"
 									}
 								],
@@ -13801,7 +13854,7 @@
 								"isOptional": true
 							},
 							"comment": {
-								"shortText": "Can be used to force scrolling to the top. Defaults to scrolling to the top after the\nthe search bar was cleared."
+								"text": "Can be used to force scrolling to the top. Defaults to scrolling to the top after the\nthe search bar was cleared."
 							},
 							"type": {
 								"type": "reflection",
@@ -13885,7 +13938,7 @@
 								"isOptional": true
 							},
 							"comment": {
-								"shortText": "Can be used to clear the root search. Defaults to not clearing the root search after\nthe window was closed."
+								"text": "Can be used to clear the root search. Defaults to not clearing the root search after\nthe window was closed."
 							},
 							"type": {
 								"type": "reflection",
@@ -14012,7 +14065,7 @@
 								"isOptional": true
 							},
 							"comment": {
-								"shortText": "The path of the file or folder to get the applications for. If no path is specified, all installed applications are returned."
+								"text": "The path of the file or folder to get the applications for. If no path is specified, all installed applications are returned."
 							},
 							"type": {
 								"type": "reference",
@@ -14068,7 +14121,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"shortText": "The path of the file or folder to get the default application for."
+								"text": "The path of the file or folder to get the default application for."
 							},
 							"type": {
 								"type": "reference",
@@ -14115,7 +14168,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"shortText": "The key you want to retrieve the value of."
+								"text": "The key you want to retrieve the value of."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -14183,7 +14236,6 @@
 					],
 					"type": {
 						"type": "reference",
-						"id": 639,
 						"name": "Values"
 					}
 				}
@@ -14250,7 +14302,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"shortText": "The text contents to insert at the cursor."
+								"text": "The text contents to insert at the cursor."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -14304,7 +14356,7 @@
 								"isOptional": true
 							},
 							"comment": {
-								"shortText": "Can be used to clear the search bar. Defaults to clearing the search bar after popped to root."
+								"text": "Can be used to clear the search bar. Defaults to clearing the search bar after popped to root."
 							},
 							"type": {
 								"type": "reflection",
@@ -14371,7 +14423,13 @@
 					"comment": {
 						"shortText": "Generate secure URL-friendly unique ID.",
 						"text": "By default, the ID will have 21 symbols to have a collision probability\nsimilar to UUID v4.\n",
-						"returns": "A random string.\n"
+						"returns": "A random string.\n",
+						"tags": [
+							{
+								"tag": "subcategory",
+								"text": "ID\n"
+							}
+						]
 					},
 					"parameters": [
 						{
@@ -14383,7 +14441,7 @@
 								"isOptional": true
 							},
 							"comment": {
-								"shortText": "Size of the ID. The default size is 21."
+								"text": "Size of the ID. The default size is 21."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -14423,7 +14481,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"shortText": "The key you want to remove the value of."
+								"text": "The key you want to remove the value of."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -14515,7 +14573,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"shortText": "The key you want to create or update the value of."
+								"text": "The key you want to create or update the value of."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -14529,7 +14587,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"shortText": "The value you want to create or update for the given key."
+								"text": "The value you want to create or update for the given key."
 							},
 							"type": {
 								"type": "reference",
@@ -14582,7 +14640,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"shortText": "The title that will be displayed for the HUD."
+								"text": "The title that will be displayed for the HUD."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -14638,7 +14696,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"shortText": "The path to show in the Finder."
+								"text": "The path to show in the Finder."
 							},
 							"type": {
 								"type": "reference",
@@ -14690,7 +14748,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"shortText": "The visual style of the Toast."
+								"text": "The visual style of the Toast."
 							},
 							"type": {
 								"type": "reference",
@@ -14705,7 +14763,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"shortText": "The title that will be displayed in the Toast."
+								"text": "The title that will be displayed in the Toast."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -14721,7 +14779,7 @@
 								"isOptional": true
 							},
 							"comment": {
-								"shortText": "The message that will be displayed in the Toast.\n"
+								"text": "The message that will be displayed in the Toast.\n"
 							},
 							"type": {
 								"type": "intrinsic",
@@ -14872,7 +14930,7 @@
 								"isOptional": true
 							},
 							"comment": {
-								"shortText": "The ID that is returned by default."
+								"text": "The ID that is returned by default."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -14886,7 +14944,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"shortText": "A function that is used to generate a random ID. Uses {@link randomId} by default."
+								"text": "A function that is used to generate a random ID. Uses {@link randomId} by default."
 							},
 							"type": {
 								"type": "reflection",
@@ -14956,7 +15014,7 @@
 	"groups": [
 		{
 			"title": "Namespaces",
-			"kind": 4,
+			"kind": 2,
 			"children": [
 				76,
 				95,
@@ -14982,7 +15040,7 @@
 		},
 		{
 			"title": "Enumerations",
-			"kind": 8,
+			"kind": 4,
 			"children": [
 				686,
 				701,
