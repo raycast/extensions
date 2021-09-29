@@ -2,7 +2,7 @@
 
 ## Overview
 
-You can write contents to the clipboard through {@link writeTextToClipboard} and clear it through [clearClipboard](#clearclipboard). We also provide convenience actions such as [CopyToClipboardAction](../api-reference/user-interface/actions.md#CopyToClipboardAction).
+You can write contents to the clipboard through [copyTextToClipboard](#copytexttoclipboard) and clear it through [clearClipboard](#clearclipboard). We also provide convenience actions such as [CopyToClipboardAction](../api-reference/user-interface/actions.md#CopyToClipboardAction).
 
 ## API Reference
 
