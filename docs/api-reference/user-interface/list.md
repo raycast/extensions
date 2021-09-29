@@ -89,14 +89,14 @@ Shows sections and items with built-in or custom filtering through an optional s
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | `null` or `List.Section` or `List.Section[]` or `List.Item` or `List.Item[]` | No | - | List sections or items. If [ListItem](list.md#listitem) elements are specified, a default section is automatically created. |
+| children | `null` or `List.Section` or `List.Section[]` or `List.Item` or `List.Item[]` | No | - | List sections or items. If [ListItem](../user-interface/list.md#listitem) elements are specified, a default section is automatically created. |
 | isLoading | `boolean` | No | - | Indicates whether a loading bar should be shown or hidden below the search bar |
 | navigationTitle | `string` | No | - | The main title for that view displayed in Raycast |
 | searchBarPlaceholder | `string` | No | - | Placeholder text that will be shown in the search bar. |
 | selectedItemId | `string` | No | - | Selects the item with the specified id. |
-| throttle | `boolean` | No | false | Defines whether the ListProps.onSearchTextChange will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations \(e.g. network requests\). |
-| onSearchTextChange | `(text: string) => void` | No | - |  |
-| onSelectionChange | `(id: string) => void` | No | - |  |
+| throttle | `boolean` | No | false | Defines whether the ListProps.onSearchTextChange will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). |
+| onSearchTextChange | <code>(text: string) => void</code> | No | - |  |
+| onSelectionChange | <code>(id: string) => void</code> | No | - |  |
 
 ### List.Item
 
@@ -104,11 +104,11 @@ Represents an item within a list section.
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| accessoryIcon | `ImageLike` | No | - | A optional icon displayed as accessory for the list item. See [ImageLike](icons-and-images.md#imagelike) for the supported formats and types. |
-| accessoryTitle | `string` | No | - | An additional icon displayed for the item. See [ImageLike](icons-and-images.md#imagelike) for the supported formats and types. |
-| actions | `null` or `ActionPanel` | No | - | An [ActionPanel](action-panel.md#actionpanel) that will be updated for the selected list item. |
+| accessoryIcon | `ImageLike` | No | - | A optional icon displayed as accessory for the list item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
+| accessoryTitle | `string` | No | - | An additional icon displayed for the item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
+| actions | `null` or `ActionPanel` | No | - | An [ActionPanel](../user-interface/action-panel.md#actionpanel) that will be updated for the selected list item. |
 | children | `null` or `ActionPanel` | No | - |  |
-| icon | `ImageLike` | No | - | A optional icon displayed for the list item. See [ImageLike](icons-and-images.md#imagelike) for the supported formats and types. |
+| icon | `ImageLike` | No | - | A optional icon displayed for the list item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
 | id | `string` | No | - | ID of the item. Make sure to assign each item a unique ID or a UUID will be auto generated. |
 | keywords | `string[]` | No | - | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. |
 | subtitle | `string` | No | - | An optional subtitle displayed next to the main title. |
@@ -120,8 +120,7 @@ Visually separated group of list items. Use sections to group related list items
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | `null` or `List.Item` or `List.Item[]` | No | - | The [ListItem](list.md#listitem) elements of the section. |
+| children | `null` or `List.Item` or `List.Item[]` | No | - | The [ListItem](../user-interface/list.md#listitem) elements of the section. |
 | id | `string` | No | - | ID of the section. Make sure to assign each section a unique ID or a UUID will be auto generated. |
 | subtitle | `string` | No | - | An optional subtitle displayed next to the title of the section. |
 | title | `string` | No | - | Title displayed above the section. |
-

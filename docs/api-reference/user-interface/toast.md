@@ -38,7 +38,7 @@ async function showToast(style: ToastStyle, title: string, message: string): Pro
 | :--- | :--- | :--- | :--- |
 | style | `ToastStyle` | Yes | The visual style of the Toast. |
 | title | `string` | Yes | The title that will be displayed in the Toast. |
-| message | `string` | No | The message that will be displayed in the Toast. |
+| message | `string` | No | The message that will be displayed in the Toast.  |
 
 #### Return
 
@@ -46,13 +46,14 @@ A promise that resolves with the shown toast. The toast can be used to change or
 
 ### Toast
 
-A Toast with a certain style, title, and message. Use [showToast](toast.md#showtoast) as shortcut for creating and showing a Toast.
+A Toast with a certain style, title, and message.
+Use [showToast](../user-interface/toast.md#showtoast) as shortcut for creating and showing a Toast.
 
 #### Constructors
 
 | Name | Type | Description |
 | :--- | :--- | :--- |
-| constructor | `(options: ToastOptions) => Toast` |  |
+| constructor | <code>(options: ToastOptions) => Toast</code> |  |
 
 #### Accessors
 
@@ -66,12 +67,12 @@ A Toast with a certain style, title, and message. Use [showToast](toast.md#showt
 
 | Name | Type | Description |
 | :--- | :--- | :--- |
-| hide | `() => Promise` | Hides the Toast. |
-| show | `() => Promise` | Shows the Toast. |
+| hide | <code>() => Promise<void></code> | Hides the Toast. |
+| show | <code>() => Promise<void></code> | Shows the Toast. |
 
 ### ToastOptions
 
-The options to create a [Toast](toast.md#toast).
+The options to create a [Toast](../user-interface/toast.md#toast).
 
 #### Properties
 
@@ -92,4 +93,3 @@ Defines the visual style of the Toast.
 | Animated | "ANIMATED" |
 | Failure | "FAILURE" |
 | Success | "SUCCESS" |
-

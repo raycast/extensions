@@ -4,7 +4,8 @@
 
 ### getPreferenceValues
 
-Generically typed convenience function that returns a [preferences](https://github.com/raycast/extensions/tree/0dffd9e1dbd114838683b26f2882142d0a6ef504/docs/preferences.md#preferences) object where each preference name is mapped to its value. Note that the values fall back to defined default values.
+Generically typed convenience function that returns a [preferences](../preferences.md#preferences) object where each preference name is mapped to its value.
+Note that the values fall back to defined default values.
 
 #### Signature
 
@@ -14,33 +15,36 @@ function getPreferenceValues(): Values
 
 #### Return
 
+
+
 ### preferences
 
 ```typescript
 preferences: Preferences = ...
 ```
 
-Contains the preference values \(entered in Raycast Preferences\) that have been passed to the command.
+Contains the preference values (entered in Raycast Preferences) that have been passed to the command.
 
 ### Preference
 
-Holds data about a single preference item \(entered in Raycast Preferences\). Maps to the properties declared in package.json.
+Holds data about a single preference item (entered in Raycast Preferences).
+Maps to the properties declared in package.json.
 
 #### Properties
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| data | `unknown[]` | No |  |
-| default | `unknown` | No |  |
-| description | `string` | Yes |  |
-| label | `string` | No |  |
-| link | `string` | No |  |
-| name | `string` | Yes |  |
-| placeholder | `string` | No |  |
-| required | `boolean` | Yes |  |
-| title | `string` | Yes |  |
-| type | `"textfield"` or `"password"` or `"checkbox"` or `"dropdown"` | Yes |  |
-| value | `unknown` | No |  |
+| data | `unknown[]` | No | The data that is used for dropdowns. |
+| default | `unknown` | No | The default value of the preference if there is no `value` specified. |
+| description | `string` | Yes | The description of the preference. |
+| label | `string` | No | A label that is used for checkboxes. |
+| link | `string` | No | A link for further information about the preference. |
+| name | `string` | Yes | The name of the preference. |
+| placeholder | `string` | No | A placeholder that is used for textfields and passwords. |
+| required | `boolean` | Yes | Specifies if the preference is required. |
+| title | `string` | Yes | The title of the preference. |
+| type | `"textfield"` or `"password"` or `"checkbox"` or `"dropdown"` | Yes | The type of the preference. |
+| value | `unknown` | No | The value of the preference. |
 
 ### PreferenceValues
 
@@ -50,7 +54,7 @@ Values of preference items.
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| \[name: string\] | `any` | Yes |  |
+| [name: string] | `any` | Yes |  |
 
 ### Preferences
 
@@ -58,5 +62,4 @@ Values of preference items.
 Preferences: Record<string, Preference>
 ```
 
-A record type holding the preferences \(entered in Raycast Preferences\) that have been passed to the command.
-
+A record type holding the preferences (entered in Raycast Preferences) that have been passed to the command.
