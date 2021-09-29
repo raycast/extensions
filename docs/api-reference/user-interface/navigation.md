@@ -12,6 +12,40 @@ A hook that lets you push and pop view components in the navigation stack.
 function useNavigation(): Navigation
 ```
 
+#### Example
+
+```typescript
+import { ActionPanel, Detail, useNavigation } from "@raycast/api";
+
+function Ping() {
+  const { push } = useNavigation();
+
+  return (
+    <Detail markdown="Ping">
+      <ActionPanel>
+        <ActionPanel.Item title="Push" onAction={() => push(<Pong />)} />
+      </ActionPanel>
+    </Detail>
+  );
+}
+
+function Pong() {
+  const { pop } = useNavigation();
+
+  return (
+    <Detail markdown="Pong">
+      <ActionPanel>
+        <ActionPanel.Item title="Pop" onAction={pop} />
+      </ActionPanel>
+    </Detail>
+  );
+}
+
+export default function Command() {
+  return <Ping />;
+}
+```
+
 #### Return
 
 A [Navigation](../user-interface/navigation.md#navigation) object with Navigation.push and Navigation.pop functions.

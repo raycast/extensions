@@ -12,6 +12,18 @@ Returns all applications that can open the file.
 async function getApplications(path: PathLike): Promise<Application[]>
 ```
 
+#### Example
+
+```typescript
+import { getApplications } from "@raycast/api";
+
+export default async () => {
+  const installedApplications = await getApplications();
+  console.log("The following applications are installed on your Mac:");
+  console.log(installedApplications.map((a) => a.name).join(", "));
+};
+```
+
 #### Parameters
 
 | Name | Type | Required | Description |
@@ -30,6 +42,17 @@ Returns the default application that the file would be opened with.
 
 ```typescript
 async function getDefaultApplication(path: PathLike): Promise<Application>
+```
+
+#### Example
+
+```typescript
+import { getDefaultApplication } from "@raycast/api";
+
+export default async () => {
+  const defaultApplication = await getDefaultApplication(__filename);
+  console.log(`Default application for JavaScript is: ${defaultApplication.name}`);
+};
 ```
 
 #### Parameters
@@ -78,6 +101,20 @@ Moves a file or director to the Trash.
 
 ```typescript
 async function trash(path: PathLike | PathLike[]): Promise<void>
+```
+
+#### Example
+
+```typescript
+import { trash } from "@raycast/api";
+import { writeFile } from "fs/promises";
+import { homedir } from "os";
+
+export default async () => {
+  const file = `${homedir()}/Desktop/yolo.txt`;
+  await writeFile(file, "I will be deleted soon!");
+  await trash(file);
+};
 ```
 
 #### Parameters

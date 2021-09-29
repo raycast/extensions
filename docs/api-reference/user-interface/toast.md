@@ -12,6 +12,16 @@ A HUD will automatically hide the main window and show a compact Toast at the bo
 async function showHUD(title: string): Promise<void>
 ```
 
+#### Example
+
+```typescript
+import { showHUD } from "@raycast/api";
+
+export default async () => {
+  await showHUD("Hey there 👋");
+};
+```
+
 #### Parameters
 
 | Name | Type | Required | Description |
@@ -32,13 +42,29 @@ Creates and shows a Toast with the the given style, title, and message.
 async function showToast(style: ToastStyle, title: string, message: string): Promise<Toast>
 ```
 
+#### Example
+
+```typescript
+import { showToast, ToastStyle } from "@raycast/api";
+
+export default async () => {
+  const success = false;
+
+  if (success) {
+    await showToast(ToastStyle.Success, "Dinner is ready", "Pizza margherita");
+  } else {
+    await showToast(ToastStyle.Failure, "Dinner isn't ready", "Pizza dropped on the floor");
+  }
+};
+```
+
 #### Parameters
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | style | `ToastStyle` | Yes | The visual style of the Toast. |
 | title | `string` | Yes | The title that will be displayed in the Toast. |
-| message | `string` | No | The message that will be displayed in the Toast.  |
+| message | `string` | No | The message that will be displayed in the Toast. |
 
 #### Return
 
@@ -47,7 +73,23 @@ A promise that resolves with the shown toast. The toast can be used to change or
 ### Toast
 
 A Toast with a certain style, title, and message.
-Use [showToast](../user-interface/toast.md#showtoast) as shortcut for creating and showing a Toast.
+
+#### Example
+
+```typescript
+import { Toast, ToastStyle } from "@raycast/api";
+import { setTimeout } from "timers/promises";
+
+export default async () => {
+  const toast = new Toast({ style: ToastStyle.Animated, title: "Uploading image" });
+  await toast.show();
+
+  await setTimeout(1000);
+
+  toast.style = ToastStyle.Success;
+  toast.title = "Uploaded image";
+};
+```
 
 #### Constructors
 
@@ -74,13 +116,29 @@ Use [showToast](../user-interface/toast.md#showtoast) as shortcut for creating a
 
 The options to create a [Toast](../user-interface/toast.md#toast).
 
+#### Example
+
+```typescript
+import { Toast, ToastOptions, ToastStyle } from "@raycast/api";
+
+export default async () => {
+  const options: ToastOptions = {
+    style: ToastStyle.Success,
+    title: "Finished cooking",
+    message: "Delicious pasta for lunch",
+  };
+  const toast = new Toast(options);
+  await toast.show();
+};
+```
+
 #### Properties
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| message | `string` | No |  |
-| style | `ToastStyle` | Yes |  |
-| title | `string` | Yes |  |
+| message | `string` | No | An additional message for the toast. Useful to show more information, e.g. an identifier of a newly create asset |
+| style | `ToastStyle` | Yes | The style of a toast. |
+| title | `string` | Yes | The title of a toast. Displayed on the top. |
 
 ### ToastStyle
 

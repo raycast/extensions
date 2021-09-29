@@ -18,6 +18,17 @@ Retrieve all stored values in the local storage of a command.
 async function allLocalStorageItems(): Promise<Record<string, LocalStorageValue>>
 ```
 
+#### Example
+
+```typescript
+import { allLocalStorageItems } from "@raycast/api";
+
+export default async () => {
+  const items = await allLocalStorageItems();
+  console.log(`Local storage item count: ${Object.entries(items).length}`);
+};
+```
+
 #### Return
 
 A promise that resolves with a record of all stored values.
@@ -32,6 +43,16 @@ Removes all stored values.
 async function clearLocalStorage(): Promise<void>
 ```
 
+#### Example
+
+```typescript
+import { clearLocalStorage } from "@raycast/api";
+
+export default async () => {
+  await clearLocalStorage();
+};
+```
+
 #### Return
 
 A promise that resolves when all values were removed.
@@ -44,6 +65,17 @@ Retrieve the stored value for the given key.
 
 ```typescript
 async function getLocalStorageItem(key: string): Promise<LocalStorageValue | undefined>
+```
+
+#### Example
+
+```typescript
+import { getLocalStorageItem } from "@raycast/api";
+
+export default async () => {
+  const item = await getLocalStorageItem("favorite-fruit");
+  console.log(item);
+};
 ```
 
 #### Parameters
@@ -66,6 +98,16 @@ Removes the stored value for the given key.
 async function removeLocalStorageItem(key: string): Promise<void>
 ```
 
+#### Example
+
+```typescript
+import { removeLocalStorageItem } from "@raycast/api";
+
+export default async () => {
+  await removeLocalStorageItem("favorite-fruit");
+};
+```
+
 #### Parameters
 
 | Name | Type | Required | Description |
@@ -86,6 +128,16 @@ Stores a value for the given key.
 async function setLocalStorageItem(key: string, value: LocalStorageValue): Promise<void>
 ```
 
+#### Example
+
+```typescript
+import { setLocalStorageItem } from "@raycast/api";
+
+export default async () => {
+  await setLocalStorageItem("favorite-fruit", "cherry");
+};
+```
+
 #### Parameters
 
 | Name | Type | Required | Description |
@@ -104,3 +156,20 @@ LocalStorageValue: string | number | boolean
 ```
 
 Supported storage value types.
+
+#### Example
+
+```typescript
+import { setLocalStorageItem } from "@raycast/api";
+
+export default async () => {
+  // String
+  await setLocalStorageItem("favorite-fruit", "cherry");
+
+  // Number
+  await setLocalStorageItem("fruit-basket-count", 3);
+
+  // Boolean
+  await setLocalStorageItem("fruit-eaten-today", true);
+};
+```

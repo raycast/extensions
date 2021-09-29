@@ -7,6 +7,41 @@
 A keyboard shortcut is defined by one or more modifier keys (command, control, etc.) and a single key equivalent (a character or special key).
 See [KeyModifier](../keyboard.md#keymodifier) and [KeyEquivalent](../keyboard.md#keyequivalent) for supported values.
 
+#### Example
+
+```typescript
+import { ActionPanel, Detail } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Detail markdown="Let's play some games 👾">
+      <ActionPanel title="Game controls">
+        <ActionPanel.Item
+          title="Up"
+          shortcut={{ modifiers: ["opt"], key: "arrowUp" }}
+          onAction={() => console.log("Go up")}
+        />
+        <ActionPanel.Item
+          title="Down"
+          shortcut={{ modifiers: ["opt"], key: "arrowDown" }}
+          onAction={() => console.log("Go down")}
+        />
+        <ActionPanel.Item
+          title="Left"
+          shortcut={{ modifiers: ["opt"], key: "arrowLeft" }}
+          onAction={() => console.log("Go left")}
+        />
+        <ActionPanel.Item
+          title="Right"
+          shortcut={{ modifiers: ["opt"], key: "arrowRight" }}
+          onAction={() => console.log("Go right")}
+        />
+      </ActionPanel>
+    </Detail>
+  );
+}
+```
+
 #### Properties
 
 | Name | Type | Required | Description |

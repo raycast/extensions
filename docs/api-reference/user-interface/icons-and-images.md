@@ -6,6 +6,20 @@
 
 An icon as it's used in the Finder.
 
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default () => {
+  return (
+    <List>
+      <List.Item title="File icon" icon={{ fileIcon: __filename }} />
+    </List>
+  );
+};
+```
+
 #### Properties
 
 | Name | Type | Required | Description |
@@ -43,6 +57,20 @@ const icon = { source: { light: "icon-light.png", dark: "icon-dark.png" }}
 ### Icon
 
 List of built-in icons that can be used for actions or lists
+
+#### Example
+
+```typescript
+import { Icon, List } from "@raycast/api";
+
+export default () => {
+  return (
+    <List>
+      <List.Item title="Icon" icon={Icon.Circle} />
+    </List>
+  );
+};
+```
 
 #### Enumeration members
 
@@ -101,6 +129,20 @@ List of built-in icons that can be used for actions or lists
 
 Available masks that can be used to change the shape of an image.
 
+#### Example
+
+```typescript
+import { ImageMask, List } from "@raycast/api";
+
+export default () => {
+  return (
+    <List>
+      <List.Item title="Icon" icon={{ source: "https://raycast.com/uploads/avatar.png", mask: ImageMask.Circle }} />
+    </List>
+  );
+};
+```
+
 #### Enumeration members
 
 | Name | Value |
@@ -116,6 +158,23 @@ ImageLike: string | Icon | FileIcon | Image
 
 Union type for the supported image types.
 
+#### Example
+
+```typescript
+import { Icon, ImageMask, List } from "@raycast/api";
+
+export default () => {
+  return (
+    <List>
+      <List.Item title="String" icon="https://raycast.com/uploads/avatar.png" />
+      <List.Item title="Icon" icon={Icon.Circle} />
+      <List.Item title="FileIcon" icon={{ fileIcon: __filename }} />
+      <List.Item title="Image" icon={{ source: "https://raycast.com/uploads/avatar.png", mask: ImageMask.Circle }} />
+    </List>
+  );
+};
+```
+
 ### ImageSource
 
 ```typescript
@@ -124,3 +183,24 @@ ImageSource: string | Icon | { dark: string; light: string }
 
 The source of an [Image](../user-interface/icons-and-images.md#image). Can be either a remote URL, a local file resource, a built-in [Icon](../user-interface/icons-and-images.md#icon) or
 a single emoji.
+
+#### Example
+
+```typescript
+import { Icon, List } from "@raycast/api";
+
+export default () => {
+  return (
+    <List>
+      <List.Item title="String" icon={{ source: "https://raycast.com/uploads/avatar.png" }} />
+      <List.Item title="Icon" icon={{ source: Icon.Circle }} />
+      <List.Item
+        title="Theme"
+        icon={{
+          source: { light: "https://raycast.com/uploads/avatar.png", dark: "https://raycast.com/uploads/avatar.png" },
+        }}
+      />
+    </List>
+  );
+};
+```

@@ -10,6 +10,7 @@ Shows a list of form items such as FormViewTextField, FormViewCheckbox or FormVi
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
+| actions | `null` or `ActionPanel` | No | - | A reference to an [ActionPanel](../user-interface/action-panel.md#actionpanel). |
 | children | `null` or `ReactElement<FormItemProps<FormValue>, string>` or `ReactElement<FormItemProps<FormValue>, string>[]` | No | - | The FormItemElement elements of the form. |
 | isLoading | `boolean` | No | - | Indicates whether a loading bar should be shown or hidden below the search bar |
 | navigationTitle | `string` | No | - | The main title for that view displayed in Raycast |
@@ -144,6 +145,30 @@ A form item with a text field for input.
 ### FormValues
 
 Values of items in the form.
+
+#### Example
+
+```typescript
+import { Form } from "@raycast/api";
+
+interface Values {
+  todo: string;
+  due?: Date;
+}
+
+export default () => {
+  function handleSubmit(values: Values) {
+    console.log(values);
+  }
+
+  return (
+    <Form onSubmit={handleSubmit}>
+      <Form.TextField id="todo" title="Todo" />
+      <Form.DatePicker id="due" title="Due Date" />
+    </Form>
+  );
+};
+```
 
 #### Properties
 

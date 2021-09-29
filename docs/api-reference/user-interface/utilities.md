@@ -12,6 +12,18 @@ Generates a memoized random ID.
 function useId(defaultId: string, generateId: () => string): string
 ```
 
+#### Example
+
+```typescript
+import { Detail, useId } from "@raycast/api";
+
+export default function Command() {
+  const id = useId();
+  console.log(id);
+  return <Detail key={id} markdown="I remember you 🧠" />;
+}
+```
+
 #### Parameters
 
 | Name | Type | Required | Description |

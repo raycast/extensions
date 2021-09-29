@@ -89,6 +89,7 @@ Shows sections and items with built-in or custom filtering through an optional s
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
+| actions | `null` or `ActionPanel` | No | - | A reference to an [ActionPanel](../user-interface/action-panel.md#actionpanel). |
 | children | `null` or `List.Section` or `List.Section[]` or `List.Item` or `List.Item[]` | No | - | List sections or items. If [ListItem](../user-interface/list.md#listitem) elements are specified, a default section is automatically created. |
 | isLoading | `boolean` | No | - | Indicates whether a loading bar should be shown or hidden below the search bar |
 | navigationTitle | `string` | No | - | The main title for that view displayed in Raycast |

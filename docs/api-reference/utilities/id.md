@@ -12,6 +12,17 @@ Generate secure URL-friendly unique ID.
 function randomId(size: number): string
 ```
 
+#### Example
+
+```typescript
+import { pasteText, randomId } from "@raycast/api";
+
+export default async () => {
+  const id = randomId();
+  await pasteText(id);
+};
+```
+
 #### Parameters
 
 | Name | Type | Required | Description |
