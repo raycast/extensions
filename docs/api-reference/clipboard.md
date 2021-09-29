@@ -73,3 +73,4 @@ async function pasteText(text: string): Promise<void>
 #### Return
 
 A promise that resolves when the text got pasted.
+

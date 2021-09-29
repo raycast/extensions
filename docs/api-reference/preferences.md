@@ -4,8 +4,7 @@
 
 ### getPreferenceValues
 
-Generically typed convenience function that returns a [preferences](../preferences.md#preferences) object where each preference name is mapped to its value.
-Note that the values fall back to defined default values.
+Generically typed convenience function that returns a [preferences](https://github.com/raycast/extensions/tree/04ddde732021c42d2160ec69796c5e474427df7a/docs/preferences.md#preferences) object where each preference name is mapped to its value. Note that the values fall back to defined default values.
 
 #### Signature
 
@@ -15,20 +14,17 @@ function getPreferenceValues(): Values
 
 #### Return
 
-
-
 ### preferences
 
 ```typescript
 preferences: Preferences = ...
 ```
 
-Contains the preference values (entered in Raycast Preferences) that have been passed to the command.
+Contains the preference values \(entered in Raycast Preferences\) that have been passed to the command.
 
 ### Preference
 
-Holds data about a single preference item (entered in Raycast Preferences).
-Maps to the properties declared in package.json.
+Holds data about a single preference item \(entered in Raycast Preferences\). Maps to the properties declared in package.json.
 
 #### Properties
 
@@ -54,7 +50,7 @@ Values of preference items.
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| [name: string] | `any` | Yes |  |
+| \[name: string\] | `any` | Yes |  |
 
 ### Preferences
 
@@ -62,4 +58,5 @@ Values of preference items.
 Preferences: Record<string, Preference>
 ```
 
-A record type holding the preferences (entered in Raycast Preferences) that have been passed to the command.
+A record type holding the preferences \(entered in Raycast Preferences\) that have been passed to the command.
+

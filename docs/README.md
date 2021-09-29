@@ -17,7 +17,7 @@ The Raycast Platform consists of two parts:
 The Raycast platform is currently in public beta. We've stabilised it during a private alpha with our community. We'll continue to work together to nail the developer experience. Join us in our [Slack workspace](https://raycast.com/community).
 {% endhint %}
 
-### Key features
+## Key features
 
 Here are a few points that make our ecosystem special:
 
@@ -27,13 +27,13 @@ Here are a few points that make our ecosystem special:
 * **Developer experience front and foremost:** A strongly typed API, hot-reloading and modern tooling that make it a blast to work with.
 * **Easy to start, flexible to scale:** Start with a simple script, add a static UI or use React to go wilde. Anything goes.
 
-### Overview
+## Overview
 
-A quick overview about where to find what in our docs: 
+A quick overview about where to find what in our docs:
 
 * \*\*\*\*[**Basics:**](basics/getting-started.md) Go over this section to learn how to build extensions in our step-by-step guides.
 * \*\*\*\*[**Examples:**](examples/todo-list.md) Kickstart your extension by using an open source example and learn as you go.
-* \*\*\*\*[**Information:**](information/cli.md) ****Get the background knowledge to master your understanding of our platform.
+* \*\*\*\*[**Information:**](information/cli.md) _\*\*_Get the background knowledge to master your understanding of our platform.
 * \*\*\*\*[**API Reference:**](api-reference/clipboard.md) Go into details wit hthe API reference that includes code snippets.
 
 Now, let's build 💪
