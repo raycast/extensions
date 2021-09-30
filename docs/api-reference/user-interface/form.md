@@ -14,14 +14,30 @@ Shows a list of form items such as FormViewTextField, FormViewCheckbox or FormVi
 | :--- | :--- | :--- | :--- | :--- |
 | actions | `null` or `ActionPanel` | No | - | A reference to an [ActionPanel](../user-interface/action-panel.md#actionpanel). |
 | children | `null` or `ReactElement<FormItemProps<FormValue>, string>` or `ReactElement<FormItemProps<FormValue>, string>[]` | No | - | The FormItemElement elements of the form. |
-| isLoading | `boolean` | No | - | Indicates whether a loading bar should be shown or hidden below the search bar |
-| navigationTitle | `string` | No | - | The main title for that view displayed in Raycast |
+| isLoading | `boolean` | No | false | Indicates whether a loading bar should be shown or hidden below the search bar |
+| navigationTitle | `string` | No | Command title | The main title for that view displayed in Raycast |
 | submitTitle | `string` | No | - | The title of the submit action button. If no title is set, Raycast displays a default title. |
 | onSubmit | <code>(input: Values) => void</code> | Yes | - |  |
 
 ### Form.Checkbox
 
 A form item with a checkbox.
+
+#### Example
+
+Example of an uncontrolled checkbox:
+
+```typescript
+import { Form } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <Form.Checkbox id="checkbox" label="Are you happy?" defaultValue={true} />
+    </Form>
+  );
+}
+```
 
 #### Props
 
@@ -43,17 +59,36 @@ A form item with a date picker.
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| dateFormat | `string` | No | - | The date format string to be used for FormViewDatePicker.value. The default format is ISO 8601 ("yyyy-MM-dd'T'HH:mm:ssXXXXX"). |
-| defaultValue | `string` | No | - | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
+| defaultValue | `Date` | No | - | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
 | id | `string` | Yes | - | ID of the form item. Make sure to assign each form item a unique id. |
 | storeValue | `boolean` | No | - | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. |
 | title | `string` | No | - | The title displayed on the left side of the item. |
-| value | `string` | No | - | The current value of the item. |
+| value | `Date` | No | - | The current value of the item. |
 | onChange | <code>(newValue: Value) => void</code> | No | - |  |
 
 ### Form.Dropdown
 
 A form item with a dropdown menu.
+
+#### Example
+
+Example of an uncontrolled dropdown:
+
+```typescript
+import { Form } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <Form.Dropdown id="emoji" title="Favorite Emoji" defaultValue="lol">
+        <Form.Dropdown.Item value="poop" title="Pile of poop" icon="💩" />
+        <Form.Dropdown.Item value="rocket" title="Rocket" icon="🚀" />
+        <Form.Dropdown.Item value="lol" title="Rolling on the floor laughing face" icon="🤣" />
+      </Form.Dropdown>
+    </Form>
+  );
+}
+```
 
 #### Props
 
@@ -71,6 +106,22 @@ A form item with a dropdown menu.
 
 Represents a context-specific action that can be selected in the user interface or triggered through an assigned keyboard shortcut on the respective view.
 
+#### Example
+
+```typescript
+import { Form, Icon } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <Form.Dropdown id="icon" title="Icon">
+        <Form.Dropdown.Item value="circle" title="Cirlce" icon={Icon.Circle} />
+      </Form.Dropdown>
+    </Form>
+  );
+}
+```
+
 #### Props
 
 | Prop | Type | Required | Default | Description |
@@ -81,8 +132,32 @@ Represents a context-specific action that can be selected in the user interface 
 
 ### Form.DropdownSection
 
-Visually separated group of items.
+Visually separated group of dropdown items.
+
 Use sections to group related menu items together.
+
+#### Example
+
+```typescript
+import { Form } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <Form.Dropdown id="food" title="Favorite Food">
+        <Form.Dropdown.Section title="Fruits">
+          <Form.Dropdown.Item value="apple" title="Apple" icon="🍎" />
+          <Form.Dropdown.Item value="banana" title="Banana" icon="🍌" />
+        </Form.Dropdown.Section>
+        <Form.Dropdown.Section title="Vegetables">
+          <Form.Dropdown.Item value="broccoli" title="Broccoli" icon="🥦" />
+          <Form.Dropdown.Item value="carrot" title="Carrot" icon="🥕" />
+        </Form.Dropdown.Section>
+      </Form.Dropdown>
+    </Form>
+  );
+}
+```
 
 #### Props
 
@@ -96,6 +171,22 @@ Use sections to group related menu items together.
 A form item that shows a separator line.
 Use for grouping and visually separating form items.
 
+#### Example
+
+```typescript
+import { Form } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <Form.TextField id="textfield" />
+      <Form.Separator />
+      <Form.TextArea id="textarea" />
+    </Form>
+  );
+}
+```
+
 #### Props
 
 | Prop | Type | Required | Default | Description |
@@ -105,6 +196,26 @@ Use for grouping and visually separating form items.
 ### Form.TagPicker
 
 A form item with a tag picker that allows the user to select multiple items.
+
+#### Example
+
+Example of an uncontrolled tag picker:
+
+```typescript
+import { Form } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <Form.TagPicker id="sports" title="Favorite Sports" defaultValue={["football"]}>
+        <Form.TagPicker.Item value="basketball" title="Basketball" icon="🏀" />
+        <Form.TagPicker.Item value="football" title="Football" icon="⚽️" />
+        <Form.TagPicker.Item value="tennis" title="Tennis" icon="🎾" />
+      </Form.TagPicker>
+    </Form>
+  );
+}
+```
 
 #### Props
 
@@ -123,6 +234,22 @@ A form item with a tag picker that allows the user to select multiple items.
 
 A tag picker item in a [FormTagPicker](../user-interface/form.md#formtagpicker).
 
+#### Example
+
+```typescript
+import { Color, Form, Icon } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <Form.TagPicker id="color" title="Color">
+        <Form.TagPicker.Item value="ger" title="Germany" icon={{ source: Icon.Circle, tintColor: Color.Red }} />
+      </Form.TagPicker>
+    </Form>
+  );
+}
+```
+
 #### Props
 
 | Prop | Type | Required | Default | Description |
@@ -135,6 +262,25 @@ A tag picker item in a [FormTagPicker](../user-interface/form.md#formtagpicker).
 
 A form item with a text area for input.
 The item supports multiline text entry.
+
+#### Example
+
+Example of an uncontrolled text area:
+
+```typescript
+import { Form } from "@raycast/api";
+
+const DESCRIPTION =
+  "We spend too much time starring at loading indicators. The Raycast team is dedicated to make everybody interact faster with their computers.";
+
+export default function Command() {
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <Form.TextArea id="description" defaultValue={DESCRIPTION} />
+    </Form>
+  );
+}
+```
 
 #### Props
 
@@ -151,6 +297,22 @@ The item supports multiline text entry.
 ### Form.TextField
 
 A form item with a text field for input.
+
+#### Example
+
+Example of an uncontrolled text field:
+
+```typescript
+import { Form } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <Form.TextField id="name" defaultValue="Steve" />
+    </Form>
+  );
+}
+```
 
 #### Props
 
@@ -181,7 +343,7 @@ interface Values {
   due?: Date;
 }
 
-export default () => {
+export default function Command() {
   function handleSubmit(values: Values) {
     console.log(values);
   }
@@ -204,7 +366,7 @@ export default () => {
 ### FormValue
 
 ```typescript
-FormValue: string | number | boolean | string[] | number[] | null
+FormValue: string | number | boolean | string[] | number[] | Date | null
 ```
 
 A possible form item value that will be used as an input for the submit callback of a form.

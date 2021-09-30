@@ -13,7 +13,7 @@ The colors adopt to light and dark theme.
 ```typescript
 import { Color, Icon, List } from "@raycast/api";
 
-export default () => {
+export default function Command() {
  return (
  <List>
    <List.Item title="Blue" icon={{ source: Icon.Circle, tintColor: Color.Blue }} />
@@ -69,7 +69,7 @@ Colors different to the built-in ones (see [Color](../user-interface/colors.md#c
 ```typescript
 import { Color, Icon, List } from "@raycast/api";
 
-export default () => {
+export default function Command() {
   return (
     <List>
       <List.Item title="Built-in color" icon={{ source: Icon.Circle, tintColor: Color.Red }} />

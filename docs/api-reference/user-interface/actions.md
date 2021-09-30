@@ -8,6 +8,25 @@ Action that copies the content to the clipboard.
 
 The main window is closed and a HUD is shown after the content was copied to the clipboard.
 
+#### Example
+
+```typescript
+import { ActionPanel, CopyToClipboardAction, Detail } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Detail
+      markdown="Press `⌘ + .` and share some love."
+      actions={
+        <ActionPanel>
+          <CopyToClipboardAction content="I ❤️ Raycast" shortcut={{ modifiers: ["cmd"], key: "." }} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
 #### Props
 
 | Prop | Type | Required | Default | Description |
@@ -24,6 +43,25 @@ An action to open a file or folder with a specific application, just as if you h
 file's icon.
 
 The main window is closed, after the file was opened.
+
+#### Example
+
+```typescript
+import { ActionPanel, Detail, OpenAction } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Detail
+      markdown="Check out your extension code."
+      actions={
+        <ActionPanel>
+          <OpenAction title="Open Folder" target={__dirname} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
 
 #### Props
 
@@ -42,6 +80,25 @@ Action that opens a URL in the default browser..
 
 The main window is closed, after the URL was opened in the browser.
 
+#### Example
+
+```typescript
+import { ActionPanel, Detail, OpenInBrowserAction } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Detail
+      markdown="Join the gang!"
+      actions={
+        <ActionPanel>
+          <OpenInBrowserAction url="https://raycast.com/jobs" />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
 #### Props
 
 | Prop | Type | Required | Default | Description |
@@ -59,6 +116,28 @@ An action to open a file or folder with a specific application.
 The action opens a sub-menu with all applications that can open the file or folder.
 The main window is closed after the file was opened in the specified application.
 
+#### Example
+
+```typescript
+import { ActionPanel, Detail, OpenWithAction } from "@raycast/api";
+import { homedir } from "os";
+
+const DESKTOP_DIR = `${homedir()}/Desktop`;
+
+export default function Command() {
+  return (
+    <Detail
+      markdown="What do you want to use to open your desktop with?"
+      actions={
+        <ActionPanel>
+          <OpenWithAction path={DESKTOP_DIR} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
 #### Props
 
 | Prop | Type | Required | Default | Description |
@@ -74,6 +153,25 @@ The main window is closed after the file was opened in the specified application
 Action that pastes the content to the front-most applications.
 
 The main window is closed, after the content was pasted to the front-most application.
+
+#### Example
+
+```typescript
+import { ActionPanel, Detail, PasteAction } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Detail
+      markdown="Let us know what you think about the Raycast API?"
+      actions={
+        <ActionPanel>
+          <PasteAction content="api@raycast.com" />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
 
 #### Props
 
@@ -105,6 +203,28 @@ Action that shows a file or folder in the Finder.
 
 The main window is closed, after the file or folder was revealed in the Finder.
 
+#### Example
+
+```typescript
+import { ActionPanel, Detail, ShowInFinderAction } from "@raycast/api";
+import { homedir } from "os";
+
+const DOWNLOADS_DIR = `${homedir()}/Downloads`;
+
+export default function Command() {
+  return (
+    <Detail
+      markdown="Are your downloads pilling up again?"
+      actions={
+        <ActionPanel>
+          <ShowInFinderAction path={DOWNLOADS_DIR} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
 #### Props
 
 | Prop | Type | Required | Default | Description |
@@ -118,6 +238,28 @@ The main window is closed, after the file or folder was revealed in the Finder.
 ### TrashAction
 
 Action that moves a file or folder to the Trash.
+
+#### Example
+
+```typescript
+import { ActionPanel, Detail, TrashAction } from "@raycast/api";
+import { homedir } from "os";
+
+const FILE = `${homedir()}/Downloads/get-rid-of-me.txt`;
+
+export default function Command() {
+  return (
+    <Detail
+      markdown="Some spring cleaning?"
+      actions={
+        <ActionPanel>
+          <TrashAction paths={FILE} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
 
 #### Props
 

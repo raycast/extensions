@@ -11,7 +11,7 @@ An icon as it's used in the Finder.
 ```typescript
 import { List } from "@raycast/api";
 
-export default () => {
+export default function Command() {
   return (
     <List>
       <List.Item title="File icon" icon={{ fileIcon: __filename }} />
@@ -65,7 +65,7 @@ List of built-in icons that can be used for actions or lists
 ```typescript
 import { Icon, List } from "@raycast/api";
 
-export default () => {
+export default function Command() {
   return (
     <List>
       <List.Item title="Icon" icon={Icon.Circle} />
@@ -136,7 +136,7 @@ Available masks that can be used to change the shape of an image.
 ```typescript
 import { ImageMask, List } from "@raycast/api";
 
-export default () => {
+export default function Command() {
   return (
     <List>
       <List.Item title="Icon" icon={{ source: "https://raycast.com/uploads/avatar.png", mask: ImageMask.Circle }} />
@@ -165,7 +165,7 @@ Union type for the supported image types.
 ```typescript
 import { Icon, ImageMask, List } from "@raycast/api";
 
-export default () => {
+export default function Command() {
   return (
     <List>
       <List.Item title="String" icon="https://raycast.com/uploads/avatar.png" />
@@ -196,7 +196,7 @@ You can also specify different remote or local assets for light and dark theme.
 ```typescript
 import { Icon, List } from "@raycast/api";
 
-export default () => {
+export default function Command() {
   return (
     <List>
       <List.Item title="String" icon={{ source: "https://raycast.com/uploads/avatar.png" }} />

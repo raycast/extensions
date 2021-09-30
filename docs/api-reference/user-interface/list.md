@@ -85,7 +85,26 @@ render(<MyList />)
 
 ### List
 
-Shows sections and items with built-in or custom filtering through an optional search bar.
+Displays [ListSection](../user-interface/list.md#listsection) or [ListItem](../user-interface/list.md#listitem).
+
+The list uses built-in filtering by indexing the title of list items and additionally keywords.
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List navigationTitle="Search Beers" searchBarPlaceholder="Search your favorite beer">
+      <List.Item title="Augustiner Helles" />
+      <List.Item title="Camden Hells" />
+      <List.Item title="Leffe Blonde" />
+      <List.Item title="Sierra Nevada IPA" />
+    </List>
+  );
+}
+```
 
 #### Props
 
@@ -93,9 +112,9 @@ Shows sections and items with built-in or custom filtering through an optional s
 | :--- | :--- | :--- | :--- | :--- |
 | actions | `null` or `ActionPanel` | No | - | A reference to an [ActionPanel](../user-interface/action-panel.md#actionpanel). |
 | children | `null` or `List.Section` or `List.Section[]` or `List.Item` or `List.Item[]` | No | - | List sections or items. If [ListItem](../user-interface/list.md#listitem) elements are specified, a default section is automatically created. |
-| isLoading | `boolean` | No | - | Indicates whether a loading bar should be shown or hidden below the search bar |
-| navigationTitle | `string` | No | - | The main title for that view displayed in Raycast |
-| searchBarPlaceholder | `string` | No | - | Placeholder text that will be shown in the search bar. |
+| isLoading | `boolean` | No | false | Indicates whether a loading bar should be shown or hidden below the search bar |
+| navigationTitle | `string` | No | Command title | The main title for that view displayed in Raycast |
+| searchBarPlaceholder | `string` | No | Search value... | Placeholder text that will be shown in the search bar. |
 | selectedItemId | `string` | No | - | Selects the item with the specified id. |
 | throttle | `boolean` | No | false | Defines whether the [ListProps.onSearchTextChange](../user-interface/list.md#listprops) will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). |
 | onSearchTextChange | <code>(text: string) => void</code> | No | - |  |
@@ -103,7 +122,11 @@ Shows sections and items with built-in or custom filtering through an optional s
 
 ### List.Item
 
-Represents an item within a list section.
+A item in the [List](../user-interface/list.md#list).
+
+This is one of the foundational UI comonents of Raycast. A list item represents a single entity. It can be a
+GitHub pull request, a file or anything else. Most likely you want to perform actions on this item, so make it clear
+to the user what this list item is about.
 
 #### Example
 
@@ -135,7 +158,29 @@ export default function Command() {
 
 ### List.Section
 
-Visually separated group of list items. Use sections to group related list items together.
+A group of related [ListItem](../user-interface/list.md#listitem).
+
+Sections are a great way to structure your list. F.e. group GitHub issues with the same status and order them by priority.
+This way the user can quickly access what is most relevant.
+
+#### Example
+
+```typescript
+import { List } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Section title="Lager">
+        <List.Item title="Camden Hells" />
+      </List.Section>
+      <List.Section title="IPA">
+        <List.Item title="Sierra Nevada IPA" />
+      </List.Section>
+    </List>
+  );
+}
+```
 
 #### Props
 
