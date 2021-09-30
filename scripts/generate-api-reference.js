@@ -414,7 +414,7 @@ ${replaceLinksInDescription(docs, getCommentText(item))}
   const remark = getRemarkValue(item);
   if (remark) {
     text += `
-${getRemarkValue(item)}
+${replaceLinksInDescription(docs, remark)}
 `;
   }
   const exampleCode = getExampleCode(item);

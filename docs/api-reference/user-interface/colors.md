@@ -52,7 +52,7 @@ ColorLike: Color | string
 
 Union type for the supported color types.
 
-Besides the {@link Color}, you can use any of the following color formats:
+Besides the [Color](../user-interface/colors.md#color), you can use any of the following color formats:
 - HEX, e.g `#FF0000`
 - Short HEX, e.g. `#F00`
 - RGBA, e.g. `rgb(255, 0, 0)`
@@ -60,7 +60,7 @@ Besides the {@link Color}, you can use any of the following color formats:
 - HSL, e.g. `hsla(200, 20%, 33%, 0.2)`
 - Keywords, e.g. `red`
 
-Colors different to the built-in ones (see {@link Color}) will be dynamically adjusted to fit the contrast.
+Colors different to the built-in ones (see [Color](../user-interface/colors.md#color)) will be dynamically adjusted to fit the contrast.
 
 #### Example
 
