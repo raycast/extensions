@@ -258,24 +258,24 @@ function formatTypeString(type) {
   return BQ + type.replaceAll(" | ", BQ + " or " + BQ) + BQ;
 }
 
-function generateFunctionSignatureMarkdown(docs, item) {
-  const parameters = getParameterList(docs, item);
-  const returnType = getReturnType(docs, item);
-  const signature = `${returnType.startsWith("Promise") ? "async " : ""}function ${item.name}(${parameters
+function generateFunctionSignatureMarkdown(docs, signature) {
+  const parameters = getParameterList(docs, signature);
+  const returnType = getReturnType(docs, signature);
+  const signatureText = `${returnType.startsWith("Promise") ? "async " : ""}function ${signature.name}(${parameters
     .map(([name, type]) => `${name}: ${type}`)
     .join(", ")}): ${returnType}`;
   let text = `
-### ${item.name}
+### ${signature.name}
 
-${replaceLinksInDescription(docs, getCommentText(item))}
+${replaceLinksInDescription(docs, getCommentText(signature))}
 
 #### Signature
 
 ${START_CODE_BLOCK}
-${signature}
+${signatureText}
 ${END_CODE_BLOCK}
 `;
-  const exampleCode = getExampleCode(item);
+  const exampleCode = getExampleCode(signature);
   if (exampleCode) {
     text += `
 #### Example
@@ -283,7 +283,7 @@ ${END_CODE_BLOCK}
 ${exampleCode}
 `;
   } else {
-    console.warn("No example code found for", item.name);
+    console.warn("No example code found for", signature.name);
   }
   if (parameters.length) {
     text += `
@@ -303,7 +303,7 @@ ${parameters
     text += `
 #### Return
 
-${replaceLinksInDescription(docs, getCommentReturns(item))}
+${replaceLinksInDescription(docs, getCommentReturns(signature))}
 `;
   }
   return text;
