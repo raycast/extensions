@@ -74,6 +74,8 @@ A promise that resolves with the shown toast. The toast can be used to change or
 
 A Toast with a certain style, title, and message.
 
+Use [showToast](../user-interface/toast.md#showtoast) as shortcut for creating and showing a Toast.
+
 #### Example
 
 ```typescript
@@ -143,6 +145,10 @@ export default async () => {
 ### ToastStyle
 
 Defines the visual style of the Toast.
+
+Use ToastStyle.Success for confirmations and ToastStyle.Failure for displaying errors.
+Use ToastStyle.Animated when your Toast should be shown until a process is completed.
+You can hide it later by using Toast.hide or update the properties of an existing Toast.
 
 #### Enumeration members
 

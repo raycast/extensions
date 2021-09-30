@@ -6,6 +6,8 @@
 
 The standard colors. Use this colors for consistency.
 
+The colors adopt to light and dark theme.
+
 #### Example
 
 ```typescript

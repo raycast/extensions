@@ -30,6 +30,8 @@ export default () => {
 
 Display different types of images, including network images or bundled assets.
 
+Apply image transforms to the source, such as a `mask` or a `tintColor`.
+
 #### Example
 
 ```typescript
@@ -183,6 +185,11 @@ ImageSource: string | Icon | { dark: string; light: string }
 
 The source of an [Image](../user-interface/icons-and-images.md#image). Can be either a remote URL, a local file resource, a built-in [Icon](../user-interface/icons-and-images.md#icon) or
 a single emoji.
+
+For consistency, it's best to use the built-in [Icon](../user-interface/icons-and-images.md#icon) in lists, the Action Panel and other places. If a
+specific icon isn't built-in, you can reference custom ones from the `assets` folder of the extension by file name,
+e.g. `my-icon.png`. Alternatively, you can reference an absolute HTTPS url that points to an image or use an emoji.
+You can also specify different remote or local assets for light and dark theme.
 
 #### Example
 

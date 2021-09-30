@@ -131,6 +131,9 @@ A promise that resolves when all files are moved to the trash.
 
 An object that represents a locally installed application on the system.
 
+It can be used to open files or folders in a specific application. Use [getApplications](../utilities/system.md#getapplications) or
+[getDefaultApplication](../utilities/system.md#getdefaultapplication) to get applications that can open a specific file or folder.
+
 #### Properties
 
 | Name | Type | Required | Description |

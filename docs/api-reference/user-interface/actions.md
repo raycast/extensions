@@ -6,6 +6,8 @@
 
 Action that copies the content to the clipboard.
 
+The main window is closed and a HUD is shown after the content was copied to the clipboard.
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | content | `string` or `number` | Yes | - | The contents that will be written to the clipboard as string. |
@@ -18,6 +20,8 @@ Action that copies the content to the clipboard.
 
 An action to open a file or folder with a specific application, just as if you had double-clicked the
 file's icon.
+
+The main window is closed, after the file was opened.
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -32,6 +36,8 @@ file's icon.
 
 Action that opens a URL in the default browser..
 
+The main window is closed, after the URL was opened in the browser.
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | icon | `ImageLike` | No | Icon.Globe | The icon displayed for the action. |
@@ -44,6 +50,9 @@ Action that opens a URL in the default browser..
 
 An action to open a file or folder with a specific application.
 
+The action opens a sub-menu with all applications that can open the file or folder.
+The main window is closed after the file was opened in the specified application.
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | icon | `ImageLike` | No | Icon.Upload | The icon displayed for the action. |
@@ -55,6 +64,8 @@ An action to open a file or folder with a specific application.
 ### PasteAction
 
 Action that pastes the content to the front-most applications.
+
+The main window is closed, after the content was pasted to the front-most application.
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -79,6 +90,8 @@ Action that allows to push a new view to the navigation stack.
 ### ShowInFinderAction
 
 Action that shows a file or folder in the Finder.
+
+The main window is closed, after the file or folder was revealed in the Finder.
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |

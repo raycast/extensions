@@ -146,6 +146,9 @@ A form item with a text field for input.
 
 Values of items in the form.
 
+For type-safe form values you can define your own interface. Use the ID's of the form items
+as property name. See the example for more details.
+
 #### Example
 
 ```typescript

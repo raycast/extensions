@@ -6,6 +6,10 @@
 
 Generates a memoized random ID.
 
+The generated ID is preserved across renders. It's used internally to generate fallback ID's
+for [List.Section](../user-interface/list.md#listsection) or [List.Item](../user-interface/list.md#listitem). The generated ID is saved as React `ref` and
+won't change unless the React component is unmounted.
+
 #### Signature
 
 ```typescript

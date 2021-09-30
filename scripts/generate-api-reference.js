@@ -186,7 +186,7 @@ function getDefaultValue(item) {
 }
 
 function getRemarkValue(item) {
-  const found = item.comment?.tags?.find((x) => x.tag === "remark");
+  const found = item.comment?.tags?.find((x) => x.tag === "remark" || x.tag === "remarks");
   if (found) {
     return found.text.trim();
   }
@@ -268,7 +268,14 @@ function generateFunctionSignatureMarkdown(docs, signature) {
 ### ${signature.name}
 
 ${replaceLinksInDescription(docs, getCommentText(signature))}
-
+`;
+  const remark = getRemarkValue(signature);
+  if (remark) {
+    text += `
+${replaceLinksInDescription(docs, remark)}
+`;
+  }
+  text += `
 #### Signature
 
 ${START_CODE_BLOCK}
@@ -317,6 +324,12 @@ function generateReactComponentSignatureMarkdown(docs, signature, item) {
 
 ${replaceLinksInDescription(docs, getCommentText(signature))}
 `;
+  const remark = getRemarkValue(signature);
+  if (remark) {
+    text += `
+${replaceLinksInDescription(docs, remark)}
+`;
+  }
   const exampleCode = getExampleCode(signature);
   if (exampleCode) {
     text += `
@@ -373,6 +386,12 @@ function generateInterfaceMarkdown(docs, item) {
 
 ${replaceLinksInDescription(docs, getCommentText(item))}
 `;
+  const remark = getRemarkValue(item);
+  if (remark) {
+    text += `
+${replaceLinksInDescription(docs, remark)}
+`;
+  }
   const exampleCode = getExampleCode(item);
   if (exampleCode) {
     text += `
@@ -445,6 +464,12 @@ function generateClassMarkdown(docs, item) {
 
 ${replaceLinksInDescription(docs, getCommentText(item))}
 `;
+  const remark = getRemarkValue(item);
+  if (remark) {
+    text += `
+${replaceLinksInDescription(docs, remark)}
+`;
+  }
   const exampleCode = getExampleCode(item);
   if (exampleCode) {
     text += `
@@ -496,6 +521,12 @@ function generateEnumerationMarkdown(docs, item) {
 
 ${replaceLinksInDescription(docs, getCommentText(item))}
 `;
+  const remark = getRemarkValue(item);
+  if (remark) {
+    text += `
+${replaceLinksInDescription(docs, remark)}
+`;
+  }
   const exampleCode = getExampleCode(item);
   if (exampleCode) {
     text += `
@@ -527,6 +558,12 @@ ${END_CODE_BLOCK}
 
 ${replaceLinksInDescription(docs, getCommentText(item))}
 `;
+  const remark = getRemarkValue(item);
+  if (remark) {
+    text += `
+${replaceLinksInDescription(docs, remark)}
+`;
+  }
   const exampleCode = getExampleCode(item);
   if (exampleCode) {
     text += `

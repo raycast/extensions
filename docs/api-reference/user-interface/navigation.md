@@ -6,6 +6,9 @@
 
 A hook that lets you push and pop view components in the navigation stack.
 
+Most likely you won't use this hook too often. To push a new component, use the [PushAction](../user-interface/actions.md#pushaction).
+When a user presses `ESC`, we automatically push to the previous component.
+
 #### Signature
 
 ```typescript

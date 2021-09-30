@@ -6,6 +6,12 @@
 
 Represents a list of actions in the user interface, accessible through the action panel.
 
+The items can be grouped into sections and they can be assigned keyboard shortcuts.
+Use the menu for context-specific actions on list items or detail screens.
+
+Note that when used for the action panel, the first (ENTER) and second (CMD + ENTER) menu items have automatically assigned keyboard shortcuts.
+Custom shortcuts will work in addition to the default shortcuts.
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | children | `ActionPanelChildren` | No | - | Sections or items. If [ActionPanel.Item](../user-interface/action-panel.md#actionpanelitem) elements are specified, a default section is automatically created. |
