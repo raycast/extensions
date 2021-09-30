@@ -5,3 +5,7 @@
 ## Screenshot
 
 <!-- If you add a new extension or command, include a screenshot or better a screencast of how it works. -->
+
+## Checklist
+
+- [ ] I read the [contribution guidelines](contributing.md)
