@@ -95,7 +95,7 @@ Shows sections and items with built-in or custom filtering through an optional s
 | navigationTitle | `string` | No | - | The main title for that view displayed in Raycast |
 | searchBarPlaceholder | `string` | No | - | Placeholder text that will be shown in the search bar. |
 | selectedItemId | `string` | No | - | Selects the item with the specified id. |
-| throttle | `boolean` | No | false | Defines whether the ListProps.onSearchTextChange will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). |
+| throttle | `boolean` | No | false | Defines whether the [ListProps.onSearchTextChange](../user-interface/list.md#listprops) will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). |
 | onSearchTextChange | <code>(text: string) => void</code> | No | - |  |
 | onSelectionChange | <code>(id: string) => void</code> | No | - |  |
 

@@ -146,9 +146,9 @@ export default async () => {
 
 Defines the visual style of the Toast.
 
-Use ToastStyle.Success for confirmations and ToastStyle.Failure for displaying errors.
-Use ToastStyle.Animated when your Toast should be shown until a process is completed.
-You can hide it later by using Toast.hide or update the properties of an existing Toast.
+Use [ToastStyle.Success](../user-interface/toast.md#toaststyle) for confirmations and [ToastStyle.Failure](../user-interface/toast.md#toaststyle) for displaying errors.
+Use [ToastStyle.Animated](../user-interface/toast.md#toaststyle) when your Toast should be shown until a process is completed.
+You can hide it later by using [Toast.hide](../user-interface/toast.md#toast) or update the properties of an existing Toast.
 
 #### Enumeration members
 

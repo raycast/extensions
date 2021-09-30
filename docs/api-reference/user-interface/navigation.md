@@ -51,7 +51,7 @@ export default function Command() {
 
 #### Return
 
-A [Navigation](../user-interface/navigation.md#navigation) object with Navigation.push and Navigation.pop functions.
+A [Navigation](../user-interface/navigation.md#navigation) object with [Navigation.push](../user-interface/navigation.md#navigation) and [Navigation.pop](../user-interface/navigation.md#navigation) functions.
 Use the functions to alter the navigation stack.
 
 ### Navigation

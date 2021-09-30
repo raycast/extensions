@@ -64,19 +64,33 @@ function generateLinkDestination(docs, name) {
     docs.children.find((x) => x.name === name && x.kindString !== "Namespace") ||
     // FIXME this replaceAll is a real hack based on naming convention
     docs.children.find((x) => x.name === name.replaceAll(".", "") && x.kindString !== "Namespace");
-  if (!found) {
-    console.warn("generateLinkDestination not found for", name);
-    return null;
+  if (found) {
+    const category = docs.categories.find((category) => category.children.includes(found.id));
+    if (!category) {
+      throw new Error(`no category found for: ${name}`);
+    }
+    const subcategory = getSubcategory(found);
+    if (!subcategory) {
+      return `../${getFilename(category.title)}.md#${getLinkName(name)}`;
+    }
+    return `../${getFilename(category.title)}/${getFilename(subcategory)}.md#${getLinkName(name)}`;
   }
-  const category = docs.categories.find((category) => category.children.includes(found.id));
-  if (!category) {
-    throw new Error(`no category found for: ${name}`);
+  const foundParent =
+    // FIXME another hack to link to parent item based on naming convention
+    docs.children.find((x) => x.name === name.split(".")[0] && x.kindString !== "Namespace");
+  if (foundParent) {
+    const category = docs.categories.find((category) => category.children.includes(foundParent.id));
+    if (!category) {
+      throw new Error(`no category found for: ${name}`);
+    }
+    const subcategory = getSubcategory(foundParent);
+    if (!subcategory) {
+      return `../${getFilename(category.title)}.md#${getLinkName(name.split(".")[0])}`;
+    }
+    return `../${getFilename(category.title)}/${getFilename(subcategory)}.md#${getLinkName(name.split(".")[0])}`;
   }
-  const subcategory = getSubcategory(found);
-  if (!subcategory) {
-    return `../${getFilename(category.title)}.md#${getLinkName(name)}`;
-  }
-  return `../${getFilename(category.title)}/${getFilename(subcategory)}.md#${getLinkName(name)}`;
+  console.warn("generateLinkDestination not found for", name);
+  return null;
 }
 
 function replaceLinksInDescription(docs, desc) {

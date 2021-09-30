@@ -11,7 +11,7 @@ The main window is closed and a HUD is shown after the content was copied to the
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | content | `string` or `number` | Yes | - | The contents that will be written to the clipboard as string. |
-| icon | `ImageLike` | No | Icon.Clipboard | A optional icon displayed for the item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
+| icon | `ImageLike` | No | [Icon.Clipboard](../user-interface/icons-and-images.md#icon) | A optional icon displayed for the item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
 | shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the action. |
 | title | `string` | No | - | An optional title for the action. |
 | onCopy | <code>(content: string \| number) => void</code> | No | - |  |
@@ -26,7 +26,7 @@ The main window is closed, after the file was opened.
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | application | `string` or `Application` | No | - | The application name to use for opening the file. |
-| icon | `ImageLike` | No | Icon.Finder | The icon displayed for the action. |
+| icon | `ImageLike` | No | [Icon.Finder](../user-interface/icons-and-images.md#icon) | The icon displayed for the action. |
 | shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the action. |
 | target | `string` | Yes | - | The file, folder or URL to open. |
 | title | `string` | Yes | - | The title for the action. |
@@ -40,7 +40,7 @@ The main window is closed, after the URL was opened in the browser.
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | `ImageLike` | No | Icon.Globe | The icon displayed for the action. |
+| icon | `ImageLike` | No | [Icon.Globe](../user-interface/icons-and-images.md#icon) | The icon displayed for the action. |
 | shortcut | `KeyboardShortcut` | No | - | The optional keyboard shortcut for the menu item |
 | title | `string` | No | - | An optional title for the action. |
 | url | `string` | Yes | - | The URL to open. |
@@ -55,7 +55,7 @@ The main window is closed after the file was opened in the specified application
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | `ImageLike` | No | Icon.Upload | The icon displayed for the action. |
+| icon | `ImageLike` | No | [Icon.Upload](../user-interface/icons-and-images.md#icon) | The icon displayed for the action. |
 | path | `string` | Yes | - | The path to open. |
 | shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the action. |
 | title | `string` | No | Open With | The title for the action. |
@@ -70,7 +70,7 @@ The main window is closed, after the content was pasted to the front-most applic
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | content | `string` or `number` | Yes | - | The contents that will be written to the clipboard as string. |
-| icon | `ImageLike` | No | Icon.Clipboard | The icon displayed for the action. |
+| icon | `ImageLike` | No | [Icon.Clipboard](../user-interface/icons-and-images.md#icon) | The icon displayed for the action. |
 | shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the action. |
 | title | `string` | No | - | An optional title for the action. |
 | onPaste | <code>(content: string \| number) => void</code> | No | - |  |
@@ -95,7 +95,7 @@ The main window is closed, after the file or folder was revealed in the Finder.
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | `ImageLike` | No | Icon.Finder | A optional icon displayed for the item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
+| icon | `ImageLike` | No | [Icon.Finder](../user-interface/icons-and-images.md#icon) | A optional icon displayed for the item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
 | path | `PathLike` | Yes | - | The path to open. |
 | shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the action. |
 | title | `string` | No | Show in Finder | An optional title for the action. |
@@ -107,7 +107,7 @@ Action that moves a file or folder to the Trash.
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | `ImageLike` | No | Icon.Trash | A optional icon displayed for the action. |
+| icon | `ImageLike` | No | [Icon.Trash](../user-interface/icons-and-images.md#icon) | A optional icon displayed for the action. |
 | paths | `PathLike` or `PathLike[]` | Yes | - | The item or items to move to the trash. |
 | shortcut | `KeyboardShortcut` | No | - | The optional keyboard shortcut for the action. |
 | title | `string` | No | Move to Trash | An optional title for the action. |
