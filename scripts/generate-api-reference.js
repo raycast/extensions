@@ -355,6 +355,8 @@ ${exampleCode}
     console.warn("No example code found for", item.name);
   }
   text += `
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 ${props

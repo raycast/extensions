@@ -87,6 +87,8 @@ render(<MyList />)
 
 Shows sections and items with built-in or custom filtering through an optional search bar.
 
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | actions | `null` or `ActionPanel` | No | - | A reference to an [ActionPanel](../user-interface/action-panel.md#actionpanel). |
@@ -117,6 +119,8 @@ export default function Command() {
 }
 ```
 
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | accessoryIcon | `ImageLike` | No | - | A optional icon displayed as accessory for the list item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
@@ -132,6 +136,8 @@ export default function Command() {
 ### List.Section
 
 Visually separated group of list items. Use sections to group related list items together.
+
+#### Props
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |

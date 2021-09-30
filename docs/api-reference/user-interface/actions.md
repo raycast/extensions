@@ -8,6 +8,8 @@ Action that copies the content to the clipboard.
 
 The main window is closed and a HUD is shown after the content was copied to the clipboard.
 
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | content | `string` or `number` | Yes | - | The contents that will be written to the clipboard as string. |
@@ -22,6 +24,8 @@ An action to open a file or folder with a specific application, just as if you h
 file's icon.
 
 The main window is closed, after the file was opened.
+
+#### Props
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -38,6 +42,8 @@ Action that opens a URL in the default browser..
 
 The main window is closed, after the URL was opened in the browser.
 
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | icon | `ImageLike` | No | [Icon.Globe](../user-interface/icons-and-images.md#icon) | The icon displayed for the action. |
@@ -53,6 +59,8 @@ An action to open a file or folder with a specific application.
 The action opens a sub-menu with all applications that can open the file or folder.
 The main window is closed after the file was opened in the specified application.
 
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | icon | `ImageLike` | No | [Icon.Upload](../user-interface/icons-and-images.md#icon) | The icon displayed for the action. |
@@ -67,6 +75,8 @@ Action that pastes the content to the front-most applications.
 
 The main window is closed, after the content was pasted to the front-most application.
 
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | content | `string` or `number` | Yes | - | The contents that will be written to the clipboard as string. |
@@ -78,6 +88,8 @@ The main window is closed, after the content was pasted to the front-most applic
 ### PushAction
 
 Action that allows to push a new view to the navigation stack.
+
+#### Props
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -93,6 +105,8 @@ Action that shows a file or folder in the Finder.
 
 The main window is closed, after the file or folder was revealed in the Finder.
 
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | icon | `ImageLike` | No | [Icon.Finder](../user-interface/icons-and-images.md#icon) | A optional icon displayed for the item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
@@ -104,6 +118,8 @@ The main window is closed, after the file or folder was revealed in the Finder.
 ### TrashAction
 
 Action that moves a file or folder to the Trash.
+
+#### Props
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |

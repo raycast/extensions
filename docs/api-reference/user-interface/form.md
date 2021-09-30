@@ -8,6 +8,8 @@ Gonna put some content here.
 
 Shows a list of form items such as FormViewTextField, FormViewCheckbox or FormViewDropdown.
 
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | actions | `null` or `ActionPanel` | No | - | A reference to an [ActionPanel](../user-interface/action-panel.md#actionpanel). |
@@ -20,6 +22,8 @@ Shows a list of form items such as FormViewTextField, FormViewCheckbox or FormVi
 ### Form.Checkbox
 
 A form item with a checkbox.
+
+#### Props
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -35,6 +39,8 @@ A form item with a checkbox.
 
 A form item with a date picker.
 
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | dateFormat | `string` | No | - | The date format string to be used for FormViewDatePicker.value. The default format is ISO 8601 ("yyyy-MM-dd'T'HH:mm:ssXXXXX"). |
@@ -48,6 +54,8 @@ A form item with a date picker.
 ### Form.Dropdown
 
 A form item with a dropdown menu.
+
+#### Props
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -63,6 +71,8 @@ A form item with a dropdown menu.
 
 Represents a context-specific action that can be selected in the user interface or triggered through an assigned keyboard shortcut on the respective view.
 
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | icon | `ImageLike` | No | - | A optional icon displayed for the item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
@@ -74,6 +84,8 @@ Represents a context-specific action that can be selected in the user interface 
 Visually separated group of items.
 Use sections to group related menu items together.
 
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | children | `null` or `Form.DropdownItem` or `Form.DropdownItem[]` | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
@@ -84,6 +96,8 @@ Use sections to group related menu items together.
 A form item that shows a separator line.
 Use for grouping and visually separating form items.
 
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 
@@ -91,6 +105,8 @@ Use for grouping and visually separating form items.
 ### Form.TagPicker
 
 A form item with a tag picker that allows the user to select multiple items.
+
+#### Props
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -107,6 +123,8 @@ A form item with a tag picker that allows the user to select multiple items.
 
 A tag picker item in a [FormTagPicker](../user-interface/form.md#formtagpicker).
 
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | icon | `ImageLike` | No | - | An icon to show in the token. |
@@ -117,6 +135,8 @@ A tag picker item in a [FormTagPicker](../user-interface/form.md#formtagpicker).
 
 A form item with a text area for input.
 The item supports multiline text entry.
+
+#### Props
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -131,6 +151,8 @@ The item supports multiline text entry.
 ### Form.TextField
 
 A form item with a text field for input.
+
+#### Props
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |

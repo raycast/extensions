@@ -12,6 +12,8 @@ Use the menu for context-specific actions on list items or detail screens.
 Note that when used for the action panel, the first (ENTER) and second (CMD + ENTER) menu items have automatically assigned keyboard shortcuts.
 Custom shortcuts will work in addition to the default shortcuts.
 
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | children | `ActionPanelChildren` | No | - | Sections or items. If [ActionPanel.Item](../user-interface/action-panel.md#actionpanelitem) elements are specified, a default section is automatically created. |
@@ -20,6 +22,8 @@ Custom shortcuts will work in addition to the default shortcuts.
 ### ActionPanel.Item
 
 Represents a context-specific action that can be selected in the user interface or triggered through an assigned keyboard shortcut on the respective view.
+
+#### Props
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -34,6 +38,8 @@ Represents a context-specific action that can be selected in the user interface 
 Visually separated group of items.
 Use sections to group related menu items together.
 
+#### Props
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | children | `ActionPanelSectionChildren` | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
@@ -42,6 +48,8 @@ Use sections to group related menu items together.
 ### ActionPanel.Submenu
 
 Represents a context-specific action that can be selected in the user interface or triggered through an assigned keyboard shortcut on the respective view.
+
+#### Props
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
