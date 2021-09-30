@@ -280,7 +280,7 @@ ${END_CODE_BLOCK}
     text += `
 #### Example
 
-${getExampleCode(item)}
+${exampleCode}
 `;
   } else {
     console.warn("No example code found for", item.name);
@@ -316,7 +316,18 @@ function generateReactComponentSignatureMarkdown(docs, signature, item) {
 ### ${name}
 
 ${replaceLinksInDescription(docs, getCommentText(signature))}
+`;
+  const exampleCode = getExampleCode(signature);
+  if (exampleCode) {
+    text += `
+#### Example
 
+${exampleCode}
+`;
+  } else {
+    console.warn("No example code found for", item.name);
+  }
+  text += `
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 ${props
@@ -367,7 +378,7 @@ ${replaceLinksInDescription(docs, getCommentText(item))}
     text += `
 #### Example
 
-${getExampleCode(item)}
+${exampleCode}
 `;
   } else {
     console.warn("No example code found for", item.name);
@@ -411,7 +422,7 @@ ${getRemarkValue(item)}
     text += `
 #### Example
 
-${getExampleCode(item)}
+${exampleCode}
 `;
   } else {
     console.warn("No example code found for", item.name);
@@ -439,7 +450,7 @@ ${replaceLinksInDescription(docs, getCommentText(item))}
     text += `
 #### Example
 
-${getExampleCode(item)}
+${exampleCode}
 `;
   } else {
     console.warn("No example code found for", item.name);
@@ -490,7 +501,7 @@ ${replaceLinksInDescription(docs, getCommentText(item))}
     text += `
 #### Example
 
-${getExampleCode(item)}
+${exampleCode}
 `;
   } else {
     console.warn("No example code found for", item.name);
@@ -521,7 +532,7 @@ ${replaceLinksInDescription(docs, getCommentText(item))}
     text += `
 #### Example
 
-${getExampleCode(item)}
+${exampleCode}
 `;
   } else {
     console.warn("No example code found for", item.name);

@@ -103,6 +103,20 @@ Shows sections and items with built-in or custom filtering through an optional s
 
 Represents an item within a list section.
 
+#### Example
+
+```typescript
+import { Icon, List } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item icon={Icon.Star} title="Augustiner Helles" subtitle="0,5 Liter" accessoryTitle="Germany" />
+    </List>
+  );
+}
+```
+
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | accessoryIcon | `ImageLike` | No | - | A optional icon displayed as accessory for the list item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
