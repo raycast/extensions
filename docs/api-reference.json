@@ -1281,7 +1281,7 @@
 						"type": "query",
 						"queryType": {
 							"type": "reference",
-							"id": 273,
+							"id": 272,
 							"name": "FormDropdown"
 						}
 					}
@@ -1296,7 +1296,7 @@
 						"type": "query",
 						"queryType": {
 							"type": "reference",
-							"id": 299,
+							"id": 298,
 							"name": "FormDropdownItem"
 						}
 					}
@@ -1311,7 +1311,7 @@
 						"type": "query",
 						"queryType": {
 							"type": "reference",
-							"id": 291,
+							"id": 290,
 							"name": "FormDropdownSection"
 						}
 					}
@@ -1326,7 +1326,7 @@
 						"type": "query",
 						"queryType": {
 							"type": "reference",
-							"id": 269,
+							"id": 268,
 							"name": "FormSeparator"
 						}
 					}
@@ -1341,7 +1341,7 @@
 						"type": "query",
 						"queryType": {
 							"type": "reference",
-							"id": 318,
+							"id": 317,
 							"name": "FormTagPicker"
 						}
 					}
@@ -1356,7 +1356,7 @@
 						"type": "query",
 						"queryType": {
 							"type": "reference",
-							"id": 336,
+							"id": 335,
 							"name": "FormTagPickerItem"
 						}
 					}
@@ -1799,7 +1799,7 @@
 			"flags": {},
 			"children": [
 				{
-					"id": 268,
+					"id": 267,
 					"name": "displayName",
 					"kind": 32,
 					"kindString": "Variable",
@@ -1824,24 +1824,6 @@
 							"kindString": "Type literal",
 							"flags": {},
 							"children": [
-								{
-									"id": 263,
-									"name": "dateFormat",
-									"kind": 1024,
-									"kindString": "Property",
-									"flags": {},
-									"type": {
-										"type": "reference",
-										"typeArguments": [
-											{
-												"type": "intrinsic",
-												"name": "string"
-											}
-										],
-										"name": "Requireable"
-									},
-									"defaultValue": "..."
-								},
 								{
 									"id": 262,
 									"name": "defaultValue",
@@ -1879,7 +1861,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 264,
+									"id": 263,
 									"name": "onChange",
 									"kind": 1024,
 									"kindString": "Property",
@@ -1890,21 +1872,21 @@
 											{
 												"type": "reflection",
 												"declaration": {
-													"id": 265,
+													"id": 264,
 													"name": "__type",
 													"kind": 65536,
 													"kindString": "Type literal",
 													"flags": {},
 													"signatures": [
 														{
-															"id": 266,
+															"id": 265,
 															"name": "__type",
 															"kind": 4096,
 															"kindString": "Call signature",
 															"flags": {},
 															"parameters": [
 																{
-																	"id": 267,
+																	"id": 266,
 																	"name": "args",
 																	"kind": 32768,
 																	"kindString": "Parameter",
@@ -1980,7 +1962,7 @@
 										"typeArguments": [
 											{
 												"type": "intrinsic",
-												"name": "string"
+												"name": "object"
 											}
 										],
 										"name": "Requireable"
@@ -1993,10 +1975,9 @@
 									"title": "Properties",
 									"kind": 1024,
 									"children": [
-										263,
 										262,
 										258,
-										264,
+										263,
 										260,
 										259,
 										261
@@ -2012,21 +1993,21 @@
 					"title": "Variables",
 					"kind": 32,
 					"children": [
-						268,
+						267,
 						256
 					]
 				}
 			]
 		},
 		{
-			"id": 276,
+			"id": 275,
 			"name": "FormDropdown",
 			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
 				{
-					"id": 290,
+					"id": 289,
 					"name": "Item",
 					"kind": 32,
 					"kindString": "Variable",
@@ -2035,13 +2016,13 @@
 						"type": "query",
 						"queryType": {
 							"type": "reference",
-							"id": 299,
+							"id": 298,
 							"name": "FormDropdownItem"
 						}
 					}
 				},
 				{
-					"id": 289,
+					"id": 288,
 					"name": "Section",
 					"kind": 32,
 					"kindString": "Variable",
@@ -2050,13 +2031,13 @@
 						"type": "query",
 						"queryType": {
 							"type": "reference",
-							"id": 291,
+							"id": 290,
 							"name": "FormDropdownSection"
 						}
 					}
 				},
 				{
-					"id": 288,
+					"id": 287,
 					"name": "displayName",
 					"kind": 32,
 					"kindString": "Variable",
@@ -2067,7 +2048,7 @@
 					}
 				},
 				{
-					"id": 277,
+					"id": 276,
 					"name": "propTypes",
 					"kind": 32,
 					"kindString": "Variable",
@@ -2075,14 +2056,14 @@
 					"type": {
 						"type": "reflection",
 						"declaration": {
-							"id": 278,
+							"id": 277,
 							"name": "__type",
 							"kind": 65536,
 							"kindString": "Type literal",
 							"flags": {},
 							"children": [
 								{
-									"id": 283,
+									"id": 282,
 									"name": "defaultValue",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2100,7 +2081,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 279,
+									"id": 278,
 									"name": "id",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2118,7 +2099,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 284,
+									"id": 283,
 									"name": "onChange",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2129,21 +2110,21 @@
 											{
 												"type": "reflection",
 												"declaration": {
-													"id": 285,
+													"id": 284,
 													"name": "__type",
 													"kind": 65536,
 													"kindString": "Type literal",
 													"flags": {},
 													"signatures": [
 														{
-															"id": 286,
+															"id": 285,
 															"name": "__type",
 															"kind": 4096,
 															"kindString": "Call signature",
 															"flags": {},
 															"parameters": [
 																{
-																	"id": 287,
+																	"id": 286,
 																	"name": "args",
 																	"kind": 32768,
 																	"kindString": "Parameter",
@@ -2173,7 +2154,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 281,
+									"id": 280,
 									"name": "storeValue",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2191,7 +2172,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 280,
+									"id": 279,
 									"name": "title",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2209,7 +2190,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 282,
+									"id": 281,
 									"name": "value",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2232,12 +2213,12 @@
 									"title": "Properties",
 									"kind": 1024,
 									"children": [
+										282,
+										278,
 										283,
-										279,
-										284,
-										281,
 										280,
-										282
+										279,
+										281
 									]
 								}
 							]
@@ -2250,23 +2231,23 @@
 					"title": "Variables",
 					"kind": 32,
 					"children": [
-						290,
 						289,
 						288,
-						277
+						287,
+						276
 					]
 				}
 			]
 		},
 		{
-			"id": 302,
+			"id": 301,
 			"name": "FormDropdownItem",
 			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
 				{
-					"id": 317,
+					"id": 316,
 					"name": "displayName",
 					"kind": 32,
 					"kindString": "Variable",
@@ -2277,7 +2258,7 @@
 					}
 				},
 				{
-					"id": 303,
+					"id": 302,
 					"name": "propTypes",
 					"kind": 32,
 					"kindString": "Variable",
@@ -2285,14 +2266,14 @@
 					"type": {
 						"type": "reflection",
 						"declaration": {
-							"id": 304,
+							"id": 303,
 							"name": "__type",
 							"kind": 65536,
 							"kindString": "Type literal",
 							"flags": {},
 							"children": [
 								{
-									"id": 307,
+									"id": 306,
 									"name": "icon",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2316,14 +2297,14 @@
 																	{
 																		"type": "reflection",
 																		"declaration": {
-																			"id": 308,
+																			"id": 307,
 																			"name": "__type",
 																			"kind": 65536,
 																			"kindString": "Type literal",
 																			"flags": {},
 																			"children": [
 																				{
-																					"id": 309,
+																					"id": 308,
 																					"name": "fileIcon",
 																					"kind": 1024,
 																					"kindString": "Property",
@@ -2346,7 +2327,7 @@
 																					"title": "Properties",
 																					"kind": 1024,
 																					"children": [
-																						309
+																						308
 																					]
 																				}
 																			]
@@ -2367,14 +2348,14 @@
 																	{
 																		"type": "reflection",
 																		"declaration": {
-																			"id": 310,
+																			"id": 309,
 																			"name": "__type",
 																			"kind": 65536,
 																			"kindString": "Type literal",
 																			"flags": {},
 																			"children": [
 																				{
-																					"id": 315,
+																					"id": 314,
 																					"name": "mask",
 																					"kind": 1024,
 																					"kindString": "Property",
@@ -2392,7 +2373,7 @@
 																					"defaultValue": "..."
 																				},
 																				{
-																					"id": 311,
+																					"id": 310,
 																					"name": "source",
 																					"kind": 1024,
 																					"kindString": "Property",
@@ -2413,14 +2394,14 @@
 																											{
 																												"type": "reflection",
 																												"declaration": {
-																													"id": 312,
+																													"id": 311,
 																													"name": "__type",
 																													"kind": 65536,
 																													"kindString": "Type literal",
 																													"flags": {},
 																													"children": [
 																														{
-																															"id": 314,
+																															"id": 313,
 																															"name": "dark",
 																															"kind": 1024,
 																															"kindString": "Property",
@@ -2438,7 +2419,7 @@
 																															"defaultValue": "..."
 																														},
 																														{
-																															"id": 313,
+																															"id": 312,
 																															"name": "light",
 																															"kind": 1024,
 																															"kindString": "Property",
@@ -2461,8 +2442,8 @@
 																															"title": "Properties",
 																															"kind": 1024,
 																															"children": [
-																																314,
-																																313
+																																313,
+																																312
 																															]
 																														}
 																													]
@@ -2479,7 +2460,7 @@
 																					"defaultValue": "..."
 																				},
 																				{
-																					"id": 316,
+																					"id": 315,
 																					"name": "tintColor",
 																					"kind": 1024,
 																					"kindString": "Property",
@@ -2502,9 +2483,9 @@
 																					"title": "Properties",
 																					"kind": 1024,
 																					"children": [
-																						315,
-																						311,
-																						316
+																						314,
+																						310,
+																						315
 																					]
 																				}
 																			]
@@ -2524,7 +2505,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 306,
+									"id": 305,
 									"name": "title",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2542,7 +2523,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 305,
+									"id": 304,
 									"name": "value",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2565,9 +2546,9 @@
 									"title": "Properties",
 									"kind": 1024,
 									"children": [
-										307,
 										306,
-										305
+										305,
+										304
 									]
 								}
 							]
@@ -2580,21 +2561,21 @@
 					"title": "Variables",
 					"kind": 32,
 					"children": [
-						317,
-						303
+						316,
+						302
 					]
 				}
 			]
 		},
 		{
-			"id": 294,
+			"id": 293,
 			"name": "FormDropdownSection",
 			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
 				{
-					"id": 298,
+					"id": 297,
 					"name": "displayName",
 					"kind": 32,
 					"kindString": "Variable",
@@ -2605,7 +2586,7 @@
 					}
 				},
 				{
-					"id": 295,
+					"id": 294,
 					"name": "propTypes",
 					"kind": 32,
 					"kindString": "Variable",
@@ -2613,14 +2594,14 @@
 					"type": {
 						"type": "reflection",
 						"declaration": {
-							"id": 296,
+							"id": 295,
 							"name": "__type",
 							"kind": 65536,
 							"kindString": "Type literal",
 							"flags": {},
 							"children": [
 								{
-									"id": 297,
+									"id": 296,
 									"name": "title",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2643,7 +2624,7 @@
 									"title": "Properties",
 									"kind": 1024,
 									"children": [
-										297
+										296
 									]
 								}
 							]
@@ -2656,21 +2637,21 @@
 					"title": "Variables",
 					"kind": 32,
 					"children": [
-						298,
-						295
+						297,
+						294
 					]
 				}
 			]
 		},
 		{
-			"id": 271,
+			"id": 270,
 			"name": "FormSeparator",
 			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
 				{
-					"id": 272,
+					"id": 271,
 					"name": "displayName",
 					"kind": 32,
 					"kindString": "Variable",
@@ -2686,20 +2667,20 @@
 					"title": "Variables",
 					"kind": 32,
 					"children": [
-						272
+						271
 					]
 				}
 			]
 		},
 		{
-			"id": 321,
+			"id": 320,
 			"name": "FormTagPicker",
 			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
 				{
-					"id": 335,
+					"id": 334,
 					"name": "Item",
 					"kind": 32,
 					"kindString": "Variable",
@@ -2708,13 +2689,13 @@
 						"type": "query",
 						"queryType": {
 							"type": "reference",
-							"id": 336,
+							"id": 335,
 							"name": "FormTagPickerItem"
 						}
 					}
 				},
 				{
-					"id": 334,
+					"id": 333,
 					"name": "displayName",
 					"kind": 32,
 					"kindString": "Variable",
@@ -2725,7 +2706,7 @@
 					}
 				},
 				{
-					"id": 322,
+					"id": 321,
 					"name": "propTypes",
 					"kind": 32,
 					"kindString": "Variable",
@@ -2733,14 +2714,14 @@
 					"type": {
 						"type": "reflection",
 						"declaration": {
-							"id": 323,
+							"id": 322,
 							"name": "__type",
 							"kind": 65536,
 							"kindString": "Type literal",
 							"flags": {},
 							"children": [
 								{
-									"id": 329,
+									"id": 328,
 									"name": "defaultValue",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2774,7 +2755,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 324,
+									"id": 323,
 									"name": "id",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2792,7 +2773,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 330,
+									"id": 329,
 									"name": "onChange",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2803,21 +2784,21 @@
 											{
 												"type": "reflection",
 												"declaration": {
-													"id": 331,
+													"id": 330,
 													"name": "__type",
 													"kind": 65536,
 													"kindString": "Type literal",
 													"flags": {},
 													"signatures": [
 														{
-															"id": 332,
+															"id": 331,
 															"name": "__type",
 															"kind": 4096,
 															"kindString": "Call signature",
 															"flags": {},
 															"parameters": [
 																{
-																	"id": 333,
+																	"id": 332,
 																	"name": "args",
 																	"kind": 32768,
 																	"kindString": "Parameter",
@@ -2847,7 +2828,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 327,
+									"id": 326,
 									"name": "placeholder",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2865,7 +2846,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 326,
+									"id": 325,
 									"name": "storeValue",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2883,7 +2864,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 325,
+									"id": 324,
 									"name": "title",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2901,7 +2882,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 328,
+									"id": 327,
 									"name": "value",
 									"kind": 1024,
 									"kindString": "Property",
@@ -2940,13 +2921,13 @@
 									"title": "Properties",
 									"kind": 1024,
 									"children": [
+										328,
+										323,
 										329,
-										324,
-										330,
-										327,
 										326,
 										325,
-										328
+										324,
+										327
 									]
 								}
 							]
@@ -2959,22 +2940,22 @@
 					"title": "Variables",
 					"kind": 32,
 					"children": [
-						335,
 						334,
-						322
+						333,
+						321
 					]
 				}
 			]
 		},
 		{
-			"id": 339,
+			"id": 338,
 			"name": "FormTagPickerItem",
 			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
 				{
-					"id": 354,
+					"id": 353,
 					"name": "displayName",
 					"kind": 32,
 					"kindString": "Variable",
@@ -2985,7 +2966,7 @@
 					}
 				},
 				{
-					"id": 340,
+					"id": 339,
 					"name": "propTypes",
 					"kind": 32,
 					"kindString": "Variable",
@@ -2993,14 +2974,14 @@
 					"type": {
 						"type": "reflection",
 						"declaration": {
-							"id": 341,
+							"id": 340,
 							"name": "__type",
 							"kind": 65536,
 							"kindString": "Type literal",
 							"flags": {},
 							"children": [
 								{
-									"id": 344,
+									"id": 343,
 									"name": "icon",
 									"kind": 1024,
 									"kindString": "Property",
@@ -3024,14 +3005,14 @@
 																	{
 																		"type": "reflection",
 																		"declaration": {
-																			"id": 345,
+																			"id": 344,
 																			"name": "__type",
 																			"kind": 65536,
 																			"kindString": "Type literal",
 																			"flags": {},
 																			"children": [
 																				{
-																					"id": 346,
+																					"id": 345,
 																					"name": "fileIcon",
 																					"kind": 1024,
 																					"kindString": "Property",
@@ -3054,7 +3035,7 @@
 																					"title": "Properties",
 																					"kind": 1024,
 																					"children": [
-																						346
+																						345
 																					]
 																				}
 																			]
@@ -3075,14 +3056,14 @@
 																	{
 																		"type": "reflection",
 																		"declaration": {
-																			"id": 347,
+																			"id": 346,
 																			"name": "__type",
 																			"kind": 65536,
 																			"kindString": "Type literal",
 																			"flags": {},
 																			"children": [
 																				{
-																					"id": 352,
+																					"id": 351,
 																					"name": "mask",
 																					"kind": 1024,
 																					"kindString": "Property",
@@ -3100,7 +3081,7 @@
 																					"defaultValue": "..."
 																				},
 																				{
-																					"id": 348,
+																					"id": 347,
 																					"name": "source",
 																					"kind": 1024,
 																					"kindString": "Property",
@@ -3121,14 +3102,14 @@
 																											{
 																												"type": "reflection",
 																												"declaration": {
-																													"id": 349,
+																													"id": 348,
 																													"name": "__type",
 																													"kind": 65536,
 																													"kindString": "Type literal",
 																													"flags": {},
 																													"children": [
 																														{
-																															"id": 351,
+																															"id": 350,
 																															"name": "dark",
 																															"kind": 1024,
 																															"kindString": "Property",
@@ -3146,7 +3127,7 @@
 																															"defaultValue": "..."
 																														},
 																														{
-																															"id": 350,
+																															"id": 349,
 																															"name": "light",
 																															"kind": 1024,
 																															"kindString": "Property",
@@ -3169,8 +3150,8 @@
 																															"title": "Properties",
 																															"kind": 1024,
 																															"children": [
-																																351,
-																																350
+																																350,
+																																349
 																															]
 																														}
 																													]
@@ -3187,7 +3168,7 @@
 																					"defaultValue": "..."
 																				},
 																				{
-																					"id": 353,
+																					"id": 352,
 																					"name": "tintColor",
 																					"kind": 1024,
 																					"kindString": "Property",
@@ -3210,9 +3191,9 @@
 																					"title": "Properties",
 																					"kind": 1024,
 																					"children": [
-																						352,
-																						348,
-																						353
+																						351,
+																						347,
+																						352
 																					]
 																				}
 																			]
@@ -3232,7 +3213,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 343,
+									"id": 342,
 									"name": "title",
 									"kind": 1024,
 									"kindString": "Property",
@@ -3250,7 +3231,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 342,
+									"id": 341,
 									"name": "value",
 									"kind": 1024,
 									"kindString": "Property",
@@ -3273,9 +3254,9 @@
 									"title": "Properties",
 									"kind": 1024,
 									"children": [
-										344,
 										343,
-										342
+										342,
+										341
 									]
 								}
 							]
@@ -3288,8 +3269,8 @@
 					"title": "Variables",
 					"kind": 32,
 					"children": [
-						354,
-						340
+						353,
+						339
 					]
 				}
 			]
@@ -3778,14 +3759,14 @@
 			]
 		},
 		{
-			"id": 455,
+			"id": 453,
 			"name": "List",
 			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
 				{
-					"id": 470,
+					"id": 468,
 					"name": "Item",
 					"kind": 32,
 					"kindString": "Variable",
@@ -3794,13 +3775,13 @@
 						"type": "query",
 						"queryType": {
 							"type": "reference",
-							"id": 482,
+							"id": 480,
 							"name": "ListItem"
 						}
 					}
 				},
 				{
-					"id": 471,
+					"id": 469,
 					"name": "Section",
 					"kind": 32,
 					"kindString": "Variable",
@@ -3809,13 +3790,13 @@
 						"type": "query",
 						"queryType": {
 							"type": "reference",
-							"id": 472,
+							"id": 470,
 							"name": "ListSection"
 						}
 					}
 				},
 				{
-					"id": 469,
+					"id": 467,
 					"name": "displayName",
 					"kind": 32,
 					"kindString": "Variable",
@@ -3826,7 +3807,7 @@
 					}
 				},
 				{
-					"id": 456,
+					"id": 454,
 					"name": "propTypes",
 					"kind": 32,
 					"kindString": "Variable",
@@ -3834,14 +3815,14 @@
 					"type": {
 						"type": "reflection",
 						"declaration": {
-							"id": 457,
+							"id": 455,
 							"name": "__type",
 							"kind": 65536,
 							"kindString": "Type literal",
 							"flags": {},
 							"children": [
 								{
-									"id": 461,
+									"id": 459,
 									"name": "onSearchTextChange",
 									"kind": 1024,
 									"kindString": "Property",
@@ -3852,21 +3833,21 @@
 											{
 												"type": "reflection",
 												"declaration": {
-													"id": 462,
+													"id": 460,
 													"name": "__type",
 													"kind": 65536,
 													"kindString": "Type literal",
 													"flags": {},
 													"signatures": [
 														{
-															"id": 463,
+															"id": 461,
 															"name": "__type",
 															"kind": 4096,
 															"kindString": "Call signature",
 															"flags": {},
 															"parameters": [
 																{
-																	"id": 464,
+																	"id": 462,
 																	"name": "args",
 																	"kind": 32768,
 																	"kindString": "Parameter",
@@ -3896,7 +3877,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 465,
+									"id": 463,
 									"name": "onSelectionChange",
 									"kind": 1024,
 									"kindString": "Property",
@@ -3907,21 +3888,21 @@
 											{
 												"type": "reflection",
 												"declaration": {
-													"id": 466,
+													"id": 464,
 													"name": "__type",
 													"kind": 65536,
 													"kindString": "Type literal",
 													"flags": {},
 													"signatures": [
 														{
-															"id": 467,
+															"id": 465,
 															"name": "__type",
 															"kind": 4096,
 															"kindString": "Call signature",
 															"flags": {},
 															"parameters": [
 																{
-																	"id": 468,
+																	"id": 466,
 																	"name": "args",
 																	"kind": 32768,
 																	"kindString": "Parameter",
@@ -3951,7 +3932,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 459,
+									"id": 457,
 									"name": "searchBarPlaceholder",
 									"kind": 1024,
 									"kindString": "Property",
@@ -3969,7 +3950,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 458,
+									"id": 456,
 									"name": "selectedItemId",
 									"kind": 1024,
 									"kindString": "Property",
@@ -3987,7 +3968,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 460,
+									"id": 458,
 									"name": "throttle",
 									"kind": 1024,
 									"kindString": "Property",
@@ -4010,11 +3991,11 @@
 									"title": "Properties",
 									"kind": 1024,
 									"children": [
-										461,
-										465,
 										459,
-										458,
-										460
+										463,
+										457,
+										456,
+										458
 									]
 								}
 							]
@@ -4027,23 +4008,23 @@
 					"title": "Variables",
 					"kind": 32,
 					"children": [
-						470,
-						471,
+						468,
 						469,
-						456
+						467,
+						454
 					]
 				}
 			]
 		},
 		{
-			"id": 485,
+			"id": 483,
 			"name": "ListItem",
 			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
 				{
-					"id": 503,
+					"id": 501,
 					"name": "displayName",
 					"kind": 32,
 					"kindString": "Variable",
@@ -4054,7 +4035,7 @@
 					}
 				},
 				{
-					"id": 486,
+					"id": 484,
 					"name": "propTypes",
 					"kind": 32,
 					"kindString": "Variable",
@@ -4062,14 +4043,14 @@
 					"type": {
 						"type": "reflection",
 						"declaration": {
-							"id": 487,
+							"id": 485,
 							"name": "__type",
 							"kind": 65536,
 							"kindString": "Type literal",
 							"flags": {},
 							"children": [
 								{
-									"id": 491,
+									"id": 489,
 									"name": "accessoryTitle",
 									"kind": 1024,
 									"kindString": "Property",
@@ -4087,7 +4068,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 493,
+									"id": 491,
 									"name": "icon",
 									"kind": 1024,
 									"kindString": "Property",
@@ -4111,14 +4092,14 @@
 																	{
 																		"type": "reflection",
 																		"declaration": {
-																			"id": 494,
+																			"id": 492,
 																			"name": "__type",
 																			"kind": 65536,
 																			"kindString": "Type literal",
 																			"flags": {},
 																			"children": [
 																				{
-																					"id": 495,
+																					"id": 493,
 																					"name": "fileIcon",
 																					"kind": 1024,
 																					"kindString": "Property",
@@ -4141,7 +4122,7 @@
 																					"title": "Properties",
 																					"kind": 1024,
 																					"children": [
-																						495
+																						493
 																					]
 																				}
 																			]
@@ -4162,14 +4143,14 @@
 																	{
 																		"type": "reflection",
 																		"declaration": {
-																			"id": 496,
+																			"id": 494,
 																			"name": "__type",
 																			"kind": 65536,
 																			"kindString": "Type literal",
 																			"flags": {},
 																			"children": [
 																				{
-																					"id": 501,
+																					"id": 499,
 																					"name": "mask",
 																					"kind": 1024,
 																					"kindString": "Property",
@@ -4187,7 +4168,7 @@
 																					"defaultValue": "..."
 																				},
 																				{
-																					"id": 497,
+																					"id": 495,
 																					"name": "source",
 																					"kind": 1024,
 																					"kindString": "Property",
@@ -4208,14 +4189,14 @@
 																											{
 																												"type": "reflection",
 																												"declaration": {
-																													"id": 498,
+																													"id": 496,
 																													"name": "__type",
 																													"kind": 65536,
 																													"kindString": "Type literal",
 																													"flags": {},
 																													"children": [
 																														{
-																															"id": 500,
+																															"id": 498,
 																															"name": "dark",
 																															"kind": 1024,
 																															"kindString": "Property",
@@ -4233,7 +4214,7 @@
 																															"defaultValue": "..."
 																														},
 																														{
-																															"id": 499,
+																															"id": 497,
 																															"name": "light",
 																															"kind": 1024,
 																															"kindString": "Property",
@@ -4256,8 +4237,8 @@
 																															"title": "Properties",
 																															"kind": 1024,
 																															"children": [
-																																500,
-																																499
+																																498,
+																																497
 																															]
 																														}
 																													]
@@ -4274,7 +4255,7 @@
 																					"defaultValue": "..."
 																				},
 																				{
-																					"id": 502,
+																					"id": 500,
 																					"name": "tintColor",
 																					"kind": 1024,
 																					"kindString": "Property",
@@ -4297,9 +4278,9 @@
 																					"title": "Properties",
 																					"kind": 1024,
 																					"children": [
-																						501,
-																						497,
-																						502
+																						499,
+																						495,
+																						500
 																					]
 																				}
 																			]
@@ -4319,7 +4300,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 488,
+									"id": 486,
 									"name": "id",
 									"kind": 1024,
 									"kindString": "Property",
@@ -4337,7 +4318,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 492,
+									"id": 490,
 									"name": "keywords",
 									"kind": 1024,
 									"kindString": "Property",
@@ -4371,7 +4352,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 490,
+									"id": 488,
 									"name": "subtitle",
 									"kind": 1024,
 									"kindString": "Property",
@@ -4389,7 +4370,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 489,
+									"id": 487,
 									"name": "title",
 									"kind": 1024,
 									"kindString": "Property",
@@ -4412,12 +4393,12 @@
 									"title": "Properties",
 									"kind": 1024,
 									"children": [
+										489,
 										491,
-										493,
-										488,
-										492,
+										486,
 										490,
-										489
+										488,
+										487
 									]
 								}
 							]
@@ -4430,21 +4411,21 @@
 					"title": "Variables",
 					"kind": 32,
 					"children": [
-						503,
-						486
+						501,
+						484
 					]
 				}
 			]
 		},
 		{
-			"id": 475,
+			"id": 473,
 			"name": "ListSection",
 			"kind": 2,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
 				{
-					"id": 481,
+					"id": 479,
 					"name": "displayName",
 					"kind": 32,
 					"kindString": "Variable",
@@ -4455,7 +4436,7 @@
 					}
 				},
 				{
-					"id": 476,
+					"id": 474,
 					"name": "propTypes",
 					"kind": 32,
 					"kindString": "Variable",
@@ -4463,14 +4444,14 @@
 					"type": {
 						"type": "reflection",
 						"declaration": {
-							"id": 477,
+							"id": 475,
 							"name": "__type",
 							"kind": 65536,
 							"kindString": "Type literal",
 							"flags": {},
 							"children": [
 								{
-									"id": 478,
+									"id": 476,
 									"name": "id",
 									"kind": 1024,
 									"kindString": "Property",
@@ -4488,7 +4469,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 480,
+									"id": 478,
 									"name": "subtitle",
 									"kind": 1024,
 									"kindString": "Property",
@@ -4506,7 +4487,7 @@
 									"defaultValue": "..."
 								},
 								{
-									"id": 479,
+									"id": 477,
 									"name": "title",
 									"kind": 1024,
 									"kindString": "Property",
@@ -4529,9 +4510,9 @@
 									"title": "Properties",
 									"kind": 1024,
 									"children": [
+										476,
 										478,
-										480,
-										479
+										477
 									]
 								}
 							]
@@ -4544,14 +4525,14 @@
 					"title": "Variables",
 					"kind": 32,
 					"children": [
-						481,
-						476
+						479,
+						474
 					]
 				}
 			]
 		},
 		{
-			"id": 685,
+			"id": 683,
 			"name": "Color",
 			"kind": 4,
 			"kindString": "Enumeration",
@@ -4565,7 +4546,7 @@
 					},
 					{
 						"tag": "example",
-						"text": "\n```typescript\nimport { Color, Icon, List } from \"@raycast/api\";\n\nexport default () => {\n return (\n <List>\n   <List.Item title=\"Blue\" icon={{ source: Icon.Circle, tintColor: Color.Blue }} />\n   <List.Item title=\"Green\" icon={{ source: Icon.Circle, tintColor: Color.Green }} />\n   <List.Item title=\"Brown\" icon={{ source: Icon.Circle, tintColor: Color.Brown }} />\n   <List.Item title=\"Magenta\" icon={{ source: Icon.Circle, tintColor: Color.Magenta }} />\n   <List.Item title=\"Orange\" icon={{ source: Icon.Circle, tintColor: Color.Orange }} />\n   <List.Item title=\"Purple\" icon={{ source: Icon.Circle, tintColor: Color.Purple }} />\n   <List.Item title=\"Red\" icon={{ source: Icon.Circle, tintColor: Color.Red }} />\n   <List.Item title=\"Yellow\" icon={{ source: Icon.Circle, tintColor: Color.Yellow }} />\n   <List.Item title=\"PrimaryText\" icon={{ source: Icon.Circle, tintColor: Color.PrimaryText }} />\n   <List.Item title=\"SecondaryText\" icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }} />\n </List>\n );\n};\n```\n"
+						"text": "\n```typescript\nimport { Color, Icon, List } from \"@raycast/api\";\n\nexport default function Command() {\n return (\n <List>\n   <List.Item title=\"Blue\" icon={{ source: Icon.Circle, tintColor: Color.Blue }} />\n   <List.Item title=\"Green\" icon={{ source: Icon.Circle, tintColor: Color.Green }} />\n   <List.Item title=\"Brown\" icon={{ source: Icon.Circle, tintColor: Color.Brown }} />\n   <List.Item title=\"Magenta\" icon={{ source: Icon.Circle, tintColor: Color.Magenta }} />\n   <List.Item title=\"Orange\" icon={{ source: Icon.Circle, tintColor: Color.Orange }} />\n   <List.Item title=\"Purple\" icon={{ source: Icon.Circle, tintColor: Color.Purple }} />\n   <List.Item title=\"Red\" icon={{ source: Icon.Circle, tintColor: Color.Red }} />\n   <List.Item title=\"Yellow\" icon={{ source: Icon.Circle, tintColor: Color.Yellow }} />\n   <List.Item title=\"PrimaryText\" icon={{ source: Icon.Circle, tintColor: Color.PrimaryText }} />\n   <List.Item title=\"SecondaryText\" icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }} />\n </List>\n );\n};\n```\n"
 					},
 					{
 						"tag": "subcategory",
@@ -4575,7 +4556,7 @@
 			},
 			"children": [
 				{
-					"id": 686,
+					"id": 684,
 					"name": "Blue",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4583,7 +4564,7 @@
 					"defaultValue": "\"raycast-blue\""
 				},
 				{
-					"id": 687,
+					"id": 685,
 					"name": "Brown",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4591,7 +4572,7 @@
 					"defaultValue": "\"raycast-brown\""
 				},
 				{
-					"id": 688,
+					"id": 686,
 					"name": "Green",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4599,7 +4580,7 @@
 					"defaultValue": "\"raycast-green\""
 				},
 				{
-					"id": 689,
+					"id": 687,
 					"name": "Magenta",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4607,7 +4588,7 @@
 					"defaultValue": "\"raycast-magenta\""
 				},
 				{
-					"id": 690,
+					"id": 688,
 					"name": "Orange",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4615,7 +4596,7 @@
 					"defaultValue": "\"raycast-orange\""
 				},
 				{
-					"id": 694,
+					"id": 692,
 					"name": "PrimaryText",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4623,7 +4604,7 @@
 					"defaultValue": "\"raycast-primary-text\""
 				},
 				{
-					"id": 691,
+					"id": 689,
 					"name": "Purple",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4631,7 +4612,7 @@
 					"defaultValue": "\"raycast-purple\""
 				},
 				{
-					"id": 692,
+					"id": 690,
 					"name": "Red",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4639,7 +4620,7 @@
 					"defaultValue": "\"raycast-red\""
 				},
 				{
-					"id": 695,
+					"id": 693,
 					"name": "SecondaryText",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4647,7 +4628,7 @@
 					"defaultValue": "\"raycast-secondary-text\""
 				},
 				{
-					"id": 693,
+					"id": 691,
 					"name": "Yellow",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4660,22 +4641,22 @@
 					"title": "Enumeration members",
 					"kind": 16,
 					"children": [
+						684,
+						685,
 						686,
 						687,
 						688,
+						692,
 						689,
 						690,
-						694,
-						691,
-						692,
-						695,
-						693
+						693,
+						691
 					]
 				}
 			]
 		},
 		{
-			"id": 700,
+			"id": 698,
 			"name": "Icon",
 			"kind": 4,
 			"kindString": "Enumeration",
@@ -4685,7 +4666,7 @@
 				"tags": [
 					{
 						"tag": "example",
-						"text": "\n```typescript\nimport { Icon, List } from \"@raycast/api\";\n\nexport default () => {\n  return (\n    <List>\n      <List.Item title=\"Icon\" icon={Icon.Circle} />\n    </List>\n  );\n};\n```\n"
+						"text": "\n```typescript\nimport { Icon, List } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <List>\n      <List.Item title=\"Icon\" icon={Icon.Circle} />\n    </List>\n  );\n};\n```\n"
 					},
 					{
 						"tag": "subcategory",
@@ -4695,7 +4676,7 @@
 			},
 			"children": [
 				{
-					"id": 701,
+					"id": 699,
 					"name": "ArrowClockwise",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4703,7 +4684,7 @@
 					"defaultValue": "\"arrow-clockwise-16\""
 				},
 				{
-					"id": 702,
+					"id": 700,
 					"name": "ArrowRight",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4711,7 +4692,7 @@
 					"defaultValue": "\"arrow-right-16\""
 				},
 				{
-					"id": 703,
+					"id": 701,
 					"name": "Binoculars",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4719,7 +4700,7 @@
 					"defaultValue": "\"binoculars-16\""
 				},
 				{
-					"id": 704,
+					"id": 702,
 					"name": "Bubble",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4727,7 +4708,7 @@
 					"defaultValue": "\"bubble-left-16\""
 				},
 				{
-					"id": 705,
+					"id": 703,
 					"name": "Calendar",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4735,7 +4716,7 @@
 					"defaultValue": "\"calendar-16\""
 				},
 				{
-					"id": 706,
+					"id": 704,
 					"name": "Checkmark",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4743,7 +4724,7 @@
 					"defaultValue": "\"checkmark-circle-16\""
 				},
 				{
-					"id": 707,
+					"id": 705,
 					"name": "ChevronDown",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4751,7 +4732,7 @@
 					"defaultValue": "\"chevron-down-16\""
 				},
 				{
-					"id": 708,
+					"id": 706,
 					"name": "ChevronUp",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4759,7 +4740,7 @@
 					"defaultValue": "\"chevron-up-16\""
 				},
 				{
-					"id": 709,
+					"id": 707,
 					"name": "Circle",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4767,7 +4748,7 @@
 					"defaultValue": "\"circle-16\""
 				},
 				{
-					"id": 710,
+					"id": 708,
 					"name": "Clipboard",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4775,7 +4756,7 @@
 					"defaultValue": "\"doc-on-clipboard-16\""
 				},
 				{
-					"id": 711,
+					"id": 709,
 					"name": "Clock",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4783,7 +4764,7 @@
 					"defaultValue": "\"clock-16\""
 				},
 				{
-					"id": 712,
+					"id": 710,
 					"name": "Desktop",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4791,7 +4772,7 @@
 					"defaultValue": "\"desktopcomputer-16\""
 				},
 				{
-					"id": 713,
+					"id": 711,
 					"name": "Document",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4799,7 +4780,7 @@
 					"defaultValue": "\"doc-16\""
 				},
 				{
-					"id": 714,
+					"id": 712,
 					"name": "Dot",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4807,7 +4788,7 @@
 					"defaultValue": "\"dot-16\""
 				},
 				{
-					"id": 715,
+					"id": 713,
 					"name": "Download",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4815,7 +4796,7 @@
 					"defaultValue": "\"square-and-arrow-down-16\""
 				},
 				{
-					"id": 716,
+					"id": 714,
 					"name": "Envelope",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4823,7 +4804,7 @@
 					"defaultValue": "\"envelope-16\""
 				},
 				{
-					"id": 717,
+					"id": 715,
 					"name": "ExclamationMark",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4831,7 +4812,7 @@
 					"defaultValue": "\"exclamation-mark-triangle-16\""
 				},
 				{
-					"id": 718,
+					"id": 716,
 					"name": "Eye",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4839,7 +4820,7 @@
 					"defaultValue": "\"eye-16\""
 				},
 				{
-					"id": 719,
+					"id": 717,
 					"name": "EyeSlash",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4847,7 +4828,7 @@
 					"defaultValue": "\"eye-slash-16\""
 				},
 				{
-					"id": 720,
+					"id": 718,
 					"name": "Finder",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4855,7 +4836,7 @@
 					"defaultValue": "\"finder-16\""
 				},
 				{
-					"id": 721,
+					"id": 719,
 					"name": "Gear",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4863,7 +4844,7 @@
 					"defaultValue": "\"gearshape-16\""
 				},
 				{
-					"id": 722,
+					"id": 720,
 					"name": "Globe",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4871,7 +4852,7 @@
 					"defaultValue": "\"globe-16\""
 				},
 				{
-					"id": 723,
+					"id": 721,
 					"name": "Hammer",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4879,7 +4860,7 @@
 					"defaultValue": "\"hammer-16\""
 				},
 				{
-					"id": 724,
+					"id": 722,
 					"name": "LevelMeter",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4887,7 +4868,7 @@
 					"defaultValue": "\"level-meter-16\""
 				},
 				{
-					"id": 725,
+					"id": 723,
 					"name": "Link",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4895,7 +4876,7 @@
 					"defaultValue": "\"link-16\""
 				},
 				{
-					"id": 726,
+					"id": 724,
 					"name": "List",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4903,7 +4884,7 @@
 					"defaultValue": "\"main-list-view-16\""
 				},
 				{
-					"id": 727,
+					"id": 725,
 					"name": "MagnifyingGlass",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4911,7 +4892,7 @@
 					"defaultValue": "\"magnifyingglass-16\""
 				},
 				{
-					"id": 728,
+					"id": 726,
 					"name": "MemoryChip",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4919,7 +4900,7 @@
 					"defaultValue": "\"memorychip-16\""
 				},
 				{
-					"id": 729,
+					"id": 727,
 					"name": "Message",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4927,7 +4908,7 @@
 					"defaultValue": "\"message-16\""
 				},
 				{
-					"id": 730,
+					"id": 728,
 					"name": "Pencil",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4935,7 +4916,7 @@
 					"defaultValue": "\"pencil-16\""
 				},
 				{
-					"id": 731,
+					"id": 729,
 					"name": "Person",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4943,7 +4924,7 @@
 					"defaultValue": "\"person-crop-circle-16\""
 				},
 				{
-					"id": 732,
+					"id": 730,
 					"name": "Phone",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4951,7 +4932,7 @@
 					"defaultValue": "\"phone-16\""
 				},
 				{
-					"id": 733,
+					"id": 731,
 					"name": "Pin",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4959,7 +4940,7 @@
 					"defaultValue": "\"pin-16\""
 				},
 				{
-					"id": 734,
+					"id": 732,
 					"name": "Plus",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4967,7 +4948,7 @@
 					"defaultValue": "\"plus-16\""
 				},
 				{
-					"id": 742,
+					"id": 740,
 					"name": "QuesionMark",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4975,7 +4956,7 @@
 					"defaultValue": "\"questionmark-circle-16\""
 				},
 				{
-					"id": 735,
+					"id": 733,
 					"name": "Sidebar",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4983,7 +4964,7 @@
 					"defaultValue": "\"sidebar-right-16\""
 				},
 				{
-					"id": 736,
+					"id": 734,
 					"name": "SpeakerArrowDown",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4991,7 +4972,7 @@
 					"defaultValue": "\"speaker-arrow-down-16\""
 				},
 				{
-					"id": 737,
+					"id": 735,
 					"name": "SpeakerArrowUp",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4999,7 +4980,7 @@
 					"defaultValue": "\"speaker-arrow-up-16\""
 				},
 				{
-					"id": 738,
+					"id": 736,
 					"name": "SpeakerSlash",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5007,7 +4988,7 @@
 					"defaultValue": "\"speaker-slash-16\""
 				},
 				{
-					"id": 739,
+					"id": 737,
 					"name": "Star",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5015,7 +4996,7 @@
 					"defaultValue": "\"star-16\""
 				},
 				{
-					"id": 743,
+					"id": 741,
 					"name": "Terminal",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5023,7 +5004,7 @@
 					"defaultValue": "\"terminal-16\""
 				},
 				{
-					"id": 740,
+					"id": 738,
 					"name": "Text",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5031,7 +5012,7 @@
 					"defaultValue": "\"text-alignleft-16\""
 				},
 				{
-					"id": 741,
+					"id": 739,
 					"name": "TextDocument",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5039,7 +5020,7 @@
 					"defaultValue": "\"doc-plaintext-16\""
 				},
 				{
-					"id": 744,
+					"id": 742,
 					"name": "Trash",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5047,7 +5028,7 @@
 					"defaultValue": "\"trash-16\""
 				},
 				{
-					"id": 745,
+					"id": 743,
 					"name": "Upload",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5055,7 +5036,7 @@
 					"defaultValue": "\"square-and-arrow-up-16\""
 				},
 				{
-					"id": 746,
+					"id": 744,
 					"name": "Video",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5063,7 +5044,7 @@
 					"defaultValue": "\"video-16\""
 				},
 				{
-					"id": 747,
+					"id": 745,
 					"name": "Window",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5071,7 +5052,7 @@
 					"defaultValue": "\"macwindow-16\""
 				},
 				{
-					"id": 748,
+					"id": 746,
 					"name": "XmarkCircle",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5084,6 +5065,8 @@
 					"title": "Enumeration members",
 					"kind": 16,
 					"children": [
+						699,
+						700,
 						701,
 						702,
 						703,
@@ -5116,28 +5099,26 @@
 						730,
 						731,
 						732,
+						740,
 						733,
 						734,
-						742,
 						735,
 						736,
 						737,
+						741,
 						738,
 						739,
+						742,
 						743,
-						740,
-						741,
 						744,
 						745,
-						746,
-						747,
-						748
+						746
 					]
 				}
 			]
 		},
 		{
-			"id": 760,
+			"id": 758,
 			"name": "ImageMask",
 			"kind": 4,
 			"kindString": "Enumeration",
@@ -5147,7 +5128,7 @@
 				"tags": [
 					{
 						"tag": "example",
-						"text": "\n```typescript\nimport { ImageMask, List } from \"@raycast/api\";\n\nexport default () => {\n  return (\n    <List>\n      <List.Item title=\"Icon\" icon={{ source: \"https://raycast.com/uploads/avatar.png\", mask: ImageMask.Circle }} />\n    </List>\n  );\n};\n```\n"
+						"text": "\n```typescript\nimport { ImageMask, List } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <List>\n      <List.Item title=\"Icon\" icon={{ source: \"https://raycast.com/uploads/avatar.png\", mask: ImageMask.Circle }} />\n    </List>\n  );\n};\n```\n"
 					},
 					{
 						"tag": "subcategory",
@@ -5157,7 +5138,7 @@
 			},
 			"children": [
 				{
-					"id": 761,
+					"id": 759,
 					"name": "Circle",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5168,7 +5149,7 @@
 					"defaultValue": "\"circle\""
 				},
 				{
-					"id": 762,
+					"id": 760,
 					"name": "RoundedRectangle",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5184,14 +5165,14 @@
 					"title": "Enumeration members",
 					"kind": 16,
 					"children": [
-						761,
-						762
+						759,
+						760
 					]
 				}
 			]
 		},
 		{
-			"id": 798,
+			"id": 796,
 			"name": "ToastStyle",
 			"kind": 4,
 			"kindString": "Enumeration",
@@ -5211,7 +5192,7 @@
 			},
 			"children": [
 				{
-					"id": 801,
+					"id": 799,
 					"name": "Animated",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5219,7 +5200,7 @@
 					"defaultValue": "\"ANIMATED\""
 				},
 				{
-					"id": 800,
+					"id": 798,
 					"name": "Failure",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5227,7 +5208,7 @@
 					"defaultValue": "\"FAILURE\""
 				},
 				{
-					"id": 799,
+					"id": 797,
 					"name": "Success",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5240,15 +5221,15 @@
 					"title": "Enumeration members",
 					"kind": 16,
 					"children": [
-						801,
-						800,
-						799
+						799,
+						798,
+						797
 					]
 				}
 			]
 		},
 		{
-			"id": 771,
+			"id": 769,
 			"name": "Toast",
 			"kind": 128,
 			"kindString": "Class",
@@ -5272,42 +5253,42 @@
 			},
 			"children": [
 				{
-					"id": 772,
+					"id": 770,
 					"name": "constructor",
 					"kind": 512,
 					"kindString": "Constructor",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 773,
+							"id": 771,
 							"name": "new Toast",
 							"kind": 16384,
 							"kindString": "Constructor signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 774,
+									"id": 772,
 									"name": "options",
 									"kind": 32768,
 									"kindString": "Parameter",
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 794,
+										"id": 792,
 										"name": "ToastOptions"
 									}
 								}
 							],
 							"type": {
 								"type": "reference",
-								"id": 771,
+								"id": 769,
 								"name": "Toast"
 							}
 						}
 					]
 				},
 				{
-					"id": 784,
+					"id": 782,
 					"name": "message",
 					"kind": 262144,
 					"kindString": "Accessor",
@@ -5316,7 +5297,7 @@
 					},
 					"getSignature": [
 						{
-							"id": 785,
+							"id": 783,
 							"name": "message",
 							"kind": 524288,
 							"kindString": "Get signature",
@@ -5338,14 +5319,14 @@
 					],
 					"setSignature": [
 						{
-							"id": 786,
+							"id": 784,
 							"name": "message",
 							"kind": 1048576,
 							"kindString": "Set signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 787,
+									"id": 785,
 									"name": "message",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -5373,7 +5354,7 @@
 					]
 				},
 				{
-					"id": 776,
+					"id": 774,
 					"name": "style",
 					"kind": 262144,
 					"kindString": "Accessor",
@@ -5382,35 +5363,35 @@
 					},
 					"getSignature": [
 						{
-							"id": 777,
+							"id": 775,
 							"name": "style",
 							"kind": 524288,
 							"kindString": "Get signature",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 798,
+								"id": 796,
 								"name": "ToastStyle"
 							}
 						}
 					],
 					"setSignature": [
 						{
-							"id": 778,
+							"id": 776,
 							"name": "style",
 							"kind": 1048576,
 							"kindString": "Set signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 779,
+									"id": 777,
 									"name": "style",
 									"kind": 32768,
 									"kindString": "Parameter",
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 798,
+										"id": 796,
 										"name": "ToastStyle"
 									}
 								}
@@ -5423,7 +5404,7 @@
 					]
 				},
 				{
-					"id": 780,
+					"id": 778,
 					"name": "title",
 					"kind": 262144,
 					"kindString": "Accessor",
@@ -5432,7 +5413,7 @@
 					},
 					"getSignature": [
 						{
-							"id": 781,
+							"id": 779,
 							"name": "title",
 							"kind": 524288,
 							"kindString": "Get signature",
@@ -5445,14 +5426,14 @@
 					],
 					"setSignature": [
 						{
-							"id": 782,
+							"id": 780,
 							"name": "title",
 							"kind": 1048576,
 							"kindString": "Set signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 783,
+									"id": 781,
 									"name": "title",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -5471,7 +5452,7 @@
 					]
 				},
 				{
-					"id": 790,
+					"id": 788,
 					"name": "hide",
 					"kind": 2048,
 					"kindString": "Method",
@@ -5480,7 +5461,7 @@
 					},
 					"signatures": [
 						{
-							"id": 791,
+							"id": 789,
 							"name": "hide",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -5503,7 +5484,7 @@
 					]
 				},
 				{
-					"id": 788,
+					"id": 786,
 					"name": "show",
 					"kind": 2048,
 					"kindString": "Method",
@@ -5512,7 +5493,7 @@
 					},
 					"signatures": [
 						{
-							"id": 789,
+							"id": 787,
 							"name": "show",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -5540,24 +5521,24 @@
 					"title": "Constructors",
 					"kind": 512,
 					"children": [
-						772
+						770
 					]
 				},
 				{
 					"title": "Accessors",
 					"kind": 262144,
 					"children": [
-						784,
-						776,
-						780
+						782,
+						774,
+						778
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						790,
-						788
+						788,
+						786
 					]
 				}
 			]
@@ -5591,7 +5572,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 751,
+						"id": 749,
 						"name": "ImageLike"
 					}
 				},
@@ -5817,7 +5798,7 @@
 			]
 		},
 		{
-			"id": 658,
+			"id": 656,
 			"name": "ActionPanelState",
 			"kind": 256,
 			"kindString": "Interface",
@@ -5833,14 +5814,14 @@
 			},
 			"children": [
 				{
-					"id": 659,
+					"id": 657,
 					"name": "update",
 					"kind": 2048,
 					"kindString": "Method",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 660,
+							"id": 658,
 							"name": "update",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -5850,7 +5831,7 @@
 							},
 							"parameters": [
 								{
-									"id": 661,
+									"id": 659,
 									"name": "actionPanel",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -5909,7 +5890,7 @@
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						659
+						657
 					]
 				}
 			]
@@ -5970,7 +5951,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 751,
+						"id": 749,
 						"name": "ImageLike"
 					}
 				},
@@ -6114,7 +6095,7 @@
 			]
 		},
 		{
-			"id": 536,
+			"id": 534,
 			"name": "CopyToClipboardActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -6130,7 +6111,7 @@
 			},
 			"children": [
 				{
-					"id": 537,
+					"id": 535,
 					"name": "content",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6153,7 +6134,7 @@
 					}
 				},
 				{
-					"id": 539,
+					"id": 537,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6171,12 +6152,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 751,
+						"id": 749,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 540,
+					"id": 538,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6193,7 +6174,7 @@
 					}
 				},
 				{
-					"id": 538,
+					"id": 536,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6209,7 +6190,7 @@
 					}
 				},
 				{
-					"id": 541,
+					"id": 539,
 					"name": "onCopy",
 					"kind": 2048,
 					"kindString": "Method",
@@ -6218,7 +6199,7 @@
 					},
 					"signatures": [
 						{
-							"id": 542,
+							"id": 540,
 							"name": "onCopy",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -6234,7 +6215,7 @@
 							},
 							"parameters": [
 								{
-									"id": 543,
+									"id": 541,
 									"name": "content",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -6267,17 +6248,17 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
+						535,
 						537,
-						539,
-						540,
-						538
+						538,
+						536
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						541
+						539
 					]
 				}
 			]
@@ -6418,7 +6399,13 @@
 						"isOptional": true
 					},
 					"comment": {
-						"shortText": "Indicates whether a loading bar should be shown or hidden below the search bar"
+						"shortText": "Indicates whether a loading bar should be shown or hidden below the search bar",
+						"tags": [
+							{
+								"tag": "defaultvalue",
+								"text": "false\n"
+							}
+						]
 					},
 					"type": {
 						"type": "intrinsic",
@@ -6463,7 +6450,13 @@
 						"isOptional": true
 					},
 					"comment": {
-						"shortText": "The main title for that view displayed in Raycast"
+						"shortText": "The main title for that view displayed in Raycast",
+						"tags": [
+							{
+								"tag": "defaultvalue",
+								"text": "Command title\n"
+							}
+						]
 					},
 					"type": {
 						"type": "intrinsic",
@@ -6500,7 +6493,7 @@
 			]
 		},
 		{
-			"id": 628,
+			"id": 626,
 			"name": "Environment",
 			"kind": 256,
 			"kindString": "Interface",
@@ -6510,7 +6503,7 @@
 			},
 			"children": [
 				{
-					"id": 632,
+					"id": 630,
 					"name": "assetsPath",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6524,7 +6517,7 @@
 					}
 				},
 				{
-					"id": 631,
+					"id": 629,
 					"name": "commandName",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6538,7 +6531,7 @@
 					}
 				},
 				{
-					"id": 630,
+					"id": 628,
 					"name": "extensionName",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6552,7 +6545,7 @@
 					}
 				},
 				{
-					"id": 634,
+					"id": 632,
 					"name": "isDevelopment",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6566,7 +6559,7 @@
 					}
 				},
 				{
-					"id": 629,
+					"id": 627,
 					"name": "raycastVersion",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6580,7 +6573,7 @@
 					}
 				},
 				{
-					"id": 633,
+					"id": 631,
 					"name": "supportPath",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6605,18 +6598,18 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						632,
-						631,
 						630,
-						634,
 						629,
-						633
+						628,
+						632,
+						627,
+						631
 					]
 				}
 			]
 		},
 		{
-			"id": 749,
+			"id": 747,
 			"name": "FileIcon",
 			"kind": 256,
 			"kindString": "Interface",
@@ -6626,7 +6619,7 @@
 				"tags": [
 					{
 						"tag": "example",
-						"text": "\n```typescript\nimport { List } from \"@raycast/api\";\n\nexport default () => {\n  return (\n    <List>\n      <List.Item title=\"File icon\" icon={{ fileIcon: __filename }} />\n    </List>\n  );\n};\n```\n"
+						"text": "\n```typescript\nimport { List } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <List>\n      <List.Item title=\"File icon\" icon={{ fileIcon: __filename }} />\n    </List>\n  );\n};\n```\n"
 					},
 					{
 						"tag": "subcategory",
@@ -6636,7 +6629,7 @@
 			},
 			"children": [
 				{
-					"id": 750,
+					"id": 748,
 					"name": "fileIcon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6655,13 +6648,13 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						750
+						748
 					]
 				}
 			]
 		},
 		{
-			"id": 399,
+			"id": 398,
 			"name": "FormCheckboxProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -6677,7 +6670,7 @@
 			},
 			"children": [
 				{
-					"id": 405,
+					"id": 404,
 					"name": "defaultValue",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6703,12 +6696,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 374,
+						"id": 373,
 						"name": "FormItemProps.defaultValue"
 					}
 				},
 				{
-					"id": 401,
+					"id": 400,
 					"name": "id",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6722,12 +6715,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 370,
+						"id": 369,
 						"name": "FormItemProps.id"
 					}
 				},
 				{
-					"id": 400,
+					"id": 399,
 					"name": "label",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6741,7 +6734,7 @@
 					}
 				},
 				{
-					"id": 403,
+					"id": 402,
 					"name": "storeValue",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6757,12 +6750,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 372,
+						"id": 371,
 						"name": "FormItemProps.storeValue"
 					}
 				},
 				{
-					"id": 402,
+					"id": 401,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6778,12 +6771,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 371,
+						"id": 370,
 						"name": "FormItemProps.title"
 					}
 				},
 				{
-					"id": 404,
+					"id": 403,
 					"name": "value",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6799,12 +6792,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 373,
+						"id": 372,
 						"name": "FormItemProps.value"
 					}
 				},
 				{
-					"id": 406,
+					"id": 405,
 					"name": "onChange",
 					"kind": 2048,
 					"kindString": "Method",
@@ -6813,7 +6806,7 @@
 					},
 					"signatures": [
 						{
-							"id": 407,
+							"id": 406,
 							"name": "onChange",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -6823,7 +6816,7 @@
 							},
 							"parameters": [
 								{
-									"id": 408,
+									"id": 407,
 									"name": "newValue",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -6840,14 +6833,14 @@
 							},
 							"inheritedFrom": {
 								"type": "reference",
-								"id": 376,
+								"id": 375,
 								"name": "FormItemProps.onChange"
 							}
 						}
 					],
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 375,
+						"id": 374,
 						"name": "FormItemProps.onChange"
 					}
 				}
@@ -6857,26 +6850,26 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						405,
-						401,
+						404,
 						400,
-						403,
+						399,
 						402,
-						404
+						401,
+						403
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						406
+						405
 					]
 				}
 			],
 			"extendedTypes": [
 				{
 					"type": "reference",
-					"id": 369,
+					"id": 368,
 					"typeArguments": [
 						{
 							"type": "intrinsic",
@@ -6888,7 +6881,7 @@
 			]
 		},
 		{
-			"id": 409,
+			"id": 408,
 			"name": "FormDatePickerProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -6904,23 +6897,7 @@
 			},
 			"children": [
 				{
-					"id": 410,
-					"name": "dateFormat",
-					"kind": 1024,
-					"kindString": "Property",
-					"flags": {
-						"isOptional": true
-					},
-					"comment": {
-						"shortText": "The date format string to be used for {@link FormViewDatePicker.value}.\nThe default format is ISO 8601 (\"yyyy-MM-dd'T'HH:mm:ssXXXXX\")."
-					},
-					"type": {
-						"type": "intrinsic",
-						"name": "string"
-					}
-				},
-				{
-					"id": 415,
+					"id": 413,
 					"name": "defaultValue",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6941,17 +6918,17 @@
 						]
 					},
 					"type": {
-						"type": "intrinsic",
-						"name": "string"
+						"type": "reference",
+						"name": "Date"
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 374,
+						"id": 373,
 						"name": "FormItemProps.defaultValue"
 					}
 				},
 				{
-					"id": 411,
+					"id": 409,
 					"name": "id",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6965,12 +6942,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 370,
+						"id": 369,
 						"name": "FormItemProps.id"
 					}
 				},
 				{
-					"id": 413,
+					"id": 411,
 					"name": "storeValue",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6986,12 +6963,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 372,
+						"id": 371,
 						"name": "FormItemProps.storeValue"
 					}
 				},
 				{
-					"id": 412,
+					"id": 410,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7007,12 +6984,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 371,
+						"id": 370,
 						"name": "FormItemProps.title"
 					}
 				},
 				{
-					"id": 414,
+					"id": 412,
 					"name": "value",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7023,17 +7000,17 @@
 						"shortText": "The current value of the item."
 					},
 					"type": {
-						"type": "intrinsic",
-						"name": "string"
+						"type": "reference",
+						"name": "Date"
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 373,
+						"id": 372,
 						"name": "FormItemProps.value"
 					}
 				},
 				{
-					"id": 416,
+					"id": 414,
 					"name": "onChange",
 					"kind": 2048,
 					"kindString": "Method",
@@ -7042,7 +7019,7 @@
 					},
 					"signatures": [
 						{
-							"id": 417,
+							"id": 415,
 							"name": "onChange",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -7052,7 +7029,7 @@
 							},
 							"parameters": [
 								{
-									"id": 418,
+									"id": 416,
 									"name": "newValue",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -7069,14 +7046,14 @@
 							},
 							"inheritedFrom": {
 								"type": "reference",
-								"id": 376,
+								"id": 375,
 								"name": "FormItemProps.onChange"
 							}
 						}
 					],
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 375,
+						"id": 374,
 						"name": "FormItemProps.onChange"
 					}
 				}
@@ -7086,30 +7063,29 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						410,
-						415,
-						411,
 						413,
-						412,
-						414
+						409,
+						411,
+						410,
+						412
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						416
+						414
 					]
 				}
 			],
 			"extendedTypes": [
 				{
 					"type": "reference",
-					"id": 369,
+					"id": 368,
 					"typeArguments": [
 						{
-							"type": "intrinsic",
-							"name": "string"
+							"type": "reference",
+							"name": "Date"
 						}
 					],
 					"name": "FormItemProps"
@@ -7117,7 +7093,7 @@
 			]
 		},
 		{
-			"id": 433,
+			"id": 431,
 			"name": "FormDropdownItemProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -7133,7 +7109,7 @@
 			},
 			"children": [
 				{
-					"id": 436,
+					"id": 434,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7145,12 +7121,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 751,
+						"id": 749,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 435,
+					"id": 433,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7164,7 +7140,7 @@
 					}
 				},
 				{
-					"id": 434,
+					"id": 432,
 					"name": "value",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7183,15 +7159,15 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						436,
-						435,
-						434
+						434,
+						433,
+						432
 					]
 				}
 			]
 		},
 		{
-			"id": 420,
+			"id": 418,
 			"name": "FormDropdownProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -7207,7 +7183,7 @@
 			},
 			"children": [
 				{
-					"id": 421,
+					"id": 419,
 					"name": "children",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7229,7 +7205,7 @@
 								"typeArguments": [
 									{
 										"type": "reference",
-										"id": 430,
+										"id": 428,
 										"name": "FormDropdownSectionProps"
 									},
 									{
@@ -7261,7 +7237,7 @@
 									"typeArguments": [
 										{
 											"type": "reference",
-											"id": 430,
+											"id": 428,
 											"name": "FormDropdownSectionProps"
 										},
 										{
@@ -7292,7 +7268,7 @@
 								"typeArguments": [
 									{
 										"type": "reference",
-										"id": 433,
+										"id": 431,
 										"name": "FormDropdownItemProps"
 									},
 									{
@@ -7324,7 +7300,7 @@
 									"typeArguments": [
 										{
 											"type": "reference",
-											"id": 433,
+											"id": 431,
 											"name": "FormDropdownItemProps"
 										},
 										{
@@ -7354,7 +7330,7 @@
 					}
 				},
 				{
-					"id": 426,
+					"id": 424,
 					"name": "defaultValue",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7380,12 +7356,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 374,
+						"id": 373,
 						"name": "FormItemProps.defaultValue"
 					}
 				},
 				{
-					"id": 422,
+					"id": 420,
 					"name": "id",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7399,12 +7375,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 370,
+						"id": 369,
 						"name": "FormItemProps.id"
 					}
 				},
 				{
-					"id": 424,
+					"id": 422,
 					"name": "storeValue",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7420,12 +7396,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 372,
+						"id": 371,
 						"name": "FormItemProps.storeValue"
 					}
 				},
 				{
-					"id": 423,
+					"id": 421,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7441,12 +7417,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 371,
+						"id": 370,
 						"name": "FormItemProps.title"
 					}
 				},
 				{
-					"id": 425,
+					"id": 423,
 					"name": "value",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7462,12 +7438,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 373,
+						"id": 372,
 						"name": "FormItemProps.value"
 					}
 				},
 				{
-					"id": 427,
+					"id": 425,
 					"name": "onChange",
 					"kind": 2048,
 					"kindString": "Method",
@@ -7476,7 +7452,7 @@
 					},
 					"signatures": [
 						{
-							"id": 428,
+							"id": 426,
 							"name": "onChange",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -7486,7 +7462,7 @@
 							},
 							"parameters": [
 								{
-									"id": 429,
+									"id": 427,
 									"name": "newValue",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -7503,14 +7479,14 @@
 							},
 							"inheritedFrom": {
 								"type": "reference",
-								"id": 376,
+								"id": 375,
 								"name": "FormItemProps.onChange"
 							}
 						}
 					],
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 375,
+						"id": 374,
 						"name": "FormItemProps.onChange"
 					}
 				}
@@ -7520,26 +7496,26 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						421,
-						426,
-						422,
+						419,
 						424,
-						423,
-						425
+						420,
+						422,
+						421,
+						423
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						427
+						425
 					]
 				}
 			],
 			"extendedTypes": [
 				{
 					"type": "reference",
-					"id": 369,
+					"id": 368,
 					"typeArguments": [
 						{
 							"type": "intrinsic",
@@ -7551,7 +7527,7 @@
 			]
 		},
 		{
-			"id": 430,
+			"id": 428,
 			"name": "FormDropdownSectionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -7567,7 +7543,7 @@
 			},
 			"children": [
 				{
-					"id": 431,
+					"id": 429,
 					"name": "children",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7589,7 +7565,7 @@
 								"typeArguments": [
 									{
 										"type": "reference",
-										"id": 433,
+										"id": 431,
 										"name": "FormDropdownItemProps"
 									},
 									{
@@ -7621,7 +7597,7 @@
 									"typeArguments": [
 										{
 											"type": "reference",
-											"id": 433,
+											"id": 431,
 											"name": "FormDropdownItemProps"
 										},
 										{
@@ -7651,7 +7627,7 @@
 					}
 				},
 				{
-					"id": 432,
+					"id": 430,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7672,14 +7648,14 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						431,
-						432
+						429,
+						430
 					]
 				}
 			]
 		},
 		{
-			"id": 369,
+			"id": 368,
 			"name": "FormItemProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -7695,7 +7671,7 @@
 			},
 			"children": [
 				{
-					"id": 374,
+					"id": 373,
 					"name": "defaultValue",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7721,7 +7697,7 @@
 					}
 				},
 				{
-					"id": 370,
+					"id": 369,
 					"name": "id",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7735,7 +7711,7 @@
 					}
 				},
 				{
-					"id": 372,
+					"id": 371,
 					"name": "storeValue",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7751,7 +7727,7 @@
 					}
 				},
 				{
-					"id": 371,
+					"id": 370,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7767,7 +7743,7 @@
 					}
 				},
 				{
-					"id": 373,
+					"id": 372,
 					"name": "value",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7783,7 +7759,7 @@
 					}
 				},
 				{
-					"id": 375,
+					"id": 374,
 					"name": "onChange",
 					"kind": 2048,
 					"kindString": "Method",
@@ -7792,7 +7768,7 @@
 					},
 					"signatures": [
 						{
-							"id": 376,
+							"id": 375,
 							"name": "onChange",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -7802,7 +7778,7 @@
 							},
 							"parameters": [
 								{
-									"id": 377,
+									"id": 376,
 									"name": "newValue",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -7826,31 +7802,31 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						374,
-						370,
-						372,
+						373,
+						369,
 						371,
-						373
+						370,
+						372
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						375
+						374
 					]
 				}
 			],
 			"typeParameter": [
 				{
-					"id": 378,
+					"id": 377,
 					"name": "Value",
 					"kind": 131072,
 					"kindString": "Type parameter",
 					"flags": {},
 					"type": {
 						"type": "reference",
-						"id": 355,
+						"id": 354,
 						"name": "FormValue"
 					}
 				}
@@ -7858,38 +7834,38 @@
 			"extendedBy": [
 				{
 					"type": "reference",
-					"id": 379,
+					"id": 378,
 					"name": "FormTextFieldProps"
 				},
 				{
 					"type": "reference",
-					"id": 389,
+					"id": 388,
 					"name": "FormTextAreaProps"
 				},
 				{
 					"type": "reference",
-					"id": 399,
+					"id": 398,
 					"name": "FormCheckboxProps"
 				},
 				{
 					"type": "reference",
-					"id": 409,
+					"id": 408,
 					"name": "FormDatePickerProps"
 				},
 				{
 					"type": "reference",
-					"id": 420,
+					"id": 418,
 					"name": "FormDropdownProps"
 				},
 				{
 					"type": "reference",
-					"id": 437,
+					"id": 435,
 					"name": "FormTagPickerProps"
 				}
 			]
 		},
 		{
-			"id": 359,
+			"id": 358,
 			"name": "FormProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -7905,7 +7881,7 @@
 			},
 			"children": [
 				{
-					"id": 365,
+					"id": 364,
 					"name": "actions",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7960,7 +7936,7 @@
 					}
 				},
 				{
-					"id": 360,
+					"id": 359,
 					"name": "children",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7982,11 +7958,11 @@
 								"typeArguments": [
 									{
 										"type": "reference",
-										"id": 369,
+										"id": 368,
 										"typeArguments": [
 											{
 												"type": "reference",
-												"id": 355,
+												"id": 354,
 												"name": "FormValue"
 											}
 										],
@@ -8021,11 +7997,11 @@
 									"typeArguments": [
 										{
 											"type": "reference",
-											"id": 369,
+											"id": 368,
 											"typeArguments": [
 												{
 													"type": "reference",
-													"id": 355,
+													"id": 354,
 													"name": "FormValue"
 												}
 											],
@@ -8058,7 +8034,7 @@
 					}
 				},
 				{
-					"id": 367,
+					"id": 366,
 					"name": "isLoading",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8066,7 +8042,13 @@
 						"isOptional": true
 					},
 					"comment": {
-						"shortText": "Indicates whether a loading bar should be shown or hidden below the search bar"
+						"shortText": "Indicates whether a loading bar should be shown or hidden below the search bar",
+						"tags": [
+							{
+								"tag": "defaultvalue",
+								"text": "false\n"
+							}
+						]
 					},
 					"type": {
 						"type": "intrinsic",
@@ -8078,7 +8060,7 @@
 					}
 				},
 				{
-					"id": 366,
+					"id": 365,
 					"name": "navigationTitle",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8086,7 +8068,13 @@
 						"isOptional": true
 					},
 					"comment": {
-						"shortText": "The main title for that view displayed in Raycast"
+						"shortText": "The main title for that view displayed in Raycast",
+						"tags": [
+							{
+								"tag": "defaultvalue",
+								"text": "Command title\n"
+							}
+						]
 					},
 					"type": {
 						"type": "intrinsic",
@@ -8098,7 +8086,7 @@
 					}
 				},
 				{
-					"id": 361,
+					"id": 360,
 					"name": "submitTitle",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8114,14 +8102,14 @@
 					}
 				},
 				{
-					"id": 362,
+					"id": 361,
 					"name": "onSubmit",
 					"kind": 2048,
 					"kindString": "Method",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 363,
+							"id": 362,
 							"name": "onSubmit",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -8131,7 +8119,7 @@
 							},
 							"parameters": [
 								{
-									"id": 364,
+									"id": 363,
 									"name": "input",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8155,24 +8143,24 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						365,
-						360,
-						367,
+						364,
+						359,
 						366,
-						361
+						365,
+						360
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						362
+						361
 					]
 				}
 			],
 			"typeParameter": [
 				{
-					"id": 368,
+					"id": 367,
 					"name": "Values",
 					"kind": 131072,
 					"kindString": "Type parameter",
@@ -8191,7 +8179,7 @@
 			]
 		},
 		{
-			"id": 419,
+			"id": 417,
 			"name": "FormSeparatorProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -8207,7 +8195,7 @@
 			}
 		},
 		{
-			"id": 448,
+			"id": 446,
 			"name": "FormTagPickerItemProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -8223,7 +8211,7 @@
 			},
 			"children": [
 				{
-					"id": 451,
+					"id": 449,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8235,12 +8223,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 751,
+						"id": 749,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 450,
+					"id": 448,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8254,7 +8242,7 @@
 					}
 				},
 				{
-					"id": 449,
+					"id": 447,
 					"name": "value",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8273,15 +8261,15 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						451,
-						450,
-						449
+						449,
+						448,
+						447
 					]
 				}
 			]
 		},
 		{
-			"id": 437,
+			"id": 435,
 			"name": "FormTagPickerProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -8297,7 +8285,7 @@
 			},
 			"children": [
 				{
-					"id": 438,
+					"id": 436,
 					"name": "children",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8319,7 +8307,7 @@
 								"typeArguments": [
 									{
 										"type": "reference",
-										"id": 448,
+										"id": 446,
 										"name": "FormTagPickerItemProps"
 									},
 									{
@@ -8351,7 +8339,7 @@
 									"typeArguments": [
 										{
 											"type": "reference",
-											"id": 448,
+											"id": 446,
 											"name": "FormTagPickerItemProps"
 										},
 										{
@@ -8381,7 +8369,7 @@
 					}
 				},
 				{
-					"id": 444,
+					"id": 442,
 					"name": "defaultValue",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8410,12 +8398,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 374,
+						"id": 373,
 						"name": "FormItemProps.defaultValue"
 					}
 				},
 				{
-					"id": 440,
+					"id": 438,
 					"name": "id",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8429,12 +8417,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 370,
+						"id": 369,
 						"name": "FormItemProps.id"
 					}
 				},
 				{
-					"id": 439,
+					"id": 437,
 					"name": "placeholder",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8450,7 +8438,7 @@
 					}
 				},
 				{
-					"id": 442,
+					"id": 440,
 					"name": "storeValue",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8466,12 +8454,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 372,
+						"id": 371,
 						"name": "FormItemProps.storeValue"
 					}
 				},
 				{
-					"id": 441,
+					"id": 439,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8487,12 +8475,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 371,
+						"id": 370,
 						"name": "FormItemProps.title"
 					}
 				},
 				{
-					"id": 443,
+					"id": 441,
 					"name": "value",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8511,12 +8499,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 373,
+						"id": 372,
 						"name": "FormItemProps.value"
 					}
 				},
 				{
-					"id": 445,
+					"id": 443,
 					"name": "onChange",
 					"kind": 2048,
 					"kindString": "Method",
@@ -8525,7 +8513,7 @@
 					},
 					"signatures": [
 						{
-							"id": 446,
+							"id": 444,
 							"name": "onChange",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -8535,7 +8523,7 @@
 							},
 							"parameters": [
 								{
-									"id": 447,
+									"id": 445,
 									"name": "newValue",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8552,14 +8540,14 @@
 							},
 							"inheritedFrom": {
 								"type": "reference",
-								"id": 376,
+								"id": 375,
 								"name": "FormItemProps.onChange"
 							}
 						}
 					],
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 375,
+						"id": 374,
 						"name": "FormItemProps.onChange"
 					}
 				}
@@ -8569,27 +8557,27 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
+						436,
+						442,
 						438,
-						444,
+						437,
 						440,
 						439,
-						442,
-						441,
-						443
+						441
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						445
+						443
 					]
 				}
 			],
 			"extendedTypes": [
 				{
 					"type": "reference",
-					"id": 369,
+					"id": 368,
 					"typeArguments": [
 						{
 							"type": "array",
@@ -8604,7 +8592,7 @@
 			]
 		},
 		{
-			"id": 389,
+			"id": 388,
 			"name": "FormTextAreaProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -8620,7 +8608,7 @@
 			},
 			"children": [
 				{
-					"id": 395,
+					"id": 394,
 					"name": "defaultValue",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8646,12 +8634,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 374,
+						"id": 373,
 						"name": "FormItemProps.defaultValue"
 					}
 				},
 				{
-					"id": 391,
+					"id": 390,
 					"name": "id",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8665,12 +8653,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 370,
+						"id": 369,
 						"name": "FormItemProps.id"
 					}
 				},
 				{
-					"id": 390,
+					"id": 389,
 					"name": "placeholder",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8686,7 +8674,7 @@
 					}
 				},
 				{
-					"id": 393,
+					"id": 392,
 					"name": "storeValue",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8702,12 +8690,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 372,
+						"id": 371,
 						"name": "FormItemProps.storeValue"
 					}
 				},
 				{
-					"id": 392,
+					"id": 391,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8723,12 +8711,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 371,
+						"id": 370,
 						"name": "FormItemProps.title"
 					}
 				},
 				{
-					"id": 394,
+					"id": 393,
 					"name": "value",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8744,12 +8732,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 373,
+						"id": 372,
 						"name": "FormItemProps.value"
 					}
 				},
 				{
-					"id": 396,
+					"id": 395,
 					"name": "onChange",
 					"kind": 2048,
 					"kindString": "Method",
@@ -8758,7 +8746,7 @@
 					},
 					"signatures": [
 						{
-							"id": 397,
+							"id": 396,
 							"name": "onChange",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -8768,7 +8756,7 @@
 							},
 							"parameters": [
 								{
-									"id": 398,
+									"id": 397,
 									"name": "newValue",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -8785,14 +8773,14 @@
 							},
 							"inheritedFrom": {
 								"type": "reference",
-								"id": 376,
+								"id": 375,
 								"name": "FormItemProps.onChange"
 							}
 						}
 					],
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 375,
+						"id": 374,
 						"name": "FormItemProps.onChange"
 					}
 				}
@@ -8802,26 +8790,26 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						395,
-						391,
+						394,
 						390,
-						393,
+						389,
 						392,
-						394
+						391,
+						393
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						396
+						395
 					]
 				}
 			],
 			"extendedTypes": [
 				{
 					"type": "reference",
-					"id": 369,
+					"id": 368,
 					"typeArguments": [
 						{
 							"type": "intrinsic",
@@ -8833,7 +8821,7 @@
 			]
 		},
 		{
-			"id": 379,
+			"id": 378,
 			"name": "FormTextFieldProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -8849,7 +8837,7 @@
 			},
 			"children": [
 				{
-					"id": 385,
+					"id": 384,
 					"name": "defaultValue",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8875,12 +8863,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 374,
+						"id": 373,
 						"name": "FormItemProps.defaultValue"
 					}
 				},
 				{
-					"id": 381,
+					"id": 380,
 					"name": "id",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8894,12 +8882,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 370,
+						"id": 369,
 						"name": "FormItemProps.id"
 					}
 				},
 				{
-					"id": 380,
+					"id": 379,
 					"name": "placeholder",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8915,7 +8903,7 @@
 					}
 				},
 				{
-					"id": 383,
+					"id": 382,
 					"name": "storeValue",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8931,12 +8919,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 372,
+						"id": 371,
 						"name": "FormItemProps.storeValue"
 					}
 				},
 				{
-					"id": 382,
+					"id": 381,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8952,12 +8940,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 371,
+						"id": 370,
 						"name": "FormItemProps.title"
 					}
 				},
 				{
-					"id": 384,
+					"id": 383,
 					"name": "value",
 					"kind": 1024,
 					"kindString": "Property",
@@ -8973,12 +8961,12 @@
 					},
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 373,
+						"id": 372,
 						"name": "FormItemProps.value"
 					}
 				},
 				{
-					"id": 386,
+					"id": 385,
 					"name": "onChange",
 					"kind": 2048,
 					"kindString": "Method",
@@ -8987,7 +8975,7 @@
 					},
 					"signatures": [
 						{
-							"id": 387,
+							"id": 386,
 							"name": "onChange",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -8997,7 +8985,7 @@
 							},
 							"parameters": [
 								{
-									"id": 388,
+									"id": 387,
 									"name": "newValue",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -9014,14 +9002,14 @@
 							},
 							"inheritedFrom": {
 								"type": "reference",
-								"id": 376,
+								"id": 375,
 								"name": "FormItemProps.onChange"
 							}
 						}
 					],
 					"inheritedFrom": {
 						"type": "reference",
-						"id": 375,
+						"id": 374,
 						"name": "FormItemProps.onChange"
 					}
 				}
@@ -9031,26 +9019,26 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						385,
-						381,
+						384,
 						380,
-						383,
+						379,
 						382,
-						384
+						381,
+						383
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						386
+						385
 					]
 				}
 			],
 			"extendedTypes": [
 				{
 					"type": "reference",
-					"id": 369,
+					"id": 368,
 					"typeArguments": [
 						{
 							"type": "intrinsic",
@@ -9062,7 +9050,7 @@
 			]
 		},
 		{
-			"id": 356,
+			"id": 355,
 			"name": "FormValues",
 			"kind": 256,
 			"kindString": "Interface",
@@ -9076,7 +9064,7 @@
 					},
 					{
 						"tag": "example",
-						"text": "\n```typescript\nimport { Form } from \"@raycast/api\";\n\ninterface Values {\n  todo: string;\n  due?: Date;\n}\n\nexport default () => {\n  function handleSubmit(values: Values) {\n    console.log(values);\n  }\n\n  return (\n    <Form onSubmit={handleSubmit}>\n      <Form.TextField id=\"todo\" title=\"Todo\" />\n      <Form.DatePicker id=\"due\" title=\"Due Date\" />\n    </Form>\n  );\n};\n```\n"
+						"text": "\n```typescript\nimport { Form } from \"@raycast/api\";\n\ninterface Values {\n  todo: string;\n  due?: Date;\n}\n\nexport default function Command() {\n  function handleSubmit(values: Values) {\n    console.log(values);\n  }\n\n  return (\n    <Form onSubmit={handleSubmit}>\n      <Form.TextField id=\"todo\" title=\"Todo\" />\n      <Form.DatePicker id=\"due\" title=\"Due Date\" />\n    </Form>\n  );\n};\n```\n"
 					},
 					{
 						"tag": "subcategory",
@@ -9085,7 +9073,7 @@
 				]
 			},
 			"indexSignature": {
-				"id": 357,
+				"id": 356,
 				"name": "__index",
 				"kind": 8192,
 				"kindString": "Index signature",
@@ -9095,7 +9083,7 @@
 				},
 				"parameters": [
 					{
-						"id": 358,
+						"id": 357,
 						"name": "item",
 						"kind": 32768,
 						"flags": {},
@@ -9112,7 +9100,7 @@
 			}
 		},
 		{
-			"id": 752,
+			"id": 750,
 			"name": "Image",
 			"kind": 256,
 			"kindString": "Interface",
@@ -9136,7 +9124,7 @@
 			},
 			"children": [
 				{
-					"id": 754,
+					"id": 752,
 					"name": "mask",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9148,12 +9136,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 760,
+						"id": 758,
 						"name": "ImageMask"
 					}
 				},
 				{
-					"id": 753,
+					"id": 751,
 					"name": "source",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9163,12 +9151,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 756,
+						"id": 754,
 						"name": "ImageSource"
 					}
 				},
 				{
-					"id": 755,
+					"id": 753,
 					"name": "tintColor",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9189,9 +9177,9 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						754,
-						753,
-						755
+						752,
+						751,
+						753
 					]
 				}
 			]
@@ -9252,7 +9240,7 @@
 			]
 		},
 		{
-			"id": 523,
+			"id": 521,
 			"name": "ListItemProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -9268,7 +9256,7 @@
 			},
 			"children": [
 				{
-					"id": 530,
+					"id": 528,
 					"name": "accessoryIcon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9280,12 +9268,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 751,
+						"id": 749,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 527,
+					"id": 525,
 					"name": "accessoryTitle",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9301,7 +9289,7 @@
 					}
 				},
 				{
-					"id": 531,
+					"id": 529,
 					"name": "actions",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9356,7 +9344,7 @@
 					}
 				},
 				{
-					"id": 532,
+					"id": 530,
 					"name": "children",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9412,7 +9400,7 @@
 					}
 				},
 				{
-					"id": 529,
+					"id": 527,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9424,12 +9412,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 751,
+						"id": 749,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 524,
+					"id": 522,
 					"name": "id",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9445,7 +9433,7 @@
 					}
 				},
 				{
-					"id": 528,
+					"id": 526,
 					"name": "keywords",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9464,7 +9452,7 @@
 					}
 				},
 				{
-					"id": 526,
+					"id": 524,
 					"name": "subtitle",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9480,7 +9468,7 @@
 					}
 				},
 				{
-					"id": 525,
+					"id": 523,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9499,15 +9487,15 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
+						528,
+						525,
+						529,
 						530,
 						527,
-						531,
-						532,
-						529,
-						524,
-						528,
+						522,
 						526,
-						525
+						524,
+						523
 					]
 				}
 			],
@@ -9519,7 +9507,7 @@
 			]
 		},
 		{
-			"id": 504,
+			"id": 502,
 			"name": "ListProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -9535,7 +9523,7 @@
 			},
 			"children": [
 				{
-					"id": 515,
+					"id": 513,
 					"name": "actions",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9590,7 +9578,7 @@
 					}
 				},
 				{
-					"id": 505,
+					"id": 503,
 					"name": "children",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9612,7 +9600,7 @@
 								"typeArguments": [
 									{
 										"type": "reference",
-										"id": 518,
+										"id": 516,
 										"name": "ListSectionProps"
 									},
 									{
@@ -9644,7 +9632,7 @@
 									"typeArguments": [
 										{
 											"type": "reference",
-											"id": 518,
+											"id": 516,
 											"name": "ListSectionProps"
 										},
 										{
@@ -9675,7 +9663,7 @@
 								"typeArguments": [
 									{
 										"type": "reference",
-										"id": 523,
+										"id": 521,
 										"name": "ListItemProps"
 									},
 									{
@@ -9707,7 +9695,7 @@
 									"typeArguments": [
 										{
 											"type": "reference",
-											"id": 523,
+											"id": 521,
 											"name": "ListItemProps"
 										},
 										{
@@ -9737,7 +9725,7 @@
 					}
 				},
 				{
-					"id": 517,
+					"id": 515,
 					"name": "isLoading",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9745,7 +9733,13 @@
 						"isOptional": true
 					},
 					"comment": {
-						"shortText": "Indicates whether a loading bar should be shown or hidden below the search bar"
+						"shortText": "Indicates whether a loading bar should be shown or hidden below the search bar",
+						"tags": [
+							{
+								"tag": "defaultvalue",
+								"text": "false\n"
+							}
+						]
 					},
 					"type": {
 						"type": "intrinsic",
@@ -9757,7 +9751,7 @@
 					}
 				},
 				{
-					"id": 516,
+					"id": 514,
 					"name": "navigationTitle",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9765,7 +9759,13 @@
 						"isOptional": true
 					},
 					"comment": {
-						"shortText": "The main title for that view displayed in Raycast"
+						"shortText": "The main title for that view displayed in Raycast",
+						"tags": [
+							{
+								"tag": "defaultvalue",
+								"text": "Command title\n"
+							}
+						]
 					},
 					"type": {
 						"type": "intrinsic",
@@ -9777,7 +9777,7 @@
 					}
 				},
 				{
-					"id": 509,
+					"id": 507,
 					"name": "searchBarPlaceholder",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9785,7 +9785,13 @@
 						"isOptional": true
 					},
 					"comment": {
-						"shortText": "Placeholder text that will be shown in the search bar."
+						"shortText": "Placeholder text that will be shown in the search bar.",
+						"tags": [
+							{
+								"tag": "defaultvalue",
+								"text": "Search value...\n"
+							}
+						]
 					},
 					"type": {
 						"type": "intrinsic",
@@ -9793,7 +9799,7 @@
 					}
 				},
 				{
-					"id": 510,
+					"id": 508,
 					"name": "selectedItemId",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9809,7 +9815,7 @@
 					}
 				},
 				{
-					"id": 511,
+					"id": 509,
 					"name": "throttle",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9831,7 +9837,7 @@
 					}
 				},
 				{
-					"id": 512,
+					"id": 510,
 					"name": "onSearchTextChange",
 					"kind": 2048,
 					"kindString": "Method",
@@ -9840,7 +9846,7 @@
 					},
 					"signatures": [
 						{
-							"id": 513,
+							"id": 511,
 							"name": "onSearchTextChange",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -9850,7 +9856,7 @@
 							},
 							"parameters": [
 								{
-									"id": 514,
+									"id": 512,
 									"name": "text",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -9869,7 +9875,7 @@
 					]
 				},
 				{
-					"id": 506,
+					"id": 504,
 					"name": "onSelectionChange",
 					"kind": 2048,
 					"kindString": "Method",
@@ -9878,7 +9884,7 @@
 					},
 					"signatures": [
 						{
-							"id": 507,
+							"id": 505,
 							"name": "onSelectionChange",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -9888,7 +9894,7 @@
 							},
 							"parameters": [
 								{
-									"id": 508,
+									"id": 506,
 									"name": "id",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -9914,21 +9920,21 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
+						513,
+						503,
 						515,
-						505,
-						517,
-						516,
-						509,
-						510,
-						511
+						514,
+						507,
+						508,
+						509
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						512,
-						506
+						510,
+						504
 					]
 				}
 			],
@@ -9944,7 +9950,7 @@
 			]
 		},
 		{
-			"id": 518,
+			"id": 516,
 			"name": "ListSectionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -9960,7 +9966,7 @@
 			},
 			"children": [
 				{
-					"id": 519,
+					"id": 517,
 					"name": "children",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9982,7 +9988,7 @@
 								"typeArguments": [
 									{
 										"type": "reference",
-										"id": 523,
+										"id": 521,
 										"name": "ListItemProps"
 									},
 									{
@@ -10014,7 +10020,7 @@
 									"typeArguments": [
 										{
 											"type": "reference",
-											"id": 523,
+											"id": 521,
 											"name": "ListItemProps"
 										},
 										{
@@ -10044,7 +10050,7 @@
 					}
 				},
 				{
-					"id": 520,
+					"id": 518,
 					"name": "id",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10060,7 +10066,7 @@
 					}
 				},
 				{
-					"id": 522,
+					"id": 520,
 					"name": "subtitle",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10076,7 +10082,7 @@
 					}
 				},
 				{
-					"id": 521,
+					"id": 519,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10097,16 +10103,16 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						519,
+						517,
+						518,
 						520,
-						522,
-						521
+						519
 					]
 				}
 			]
 		},
 		{
-			"id": 670,
+			"id": 668,
 			"name": "Navigation",
 			"kind": 256,
 			"kindString": "Interface",
@@ -10122,14 +10128,14 @@
 			},
 			"children": [
 				{
-					"id": 674,
+					"id": 672,
 					"name": "pop",
 					"kind": 2048,
 					"kindString": "Method",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 675,
+							"id": 673,
 							"name": "pop",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -10145,14 +10151,14 @@
 					]
 				},
 				{
-					"id": 671,
+					"id": 669,
 					"name": "push",
 					"kind": 2048,
 					"kindString": "Method",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 672,
+							"id": 670,
 							"name": "push",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -10162,7 +10168,7 @@
 							},
 							"parameters": [
 								{
-									"id": 673,
+									"id": 671,
 									"name": "component",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -10189,14 +10195,14 @@
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						674,
-						671
+						672,
+						669
 					]
 				}
 			]
 		},
 		{
-			"id": 547,
+			"id": 545,
 			"name": "OpenActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -10212,7 +10218,7 @@
 			},
 			"children": [
 				{
-					"id": 549,
+					"id": 547,
 					"name": "application",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10244,7 +10250,7 @@
 					}
 				},
 				{
-					"id": 551,
+					"id": 549,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10262,12 +10268,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 751,
+						"id": 749,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 552,
+					"id": 550,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10284,7 +10290,7 @@
 					}
 				},
 				{
-					"id": 548,
+					"id": 546,
 					"name": "target",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10298,7 +10304,7 @@
 					}
 				},
 				{
-					"id": 550,
+					"id": 548,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10312,7 +10318,7 @@
 					}
 				},
 				{
-					"id": 553,
+					"id": 551,
 					"name": "onOpen",
 					"kind": 2048,
 					"kindString": "Method",
@@ -10321,7 +10327,7 @@
 					},
 					"signatures": [
 						{
-							"id": 554,
+							"id": 552,
 							"name": "onOpen",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -10337,7 +10343,7 @@
 							},
 							"parameters": [
 								{
-									"id": 555,
+									"id": 553,
 									"name": "target",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -10361,24 +10367,24 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
+						547,
 						549,
-						551,
-						552,
-						548,
-						550
+						550,
+						546,
+						548
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						553
+						551
 					]
 				}
 			]
 		},
 		{
-			"id": 559,
+			"id": 557,
 			"name": "OpenInBrowserActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -10394,7 +10400,7 @@
 			},
 			"children": [
 				{
-					"id": 562,
+					"id": 560,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10412,12 +10418,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 751,
+						"id": 749,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 563,
+					"id": 561,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10434,7 +10440,7 @@
 					}
 				},
 				{
-					"id": 561,
+					"id": 559,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10450,7 +10456,7 @@
 					}
 				},
 				{
-					"id": 560,
+					"id": 558,
 					"name": "url",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10464,7 +10470,7 @@
 					}
 				},
 				{
-					"id": 564,
+					"id": 562,
 					"name": "onOpen",
 					"kind": 2048,
 					"kindString": "Method",
@@ -10473,7 +10479,7 @@
 					},
 					"signatures": [
 						{
-							"id": 565,
+							"id": 563,
 							"name": "onOpen",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -10489,7 +10495,7 @@
 							},
 							"parameters": [
 								{
-									"id": 566,
+									"id": 564,
 									"name": "url",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -10513,23 +10519,23 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						562,
-						563,
+						560,
 						561,
-						560
+						559,
+						558
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						564
+						562
 					]
 				}
 			]
 		},
 		{
-			"id": 570,
+			"id": 568,
 			"name": "OpenWithActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -10545,7 +10551,7 @@
 			},
 			"children": [
 				{
-					"id": 573,
+					"id": 571,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10563,12 +10569,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 751,
+						"id": 749,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 571,
+					"id": 569,
 					"name": "path",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10582,7 +10588,7 @@
 					}
 				},
 				{
-					"id": 574,
+					"id": 572,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10599,7 +10605,7 @@
 					}
 				},
 				{
-					"id": 572,
+					"id": 570,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10621,7 +10627,7 @@
 					}
 				},
 				{
-					"id": 575,
+					"id": 573,
 					"name": "onOpen",
 					"kind": 2048,
 					"kindString": "Method",
@@ -10630,7 +10636,7 @@
 					},
 					"signatures": [
 						{
-							"id": 576,
+							"id": 574,
 							"name": "onOpen",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -10646,7 +10652,7 @@
 							},
 							"parameters": [
 								{
-									"id": 577,
+									"id": 575,
 									"name": "path",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -10670,23 +10676,23 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						573,
 						571,
-						574,
-						572
+						569,
+						572,
+						570
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						575
+						573
 					]
 				}
 			]
 		},
 		{
-			"id": 581,
+			"id": 579,
 			"name": "PasteActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -10702,7 +10708,7 @@
 			},
 			"children": [
 				{
-					"id": 582,
+					"id": 580,
 					"name": "content",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10725,7 +10731,7 @@
 					}
 				},
 				{
-					"id": 584,
+					"id": 582,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10743,12 +10749,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 751,
+						"id": 749,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 585,
+					"id": 583,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10765,7 +10771,7 @@
 					}
 				},
 				{
-					"id": 583,
+					"id": 581,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10781,7 +10787,7 @@
 					}
 				},
 				{
-					"id": 586,
+					"id": 584,
 					"name": "onPaste",
 					"kind": 2048,
 					"kindString": "Method",
@@ -10790,7 +10796,7 @@
 					},
 					"signatures": [
 						{
-							"id": 587,
+							"id": 585,
 							"name": "onPaste",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -10806,7 +10812,7 @@
 							},
 							"parameters": [
 								{
-									"id": 588,
+									"id": 586,
 									"name": "content",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -10839,23 +10845,23 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
+						580,
 						582,
-						584,
-						585,
-						583
+						583,
+						581
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						586
+						584
 					]
 				}
 			]
 		},
 		{
-			"id": 640,
+			"id": 638,
 			"name": "Preference",
 			"kind": 256,
 			"kindString": "Interface",
@@ -10865,7 +10871,7 @@
 			},
 			"children": [
 				{
-					"id": 651,
+					"id": 649,
 					"name": "data",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10884,7 +10890,7 @@
 					}
 				},
 				{
-					"id": 647,
+					"id": 645,
 					"name": "default",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10900,7 +10906,7 @@
 					}
 				},
 				{
-					"id": 645,
+					"id": 643,
 					"name": "description",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10920,7 +10926,7 @@
 					}
 				},
 				{
-					"id": 650,
+					"id": 648,
 					"name": "label",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10936,7 +10942,7 @@
 					}
 				},
 				{
-					"id": 649,
+					"id": 647,
 					"name": "link",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10958,7 +10964,7 @@
 					}
 				},
 				{
-					"id": 641,
+					"id": 639,
 					"name": "name",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10972,7 +10978,7 @@
 					}
 				},
 				{
-					"id": 648,
+					"id": 646,
 					"name": "placeholder",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10988,7 +10994,7 @@
 					}
 				},
 				{
-					"id": 643,
+					"id": 641,
 					"name": "required",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11001,7 +11007,7 @@
 								"text": "\nIf the preference is required, an onboarding view is shown when the\nextension is opened for the first time.\n"
 							},
 							{
-								"tag": "default",
+								"tag": "defaultvalue",
 								"text": "false\n"
 							}
 						]
@@ -11012,7 +11018,7 @@
 					}
 				},
 				{
-					"id": 644,
+					"id": 642,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11032,7 +11038,7 @@
 					}
 				},
 				{
-					"id": 642,
+					"id": 640,
 					"name": "type",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11063,7 +11069,7 @@
 					}
 				},
 				{
-					"id": 646,
+					"id": 644,
 					"name": "value",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11084,23 +11090,23 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						651,
-						647,
-						645,
-						650,
 						649,
-						641,
-						648,
+						645,
 						643,
-						644,
+						648,
+						647,
+						639,
+						646,
+						641,
 						642,
-						646
+						640,
+						644
 					]
 				}
 			]
 		},
 		{
-			"id": 653,
+			"id": 651,
 			"name": "PreferenceValues",
 			"kind": 256,
 			"kindString": "Interface",
@@ -11109,14 +11115,14 @@
 				"shortText": "Values of preference items."
 			},
 			"indexSignature": {
-				"id": 654,
+				"id": 652,
 				"name": "__index",
 				"kind": 8192,
 				"kindString": "Index signature",
 				"flags": {},
 				"parameters": [
 					{
-						"id": 655,
+						"id": 653,
 						"name": "name",
 						"kind": 32768,
 						"flags": {},
@@ -11133,7 +11139,7 @@
 			}
 		},
 		{
-			"id": 592,
+			"id": 590,
 			"name": "PushActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -11149,7 +11155,7 @@
 			},
 			"children": [
 				{
-					"id": 595,
+					"id": 593,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11161,12 +11167,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 751,
+						"id": 749,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 596,
+					"id": 594,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11183,7 +11189,7 @@
 					}
 				},
 				{
-					"id": 594,
+					"id": 592,
 					"name": "target",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11197,7 +11203,7 @@
 					}
 				},
 				{
-					"id": 593,
+					"id": 591,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11211,7 +11217,7 @@
 					}
 				},
 				{
-					"id": 597,
+					"id": 595,
 					"name": "onPush",
 					"kind": 2048,
 					"kindString": "Method",
@@ -11220,7 +11226,7 @@
 					},
 					"signatures": [
 						{
-							"id": 598,
+							"id": 596,
 							"name": "onPush",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -11247,23 +11253,23 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						595,
-						596,
+						593,
 						594,
-						593
+						592,
+						591
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						597
+						595
 					]
 				}
 			]
 		},
 		{
-			"id": 602,
+			"id": 600,
 			"name": "ShowInFinderActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -11279,7 +11285,7 @@
 			},
 			"children": [
 				{
-					"id": 605,
+					"id": 603,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11297,12 +11303,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 751,
+						"id": 749,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 603,
+					"id": 601,
 					"name": "path",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11316,7 +11322,7 @@
 					}
 				},
 				{
-					"id": 606,
+					"id": 604,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11333,7 +11339,7 @@
 					}
 				},
 				{
-					"id": 604,
+					"id": 602,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11355,7 +11361,7 @@
 					}
 				},
 				{
-					"id": 607,
+					"id": 605,
 					"name": "onShow",
 					"kind": 2048,
 					"kindString": "Method",
@@ -11364,7 +11370,7 @@
 					},
 					"signatures": [
 						{
-							"id": 608,
+							"id": 606,
 							"name": "onShow",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -11380,7 +11386,7 @@
 							},
 							"parameters": [
 								{
-									"id": 609,
+									"id": 607,
 									"name": "path",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -11404,23 +11410,23 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						605,
 						603,
-						606,
-						604
+						601,
+						604,
+						602
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						607
+						605
 					]
 				}
 			]
 		},
 		{
-			"id": 794,
+			"id": 792,
 			"name": "ToastOptions",
 			"kind": 256,
 			"kindString": "Interface",
@@ -11440,7 +11446,7 @@
 			},
 			"children": [
 				{
-					"id": 797,
+					"id": 795,
 					"name": "message",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11456,7 +11462,7 @@
 					}
 				},
 				{
-					"id": 795,
+					"id": 793,
 					"name": "style",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11466,12 +11472,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 798,
+						"id": 796,
 						"name": "ToastStyle"
 					}
 				},
 				{
-					"id": 796,
+					"id": 794,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11490,15 +11496,15 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						797,
 						795,
-						796
+						793,
+						794
 					]
 				}
 			]
 		},
 		{
-			"id": 613,
+			"id": 611,
 			"name": "TrashActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -11514,7 +11520,7 @@
 			},
 			"children": [
 				{
-					"id": 616,
+					"id": 614,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11532,12 +11538,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 751,
+						"id": 749,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 614,
+					"id": 612,
 					"name": "paths",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11563,7 +11569,7 @@
 					}
 				},
 				{
-					"id": 617,
+					"id": 615,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11580,7 +11586,7 @@
 					}
 				},
 				{
-					"id": 615,
+					"id": 613,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11602,7 +11608,7 @@
 					}
 				},
 				{
-					"id": 618,
+					"id": 616,
 					"name": "onTrash",
 					"kind": 2048,
 					"kindString": "Method",
@@ -11611,7 +11617,7 @@
 					},
 					"signatures": [
 						{
-							"id": 619,
+							"id": 617,
 							"name": "onTrash",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -11627,7 +11633,7 @@
 							},
 							"parameters": [
 								{
-									"id": 620,
+									"id": 618,
 									"name": "paths",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -11663,17 +11669,17 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						616,
 						614,
-						617,
-						615
+						612,
+						615,
+						613
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						618
+						616
 					]
 				}
 			]
@@ -11809,7 +11815,7 @@
 			}
 		},
 		{
-			"id": 696,
+			"id": 694,
 			"name": "ColorLike",
 			"kind": 4194304,
 			"kindString": "Type alias",
@@ -11823,7 +11829,7 @@
 					},
 					{
 						"tag": "example",
-						"text": "\n```typescript\nimport { Color, Icon, List } from \"@raycast/api\";\n\nexport default () => {\n  return (\n    <List>\n      <List.Item title=\"Built-in color\" icon={{ source: Icon.Circle, tintColor: Color.Red }} />\n      <List.Item title=\"HEX\" icon={{ source: Icon.Circle, tintColor: \"#FF0000\" }} />\n      <List.Item title=\"Short HEX\" icon={{ source: Icon.Circle, tintColor: \"#F00\" }} />\n      <List.Item title=\"RGBA\" icon={{ source: Icon.Circle, tintColor: \"rgb(255, 0, 0)\" }} />\n      <List.Item title=\"RGBA Percentage\" icon={{ source: Icon.Circle, tintColor: \"rgb(255, 0, 0, 1.0)\" }} />\n      <List.Item title=\"HSL\" icon={{ source: Icon.Circle, tintColor: \"hsla(200, 20%, 33%, 0.2)\" }} />\n      <List.Item title=\"Keywords\" icon={{ source: Icon.Circle, tintColor: \"red\" }} />\n    </List>\n  );\n};\n```\n"
+						"text": "\n```typescript\nimport { Color, Icon, List } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <List>\n      <List.Item title=\"Built-in color\" icon={{ source: Icon.Circle, tintColor: Color.Red }} />\n      <List.Item title=\"HEX\" icon={{ source: Icon.Circle, tintColor: \"#FF0000\" }} />\n      <List.Item title=\"Short HEX\" icon={{ source: Icon.Circle, tintColor: \"#F00\" }} />\n      <List.Item title=\"RGBA\" icon={{ source: Icon.Circle, tintColor: \"rgb(255, 0, 0)\" }} />\n      <List.Item title=\"RGBA Percentage\" icon={{ source: Icon.Circle, tintColor: \"rgb(255, 0, 0, 1.0)\" }} />\n      <List.Item title=\"HSL\" icon={{ source: Icon.Circle, tintColor: \"hsla(200, 20%, 33%, 0.2)\" }} />\n      <List.Item title=\"Keywords\" icon={{ source: Icon.Circle, tintColor: \"red\" }} />\n    </List>\n  );\n};\n```\n"
 					},
 					{
 						"tag": "subcategory",
@@ -11836,7 +11842,7 @@
 				"types": [
 					{
 						"type": "reference",
-						"id": 685,
+						"id": 683,
 						"name": "Color"
 					},
 					{
@@ -11847,7 +11853,7 @@
 			}
 		},
 		{
-			"id": 355,
+			"id": 354,
 			"name": "FormValue",
 			"kind": 4194304,
 			"kindString": "Type alias",
@@ -11891,6 +11897,10 @@
 						}
 					},
 					{
+						"type": "reference",
+						"name": "Date"
+					},
+					{
 						"type": "literal",
 						"value": null
 					}
@@ -11898,7 +11908,7 @@
 			}
 		},
 		{
-			"id": 751,
+			"id": 749,
 			"name": "ImageLike",
 			"kind": 4194304,
 			"kindString": "Type alias",
@@ -11908,7 +11918,7 @@
 				"tags": [
 					{
 						"tag": "example",
-						"text": "\n```typescript\nimport { Icon, ImageMask, List } from \"@raycast/api\";\n\nexport default () => {\n  return (\n    <List>\n      <List.Item title=\"String\" icon=\"https://raycast.com/uploads/avatar.png\" />\n      <List.Item title=\"Icon\" icon={Icon.Circle} />\n      <List.Item title=\"FileIcon\" icon={{ fileIcon: __filename }} />\n      <List.Item title=\"Image\" icon={{ source: \"https://raycast.com/uploads/avatar.png\", mask: ImageMask.Circle }} />\n    </List>\n  );\n};\n```\n"
+						"text": "\n```typescript\nimport { Icon, ImageMask, List } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <List>\n      <List.Item title=\"String\" icon=\"https://raycast.com/uploads/avatar.png\" />\n      <List.Item title=\"Icon\" icon={Icon.Circle} />\n      <List.Item title=\"FileIcon\" icon={{ fileIcon: __filename }} />\n      <List.Item title=\"Image\" icon={{ source: \"https://raycast.com/uploads/avatar.png\", mask: ImageMask.Circle }} />\n    </List>\n  );\n};\n```\n"
 					},
 					{
 						"tag": "subcategory",
@@ -11925,24 +11935,24 @@
 					},
 					{
 						"type": "reference",
-						"id": 700,
+						"id": 698,
 						"name": "Icon"
 					},
 					{
 						"type": "reference",
-						"id": 749,
+						"id": 747,
 						"name": "FileIcon"
 					},
 					{
 						"type": "reference",
-						"id": 752,
+						"id": 750,
 						"name": "Image"
 					}
 				]
 			}
 		},
 		{
-			"id": 756,
+			"id": 754,
 			"name": "ImageSource",
 			"kind": 4194304,
 			"kindString": "Type alias",
@@ -11956,7 +11966,7 @@
 					},
 					{
 						"tag": "example",
-						"text": "\n```typescript\nimport { Icon, List } from \"@raycast/api\";\n\nexport default () => {\n  return (\n    <List>\n      <List.Item title=\"String\" icon={{ source: \"https://raycast.com/uploads/avatar.png\" }} />\n      <List.Item title=\"Icon\" icon={{ source: Icon.Circle }} />\n      <List.Item\n        title=\"Theme\"\n        icon={{\n          source: { light: \"https://raycast.com/uploads/avatar.png\", dark: \"https://raycast.com/uploads/avatar.png\" },\n        }}\n      />\n    </List>\n  );\n};\n```\n"
+						"text": "\n```typescript\nimport { Icon, List } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <List>\n      <List.Item title=\"String\" icon={{ source: \"https://raycast.com/uploads/avatar.png\" }} />\n      <List.Item title=\"Icon\" icon={{ source: Icon.Circle }} />\n      <List.Item\n        title=\"Theme\"\n        icon={{\n          source: { light: \"https://raycast.com/uploads/avatar.png\", dark: \"https://raycast.com/uploads/avatar.png\" },\n        }}\n      />\n    </List>\n  );\n};\n```\n"
 					},
 					{
 						"tag": "subcategory",
@@ -11973,20 +11983,20 @@
 					},
 					{
 						"type": "reference",
-						"id": 700,
+						"id": 698,
 						"name": "Icon"
 					},
 					{
 						"type": "reflection",
 						"declaration": {
-							"id": 757,
+							"id": 755,
 							"name": "__type",
 							"kind": 65536,
 							"kindString": "Type literal",
 							"flags": {},
 							"children": [
 								{
-									"id": 759,
+									"id": 757,
 									"name": "dark",
 									"kind": 1024,
 									"kindString": "Property",
@@ -11997,7 +12007,7 @@
 									}
 								},
 								{
-									"id": 758,
+									"id": 756,
 									"name": "light",
 									"kind": 1024,
 									"kindString": "Property",
@@ -12013,8 +12023,8 @@
 									"title": "Properties",
 									"kind": 1024,
 									"children": [
-										759,
-										758
+										757,
+										756
 									]
 								}
 							]
@@ -12399,7 +12409,7 @@
 			}
 		},
 		{
-			"id": 639,
+			"id": 637,
 			"name": "Preferences",
 			"kind": 4194304,
 			"kindString": "Type alias",
@@ -12416,7 +12426,7 @@
 					},
 					{
 						"type": "reference",
-						"id": 640,
+						"id": 638,
 						"name": "Preference"
 					}
 				],
@@ -12424,7 +12434,7 @@
 			}
 		},
 		{
-			"id": 635,
+			"id": 633,
 			"name": "environment",
 			"kind": 32,
 			"kindString": "Variable",
@@ -12442,13 +12452,13 @@
 			},
 			"type": {
 				"type": "reference",
-				"id": 628,
+				"id": 626,
 				"name": "Environment"
 			},
 			"defaultValue": "..."
 		},
 		{
-			"id": 652,
+			"id": 650,
 			"name": "preferences",
 			"kind": 32,
 			"kindString": "Variable",
@@ -12460,7 +12470,7 @@
 			},
 			"type": {
 				"type": "reference",
-				"id": 639,
+				"id": 637,
 				"name": "Preferences"
 			},
 			"defaultValue": "..."
@@ -12670,14 +12680,14 @@
 			]
 		},
 		{
-			"id": 533,
+			"id": 531,
 			"name": "CopyToClipboardAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 534,
+					"id": 532,
 					"name": "CopyToClipboardAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -12690,6 +12700,10 @@
 								"text": "\nThe main window is closed and a HUD is shown after the content was copied to the clipboard.\n"
 							},
 							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { ActionPanel, CopyToClipboardAction, Detail } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Detail\n      markdown=\"Press `⌘ + .` and share some love.\"\n      actions={\n        <ActionPanel>\n          <CopyToClipboardAction content=\"I ❤️ Raycast\" shortcut={{ modifiers: [\"cmd\"], key: \".\" }} />\n        </ActionPanel>\n      }\n    />\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Actions\n"
 							}
@@ -12697,14 +12711,14 @@
 					},
 					"parameters": [
 						{
-							"id": 535,
+							"id": 533,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 536,
+								"id": 534,
 								"name": "CopyToClipboardActionProps"
 							}
 						}
@@ -12714,7 +12728,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 536,
+								"id": 534,
 								"name": "CopyToClipboardActionProps"
 							}
 						],
@@ -12737,8 +12751,16 @@
 					"kindString": "Call signature",
 					"flags": {},
 					"comment": {
-						"shortText": "Renders a markdown (CommonMark) string. Typically used when navigating from a list or as standalone view.",
+						"shortText": "Renders a markdown (CommonMark) string.",
 						"tags": [
+							{
+								"tag": "remarks",
+								"text": "\nTypically used when navigating from a list or as standalone view.\n"
+							},
+							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { Detail } from \"@raycast/api\";\n\nexport default function Command() {\n  return <Detail markdown=\"**Hello** _World_!\" />;\n}\n```\n"
+							},
 							{
 								"tag": "subcategory",
 								"text": "Detail\n"
@@ -12804,12 +12826,12 @@
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 356,
+								"id": 355,
 								"name": "FormValues"
 							},
 							"default": {
 								"type": "reference",
-								"id": 356,
+								"id": 355,
 								"name": "FormValues"
 							}
 						}
@@ -12823,7 +12845,7 @@
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 359,
+								"id": 358,
 								"typeArguments": [
 									{
 										"type": "reference",
@@ -12839,7 +12861,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 359,
+								"id": 358,
 								"typeArguments": [
 									{
 										"type": "reference",
@@ -12871,6 +12893,14 @@
 						"shortText": "A form item with a checkbox.",
 						"tags": [
 							{
+								"tag": "example",
+								"text": "\nExample of an uncontrolled checkbox:\n\n```typescript\nimport { Form } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.Checkbox id=\"checkbox\" label=\"Are you happy?\" defaultValue={true} />\n    </Form>\n  );\n}\n```\n"
+							},
+							{
+								"tag": "example",
+								"text": "\nExample of a controlled checkbox:\n\n```typescript\nimport { Form } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [checked, setChecked] = useState(true);\n\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.Checkbox id=\"checkbox\" label=\"Do you like orange juice?\" value={checked} onChange={setChecked} />\n    </Form>\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Form\n"
 							}
@@ -12885,7 +12915,7 @@
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 399,
+								"id": 398,
 								"name": "FormCheckboxProps"
 							}
 						}
@@ -12895,7 +12925,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 399,
+								"id": 398,
 								"name": "FormCheckboxProps"
 							}
 						],
@@ -12935,7 +12965,7 @@
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 409,
+								"id": 408,
 								"name": "FormDatePickerProps"
 							}
 						}
@@ -12945,7 +12975,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 409,
+								"id": 408,
 								"name": "FormDatePickerProps"
 							}
 						],
@@ -12955,14 +12985,14 @@
 			]
 		},
 		{
-			"id": 273,
+			"id": 272,
 			"name": "FormDropdown",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 274,
+					"id": 273,
 					"name": "FormDropdown",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -12971,6 +13001,14 @@
 						"shortText": "A form item with a dropdown menu.",
 						"tags": [
 							{
+								"tag": "example",
+								"text": "\nExample of an uncontrolled dropdown:\n\n```typescript\nimport { Form } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.Dropdown id=\"emoji\" title=\"Favorite Emoji\" defaultValue=\"lol\">\n        <Form.Dropdown.Item value=\"poop\" title=\"Pile of poop\" icon=\"💩\" />\n        <Form.Dropdown.Item value=\"rocket\" title=\"Rocket\" icon=\"🚀\" />\n        <Form.Dropdown.Item value=\"lol\" title=\"Rolling on the floor laughing face\" icon=\"🤣\" />\n      </Form.Dropdown>\n    </Form>\n  );\n}\n```\n"
+							},
+							{
+								"tag": "example",
+								"text": "\nExample of a controlled dropdown:\n\n```typescript\nimport { Form } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [programmingLanguage, setProgrammingLanguage] = useState<string>(\"typescript\");\n\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.Dropdown\n        id=\"dropdown\"\n        title=\"Favorite Language\"\n        value={programmingLanguage}\n        onChange={setProgrammingLanguage}\n      >\n        <Form.Dropdown.Item value=\"cpp\" title=\"C++\" />\n        <Form.Dropdown.Item value=\"javascript\" title=\"JavaScript\" />\n        <Form.Dropdown.Item value=\"ruby\" title=\"Ruby\" />\n        <Form.Dropdown.Item value=\"python\" title=\"Python\" />\n        <Form.Dropdown.Item value=\"swift\" title=\"Swift\" />\n        <Form.Dropdown.Item value=\"typescript\" title=\"TypeScript\" />\n      </Form.Dropdown>\n    </Form>\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Form\n"
 							}
@@ -12978,14 +13016,14 @@
 					},
 					"parameters": [
 						{
-							"id": 275,
+							"id": 274,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 420,
+								"id": 418,
 								"name": "FormDropdownProps"
 							}
 						}
@@ -12995,7 +13033,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 420,
+								"id": 418,
 								"name": "FormDropdownProps"
 							}
 						],
@@ -13005,14 +13043,14 @@
 			]
 		},
 		{
-			"id": 299,
+			"id": 298,
 			"name": "FormDropdownItem",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 300,
+					"id": 299,
 					"name": "FormDropdownItem",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13021,6 +13059,10 @@
 						"shortText": "Represents a context-specific action that can be selected in the user interface or triggered through an assigned keyboard shortcut on the respective view.",
 						"tags": [
 							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { Form, Icon } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.Dropdown id=\"icon\" title=\"Icon\">\n        <Form.Dropdown.Item value=\"circle\" title=\"Cirlce\" icon={Icon.Circle} />\n      </Form.Dropdown>\n    </Form>\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Form\n"
 							}
@@ -13028,14 +13070,14 @@
 					},
 					"parameters": [
 						{
-							"id": 301,
+							"id": 300,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 433,
+								"id": 431,
 								"name": "FormDropdownItemProps"
 							}
 						}
@@ -13045,7 +13087,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 433,
+								"id": 431,
 								"name": "FormDropdownItemProps"
 							}
 						],
@@ -13055,21 +13097,29 @@
 			]
 		},
 		{
-			"id": 291,
+			"id": 290,
 			"name": "FormDropdownSection",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 292,
+					"id": 291,
 					"name": "FormDropdownSection",
 					"kind": 4096,
 					"kindString": "Call signature",
 					"flags": {},
 					"comment": {
-						"shortText": "Visually separated group of items.\nUse sections to group related menu items together.",
+						"shortText": "Visually separated group of dropdown items.",
 						"tags": [
+							{
+								"tag": "remarks",
+								"text": "\nUse sections to group related menu items together.\n"
+							},
+							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { Form } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.Dropdown id=\"food\" title=\"Favorite Food\">\n        <Form.Dropdown.Section title=\"Fruits\">\n          <Form.Dropdown.Item value=\"apple\" title=\"Apple\" icon=\"🍎\" />\n          <Form.Dropdown.Item value=\"banana\" title=\"Banana\" icon=\"🍌\" />\n        </Form.Dropdown.Section>\n        <Form.Dropdown.Section title=\"Vegetables\">\n          <Form.Dropdown.Item value=\"broccoli\" title=\"Broccoli\" icon=\"🥦\" />\n          <Form.Dropdown.Item value=\"carrot\" title=\"Carrot\" icon=\"🥕\" />\n        </Form.Dropdown.Section>\n      </Form.Dropdown>\n    </Form>\n  );\n}\n```\n"
+							},
 							{
 								"tag": "subcategory",
 								"text": "Form\n"
@@ -13078,14 +13128,14 @@
 					},
 					"parameters": [
 						{
-							"id": 293,
+							"id": 292,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 430,
+								"id": 428,
 								"name": "FormDropdownSectionProps"
 							}
 						}
@@ -13095,7 +13145,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 430,
+								"id": 428,
 								"name": "FormDropdownSectionProps"
 							}
 						],
@@ -13105,14 +13155,14 @@
 			]
 		},
 		{
-			"id": 269,
+			"id": 268,
 			"name": "FormSeparator",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 270,
+					"id": 269,
 					"name": "FormSeparator",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13121,6 +13171,10 @@
 						"shortText": "A form item that shows a separator line.\nUse for grouping and visually separating form items.",
 						"tags": [
 							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { Form } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TextField id=\"textfield\" />\n      <Form.Separator />\n      <Form.TextArea id=\"textarea\" />\n    </Form>\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Form\n"
 							}
@@ -13131,7 +13185,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 419,
+								"id": 417,
 								"name": "FormSeparatorProps"
 							}
 						],
@@ -13141,14 +13195,14 @@
 			]
 		},
 		{
-			"id": 318,
+			"id": 317,
 			"name": "FormTagPicker",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 319,
+					"id": 318,
 					"name": "FormTagPicker",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13157,6 +13211,14 @@
 						"shortText": "A form item with a tag picker that allows the user to select multiple items.",
 						"tags": [
 							{
+								"tag": "example",
+								"text": "\nExample of an uncontrolled tag picker:\n\n```typescript\nimport { Form } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TagPicker id=\"sports\" title=\"Favorite Sports\" defaultValue={[\"football\"]}>\n        <Form.TagPicker.Item value=\"basketball\" title=\"Basketball\" icon=\"🏀\" />\n        <Form.TagPicker.Item value=\"football\" title=\"Football\" icon=\"⚽️\" />\n        <Form.TagPicker.Item value=\"tennis\" title=\"Tennis\" icon=\"🎾\" />\n      </Form.TagPicker>\n    </Form>\n  );\n}\n```\n"
+							},
+							{
+								"tag": "example",
+								"text": "\nExample of a controlled tag picker:\n\n```typescript\nimport { Form } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [countries, setCountries] = useState<string[]>([\"ger\", \"ned\", \"pol\"]);\n\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TagPicker id=\"countries\" title=\"Visited Countries\" value={countries} onChange={setCountries}>\n        <Form.TagPicker.Item value=\"ger\" title=\"Germany\" icon=\"🇩🇪\" />\n        <Form.TagPicker.Item value=\"ind\" title=\"India\" icon=\"🇮🇳\" />\n        <Form.TagPicker.Item value=\"ned\" title=\"Netherlands\" icon=\"🇳🇱\" />\n        <Form.TagPicker.Item value=\"nor\" title=\"Norway\" icon=\"🇳🇴\" />\n        <Form.TagPicker.Item value=\"pol\" title=\"Poland\" icon=\"🇵🇱\" />\n        <Form.TagPicker.Item value=\"rus\" title=\"Russia\" icon=\"🇷🇺\" />\n        <Form.TagPicker.Item value=\"sco\" title=\"Scotland\" icon=\"🏴󠁧󠁢󠁳󠁣󠁴󠁿\" />\n      </Form.TagPicker>\n    </Form>\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Form\n"
 							}
@@ -13164,14 +13226,14 @@
 					},
 					"parameters": [
 						{
-							"id": 320,
+							"id": 319,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 437,
+								"id": 435,
 								"name": "FormTagPickerProps"
 							}
 						}
@@ -13181,7 +13243,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 437,
+								"id": 435,
 								"name": "FormTagPickerProps"
 							}
 						],
@@ -13191,14 +13253,14 @@
 			]
 		},
 		{
-			"id": 336,
+			"id": 335,
 			"name": "FormTagPickerItem",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 337,
+					"id": 336,
 					"name": "FormTagPickerItem",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13207,6 +13269,10 @@
 						"shortText": "A tag picker item in a {@link FormTagPicker}.",
 						"tags": [
 							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { Color, Form, Icon } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TagPicker id=\"color\" title=\"Color\">\n        <Form.TagPicker.Item value=\"ger\" title=\"Germany\" icon={{ source: Icon.Circle, tintColor: Color.Red }} />\n      </Form.TagPicker>\n    </Form>\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Form\n"
 							}
@@ -13214,14 +13280,14 @@
 					},
 					"parameters": [
 						{
-							"id": 338,
+							"id": 337,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 448,
+								"id": 446,
 								"name": "FormTagPickerItemProps"
 							}
 						}
@@ -13231,7 +13297,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 448,
+								"id": 446,
 								"name": "FormTagPickerItemProps"
 							}
 						],
@@ -13257,6 +13323,14 @@
 						"shortText": "A form item with a text area for input.\nThe item supports multiline text entry.",
 						"tags": [
 							{
+								"tag": "example",
+								"text": "\nExample of an uncontrolled text area:\n\n```typescript\nimport { Form } from \"@raycast/api\";\n\nconst DESCRIPTION =\n  \"We spend too much time starring at loading indicators. The Raycast team is dedicated to make everybody interact faster with their computers.\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TextArea id=\"description\" defaultValue={DESCRIPTION} />\n    </Form>\n  );\n}\n```\n"
+							},
+							{
+								"tag": "example",
+								"text": "\nExample of a controlled text area:\n\n```typescript\nimport { Form } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [text, setText] = useState<string>();\n\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TextArea id=\"textarea\" value={text} onChange={setText} />\n    </Form>\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Form\n"
 							}
@@ -13271,7 +13345,7 @@
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 389,
+								"id": 388,
 								"name": "FormTextAreaProps"
 							}
 						}
@@ -13281,7 +13355,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 389,
+								"id": 388,
 								"name": "FormTextAreaProps"
 							}
 						],
@@ -13307,6 +13381,14 @@
 						"shortText": "A form item with a text field for input.",
 						"tags": [
 							{
+								"tag": "example",
+								"text": "\nExample of an uncontrolled text field:\n\n```typescript\nimport { Form } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TextField id=\"name\" defaultValue=\"Steve\" />\n    </Form>\n  );\n}\n```\n"
+							},
+							{
+								"tag": "example",
+								"text": "\nExample of a controlled text field:\n\n```typescript\nimport { Form } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [text, setText] = useState<string>();\n\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TextField id=\"textfield\" value={text} onChange={setText} />\n    </Form>\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Form\n"
 							}
@@ -13321,7 +13403,7 @@
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 379,
+								"id": 378,
 								"name": "FormTextFieldProps"
 							}
 						}
@@ -13331,7 +13413,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 379,
+								"id": 378,
 								"name": "FormTextFieldProps"
 							}
 						],
@@ -13341,21 +13423,29 @@
 			]
 		},
 		{
-			"id": 452,
+			"id": 450,
 			"name": "List",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 453,
+					"id": 451,
 					"name": "List",
 					"kind": 4096,
 					"kindString": "Call signature",
 					"flags": {},
 					"comment": {
-						"shortText": "Shows sections and items with built-in or custom filtering through an optional search bar.",
+						"shortText": "Displays {@link ListSection} or {@link ListItem}.",
 						"tags": [
+							{
+								"tag": "remarks",
+								"text": "\nThe list uses built-in filtering by indexing the title of list items and additionally keywords.\n"
+							},
+							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { List } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <List navigationTitle=\"Search Beers\" searchBarPlaceholder=\"Search your favorite beer\">\n      <List.Item title=\"Augustiner Helles\" />\n      <List.Item title=\"Camden Hells\" />\n      <List.Item title=\"Leffe Blonde\" />\n      <List.Item title=\"Sierra Nevada IPA\" />\n    </List>\n  );\n}\n```\n"
+							},
 							{
 								"tag": "subcategory",
 								"text": "List\n"
@@ -13364,14 +13454,14 @@
 					},
 					"parameters": [
 						{
-							"id": 454,
+							"id": 452,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 504,
+								"id": 502,
 								"name": "ListProps"
 							}
 						}
@@ -13381,7 +13471,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 504,
+								"id": 502,
 								"name": "ListProps"
 							}
 						],
@@ -13391,21 +13481,25 @@
 			]
 		},
 		{
-			"id": 482,
+			"id": 480,
 			"name": "ListItem",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 483,
+					"id": 481,
 					"name": "ListItem",
 					"kind": 4096,
 					"kindString": "Call signature",
 					"flags": {},
 					"comment": {
-						"shortText": "Represents an item within a list section.",
+						"shortText": "A item in the {@link List}.",
 						"tags": [
+							{
+								"tag": "remarks",
+								"text": "\nThis is one of the foundational UI comonents of Raycast. A list item represents a single entity. It can be a\nGitHub pull request, a file or anything else. Most likely you want to perform actions on this item, so make it clear\nto the user what this list item is about.\n"
+							},
 							{
 								"tag": "example",
 								"text": "\n```typescript\nimport { Icon, List } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <List>\n      <List.Item icon={Icon.Star} title=\"Augustiner Helles\" subtitle=\"0,5 Liter\" accessoryTitle=\"Germany\" />\n    </List>\n  );\n}\n```\n"
@@ -13418,14 +13512,14 @@
 					},
 					"parameters": [
 						{
-							"id": 484,
+							"id": 482,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 523,
+								"id": 521,
 								"name": "ListItemProps"
 							}
 						}
@@ -13435,7 +13529,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 523,
+								"id": 521,
 								"name": "ListItemProps"
 							}
 						],
@@ -13445,21 +13539,29 @@
 			]
 		},
 		{
-			"id": 472,
+			"id": 470,
 			"name": "ListSection",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 473,
+					"id": 471,
 					"name": "ListSection",
 					"kind": 4096,
 					"kindString": "Call signature",
 					"flags": {},
 					"comment": {
-						"shortText": "Visually separated group of list items. Use sections to group related list items together.",
+						"shortText": "A group of related {@link ListItem}.",
 						"tags": [
+							{
+								"tag": "remarks",
+								"text": "\nSections are a great way to structure your list. F.e. group GitHub issues with the same status and order them by priority.\nThis way the user can quickly access what is most relevant.\n"
+							},
+							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { List } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <List>\n      <List.Section title=\"Lager\">\n        <List.Item title=\"Camden Hells\" />\n      </List.Section>\n      <List.Section title=\"IPA\">\n        <List.Item title=\"Sierra Nevada IPA\" />\n      </List.Section>\n    </List>\n  );\n}\n```\n"
+							},
 							{
 								"tag": "subcategory",
 								"text": "List\n"
@@ -13468,14 +13570,14 @@
 					},
 					"parameters": [
 						{
-							"id": 474,
+							"id": 472,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 518,
+								"id": 516,
 								"name": "ListSectionProps"
 							}
 						}
@@ -13485,7 +13587,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 518,
+								"id": 516,
 								"name": "ListSectionProps"
 							}
 						],
@@ -13495,14 +13597,14 @@
 			]
 		},
 		{
-			"id": 544,
+			"id": 542,
 			"name": "OpenAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 545,
+					"id": 543,
 					"name": "OpenAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13515,6 +13617,10 @@
 								"text": "\nThe main window is closed, after the file was opened.\n"
 							},
 							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { ActionPanel, Detail, OpenAction } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Detail\n      markdown=\"Check out your extension code.\"\n      actions={\n        <ActionPanel>\n          <OpenAction title=\"Open Folder\" target={__dirname} />\n        </ActionPanel>\n      }\n    />\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Actions\n"
 							}
@@ -13522,14 +13628,14 @@
 					},
 					"parameters": [
 						{
-							"id": 546,
+							"id": 544,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 547,
+								"id": 545,
 								"name": "OpenActionProps"
 							}
 						}
@@ -13539,7 +13645,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 547,
+								"id": 545,
 								"name": "OpenActionProps"
 							}
 						],
@@ -13549,14 +13655,14 @@
 			]
 		},
 		{
-			"id": 556,
+			"id": 554,
 			"name": "OpenInBrowserAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 557,
+					"id": 555,
 					"name": "OpenInBrowserAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13569,6 +13675,10 @@
 								"text": "\nThe main window is closed, after the URL was opened in the browser.\n"
 							},
 							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { ActionPanel, Detail, OpenInBrowserAction } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Detail\n      markdown=\"Join the gang!\"\n      actions={\n        <ActionPanel>\n          <OpenInBrowserAction url=\"https://raycast.com/jobs\" />\n        </ActionPanel>\n      }\n    />\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Actions\n"
 							}
@@ -13576,14 +13686,14 @@
 					},
 					"parameters": [
 						{
-							"id": 558,
+							"id": 556,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 559,
+								"id": 557,
 								"name": "OpenInBrowserActionProps"
 							}
 						}
@@ -13593,7 +13703,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 559,
+								"id": 557,
 								"name": "OpenInBrowserActionProps"
 							}
 						],
@@ -13603,14 +13713,14 @@
 			]
 		},
 		{
-			"id": 567,
+			"id": 565,
 			"name": "OpenWithAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 568,
+					"id": 566,
 					"name": "OpenWithAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13623,6 +13733,10 @@
 								"text": "\nThe action opens a sub-menu with all applications that can open the file or folder.\nThe main window is closed after the file was opened in the specified application.\n"
 							},
 							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { ActionPanel, Detail, OpenWithAction } from \"@raycast/api\";\nimport { homedir } from \"os\";\n\nconst DESKTOP_DIR = `${homedir()}/Desktop`;\n\nexport default function Command() {\n  return (\n    <Detail\n      markdown=\"What do you want to use to open your desktop with?\"\n      actions={\n        <ActionPanel>\n          <OpenWithAction path={DESKTOP_DIR} />\n        </ActionPanel>\n      }\n    />\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Actions\n"
 							}
@@ -13630,14 +13744,14 @@
 					},
 					"parameters": [
 						{
-							"id": 569,
+							"id": 567,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 570,
+								"id": 568,
 								"name": "OpenWithActionProps"
 							}
 						}
@@ -13647,7 +13761,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 570,
+								"id": 568,
 								"name": "OpenWithActionProps"
 							}
 						],
@@ -13657,14 +13771,14 @@
 			]
 		},
 		{
-			"id": 578,
+			"id": 576,
 			"name": "PasteAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 579,
+					"id": 577,
 					"name": "PasteAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13677,6 +13791,10 @@
 								"text": "\nThe main window is closed, after the content was pasted to the front-most application.\n"
 							},
 							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { ActionPanel, Detail, PasteAction } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Detail\n      markdown=\"Let us know what you think about the Raycast API?\"\n      actions={\n        <ActionPanel>\n          <PasteAction content=\"api@raycast.com\" />\n        </ActionPanel>\n      }\n    />\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Actions\n"
 							}
@@ -13684,14 +13802,14 @@
 					},
 					"parameters": [
 						{
-							"id": 580,
+							"id": 578,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 581,
+								"id": 579,
 								"name": "PasteActionProps"
 							}
 						}
@@ -13701,7 +13819,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 581,
+								"id": 579,
 								"name": "PasteActionProps"
 							}
 						],
@@ -13711,14 +13829,14 @@
 			]
 		},
 		{
-			"id": 589,
+			"id": 587,
 			"name": "PushAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 590,
+					"id": 588,
 					"name": "PushAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13734,14 +13852,14 @@
 					},
 					"parameters": [
 						{
-							"id": 591,
+							"id": 589,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 592,
+								"id": 590,
 								"name": "PushActionProps"
 							}
 						}
@@ -13751,7 +13869,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 592,
+								"id": 590,
 								"name": "PushActionProps"
 							}
 						],
@@ -13761,14 +13879,14 @@
 			]
 		},
 		{
-			"id": 599,
+			"id": 597,
 			"name": "ShowInFinderAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 600,
+					"id": 598,
 					"name": "ShowInFinderAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13781,6 +13899,10 @@
 								"text": "\nThe main window is closed, after the file or folder was revealed in the Finder.\n"
 							},
 							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { ActionPanel, Detail, ShowInFinderAction } from \"@raycast/api\";\nimport { homedir } from \"os\";\n\nconst DOWNLOADS_DIR = `${homedir()}/Downloads`;\n\nexport default function Command() {\n  return (\n    <Detail\n      markdown=\"Are your downloads pilling up again?\"\n      actions={\n        <ActionPanel>\n          <ShowInFinderAction path={DOWNLOADS_DIR} />\n        </ActionPanel>\n      }\n    />\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Actions\n"
 							}
@@ -13788,14 +13910,14 @@
 					},
 					"parameters": [
 						{
-							"id": 601,
+							"id": 599,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 602,
+								"id": 600,
 								"name": "ShowInFinderActionProps"
 							}
 						}
@@ -13805,7 +13927,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 602,
+								"id": 600,
 								"name": "ShowInFinderActionProps"
 							}
 						],
@@ -13815,14 +13937,14 @@
 			]
 		},
 		{
-			"id": 610,
+			"id": 608,
 			"name": "TrashAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 611,
+					"id": 609,
 					"name": "TrashAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13831,6 +13953,10 @@
 						"shortText": "Action that moves a file or folder to the Trash.",
 						"tags": [
 							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { ActionPanel, Detail, TrashAction } from \"@raycast/api\";\nimport { homedir } from \"os\";\n\nconst FILE = `${homedir()}/Downloads/get-rid-of-me.txt`;\n\nexport default function Command() {\n  return (\n    <Detail\n      markdown=\"Some spring cleaning?\"\n      actions={\n        <ActionPanel>\n          <TrashAction paths={FILE} />\n        </ActionPanel>\n      }\n    />\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Actions\n"
 							}
@@ -13838,14 +13964,14 @@
 					},
 					"parameters": [
 						{
-							"id": 612,
+							"id": 610,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 613,
+								"id": 611,
 								"name": "TrashActionProps"
 							}
 						}
@@ -13855,7 +13981,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 613,
+								"id": 611,
 								"name": "TrashActionProps"
 							}
 						],
@@ -14386,14 +14512,14 @@
 			]
 		},
 		{
-			"id": 636,
+			"id": 634,
 			"name": "getPreferenceValues",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 637,
+					"id": 635,
 					"name": "getPreferenceValues",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -14409,19 +14535,19 @@
 					},
 					"typeParameter": [
 						{
-							"id": 638,
+							"id": 636,
 							"name": "Values",
 							"kind": 131072,
 							"kindString": "Type parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 653,
+								"id": 651,
 								"name": "PreferenceValues"
 							},
 							"default": {
 								"type": "reference",
-								"id": 653,
+								"id": 651,
 								"name": "PreferenceValues"
 							}
 						}
@@ -14614,14 +14740,14 @@
 			]
 		},
 		{
-			"id": 802,
+			"id": 800,
 			"name": "randomId",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 803,
+					"id": 801,
 					"name": "randomId",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -14643,7 +14769,7 @@
 					},
 					"parameters": [
 						{
-							"id": 804,
+							"id": 802,
 							"name": "size",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -14719,14 +14845,14 @@
 			]
 		},
 		{
-			"id": 676,
+			"id": 674,
 			"name": "render",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 677,
+					"id": 675,
 					"name": "render",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -14746,7 +14872,7 @@
 					},
 					"parameters": [
 						{
-							"id": 678,
+							"id": 676,
 							"name": "nodeToRender",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -14832,14 +14958,14 @@
 			]
 		},
 		{
-			"id": 768,
+			"id": 766,
 			"name": "showHUD",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 769,
+					"id": 767,
 					"name": "showHUD",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -14860,7 +14986,7 @@
 					},
 					"parameters": [
 						{
-							"id": 770,
+							"id": 768,
 							"name": "title",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -14944,14 +15070,14 @@
 			]
 		},
 		{
-			"id": 763,
+			"id": 761,
 			"name": "showToast",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 764,
+					"id": 762,
 					"name": "showToast",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -14972,7 +15098,7 @@
 					},
 					"parameters": [
 						{
-							"id": 765,
+							"id": 763,
 							"name": "style",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -14982,12 +15108,12 @@
 							},
 							"type": {
 								"type": "reference",
-								"id": 798,
+								"id": 796,
 								"name": "ToastStyle"
 							}
 						},
 						{
-							"id": 766,
+							"id": 764,
 							"name": "title",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -15001,7 +15127,7 @@
 							}
 						},
 						{
-							"id": 767,
+							"id": 765,
 							"name": "message",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -15022,7 +15148,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 771,
+								"id": 769,
 								"name": "Toast"
 							}
 						],
@@ -15097,14 +15223,14 @@
 			]
 		},
 		{
-			"id": 656,
+			"id": 654,
 			"name": "useActionPanel",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 657,
+					"id": 655,
 					"name": "useActionPanel",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -15121,21 +15247,21 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 658,
+						"id": 656,
 						"name": "ActionPanelState"
 					}
 				}
 			]
 		},
 		{
-			"id": 662,
+			"id": 660,
 			"name": "useId",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 663,
+					"id": 661,
 					"name": "useId",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -15160,7 +15286,7 @@
 					},
 					"parameters": [
 						{
-							"id": 664,
+							"id": 662,
 							"name": "defaultId",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -15176,7 +15302,7 @@
 							}
 						},
 						{
-							"id": 665,
+							"id": 663,
 							"name": "generateId",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -15187,14 +15313,14 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 666,
+									"id": 664,
 									"name": "__type",
 									"kind": 65536,
 									"kindString": "Type literal",
 									"flags": {},
 									"signatures": [
 										{
-											"id": 667,
+											"id": 665,
 											"name": "__type",
 											"kind": 4096,
 											"kindString": "Call signature",
@@ -15218,14 +15344,14 @@
 			]
 		},
 		{
-			"id": 668,
+			"id": 666,
 			"name": "useNavigation",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 669,
+					"id": 667,
 					"name": "useNavigation",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -15250,7 +15376,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 670,
+						"id": 668,
 						"name": "Navigation"
 					}
 				}
@@ -15270,35 +15396,35 @@
 				180,
 				238,
 				255,
-				276,
-				302,
-				294,
-				271,
-				321,
-				339,
+				275,
+				301,
+				293,
+				270,
+				320,
+				338,
 				221,
 				204,
 				68,
-				455,
-				485,
-				475
+				453,
+				483,
+				473
 			]
 		},
 		{
 			"title": "Enumerations",
 			"kind": 4,
 			"children": [
-				685,
-				700,
-				760,
-				798
+				683,
+				698,
+				758,
+				796
 			]
 		},
 		{
 			"title": "Classes",
 			"kind": 128,
 			"children": [
-				771
+				769
 			]
 		},
 		{
@@ -15308,42 +15434,42 @@
 				147,
 				141,
 				144,
-				658,
+				656,
 				154,
 				28,
-				536,
+				534,
 				170,
-				628,
-				749,
-				399,
-				409,
-				433,
-				420,
-				430,
-				369,
-				359,
-				419,
-				448,
-				437,
-				389,
-				379,
-				356,
-				752,
+				626,
+				747,
+				398,
+				408,
+				431,
+				418,
+				428,
+				368,
+				358,
+				417,
+				446,
+				435,
+				388,
+				378,
+				355,
+				750,
 				42,
-				523,
-				504,
-				518,
-				670,
-				547,
-				559,
-				570,
-				581,
-				640,
-				653,
-				592,
-				602,
-				794,
-				613
+				521,
+				502,
+				516,
+				668,
+				545,
+				557,
+				568,
+				579,
+				638,
+				651,
+				590,
+				600,
+				792,
+				611
 			]
 		},
 		{
@@ -15352,22 +15478,22 @@
 			"children": [
 				139,
 				140,
-				696,
-				355,
-				751,
-				756,
+				694,
+				354,
+				749,
+				754,
 				47,
 				46,
 				62,
-				639
+				637
 			]
 		},
 		{
 			"title": "Variables",
 			"kind": 32,
 			"children": [
-				635,
-				652
+				633,
+				650
 			]
 		},
 		{
@@ -15378,29 +15504,29 @@
 				89,
 				81,
 				116,
-				533,
+				531,
 				160,
 				176,
 				235,
 				252,
-				273,
-				299,
-				291,
-				269,
-				318,
-				336,
+				272,
+				298,
+				290,
+				268,
+				317,
+				335,
 				218,
 				201,
-				452,
-				482,
-				472,
-				544,
-				556,
-				567,
-				578,
-				589,
-				599,
-				610,
+				450,
+				480,
+				470,
+				542,
+				554,
+				565,
+				576,
+				587,
+				597,
+				608,
 				48,
 				35,
 				60,
@@ -15410,21 +15536,21 @@
 				22,
 				25,
 				50,
-				636,
+				634,
 				40,
 				37,
 				6,
-				802,
+				800,
 				57,
-				676,
+				674,
 				53,
-				768,
+				766,
 				16,
-				763,
+				761,
 				19,
-				656,
-				662,
-				668
+				654,
+				660,
+				666
 			]
 		}
 	],
@@ -15432,87 +15558,87 @@
 		{
 			"title": "User Interface",
 			"children": [
-				685,
-				700,
-				760,
-				798,
-				771,
+				683,
+				698,
+				758,
+				796,
+				769,
 				147,
 				141,
 				144,
-				658,
+				656,
 				154,
-				536,
+				534,
 				170,
-				749,
-				399,
-				409,
-				433,
-				420,
-				430,
-				369,
-				359,
-				419,
-				448,
-				437,
-				389,
-				379,
-				356,
-				752,
-				523,
-				504,
-				518,
-				670,
-				547,
-				559,
-				570,
-				581,
-				592,
-				602,
-				794,
-				613,
+				747,
+				398,
+				408,
+				431,
+				418,
+				428,
+				368,
+				358,
+				417,
+				446,
+				435,
+				388,
+				378,
+				355,
+				750,
+				521,
+				502,
+				516,
+				668,
+				545,
+				557,
+				568,
+				579,
+				590,
+				600,
+				792,
+				611,
 				139,
 				140,
-				696,
-				355,
-				751,
-				756,
+				694,
+				354,
+				749,
+				754,
 				70,
 				89,
 				81,
 				116,
-				533,
+				531,
 				160,
 				176,
 				235,
 				252,
-				273,
-				299,
-				291,
-				269,
-				318,
-				336,
+				272,
+				298,
+				290,
+				268,
+				317,
+				335,
 				218,
 				201,
-				452,
-				482,
-				472,
-				544,
-				556,
-				567,
-				578,
-				589,
-				599,
-				610,
+				450,
+				480,
+				470,
+				542,
+				554,
+				565,
+				576,
+				587,
+				597,
+				608,
 				11,
 				1,
 				6,
-				676,
-				768,
-				763,
-				656,
-				662,
-				668
+				674,
+				766,
+				761,
+				654,
+				660,
+				666
 			]
 		},
 		{
@@ -15546,8 +15672,8 @@
 		{
 			"title": "Environment",
 			"children": [
-				628,
-				635
+				626,
+				633
 			]
 		},
 		{
@@ -15561,28 +15687,28 @@
 				180,
 				238,
 				255,
-				276,
-				302,
-				294,
-				271,
-				321,
-				339,
+				275,
+				301,
+				293,
+				270,
+				320,
+				338,
 				221,
 				204,
 				68,
-				455,
-				485,
-				475
+				453,
+				483,
+				473
 			]
 		},
 		{
 			"title": "Preferences",
 			"children": [
-				640,
-				653,
-				639,
-				652,
-				636
+				638,
+				651,
+				637,
+				650,
+				634
 			]
 		},
 		{
@@ -15591,7 +15717,7 @@
 				28,
 				22,
 				25,
-				802,
+				800,
 				16,
 				19
 			]
