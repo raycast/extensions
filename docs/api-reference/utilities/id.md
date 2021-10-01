@@ -32,4 +32,3 @@ export default async () => {
 #### Return
 
 A random string.
-

@@ -173,4 +173,3 @@ export default async () => {
   await setLocalStorageItem("fruit-eaten-today", true);
 };
 ```
-
