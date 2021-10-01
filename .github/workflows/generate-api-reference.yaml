@@ -5,6 +5,9 @@ on:
       - "docs/api-reference.json"
     branches: [main]
   workflow_dispatch:
+  repository_dispatch:
+    types:  
+      - generate_api_reference
 jobs:
   generate-api-reference:
     runs-on: ubuntu-latest
