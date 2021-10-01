@@ -1834,8 +1834,8 @@
 										"type": "reference",
 										"typeArguments": [
 											{
-												"type": "intrinsic",
-												"name": "string"
+												"type": "reference",
+												"name": "Date"
 											}
 										],
 										"name": "Requireable"
@@ -1961,8 +1961,8 @@
 										"type": "reference",
 										"typeArguments": [
 											{
-												"type": "intrinsic",
-												"name": "object"
+												"type": "reference",
+												"name": "Date"
 											}
 										],
 										"name": "Requireable"
@@ -4532,7 +4532,7 @@
 			]
 		},
 		{
-			"id": 683,
+			"id": 684,
 			"name": "Color",
 			"kind": 4,
 			"kindString": "Enumeration",
@@ -4556,7 +4556,7 @@
 			},
 			"children": [
 				{
-					"id": 684,
+					"id": 685,
 					"name": "Blue",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4564,7 +4564,7 @@
 					"defaultValue": "\"raycast-blue\""
 				},
 				{
-					"id": 685,
+					"id": 686,
 					"name": "Brown",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4572,7 +4572,7 @@
 					"defaultValue": "\"raycast-brown\""
 				},
 				{
-					"id": 686,
+					"id": 687,
 					"name": "Green",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4580,7 +4580,7 @@
 					"defaultValue": "\"raycast-green\""
 				},
 				{
-					"id": 687,
+					"id": 688,
 					"name": "Magenta",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4588,7 +4588,7 @@
 					"defaultValue": "\"raycast-magenta\""
 				},
 				{
-					"id": 688,
+					"id": 689,
 					"name": "Orange",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4596,7 +4596,7 @@
 					"defaultValue": "\"raycast-orange\""
 				},
 				{
-					"id": 692,
+					"id": 693,
 					"name": "PrimaryText",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4604,7 +4604,7 @@
 					"defaultValue": "\"raycast-primary-text\""
 				},
 				{
-					"id": 689,
+					"id": 690,
 					"name": "Purple",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4612,7 +4612,7 @@
 					"defaultValue": "\"raycast-purple\""
 				},
 				{
-					"id": 690,
+					"id": 691,
 					"name": "Red",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4620,7 +4620,7 @@
 					"defaultValue": "\"raycast-red\""
 				},
 				{
-					"id": 693,
+					"id": 694,
 					"name": "SecondaryText",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4628,7 +4628,7 @@
 					"defaultValue": "\"raycast-secondary-text\""
 				},
 				{
-					"id": 691,
+					"id": 692,
 					"name": "Yellow",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4641,22 +4641,22 @@
 					"title": "Enumeration members",
 					"kind": 16,
 					"children": [
-						684,
 						685,
 						686,
 						687,
 						688,
-						692,
 						689,
-						690,
 						693,
-						691
+						690,
+						691,
+						694,
+						692
 					]
 				}
 			]
 		},
 		{
-			"id": 698,
+			"id": 699,
 			"name": "Icon",
 			"kind": 4,
 			"kindString": "Enumeration",
@@ -4676,7 +4676,7 @@
 			},
 			"children": [
 				{
-					"id": 699,
+					"id": 700,
 					"name": "ArrowClockwise",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4684,7 +4684,7 @@
 					"defaultValue": "\"arrow-clockwise-16\""
 				},
 				{
-					"id": 700,
+					"id": 701,
 					"name": "ArrowRight",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4692,7 +4692,7 @@
 					"defaultValue": "\"arrow-right-16\""
 				},
 				{
-					"id": 701,
+					"id": 702,
 					"name": "Binoculars",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4700,7 +4700,7 @@
 					"defaultValue": "\"binoculars-16\""
 				},
 				{
-					"id": 702,
+					"id": 703,
 					"name": "Bubble",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4708,7 +4708,7 @@
 					"defaultValue": "\"bubble-left-16\""
 				},
 				{
-					"id": 703,
+					"id": 704,
 					"name": "Calendar",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4716,7 +4716,7 @@
 					"defaultValue": "\"calendar-16\""
 				},
 				{
-					"id": 704,
+					"id": 705,
 					"name": "Checkmark",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4724,7 +4724,7 @@
 					"defaultValue": "\"checkmark-circle-16\""
 				},
 				{
-					"id": 705,
+					"id": 706,
 					"name": "ChevronDown",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4732,7 +4732,7 @@
 					"defaultValue": "\"chevron-down-16\""
 				},
 				{
-					"id": 706,
+					"id": 707,
 					"name": "ChevronUp",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4740,7 +4740,7 @@
 					"defaultValue": "\"chevron-up-16\""
 				},
 				{
-					"id": 707,
+					"id": 708,
 					"name": "Circle",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4748,7 +4748,7 @@
 					"defaultValue": "\"circle-16\""
 				},
 				{
-					"id": 708,
+					"id": 709,
 					"name": "Clipboard",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4756,7 +4756,7 @@
 					"defaultValue": "\"doc-on-clipboard-16\""
 				},
 				{
-					"id": 709,
+					"id": 710,
 					"name": "Clock",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4764,7 +4764,7 @@
 					"defaultValue": "\"clock-16\""
 				},
 				{
-					"id": 710,
+					"id": 711,
 					"name": "Desktop",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4772,7 +4772,7 @@
 					"defaultValue": "\"desktopcomputer-16\""
 				},
 				{
-					"id": 711,
+					"id": 712,
 					"name": "Document",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4780,7 +4780,7 @@
 					"defaultValue": "\"doc-16\""
 				},
 				{
-					"id": 712,
+					"id": 713,
 					"name": "Dot",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4788,7 +4788,7 @@
 					"defaultValue": "\"dot-16\""
 				},
 				{
-					"id": 713,
+					"id": 714,
 					"name": "Download",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4796,7 +4796,7 @@
 					"defaultValue": "\"square-and-arrow-down-16\""
 				},
 				{
-					"id": 714,
+					"id": 715,
 					"name": "Envelope",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4804,7 +4804,7 @@
 					"defaultValue": "\"envelope-16\""
 				},
 				{
-					"id": 715,
+					"id": 716,
 					"name": "ExclamationMark",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4812,7 +4812,7 @@
 					"defaultValue": "\"exclamation-mark-triangle-16\""
 				},
 				{
-					"id": 716,
+					"id": 717,
 					"name": "Eye",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4820,7 +4820,7 @@
 					"defaultValue": "\"eye-16\""
 				},
 				{
-					"id": 717,
+					"id": 718,
 					"name": "EyeSlash",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4828,7 +4828,7 @@
 					"defaultValue": "\"eye-slash-16\""
 				},
 				{
-					"id": 718,
+					"id": 719,
 					"name": "Finder",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4836,7 +4836,7 @@
 					"defaultValue": "\"finder-16\""
 				},
 				{
-					"id": 719,
+					"id": 720,
 					"name": "Gear",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4844,7 +4844,7 @@
 					"defaultValue": "\"gearshape-16\""
 				},
 				{
-					"id": 720,
+					"id": 721,
 					"name": "Globe",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4852,7 +4852,7 @@
 					"defaultValue": "\"globe-16\""
 				},
 				{
-					"id": 721,
+					"id": 722,
 					"name": "Hammer",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4860,7 +4860,7 @@
 					"defaultValue": "\"hammer-16\""
 				},
 				{
-					"id": 722,
+					"id": 723,
 					"name": "LevelMeter",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4868,7 +4868,7 @@
 					"defaultValue": "\"level-meter-16\""
 				},
 				{
-					"id": 723,
+					"id": 724,
 					"name": "Link",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4876,7 +4876,7 @@
 					"defaultValue": "\"link-16\""
 				},
 				{
-					"id": 724,
+					"id": 725,
 					"name": "List",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4884,7 +4884,7 @@
 					"defaultValue": "\"main-list-view-16\""
 				},
 				{
-					"id": 725,
+					"id": 726,
 					"name": "MagnifyingGlass",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4892,7 +4892,7 @@
 					"defaultValue": "\"magnifyingglass-16\""
 				},
 				{
-					"id": 726,
+					"id": 727,
 					"name": "MemoryChip",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4900,7 +4900,7 @@
 					"defaultValue": "\"memorychip-16\""
 				},
 				{
-					"id": 727,
+					"id": 728,
 					"name": "Message",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4908,7 +4908,7 @@
 					"defaultValue": "\"message-16\""
 				},
 				{
-					"id": 728,
+					"id": 729,
 					"name": "Pencil",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4916,7 +4916,7 @@
 					"defaultValue": "\"pencil-16\""
 				},
 				{
-					"id": 729,
+					"id": 730,
 					"name": "Person",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4924,7 +4924,7 @@
 					"defaultValue": "\"person-crop-circle-16\""
 				},
 				{
-					"id": 730,
+					"id": 731,
 					"name": "Phone",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4932,7 +4932,7 @@
 					"defaultValue": "\"phone-16\""
 				},
 				{
-					"id": 731,
+					"id": 732,
 					"name": "Pin",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4940,7 +4940,7 @@
 					"defaultValue": "\"pin-16\""
 				},
 				{
-					"id": 732,
+					"id": 733,
 					"name": "Plus",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4948,7 +4948,7 @@
 					"defaultValue": "\"plus-16\""
 				},
 				{
-					"id": 740,
+					"id": 741,
 					"name": "QuesionMark",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4956,7 +4956,7 @@
 					"defaultValue": "\"questionmark-circle-16\""
 				},
 				{
-					"id": 733,
+					"id": 734,
 					"name": "Sidebar",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4964,7 +4964,7 @@
 					"defaultValue": "\"sidebar-right-16\""
 				},
 				{
-					"id": 734,
+					"id": 735,
 					"name": "SpeakerArrowDown",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4972,7 +4972,7 @@
 					"defaultValue": "\"speaker-arrow-down-16\""
 				},
 				{
-					"id": 735,
+					"id": 736,
 					"name": "SpeakerArrowUp",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4980,7 +4980,7 @@
 					"defaultValue": "\"speaker-arrow-up-16\""
 				},
 				{
-					"id": 736,
+					"id": 737,
 					"name": "SpeakerSlash",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4988,7 +4988,7 @@
 					"defaultValue": "\"speaker-slash-16\""
 				},
 				{
-					"id": 737,
+					"id": 738,
 					"name": "Star",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4996,7 +4996,7 @@
 					"defaultValue": "\"star-16\""
 				},
 				{
-					"id": 741,
+					"id": 742,
 					"name": "Terminal",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5004,7 +5004,7 @@
 					"defaultValue": "\"terminal-16\""
 				},
 				{
-					"id": 738,
+					"id": 739,
 					"name": "Text",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5012,7 +5012,7 @@
 					"defaultValue": "\"text-alignleft-16\""
 				},
 				{
-					"id": 739,
+					"id": 740,
 					"name": "TextDocument",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5020,7 +5020,7 @@
 					"defaultValue": "\"doc-plaintext-16\""
 				},
 				{
-					"id": 742,
+					"id": 743,
 					"name": "Trash",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5028,7 +5028,7 @@
 					"defaultValue": "\"trash-16\""
 				},
 				{
-					"id": 743,
+					"id": 744,
 					"name": "Upload",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5036,7 +5036,7 @@
 					"defaultValue": "\"square-and-arrow-up-16\""
 				},
 				{
-					"id": 744,
+					"id": 745,
 					"name": "Video",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5044,7 +5044,7 @@
 					"defaultValue": "\"video-16\""
 				},
 				{
-					"id": 745,
+					"id": 746,
 					"name": "Window",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5052,7 +5052,7 @@
 					"defaultValue": "\"macwindow-16\""
 				},
 				{
-					"id": 746,
+					"id": 747,
 					"name": "XmarkCircle",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5065,7 +5065,6 @@
 					"title": "Enumeration members",
 					"kind": 16,
 					"children": [
-						699,
 						700,
 						701,
 						702,
@@ -5099,26 +5098,27 @@
 						730,
 						731,
 						732,
-						740,
 						733,
+						741,
 						734,
 						735,
 						736,
 						737,
-						741,
 						738,
-						739,
 						742,
+						739,
+						740,
 						743,
 						744,
 						745,
-						746
+						746,
+						747
 					]
 				}
 			]
 		},
 		{
-			"id": 758,
+			"id": 759,
 			"name": "ImageMask",
 			"kind": 4,
 			"kindString": "Enumeration",
@@ -5138,7 +5138,7 @@
 			},
 			"children": [
 				{
-					"id": 759,
+					"id": 760,
 					"name": "Circle",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5149,7 +5149,7 @@
 					"defaultValue": "\"circle\""
 				},
 				{
-					"id": 760,
+					"id": 761,
 					"name": "RoundedRectangle",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5165,14 +5165,14 @@
 					"title": "Enumeration members",
 					"kind": 16,
 					"children": [
-						759,
-						760
+						760,
+						761
 					]
 				}
 			]
 		},
 		{
-			"id": 796,
+			"id": 797,
 			"name": "ToastStyle",
 			"kind": 4,
 			"kindString": "Enumeration",
@@ -5192,7 +5192,7 @@
 			},
 			"children": [
 				{
-					"id": 799,
+					"id": 800,
 					"name": "Animated",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5200,7 +5200,7 @@
 					"defaultValue": "\"ANIMATED\""
 				},
 				{
-					"id": 798,
+					"id": 799,
 					"name": "Failure",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5208,7 +5208,7 @@
 					"defaultValue": "\"FAILURE\""
 				},
 				{
-					"id": 797,
+					"id": 798,
 					"name": "Success",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5221,15 +5221,15 @@
 					"title": "Enumeration members",
 					"kind": 16,
 					"children": [
+						800,
 						799,
-						798,
-						797
+						798
 					]
 				}
 			]
 		},
 		{
-			"id": 769,
+			"id": 770,
 			"name": "Toast",
 			"kind": 128,
 			"kindString": "Class",
@@ -5253,42 +5253,42 @@
 			},
 			"children": [
 				{
-					"id": 770,
+					"id": 771,
 					"name": "constructor",
 					"kind": 512,
 					"kindString": "Constructor",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 771,
+							"id": 772,
 							"name": "new Toast",
 							"kind": 16384,
 							"kindString": "Constructor signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 772,
+									"id": 773,
 									"name": "options",
 									"kind": 32768,
 									"kindString": "Parameter",
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 792,
+										"id": 793,
 										"name": "ToastOptions"
 									}
 								}
 							],
 							"type": {
 								"type": "reference",
-								"id": 769,
+								"id": 770,
 								"name": "Toast"
 							}
 						}
 					]
 				},
 				{
-					"id": 782,
+					"id": 783,
 					"name": "message",
 					"kind": 262144,
 					"kindString": "Accessor",
@@ -5297,7 +5297,7 @@
 					},
 					"getSignature": [
 						{
-							"id": 783,
+							"id": 784,
 							"name": "message",
 							"kind": 524288,
 							"kindString": "Get signature",
@@ -5319,14 +5319,14 @@
 					],
 					"setSignature": [
 						{
-							"id": 784,
+							"id": 785,
 							"name": "message",
 							"kind": 1048576,
 							"kindString": "Set signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 785,
+									"id": 786,
 									"name": "message",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -5354,7 +5354,7 @@
 					]
 				},
 				{
-					"id": 774,
+					"id": 775,
 					"name": "style",
 					"kind": 262144,
 					"kindString": "Accessor",
@@ -5363,35 +5363,35 @@
 					},
 					"getSignature": [
 						{
-							"id": 775,
+							"id": 776,
 							"name": "style",
 							"kind": 524288,
 							"kindString": "Get signature",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 796,
+								"id": 797,
 								"name": "ToastStyle"
 							}
 						}
 					],
 					"setSignature": [
 						{
-							"id": 776,
+							"id": 777,
 							"name": "style",
 							"kind": 1048576,
 							"kindString": "Set signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 777,
+									"id": 778,
 									"name": "style",
 									"kind": 32768,
 									"kindString": "Parameter",
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 796,
+										"id": 797,
 										"name": "ToastStyle"
 									}
 								}
@@ -5404,7 +5404,7 @@
 					]
 				},
 				{
-					"id": 778,
+					"id": 779,
 					"name": "title",
 					"kind": 262144,
 					"kindString": "Accessor",
@@ -5413,7 +5413,7 @@
 					},
 					"getSignature": [
 						{
-							"id": 779,
+							"id": 780,
 							"name": "title",
 							"kind": 524288,
 							"kindString": "Get signature",
@@ -5426,14 +5426,14 @@
 					],
 					"setSignature": [
 						{
-							"id": 780,
+							"id": 781,
 							"name": "title",
 							"kind": 1048576,
 							"kindString": "Set signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 781,
+									"id": 782,
 									"name": "title",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -5452,7 +5452,7 @@
 					]
 				},
 				{
-					"id": 788,
+					"id": 789,
 					"name": "hide",
 					"kind": 2048,
 					"kindString": "Method",
@@ -5461,7 +5461,7 @@
 					},
 					"signatures": [
 						{
-							"id": 789,
+							"id": 790,
 							"name": "hide",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -5484,7 +5484,7 @@
 					]
 				},
 				{
-					"id": 786,
+					"id": 787,
 					"name": "show",
 					"kind": 2048,
 					"kindString": "Method",
@@ -5493,7 +5493,7 @@
 					},
 					"signatures": [
 						{
-							"id": 787,
+							"id": 788,
 							"name": "show",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -5521,24 +5521,24 @@
 					"title": "Constructors",
 					"kind": 512,
 					"children": [
-						770
+						771
 					]
 				},
 				{
 					"title": "Accessors",
 					"kind": 262144,
 					"children": [
-						782,
-						774,
-						778
+						783,
+						775,
+						779
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						788,
-						786
+						789,
+						787
 					]
 				}
 			]
@@ -5572,7 +5572,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 749,
+						"id": 750,
 						"name": "ImageLike"
 					}
 				},
@@ -5798,7 +5798,7 @@
 			]
 		},
 		{
-			"id": 656,
+			"id": 657,
 			"name": "ActionPanelState",
 			"kind": 256,
 			"kindString": "Interface",
@@ -5814,14 +5814,14 @@
 			},
 			"children": [
 				{
-					"id": 657,
+					"id": 658,
 					"name": "update",
 					"kind": 2048,
 					"kindString": "Method",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 658,
+							"id": 659,
 							"name": "update",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -5831,7 +5831,7 @@
 							},
 							"parameters": [
 								{
-									"id": 659,
+									"id": 660,
 									"name": "actionPanel",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -5890,7 +5890,7 @@
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						657
+						658
 					]
 				}
 			]
@@ -5951,7 +5951,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 749,
+						"id": 750,
 						"name": "ImageLike"
 					}
 				},
@@ -6095,7 +6095,7 @@
 			]
 		},
 		{
-			"id": 534,
+			"id": 535,
 			"name": "CopyToClipboardActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -6111,7 +6111,7 @@
 			},
 			"children": [
 				{
-					"id": 535,
+					"id": 536,
 					"name": "content",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6134,7 +6134,7 @@
 					}
 				},
 				{
-					"id": 537,
+					"id": 538,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6152,12 +6152,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 749,
+						"id": 750,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 538,
+					"id": 539,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6174,7 +6174,7 @@
 					}
 				},
 				{
-					"id": 536,
+					"id": 537,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6190,7 +6190,7 @@
 					}
 				},
 				{
-					"id": 539,
+					"id": 540,
 					"name": "onCopy",
 					"kind": 2048,
 					"kindString": "Method",
@@ -6199,7 +6199,7 @@
 					},
 					"signatures": [
 						{
-							"id": 540,
+							"id": 541,
 							"name": "onCopy",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -6215,7 +6215,7 @@
 							},
 							"parameters": [
 								{
-									"id": 541,
+									"id": 542,
 									"name": "content",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -6248,17 +6248,17 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						535,
-						537,
+						536,
 						538,
-						536
+						539,
+						537
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						539
+						540
 					]
 				}
 			]
@@ -6361,9 +6361,8 @@
 								"type": "reference",
 								"typeArguments": [
 									{
-										"type": "reference",
-										"id": 141,
-										"name": "ActionPanelProps"
+										"type": "intrinsic",
+										"name": "unknown"
 									},
 									{
 										"type": "union",
@@ -6493,7 +6492,7 @@
 			]
 		},
 		{
-			"id": 626,
+			"id": 627,
 			"name": "Environment",
 			"kind": 256,
 			"kindString": "Interface",
@@ -6503,7 +6502,7 @@
 			},
 			"children": [
 				{
-					"id": 630,
+					"id": 631,
 					"name": "assetsPath",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6517,7 +6516,7 @@
 					}
 				},
 				{
-					"id": 629,
+					"id": 630,
 					"name": "commandName",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6531,7 +6530,7 @@
 					}
 				},
 				{
-					"id": 628,
+					"id": 629,
 					"name": "extensionName",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6545,7 +6544,7 @@
 					}
 				},
 				{
-					"id": 632,
+					"id": 633,
 					"name": "isDevelopment",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6559,7 +6558,7 @@
 					}
 				},
 				{
-					"id": 627,
+					"id": 628,
 					"name": "raycastVersion",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6573,7 +6572,7 @@
 					}
 				},
 				{
-					"id": 631,
+					"id": 632,
 					"name": "supportPath",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6598,18 +6597,18 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
+						631,
 						630,
 						629,
+						633,
 						628,
-						632,
-						627,
-						631
+						632
 					]
 				}
 			]
 		},
 		{
-			"id": 747,
+			"id": 748,
 			"name": "FileIcon",
 			"kind": 256,
 			"kindString": "Interface",
@@ -6629,7 +6628,7 @@
 			},
 			"children": [
 				{
-					"id": 748,
+					"id": 749,
 					"name": "fileIcon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6648,7 +6647,7 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						748
+						749
 					]
 				}
 			]
@@ -7121,7 +7120,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 749,
+						"id": 750,
 						"name": "ImageLike"
 					}
 				},
@@ -8223,7 +8222,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 749,
+						"id": 750,
 						"name": "ImageLike"
 					}
 				},
@@ -9100,7 +9099,7 @@
 			}
 		},
 		{
-			"id": 750,
+			"id": 751,
 			"name": "Image",
 			"kind": 256,
 			"kindString": "Interface",
@@ -9124,7 +9123,7 @@
 			},
 			"children": [
 				{
-					"id": 752,
+					"id": 753,
 					"name": "mask",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9136,12 +9135,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 758,
+						"id": 759,
 						"name": "ImageMask"
 					}
 				},
 				{
-					"id": 751,
+					"id": 752,
 					"name": "source",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9151,12 +9150,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 754,
+						"id": 755,
 						"name": "ImageSource"
 					}
 				},
 				{
-					"id": 753,
+					"id": 754,
 					"name": "tintColor",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9177,9 +9176,9 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
+						753,
 						752,
-						751,
-						753
+						754
 					]
 				}
 			]
@@ -9268,7 +9267,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 749,
+						"id": 750,
 						"name": "ImageLike"
 					}
 				},
@@ -9344,62 +9343,6 @@
 					}
 				},
 				{
-					"id": 530,
-					"name": "children",
-					"kind": 1024,
-					"kindString": "Property",
-					"flags": {
-						"isOptional": true
-					},
-					"comment": {
-						"tags": [
-							{
-								"tag": "deprecated",
-								"text": ""
-							}
-						]
-					},
-					"type": {
-						"type": "union",
-						"types": [
-							{
-								"type": "literal",
-								"value": null
-							},
-							{
-								"type": "reference",
-								"typeArguments": [
-									{
-										"type": "reference",
-										"id": 141,
-										"name": "ActionPanelProps"
-									},
-									{
-										"type": "union",
-										"types": [
-											{
-												"type": "intrinsic",
-												"name": "string"
-											},
-											{
-												"type": "reference",
-												"typeArguments": [
-													{
-														"type": "intrinsic",
-														"name": "any"
-													}
-												],
-												"name": "JSXElementConstructor"
-											}
-										]
-									}
-								],
-								"name": "ReactElement"
-							}
-						]
-					}
-				},
-				{
 					"id": 527,
 					"name": "icon",
 					"kind": 1024,
@@ -9412,7 +9355,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 749,
+						"id": 750,
 						"name": "ImageLike"
 					}
 				},
@@ -9490,7 +9433,6 @@
 						528,
 						525,
 						529,
-						530,
 						527,
 						522,
 						526,
@@ -10112,7 +10054,7 @@
 			]
 		},
 		{
-			"id": 668,
+			"id": 669,
 			"name": "Navigation",
 			"kind": 256,
 			"kindString": "Interface",
@@ -10128,14 +10070,14 @@
 			},
 			"children": [
 				{
-					"id": 672,
+					"id": 673,
 					"name": "pop",
 					"kind": 2048,
 					"kindString": "Method",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 673,
+							"id": 674,
 							"name": "pop",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -10151,14 +10093,14 @@
 					]
 				},
 				{
-					"id": 669,
+					"id": 670,
 					"name": "push",
 					"kind": 2048,
 					"kindString": "Method",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 670,
+							"id": 671,
 							"name": "push",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -10168,7 +10110,7 @@
 							},
 							"parameters": [
 								{
-									"id": 671,
+									"id": 672,
 									"name": "component",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -10195,14 +10137,14 @@
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						672,
-						669
+						673,
+						670
 					]
 				}
 			]
 		},
 		{
-			"id": 545,
+			"id": 546,
 			"name": "OpenActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -10218,7 +10160,7 @@
 			},
 			"children": [
 				{
-					"id": 547,
+					"id": 548,
 					"name": "application",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10250,7 +10192,7 @@
 					}
 				},
 				{
-					"id": 549,
+					"id": 550,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10268,12 +10210,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 749,
+						"id": 750,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 550,
+					"id": 551,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10290,7 +10232,7 @@
 					}
 				},
 				{
-					"id": 546,
+					"id": 547,
 					"name": "target",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10304,7 +10246,7 @@
 					}
 				},
 				{
-					"id": 548,
+					"id": 549,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10318,7 +10260,7 @@
 					}
 				},
 				{
-					"id": 551,
+					"id": 552,
 					"name": "onOpen",
 					"kind": 2048,
 					"kindString": "Method",
@@ -10327,7 +10269,7 @@
 					},
 					"signatures": [
 						{
-							"id": 552,
+							"id": 553,
 							"name": "onOpen",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -10343,7 +10285,7 @@
 							},
 							"parameters": [
 								{
-									"id": 553,
+									"id": 554,
 									"name": "target",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -10367,24 +10309,24 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						547,
-						549,
+						548,
 						550,
-						546,
-						548
+						551,
+						547,
+						549
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						551
+						552
 					]
 				}
 			]
 		},
 		{
-			"id": 557,
+			"id": 558,
 			"name": "OpenInBrowserActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -10400,7 +10342,7 @@
 			},
 			"children": [
 				{
-					"id": 560,
+					"id": 561,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10418,12 +10360,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 749,
+						"id": 750,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 561,
+					"id": 562,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10440,7 +10382,7 @@
 					}
 				},
 				{
-					"id": 559,
+					"id": 560,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10456,7 +10398,7 @@
 					}
 				},
 				{
-					"id": 558,
+					"id": 559,
 					"name": "url",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10470,7 +10412,7 @@
 					}
 				},
 				{
-					"id": 562,
+					"id": 563,
 					"name": "onOpen",
 					"kind": 2048,
 					"kindString": "Method",
@@ -10479,7 +10421,7 @@
 					},
 					"signatures": [
 						{
-							"id": 563,
+							"id": 564,
 							"name": "onOpen",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -10495,7 +10437,7 @@
 							},
 							"parameters": [
 								{
-									"id": 564,
+									"id": 565,
 									"name": "url",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -10519,23 +10461,23 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						560,
 						561,
-						559,
-						558
+						562,
+						560,
+						559
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						562
+						563
 					]
 				}
 			]
 		},
 		{
-			"id": 568,
+			"id": 569,
 			"name": "OpenWithActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -10551,7 +10493,7 @@
 			},
 			"children": [
 				{
-					"id": 571,
+					"id": 572,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10569,12 +10511,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 749,
+						"id": 750,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 569,
+					"id": 570,
 					"name": "path",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10588,7 +10530,7 @@
 					}
 				},
 				{
-					"id": 572,
+					"id": 573,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10605,7 +10547,7 @@
 					}
 				},
 				{
-					"id": 570,
+					"id": 571,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10627,7 +10569,7 @@
 					}
 				},
 				{
-					"id": 573,
+					"id": 574,
 					"name": "onOpen",
 					"kind": 2048,
 					"kindString": "Method",
@@ -10636,7 +10578,7 @@
 					},
 					"signatures": [
 						{
-							"id": 574,
+							"id": 575,
 							"name": "onOpen",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -10652,7 +10594,7 @@
 							},
 							"parameters": [
 								{
-									"id": 575,
+									"id": 576,
 									"name": "path",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -10676,23 +10618,23 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						571,
-						569,
 						572,
-						570
+						570,
+						573,
+						571
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						573
+						574
 					]
 				}
 			]
 		},
 		{
-			"id": 579,
+			"id": 580,
 			"name": "PasteActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -10708,7 +10650,7 @@
 			},
 			"children": [
 				{
-					"id": 580,
+					"id": 581,
 					"name": "content",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10731,7 +10673,7 @@
 					}
 				},
 				{
-					"id": 582,
+					"id": 583,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10749,12 +10691,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 749,
+						"id": 750,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 583,
+					"id": 584,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10771,7 +10713,7 @@
 					}
 				},
 				{
-					"id": 581,
+					"id": 582,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10787,7 +10729,7 @@
 					}
 				},
 				{
-					"id": 584,
+					"id": 585,
 					"name": "onPaste",
 					"kind": 2048,
 					"kindString": "Method",
@@ -10796,7 +10738,7 @@
 					},
 					"signatures": [
 						{
-							"id": 585,
+							"id": 586,
 							"name": "onPaste",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -10812,7 +10754,7 @@
 							},
 							"parameters": [
 								{
-									"id": 586,
+									"id": 587,
 									"name": "content",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -10845,23 +10787,23 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						580,
-						582,
+						581,
 						583,
-						581
+						584,
+						582
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						584
+						585
 					]
 				}
 			]
 		},
 		{
-			"id": 638,
+			"id": 639,
 			"name": "Preference",
 			"kind": 256,
 			"kindString": "Interface",
@@ -10871,7 +10813,7 @@
 			},
 			"children": [
 				{
-					"id": 649,
+					"id": 650,
 					"name": "data",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10890,7 +10832,7 @@
 					}
 				},
 				{
-					"id": 645,
+					"id": 646,
 					"name": "default",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10906,7 +10848,7 @@
 					}
 				},
 				{
-					"id": 643,
+					"id": 644,
 					"name": "description",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10926,7 +10868,7 @@
 					}
 				},
 				{
-					"id": 648,
+					"id": 649,
 					"name": "label",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10942,7 +10884,7 @@
 					}
 				},
 				{
-					"id": 647,
+					"id": 648,
 					"name": "link",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10964,7 +10906,7 @@
 					}
 				},
 				{
-					"id": 639,
+					"id": 640,
 					"name": "name",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10978,7 +10920,7 @@
 					}
 				},
 				{
-					"id": 646,
+					"id": 647,
 					"name": "placeholder",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10994,7 +10936,7 @@
 					}
 				},
 				{
-					"id": 641,
+					"id": 642,
 					"name": "required",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11018,7 +10960,7 @@
 					}
 				},
 				{
-					"id": 642,
+					"id": 643,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11038,7 +10980,7 @@
 					}
 				},
 				{
-					"id": 640,
+					"id": 641,
 					"name": "type",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11069,7 +11011,7 @@
 					}
 				},
 				{
-					"id": 644,
+					"id": 645,
 					"name": "value",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11090,23 +11032,23 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						649,
-						645,
-						643,
-						648,
-						647,
-						639,
+						650,
 						646,
-						641,
-						642,
+						644,
+						649,
+						648,
 						640,
-						644
+						647,
+						642,
+						643,
+						641,
+						645
 					]
 				}
 			]
 		},
 		{
-			"id": 651,
+			"id": 652,
 			"name": "PreferenceValues",
 			"kind": 256,
 			"kindString": "Interface",
@@ -11115,14 +11057,14 @@
 				"shortText": "Values of preference items."
 			},
 			"indexSignature": {
-				"id": 652,
+				"id": 653,
 				"name": "__index",
 				"kind": 8192,
 				"kindString": "Index signature",
 				"flags": {},
 				"parameters": [
 					{
-						"id": 653,
+						"id": 654,
 						"name": "name",
 						"kind": 32768,
 						"flags": {},
@@ -11139,7 +11081,7 @@
 			}
 		},
 		{
-			"id": 590,
+			"id": 591,
 			"name": "PushActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -11155,7 +11097,7 @@
 			},
 			"children": [
 				{
-					"id": 593,
+					"id": 594,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11167,12 +11109,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 749,
+						"id": 750,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 594,
+					"id": 595,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11189,7 +11131,7 @@
 					}
 				},
 				{
-					"id": 592,
+					"id": 593,
 					"name": "target",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11203,7 +11145,7 @@
 					}
 				},
 				{
-					"id": 591,
+					"id": 592,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11217,7 +11159,7 @@
 					}
 				},
 				{
-					"id": 595,
+					"id": 596,
 					"name": "onPush",
 					"kind": 2048,
 					"kindString": "Method",
@@ -11226,7 +11168,7 @@
 					},
 					"signatures": [
 						{
-							"id": 596,
+							"id": 597,
 							"name": "onPush",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -11253,23 +11195,23 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						593,
 						594,
-						592,
-						591
+						595,
+						593,
+						592
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						595
+						596
 					]
 				}
 			]
 		},
 		{
-			"id": 600,
+			"id": 601,
 			"name": "ShowInFinderActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -11285,7 +11227,7 @@
 			},
 			"children": [
 				{
-					"id": 603,
+					"id": 604,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11303,12 +11245,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 749,
+						"id": 750,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 601,
+					"id": 602,
 					"name": "path",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11322,7 +11264,7 @@
 					}
 				},
 				{
-					"id": 604,
+					"id": 605,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11339,7 +11281,7 @@
 					}
 				},
 				{
-					"id": 602,
+					"id": 603,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11361,7 +11303,7 @@
 					}
 				},
 				{
-					"id": 605,
+					"id": 606,
 					"name": "onShow",
 					"kind": 2048,
 					"kindString": "Method",
@@ -11370,7 +11312,7 @@
 					},
 					"signatures": [
 						{
-							"id": 606,
+							"id": 607,
 							"name": "onShow",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -11386,7 +11328,7 @@
 							},
 							"parameters": [
 								{
-									"id": 607,
+									"id": 608,
 									"name": "path",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -11410,23 +11352,23 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						603,
-						601,
 						604,
-						602
+						602,
+						605,
+						603
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						605
+						606
 					]
 				}
 			]
 		},
 		{
-			"id": 792,
+			"id": 793,
 			"name": "ToastOptions",
 			"kind": 256,
 			"kindString": "Interface",
@@ -11446,7 +11388,7 @@
 			},
 			"children": [
 				{
-					"id": 795,
+					"id": 796,
 					"name": "message",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11462,7 +11404,7 @@
 					}
 				},
 				{
-					"id": 793,
+					"id": 794,
 					"name": "style",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11472,12 +11414,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 796,
+						"id": 797,
 						"name": "ToastStyle"
 					}
 				},
 				{
-					"id": 794,
+					"id": 795,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11496,15 +11438,15 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						795,
-						793,
-						794
+						796,
+						794,
+						795
 					]
 				}
 			]
 		},
 		{
-			"id": 611,
+			"id": 612,
 			"name": "TrashActionProps",
 			"kind": 256,
 			"kindString": "Interface",
@@ -11520,7 +11462,7 @@
 			},
 			"children": [
 				{
-					"id": 614,
+					"id": 615,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11538,12 +11480,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 749,
+						"id": 750,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 612,
+					"id": 613,
 					"name": "paths",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11569,7 +11511,7 @@
 					}
 				},
 				{
-					"id": 615,
+					"id": 616,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11586,7 +11528,7 @@
 					}
 				},
 				{
-					"id": 613,
+					"id": 614,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11608,7 +11550,7 @@
 					}
 				},
 				{
-					"id": 616,
+					"id": 617,
 					"name": "onTrash",
 					"kind": 2048,
 					"kindString": "Method",
@@ -11617,7 +11559,7 @@
 					},
 					"signatures": [
 						{
-							"id": 617,
+							"id": 618,
 							"name": "onTrash",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -11633,7 +11575,7 @@
 							},
 							"parameters": [
 								{
-									"id": 618,
+									"id": 619,
 									"name": "paths",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -11669,17 +11611,17 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						614,
-						612,
 						615,
-						613
+						613,
+						616,
+						614
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						616
+						617
 					]
 				}
 			]
@@ -11815,7 +11757,7 @@
 			}
 		},
 		{
-			"id": 694,
+			"id": 695,
 			"name": "ColorLike",
 			"kind": 4194304,
 			"kindString": "Type alias",
@@ -11842,7 +11784,7 @@
 				"types": [
 					{
 						"type": "reference",
-						"id": 683,
+						"id": 684,
 						"name": "Color"
 					},
 					{
@@ -11908,7 +11850,7 @@
 			}
 		},
 		{
-			"id": 749,
+			"id": 750,
 			"name": "ImageLike",
 			"kind": 4194304,
 			"kindString": "Type alias",
@@ -11935,24 +11877,24 @@
 					},
 					{
 						"type": "reference",
-						"id": 698,
+						"id": 699,
 						"name": "Icon"
 					},
 					{
 						"type": "reference",
-						"id": 747,
+						"id": 748,
 						"name": "FileIcon"
 					},
 					{
 						"type": "reference",
-						"id": 750,
+						"id": 751,
 						"name": "Image"
 					}
 				]
 			}
 		},
 		{
-			"id": 754,
+			"id": 755,
 			"name": "ImageSource",
 			"kind": 4194304,
 			"kindString": "Type alias",
@@ -11983,20 +11925,20 @@
 					},
 					{
 						"type": "reference",
-						"id": 698,
+						"id": 699,
 						"name": "Icon"
 					},
 					{
 						"type": "reflection",
 						"declaration": {
-							"id": 755,
+							"id": 756,
 							"name": "__type",
 							"kind": 65536,
 							"kindString": "Type literal",
 							"flags": {},
 							"children": [
 								{
-									"id": 757,
+									"id": 758,
 									"name": "dark",
 									"kind": 1024,
 									"kindString": "Property",
@@ -12007,7 +11949,7 @@
 									}
 								},
 								{
-									"id": 756,
+									"id": 757,
 									"name": "light",
 									"kind": 1024,
 									"kindString": "Property",
@@ -12023,8 +11965,8 @@
 									"title": "Properties",
 									"kind": 1024,
 									"children": [
-										757,
-										756
+										758,
+										757
 									]
 								}
 							]
@@ -12409,7 +12351,7 @@
 			}
 		},
 		{
-			"id": 637,
+			"id": 638,
 			"name": "Preferences",
 			"kind": 4194304,
 			"kindString": "Type alias",
@@ -12426,7 +12368,7 @@
 					},
 					{
 						"type": "reference",
-						"id": 638,
+						"id": 639,
 						"name": "Preference"
 					}
 				],
@@ -12434,7 +12376,7 @@
 			}
 		},
 		{
-			"id": 633,
+			"id": 634,
 			"name": "environment",
 			"kind": 32,
 			"kindString": "Variable",
@@ -12452,13 +12394,13 @@
 			},
 			"type": {
 				"type": "reference",
-				"id": 626,
+				"id": 627,
 				"name": "Environment"
 			},
 			"defaultValue": "..."
 		},
 		{
-			"id": 650,
+			"id": 651,
 			"name": "preferences",
 			"kind": 32,
 			"kindString": "Variable",
@@ -12470,7 +12412,7 @@
 			},
 			"type": {
 				"type": "reference",
-				"id": 637,
+				"id": 638,
 				"name": "Preferences"
 			},
 			"defaultValue": "..."
@@ -12493,7 +12435,11 @@
 						"tags": [
 							{
 								"tag": "remarks",
-								"text": "\nThe items can be grouped into sections and they can be assigned keyboard shortcuts.\nUse the menu for context-specific actions on list items or detail screens.\n\nNote that when used for the action panel, the first (ENTER) and second (CMD + ENTER) menu items have automatically assigned keyboard shortcuts.\nCustom shortcuts will work in addition to the default shortcuts.\n"
+								"text": "\nThe items can be grouped into sections and they can be assigned keyboard shortcuts.\nUse the menu for context-specific actions on list items or detail screens.\n\nThe first and second action become the primary and secondary action and get automatically the default keyboard shortcuts assigned.\nIn list and details, this is `↵` for the primary action and `⌘` `↵` for the secondary.\nIn forms it's `⌘` `↵` for the primary and `⌘` `⇧` `↵` for the secondary.\n"
+							},
+							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <List navigationTitle=\"Open Pull Requests\">\n      <List.Item\n        title=\"Docs: Update API Reference\"\n        subtitle=\"#1\"\n        actions={\n          <ActionPanel title=\"#1 in raycast/extensions\">\n            <OpenInBrowserAction url=\"https://github.com/raycast/extensions/pull/1\" />\n            <CopyToClipboardAction\n              title=\"Copy Pull Request URL\"\n              content=\"https://github.com/raycast/extensions/pull/1\"\n            />\n          </ActionPanel>\n        }\n      />\n    </List>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "subcategory",
@@ -12546,6 +12492,10 @@
 						"shortText": "Represents a context-specific action that can be selected in the user interface or triggered through an assigned keyboard shortcut on the respective view.",
 						"tags": [
 							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <List navigationTitle=\"Open Pull Requests\">\n      <List.Item\n        title=\"Docs: Update API Reference\"\n        subtitle=\"#1\"\n        actions={\n          <ActionPanel title=\"#1 in raycast/extensions\">\n            <OpenInBrowserAction url=\"https://github.com/raycast/extensions/pull/1\" />\n            <CopyToClipboardAction title=\"Copy Pull Request Number\" content=\"#1\" />\n            <ActionPanel.Item title=\"Close Pull Request\" onAction={() => console.log(\"Close PR #1\")} />\n          </ActionPanel>\n        }\n      />\n    </List>\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Action Panel\n"
 							}
@@ -12593,8 +12543,12 @@
 					"kindString": "Call signature",
 					"flags": {},
 					"comment": {
-						"shortText": "Visually separated group of items.\nUse sections to group related menu items together.",
+						"shortText": "Visually separated group of items. Use sections to group related menu items together.",
 						"tags": [
+							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <List navigationTitle=\"Open Pull Requests\">\n      <List.Item\n        title=\"Docs: Update API Reference\"\n        subtitle=\"#1\"\n        actions={\n          <ActionPanel title=\"#1 in raycast/extensions\">\n            <ActionPanel.Section title=\"Copy\">\n              <CopyToClipboardAction title=\"Copy Pull Request Number\" content=\"#1\" />\n              <CopyToClipboardAction\n                title=\"Copy Pull Request URL\"\n                content=\"https://github.com/raycast/extensions/pull/1\"\n              />\n              <CopyToClipboardAction title=\"Copy Pull Request Title\" content=\"Docs: Update API Reference\" />\n            </ActionPanel.Section>\n            <ActionPanel.Section title=\"Danger zone\">\n              <ActionPanel.Item title=\"Close Pull Request\" onAction={() => console.log(\"Close PR #1\")} />\n            </ActionPanel.Section>\n          </ActionPanel>\n        }\n      />\n    </List>\n  );\n}\n```\n"
+							},
 							{
 								"tag": "subcategory",
 								"text": "Action Panel\n"
@@ -12646,6 +12600,10 @@
 						"shortText": "Represents a context-specific action that can be selected in the user interface or triggered through an assigned keyboard shortcut on the respective view.",
 						"tags": [
 							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { ActionPanel, Color, Icon, List } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <List navigationTitle=\"Open Pull Requests\">\n      <List.Item\n        title=\"Docs: Update API Reference\"\n        subtitle=\"#1\"\n        actions={\n          <ActionPanel title=\"#1 in raycast/extensions\">\n            <ActionPanel.Submenu title=\"Add Label\">\n              <ActionPanel.Item\n                icon={{ source: Icon.Circle, tintColor: Color.Red }}\n                title=\"Bug\"\n                onAction={() => console.log(\"Add bug label\")}\n              />\n              <ActionPanel.Item\n                icon={{ source: Icon.Circle, tintColor: Color.Yellow }}\n                title=\"Enhancement\"\n                onAction={() => console.log(\"Add enhancement label\")}\n              />\n              <ActionPanel.Item\n                icon={{ source: Icon.Circle, tintColor: Color.Blue }}\n                title=\"Help Wanted\"\n                onAction={() => console.log(\"Add help wanted label\")}\n              />\n            </ActionPanel.Submenu>\n          </ActionPanel>\n        }\n      />\n    </List>\n  );\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Action Panel\n"
 							}
@@ -12680,14 +12638,14 @@
 			]
 		},
 		{
-			"id": 531,
+			"id": 532,
 			"name": "CopyToClipboardAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 532,
+					"id": 533,
 					"name": "CopyToClipboardAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -12711,14 +12669,14 @@
 					},
 					"parameters": [
 						{
-							"id": 533,
+							"id": 534,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 534,
+								"id": 535,
 								"name": "CopyToClipboardActionProps"
 							}
 						}
@@ -12728,7 +12686,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 534,
+								"id": 535,
 								"name": "CopyToClipboardActionProps"
 							}
 						],
@@ -12950,6 +12908,14 @@
 					"comment": {
 						"shortText": "A form item with a date picker.",
 						"tags": [
+							{
+								"tag": "example",
+								"text": "\nExample of an uncontrolled date picker:\n\n```typescript\nimport { Form } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.DatePicker id=\"dateOfBirth\" title=\"Date of Birth\" defaultValue={new Date(1955, 1, 24)} />\n    </Form>\n  );\n}\n```\n"
+							},
+							{
+								"tag": "example",
+								"text": "\nExample of a controlled checkbox:\n\n```typescript\nimport { Form } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [date, setDate] = useState<Date>();\n\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.DatePicker id=\"launchDate\" title=\"Launch Date\" value={date} onChange={setDate} />\n    </Form>\n  );\n}\n```\n"
+							},
 							{
 								"tag": "subcategory",
 								"text": "Form\n"
@@ -13498,7 +13464,7 @@
 						"tags": [
 							{
 								"tag": "remarks",
-								"text": "\nThis is one of the foundational UI comonents of Raycast. A list item represents a single entity. It can be a\nGitHub pull request, a file or anything else. Most likely you want to perform actions on this item, so make it clear\nto the user what this list item is about.\n"
+								"text": "\nThis is one of the foundational UI components of Raycast. A list item represents a single entity. It can be a\nGitHub pull request, a file or anything else. Most likely you want to perform actions on this item, so make it clear\nto the user what this list item is about.\n"
 							},
 							{
 								"tag": "example",
@@ -13597,14 +13563,14 @@
 			]
 		},
 		{
-			"id": 542,
+			"id": 543,
 			"name": "OpenAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 543,
+					"id": 544,
 					"name": "OpenAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13628,14 +13594,14 @@
 					},
 					"parameters": [
 						{
-							"id": 544,
+							"id": 545,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 545,
+								"id": 546,
 								"name": "OpenActionProps"
 							}
 						}
@@ -13645,7 +13611,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 545,
+								"id": 546,
 								"name": "OpenActionProps"
 							}
 						],
@@ -13655,14 +13621,14 @@
 			]
 		},
 		{
-			"id": 554,
+			"id": 555,
 			"name": "OpenInBrowserAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 555,
+					"id": 556,
 					"name": "OpenInBrowserAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13686,14 +13652,14 @@
 					},
 					"parameters": [
 						{
-							"id": 556,
+							"id": 557,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 557,
+								"id": 558,
 								"name": "OpenInBrowserActionProps"
 							}
 						}
@@ -13703,7 +13669,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 557,
+								"id": 558,
 								"name": "OpenInBrowserActionProps"
 							}
 						],
@@ -13713,14 +13679,14 @@
 			]
 		},
 		{
-			"id": 565,
+			"id": 566,
 			"name": "OpenWithAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 566,
+					"id": 567,
 					"name": "OpenWithAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13744,14 +13710,14 @@
 					},
 					"parameters": [
 						{
-							"id": 567,
+							"id": 568,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 568,
+								"id": 569,
 								"name": "OpenWithActionProps"
 							}
 						}
@@ -13761,7 +13727,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 568,
+								"id": 569,
 								"name": "OpenWithActionProps"
 							}
 						],
@@ -13771,14 +13737,14 @@
 			]
 		},
 		{
-			"id": 576,
+			"id": 577,
 			"name": "PasteAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 577,
+					"id": 578,
 					"name": "PasteAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13802,14 +13768,14 @@
 					},
 					"parameters": [
 						{
-							"id": 578,
+							"id": 579,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 579,
+								"id": 580,
 								"name": "PasteActionProps"
 							}
 						}
@@ -13819,7 +13785,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 579,
+								"id": 580,
 								"name": "PasteActionProps"
 							}
 						],
@@ -13829,14 +13795,14 @@
 			]
 		},
 		{
-			"id": 587,
+			"id": 588,
 			"name": "PushAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 588,
+					"id": 589,
 					"name": "PushAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13845,6 +13811,10 @@
 						"shortText": "Action that allows to push a new view to the navigation stack.",
 						"tags": [
 							{
+								"tag": "example",
+								"text": "\n```typescript\nimport { ActionPanel, Detail, PushAction } from \"@raycast/api\";\n\nfunction Ping() {\n  return (\n    <Detail\n      markdown=\"Ping\"\n      actions={\n        <ActionPanel>\n          <PushAction title=\"Push Pong\" target={<Pong />} />\n        </ActionPanel>\n      }\n    />\n  );\n}\n\nfunction Pong() {\n  return <Detail markdown=\"Pong\" />;\n}\n\nexport default function Command() {\n  return <Ping />;\n}\n```\n"
+							},
+							{
 								"tag": "subcategory",
 								"text": "Actions\n"
 							}
@@ -13852,14 +13822,14 @@
 					},
 					"parameters": [
 						{
-							"id": 589,
+							"id": 590,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 590,
+								"id": 591,
 								"name": "PushActionProps"
 							}
 						}
@@ -13869,7 +13839,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 590,
+								"id": 591,
 								"name": "PushActionProps"
 							}
 						],
@@ -13879,14 +13849,14 @@
 			]
 		},
 		{
-			"id": 597,
+			"id": 598,
 			"name": "ShowInFinderAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 598,
+					"id": 599,
 					"name": "ShowInFinderAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13910,14 +13880,14 @@
 					},
 					"parameters": [
 						{
-							"id": 599,
+							"id": 600,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 600,
+								"id": 601,
 								"name": "ShowInFinderActionProps"
 							}
 						}
@@ -13927,7 +13897,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 600,
+								"id": 601,
 								"name": "ShowInFinderActionProps"
 							}
 						],
@@ -13937,14 +13907,14 @@
 			]
 		},
 		{
-			"id": 608,
+			"id": 609,
 			"name": "TrashAction",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 609,
+					"id": 610,
 					"name": "TrashAction",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -13964,14 +13934,14 @@
 					},
 					"parameters": [
 						{
-							"id": 610,
+							"id": 611,
 							"name": "props",
 							"kind": 32768,
 							"kindString": "Parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 611,
+								"id": 612,
 								"name": "TrashActionProps"
 							}
 						}
@@ -13981,7 +13951,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 611,
+								"id": 612,
 								"name": "TrashActionProps"
 							}
 						],
@@ -14512,14 +14482,14 @@
 			]
 		},
 		{
-			"id": 634,
+			"id": 635,
 			"name": "getPreferenceValues",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 635,
+					"id": 636,
 					"name": "getPreferenceValues",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -14535,19 +14505,19 @@
 					},
 					"typeParameter": [
 						{
-							"id": 636,
+							"id": 637,
 							"name": "Values",
 							"kind": 131072,
 							"kindString": "Type parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 651,
+								"id": 652,
 								"name": "PreferenceValues"
 							},
 							"default": {
 								"type": "reference",
-								"id": 651,
+								"id": 652,
 								"name": "PreferenceValues"
 							}
 						}
@@ -14740,14 +14710,14 @@
 			]
 		},
 		{
-			"id": 800,
+			"id": 801,
 			"name": "randomId",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 801,
+					"id": 802,
 					"name": "randomId",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -14769,7 +14739,7 @@
 					},
 					"parameters": [
 						{
-							"id": 802,
+							"id": 803,
 							"name": "size",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -14845,14 +14815,14 @@
 			]
 		},
 		{
-			"id": 674,
+			"id": 675,
 			"name": "render",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 675,
+					"id": 676,
 					"name": "render",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -14872,7 +14842,7 @@
 					},
 					"parameters": [
 						{
-							"id": 676,
+							"id": 677,
 							"name": "nodeToRender",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -14958,14 +14928,14 @@
 			]
 		},
 		{
-			"id": 766,
+			"id": 767,
 			"name": "showHUD",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 767,
+					"id": 768,
 					"name": "showHUD",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -14986,7 +14956,7 @@
 					},
 					"parameters": [
 						{
-							"id": 768,
+							"id": 769,
 							"name": "title",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -15070,14 +15040,14 @@
 			]
 		},
 		{
-			"id": 761,
+			"id": 762,
 			"name": "showToast",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 762,
+					"id": 763,
 					"name": "showToast",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -15098,7 +15068,7 @@
 					},
 					"parameters": [
 						{
-							"id": 763,
+							"id": 764,
 							"name": "style",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -15108,12 +15078,12 @@
 							},
 							"type": {
 								"type": "reference",
-								"id": 796,
+								"id": 797,
 								"name": "ToastStyle"
 							}
 						},
 						{
-							"id": 764,
+							"id": 765,
 							"name": "title",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -15127,7 +15097,7 @@
 							}
 						},
 						{
-							"id": 765,
+							"id": 766,
 							"name": "message",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -15148,7 +15118,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 769,
+								"id": 770,
 								"name": "Toast"
 							}
 						],
@@ -15223,14 +15193,14 @@
 			]
 		},
 		{
-			"id": 654,
+			"id": 655,
 			"name": "useActionPanel",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 655,
+					"id": 656,
 					"name": "useActionPanel",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -15247,21 +15217,21 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 656,
+						"id": 657,
 						"name": "ActionPanelState"
 					}
 				}
 			]
 		},
 		{
-			"id": 660,
+			"id": 661,
 			"name": "useId",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 661,
+					"id": 662,
 					"name": "useId",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -15286,7 +15256,7 @@
 					},
 					"parameters": [
 						{
-							"id": 662,
+							"id": 663,
 							"name": "defaultId",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -15302,7 +15272,7 @@
 							}
 						},
 						{
-							"id": 663,
+							"id": 664,
 							"name": "generateId",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -15313,14 +15283,14 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 664,
+									"id": 665,
 									"name": "__type",
 									"kind": 65536,
 									"kindString": "Type literal",
 									"flags": {},
 									"signatures": [
 										{
-											"id": 665,
+											"id": 666,
 											"name": "__type",
 											"kind": 4096,
 											"kindString": "Call signature",
@@ -15344,14 +15314,14 @@
 			]
 		},
 		{
-			"id": 666,
+			"id": 667,
 			"name": "useNavigation",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 667,
+					"id": 668,
 					"name": "useNavigation",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -15366,7 +15336,7 @@
 							},
 							{
 								"tag": "example",
-								"text": "\n```typescript\nimport { ActionPanel, Detail, useNavigation } from \"@raycast/api\";\n\nfunction Ping() {\n  const { push } = useNavigation();\n\n  return (\n    <Detail markdown=\"Ping\">\n      <ActionPanel>\n        <ActionPanel.Item title=\"Push\" onAction={() => push(<Pong />)} />\n      </ActionPanel>\n    </Detail>\n  );\n}\n\nfunction Pong() {\n  const { pop } = useNavigation();\n\n  return (\n    <Detail markdown=\"Pong\">\n      <ActionPanel>\n        <ActionPanel.Item title=\"Pop\" onAction={pop} />\n      </ActionPanel>\n    </Detail>\n  );\n}\n\nexport default function Command() {\n  return <Ping />;\n}\n```\n"
+								"text": "\n```typescript\nimport { ActionPanel, Detail, useNavigation } from \"@raycast/api\";\n\nfunction Ping() {\n  const { push } = useNavigation();\n\n  return (\n    <Detail\n      markdown=\"Ping\"\n      actions={\n        <ActionPanel>\n          <ActionPanel.Item title=\"Push\" onAction={() => push(<Pong />)} />\n        </ActionPanel>\n      }\n    />\n  );\n}\n\nfunction Pong() {\n  const { pop } = useNavigation();\n\n  return (\n    <Detail\n      markdown=\"Pong\"\n      actions={\n        <ActionPanel>\n          <ActionPanel.Item title=\"Pop\" onAction={pop} />\n        </ActionPanel>\n      }\n    />\n  );\n}\n\nexport default function Command() {\n  return <Ping />;\n}\n```\n"
 							},
 							{
 								"tag": "subcategory",
@@ -15376,7 +15346,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 668,
+						"id": 669,
 						"name": "Navigation"
 					}
 				}
@@ -15414,17 +15384,17 @@
 			"title": "Enumerations",
 			"kind": 4,
 			"children": [
-				683,
-				698,
-				758,
-				796
+				684,
+				699,
+				759,
+				797
 			]
 		},
 		{
 			"title": "Classes",
 			"kind": 128,
 			"children": [
-				769
+				770
 			]
 		},
 		{
@@ -15434,13 +15404,13 @@
 				147,
 				141,
 				144,
-				656,
+				657,
 				154,
 				28,
-				534,
+				535,
 				170,
-				626,
-				747,
+				627,
+				748,
 				398,
 				408,
 				431,
@@ -15454,22 +15424,22 @@
 				388,
 				378,
 				355,
-				750,
+				751,
 				42,
 				521,
 				502,
 				516,
-				668,
-				545,
-				557,
-				568,
-				579,
-				638,
-				651,
-				590,
-				600,
-				792,
-				611
+				669,
+				546,
+				558,
+				569,
+				580,
+				639,
+				652,
+				591,
+				601,
+				793,
+				612
 			]
 		},
 		{
@@ -15478,22 +15448,22 @@
 			"children": [
 				139,
 				140,
-				694,
+				695,
 				354,
-				749,
-				754,
+				750,
+				755,
 				47,
 				46,
 				62,
-				637
+				638
 			]
 		},
 		{
 			"title": "Variables",
 			"kind": 32,
 			"children": [
-				633,
-				650
+				634,
+				651
 			]
 		},
 		{
@@ -15504,7 +15474,7 @@
 				89,
 				81,
 				116,
-				531,
+				532,
 				160,
 				176,
 				235,
@@ -15520,13 +15490,13 @@
 				450,
 				480,
 				470,
-				542,
-				554,
-				565,
-				576,
-				587,
-				597,
-				608,
+				543,
+				555,
+				566,
+				577,
+				588,
+				598,
+				609,
 				48,
 				35,
 				60,
@@ -15536,21 +15506,21 @@
 				22,
 				25,
 				50,
-				634,
+				635,
 				40,
 				37,
 				6,
-				800,
+				801,
 				57,
-				674,
+				675,
 				53,
-				766,
+				767,
 				16,
-				761,
+				762,
 				19,
-				654,
-				660,
-				666
+				655,
+				661,
+				667
 			]
 		}
 	],
@@ -15558,19 +15528,19 @@
 		{
 			"title": "User Interface",
 			"children": [
-				683,
-				698,
-				758,
-				796,
-				769,
+				684,
+				699,
+				759,
+				797,
+				770,
 				147,
 				141,
 				144,
-				656,
+				657,
 				154,
-				534,
+				535,
 				170,
-				747,
+				748,
 				398,
 				408,
 				431,
@@ -15584,30 +15554,30 @@
 				388,
 				378,
 				355,
-				750,
+				751,
 				521,
 				502,
 				516,
-				668,
-				545,
-				557,
-				568,
-				579,
-				590,
-				600,
-				792,
-				611,
+				669,
+				546,
+				558,
+				569,
+				580,
+				591,
+				601,
+				793,
+				612,
 				139,
 				140,
-				694,
+				695,
 				354,
-				749,
-				754,
+				750,
+				755,
 				70,
 				89,
 				81,
 				116,
-				531,
+				532,
 				160,
 				176,
 				235,
@@ -15623,22 +15593,22 @@
 				450,
 				480,
 				470,
-				542,
-				554,
-				565,
-				576,
-				587,
-				597,
-				608,
+				543,
+				555,
+				566,
+				577,
+				588,
+				598,
+				609,
 				11,
 				1,
 				6,
-				674,
-				766,
-				761,
-				654,
-				660,
-				666
+				675,
+				767,
+				762,
+				655,
+				661,
+				667
 			]
 		},
 		{
@@ -15672,8 +15642,8 @@
 		{
 			"title": "Environment",
 			"children": [
-				626,
-				633
+				627,
+				634
 			]
 		},
 		{
@@ -15704,11 +15674,11 @@
 		{
 			"title": "Preferences",
 			"children": [
+				639,
+				652,
 				638,
 				651,
-				637,
-				650,
-				634
+				635
 			]
 		},
 		{
@@ -15717,7 +15687,7 @@
 				28,
 				22,
 				25,
-				800,
+				801,
 				16,
 				19
 			]
