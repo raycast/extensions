@@ -11,3 +11,14 @@
     <img alt="" src="https://img.shields.io/badge/Join%20the%20community-black.svg?style=for-the-badge&logo=Slack">
   </a>
 </p>
+
+This repository contains all extensions that are available in the [Raycast Store](https://raycast.com/store). It also includes documentation and examples to extend Raycast. 
+
+## Getting Started
+
+Visit [https://developers.raycast.com](https://developers.raycast.com) to get started with our API.
+
+
+## Community
+
+Join our [Slack community](https://raycast.com/community) to share your extension, debug nasty bugs or simply get to know like-minded folks.
