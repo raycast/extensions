@@ -52,9 +52,9 @@ const icon = { source: { light: "icon-light.png", dark: "icon-dark.png" }}
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| mask | `ImageMask` | No | A [ImageMask](../user-interface/icons-and-images.md#imagemask) to apply to the image. |
+| mask | `ImageMask` | No | A [ImageMask](icons-and-images.md#imagemask) to apply to the image. |
 | source | `ImageSource` | Yes | The source of the image. |
-| tintColor | `string` | No | A [ColorLike](../user-interface/colors.md#colorlike) to tint all the non-transparent pixels of the image. |
+| tintColor | `string` | No | A [ColorLike](colors.md#colorlike) to tint all the non-transparent pixels of the image. |
 
 ### Icon
 
@@ -183,13 +183,9 @@ export default function Command() {
 ImageSource: string | Icon | { dark: string; light: string }
 ```
 
-The source of an [Image](../user-interface/icons-and-images.md#image). Can be either a remote URL, a local file resource, a built-in [Icon](../user-interface/icons-and-images.md#icon) or
-a single emoji.
+The source of an [Image](icons-and-images.md#image). Can be either a remote URL, a local file resource, a built-in [Icon](icons-and-images.md#icon) or a single emoji.
 
-For consistency, it's best to use the built-in [Icon](../user-interface/icons-and-images.md#icon) in lists, the Action Panel and other places. If a
-specific icon isn't built-in, you can reference custom ones from the `assets` folder of the extension by file name,
-e.g. `my-icon.png`. Alternatively, you can reference an absolute HTTPS url that points to an image or use an emoji.
-You can also specify different remote or local assets for light and dark theme.
+For consistency, it's best to use the built-in [Icon](icons-and-images.md#icon) in lists, the Action Panel and other places. If a specific icon isn't built-in, you can reference custom ones from the `assets` folder of the extension by file name, e.g. `my-icon.png`. Alternatively, you can reference an absolute HTTPS url that points to an image or use an emoji. You can also specify different remote or local assets for light and dark theme.
 
 #### Example
 
@@ -211,3 +207,4 @@ export default function Command() {
   );
 };
 ```
+

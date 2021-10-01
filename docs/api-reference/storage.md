@@ -2,9 +2,9 @@
 
 ## Overview
 
-Similar to the LocalStorage browser API, this group of functions can be used to store non-sensitive small data that is persisted across command launches. All commands in an extension have shared access to the stored data. Values can be managed through functions such as [getLocalStorageItem](#getLocalStorageItem), [setLocalStorageItem](#setLocalStorageItem), or [removeLocalStorageItem](#removeLocalStorageItem). A typical use cases is storing user preferences. **Note** that this API is not meant to store large amounts of data and the data is **not encrypted**, i.e. could easily be inspected by anybody. We are going to provide more storage options for larger and sensitive data in the future.
+Similar to the LocalStorage browser API, this group of functions can be used to store non-sensitive small data that is persisted across command launches. All commands in an extension have shared access to the stored data. Values can be managed through functions such as [getLocalStorageItem](storage.md#getLocalStorageItem), [setLocalStorageItem](storage.md#setLocalStorageItem), or [removeLocalStorageItem](storage.md#removeLocalStorageItem). A typical use cases is storing user preferences. **Note** that this API is not meant to store large amounts of data and the data is **not encrypted**, i.e. could easily be inspected by anybody. We are going to provide more storage options for larger and sensitive data in the future.
 
-You can also use Node's built-in APIs to write files, e.g. to the extension's own `supportPath`, accessible through [Environment](../api-reference/environment.md).
+You can also use Node's built-in APIs to write files, e.g. to the extension's own `supportPath`, accessible through [Environment](environment.md).
 
 ## API Reference
 
@@ -173,3 +173,4 @@ export default async () => {
   await setLocalStorageItem("fruit-eaten-today", true);
 };
 ```
+
