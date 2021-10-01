@@ -10,7 +10,7 @@ You can also use Node's built-in APIs to write files, e.g. to the extension's ow
 
 ### allLocalStorageItems
 
-Retrieve all stored values in the local storage of a command.
+Retrieve all stored values in the local storage of an extension.
 
 #### Signature
 
@@ -35,7 +35,7 @@ A promise that resolves with a record of all stored values.
 
 ### clearLocalStorage
 
-Removes all stored values.
+Removes all stored values of an extension.
 
 #### Signature
 
@@ -173,4 +173,3 @@ export default async () => {
   await setLocalStorageItem("fruit-eaten-today", true);
 };
 ```
-

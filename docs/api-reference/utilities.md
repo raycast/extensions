@@ -32,7 +32,7 @@ export default async () => {
 
 #### Return
 
-An array of [Application](utilities.md#application),
+An array of [Application](../utilities.md#application).
 
 ### getDefaultApplication
 
@@ -63,7 +63,38 @@ export default async () => {
 
 #### Return
 
-The default [Application](utilities.md#application) that would open the file. Throws an error if no application was found.
+The default [Application](../utilities.md#application) that would open the file. Throws an error if no application was found.
+
+### randomId
+
+Generate secure URL-friendly unique ID.
+
+#### Signature
+
+```typescript
+function randomId(size: number): string
+```
+
+#### Example
+
+```typescript
+import { pasteText, randomId } from "@raycast/api";
+
+export default async () => {
+  const id = randomId();
+  await pasteText(id);
+};
+```
+
+#### Parameters
+
+| Name | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| size | `number` | No | Size of the ID. The default size is 21. |
+
+#### Return
+
+A random string.
 
 ### showInFinder
 
@@ -131,7 +162,8 @@ A promise that resolves when all files are moved to the trash.
 
 An object that represents a locally installed application on the system.
 
-It can be used to open files or folders in a specific application. Use [getApplications](utilities.md#getapplications) or [getDefaultApplication](utilities.md#getdefaultapplication) to get applications that can open a specific file or folder.
+It can be used to open files or folders in a specific application. Use [getApplications](../utilities.md#getapplications) or
+[getDefaultApplication](../utilities.md#getdefaultapplication) to get applications that can open a specific file or folder.
 
 #### Properties
 
@@ -140,4 +172,3 @@ It can be used to open files or folders in a specific application. Use [getAppli
 | bundleId | `string` | No | The bundle identifier of the application, e.g. `com.raycast.macos`. |
 | name | `string` | Yes | The display name of the application. |
 | path | `string` | Yes | The absolute path to the application bundle, e.g. `/Applications/Raycast.app`, |
-

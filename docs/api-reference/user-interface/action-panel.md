@@ -4,11 +4,14 @@
 
 ### ActionPanel
 
-Represents a list of actions in the user interface, accessible through the action panel.
+Exposes a list of actions that can be performed by the user.
 
-The items can be grouped into sections and they can be assigned keyboard shortcuts. Use the menu for context-specific actions on list items or detail screens.
+Often items are context-aware, e.g. based on the selected list item. Actions can be grouped into semantic
+section and can have keyboard shortcuts assigned.
 
-The first and second action become the primary and secondary action and get automatically the default keyboard shortcuts assigned. In list and details, this is `↵` for the primary action and `⌘` `↵` for the secondary. In forms it's `⌘` `↵` for the primary and `⌘` `⇧` `↵` for the secondary.
+The first and second action become the primary and secondary action. They get automatically the default keyboard shortcuts assigned.
+In list and details, this is `↵` for the primary and `⌘` `↵` for the secondary action. In forms it's `⌘` `↵` for the primary and
+`⌘` `⇧` `↵` for the secondary.
 
 #### Example
 
@@ -40,12 +43,14 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | `ActionPanelChildren` | No | - | Sections or items. If [ActionPanel.Item](action-panel.md#actionpanelitem) elements are specified, a default section is automatically created. |
+| children | `ActionPanelChildren` | No | - | Sections or items. If [ActionPanel.Item](../user-interface/action-panel.md#actionpanelitem) elements are specified, a default section is automatically created. |
 | title | `string` | No | - | The title displayed at the top of the panel |
 
 ### ActionPanel.Item
 
-Represents a context-specific action that can be selected in the user interface or triggered through an assigned keyboard shortcut on the respective view.
+A context-specific action that can be performed by the user.
+
+Assign keyboard shortcuts to items to make it easier for users to perform frequently used actions.
 
 #### Example
 
@@ -79,11 +84,14 @@ export default function Command() {
 | id | `string` | No | - | ID of the item. |
 | shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the item. |
 | title | `string` | Yes | - | The title displayed for the item. |
-| onAction | `() => void` | No | - |  |
+| onAction | <code>() => void</code> | No | - |  |
 
 ### ActionPanel.Section
 
-Visually separated group of items. Use sections to group related menu items together.
+A group of visually separated items.
+
+Use sections if the [ActionPanel](../user-interface/action-panel.md#actionpanel) contains a lot of actions to help guide the user to related actions.
+For example, create a section for all copy actions.
 
 #### Example
 
@@ -121,12 +129,15 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | `ActionPanelSectionChildren` | No | - | The item elements of the section. When used for the action panel, the first item in the list is the _primary_ action that will be triggered by the default shortcut \(ENTER\), while the second item is the _secondary_ action triggered by CMD + ENTER. |
+| children | `ActionPanelSectionChildren` | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
 | title | `string` | No | - | Title displayed above the section |
 
 ### ActionPanel.Submenu
 
-Represents a context-specific action that can be selected in the user interface or triggered through an assigned keyboard shortcut on the respective view.
+An action that shows more actions in a submenu.
+
+This is handy when an action needs to select from a range of options. For example, to add a label to a GitHub pull request
+or an assignee to a todo.
 
 #### Example
 
@@ -188,17 +199,18 @@ function useActionPanel(): ActionPanelState
 
 #### Return
 
-A ActionPanelActions object with an ActionPanelHook.update function. Use the function to update the global Action Panel.
+A ActionPanelActions object with an ActionPanelHook.update function.
+Use the function to update the global Action Panel.
 
 ### ActionPanelState
 
-Return type of the [useActionPanel](action-panel.md#useactionpanel) hook to perform global Action Panel updates.
+Return type of the [useActionPanel](../user-interface/action-panel.md#useactionpanel) hook to perform global Action Panel updates.
 
 #### Properties
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| update | `(actionPanel: null | ActionPanel) => void` | Yes | Updates the global Action Panel. |
+| update | <code>(actionPanel: null \| ActionPanel) => void</code> | Yes | Updates the global Action Panel. |
 
 ### ActionPanelChildren
 
@@ -206,7 +218,7 @@ Return type of the [useActionPanel](action-panel.md#useactionpanel) hook to perf
 ActionPanelChildren: ActionPanel.Section | ActionPanel.Section[] | ActionPanelSectionChildren | null
 ```
 
-Supported children for the [ActionPanel](action-panel.md#actionpanel) and [ActionPanelSubmenu](action-panel.md#actionpanelsubmenu) components.
+Supported children for the [ActionPanel](../user-interface/action-panel.md#actionpanel) and [ActionPanelSubmenu](../user-interface/action-panel.md#actionpanelsubmenu) components.
 
 ### ActionPanelSectionChildren
 
@@ -214,5 +226,4 @@ Supported children for the [ActionPanel](action-panel.md#actionpanel) and [Actio
 ActionPanelSectionChildren: ActionPanel.Item | ActionPanel.Item[] | ReactElement<ActionPanelSubmenuProps> | ReactElement<ActionPanelSubmenuProps>[] | null
 ```
 
-Supported children for the [ActionPanelSection](action-panel.md#actionpanelsection) component.
-
+Supported children for the [ActionPanelSection](../user-interface/action-panel.md#actionpanelsection) component.

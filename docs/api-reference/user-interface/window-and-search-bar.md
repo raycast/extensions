@@ -91,4 +91,3 @@ export default function Command() {
 #### Return
 
 A promise that resolves when Raycast popped to root.
-

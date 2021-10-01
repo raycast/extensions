@@ -74,7 +74,7 @@ A promise that resolves with the shown toast. The toast can be used to change or
 
 A Toast with a certain style, title, and message.
 
-Use [showToast](toast.md#showtoast) as shortcut for creating and showing a Toast.
+Use [showToast](../user-interface/toast.md#showtoast) as shortcut for creating and showing a Toast.
 
 #### Example
 
@@ -97,7 +97,7 @@ export default async () => {
 
 | Name | Type | Description |
 | :--- | :--- | :--- |
-| constructor | `(options: ToastOptions) => Toast` |  |
+| constructor | <code>(options: ToastOptions) => Toast</code> |  |
 
 #### Accessors
 
@@ -111,12 +111,12 @@ export default async () => {
 
 | Name | Type | Description |
 | :--- | :--- | :--- |
-| hide | `() => Promise` | Hides the Toast. |
-| show | `() => Promise` | Shows the Toast. |
+| hide | <code>() => Promise<void></code> | Hides the Toast. |
+| show | <code>() => Promise<void></code> | Shows the Toast. |
 
 ### ToastOptions
 
-The options to create a [Toast](toast.md#toast).
+The options to create a [Toast](../user-interface/toast.md#toast).
 
 #### Example
 
@@ -146,7 +146,9 @@ export default async () => {
 
 Defines the visual style of the Toast.
 
-Use [ToastStyle.Success](toast.md#toaststyle) for confirmations and [ToastStyle.Failure](toast.md#toaststyle) for displaying errors. Use [ToastStyle.Animated](toast.md#toaststyle) when your Toast should be shown until a process is completed. You can hide it later by using [Toast.hide](toast.md#toast) or update the properties of an existing Toast.
+Use [ToastStyle.Success](../user-interface/toast.md#toaststyle) for confirmations and [ToastStyle.Failure](../user-interface/toast.md#toaststyle) for displaying errors.
+Use [ToastStyle.Animated](../user-interface/toast.md#toaststyle) when your Toast should be shown until a process is completed.
+You can hide it later by using [Toast.hide](../user-interface/toast.md#toast) or update the properties of an existing Toast.
 
 #### Enumeration members
 
@@ -155,4 +157,3 @@ Use [ToastStyle.Success](toast.md#toaststyle) for confirmations and [ToastStyle.
 | Animated | "ANIMATED" |
 | Failure | "FAILURE" |
 | Success | "SUCCESS" |
-

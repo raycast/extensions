@@ -52,7 +52,7 @@ export default async () => {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| text | `string` | Yes |  |
+| text | `string` | Yes | The text to copy to the clipboard. |
 
 #### Return
 
@@ -112,9 +112,8 @@ export default async () => {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| text | `string` | Yes | The text contents to insert at the cursor. |
+| text | `string` | Yes | The text to insert at the cursor. |
 
 #### Return
 
 A promise that resolves when the text got pasted.
-
