@@ -6,12 +6,9 @@
 
 Represents a list of actions in the user interface, accessible through the action panel.
 
-The items can be grouped into sections and they can be assigned keyboard shortcuts.
-Use the menu for context-specific actions on list items or detail screens.
+The items can be grouped into sections and they can be assigned keyboard shortcuts. Use the menu for context-specific actions on list items or detail screens.
 
-The first and second action become the primary and secondary action and get automatically the default keyboard shortcuts assigned.
-In list and details, this is `↵` for the primary action and `⌘` `↵` for the secondary.
-In forms it's `⌘` `↵` for the primary and `⌘` `⇧` `↵` for the secondary.
+The first and second action become the primary and secondary action and get automatically the default keyboard shortcuts assigned. In list and details, this is `↵` for the primary action and `⌘` `↵` for the secondary. In forms it's `⌘` `↵` for the primary and `⌘` `⇧` `↵` for the secondary.
 
 #### Example
 
@@ -43,7 +40,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | `ActionPanelChildren` | No | - | Sections or items. If [ActionPanel.Item](../user-interface/action-panel.md#actionpanelitem) elements are specified, a default section is automatically created. |
+| children | `ActionPanelChildren` | No | - | Sections or items. If [ActionPanel.Item](action-panel.md#actionpanelitem) elements are specified, a default section is automatically created. |
 | title | `string` | No | - | The title displayed at the top of the panel |
 
 ### ActionPanel.Item
@@ -82,7 +79,7 @@ export default function Command() {
 | id | `string` | No | - | ID of the item. |
 | shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the item. |
 | title | `string` | Yes | - | The title displayed for the item. |
-| onAction | <code>() => void</code> | No | - |  |
+| onAction | `() => void` | No | - |  |
 
 ### ActionPanel.Section
 
@@ -124,7 +121,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | `ActionPanelSectionChildren` | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
+| children | `ActionPanelSectionChildren` | No | - | The item elements of the section. When used for the action panel, the first item in the list is the _primary_ action that will be triggered by the default shortcut \(ENTER\), while the second item is the _secondary_ action triggered by CMD + ENTER. |
 | title | `string` | No | - | Title displayed above the section |
 
 ### ActionPanel.Submenu
@@ -191,18 +188,17 @@ function useActionPanel(): ActionPanelState
 
 #### Return
 
-A ActionPanelActions object with an ActionPanelHook.update function.
-Use the function to update the global Action Panel.
+A ActionPanelActions object with an ActionPanelHook.update function. Use the function to update the global Action Panel.
 
 ### ActionPanelState
 
-Return type of the [useActionPanel](../user-interface/action-panel.md#useactionpanel) hook to perform global Action Panel updates.
+Return type of the [useActionPanel](action-panel.md#useactionpanel) hook to perform global Action Panel updates.
 
 #### Properties
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| update | <code>(actionPanel: null \| ActionPanel) => void</code> | Yes | Updates the global Action Panel. |
+| update | `(actionPanel: null | ActionPanel) => void` | Yes | Updates the global Action Panel. |
 
 ### ActionPanelChildren
 
@@ -210,7 +206,7 @@ Return type of the [useActionPanel](../user-interface/action-panel.md#useactionp
 ActionPanelChildren: ActionPanel.Section | ActionPanel.Section[] | ActionPanelSectionChildren | null
 ```
 
-Supported children for the [ActionPanel](../user-interface/action-panel.md#actionpanel) and [ActionPanelSubmenu](../user-interface/action-panel.md#actionpanelsubmenu) components.
+Supported children for the [ActionPanel](action-panel.md#actionpanel) and [ActionPanelSubmenu](action-panel.md#actionpanelsubmenu) components.
 
 ### ActionPanelSectionChildren
 
@@ -218,4 +214,5 @@ Supported children for the [ActionPanel](../user-interface/action-panel.md#actio
 ActionPanelSectionChildren: ActionPanel.Item | ActionPanel.Item[] | ReactElement<ActionPanelSubmenuProps> | ReactElement<ActionPanelSubmenuProps>[] | null
 ```
 
-Supported children for the [ActionPanelSection](../user-interface/action-panel.md#actionpanelsection) component.
+Supported children for the [ActionPanelSection](action-panel.md#actionpanelsection) component.
+

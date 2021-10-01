@@ -35,6 +35,7 @@
   * [Action Panel](api-reference/user-interface/action-panel.md)
   * [Actions](api-reference/user-interface/actions.md)
   * [Colors](api-reference/user-interface/colors.md)
+  * [Detail](api-reference/user-interface/detail.md)
   * [Form](api-reference/user-interface/form.md)
   * [Icons & Images](api-reference/user-interface/icons-and-images.md)
   * [List](api-reference/user-interface/list.md)
@@ -43,9 +44,7 @@
   * [Toast](api-reference/user-interface/toast.md)
   * [Utilities](api-reference/user-interface/utilities.md)
   * [Window & Search Bar](api-reference/user-interface/window-and-search-bar.md)
-* [Utilities](api-reference/utilities/README.md)
-  * [ID](api-reference/utilities/id.md)
-  * [System](api-reference/utilities/system.md)
+* [Utilities](api-reference/utilities.md)
 
 ---
 

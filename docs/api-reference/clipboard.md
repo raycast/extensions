@@ -1,7 +1,5 @@
 # Clipboard
 
-## Overview
-
 You can write contents to the clipboard through [copyTextToClipboard](clipboard.md#copytexttoclipboard) and clear it through [clearClipboard](clipboard.md#clearclipboard). We also provide convenience actions such as [CopyToClipboardAction](user-interface/actions.md#CopyToClipboardAction).
 
 ## API Reference
@@ -119,3 +117,4 @@ export default async () => {
 #### Return
 
 A promise that resolves when the text got pasted.
+
