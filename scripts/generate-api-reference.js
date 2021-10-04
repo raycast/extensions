@@ -256,9 +256,18 @@ function getReturnType(docs, item) {
 }
 
 function getExampleCode(item) {
-  const found = item.comment?.tags?.find((x) => x.tag === "example");
-  if (found) {
-    return found.text.trim();
+  const items = item.comment?.tags?.filter((x) => x.tag === "example");
+  if (items?.length === 1) {
+    return items[0].text.trim();
+  }
+  if (items?.length > 1) {
+    return (
+      "{% tabs %}\n" +
+      items
+        .map(({ text }, index) => `{% tab title="Example ${index + 1}" %}\n` + text.trim() + "\n{% endtab %}")
+        .join("\n") +
+      "\n{% endtabs %}"
+    );
   }
   return null;
 }

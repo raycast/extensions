@@ -25,6 +25,8 @@ A form item with a checkbox.
 
 #### Example
 
+{% tabs %}
+{% tab title="Example 1" %}
 Example of an uncontrolled checkbox:
 
 ```typescript
@@ -38,6 +40,26 @@ export default function Command() {
   );
 }
 ```
+{% endtab %}
+{% tab title="Example 2" %}
+Example of a controlled checkbox:
+
+```typescript
+import { Form } from "@raycast/api";
+import { useState } from "react";
+
+export default function Command() {
+  const [checked, setChecked] = useState(true);
+
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <Form.Checkbox id="checkbox" label="Do you like orange juice?" value={checked} onChange={setChecked} />
+    </Form>
+  );
+}
+```
+{% endtab %}
+{% endtabs %}
 
 #### Props
 
@@ -57,6 +79,8 @@ A form item with a date picker.
 
 #### Example
 
+{% tabs %}
+{% tab title="Example 1" %}
 Example of an uncontrolled date picker:
 
 ```typescript
@@ -70,6 +94,26 @@ export default function Command() {
   );
 }
 ```
+{% endtab %}
+{% tab title="Example 2" %}
+Example of a controlled checkbox:
+
+```typescript
+import { Form } from "@raycast/api";
+import { useState } from "react";
+
+export default function Command() {
+  const [date, setDate] = useState<Date>();
+
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <Form.DatePicker id="launchDate" title="Launch Date" value={date} onChange={setDate} />
+    </Form>
+  );
+}
+```
+{% endtab %}
+{% endtabs %}
 
 #### Props
 
@@ -88,6 +132,8 @@ A form item with a dropdown menu.
 
 #### Example
 
+{% tabs %}
+{% tab title="Example 1" %}
 Example of an uncontrolled dropdown:
 
 ```typescript
@@ -105,6 +151,38 @@ export default function Command() {
   );
 }
 ```
+{% endtab %}
+{% tab title="Example 2" %}
+Example of a controlled dropdown:
+
+```typescript
+import { Form } from "@raycast/api";
+import { useState } from "react";
+
+export default function Command() {
+  const [programmingLanguage, setProgrammingLanguage] = useState<string>("typescript");
+
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <Form.Dropdown
+        id="dropdown"
+        title="Favorite Language"
+        value={programmingLanguage}
+        onChange={setProgrammingLanguage}
+      >
+        <Form.Dropdown.Item value="cpp" title="C++" />
+        <Form.Dropdown.Item value="javascript" title="JavaScript" />
+        <Form.Dropdown.Item value="ruby" title="Ruby" />
+        <Form.Dropdown.Item value="python" title="Python" />
+        <Form.Dropdown.Item value="swift" title="Swift" />
+        <Form.Dropdown.Item value="typescript" title="TypeScript" />
+      </Form.Dropdown>
+    </Form>
+  );
+}
+```
+{% endtab %}
+{% endtabs %}
 
 #### Props
 
@@ -215,6 +293,8 @@ A form item with a tag picker that allows the user to select multiple items.
 
 #### Example
 
+{% tabs %}
+{% tab title="Example 1" %}
 Example of an uncontrolled tag picker:
 
 ```typescript
@@ -232,6 +312,34 @@ export default function Command() {
   );
 }
 ```
+{% endtab %}
+{% tab title="Example 2" %}
+Example of a controlled tag picker:
+
+```typescript
+import { Form } from "@raycast/api";
+import { useState } from "react";
+
+export default function Command() {
+  const [countries, setCountries] = useState<string[]>(["ger", "ned", "pol"]);
+
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <Form.TagPicker id="countries" title="Visited Countries" value={countries} onChange={setCountries}>
+        <Form.TagPicker.Item value="ger" title="Germany" icon="🇩🇪" />
+        <Form.TagPicker.Item value="ind" title="India" icon="🇮🇳" />
+        <Form.TagPicker.Item value="ned" title="Netherlands" icon="🇳🇱" />
+        <Form.TagPicker.Item value="nor" title="Norway" icon="🇳🇴" />
+        <Form.TagPicker.Item value="pol" title="Poland" icon="🇵🇱" />
+        <Form.TagPicker.Item value="rus" title="Russia" icon="🇷🇺" />
+        <Form.TagPicker.Item value="sco" title="Scotland" icon="🏴󠁧󠁢󠁳󠁣󠁴󠁿" />
+      </Form.TagPicker>
+    </Form>
+  );
+}
+```
+{% endtab %}
+{% endtabs %}
 
 #### Props
 
@@ -281,6 +389,8 @@ The item supports multiline text entry.
 
 #### Example
 
+{% tabs %}
+{% tab title="Example 1" %}
 Example of an uncontrolled text area:
 
 ```typescript
@@ -297,6 +407,26 @@ export default function Command() {
   );
 }
 ```
+{% endtab %}
+{% tab title="Example 2" %}
+Example of a controlled text area:
+
+```typescript
+import { Form } from "@raycast/api";
+import { useState } from "react";
+
+export default function Command() {
+  const [text, setText] = useState<string>();
+
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <Form.TextArea id="textarea" value={text} onChange={setText} />
+    </Form>
+  );
+}
+```
+{% endtab %}
+{% endtabs %}
 
 #### Props
 
@@ -316,6 +446,8 @@ A form item with a text field for input.
 
 #### Example
 
+{% tabs %}
+{% tab title="Example 1" %}
 Example of an uncontrolled text field:
 
 ```typescript
@@ -329,6 +461,26 @@ export default function Command() {
   );
 }
 ```
+{% endtab %}
+{% tab title="Example 2" %}
+Example of a controlled text field:
+
+```typescript
+import { Form } from "@raycast/api";
+import { useState } from "react";
+
+export default function Command() {
+  const [text, setText] = useState<string>();
+
+  return (
+    <Form onSubmit={(values) => console.log(values)}>
+      <Form.TextField id="textfield" value={text} onChange={setText} />
+    </Form>
+  );
+}
+```
+{% endtab %}
+{% endtabs %}
 
 #### Props
 
