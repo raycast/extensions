@@ -281,7 +281,10 @@ function getExampleCode(item) {
     return (
       "{% tabs %}\n" +
       items
-        .map(({ text }, index) => `{% tab title="Example ${index + 1}" %}\n` + text.trim() + "\n{% endtab %}")
+        .map(({ text }) => {
+          const [title, ...body] = text.trim().split("\n");
+          return `{% tab title="${title}" %}\n` + body.join("\n") + "\n{% endtab %}";
+        })
         .join("\n") +
       "\n{% endtabs %}"
     );

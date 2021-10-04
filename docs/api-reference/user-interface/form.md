@@ -26,8 +26,7 @@ A form item with a checkbox.
 #### Example
 
 {% tabs %}
-{% tab title="Example 1" %}
-Example of an uncontrolled checkbox:
+{% tab title="Example of an uncontrolled checkbox:" %}
 
 ```typescript
 import { Form } from "@raycast/api";
@@ -41,8 +40,7 @@ export default function Command() {
 }
 ```
 {% endtab %}
-{% tab title="Example 2" %}
-Example of a controlled checkbox:
+{% tab title="Example of a controlled checkbox:" %}
 
 ```typescript
 import { Form } from "@raycast/api";
@@ -80,8 +78,7 @@ A form item with a date picker.
 #### Example
 
 {% tabs %}
-{% tab title="Example 1" %}
-Example of an uncontrolled date picker:
+{% tab title="Example of an uncontrolled date picker:" %}
 
 ```typescript
 import { Form } from "@raycast/api";
@@ -95,8 +92,7 @@ export default function Command() {
 }
 ```
 {% endtab %}
-{% tab title="Example 2" %}
-Example of a controlled checkbox:
+{% tab title="Example of a controlled checkbox:" %}
 
 ```typescript
 import { Form } from "@raycast/api";
@@ -133,8 +129,7 @@ A form item with a dropdown menu.
 #### Example
 
 {% tabs %}
-{% tab title="Example 1" %}
-Example of an uncontrolled dropdown:
+{% tab title="Example of an uncontrolled dropdown:" %}
 
 ```typescript
 import { Form } from "@raycast/api";
@@ -152,8 +147,7 @@ export default function Command() {
 }
 ```
 {% endtab %}
-{% tab title="Example 2" %}
-Example of a controlled dropdown:
+{% tab title="Example of a controlled dropdown:" %}
 
 ```typescript
 import { Form } from "@raycast/api";
@@ -294,8 +288,7 @@ A form item with a tag picker that allows the user to select multiple items.
 #### Example
 
 {% tabs %}
-{% tab title="Example 1" %}
-Example of an uncontrolled tag picker:
+{% tab title="Example of an uncontrolled tag picker:" %}
 
 ```typescript
 import { Form } from "@raycast/api";
@@ -313,8 +306,7 @@ export default function Command() {
 }
 ```
 {% endtab %}
-{% tab title="Example 2" %}
-Example of a controlled tag picker:
+{% tab title="Example of a controlled tag picker:" %}
 
 ```typescript
 import { Form } from "@raycast/api";
@@ -390,8 +382,7 @@ The item supports multiline text entry.
 #### Example
 
 {% tabs %}
-{% tab title="Example 1" %}
-Example of an uncontrolled text area:
+{% tab title="Example of an uncontrolled text area:" %}
 
 ```typescript
 import { Form } from "@raycast/api";
@@ -408,8 +399,7 @@ export default function Command() {
 }
 ```
 {% endtab %}
-{% tab title="Example 2" %}
-Example of a controlled text area:
+{% tab title="Example of a controlled text area:" %}
 
 ```typescript
 import { Form } from "@raycast/api";
@@ -447,8 +437,7 @@ A form item with a text field for input.
 #### Example
 
 {% tabs %}
-{% tab title="Example 1" %}
-Example of an uncontrolled text field:
+{% tab title="Example of an uncontrolled text field:" %}
 
 ```typescript
 import { Form } from "@raycast/api";
@@ -462,8 +451,7 @@ export default function Command() {
 }
 ```
 {% endtab %}
-{% tab title="Example 2" %}
-Example of a controlled text field:
+{% tab title="Example of a controlled text field:" %}
 
 ```typescript
 import { Form } from "@raycast/api";
