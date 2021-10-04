@@ -117,7 +117,7 @@ function getTypeString(docs, item) {
       if (props) {
         const comp = findReactComponentByReturnTypeProps(docs, props);
         if (comp) {
-          return getNamespacedName(docs, comp) || comp.name;
+          return getNamespacedName(docs, comp);
         }
       }
     }
@@ -207,19 +207,36 @@ function getRemarkValue(item) {
   return null;
 }
 
-function getNamespacedName(docs, item, path = [], children = docs.children) {
-  for (const child of children) {
-    if (child.type?.queryType?.id === item.id) {
-      return [...path, child.name].join(".");
-    }
-    if (child.kindString === "Namespace") {
-      const name = getNamespacedName(docs, item, [...path, child.name], child.children);
-      if (name) {
-        return name;
+// NOTE this function is tricky and not easy to read.
+// there should be room for improvement.
+function getNamespacedName(docs, item) {
+  const walk = (target, children) => {
+    const results = [];
+    for (const child of children) {
+      if (child.type?.queryType?.name === target.name) {
+        results.push([child]);
+      }
+      if (child.kindString === "Namespace") {
+        walk(target, child.children).forEach((result) => {
+          const childResults = walk(child, docs.children);
+          if (childResults.length) {
+            childResults.forEach((childResult) => {
+              results.push([...childResult, ...result]);
+            });
+          } else {
+            results.push([child, ...result]);
+          }
+        });
       }
     }
+    return results;
+  };
+  const candidates = walk(item, docs.children);
+  if (candidates.length) {
+    candidates.sort((a, b) => b.length - a.length);
+    return candidates[0].map(({ name }) => name).join(".");
   }
-  return null;
+  return item.name;
 }
 
 function findReactComponentByReturnTypeProps(docs, item) {
@@ -340,7 +357,7 @@ ${replaceLinksInDescription(docs, getCommentReturns(signature))}
 }
 
 function generateReactComponentSignatureMarkdown(docs, signature, item) {
-  const name = getNamespacedName(docs, item) || item.name;
+  const name = getNamespacedName(docs, item);
   const props = getPropList(docs, signature);
   let text = `
 ### ${name}

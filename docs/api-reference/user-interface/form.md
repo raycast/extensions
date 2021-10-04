@@ -188,7 +188,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | `null` or `Form.DropdownSection` or `Form.DropdownSection[]` or `Form.DropdownItem` or `Form.DropdownItem[]` | No | - | Sections or items. If [FormDropdownItem](../user-interface/form.md#formdropdownitem) elements are specified, a default section is automatically created. |
+| children | `null` or `Form.Dropdown.Section` or `Form.Dropdown.Section[]` or `Form.Dropdown.Item` or `Form.Dropdown.Item[]` | No | - | Sections or items. If [FormDropdownItem](../user-interface/form.md#formdropdownitem) elements are specified, a default section is automatically created. |
 | defaultValue | `string` | No | - | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
 | id | `string` | Yes | - | ID of the form item. Make sure to assign each form item a unique id. |
 | storeValue | `boolean` | No | - | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. |
@@ -196,7 +196,7 @@ export default function Command() {
 | value | `string` | No | - | The current value of the item. |
 | onChange | <code>(newValue: Value) => void</code> | No | - |  |
 
-### Form.DropdownItem
+### Form.Dropdown.Item
 
 Represents a context-specific action that can be selected in the user interface or triggered through an assigned keyboard shortcut on the respective view.
 
@@ -224,7 +224,7 @@ export default function Command() {
 | title | `string` | Yes | - | The title displayed for the item. |
 | value | `string` | Yes | - | Value of the dropdown item. Make sure to assign each unique value for each item. |
 
-### Form.DropdownSection
+### Form.Dropdown.Section
 
 Visually separated group of dropdown items.
 
@@ -257,7 +257,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | `null` or `Form.DropdownItem` or `Form.DropdownItem[]` | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
+| children | `null` or `Form.Dropdown.Item` or `Form.Dropdown.Item[]` | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
 | title | `string` | No | - | Title displayed above the section |
 
 ### Form.Separator
@@ -345,7 +345,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | `null` or `Form.TagPickerItem` or `Form.TagPickerItem[]` | No | - | The list of tag picker's items. |
+| children | `null` or `Form.TagPicker.Item` or `Form.TagPicker.Item[]` | No | - | The list of tag picker's items. |
 | defaultValue | `string[]` | No | - | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
 | id | `string` | Yes | - | ID of the form item. Make sure to assign each form item a unique id. |
 | placeholder | `string` | No | - | Placeholder text shown in the token field. |
@@ -354,7 +354,7 @@ export default function Command() {
 | value | `string[]` | No | - | The current value of the item. |
 | onChange | <code>(newValue: Value) => void</code> | No | - |  |
 
-### Form.TagPickerItem
+### Form.TagPicker.Item
 
 A tag picker item in a [FormTagPicker](../user-interface/form.md#formtagpicker).
 
