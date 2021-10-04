@@ -262,6 +262,19 @@ export default function Command() {
 | title | `string` | No | Show in Finder | An optional title for the action. |
 | onShow | <code>(path: PathLike) => void</code> | No | - |  |
 
+### SubmitFormAction
+
+Action that allows to add a submit handler for capturing form values.
+
+#### Props
+
+| Prop | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| icon | `ImageLike` | No | - | The icon displayed for the action. |
+| shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the action. |
+| title | `string` | No | - | The title displayed for the item. |
+| onSubmit | <code>(input: Values) => void</code> | No | - |  |
+
 ### TrashAction
 
 Action that moves a file or folder to the Trash.

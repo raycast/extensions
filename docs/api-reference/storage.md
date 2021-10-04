@@ -15,7 +15,7 @@ Retrieve all stored values in the local storage of an extension.
 #### Signature
 
 ```typescript
-async function allLocalStorageItems(): Promise<Record<string, LocalStorageValue>>
+async function allLocalStorageItems(): Promise<Values>
 ```
 
 #### Example
@@ -23,15 +23,20 @@ async function allLocalStorageItems(): Promise<Record<string, LocalStorageValue>
 ```typescript
 import { allLocalStorageItems } from "@raycast/api";
 
+interface Values {
+  todo: string;
+  priority: number;
+}
+
 export default async () => {
-  const items = await allLocalStorageItems();
+  const items: Values = await allLocalStorageItems();
   console.log(`Local storage item count: ${Object.entries(items).length}`);
 };
 ```
 
 #### Return
 
-A promise that resolves with a record of all stored values.
+A promise that resolves with an object containing all [LocalStorageValues](../storage.md#localstoragevalues).
 
 ### clearLocalStorage
 
@@ -64,7 +69,7 @@ Retrieve the stored value for the given key.
 #### Signature
 
 ```typescript
-async function getLocalStorageItem(key: string): Promise<LocalStorageValue | undefined>
+async function getLocalStorageItem(key: string): Promise<Value | undefined>
 ```
 
 #### Example
@@ -73,7 +78,7 @@ async function getLocalStorageItem(key: string): Promise<LocalStorageValue | und
 import { getLocalStorageItem } from "@raycast/api";
 
 export default async () => {
-  const item = await getLocalStorageItem("favorite-fruit");
+  const item: string = await getLocalStorageItem("favorite-fruit");
   console.log(item);
 };
 ```
@@ -148,6 +153,18 @@ export default async () => {
 #### Return
 
 A promise that resolves when the value was stored.
+
+### LocalStorageValues
+
+Values of local storage items.
+
+For type-safe values you can define your own interface. Use the keys of the local storage items as property name.
+
+#### Properties
+
+| Name | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| [key: string] | `any` | Yes | The local storage value of a given key. |
 
 ### LocalStorageValue
 
