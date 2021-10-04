@@ -117,7 +117,7 @@ function getTypeString(docs, item) {
       if (props) {
         const comp = findReactComponentByReturnTypeProps(docs, props);
         if (comp) {
-          return getNamespacedName(docs.children, [], comp) || comp.name;
+          return getNamespacedName(docs, comp) || comp.name;
         }
       }
     }
@@ -207,13 +207,13 @@ function getRemarkValue(item) {
   return null;
 }
 
-function getNamespacedName(children, path, item) {
+function getNamespacedName(docs, item, path = [], children = docs.children) {
   for (const child of children) {
     if (child.type?.queryType?.id === item.id) {
       return [...path, child.name].join(".");
     }
     if (child.kindString === "Namespace") {
-      const name = getNamespacedName(child.children, [...path, child.name], item);
+      const name = getNamespacedName(docs, item, [...path, child.name], child.children);
       if (name) {
         return name;
       }
@@ -340,7 +340,7 @@ ${replaceLinksInDescription(docs, getCommentReturns(signature))}
 }
 
 function generateReactComponentSignatureMarkdown(docs, signature, item) {
-  const name = getNamespacedName(docs.children, [], item) || item.name;
+  const name = getNamespacedName(docs, item) || item.name;
   const props = getPropList(docs, signature);
   let text = `
 ### ${name}
