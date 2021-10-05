@@ -9146,6 +9146,9 @@
 					"kind": 1024,
 					"kindString": "Property",
 					"flags": {},
+					"comment": {
+						"shortText": "The key of the keyboard shortcut."
+					},
 					"type": {
 						"type": "reference",
 						"id": 47,
@@ -9158,6 +9161,9 @@
 					"kind": 1024,
 					"kindString": "Property",
 					"flags": {},
+					"comment": {
+						"shortText": "The modifier keys of the keyboard shortcut."
+					},
 					"type": {
 						"type": "array",
 						"elementType": {
