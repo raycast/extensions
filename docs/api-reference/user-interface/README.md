@@ -6,7 +6,7 @@ Raycast uses React for its user interface declaration and renders the supported 
 * [Detail](detail.md) to present more information, f.e. the details of a GitHub pull request.
 * [Form](form.md) to create new content, f.e. filing a bug report.
 
-Each component can provide interaction via an [ActionPanel](action-panel.md). The panel has a list of actions where each one can be associated with a keyboard shortcut. Shortcuts allow users to use Raycast without using their mouse.
+Each component can provide interaction via an [ActionPanel](action-panel.md). The panel has a list of actions where each one can be associated with a [keyboard shortcut](../keyboard.md). Shortcuts allow users to use Raycast without using their mouse.
 
 In addition to the React components, there imperative mthods such as [`showToast`](toast.md#showtoast), [`closeMainWindow`](window-and-search-bar.md#closemainwindow) or [`popToRoot`](window-and-search-bar.md#poptoroot) that be used to trigger temporary UI changes. 
 
