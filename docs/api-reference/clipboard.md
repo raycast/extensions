@@ -1,6 +1,6 @@
 # Clipboard
 
-You can write contents to the clipboard through [copyTextToClipboard](clipboard.md#copytexttoclipboard) and clear it through [clearClipboard](clipboard.md#clearclipboard). We also provide convenience actions such as [CopyToClipboardAction](user-interface/actions.md#CopyToClipboardAction).
+Use the Clipboard APIs to work with text from your clipboard and current selection. You can write contents to the clipboard through [`copyTextToClipboard`](clipboard.md#copytexttoclipboard) and clear it through [`clearClipboard`](clipboard.md#clearclipboard). The convenience action [`CopyToClipboardAction`](user-interface/actions.md#CopyToClipboardAction) can be used to copy content of a selected list item to the clipboard.The [`getSelectedText`](clipboard.md#getselectedtext) API allows to get the current text selection of the frontmost application. This can be handy if you need to transform or act on the selection. The [`pasteText`](clipboard.md#pastetext) function inserts text at the current cursor position. We use this in the Clipboard History to paste an entry to your frontmost app. You can use the [`PasteAction`](user-interface/actions.md#pasteaction) to add this functionality to your list or form.
 
 ## API Reference
 
@@ -117,3 +117,4 @@ export default async () => {
 #### Return
 
 A promise that resolves when the text got pasted.
+

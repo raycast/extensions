@@ -1,5 +1,7 @@
 # Utilities
 
+This list of Utility APIs make your life easier as a developer. They also expose some of Raycast's native functionality to allow deep integration into the user's setup. For example, you can use the Application APIs to check if a desktop application is installed and then provide an action to deeplink into it.
+
 ## API Reference
 
 ### getApplications
@@ -32,7 +34,7 @@ export default async () => {
 
 #### Return
 
-An array of [Application](../utilities.md#application).
+An array of [Application](https://github.com/raycast/extensions/tree/dedca25c38f912507c9e8eae9c8aea6e16332c93/docs/utilities.md#application).
 
 ### getDefaultApplication
 
@@ -63,7 +65,7 @@ export default async () => {
 
 #### Return
 
-The default [Application](../utilities.md#application) that would open the file. Throws an error if no application was found.
+The default [Application](https://github.com/raycast/extensions/tree/dedca25c38f912507c9e8eae9c8aea6e16332c93/docs/utilities.md#application) that would open the file. Throws an error if no application was found.
 
 ### randomId
 
@@ -162,8 +164,7 @@ A promise that resolves when all files are moved to the trash.
 
 An object that represents a locally installed application on the system.
 
-It can be used to open files or folders in a specific application. Use [getApplications](../utilities.md#getapplications) or
-[getDefaultApplication](../utilities.md#getdefaultapplication) to get applications that can open a specific file or folder.
+It can be used to open files or folders in a specific application. Use [getApplications](https://github.com/raycast/extensions/tree/dedca25c38f912507c9e8eae9c8aea6e16332c93/docs/utilities.md#getapplications) or [getDefaultApplication](https://github.com/raycast/extensions/tree/dedca25c38f912507c9e8eae9c8aea6e16332c93/docs/utilities.md#getdefaultapplication) to get applications that can open a specific file or folder.
 
 #### Properties
 
@@ -172,3 +173,4 @@ It can be used to open files or folders in a specific application. Use [getAppli
 | bundleId | `string` | No | The bundle identifier of the application, e.g. `com.raycast.macos`. |
 | name | `string` | Yes | The display name of the application. |
 | path | `string` | Yes | The absolute path to the application bundle, e.g. `/Applications/Raycast.app`, |
+

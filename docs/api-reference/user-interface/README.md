@@ -1,10 +1,12 @@
 # User Interface
 
-Raycast uses React for its user interface declaration and renders the supported elements to native Raycast UI. State is managed through [React's built-in hooks and effects](https://reactjs.org/docs/hooks-intro.html). When state is updated, Raycast automatically re-renders the user interface.
+Raycast uses React for its user interface declaration and renders the supported elements to native our native UI. The API comes with a set of UI components that you can use to build your extensions. Think of it as a design system. The high-level components are the following:
 
-The API comes with a set of UI components that are currently enable you to set up [List](list.md) and [Detail](https://github.com/raycast/extensions/tree/8faa62f0241793979ee33e59d2cb528131d9ab52/docs/api-reference/user-interface/detail.md)-style user interfaces and provide interaction via an [ActionPanel](action-panel.md). Each action can be associated with a [KeyboardShortcut](https://github.com/raycast/extensions/tree/8faa62f0241793979ee33e59d2cb528131d9ab52/docs/api-reference/keyboard.md) so that users can interact with the command without using the mouse.
+* [List](list.md) to show multiple similar items, f.e. a list of your open todos.
+* [Detail](detail.md) to present more information, f.e. the details of a GitHub pull request.
+* [Form](form.md) to create new content, f.e. filing a bug report.
 
-You can gather user input through [Form](form.md) elements and show input fields such as [textfields](form.md#form.textfield) or [checkboxes](form.md#form.checkbox).
+Each component can provide interaction via an [ActionPanel](action-panel.md). The panel has a list of actions where each one can be associated with a keyboard shortcut. Shortcuts allow users to use Raycast without using their mouse.
 
-The UI API also includes imperative-style methods such as [showToast](toast.md#showToast), [closeMainWindow](window-and-search-bar.md#closeMainWindow), or [popToRoot](window-and-search-bar.md#popToRoot). They trigger temporary UI changes and are typically used from actions or to show error states.
+In addition to the React components, there imperative mthods such as [`showToast`](toast.md#showtoast), [`closeMainWindow`](window-and-search-bar.md#closemainwindow) or [`popToRoot`](window-and-search-bar.md#poptoroot) that be used to trigger temporary UI changes. 
 
