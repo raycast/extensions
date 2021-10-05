@@ -29,6 +29,7 @@
 
 * [Clipboard](api-reference/clipboard.md)
 * [Environment](api-reference/environment.md)
+* [Keyboard](api-reference/keyboard.md)
 * [Preferences](api-reference/preferences.md)
 * [Storage](api-reference/storage.md)
 * [User Interface](api-reference/user-interface/README.md)
