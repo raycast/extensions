@@ -27,7 +27,7 @@ console.log(`Is development mode: ${environment.isDevelopment}`);
 
 ### Environment
 
-Holds data about the environment the command is running in. Use the global [environment](https://github.com/raycast/extensions/tree/dedca25c38f912507c9e8eae9c8aea6e16332c93/docs/environment.md#environment) object to retrieve values.
+Holds data about the environment the command is running in. Use the global [environment](../environment.md#environment) object to retrieve values.
 
 #### Properties
 
@@ -36,7 +36,6 @@ Holds data about the environment the command is running in. Use the global [envi
 | assetsPath | `string` | Yes | The absolute path to the assets directory of the extension. |
 | commandName | `string` | Yes | The name of the launched command, as specified in package.json |
 | extensionName | `string` | Yes | The name of the extension, as specified in package.json |
-| isDevelopment | `boolean` | Yes | Indicates whether the command is a development command \(vs. an installed command from the Store\). |
+| isDevelopment | `boolean` | Yes | Indicates whether the command is a development command (vs. an installed command from the Store). |
 | raycastVersion | `string` | Yes | The version of the main Raycast app |
 | supportPath | `string` | Yes | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. |
-
