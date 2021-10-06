@@ -14,6 +14,8 @@
 
 This repository contains all extensions that are available in the [Raycast Store](https://raycast.com/store). It also includes documentation and examples to extend Raycast. 
 
+![Header](images/header.png)
+
 ## Getting Started
 
 Visit [https://developers.raycast.com](https://developers.raycast.com) to get started with our API. If you want to discover and install extensions, check out [our Store](https://raycast.com/store).
