@@ -1,6 +1,6 @@
 ---
-name: "🐞 Extension Bug Report"
-about: Report a reproducible bug or regression related to extension(s) published in the Store.
+name: "🧩 🐞 Extension Bug Report"
+about: Report a reproducible bug or regression related to extension(s) published in the Store
 title: '[Extension Bug] '
 labels: 'extension, bug'
 

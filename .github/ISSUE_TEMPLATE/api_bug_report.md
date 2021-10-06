@@ -1,6 +1,6 @@
 ---
-name: "🐞 API Bug Report"
-about: Report a reproducible bug or regression related to extensions API.
+name: "🧬 🐞 API Bug Report"
+about: Report a reproducible bug or regression related to extensions API
 title: '[API Bug] '
 labels: 'api, bug'
 
