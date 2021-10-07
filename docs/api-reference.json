@@ -1,7 +1,7 @@
 {
 	"id": 0,
 	"name": "@raycast/api",
-	"kind": 0,
+	"kind": 1,
 	"kindString": "Project",
 	"flags": {},
 	"originalName": "",
@@ -9,7 +9,7 @@
 		{
 			"id": 78,
 			"name": "ActionPanel",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -133,7 +133,7 @@
 		{
 			"id": 97,
 			"name": "ActionPanelItem",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -618,7 +618,7 @@
 		{
 			"id": 89,
 			"name": "ActionPanelSection",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -694,7 +694,7 @@
 		{
 			"id": 124,
 			"name": "ActionPanelSubmenu",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -1123,7 +1123,7 @@
 		{
 			"id": 168,
 			"name": "Detail",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -1237,7 +1237,7 @@
 		{
 			"id": 184,
 			"name": "Form",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -1567,7 +1567,7 @@
 		{
 			"id": 242,
 			"name": "FormCheckbox",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -1794,7 +1794,7 @@
 		{
 			"id": 259,
 			"name": "FormDatePicker",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -2002,7 +2002,7 @@
 		{
 			"id": 279,
 			"name": "FormDropdown",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -2242,7 +2242,7 @@
 		{
 			"id": 305,
 			"name": "FormDropdownItem",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -2570,7 +2570,7 @@
 		{
 			"id": 297,
 			"name": "FormDropdownSection",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -2646,7 +2646,7 @@
 		{
 			"id": 274,
 			"name": "FormSeparator",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -2675,7 +2675,7 @@
 		{
 			"id": 324,
 			"name": "FormTagPicker",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -2950,7 +2950,7 @@
 		{
 			"id": 342,
 			"name": "FormTagPickerItem",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -3278,7 +3278,7 @@
 		{
 			"id": 225,
 			"name": "FormTextArea",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -3505,7 +3505,7 @@
 		{
 			"id": 208,
 			"name": "FormTextField",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -3732,7 +3732,7 @@
 		{
 			"id": 73,
 			"name": "GlobalActionPanel",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -3761,7 +3761,7 @@
 		{
 			"id": 456,
 			"name": "List",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -4019,7 +4019,7 @@
 		{
 			"id": 486,
 			"name": "ListItem",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -4420,7 +4420,7 @@
 		{
 			"id": 476,
 			"name": "ListSection",
-			"kind": 2,
+			"kind": 4,
 			"kindString": "Namespace",
 			"flags": {},
 			"children": [
@@ -4534,7 +4534,7 @@
 		{
 			"id": 698,
 			"name": "Color",
-			"kind": 4,
+			"kind": 8,
 			"kindString": "Enumeration",
 			"flags": {},
 			"comment": {
@@ -4658,7 +4658,7 @@
 		{
 			"id": 713,
 			"name": "Icon",
-			"kind": 4,
+			"kind": 8,
 			"kindString": "Enumeration",
 			"flags": {},
 			"comment": {
@@ -5120,7 +5120,7 @@
 		{
 			"id": 773,
 			"name": "ImageMask",
-			"kind": 4,
+			"kind": 8,
 			"kindString": "Enumeration",
 			"flags": {},
 			"comment": {
@@ -5178,7 +5178,7 @@
 		{
 			"id": 811,
 			"name": "ToastStyle",
-			"kind": 4,
+			"kind": 8,
 			"kindString": "Enumeration",
 			"flags": {},
 			"comment": {
@@ -6832,6 +6832,7 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
+										"id": 380,
 										"name": "Value"
 									}
 								}
@@ -7045,6 +7046,7 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
+										"id": 380,
 										"name": "Value"
 									}
 								}
@@ -7478,6 +7480,7 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
+										"id": 380,
 										"name": "Value"
 									}
 								}
@@ -7702,6 +7705,7 @@
 					},
 					"type": {
 						"type": "reference",
+						"id": 380,
 						"name": "Value"
 					}
 				},
@@ -7764,6 +7768,7 @@
 					},
 					"type": {
 						"type": "reference",
+						"id": 380,
 						"name": "Value"
 					}
 				},
@@ -7794,6 +7799,7 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
+										"id": 380,
 										"name": "Value"
 									}
 								}
@@ -8470,6 +8476,7 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
+										"id": 380,
 										"name": "Value"
 									}
 								}
@@ -8703,6 +8710,7 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
+										"id": 380,
 										"name": "Value"
 									}
 								}
@@ -8932,6 +8940,7 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
+										"id": 380,
 										"name": "Value"
 									}
 								}
@@ -10105,7 +10114,7 @@
 									"kindString": "Parameter",
 									"flags": {},
 									"comment": {
-										"text": "The React component to push to the navigation stack.\n"
+										"shortText": "The React component to push to the navigation stack.\n"
 									},
 									"type": {
 										"type": "reference",
@@ -11432,6 +11441,7 @@
 									"flags": {},
 									"type": {
 										"type": "reference",
+										"id": 623,
 										"name": "Values"
 									}
 								}
@@ -12485,9 +12495,7 @@
 			"name": "environment",
 			"kind": 32,
 			"kindString": "Variable",
-			"flags": {
-				"isConst": true
-			},
+			"flags": {},
 			"comment": {
 				"shortText": "Contains environment values such as the Raycast version, extension info, and paths.",
 				"tags": [
@@ -12509,9 +12517,7 @@
 			"name": "preferences",
 			"kind": 32,
 			"kindString": "Variable",
-			"flags": {
-				"isConst": true
-			},
+			"flags": {},
 			"comment": {
 				"shortText": "Contains the preference values that have been passed to the command."
 			},
@@ -14046,6 +14052,7 @@
 								"typeArguments": [
 									{
 										"type": "reference",
+										"id": 614,
 										"name": "Values"
 									}
 								],
@@ -14062,6 +14069,7 @@
 								"typeArguments": [
 									{
 										"type": "reference",
+										"id": 614,
 										"name": "Values"
 									}
 								],
@@ -14174,6 +14182,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
+								"id": 50,
 								"name": "Values"
 							}
 						],
@@ -14287,7 +14296,7 @@
 								"isOptional": true
 							},
 							"comment": {
-								"text": "Can be used to force scrolling to the top. Defaults to scrolling to the top after the\nthe search bar was cleared."
+								"shortText": "Can be used to force scrolling to the top. Defaults to scrolling to the top after the\nthe search bar was cleared."
 							},
 							"type": {
 								"type": "reflection",
@@ -14375,7 +14384,7 @@
 								"isOptional": true
 							},
 							"comment": {
-								"text": "Can be used to clear the root search. Defaults to not clearing the root search after\nthe window was closed."
+								"shortText": "Can be used to clear the root search. Defaults to not clearing the root search after\nthe window was closed."
 							},
 							"type": {
 								"type": "reflection",
@@ -14457,7 +14466,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"text": "The text to copy to the clipboard."
+								"shortText": "The text to copy to the clipboard."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -14511,7 +14520,7 @@
 								"isOptional": true
 							},
 							"comment": {
-								"text": "The path of the file or folder to get the applications for. If no path is specified, all installed applications are returned."
+								"shortText": "The path of the file or folder to get the applications for. If no path is specified, all installed applications are returned."
 							},
 							"type": {
 								"type": "reference",
@@ -14567,7 +14576,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"text": "The path of the file or folder to get the default application for."
+								"shortText": "The path of the file or folder to get the default application for."
 							},
 							"type": {
 								"type": "reference",
@@ -14639,7 +14648,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"text": "The key you want to retrieve the value of."
+								"shortText": "The key you want to retrieve the value of."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -14655,6 +14664,7 @@
 								"types": [
 									{
 										"type": "reference",
+										"id": 53,
 										"name": "Value"
 									},
 									{
@@ -14717,6 +14727,7 @@
 					],
 					"type": {
 						"type": "reference",
+						"id": 652,
 						"name": "Values"
 					}
 				}
@@ -14793,7 +14804,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"text": "The text to insert at the cursor."
+								"shortText": "The text to insert at the cursor."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -14851,7 +14862,7 @@
 								"isOptional": true
 							},
 							"comment": {
-								"text": "Can be used to clear the search bar. Defaults to clearing the search bar after popped to root."
+								"shortText": "Can be used to clear the search bar. Defaults to clearing the search bar after popped to root."
 							},
 							"type": {
 								"type": "reflection",
@@ -14936,7 +14947,7 @@
 								"isOptional": true
 							},
 							"comment": {
-								"text": "Size of the ID. The default size is 21."
+								"shortText": "Size of the ID. The default size is 21."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -14982,7 +14993,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"text": "The key you want to remove the value of."
+								"shortText": "The key you want to remove the value of."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -15080,7 +15091,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"text": "The key you want to create or update the value of."
+								"shortText": "The key you want to create or update the value of."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -15094,7 +15105,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"text": "The value you want to create or update for the given key."
+								"shortText": "The value you want to create or update for the given key."
 							},
 							"type": {
 								"type": "reference",
@@ -15151,7 +15162,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"text": "The title that will be displayed for the HUD."
+								"shortText": "The title that will be displayed for the HUD."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -15203,7 +15214,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"text": "The path to show in the Finder."
+								"shortText": "The path to show in the Finder."
 							},
 							"type": {
 								"type": "reference",
@@ -15259,7 +15270,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"text": "The visual style of the Toast."
+								"shortText": "The visual style of the Toast."
 							},
 							"type": {
 								"type": "reference",
@@ -15274,7 +15285,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"text": "The title that will be displayed in the Toast."
+								"shortText": "The title that will be displayed in the Toast."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -15290,7 +15301,7 @@
 								"isOptional": true
 							},
 							"comment": {
-								"text": "The message that will be displayed in the Toast."
+								"shortText": "The message that will be displayed in the Toast."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -15445,7 +15456,7 @@
 								"isOptional": true
 							},
 							"comment": {
-								"text": "The ID that is returned by default."
+								"shortText": "The ID that is returned by default."
 							},
 							"type": {
 								"type": "intrinsic",
@@ -15459,7 +15470,7 @@
 							"kindString": "Parameter",
 							"flags": {},
 							"comment": {
-								"text": "A function that is used to generate a random ID. Uses {@link randomId} by default."
+								"shortText": "A function that is used to generate a random ID. Uses {@link randomId} by default."
 							},
 							"type": {
 								"type": "reflection",
@@ -15537,7 +15548,7 @@
 	"groups": [
 		{
 			"title": "Namespaces",
-			"kind": 2,
+			"kind": 4,
 			"children": [
 				78,
 				97,
@@ -15563,7 +15574,7 @@
 		},
 		{
 			"title": "Enumerations",
-			"kind": 4,
+			"kind": 8,
 			"children": [
 				698,
 				713,
