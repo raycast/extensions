@@ -1,12 +1,12 @@
 # Preferences
 
-Use the Preferences API to make your extension configurable. Preferences can be configured per command or shared in the context of an extension. Required preferences need to be set before a command opens. They are great a way to make sure that the user of your extension has everything set up properly. 
+Use the Preferences API to make your extension configurable. Preferences can be configured per command or shared in the context of an extension. Required preferences need to be set before a command opens. They are great a way to make sure that the user of your extension has everything set up properly.
 
 ## API Reference
 
 ### getPreferenceValues
 
-A convenience function for type-safe access to the values of the [preferences](../preferences.md#preferences) object.
+A convenience function for type-safe access to the values of the [preferences](https://github.com/raycast/extensions/tree/c7c740a4e64bd69ec583e9fc064d014d782391fc/docs/preferences.md#preferences) object.
 
 Each preference name is mapped to its value and the defined default values are used as fallback values.
 
@@ -47,8 +47,7 @@ Contains the preference values that have been passed to the command.
 
 ### Preference
 
-Holds data about a single preference item (entered in Raycast Preferences). Use the [getPreferenceValues](../preferences.md#getpreferencevalues)
-function or the global [preferences](../preferences.md#preferences) object to retrieve values.
+Holds data about a single preference item \(entered in Raycast Preferences\). Use the [getPreferenceValues](https://github.com/raycast/extensions/tree/c7c740a4e64bd69ec583e9fc064d014d782391fc/docs/preferences.md#getpreferencevalues) function or the global [preferences](https://github.com/raycast/extensions/tree/c7c740a4e64bd69ec583e9fc064d014d782391fc/docs/preferences.md#preferences) object to retrieve values.
 
 The object maps to a defined preference in the `package.json` manifest file.
 
@@ -75,7 +74,7 @@ Values of preference items.
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| [name: string] | `any` | Yes |  |
+| \[name: string\] | `any` | Yes |  |
 
 ### Preferences
 
@@ -83,4 +82,5 @@ Values of preference items.
 Preferences: Record<string, Preference>
 ```
 
-A record type holding the preferences (entered in Raycast Preferences) that have been passed to the command.
+A record type holding the preferences \(entered in Raycast Preferences\) that have been passed to the command.
+

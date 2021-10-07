@@ -1,6 +1,6 @@
 # Storage
 
-The storage APIs can be used to store non-sensitive data that is persisted across command launches. It's methods are similar to the [browser's `localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage). All commands in an extension have shared access to the stored data. Extensions can't access the storage of other extensions. Values can be managed through functions such as [getLocalStorageItem](storage.md#getLocalStorageItem), [setLocalStorageItem](storage.md#setLocalStorageItem), or [removeLocalStorageItem](storage.md#removeLocalStorageItem). A typical use cases is storing user related data, f.e. their entered todos. 
+The storage APIs can be used to store non-sensitive data that is persisted across command launches. It's methods are similar to the [browser's `localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage). All commands in an extension have shared access to the stored data. Extensions can't access the storage of other extensions. Values can be managed through functions such as [getLocalStorageItem](storage.md#getLocalStorageItem), [setLocalStorageItem](storage.md#setLocalStorageItem), or [removeLocalStorageItem](storage.md#removeLocalStorageItem). A typical use cases is storing user related data, f.e. their entered todos.
 
 {% hint style="info" %}
 The data is stored in the user's database. The API is not meant to store large amounts of data. For this, use [Node's built-in APIs to write files](https://nodejs.dev/learn/writing-files-with-nodejs), e.g. to the extension's [support directory](environment.md#environment).
@@ -36,7 +36,7 @@ export default async () => {
 
 #### Return
 
-A promise that resolves with an object containing all [LocalStorageValues](../storage.md#localstoragevalues).
+A promise that resolves with an object containing all [LocalStorageValues](https://github.com/raycast/extensions/tree/c7c740a4e64bd69ec583e9fc064d014d782391fc/docs/storage.md#localstoragevalues).
 
 ### clearLocalStorage
 
@@ -164,7 +164,7 @@ For type-safe values you can define your own interface. Use the keys of the loca
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| [key: string] | `any` | Yes | The local storage value of a given key. |
+| \[key: string\] | `any` | Yes | The local storage value of a given key. |
 
 ### LocalStorageValue
 
@@ -190,3 +190,4 @@ export default async () => {
   await setLocalStorageItem("fruit-eaten-today", true);
 };
 ```
+

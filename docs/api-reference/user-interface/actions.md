@@ -34,15 +34,14 @@ export default function Command() {
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | content | `string` or `number` | Yes | - | The contents that will be written to the clipboard as string. |
-| icon | `ImageLike` | No | [Icon.Clipboard](../user-interface/icons-and-images.md#icon) | A optional icon displayed for the item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
+| icon | `ImageLike` | No | [Icon.Clipboard](icons-and-images.md#icon) | A optional icon displayed for the item. See [ImageLike](icons-and-images.md#imagelike) for the supported formats and types. |
 | shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the action. |
 | title | `string` | No | - | An optional title for the action. |
-| onCopy | <code>(content: string \| number) => void</code> | No | - |  |
+| onCopy | `(content: string | number) => void` | No | - |  |
 
 ### OpenAction
 
-An action to open a file or folder with a specific application, just as if you had double-clicked the
-file's icon.
+An action to open a file or folder with a specific application, just as if you had double-clicked the file's icon.
 
 The main window is closed, after the file was opened.
 
@@ -70,11 +69,11 @@ export default function Command() {
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | application | `string` or `Application` | No | - | The application name to use for opening the file. |
-| icon | `ImageLike` | No | [Icon.Finder](../user-interface/icons-and-images.md#icon) | The icon displayed for the action. |
+| icon | `ImageLike` | No | [Icon.Finder](icons-and-images.md#icon) | The icon displayed for the action. |
 | shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the action. |
 | target | `string` | Yes | - | The file, folder or URL to open. |
 | title | `string` | Yes | - | The title for the action. |
-| onOpen | <code>(target: string) => void</code> | No | - |  |
+| onOpen | `(target: string) => void` | No | - |  |
 
 ### OpenInBrowserAction
 
@@ -105,18 +104,17 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | `ImageLike` | No | [Icon.Globe](../user-interface/icons-and-images.md#icon) | The icon displayed for the action. |
+| icon | `ImageLike` | No | [Icon.Globe](icons-and-images.md#icon) | The icon displayed for the action. |
 | shortcut | `KeyboardShortcut` | No | - | The optional keyboard shortcut for the menu item |
 | title | `string` | No | - | An optional title for the action. |
 | url | `string` | Yes | - | The URL to open. |
-| onOpen | <code>(url: string) => void</code> | No | - |  |
+| onOpen | `(url: string) => void` | No | - |  |
 
 ### OpenWithAction
 
 An action to open a file or folder with a specific application.
 
-The action opens a sub-menu with all applications that can open the file or folder.
-The main window is closed after the file was opened in the specified application.
+The action opens a sub-menu with all applications that can open the file or folder. The main window is closed after the file was opened in the specified application.
 
 #### Example
 
@@ -144,11 +142,11 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | `ImageLike` | No | [Icon.Upload](../user-interface/icons-and-images.md#icon) | The icon displayed for the action. |
+| icon | `ImageLike` | No | [Icon.Upload](icons-and-images.md#icon) | The icon displayed for the action. |
 | path | `string` | Yes | - | The path to open. |
 | shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the action. |
 | title | `string` | No | Open With | The title for the action. |
-| onOpen | <code>(path: string) => void</code> | No | - |  |
+| onOpen | `(path: string) => void` | No | - |  |
 
 ### PasteAction
 
@@ -180,10 +178,10 @@ export default function Command() {
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | content | `string` or `number` | Yes | - | The contents that will be written to the clipboard as string. |
-| icon | `ImageLike` | No | [Icon.Clipboard](../user-interface/icons-and-images.md#icon) | The icon displayed for the action. |
+| icon | `ImageLike` | No | [Icon.Clipboard](icons-and-images.md#icon) | The icon displayed for the action. |
 | shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the action. |
 | title | `string` | No | - | An optional title for the action. |
-| onPaste | <code>(content: string \| number) => void</code> | No | - |  |
+| onPaste | `(content: string | number) => void` | No | - |  |
 
 ### PushAction
 
@@ -224,7 +222,7 @@ export default function Command() {
 | shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the action. |
 | target | `ReactNode` | Yes | - | The target view that will be pushed to the navigation stack. |
 | title | `string` | Yes | - | The title displayed for the item. |
-| onPush | <code>() => void</code> | No | - |  |
+| onPush | `() => void` | No | - |  |
 
 ### ShowInFinderAction
 
@@ -258,11 +256,11 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | `ImageLike` | No | [Icon.Finder](../user-interface/icons-and-images.md#icon) | A optional icon displayed for the item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
+| icon | `ImageLike` | No | [Icon.Finder](icons-and-images.md#icon) | A optional icon displayed for the item. See [ImageLike](icons-and-images.md#imagelike) for the supported formats and types. |
 | path | `PathLike` | Yes | - | The path to open. |
 | shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the action. |
 | title | `string` | No | Show in Finder | An optional title for the action. |
-| onShow | <code>(path: PathLike) => void</code> | No | - |  |
+| onShow | `(path: PathLike) => void` | No | - |  |
 
 ### SubmitFormAction
 
@@ -275,7 +273,7 @@ Action that allows to add a submit handler for capturing form values.
 | icon | `ImageLike` | No | - | The icon displayed for the action. |
 | shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the action. |
 | title | `string` | No | - | The title displayed for the item. |
-| onSubmit | <code>(input: Values) => void</code> | No | - |  |
+| onSubmit | `(input: Values) => void` | No | - |  |
 
 ### TrashAction
 
@@ -307,8 +305,9 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | `ImageLike` | No | [Icon.Trash](../user-interface/icons-and-images.md#icon) | A optional icon displayed for the action. |
+| icon | `ImageLike` | No | [Icon.Trash](icons-and-images.md#icon) | A optional icon displayed for the action. |
 | paths | `PathLike` or `PathLike[]` | Yes | - | The item or items to move to the trash. |
 | shortcut | `KeyboardShortcut` | No | - | The optional keyboard shortcut for the action. |
 | title | `string` | No | Move to Trash | An optional title for the action. |
-| onTrash | <code>(paths: PathLike \| PathLike[]) => void</code> | No | - |  |
+| onTrash | `(paths: PathLike | PathLike[]) => void` | No | - |  |
+
