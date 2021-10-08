@@ -36,7 +36,7 @@ export default async () => {
 
 #### Return
 
-A promise that resolves with an object containing all [LocalStorageValues](https://github.com/raycast/extensions/tree/c7c740a4e64bd69ec583e9fc064d014d782391fc/docs/storage.md#localstoragevalues).
+A promise that resolves with an object containing all [LocalStorageValues](../storage.md#localstoragevalues).
 
 ### clearLocalStorage
 
@@ -164,7 +164,7 @@ For type-safe values you can define your own interface. Use the keys of the loca
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| \[key: string\] | `any` | Yes | The local storage value of a given key. |
+| [key: string] | `any` | Yes | The local storage value of a given key. |
 
 ### LocalStorageValue
 
@@ -190,4 +190,3 @@ export default async () => {
   await setLocalStorageItem("fruit-eaten-today", true);
 };
 ```
-

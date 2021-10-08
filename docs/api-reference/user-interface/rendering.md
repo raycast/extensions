@@ -51,4 +51,3 @@ render(<Command />)
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | nodeToRender | `ReactNode` | Yes |  |
-

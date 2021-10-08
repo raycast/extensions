@@ -117,4 +117,3 @@ export default async () => {
 #### Return
 
 A promise that resolves when the text got pasted.
-

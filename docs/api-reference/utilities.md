@@ -34,7 +34,7 @@ export default async () => {
 
 #### Return
 
-An array of [Application](https://github.com/raycast/extensions/tree/c7c740a4e64bd69ec583e9fc064d014d782391fc/docs/utilities.md#application).
+An array of [Application](../utilities.md#application).
 
 ### getDefaultApplication
 
@@ -65,7 +65,7 @@ export default async () => {
 
 #### Return
 
-The default [Application](https://github.com/raycast/extensions/tree/c7c740a4e64bd69ec583e9fc064d014d782391fc/docs/utilities.md#application) that would open the file. Throws an error if no application was found.
+The default [Application](../utilities.md#application) that would open the file. Throws an error if no application was found.
 
 ### randomId
 
@@ -164,7 +164,8 @@ A promise that resolves when all files are moved to the trash.
 
 An object that represents a locally installed application on the system.
 
-It can be used to open files or folders in a specific application. Use [getApplications](https://github.com/raycast/extensions/tree/c7c740a4e64bd69ec583e9fc064d014d782391fc/docs/utilities.md#getapplications) or [getDefaultApplication](https://github.com/raycast/extensions/tree/c7c740a4e64bd69ec583e9fc064d014d782391fc/docs/utilities.md#getdefaultapplication) to get applications that can open a specific file or folder.
+It can be used to open files or folders in a specific application. Use [getApplications](../utilities.md#getapplications) or
+[getDefaultApplication](../utilities.md#getdefaultapplication) to get applications that can open a specific file or folder.
 
 #### Properties
 
@@ -173,4 +174,3 @@ It can be used to open files or folders in a specific application. Use [getAppli
 | bundleId | `string` | No | The bundle identifier of the application, e.g. `com.raycast.macos`. |
 | name | `string` | Yes | The display name of the application. |
 | path | `string` | Yes | The absolute path to the application bundle, e.g. `/Applications/Raycast.app`, |
-
