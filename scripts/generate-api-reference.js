@@ -54,7 +54,7 @@ function getCommentReturns(item) {
 }
 
 function getLinkName(name) {
-  name = name.replace(/[^\w.]/g, "");
+  name = name.replace(/\W/g, "");
   name = name.toLowerCase();
   return name;
 }
