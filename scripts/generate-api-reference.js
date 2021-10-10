@@ -4,7 +4,6 @@ const fs = require("fs").promises;
 
 const START_CODE_BLOCK = "```typescript";
 const END_CODE_BLOCK = "```";
-const BQ = "`";
 
 function getFilename(title) {
   return title.toLowerCase().replaceAll(" ", "-").replaceAll("&", "and");
@@ -54,7 +53,7 @@ function getCommentReturns(item) {
 }
 
 function getLinkName(name) {
-  name = name.replace(/\W/g, "");
+  name = name.replace(/\W/g, "-");
   name = name.toLowerCase();
   return name;
 }
@@ -100,6 +99,16 @@ function replaceLinksInDescription(docs, desc) {
       return p1;
     }
     return `[${p1}](${link})`;
+  });
+}
+
+function replaceTypeLikeStringsInType(docs, type) {
+  return type.replaceAll(/\b([A-Z][.A-Za-z]+)(\s|$)/g, (match, p1, p2) => {
+    const link = generateLinkDestination(docs, p1);
+    if (!link) {
+      return `${p1}${p2}`;
+    }
+    return `[${p1}](${link})${p2}`;
   });
 }
 
@@ -292,13 +301,17 @@ function getExampleCode(item) {
   return null;
 }
 
-function formatTypeString(type) {
+function formatTypeString(docs, type) {
+  // FIXME there should be better way like doing it while constructing type string
+  type = replaceTypeLikeStringsInType(docs, type);
+  // escape "<" because of <code>
+  type = type.replaceAll("<", "&lt;");
   // FIXME this replaceAll might be too hacky
   if (type.startsWith("(")) {
     // assuming signature
     return "<code>" + type.replaceAll(" | ", " \\| ") + "</code>";
   }
-  return BQ + type.replaceAll(" | ", BQ + " or " + BQ) + BQ;
+  return "<code>" + type.replaceAll(" | ", "</code>" + " or " + "<code>") + "</code>";
 }
 
 function generateFunctionSignatureMarkdown(docs, signature) {
@@ -344,7 +357,10 @@ ${exampleCode}
 ${parameters
   .map(
     ([name, type, required, desc]) =>
-      `| ${name} | ${formatTypeString(type)} | ${required ? "Yes" : "No"} | ${replaceLinksInDescription(docs, desc)} |`
+      `| ${name} | ${formatTypeString(docs, type)} | ${required ? "Yes" : "No"} | ${replaceLinksInDescription(
+        docs,
+        desc
+      )} |`
   )
   .join("\n")}
 `;
@@ -391,7 +407,7 @@ ${exampleCode}
 ${props
   .map(
     ([name, type, required, def, desc]) =>
-      `| ${name} | ${formatTypeString(type)} | ${required ? "Yes" : "No"} | ${replaceLinksInDescription(
+      `| ${name} | ${formatTypeString(docs, type)} | ${required ? "Yes" : "No"} | ${replaceLinksInDescription(
         docs,
         def || "-"
       )} | ${replaceLinksInDescription(docs, desc)} |`
@@ -456,7 +472,10 @@ ${exampleCode}
 ${properties
   .map(
     ([name, type, required, desc]) =>
-      `| ${name} | ${formatTypeString(type)} | ${required ? "Yes" : "No"} | ${replaceLinksInDescription(docs, desc)} |`
+      `| ${name} | ${formatTypeString(docs, type)} | ${required ? "Yes" : "No"} | ${replaceLinksInDescription(
+        docs,
+        desc
+      )} |`
   )
   .join("\n")}
 `;
@@ -531,7 +550,9 @@ ${exampleCode}
 | Name | Type | Description |
 | :--- | :--- | :--- |
 ${constructors
-  .map(([name, type, desc]) => `| ${name} | ${formatTypeString(type)} | ${replaceLinksInDescription(docs, desc)} |`)
+  .map(
+    ([name, type, desc]) => `| ${name} | ${formatTypeString(docs, type)} | ${replaceLinksInDescription(docs, desc)} |`
+  )
   .join("\n")}
 `;
   if (accessors.length) {
@@ -541,7 +562,9 @@ ${constructors
 | Name | Type | Description |
 | :--- | :--- | :--- |
 ${accessors
-  .map(([name, type, desc]) => `| ${name} | ${formatTypeString(type)} | ${replaceLinksInDescription(docs, desc)} |`)
+  .map(
+    ([name, type, desc]) => `| ${name} | ${formatTypeString(docs, type)} | ${replaceLinksInDescription(docs, desc)} |`
+  )
   .join("\n")}
 `;
   }
@@ -552,7 +575,9 @@ ${accessors
 | Name | Type | Description |
 | :--- | :--- | :--- |
 ${methods
-  .map(([name, type, desc]) => `| ${name} | ${formatTypeString(type)} | ${replaceLinksInDescription(docs, desc)} |`)
+  .map(
+    ([name, type, desc]) => `| ${name} | ${formatTypeString(docs, type)} | ${replaceLinksInDescription(docs, desc)} |`
+  )
   .join("\n")}
 `;
   }
