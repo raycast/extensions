@@ -48,8 +48,8 @@ export default function Command() {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| key | `KeyEquivalent` | Yes | The key of the keyboard shortcut. |
-| modifiers | `KeyModifier[]` | Yes | The modifier keys of the keyboard shortcut. |
+| key | <code>[KeyEquivalent](../keyboard.md#keyequivalent)</code> | Yes | The key of the keyboard shortcut. |
+| modifiers | <code>KeyModifier[]</code> | Yes | The modifier keys of the keyboard shortcut. |
 
 ### KeyEquivalent
 

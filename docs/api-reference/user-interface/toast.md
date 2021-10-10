@@ -26,7 +26,7 @@ export default async () => {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| title | `string` | Yes | The title that will be displayed for the HUD. |
+| title | <code>string</code> | Yes | The title that will be displayed for the HUD. |
 
 #### Return
 
@@ -62,9 +62,9 @@ export default async () => {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| style | `ToastStyle` | Yes | The visual style of the Toast. |
-| title | `string` | Yes | The title that will be displayed in the Toast. |
-| message | `string` | No | The message that will be displayed in the Toast. |
+| style | <code>[ToastStyle](../user-interface/toast.md#toaststyle)</code> | Yes | The visual style of the Toast. |
+| title | <code>string</code> | Yes | The title that will be displayed in the Toast. |
+| message | <code>string</code> | No | The message that will be displayed in the Toast. |
 
 #### Return
 
@@ -97,22 +97,22 @@ export default async () => {
 
 | Name | Type | Description |
 | :--- | :--- | :--- |
-| constructor | <code>(options: ToastOptions) => Toast</code> |  |
+| constructor | <code>(options: ToastOptions) => [Toast](../user-interface/toast.md#toast)</code> |  |
 
 #### Accessors
 
 | Name | Type | Description |
 | :--- | :--- | :--- |
-| message | `undefined` or `string` |  |
-| style | `ToastStyle` |  |
-| title | `string` |  |
+| message | <code>undefined</code> or <code>string</code> |  |
+| style | <code>[ToastStyle](../user-interface/toast.md#toaststyle)</code> |  |
+| title | <code>string</code> |  |
 
 #### Methods
 
 | Name | Type | Description |
 | :--- | :--- | :--- |
-| hide | <code>() => Promise<void></code> | Hides the Toast. |
-| show | <code>() => Promise<void></code> | Shows the Toast. |
+| hide | <code>() => Promise&lt;void></code> | Hides the Toast. |
+| show | <code>() => Promise&lt;void></code> | Shows the Toast. |
 
 ### ToastOptions
 
@@ -138,9 +138,9 @@ export default async () => {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| message | `string` | No | An additional message for the toast. Useful to show more information, e.g. an identifier of a newly create asset |
-| style | `ToastStyle` | Yes | The style of a toast. |
-| title | `string` | Yes | The title of a toast. Displayed on the top. |
+| message | <code>string</code> | No | An additional message for the toast. Useful to show more information, e.g. an identifier of a newly create asset |
+| style | <code>[ToastStyle](../user-interface/toast.md#toaststyle)</code> | Yes | The style of a toast. |
+| title | <code>string</code> | Yes | The title of a toast. Displayed on the top. |
 
 ### ToastStyle
 

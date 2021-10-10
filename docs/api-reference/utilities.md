@@ -30,7 +30,7 @@ export default async () => {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| path | `PathLike` | No | The path of the file or folder to get the applications for. If no path is specified, all installed applications are returned. |
+| path | <code>PathLike</code> | No | The path of the file or folder to get the applications for. If no path is specified, all installed applications are returned. |
 
 #### Return
 
@@ -61,7 +61,7 @@ export default async () => {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| path | `PathLike` | Yes | The path of the file or folder to get the default application for. |
+| path | <code>PathLike</code> | Yes | The path of the file or folder to get the default application for. |
 
 #### Return
 
@@ -92,7 +92,7 @@ export default async () => {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| size | `number` | No | Size of the ID. The default size is 21. |
+| size | <code>number</code> | No | Size of the ID. The default size is 21. |
 
 #### Return
 
@@ -120,7 +120,7 @@ showInFinder(homedir(), "Downloads")
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| path | `PathLike` | Yes | The path to show in the Finder. |
+| path | <code>PathLike</code> | Yes | The path to show in the Finder. |
 
 #### Return
 
@@ -154,7 +154,7 @@ export default async () => {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| path | `PathLike` or `PathLike[]` | Yes |  |
+| path | <code>PathLike</code> or <code>PathLike[]</code> | Yes |  |
 
 #### Return
 
@@ -171,6 +171,6 @@ It can be used to open files or folders in a specific application. Use [getAppli
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| bundleId | `string` | No | The bundle identifier of the application, e.g. `com.raycast.macos`. |
-| name | `string` | Yes | The display name of the application. |
-| path | `string` | Yes | The absolute path to the application bundle, e.g. `/Applications/Raycast.app`, |
+| bundleId | <code>string</code> | No | The bundle identifier of the application, e.g. `com.raycast.macos`. |
+| name | <code>string</code> | Yes | The display name of the application. |
+| path | <code>string</code> | Yes | The absolute path to the application bundle, e.g. `/Applications/Raycast.app`, |

@@ -50,4 +50,4 @@ render(<Command />)
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| nodeToRender | `ReactNode` | Yes |  |
+| nodeToRender | <code>ReactNode</code> | Yes |  |

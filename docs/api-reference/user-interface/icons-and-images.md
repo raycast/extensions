@@ -24,7 +24,7 @@ export default function Command() {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| fileIcon | `string` | Yes | The path to a file or folder to get it's icon from. |
+| fileIcon | <code>string</code> | Yes | The path to a file or folder to get it's icon from. |
 
 ### Image
 
@@ -52,9 +52,9 @@ const icon = { source: { light: "icon-light.png", dark: "icon-dark.png" }}
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| mask | `ImageMask` | No | A [ImageMask](../user-interface/icons-and-images.md#imagemask) to apply to the image. |
-| source | `ImageSource` | Yes | The source of the image. |
-| tintColor | `string` | No | A [ColorLike](../user-interface/colors.md#colorlike) to tint all the non-transparent pixels of the image. |
+| mask | <code>[ImageMask](../user-interface/icons-and-images.md#imagemask)</code> | No | A [ImageMask](../user-interface/icons-and-images.md#imagemask) to apply to the image. |
+| source | <code>[ImageSource](../user-interface/icons-and-images.md#imagesource)</code> | Yes | The source of the image. |
+| tintColor | <code>string</code> | No | A [ColorLike](../user-interface/colors.md#colorlike) to tint all the non-transparent pixels of the image. |
 
 ### Icon
 

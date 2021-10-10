@@ -52,7 +52,7 @@ export default async () => {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| text | `string` | Yes | The text to copy to the clipboard. |
+| text | <code>string</code> | Yes | The text to copy to the clipboard. |
 
 #### Return
 
@@ -112,7 +112,7 @@ export default async () => {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| text | `string` | Yes | The text to insert at the cursor. |
+| text | <code>string</code> | Yes | The text to insert at the cursor. |
 
 #### Return
 

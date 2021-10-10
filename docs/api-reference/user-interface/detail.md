@@ -22,8 +22,8 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| actions | `null` or `ActionPanel` | No | - | A reference to an [ActionPanel](../user-interface/action-panel.md#actionpanel). |
-| children | `null` or `ReactElement<unknown, string>` | No | - |  |
-| isLoading | `boolean` | No | false | Indicates whether a loading bar should be shown or hidden below the search bar |
-| markdown | `null` or `string` | No | - | The CommonMark string to be rendered. |
-| navigationTitle | `string` | No | Command title | The main title for that view displayed in Raycast |
+| actions | <code>null</code> or <code>[ActionPanel](../user-interface/action-panel.md#actionpanel)</code> | No | - | A reference to an [ActionPanel](../user-interface/action-panel.md#actionpanel). |
+| children | <code>null</code> or <code>ReactElement&lt;unknown, string></code> | No | - |  |
+| isLoading | <code>boolean</code> | No | false | Indicates whether a loading bar should be shown or hidden below the search bar |
+| markdown | <code>null</code> or <code>string</code> | No | - | The CommonMark string to be rendered. |
+| navigationTitle | <code>string</code> | No | Command title | The main title for that view displayed in Raycast |

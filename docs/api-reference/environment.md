@@ -33,9 +33,9 @@ Holds data about the environment the command is running in. Use the global [envi
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| assetsPath | `string` | Yes | The absolute path to the assets directory of the extension. |
-| commandName | `string` | Yes | The name of the launched command, as specified in package.json |
-| extensionName | `string` | Yes | The name of the extension, as specified in package.json |
-| isDevelopment | `boolean` | Yes | Indicates whether the command is a development command (vs. an installed command from the Store). |
-| raycastVersion | `string` | Yes | The version of the main Raycast app |
-| supportPath | `string` | Yes | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. |
+| assetsPath | <code>string</code> | Yes | The absolute path to the assets directory of the extension. |
+| commandName | <code>string</code> | Yes | The name of the launched command, as specified in package.json |
+| extensionName | <code>string</code> | Yes | The name of the extension, as specified in package.json |
+| isDevelopment | <code>boolean</code> | Yes | Indicates whether the command is a development command (vs. an installed command from the Store). |
+| raycastVersion | <code>string</code> | Yes | The version of the main Raycast app |
+| supportPath | <code>string</code> | Yes | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. |

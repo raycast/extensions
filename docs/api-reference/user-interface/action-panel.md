@@ -43,8 +43,8 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | `ActionPanelChildren` | No | - | Sections or items. If [ActionPanel.Item](../user-interface/action-panel.md#actionpanelitem) elements are specified, a default section is automatically created. |
-| title | `string` | No | - | The title displayed at the top of the panel |
+| children | <code>[ActionPanelChildren](../user-interface/action-panel.md#actionpanelchildren)</code> | No | - | Sections or items. If [ActionPanel.Item](../user-interface/action-panel.md#actionpanel-item) elements are specified, a default section is automatically created. |
+| title | <code>string</code> | No | - | The title displayed at the top of the panel |
 
 ### ActionPanel.Item
 
@@ -80,10 +80,10 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | `ImageLike` | No | - | The icon displayed for the action. |
-| id | `string` | No | - | ID of the item. |
-| shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the item. |
-| title | `string` | Yes | - | The title displayed for the item. |
+| icon | <code>[ImageLike](../user-interface/icons-and-images.md#imagelike)</code> | No | - | The icon displayed for the action. |
+| id | <code>string</code> | No | - | ID of the item. |
+| shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the item. |
+| title | <code>string</code> | Yes | - | The title displayed for the item. |
 | onAction | <code>() => void</code> | No | - |  |
 
 ### ActionPanel.Section
@@ -129,8 +129,8 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | `ActionPanelSectionChildren` | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
-| title | `string` | No | - | Title displayed above the section |
+| children | <code>[ActionPanelSectionChildren](../user-interface/action-panel.md#actionpanelsectionchildren)</code> | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
+| title | <code>string</code> | No | - | Title displayed above the section |
 
 ### ActionPanel.Submenu
 
@@ -181,11 +181,11 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | `ActionPanelChildren` | No | - | Items of the submenu. |
-| icon | `ImageLike` | No | - | The icon displayed for the submenu. |
-| id | `string` | No | - | ID of the submenu. Make sure to assign each section a unique ID or a UUID will be auto-generated. |
-| shortcut | `KeyboardShortcut` | No | - | The keyboard shortcut for the submenu. |
-| title | `string` | Yes | - | The title displayed for submenu. |
+| children | <code>[ActionPanelChildren](../user-interface/action-panel.md#actionpanelchildren)</code> | No | - | Items of the submenu. |
+| icon | <code>[ImageLike](../user-interface/icons-and-images.md#imagelike)</code> | No | - | The icon displayed for the submenu. |
+| id | <code>string</code> | No | - | ID of the submenu. Make sure to assign each section a unique ID or a UUID will be auto-generated. |
+| shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the submenu. |
+| title | <code>string</code> | Yes | - | The title displayed for submenu. |
 
 ### useActionPanel
 
