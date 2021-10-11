@@ -4,26 +4,26 @@
 
 ## Basics
 
-* [Getting started](basics/getting-started.md)
-* [Create your first extension](basics/create-your-first-extension.md)
-* [Publish an extension](basics/publish-an-extension.md)
-* [Debug an extension](basics/debug-an-extension.md)
-* [Install an extension](basics/install-an-extension.md)
+* [Getting Started](basics/getting-started.md)
+* [Create Your First Extension](basics/create-your-first-extension.md)
+* [Publish an Extension](basics/publish-an-extension.md)
+* [Debug an Extension](basics/debug-an-extension.md)
+* [Install an Extension](basics/install-an-extension.md)
 
 ## Examples
 
 * [Doppler](examples/doppler.md)
-* [Hacker news](examples/hello-world.md)
-* [Todo list](examples/todo-list.md)
-* [Spotify controls](examples/script.md)
+* [Hacker News](examples/hacker-news.md)
+* [Todo List](examples/todo-list.md)
+* [Spotify Controls](examples/spotify-controls.md)
 
 ## Information
 
 * [CLI](information/cli.md)
-* [File structure](information/file-structure.md)
+* [File Structure](information/file-structure.md)
 * [Lifecycle](information/lifecycle.md)
 * [Manifest](information/manifest.md)
-* [Review process](information/review-process.md)
+* [Review Process](information/review-process.md)
 * [Terminology](information/terminology.md)
 
 ## API Reference
