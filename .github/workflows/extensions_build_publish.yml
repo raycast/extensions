@@ -1,0 +1,56 @@
+name: Extensions Build & Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      paths:
+        description: 'Extensions to update (space-separated relative paths for extensions) or ("extensions/**"" to execute on all possible subdirectories)'
+        required: true
+      command:
+        description: 'Ray CLI command to run (build | publish)'
+        default: 'build'
+        required: true
+  pull_request:
+    paths:
+      - "extensions/**"
+    branches: [main, master]
+  push:
+    paths:
+      - "extensions/**"
+    branches: [main, master]
+
+jobs:
+  extensions_build_publish:
+    name: Extensions Build & Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Checkout Actions
+        uses: actions/checkout@v2
+        with:
+          repository: raycast/github-actions
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          path: .github/actions/raycast-github-actions
+      - name: Run Ray CLI
+        uses: ./.github/actions/raycast-github-actions/ray
+        with:
+          access_token: "${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}"
+          api_url: "${{ secrets.RAYCAST_CLI_API_URL }}"
+          command: "${{ inputs.command }}"
+          paths: "${{ inputs.paths }}"
+      - name: Notify Failure to Slack
+        if: failure() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: edge/simple-slack-notify@master
+        with:
+          color: "danger"
+          text: ":no_entry_sign: ${env.GITHUB_WORKFLOW} has failed"
+          fields: |
+            [
+              { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
+              { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
+            ]
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_STORE_REVIEW_CHANNEL_WEBHOOK_URL }}
