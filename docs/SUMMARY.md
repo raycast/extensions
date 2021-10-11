@@ -12,9 +12,10 @@
 
 ## Examples
 
-* [Hello world](examples/hello-world.md)
+* [Doppler](examples/doppler.md)
+* [Hacker news](examples/hello-world.md)
 * [Todo list](examples/todo-list.md)
-* [Script](examples/script.md)
+* [Spotify controls](examples/script.md)
 
 ## Information
 
@@ -47,9 +48,8 @@
   * [Window & Search Bar](api-reference/user-interface/window-and-search-bar.md)
 * [Utilities](api-reference/utilities.md)
 
----
+***
 
 * [Changelog](changelog.md)
 * [Community](https://raycast.com/community)
 * [FAQ](faq.md)
-
