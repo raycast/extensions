@@ -24,5 +24,4 @@ Then press the Install Extension button in the top right corner and follow the s
 
 ### Use installed extensions
 
-After an extension is installed, you can search for it's commands in the root search. The extension can be further configured in the Extensions preferences tab.
-
+After an extension is installed, you can search for its commands in the root search. The extension can be further configured in the Extensions preferences tab.

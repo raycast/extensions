@@ -1,5 +1,5 @@
 ---
-description: 'The Raycast CLI allows you to build, develop and lint your extension.'
+description: The Raycast CLI allows you to build, develop and lint your extension.
 ---
 
 # CLI
@@ -21,7 +21,7 @@ You can use `ray build -e dist` to validate that your extension builds properly.
 `ray develop` starts your extension in development mode. The mode includes the following:
 
 * Extension shows up at the top of the root search for quick access
-* Commands get automatically reloaded when you save your changes
+* Commands get automatically reloaded when you save your changes (you can toggle auto-reloading via Raycast Preferences > Advanced > "Auto-reload on save")
 * Error overlays include detailed stack traces for faster debugging
 * Log messages are displayed in the terminal
 * Status indicator is visible in the navigation title of the command to signal build errors
@@ -30,4 +30,3 @@ You can use `ray build -e dist` to validate that your extension builds properly.
 ### Lint
 
 `ray lint` runs [ESLint](http://eslint.org) for all files in the `src` directory. 
-
