@@ -8,7 +8,7 @@ description: Learn how to build your first extension and use it in Raycast.
 
 Open the Create Extension command, name your extension "Hello World" and select the Markdown template. Pick a parent folder in the Location field and press `⌘` `↵` to continue.
 
-![Create a new extension](../.gitbook/assets/cleanshot-2021-09-21-at-3.29.22.mp4)
+![Create a new extension](../../.gitbook/assets/cleanshot-2021-09-21-at-3.29.22.mp4)
 
 Next, you'll need to follow the on-screen instructions to build the extension.
 
@@ -35,6 +35,4 @@ Now, you can press `⌃` `C` in your terminal to stop `npm run dev`. The extensi
 {% hint style="info" %}
 Don't forget to run [`npm run dev`](../information/cli.md#development) again when you want to change something in your extension.
 {% endhint %}
-
-
 
