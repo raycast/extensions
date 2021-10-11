@@ -2,7 +2,7 @@
 description: This guide covers the prerequisites you need to start building extensions.
 ---
 
-# Getting started
+# Getting Started
 
 ### System requirements
 
@@ -15,7 +15,7 @@ Before you can create your first extension, make sure you have the following pre
 
 ### Activate early access
 
-In order to use the API as well as discover extensions in the store, you need to activate early access to our platform. For this, open Raycast, insert `0xC0DE` in the root search and press `↵`. 
+In order to use the API as well as discover extensions in the store, you need to activate early access to our platform. For this, open Raycast, insert `0xC0FFEE` in the root search and press `↵`. 
 
 This unlocks the following commands:
 
