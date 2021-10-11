@@ -19,6 +19,7 @@
 
 ## Information
 
+* [Best Practices](information/best-practices.md)
 * [CLI](information/cli.md)
 * [File Structure](information/file-structure.md)
 * [Lifecycle](information/lifecycle.md)
