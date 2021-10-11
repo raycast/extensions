@@ -1,6 +1,6 @@
 # Storage
 
-The storage APIs can be used to store non-sensitive data that is persisted across command launches. It's methods are similar to the [browser's `localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage). All commands in an extension have shared access to the stored data. Extensions can't access the storage of other extensions. Values can be managed through functions such as [getLocalStorageItem](storage.md#getLocalStorageItem), [setLocalStorageItem](storage.md#setLocalStorageItem), or [removeLocalStorageItem](storage.md#removeLocalStorageItem). A typical use cases is storing user related data, f.e. their entered todos.
+The storage APIs can be used to store non-sensitive data that is persisted across command launches. Its methods are similar to the [browser's `localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage). All commands in an extension have shared access to the stored data. Extensions can't access the storage of other extensions. Values can be managed through functions such as [getLocalStorageItem](storage.md#getLocalStorageItem), [setLocalStorageItem](storage.md#setLocalStorageItem), or [removeLocalStorageItem](storage.md#removeLocalStorageItem). A typical use cases is storing user related data, for example entered todos.
 
 {% hint style="info" %}
 The data is stored in the user's database. The API is not meant to store large amounts of data. For this, use [Node's built-in APIs to write files](https://nodejs.dev/learn/writing-files-with-nodejs), e.g. to the extension's [support directory](environment.md#environment).
@@ -85,9 +85,9 @@ export default async () => {
 
 #### Parameters
 
-| Name | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| key | <code>string</code> | Yes | The key you want to retrieve the value of. |
+| Name | Type     | Required | Description                                |
+| ---- | -------- | -------- | ------------------------------------------ |
+| key  | `string` | Yes      | The key you want to retrieve the value of. |
 
 #### Return
 
@@ -115,9 +115,9 @@ export default async () => {
 
 #### Parameters
 
-| Name | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| key | <code>string</code> | Yes | The key you want to remove the value of. |
+| Name | Type     | Required | Description                              |
+| ---- | -------- | -------- | ---------------------------------------- |
+| key  | `string` | Yes      | The key you want to remove the value of. |
 
 #### Return
 
@@ -145,10 +145,10 @@ export default async () => {
 
 #### Parameters
 
-| Name | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| key | <code>string</code> | Yes | The key you want to create or update the value of. |
-| value | <code>[LocalStorageValue](../storage.md#localstoragevalue)</code> | Yes | The value you want to create or update for the given key. |
+| Name  | Type                                                   | Required | Description                                               |
+| ----- | ------------------------------------------------------ | -------- | --------------------------------------------------------- |
+| key   | `string`                                               | Yes      | The key you want to create or update the value of.        |
+| value | [`LocalStorageValue`](../storage.md#localstoragevalue) | Yes      | The value you want to create or update for the given key. |
 
 #### Return
 
@@ -162,9 +162,9 @@ For type-safe values you can define your own interface. Use the keys of the loca
 
 #### Properties
 
-| Name | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| [key: string] | <code>any</code> | Yes | The local storage value of a given key. |
+| Name           | Type  | Required | Description                             |
+| -------------- | ----- | -------- | --------------------------------------- |
+| \[key: string] | `any` | Yes      | The local storage value of a given key. |
 
 ### LocalStorageValue
 
