@@ -3,7 +3,7 @@
   "title": "Git-Repos",
   "description": "Git Repositories",
   "icon": "git-repos-icon.png",
-  "author": "tekno",
+  "author": "moored",
   "private": true,
   "commands": [
     {
