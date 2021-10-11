@@ -25,7 +25,7 @@ Here are a few points that make our ecosystem special:
 * **No-brainer to build UI:** You concentrate on the logic, we push the pixels. Use our built-in UI components to be consistent with all our extensions. 
 * **Collaborate with our community:** Build your extension, share it with our community and get inspired by others. 
 * **Developer experience front and foremost:** A strongly typed API, hot-reloading and modern tooling that make it a blast to work with.
-* **Easy to start, flexible to scale:** Start with a simple script, add a static UI or use React to go wilde. Anything goes.
+* **Easy to start, flexible to scale:** Start with a simple script, add a static UI or use React to go wild. Anything goes.
 
 ## Overview
 
@@ -37,4 +37,3 @@ A quick overview about where to find what in our docs:
 * [**API Reference:**](api-reference/clipboard.md) Go into details wit hthe API reference that includes code snippets.
 
 Now, let's build 💪
-
