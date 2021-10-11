@@ -8,6 +8,29 @@ description: Tips to guarantee good user experience for your extensions
 
 Network requests can fail, permissions to files can be missing... More generally, errors happen. By default we handle every unhandled exception or unresolved promise and show error screens. However, you should handle the "expected" error cases for your command. You should aim to not disrupt the user's flow just because something went wrong. F.e. if a network request fails but you can read the cache, show the cache. A user might not need the fresh data straight away. In most cases it's best to show a `Toast` with information about the error.
 
+Here is an example on how to show a toast for an error:
+
+```tsx
+import { Detail, showToast, ToastStyle } from "@raycast/api";
+import { useEffect, useState } from "react";
+
+export default function Command() {
+  const [error, setError] = useState<Error>();
+
+  useEffect(() => {
+    setTimeout(() => {
+      setError(new Error("Booom 💥"));
+    }, 1000);
+  }, []);
+
+  if (error) {
+    showToast(ToastStyle.Failure, "Something went wrong", error.message);
+  }
+
+  return <Detail markdown="Example for proper error handling" />;
+}
+```
+
 ## Handle runtime dependencies
 
 Ideally, you're extension doesn't depend on any runtime depencies. In reality, sometimes locally installed apps or CLIs are required to perform functionality. Here are a few tips to guarantee a good user experience:
