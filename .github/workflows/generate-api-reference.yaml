@@ -25,6 +25,25 @@ jobs:
         run: |
           git config --global user.email "bot@raycast.com"
           git config --global user.name "raycastbot"
-          git add .
-          git commit --message "Docs: Generate API reference"
-          git push
+
+          if ! [[ -z $(git status -s) ]] ; then
+            git add .
+            git status .
+            git commit --message "Docs: Generate API reference"
+            git push -u origin $(git rev-parse --abbrev-ref HEAD)
+          else
+            echo "No changes, skipping sync."
+          fi
+      - name: Notify Failure to Slack
+        if: failure()
+        uses: edge/simple-slack-notify@master
+        with:
+          color: "danger"
+          text: ":no_entry_sign: ${env.GITHUB_WORKFLOW} has failed"
+          fields: |
+            [
+              { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
+              { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
+            ]
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_STORE_REVIEW_CHANNEL_WEBHOOK_URL }}
