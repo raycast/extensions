@@ -22,6 +22,8 @@ console.error(error); // Prints: Boom 💥
 
 For more, checkout the [Node.js documentation](https://nodejs.org/dist/latest-v16.x/docs/api/console.html).
 
+We automatically disable console logging for store extensions.
+
 ### Unhandled exceptions and promise rejections
 
 All unhandled exceptions and promise rejections are shown with an error overlay in Raycast. 
@@ -57,4 +59,26 @@ npm install -g react-devtools
 ```
 
 Then you can run `react-devtools` from a terminal to launch the standalone DevTools app. Raycast connects automatically and you can start debugging your component tree.
+
+### Environments
+
+By default, extensions installed from the store run in Node production mode and development extensions in development mode. In development mode, the CLI output shows you additional errors and warnings (e.g. the infamous warning when you're missing the React `key` property for your list items); performance is generally better when running in production mode. You can force development extensions to run in Node production mode by going to Raycast Preferences > Advanced > "Use Node production environment".
+
+At runtime, you can check which Node environment you're running in:
+
+```typescript
+if (process.env.NODE_ENV === "development") { 
+  // running in development Node environment 
+}
+```
+
+To check whether you're running the store or local development version:
+
+```typescript
+import { environment } from "@raycast/api";
+
+if (environment.isDevelopment) {
+  // running the development version
+}
+```
 
