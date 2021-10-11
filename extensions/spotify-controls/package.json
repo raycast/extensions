@@ -1,0 +1,61 @@
+{
+  "name": "spotify-controls",
+  "title": "Spotify Controls",
+  "description": "Control the Spotify app for macOS with your keyboard.",
+  "icon": "icon.png",
+  "author": "thomas",
+  "commands": [
+    {
+      "name": "play",
+      "title": "Play",
+      "subtitle": "Spotify",
+      "description": "Plays current track in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pause",
+      "title": "Pause",
+      "subtitle": "Spotify",
+      "description": "Pause current track in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "playPause",
+      "title": "Toggle Play/Pause",
+      "subtitle": "Spotify",
+      "description": "Toggles play or pause of current track in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previousTrack",
+      "title": "Previous Track",
+      "subtitle": "Spotify",
+      "description": "Skips to the previous track in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "nextTrack",
+      "title": "Next Track",
+      "subtitle": "Spotify",
+      "description": "Skips to the next track in Spotify.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.24.3",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^16.4.3",
+    "@types/react": "^17.0.15",
+    "@typescript-eslint/eslint-plugin": "^4.28.5",
+    "@typescript-eslint/parser": "^4.28.5",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
