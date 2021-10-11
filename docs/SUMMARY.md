@@ -12,7 +12,7 @@
 
 ## Examples
 
-* [Doppler Share Secrets](examples/doppler-share-secrets.md)
+* [Doppler Share Secrets](examples/doppler.md)
 * [Hacker News](examples/hacker-news.md)
 * [Todo List](examples/todo-list.md)
 * [Spotify Controls](examples/spotify-controls.md)
