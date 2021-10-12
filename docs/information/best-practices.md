@@ -35,8 +35,7 @@ export default function Command() {
 
 Ideally, you're extension doesn't depend on any runtime dependencies. In reality, sometimes locally installed apps or CLIs are required to perform functionality. Here are a few tips to guarantee a good user experience:
 
-* If a command requires a runtime dependency to run, consider bundling it in the `assets` folder. 
-  * If you can't bundle it (e.g. an app that needs to be installed by the user), show a helpful message.
+* If a command requires a runtime dependency to run (e.g. an app that needs to be installed by the user), show a helpful message. 
   * If your extension is tightly coupled to an app, f.e. searching tabs in Safari or using AppleScript to control Spotify, checks don't always have to be strict because users most likely don't install the extension without having the dependency installed locally. 
 * If only some functionality of your extension requires the runtime dependency, consider making this functionality only available if the dependency is installed. Typically, this is the best case for [actions](terminology.md#action), e.g. to open a URL in the desktop app instead of the browser.
 
