@@ -49,7 +49,7 @@ export default function Command() {
 ### ColorLike
 
 ```typescript
-ColorLike: Color | string
+ColorLike: DynamicColor | Color | string
 ```
 
 Union type for the supported color types.

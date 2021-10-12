@@ -199,7 +199,7 @@ function useActionPanel(): ActionPanelState
 
 #### Return
 
-A ActionPanelActions object with an ActionPanelHook.update function.
+A [ActionPanelState](../user-interface/action-panel.md#actionpanelstate) object with an update function.
 Use the function to update the global Action Panel.
 
 ### ActionPanelState
@@ -218,7 +218,7 @@ Return type of the [useActionPanel](../user-interface/action-panel.md#useactionp
 ActionPanelChildren: ActionPanel.Section | ActionPanel.Section[] | ActionPanelSectionChildren | null
 ```
 
-Supported children for the [ActionPanel](../user-interface/action-panel.md#actionpanel) and [ActionPanelSubmenu](../user-interface/action-panel.md#actionpanelsubmenu) components.
+Supported children for the [ActionPanel](../user-interface/action-panel.md#actionpanel) and [ActionPanel.Submenu](../user-interface/action-panel.md#actionpanel-submenu) components.
 
 ### ActionPanelSectionChildren
 
@@ -226,4 +226,4 @@ Supported children for the [ActionPanel](../user-interface/action-panel.md#actio
 ActionPanelSectionChildren: ActionPanel.Item | ActionPanel.Item[] | ReactElement<ActionPanelSubmenuProps> | ReactElement<ActionPanelSubmenuProps>[] | null
 ```
 
-Supported children for the [ActionPanelSection](../user-interface/action-panel.md#actionpanelsection) component.
+Supported children for the [ActionPanel.Section](../user-interface/action-panel.md#actionpanel-section) component.

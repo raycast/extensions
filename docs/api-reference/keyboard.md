@@ -16,7 +16,7 @@ import { ActionPanel, Detail } from "@raycast/api";
 
 export default function Command() {
   return (
-    <Detail markdown="Let's play some games 👾">
+    <Detail markdown="Let's play some games 👾" actions={
       <ActionPanel title="Game controls">
         <ActionPanel.Item
           title="Up"
@@ -38,8 +38,8 @@ export default function Command() {
           shortcut={{ modifiers: ["opt"], key: "arrowRight" }}
           onAction={() => console.log("Go right")}
         />
-      </ActionPanel>
-    </Detail>
+      </ActionPanel>}
+    />
   );
 }
 ```

@@ -54,7 +54,7 @@ const icon = { source: { light: "icon-light.png", dark: "icon-dark.png" }}
 | :--- | :--- | :--- | :--- |
 | mask | <code>[ImageMask](../user-interface/icons-and-images.md#imagemask)</code> | No | A [ImageMask](../user-interface/icons-and-images.md#imagemask) to apply to the image. |
 | source | <code>[ImageSource](../user-interface/icons-and-images.md#imagesource)</code> | Yes | The source of the image. |
-| tintColor | <code>string</code> | No | A [ColorLike](../user-interface/colors.md#colorlike) to tint all the non-transparent pixels of the image. |
+| tintColor | <code>[ColorLike](../user-interface/colors.md#colorlike)</code> | No | A [ColorLike](../user-interface/colors.md#colorlike) to tint all the non-transparent pixels of the image. |
 
 ### Icon
 
