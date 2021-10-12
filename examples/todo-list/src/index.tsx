@@ -42,11 +42,11 @@ export default function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <ToggleTodoAction todo={todo} index={index} onToggle={handleToggle} />
+                <ToggleTodoAction todo={todo} onToggle={() => handleToggle(index)} />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <CreateTodoAction onCreate={handleCreate} />
-                <DeleteTodoAction index={index} onDelete={handleDelete} />
+                <DeleteTodoAction onDelete={() => handleDelete(index)} />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -67,23 +67,23 @@ function CreateTodoAction(props: { onCreate: (todo: Todo) => void }) {
   );
 }
 
-function ToggleTodoAction(props: { todo: Todo; index: number; onToggle: (index: number) => void }) {
+function ToggleTodoAction(props: { todo: Todo; onToggle: () => void }) {
   return (
     <ActionPanel.Item
       icon={props.todo.isCompleted ? Icon.Circle : Icon.Checkmark}
       title={props.todo.isCompleted ? "Uncomplete Todo" : "Complete Todo"}
-      onAction={() => props.onToggle(props.index)}
+      onAction={props.onToggle}
     />
   );
 }
 
-function DeleteTodoAction(props: { index: number; onDelete: (index: number) => void }) {
+function DeleteTodoAction(props: { onDelete: () => void }) {
   return (
     <ActionPanel.Item
       icon={Icon.Trash}
       title="Delete Todo"
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
-      onAction={() => props.onDelete(props.index)}
+      onAction={props.onDelete}
     />
   );
 }
