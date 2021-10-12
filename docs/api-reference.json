@@ -5932,7 +5932,7 @@
 							},
 							{
 								"tag": "remarks",
-								"text": "\nIf {@link ActionPanelItem} elements are specified, a default section is automatically created.\\\nUse {@link ActionPanel.Submenu} as parent when specifying sub-menu's children to make code is more readable.\n"
+								"text": "\nIf {@link ActionPanel.Item} elements are specified, a default section is automatically created.\\\nUse {@link ActionPanel.Submenu} as parent when specifying sub-menu's children to make code is more readable.\n"
 							}
 						]
 					},
@@ -9116,8 +9116,9 @@
 						"shortText": "A {@link ColorLike} to tint all the non-transparent pixels of the image."
 					},
 					"type": {
-						"type": "intrinsic",
-						"name": "string"
+						"type": "reference",
+						"id": 709,
+						"name": "ColorLike"
 					}
 				}
 			],
@@ -9144,7 +9145,7 @@
 				"tags": [
 					{
 						"tag": "example",
-						"text": "\n```typescript\nimport { ActionPanel, Detail } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Detail markdown=\"Let's play some games 👾\">\n      <ActionPanel title=\"Game controls\">\n        <ActionPanel.Item\n          title=\"Up\"\n          shortcut={{ modifiers: [\"opt\"], key: \"arrowUp\" }}\n          onAction={() => console.log(\"Go up\")}\n        />\n        <ActionPanel.Item\n          title=\"Down\"\n          shortcut={{ modifiers: [\"opt\"], key: \"arrowDown\" }}\n          onAction={() => console.log(\"Go down\")}\n        />\n        <ActionPanel.Item\n          title=\"Left\"\n          shortcut={{ modifiers: [\"opt\"], key: \"arrowLeft\" }}\n          onAction={() => console.log(\"Go left\")}\n        />\n        <ActionPanel.Item\n          title=\"Right\"\n          shortcut={{ modifiers: [\"opt\"], key: \"arrowRight\" }}\n          onAction={() => console.log(\"Go right\")}\n        />\n      </ActionPanel>\n    </Detail>\n  );\n}\n```\n"
+						"text": "\n```typescript\nimport { ActionPanel, Detail } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Detail markdown=\"Let's play some games 👾\" actions={\n      <ActionPanel title=\"Game controls\">\n        <ActionPanel.Item\n          title=\"Up\"\n          shortcut={{ modifiers: [\"opt\"], key: \"arrowUp\" }}\n          onAction={() => console.log(\"Go up\")}\n        />\n        <ActionPanel.Item\n          title=\"Down\"\n          shortcut={{ modifiers: [\"opt\"], key: \"arrowDown\" }}\n          onAction={() => console.log(\"Go down\")}\n        />\n        <ActionPanel.Item\n          title=\"Left\"\n          shortcut={{ modifiers: [\"opt\"], key: \"arrowLeft\" }}\n          onAction={() => console.log(\"Go left\")}\n        />\n        <ActionPanel.Item\n          title=\"Right\"\n          shortcut={{ modifiers: [\"opt\"], key: \"arrowRight\" }}\n          onAction={() => console.log(\"Go right\")}\n        />\n      </ActionPanel>}\n    />\n  );\n}\n```\n"
 					}
 				]
 			},
@@ -9484,7 +9485,7 @@
 						"isOptional": true
 					},
 					"comment": {
-						"shortText": "List sections or items. If {@link ListItem} elements are specified, a default section is automatically created."
+						"shortText": "List sections or items. If {@link List.Item} elements are specified, a default section is automatically created."
 					},
 					"type": {
 						"type": "union",
@@ -9872,7 +9873,7 @@
 						"isOptional": true
 					},
 					"comment": {
-						"shortText": "The {@link ListItem} elements of the section."
+						"shortText": "The {@link List.Item} elements of the section."
 					},
 					"type": {
 						"type": "union",
@@ -11748,7 +11749,7 @@
 			"kindString": "Type alias",
 			"flags": {},
 			"comment": {
-				"shortText": "Supported children for the {@link ActionPanel} and {@link ActionPanelSubmenu} components.",
+				"shortText": "Supported children for the {@link ActionPanel} and {@link ActionPanel.Submenu} components.",
 				"tags": [
 					{
 						"tag": "subcategory",
@@ -11803,7 +11804,7 @@
 			"kindString": "Type alias",
 			"flags": {},
 			"comment": {
-				"shortText": "Supported children for the {@link ActionPanelSection} component.",
+				"shortText": "Supported children for the {@link ActionPanel.Section} component.",
 				"tags": [
 					{
 						"tag": "subcategory",
@@ -11897,6 +11898,10 @@
 			"type": {
 				"type": "union",
 				"types": [
+					{
+						"type": "reference",
+						"name": "DynamicColor"
+					},
 					{
 						"type": "reference",
 						"id": 698,
@@ -13494,7 +13499,7 @@
 					"kindString": "Call signature",
 					"flags": {},
 					"comment": {
-						"shortText": "Displays {@link ListSection} or {@link ListItem}.",
+						"shortText": "Displays {@link List.Section} or {@link List.Item}.",
 						"tags": [
 							{
 								"tag": "remarks",
@@ -15399,7 +15404,7 @@
 					"flags": {},
 					"comment": {
 						"shortText": "A hook that lets you update the global Action Panel.",
-						"returns": "A {@link ActionPanelActions} object with an {@link ActionPanelHook.update} function.\nUse the function to update the global Action Panel.\n",
+						"returns": "A {@link ActionPanelState} object with an {@link update} function.\nUse the function to update the global Action Panel.\n",
 						"tags": [
 							{
 								"tag": "subcategory",
