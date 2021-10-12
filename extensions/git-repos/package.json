@@ -4,6 +4,7 @@
   "description": "Git Repositories",
   "icon": "git-repos-icon.png",
   "author": "moored",
+  "license": "MIT",
   "private": true,
   "commands": [
     {
