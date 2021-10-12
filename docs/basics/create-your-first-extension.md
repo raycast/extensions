@@ -2,13 +2,13 @@
 description: Learn how to build your first extension and use it in Raycast.
 ---
 
-# Create your first extension
+# Create Your First Extension
 
 ### Create a new extension
 
 Open the Create Extension command, name your extension "Hello World" and select the Markdown template. Pick a parent folder in the Location field and press `⌘` `↵` to continue.
 
-![Create a new extension](../../.gitbook/assets/cleanshot-2021-09-21-at-3.29.22.mp4)
+![Create a new extensio](../.gitbook/assets/basics-create-extension.png)
 
 Next, you'll need to follow the on-screen instructions to build the extension.
 
@@ -16,7 +16,7 @@ Next, you'll need to follow the on-screen instructions to build the extension.
 
 Open your terminal, navigate to your extension directory and run `npm install && npm run dev`. Open Raycast and you'll notice your extension at the top of the root search. Press `↵` to open it.
 
-![Your first extension](../.gitbook/assets/cleanshot-2021-09-21-at-4.08.01-2x.png)
+![Your first extension](../.gitbook/assets/basics-build-extension.png)
 
 ### Develop your extension
 
@@ -28,9 +28,11 @@ To make changes to your extension, open the `./src/index.tsx` file in your exten
 
 ### Use your extension
 
-Now, you can press `⌃` `C` in your terminal to stop `npm run dev`. The extension stays in Raycast and you can find it's commands in the root when searching for "Hello World". 
+Now, you can press `⌃` `C` in your terminal to stop `npm run dev`. The extension stays in Raycast and you can find it's commands in the root when searching for the extension name "Hello World" or the command name "Render Markdown". 
 
-🎉 Congratulations! You built your first extension. 
+![Find your extension in the root search](../.gitbook/assets/basics-use-extension.png)
+
+🎉 Congratulations! You built your first extension. Off to many more.
 
 {% hint style="info" %}
 Don't forget to run [`npm run dev`](../information/cli.md#development) again when you want to change something in your extension.

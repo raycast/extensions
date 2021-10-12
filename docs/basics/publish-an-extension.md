@@ -2,7 +2,7 @@
 description: Learn how to share your extension with our community.
 ---
 
-# Publish an extension
+# Publish an Extension
 
 Before you publish your extension, take a look at the [review process](../information/review-process.md). Making sure you follow the guidelines is the best way to help your extension pass the review. 
 
@@ -30,7 +30,6 @@ We're still figuring things out and update our guidelines. If something is uncle
 
 Once your extension is published in the Rayast Store, you can share it with our community. Open the Manage Extensions command, search for your extension and press `⌘` `⌥` `.` to copy the link. 
 
-![Manage your extensions](../.gitbook/assets/cleanshot-2021-09-28-at-9.55.21-2x.png)
+![Manage your extensions](../.gitbook/assets/basics-manage-extensions.png)
 
 🚀 Now it's time to share your work! Tweet about your extension, share it with our [Slack community](https://raycast.com/community) or send it to your teammates. 
-
