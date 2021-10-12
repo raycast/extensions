@@ -13,12 +13,23 @@ import {
 import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
 import { dataToProject, Group, Issue, Project } from "../gitlabapi";
-import { GitLabIcons } from "../icons";
+import { GitLabIcons, useImage } from "../icons";
 import { EpicList } from "./epics";
 import { IssueList, IssueScope, IssueState } from "./issues";
 import { MilestoneList } from "./milestones";
 import { MRList, MRScope, MRState } from "./mr";
 import { ProjectListItem } from "./project";
+
+function groupIconUrl(group: any): string | undefined {
+  let result: string | undefined;
+  // TODO check also namespace for icon
+  if (group.avatar_url) {
+    result = group.avatar_url;
+  } else if (group.owner && group.owner.avatar_url) {
+    result = group.owner.avatar_url;
+  }
+  return result;
+}
 
 function groupIcon(group: any): ImageLike {
   let result: string = GitLabIcons.project;
@@ -37,11 +48,12 @@ function webUrl(group: Group, partial: string) {
 
 export function GroupListItem(props: { group: any }) {
   const group = props.group;
+  const { localFilepath: localImageFilepath, error, isLoading } = useImage(groupIconUrl(group), GitLabIcons.project);
   return (
     <List.Item
       id={`${group.id}`}
       title={group.full_name}
-      icon={groupIcon(group)}
+      icon={localImageFilepath}
       actions={
         <ActionPanel>
           <PushAction
