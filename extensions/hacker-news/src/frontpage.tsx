@@ -16,9 +16,9 @@ export default function Command() {
     async function fetchStories() {
       try {
         const feed = await parser.parseURL("https://hnrss.org/frontpage?description=0&count=25");
-        setState({ ...state, items: feed.items });
+        setState({ items: feed.items });
       } catch (error) {
-        setState({ ...state, error: error instanceof Error ? error : new Error("Something went wrong") });
+        setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
       }
     }
 
@@ -93,10 +93,10 @@ function getIcon(index: number) {
 
 function getPoints(item: Parser.Item) {
   const matches = item.contentSnippet?.match(/(?<=Points:\s*)(\d+)/g);
-  return matches ? matches[0] : undefined;
+  return matches?.[0];
 }
 
 function getComments(item: Parser.Item) {
   const matches = item.contentSnippet?.match(/(?<=Comments:\s*)(\d+)/g);
-  return matches ? matches[0] : undefined;
+  return matches?.[0];
 }
