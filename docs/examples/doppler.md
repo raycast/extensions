@@ -8,4 +8,5 @@ description: This example uses a simple form to collect data.
 The source code of the example can be found [here](../../examples/doppler-share-secrets). You can install it [here](https://www.raycast.com/thomas/doppler-share-secrets).
 {% endhint %}
 
-![](<../.gitbook/assets/blue (1).png>)
+![Example: Safely share secrets with Doppler](../.gitbook/assets/example-doppler-share-secrets.png)
+
