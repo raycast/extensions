@@ -44,11 +44,6 @@ export function ProjectListItem(props: { project: Project }) {
       actions={
         <ActionPanel>
           <OpenInBrowserAction url={project.web_url} />
-          <PushAction
-            title="Explore"
-            icon={{ source: GitLabIcons.explorer, tintColor: Color.PrimaryText }}
-            target={<ProjectNavMenusList project={project} />}
-          />
           <CopyToClipboardAction title="Copy Project ID" content={project.id} />
           <PushAction
             title="Issues"
