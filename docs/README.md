@@ -31,9 +31,9 @@ Here are a few points that make our ecosystem special:
 
 A quick overview about where to find what in our docs:
 
-* [**Basics:**](basics/getting-started.md) Go over this section to learn how to build extensions in our step-by-step guides.
-* [**Examples:**](examples/todo-list.md) Kickstart your extension by using an open source example and learn as you go.
-* [**Information:**](information/cli.md) Get the background knowledge to master your understanding of our platform.
-* [**API Reference:**](api-reference/clipboard.md) Go into details wit hthe API reference that includes code snippets.
+* ****[**Basics:**](broken-reference) Go over this section to learn how to build extensions in our step-by-step guides.
+* ****[**Examples:**](broken-reference) Kickstart your extension by using an open source example and learn as you go.
+* ****[**Information:**](broken-reference) Get the background knowledge to master your understanding of our platform.
+* ****[**API Reference:**](broken-reference) Go into details wit hthe API reference that includes code snippets.
 
 Now, let's build 💪
