@@ -33,7 +33,7 @@ export default function Command() {
 
 ## Handle runtime dependencies
 
-Ideally, you're extension doesn't depend on any runtime depencies. In reality, sometimes locally installed apps or CLIs are required to perform functionality. Here are a few tips to guarantee a good user experience:
+Ideally, you're extension doesn't depend on any runtime dependencies. In reality, sometimes locally installed apps or CLIs are required to perform functionality. Here are a few tips to guarantee a good user experience:
 
 * If a command requires a runtime dependency to run, consider bundling it in the `assets` folder. 
   * If you can't bundle it (e.g. an app that needs to be installed by the user), show a helpful message.
@@ -44,7 +44,9 @@ Ideally, you're extension doesn't depend on any runtime depencies. In reality, s
 
 When commands need to load big data sets, it's best to inform the user about this. To keep your command snappy, it's important to render a React component as quickly as possible. 
 
-You can start with an empty list or a static form and then load the data to fill the view. To make the user aware of the loading process, you can use the `isLoading` prop on all top-level components, e.g. [`<Detail>`](../api-reference/user-interface/detail.md), [`<Form>`](../api-reference/user-interface/form.md) or [`<List>`](../api-reference/user-interface/list.md). Here is an example for a list:
+You can start with an empty list or a static form and then load the data to fill the view. To make the user aware of the loading process, you can use the `isLoading` prop on all top-level components, e.g. [`<Detail>`](../api-reference/user-interface/detail.md), [`<Form>`](../api-reference/user-interface/form.md) or [`<List>`](../api-reference/user-interface/list.md). 
+
+Here is an example to show the loading indicator in a list:
 
 ```tsx
 import { List } from "@raycast/api";
