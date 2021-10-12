@@ -9,7 +9,7 @@ export function ReviewList() {
   const { mrs, error, isLoading } = useSearch(searchText);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Merge Requests", error);
+    showToast(ToastStyle.Failure, "Cannot search Reviews", error);
   }
 
   return (
