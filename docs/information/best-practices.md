@@ -1,5 +1,5 @@
 ---
-description: Tips to guarantee good user experience for your extensions
+description: Tips to guarantee a good user experience for your extensions.
 ---
 
 # Best Practices
