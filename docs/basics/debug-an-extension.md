@@ -2,7 +2,7 @@
 description: This guide covers how to find and fix bugs in your extension.
 ---
 
-# Debug an extension
+# Debug an Extension
 
 Bugs are unavoidable. Therefore it's important to have an easy way to discover and fix them. This guide shows you how to find problems in your extensions.
 
@@ -28,7 +28,7 @@ We automatically disable console logging for store extensions.
 
 All unhandled exceptions and promise rejections are shown with an error overlay in Raycast. 
 
-![Unhandled exception in development mode](../.gitbook/assets/cleanshot-2021-09-28-at-10.06.46-2x.png)
+![Unhandled exception in development mode](../.gitbook/assets/basics-unhandled-exception.png)
 
 During development, we show the stack trace and add an action to jump to the error to make it easy to fix it. In production, only the error message is shown. You should [show a toast](../api-reference/user-interface/toast.md#showtoast) for all expected errors, e.g. a failing network request.
 
@@ -36,7 +36,7 @@ During development, we show the stack trace and add an action to jump to the err
 
 We support [React Developer Tools](https://github.com/facebook/react/tree/main/packages/react-devtools) out-of-the-box. Use the tools to inspect and change the props of your React components, and see the results immediately in Raycast. This is especially useful for complex commands with a lot of state. 
 
-![React Developer Tools](../.gitbook/assets/cleanshot-2021-09-09-at-5.18.55-2x.png)
+![React Developer Tools](../.gitbook/assets/basics-react-developer-tools.png)
 
 To get started, add the `react-devtools` to your extension. Open a terminal, navigate to your extension directory and run the following command:
 
