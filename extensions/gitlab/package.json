@@ -3,7 +3,7 @@
   "title": "GitLab",
   "version": "1.0.0",
   "author": "tonka3000",
-  "license": "MPL-2.0",
+  "license": "MIT",
   "description": "Raycast commands for GitLab",
   "icon": "gitlab.png",
   "commands": [
