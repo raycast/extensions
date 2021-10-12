@@ -4,7 +4,7 @@ export default function Command() {
   const { push } = useNavigation();
 
   return (
-    <List navigationTitle="List">
+    <List>
       <List.Item
         title="Push Action"
         actions={
