@@ -45,7 +45,7 @@ function ProjectListItem(props) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenAction title="Open in Code" icon="code.png" target={props.uri} application="Visual Studio Code" />
+            <OpenAction title="Open in Code" icon="icon.png" target={props.uri} application="Visual Studio Code" />
             <ShowInFinderAction path={props.uri} />
           </ActionPanel.Section>
           <ActionPanel.Section>

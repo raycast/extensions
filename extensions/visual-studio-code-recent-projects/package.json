@@ -2,7 +2,7 @@
   "name": "visual-studio-code",
   "title": "Visual Studio Code Recent Projects",
   "description": "Search and open recent projects from Visual Studio Code.",
-  "icon": "code.png",
+  "icon": "icon.png",
   "author": "thomas",
   "license": "MIT",
   "commands": [
