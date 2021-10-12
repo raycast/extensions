@@ -14,7 +14,7 @@ export function ReviewList() {
 
   return (
     <List
-      searchBarPlaceholder="Filter Todos by name..."
+      searchBarPlaceholder="Filter Reviews by name..."
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
