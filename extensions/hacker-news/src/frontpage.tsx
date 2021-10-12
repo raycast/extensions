@@ -32,7 +32,7 @@ export default function Command() {
   return (
     <List isLoading={!state.items && !state.error}>
       {state.items?.map((item, index) => (
-        <StoryListItem key={index} item={item} index={index} />
+        <StoryListItem key={item.guid} item={item} index={index} />
       ))}
     </List>
   );
