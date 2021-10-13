@@ -21,6 +21,11 @@ export function StatesList(props: { domain: string }) {
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search Home Assistant states", error);
   }
+
+  if (!states) {
+    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  }
+
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
       {states?.map((state) => (
