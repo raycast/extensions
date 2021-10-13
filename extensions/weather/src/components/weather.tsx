@@ -15,7 +15,7 @@ export function DayListItem(props: { day: WeatherData; title: string }) {
       subtitle={`max: ${data.maxtempC} °C, min: ${data.mintempC} °C`}
       actions={
         <ActionPanel>
-          <PushAction title="Details" target={<DayList day={data} title={`${props.title} - ${wd}`} />} />
+          <PushAction title="Show Details" target={<DayList day={data} title={`${props.title} - ${wd}`} />} />
         </ActionPanel>
       }
     />
