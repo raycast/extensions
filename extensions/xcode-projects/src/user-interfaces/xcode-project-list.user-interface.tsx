@@ -12,7 +12,7 @@ export function xcodeProjectList(
   return (
     <List
       isLoading={!xcodeProjects}
-      searchBarPlaceholder="Search Xcode projects...">
+      searchBarPlaceholder="Search for Xcode Projects or Swift Packages">
       {xcodeProjects?.map(xcodeProjectListItem)}
     </List>
   );
