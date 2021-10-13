@@ -146,11 +146,11 @@ export function useSearch(
   query: string | undefined,
   parentGroupID?: number
 ): {
-  groupsinfo: GroupInfo;
+  groupsinfo?: GroupInfo;
   error?: string;
   isLoading: boolean;
 } {
-  const [groupsinfo, setGroupsInfo] = useState<GroupInfo>({ groups: [], projects: [] });
+  const [groupsinfo, setGroupsInfo] = useState<GroupInfo | undefined>(); //{ groups: [], projects: [] });
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -181,7 +181,11 @@ export function useSearch(
           projectsdata = projectsdatagl.map((p: any) => dataToProject(p));
         }
         if (!cancel) {
-          setGroupsInfo({ ...groupsinfo, groups: data, projects: projectsdata });
+          if (groupsinfo) {
+            setGroupsInfo({ ...groupsinfo, groups: data, projects: projectsdata });
+          } else {
+            setGroupsInfo({ groups: data, projects: projectsdata });
+          }
         }
       } catch (e: any) {
         if (!cancel) {
