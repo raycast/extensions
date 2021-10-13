@@ -76,6 +76,13 @@
       "subtitle" : "Home Assistant",
       "description": "Get/Set states of Home Assistant climate entities",
       "mode": "view"
+    },
+    {
+      "name": "attributes",
+      "title": "Search Entity Attributes",
+      "subtitle" : "Home Assistant",
+      "description": "Query Home Assistant entity attributes",
+      "mode": "view"
     }
   ],
   "preferences": [
