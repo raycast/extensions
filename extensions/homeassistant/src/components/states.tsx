@@ -10,10 +10,10 @@ import {
   showToast,
   ToastStyle,
 } from "@raycast/api";
-import { State } from "./haapi";
+import { State } from "../haapi";
 import { useState, useEffect } from "react";
-import { createHomeAssistantClient } from "./common";
-import { EntityAttributesList } from "./components/attributes";
+import { createHomeAssistantClient } from "../common";
+import { EntityAttributesList } from "./attributes";
 
 export const ha = createHomeAssistantClient();
 
