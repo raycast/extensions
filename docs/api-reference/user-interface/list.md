@@ -150,7 +150,7 @@ export default function Command() {
 
 ### List.Section
 
-A group of related [ListItem](../user-interface/list.md#listitem).
+A group of related [List.Item](../user-interface/list.md#list-item).
 
 Sections are a great way to structure your list. F.e. group GitHub issues with the same status and order them by priority.
 This way the user can quickly access what is most relevant.
