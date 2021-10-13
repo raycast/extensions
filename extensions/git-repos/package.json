@@ -1,6 +1,6 @@
 {
   "name": "git-repos",
-  "title": "Git-Repos",
+  "title": "Git Repos",
   "description": "Git Repositories",
   "icon": "git-repos-icon.png",
   "author": "moored",
@@ -10,14 +10,57 @@
     {
       "name": "list",
       "title": "List Repos",
-      "description": "List Git Repositories with Custom Actions",
+      "description": "Quick access to open local git repos in your applications",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "repoScanPath",
+      "type": "textfield",
+      "required": true,
+      "default": "",
+      "title": "Path to scan for Git Repos",
+      "description": "Path to scan for Git Repos. ~/ is expanded and use a , to seperate mulitple paths"
     },
     {
-      "name": "settings",
-      "title": "Settings",
-      "description": "Settings",
-      "mode": "view"
+      "name": "repoScanDepth",
+      "type": "dropdown",
+      "required": true,
+      "title": "Max scan depth",
+      "data": [
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        }
+      ],
+      "description": "Maximnum depth to scan for repos",
+      "default": "3"
+    },
+    {
+      "name": "includeSubmodules",
+      "type": "checkbox",
+      "required": true,
+      "title": "Include submodules",
+      "label": "",
+      "default": false,
+      "description": "Include submodules in scan"
     }
   ],
   "dependencies": {

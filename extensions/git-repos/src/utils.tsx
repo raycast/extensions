@@ -1,6 +1,6 @@
 import {
   environment,
-  getApplications,
+  preferences,
   showToast,
   ToastStyle,
 } from "@raycast/api"
@@ -15,15 +15,7 @@ const execp = promisify(exec)
 import parseGitConfig = require("parse-git-config")
 import parseGithubURL = require("parse-github-url")
 
-const SettingsFile = path.join(environment.supportPath, "settings.json")
-const SettingsVersion = 1
 const CacheFile = path.join(environment.supportPath, "cache.json")
-
-export function log(message: string): void  {
-  if (environment.isDevelopment) {
-    console.log(message)
-  }
-}
 
 export interface GitRepo {
   name: string
@@ -60,7 +52,6 @@ export class Cache {
   }
 
   save(): void {
-    makeSupportPath()
     const jsonData = JSON.stringify(this, null, 2) + "\n"
     fs.writeFileSync(CacheFile, jsonData)
   }
@@ -81,21 +72,9 @@ export interface RepoSearchResponse {
 }
 
 export interface Settings {
-  version: number
   reposDir: string
   maxDepth: number
   includeSubmodules: boolean
-  cacheExpiration?: number // Pre v1: To be removed in future version
-  customActions: CustomAction[]
-}
-
-export interface CustomAction {
-  title: string
-  icon?: string // Pre V1: To be removed in future version
-  customIcon?: string
-  app: string
-  appPath: string
-  appBundleId: string
 }
 
 export function resolvePath(filepath: string): string {
@@ -117,63 +96,13 @@ function makeSupportPath() {
   fs.mkdirSync(environment.supportPath, { recursive: true })
 }
 
-export function saveSettings(settings: Settings): void {
-  makeSupportPath()
-  // Remove the unused cacheExpiration value
-  delete settings.cacheExpiration
-  const jsonData = JSON.stringify(settings, null, 2)
-  fs.writeFileSync(SettingsFile, jsonData)
-}
 
 export async function loadSettings(): Promise<Settings> {
-  makeSupportPath()
-  const defaultSettings: Settings = {
-    version: SettingsVersion,
-    reposDir: "",
-    maxDepth: 3,
-    includeSubmodules: false,
-    customActions: [
-      { title: "Open in Finder", app: "Finder", appBundleId: "com.apple.finder", appPath: "/System/Library/CoreServices/Finder.app"  },
-      { title: "", app: "", appBundleId: "", appPath: ""  },
-      { title: "", app: "", appBundleId: "", appPath: ""  },
-      { title: "", app: "", appBundleId: "", appPath: ""  },
-      { title: "", app: "", appBundleId: "", appPath: ""  }
-    ]
+  return {
+    reposDir: preferences.repoScanPath?.value as string,
+    maxDepth: preferences.repoScanDepth?.value as number ?? 3,
+    includeSubmodules: preferences.includeSubmodules?.value as boolean,
   }
-  try {
-    fs.accessSync(SettingsFile, fs.constants.R_OK)
-  } catch (err) {
-    return defaultSettings
-  }
-  const jsonData = fs.readFileSync(SettingsFile).toString()
-  if (jsonData.length > 0) {
-    const settings: Settings = JSON.parse(jsonData)
-
-    if (settings.version === undefined || settings.version < SettingsVersion) {
-      // Perform settings migration to version 1
-      if (settings.version === undefined ||settings.version < 1) {
-        settings.version = SettingsVersion
-        // Remove the unused cacheExpiration value
-        delete settings.cacheExpiration
-        const apps = await getApplications()
-        settings.customActions.map((action) => {
-          apps.find((a) => {
-            if (a.name === action.app) {
-              delete action.icon
-              action.app = a.name
-              action.appBundleId = a.bundleId ?? ""
-              action.appPath = a.path
-              return true
-            }
-            return false
-          })
-        })
-      }
-      saveSettings(settings)
-    }
-    return settings
-  }
-  return defaultSettings
 }
 
 export function gitRemotes(path: string): RemoteRepo[] {
