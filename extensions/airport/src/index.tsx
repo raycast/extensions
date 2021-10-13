@@ -77,7 +77,6 @@ export default function ArticleList() {
             appsResponse?.apps.waitlist.includes(app.id)
         ),
       }));
-      console.log(state);
       showToast(ToastStyle.Success, "Fetched Latest Apps");
     }
     fetch();
