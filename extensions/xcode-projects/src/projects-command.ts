@@ -5,9 +5,9 @@ import { xcodeProjectList } from "./user-interfaces/xcode-project-list.user-inte
 import { XcodeProjectService } from "./services/xcode-project.service";
 
 /**
- * xcode Command
+ * Xcode projects command
  */
-export default function Command(): JSX.Element {
+export default () => {
     // Initialize XcodeProjectService
     const xcodeProjectService = new XcodeProjectService();
     // Use XcodeProject State
@@ -45,4 +45,4 @@ export default function Command(): JSX.Element {
     }, []);
     // Return XcodeProject List
     return xcodeProjectList(xcodeProjects);
-}
+};

@@ -3,13 +3,13 @@
   "title": "Xcode Projects",
   "description": "Search and open your recent Xcode projects",
   "icon": "command-icon.png",
-  "author": "SvenTiigi",
+  "author": "Sven Tiigi",
   "license": "MIT",
   "commands": [
     {
-      "name": "xcode",
-      "title": "xcode",
-      "subtitle": "List your recent Xcode projects",
+      "name": "projects-command",
+      "title": "Xcode Projects",
+      "subtitle": "Xcode",
       "description": "Search and open your recent Xcode projects",
       "mode": "view"
     }
