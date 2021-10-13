@@ -53,5 +53,5 @@
 
 * [Changelog](changelog.md)
 * [Community](https://raycast.com/community)
-* [FAQ](faq.md)
 * [GitHub](https://github.com/raycast/extensions)
+* [FAQ](faq.md)
