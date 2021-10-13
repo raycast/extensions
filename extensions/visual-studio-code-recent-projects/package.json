@@ -33,7 +33,8 @@
     "eslint-config-prettier": "^7.1.0"
   },
   "dependencies": {
-    "@raycast/api": "^1.24.0"
+    "@raycast/api": "^1.24.0",
+    "tildify": "^3.0.0"
   },
   "scripts": {
     "dev": "ray develop",

@@ -1,7 +1,9 @@
 import { ActionPanel, CopyToClipboardAction, List, OpenAction, ShowInFinderAction } from "@raycast/api";
 import { existsSync, readFileSync } from "fs";
+import tildify from "tildify";
 import { homedir } from "os";
 import { basename, dirname } from "path";
+import { fileURLToPath } from "url";
 
 const STORAGE = `${homedir()}/Library/Application Support/Code/storage.json`;
 
@@ -33,8 +35,9 @@ export default function Command() {
 
 function ProjectListItem(props) {
   const name = decodeURI(basename(props.uri));
-  const path = decodeURI(props.uri.replace(`file://${homedir()}`, "~"));
-  const subtitle = dirname(path);
+  const path = fileURLToPath(props.uri);
+  const prettyPath = tildify(path);
+  const subtitle = dirname(prettyPath);
   const keywords = path.split("/");
   return (
     <List.Item
@@ -46,13 +49,13 @@ function ProjectListItem(props) {
         <ActionPanel>
           <ActionPanel.Section>
             <OpenAction title="Open in Code" icon="icon.png" target={props.uri} application="Visual Studio Code" />
-            <ShowInFinderAction path={props.uri} />
+            <ShowInFinderAction path={path} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CopyToClipboardAction title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
             <CopyToClipboardAction
               title="Copy Path"
-              content={path}
+              content={prettyPath}
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
           </ActionPanel.Section>
