@@ -86,12 +86,12 @@ export default function ArticleList() {
     <List isLoading={state.all.length === 0} searchBarPlaceholder="Filter apps by name...">
       <List.Section id="popular" title="Popular">
         {state.featured.map((app: App) => (
-          <AppListItem type="featured" key={`popular-${app.id}`} app={app} />
+          <AppListItem type="featured" app={app} />
         ))}
       </List.Section>
       <List.Section id="featured" title="Featured">
         {state.popular.map((app: App) => (
-          <AppListItem type="popular" key={`featured-${app.id}`} app={app} />
+          <AppListItem type="popular" app={app} />
         ))}
       </List.Section>
       <List.Section id="new" title="New">
