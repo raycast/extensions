@@ -118,6 +118,10 @@ export function GroupList(props: { parentGroup?: Group }) {
     showToast(ToastStyle.Failure, "Cannot search Groups", error);
   }
 
+  if (!groupsinfo) {
+    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  }
+
   const navtitle = parentGroup ? `Group ${parentGroup.full_path}` : undefined;
 
   return (

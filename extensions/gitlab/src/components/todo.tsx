@@ -33,6 +33,10 @@ export function TodoList() {
     showToast(ToastStyle.Failure, "Cannot search Merge Requests", error);
   }
 
+  if (!todos) {
+    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  }
+
   return (
     <List
       searchBarPlaceholder="Filter Todos by name..."

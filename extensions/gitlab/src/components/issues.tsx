@@ -161,6 +161,10 @@ export function IssueList({
     showToast(ToastStyle.Failure, "Cannot search issue", error);
   }
 
+  if (!issues) {
+    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  }
+
   const title = scope == IssueScope.assigned_to_me ? "Your Issues" : "Created Recently";
 
   return (

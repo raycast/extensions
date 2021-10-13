@@ -104,6 +104,10 @@ export function ProjectSearchList() {
     showToast(ToastStyle.Failure, "Cannot search Project", error);
   }
 
+  if (!projects) {
+    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  }
+
   return (
     <List
       searchBarPlaceholder="Filter Projects by name..."

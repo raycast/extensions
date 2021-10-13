@@ -134,6 +134,10 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
     showToast(ToastStyle.Failure, "Cannot search Project", error);
   }
 
+  if (!data) {
+    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  }
+
   return (
     <List
       searchBarPlaceholder="Filter Projects by name..."

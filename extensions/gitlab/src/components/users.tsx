@@ -19,6 +19,10 @@ export function UserList() {
     showToast(ToastStyle.Failure, "Cannot search Merge Requests", error);
   }
 
+  if (!users) {
+    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  }
+
   return (
     <List searchBarPlaceholder="Filter Users by name..." onSearchTextChange={setSearchText} isLoading={isLoading}>
       {users?.map((user) => (

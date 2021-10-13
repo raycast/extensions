@@ -12,6 +12,10 @@ export function ReviewList() {
     showToast(ToastStyle.Failure, "Cannot search Reviews", error);
   }
 
+  if (!mrs) {
+    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  }
+
   return (
     <List
       searchBarPlaceholder="Filter Reviews by name..."

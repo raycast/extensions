@@ -268,6 +268,10 @@ export function EventList(props: {}) {
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search Events", error);
   }
+
+  if (!data) {
+    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  }
   return (
     <List onSearchTextChange={setSearchText} isLoading={isLoading} throttle={true}>
       {data?.map((ev) => (

@@ -141,6 +141,10 @@ export function MRList({
     showToast(ToastStyle.Failure, "Cannot search Merge Requests", error);
   }
 
+  if (!mrs) {
+    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  }
+
   const title = scope == MRScope.assigned_to_me ? "Your Merge Requests" : "Created Recently";
 
   return (
