@@ -24,17 +24,15 @@
       "description": "Use `Shell Command: Install 'code' command in PATH` from the command palette to install."
     }
   ],
-  "devDependencies": {
-    "@types/node": "^15.12.4",
-    "@types/react": "^17.0.9",
-    "@typescript-eslint/eslint-plugin": "^4.12.0",
-    "@typescript-eslint/parser": "^4.12.0",
-    "eslint": "^7.29.0",
-    "eslint-config-prettier": "^7.1.0"
-  },
   "dependencies": {
-    "@raycast/api": "^1.24.0",
+    "@raycast/api": "^1.25.0",
     "tildify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0"
   },
   "scripts": {
     "dev": "ray develop",
