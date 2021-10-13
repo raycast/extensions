@@ -162,7 +162,8 @@ export function StateActionPanel(props: { state: State }) {
       );
     }
     case "climate": {
-      const changeTempAllowed = state.state === "heat" || state.state == "auto" ? true : false;
+      const changeTempAllowed =
+        state.state === "heat" || state.state === "cool" || state.state == "auto" ? true : false;
       const currentTempValue: number | undefined = state.attributes.temperature || undefined;
       const [currentTemp, setCurrentTemp] = useState<number | undefined>(currentTempValue);
       const upperTemp = currentTemp ? currentTemp + 0.5 : undefined;
