@@ -1,0 +1,170 @@
+import {
+  ActionPanel,
+  CopyToClipboardAction,
+  List,
+  OpenInBrowserAction,
+  showToast,
+  ToastStyle,
+  PushAction,
+  Color,
+} from "@raycast/api";
+import { useEffect, useState } from "react";
+import { gitlab, gitlabgql } from "../common";
+import { Project } from "../gitlabapi";
+import { projectIcon } from "../utils";
+import { PipelineList } from "./pipelines";
+import { BranchList } from "./branch";
+import { MilestoneList } from "./milestones";
+import { MRList, MRScope } from "./mr";
+import { ProjectNavMenusList } from "./project_nav";
+import { IssueList, IssueScope } from "./issues";
+import { CloneProjectInVSCodeAction } from "./project_actions";
+import { GitLabIcons } from "../icons";
+import { ClearLocalCacheAction } from "./cache_actions";
+
+function webUrl(project: Project, partial: string) {
+  return gitlabgql.urlJoin(`${project.fullPath}/${partial}`);
+}
+
+export function ProjectListItem(props: { project: Project }) {
+  const project = props.project;
+  return (
+    <List.Item
+      id={project.id.toString()}
+      title={project.name_with_namespace}
+      subtitle={"Stars " + project.star_count}
+      icon={projectIcon(project)}
+      actions={
+        <ActionPanel>
+          <OpenInBrowserAction url={project.web_url} />
+          <PushAction
+            title="Explore"
+            icon={{ source: GitLabIcons.explorer, tintColor: Color.PrimaryText }}
+            target={<ProjectNavMenusList project={project} />}
+          />
+          <CopyToClipboardAction title="Copy Project ID" content={project.id} />
+          <PushAction
+            title="Issues"
+            shortcut={{ modifiers: ["cmd"], key: "i" }}
+            icon={{ source: GitLabIcons.issue, tintColor: Color.PrimaryText }}
+            target={<IssueList scope={IssueScope.all} project={project} />}
+          />
+          <PushAction
+            title="Merge Requests"
+            shortcut={{ modifiers: ["cmd"], key: "m" }}
+            icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
+            target={<MRList scope={MRScope.all} project={project} />}
+          />
+          <PushAction
+            title="Branches"
+            shortcut={{ modifiers: ["cmd"], key: "b" }}
+            icon={{ source: GitLabIcons.branches, tintColor: Color.PrimaryText }}
+            target={<BranchList project={project} />}
+          />
+          <PushAction
+            title="Pipelines"
+            shortcut={{ modifiers: ["cmd"], key: "p" }}
+            icon={{ source: GitLabIcons.ci, tintColor: Color.PrimaryText }}
+            target={<PipelineList projectFullPath={project.fullPath} />}
+          />
+          <PushAction
+            title="Milestones"
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            icon={{ source: GitLabIcons.milestone, tintColor: Color.PrimaryText }}
+            target={<MilestoneList project={project} />}
+          />
+          <OpenInBrowserAction
+            title="Labels"
+            icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
+            url={webUrl(props.project, "-/labels")}
+          />
+          <OpenInBrowserAction
+            title="Security & Compliance"
+            icon={{ source: GitLabIcons.security, tintColor: Color.PrimaryText }}
+            url={webUrl(props.project, "-/security/discover")}
+          />
+          <OpenInBrowserAction
+            title="Settings"
+            icon={{ source: GitLabIcons.settings, tintColor: Color.PrimaryText }}
+            url={webUrl(props.project, "edit")}
+          />
+          <CloneProjectInVSCodeAction shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} project={project} />
+          <ClearLocalCacheAction />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+export function ProjectSearchList() {
+  const [searchText, setSearchText] = useState<string>();
+  const { projects, error, isLoading } = useSearch(searchText);
+
+  if (error) {
+    showToast(ToastStyle.Failure, "Cannot search Project", error);
+  }
+
+  if (!projects) {
+    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  }
+
+  return (
+    <List
+      searchBarPlaceholder="Filter Projects by name..."
+      onSearchTextChange={setSearchText}
+      isLoading={isLoading}
+      throttle={true}
+    >
+      {projects?.map((project) => (
+        <ProjectListItem key={project.id} project={project} />
+      ))}
+    </List>
+  );
+}
+
+export function useSearch(query: string | undefined): {
+  projects?: Project[];
+  error?: string;
+  isLoading: boolean;
+} {
+  const [projects, setProjects] = useState<Project[]>();
+  const [error, setError] = useState<string>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  let cancel = false;
+
+  useEffect(() => {
+    async function fetchData() {
+      if (query === null || cancel) {
+        return;
+      }
+
+      setIsLoading(true);
+      setError(undefined);
+
+      try {
+        const glProjects = await gitlab.getProjects({ searchText: query || "", searchIn: "title" });
+
+        if (!cancel) {
+          setProjects(glProjects);
+        }
+      } catch (e: any) {
+        if (!cancel) {
+          setError(e.message);
+        }
+      } finally {
+        if (!cancel) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      cancel = true;
+    };
+  }, [query]);
+
+  return { projects, error, isLoading };
+}
