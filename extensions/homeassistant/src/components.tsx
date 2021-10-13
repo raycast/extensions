@@ -1,20 +1,36 @@
 import {
   ActionPanel,
   ActionPanelItem,
-  ActionPanelSubmenu,
   Color,
   CopyToClipboardAction,
   Icon,
   List,
   popToRoot,
+  PushAction,
   showToast,
   ToastStyle,
 } from "@raycast/api";
-import { HomeAssistant, State } from "./haapi";
+import { State } from "./haapi";
 import { useState, useEffect } from "react";
 import { createHomeAssistantClient } from "./common";
+import { EntityAttributesList } from "./components/attributes";
 
 export const ha = createHomeAssistantClient();
+
+export function ShowAttributesAction(props: { state: State }) {
+  if (props.state.attributes) {
+    return (
+      <PushAction
+        title="Show Attributes"
+        target={<EntityAttributesList state={props.state} />}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+        icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
+      />
+    );
+  } else {
+    return null;
+  }
+}
 
 export function StatesList(props: { domain: string }) {
   const [searchText, setSearchText] = useState<string>();
@@ -74,6 +90,7 @@ export function StateActionPanel(props: { state: State }) {
             onAction={async () => await ha.stopCover(props.state.entity_id)}
             icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
           />
+          <ShowAttributesAction state={props.state} />
           <CopyToClipboardAction title="Copy value" content={props.state.state} />
         </ActionPanel>
       );
@@ -98,6 +115,7 @@ export function StateActionPanel(props: { state: State }) {
             onAction={async () => await ha.turnOffLight(props.state.entity_id)}
             icon={{ source: "power.png", tintColor: Color.Red }}
           />
+          <ShowAttributesAction state={props.state} />
           <CopyToClipboardAction title="Copy value" content={props.state.state} />
         </ActionPanel>
       );
@@ -156,6 +174,7 @@ export function StateActionPanel(props: { state: State }) {
             onAction={async () => await ha.muteMedia(entityID)}
             icon={{ source: Icon.SpeakerSlash, tintColor: Color.PrimaryText }}
           />
+          <ShowAttributesAction state={props.state} />
           <CopyToClipboardAction title="Copy ID" content={entityID} />
           <CopyToClipboardAction title="Copy State Value" content={props.state.state} />
         </ActionPanel>
@@ -257,6 +276,7 @@ export function StateActionPanel(props: { state: State }) {
               icon={{ source: "minus.png", tintColor: Color.PrimaryText }}
             />
           )}
+          <ShowAttributesAction state={props.state} />
           <CopyToClipboardAction title="Copy ID" content={entityID} />
           <CopyToClipboardAction title="Copy State Value" content={state.state} />
         </ActionPanel>

@@ -1,7 +1,7 @@
 {
   "name": "homeassistant",
   "title": "Home Assistant",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "tonka3000",
   "license": "MIT",
   "description": "Home Assistant remote control. Control your house with Raycast 🚀",
@@ -97,7 +97,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.24.5",
+    "@raycast/api": "^1.25.0",
     "node-fetch": "^2.6.1",
     "url-join": "^4.0.1"
   },
