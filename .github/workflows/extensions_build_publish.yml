@@ -28,14 +28,8 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - name: Checkout Actions
-        uses: actions/checkout@v2
-        with:
-          repository: raycast/github-actions
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          path: .github/actions/raycast-github-actions
       - name: Run Ray CLI
-        uses: ./.github/actions/raycast-github-actions/ray
+        uses: raycast/github-actions/ray@master
         with:
           access_token: "${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}"
           api_url: "${{ secrets.RAYCAST_CLI_API_URL }}"
