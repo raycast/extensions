@@ -34,7 +34,7 @@ export function WeatherList(props: {}) {
     showToast(ToastStyle.Failure, "Cannot search weather", error);
   }
   if (!data) {
-    return <List />;
+    return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
   const area = data.nearest_area[0];
