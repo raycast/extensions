@@ -1,0 +1,119 @@
+{
+  "name": "homeassistant",
+  "title": "Home Assistant",
+  "version": "1.0.0",
+  "author": "tonka3000",
+  "license": "MIT",
+  "description": "Home Assistant remote control. Control your house with Raycast 🚀",
+  "icon": "home-assistant.png",
+  "commands": [
+    {
+      "name": "index",
+      "title": "All Entities",
+      "subtitle" : "Home Assistant",
+      "description": "Get/Set states of Home Assistant entities",
+      "mode": "view"
+    },
+    {
+      "name": "covers",
+      "title": "Covers",
+      "subtitle" : "Home Assistant",
+      "description": "Get/Set states of Home Assistant covers",
+      "mode": "view"
+    },
+    {
+      "name": "lights",
+      "title": "Lights",
+      "subtitle" : "Home Assistant",
+      "description": "Get/Set states of Home Assistant lights",
+      "mode": "view"
+    },
+    {
+      "name": "persons",
+      "title": "Persons",
+      "subtitle" : "Home Assistant",
+      "description": "Get/Set states of Home Assistant persons",
+      "mode": "view"
+    },
+    {
+      "name": "sensors",
+      "title": "Sensors",
+      "subtitle" : "Home Assistant",
+      "description": "Get/Set states of Home Assistant sensors",
+      "mode": "view"
+    },
+    {
+      "name": "binarysensors",
+      "title": "Binary Sensors",
+      "subtitle" : "Home Assistant",
+      "description": "Get/Set states of Home Assistant binary sensors",
+      "mode": "view"
+    },
+    {
+      "name": "mediaplayers",
+      "title": "Mediaplayers",
+      "subtitle" : "Home Assistant",
+      "description": "Get/Set states of Home Assistant mediaplayers",
+      "mode": "view"
+    },
+    {
+      "name": "automations",
+      "title": "Automations",
+      "subtitle" : "Home Assistant",
+      "description": "Home Assistant automations",
+      "mode": "view"
+    },
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "subtitle" : "Home Assistant",
+      "description": "Open Home Assistant dashboard",
+      "mode": "view"
+    },
+    {
+      "name": "climate",
+      "title": "Climate",
+      "subtitle" : "Home Assistant",
+      "description": "Get/Set states of Home Assistant climate entities",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instance",
+      "type": "textfield",
+      "required": true,
+      "title": "Home Assistant URL",
+      "description": "URL of your Home Assistant instance",
+      "placeholder": "http://homeassistant.local:8123"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Home Assistant API token",
+      "placeholder": "Enter your Home Assistant API token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.24.5",
+    "node-fetch": "^2.6.1",
+    "url-join": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.4.3",
+    "@types/node-fetch": "^2.5.12",
+    "@types/react": "^17.0.15",
+    "@types/url-join": "^4.0.1",
+    "@typescript-eslint/eslint-plugin": "^4.28.5",
+    "@typescript-eslint/parser": "^4.28.5",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist"
+  }
+}
