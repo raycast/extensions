@@ -19,7 +19,7 @@ export function xcodeProjectListItem(
       actions={
         <ActionPanel>
           <OpenAction
-            title="Open in Xcode"
+            title="Open with Xcode"
             target={xcodeProject.filePath} />
           <ShowInFinderAction path={xcodeProject.filePath} />
         </ActionPanel>
