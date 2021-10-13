@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenAction, ShowInFinderAction } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, environment, List, OpenAction, ShowInFinderAction } from "@raycast/api";
 import { existsSync, readFileSync } from "fs";
 import tildify from "tildify";
 import { homedir } from "os";
@@ -59,8 +59,26 @@ function ProjectListItem(props) {
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
           </ActionPanel.Section>
+          <DevelopmentActionSection />
         </ActionPanel>
       }
     />
+  );
+}
+
+function DevelopmentActionSection() {
+  return (
+    environment.isDevelopment && (
+      <ActionPanel.Section>
+        <OpenAction
+          title="Open Storage File in Code"
+          icon="icon.png"
+          target={STORAGE}
+          application="Visual Studio Code"
+        />
+        <ShowInFinderAction title="Show Storage File in Finder" path={STORAGE} />
+        <CopyToClipboardAction title="Copy Storage File Path" content={STORAGE} />
+      </ActionPanel.Section>
+    )
   );
 }
