@@ -9,12 +9,16 @@ export function DayListItem(props: { day: WeatherData; title: string }) {
   const data = props.day;
   const wd = getWeekday(data.date);
   return (
-    <List.Item key={data.date} title={wd} subtitle={`max: ${data.maxtempC} °C, min: ${data.mintempC} °C`}
+    <List.Item
+      key={data.date}
+      title={wd}
+      subtitle={`max: ${data.maxtempC} °C, min: ${data.mintempC} °C`}
       actions={
-      <ActionPanel>
-        <PushAction title="Details" target={<DayList day={data} title={`${props.title} - ${wd}`} />} />
-      </ActionPanel>
-    }/>
+        <ActionPanel>
+          <PushAction title="Details" target={<DayList day={data} title={`${props.title} - ${wd}`} />} />
+        </ActionPanel>
+      }
+    />
   );
 }
 
@@ -39,8 +43,13 @@ export function WeatherList(props: {}) {
   const title = `${area.areaName[0].value}, ${area.region[0].value}, ${area.country[0].value}`;
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setQuery} throttle={true} navigationTitle={title}>
-      <List.Section title={`Current`}>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search for other location (e.g. London)"
+      onSearchTextChange={setQuery}
+      throttle={true}
+    >
+      <List.Section title={`Current (${title})`}>
         <List.Item
           key="_"
           title={`${curcon.temp_C}°C`}
