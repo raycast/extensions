@@ -5,6 +5,7 @@
   "description": "Weather forecast via wttr.in",
   "icon": "weather.png",
   "author": "tonka3000",
+  "license": "MIT",
   "commands": [
     {
       "name": "index",
