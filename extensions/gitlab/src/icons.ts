@@ -23,7 +23,8 @@ export enum GitLabIcons {
     labels = "dash.png",
     epic = "epic.png",
     comment = "book.png",
-    wiki = "list.png"
+    wiki = "list.png",
+    show_details = "sidebar-right-16"
 }
 
 async function getImageCacheDirectory(ensureDirectory = false): Promise<string> {

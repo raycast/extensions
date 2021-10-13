@@ -180,7 +180,11 @@ export function MRListItem(props: { mr: MergeRequest }) {
       accessoryTitle={toDateString(mr.updated_at)}
       actions={
         <ActionPanel>
-          <PushAction title="Show Details" target={<MRDetail mr={mr} />} />
+          <PushAction
+            title="Show Details"
+            target={<MRDetail mr={mr} />}
+            icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
+          />
           <OpenInBrowserAction url={mr.web_url} />
           <MRItemActions mr={mr} />
         </ActionPanel>

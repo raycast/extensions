@@ -1,18 +1,20 @@
 import { ActionPanel, Color, Icon, PushAction, showToast, ToastStyle } from "@raycast/api";
 import React from "react";
 import { gitlab } from "../common";
-import { jsonDataToIssue, jsonDataToMergeRequest as jsonDataToMergeRequest, MergeRequest, Todo } from "../gitlabapi";
+import { jsonDataToIssue, jsonDataToMergeRequest as jsonDataToMergeRequest, Todo } from "../gitlabapi";
+import { GitLabIcons } from "../icons";
 import { IssueDetail } from "./issues";
 import { MRDetail } from "./mr";
 
 export function ShowTodoDetailsAction(props: { todo: Todo }) {
   const todo = props.todo;
+  const icon = { source: GitLabIcons.show_details, tintColor: Color.PrimaryText };
   if (todo.target_type === "MergeRequest") {
     const mr = jsonDataToMergeRequest(todo.target);
-    return <PushAction title="Show Details" target={<MRDetail mr={mr} />} />;
+    return <PushAction title="Show Details" target={<MRDetail mr={mr} />} icon={icon} />;
   } else if (todo.target_type === "Issue") {
     const issue = jsonDataToIssue(todo.target);
-    return <PushAction title="Show Details" target={<IssueDetail issue={issue} />} />;
+    return <PushAction title="Show Details" target={<IssueDetail issue={issue} />} icon={icon} />;
   } else {
     return null;
   }
