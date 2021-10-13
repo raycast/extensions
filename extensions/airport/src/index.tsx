@@ -2,38 +2,130 @@ import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToas
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 
+interface App {
+  id: string;
+  name: string;
+  icon: string;
+  categories: string;
+  description: string;
+  status: string;
+  platform: string;
+}
+
+interface Apps {
+  all: App[];
+  featured: any[];
+  popular: any[];
+  new: any[];
+  upcoming: any[];
+  waitlist: any[];
+}
+interface Response {
+  apps: Apps;
+  categories: any[];
+  sections: any[];
+}
+
 export default function ArticleList() {
-  const [state, setState] = useState<{ apps: App[] }>({ apps: [] });
+  const [state, setState] = useState<{
+    all: App[] | any;
+    popular: string[] | any;
+    featured: string[] | any;
+    new: string[] | any;
+    upcoming: string[] | any;
+    waitlist: string[] | any;
+  }>({ all: [], popular: [], featured: [], new: [], upcoming: [], waitlist: [] });
 
   useEffect(() => {
     async function fetch() {
       showToast(ToastStyle.Animated, "Loading Apps");
-      const apps = await fetchArticles();
+      const appsResponse = await fetchApps();
       setState((oldState) => ({
         ...oldState,
-        apps: apps,
+        all: appsResponse?.apps.all.filter(
+          (app) =>
+            !appsResponse?.apps.popular.includes(app.id) &&
+            !appsResponse?.apps.featured.includes(app.id) &&
+            !appsResponse?.apps.new.includes(app.id) &&
+            !appsResponse?.apps.upcoming.includes(app.id) &&
+            !appsResponse?.apps.waitlist.includes(app.id)
+        ),
+        popular: appsResponse?.apps.all.filter((app) => appsResponse?.apps.popular.includes(app.id)),
+        featured: appsResponse?.apps.all.filter((app) => appsResponse?.apps.featured.includes(app.id)),
+        new: appsResponse?.apps.all.filter(
+          (app) =>
+            !appsResponse?.apps.popular.includes(app.id) &&
+            !appsResponse?.apps.featured.includes(app.id) &&
+            appsResponse?.apps.new.includes(app.id) &&
+            !appsResponse?.apps.upcoming.includes(app.id) &&
+            !appsResponse?.apps.waitlist.includes(app.id)
+        ),
+        upcoming: appsResponse?.apps.all.filter(
+          (app) =>
+            !appsResponse?.apps.popular.includes(app.id) &&
+            !appsResponse?.apps.featured.includes(app.id) &&
+            !appsResponse?.apps.new.includes(app.id) &&
+            appsResponse?.apps.upcoming.includes(app.id) &&
+            !appsResponse?.apps.waitlist.includes(app.id)
+        ),
+        waitlist: appsResponse?.apps.all.filter(
+          (app) =>
+            !appsResponse?.apps.popular.includes(app.id) &&
+            !appsResponse?.apps.featured.includes(app.id) &&
+            !appsResponse?.apps.new.includes(app.id) &&
+            !appsResponse?.apps.upcoming.includes(app.id) &&
+            appsResponse?.apps.waitlist.includes(app.id)
+        ),
       }));
+      console.log(state);
       showToast(ToastStyle.Success, "Fetched Latest Apps");
     }
     fetch();
   }, []);
 
   return (
-    <List isLoading={state.apps.length === 0} searchBarPlaceholder="Filter apps by name...">
-      {state.apps.map((app) => (
-        <ArticleListItem key={app.id} app={app} />
-      ))}
+    <List isLoading={state.all.length === 0} searchBarPlaceholder="Filter apps by name...">
+      <List.Section id="popular" title="Popular">
+        {state.featured.map((app: App) => (
+          <AppListItem type="featured" key={`popular-${app.id}`} app={app} />
+        ))}
+      </List.Section>
+      <List.Section id="featured" title="Featured">
+        {state.popular.map((app: App) => (
+          <AppListItem type="popular" key={`featured-${app.id}`} app={app} />
+        ))}
+      </List.Section>
+      <List.Section id="new" title="New">
+        {state.new.map((app: App) => (
+          <AppListItem type="new" app={app} />
+        ))}
+      </List.Section>
+      <List.Section id="upcoming" title="Upcoming">
+        {state.upcoming.map((app: App) => (
+          <AppListItem type="upcoming" app={app} />
+        ))}
+      </List.Section>
+      <List.Section id="waitlist" title="Waitlist">
+        {state.waitlist.map((app: App) => (
+          <AppListItem type="waitlist" app={app} />
+        ))}
+      </List.Section>
+      <List.Section id="all" title="All">
+        {state.all.map((app: App) => (
+          <AppListItem type="all" app={app} />
+        ))}
+      </List.Section>
     </List>
   );
 }
 
-function ArticleListItem(props: { app: App }) {
-  const app = props.app;
+function AppListItem(props: { app: App; type: string }) {
+  const { app, type } = props;
 
   return (
     <List.Item
-      id={app.id}
-      key={app.id}
+      id={`${type}-${app.id}`}
+      key={`${type}-${app.id}`}
       title={app.name}
       subtitle={app.description}
       icon={{ source: app.icon }}
@@ -47,90 +139,14 @@ function ArticleListItem(props: { app: App }) {
   );
 }
 
-async function fetchArticles(): Promise<App[]> {
+async function fetchApps(): Promise<Response | null> {
   try {
     const response = await fetch("https://app.airport.community/api/apps");
     const json: any = await response.json();
-    return json.apps.all as App[];
+    return json as Response;
   } catch (error) {
     console.error(error);
-    showToast(ToastStyle.Failure, "Could not load articles");
-    return Promise.resolve([]);
+    showToast(ToastStyle.Failure, "Could not load apps");
+    return Promise.resolve(null);
   }
 }
-
-type Article = {
-  id: string;
-  title: string;
-  url: string;
-  date_modified: string;
-};
-
-// import {
-//   Form,
-//   List,
-//   OpenInBrowserAction,
-//   CopyToClipboardAction,
-//   showHUD,
-//   FormValue,
-//   ActionPanel,
-//   SubmitFormAction,
-//   showToast,
-//   ToastStyle,
-//   Detail,
-// } from "@raycast/api";
-
-// import axios, { AxiosResponse } from "axios";
-
-// import { useEffect, useState } from "react";
-
-interface App {
-  id: string;
-  name: string;
-  icon: string;
-  categories: string;
-  description: string;
-  status: string;
-  platform: string;
-}
-
-// export default function Command() {
-//   function handleSubmit(values: Record<string, FormValue>) {
-//     console.log(values);
-//     showToast(ToastStyle.Success, "Submitted form", "See logs for submitted values");
-//   }
-
-//   const fetchApps = async () => {
-//     const result: any = (await axios.get("https://app.airport.community/api/apps")).data;
-//     setApps(result?.apps.all.sort);
-//     console.log(apps);
-//   };
-
-//   const [apps, setApps] = useState<App[] | null>(null);
-//   useEffect(() => {
-//     fetchApps();
-//     return () => {
-//       fetchApps;
-//     };
-//   }, []);
-
-//   return (
-//     <>
-//       <List isLoading={!apps} navigationTitle="Open Pull Requests">
-//         <List.Section title="Apps">
-//           {apps?.map((app) => (
-//             <List.Item
-//               title={app.name}
-//               subtitle={app.description}
-//               actions={
-//                 <ActionPanel title="Open on Airport">
-//                   <OpenInBrowserAction url={`https://app.airport.community/app/${app.id}`} />
-//                 </ActionPanel>
-//               }
-//             />
-//           ))}
-//         </List.Section>
-//       </List>
-//     </>
-//   );
-// }
