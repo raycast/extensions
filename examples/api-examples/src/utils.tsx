@@ -50,6 +50,12 @@ export function usePackageSearch(query: string | undefined): {
       try {
         const url = `https://api.npms.io/v2/search?q=${query ?? ""}`;
         const response = await fetch(url);
+
+        if (!response.ok) {
+          setError(response.statusText);
+          return;
+        }
+
         const json = await response.json();
 
         if (!cancel) {
