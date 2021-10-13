@@ -127,7 +127,7 @@ export function gitRemotes(path: string): RemoteRepo[] {
 export function parsePath(path: string): [ string[], string[] ] {
   const resolvedPaths: string[] = []
   const unresolvedPaths: string[] = []
-  const paths = path.split(";")
+  const paths = path.split(":")
   paths.map((path) => {
     path = path.trim()
     if (path.length === 0) { return }
