@@ -2,7 +2,7 @@
   "name": "xcode-projects",
   "title": "Xcode Projects",
   "description": "Search and open your recent Xcode projects",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "Sven Tiigi",
   "license": "MIT",
   "commands": [
