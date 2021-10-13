@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "author": "tonka3000",
   "license": "MIT",
-  "description": "Raycast commands for GitLab",
+  "description": "Create, search and modify issues, manage merge requests, projects and more.",
   "icon": "gitlab.png",
   "commands": [
     {
