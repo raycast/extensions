@@ -5,13 +5,12 @@ import { XcodeSimulator } from "./models/xcode-simulator.model";
 import { groupBy } from "./shared/group-by";
 import { map } from "rxjs";
 
-// Initialize global XcodeSimulatorService
-const xcodeSimulatorService = new XcodeSimulatorService();
-
 /**
  * Xcode simulators command
  */
 export default () => {
+  // Use XcodeSimulatorService State
+  const [xcodeSimulatorService] = useState<XcodeSimulatorService>(new XcodeSimulatorService());
   // Use XcodeRelease State
   const [xcodeSimulators, setXcodeSimulators] = useState<Map<string, XcodeSimulator[]> | undefined>(undefined);
   // Use Effect
