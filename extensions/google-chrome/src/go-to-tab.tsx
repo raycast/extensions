@@ -1,0 +1,112 @@
+import {ActionPanel, closeMainWindow, Icon, List} from "@raycast/api";
+import {runAppleScript} from "run-applescript";
+import {useEffect, useState} from "react";
+
+class Tab {
+  static readonly TAB_CONTENTS_SEPARATOR: string = '~~~';
+
+  constructor(
+    public readonly title: string,
+    public readonly url: string,
+    public readonly favicon: string,
+    public readonly windowsIndex: number,
+    public readonly tabIndex: number
+  ) {}
+
+  static parse(line: string): Tab {
+    const parts = line.split(this.TAB_CONTENTS_SEPARATOR);
+
+    return new Tab(parts[0], parts[1], parts[2], +parts[3], +parts[4]);
+  }
+
+  key(): string {
+    return `${this.windowsIndex}${Tab.TAB_CONTENTS_SEPARATOR}${this.tabIndex}`;
+  }
+}
+
+async function getOpenTabs(): Promise<Tab[]> {
+  const openTabs = await runAppleScript(`
+      set _output to ""
+      tell application "Google Chrome"
+        set _window_index to 1
+        repeat with w in windows
+          set _tab_index to 1
+          repeat with t in tabs of w
+            set _title to get title of t
+            set _url to get URL of t
+            set _favicon to execute of tab _tab_index of window _window_index javascript ¬
+                    "document.head.querySelector('link[rel~=icon]').href;"
+            set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _window_index & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "\\n")
+            set _tab_index to _tab_index + 1
+          end repeat
+          set _window_index to _window_index + 1
+          if _window_index > count windows then exit repeat
+        end repeat
+      end tell
+      return _output
+  `);
+
+  return openTabs.split("\n").map(line => Tab.parse(line));
+}
+
+async function setActiveTab(tab: Tab): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      activate
+      set index of window (${tab.windowsIndex} as number) to (${tab.windowsIndex} as number)
+      set active tab index of window (${tab.windowsIndex} as number) to (${tab.tabIndex} as number)
+    end tell
+  `);
+}
+
+interface State {
+  tabs?: Tab[];
+}
+
+export default function Command() {
+  const [state, setState] = useState<State>({});
+
+  useEffect(() => {
+    async function getTabs() {
+      setState({tabs: await getOpenTabs()});
+    }
+
+    getTabs();
+  }, []);
+
+  return (
+    <List>
+      {state.tabs?.map((tab, index) => (
+        <TabListItem key={tab.key()} tab={tab} index={index}/>
+      ))}
+    </List>
+  );
+}
+
+function TabListItem(props: { tab: Tab; index: number }) {
+  return (
+    <List.Item
+      icon={props.tab.favicon}
+      title={props.tab.title}
+      subtitle={props.tab.url}
+      actions={<Actions tab={props.tab}/>}
+    />
+  );
+}
+
+function Actions(props: { tab: Tab }) {
+  return (
+    <ActionPanel title={props.tab.title}>
+      <GoToTab tab={props.tab}/>
+    </ActionPanel>
+  );
+}
+
+function GoToTab(props: { tab: Tab }) {
+  async function handleAction() {
+    await setActiveTab(props.tab);
+    await closeMainWindow();
+  }
+
+  return <ActionPanel.Item title="Open tab" icon={{source: Icon.Eye}} onAction={handleAction}/>;
+}
