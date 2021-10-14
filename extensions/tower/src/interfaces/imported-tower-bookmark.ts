@@ -1,12 +1,12 @@
 export default interface ImportedTowerBookmarks {
-    children: ImportedTowerBookmark[];
+  children: ImportedTowerBookmark[];
 }
 
 export interface ImportedTowerBookmark {
-    fileURL: string;
-    lastOpenedDate: number;
-    name: string;
-    repositoryIdentifier: string;
-    type: number;
-    valid: boolean;
+  fileURL: string;
+  lastOpenedDate: number;
+  name: string;
+  repositoryIdentifier: string;
+  type: number;
+  valid: boolean;
 }
