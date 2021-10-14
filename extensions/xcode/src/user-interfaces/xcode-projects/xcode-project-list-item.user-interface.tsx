@@ -1,6 +1,6 @@
-import { XcodeProject } from "../models/xcode-project.model";
+import { XcodeProject } from "../../models/xcode-project.model";
 import { ActionPanel, List, OpenAction, ShowInFinderAction } from "@raycast/api";
-import { XcodeProjectType } from "../models/xcode-project-type.model";
+import { XcodeProjectType } from "../../models/xcode-project-type.model";
 
 /**
  * Xcode Project List Item

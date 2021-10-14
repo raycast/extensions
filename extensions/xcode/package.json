@@ -1,0 +1,44 @@
+{
+  "name": "xcode",
+  "title": "Xcode",
+  "version": "1.0.0",
+  "author": "Sven Tiigi",
+  "license": "MIT",
+  "description": "Open your recent Xcode Projects and view the latest Xcode Releases",
+  "icon": "xcode-13.png",
+  "commands": [
+    {
+      "name": "projects-command",
+      "title": "Projects",
+      "subtitle": "Your recent Xcode Projects",
+      "description": "Search and open your recent Xcode Projects",
+      "mode": "view"
+    },
+    {
+      "name": "releases-command",
+      "title": "Releases",
+      "subtitle": "The latest Xcode Releases",
+      "description": "Search, download and view the latest Xcode Releases",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/node-fetch": "^3.0.3",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

@@ -1,7 +1,7 @@
 import { showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { XcodeProject } from "./models/xcode-project.model";
-import { xcodeProjectList } from "./user-interfaces/xcode-project-list.user-interface";
+import { xcodeProjectList } from "./user-interfaces/xcode-projects/xcode-project-list.user-interface";
 import { XcodeProjectService } from "./services/xcode-project.service";
 
 /**
