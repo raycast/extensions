@@ -23,12 +23,8 @@ export default function Command() {
       folders.push(<ProjectListItem key={entry.folderUri} uri={entry.folderUri} />);
     } else if (entry.fileUri && existsSync(new URL(entry.fileUri))) {
       files.push(<ProjectListItem key={entry.fileUri} uri={entry.fileUri} />);
-    } else if (
-      entry.hasOwnProperty("workspace") &&
-      entry.workspace.hasOwnProperty("id") &&
-      existsSync(new URL(entry.workspace.configPath))
-    ) {
-      workspaces.push(<ProjectListItem key={entry.workspace.id} uri={entry.workspace.configPath} />);
+    } else if (entry.workspace && entry.workspace.configPath && existsSync(new URL(entry.workspace.configPath))) {
+      workspaces.push(<ProjectListItem key={entry.workspace.configPath} uri={entry.workspace.configPath} />);
     }
   });
 
