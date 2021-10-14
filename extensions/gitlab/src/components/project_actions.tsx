@@ -5,6 +5,7 @@ import {
   KeyboardShortcut,
   List,
   ListItem,
+  OpenInBrowserAction,
   popToRoot,
   PushAction,
   showToast,
@@ -65,6 +66,23 @@ export function CloneProjectInVSCodeAction(props: { shortcut?: KeyboardShortcut;
         icon={{ fileIcon: code }}
         shortcut={props.shortcut}
         target={<CloneInVSCodeList project={pro} />}
+      />
+    );
+  } else {
+    return null;
+  }
+}
+
+export function CloneProjectInGitPod(props: { shortcut?: KeyboardShortcut; project: Project }) {
+  const pro = props.project;
+  const url = `https://gitpod.io#${pro.web_url}`;
+  if (pro.http_url_to_repo || pro.ssh_url_to_repo) {
+    return (
+      <OpenInBrowserAction
+        title="Clone in Gitpod"
+        shortcut={props.shortcut}
+        icon={{ source: "gitpod.png" }}
+        url={url}
       />
     );
   } else {
