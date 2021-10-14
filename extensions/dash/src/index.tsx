@@ -5,14 +5,28 @@ import DocsetSearch from "./DocsetSearch";
 
 export default function DocSetList() {
   const [docsets, setDocsets] = useState<Docset[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const [filteredDocsets, setFilteredDocsets] = useState<Docset[]>([]);
 
   useEffect(() => {
     getDocsets().then(setDocsets);
   }, []);
 
+  const searchInDocsets = (newSearchText: string) => {
+    setSearchText(newSearchText);
+
+    setFilteredDocsets(
+      docsets.filter((docset) => docset.docsetName.toLowerCase().includes(newSearchText.toLowerCase()))
+    );
+  };
+
   return (
-    <List isLoading={docsets.length === 0} searchBarPlaceholder="Filter docsets by name...">
-      {docsets.map((docset) => (
+    <List
+      isLoading={docsets.length === 0}
+      searchBarPlaceholder="Filter docsets by name..."
+      onSearchTextChange={searchInDocsets}
+    >
+      {(searchText.length > 0 ? filteredDocsets : docsets).map((docset) => (
         <DocsetListItem key={docset.docsetBundle} docset={docset} />
       ))}
     </List>
