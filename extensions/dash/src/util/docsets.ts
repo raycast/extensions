@@ -1,18 +1,12 @@
 import tempy from "tempy";
 import { exec } from "child_process";
 import { existsSync, readFile } from "fs";
+import { getDashAppPath } from "./dashApp";
 
 export type Docset = {
   docsetBundle: string;
   docsetName: string;
   docsetPath: string;
-}
-
-function getDashAppPath() {
-  return [
-    "/Applications/Dash.app",
-    "/Applications/Setapp/Dash.app"
-  ].find(existsSync);
 }
 
 export function getDocsets(): Promise<Docset[]> {
