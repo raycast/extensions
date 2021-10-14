@@ -18,4 +18,4 @@
 
 ## Checklist
 
-- [ ] I read the [contribution guidelines](contributing.md)
+- [ ] I read the [documentation about publishing](https://developers.raycast.com/basics/publish-an-extension)
