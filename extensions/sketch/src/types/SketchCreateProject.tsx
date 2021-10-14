@@ -1,4 +1,4 @@
-import { Project } from "./sketch";
+import { Project } from "./SketchWorkspaceShare";
 
 export interface CreateProjectBodyRes {
   data: Data;

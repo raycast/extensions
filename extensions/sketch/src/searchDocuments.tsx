@@ -12,19 +12,18 @@ import {
   ImageMask,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { Share } from "./types/sketch";
+import { Share } from "./types/SketchWorkspaceShare";
 import { login } from "./utils/functions";
 import useSearch from "./hooks/useSearch";
+import { Preferences, SelectedWorkspace } from "./types/preferences";
+import { PersonalShare } from "./types/SketchPersonalShare";
+import { getSelectedWorkspace } from "./utils/storage";
 
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
-import { Preferences, SelectedWorkspace } from "./types/preferences";
-import { PersonalShare } from "./types/personalShare";
-import { getSelectedWorkspace } from "./utils/storage";
 TimeAgo.addDefaultLocale(en);
 
 const timeAgo = new TimeAgo("en-US");
-console.log("yes");
 
 interface ToastError {
   title: string;
