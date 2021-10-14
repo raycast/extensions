@@ -1,7 +1,7 @@
 {
   "name": "producthunt",
   "title": "Product Hunt",
-  "description": "Read the latest stories of Hacker News.",
+  "description": "Get the latest products from the fontpage of Product Hunt.",
   "icon": "icon.png",
   "author": "Ragnor Comerford",
   "commands": [
