@@ -19,8 +19,17 @@ export default function Command() {
   return <Detail markdown={`\`\`\`\n\n\n${frame}\n\n\`\`\``} />;
 }
 
+const frameCache = new Map<number, string>([]);
+
 function getFrame(index: number) {
+  const cachedFrame = frameCache.get(index);
+  if (cachedFrame) {
+    return cachedFrame;
+  }
+
   const file = resolve(environment.assetsPath, "frames", `${index}.txt`);
   const data = readFileSync(file);
-  return data.toString();
+  const frame = data.toString();
+  frameCache.set(index, frame);
+  return frame;
 }
