@@ -4,6 +4,7 @@
   "description": "Raycast Command for Searching Notion",
   "icon": "command-icon.png",
   "author": "reckoning-dev",
+  "version": "1.0.0",
   "license": "MIT",
   "commands": [
     {
