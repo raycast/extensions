@@ -25,13 +25,6 @@
   ],
   "commands": [
     {
-      "name": "setWorkspace",
-      "title": "Set Workspace",
-      "subtitle": "Sketch",
-      "description": "Set the Workspace you want to browse into",
-      "mode": "view"
-    },
-    {
       "name": "searchDocuments",
       "title": "Search Documents",
       "subtitle": "Sketch",

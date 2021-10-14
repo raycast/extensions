@@ -57,7 +57,7 @@ export default function useSearch(
     return () => {
       cancel = true;
     };
-  }, [query, token]);
+  }, [query, token, selectedWorkspace]);
 
   return { data, error, isLoading };
 }
