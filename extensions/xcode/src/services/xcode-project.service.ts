@@ -1,7 +1,7 @@
 import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
 import { XcodeProject } from "../models/xcode-project.model";
-import { exec } from "child_process";
 import { XcodeProjectType } from "../models/xcode-project-type.model";
+import { execAsync } from "../shared/exec-async";
 
 /**
  * XcodeProjectService
@@ -34,9 +34,9 @@ export class XcodeProjectService {
    * Cache XcodeProjects
    * @param xcodeProjects The XcodeProjects that should be cached
    */
-  private async cacheXcodeProjects(
+  private cacheXcodeProjects(
     xcodeProjects: XcodeProject[]
-  ) {
+  ):  Promise<void> {
     // Store XcodeProjects JSON in LocalStorage
     return setLocalStorageItem(
       this.xcodeProjectsJSONLocalStorageKey,
@@ -48,44 +48,36 @@ export class XcodeProjectService {
    * Retrieve XcodeProjects
    */
   async xcodeProjects(): Promise<XcodeProject[]> {
-    return new Promise((resolve, reject) => {
-      // Initialize Spotlight Search Parameters
-      const spotlightSearchParameters = [
-        "kMDItemDisplayName == *.xcodeproj",
-        "kMDItemDisplayName == *.xcworkspace",
-        "kMDItemDisplayName == Package.swift",
-        "kMDItemDisplayName == *.playground",
-      ]
-      // Execute command
-      exec(
-        `mdfind '${spotlightSearchParameters.join(" || ")}'`,
-        (error, stdout, stderr) => {
-          // Check if an error is available
-          if (stderr) {
-            // Return out of function and reject with error
-            return reject(stderr);
-          }
-          // Initialize XcodeProjects
-          const xcodeProjects = stdout
-            // Split standard output by new line
-            .split("\n")
-            // Filter out any Xcode Project that is included in Carthage/Checkouts or Pods from CocoaPods
-            .filter(xcodeProjectPath => {
-              return !xcodeProjectPath.includes("Carthage/Checkouts")
-                && !xcodeProjectPath.includes("Pods")
-                && !xcodeProjectPath.includes("Library/Autosave Information");
-            })
-            // Decode each Xcode Project Path
-            .map(xcodeProjectPath => XcodeProjectService.decodeXcodeProject(xcodeProjectPath))
-            // Filter out null values
-            .filter(xcodeProject => !!xcodeProject) as XcodeProject[];
-          // Resolve with XcodeProjects
-          resolve(xcodeProjects);
-          // Cache XcodeProjects
-          this.cacheXcodeProjects(xcodeProjects);
-        }
-      );
-    });
+    // Initialize Spotlight Search Parameters
+    const spotlightSearchParameters = [
+      "kMDItemDisplayName == *.xcodeproj",
+      "kMDItemDisplayName == *.xcworkspace",
+      "kMDItemDisplayName == Package.swift",
+      "kMDItemDisplayName == *.playground",
+    ]
+    // Execute command
+    const output = await execAsync(
+      `mdfind '${spotlightSearchParameters.join(" || ")}'`
+    )
+    // Initialize XcodeProjects
+    const xcodeProjects = output
+      .stdout
+      // Split standard output by new line
+      .split("\n")
+      // Filter out any Xcode Project that is included in Carthage/Checkouts or Pods from CocoaPods
+      .filter(xcodeProjectPath => {
+        return !xcodeProjectPath.includes("Carthage/Checkouts")
+          && !xcodeProjectPath.includes("Pods")
+          && !xcodeProjectPath.includes("Library/Autosave Information");
+      })
+      // Decode each Xcode Project Path
+      .map(xcodeProjectPath => XcodeProjectService.decodeXcodeProject(xcodeProjectPath))
+      // Filter out null values
+      .filter(xcodeProject => !!xcodeProject) as XcodeProject[];
+    // Cache XcodeProjects
+    this.cacheXcodeProjects(xcodeProjects);
+    // Return XcodeProjects
+    return xcodeProjects;
   }
 
   /**
