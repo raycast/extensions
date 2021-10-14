@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "author": "Sven Tiigi",
   "license": "MIT",
-  "description": "Open your recent Xcode Projects and view the latest Xcode Releases",
+  "description": "Open your recent Xcode Projects, view the latest Xcode Releases and manage your Xcode Simulators",
   "icon": "xcode-13.png",
   "commands": [
     {
@@ -20,11 +20,19 @@
       "subtitle": "The latest Xcode Releases",
       "description": "Search, download and view the latest Xcode Releases",
       "mode": "view"
+    },
+    {
+      "name": "simulators-command",
+      "title": "Simulators",
+      "subtitle": "Manage your Xcode Simulators",
+      "description": "Boot and shutdown Xcode Simulators",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
-    "node-fetch": "^3.0.0"
+    "node-fetch": "^3.0.0",
+    "rxjs": "^7.4.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
