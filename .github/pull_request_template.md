@@ -6,11 +6,11 @@
 
 <!-- Please choose one option and delete others that are not relevant. -->
 
-- New extension
-- Bug fix / improvement for my extension
-- Bug fix / improvement for somebody else's extension
-- Documentation update
-- Other (Specify)
+- [ ] New extension
+- [ ] Bug fix / improvement for my extension
+- [ ] Bug fix / improvement for somebody else's extension
+- [ ] Documentation update
+- [ ] Other (Specify):
 
 ## Screenshot
 
