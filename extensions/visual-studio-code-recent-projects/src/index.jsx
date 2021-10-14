@@ -46,7 +46,6 @@ function ProjectListItem(props) {
   const path = fileURLToPath(props.uri);
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);
-  Lunae;
   const keywords = path.split("/");
   return (
     <List.Item
