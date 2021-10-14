@@ -15,6 +15,7 @@ export function xcodeSimulatorListItem(
   return (
     <List.Item
       key={xcodeSimulator.udid}
+      icon={{ source: "xcode-simulator.png" }}
       title={xcodeSimulator.name}
       subtitle={xcodeSimulator.runtime}
       accessoryTitle={xcodeSimulator.state}
