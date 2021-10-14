@@ -15,6 +15,7 @@ function getRecentEntries() {
 export default function Command() {
   const folders = [];
   const files = [];
+  const workspaces = [];
 
   const recentEntries = getRecentEntries();
   recentEntries.forEach((entry) => {
@@ -22,11 +23,14 @@ export default function Command() {
       folders.push(<ProjectListItem key={entry.folderUri} uri={entry.folderUri} />);
     } else if (entry.fileUri && existsSync(new URL(entry.fileUri))) {
       files.push(<ProjectListItem key={entry.fileUri} uri={entry.fileUri} />);
+    } else if (entry.workspace && entry.workspace.configPath && existsSync(new URL(entry.workspace.configPath))) {
+      workspaces.push(<ProjectListItem key={entry.workspace.configPath} uri={entry.workspace.configPath} />);
     }
   });
 
   return (
     <List searchBarPlaceholder="Search recent projects...">
+      <List.Section title="Workspaces">{workspaces}</List.Section>
       <List.Section title="Folders">{folders}</List.Section>
       <List.Section title="Files">{files}</List.Section>
     </List>
