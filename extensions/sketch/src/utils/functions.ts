@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { BodyRes, Share, SketchErrorBody } from "../types/sketch";
+import { BodyRes, Share } from "../types/SketchWorkspaceShare";
 import fetch, { FetchError } from "node-fetch";
-import { CreateProjectBodyRes } from "../types/createProject";
-import { GetWorkspacesBodyRes } from "../types/getWorkspaces";
+import { GetWorkspacesBodyRes } from "../types/SketchGetWorkspaces";
 import { SelectedWorkspace } from "../types/preferences";
+import { SketchErrorBody } from "../types/SketchGeneric";
 
 type TokenBody = {
   access_token: string;
@@ -78,37 +78,38 @@ export async function getShares(
     throw new Error((error as FetchError).message);
   }
 }
+// next update
 
-export async function createProject(token: string, selectedWorkspace: SelectedWorkspace, name: string): Promise<CreateProjectBodyRes> {
-  try {
-    const resp = await fetch("https://graphql.sketch.cloud/api", {
-      method: "POST",
-      headers: {
-        Authorization: `bearer ${token}`,
-        "Content-Type": "application/json",
-        Accept: "*/*",
-      },
-      body: JSON.stringify({
-        operationName: "createWorkspaceProject",
-        variables: {
-          projectName: name,
-          workspaceId: selectedWorkspace.identifier,
-        },
-        query:
-          "mutation createWorkspaceProject($workspaceId: UUID!, $projectName: String!) {\n  createWorkspaceProject(workspaceIdentifier: $workspaceId, name: $projectName) {\n    project {\n      ...Project\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment Project on Project {\n  name\n  shortId\n  identifier\n  type\n  __typename\n}\n",
-      }),
-    });
-    const json = await resp.json();
+// export async function createProject(token: string, selectedWorkspace: SelectedWorkspace, name: string): Promise<CreateProjectBodyRes> {
+//   try {
+//     const resp = await fetch("https://graphql.sketch.cloud/api", {
+//       method: "POST",
+//       headers: {
+//         Authorization: `bearer ${token}`,
+//         "Content-Type": "application/json",
+//         Accept: "*/*",
+//       },
+//       body: JSON.stringify({
+//         operationName: "createWorkspaceProject",
+//         variables: {
+//           projectName: name,
+//           workspaceId: selectedWorkspace.identifier,
+//         },
+//         query:
+//           "mutation createWorkspaceProject($workspaceId: UUID!, $projectName: String!) {\n  createWorkspaceProject(workspaceIdentifier: $workspaceId, name: $projectName) {\n    project {\n      ...Project\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment Project on Project {\n  name\n  shortId\n  identifier\n  type\n  __typename\n}\n",
+//       }),
+//     });
+//     const json = await resp.json();
 
-    if (resp.ok) {
-      return json as CreateProjectBodyRes;
-    } else {
-      throw new Error((json as SketchErrorBody).message);
-    }
-  } catch (error) {
-    throw new Error((error as FetchError).message);
-  }
-}
+//     if (resp.ok) {
+//       return json as CreateProjectBodyRes;
+//     } else {
+//       throw new Error((json as SketchErrorBody).message);
+//     }
+//   } catch (error) {
+//     throw new Error((error as FetchError).message);
+//   }
+// }
 
 export async function getWorkspaces(token: string): Promise<GetWorkspacesBodyRes> {
   try {

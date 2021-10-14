@@ -1,6 +1,6 @@
 import { Form, getPreferenceValues, Icon, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { PersonalWorkspace, WorkspacesEntity } from "./types/getWorkspaces";
+import { PersonalWorkspace, WorkspacesEntity } from "./types/SketchGetWorkspaces";
 import { Preferences } from "./types/preferences";
 import { getWorkspaces, login } from "./utils/functions";
 import { getSelectedWorkspace } from "./utils/storage";
@@ -20,8 +20,6 @@ export default function Command() {
     showToast(ToastStyle.Failure, loginError);
   }
 
-  console.log(selectedWorkspace);
-
   const handleSubmit = async (value: string) => {
     if (!value) showToast(ToastStyle.Failure, "No workspace selected!");
     setSelectedWorkspace(value);
@@ -36,10 +34,8 @@ export default function Command() {
         const fetchedToken: string = await login(email, password);
         setToken(fetchedToken);
         const storedSelectedWorkspace = await getSelectedWorkspace();
-        console.log(storedSelectedWorkspace);
         if (storedSelectedWorkspace) setSelectedWorkspace(JSON.stringify(storedSelectedWorkspace));
       } catch (error) {
-        console.log((error as ErrorEvent).message);
         setLoginError((error as ErrorEvent).message);
       }
     }
@@ -54,7 +50,6 @@ export default function Command() {
         const { personalWorkspace, workspaces } = fetchedWorkspaces.data.me;
         setAllWorkspaces({ personalWorkspaces: personalWorkspace, workspaces: workspaces });
       } catch (error) {
-        console.log((error as ErrorEvent).message);
         setLoginError((error as ErrorEvent).message);
       }
     }

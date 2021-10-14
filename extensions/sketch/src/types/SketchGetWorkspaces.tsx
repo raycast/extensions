@@ -1,4 +1,4 @@
-import { Avatar } from "./sketch";
+import { Avatar } from "./SketchWorkspaceShare";
 
 export interface GetWorkspacesBodyRes {
   data: Data;

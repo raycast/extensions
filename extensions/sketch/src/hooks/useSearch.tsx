@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { SelectedWorkspace } from "../types/preferences";
-import { Share } from "../types/sketch";
+import { Share } from "../types/SketchWorkspaceShare";
 import { getShares } from "../utils/functions";
 
 export default function useSearch(
