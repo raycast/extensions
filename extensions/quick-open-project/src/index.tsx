@@ -139,7 +139,7 @@ function Command() {
   const { projects, isLoading } = searchProjects(searchQuery);
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchQuery}>
+    <List isLoading={isLoading} onSearchTextChange={setSearchQuery} selectedItemId={(projects && projects[0]) ? projects[0].fullPath : ""}>
       {projects?.map((project) => (
         <List.Item
           id={project.fullPath}
