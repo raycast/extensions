@@ -5,6 +5,7 @@
   "description": "Find and open projects on your system",
   "icon": "icon.png",
   "author": "zerowidth",
+  "license": "MIT",
   "commands": [
     {
       "name": "index",
