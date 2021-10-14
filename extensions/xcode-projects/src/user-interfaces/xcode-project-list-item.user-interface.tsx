@@ -14,6 +14,7 @@ export function xcodeProjectListItem(
       key={xcodeProject.filePath}
       title={xcodeProject.name}
       subtitle={xcodeProject.filePath}
+      accessoryTitle={accessoryTitle(xcodeProject.type)}
       keywords={xcodeProject.keywords}
       icon={{ source: imageAssetSource(xcodeProject.type) }}
       actions={
@@ -44,5 +45,24 @@ function imageAssetSource(
       return "swift-package.png";
     case XcodeProjectType.swiftPlayground:
       return "swift-playground.png";
+  }
+}
+
+/**
+ * Retrieve accessory title from XcodeProjectType
+ * @param xcodeProjectType The XcodeProjectType
+ */
+function accessoryTitle(
+  xcodeProjectType: XcodeProjectType
+): string {
+  switch (xcodeProjectType) {
+    case XcodeProjectType.project:
+      return "Project";
+    case XcodeProjectType.workspace:
+      return "Workspace";
+    case XcodeProjectType.swiftPackage:
+      return "Swift Package";
+    case XcodeProjectType.swiftPlayground:
+      return "Playground";
   }
 }
