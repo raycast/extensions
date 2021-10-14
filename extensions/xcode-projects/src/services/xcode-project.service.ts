@@ -49,9 +49,16 @@ export class XcodeProjectService {
    */
   async xcodeProjects(): Promise<XcodeProject[]> {
     return new Promise((resolve, reject) => {
+      // Initialize Spotlight Search Parameters
+      const spotlightSearchParameters = [
+        "kMDItemDisplayName == *.xcodeproj",
+        "kMDItemDisplayName == *.xcworkspace",
+        "kMDItemDisplayName == Package.swift",
+        "kMDItemDisplayName == *.playground",
+      ]
       // Execute command
       exec(
-        "mdfind 'kMDItemDisplayName == Package.swift || kMDItemDisplayName == *.xcodeproj || kMDItemDisplayName == *.xcworkspace'",
+        `mdfind '${spotlightSearchParameters.join(" || ")}'`,
         (error, stdout, stderr) => {
           // Check if an error is available
           if (stderr) {
@@ -92,21 +99,22 @@ export class XcodeProjectService {
     const lastPathComponent = xcodeProjectPath.substring(xcodeProjectPath.lastIndexOf("/") + 1);
     // Initialize the file extension
     const fileExtension = lastPathComponent.split(".").at(-1);
-    // Initialize keywords
-    let keywords = xcodeProjectPath.split("/");
-    // Pop last element of keywords
-    keywords.pop();
-    // Filter out empty keywords
-    keywords = keywords.filter(Boolean)
     // Declare name
     let name: string
     // Switch on file extension
     switch (fileExtension) {
       case XcodeProjectType.project:
       case XcodeProjectType.workspace:
-        name = lastPathComponent.split(".")[0];
+      case XcodeProjectType.swiftPlayground:
+        // Initialize file name components
+        const fileNameComponent = lastPathComponent.split(".");
+        // Pop last file name component
+        fileNameComponent.pop();
+        // Initialize name with re-joined file name components
+        name = fileNameComponent.join(".");
         break;
       case XcodeProjectType.swiftPackage:
+        // Initialize name by using the parent directory name otherwise use last path component
         name = xcodeProjectPath.split("/").at(-2) ?? lastPathComponent;
         break;
       default:
@@ -114,10 +122,14 @@ export class XcodeProjectService {
         // Return undefined to exclude project
         return undefined;
     }
+    // Initialize keywords
+    let keywords = xcodeProjectPath.split("/");
+    // Pop last element of keywords
+    keywords.pop();
     // Push name to keywords
     keywords.push(name);
-    // Filter out duplicates
-    keywords = [...new Set(keywords)];
+    // Filter out duplicates and empty keywords
+    keywords = [...new Set(keywords.filter(Boolean))];
     // Return XcodeProject
     return {
       name: name,

@@ -41,6 +41,8 @@ function imageAssetSource(
     case XcodeProjectType.workspace:
       return "xcode-workspace.png";
     case XcodeProjectType.swiftPackage:
-      return "swift-package.png"
+      return "swift-package.png";
+    case XcodeProjectType.swiftPlayground:
+      return "swift-playground.png";
   }
 }

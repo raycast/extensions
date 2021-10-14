@@ -4,5 +4,6 @@
 export enum XcodeProjectType {
   project = "xcodeproj",
   workspace = "xcworkspace",
-  swiftPackage = "swift"
+  swiftPackage = "swift",
+  swiftPlayground = "playground"
 }
