@@ -50,7 +50,6 @@ const useStateFromLocalStorage = <T, _ = void>(key: string, initialValue: T): [T
 };
 
 export default function Main(): ReactElement {
-  const [searchText, setSearchText] = useState<string>("");
   const [list, setList] = useStateFromLocalStorage<Category[]>("emoji-list", []);
   const didUnmount = useRef<boolean>(false);
 
@@ -74,35 +73,33 @@ export default function Main(): ReactElement {
   }, []);
 
   return (
-    <List onSearchTextChange={setSearchText} isLoading={list.length === 0}>
+    <List isLoading={list.length === 0}>
       {[{ category: "Recently Used", emojis: recentlyUsed }, ...list].map((category: Category) => (
         <List.Section title={category.category} key={category.category}>
-          {category.emojis
-            .filter((emoji) => emoji.description.includes(searchText))
-            .map((emoji) => (
-              <List.Item
-                key={`${category.category}${emoji.description}`}
-                id={`${category.category}${emoji.description}`}
-                icon={emoji.emoji}
-                title={emoji.description}
-                actions={
-                  <ActionPanel>
-                    <ActionPanel.Section>
-                      <PasteAction
-                        title="Paste Emoji to Curent Window"
-                        content={emoji.emoji}
-                        onPaste={() => addToRecentlyUsed(emoji)}
-                      />
-                      <CopyToClipboardAction
-                        title="Copy Emoji to Clipboard"
-                        content={emoji.emoji}
-                        onCopy={() => addToRecentlyUsed(emoji)}
-                      />
-                    </ActionPanel.Section>
-                  </ActionPanel>
-                }
-              />
-            ))}
+          {category.emojis.map((emoji) => (
+            <List.Item
+              key={`${category.category}${emoji.description}`}
+              id={`${category.category}${emoji.description}`}
+              icon={emoji.emoji}
+              title={emoji.description}
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Section>
+                    <PasteAction
+                      title="Paste Emoji to Curent Window"
+                      content={emoji.emoji}
+                      onPaste={() => addToRecentlyUsed(emoji)}
+                    />
+                    <CopyToClipboardAction
+                      title="Copy Emoji to Clipboard"
+                      content={emoji.emoji}
+                      onCopy={() => addToRecentlyUsed(emoji)}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          ))}
         </List.Section>
       ))}
     </List>

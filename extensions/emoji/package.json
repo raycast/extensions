@@ -1,16 +1,16 @@
 {
   "name": "emoji",
-  "title": "Emoji",
-  "description": "Finds an emoji and copy it to the clipboard",
+  "title": "Emoji Search",
+  "description": "Finds emojis and inerts or copies them.",
   "icon": "command-icon.png",
   "author": "FezVrasta",
   "license": "MIT",
   "commands": [
     {
       "name": "emoji",
-      "title": "emoji",
+      "title": "Search Emoji",
       "subtitle": "",
-      "description": "Finds an emoji and copy it to the clipboard",
+      "description": "Finds emojis and inerts or copies them.",
       "mode": "view"
     }
   ],
