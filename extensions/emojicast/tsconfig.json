@@ -1,0 +1,14 @@
+{
+  "include": ["src/**/*", "index.tsx"],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["ES2016"],
+    "target": "es6",
+    "module": "commonjs",
+    "strict": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "resolveJsonModule": true,
+    "esModuleInterop": true
+  }
+}

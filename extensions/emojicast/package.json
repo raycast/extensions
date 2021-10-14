@@ -1,0 +1,47 @@
+{
+  "name": "emojicast",
+  "title": "Find an Emoji",
+  "icon": "logo.png",
+  "version": "1.0.0",
+  "description": "Copy or paste an emoji",
+  "author": "Matt Gleich <email@mattglei.ch>",
+  "license": "MPL-2.0",
+  "private": true,
+  "scripts": {
+    "publish": "ray archive",
+    "dev": "ray develop",
+    "format": "prettier -w .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "gen": "cd scripts && go run gen.go && cd .. && yarn run format"
+  },
+  "keywords": [
+    "emojis",
+    "search",
+    "copy and paste"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gleich/emojicast"
+  },
+  "commands": [
+    {
+      "name": "index",
+      "title": "Find an Emoji",
+      "description": "Copy or paste an emoji",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^0.1.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.17.0",
+    "@typescript-eslint/parser": "^4.17.0",
+    "@types/react": "^17.0.13",
+    "eslint": "^7.21.0",
+    "eslint-config-prettier": "^8.1.0",
+    "prettier": "^2.2.1",
+    "typescript": "^4.2.3"
+  }
+}
