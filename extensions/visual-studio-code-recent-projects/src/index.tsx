@@ -4,6 +4,7 @@ import {
   environment,
   List,
   OpenAction,
+  OpenWithAction,
   ShowInFinderAction,
   TrashAction,
 } from "@raycast/api";
@@ -20,10 +21,6 @@ const STORAGE = `${homedir()}/Library/Application Support/Code/storage.json`;
 function getRecentEntries(): EntryLike[] {
   const json = JSON.parse(readFileSync(STORAGE).toString());
   return json.openedPathsList.entries;
-}
-
-function matches(input: string, query: string) {
-  return input.toLowerCase().normalize().includes(query.toLowerCase().normalize());
 }
 
 export default function Command() {
@@ -68,6 +65,7 @@ function ProjectListItem(props: { uri: string }) {
           <ActionPanel.Section>
             <OpenAction title="Open in Code" icon="icon.png" target={props.uri} application="Visual Studio Code" />
             <ShowInFinderAction path={path} />
+            <OpenWithAction path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CopyToClipboardAction title="Copy Name" content={name} shortcut={{ modifiers: ["cmd"], key: "." }} />
