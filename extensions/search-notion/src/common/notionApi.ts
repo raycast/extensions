@@ -17,10 +17,10 @@ export type QueryResultItem = {
   icon: string;
 };
 
-const parseRepositoryItem = (data) => {
+const parseRepositoryItem = (data: any) => {
   const results = data.results;
-  var parseItems = function(other_data) {
-    return function(item) {
+  var parseItems = function(other_data: any) {
+    return function(item: any) {
       const page_icon = !hasObjectProp(other_data[`${item.id}`]['value'], 'format') ? '' : hasStringProp(other_data[`${item.id}`]['value']['format'], 'page_icon') ? `${other_data[`${item.id}`]['value']['format']['page_icon']}`: '';
       const acc_title = hasStringProp(item.highlight, 'pathText') ? `${item.highlight.pathText}`.replace(/<\/gzkNfoUU>/g, '').replace(/<gzkNfoUU>/g, '').substring(0, 40): '';
       const reg_title = hasObjectProp(other_data[`${item.id}`]['value'], "properties") ? other_data[`${item.id}`]['value']['properties']['title']['0']['0'] : hasStringProp(item.highlight, 'text') ? `${item.highlight.text}`.replace(/<gzkNfoUU>/g, '').replace(/<\/gzkNfoUU>/g, '') : acc_title;
