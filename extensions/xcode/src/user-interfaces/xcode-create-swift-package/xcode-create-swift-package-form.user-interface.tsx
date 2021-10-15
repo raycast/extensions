@@ -1,8 +1,8 @@
 import { ActionPanel, Form, Navigation, showHUD, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
-import { XcodeSwiftPackageType } from "../../models/xcode-swift-package-type.model";
+import { XcodeSwiftPackageType } from "../../models/swift-package/xcode-swift-package-type.model";
 import { XcodeSwiftPackageService } from "../../services/xcode-swift-package.service";
-import { XcodeSwiftPackageCreationParameters } from "../../models/xcode-swift-package-creation-parameters.model";
-import { XcodeSwiftPackage } from "../../models/xcode-swift-package.model";
+import { XcodeSwiftPackageCreationParameters } from "../../models/swift-package/xcode-swift-package-creation-parameters.model";
+import { XcodeSwiftPackage } from "../../models/swift-package/xcode-swift-package.model";
 
 /**
  * Xcode create Swift Package Form

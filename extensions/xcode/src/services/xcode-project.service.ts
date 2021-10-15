@@ -1,6 +1,6 @@
 import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
-import { XcodeProject } from "../models/xcode-project.model";
-import { XcodeProjectType } from "../models/xcode-project-type.model";
+import { XcodeProject } from "../models/project/xcode-project.model";
+import { XcodeProjectType } from "../models/project/xcode-project-type.model";
 import { execAsync } from "../shared/exec-async";
 
 /**

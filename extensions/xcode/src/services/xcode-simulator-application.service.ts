@@ -1,9 +1,9 @@
-import { XcodeSimulatorApplication } from "../models/xcode-simulator-application.model";
+import { XcodeSimulatorApplication } from "../models/simulator/xcode-simulator-application.model";
 import { XcodeSimulatorService } from "./xcode-simulator.service";
 import * as fs from "fs";
 import * as Path from "path";
 import { execAsync } from "../shared/exec-async";
-import { XcodeSimulator } from "../models/xcode-simulator.model";
+import { XcodeSimulator } from "../models/simulator/xcode-simulator.model";
 import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
 
 /**

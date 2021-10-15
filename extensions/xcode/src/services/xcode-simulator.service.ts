@@ -1,4 +1,4 @@
-import { XcodeSimulator } from "../models/xcode-simulator.model";
+import { XcodeSimulator } from "../models/simulator/xcode-simulator.model";
 import { execAsync, ExecAsyncOutput } from "../shared/exec-async";
 import { BehaviorSubject, Observable } from "rxjs";
 import { showToast, ToastStyle } from "@raycast/api";

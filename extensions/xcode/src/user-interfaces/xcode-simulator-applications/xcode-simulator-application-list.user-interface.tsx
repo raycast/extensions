@@ -1,5 +1,5 @@
 import { List, Navigation } from "@raycast/api";
-import { XcodeSimulatorApplication } from "../../models/xcode-simulator-application.model";
+import { XcodeSimulatorApplication } from "../../models/simulator/xcode-simulator-application.model";
 import { xcodeSimulatorApplicationListItem } from "./xcode-simulator-application-list-item.user-interface";
 import { Source } from "../../shared/source";
 

@@ -1,4 +1,4 @@
-import { XcodeSimulatorApplication } from "../../models/xcode-simulator-application.model";
+import { XcodeSimulatorApplication } from "../../models/simulator/xcode-simulator-application.model";
 import { ActionPanel, CopyToClipboardAction, Icon, List, Navigation, ShowInFinderAction } from "@raycast/api";
 
 /**

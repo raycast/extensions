@@ -1,5 +1,5 @@
-import { XcodeRelease } from "../models/xcode-release.model";
-import { XcodeReleaseSDK } from "../models/xcode-release-sdk.model";
+import { XcodeRelease } from "../models/release/xcode-release.model";
+import { XcodeReleaseSDK } from "../models/release/xcode-release-sdk.model";
 import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
 import fetch from 'node-fetch';
 

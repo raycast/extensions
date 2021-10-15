@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { XcodeSimulatorService } from "./services/xcode-simulator.service";
 import { xcodeSimulatorsList } from "./user-interfaces/xcode-simulators/xcode-simulators-list.user-interface";
-import { XcodeSimulator } from "./models/xcode-simulator.model";
+import { XcodeSimulator } from "./models/simulator/xcode-simulator.model";
 import { groupBy } from "./shared/group-by";
 import { map } from "rxjs";
 

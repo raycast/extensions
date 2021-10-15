@@ -1,4 +1,4 @@
-import { XcodeSimulator } from "../../models/xcode-simulator.model";
+import { XcodeSimulator } from "../../models/simulator/xcode-simulator.model";
 import { List } from "@raycast/api";
 import { xcodeSimulatorListItem } from "./xcode-simulators-list-item.user-interface";
 import { XcodeSimulatorService } from "../../services/xcode-simulator.service";

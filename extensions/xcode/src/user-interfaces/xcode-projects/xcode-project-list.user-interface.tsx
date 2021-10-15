@@ -1,4 +1,4 @@
-import { XcodeProject } from "../../models/xcode-project.model";
+import { XcodeProject } from "../../models/project/xcode-project.model";
 import { List } from "@raycast/api";
 import { xcodeProjectListItem } from "./xcode-project-list-item.user-interface";
 

@@ -1,4 +1,4 @@
-import { XcodeRelease } from "../../models/xcode-release.model";
+import { XcodeRelease } from "../../models/release/xcode-release.model";
 import { ActionPanel, ActionPanelProps, Image, List, OpenAction } from "@raycast/api";
 import { ReactElement } from "react";
 

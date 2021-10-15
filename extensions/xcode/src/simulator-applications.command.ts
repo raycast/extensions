@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { showToast, ToastStyle, useNavigation } from "@raycast/api";
 import { xcodeSimulatorApplicationList } from "./user-interfaces/xcode-simulator-applications/xcode-simulator-application-list.user-interface";
 import { XcodeSimulatorApplicationService } from "./services/xcode-simulator-application.service";
-import { XcodeSimulatorApplication } from "./models/xcode-simulator-application.model";
+import { XcodeSimulatorApplication } from "./models/simulator/xcode-simulator-application.model";
 import { Source } from "./shared/source";
 
 /**

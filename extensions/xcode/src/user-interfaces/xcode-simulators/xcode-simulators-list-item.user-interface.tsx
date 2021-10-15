@@ -1,5 +1,5 @@
 import { ActionPanel, ActionPanelProps, List, showToast, ToastStyle } from "@raycast/api";
-import { XcodeSimulator } from "../../models/xcode-simulator.model";
+import { XcodeSimulator } from "../../models/simulator/xcode-simulator.model";
 import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
 import { ReactElement } from "react";
 

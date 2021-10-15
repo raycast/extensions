@@ -1,6 +1,6 @@
 import { XcodeReleaseService } from "./services/xcode-release.service";
 import { useEffect, useState } from "react";
-import { XcodeRelease } from "./models/xcode-release.model";
+import { XcodeRelease } from "./models/release/xcode-release.model";
 import { xcodeReleaseList } from "./user-interfaces/xcode-releases/xcode-release-list.user-interface";
 import { showToast, ToastStyle } from "@raycast/api";
 

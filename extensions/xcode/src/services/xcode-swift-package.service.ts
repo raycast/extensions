@@ -1,6 +1,6 @@
-import { XcodeSwiftPackage } from "../models/xcode-swift-package.model";
+import { XcodeSwiftPackage } from "../models/swift-package/xcode-swift-package.model";
 import { execAsync } from "../shared/exec-async";
-import { XcodeSwiftPackageCreationParameters } from "../models/xcode-swift-package-creation-parameters.model";
+import { XcodeSwiftPackageCreationParameters } from "../models/swift-package/xcode-swift-package-creation-parameters.model";
 import * as Path from "path";
 
 /**

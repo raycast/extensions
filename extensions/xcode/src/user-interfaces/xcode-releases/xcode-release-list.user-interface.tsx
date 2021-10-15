@@ -1,4 +1,4 @@
-import { XcodeRelease } from "../../models/xcode-release.model";
+import { XcodeRelease } from "../../models/release/xcode-release.model";
 import { List } from "@raycast/api";
 import { xcodeReleaseListItem } from "./xcode-release-list-item.user-interface";
 
