@@ -8,49 +8,49 @@
   "icon": "icon.png",
   "commands": [
     {
-      "name": "projects-command",
+      "name": "projects.command",
       "title": "Projects",
       "subtitle": "Your recent Xcode Projects",
       "description": "Search and open your recent Xcode Projects",
       "mode": "view"
     },
     {
-      "name": "simulator-applications-command",
+      "name": "simulator-applications.command",
       "title": "Apps",
       "subtitle": "Apps installed on Xcode Simulators",
       "description": "View the bundle and sandbox path of your Apps that are installed on a Xcode Simulator",
       "mode": "view"
     },
     {
-      "name": "simulators-command",
+      "name": "simulators.command",
       "title": "Simulators",
       "subtitle": "Manage your Xcode Simulators",
       "description": "Boot and shutdown Xcode Simulators",
       "mode": "view"
     },
     {
-      "name": "releases-command",
+      "name": "releases.command",
       "title": "Releases",
       "subtitle": "The latest Xcode Releases",
       "description": "Search, download and view the latest Xcode Releases",
       "mode": "view"
     },
     {
-      "name": "create-swift-package-command",
+      "name": "create-swift-package.command",
       "title": "Create Swift Package",
       "subtitle": "Create a new Swift Package",
       "description": "Create a new Swift Package and open it directly in Xcode",
       "mode": "view"
     },
     {
-      "name": "clear-derived-data-command",
+      "name": "clear-derived-data.command",
       "title": "Clear Derived Data",
       "subtitle": "Clean your Xcode cache files",
       "description": "Removes the ~/Library/Developer/Xcode/DerivedData directory",
       "mode": "no-view"
     },
     {
-      "name": "clear-swift-package-manager-cache-command",
+      "name": "clear-swift-package-manager-cache.command",
       "title": "Clear SPM cache",
       "subtitle": "Clears the global Swift Package Manager cache",
       "description": "Removes the ~/Library/Caches/org.swift.swiftpm/repositories directory",
