@@ -1,4 +1,15 @@
-import { render, ActionPanel, Color, Icon, List, OpenInBrowserAction } from "@raycast/api";
+import {
+  render,
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  OpenInBrowserAction,
+  preferences,
+  showToast,
+  ToastStyle,
+  Detail,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import useInterval from "./use-interval";
 import { Deployment, DeploymentState, fetchDeployments, fetchUsername } from "./vercel";
@@ -6,6 +17,12 @@ import { Deployment, DeploymentState, fetchDeployments, fetchUsername } from "./
 render(<Main />);
 
 function Main(): JSX.Element {
+  const token = String(preferences.token.value);
+  if (token.length !== 24) {
+    showToast(ToastStyle.Failure, "Invalid token detected");
+    throw new Error("Invalid token length detected");
+  }
+
   const [username, setUsername] = useState("");
   const [deployments, setDeployments] = useState<Deployment[]>();
 

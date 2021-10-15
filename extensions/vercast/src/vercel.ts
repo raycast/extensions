@@ -34,6 +34,7 @@ export async function fetchUsername(): Promise<string> {
   } catch (err) {
     console.error(err);
     showToast(ToastStyle.Failure, "Failed to fetch username");
+    throw new Error("Failed to fetch username");
   }
   return Promise.resolve("");
 }
@@ -80,6 +81,7 @@ export async function fetchDeployments(username: string): Promise<Deployment[]> 
   } catch (err) {
     console.error(err);
     showToast(ToastStyle.Failure, "Failed to fetch deployments");
+    throw new Error("Failed to fetch deployments");
   }
   return Promise.resolve([]);
 }
