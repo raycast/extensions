@@ -45,6 +45,11 @@ export default async function mainSearchPage(query, databaseId, databaseTitle) {
 
   resultSection.clearListItem()
 
+  if(!query && !pages[0]){
+    RS.newDetail('## No pages available \n\n Make sure to **Invite** at least one database or page with the integration you have created.\n ![NotionShare](https://images.ctfassets.net/lzny33ho1g45/2pIkZOvLY2o2dwfnJIYJxt/d5d9f1318b2e79ad92d8197e4abab655/automate-notion-with-zapier-11-share-options.png)').render()
+    return
+  }
+
   pages.forEach(function (page){ 
 
 
@@ -262,6 +267,10 @@ async function pagePreview(pageId, pageTitle) {
     }
 
   })
+
+  if(!PageBlocks[0]) {
+    pageContent += '*Page is empty*'
+  }
 
   notionPagePreview
   .setMarkdown(pageContent)
