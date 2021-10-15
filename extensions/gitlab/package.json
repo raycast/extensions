@@ -1,7 +1,7 @@
 {
   "name": "gitlab",
   "title": "GitLab",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "tonka3000",
   "license": "MIT",
   "description": "Create, search and modify issues, manage merge requests, projects and more.",
