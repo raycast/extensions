@@ -219,7 +219,7 @@ export function useRepoCache(query: string | undefined): {
 } {
   const [response, setResponse] = useState<RepoSearchResponse>()
   const [error, setError] = useState<string>()
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [fetched, setIsFetched] = useState<boolean>(false)
   const cache = new Cache()
 
@@ -235,8 +235,6 @@ export function useRepoCache(query: string | undefined): {
       if (cancel || fetched) {
         return
       }
-
-      setIsLoading(true)
       setError(undefined)
 
       try {
@@ -277,7 +275,10 @@ export function useRepoCache(query: string | undefined): {
       repos = filterRepos(repos, query)
       sectionTitle = `${repos.length} Repo${repos.length != 1 ? "s" : ""} Found`
     }
-    setResponse({ sectionTitle: sectionTitle, repos: repos })
+
+    if (cache.repos.length > 0) {
+      setResponse({ sectionTitle: sectionTitle, repos: repos })
+    }
 
     if (!fetched) {
       fetchRepos()

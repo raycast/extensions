@@ -8,7 +8,7 @@ export function getIcon(weatherCode: string): string {
 
 export function getWindDirectionIcon(degree: string): string {
     const deg = parseFloat(degree);
-    const windIndex = Math.round(((deg + 22.5) % 360) / 45.0);
+    const windIndex = Math.floor(((deg + 22.5) % 360) / 45.0);
     const wind_direction = WIND_DIRECTION[windIndex];
     return wind_direction;
 }

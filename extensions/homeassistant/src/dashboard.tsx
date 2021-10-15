@@ -1,5 +1,5 @@
 import { popToRoot, render, showHUD } from "@raycast/api";
-import { ha } from "./components";
+import { ha } from "./components/states";
 import open from "open";
 
 async function main() {
