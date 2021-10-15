@@ -67,7 +67,8 @@
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "node-fetch": "^3.0.0",
-    "rxjs": "^7.4.0"
+    "rxjs": "^7.4.0",
+    "tildify": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
