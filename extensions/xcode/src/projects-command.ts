@@ -30,6 +30,11 @@ export default () => {
       .xcodeProjects()
       .then(setXcodeProjects)
       .catch(error => {
+        // Check if no XcodeProjects have been set
+        if (!xcodeProjects) {
+          // Set empty XcodeProjects
+          setXcodeProjects([]);
+        }
         // Log Error
         console.error(error);
         // Show Toast
