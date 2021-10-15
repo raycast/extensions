@@ -1,6 +1,7 @@
 import { XcodeProject } from "../../models/project/xcode-project.model";
 import { ActionPanel, List, OpenAction, ShowInFinderAction } from "@raycast/api";
 import { XcodeProjectType } from "../../models/project/xcode-project-type.model";
+import tildify from "tildify";
 
 /**
  * Xcode Project List Item
@@ -13,7 +14,7 @@ export function xcodeProjectListItem(
     <List.Item
       key={xcodeProject.filePath}
       title={xcodeProject.name}
-      subtitle={xcodeProject.filePath}
+      subtitle={tildify(xcodeProject.filePath)}
       accessoryTitle={accessoryTitle(xcodeProject.type)}
       keywords={xcodeProject.keywords}
       icon={{ source: imageAssetSource(xcodeProject.type) }}
