@@ -42,9 +42,7 @@ const useRailwayToken = (): string | null =>
     try {
       const { token } = JSON.parse(fs.readFileSync(railwayConfigPath, "utf8"));
       return token;
-    } catch (e) {
-      // console.error(e);
-    }
+    } catch (e) {}
 
     return null;
   }, [environment.supportPath]);
