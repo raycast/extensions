@@ -81,24 +81,24 @@ export default function Main(): ReactElement {
                       }
                       if (remote.host === "github.com") {
                          return (
-                          <ActionPanel.Submenu title={`Open ${remote.name} on ${host}`} key={`GitHub_${remote.name}`} icon={icon != undefined ? icon : Icon.Globe} shortcut={shortcut}>
+                          <ActionPanel.Submenu title={`Open ${remote.name} on ${host}`} key={`GitHub_${remote.name}`} icon={icon ?? Icon.Globe} shortcut={shortcut}>
                             <OpenInBrowserAction
                               title={`Code`}
                               key={`code ${remote.name}`}
                               url={remote.url}
-                              shortcut={{modifiers: ["cmd"], key: "c"}}
+                              shortcut={{modifiers: ["shift", "cmd"], key: "c"}}
                             />
                             <OpenInBrowserAction
                               title={`Issues`}
                               key={`issues ${remote.name}`}
                               url={`${remote.url}/issues`}
-                              shortcut={{modifiers: ["cmd"], key: "i"}}
+                              shortcut={{modifiers: ["shift", "cmd"], key: "i"}}
                             />
                             <OpenInBrowserAction
                               title={`Pull Requests`}
                               key={`pulls ${remote.name}`}
                               url={`${remote.url}/pulls`}
-                              shortcut={{modifiers: ["cmd"], key: "p"}}
+                              shortcut={{modifiers: ["shift", "cmd"], key: "p"}}
                             />
                           </ActionPanel.Submenu>
                         )
@@ -109,7 +109,7 @@ export default function Main(): ReactElement {
                             key={`open remote ${remote.name}`}
                             url={remote.url}
                             shortcut={shortcut}
-                            icon={icon != undefined ? icon : Icon.Globe}
+                            icon={icon ?? Icon.Globe}
                           />
                         )
                       }
