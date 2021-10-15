@@ -109,8 +109,10 @@ export class XcodeSimulatorService {
       // Send XcodeSimulators to Subject
       this.xcodeSimulatorsSubject.next(simulators);
     } catch (error) {
+      // Send empty XcodeSimulators to Subject
+      this.xcodeSimulatorsSubject.next([]);
       // Show failure Toast
-      showToast(
+      await showToast(
         ToastStyle.Failure,
         "An error occurred while retrieving the Xcode Simulators",
         (error as Error).message
