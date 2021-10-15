@@ -34,6 +34,13 @@
       "subtitle": "Apps installed on Xcode Simulators",
       "description": "View the bundle and sandbox path of your Apps that are installed on a Xcode Simulator",
       "mode": "view"
+    },
+    {
+      "name": "create-swift-package-command",
+      "title": "Create Swift Package",
+      "subtitle": "Create a new Swift Package",
+      "description": "Create a new Swift Package and open it directly in Xcode",
+      "mode": "view"
     }
   ],
   "keywords": [
