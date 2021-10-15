@@ -8,7 +8,6 @@ import {
   preferences,
   showToast,
   ToastStyle,
-  Detail,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import useInterval from "./use-interval";
