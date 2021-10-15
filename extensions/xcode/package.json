@@ -1,0 +1,88 @@
+{
+  "name": "xcode",
+  "title": "Xcode",
+  "version": "1.0.0",
+  "author": "SvenTiigi",
+  "license": "MIT",
+  "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases and quickly clear Xcode cache files.",
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "projects.command",
+      "title": "Search Recent Projects",
+      "subtitle": "Xcode",
+      "description": "Search and open your recent Xcode Projects",
+      "mode": "view"
+    },
+    {
+      "name": "simulator-applications.command",
+      "title": "Installed Simulator Apps",
+      "subtitle": "Xcode",
+      "description": "View the bundle and sandbox path of your Apps that are installed on a Xcode Simulator",
+      "mode": "view"
+    },
+    {
+      "name": "simulators.command",
+      "title": "Manage Simulators",
+      "subtitle": "Xcode",
+      "description": "Manage your Xcode Simulators",
+      "mode": "view"
+    },
+    {
+      "name": "releases.command",
+      "title": "Xcode Releases",
+      "subtitle": "Xcode",
+      "description": "Search, download and view the latest Xcode Releases",
+      "mode": "view"
+    },
+    {
+      "name": "create-swift-package.command",
+      "title": "Create Swift Package",
+      "subtitle": "Xcode",
+      "description": "Create a new Swift Package and open it directly in Xcode",
+      "mode": "view"
+    },
+    {
+      "name": "clear-derived-data.command",
+      "title": "Clear Derived Data",
+      "subtitle": "Xcode",
+      "description": "Removes the ~/Library/Developer/Xcode/DerivedData directory",
+      "mode": "no-view"
+    },
+    {
+      "name": "clear-swift-package-manager-cache.command",
+      "title": "Clear Swift Package Manager Cache",
+      "subtitle": "Xcode",
+      "description": "Removes the ~/Library/Caches/org.swift.swiftpm/repositories directory",
+      "mode": "no-view"
+    }
+  ],
+  "keywords": [
+    "Xcode",
+    "Simulator",
+    "Swift",
+    "Swift Package",
+    "SPM"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "node-fetch": "^3.0.0",
+    "rxjs": "^7.4.0",
+    "tildify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/node-fetch": "^3.0.3",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
