@@ -41,6 +41,13 @@
       "subtitle": "Create a new Swift Package",
       "description": "Create a new Swift Package and open it directly in Xcode",
       "mode": "view"
+    },
+    {
+      "name": "clear-derived-data-command",
+      "title": "Clear Derived Data",
+      "subtitle": "Clean your Xcode cache files",
+      "description": "Removes the ~/Library/Developer/Xcode/DerivedData/ directory",
+      "mode": "no-view"
     }
   ],
   "keywords": [
