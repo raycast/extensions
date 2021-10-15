@@ -1,0 +1,35 @@
+{
+  "name": "two-factor-auth",
+  "title": "Two-Factor Auth",
+  "description": "Two-factor authentication for Raycast",
+  "icon": "command-icon.png",
+  "author": "cjdenio",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Two-Factor Auth",
+      "description": "Two-factor authentication for Raycast",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "hi-base32": "^0.5.1",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.4.3",
+    "@types/node-fetch": "^2.5.12",
+    "@types/react": "^17.0.15",
+    "@typescript-eslint/eslint-plugin": "^4.28.5",
+    "@typescript-eslint/parser": "^4.28.5",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop target"
+  }
+}
