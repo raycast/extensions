@@ -128,7 +128,7 @@ function AppListItem(props: { app: App; type: string }) {
       icon={{ source: app.icon }}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`https://app.airport.community/app/${app.id}?utm_source=raycast`} />
+          <OpenInBrowserAction url={`https://app.airport.community/app/${app.id}`} />
           <CopyToClipboardAction title="Copy URL" content={`https://app.airport.community/app/${app.id}`} />
         </ActionPanel>
       }
