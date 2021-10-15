@@ -26,7 +26,7 @@ interface Response {
   sections: any[];
 }
 
-export default function ArticleList() {
+export default function AppList() {
   const [state, setState] = useState<{
     all: App[] | any;
     popular: string[] | any;
@@ -84,32 +84,32 @@ export default function ArticleList() {
     <List isLoading={state.all.length === 0} searchBarPlaceholder="Filter apps by name...">
       <List.Section id="popular" title="Popular">
         {state.featured.map((app: App) => (
-          <AppListItem type="featured" app={app} />
+          <AppListItem key={app.id} type="featured" app={app} />
         ))}
       </List.Section>
       <List.Section id="featured" title="Featured">
         {state.popular.map((app: App) => (
-          <AppListItem type="popular" app={app} />
+          <AppListItem key={app.id} type="popular" app={app} />
         ))}
       </List.Section>
       <List.Section id="new" title="New">
         {state.new.map((app: App) => (
-          <AppListItem type="new" app={app} />
+          <AppListItem key={app.id} type="new" app={app} />
         ))}
       </List.Section>
       <List.Section id="upcoming" title="Upcoming">
         {state.upcoming.map((app: App) => (
-          <AppListItem type="upcoming" app={app} />
+          <AppListItem key={app.id} type="upcoming" app={app} />
         ))}
       </List.Section>
       <List.Section id="waitlist" title="Waitlist">
         {state.waitlist.map((app: App) => (
-          <AppListItem type="waitlist" app={app} />
+          <AppListItem key={app.id} type="waitlist" app={app} />
         ))}
       </List.Section>
       <List.Section id="all" title="All">
         {state.all.map((app: App) => (
-          <AppListItem type="all" app={app} />
+          <AppListItem key={app.id} type="all" app={app} />
         ))}
       </List.Section>
     </List>
@@ -128,7 +128,7 @@ function AppListItem(props: { app: App; type: string }) {
       icon={{ source: app.icon }}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`https://app.airport.community/app/${app.id}`} />
+          <OpenInBrowserAction url={`https://app.airport.community/app/${app.id}?utm_source=raycast`} />
           <CopyToClipboardAction title="Copy URL" content={`https://app.airport.community/app/${app.id}`} />
         </ActionPanel>
       }
