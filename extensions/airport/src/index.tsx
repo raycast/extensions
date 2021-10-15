@@ -38,7 +38,6 @@ export default function ArticleList() {
 
   useEffect(() => {
     async function fetch() {
-      showToast(ToastStyle.Animated, "Loading Apps");
       const appsResponse = await fetchApps();
       setState((oldState) => ({
         ...oldState,
@@ -77,7 +76,6 @@ export default function ArticleList() {
             appsResponse?.apps.waitlist.includes(app.id)
         ),
       }));
-      showToast(ToastStyle.Success, "Fetched Latest Apps");
     }
     fetch();
   }, []);
