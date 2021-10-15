@@ -20,6 +20,7 @@ export interface Deployment {
   time: string;
   id: string;
   url: string;
+  domain: string;
 }
 
 export async function fetchUsername(): Promise<string> {
@@ -69,6 +70,7 @@ export async function fetchDeployments(username: string): Promise<Deployment[]> 
             time: dayjs(deployment.createdAt).fromNow(),
             id: deployment.id,
             url: `https://vercel.com/${username}/${project.name}/${deployment.id.replace("dpl_", "")}`,
+            domain: deployment.alias[0],
           });
           break;
         }

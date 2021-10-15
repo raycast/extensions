@@ -1,15 +1,16 @@
 {
   "name": "vercast",
-  "title": "vercast",
-  "description": "View your vercel deployments",
-  "icon": "vercel-icon.png",
+  "title": "Vercast",
+  "description": "Search Vercel Deployments",
+  "icon": "icon.png",
   "author": "matt",
+  "license": "MPL-2.0",
   "commands": [
     {
       "name": "index",
-      "title": "vercast",
+      "title": "Vercast",
       "subtitle": "",
-      "description": "View your vercel deployments",
+      "description": "Search Vercel Deployments",
       "mode": "view",
       "preferences": [
         {
@@ -24,10 +25,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^0.1.0",
+    "@raycast/api": "^1.25.0",
     "dayjs": "^1.10.7",
-    "node-fetch": "^2.6.1",
-    "use-interval": "^1.3.0"
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "@types/node": "^16.4.3",

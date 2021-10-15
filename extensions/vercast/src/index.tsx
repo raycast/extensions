@@ -1,6 +1,6 @@
 import { render, ActionPanel, Color, Icon, List, OpenInBrowserAction } from "@raycast/api";
 import { useEffect, useState } from "react";
-import useInterval from "use-interval";
+import useInterval from "./use-interval";
 import { Deployment, DeploymentState, fetchDeployments, fetchUsername } from "./vercel";
 
 render(<Main />);
@@ -50,6 +50,7 @@ function Main(): JSX.Element {
             key={d.id}
             id={d.id}
             title={d.project}
+            subtitle={d.domain}
             accessoryTitle={d.time}
             icon={{ tintColor: iconTintColor, source: iconSource }}
             actions={
