@@ -61,29 +61,58 @@ export default function Main(): ReactElement {
                       }
 
                       let icon = undefined as Image | undefined
+                      let host = remote.host
                       switch (remote.host) {
                         case "github.com":
                           icon = { source: { dark: "github-icon-dark.png", light: "github-icon-light.png" } }
+                          host = "GitHub"
                           break
                         case "gitlab.com":
                           icon = { source: { dark: "gitlab-icon-dark.png", light: "gitlab-icon-light.png" } }
+                          host = "GitLab"
                           break
                         case "bitbucket.org":
                           icon = { source: { dark: "bitbucket-icon-dark.png", light: "bitbucket-icon-light.png" } }
+                          host = "Bitbucket"
                           break
 
                         default:
                           break
                       }
-                      return (
-                        <OpenInBrowserAction
-                          title={`Open on ${remote.host} (${remote.name})`}
-                          key={`open remote ${remote.name}`}
-                          url={remote.url}
-                          shortcut={shortcut}
-                          icon={icon != undefined ? icon : Icon.Globe}
-                        />
-                      )
+                      if (remote.host === "github.com") {
+                         return (
+                          <ActionPanel.Submenu title={`Open ${remote.name} on ${host}`} key={`GitHub_${remote.name}`} icon={icon ?? Icon.Globe} shortcut={shortcut}>
+                            <OpenInBrowserAction
+                              title={`Code`}
+                              key={`code ${remote.name}`}
+                              url={remote.url}
+                              shortcut={{modifiers: ["shift", "cmd"], key: "c"}}
+                            />
+                            <OpenInBrowserAction
+                              title={`Issues`}
+                              key={`issues ${remote.name}`}
+                              url={`${remote.url}/issues`}
+                              shortcut={{modifiers: ["shift", "cmd"], key: "i"}}
+                            />
+                            <OpenInBrowserAction
+                              title={`Pull Requests`}
+                              key={`pulls ${remote.name}`}
+                              url={`${remote.url}/pulls`}
+                              shortcut={{modifiers: ["shift", "cmd"], key: "p"}}
+                            />
+                          </ActionPanel.Submenu>
+                        )
+                      } else {
+                        return (
+                          <OpenInBrowserAction
+                            title={`Open ${remote.name} on ${host}`}
+                            key={`open remote ${remote.name}`}
+                            url={remote.url}
+                            shortcut={shortcut}
+                            icon={icon ?? Icon.Globe}
+                          />
+                        )
+                      }
                     })
                   }
                   <CopyToClipboardAction title={"Copy Path to Clipboard"} content={repo.fullPath} shortcut={{ modifiers: ["cmd"], key: "." }} />
