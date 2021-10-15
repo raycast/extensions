@@ -1,20 +1,14 @@
-import { preferences } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
+
+interface Preferences {
+  cookie: string;
+  spaceID: string;
+}
 
 export async function initialize(): Promise<{
   cookie: string;
   spaceID: string;
 }> {
-  const cookie = preferences.cookie?.value as
-    | string
-    | undefined;
-  if (!cookie) {
-    throw new Error("no cookie");
-  }
-  const spaceID = preferences.spaceID?.value as
-    | string
-    | undefined;
-  if (!spaceID) {
-    throw new Error("no spaceID");
-  }
-  return { cookie, spaceID };
+  const preferences: Preferences = getPreferenceValues();
+  return preferences;
 }
