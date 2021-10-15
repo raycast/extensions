@@ -1,7 +1,6 @@
-import { ActionPanel, CopyToClipboardAction, List, KeyboardShortcut, Icon } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, Icon } from "@raycast/api";
 import type { QueryResultItem } from "./notionApi";
 import { useVisitedUrls } from "./useVisitedUrls";
-import { OpenInBrowserActionWithCallback } from "./OpenInBrowserActionWithCallback";
 
 
 type Props = {
@@ -33,7 +32,7 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
               accessoryTitle={item.accessoryTitle}
               actions={
                 <ActionPanel>
-                <OpenInBrowserActionWithCallback url={item.url} onOpen={onOpen} />
+                <OpenInBrowserAction url={item.url} onOpen={onOpen} />
                 <CopyToClipboardAction title="Copy URL" content={item.url} />
               </ActionPanel>
               }

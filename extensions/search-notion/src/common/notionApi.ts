@@ -1,12 +1,16 @@
 import fetch from "node-fetch";
+import { getPreferenceValues } from "@raycast/api";
 import {
-  assertNumberProp,
-  assertStringProp,
   hasStringProp,
   hasObjectProp,
-  assertObjectProp,
   assertArrayProp,
 } from "./typeUtils";
+
+
+interface Preferences {
+  cookie: string;
+  spaceID: string;
+}
 
 export type QueryResultItem = {
   id: string;
@@ -41,21 +45,20 @@ const parseRepositoryItem = (data: any) => {
 };
 
 export const searchResources = async (
-  cookie: string | null,
-  spaceID: string | null,
   q: string
 ): Promise<QueryResultItem[]> => {
+  const preferences: Preferences = getPreferenceValues();
   const requestOptions = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'notion-client-version': "23.9.0.33",
-      'cookie': `${cookie}`
+      'cookie': `${preferences.cookie}`
     },
     body: JSON.stringify({
       "type": "BlocksInSpace",
       "query": `${encodeURIComponent(q)}`,
-      "spaceId": `${spaceID}`,
+      "spaceId": `${preferences.spaceID}`,
       "limit": 20,
       "filters": {
         "isDeletedOnly": false,
