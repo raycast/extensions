@@ -39,6 +39,20 @@
       "subtitle": "Spotify",
       "description": "Skips to the next track in Spotify.",
       "mode": "no-view"
+    },
+    {
+      "name": "current",
+      "title": "Current Song",
+      "subtitle": "Spotify",
+      "description": "Currently playing song in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "copyUrl",
+      "title": "Copy Current Song's URL",
+      "subtitle": "Spotify",
+      "description": "Currently playing song's URL in Spotify.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
