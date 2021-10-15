@@ -14,4 +14,13 @@ export class XcodeCleanupService {
     ).then();
   }
 
+  /**
+   * Clear Swift Package Manager Cache
+   */
+  clearSwiftPackageManagerCache(): Promise<void> {
+    return execAsync(
+      "rm -rf ~/Library/Caches/org.swift.swiftpm/repositories"
+    ).then();
+  }
+
 }

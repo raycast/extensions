@@ -48,6 +48,13 @@
       "subtitle": "Clean your Xcode cache files",
       "description": "Removes the ~/Library/Developer/Xcode/DerivedData directory",
       "mode": "no-view"
+    },
+    {
+      "name": "clear-swift-package-manager-cache-command",
+      "title": "Clear SPM cache",
+      "subtitle": "Clears the global Swift Package Manager cache",
+      "description": "Removes the ~/Library/Caches/org.swift.swiftpm/repositories directory",
+      "mode": "no-view"
     }
   ],
   "keywords": [
