@@ -157,34 +157,6 @@ export class XcodeSimulatorApplicationService {
     applicationDirectoryPath: string,
     sandBoxBundleIdDirectoryPathMap: Map<string, string>
   ): Promise<XcodeSimulatorApplication | undefined> {
-    // Declare bundle identifier
-    let bundleIdentifier: string;
-    try {
-      // Initialize bundle identifier
-      bundleIdentifier = (
-        await execAsync(
-          [
-            "defaults",
-            "read",
-            Path.join(
-              applicationDirectoryPath,
-              ".com.apple.mobile_container_manager.metadata.plist"
-            ),
-            "MCMMetadataIdentifier"
-          ].join(" ")
-        )
-      ).stdout.trim();
-    } catch {
-      // On error return no application
-      return undefined;
-    }
-    // Retrieve possible SandBox directory path for bundle identifier
-    const sandBoxDirectoryPath = sandBoxBundleIdDirectoryPathMap.get(bundleIdentifier);
-    // Check if SandBox directory path is not available
-    if (!sandBoxDirectoryPath) {
-      // Return no application
-      return undefined;
-    }
     // Declare application file name
     let applicationFileName: string;
     try {
@@ -203,8 +175,8 @@ export class XcodeSimulatorApplicationService {
       // On error return no application
       return undefined;
     }
-    // Declare optional Info.plist JSON
-    let infoPlistJSON: any | undefined;
+    // Declare Info.plist JSON
+    let infoPlistJSON: any
     try {
       // Try to parse Info.plist JSON
       // using 'plutil' to convert the Info.plist XML to JSON format
@@ -234,22 +206,36 @@ export class XcodeSimulatorApplicationService {
         ).stdout.trim()
       );
     } catch {
-      // Simply ignore this error
-      // as we treat the infoPlistJSON as an optional value
+      // Return no application
+      return undefined;
+    }
+    // Declare bundle identifier
+    const bundleIdentifier = infoPlistJSON["CFBundleIdentifier"];
+    // Check if bundle identifier is not available
+    if (!bundleIdentifier) {
+      // Return no application
+      return undefined;
+    }
+    // Retrieve possible SandBox directory path for bundle identifier
+    const sandBoxDirectoryPath = sandBoxBundleIdDirectoryPathMap.get(bundleIdentifier);
+    // Check if SandBox directory path is not available
+    if (!sandBoxDirectoryPath) {
+      // Return no application
+      return undefined;
     }
     // Retrieve version from Info.plist
-    const version = infoPlistJSON?.["CFBundleShortVersionString"];
+    const version = infoPlistJSON["CFBundleShortVersionString"];
     // Retrieve build number from Info.plist
-    const buildNumber = infoPlistJSON?.["CFBundleVersion"];
+    const buildNumber = infoPlistJSON["CFBundleVersion"];
     // Retrieve application name from Info.plist
     // by either using the `CFBundleDisplayName` or `CFBundleName`
     // otherwise use application file name as fallback
-    const applicationName = infoPlistJSON?.["CFBundleDisplayName"]
-      ?? infoPlistJSON?.["CFBundleName"]
+    const applicationName = infoPlistJSON["CFBundleDisplayName"]
+      ?? infoPlistJSON["CFBundleName"]
       ?? applicationFileName.split(".")[0];
     // Retrieve primary app icon name from Info.plist
     const primaryAppIconName = infoPlistJSON
-      ?.["CFBundleIcons"]
+      ["CFBundleIcons"]
       ?.["CFBundlePrimaryIcon"]
       ?.["CFBundleIconFiles"]
       ?.at(0);
