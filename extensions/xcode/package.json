@@ -36,6 +36,13 @@
       "mode": "view"
     }
   ],
+  "keywords": [
+    "Xcode",
+    "Simulator",
+    "Swift",
+    "Swift Package",
+    "SPM"
+  ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "node-fetch": "^3.0.0",
