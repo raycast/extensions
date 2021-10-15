@@ -8,7 +8,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Apps",
+      "title": "Search Apps",
       "subtitle": "See Airport Apps",
       "description": "Airport is the best place to discover new TestFlight apps from developers.",
       "mode": "view"
