@@ -1,7 +1,7 @@
 {
   "name": "search-notion",
-  "title": "Search Notion",
-  "description": "Raycast Command for Searching Notion",
+  "title": "Search Notion Without Admin Access",
+  "description": "Search Notion pages and open visited ones faster.",
   "icon": "command-icon.png",
   "author": "reckoning-dev",
   "version": "1.0.0",
@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "commandsearchnotion",
-      "title": "Search Notion",
-      "subtitle": "",
+      "title": "Search Pages",
+      "subtitle": "Notion",
       "description": "Search Notion Pages",
       "mode": "view"
     }
@@ -20,10 +20,9 @@
       "name": "cookie",
       "type": "password",
       "required": true,
-      "title": "Notion Search Cookie",
+      "title": "Cookie",
       "description": "Your Personal Notion Search Cookie",
-      "placeholder": "Enter your Personal Notion Search Cookie",
-      "link": "https://www.notion.so"
+      "placeholder": "Enter your Personal Notion Search Cookie"
     },
     {
       "name": "spaceID",
@@ -31,8 +30,7 @@
       "required": true,
       "title": "Notion Search spaceId",
       "description": "Your Personal Notion spaceId",
-      "placeholder": "Enter your Personal Notion spaceId",
-      "link": "https://www.notion.so"
+      "placeholder": "Enter your Personal Notion spaceId"
     }
   ],
   "dependencies": {
