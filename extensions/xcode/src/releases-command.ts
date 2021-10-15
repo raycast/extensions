@@ -29,6 +29,11 @@ export default () => {
       .xcodeReleases()
       .then(setXcodeReleases)
       .catch(error => {
+        // Check if no XcodeReleases have been set
+        if (!xcodeReleases) {
+          // Set empty XcodeReleases
+          setXcodeReleases([]);
+        }
         // Log Error
         console.error(error);
         // Show Toast
