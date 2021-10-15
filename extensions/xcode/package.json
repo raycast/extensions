@@ -2,7 +2,7 @@
   "name": "xcode",
   "title": "Xcode",
   "version": "1.0.0",
-  "author": "Sven Tiigi",
+  "author": "SvenTiigi",
   "license": "MIT",
   "description": "Open your recent Xcode Projects, view the latest Xcode Releases and manage your Xcode Simulators",
   "icon": "icon.png",
