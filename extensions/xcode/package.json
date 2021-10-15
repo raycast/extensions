@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "author": "SvenTiigi",
   "license": "MIT",
-  "description": "Open your recent Xcode Projects, view the latest Xcode Releases and manage your Xcode Simulators",
+  "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases and quickly clear Xcode cache files.",
   "icon": "icon.png",
   "commands": [
     {
