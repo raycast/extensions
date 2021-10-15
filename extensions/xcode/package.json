@@ -46,7 +46,7 @@
       "name": "clear-derived-data-command",
       "title": "Clear Derived Data",
       "subtitle": "Clean your Xcode cache files",
-      "description": "Removes the ~/Library/Developer/Xcode/DerivedData/ directory",
+      "description": "Removes the ~/Library/Developer/Xcode/DerivedData directory",
       "mode": "no-view"
     }
   ],
