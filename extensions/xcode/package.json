@@ -27,6 +27,13 @@
       "subtitle": "Manage your Xcode Simulators",
       "description": "Boot and shutdown Xcode Simulators",
       "mode": "view"
+    },
+    {
+      "name": "simulator-applications-command",
+      "title": "Apps",
+      "subtitle": "Apps installed on Xcode Simulators",
+      "description": "View the bundle and sandbox path of your Apps that are installed on a Xcode Simulator",
+      "mode": "view"
     }
   ],
   "dependencies": {

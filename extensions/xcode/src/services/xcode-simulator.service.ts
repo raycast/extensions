@@ -24,24 +24,13 @@ export class XcodeSimulatorService {
   }
 
   /**
-   * Refresh XcodeSimulators
+   * Retrieve all installed XcodeSimulators
    */
-  private async refreshXcodeSimulators() {
-    // Declare output
-    let output: ExecAsyncOutput;
-    try {
-      // Execute command
-      output = await execAsync(
-        "xcrun simctl list -j -v devices"
-      );
-    } catch (error) {
-      // Show failure Toast
-      return showToast(
-        ToastStyle.Failure,
-        "An error occurred while retrieving the Xcode Simulators",
-        (error as Error).message
-      );
-    }
+  async getXcodeSimulators(): Promise<XcodeSimulator[]> {
+    // Execute command
+    const output = await execAsync(
+      "xcrun simctl list -j -v devices"
+    );
     // Parse stdout as JSON
     const devicesResponseJSON = JSON.parse(output.stdout);
     // Check if JSON or devices within the JSON are not available
@@ -72,8 +61,8 @@ export class XcodeSimulatorService {
           })
       );
     }
-    // Send XcodeSimulators to Subject
-    this.xcodeSimulatorsSubject.next(simulators);
+    // Return XcodeSimulators
+    return simulators;
   }
 
   /**
@@ -108,6 +97,25 @@ export class XcodeSimulatorService {
     );
     // Refresh XcodeSimulators
     this.refreshXcodeSimulators();
+  }
+
+  /**
+   * Refresh XcodeSimulators
+   */
+  private async refreshXcodeSimulators() {
+    try {
+      // Retrieve XcodeSimulators
+      const simulators = await this.getXcodeSimulators();
+      // Send XcodeSimulators to Subject
+      this.xcodeSimulatorsSubject.next(simulators);
+    } catch (error) {
+      // Show failure Toast
+      showToast(
+        ToastStyle.Failure,
+        "An error occurred while retrieving the Xcode Simulators",
+        (error as Error).message
+      );
+    }
   }
 
   /**
