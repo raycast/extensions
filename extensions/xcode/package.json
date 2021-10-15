@@ -15,10 +15,10 @@
       "mode": "view"
     },
     {
-      "name": "releases-command",
-      "title": "Releases",
-      "subtitle": "The latest Xcode Releases",
-      "description": "Search, download and view the latest Xcode Releases",
+      "name": "simulator-applications-command",
+      "title": "Apps",
+      "subtitle": "Apps installed on Xcode Simulators",
+      "description": "View the bundle and sandbox path of your Apps that are installed on a Xcode Simulator",
       "mode": "view"
     },
     {
@@ -29,10 +29,10 @@
       "mode": "view"
     },
     {
-      "name": "simulator-applications-command",
-      "title": "Apps",
-      "subtitle": "Apps installed on Xcode Simulators",
-      "description": "View the bundle and sandbox path of your Apps that are installed on a Xcode Simulator",
+      "name": "releases-command",
+      "title": "Releases",
+      "subtitle": "The latest Xcode Releases",
+      "description": "Search, download and view the latest Xcode Releases",
       "mode": "view"
     },
     {
