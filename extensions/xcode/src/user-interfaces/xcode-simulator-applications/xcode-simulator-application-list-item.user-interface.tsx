@@ -10,7 +10,6 @@ export function xcodeSimulatorApplicationListItem(
   xcodeSimulatorApplication: XcodeSimulatorApplication
 ): JSX.Element {
   const { push } = useNavigation();
-  const detail = xcodeSimulatorApplicationDetail(xcodeSimulatorApplication);
   return (
     <List.Item
       key={key(xcodeSimulatorApplication)}
@@ -23,7 +22,11 @@ export function xcodeSimulatorApplicationListItem(
           <ActionPanel.Item
             icon={Icon.Finder}
             title="View Directories"
-            onAction={() => push(detail)}
+            onAction={
+              () => push(
+                xcodeSimulatorApplicationDetail(xcodeSimulatorApplication)
+              )
+            }
           />
           <ShowInFinderAction
             title={"Open Documents directory"}
