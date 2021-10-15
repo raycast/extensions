@@ -43,6 +43,14 @@ export default () => {
         });
       })
       .catch(error => {
+        // Check if no XcodeSimulatorApplications are available
+        if (!xcodeSimulatorApplications) {
+          // Set empty applications
+          setXcodeSimulatorApplication({
+            value: [],
+            isCache: false
+          })
+        }
         // Log Error
         console.error(error);
         // Show Toast
