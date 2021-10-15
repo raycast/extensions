@@ -1,7 +1,7 @@
 {
   "name": "emoji",
   "title": "Emoji Search",
-  "description": "Finds emojis and inerts or copies them.",
+  "description": "Finds emojis and inserts or copies them.",
   "icon": "command-icon.png",
   "author": "FezVrasta",
   "license": "MIT",
@@ -10,7 +10,7 @@
       "name": "emoji",
       "title": "Search Emoji",
       "subtitle": "",
-      "description": "Finds emojis and inerts or copies them.",
+      "description": "Finds emojis and inserts or copies them.",
       "mode": "view"
     }
   ],
