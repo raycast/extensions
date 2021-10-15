@@ -23,7 +23,7 @@ export default () => {
         // and cached XcodeSimulatorApplications are available and not empty
         if (!xcodeSimulatorApplications
           && cachedXcodeSimulatorApplications
-          && cachedXcodeSimulatorApplications.length !== 0) {
+          && cachedXcodeSimulatorApplications.length > 0) {
           // Set cached XcodeSimulatorApplications
           setXcodeSimulatorApplication({
             value: cachedXcodeSimulatorApplications,
