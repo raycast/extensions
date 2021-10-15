@@ -1,24 +1,48 @@
 import {
   ActionPanel,
   ActionPanelItem,
-  ActionPanelSubmenu,
   Color,
   CopyToClipboardAction,
   Icon,
+  ImageLike,
+  KeyboardShortcut,
   List,
+  OpenAction,
   popToRoot,
+  PushAction,
   showToast,
   ToastStyle,
 } from "@raycast/api";
-import { HomeAssistant, State } from "./haapi";
+import { State } from "../haapi";
 import { useState, useEffect } from "react";
-import { createHomeAssistantClient } from "./common";
+import { createHomeAssistantClient } from "../common";
+import { EntityAttributesList } from "./attributes";
 
 export const ha = createHomeAssistantClient();
 
+export function ShowAttributesAction(props: { state: State }) {
+  if (props.state.attributes) {
+    return (
+      <PushAction
+        title="Show Attributes"
+        target={<EntityAttributesList state={props.state} />}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+        icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
+      />
+    );
+  } else {
+    return null;
+  }
+}
+
 export function StatesList(props: { domain: string }) {
   const [searchText, setSearchText] = useState<string>();
-  const { states, error, isLoading } = useSearch(searchText, props.domain);
+  const [updateTimestamp, setUpdateTimestamp] = useState<Date>(new Date());
+  const { states, error, isLoading } = useSearch(searchText, props.domain, updateTimestamp);
+
+  const refreshStates = () => {
+    setUpdateTimestamp(new Date());
+  };
 
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search Home Assistant states", error);
@@ -36,44 +60,66 @@ export function StatesList(props: { domain: string }) {
           title={state.attributes.friendly_name || state.entity_id}
           subtitle={state.entity_id}
           accessoryTitle={state.state}
-          actions={<StateActionPanel state={state} />}
+          actions={<StateActionPanel state={state} refreshStates={refreshStates} />}
         />
       ))}
     </List>
   );
 }
 
-export function StateActionPanel(props: { state: State }) {
+export function StateActionPanel(props: { state: State; refreshStates: () => void }) {
   const state = props.state;
   const domain = props.state.entity_id.split(".")[0];
   const entityID = props.state.entity_id;
+  const refreshStates = props.refreshStates;
+
+  function StateActionItem(props: {
+    title: string;
+    onAction: () => Promise<void>;
+    icon?: ImageLike | undefined;
+    shortcut?: KeyboardShortcut | undefined;
+  }) {
+    return (
+      <ActionPanel.Item
+        title={props.title}
+        onAction={async () => {
+          await props.onAction();
+          refreshStates();
+        }}
+        icon={props.icon}
+        shortcut={props.shortcut}
+      />
+    );
+  }
+
   switch (domain) {
     case "cover": {
       return (
         <ActionPanel>
-          <ActionPanel.Item
+          <StateActionItem
             title="Toggle"
             onAction={async () => await ha.toggleCover(props.state.entity_id)}
             icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
           />
-          <ActionPanel.Item
+          <StateActionItem
             title="Open"
             shortcut={{ modifiers: ["cmd"], key: "o" }}
             onAction={async () => await ha.openCover(props.state.entity_id)}
             icon={{ source: Icon.ChevronUp, tintColor: Color.PrimaryText }}
           />
-          <ActionPanel.Item
+          <StateActionItem
             title="Close"
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             onAction={async () => await ha.closeCover(props.state.entity_id)}
             icon={{ source: Icon.ChevronDown, tintColor: Color.PrimaryText }}
           />
-          <ActionPanel.Item
+          <StateActionItem
             title="Stop"
             shortcut={{ modifiers: ["cmd"], key: "s" }}
             onAction={async () => await ha.stopCover(props.state.entity_id)}
             icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
           />
+          <ShowAttributesAction state={props.state} />
           <CopyToClipboardAction title="Copy value" content={props.state.state} />
         </ActionPanel>
       );
@@ -81,23 +127,24 @@ export function StateActionPanel(props: { state: State }) {
     case "light": {
       return (
         <ActionPanel>
-          <ActionPanel.Item
+          <StateActionItem
             title="Toggle"
             onAction={async () => await ha.toggleLight(props.state.entity_id)}
             icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
           />
-          <ActionPanel.Item
+          <StateActionItem
             title="Turn On"
             shortcut={{ modifiers: ["cmd"], key: "o" }}
             onAction={async () => await ha.turnOnLight(props.state.entity_id)}
             icon={{ source: "power.png", tintColor: Color.Green }}
           />
-          <ActionPanel.Item
+          <StateActionItem
             title="Turn Off"
             shortcut={{ modifiers: ["cmd"], key: "f" }}
             onAction={async () => await ha.turnOffLight(props.state.entity_id)}
             icon={{ source: "power.png", tintColor: Color.Red }}
           />
+          <ShowAttributesAction state={props.state} />
           <CopyToClipboardAction title="Copy value" content={props.state.state} />
         </ActionPanel>
       );
@@ -105,57 +152,58 @@ export function StateActionPanel(props: { state: State }) {
     case "media_player": {
       return (
         <ActionPanel>
-          <ActionPanel.Item
+          <StateActionItem
             title="Play/Pause"
             onAction={async () => await ha.playPauseMedia(entityID)}
             icon={{ source: "play-pause.jpg", tintColor: Color.PrimaryText }}
           />
-          <ActionPanel.Item
+          <StateActionItem
             title="Play"
             onAction={async () => await ha.playMedia(entityID)}
             icon={{ source: "play.png", tintColor: Color.PrimaryText }}
           />
-          <ActionPanel.Item
+          <StateActionItem
             title="Pause"
             shortcut={{ modifiers: ["cmd"], key: "p" }}
             onAction={async () => await ha.pauseMedia(entityID)}
             icon={{ source: "pause.png", tintColor: Color.PrimaryText }}
           />
-          <ActionPanel.Item
+          <StateActionItem
             title="Stop"
             shortcut={{ modifiers: ["cmd"], key: "s" }}
             onAction={async () => await ha.stopMedia(entityID)}
             icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
           />
-          <ActionPanel.Item
+          <StateActionItem
             title="Next"
             shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
             onAction={async () => await ha.nextMedia(entityID)}
             icon={{ source: "next.png", tintColor: Color.PrimaryText }}
           />
-          <ActionPanel.Item
+          <StateActionItem
             title="Previous"
             shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
             onAction={async () => await ha.previousMedia(entityID)}
             icon={{ source: "previous.png", tintColor: Color.PrimaryText }}
           />
-          <ActionPanel.Item
+          <StateActionItem
             title="Volume Up"
             shortcut={{ modifiers: ["cmd"], key: "+" }}
             onAction={async () => await ha.volumeUpMedia(entityID)}
             icon={{ source: Icon.SpeakerArrowUp, tintColor: Color.PrimaryText }}
           />
-          <ActionPanel.Item
+          <StateActionItem
             title="Volume Down"
             shortcut={{ modifiers: ["cmd"], key: "-" }}
             onAction={async () => await ha.volumeDownMedia(entityID)}
             icon={{ source: Icon.SpeakerArrowDown, tintColor: Color.PrimaryText }}
           />
-          <ActionPanel.Item
+          <StateActionItem
             title="Mute"
             onAction={async () => await ha.muteMedia(entityID)}
             icon={{ source: Icon.SpeakerSlash, tintColor: Color.PrimaryText }}
           />
+          <ShowAttributesAction state={props.state} />
           <CopyToClipboardAction title="Copy ID" content={entityID} />
           <CopyToClipboardAction title="Copy State Value" content={props.state.state} />
         </ActionPanel>
@@ -163,7 +211,9 @@ export function StateActionPanel(props: { state: State }) {
     }
     case "climate": {
       const changeTempAllowed =
-        state.state === "heat" || state.state === "cool" || state.state == "auto" ? true : false;
+        state.state === "heat" || state.state === "cool" || state.state === "heat_cool" || state.state == "auto"
+          ? true
+          : false;
       const currentTempValue: number | undefined = state.attributes.temperature || undefined;
       const [currentTemp, setCurrentTemp] = useState<number | undefined>(currentTempValue);
       const upperTemp = currentTemp ? currentTemp + 0.5 : undefined;
@@ -186,7 +236,7 @@ export function StateActionPanel(props: { state: State }) {
               icon={{ source: "thermometer.png", tintColor: Color.PrimaryText }}
             >
               {temps.map((t) => (
-                <ActionPanelItem
+                <StateActionItem
                   key={t.toString()}
                   title={t.toString()}
                   onAction={async () => {
@@ -204,7 +254,7 @@ export function StateActionPanel(props: { state: State }) {
               icon={{ source: Icon.Gear, tintColor: Color.PrimaryText }}
             >
               {state.attributes.hvac_modes?.map((o: string) => (
-                <ActionPanelItem
+                <StateActionItem
                   key={o}
                   title={o}
                   onAction={async () => {
@@ -223,7 +273,7 @@ export function StateActionPanel(props: { state: State }) {
               icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
             >
               {preset_modes?.map((o: string) => (
-                <ActionPanelItem
+                <StateActionItem
                   key={o}
                   title={o}
                   onAction={async () => {
@@ -236,7 +286,7 @@ export function StateActionPanel(props: { state: State }) {
           )}
 
           {upperTemp && changeTempAllowed && (
-            <ActionPanel.Item
+            <StateActionItem
               title={`Increase Temp. 0.5`}
               shortcut={{ modifiers: ["cmd"], key: "+" }}
               onAction={async () => {
@@ -247,7 +297,7 @@ export function StateActionPanel(props: { state: State }) {
             />
           )}
           {lowerTemp && changeTempAllowed && (
-            <ActionPanel.Item
+            <StateActionItem
               title={`Decrease Temp. 0.5`}
               shortcut={{ modifiers: ["cmd"], key: "-" }}
               onAction={async () => {
@@ -257,6 +307,7 @@ export function StateActionPanel(props: { state: State }) {
               icon={{ source: "minus.png", tintColor: Color.PrimaryText }}
             />
           )}
+          <ShowAttributesAction state={props.state} />
           <CopyToClipboardAction title="Copy ID" content={entityID} />
           <CopyToClipboardAction title="Copy State Value" content={state.state} />
         </ActionPanel>
@@ -270,7 +321,8 @@ export function StateActionPanel(props: { state: State }) {
 
 export function useSearch(
   query: string | undefined,
-  domain: string
+  domain: string,
+  updateTimestamp: Date
 ): {
   states?: State[];
   error?: string;
@@ -313,7 +365,7 @@ export function useSearch(
     return () => {
       cancel = true;
     };
-  }, [query]);
+  }, [query, updateTimestamp]);
 
   return { states, error, isLoading };
 }
