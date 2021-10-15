@@ -28,7 +28,7 @@ export const useVisitedUrls = (): [string[], (url: string) => void] => {
     loadVisitedUrls().then(setUrls);
   }, []);
   const add = (url: string) => {
-    const nextUrls = [url, ...urls.filter((item) => item !== url)].slice(0, 1000);
+    const nextUrls = [url, ...urls.filter((item) => item !== url)].slice(0, 20);
     setUrls(nextUrls);
     saveVisitedUrls(nextUrls);
   };
