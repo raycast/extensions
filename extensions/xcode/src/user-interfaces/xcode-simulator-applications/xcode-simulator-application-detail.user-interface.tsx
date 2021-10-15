@@ -1,12 +1,14 @@
 import { XcodeSimulatorApplication } from "../../models/xcode-simulator-application.model";
-import { ActionPanel, CopyToClipboardAction, Icon, List, ShowInFinderAction, useNavigation } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, Icon, List, Navigation, ShowInFinderAction } from "@raycast/api";
 
 /**
  * Xcode Simulator Application Detail
  * @param xcodeSimulatorApplication The XcodeSimulatorApplication
+ * @param navigation The Navigation
  */
 export function xcodeSimulatorApplicationDetail(
-  xcodeSimulatorApplication: XcodeSimulatorApplication
+  xcodeSimulatorApplication: XcodeSimulatorApplication,
+  navigation: Navigation
 ): JSX.Element {
   const applicationDirectories = [
     ["Open Documents directory", xcodeSimulatorApplication.sandBoxDocumentsPath],
@@ -14,13 +16,15 @@ export function xcodeSimulatorApplicationDetail(
     ["Open SandBox directory", xcodeSimulatorApplication.sandBoxPath],
     ["Open Bundle directory", xcodeSimulatorApplication.bundlePath]
   ];
-  const { pop } = useNavigation();
   return (
-    <List navigationTitle={xcodeSimulatorApplication.name}>
+    <List
+      navigationTitle={xcodeSimulatorApplication.name}
+      searchBarPlaceholder={xcodeSimulatorApplication.name}>
       <List.Section title={"Directories"}>
         {
           applicationDirectories.map(directory => {
             return <List.Item
+              key={directory[1]}
               icon={Icon.Finder}
               title={directory[0]}
               actions={
@@ -35,13 +39,14 @@ export function xcodeSimulatorApplicationDetail(
       </List.Section>
       <List.Section title={"Other"}>
         <List.Item
+          key={"back-to-list"}
           icon={Icon.XmarkCircle}
           title={"Back to list"}
           actions={
             <ActionPanel>
               <ActionPanel.Item
                 title="Back"
-                onAction={pop}
+                onAction={navigation.pop}
               />
             </ActionPanel>
           }

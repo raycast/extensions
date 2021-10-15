@@ -1,15 +1,16 @@
 import { XcodeSimulatorApplication } from "../../models/xcode-simulator-application.model";
-import { ActionPanel, Icon, ImageLike, ImageMask, List, ShowInFinderAction, useNavigation } from "@raycast/api";
+import { ActionPanel, Icon, ImageLike, ImageMask, List, Navigation, ShowInFinderAction } from "@raycast/api";
 import { xcodeSimulatorApplicationDetail } from "./xcode-simulator-application-detail.user-interface";
 
 /**
  * Xcode Simulator Application List Item
  * @param xcodeSimulatorApplication The XcodeSimulatorApplication
+ * @param navigation The Navigation
  */
 export function xcodeSimulatorApplicationListItem(
-  xcodeSimulatorApplication: XcodeSimulatorApplication
+  xcodeSimulatorApplication: XcodeSimulatorApplication,
+  navigation: Navigation
 ): JSX.Element {
-  const { push } = useNavigation();
   return (
     <List.Item
       key={key(xcodeSimulatorApplication)}
@@ -23,8 +24,11 @@ export function xcodeSimulatorApplicationListItem(
             icon={Icon.Finder}
             title="View Directories"
             onAction={
-              () => push(
-                xcodeSimulatorApplicationDetail(xcodeSimulatorApplication)
+              () => navigation.push(
+                xcodeSimulatorApplicationDetail(
+                  xcodeSimulatorApplication,
+                  navigation
+                )
               )
             }
           />

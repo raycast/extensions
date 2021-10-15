@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, ToastStyle, useNavigation } from "@raycast/api";
 import { xcodeSimulatorApplicationList } from "./user-interfaces/xcode-simulator-applications/xcode-simulator-application-list.user-interface";
 import { XcodeSimulatorApplicationService } from "./services/xcode-simulator-application.service";
 import { XcodeSimulatorApplication } from "./models/xcode-simulator-application.model";
@@ -11,6 +11,8 @@ import { Source } from "./shared/source";
 export default () => {
   // Initialize XcodeSimulatorApplicationService
   const xcodeSimulatorApplicationService = new XcodeSimulatorApplicationService();
+  // Use Navigation
+  const navigation = useNavigation();
   // Use XcodeSimulatorApplication State
   const [xcodeSimulatorApplications, setXcodeSimulatorApplication] = useState<Source<XcodeSimulatorApplication[]> | undefined>(undefined);
   // Use Effect
@@ -61,6 +63,9 @@ export default () => {
         );
       });
   }, []);
-  // Return XcodeRelease List
-  return xcodeSimulatorApplicationList(xcodeSimulatorApplications);
+  // Return XcodeRelease List with Navigation
+  return xcodeSimulatorApplicationList(
+    xcodeSimulatorApplications,
+    navigation
+  );
 };
