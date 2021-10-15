@@ -20,7 +20,7 @@ import { getWorkspaces, login } from "./utils/functions";
 import useSearch from "./hooks/useSearch";
 import { Preferences, SelectedWorkspace, StoredCachedData } from "./types/preferences";
 import { PersonalShare } from "./types/SketchPersonalShare";
-import { getAllWorkspaces, getCachedData, getSelectedWorkspace } from "./utils/storage";
+import { getAllWorkspaces, getCachedData, getLastUsedEmail, getSelectedWorkspace } from "./utils/storage";
 
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
@@ -62,7 +62,7 @@ export default function DocumentsList() {
       const workspaceToSelect = { name, identifier };
       setSelectedWorkspace(workspaceToSelect);
       await setLocalStorageItem("selectedWorkspace", JSON.stringify(workspaceToSelect));
-      console.log('✓ storing first workspace avaiable')
+      console.log("✓ storing first workspace avaiable");
     }
     otherThings();
   }, [selectedWorkspace, workspaces, token]);
@@ -74,9 +74,9 @@ export default function DocumentsList() {
         const fetchedWorkspaces = await getWorkspaces(token);
         setWorkspaces(fetchedWorkspaces.data.me);
         await setLocalStorageItem("allWorkspaces", JSON.stringify(fetchedWorkspaces.data.me));
-        console.log('✓ storing all workspace names and identifiers')
+        console.log("✓ storing all workspace names and identifiers");
       } catch (error) {
-        console.error((error as ErrorEvent).message)
+        console.error((error as ErrorEvent).message);
         showToast(ToastStyle.Failure, (error as ErrorEvent).message);
       }
     }
@@ -102,31 +102,38 @@ export default function DocumentsList() {
 
   useEffect(() => {
     async function fetch() {
-      // execute before login to show list asap
-      const storedCachedData: StoredCachedData = await getCachedData();
-      if (storedCachedData) {
-        console.log("✓ Found cached data");
-        setCachedData(storedCachedData);
-      }
-
-      const storedWorkspaces: Me = await getAllWorkspaces();
-      if (storedWorkspaces) {
-        console.log("✓ Found workspaces");
-        setWorkspaces(storedWorkspaces);
-      }
-
-      const storedSelectedWorkspace = await getSelectedWorkspace();
-      if (storedSelectedWorkspace) {
-        console.log("✓ Found selected workspace");
-        setSelectedWorkspace(storedSelectedWorkspace);
-      }
-
       const { email, password }: Preferences = getPreferenceValues();
+      const storedLasUsedEmail: string | undefined = await getLastUsedEmail();
+
+      if (storedLasUsedEmail === email) {
+        console.log("✓ logging in with *stored* email");
+        const storedCachedData: StoredCachedData = await getCachedData();
+        if (storedCachedData) {
+          console.log("✓ Found cached data");
+          setCachedData(storedCachedData);
+        }
+
+        const storedWorkspaces: Me = await getAllWorkspaces();
+        if (storedWorkspaces) {
+          console.log("✓ Found workspaces");
+          setWorkspaces(storedWorkspaces);
+        }
+
+        const storedSelectedWorkspace = await getSelectedWorkspace();
+        if (storedSelectedWorkspace) {
+          console.log("✓ Found selected workspace");
+          setSelectedWorkspace(storedSelectedWorkspace);
+        }
+      } else {
+        console.log("✓ logging in with *new* email");
+      }
+
+      await setLocalStorageItem("lastUsedEmail", email);
 
       try {
         const fetchedToken: string = await login(email, password);
         setToken(fetchedToken);
-        console.log('✓ logged in')
+        console.log("✓ logged in");
       } catch (error) {
         console.log((error as ErrorEvent).message);
         setLoginError((error as ErrorEvent).message);
@@ -177,9 +184,9 @@ function ShareListItem(props: {
   updateWorkspace: (workspace: SelectedWorkspace) => void;
 }) {
   const thumbnail = () => {
-    if (share.version.previewFiles?.length) {
-      if (share.version.previewFiles[0]?.thumbnails?.length) {
-        return share.version.previewFiles[0].thumbnails[0].url;
+    if (props.share.version.previewFiles?.length) {
+      if (props.share.version.previewFiles[0]?.thumbnails?.length) {
+        return props.share.version.previewFiles[0].thumbnails[0].url;
       } else {
         return undefined;
       }
@@ -188,49 +195,47 @@ function ShareListItem(props: {
     }
   };
 
-  const share = props.share;
-  const wp = props.workspaces;
-
   return (
     <List.Item
-      id={share.identifier}
-      key={share.identifier}
-      title={share.name}
-      subtitle={share.project?.name}
-      keywords={share.project?.name ? [share.project.name] : []}
+      id={props.share.identifier}
+      key={props.share.identifier}
+      title={props.share.name}
+      subtitle={props.share.project?.name}
+      keywords={props.share.project?.name ? [props.share.project.name] : []}
       icon={{ source: thumbnail() ?? Icon.Document, tintColor: Color.Yellow, mask: ImageMask.RoundedRectangle }}
-      accessoryTitle={timeAgo.format(new Date(share.updatedAt)) as string}
+      accessoryTitle={timeAgo.format(new Date(props.share.updatedAt)) as string}
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Actions">
+          <ActionPanel.Section>
             <OpenAction
               icon={{ source: { light: "sketch-symbol-onlight.png", dark: "sketch-symbol-ondark.png" } }}
               title="Open In Sketch"
-              target={`sketch://sketch.cloud/s/${share.identifier}`}
+              target={`sketch://sketch.cloud/s/${props.share.identifier}`}
               application="Sketch"
             />
-            <OpenInBrowserAction url={share.publicUrl} />
-            <CopyToClipboardAction title="Copy URL" content={share.publicUrl} />
+            <OpenInBrowserAction url={props.share.publicUrl} />
+            <CopyToClipboardAction title="Copy URL" content={props.share.publicUrl} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Workspaces">
-            {wp?.personalWorkspace && (
+            {props.workspaces?.personalWorkspace && (
               <ActionPanel.Item
                 icon={Icon.Person}
-                title={wp.personalWorkspace.name}
+                title={props.workspaces.personalWorkspace.name}
                 shortcut={{ modifiers: ["ctrl"], key: "1" }}
                 onAction={() =>
+                  props.workspaces &&
                   props.updateWorkspace({
-                    name: wp.personalWorkspace.name,
-                    identifier: wp.personalWorkspace.identifier,
+                    name: props.workspaces.personalWorkspace.name,
+                    identifier: props.workspaces.personalWorkspace.identifier,
                   })
                 }
               />
             )}
 
-            {wp?.workspaces?.map((workspace, index) => (
+            {props.workspaces?.workspaces?.map((workspace, index) => (
               <ActionPanel.Item
                 key={workspace.identifier}
-                icon={workspace.avatar.small ?? Icon.Desktop}
+                icon={workspace.avatar?.small ?? Icon.Dot}
                 title={workspace.name}
                 shortcut={{ modifiers: ["ctrl"], key: (index + 2).toString() as KeyEquivalent }}
                 onAction={() =>

@@ -15,9 +15,3 @@ export interface StoredCachedData {
   identifier: string;
   shares: Share[] | PersonalShare[];
 }
-
-export interface StorageItems {
-  selectedWorkspace?: string | undefined;
-  cachedData?: string | undefined;
-  allWorkspaces?: string | undefined;
-}
