@@ -22,7 +22,9 @@ export default async () => {
       ToastStyle.Success,
       "Derived Data successfully cleared"
     );
-  } catch {
+  } catch (error) {
+    // Log error
+    console.error(error);
     // Hide loading Toast
     await loadingToast.hide();
     // Show failure Toast
