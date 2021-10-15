@@ -5,7 +5,7 @@
   "author": "Sven Tiigi",
   "license": "MIT",
   "description": "Open your recent Xcode Projects, view the latest Xcode Releases and manage your Xcode Simulators",
-  "icon": "xcode-13.png",
+  "icon": "icon.png",
   "commands": [
     {
       "name": "projects-command",
