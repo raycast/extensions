@@ -111,13 +111,13 @@ const Command = () => {
     >
       {key ? (
         <>
-          <Form.Dropdown id="from" defaultValue="" title="From">
+          <Form.Dropdown id="from" defaultValue="" storeValue={true} title="From">
             <Form.Dropdown.Item value="" title="Detect" />
             {Object.entries(languages).map(([value, title]) => (
               <Form.Dropdown.Item value={value} title={title} key={value} />
             ))}
           </Form.Dropdown>
-          <Form.Dropdown id="to" defaultValue="EN" title="To">
+          <Form.Dropdown id="to" defaultValue="EN" storeValue={true} title="To">
             {Object.entries(languages).map(([value, title]) => (
               <Form.Dropdown.Item value={value} title={title} key={value} />
             ))}
