@@ -85,7 +85,7 @@ const Command = () => {
         await showToast(
           ToastStyle.Failure,
           "Something went wrong",
-          "Check your internet connection, API Key, or you've maxed out the API."
+          "Check your internet connection, API key, or you've maxed out the API."
         );
       }
     }
@@ -127,7 +127,7 @@ const Command = () => {
           <Form.TextArea id="translation" value={translation} />
         </>
       ) : (
-        <Form.TextField id="key" title="API Key" placeholder="Enter your API Key from DeepL" />
+        <Form.TextField id="key" title="API key" placeholder="Enter your API key from DeepL" />
       )}
     </Form>
   );
