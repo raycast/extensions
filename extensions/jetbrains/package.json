@@ -1,14 +1,14 @@
 {
   "name": "jetbrains",
-  "title": "JetBrains",
+  "title": "JetBrains Toolbox Recent Projects",
   "description": "Search and open JetBrains Toolbox projects",
   "icon": "jb.png",
   "author": "gdsmith",
   "commands": [
     {
       "name": "recent",
-      "title": "JetBrains Recent Projects",
-      "subtitle": "",
+      "title": "Open Recent Projects",
+      "subtitle": "JetBrains Toolbox",
       "description": "Search and open JetBrains Toolbox projects",
       "mode": "view"
     }
@@ -35,6 +35,7 @@
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "fast-glob": "^3.2.7",
+    "fuse.js": "^6.4.6",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {

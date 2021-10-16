@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
   ActionPanel,
   CopyToClipboardAction,
+  Detail,
   List,
   OpenWithAction,
   popToRoot,
@@ -9,14 +10,17 @@ import {
   showHUD,
   ShowInFinderAction,
   showToast,
-  ToastStyle
+  ToastStyle,
 } from "@raycast/api";
-import { existsSync, readFileSync } from "fs";
-import { homedir } from "os";
-import { basename, dirname, resolve } from "path";
-import { parseString } from "xml2js";
-import { exec } from "child_process";
-import { file, getFiles, getOtherTools, getRightTool, listAnd, preferredApp } from "./util";
+import Fuse from "fuse.js";
+import {readFile, stat} from "fs/promises";
+import {homedir} from "os";
+import {basename, dirname, resolve} from "path";
+import {parseStringPromise} from "xml2js";
+import {exec} from "child_process";
+import {createUniqueArray, file, getFiles, getOtherTools, getRightTool, listAnd, preferredApp} from "./util";
+
+const JetBrainsIcon = "jb.png";
 
 interface xmlJson {
   _attr: {
@@ -35,157 +39,260 @@ interface recentEntry {
   opened: number;
   app: string;
   icon: string;
+  exists?: boolean;
+  filter?: number;
 }
 
 const ICON_GLOB = "Applications/JetBrains Toolbox/*/Contents/Resources/icon.icns";
 const BIN_GLOB = ".config/jetbrains/bin/*";
 const RECENT_GLOB = "Library/Application Support/JetBrains/*/options/recentProject*.xml";
 
-function addRecent(app: file, current: Array<recentEntry>): Array<recentEntry> {
-  let entries = Array<recentEntry>();
-  try {
-    const xmlFile = readFileSync(app.path);
-    parseString(xmlFile, { attrkey: "_attr" }, (err, result) => {
-      if (err) {
-        return;
-      }
-      const recentEntries: Array<recentEntry> = (result.application.component[0].option[0].map[0].entry ?? []).map((recentEntry: xmlJson): recentEntry => {
-        const projectOpenTimestamp = (recentEntry.value[0].RecentProjectMetaInfo[0].option ?? []).find((recentOption: xmlJson) => recentOption._attr.name === "projectOpenTimestamp");
-        const path = recentEntry._attr.key.replace("$USER_HOME$", homedir());
+const getIcons = async () => {
+  return getFiles(resolve(homedir(), ICON_GLOB)).then((icons) =>
+    icons.map((icon) => {
+      return {
+        ...icon,
+        title: icon.path.split("/").find((path) => path.match(/.+\.app/)) || icon.title,
+        icon: icon.path,
+      };
+    })
+  );
+};
+
+const getTools = async (icons: Promise<file[]>, apps: Promise<file[]>) => {
+  return getFiles(resolve(homedir(), BIN_GLOB)).then((tools) =>
+    Promise.all(
+      tools.map(async (file) => {
+        const icon = (await icons).find((icon) => icon.path.match(new RegExp(file.title, "i")));
+        const app = (await apps).find((app) => {
+          return app.title.toLowerCase().startsWith(file.title.toLowerCase());
+        });
         return {
-          title: basename(path),
-          dirname: dirname(path)
-            .replace(homedir(), "~")
-            .replace("$APPLICATION_HOME_DIR$", "~appHomeDir~")
-            .replace("/Volumes", ""),
-          path: path,
-          opened: Number(projectOpenTimestamp?._attr.value ?? 0),
-          parts: path.substr(1).split("/").reverse().join(" ← "),
-          app: app.title,
-          icon: app.icon
+          ...file,
+          title: app ? app.title : file.title,
+          icon: icon ? icon.path : JetBrainsIcon,
         };
+      })
+    )
+  );
+};
+
+const getApps = async (icons: Promise<file[]>) => {
+  return icons.then((icons) => {
+    return getFiles(resolve(homedir(), RECENT_GLOB)).then((apps) => {
+      return apps
+        .filter((file) => !file.path.match(/CodeWithMe/))
+        .map((file) => {
+          const [, appName] = file.path.match(/([^/0-9.]+)([^/]+)\/options\/recentProject.+.xml/) ?? [];
+          const icon = icons.find((icon) => icon.path.match(new RegExp(appName.replace("CE", ""), "i")));
+          return {
+            ...file,
+            title: appName || file.title,
+            icon: icon ? icon.path : JetBrainsIcon,
+          };
+        })
+        .sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
+    });
+  });
+};
+
+const loadEntries = async (apps: Promise<file[]>) => {
+  const map = new Map<string, Array<recentEntry>>();
+  for (const app of await apps) {
+    const res = await app;
+    const entries = await getRecentEntries(res);
+    // sort before unique so we get the newest versions
+    map.set(
+      res.title,
+      createUniqueArray<recentEntry>("path", [...(map.get(res.title) ?? []), ...entries]).sort(
+        (a, b) => b.opened - a.opened
+      )
+    );
+  }
+  return map;
+};
+
+async function getRecentEntries(app: file): Promise<Array<recentEntry>> {
+  const recents = readFile(app.path).then((xmlFile) =>
+    parseStringPromise(xmlFile, {attrkey: "_attr"}).then((result) => {
+      const recentEntries: Array<recentEntry> = (result.application.component[0].option[0].map[0].entry ?? []).map(
+        (recentEntry: xmlJson): recentEntry => {
+          const projectOpenTimestamp = (recentEntry.value[0].RecentProjectMetaInfo[0].option ?? []).find(
+            (recentOption: xmlJson) => recentOption._attr.name === "projectOpenTimestamp"
+          );
+          const path = recentEntry._attr.key.replace("$USER_HOME$", homedir());
+          return {
+            title: basename(path),
+            dirname: dirname(path)
+              .replace(homedir(), "~")
+              // .replace('$APPLICATION_HOME_DIR$', "~appHomeDir~")
+              .replace("/Volumes", ""),
+            path: path,
+            opened: Number(projectOpenTimestamp?._attr.value ?? 0),
+            parts: path.substr(1).split("/").reverse().slice(1).join(" ← "),
+            app: app.title,
+            icon: app.icon ?? JetBrainsIcon,
+          };
+        }
+      );
+      return recentEntries.map(async (recent) => {
+        return {
+          ...recent,
+          exists: await stat(recent.path)
+            .then(() => true)
+            .catch(() => false),
+        } as recentEntry;
       });
-      const paths = current.map(cur => cur.path);
-      entries = current.concat(recentEntries.filter(({ path }) => existsSync(path) ?? false).filter(({ path }) => !paths.includes(path)));
-    });
-  } catch (e) {
-    console.log(e);
-  }
-  return entries;
+    })
+  );
+  return recents.then(async (entries) => await Promise.all(entries));
 }
 
-function OpenInJetBrainsAppAction({ tool, recent }: { tool: file, recent: recentEntry }) {
+function OpenInJetBrainsAppAction({tool, recent}: { tool: file; recent: recentEntry | null }) {
   function handleAction() {
-    exec(`${tool.path.replace(" ", "\\ ")} "${recent.path}"`, (err, stdOut, stdErr) => {
+    exec(`${tool.path.replace(" ", "\\ ")} "${recent ? recent.path : ""}"`, (err, stdOut, stdErr) => {
       err
-        ? showToast(ToastStyle.Failure, "Failed", err.message).then(() => console.log({ err, stdOut, stdErr }))
-        : showHUD(`Opening ${recent.title}`).then(() => popToRoot({ clearSearchBar: true }));
+        ? showToast(ToastStyle.Failure, "Failed", err.message).then(() => console.log({err, stdOut, stdErr}))
+        : showHUD(`Opening ${recent ? recent.title : tool.title}`).then(() => popToRoot({clearSearchBar: true}));
     });
   }
 
-  return <ActionPanel.Item
-    title={`Open with ${tool.title}`}
-    icon={tool.icon}
-    onAction={handleAction}
-  />;
+  return (
+    <ActionPanel.Item title={`Open ${recent ? "with " : ""}${tool.title}`} icon={tool.icon} onAction={handleAction}/>
+  );
 }
 
-function RecentProject({ app, recent, tools }: { app: string, recent: recentEntry, tools: Array<file> }) {
+function RecentProject({app, recent, tools}: { app: string; recent: recentEntry; tools: Array<file> }) {
   const rightTool = getRightTool(tools, recent.app);
   const otherTools = getOtherTools(tools, recent.app, rightTool);
 
-  return <List.Item
-    accessoryTitle={app}
-    title={recent.title}
-    keywords={recent.path.split("/").concat([recent.path]).concat([app])}
-    icon={recent.icon}
-    subtitle={recent.dirname}
-    actions={<ActionPanel title={recent.title}>
-      <ActionPanel.Section>
-        <OpenInJetBrainsAppAction tool={rightTool} recent={recent} />
-        <ShowInFinderAction path={recent.path} />
-        {recent.path.search(/\$/) ? <OpenWithAction path={recent.path} /> : null}
-        <CopyToClipboardAction title="Copy Path" content={recent.path}
-                               shortcut={{ modifiers: ["cmd", "shift"], key: "." }} />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
-        {otherTools.map(tool => <OpenInJetBrainsAppAction key={tool.path} tool={tool} recent={recent} />)}
-      </ActionPanel.Section>
-    </ActionPanel>
-    }
-  />;
+  return (
+    <List.Item
+      accessoryTitle={app}
+      title={recent.title}
+      keywords={recent.path.split("/").concat([recent.path]).concat([app])}
+      icon={recent.icon}
+      subtitle={recent.parts}
+      actions={<ActionPanel>
+        <ActionPanel.Section>
+          <OpenInJetBrainsAppAction tool={rightTool} recent={recent}/>
+          <ShowInFinderAction path={recent.path}/>
+          {recent.exists ? <OpenWithAction path={recent.path}/> : null}
+          <CopyToClipboardAction
+            title="Copy Path"
+            content={recent.path}
+            shortcut={{modifiers: ["cmd", "shift"], key: "."}}
+          />
+        </ActionPanel.Section>
+        <ActionPanel.Section>
+          {otherTools.map((tool) => (
+            <OpenInJetBrainsAppAction key={`${tool.path}-${recent.path}`} tool={tool} recent={recent}/>
+          ))}
+        </ActionPanel.Section>
+      </ActionPanel>}
+    />
+  );
 }
 
-function Command() {
-  const [icons, setIcons] = useState<file[]>();
+interface state {
+  keys: Array<string>;
+  recent: Map<string, Array<recentEntry>> | null;
+  tools: Array<file> | null;
+}
+
+const fuseRecent = (search: string, recent: Array<recentEntry>, fused: Fuse<recentEntry> | undefined): recentEntry[] => {
+  if (search === '') {
+    return recent;
+  }
+  if (fused === undefined) {
+    return recent;
+  }
+
+  return fused.search(search).map(({item}) => item)
+};
+
+function ProjectList() {
+  const [{recent, tools, keys}, setRecent] = useState<state>({recent: null, tools: null, keys: []});
+  const [search, setSearch] = useState<string>("");
+  const [fused, setFused] = useState<Map<string, Fuse<recentEntry>>>(new Map<string, Fuse<recentEntry>>());
+
   useEffect(() => {
-    getFiles(resolve(homedir(), ICON_GLOB))
-      .then(files => setIcons(files.map(icon => ({
-          ...icon,
-          title: icon.path.split("/").find((path => path.match(/.+\.app/))) || icon.title,
-          icon: icon.path
+    const icons = getIcons();
+    const apps = getApps(icons);
+    getTools(icons, apps).then((tools) =>
+      loadEntries(apps).then((entries) =>
+        setRecent({
+          recent: entries,
+          tools: tools.sort((a, b) =>
+            a.title === preferredApp.toLowerCase() ? -1 : b.title === preferredApp.toLowerCase() ? 1 : 0
+          ),
+          keys: Array.from(entries.keys())
+            .sort((a, b) => (a === preferredApp ? -1 : b === preferredApp ? 1 : 0))
         })
-      )));
+      )
+    );
   }, []);
 
-  const [apps, setApps] = useState<file[]>();
   useEffect(() => {
-    if (icons === undefined) return;
-    getFiles(resolve(homedir(), RECENT_GLOB)).then(files => setApps(files
-      .map(file => {
-        const [, appName] = file.path.match(/([^/0-9.]+)([^/]+)\/options\/recentProject.+.xml/) ?? [];
-        const icon = icons.find((icon) => icon.path.match(new RegExp(appName.replace("CE", ""), "i")));
-        return {
-          ...file,
-          title: appName || file.title,
-          icon: icon ? icon.path : "jb.png"
-        };
-      })
-      .sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime())
-      .filter(file => !file.path.match(/CodeWithMe/))));
-  }, [icons]);
+    const updated = new Map<string, Fuse<recentEntry>>()
+    const options = {
+      isCaseSensitive: false,
+      findAllMatches: true,
+      shouldSort: true,
+      ignoreLocation: true,
+      // Search in `author` and in `tags` array
+      keys: ['path', 'title', 'parts', 'app']
+    };
+    for (const key of keys) {
+      const entries = recent?.get(key);
+      if (entries === undefined) {
+        continue
+      }
+      updated.set(key, new Fuse<recentEntry>(entries, options));
+    }
+    setFused(updated)
+  }, [recent])
 
-  const [tools, setTools] = useState<file[]>();
-  useEffect(() => {
-    if (icons === undefined) return;
-    if (apps === undefined) return;
-
-    getFiles(resolve(homedir(), BIN_GLOB))
-      .then(files => setTools(files.map(file => {
-          const icon = icons.find((icon) => icon.path.match(new RegExp(file.title, "i")));
-          const app = apps.find((app) => app.title.match(new RegExp(file.title, "i")));
-          // console.log([file.title, app?.title]);
-          return {
-            ...file,
-            title: app?.title || file.title,
-            icon: icon ? icon.path : "jb.png",
-          };
-        })
-      ));
-  }, [icons, apps]);
-
-
-  const recent = new Map<string, Array<recentEntry>>();
-  for (const app of apps ?? []) {
-    recent.set(app.title, addRecent(app, recent.get(app.title) ?? []).sort((a, b) => b.opened - a.opened));
+  if (recent === null || tools === null) {
+    return <Detail isLoading/>;
+  } else if (tools.length === 0) {
+    return (
+      <Detail
+        markdown="No JetBrains applications found. Please check that you have [JetBrains Toolbox](https://jb.gg/toolbox-app-faq) and at least one IDE installed."/>
+    );
+  } else if (recent.size === 0) {
+    return (
+      <Detail markdown="No recent projects found">
+        <ActionPanel>
+          {tools
+            .sort((a, b) =>
+              a.title === preferredApp.toLowerCase() ? -1 : b.title === preferredApp.toLowerCase() ? 1 : 0
+            )
+            .map((tool) => (
+              <OpenInJetBrainsAppAction key={tool.title} tool={tool} recent={null}/>
+            ))}
+        </ActionPanel>
+      </Detail>
+    );
   }
-  const keys = Array.from(recent.keys()).sort((a, b) => a === preferredApp ? -1 : b === preferredApp ? 1 : 0);
+
   return (
     <List
       searchBarPlaceholder={`Search recent ${listAnd(recent.keys())} projects…`}
-      isLoading={recent.size === 0}
+      onSearchTextChange={(term) => setSearch(term.trim())}
     >
-      {tools && keys.map(key =>
-        <List.Section key={key} title={key}>
-          {(recent.get(key) ?? []).map((recent: recentEntry) =>
-            <RecentProject
-              tools={tools}
-              key={recent.path}
-              app={key}
-              recent={recent} />)}
+      {keys.map((key: string) => (
+        <List.Section title={key} key={key}>
+          {fuseRecent(search, recent.get(key) ?? [], fused.get(key))
+            .map((recent: recentEntry) =>
+              recent?.path && tools.length > 0 ? (
+                <RecentProject tools={tools} key={`${key}-${recent.path}`} app={key} recent={recent}/>
+              ) : null
+            )}
         </List.Section>
-      )}
-    </List>);
+      ))}
+    </List>
+  );
 }
 
-render(<Command />);
+render(<ProjectList/>);
