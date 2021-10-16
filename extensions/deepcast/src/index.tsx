@@ -125,7 +125,7 @@ const Command = () => {
           <Form.TextArea id="translation" value={translation} />
         </>
       ) : (
-        <Form.TextField id="key" title="API Key" placeholder="Enter Key" />
+        <Form.TextField id="key" title="API Key" placeholder="Enter your API Key from DeepL" />
       )}
     </Form>
   );
