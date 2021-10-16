@@ -1,0 +1,47 @@
+{
+  "name": "amc-score-calculator",
+  "title": "AMC Score Calculator",
+  "description": "Calculates AMC scores for 8, 10, and 12",
+  "icon": "command-icon.png",
+  "author": "ryanccn",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "eight",
+      "title": "AMC 8",
+      "subtitle": "",
+      "description": "Calculate AMC 8 scores",
+      "mode": "view"
+    },
+    {
+      "name": "ten",
+      "title": "AMC 10",
+      "subtitle": "",
+      "description": "Calculate AMC 10 scores",
+      "mode": "view"
+    },
+    {
+      "name": "twelve",
+      "title": "AMC 12",
+      "subtitle": "",
+      "description": "Calculate AMC 12 scores",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
