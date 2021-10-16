@@ -12,8 +12,11 @@ import {
   Icon,
   CopyToClipboardAction,
   Toast,
+  OpenAction,
+  Application,
+  getApplications,
 } from "@raycast/api"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import fetch from "node-fetch"
 
 import TimeAgo from "javascript-time-ago"
@@ -65,7 +68,6 @@ export default function FileList() {
 function FileListItem(props: { file: File }) {
   const { file } = props
 
-  const url = `https://figma.com/file/${file.key}`
   const accessoryTitle = String(timeAgo.format(new Date(file.last_modified)))
   return (
     <List.Item
@@ -77,13 +79,34 @@ function FileListItem(props: { file: File }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction url={url} />
-            <CopyToClipboardAction content={url} />
+            <OpenProjectFileAction file={props.file} />
+            <CopyToClipboardAction content={`https://figma.com/file/${file.key}`} />
           </ActionPanel.Section>
           <DevelopmentActionSection />
         </ActionPanel>
       }
     />
+  )
+}
+
+function OpenProjectFileAction(props: { file: File }) {
+  const [desktopApp, setDesktopApp] = useState<Application>()
+
+  useEffect(() => {
+    getApplications()
+      .then((apps) => apps.find((a) => a.bundleId === "com.figma.Desktop"))
+      .then(setDesktopApp)
+  }, [])
+
+  return desktopApp ? (
+    <OpenAction
+      icon="command-icon.png"
+      title="Open in Figma"
+      target={`figma://file/${props.file.key}`}
+      application={desktopApp}
+    />
+  ) : (
+    <OpenInBrowserAction url={`https://figma.com/file/${props.file.key}`} />
   )
 }
 
