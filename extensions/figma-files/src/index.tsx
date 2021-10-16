@@ -11,6 +11,12 @@ import {
 import { useState, useEffect } from "react"
 import fetch from "node-fetch"
 
+import TimeAgo from "javascript-time-ago"
+import en from "javascript-time-ago/locale/en.json"
+
+TimeAgo.addDefaultLocale(en)
+const timeAgo = new TimeAgo("en-US")
+
 export default function FileList() {
   const [state, setState] = useState<{ projectFiles: ProjectFiles[]; isLoading: boolean }>({
     projectFiles: [],
@@ -54,13 +60,14 @@ export default function FileList() {
 function FileListItem(props: { file: File }) {
   const { file } = props
 
+  const accessoryTitle = String(timeAgo.format(new Date(file.last_modified)))
   return (
     <List.Item
       id={file.key}
       key={file.key}
       title={file.name}
       icon={file.thumbnail_url}
-      accessoryTitle={new Date(file.last_modified).toLocaleDateString()}
+      accessoryTitle={accessoryTitle}
       actions={
         <ActionPanel>
           <OpenInBrowserAction url={`https://figma.com/file/${file.key}`} />
