@@ -1,26 +1,45 @@
-import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle, getPreferenceValues } from "@raycast/api"
+import {
+  ActionPanel,
+  List,
+  OpenInBrowserAction,
+  showToast,
+  ToastStyle,
+  getPreferenceValues,
+  setLocalStorageItem,
+  getLocalStorageItem,
+} from "@raycast/api"
 import { useState, useEffect } from "react"
 import fetch from "node-fetch"
 
 export default function FileList() {
-  const [state, setState] = useState<{ projectFiles: ProjectFiles[] }>({
+  const [state, setState] = useState<{ projectFiles: ProjectFiles[]; isLoading: boolean }>({
     projectFiles: [],
+    isLoading: true,
   })
 
   useEffect(() => {
     async function fetch() {
-      const projectFiles = await fetchFiles()
+      const cachedFiles = await loadFiles()
+
+      if (cachedFiles) {
+        setState((oldState) => ({ ...oldState, projectFiles: cachedFiles }))
+      }
+
+      const newFiles = await fetchFiles()
 
       setState((oldState) => ({
         ...oldState,
-        projectFiles,
+        projectFiles: newFiles,
+        isLoading: false,
       }))
+
+      await storeFiles(newFiles)
     }
     fetch()
   }, [])
 
   return (
-    <List isLoading={state.projectFiles.length === 0} searchBarPlaceholder="Filter files by name...">
+    <List isLoading={state.isLoading} searchBarPlaceholder="Filter files by name...">
       {state.projectFiles.map((project) => (
         <List.Section key={project.name} title={project.name}>
           {project.files.map((file) => (
@@ -94,6 +113,18 @@ async function fetchFiles(): Promise<ProjectFiles[]> {
   })
 
   return Promise.all(projects) as Promise<ProjectFiles[]>
+}
+
+const PROJECT_FILES_CACHE_KEY = "PROJECT_FILES"
+
+async function storeFiles(projectFiles: ProjectFiles[]) {
+  const data = JSON.stringify(projectFiles)
+  await setLocalStorageItem("PROJECT_FILES", data)
+}
+
+async function loadFiles() {
+  const data: string | undefined = await getLocalStorageItem(PROJECT_FILES_CACHE_KEY)
+  return data !== undefined ? JSON.parse(data) : undefined
 }
 
 type Project = {
