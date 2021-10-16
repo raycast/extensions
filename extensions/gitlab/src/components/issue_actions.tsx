@@ -1,7 +1,18 @@
-import { ActionPanel, closeMainWindow, Color, CopyToClipboardAction, Icon, showToast, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  closeMainWindow,
+  Color,
+  CopyToClipboardAction,
+  Icon,
+  PushAction,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 import React from "react";
 import { gitlab } from "../common";
-import { Issue } from "../gitlabapi";
+import { Issue, Label } from "../gitlabapi";
+import { GitLabIcons } from "../icons";
+import { LabelList } from "./label";
 
 export function CloseIssueAction(props: { issue: Issue }) {
   const issue = props.issue;
@@ -39,6 +50,17 @@ export function ReopenIssueAction(props: { issue: Issue }) {
   return <ActionPanel.Item title="Reopen Issue" icon={{ source: Icon.ExclamationMark }} onAction={handleAction} />;
 }
 
+function ShowIssueLabelsAction(props: { labels: Label[] }) {
+  return (
+    <PushAction
+      title="Show Labels"
+      target={<LabelList labels={props.labels} />}
+      shortcut={{ modifiers: ["cmd"], key: "l" }}
+      icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
+    />
+  );
+}
+
 export function IssueItemActions(props: { issue: Issue }) {
   const issue = props.issue;
   return (
@@ -48,6 +70,7 @@ export function IssueItemActions(props: { issue: Issue }) {
       <CopyToClipboardAction title="Copy Issue Number" content={issue.iid} />
       <CopyToClipboardAction title="Copy Issue URL" content={issue.web_url} />
       <CopyToClipboardAction title="Copy Issue Title" content={issue.title} />
+      <ShowIssueLabelsAction labels={issue.labels} />
     </React.Fragment>
   );
 }

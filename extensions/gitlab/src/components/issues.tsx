@@ -43,9 +43,17 @@ export function IssueDetail(props: { issue: Issue }) {
     showToast(ToastStyle.Failure, "Could not get issue details", error);
   }
 
+  const desc = description ? description : props.issue.description;
+
+  let md = "";
+  if (props.issue) {
+    md = props.issue.labels.map((i) => `\`${i.name}\``).join(" ") + "  \n";
+  }
+  md += "## Description\n" + optimizeMarkdownText(desc);
+
   return (
     <Detail
-      markdown={optimizeMarkdownText(description)}
+      markdown={md}
       isLoading={isLoading}
       navigationTitle={`${props.issue.reference_full}`}
       actions={
@@ -59,11 +67,11 @@ export function IssueDetail(props: { issue: Issue }) {
 }
 
 export function useDetail(issueID: number): {
-  description: string;
+  description?: string;
   error?: string;
   isLoading: boolean;
 } {
-  const [description, setDescription] = useState<string>("");
+  const [description, setDescription] = useState<string>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 

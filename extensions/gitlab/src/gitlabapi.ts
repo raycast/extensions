@@ -75,7 +75,8 @@ export function jsonDataToIssue(issue: any): Issue {
         updated_at: new Date(issue.updated_at),
         author: userFromJson(issue.author),
         project_id: issue.project_id,
-        milestone: dataToMilestone(issue.milestone)
+        milestone: dataToMilestone(issue.milestone),
+        labels: issue.labels as Label[]
     };
 }
 
@@ -133,6 +134,7 @@ export class Label {
     public name: string = "";
     public color: string = "";
     public textColor: string = "";
+    public description: string = "";
 }
 
 export class Milestone {
@@ -152,6 +154,7 @@ export class Issue {
     public updated_at = new Date(2000, 1, 1);
     public project_id = 0;
     public milestone?: Milestone = undefined;
+    public labels: Label[] = [];
 }
 
 export class MergeRequest {
@@ -365,6 +368,9 @@ export class GitLab {
 
     async getIssues(params: Record<string, any>, project?: Project): Promise<Issue[]> {
         const projectPrefix = project ? `projects/${project.id}/` : "";
+        if (!params.with_labels_details) {
+            params.with_labels_details = "true";
+        }
         const issueItems: Issue[] = await this.fetch(`${projectPrefix}issues`, params = params)
             .then((issues) => {
                 return issues.map((issue: any, index: number) => jsonDataToIssue(issue))
@@ -373,6 +379,9 @@ export class GitLab {
     }
 
     async getGroupIssues(params: Record<string, any>, groupID: number): Promise<Issue[]> {
+        if (!params.with_labels_details) {
+            params.with_labels_details = "true";
+        }
         const issueItems: Issue[] = await this.fetch(`groups/${groupID}/issues`, params = params)
             .then((issues) => {
                 return issues.map((issue: any, index: number) => jsonDataToIssue(issue))
