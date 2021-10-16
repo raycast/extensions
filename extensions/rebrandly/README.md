@@ -18,7 +18,7 @@ Browse [Rebrandly](https://rebrandly.com/) shortlinks on [Raycast](https://www.r
 
 ## Author
 
-- Griko Nibras ([@grikomsn](https://github.com/grikomsn))
+- Griko Nibras ([@grikomsn](https://www.raycast.com/grikomsn))
 
 ## License
 
