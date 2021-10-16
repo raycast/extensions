@@ -2,23 +2,23 @@ import { List, showToast, ToastStyle } from "@raycast/api";
 import { isLeft } from 'fp-ts/lib/Either';
 import { useEffect, useState } from "react";
 import FeedItem from './components/FeedItem';
-import { Beta, Feed } from './responseTypes';
+import { Feed, Interview } from './responseTypes';
 import { getInterviewsFeed } from './util';
 
 
 interface State {
-  feed: Feed<Beta> | null;
+  feed: Feed<Interview> | null;
   error?: Error
 }
 
 
-export default function BetasList() {
+export default function InterviewsList() {
   const [state, setState] = useState<State>( {
     feed: null
   } );
 
   useEffect( () => {
-    async function fetchBetas() {
+    async function fetchInterviews() {
       const feedEither = await getInterviewsFeed();
 
       if ( isLeft( feedEither ) ) {
@@ -29,7 +29,7 @@ export default function BetasList() {
       setState( { feed: feedEither.right } )
     }
 
-    fetchBetas();
+    fetchInterviews();
   }, [] );
 
   return (
@@ -38,8 +38,8 @@ export default function BetasList() {
       navigationTitle={state.feed?.title}
       searchBarPlaceholder="Filter betas by name..."
     >
-      {state.feed?.items.map( beta => (
-        <FeedItem item={beta} key={beta.link} />
+      {state.feed?.items.map( interview => (
+        <FeedItem item={interview} key={interview.link} />
       ) )}
     </List>
   );
