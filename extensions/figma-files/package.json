@@ -1,17 +1,16 @@
 {
   "name": "figma-files-raycast-extension",
-  "title": "Figma files extension for Raycast",
+  "title": "Figma File Search",
   "description": "Lists Figma files allowing you to search and navigate to them.",
   "icon": "command-icon.png",
   "author": "Michael Schultz (https://michaelschultz.com)",
-  "homepage": "https://github.com/michaelwschultz/figma-files-raycast-extension",
   "version": "1.0.0",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Figma files",
-      "subtitle": "List files from your Figma team",
+      "title": "Search Files",
+      "subtitle": "Figma",
       "description": "Lists Figma files allowing you to search and navigate to them.",
       "mode": "view",
       "preferences": [
@@ -26,7 +25,7 @@
           "name": "TEAM_ID",
           "type": "password",
           "required": true,
-          "title": "Team Id (found in the url of your team page)",
+          "title": "Team ID",
           "description": "Find this in the url after navigating to your team page."
         }
       ]
