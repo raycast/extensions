@@ -7,6 +7,11 @@ import {
   getPreferenceValues,
   setLocalStorageItem,
   getLocalStorageItem,
+  environment,
+  removeLocalStorageItem,
+  Icon,
+  CopyToClipboardAction,
+  Toast,
 } from "@raycast/api"
 import { useState, useEffect } from "react"
 import fetch from "node-fetch"
@@ -60,6 +65,7 @@ export default function FileList() {
 function FileListItem(props: { file: File }) {
   const { file } = props
 
+  const url = `https://figma.com/file/${file.key}`
   const accessoryTitle = String(timeAgo.format(new Date(file.last_modified)))
   return (
     <List.Item
@@ -70,11 +76,37 @@ function FileListItem(props: { file: File }) {
       accessoryTitle={accessoryTitle}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`https://figma.com/file/${file.key}`} />
+          <ActionPanel.Section>
+            <OpenInBrowserAction url={url} />
+            <CopyToClipboardAction content={url} />
+          </ActionPanel.Section>
+          <DevelopmentActionSection />
         </ActionPanel>
       }
     />
   )
+}
+
+function DevelopmentActionSection() {
+  async function handleClearCache() {
+    const toast = await showToast(ToastStyle.Animated, "Clearing cache")
+
+    try {
+      await clearFiles()
+      toast.style = ToastStyle.Success
+      toast.title = "Cleared cache"
+    } catch (error) {
+      toast.style = ToastStyle.Failure
+      toast.title = "Failed clearing cache"
+      toast.message = error instanceof Error ? error.message : undefined
+    }
+  }
+
+  return environment.isDevelopment ? (
+    <ActionPanel.Section title="Development">
+      <ActionPanel.Item icon={Icon.Trash} title="Clear Cache" onAction={handleClearCache} />
+    </ActionPanel.Section>
+  ) : null
 }
 
 async function fetchTeamProjects(): Promise<TeamProjects> {
@@ -132,6 +164,10 @@ async function storeFiles(projectFiles: ProjectFiles[]) {
 async function loadFiles() {
   const data: string | undefined = await getLocalStorageItem(PROJECT_FILES_CACHE_KEY)
   return data !== undefined ? JSON.parse(data) : undefined
+}
+
+async function clearFiles() {
+  return await removeLocalStorageItem(PROJECT_FILES_CACHE_KEY)
 }
 
 type Project = {
