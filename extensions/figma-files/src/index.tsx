@@ -11,16 +11,14 @@ import {
   removeLocalStorageItem,
   Icon,
   CopyToClipboardAction,
-  Toast,
   OpenAction,
   Application,
   getApplications,
 } from "@raycast/api"
-import { useState, useEffect, useMemo } from "react"
-import fetch from "node-fetch"
-
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en.json"
+import fetch from "node-fetch"
+import { useState, useEffect } from "react"
 
 TimeAgo.addDefaultLocale(en)
 const timeAgo = new TimeAgo("en-US")
