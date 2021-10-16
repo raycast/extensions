@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
 import { Group, Issue, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { optimizeMarkdownText, toDateString } from "../utils";
+import { optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
 import { IssueItemActions } from "./issue_actions";
 
 export enum IssueScope {
@@ -188,6 +188,53 @@ export function IssueList({
   );
 }
 
+function getIssueQuery(query: string | undefined) {
+  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee"]);
+}
+
+function injectQueryNamedParameters(
+  requestParams: Record<string, any>,
+  query: Query,
+  scope: IssueScope,
+  isNegative: boolean
+) {
+  const namedParams = isNegative ? query.negativeNamed : query.named;
+  for (const extraParam of Object.keys(namedParams)) {
+    const extraParamVal = namedParams[extraParam];
+    const prefixed = (text: string): string => {
+      return isNegative ? `not[${text}]` : text;
+    };
+    if (extraParamVal) {
+      switch (extraParam) {
+        case "label":
+          {
+            requestParams[prefixed("labels")] = extraParamVal.join(",");
+          }
+          break;
+        case "author":
+          {
+            if (scope === IssueScope.all) {
+              requestParams[prefixed("author_username")] = extraParamVal.join(",");
+            }
+          }
+          break;
+        case "milestone":
+          {
+            requestParams[prefixed("milestone")] = extraParamVal.join(",");
+          }
+          break;
+        case "assignee":
+          {
+            if (scope === IssueScope.all) {
+              requestParams[prefixed("assignee_username")] = extraParamVal.join(",");
+            }
+          }
+          break;
+      }
+    }
+  }
+}
+
 export function useSearch(
   query: string | undefined,
   scope: IssueScope,
@@ -215,29 +262,23 @@ export function useSearch(
       setError(undefined);
 
       try {
+        const qd = getIssueQuery(query);
+        query = qd.query;
+        const requestParams: Record<string, any> = {
+          state: state,
+          scope: scope,
+          search: query || "",
+          in: "title",
+        };
+        injectQueryNamedParameters(requestParams, qd, scope, false);
+        injectQueryNamedParameters(requestParams, qd, scope, true);
         if (group) {
-          const glIssues = await gitlab.getGroupIssues(
-            {
-              state: state,
-              scope: scope,
-              search: query || "",
-              in: "title",
-            },
-            group.id
-          );
+          const glIssues = await gitlab.getGroupIssues(requestParams, group.id);
           if (!cancel) {
             setIssues(glIssues);
           }
         } else {
-          const glIssues = await gitlab.getIssues(
-            {
-              state: state,
-              scope: scope,
-              search: query || "",
-              in: "title",
-            },
-            project
-          );
+          const glIssues = await gitlab.getIssues(requestParams, project);
           if (!cancel) {
             setIssues(glIssues);
           }
