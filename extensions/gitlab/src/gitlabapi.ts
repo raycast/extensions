@@ -51,6 +51,7 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
         project_id: mr.project_id,
         description: mr.description,
         reference_full: mr.references.full,
+        labels: mr.labels as Label[]
     }
 }
 
@@ -168,6 +169,7 @@ export class MergeRequest {
     public updated_at = new Date(2000, 1, 1);
     public project_id = 0;
     public reference_full = "";
+    public labels: Label[] = [];
 }
 
 export class Todo {
@@ -515,6 +517,9 @@ export class GitLab {
     }
 
     async getMergeRequests(params: Record<string, any>, project?: Project): Promise<MergeRequest[]> {
+        if (!params.with_labels_details) {
+            params.with_labels_details = "true";
+        }
         const projectPrefix = project ? `projects/${project.id}/` : "";
         const issueItems: MergeRequest[] = await this.fetch(`${projectPrefix}merge_requests`, params = params)
             .then((issues) => {
@@ -524,6 +529,9 @@ export class GitLab {
     }
 
     async getGroupMergeRequests(params: Record<string, any>, group: Group): Promise<MergeRequest[]> {
+        if (!params.with_labels_details) {
+            params.with_labels_details = "true";
+        }
         const issueItems: MergeRequest[] = await this.fetch(`groups/${group.id}/merge_requests`, params = params)
             .then((issues) => {
                 return issues.map((issue: any, _: number) => jsonDataToMergeRequest(issue))

@@ -51,6 +51,9 @@ export function ReopenIssueAction(props: { issue: Issue }) {
 }
 
 function ShowIssueLabelsAction(props: { labels: Label[] }) {
+  if (props.labels.length <= 0) {
+    return null;
+  }
   return (
     <PushAction
       title="Show Labels"

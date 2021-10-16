@@ -46,9 +46,17 @@ export function MRDetail(props: { mr: MergeRequest }) {
     showToast(ToastStyle.Failure, "Could not get merge request details", error);
   }
 
+  const desc = (description ? description : props.mr.description) || "";
+
+  let md = "";
+  if (props.mr) {
+    md = props.mr.labels.map((i) => `\`${i.name}\``).join(" ") + "  \n";
+  }
+  md += "## Description\n" + optimizeMarkdownText(desc);
+
   return (
     <Detail
-      markdown={optimizeMarkdownText(description)}
+      markdown={md}
       isLoading={isLoading}
       navigationTitle={`${props.mr.reference_full}`}
       actions={
@@ -62,11 +70,11 @@ export function MRDetail(props: { mr: MergeRequest }) {
 }
 
 export function useDetail(issueID: number): {
-  description: string;
+  description?: string;
   error?: string;
   isLoading: boolean;
 } {
-  const [description, setDescription] = useState<string>("");
+  const [description, setDescription] = useState<string>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 

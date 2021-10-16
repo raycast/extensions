@@ -43,7 +43,7 @@ export function IssueDetail(props: { issue: Issue }) {
     showToast(ToastStyle.Failure, "Could not get issue details", error);
   }
 
-  const desc = description ? description : props.issue.description;
+  const desc = (description ? description : props.issue.description) || "";
 
   let md = "";
   if (props.issue) {
