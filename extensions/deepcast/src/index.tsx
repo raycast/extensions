@@ -77,13 +77,14 @@ const Command = () => {
         const translation = JSON.parse(response.body).translations[0].text;
         setLoading(false);
         setTranslation(translation);
+        copyTextToClipboard(translation);
         await showToast(ToastStyle.Success, "The translation was copied to your clipboard.");
       } catch (error) {
         setLoading(false);
         await showToast(
           ToastStyle.Failure,
           "Something went wrong",
-          "Either something is wrong with your internet connection, or you've maxed out the free API quota for this month."
+          "Either something is wrong with your internet connection, API Key, or you've maxed out the free API quota for this month."
         );
       }
     }
@@ -120,7 +121,6 @@ const Command = () => {
             ))}
           </Form.Dropdown>
           <Form.Separator />
-          {/* Would be nice if this can be autoselected */}
           <Form.TextArea id="text" placeholder="Enter or paste text here" />
           <Form.TextArea id="translation" value={translation} />
         </>
