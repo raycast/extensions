@@ -10,6 +10,7 @@ import {
   copyTextToClipboard,
   showToast,
   ToastStyle,
+  Detail,
 } from "@raycast/api";
 import got from "got";
 import { useEffect, useState } from "react";
@@ -49,7 +50,7 @@ interface Values {
 }
 
 const Command = () => {
-  const [key, setKey] = useState<LocalStorageValue | undefined>();
+  const [key, setKey] = useState<LocalStorageValue | undefined | null>(null);
   const [loading, setLoading] = useState(true);
   const [translation, setTranslation] = useState("");
 
@@ -84,13 +85,14 @@ const Command = () => {
         await showToast(
           ToastStyle.Failure,
           "Something went wrong",
-          "Either something is wrong with your internet connection, API Key, or you've maxed out the free API quota for this month."
+          "Check your internet connection, API Key, or you've maxed out the API."
         );
       }
     }
   };
-
-  return (
+  return key === null ? (
+    <Detail></Detail>
+  ) : (
     <Form
       actions={
         <ActionPanel>
