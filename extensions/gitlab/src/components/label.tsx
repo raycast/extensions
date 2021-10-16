@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, Detail, List, PushAction } from "@raycast/api";
+import { ActionPanel, Color, CopyToClipboardAction, Detail, Icon, List, PushAction } from "@raycast/api";
 import { Label } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 
@@ -11,16 +11,20 @@ export function LabelDetail(props: { label: Label }) {
   return <Detail markdown={md} />;
 }
 
-export function LabelItem(props: { label: Label }) {
+export function LabelListItem(props: { label: Label }) {
   const l = props.label;
   return (
     <List.Item
       key={l.id.toString()}
       title={l.name}
-      icon={{ source: GitLabIcons.labels, tintColor: l.color }}
+      icon={{ source: Icon.Circle, tintColor: l.color }}
       actions={
         <ActionPanel>
-          <PushAction title="Show Details" target={<LabelDetail label={l} />} />
+          <PushAction
+            title="Show Details"
+            target={<LabelDetail label={l} />}
+            icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
+          />
           <CopyToClipboardAction title="Copy Color" content={l.color} />
         </ActionPanel>
       }
@@ -28,12 +32,23 @@ export function LabelItem(props: { label: Label }) {
   );
 }
 
-export function LabelList(props: { labels: Label[]; title?: string | undefined }) {
+export function LabelList(props: {
+  labels: Label[];
+  title?: string | undefined;
+  onSearchTextChange?: ((text: string) => void) | undefined;
+  isLoading?: boolean | undefined;
+  throttle?: boolean | undefined;
+}) {
   return (
-    <List searchBarPlaceholder="Search labels by name">
+    <List
+      searchBarPlaceholder="Search labels by name"
+      onSearchTextChange={props.onSearchTextChange}
+      isLoading={props.isLoading}
+      throttle={props.throttle}
+    >
       <List.Section title={props.title}>
         {props.labels.map((l) => (
-          <LabelItem key={l.id.toString()} label={l} />
+          <LabelListItem key={l.id.toString()} label={l} />
         ))}
       </List.Section>
     </List>

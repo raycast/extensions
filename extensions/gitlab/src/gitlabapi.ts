@@ -415,13 +415,14 @@ export class GitLab {
     }
 
     async getProjectLabels(projectId: Number): Promise<Label[]> {
-        const items: Label[] = await this.fetch(`projects/${projectId}/labels`)
+        const items: Label[] = await this.fetch(`projects/${projectId}/labels`, {}, true)
             .then((labels) => {
                 return labels.map((data: any, index: number) => ({
                     id: data.id,
                     name: data.name,
                     color: data.color,
                     textColor: data.text_color,
+                    description: data.description
                 }))
             });
         return items;
