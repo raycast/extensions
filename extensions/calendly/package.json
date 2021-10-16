@@ -1,0 +1,48 @@
+{
+  "name": "calendly",
+  "title": "Calendly",
+  "description": "Raycast commands to access Calendly instance",
+  "icon": "logo.png",
+  "author": "eluce2",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "calendly",
+      "title": "Calendly",
+      "subtitle": "Copy Meeting URL",
+      "description": "Copy Meeting URL",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "axios": "^0.23.0",
+    "lodash": "^4.17.21"
+  },
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Calendly Personal Access Token",
+      "description": "Calendly Personal Access token",
+      "link": "https://calendly.com/integrations/api_webhooks",
+      "placeholder": "Calendly Personal Access token"
+    }
+  ],
+  "devDependencies": {
+    "@types/lodash": "^4.14.175",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.20.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
