@@ -1,5 +1,5 @@
 import { PersonalShare } from "./SketchPersonalShare";
-import { Share } from "./SketchWorkspaceShare";
+import { Project, Share } from "./SketchWorkspaceShare";
 
 export interface Preferences {
   email: string;
@@ -14,4 +14,9 @@ export interface SelectedWorkspace {
 export interface StoredCachedData {
   identifier: string;
   shares: Share[] | PersonalShare[];
+}
+
+export interface StoredCachedProjctes {
+  identifier: string;
+  projects: Project[];
 }
