@@ -72,7 +72,7 @@ const Command = () => {
         setLoading(true);
         const response = await got(
           `https://api-free.deepl.com/v2/translate?auth_key=${key}&text=${values.text}&target_lang=${values.to}${
-            values.from ? `source_lang=${values.from}` : ""
+            values.from ? `&source_lang=${values.from}` : ""
           }`
         );
         const translation = JSON.parse(response.body).translations[0].text;
