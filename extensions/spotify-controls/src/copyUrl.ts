@@ -14,7 +14,7 @@ export default async () => {
 
   try {
     await runAppleScriptAndReturn(script);
-    await showToast(ToastStyle.Success, "Spotify", "URL copied to the clipboard.");
+    await showToast(ToastStyle.Success, "Copied URL to clipboard");
   } catch (_) {
     await showToast(ToastStyle.Failure, "Spotify", "Could not fetch current track.");
   }
