@@ -14,7 +14,7 @@ import { Group, MergeRequest, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab, gitlabgql } from "../common";
 import { useState, useEffect } from "react";
-import { optimizeMarkdownText, toDateString } from "../utils";
+import { optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
 import { gql } from "@apollo/client";
 import { MRItemActions } from "./mr_actions";
 
@@ -193,6 +193,68 @@ export function MRListItem(props: { mr: MergeRequest }) {
   );
 }
 
+function getIssueQuery(query: string | undefined) {
+  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee", "draft", "target-branch", "reviewer"]);
+}
+
+function injectQueryNamedParameters(
+  requestParams: Record<string, any>,
+  query: Query,
+  scope: MRScope,
+  isNegative: boolean
+) {
+  const namedParams = isNegative ? query.negativeNamed : query.named;
+  for (const extraParam of Object.keys(namedParams)) {
+    const extraParamVal = namedParams[extraParam];
+    const prefixed = (text: string): string => {
+      return isNegative ? `not[${text}]` : text;
+    };
+    if (extraParamVal) {
+      switch (extraParam) {
+        case "label":
+          {
+            requestParams[prefixed("labels")] = extraParamVal.join(",");
+          }
+          break;
+        case "author":
+          {
+            if (scope === MRScope.all) {
+              requestParams[prefixed("author_username")] = extraParamVal.join(",");
+            }
+          }
+          break;
+        case "milestone":
+          {
+            requestParams[prefixed("milestone")] = extraParamVal.join(",");
+          }
+          break;
+        case "assignee":
+          {
+            if (scope === MRScope.all) {
+              requestParams[prefixed("assignee_username")] = extraParamVal.join(",");
+            }
+          }
+          break;
+        case "draft":
+          {
+            requestParams[prefixed("wip")] = extraParamVal.join(",").toLocaleLowerCase();
+          }
+          break;
+        case "target-branch":
+          {
+            requestParams[prefixed("target_branch")] = extraParamVal.join(",");
+          }
+          break;
+        case "reviewer":
+          {
+            requestParams[prefixed("reviewer_username")] = extraParamVal.join(",");
+          }
+          break;
+      }
+    }
+  }
+}
+
 export function useSearch(
   query: string | undefined,
   scope: MRScope,
@@ -220,12 +282,16 @@ export function useSearch(
       setError(undefined);
 
       try {
-        const params = {
+        const qd = getIssueQuery(query);
+        query = qd.query;
+        const params: Record<string, any> = {
           state: state,
           scope: scope,
           search: query || "",
           in: "title",
         };
+        injectQueryNamedParameters(params, qd, scope, false);
+        injectQueryNamedParameters(params, qd, scope, true);
         if (group) {
           const glMRs = await gitlab.getGroupMergeRequests(params, group);
           if (!cancel) {
