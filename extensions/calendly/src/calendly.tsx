@@ -7,7 +7,6 @@ import {
   Toast,
   copyTextToClipboard,
   showHUD,
-  environment,
   OpenInBrowserAction,
   Detail,
   showToast,
@@ -35,7 +34,6 @@ export default function Calendly() {
     getEventTypes()
       .then((data) => {
         setItems(data);
-        console.log("lengh", data.length);
       })
       .catch((error) => {
         if (error.response.status === 401) {
@@ -93,15 +91,6 @@ export default function Calendly() {
                     await showHUD("Single-use Link Copied to Clipboard 📋");
                   }}
                 />
-                {environment.isDevelopment && (
-                  <ActionPanel.Item
-                    title="Debug Event JSON"
-                    icon={Icon.Binoculars}
-                    onAction={() => {
-                      console.log(event);
-                    }}
-                  />
-                )}
               </ActionPanel>
             }
           />
