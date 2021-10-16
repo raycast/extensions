@@ -29,7 +29,7 @@ export default async () => {
 
   try {
     const result = await runAppleScriptAndReturn(script);
-    await showToast(ToastStyle.Success, "Spotify", result);
+    await showToast(ToastStyle.Success, "Currently Playing Track", result);
   } catch (err) {
     await showToast(ToastStyle.Failure, "Spotify", "Could not fetch current track.");
   }
