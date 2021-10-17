@@ -49,7 +49,7 @@
     },
     {
       "name": "copyUrl",
-      "title": "Copy Current Song's URL",
+      "title": "Copy Current Track URL",
       "subtitle": "Spotify",
       "description": "Currently playing song's URL in Spotify.",
       "mode": "no-view"
