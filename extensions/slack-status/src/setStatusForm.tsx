@@ -52,8 +52,6 @@ export default function CustomStatusForm(props: {
         <Form.Dropdown.Item key={"90m"} title="1.5 hour" value="90" />
         <Form.Dropdown.Item key={"120m"} title="2 hours" value="120" />
         <Form.Dropdown.Item key={"180m"} title="3 hours" value="180" />
-        {/* <Form.Dropdown.Item key={"today"} title="Today" value="today" /> */}
-        {/* <Form.Dropdown.Item key={"thisweek"} title="This Week" value="thisweek" /> */}
       </Form.Dropdown>
     </Form>
   );

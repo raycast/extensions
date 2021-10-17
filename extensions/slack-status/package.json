@@ -2,7 +2,7 @@
   "name": "slack-status",
   "title": "Slack Status",
   "description": "Quickly change your Slack status",
-  "icon": "slack-logo.png",
+  "icon": "slack-icon.png",
   "author": "petr",
   "license": "MIT",
   "commands": [
