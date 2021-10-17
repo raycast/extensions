@@ -1,16 +1,16 @@
 {
   "name": "vercast",
   "title": "Vercel Deployments",
-  "description": "Quickly open and check the status of your Vercel deployments.",
+  "description": "View your Vercel deployments",
   "icon": "icon.png",
   "author": "matt",
   "license": "MPL-2.0",
   "commands": [
     {
       "name": "index",
-      "title": "Search Deployments",
+      "title": "Search Vercel Deployments",
       "subtitle": "Vercel",
-      "description": "Quickly open and check the status of your Vercel deployments.",
+      "description": "Search over your Vercel deployments",
       "mode": "view",
       "preferences": [
         {
@@ -20,6 +20,13 @@
           "title": "Token",
           "description": "Account Token",
           "link": "https://vercel.com/account/tokens"
+        },
+        {
+          "name": "ignoredTeams",
+          "type": "textfield",
+          "required": false,
+          "title": "Ignored Team IDs",
+          "description": "separated by commas"
         }
       ]
     }
