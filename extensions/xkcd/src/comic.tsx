@@ -2,7 +2,7 @@ import { ActionPanel, Detail, OpenInBrowserAction, setLocalStorageItem } from "@
 import { useAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { lastViewedAtom, maxNumAtom, readStatusAtom } from "./atoms";
-import OpenComic, { OpenRandomComic } from "./open_comic";
+import OpenComic, { OpenRandomComic, OpenRandomUnreadComic } from "./open_comic";
 import { BASE_URL, Comic, fetchComic } from "./xkcd";
 
 const ComicPage = ({ num }: { num: number }) => {
@@ -34,7 +34,8 @@ ${comicData.alt}
       actions={
         <ActionPanel>
           <OpenInBrowserAction url={`${BASE_URL}/${num}/`} />
-          <OpenRandomComic />
+          <OpenRandomUnreadComic />
+          <OpenRandomComic shortcut={{ key: "j", modifiers: ["cmd"] }} />
           {num !== 1 && <OpenComic num={num - 1} title="Previous Comic" shortcut={{ key: "h", modifiers: ["cmd"] }} />}
           {num !== maxNum && <OpenComic num={num + 1} title="Next Comic" shortcut={{ key: "l", modifiers: ["cmd"] }} />}
         </ActionPanel>
