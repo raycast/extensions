@@ -168,10 +168,23 @@ export class Wttr {
         }
     }
 
-    public async getWeather(city?: string): Promise<Weather> {
+    public async getWeather(city?: string, language?: string | undefined): Promise<Weather> {
         // setting lang: "en" manipulate the e.g. kmph values
-        return await this.fetch(city, { format: "j1" }) as Weather;
+        let params: Record<string, string> = {
+            format: "j1"
+        };
+        console.log("l: " + language);
+        if (language && supportedLanguages.includes(language)) {
+            params.lang = language;
+        }
+        console.log(params);
+
+        return await this.fetch(city, params) as Weather;
     }
 }
+
+export const supportedLanguages: string[] = [
+    "en", "de", "fr"
+];
 
 export const wttr = new Wttr();

@@ -1,8 +1,11 @@
 import { ActionPanel, List, PushAction, showToast, ToastStyle } from "@raycast/api";
 import moment from "moment";
+import "moment/locale/fr";
+import "moment/locale/de";
 import { useEffect, useState } from "react";
 import { getIcon, getWindDirectionIcon } from "../icons";
-import { Weather, WeatherData, wttr } from "../wttr";
+import { getLanguage, getTs } from "../lang";
+import { supportedLanguages, Weather, WeatherData, wttr } from "../wttr";
 import { DayList } from "./day";
 
 export function DayListItem(props: { day: WeatherData; title: string }) {
@@ -24,12 +27,17 @@ export function DayListItem(props: { day: WeatherData; title: string }) {
 
 function getWeekday(date: string): string {
   const d = moment(date);
-  return d.format("dddd");
+  let lang = getLanguage() || "en";
+  if (!supportedLanguages.includes(lang)) {
+    lang = "en";
+  }
+  return d.locale(lang).format("dddd");
 }
 
-export function WeatherList(props: {}) {
+export function WeatherList() {
+  const lang = getLanguage();
   const [query, setQuery] = useState<string>("");
-  const { data, error, isLoading } = useSearch(query);
+  const { data, error, isLoading } = useSearch(query, lang);
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search weather", error);
   }
@@ -39,8 +47,19 @@ export function WeatherList(props: {}) {
 
   const area = data.nearest_area[0];
   const curcon = data.current_condition[0];
+  const curcon_data = curcon as any;
 
   const title = `${area.areaName[0].value}, ${area.region[0].value}, ${area.country[0].value}`;
+
+  const getWeatherDescLang = (): string | undefined => {
+    try {
+      return curcon_data[`lang_${lang}`][0].value;
+    } catch (error) {
+      return undefined;
+    }
+  };
+
+  const weatherDesc = getWeatherDescLang() || curcon.weatherDesc[0].value;
 
   return (
     <List
@@ -49,18 +68,18 @@ export function WeatherList(props: {}) {
       onSearchTextChange={setQuery}
       throttle={true}
     >
-      <List.Section title={`Current (${title})`}>
+      <List.Section title={`${getTs("Weather report")} (${title})`}>
         <List.Item
           key="_"
           title={`${curcon.temp_C}°C`}
-          subtitle={curcon.weatherDesc[0].value}
+          subtitle={weatherDesc}
           icon={getIcon(curcon.weatherCode)}
-          accessoryTitle={`humidity: ${curcon.humidity}% | wind: ${curcon.windspeedKmph} km/h ${getWindDirectionIcon(
-            curcon.winddirDegree
-          )}`}
+          accessoryTitle={`${getTs("humidity")}: ${curcon.humidity}% | ${getTs("wind")}: ${
+            curcon.windspeedKmph
+          } km/h ${getWindDirectionIcon(curcon.winddirDegree)}`}
         />
       </List.Section>
-      <List.Section title="Daily Forecast">
+      <List.Section title={getTs("Daily Forecast")}>
         {data.weather?.map((data, index) => (
           <DayListItem key={data.date} day={data} title={title} />
         ))}
@@ -69,7 +88,10 @@ export function WeatherList(props: {}) {
   );
 }
 
-export function useSearch(query: string | undefined): {
+export function useSearch(
+  query: string | undefined,
+  lang: string | undefined
+): {
   data: Weather | undefined;
   error?: string;
   isLoading: boolean;
@@ -90,7 +112,7 @@ export function useSearch(query: string | undefined): {
       setError(undefined);
 
       try {
-        const wdata = await wttr.getWeather(query);
+        const wdata = await wttr.getWeather(query, lang);
         if (!cancel) {
           setData(wdata);
         }

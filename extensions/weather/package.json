@@ -1,7 +1,7 @@
 {
   "name": "weather",
   "title": "Weather",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Weather forecast via wttr.in",
   "icon": "weather.png",
   "author": "tonka3000",
@@ -12,6 +12,21 @@
       "title": "Weather",
       "description": "Weather forecast via wttr.in",
       "mode": "view"
+    }
+  ],
+  "preferences" : [
+    {
+      "name" : "language",
+      "type" : "dropdown",
+      "title" : "Language",
+      "required" : false,
+      "default" : "en",
+      "description" : "Display Language",
+      "data" : [
+        { "title" : "English", "value" : "en" },
+        { "title" : "German", "value" : "de" },
+        { "title" : "French", "value" : "fr" }
+      ]
     }
   ],
   "dependencies": {
