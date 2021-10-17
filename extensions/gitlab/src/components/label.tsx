@@ -13,11 +13,13 @@ export function LabelDetail(props: { label: Label }) {
 
 export function LabelListItem(props: { label: Label }) {
   const l = props.label;
+  const accessoryTitle = Object.keys(l).includes("subscribed") && l.subscribed ? "subscribed" : undefined;
   return (
     <List.Item
       key={l.id.toString()}
       title={l.name}
       icon={{ source: Icon.Circle, tintColor: l.color }}
+      accessoryTitle={accessoryTitle}
       actions={
         <ActionPanel>
           <PushAction

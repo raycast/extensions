@@ -136,6 +136,7 @@ export class Label {
     public color: string = "";
     public textColor: string = "";
     public description: string = "";
+    public subscribed?: boolean | undefined;
 }
 
 export class Milestone {
@@ -422,7 +423,8 @@ export class GitLab {
                     name: data.name,
                     color: data.color,
                     textColor: data.text_color,
-                    description: data.description
+                    description: data.description,
+                    subscribed: data.subscribed || undefined
                 }))
             });
         return items;
