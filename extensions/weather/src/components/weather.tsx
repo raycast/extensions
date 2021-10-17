@@ -5,17 +5,28 @@ import "moment/locale/de";
 import { useEffect, useState } from "react";
 import { getIcon, getWindDirectionIcon } from "../icons";
 import { getLanguage, getTs } from "../lang";
+import { getTemperatureUnit, getWindUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
 import { supportedLanguages, Weather, WeatherData, wttr } from "../wttr";
 import { DayList } from "./day";
 
 export function DayListItem(props: { day: WeatherData; title: string }) {
   const data = props.day;
   const wd = getWeekday(data.date);
+  const getTemp = (prefix: string) => {
+    const unit = getWttrTemperaturePostfix();
+    const key = `${prefix}temp${unit}`;
+    const rec = data as Record<string, any>;
+    let val = "?";
+    if (rec[key]) {
+      val = `${rec[key]}`;
+    }
+    return `${val} ${getTemperatureUnit()}`;
+  };
   return (
     <List.Item
       key={data.date}
       title={wd}
-      subtitle={`max: ${data.maxtempC} °C, min: ${data.mintempC} °C`}
+      subtitle={`max: ${getTemp("max")}, min: ${getTemp("min")}`}
       actions={
         <ActionPanel>
           <PushAction title="Show Details" target={<DayList day={data} title={`${props.title} - ${wd}`} />} />
@@ -61,6 +72,26 @@ export function WeatherList() {
 
   const weatherDesc = getWeatherDescLang() || curcon.weatherDesc[0].value;
 
+  const getWind = (): string => {
+    const data = curcon as Record<string, any>;
+    const key = `windspeed${getWttrWindPostfix()}`;
+    let val = "?";
+    if (data[key]) {
+      val = data[key] || "?";
+    }
+    return `${val} ${getWindUnit()}`;
+  };
+
+  const getTemp = (): string => {
+    const key = `temp_${getWttrTemperaturePostfix()}`;
+    const f = curcon as Record<string, any>;
+    let val = "?";
+    if (f[key]) {
+      val = f[key];
+    }
+    return `${val} ${getTemperatureUnit()}`;
+  };
+
   return (
     <List
       isLoading={isLoading}
@@ -71,12 +102,12 @@ export function WeatherList() {
       <List.Section title={`${getTs("Weather report")} (${title})`}>
         <List.Item
           key="_"
-          title={`${curcon.temp_C}°C`}
+          title={getTemp()}
           subtitle={weatherDesc}
           icon={getIcon(curcon.weatherCode)}
-          accessoryTitle={`${getTs("humidity")}: ${curcon.humidity}% | ${getTs("wind")}: ${
-            curcon.windspeedKmph
-          } km/h ${getWindDirectionIcon(curcon.winddirDegree)}`}
+          accessoryTitle={`${getTs("humidity")}: ${curcon.humidity}% | ${getTs(
+            "wind"
+          )}: ${getWind()} ${getWindDirectionIcon(curcon.winddirDegree)}`}
         />
       </List.Section>
       <List.Section title={getTs("Daily Forecast")}>

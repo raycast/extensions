@@ -27,6 +27,18 @@
         { "title" : "German", "value" : "de" },
         { "title" : "French", "value" : "fr" }
       ]
+    },
+    {
+      "name" : "unitsystem",
+      "type" : "dropdown",
+      "title" : "Unit System",
+      "required" : false,
+      "default" : "metric",
+      "description" : "Unit System",
+      "data" : [
+        { "title" : "Metric System", "value" : "metric" },
+        { "title" : "Imperial Units", "value" : "imperial" }
+      ]
     }
   ],
   "dependencies": {
