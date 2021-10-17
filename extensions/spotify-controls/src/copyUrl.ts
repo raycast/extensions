@@ -1,5 +1,5 @@
 import { showToast, ToastStyle } from "@raycast/api";
-import { runAppleScriptAndReturn } from "./utils";
+import { runAppleScript } from "run-applescript";
 
 export default async () => {
   const script = `
@@ -13,7 +13,7 @@ export default async () => {
     set the clipboard to ("https://open.spotify.com/track/" & idPart)`;
 
   try {
-    await runAppleScriptAndReturn(script);
+    await runAppleScript(script);
     await showToast(ToastStyle.Success, "Copied URL to clipboard");
   } catch (_) {
     await showToast(ToastStyle.Failure, "Failed copying URL");

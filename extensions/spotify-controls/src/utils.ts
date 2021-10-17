@@ -15,14 +15,3 @@ export async function runAppleScriptSilently(appleScript: string) {
   await closeMainWindow();
   await runAppleScript(appleScript);
 }
-
-/**
- * Runs the AppleScript
- *
- * @param appleScript - The AppleScript to run
- * @throws An error when the AppleScript fails to run
- * @returns A promise that is resolved when the AppleScript finished running
- */
-export async function runAppleScriptAndReturn(appleScript: string) {
-  return await runAppleScript(appleScript);
-}
