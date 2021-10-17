@@ -1,5 +1,5 @@
 import { ActionPanel, Color, CopyToClipboardAction, Icon, List } from "@raycast/api";
-import { useState } from 'react';
+import { useState } from "react";
 
 function enumKeys<O extends object, K extends keyof O = keyof O>(obj: O): K[] {
   return Object.keys(obj).filter(k => Number.isNaN(+k)) as K[];
@@ -16,7 +16,7 @@ export default function Command() {
         key={colorName}
         onAction={() => setColor(Color[colorName])}
       />
-    )
+    );
   }
 
   const items: Element[] = [];
@@ -36,7 +36,7 @@ export default function Command() {
           </ActionPanel>
         }
       />
-    )
+    );
   }
 
   return (
