@@ -42,7 +42,7 @@
     },
     {
       "name": "current",
-      "title": "Current Song",
+      "title": "Current Track",
       "subtitle": "Spotify",
       "description": "Currently playing song in Spotify.",
       "mode": "no-view"
