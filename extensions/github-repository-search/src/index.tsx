@@ -10,13 +10,15 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 import { Repository } from "./types";
+import { useDebounce } from "use-debounce";
 import { useRepositories } from "./useRepositories";
 import { clearVisitedRepositories, useVisitedRepositories } from "./useVisitedRepositories";
 import { getAccessoryTitle, getIcon, getSubtitle } from "./utils";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
-  const { data, error, isLoading: isLoadingRepositories } = useRepositories(searchText);
+  const [debouncedSearchText] = useDebounce(searchText, 200);
+  const { data, error, isLoading: isLoadingRepositories } = useRepositories(debouncedSearchText);
   const {
     repositories: visitedRepositories,
     visitRepository,

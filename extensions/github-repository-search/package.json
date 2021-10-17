@@ -27,7 +27,8 @@
     "@raycast/api": "^1.25.0",
     "javascript-time-ago": "^2.3.9",
     "octokit": "^1.7.0",
-    "swr": "^1.0.1"
+    "swr": "^1.0.1",
+    "use-debounce": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
