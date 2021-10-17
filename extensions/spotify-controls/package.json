@@ -39,6 +39,20 @@
       "subtitle": "Spotify",
       "description": "Skips to the next track in Spotify.",
       "mode": "no-view"
+    },
+    {
+      "name": "current",
+      "title": "Current Track",
+      "subtitle": "Spotify",
+      "description": "Currently playing track in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "copyUrl",
+      "title": "Copy Current Track URL",
+      "subtitle": "Spotify",
+      "description": "Currently playing song's URL in Spotify.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
@@ -52,6 +66,8 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "2.4.1",
     "typescript": "^4.4.3"
   },
   "scripts": {
