@@ -23,7 +23,7 @@
       "type": "password",
       "required": true,
       "title": "Everhour Token",
-      "description": "Your Everhour Token. You can find it in our Everhour profile section",
+      "description": "Your Everhour Token. You can find it in your Everhour profile",
       "placeholder": "Enter your Everhour token"
     }
   ],
