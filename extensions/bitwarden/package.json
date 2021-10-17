@@ -1,0 +1,50 @@
+{
+  "name": "bitwarden",
+  "title": "Bitwarden",
+  "description": "Browse Bitwarden Password",
+  "icon": "bitwarden.png",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Bitwarden Vault Items",
+      "description": "Browse Bitwarden Password",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "type": "textfield",
+      "required": true,
+      "title": "Client ID",
+      "description": "https://bitwarden.com/help/article/personal-api-key/",
+      "placeholder": "Enter your Client ID"
+    },
+    {
+      "name": "clientSecret",
+      "type": "password",
+      "required": true,
+      "title": "Client Secret",
+      "description": "https://bitwarden.com/help/article/personal-api-key/",
+      "placeholder": "Enter your Client Secret"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "execa": "^5.1.1",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.3",
+    "@types/node": "^16.4.3",
+    "@types/react": "^17.0.15",
+    "@typescript-eslint/eslint-plugin": "^4.28.5",
+    "@typescript-eslint/parser": "^4.28.5",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "dev": "ray develop target"
+  }
+}
