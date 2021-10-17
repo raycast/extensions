@@ -7,7 +7,7 @@
   "commands": [
     {
       "name": "frontpage",
-      "title": "Check Today's Product Hunt",
+      "title": "Check Today's Hunts",
       "subtitle": "Product Hunt",
       "description": "Get the latest products from the fontpage of Product Hunt.",
       "mode": "view"
