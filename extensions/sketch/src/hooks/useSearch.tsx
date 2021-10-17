@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { SelectedWorkspace } from "../types/preferences";
+import { EntriesEntity } from "../types/SketchProjectShares";
 import { Share } from "../types/SketchWorkspaceShare";
-import { getShares } from "../utils/functions";
+import { getProjectShares, getShares } from "../utils/functions";
 
 export default function useSearch(
   token: string | undefined,
   selectedWorkspace: SelectedWorkspace | undefined,
-  query: string | undefined
+  query: string | undefined,
+  shortId?: string
 ): {
-  data: Record<"shares", Share[]> | undefined;
+  data: Record<"shares", Share[] | EntriesEntity[]> | undefined;
   error?: string;
   isLoading: boolean;
 } {
-  const [data, setData] = useState<{ shares: Share[] }>({ shares: [] });
+  const [data, setData] = useState<{ shares: Share[] | EntriesEntity[] }>({ shares: [] });
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -32,7 +34,9 @@ export default function useSearch(
       setError(undefined);
 
       try {
-        const shares: Share[] | undefined = await getShares(token, selectedWorkspace, query);
+        const shares = shortId
+          ? await getProjectShares(token, shortId, query)
+          : await getShares(token, selectedWorkspace, query);
         if (!cancel && shares) {
           setData({
             shares: shares,
@@ -43,7 +47,7 @@ export default function useSearch(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error) {
         if (!cancel) {
-          setError(error as string);
+          setError((error as ErrorEvent).message);
         }
       } finally {
         if (!cancel) {

@@ -1,5 +1,20 @@
 import { PersonalShare } from "../types/SketchPersonalShare";
+import { EntriesEntity } from "../types/SketchProjects";
 import { Share } from "../types/SketchWorkspaceShare";
+
+export const dummyProjects: EntriesEntity[] = [
+  { __typename: "", name: "Apple", shortId: "a", identifier: "a", type: "" },
+  { __typename: "", name: "Airbnb", shortId: "b", identifier: "b", type: "" },
+  { __typename: "", name: "Amazon", shortId: "c", identifier: "c", type: "" },
+  { __typename: "", name: "Desain", shortId: "g", identifier: "g", type: "" },
+  { __typename: "", name: "Intern", shortId: "d", identifier: "d", type: "" },
+  { __typename: "", name: "MasterClass", shortId: "i", identifier: "i", type: "" },
+  { __typename: "", name: "ProjectX", shortId: "l", identifier: "l", type: "" },
+  { __typename: "", name: "Raycast", shortId: "e", identifier: "e", type: "" },
+  { __typename: "", name: "Supercharge", shortId: "f", identifier: "f", type: "" },
+  { __typename: "", name: "Treejoin", shortId: "h", identifier: "h", type: "" },
+  { __typename: "", name: "", shortId: ",", identifier: "m", type: "" },
+];
 
 export const dummyShares: Share[] | PersonalShare[] = [
   {
