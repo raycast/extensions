@@ -206,13 +206,13 @@ function ShareListItem(props: {
       id={project.identifier}
       key={project.identifier}
       title={project.name}
-      icon={{ source: Icon.Dot, tintColor: Color.Yellow }}
+      icon={{ source: { dark: "folder-icon@dark.png", light: "folder-icon.png" }}}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             <ActionPanel.Item
               icon={Icon.List}
-              title={`Open ${project.name}`}
+              title={`Open`}
               onAction={() =>
                 push(<DocumentsList shortId={project.shortId} projectName={project.name} token={props.token} />)
               }
@@ -237,9 +237,12 @@ function ShareListItem(props: {
             {wp?.workspaces?.map((workspace, index) => (
               <ActionPanel.Item
                 key={workspace.identifier}
-                icon={workspace.avatar?.small ?? Icon.Desktop}
+                icon={workspace.avatar?.small ?? Icon.Person}
                 title={workspace.name}
-                shortcut={{ modifiers: ["ctrl"], key: (index + 2).toString() as KeyEquivalent }}
+                shortcut={{
+                  modifiers: ["ctrl"],
+                  key: (index + (wp?.personalWorkspace ? 2 : 1)).toString() as KeyEquivalent,
+                }}
                 onAction={() =>
                   props.updateWorkspace({
                     name: workspace.name,

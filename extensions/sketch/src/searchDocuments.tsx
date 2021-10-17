@@ -253,9 +253,12 @@ function ShareListItem(props: {
             {props.workspaces?.workspaces?.map((workspace, index) => (
               <ActionPanel.Item
                 key={workspace.identifier}
-                icon={workspace.avatar?.small ?? Icon.Dot}
+                icon={workspace.avatar?.small ?? Icon.Person}
                 title={workspace.name}
-                shortcut={{ modifiers: ["ctrl"], key: (index + 2).toString() as KeyEquivalent }}
+                shortcut={{
+                  modifiers: ["ctrl"],
+                  key: (index + (props.workspaces?.personalWorkspace ? 2 : 1)).toString() as KeyEquivalent,
+                }}
                 onAction={() =>
                   props.updateWorkspace({
                     name: workspace.name,
