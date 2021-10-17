@@ -1,4 +1,4 @@
-import { showToast, ToastStyle, Form, ActionPanel, SubmitFormAction, Detail, showHUD, CopyToClipboardAction } from "@raycast/api";
+import { showToast, ToastStyle, Form, ActionPanel, SubmitFormAction, Detail, CopyToClipboardAction } from "@raycast/api";
 import execa from "execa";
 import { getWorkflowEnv } from "./utils";
 
@@ -24,7 +24,7 @@ export function TroubleshootingGuide(): JSX.Element {
 export function UnlockForm(props: { setSessionToken: (session: string) => void }): JSX.Element {
   async function onSubmit(values: { password: string }) {
     try {
-      const toast = await showToast(ToastStyle.Animated, "Loading Items...");
+      const toast = await showToast(ToastStyle.Animated, "Unlocking Your Vault...", "It may takes some time");
       const { stdout: sessionToken } = await execa("bw", ["unlock", values.password, "--raw"], {
         env: getWorkflowEnv(),
       });

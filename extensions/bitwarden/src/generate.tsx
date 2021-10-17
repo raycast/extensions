@@ -1,4 +1,4 @@
-import { ActionPanel, copyTextToClipboard, Form, popToRoot, showHUD, SubmitFormAction } from "@raycast/api";
+import { ActionPanel, copyTextToClipboard, Form, showHUD, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
 import execa from "execa";
 import { Fragment, useState } from "react";
 import { TroubleshootingGuide } from "./components";
@@ -41,14 +41,15 @@ export default function PasswordGenerator(): JSX.Element {
       cmd_args.push("--separator", values.separator);
     }
 
-    console.log(cmd_args);
+    const toast = await showToast(ToastStyle.Animated, "Generating new Password...")
     const { stdout: password } = await execa("bw", cmd_args, { env: getWorkflowEnv() });
+    toast.hide()
     return password;
   }
   async function copyPasswordToClipboard(values: FormValues) {
     const password = await generatePassword(values);
     await copyTextToClipboard(password);
-    showHUD("Password Copied to Clipboard!");
+    showHUD("Password Copied to the Clipboard!");
   }
 
   return (

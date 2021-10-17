@@ -1,21 +1,13 @@
-import {
-  ActionPanel,
-  copyTextToClipboard,
-  Detail,
-  Form,
-  popToRoot,
-  showHUD,
-  SubmitFormAction,
-} from "@raycast/api";
+import { ActionPanel, copyTextToClipboard, Detail, Form, showHUD, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
 import execa from "execa";
 import { TroubleshootingGuide, UnlockForm } from "./components";
 import { useSessionToken } from "./hooks";
 import { Send } from "./types";
-import { checkCliPath } from "./utils";
+import { checkCliPath, getWorkflowEnv } from "./utils";
 
 export default function SendCommand(): JSX.Element {
   if (!checkCliPath()) {
-    return <TroubleshootingGuide/>
+    return <TroubleshootingGuide />;
   }
   const [sessionToken, setSessionToken] = useSessionToken();
 
@@ -47,12 +39,14 @@ function SendForm(props: { sessionToken: string }) {
       },
       type: 0,
     };
+    const toast = await showToast(ToastStyle.Animated, "Creating Send...")
     const { stdout: output } = await execa.command("bw encode | bw send create --raw", {
       input: JSON.stringify(send),
       shell: true,
-      env: { BW_SESSION: props.sessionToken },
+      env: { ...getWorkflowEnv(), BW_SESSION: props.sessionToken },
     });
-    copyTextToClipboard(output.split("\n")[2]);
+    toast.hide()
+    copyTextToClipboard(output.split("\n")[1]);
     showHUD("Link Copied to Clipboard!");
   }
 

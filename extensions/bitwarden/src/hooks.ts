@@ -25,7 +25,7 @@ export function useSessionToken(): [string | null | undefined, (sessionToken: st
       else if (status === "locked") setSessionToken(null);
       else if (status === "unauthenticated") {
         try {
-          const toast = await showToast(ToastStyle.Animated, "Login in...", "It may takes some times");
+          const toast = await showToast(ToastStyle.Animated, "Login in...", "It may takes some time");
           await execa("bw", ["login", "--apikey"], {"env": getWorkflowEnv()});
           toast.hide();
           setSessionToken(null);
