@@ -6,7 +6,6 @@ import {
   Icon,
   showToast,
   ToastStyle,
-  getPreferenceValues,
   PushAction,
   Detail,
   getLocalStorageItem,
@@ -20,13 +19,7 @@ import { Item, Folder } from "./types";
 import { useEffect, useState } from "react";
 import yaml = require("js-yaml");
 import execa = require("execa");
-import { filterNullishPropertiesFromObject, codeBlock } from "./utils";
-
-const { clientId, clientSecret } = getPreferenceValues();
-
-process.env.PATH = "/usr/local/bin";
-process.env.BW_CLIENTID = clientId;
-process.env.BW_CLIENTSECRET = clientSecret;
+import { filterNullishPropertiesFromObject, codeBlock, getWorkflowEnv } from "./utils";
 
 function useSessionToken() {
   const [sessionToken, setSessionToken] = useState<string | null>();
@@ -41,7 +34,8 @@ function useSessionToken() {
       console.debug("Get Status");
       const { stdout: jsonStatus } = await execa(
         "bw",
-        sessionToken ? ["status", "--session", sessionToken] : ["status"]
+        sessionToken ? ["status", "--session", sessionToken] : ["status"],
+        { env: getWorkflowEnv() }
       );
       const { status } = JSON.parse(jsonStatus);
 
@@ -50,7 +44,7 @@ function useSessionToken() {
       else if (status === "unauthenticated") {
         try {
           const toast = await showToast(ToastStyle.Animated, "Login in...", "It may takes some times");
-          await execa("bw", ["login", "--apikey"]);
+          await execa("bw", ["login", "--apikey"], { env: getWorkflowEnv() });
           toast.hide();
           setSessionToken(null);
         } catch (error) {
@@ -83,8 +77,12 @@ export default function Bitwarden(): JSX.Element {
   async function loadItems(sessionToken: string) {
     try {
       console.debug("Get Items");
-      const itemPromise = execa("bw", ["list", "items", "--session", sessionToken]).then((res) => res.stdout);
-      const folderPromise = execa("bw", ["list", "folders", "--session", sessionToken]).then((res) => res.stdout);
+      const itemPromise = execa("bw", ["list", "items", "--session", sessionToken], { env: getWorkflowEnv() }).then(
+        (res) => res.stdout
+      );
+      const folderPromise = execa("bw", ["list", "folders", "--session", sessionToken], { env: getWorkflowEnv() }).then(
+        (res) => res.stdout
+      );
       const [itemString, folderString] = await Promise.all([itemPromise, folderPromise]);
       const items = JSON.parse(itemString);
       const folders = JSON.parse(folderString);
@@ -116,7 +114,7 @@ export default function Bitwarden(): JSX.Element {
               icon={Icon.Upload}
               onAction={async () => {
                 if (sessionToken) {
-                  await execa("bw", ["lock", "--session", sessionToken]);
+                  await execa("bw", ["lock", "--session", sessionToken], { env: getWorkflowEnv() });
                   setSessionToken(null);
                 }
               }}
@@ -127,10 +125,10 @@ export default function Bitwarden(): JSX.Element {
               icon={Icon.ArrowClockwise}
               onAction={async () => {
                 if (sessionToken) {
-                  const toast = await showToast(ToastStyle.Animated, "Syncing Items...")
-                  await execa("bw", ["sync", "--session", sessionToken]);
+                  const toast = await showToast(ToastStyle.Animated, "Syncing Items...");
+                  await execa("bw", ["sync", "--session", sessionToken], { env: getWorkflowEnv() });
                   await loadItems(sessionToken);
-                  await toast.hide()
+                  await toast.hide();
                 }
               }}
             />,

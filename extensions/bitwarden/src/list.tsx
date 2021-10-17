@@ -20,7 +20,7 @@ import { Item, Folder } from "./types";
 import { useEffect, useState } from "react";
 import yaml from "js-yaml";
 import execa from "execa";
-import { filterNullishPropertiesFromObject, codeBlock } from "./utils";
+import { filterNullishPropertiesFromObject, codeBlock, getWorkflowEnv } from "./utils";
 import { useSessionToken } from "./hooks";
 import { UnlockForm } from "./components";
 
@@ -77,7 +77,7 @@ function ItemList(props: { sessionToken: string; setSessionToken: (sessionToken:
               icon={Icon.Upload}
               onAction={async () => {
                 if (sessionToken) {
-                  await execa("bw", ["lock", "--session", sessionToken]);
+                  await execa("bw", ["lock", "--session", sessionToken], {env: getWorkflowEnv()});
                   setSessionToken(null);
                 }
               }}
@@ -89,7 +89,7 @@ function ItemList(props: { sessionToken: string; setSessionToken: (sessionToken:
               onAction={async () => {
                 if (sessionToken) {
                   const toast = await showToast(ToastStyle.Animated, "Syncing Items...");
-                  await execa("bw", ["sync", "--session", sessionToken]);
+                  await execa("bw", ["sync", "--session", sessionToken], {env: getWorkflowEnv()});
                   await loadItems(sessionToken);
                   await toast.hide();
                 }

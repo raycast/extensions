@@ -1,6 +1,7 @@
 import { getLocalStorageItem, showToast, ToastStyle, removeLocalStorageItem, setLocalStorageItem } from "@raycast/api";
 import execa from "execa";
 import { useState, useEffect } from "react";
+import { getWorkflowEnv } from "./utils";
 
 export function useSessionToken(): [string | null | undefined, (sessionToken: string | null) => void] {
   const [sessionToken, setSessionToken] = useState<string | null>();
@@ -15,7 +16,8 @@ export function useSessionToken(): [string | null | undefined, (sessionToken: st
       console.debug("Get Status");
       const { stdout: jsonStatus } = await execa(
         "bw",
-        sessionToken ? ["status", "--session", sessionToken] : ["status"]
+        sessionToken ? ["status", "--session", sessionToken] : ["status"],
+        {env: getWorkflowEnv()}
       );
       const { status } = JSON.parse(jsonStatus);
 
@@ -24,7 +26,7 @@ export function useSessionToken(): [string | null | undefined, (sessionToken: st
       else if (status === "unauthenticated") {
         try {
           const toast = await showToast(ToastStyle.Animated, "Login in...", "It may takes some times");
-          await execa("bw", ["login", "--apikey"]);
+          await execa("bw", ["login", "--apikey"], {"env": getWorkflowEnv()});
           toast.hide();
           setSessionToken(null);
         } catch (error) {

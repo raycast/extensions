@@ -1,11 +1,12 @@
 import { showToast, ToastStyle, setLocalStorageItem, Form, ActionPanel, SubmitFormAction } from "@raycast/api";
 import execa from "execa";
+import { getWorkflowEnv } from "./utils";
 
 export function UnlockForm(props: { setSessionToken: (session: string) => void }) {
     async function onSubmit(values: { password: string }) {
       try {
         const toast = await showToast(ToastStyle.Animated, "Loading Items...");
-        const { stdout: sessionToken } = await execa("bw", ["unlock", values.password, "--raw"]);
+        const { stdout: sessionToken } = await execa("bw", ["unlock", values.password, "--raw"], {env: getWorkflowEnv()});
 
         toast.hide();
         props.setSessionToken(sessionToken);

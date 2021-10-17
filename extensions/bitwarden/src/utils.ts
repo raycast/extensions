@@ -1,3 +1,5 @@
+import { getPreferenceValues } from "@raycast/api";
+
 export function codeBlock(content: string): string {
   return "```\n" + content + "\n```";
 }
@@ -12,4 +14,9 @@ export function filterNullishPropertiesFromObject(obj: any): any {
   });
 
   return Object.fromEntries(newEntries);
+}
+
+export function getWorkflowEnv(): { PATH: string; BW_CLIENTID: string; BW_CLIENTSECRET: string } {
+  const { clientId, clientSecret, path } = getPreferenceValues();
+  return { PATH: path, BW_CLIENTID: clientId, BW_CLIENTSECRET: clientSecret };
 }

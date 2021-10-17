@@ -7,8 +7,7 @@ import {
 } from "@raycast/api";
 import execa from "execa";
 import { Fragment, useState } from "react";
-
-process.env.PATH = "/usr/local/bin";
+import { getWorkflowEnv } from "./utils";
 
 function range(start: number, stop: number) {
   return Array.from({ length: stop - start }, (_, i) => start + i);
@@ -44,7 +43,7 @@ export default function PasswordGenerator(): JSX.Element {
     }
 
     console.log(cmd_args);
-    const { stdout: password } = await execa("bw", cmd_args);
+    const { stdout: password } = await execa("bw", cmd_args, {env: getWorkflowEnv()});
     return password;
   }
   async function copyPasswordToClipboard(values: FormValues) {

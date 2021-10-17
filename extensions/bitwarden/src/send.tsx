@@ -3,7 +3,6 @@ import {
   copyTextToClipboard,
   Detail,
   Form,
-  getPreferenceValues,
   showHUD,
   SubmitFormAction,
 } from "@raycast/api";
@@ -11,12 +10,6 @@ import execa from "execa";
 import { UnlockForm } from "./components";
 import { useSessionToken } from "./hooks";
 import { Send } from "./types";
-
-const { clientId, clientSecret } = getPreferenceValues();
-
-process.env.PATH = "/usr/local/bin";
-process.env.BW_CLIENTID = clientId;
-process.env.BW_CLIENTSECRET = clientSecret;
 
 export default function SendCommand(): JSX.Element {
   const [sessionToken, setSessionToken] = useSessionToken();
@@ -69,7 +62,7 @@ function SendForm(props: { sessionToken: string }) {
       <Form.TextField id="name" placeholder="The name of the Send." title="Name" />
       <Form.TextArea id="text" placeholder="The text you want to send." title="Text" />
       <Form.TextArea id="notes" placeholder="Private notes about this Send." title="Note" />
-      <Form.DatePicker id="deletionDate" defaultValue={date} />
+      <Form.DatePicker id="deletionDate" defaultValue={date} title="Deletion Date" />
     </Form>
   );
 }
