@@ -56,7 +56,7 @@ function ShowIssueLabelsAction(props: { labels: Label[] }) {
   }
   return (
     <PushAction
-      title="Show Labels"
+      title="Show attached Labels"
       target={<LabelList labels={props.labels} />}
       shortcut={{ modifiers: ["cmd"], key: "l" }}
       icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
@@ -68,12 +68,12 @@ export function IssueItemActions(props: { issue: Issue }) {
   const issue = props.issue;
   return (
     <React.Fragment>
+      <ShowIssueLabelsAction labels={issue.labels} />
       {issue.state == "opened" && <CloseIssueAction issue={issue} />}
       {issue.state == "closed" && <ReopenIssueAction issue={issue} />}
       <CopyToClipboardAction title="Copy Issue Number" content={issue.iid} />
       <CopyToClipboardAction title="Copy Issue URL" content={issue.web_url} />
       <CopyToClipboardAction title="Copy Issue Title" content={issue.title} />
-      <ShowIssueLabelsAction labels={issue.labels} />
     </React.Fragment>
   );
 }
