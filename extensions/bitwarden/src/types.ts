@@ -10,7 +10,7 @@ export interface Folder {
     name: string
 }
 
-export interface BitwardenItem {
+export interface Item {
     object:           "item";
     id:               string;
     organizationId:   null | string;

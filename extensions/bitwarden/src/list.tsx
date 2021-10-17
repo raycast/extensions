@@ -6,7 +6,6 @@ import {
   Icon,
   showToast,
   ToastStyle,
-  getPreferenceValues,
   PushAction,
   Detail,
   getLocalStorageItem,
@@ -15,11 +14,12 @@ import {
   CopyToClipboardAction,
   ActionPanelChildren,
   removeLocalStorageItem,
+  getPreferenceValues,
 } from "@raycast/api";
 import { Item, Folder } from "./types";
 import { useEffect, useState } from "react";
-import yaml = require("js-yaml");
-import execa = require("execa");
+import yaml from "js-yaml";
+import execa from "execa";
 import { filterNullishPropertiesFromObject, codeBlock } from "./utils";
 
 const { clientId, clientSecret } = getPreferenceValues();
@@ -28,7 +28,7 @@ process.env.PATH = "/usr/local/bin";
 process.env.BW_CLIENTID = clientId;
 process.env.BW_CLIENTSECRET = clientSecret;
 
-function useSessionToken() {
+function useSessionToken(): [string | null | undefined, (sessionToken: string | null) => void] {
   const [sessionToken, setSessionToken] = useState<string | null>();
 
   useEffect(() => {
@@ -61,9 +61,9 @@ function useSessionToken() {
     getSessionToken();
   }, []);
 
-  return {
+  return [
     sessionToken,
-    setSessionToken: async (sessionToken: string | null) => {
+    async (sessionToken: string | null) => {
       if (!sessionToken) {
         removeLocalStorageItem("sessionToken");
         setSessionToken(null);
@@ -72,12 +72,20 @@ function useSessionToken() {
         setSessionToken(sessionToken);
       }
     },
-    isLoading: typeof sessionToken === "undefined",
-  };
+  ];
 }
 
-export default function Bitwarden(): JSX.Element {
-  const { sessionToken, setSessionToken } = useSessionToken();
+export default function ListCommand(): JSX.Element {
+  const [sessionToken, setSessionToken] = useSessionToken();
+
+  if (sessionToken === undefined) return <Detail isLoading={true} />;
+  else if (sessionToken === null) return <UnlockForm setSessionToken={setSessionToken} />;
+
+  return <ItemList sessionToken={sessionToken} setSessionToken={setSessionToken} />;
+}
+
+function ItemList(props: { sessionToken: string; setSessionToken: (sessionToken: string | null) => void }) {
+  const { sessionToken, setSessionToken } = props;
   const [state, setState] = useState<{ folders: Folder[]; items: Item[] }>();
 
   async function loadItems(sessionToken: string) {
@@ -99,8 +107,6 @@ export default function Bitwarden(): JSX.Element {
     if (!sessionToken) return;
     loadItems(sessionToken);
   }, [sessionToken]);
-
-  if (sessionToken === null) return <UnlockForm setSessionToken={setSessionToken} />;
 
   return (
     <List isLoading={typeof state === "undefined"}>
@@ -127,10 +133,10 @@ export default function Bitwarden(): JSX.Element {
               icon={Icon.ArrowClockwise}
               onAction={async () => {
                 if (sessionToken) {
-                  const toast = await showToast(ToastStyle.Animated, "Syncing Items...")
+                  const toast = await showToast(ToastStyle.Animated, "Syncing Items...");
                   await execa("bw", ["sync", "--session", sessionToken]);
                   await loadItems(sessionToken);
-                  await toast.hide()
+                  await toast.hide();
                 }
               }}
             />,

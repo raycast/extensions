@@ -5,8 +5,14 @@
   "icon": "bitwarden.png",
   "commands": [
     {
-      "name": "index",
-      "title": "Search Bitwarden Vault Items",
+      "name": "list",
+      "title": "Search Vault Items",
+      "description": "Browse Bitwarden Password",
+      "mode": "view"
+    },
+    {
+      "name": "generate",
+      "title": "Generate Password",
       "description": "Browse Bitwarden Password",
       "mode": "view"
     }
