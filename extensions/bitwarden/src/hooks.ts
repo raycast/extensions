@@ -3,14 +3,14 @@ import execa from "execa";
 import { useState, useEffect } from "react";
 import { getWorkflowEnv } from "./utils";
 
+const LocalStorageKey = "sessionToken"
 export function useSessionToken(): [string | null | undefined, (sessionToken: string | null) => void] {
   const [sessionToken, setSessionToken] = useState<string | null>();
 
   useEffect(() => {
     async function getSessionToken() {
-      console.log(process.env.BW_CLIENTID, process.env.BW_CLIENTSECRET);
       console.debug("Get Session Token");
-      const sessionToken = await getLocalStorageItem<string>("sessionToken");
+      const sessionToken = await getLocalStorageItem<string>(LocalStorageKey);
 
       // Check if last session token is still valid
       console.debug("Get Status");
@@ -41,10 +41,10 @@ export function useSessionToken(): [string | null | undefined, (sessionToken: st
     sessionToken,
     async (sessionToken: string | null) => {
       if (!sessionToken) {
-        removeLocalStorageItem("sessionToken");
+        removeLocalStorageItem(LocalStorageKey);
         setSessionToken(null);
       } else {
-        setLocalStorageItem("sessionToken", sessionToken);
+        setLocalStorageItem(LocalStorageKey, sessionToken);
         setSessionToken(sessionToken);
       }
     },

@@ -1,28 +1,28 @@
 {
   "name": "bitwarden",
   "title": "Bitwarden",
-  "description": "Access your Bitwarden items, generate new password",
+  "description": "Access your Bitwarden Vault from Raycast.\n Requires the bitwarden CLI to be installed.",
   "icon": "bitwarden.png",
   "commands": [
     {
       "name": "list",
       "title": "Search Vault Items",
       "subtitle": "Bitwarden",
-      "description": "Browse Bitwarden Password",
+      "description": "Browse Bitwarden Items.",
       "mode": "view"
     },
     {
       "name": "generate",
-      "title": "Generate a New Password",
+      "title": "Generate New Password",
       "subtitle": "Bitwarden",
-      "description": "Browse Bitwarden Password",
+      "description": "Generate a new password.",
       "mode": "view"
     },
     {
       "name": "send",
       "title": "Create a Send",
       "subtitle": "Bitwarden",
-      "description": "Browse Bitwarden Password",
+      "description": "Create a new Send, and copy sharable link to your clipboard.",
       "mode": "view"
     }
   ],

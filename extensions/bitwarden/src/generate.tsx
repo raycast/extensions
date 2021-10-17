@@ -1,13 +1,8 @@
-import {
-  ActionPanel,
-  copyTextToClipboard,
-  Form,
-  showHUD,
-  SubmitFormAction,
-} from "@raycast/api";
+import { ActionPanel, copyTextToClipboard, Form, popToRoot, showHUD, SubmitFormAction } from "@raycast/api";
 import execa from "execa";
 import { Fragment, useState } from "react";
-import { getWorkflowEnv } from "./utils";
+import { TroubleshootingGuide } from "./components";
+import { checkCliPath, getWorkflowEnv } from "./utils";
 
 function range(start: number, stop: number) {
   return Array.from({ length: stop - start }, (_, i) => start + i);
@@ -25,6 +20,10 @@ interface FormValues {
 }
 
 export default function PasswordGenerator(): JSX.Element {
+  if (!checkCliPath()) {
+    return <TroubleshootingGuide />;
+  }
+
   const [type, setType] = useState("password");
   async function generatePassword(values: FormValues) {
     const cmd_args = ["generate"];
@@ -43,7 +42,7 @@ export default function PasswordGenerator(): JSX.Element {
     }
 
     console.log(cmd_args);
-    const { stdout: password } = await execa("bw", cmd_args, {env: getWorkflowEnv()});
+    const { stdout: password } = await execa("bw", cmd_args, { env: getWorkflowEnv() });
     return password;
   }
   async function copyPasswordToClipboard(values: FormValues) {

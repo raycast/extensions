@@ -3,15 +3,20 @@ import {
   copyTextToClipboard,
   Detail,
   Form,
+  popToRoot,
   showHUD,
   SubmitFormAction,
 } from "@raycast/api";
 import execa from "execa";
-import { UnlockForm } from "./components";
+import { TroubleshootingGuide, UnlockForm } from "./components";
 import { useSessionToken } from "./hooks";
 import { Send } from "./types";
+import { checkCliPath } from "./utils";
 
 export default function SendCommand(): JSX.Element {
+  if (!checkCliPath()) {
+    return <TroubleshootingGuide/>
+  }
   const [sessionToken, setSessionToken] = useSessionToken();
 
   if (sessionToken === undefined) return <Detail isLoading={true} />;

@@ -1,30 +1,50 @@
-import { showToast, ToastStyle, setLocalStorageItem, Form, ActionPanel, SubmitFormAction } from "@raycast/api";
+import { showToast, ToastStyle, Form, ActionPanel, SubmitFormAction, Detail, showHUD, CopyToClipboardAction } from "@raycast/api";
 import execa from "execa";
 import { getWorkflowEnv } from "./utils";
 
-export function UnlockForm(props: { setSessionToken: (session: string) => void }) {
-    async function onSubmit(values: { password: string }) {
-      try {
-        const toast = await showToast(ToastStyle.Animated, "Loading Items...");
-        const { stdout: sessionToken } = await execa("bw", ["unlock", values.password, "--raw"], {env: getWorkflowEnv()});
+export function TroubleshootingGuide(): JSX.Element {
+  showToast(ToastStyle.Failure, "Bitwarden Cli not found");
+  return (
+    <Detail
+      markdown={`# The Bitwarden Cli was not found
 
-        toast.hide();
-        props.setSessionToken(sessionToken);
-        setLocalStorageItem("sessionToken", sessionToken);
-      } catch (error) {
-        console.log(error);
-        showToast(ToastStyle.Failure, "Wrong Password");
-      }
+## Please check that:
+
+- The Bitwarden CLI is [correctly installed](https://bitwarden.com/help/article/cli/#download-and-install)
+- The path of the installation match with the extensions settings
+`}
+   actions={
+       <ActionPanel>
+           <CopyToClipboardAction title={"Copy Brew Install Command"} content="brew install bitwarden-cli"/>
+       </ActionPanel>
+   } />
+  );
+}
+
+export function UnlockForm(props: { setSessionToken: (session: string) => void }): JSX.Element {
+  async function onSubmit(values: { password: string }) {
+    try {
+      const toast = await showToast(ToastStyle.Animated, "Loading Items...");
+      const { stdout: sessionToken } = await execa("bw", ["unlock", values.password, "--raw"], {
+        env: getWorkflowEnv(),
+      });
+
+      toast.hide();
+      props.setSessionToken(sessionToken);
+    } catch (error) {
+      console.log(error);
+      showToast(ToastStyle.Failure, "Wrong Password");
     }
-    return (
-      <Form
-        actions={
-          <ActionPanel>
-            <SubmitFormAction title="Unlock" onSubmit={onSubmit} />
-          </ActionPanel>
-        }
-      >
-        <Form.TextField id="password" title="Master password" />
-      </Form>
-    );
   }
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Unlock" onSubmit={onSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="password" title="Master password" />
+    </Form>
+  );
+}

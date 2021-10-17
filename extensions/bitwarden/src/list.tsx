@@ -2,35 +2,27 @@ import {
   ActionPanel,
   List,
   PasteAction,
-  Form,
   Icon,
   showToast,
   ToastStyle,
   PushAction,
   Detail,
-  getLocalStorageItem,
-  setLocalStorageItem,
-  SubmitFormAction,
   CopyToClipboardAction,
   ActionPanelChildren,
-  removeLocalStorageItem,
-  getPreferenceValues,
 } from "@raycast/api";
 import { Item, Folder } from "./types";
 import { useEffect, useState } from "react";
 import yaml from "js-yaml";
 import execa from "execa";
-import { filterNullishPropertiesFromObject, codeBlock, getWorkflowEnv } from "./utils";
+import { filterNullishPropertiesFromObject, codeBlock, getWorkflowEnv, checkCliPath } from "./utils";
 import { useSessionToken } from "./hooks";
-import { UnlockForm } from "./components";
-
-const { clientId, clientSecret } = getPreferenceValues();
-
-process.env.PATH = "/usr/local/bin";
-process.env.BW_CLIENTID = clientId;
-process.env.BW_CLIENTSECRET = clientSecret;
+import { TroubleshootingGuide, UnlockForm } from "./components";
 
 export default function ListCommand(): JSX.Element {
+  if (!checkCliPath()) {
+    return <TroubleshootingGuide/>
+  }
+
   const [sessionToken, setSessionToken] = useSessionToken();
 
   if (sessionToken === undefined) return <Detail isLoading={true} />;
@@ -46,8 +38,12 @@ function ItemList(props: { sessionToken: string; setSessionToken: (sessionToken:
   async function loadItems(sessionToken: string) {
     try {
       console.debug("Get Items");
-      const itemPromise = execa("bw", ["list", "items", "--session", sessionToken]).then((res) => res.stdout);
-      const folderPromise = execa("bw", ["list", "folders", "--session", sessionToken]).then((res) => res.stdout);
+      const itemPromise = execa("bw", ["list", "items", "--session", sessionToken], { env: getWorkflowEnv() }).then(
+        (res) => res.stdout
+      );
+      const folderPromise = execa("bw", ["list", "folders", "--session", sessionToken], { env: getWorkflowEnv() }).then(
+        (res) => res.stdout
+      );
       const [itemString, folderString] = await Promise.all([itemPromise, folderPromise]);
       const items = JSON.parse(itemString);
       const folders = JSON.parse(folderString);
@@ -77,7 +73,7 @@ function ItemList(props: { sessionToken: string; setSessionToken: (sessionToken:
               icon={Icon.Upload}
               onAction={async () => {
                 if (sessionToken) {
-                  await execa("bw", ["lock", "--session", sessionToken], {env: getWorkflowEnv()});
+                  await execa("bw", ["lock", "--session", sessionToken], { env: getWorkflowEnv() });
                   setSessionToken(null);
                 }
               }}
@@ -89,7 +85,7 @@ function ItemList(props: { sessionToken: string; setSessionToken: (sessionToken:
               onAction={async () => {
                 if (sessionToken) {
                   const toast = await showToast(ToastStyle.Animated, "Syncing Items...");
-                  await execa("bw", ["sync", "--session", sessionToken], {env: getWorkflowEnv()});
+                  await execa("bw", ["sync", "--session", sessionToken], { env: getWorkflowEnv() });
                   await loadItems(sessionToken);
                   await toast.hide();
                 }
@@ -137,6 +133,7 @@ function ItemListItem(props: { item: Item; folders: Folder[]; additionalActions?
     <List.Item
       id={item.id}
       title={item.name}
+      keywords={item.name.split(".")}
       accessoryIcon={item.favorite ? Icon.Star : undefined}
       icon={icon}
       subtitle={item.login?.username || undefined}
