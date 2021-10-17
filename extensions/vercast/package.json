@@ -20,6 +20,13 @@
           "title": "Token",
           "description": "Account Token",
           "link": "https://vercel.com/account/tokens"
+        },
+        {
+          "name": "ignoredTeams",
+          "type": "textfield",
+          "required": false,
+          "title": "Ignored Team IDs (separated by commas)",
+          "description": "Teams IDs to ignore (separated by commas)"
         }
       ]
     }

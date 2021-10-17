@@ -26,6 +26,9 @@ function Main(): JSX.Element {
     showToast(ToastStyle.Failure, 'Invalid token detected')
     throw new Error('Invalid token length detected')
   }
+  const ignoredTeamIDs = String(preferences.ignoredTeams.value)
+    .split(',')
+    .map((id) => id.trim())
 
   const [username, setUsername] = useState('')
   const [deployments, setDeployments] = useState<Deployment[]>()
@@ -37,15 +40,16 @@ function Main(): JSX.Element {
     }
   })
   useEffect(() => {
-    const call = async () => setDeployments(await fetchDeployments(username))
+    const call = async () =>
+      setDeployments(await fetchDeployments(username, ignoredTeamIDs))
     if (!deployments) {
       call()
     }
   })
 
   useInterval(async () => {
-    setDeployments(await fetchDeployments(username))
-  }, 1000)
+    setDeployments(await fetchDeployments(username, ignoredTeamIDs))
+  }, 2000)
 
   return (
     <List isLoading={!deployments}>
