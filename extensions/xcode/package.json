@@ -1,7 +1,7 @@
 {
   "name": "xcode",
   "title": "Xcode",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "SvenTiigi",
   "license": "MIT",
   "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases and quickly clear Xcode cache files.",
