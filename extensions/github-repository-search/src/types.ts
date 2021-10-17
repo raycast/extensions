@@ -1,7 +1,24 @@
-import { Endpoints } from "@octokit/types";
+export interface Repository {
+  id: string;
+  nameWithOwner: string;
+  owner: {
+    avatarUrl?: string;
+  };
+  viewerHasStarred: boolean;
+  stargazerCount: number;
+  primaryLanguage?: {
+    name: string;
+  };
+  updatedAt: string;
+  url: string;
+  hasIssuesEnabled: boolean;
+  hasWikiEnabled: boolean;
+  hasProjectsEnabled: boolean;
+}
 
-type Flatten<Type> = Type extends Array<infer Item> ? Item : Type;
-
-type SearchRepositoryResponse = Endpoints["GET /search/repositories"]["response"];
-
-export type Repository = Flatten<SearchRepositoryResponse["data"]["items"]>;
+export interface SearchRepositoriesResponse {
+  search: {
+    repositoryCount: number;
+    nodes: Repository[];
+  };
+}

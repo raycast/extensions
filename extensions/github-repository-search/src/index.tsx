@@ -16,7 +16,7 @@ import { getAccessoryTitle, getIcon, getSubtitle } from "./utils";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
-  const { repositories, error, isLoading: isLoadingRepositories } = useRepositories(searchText);
+  const { data, error, isLoading: isLoadingRepositories } = useRepositories(searchText);
   const {
     repositories: visitedRepositories,
     visitRepository,
@@ -38,13 +38,13 @@ export default function Command() {
         subtitle={visitedRepositories ? String(visitedRepositories.length) : undefined}
       >
         {visitedRepositories
-          ?.filter((r) => r.full_name.includes(searchText ?? ""))
+          ?.filter((r) => r.nameWithOwner.includes(searchText ?? ""))
           .map((repository) => (
             <RepositoryListItem key={repository.id} repository={repository} onVisit={visitRepository} />
           ))}
       </List.Section>
-      <List.Section title="Found Repositories">
-        {repositories?.map((repository) => (
+      <List.Section title="Found Repositories" subtitle={data ? String(data.repositoryCount) : undefined}>
+        {data?.nodes?.map((repository) => (
           <RepositoryListItem key={repository.id} repository={repository} onVisit={visitRepository} />
         ))}
       </List.Section>
@@ -56,7 +56,7 @@ function RepositoryListItem(props: { repository: Repository; onVisit: (repositor
   return (
     <List.Item
       icon={getIcon(props.repository)}
-      title={props.repository.full_name}
+      title={props.repository.nameWithOwner}
       subtitle={getSubtitle(props.repository)}
       accessoryTitle={getAccessoryTitle(props.repository)}
       actions={<Actions repository={props.repository} onVisit={props.onVisit} />}
@@ -66,53 +66,37 @@ function RepositoryListItem(props: { repository: Repository; onVisit: (repositor
 
 function Actions(props: { repository: Repository; onVisit: (repository: Repository) => void }) {
   return (
-    <ActionPanel title={props.repository.full_name}>
+    <ActionPanel title={props.repository.nameWithOwner}>
       <ActionPanel.Section>
-        <OpenInBrowserAction url={props.repository.html_url} onOpen={() => props.onVisit(props.repository)} />
+        <OpenInBrowserAction url={props.repository.url} onOpen={() => props.onVisit(props.repository)} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <OpenInBrowserAction
           title="Open Pull Requests"
-          url={`${props.repository.html_url}/pulls`}
+          url={`${props.repository.url}/pulls`}
           shortcut={{ modifiers: ["cmd"], key: "p" }}
           onOpen={() => props.onVisit(props.repository)}
         />
-        {props.repository.has_issues && (
+        {props.repository.hasIssuesEnabled && (
           <OpenInBrowserAction
             title="Open Issues"
-            url={`${props.repository.html_url}/issues`}
+            url={`${props.repository.url}/issues`}
             shortcut={{ modifiers: ["cmd"], key: "i" }}
             onOpen={() => props.onVisit(props.repository)}
           />
         )}
-        {props.repository.has_wiki && (
+        {props.repository.hasWikiEnabled && (
           <OpenInBrowserAction
             title="Open Wiki"
-            url={`${props.repository.html_url}/wiki`}
+            url={`${props.repository.url}/wiki`}
             shortcut={{ modifiers: ["cmd"], key: "w" }}
             onOpen={() => props.onVisit(props.repository)}
           />
         )}
-        {props.repository.has_downloads && (
-          <OpenInBrowserAction
-            title="Open Downloads"
-            url={`${props.repository.html_url}/downloads`}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
-            onOpen={() => props.onVisit(props.repository)}
-          />
-        )}
-        {props.repository.has_pages && (
-          <OpenInBrowserAction
-            title="Open Pages"
-            url={`${props.repository.html_url}/pages`}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
-            onOpen={() => props.onVisit(props.repository)}
-          />
-        )}
-        {props.repository.has_projects && (
+        {props.repository.hasProjectsEnabled && (
           <OpenInBrowserAction
             title="Open Projects"
-            url={`${props.repository.html_url}/projects`}
+            url={`${props.repository.url}/projects`}
             shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
             onOpen={() => props.onVisit(props.repository)}
           />
@@ -121,17 +105,17 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
       <ActionPanel.Section>
         <CopyToClipboardAction
           title="Copy Repository URL"
-          content={props.repository.html_url}
+          content={props.repository.url}
           shortcut={{ modifiers: ["cmd"], key: "." }}
         />
         <CopyToClipboardAction
           title="Copy Name with Owner"
-          content={props.repository.full_name}
+          content={props.repository.nameWithOwner}
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />
         <CopyToClipboardAction
           title="Copy Clone Command"
-          content={`git clonse ${props.repository.html_url}`}
+          content={`git clonse ${props.repository.url}`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         />
       </ActionPanel.Section>

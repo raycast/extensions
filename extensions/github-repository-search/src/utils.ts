@@ -14,19 +14,20 @@ function formatDate(input: Date | string) {
 }
 
 export function getSubtitle(repository: Repository) {
-  const count = numberFormatter.format(repository.stargazers_count);
-  return `★ ${count}`;
+  const star = repository.viewerHasStarred ? "★" : "✩";
+  const count = numberFormatter.format(repository.stargazerCount);
+  return `${star} ${count}`;
 }
 
 export function getIcon(repository: Repository) {
-  return repository.owner?.avatar_url ? { source: repository.owner.avatar_url, mask: ImageMask.Circle } : undefined;
+  return repository.owner?.avatarUrl ? { source: repository.owner.avatarUrl, mask: ImageMask.Circle } : undefined;
 }
 
 export function getAccessoryTitle(repository: Repository) {
-  let title = formatDate(repository.updated_at);
+  let title = formatDate(repository.updatedAt);
 
-  if (repository.language) {
-    title = `${repository.language}  •  ${title}`;
+  if (repository.primaryLanguage?.name) {
+    title = `${repository.primaryLanguage?.name}  •  ${title}`;
   }
 
   return title;
