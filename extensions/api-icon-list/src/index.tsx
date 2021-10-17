@@ -5,7 +5,6 @@ function enumKeys<O extends object, K extends keyof O = keyof O>(obj: O): K[] {
   return Object.keys(obj).filter(k => Number.isNaN(+k)) as K[];
 }
 
-
 export default function Command() {
   const [color, setColor] = useState<Color>();
   const actionPanelItems: Element[] = [];
@@ -24,7 +23,7 @@ export default function Command() {
     items.push(
       <List.Item
         title={iconName}
-        icon={{ source: Icon[iconName], tintColor: (color ? Color[color] : undefined) }}
+        icon={{ source: Icon[iconName], tintColor: color }}
         id={iconName}
         key={iconName}
         actions={
