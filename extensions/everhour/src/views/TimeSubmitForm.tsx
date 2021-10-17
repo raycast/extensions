@@ -11,7 +11,10 @@ export function TimeSubmitForm({ taskId, fetchTasks }: { taskId: string; fetchTa
       if (taskName) {
         await fetchTasks();
         pop();
-        await showToast(ToastStyle.Success, `Added ${hours} hours to ${taskName}`);
+        await showToast(
+          ToastStyle.Success,
+          `Added ${hours} ${parseInt(hours) === 1 ? "hour" : "hours"} to ${taskName}`
+        );
       } else {
         await showToast(ToastStyle.Failure, "Failed to add time");
       }

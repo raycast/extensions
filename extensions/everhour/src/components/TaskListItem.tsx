@@ -38,11 +38,22 @@ export function TaskListItem({
     }
   };
 
+  const resolveTaskTime = (): string => {
+    const { timeInMin } = task;
+    if (timeInMin >= 60) {
+      const hours = Math.floor(timeInMin / 60);
+      const min = timeInMin % 60;
+      return `${hours} ${hours === 1 ? "hour" : "hours"} and ${min} min`;
+    } else {
+      return `${timeInMin} min`;
+    }
+  };
+
   return (
     <List.Item
       id={task.id}
       key={task.id}
-      title={`${task.name} - ${task.timeInMin} min` + (hasActiveTimer ? " - Timer Active" : "")}
+      title={`${task.name} - ${resolveTaskTime()}` + (hasActiveTimer ? " - Timer Active" : "")}
       icon={{ source: Icon.Dot, tintColor: Color.Green }}
       actions={
         <ActionPanel>
