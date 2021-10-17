@@ -76,7 +76,7 @@ function Main(): JSX.Element {
             id={d.id}
             title={d.project}
             subtitle={d.domain}
-            accessoryTitle={d.time}
+            accessoryTitle={d.timeSince}
             icon={{ tintColor: iconTintColor, source: iconSource }}
             actions={
               <ActionPanel>

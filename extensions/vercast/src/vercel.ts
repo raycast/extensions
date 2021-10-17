@@ -17,7 +17,8 @@ export enum DeploymentState {
 export interface Deployment {
   project: string
   state: DeploymentState
-  time: string
+  timeSince: string
+  rawTime: number
   id: string
   url: string
   domain: string
@@ -87,12 +88,13 @@ export async function fetchDeployments(
             deployments.push({
               project: project.name,
               state: state,
-              time: dayjs(deployment.createdAt).fromNow(),
+              timeSince: dayjs(deployment.createdAt).fromNow(),
               id: deployment.id,
               url: `https://vercel.com/${username}/${
                 project.name
               }/${deployment.id.replace('dpl_', '')}`,
               domain: deployment.alias[0],
+              rawTime: deployment.createdAt,
             })
             break
           }
@@ -100,7 +102,7 @@ export async function fetchDeployments(
       }
     }
 
-    return deployments
+    return deployments.sort((a, b) => b.rawTime - a.rawTime)
   } catch (err) {
     console.error(err)
     showToast(ToastStyle.Failure, 'Failed to fetch deployments')

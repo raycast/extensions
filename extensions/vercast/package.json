@@ -8,7 +8,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Vercast",
+      "title": "Search Vercel Deployments",
       "subtitle": "",
       "description": "Search Vercel Deployments",
       "mode": "view",
