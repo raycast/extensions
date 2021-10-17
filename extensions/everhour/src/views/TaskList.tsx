@@ -14,7 +14,7 @@ export function TaskList({ projectId }: { projectId: string }) {
       const activeTimer = await getCurrentTimer();
       setActiveTimerTaskId(activeTimer);
     } catch (error) {
-      console.log(error);
+       await showToast(ToastStyle.Failure, "Failed to refresh tasks");
     }
   };
 
