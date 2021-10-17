@@ -1,4 +1,14 @@
-import { List, Icon, showToast, ToastStyle, ActionPanel, OpenInBrowserAction, environment } from '@raycast/api';
+import {
+  List,
+  Icon,
+  ToastStyle,
+  ActionPanel,
+  OpenInBrowserAction,
+  showToast,
+  getLocalStorageItem,
+  setLocalStorageItem,
+  environment,
+} from '@raycast/api';
 import { useEffect, useState } from 'react';
 import osascript from 'osascript-tag';
 import dayjs from 'dayjs';
@@ -130,6 +140,20 @@ function TodoListSection(props: { todos: Todo[] }) {
   );
 }
 
+const getListTodosCacheKey = (listName: ListName): string => `list:${listName}:todos`;
+
+const getCachedListTodos = async (listName: ListName): Promise<Todo[]> => {
+  const key = getListTodosCacheKey(listName);
+  const value = (await getLocalStorageItem(key)) as string;
+  return value && JSON.parse(value);
+};
+
+const setCachedListTodos = async (listName: ListName, todos: Todo[]): Promise<void> => {
+  const key = getListTodosCacheKey(listName);
+  const value = JSON.stringify(todos);
+  return setLocalStorageItem(key, value);
+};
+
 export default function ShowList(props: { listName: ListName }) {
   const [isLoading, setIsLoading] = useState(true);
   const [todos, setTodos] = useState<Todo[]>();
@@ -137,9 +161,16 @@ export default function ShowList(props: { listName: ListName }) {
 
   useEffect(() => {
     const fetchTodos = async () => {
+      const cachedResults = await getCachedListTodos(ListName[listName]);
+      if (cachedResults) {
+        setTodos(cachedResults);
+      }
+
       const results = await getListTodos(ListName[listName]);
       setTodos(results);
       setIsLoading(false);
+
+      setCachedListTodos(ListName[listName], results);
     };
 
     fetchTodos();
