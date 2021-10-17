@@ -4,6 +4,24 @@
 //
 //   "Set quicktype target language"
 
+export interface Send {
+    object:         "send";
+    name:           string;
+    notes:          string;
+    type:           number;
+    text:           {
+        text: string,
+        hidden: boolean
+    };
+    file:           null;
+    maxAccessCount: null;
+    deletionDate:   string;
+    expirationDate: null;
+    password:       null;
+    disabled:       boolean;
+    hideEmail:      boolean;
+}
+
 export interface Folder {
     object: "folder",
     id: string | null,

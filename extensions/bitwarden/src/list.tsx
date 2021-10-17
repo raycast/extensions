@@ -21,59 +21,14 @@ import { useEffect, useState } from "react";
 import yaml from "js-yaml";
 import execa from "execa";
 import { filterNullishPropertiesFromObject, codeBlock } from "./utils";
+import { useSessionToken } from "./hooks";
+import { UnlockForm } from "./components";
 
 const { clientId, clientSecret } = getPreferenceValues();
 
 process.env.PATH = "/usr/local/bin";
 process.env.BW_CLIENTID = clientId;
 process.env.BW_CLIENTSECRET = clientSecret;
-
-function useSessionToken(): [string | null | undefined, (sessionToken: string | null) => void] {
-  const [sessionToken, setSessionToken] = useState<string | null>();
-
-  useEffect(() => {
-    async function getSessionToken() {
-      console.log(process.env.BW_CLIENTID, process.env.BW_CLIENTSECRET);
-      console.debug("Get Session Token");
-      const sessionToken = await getLocalStorageItem<string>("sessionToken");
-
-      // Check if last session token is still valid
-      console.debug("Get Status");
-      const { stdout: jsonStatus } = await execa(
-        "bw",
-        sessionToken ? ["status", "--session", sessionToken] : ["status"]
-      );
-      const { status } = JSON.parse(jsonStatus);
-
-      if (status === "unlocked") setSessionToken(sessionToken);
-      else if (status === "locked") setSessionToken(null);
-      else if (status === "unauthenticated") {
-        try {
-          const toast = await showToast(ToastStyle.Animated, "Login in...", "It may takes some times");
-          await execa("bw", ["login", "--apikey"]);
-          toast.hide();
-          setSessionToken(null);
-        } catch (error) {
-          showToast(ToastStyle.Failure, "An error occurred during login!", "Please check your crendentials");
-        }
-      }
-    }
-    getSessionToken();
-  }, []);
-
-  return [
-    sessionToken,
-    async (sessionToken: string | null) => {
-      if (!sessionToken) {
-        removeLocalStorageItem("sessionToken");
-        setSessionToken(null);
-      } else {
-        setLocalStorageItem("sessionToken", sessionToken);
-        setSessionToken(sessionToken);
-      }
-    },
-  ];
-}
 
 export default function ListCommand(): JSX.Element {
   const [sessionToken, setSessionToken] = useSessionToken();
@@ -147,33 +102,6 @@ function ItemList(props: { sessionToken: string; setSessionToken: (sessionToken:
   );
 }
 
-function UnlockForm(props: { setSessionToken: (session: string) => void }) {
-  async function onSubmit(values: { password: string }) {
-    try {
-      const toast = await showToast(ToastStyle.Animated, "Loading Items...");
-      const { stdout: sessionToken } = await execa("bw", ["unlock", values.password, "--raw"]);
-
-      toast.hide();
-      props.setSessionToken(sessionToken);
-      setLocalStorageItem("sessionToken", sessionToken);
-    } catch (error) {
-      console.log(error);
-      showToast(ToastStyle.Failure, "Wrong Password");
-    }
-  }
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <SubmitFormAction title="Unlock" onSubmit={onSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="password" title="Master password" />
-    </Form>
-  );
-}
-
 function ItemListItem(props: { item: Item; folders: Folder[]; additionalActions?: ActionPanelChildren[] }) {
   const { item, folders, additionalActions } = props;
   const { type, name, notes, identity, login, secureNote, fields, passwordHistory, card } = item;
@@ -183,12 +111,16 @@ function ItemListItem(props: { item: Item; folders: Folder[]; additionalActions?
     if (folder.id) folderMap[folder.id] = folder.name;
   }
 
-  const icon = {
-    1: Icon.Globe,
-    2: Icon.TextDocument,
-    3: Icon.List,
-    4: Icon.Person,
-  }[type];
+  let icon: string | Icon | undefined;
+  if (login?.uris?.[0]?.uri?.startsWith("https"))
+    icon = `https://s2.googleusercontent.com/s2/favicons?domain_url=${login?.uris?.[0].uri}`;
+  else
+    icon = {
+      1: Icon.Globe,
+      2: Icon.TextDocument,
+      3: Icon.List,
+      4: Icon.Person,
+    }[type];
 
   const cleanItem = filterNullishPropertiesFromObject({
     name,

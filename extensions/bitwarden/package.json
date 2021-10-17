@@ -1,18 +1,27 @@
 {
   "name": "bitwarden",
   "title": "Bitwarden",
-  "description": "Browse Bitwarden Password",
+  "description": "Access your Bitwarden items, generate new password",
   "icon": "bitwarden.png",
   "commands": [
     {
       "name": "list",
       "title": "Search Vault Items",
+      "subtitle": "Bitwarden",
       "description": "Browse Bitwarden Password",
       "mode": "view"
     },
     {
       "name": "generate",
-      "title": "Generate Password",
+      "title": "Generate a New Password",
+      "subtitle": "Bitwarden",
+      "description": "Browse Bitwarden Password",
+      "mode": "view"
+    },
+    {
+      "name": "send",
+      "title": "Create a Send",
+      "subtitle": "Bitwarden",
       "description": "Browse Bitwarden Password",
       "mode": "view"
     }
@@ -32,6 +41,15 @@
       "required": true,
       "title": "Client Secret",
       "description": "https://bitwarden.com/help/article/personal-api-key/",
+      "placeholder": "Enter your Client Secret"
+    },
+    {
+      "name": "path",
+      "type": "textfield",
+      "default": "/usr/local/bin",
+      "required": false,
+      "title": "Path Environment Varaible",
+      "description": "Folder where the bitwarden-cli is located.",
       "placeholder": "Enter your Client Secret"
     }
   ],
