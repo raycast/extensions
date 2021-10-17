@@ -39,6 +39,15 @@
         { "title" : "Metric System", "value" : "metric" },
         { "title" : "Imperial Units", "value" : "imperial" }
       ]
+    },
+    {
+      "name" : "defaultquery",
+      "type" : "textfield",
+      "title" : "Default query",
+      "placeholder" : "Empty or location (e.g. London)",
+      "required" : false,
+      "default" : "",
+      "description" : "Default query when search bar is empty. Same content as in the search bar."
     }
   ],
   "dependencies": {

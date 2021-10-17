@@ -1,4 +1,4 @@
-import { ActionPanel, List, PushAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, getPreferenceValues, List, PushAction, showToast, ToastStyle } from "@raycast/api";
 import moment from "moment";
 import "moment/locale/fr";
 import "moment/locale/de";
@@ -119,6 +119,12 @@ export function WeatherList() {
   );
 }
 
+function getDefaultQuery(): string | undefined {
+  const pref = getPreferenceValues();
+  const q = (pref.defaultquery as string) || undefined;
+  return q;
+}
+
 export function useSearch(
   query: string | undefined,
   lang: string | undefined
@@ -135,6 +141,12 @@ export function useSearch(
 
   useEffect(() => {
     async function fetchData() {
+      if (!query) {
+        const dq = getDefaultQuery();
+        if (dq && dq.length > 0) {
+          query = dq;
+        }
+      }
       if (query === null || cancel) {
         return;
       }
