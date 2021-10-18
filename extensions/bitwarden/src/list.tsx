@@ -153,11 +153,6 @@ function ItemListItem(props: { item: Item; folders: Folder[]; additionalActions?
                 content={item.login?.username}
                 shortcut={{ key: "enter", modifiers: ["opt"] }}
               />
-              <PasteAction
-                title="Paste Username"
-                content={item.login?.username}
-                shortcut={{ key: "enter", modifiers: ["cmd", "opt"] }}
-              />
             </ActionPanel.Section>
           ) : null}
           {item.notes ? (
