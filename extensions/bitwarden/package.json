@@ -1,28 +1,17 @@
 {
   "name": "bitwarden",
-  "title": "Bitwarden",
-  "description": "Access your Bitwarden Vault from Raycast.\n Requires the bitwarden CLI to be installed.",
+  "title": "Search Bitwarden Vault Items",
+  "description": "Access your Bitwarden Vault Items from Raycast.\n Requires the bitwarden CLI to be installed. An installation guide is available here: https://bitwarden.com/help/article/cli/#download-and-install",
   "icon": "bitwarden.png",
+  "author": "pomdtr",
+  "license": "MIT",
+  "keywords": ["bitwarden", "secrets", "passwords"],
   "commands": [
     {
       "name": "list",
       "title": "Search Vault Items",
       "subtitle": "Bitwarden",
       "description": "Browse Bitwarden Items.",
-      "mode": "view"
-    },
-    {
-      "name": "generate",
-      "title": "Generate New Password",
-      "subtitle": "Bitwarden",
-      "description": "Generate a new password.",
-      "mode": "view"
-    },
-    {
-      "name": "send",
-      "title": "Create a Send",
-      "subtitle": "Bitwarden",
-      "description": "Create a new Send, and copy sharable link to your clipboard.",
       "mode": "view"
     }
   ],
@@ -32,7 +21,7 @@
       "type": "textfield",
       "required": true,
       "title": "Client ID",
-      "description": "https://bitwarden.com/help/article/personal-api-key/",
+      "description": "This value is unique to your account and does not change. See https://bitwarden.com/help/article/personal-api-key/#get-your-personal-api-key for instructions.",
       "placeholder": "Enter your Client ID"
     },
     {
@@ -40,7 +29,7 @@
       "type": "password",
       "required": true,
       "title": "Client Secret",
-      "description": "https://bitwarden.com/help/article/personal-api-key/",
+      "description": "This value is unique and can be rotated. See https://bitwarden.com/help/article/personal-api-key/#get-your-personal-api-key for instructions.",
       "placeholder": "Enter your Client Secret"
     },
     {
@@ -48,8 +37,8 @@
       "type": "textfield",
       "default": "/usr/local/bin",
       "required": false,
-      "title": "Path Environment Varaible",
-      "description": "Folder where the bitwarden-cli is located.",
+      "title": "Path Environment Variable",
+      "description": "Folder where the bitwarden-cli is located. Default Value match with the standard brew install location.",
       "placeholder": "Enter your Client Secret"
     }
   ],
@@ -60,15 +49,17 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.3",
-    "@types/node": "^16.4.3",
-    "@types/react": "^17.0.15",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
-    "eslint": "^7.31.0",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.3.5"
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
   },
   "scripts": {
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "build": "ray build -e dist"
   }
 }
