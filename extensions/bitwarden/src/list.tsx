@@ -51,7 +51,7 @@ function ItemList(props: { sessionToken: string | undefined; setSessionToken: (s
       console.debug(`Loaded ${items.length} Items`);
       setState({ items, folders });
     } catch (error) {
-      showToast(ToastStyle.Failure, "Expired Session!");
+      showToast(ToastStyle.Failure, "Failed to search vault", "Vault is locked");
     }
   }
 
