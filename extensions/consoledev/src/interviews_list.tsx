@@ -22,7 +22,7 @@ export default function InterviewsList() {
       const feedEither = await getInterviewsFeed();
 
       if ( isLeft( feedEither ) ) {
-        showToast( ToastStyle.Failure, 'Failed to fetch Betas.' )
+        showToast( ToastStyle.Failure, 'Failed to fetch Interviews.' )
         return
       }
 
@@ -36,7 +36,7 @@ export default function InterviewsList() {
     <List
       isLoading={state.feed === null}
       navigationTitle={state.feed?.title}
-      searchBarPlaceholder="Filter betas by name..."
+      searchBarPlaceholder="Filter interviews by name..."
     >
       {state.feed?.items.map( interview => (
         <FeedItem item={interview} key={interview.link} />
