@@ -17,6 +17,7 @@ import plist from "plist";
 import { promisify } from "util";
 import Bookmark from "./dtos/Bookmark.dto";
 import ImportedTowerBookmarks, { ImportedTowerBookmark } from "./interfaces/imported-tower-bookmark";
+import tildify from "tildify";
 
 const execp = promisify(exec);
 
@@ -48,7 +49,7 @@ async function fetchBookmarks(): Promise<Bookmark[]> {
     const bookmarks = obj.children
       .map((bookmark: ImportedTowerBookmark) => {
         return new Bookmark(
-          bookmark.fileURL.replace("file:///", "/"),
+          tildify(bookmark.fileURL.replace("file:/", "")),
           bookmark.name,
           bookmark.lastOpenedDate,
           bookmark.repositoryIdentifier

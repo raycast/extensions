@@ -1,14 +1,14 @@
 {
   "name": "tower",
-  "title": "Tower",
+  "title": "Tower Repositories",
   "description": "Navigate and open your repositories in Tower.",
   "icon": "icon.png",
   "author": "tdwesten",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "commands": [
     {
-      "name": "commandOpenBookmarks",
+      "name": "command-my-repositiories",
       "title": "My Repositories",
       "subtitle": "Tower",
       "description": "Navigate and open your repositories in Tower.",
@@ -34,9 +34,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.24.5",
+    "@raycast/api": "^1.25.0",
     "node-fetch": "^2.6.1",
-    "plist": "^3.0.3"
+    "plist": "^3.0.3",
+    "tildify": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "^16.4.3",
