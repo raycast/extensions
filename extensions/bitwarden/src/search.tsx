@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { Item, Folder } from "./types";
 import { useEffect, useState } from "react";
-import yaml from "js-yaml";
+import treeify from "treeify"
 import execa from "execa";
 import { filterNullishPropertiesFromObject, codeBlock, getWorkflowEnv, checkCliPath } from "./utils";
 import { useSessionToken } from "./hooks";
@@ -116,8 +116,11 @@ function ItemListItem(props: { item: Item; folder: Folder | undefined; additiona
     card: filterNullishPropertiesFromObject(card),
     secureNote,
     fields,
+    folder: folder?.name,
     passwordHistory,
   });
+
+  const tree = treeify.asTree(cleanItem, true)
 
   return (
     <List.Item
@@ -167,10 +170,10 @@ function ItemListItem(props: { item: Item; folder: Folder | undefined; additiona
               shortcut={{ modifiers: ["cmd"], key: "i" }}
               target={
                 <Detail
-                  markdown={codeBlock(yaml.dump(cleanItem, { indent: 2 }))}
+                  markdown={codeBlock(tree)}
                   actions={
                     <ActionPanel>
-                      <CopyToClipboardAction content={yaml.dump(cleanItem, { indent: 2 })} />
+                      <CopyToClipboardAction content={tree} />
                     </ActionPanel>
                   }
                 />

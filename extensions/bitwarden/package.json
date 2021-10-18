@@ -5,7 +5,11 @@
   "icon": "bitwarden.png",
   "author": "pomdtr",
   "license": "MIT",
-  "keywords": ["bitwarden", "secrets", "passwords"],
+  "keywords": [
+    "bitwarden",
+    "secrets",
+    "passwords"
+  ],
   "commands": [
     {
       "name": "search",
@@ -45,10 +49,9 @@
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "execa": "^5.1.1",
-    "js-yaml": "^4.1.0"
+    "treeify": "^1.1.0"
   },
   "devDependencies": {
-    "@types/js-yaml": "^4.0.3",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
