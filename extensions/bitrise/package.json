@@ -7,10 +7,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "list",
+      "name": "index",
       "title": "List Builds",
       "subtitle": "Bitrise",
-      "description": "Shows a list of the latest Bitrise builds, including meta data. Allows quickly opening each build and - if applicable - PR.",
+      "description": "Shows a list of the latest Bitrise builds, including meta data. Allows to quickly open each build and - if applicable - PR.",
       "mode": "view"
     }
   ],
