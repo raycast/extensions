@@ -9,27 +9,35 @@ import {
   showToast,
   ToastStyle,
 } from '@raycast/api'
+import { randomUUID } from 'crypto'
 import { useEffect, useState } from 'react'
 import useInterval from './use-interval'
 import {
   Deployment,
   DeploymentState,
   fetchDeployments,
+  fetchTeams,
   fetchUsername,
 } from './vercel'
 
 render(<Main />)
 
 function Main(): JSX.Element {
+  // Get preference values
   const token = String(preferences.token.value)
   if (token.length !== 24) {
     showToast(ToastStyle.Failure, 'Invalid token detected')
     throw new Error('Invalid token length detected')
   }
+  const ignoredTeamIDs = String(preferences.ignoredTeams.value ?? '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter((id) => id !== '')
 
+  // Setup useState objects
   const [username, setUsername] = useState('')
   const [deployments, setDeployments] = useState<Deployment[]>()
-
+  const [teams, setTeams] = useState<Record<string, string>>()
   useEffect(() => {
     const call = async () => setUsername(await fetchUsername())
     if (username === '') {
@@ -37,15 +45,23 @@ function Main(): JSX.Element {
     }
   })
   useEffect(() => {
-    const call = async () => setDeployments(await fetchDeployments(username))
+    const call = async () =>
+      setDeployments(await fetchDeployments(username, teams ?? {}))
     if (!deployments) {
       call()
     }
   })
+  useEffect(() => {
+    const call = async () => setTeams(await fetchTeams(ignoredTeamIDs))
+    if (!teams) {
+      call()
+    }
+  })
 
+  // Refresh deployments every 2 seconds
   useInterval(async () => {
-    setDeployments(await fetchDeployments(username))
-  }, 1000)
+    setDeployments(await fetchDeployments(username, teams ?? {}))
+  }, 2000)
 
   return (
     <List isLoading={!deployments}>
@@ -66,13 +82,14 @@ function Main(): JSX.Element {
             iconTintColor = Color.Red
             break
         }
+        const randomID = randomUUID()
         return (
           <List.Item
-            key={d.id}
-            id={d.id}
-            title={d.project}
+            key={d.id + randomID}
+            id={d.id + randomID}
+            title={(d.owner === username ? '' : `${d.owner}/`) + d.project}
             subtitle={d.domain}
-            accessoryTitle={d.time}
+            accessoryTitle={d.timeSince}
             icon={{ tintColor: iconTintColor, source: iconSource }}
             actions={
               <ActionPanel>
