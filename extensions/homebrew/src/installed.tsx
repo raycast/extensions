@@ -15,20 +15,23 @@ import {
 import { useEffect, useState } from "react";
 import { brewListInstalled, brewUninstall } from "./brew";
 
+interface Installed {
+  formulas: Formula[];
+  isLoading: bool;
+}
+
 function Main() {
-  const [formulas, setFormulas] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [installed, setInstalled] = useState({formulas: [], isLoading: true});
 
   useEffect(async () => {
-    setIsLoading(true);
     try {
-      setFormulas(await brewListInstalled());
+      setInstalled({formulas: await brewListInstalled(), isLoading: false});
     } catch (err) {
       console.log("brewListInstalled error:", err);
       showToast(ToastStyle.Failure, "Brew list failed");
+      setInstalled({formulas: [], isLoading: false});
     }
-    setIsLoading(false);
-  }, []);
+  }, []); // trigger once
 
   function FormulaListItem(props: { formula: Formula }) {
     const formula = props.formula;
@@ -60,12 +63,12 @@ function Main() {
     );
   }
 
-  function ForumulaList(props: { formulas: Formula[], isLoading: bool }) {
+  function ForumulaList(props: { installed: Installed }) {
     return (
-      <List searchBarPlaceholder="Filter formula by name..." isLoading={props.isLoading}>
+      <List searchBarPlaceholder="Filter formula by name..." isLoading={props.installed.isLoading}>
         <ListSection title="Installed">
           {
-            props.formulas.map((formula) => (
+            props.installed.formulas.map((formula) => (
               <FormulaListItem key={formula.name} formula={formula} />
             ))
           }
@@ -74,7 +77,7 @@ function Main() {
     );
   }
 
-  return <ForumulaList formulas={formulas} isLoading={isLoading} />
+  return <ForumulaList installed={installed} />
 }
 
 async function main() {
