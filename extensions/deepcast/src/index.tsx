@@ -89,7 +89,7 @@ const Command = () => {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={submit} />
+          <SubmitFormAction title="Translate" onSubmit={submit} />
           <OpenInBrowserAction title="Free API Key" url="https://www.deepl.com/pro-api" />
         </ActionPanel>
       }
