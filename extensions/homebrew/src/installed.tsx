@@ -38,23 +38,25 @@ function Main() {
                  title={formula.name}
                  subtitle={formula.desc}
                  accessoryTitle={version}
-                 icon={ {source: Icon.Checkmark, tintColor: Color.Green} }>
-        <ActionPanel>
-          <ActionPanel.Section>
-            <ShowInFinderAction path={`/usr/local/bin/${formula.name}`} />
-            <OpenInBrowserAction url={formula.homepage} />
-            <CopyToClipboardAction title="Copy URL" content={formula.homepage} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <ActionPanelItem title="Uninstall"
-                             icon={Icon.Trash}
-                             shortcut={{ modifiers:["ctrl"], key: "x" }}
-                             onAction={() => {
-                               uninstall(formula, setFormulas);
-                             }} />
-          </ActionPanel.Section>
-        </ActionPanel>
-      </List.Item>
+                 icon={ {source: Icon.Checkmark, tintColor: Color.Green} }
+                 actions={
+                   <ActionPanel>
+                     <ActionPanel.Section>
+                       <ShowInFinderAction path={`/usr/local/bin/${formula.name}`} />
+                       <OpenInBrowserAction url={formula.homepage} />
+                       <CopyToClipboardAction title="Copy URL" content={formula.homepage} />
+                     </ActionPanel.Section>
+                     <ActionPanel.Section>
+                       <ActionPanelItem title="Uninstall"
+                                        icon={Icon.Trash}
+                                        shortcut={{ modifiers:["ctrl"], key: "x" }}
+                                        onAction={() => {
+                                          uninstall(formula, setFormulas);
+                                        }} />
+                     </ActionPanel.Section>
+                   </ActionPanel>
+                 }
+      />
     );
   }
 

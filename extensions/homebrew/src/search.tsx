@@ -59,29 +59,30 @@ function Main() {
         subtitle={formula.desc}
         accessoryTitle={version}
         icon={ {source: Icon.Checkmark, tintColor: tintColor} }
-      >
-        <ActionPanel>
-          <ActionPanel.Section>
-            <ActionPanelItem title="Install"
-                             icon={Icon.Plus}
-                             shortcut={{ modifiers:["cmd"], key: "i" }}
-                             onAction={async () => {
-                               await install(formula);
-                               // TODO: Need to handle error case...
-                               let allInstalled = installed;
-                               allInstalled[formula.name] = formula;
-                               // TODO: Not sure this is triggering a reload?
-                               // And formula is also not recognised as installed (also fish).
-                               setInstalled(allInstalled);
-                             }}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <OpenInBrowserAction url={formula.homepage} />
-            <CopyToClipboardAction title="Copy URL" content={formula.homepage} />
-          </ActionPanel.Section>
-        </ActionPanel>
-      </List.Item>
+        actions={
+          <ActionPanel>
+            <ActionPanel.Section>
+              <ActionPanelItem title="Install"
+                               icon={Icon.Plus}
+                               shortcut={{ modifiers:["cmd"], key: "i" }}
+                               onAction={async () => {
+                                 await install(formula);
+                                 // TODO: Need to handle error case...
+                                 let allInstalled = installed;
+                                 allInstalled[formula.name] = formula;
+                                 // TODO: Not sure this is triggering a reload?
+                                 // And formula is also not recognised as installed (also fish).
+                                 setInstalled(allInstalled);
+                               }}
+              />
+            </ActionPanel.Section>
+            <ActionPanel.Section>
+              <OpenInBrowserAction url={formula.homepage} />
+              <CopyToClipboardAction title="Copy URL" content={formula.homepage} />
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+      />
     );
   }
 
