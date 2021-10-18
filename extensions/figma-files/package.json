@@ -3,7 +3,7 @@
   "title": "Figma File Search",
   "description": "Lists Figma files allowing you to search and navigate to them.",
   "icon": "command-icon.png",
-  "author": "Michael Schultz (https://michaelschultz.com)",
+  "author": "michaelschultz",
   "version": "1.0.0",
   "license": "MIT",
   "commands": [
