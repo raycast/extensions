@@ -3,14 +3,10 @@ import {
   ActionPanel,
   SubmitFormAction,
   OpenInBrowserAction,
-  setLocalStorageItem,
-  getLocalStorageItem,
-  LocalStorageValue,
-  removeLocalStorageItem,
   copyTextToClipboard,
   showToast,
   ToastStyle,
-  Detail,
+  getPreferenceValues,
 } from "@raycast/api";
 import got from "got";
 import { useEffect, useState } from "react";
@@ -49,24 +45,23 @@ interface Values {
   translation?: string;
 }
 
+interface Preferences {
+  key: string;
+}
+
 const Command = () => {
-  const [key, setKey] = useState<LocalStorageValue | undefined | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [key, setKey] = useState("");
+  const [loading, setLoading] = useState(false);
   const [translation, setTranslation] = useState("");
 
   useEffect(() => {
     (async () => {
-      setKey(await getLocalStorageItem("deeplKey"));
-      setLoading(false);
+      const preferences: Preferences = getPreferenceValues();
+      setKey(preferences.key);
     })();
   }, []);
 
-  const submitKey = async (values: Values) => {
-    values.key && (await setLocalStorageItem("deeplKey", values.key));
-    setKey(await getLocalStorageItem("deeplKey"));
-  };
-
-  const submitText = async (values: Values) => {
+  const submit = async (values: Values) => {
     if (values.text) {
       try {
         setLoading(true);
@@ -90,45 +85,32 @@ const Command = () => {
       }
     }
   };
-  return key === null ? (
-    <Detail></Detail>
-  ) : (
+  return (
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={key ? submitText : submitKey} />
+          <SubmitFormAction onSubmit={submit} />
           <OpenInBrowserAction title="Free API Key" url="https://www.deepl.com/pro-api" />
-          <ActionPanel.Item
-            title="Remove API Key"
-            onAction={async () => {
-              await removeLocalStorageItem("deeplKey");
-              setKey(undefined);
-            }}
-          />
         </ActionPanel>
       }
       isLoading={loading}
     >
-      {key ? (
-        <>
-          <Form.Dropdown id="from" defaultValue="" storeValue={true} title="From">
-            <Form.Dropdown.Item value="" title="Detect" />
-            {Object.entries(languages).map(([value, title]) => (
-              <Form.Dropdown.Item value={value} title={title} key={value} />
-            ))}
-          </Form.Dropdown>
-          <Form.Dropdown id="to" defaultValue="EN" storeValue={true} title="To">
-            {Object.entries(languages).map(([value, title]) => (
-              <Form.Dropdown.Item value={value} title={title} key={value} />
-            ))}
-          </Form.Dropdown>
-          <Form.Separator />
-          <Form.TextArea id="text" placeholder="Enter or paste text here" />
-          <Form.TextArea id="translation" value={translation} />
-        </>
-      ) : (
-        <Form.TextField id="key" title="API key" placeholder="Enter your API key from DeepL" />
-      )}
+      <>
+        <Form.Dropdown id="from" defaultValue="" storeValue={true} title="From">
+          <Form.Dropdown.Item value="" title="Detect" />
+          {Object.entries(languages).map(([value, title]) => (
+            <Form.Dropdown.Item value={value} title={title} key={value} />
+          ))}
+        </Form.Dropdown>
+        <Form.Dropdown id="to" defaultValue="EN" storeValue={true} title="To">
+          {Object.entries(languages).map(([value, title]) => (
+            <Form.Dropdown.Item value={value} title={title} key={value} />
+          ))}
+        </Form.Dropdown>
+        <Form.Separator />
+        <Form.TextArea id="text" placeholder="Enter or paste text here" />
+        <Form.TextArea id="translation" value={translation} />
+      </>
     </Form>
   );
 };
