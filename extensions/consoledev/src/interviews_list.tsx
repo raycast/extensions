@@ -5,6 +5,10 @@ import FeedItem from './components/FeedItem';
 import { Feed, Interview } from './responseTypes';
 import { getInterviewsFeed } from './util';
 
+import * as S from 'fp-ts/string'
+import { truncate } from './lib/string'
+import { pipe } from 'fp-ts/lib/function';
+
 
 interface State {
   feed: Feed<Interview> | null;
@@ -39,8 +43,31 @@ export default function InterviewsList() {
       searchBarPlaceholder="Filter interviews by name..."
     >
       {state.feed?.items.map( interview => (
-        <FeedItem item={interview} key={interview.link} />
+        <FeedItem
+          item={formatInterview( interview )}
+          key={interview.link}
+          type='interviews'
+        />
       ) )}
     </List>
   );
 }
+
+
+const formatInterview = ( interview: Interview ): Interview => ( {
+  ...interview,
+  title: pipe(
+    interview.title,
+    S.replace( 'Interview with', '' ),
+    S.replace( '&amp;', '&' ),
+    S.trim
+  ),
+  description: pipe(
+    interview.description,
+    S.split( ',' ),
+    a => a.slice( 1 ).join( ', ' ),
+    S.trim,
+    S.replace( '&amp;', '&' ),
+    // truncate( 40 )
+  )
+} )

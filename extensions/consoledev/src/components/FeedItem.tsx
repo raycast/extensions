@@ -1,9 +1,9 @@
 import { ActionPanel, ActionPanelItem, CopyToClipboardAction, Icon, ImageMask, ListItem, OpenInBrowserAction } from '@raycast/api'
 import { FC } from 'react'
-import { FeedItemInterface } from '../responseTypes'
+import { FeedItemInterface, FeedType } from '../responseTypes'
 import format from 'date-fns/format'
 
-const FeedItem: FC<{ item: FeedItemInterface }> = ( { item } ) => (
+const FeedItem: FC<{ item: FeedItemInterface, type?: FeedType }> = ( { item, type } ) => (
 	<ListItem
 		id={item.link}
 		title={item.title}
