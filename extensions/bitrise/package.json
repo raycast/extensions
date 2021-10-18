@@ -1,16 +1,16 @@
 {
   "name": "bitrise",
-  "title": "Bitrise builds",
-  "description": "This extension shows a list of your latest bitrise builds. \n\nIt requires a bitrise API key which you can get on https://app.bitrise.io/me/profile#/security",
+  "title": "Bitrise Builds",
+  "description": "This extension shows a list of your latest Bitrise builds.\n\nIt requires a Bitrise API key which you can get on https://app.bitrise.io/me/profile#/security",
   "icon": "bitrise-logo.png",
-  "author": "Sven Bendel",
+  "author": "ubuntudroid",
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "List bitrise builds",
-      "subtitle": "Shows a list of the latest bitrise builds",
-      "description": "Shows a list of the latest bitrise builds, including meta data. Allows quickly jumping to each build in the bitrise web UI.",
+      "name": "list",
+      "title": "List Builds",
+      "subtitle": "Bitrise",
+      "description": "Shows a list of the latest Bitrise builds, including meta data. Allows quickly opening each build and - if applicable - PR.",
       "mode": "view"
     }
   ],
