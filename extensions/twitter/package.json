@@ -12,6 +12,13 @@
       "subtitle": "Twitter",
       "description": "Show Twitter timeline",
       "mode": "view"
+    },
+    {
+      "name": "send",
+      "title": "Send Tweet",
+      "subtitle": "Twitter",
+      "description": "Send a tweet",
+      "mode": "view"
     }
   ],
   "preferences" : [
