@@ -1,16 +1,16 @@
 import { List, showToast, ToastStyle } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { TweetV1 } from "twitter-api-v2";
-import { TweetListItem } from "./components/tweet";
-import { twitterClient } from "./twitterapi";
+import { TweetListItem } from "../components/tweet";
+import { loggedInUserAccount, twitterClient } from "../twitterapi";
 
-export default function TweetList() {
+export default function MyTweetList() {
   const { data, error, isLoading } = useSearch("");
   if (error) {
     showToast(ToastStyle.Failure, "Error", error);
   }
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter Tweets by name...">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter My Tweets by name...">
       {data?.map((tweet) => (
         <TweetListItem key={tweet.id_str} tweet={tweet} />
       ))}
@@ -39,12 +39,10 @@ export function useSearch(query: string | undefined): {
       setError(undefined);
 
       try {
-        const homeTimeline = await twitterClient.v1.homeTimeline({
-          exclude_replies: true,
-        });
+        const account = await loggedInUserAccount();
+        const mytweets = await twitterClient.v1.userTimelineByUsername(account.screen_name);
         let tweets: TweetV1[] = [];
-        const tweetsRaw = await homeTimeline.fetchLast(0);
-        for (const t of tweetsRaw) {
+        for (const t of mytweets.tweets) {
           tweets.push(t);
         }
         if (!cancel) {

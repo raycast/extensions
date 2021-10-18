@@ -8,9 +8,16 @@
   "commands": [
     {
       "name": "timeline",
-      "title": "Timeline",
+      "title": "Recent Tweets",
       "subtitle": "Twitter",
       "description": "Show Twitter timeline",
+      "mode": "view"
+    },
+    {
+      "name": "mytweets",
+      "title": "My Recent Tweets",
+      "subtitle": "Twitter",
+      "description": "Show My Tweets",
       "mode": "view"
     },
     {

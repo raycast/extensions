@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { TwitterApi } from "twitter-api-v2";
+import { AccountSettingsV1, TwitterApi } from "twitter-api-v2";
 
 function createClient(): TwitterApi {
     const pref = getPreferenceValues();
@@ -17,3 +17,13 @@ function createClient(): TwitterApi {
 }
 
 export const twitterClient = createClient();
+
+let activeAccount: AccountSettingsV1 | undefined;
+
+export async function loggedInUserAccount(): Promise<AccountSettingsV1> {
+    if (!activeAccount) {
+        const account = await twitterClient.v1.accountSettings();
+        activeAccount = account;
+    }
+    return activeAccount;
+}
