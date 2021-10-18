@@ -25,19 +25,18 @@ export default function ListCommand(): JSX.Element {
 
   const [sessionToken, setSessionToken] = useSessionToken();
 
-  if (sessionToken === undefined) return <Detail isLoading={true} />;
-  else if (sessionToken === null) return <UnlockForm setSessionToken={setSessionToken} />;
+  if (sessionToken === null) return <UnlockForm setSessionToken={setSessionToken} />;
 
   return <ItemList sessionToken={sessionToken} setSessionToken={setSessionToken} />;
 }
 
-function ItemList(props: { sessionToken: string; setSessionToken: (sessionToken: string | null) => void }) {
+function ItemList(props: { sessionToken: string | undefined; setSessionToken: (sessionToken: string | null) => void }) {
   const { sessionToken, setSessionToken } = props;
   const [state, setState] = useState<{ folders: Folder[]; items: Item[] }>();
 
   async function loadItems(sessionToken: string) {
     try {
-      console.debug("Get Items");
+      console.debug("Get Items and Folders");
       const itemPromise = execa("bw", ["list", "items", "--session", sessionToken], { env: getWorkflowEnv() }).then(
         (res) => res.stdout
       );
@@ -45,8 +44,10 @@ function ItemList(props: { sessionToken: string; setSessionToken: (sessionToken:
         (res) => res.stdout
       );
       const [itemString, folderString] = await Promise.all([itemPromise, folderPromise]);
+
       const items = JSON.parse(itemString);
       const folders = JSON.parse(folderString);
+
       console.debug(`Loaded ${items.length} Items`);
       setState({ items, folders });
     } catch (error) {
