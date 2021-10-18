@@ -1,5 +1,6 @@
 import {
   ActionPanel,
+  Color,
   CopyToClipboardAction,
   environment,
   Icon,
@@ -74,6 +75,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
       </ActionPanel.Section>
       <ActionPanel.Section>
         <OpenInBrowserAction
+          icon={{ source: "pull-request.png", tintColor: Color.PrimaryText }}
           title="Open Pull Requests"
           url={`${props.repository.url}/pulls`}
           shortcut={{ modifiers: ["cmd"], key: "p" }}
@@ -81,6 +83,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
         />
         {props.repository.hasIssuesEnabled && (
           <OpenInBrowserAction
+            icon={{ source: "issue.png", tintColor: Color.PrimaryText }}
             title="Open Issues"
             url={`${props.repository.url}/issues`}
             shortcut={{ modifiers: ["cmd"], key: "i" }}
@@ -89,6 +92,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
         )}
         {props.repository.hasWikiEnabled && (
           <OpenInBrowserAction
+            icon={{ source: "wiki.png", tintColor: Color.PrimaryText }}
             title="Open Wiki"
             url={`${props.repository.url}/wiki`}
             shortcut={{ modifiers: ["cmd"], key: "w" }}
@@ -97,6 +101,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
         )}
         {props.repository.hasProjectsEnabled && (
           <OpenInBrowserAction
+            icon={{ source: "project.png", tintColor: Color.PrimaryText }}
             title="Open Projects"
             url={`${props.repository.url}/projects`}
             shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}

@@ -2,7 +2,7 @@
   "name": "github-repository-search",
   "title": "GitHub Repository Search",
   "description": "Search repositories on GitHub and open previously visited ones faster.",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "thomas",
   "license": "MIT",
   "commands": [
