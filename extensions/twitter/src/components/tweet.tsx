@@ -1,5 +1,6 @@
 import { ActionPanel, Detail, Image, ImageMask, List, OpenInBrowserAction, PushAction } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
+import { ReplyTweetAction } from "./tweet_actions";
 
 function getTweetUrl(tweet: TweetV1): string {
   return `https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`;
@@ -34,6 +35,7 @@ export function TweetListItem(props: { tweet: TweetV1 }) {
       actions={
         <ActionPanel>
           <PushAction title="Show Tweet" target={<TweetDetail tweet={t} />} />
+          <ReplyTweetAction tweet={t} />
           <OpenInBrowserAction url={getTweetUrl(t)} />
         </ActionPanel>
       }
@@ -58,6 +60,7 @@ export function TweetDetail(props: { tweet: TweetV1 }) {
       actions={
         <ActionPanel>
           <OpenInBrowserAction url={getTweetUrl(t)} />
+          <ReplyTweetAction tweet={t} />
         </ActionPanel>
       }
     />
