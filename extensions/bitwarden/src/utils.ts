@@ -11,12 +11,14 @@ export function codeBlock(content: string): string {
 export function filterNullishPropertiesFromObject(obj: any): any {
   if (!obj) return obj;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const newEntries = Object.entries(obj).filter(([_, value]) => {
-    const nullish = value ?? null;
-    return nullish !== null;
-  });
-
-  return Object.fromEntries(newEntries);
+  const noNullish = {}
+  for key in obj {
+    if (Object.hasOwnProperty(key) && (obj[key] ?? false)) {
+      noNullish[key] = obj[key];
+    }
+  }
+  
+  return noNullish;
 }
 
 export function getWorkflowEnv(): { PATH: string; BW_CLIENTID: string; BW_CLIENTSECRET: string } {
