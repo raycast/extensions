@@ -142,7 +142,7 @@ function ItemListItem(props: { item: Item; folders: Folder[]; additionalActions?
         <ActionPanel>
           {item.login?.password ? (
             <ActionPanel.Section>
-              <CopyToClipboardAction title="Copy Password" content={item.login?.password} />
+              <CopyToClipboardAction title="Copy Password" content={item.login.password} />
             </ActionPanel.Section>
           ) : null}
           {item.login?.username ? (
