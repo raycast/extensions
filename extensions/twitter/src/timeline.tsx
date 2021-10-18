@@ -20,7 +20,9 @@ export default function TweetList() {
 function TweetListItem(props: { tweet: TweetV1 }) {
   const t = props.tweet;
 
-  const text = t.full_text ? t.full_text.trim() : "";
+  const maxLength = 80;
+  const textRaw = t.full_text ? t.full_text.trim() : "";
+  const text = textRaw.slice(0, maxLength) + (textRaw.length > maxLength ? " ..." : "");
 
   const imgUrl = t.user.profile_image_url_https;
   const icon: Image | undefined = imgUrl
@@ -30,7 +32,10 @@ function TweetListItem(props: { tweet: TweetV1 }) {
   const tweetUrl = `https://twitter.com/${t.user.screen_name}/status/${t.id_str}`;
   const urls = t.entities.urls;
   const hasImage = urls && urls.length > 0;
-  const hasImageText = hasImage ? "🖼️ ," : "";
+  let states = [`💬 ${t.reply_count || 0}`, `🔁 ${t.retweet_count}`, `❤️ ${t.favorite_count}`];
+  if (hasImage) {
+    states = ["🖼️", ...states];
+  }
 
   return (
     <List.Item
@@ -38,7 +43,7 @@ function TweetListItem(props: { tweet: TweetV1 }) {
       key={t.id_str}
       title={text}
       icon={icon}
-      accessoryTitle={`${hasImageText}RT ${t.retweet_count}, 👍 ${t.favorite_count}`}
+      accessoryTitle={states.join("  ")}
       actions={
         <ActionPanel>
           <OpenInBrowserAction url={tweetUrl} />
