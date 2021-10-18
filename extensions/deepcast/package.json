@@ -8,10 +8,20 @@
   "commands": [
     {
       "name": "index",
-      "title": "Deepcast",
-      "subtitle": "",
-      "description": "",
+      "title": "Translate",
+      "subtitle": "Deepcast",
+      "description": "Translate text using DeepL",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "key",
+      "type": "password",
+      "required": true,
+      "title": "API key",
+      "description": "Your DeepL API key",
+      "placeholder": "Enter your free DeepL API key"
     }
   ],
   "dependencies": {
