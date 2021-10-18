@@ -9,11 +9,9 @@ export function useSessionToken(): [string | null | undefined, (sessionToken: st
 
   useEffect(() => {
     async function getSessionToken() {
-      console.debug("Get Session Token");
       const sessionToken = await getLocalStorageItem<string>(LocalStorageSessionKey);
 
       // Check if last session token is still valid
-      console.debug("Get Status");
       const { stdout: jsonStatus } = await execa(
         "bw",
         sessionToken ? ["status", "--session", sessionToken] : ["status"],

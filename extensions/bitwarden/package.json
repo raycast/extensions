@@ -1,45 +1,45 @@
 {
   "name": "bitwarden",
   "title": "Search Bitwarden Vault Items",
-  "description": "Access your Bitwarden Vault Items from Raycast.\n Requires the bitwarden CLI to be installed. An installation guide is available here: https://bitwarden.com/help/article/cli/#download-and-install",
+  "description": "Access your Bitwarden vault from Raycast. Requires installing the Bitwarden CLI separately.",
   "icon": "bitwarden.png",
   "author": "pomdtr",
   "license": "MIT",
   "keywords": ["bitwarden", "secrets", "passwords"],
   "commands": [
     {
-      "name": "list",
+      "name": "search",
       "title": "Search Vault Items",
       "subtitle": "Bitwarden",
-      "description": "Browse Bitwarden Items.",
+      "description": "Search all items in the authenticated Bitwarden vault.",
       "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "clientId",
-      "type": "textfield",
+      "type": "password",
       "required": true,
       "title": "Client ID",
-      "description": "This value is unique to your account and does not change. See https://bitwarden.com/help/article/personal-api-key/#get-your-personal-api-key for instructions.",
-      "placeholder": "Enter your Client ID"
+      "description": "The client_id value seen in the My Account section of a Bitwarden web vault. More info:\nhttps://bitwarden.com/help/article/personal-api-key/",
+      "placeholder": "client_id"
     },
     {
       "name": "clientSecret",
       "type": "password",
       "required": true,
       "title": "Client Secret",
-      "description": "This value is unique and can be rotated. See https://bitwarden.com/help/article/personal-api-key/#get-your-personal-api-key for instructions.",
-      "placeholder": "Enter your Client Secret"
+      "description": "The client_secret value seen in the My Account section of a Bitwarden web vault. More info:\nhttps://bitwarden.com/help/article/personal-api-key/",
+      "placeholder": "client_secret"
     },
     {
-      "name": "path",
+      "name": "CliPath",
       "type": "textfield",
-      "default": "/usr/local/bin",
+      "default": "/usr/local/bin/bw",
       "required": false,
-      "title": "Path Environment Variable",
-      "description": "Folder where the bitwarden-cli is located. Default Value match with the standard brew install location.",
-      "placeholder": "Enter your Client Secret"
+      "title": "Bitwarden CLI Installation Path",
+      "description": "Location of the local Bitwarden CLI installation. Defaults to '/usr/local/bin/bw'.",
+      "placeholder": "CLI Installation Path"
     }
   ],
   "dependencies": {

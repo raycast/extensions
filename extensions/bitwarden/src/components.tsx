@@ -1,30 +1,43 @@
-import { showToast, ToastStyle, Form, ActionPanel, SubmitFormAction, Detail, CopyToClipboardAction } from "@raycast/api";
+import {
+  showToast,
+  ToastStyle,
+  Form,
+  ActionPanel,
+  SubmitFormAction,
+  Detail,
+  CopyToClipboardAction,
+  getPreferenceValues,
+} from "@raycast/api";
 import execa from "execa";
 import { getWorkflowEnv } from "./utils";
 
 export function TroubleshootingGuide(): JSX.Element {
-  showToast(ToastStyle.Failure, "Bitwarden Cli not found");
-  return (
-    <Detail
-      markdown={`# The Bitwarden Cli was not found
-
+  showToast(ToastStyle.Failure, "Bitwarden CLI not found");
+  const { path } = getPreferenceValues();
+  const markdown = `# The Bitwarden CLI was not found
 ## Please check that:
 
-- The Bitwarden CLI is [correctly installed](https://bitwarden.com/help/article/cli/#download-and-install)
-- The path of the installation match with the extensions settings
-`}
-   actions={
-       <ActionPanel>
-           <CopyToClipboardAction title={"Copy Brew Install Command"} content="brew install bitwarden-cli"/>
-       </ActionPanel>
-   } />
+1. The Bitwarden CLI is [correctly installed](https://bitwarden.com/help/article/cli/#download-and-install)
+1. The path of the installation matches the Bitwarden CLI Installation Path extension setting
+> Currently set to: \`${path}\`
+`;
+
+  return (
+    <Detail
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <CopyToClipboardAction title={"Copy Homebrew Installation Command"} content="brew install bitwarden-cli" />
+        </ActionPanel>
+      }
+    />
   );
 }
 
 export function UnlockForm(props: { setSessionToken: (session: string) => void }): JSX.Element {
   async function onSubmit(values: { password: string }) {
     try {
-      const toast = await showToast(ToastStyle.Animated, "Unlocking Your Vault...", "It may takes some time");
+      const toast = await showToast(ToastStyle.Animated, "Unlocking Vault...", "Please wait");
       const { stdout: sessionToken } = await execa("bw", ["unlock", values.password, "--raw"], {
         env: getWorkflowEnv(),
       });
@@ -44,7 +57,7 @@ export function UnlockForm(props: { setSessionToken: (session: string) => void }
         </ActionPanel>
       }
     >
-      <Form.TextField id="password" title="Master password" />
+      <Form.TextField id="password" title="Master Password" />
     </Form>
   );
 }
