@@ -1,0 +1,83 @@
+{
+  "name": "opsgenie",
+  "title": "opsgenie",
+  "description": "Manage Opsgenie Alerts",
+  "icon": "icon.png",
+  "author": "ricoberger",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "alerts",
+      "title": "Opsgenie Alerts",
+      "subtitle": "",
+      "description": "Show a list of Opsgenie alerts",
+      "mode": "view"
+    },
+    {
+      "name": "incidents",
+      "title": "Opsgenie Incidents",
+      "subtitle": "",
+      "description": "Show a list of Opsgenie incidents",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  },
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "type": "dropdown",
+      "required": true,
+      "title": "API URL",
+      "description": "Opsgenie API URL",
+      "default": "https://api.eu.opsgenie.com",
+      "data": [
+        {
+          "title": "api.eu.opsgenie.com",
+          "value": "https://api.eu.opsgenie.com"
+        },
+        {
+          "title": "api.opsgenie.com",
+          "value": "https://api.opsgenie.com"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Opsgenie API Key"
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "title": "Username",
+      "description": "Username, which should be used for alert actions"
+    },
+    {
+      "name": "url",
+      "type": "textfield",
+      "required": true,
+      "title": "URL",
+      "description": "The URL of your Opsgenie account"
+    }
+  ]
+}
