@@ -1,13 +1,13 @@
 {
-  "name": "google-chrome",
-  "title": "Google Chrome",
-  "description": "Manage Google Chrome.",
+  "name": "google-chrome-go-to-tab",
+  "title": "Google Chrome go to tab",
+  "description": "Go to a opened Google Chrome tab.",
   "icon": "google_chrome-icon.png",
   "author": "Codely",
   "license": "MIT",
   "commands": [
     {
-      "name": "go-to-tab",
+      "name": "google-chrome-go-to-tab",
       "title": "Go to tab",
       "subtitle": "Google Chrome",
       "description": "List all tabs and go to the selected.",

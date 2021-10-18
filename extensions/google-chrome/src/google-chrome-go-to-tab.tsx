@@ -97,12 +97,12 @@ function TabListItem(props: { tab: Tab; index: number }) {
 function Actions(props: { tab: Tab }) {
   return (
     <ActionPanel title={props.tab.title}>
-      <GoToTab tab={props.tab}/>
+      <GoogleChromeGoToTab tab={props.tab}/>
     </ActionPanel>
   );
 }
 
-function GoToTab(props: { tab: Tab }) {
+function GoogleChromeGoToTab(props: { tab: Tab }) {
   async function handleAction() {
     await setActiveTab(props.tab);
     await closeMainWindow();
