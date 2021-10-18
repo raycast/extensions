@@ -31,12 +31,13 @@ async function submit(values: TweetFormValues, replyTweet?: TweetV1 | undefined)
 
 export function TweetSendForm(props: { replyTweet?: TweetV1 | undefined }) {
   const rt = props.replyTweet;
+  const submitText = rt ? "Send Reply" : "Send Tweet";
   return (
     <Form
       onSubmit={submit}
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Send Tweet" onSubmit={(values: TweetFormValues) => submit(values, rt)} />
+          <SubmitFormAction title={submitText} onSubmit={(values: TweetFormValues) => submit(values, rt)} />
         </ActionPanel>
       }
     >
