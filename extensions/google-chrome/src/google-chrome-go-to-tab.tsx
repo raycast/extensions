@@ -1,4 +1,4 @@
-import {ActionPanel, closeMainWindow, Icon, List} from "@raycast/api";
+import {ActionPanel, closeMainWindow, getPreferenceValues, Icon, List} from "@raycast/api";
 import {runAppleScript} from "run-applescript";
 import {useEffect, useState} from "react";
 
@@ -24,7 +24,12 @@ class Tab {
   }
 }
 
-async function getOpenTabs(): Promise<Tab[]> {
+async function getOpenTabs(showFavicons: boolean): Promise<Tab[]> {
+  const faviconFormula = showFavicons
+    ? `execute of tab _tab_index of window _window_index javascript ¬
+                    "document.head.querySelector('link[rel~=icon]').href;"`
+    : '""'
+
   const openTabs = await runAppleScript(`
       set _output to ""
       tell application "Google Chrome"
@@ -34,8 +39,7 @@ async function getOpenTabs(): Promise<Tab[]> {
           repeat with t in tabs of w
             set _title to get title of t
             set _url to get URL of t
-            set _favicon to execute of tab _tab_index of window _window_index javascript ¬
-                    "document.head.querySelector('link[rel~=icon]').href;"
+            set _favicon to ${faviconFormula}
             set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _window_index & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "\\n")
             set _tab_index to _tab_index + 1
           end repeat
@@ -64,11 +68,14 @@ interface State {
 }
 
 export default function Command() {
+  const { showFavicons } = getPreferenceValues();
+  const hasToShowFavicons = showFavicons as boolean;
+
   const [state, setState] = useState<State>({});
 
   useEffect(() => {
     async function getTabs() {
-      setState({tabs: await getOpenTabs()});
+      setState({tabs: await getOpenTabs(hasToShowFavicons)});
     }
 
     getTabs();
@@ -76,20 +83,20 @@ export default function Command() {
 
   return (
     <List>
-      {state.tabs?.map((tab, index) => (
-        <TabListItem key={tab.key()} tab={tab} index={index}/>
+      {state.tabs?.map((tab) => (
+        <TabListItem key={tab.key()} tab={tab} showFavicon={hasToShowFavicons} />
       ))}
     </List>
   );
 }
 
-function TabListItem(props: { tab: Tab; index: number }) {
+function TabListItem(props: { tab: Tab; showFavicon: boolean; }) {
   return (
     <List.Item
-      icon={props.tab.favicon}
       title={props.tab.title}
       subtitle={props.tab.url}
       actions={<Actions tab={props.tab}/>}
+      { ...( props.showFavicon && { icon: props.tab.favicon } ) }
     />
   );
 }

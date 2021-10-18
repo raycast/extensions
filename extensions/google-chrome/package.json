@@ -1,7 +1,7 @@
 {
   "name": "google-chrome-go-to-tab",
-  "title": "Google Chrome go to tab",
-  "description": "Go to a opened Google Chrome tab.",
+  "title": "Google Chrome Go to Tab",
+  "description": "Go to an opened Google Chrome tab.",
   "icon": "google_chrome-icon.png",
   "author": "Codely",
   "license": "MIT",
@@ -12,6 +12,16 @@
       "subtitle": "Google Chrome",
       "description": "List all tabs and go to the selected.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showFavicons",
+      "title": "Show favicons in the search",
+      "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Google Chrome profile.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
     }
   ],
   "dependencies": {
