@@ -22,18 +22,11 @@ jobs:
         run: ./generate-api-reference.js
 
       - name: Commit
-        run: |
-          git config --global user.email "bot@raycast.com"
-          git config --global user.name "raycastbot"
+        uses: raycast/github-actions/git-commit@master
+        with:
+          repo_dir: ${{ github.workspace }}
+          message: "Docs: Generate API reference"
 
-          if ! [[ -z $(git status -s) ]] ; then
-            git add .
-            git status .
-            git commit --message "Docs: Generate API reference"
-            git push -u origin $(git rev-parse --abbrev-ref HEAD)
-          else
-            echo "No changes, skipping sync."
-          fi
       - name: Notify Failure to Slack
         if: failure()
         uses: edge/simple-slack-notify@master
