@@ -28,6 +28,9 @@ function TweetListItem(props: { tweet: TweetV1 }) {
     : undefined;
 
   const tweetUrl = `https://twitter.com/${t.user.screen_name}/status/${t.id_str}`;
+  const urls = t.entities.urls;
+  const hasImage = urls && urls.length > 0;
+  const hasImageText = hasImage ? "🖼️ ," : "";
 
   return (
     <List.Item
@@ -35,7 +38,7 @@ function TweetListItem(props: { tweet: TweetV1 }) {
       key={t.id_str}
       title={text}
       icon={icon}
-      accessoryTitle={`RT ${t.retweet_count}, ❤ ${t.favorite_count}`}
+      accessoryTitle={`${hasImageText}RT ${t.retweet_count}, 👍 ${t.favorite_count}`}
       actions={
         <ActionPanel>
           <OpenInBrowserAction url={tweetUrl} />
