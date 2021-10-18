@@ -33,7 +33,7 @@ export function UnlockForm(props: { setSessionToken: (session: string) => void }
       props.setSessionToken(sessionToken);
     } catch (error) {
       console.log(error);
-      showToast(ToastStyle.Failure, "Wrong Password");
+      showToast(ToastStyle.Failure, "Failed to unlock vault", "Invalid password");
     }
   }
   return (
