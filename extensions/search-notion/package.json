@@ -8,7 +8,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "commandsearchnotion",
+      "name": "commandSearchNotion",
       "title": "Search Pages",
       "subtitle": "Notion",
       "description": "Search Notion Pages",
