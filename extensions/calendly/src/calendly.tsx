@@ -10,12 +10,21 @@ import {
   OpenInBrowserAction,
   Detail,
   showToast,
-  getLocalStorageItem,
   getPreferenceValues,
   ImageMask,
+  getLocalStorageItem,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Preferences, CalendlyEventType, CalendlyUser, createSingleUseLink, getEventTypes } from "./services/calendly";
+import {
+  Preferences,
+  CalendlyEventType,
+  CalendlyUser,
+  createSingleUseLink,
+  getUserFromCache as getUser,
+  getEventTypesFromCache as getEventTypes,
+  refreshData,
+} from "./services/calendly";
+import moment from "moment";
 
 const tokenURL = "https://calendly.com/integrations/api_webhooks";
 
@@ -35,16 +44,23 @@ export default function Calendly() {
   const [user, setUser] = useState<CalendlyUser | undefined>(undefined);
   const { defaultAction }: Preferences = getPreferenceValues();
 
+  async function init() {
+    const updated_ts = await getLocalStorageItem("updated_ts");
+    console.log({ updated_ts });
+    if (updated_ts === undefined || moment(updated_ts.toString()).isBefore(moment().subtract(24, "hours"))) {
+      // either no cache, or cache is 24+ hours old
+      console.log("refreshing data");
+      await refreshData();
+    }
+    const user = await getUser();
+    setUser(user);
+    const eventTypes = await getEventTypes();
+    setItems(eventTypes);
+  }
+
   useEffect(() => {
-    getLocalStorageItem("user").then((data) => {
-      if (data) {
-        setUser(JSON.parse(data.toString()));
-      }
-    });
-    getEventTypes()
-      .then((data) => {
-        setItems(data);
-      })
+    init()
+      .then()
       .catch((error) => {
         if (error.response.status === 401) {
           setShowError(true);

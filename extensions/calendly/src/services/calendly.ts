@@ -67,22 +67,34 @@ async function calendlyAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) 
 async function getCurrentUser(): Promise<CalendlyUser> {
   const data = await calendlyAPI<CalendlyUserResource>({ url: "/users/me" });
   const resource = data.data.resource;
-  setLocalStorageItem("user", JSON.stringify(resource));
   return resource;
 }
 
-export async function getEventTypes() {
-  let user: undefined | CalendlyUser = undefined;
-  const cache = await getLocalStorageItem("user");
-  if (cache) {
-    user = JSON.parse(cache.toString());
-  }
-  if (!user) {
-    user = await getCurrentUser();
-  }
+async function getEventTypes() {
+  const user = await getUserFromCache();
   const data = await calendlyAPI<CalendlyEventTypeResponse>({ url: "/event_types", params: { user: user.uri } });
   const collection = _.filter(data.data.collection, "active");
   return collection;
+}
+
+export async function refreshData() {
+  const user = await getCurrentUser();
+  setLocalStorageItem("user", JSON.stringify(user));
+  const eventTypes = await getEventTypes();
+  setLocalStorageItem("eventTypes", JSON.stringify(eventTypes));
+  setLocalStorageItem("updated_ts", new Date().toISOString());
+}
+
+export async function getUserFromCache(): Promise<CalendlyUser> {
+  const cache = await getLocalStorageItem("user");
+  if (!cache) throw new Error("User not found in Cache");
+  return JSON.parse(cache.toString());
+}
+
+export async function getEventTypesFromCache(): Promise<CalendlyEventType[]> {
+  const cache = await getLocalStorageItem("eventTypes");
+  if (!cache) throw new Error("Event Types not found in Cache");
+  return JSON.parse(cache.toString());
 }
 
 export async function createSingleUseLink(event: CalendlyEventType) {
