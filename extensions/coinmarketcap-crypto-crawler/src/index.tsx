@@ -3,12 +3,12 @@ import { useState, useEffect } from "react";
 import $ from "cheerio";
 import fetch from "node-fetch";
 
-const BASE_URL =  'https://coinmarketcap.com/currencies/'
+const BASE_URL = 'https://coinmarketcap.com/currencies/'
 
 type PriceInfo = {
-  priceValueText : string;
-  priceDiffText : string;
-  coinName : string;
+  priceValueText: string;
+  priceDiffText: string;
+  coinName: string;
 };
 export default function ArticleList() {
   const [coinName, setCoinName] = useState('')
@@ -24,7 +24,7 @@ export default function ArticleList() {
     setNotFound(false)
 
     fetchPrice(search).then((priceInfo: PriceInfo) => {
-      const { priceValueText = '', priceDiffText = '',coinName='' } = priceInfo;
+      const { priceValueText = '', priceDiffText = '', coinName = '' } = priceInfo;
       setCurrencyPrice(priceValueText);
       setPriceDiff(priceDiffText);
       setCoinName(coinName);
@@ -45,8 +45,8 @@ export default function ArticleList() {
         subtitle={priceDiff}
         icon={Icon.Star}
         actions={
-          <ActionPanel> 
-                       <OpenInBrowserAction url={`${BASE_URL}${coinName}`} />  
+          <ActionPanel>
+            <OpenInBrowserAction url={`${BASE_URL}${coinName}`} />
           </ActionPanel>
         }
 
@@ -73,7 +73,7 @@ async function fetchPrice(coinName: string) {
       const priceDiffText = `${priceDirection} ${priceDiffValue}`
 
       const priceValueText = priceValue.text()
-      if (!priceValueText) return { priceValueText = '', priceDiffText = '',coinName=''};
+      if (!priceValueText) return { priceValueText: '', priceDiffText: '', coinName: '' };
 
       return { priceValueText, priceDiffText, coinName }
     });
