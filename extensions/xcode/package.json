@@ -76,7 +76,9 @@
     "Simulator",
     "Swift",
     "Swift Package",
-    "SPM"
+    "SPM",
+    "Apple",
+    "Apple Developer"
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
