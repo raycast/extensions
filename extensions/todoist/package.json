@@ -1,0 +1,67 @@
+{
+  "name": "todoist",
+  "title": "Todoist",
+  "description": "Check your Todoist tasks and quickly create new ones",
+  "icon": "todoist.png",
+  "author": "thomaslombart",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "today",
+      "title": "Today Tasks",
+      "subtitle": "Todoist",
+      "description": "See your Todoist tasks due today.",
+      "mode": "view"
+    },
+    {
+      "name": "upcoming",
+      "title": "Upcoming Tasks",
+      "subtitle": "Todoist",
+      "description": "See your upcoming Todoist tasks grouped by due date.",
+      "mode": "view"
+    },
+    {
+      "name": "projects",
+      "title": "Search Projects",
+      "subtitle": "Todoist",
+      "description": "See your Todoist projects and tasks by project.",
+      "mode": "view"
+    },
+    {
+      "name": "create",
+      "title": "Create Task",
+      "subtitle": "Todoist",
+      "description": "Create a Todoist task.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Todoist Token",
+      "description": "Your Todoist Token. Find it in Todoist integration settings view.",
+      "placeholder": "Enter your Todoist token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "axios": "^0.21.4",
+    "date-fns": "^2.25.0",
+    "swr": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.0",
+    "@types/react": "^17.0.30",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
