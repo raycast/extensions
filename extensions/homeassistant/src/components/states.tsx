@@ -1,6 +1,5 @@
 import {
   ActionPanel,
-  ActionPanelItem,
   Color,
   CopyToClipboardAction,
   Icon,
@@ -17,6 +16,7 @@ import { State } from "../haapi";
 import { useState, useEffect } from "react";
 import { createHomeAssistantClient } from "../common";
 import { EntityAttributesList } from "./attributes";
+import { useHAStates } from "../hooks";
 
 export const ha = createHomeAssistantClient();
 
@@ -37,12 +37,8 @@ export function ShowAttributesAction(props: { state: State }) {
 
 export function StatesList(props: { domain: string }) {
   const [searchText, setSearchText] = useState<string>();
-  const [updateTimestamp, setUpdateTimestamp] = useState<Date>(new Date());
-  const { states, error, isLoading } = useSearch(searchText, props.domain, updateTimestamp);
-
-  const refreshStates = () => {
-    setUpdateTimestamp(new Date());
-  };
+  const { states: allStates, error, isLoading } = useHAStates();
+  const { states } = useSearch(searchText, props.domain, allStates);
 
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search Home Assistant states", error);
@@ -52,6 +48,21 @@ export function StatesList(props: { domain: string }) {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
+  const extraTitle = (state: State): string => {
+    try {
+      const e = state.entity_id;
+      if (e.startsWith("cover") && state.attributes.hasOwnProperty("current_position")) {
+        const p = state.attributes.current_position;
+        if (p > 0 && p < 100) {
+          return `${p}% | `;
+        }
+      } else if (e.startsWith("climate") && state.attributes.hasOwnProperty("current_temperature")) {
+        return `${state.attributes.current_temperature} | `;
+      }
+    } catch (e: any) {}
+    return "";
+  };
+
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
       {states?.map((state) => (
@@ -59,8 +70,8 @@ export function StatesList(props: { domain: string }) {
           key={state.entity_id}
           title={state.attributes.friendly_name || state.entity_id}
           subtitle={state.entity_id}
-          accessoryTitle={state.state}
-          actions={<StateActionPanel state={state} refreshStates={refreshStates} />}
+          accessoryTitle={extraTitle(state) + state.state}
+          actions={<StateActionPanel state={state} />}
         />
       ))}
     </List>
@@ -71,26 +82,6 @@ export function StateActionPanel(props: { state: State; refreshStates: () => voi
   const state = props.state;
   const domain = props.state.entity_id.split(".")[0];
   const entityID = props.state.entity_id;
-  const refreshStates = props.refreshStates;
-
-  function StateActionItem(props: {
-    title: string;
-    onAction: () => Promise<void>;
-    icon?: ImageLike | undefined;
-    shortcut?: KeyboardShortcut | undefined;
-  }) {
-    return (
-      <ActionPanel.Item
-        title={props.title}
-        onAction={async () => {
-          await props.onAction();
-          refreshStates();
-        }}
-        icon={props.icon}
-        shortcut={props.shortcut}
-      />
-    );
-  }
 
   switch (domain) {
     case "cover": {
@@ -236,7 +227,7 @@ export function StateActionPanel(props: { state: State; refreshStates: () => voi
               icon={{ source: "thermometer.png", tintColor: Color.PrimaryText }}
             >
               {temps.map((t) => (
-                <StateActionItem
+                <ActionPanel.Item
                   key={t.toString()}
                   title={t.toString()}
                   onAction={async () => {
@@ -254,7 +245,7 @@ export function StateActionPanel(props: { state: State; refreshStates: () => voi
               icon={{ source: Icon.Gear, tintColor: Color.PrimaryText }}
             >
               {state.attributes.hvac_modes?.map((o: string) => (
-                <StateActionItem
+                <ActionPanel.Item
                   key={o}
                   title={o}
                   onAction={async () => {
@@ -273,7 +264,7 @@ export function StateActionPanel(props: { state: State; refreshStates: () => voi
               icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
             >
               {preset_modes?.map((o: string) => (
-                <StateActionItem
+                <ActionPanel.Item
                   key={o}
                   title={o}
                   onAction={async () => {
@@ -319,53 +310,33 @@ export function StateActionPanel(props: { state: State; refreshStates: () => voi
   }
 }
 
-export function useSearch(
+function useSearch(
   query: string | undefined,
   domain: string,
-  updateTimestamp: Date
+  allStates?: State[]
 ): {
   states?: State[];
-  error?: string;
-  isLoading: boolean;
 } {
   const [states, setStates] = useState<State[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  let cancel = false;
 
   useEffect(() => {
-    async function fetchData() {
-      if (query === null || cancel) {
-        return;
+    if (allStates) {
+      let haStates: State[] = allStates;
+      if (domain) {
+        haStates = haStates.filter((s) => s.entity_id.startsWith(domain));
       }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const haStates = await ha.getStates({ domain: domain, query: query || "" });
-
-        if (!cancel) {
-          setStates(haStates);
-        }
-      } catch (e: any) {
-        if (!cancel) {
-          setError(e.toString());
-        }
-      } finally {
-        if (!cancel) {
-          setIsLoading(false);
-        }
+      if (query) {
+        haStates = haStates.filter(
+          (e) =>
+            e.entity_id.toLowerCase().includes(query.toLowerCase()) ||
+            (e.attributes.friendly_name.toLowerCase() || "").includes(query.toLowerCase())
+        );
       }
+      haStates = haStates.slice(0, 100);
+      setStates(haStates);
+    } else {
+      setStates([]);
     }
-
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, [query, updateTimestamp]);
-
-  return { states, error, isLoading };
+  }, [query, allStates]);
+  return { states };
 }

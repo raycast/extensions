@@ -17,12 +17,21 @@ export enum DeploymentState {
 export interface Deployment {
   project: string
   state: DeploymentState
-  time: string
+  timeSince: string
+  rawTime: number
   id: string
   url: string
   domain: string
+  owner: string
 }
 
+export interface Team {
+  slug: string
+  id: string
+}
+
+// Fetch the username that belongs to the token given.
+// Use for filtering deployments by user and providing links later on
 export async function fetchUsername(): Promise<string> {
   try {
     const response = await fetch(apiURL + 'www/user', {
@@ -36,21 +45,50 @@ export async function fetchUsername(): Promise<string> {
     showToast(ToastStyle.Failure, 'Failed to fetch username')
     throw new Error('Failed to fetch username')
   }
-  return Promise.resolve('')
 }
 
+// Fetch teams that the user is apart of
+export async function fetchTeams(ignoredTeamIDs: string[]): Promise<Team[]> {
+  const response = await fetch(apiURL + 'v1/teams', {
+    method: 'get',
+    headers: headers,
+  })
+  const json = await response.json()
+  const teams: Team[] = []
+  for (const team of json.teams) {
+    teams.push({ id: team.id, slug: team.slug })
+  }
+  return teams.filter((t) => !ignoredTeamIDs.includes(t.id))
+}
+
+// Fetch deployments for the user and any teams they are apart of
 export async function fetchDeployments(
-  username: string
+  username: string,
+  teams: Team[]
+): Promise<Deployment[]> {
+  const deployments: Deployment[] = [...(await rawFetchDeployments(username))]
+  for (const team of teams) {
+    deployments.push(...(await rawFetchDeployments(username, team)))
+  }
+  return deployments.sort((a, b) => b.rawTime - a.rawTime)
+}
+
+// Raw function for fetching deployments
+async function rawFetchDeployments(
+  username: string,
+  team?: Team
 ): Promise<Deployment[]> {
   dayjs.extend(relativeTime)
-
   try {
-    const response = await fetch(apiURL + 'v8/projects', {
-      method: 'get',
-      headers: headers,
-    })
-    const json = await response.json()
     const deployments: Deployment[] = []
+    const response = await fetch(
+      apiURL + `v8/projects${team ? '?teamId=' + team.id : ''}`,
+      {
+        method: 'get',
+        headers: headers,
+      }
+    )
+    const json = await response.json()
     for (const project of json.projects) {
       for (const deployment of project.latestDeployments) {
         if (deployment.creator.username === username) {
@@ -67,15 +105,18 @@ export async function fetchDeployments(
               state = DeploymentState.failed
               break
           }
+          const owner = team ? team.slug : username
           deployments.push({
             project: project.name,
             state: state,
-            time: dayjs(deployment.createdAt).fromNow(),
+            timeSince: dayjs(deployment.createdAt).fromNow(),
             id: deployment.id,
-            url: `https://vercel.com/${username}/${
+            url: `https://vercel.com/${owner}/${
               project.name
             }/${deployment.id.replace('dpl_', '')}`,
             domain: deployment.alias[0],
+            owner,
+            rawTime: deployment.createdAt,
           })
           break
         }

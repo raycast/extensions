@@ -34,7 +34,7 @@ export default async () => {
 
 #### Return
 
-An array of [Application](../utilities.md#application).
+An array of [Application](https://developers.raycast.com/api-reference/utilities#application).
 
 ### getDefaultApplication
 
@@ -65,7 +65,7 @@ export default async () => {
 
 #### Return
 
-The default [Application](../utilities.md#application) that would open the file. Throws an error if no application was found.
+The default [Application](https://developers.raycast.com/api-reference/utilities#application) that would open the file. Throws an error if no application was found.
 
 ### randomId
 
@@ -164,8 +164,8 @@ A promise that resolves when all files are moved to the trash.
 
 An object that represents a locally installed application on the system.
 
-It can be used to open files or folders in a specific application. Use [getApplications](../utilities.md#getapplications) or
-[getDefaultApplication](../utilities.md#getdefaultapplication) to get applications that can open a specific file or folder.
+It can be used to open files or folders in a specific application. Use [getApplications](https://developers.raycast.com/api-reference/utilities#getapplications) or
+[getDefaultApplication](https://developers.raycast.com/api-reference/utilities#getdefaultapplication) to get applications that can open a specific file or folder.
 
 #### Properties
 
