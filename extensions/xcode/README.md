@@ -8,6 +8,10 @@
     Search and open your recent Xcode Projects, manage your Simulators & Apps, 
     <br/>
     view the latest Releases and quickly clear Xcode cache files.
+    <br/>
+    <a href="https://www.raycast.com/SvenTiigi/xcode">
+        View in Raycast Store
+    </a>
 </p>
 
 ## Development
