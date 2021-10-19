@@ -1,4 +1,4 @@
-import {ActionPanel, closeMainWindow, getPreferenceValues, Icon, List} from "@raycast/api";
+import {ActionPanel, closeMainWindow, CopyToClipboardAction, getPreferenceValues, Icon, List} from "@raycast/api";
 import {runAppleScript} from "run-applescript";
 import {useEffect, useState} from "react";
 
@@ -106,7 +106,9 @@ function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; }) {
     <List.Item
       title={props.tab.title}
       subtitle={props.tab.urlWithoutScheme()}
-      actions={<Actions tab={props.tab}/>}
+      actions={
+        <Actions tab={props.tab}/>
+      }
       icon={props.useOriginalFavicon ?  props.tab.favicon : props.tab.googleFavicon()}
     />
   );
@@ -116,6 +118,7 @@ function Actions(props: { tab: Tab }) {
   return (
     <ActionPanel title={props.tab.title}>
       <GoogleChromeGoToTab tab={props.tab}/>
+      <CopyToClipboardAction title="Copy URL" content={props.tab.url} />
     </ActionPanel>
   );
 }
