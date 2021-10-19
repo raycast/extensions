@@ -1,7 +1,7 @@
 {
   "name": "homeassistant",
   "title": "Home Assistant",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "author": "tonka3000",
   "license": "MIT",
   "description": "Home Assistant remote control. Control your house with Raycast 🚀",
@@ -101,19 +101,31 @@
       "title": "API Token",
       "description": "Your Home Assistant long-lived access token",
       "placeholder": "Enter your Home Assistant long-lived access token"
+    },
+    {
+      "name": "ignorecerts",
+      "type": "checkbox",
+      "label": "Ignore Certificates",
+      "required": false,
+      "default": false,
+      "title": "Network Settings",
+      "description": "Ignore Certificates",
+      "placeholder": "Ignore Certificates"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "home-assistant-js-websocket": "^5.11.1",
     "node-fetch": "^2.6.1",
-    "url-join": "^4.0.1"
+    "url-join": "^4.0.1",
+    "ws": "^8.2.3"
   },
   "devDependencies": {
     "@types/node": "^16.4.3",
     "@types/node-fetch": "^2.5.12",
     "@types/react": "^17.0.15",
     "@types/url-join": "^4.0.1",
+    "@types/ws": "^8.2.0",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.31.0",
