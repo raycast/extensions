@@ -1,0 +1,57 @@
+{
+  "name": "youdao-translate",
+  "title": "Youdao Translate",
+  "description": "Translate Content By Youdao API",
+  "icon": "translate.png",
+  "author": "tiancheng92",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Youdao Translate",
+      "subtitle": "Translate Content",
+      "description": "Translate Content By Youdao API",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "app_key",
+      "type": "textfield",
+      "required": true,
+      "title": "APP Key",
+      "description": "Key of your Youdao Translate APP code",
+      "placeholder": "Enter your Youdao Translate APP code. (you can find it in https://ai.youdao.com/console/)"
+    },
+    {
+      "name": "app_secret",
+      "type": "password",
+      "required": true,
+      "title": "APP Secret",
+      "description": "Secret of your Youdao Translate APP",
+      "placeholder": "Enter your Youdao Translate APP Secret. (you can find it in https://ai.youdao.com/console/)"
+    }
+  ],
+  "keywords": [
+    "tranlate",
+    "youdao"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.30",
+    "@types/node-fetch": "^2.5.12",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
