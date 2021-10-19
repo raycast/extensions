@@ -9,14 +9,14 @@
   "commands": [
     {
       "name": "latest_bookmarks",
-      "title": "Latest bookmarks",
+      "title": "Latest Bookmarks",
       "subtitle": "Raindrop.io",
       "description": "Display your latest bookmarks",
       "mode": "view"
     },
     {
       "name": "search",
-      "title": "Search bookmarks",
+      "title": "Search Bookmarks",
       "subtitle": "Raindrop.io",
       "description": "Search bookmarks using operators",
       "mode": "view"
