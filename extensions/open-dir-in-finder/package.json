@@ -9,8 +9,8 @@
     {
       "name": "index",
       "title": "Open in Finder",
-      "subtitle": "",
-      "description": "Template to run a script without any view",
+      "subtitle": "Opens a directory in Finder",
+      "description": "Type a directory to quickly open it in Finder",
       "mode": "view"
     }
   ],
