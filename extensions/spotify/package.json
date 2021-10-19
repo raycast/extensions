@@ -1,0 +1,112 @@
+{
+  "name": "spotify",
+  "title": "Spotify",
+  "description": "Control Spotify",
+  "icon": "icon.png",
+  "author": "theactualLeoEdwards",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "playpause",
+      "title": "Toggle Play/Pause",
+      "subtitle": "Spotify",
+      "description": "Toggles Spotify to Play or Pause.",
+      "mode": "no-view"
+    },
+    {
+      "name": "next",
+      "title": "Next",
+      "subtitle": "Spotify",
+      "description": "Skips to the next track in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous",
+      "title": "Back",
+      "subtitle": "Spotify",
+      "description": "Skips to the previous track in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "repeat",
+      "title": "Toggle Repeat",
+      "subtitle": "Spotify",
+      "description": "Toggle's whether Spotify is repeating.",
+      "mode": "no-view"
+    },
+    {
+      "name": "shuffle",
+      "title": "Toggle Shuffle",
+      "subtitle": "Spotify",
+      "description": "Toggle's whether Spotify is shuffling.",
+      "mode": "no-view"
+    },
+    {
+      "name": "volumeup",
+      "title": "Volume Up",
+      "subtitle": "Spotify",
+      "description": "Bring Spotify's volume up by 10%.",
+      "mode": "no-view"
+    },
+    {
+      "name": "volumedown",
+      "title": "Volume Down",
+      "subtitle": "Spotify",
+      "description": "Bring Spotify's volume down by 10%.",
+      "mode": "no-view"
+    },
+    {
+      "name": "copyurl",
+      "title": "Copy URL",
+      "subtitle": "Spotify",
+      "description": "Copies the current playing song's URL.",
+      "mode": "no-view"
+    },
+    {
+      "name": "trackinfo",
+      "title": "Track Info",
+      "subtitle": "Spotify",
+      "description": "Gets the current track's title, artist, and time.",
+      "mode": "no-view"
+    },
+    {
+      "name": "seekforward",
+      "title": "Seek Forward",
+      "subtitle": "Spotify",
+      "description": "Seeks Forward by 10 seconds.",
+      "mode": "no-view"
+    },
+    {
+      "name": "seekbackwards",
+      "title": "Seek Backward",
+      "subtitle": "Spotify",
+      "description": "Seeks Backward by 10 seconds.",
+      "mode": "no-view"
+    },
+    {
+      "name": "nowplaying",
+      "title": "Now Playing",
+      "subtitle": "Spotify",
+      "description": "Display the current playing song in Spotify or Apple Music.",
+      "mode": "inline"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
