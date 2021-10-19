@@ -48,6 +48,22 @@ export interface Item {
     card?:            Card;
 }
 
+export interface Identity {
+    "name": string
+"identity": string
+   "title": string
+   "firstName": string
+   "lastName": string
+   "address1": string
+   "city": string
+   "postalCode": number
+   "country": string
+   "company": string
+   "email": string
+   "phone": number
+   "username": string
+}
+
 export interface Card {
     cardholderName: string;
     brand:          string;

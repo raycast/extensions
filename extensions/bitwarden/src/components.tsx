@@ -8,8 +8,7 @@ import {
   CopyToClipboardAction,
   getPreferenceValues,
 } from "@raycast/api";
-import execa from "execa";
-import { getWorkflowEnv } from "./utils";
+import { BitwardenApi } from "./api";
 
 export function TroubleshootingGuide(): JSX.Element {
   showToast(ToastStyle.Failure, "Bitwarden CLI not found");
@@ -34,15 +33,13 @@ export function TroubleshootingGuide(): JSX.Element {
   );
 }
 
-export function UnlockForm(props: { setSessionToken: (session: string) => void }): JSX.Element {
+export function UnlockForm(props: { setSessionToken: (session: string) => void, bitwardenApi: BitwardenApi }): JSX.Element {
   async function onSubmit(values: { password: string }) {
     try {
       const toast = await showToast(ToastStyle.Animated, "Unlocking Vault...", "Please wait");
-      const { stdout: sessionToken } = await execa("bw", ["unlock", values.password, "--raw"], {
-        env: getWorkflowEnv(),
-      });
-
+      const sessionToken = await props.bitwardenApi.unlockVault(values.password)
       toast.hide();
+
       props.setSessionToken(sessionToken);
     } catch (error) {
       console.log(error);

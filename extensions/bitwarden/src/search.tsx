@@ -7,36 +7,36 @@ import {
   PushAction,
   Detail,
   CopyToClipboardAction,
-  ActionPanelChildren,
+  getPreferenceValues,
 } from "@raycast/api";
 import { Item, Folder } from "./types";
 import { useEffect, useState } from "react";
-import treeify from "treeify"
-import execa from "execa";
-import { filterNullishPropertiesFromObject, codeBlock, getWorkflowEnv, checkCliPath } from "./utils";
-import { useSessionToken } from "./hooks";
+import treeify from "treeify";
+import { filterNullishPropertiesFromObject, codeBlock } from "./utils";
+import { useBitwarden as useSessionToken } from "./hooks";
 import { TroubleshootingGuide, UnlockForm } from "./components";
+import { existsSync } from "fs";
+import { BitwardenApi } from "./api";
+import { dirname } from "path";
+
+const { cliPath, clientId, clientSecret } = getPreferenceValues();
+process.env.PATH = dirname(cliPath)
+const bitwardenApi = new BitwardenApi(clientId, clientSecret);
 
 export default function ListCommand(): JSX.Element {
-  if (!checkCliPath()) {
+  if (!existsSync(cliPath)) {
     return <TroubleshootingGuide />;
   }
 
-  const [sessionToken, setSessionToken] = useSessionToken();
+  const [sessionToken, setSessionToken] = useSessionToken(bitwardenApi);
 
-  if (sessionToken === null) return <UnlockForm setSessionToken={setSessionToken} />;
+  if (sessionToken === null) return <UnlockForm setSessionToken={setSessionToken} bitwardenApi={bitwardenApi} />;
 
-  return <ItemList sessionToken={sessionToken}/>;
+  return <ItemList bitwardenApi={bitwardenApi} sessionToken={sessionToken}/>;
 }
 
-async function listItems(type: string, sessionToken: string) {
-  return execa("bw", ["list", type, "--session", sessionToken], { env: getWorkflowEnv() }).then((res) =>
-    JSON.parse(res.stdout)
-  );
-}
-
-function ItemList(props: { sessionToken: string | undefined }) {
-  const { sessionToken } = props;
+function ItemList(props: { bitwardenApi: BitwardenApi; sessionToken: string | undefined }) {
+  const { bitwardenApi, sessionToken } = props;
   const [state, setState] = useState<{ folders: Folder[]; items: Item[] }>();
 
   const folderMap: Record<string, Folder> = {};
@@ -47,8 +47,8 @@ function ItemList(props: { sessionToken: string | undefined }) {
   async function loadItems(sessionToken: string) {
     try {
       const [items, folders] = await Promise.all([
-        listItems("items", sessionToken),
-        listItems("folders", sessionToken),
+        bitwardenApi.listItems<Item>("items", sessionToken),
+        bitwardenApi.listItems<Folder>("folders", sessionToken),
       ]);
 
       setState({ items, folders });
@@ -58,8 +58,7 @@ function ItemList(props: { sessionToken: string | undefined }) {
   }
 
   useEffect(() => {
-    if (!sessionToken) return;
-    loadItems(sessionToken);
+    if (sessionToken) loadItems(sessionToken);
   }, [sessionToken]);
 
   return (
@@ -69,33 +68,31 @@ function ItemList(props: { sessionToken: string | undefined }) {
           key={item.id}
           item={item}
           folder={item.folderId ? folderMap[item.folderId] : undefined}
-          additionalActions={[
-            <ActionPanel.Item
-              key="sync"
-              title="Sync with Remote"
-              icon={Icon.ArrowClockwise}
-              onAction={async () => {
-                if (sessionToken) {
-                  const toast = await showToast(ToastStyle.Animated, "Syncing Items...");
-                  await execa("bw", ["sync", "--session", sessionToken], { env: getWorkflowEnv() });
-                  await loadItems(sessionToken);
-                  await toast.hide();
-                }
-              }}
-            />,
-          ]}
+          refreshItems={async () => {
+            if (sessionToken) {
+              const toast = await showToast(ToastStyle.Animated, "Syncing Items...");
+              await bitwardenApi.sync(sessionToken)
+              await loadItems(sessionToken);
+              await toast.hide();
+            }
+          }}
         />
       ))}
     </List>
   );
 }
 
-function ItemListItem(props: { item: Item; folder: Folder | undefined; additionalActions?: ActionPanelChildren[] }) {
-  const { item, folder, additionalActions } = props;
+function ItemListItem(props: { item: Item; folder: Folder | undefined; refreshItems?: () => void }) {
+  const { item, folder, refreshItems } = props;
   const { type, name, notes, identity, login, secureNote, fields, passwordHistory, card } = item;
   const accessoryIcons = [];
   if (folder) accessoryIcons.push(`📂 ${folder.name}`);
   if (item.favorite) accessoryIcons.push(`⭐️`);
+
+  const fieldMap = Object.fromEntries(fields?.map((field) => [field.name, field.value]) || []);
+  const uriMap = Object.fromEntries(
+    login?.uris?.filter((uri) => uri.uri).map((uri, index) => [`uri${index + 1}`, uri.uri]) || []
+  );
 
   let icon: string | Icon | undefined;
   if (login?.uris?.[0]?.uri?.startsWith("https"))
@@ -120,7 +117,7 @@ function ItemListItem(props: { item: Item; folder: Folder | undefined; additiona
     passwordHistory,
   });
 
-  const tree = treeify.asTree(cleanItem, true)
+  const tree = treeify.asTree(cleanItem, true, false);
 
   return (
     <List.Item
@@ -132,55 +129,61 @@ function ItemListItem(props: { item: Item; folder: Folder | undefined; additiona
       subtitle={item.login?.username || undefined}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            {item.login?.password ? (
-              <CopyToClipboardAction title="Copy Password" content={item.login.password} />
-            ) : null}
-            {item.login?.username ? (
-              <CopyToClipboardAction
-                title="Copy Username"
-                content={item.login?.username}
-                shortcut={{ key: "enter", modifiers: ["opt"] }}
-              />
-            ) : null}
-          </ActionPanel.Section>
+          {item.login?.password ? <CopyToClipboardAction title="Copy Password" content={item.login.password} /> : null}
           {item.notes ? (
-            <ActionPanel.Section>
-              <PushAction
-                title="Show Secure Note"
-                icon={Icon.TextDocument}
-                target={
-                  <Detail
-                    markdown={codeBlock(item.notes)}
-                    actions={
-                      <ActionPanel>
-                        <CopyToClipboardAction content={item.notes} />
-                      </ActionPanel>
-                    }
-                  />
-                }
-              />
-              <CopyToClipboardAction title={"Copy Secure Note"} content={item.notes} />
-            </ActionPanel.Section>
-          ) : null}
-          <ActionPanel.Section>
             <PushAction
-              title={"Show Details"}
-              icon={Icon.Text}
-              shortcut={{ modifiers: ["cmd"], key: "i" }}
+              title="Show Secure Note"
+              icon={Icon.TextDocument}
               target={
                 <Detail
-                  markdown={codeBlock(tree)}
+                  markdown={codeBlock(item.notes)}
                   actions={
                     <ActionPanel>
-                      <CopyToClipboardAction content={tree} />
+                      <CopyToClipboardAction content={item.notes} />
                     </ActionPanel>
                   }
                 />
               }
             />
-          </ActionPanel.Section>
-          <ActionPanel.Section>{additionalActions}</ActionPanel.Section>
+          ) : null}
+          <ActionPanel.Submenu
+            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            icon={Icon.Clipboard}
+            title="Copy Property"
+          >
+            {Object.entries({
+              username: login?.username,
+              folder: folder?.name,
+              notes,
+              ...card,
+              ...identity,
+              ...fieldMap,
+              ...uriMap,
+            }).map(([title, content], index) =>
+              content ? <CopyToClipboardAction key={index} title={title} content={content as string | number} /> : null
+            )}
+          </ActionPanel.Submenu>
+          <PushAction
+            title={"Show Details"}
+            icon={Icon.Text}
+            shortcut={{ modifiers: ["cmd"], key: "i" }}
+            target={
+              <Detail
+                markdown={codeBlock(tree)}
+                actions={
+                  <ActionPanel>
+                    <CopyToClipboardAction content={tree} />
+                  </ActionPanel>
+                }
+              />
+            }
+          />
+          <ActionPanel.Item
+            title="Refresh Items"
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            icon={Icon.ArrowClockwise}
+            onAction={refreshItems}
+          />
         </ActionPanel>
       }
     />

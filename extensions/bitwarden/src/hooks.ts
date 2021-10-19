@@ -1,30 +1,23 @@
 import { getLocalStorageItem, showToast, ToastStyle, removeLocalStorageItem, setLocalStorageItem } from "@raycast/api";
-import execa from "execa";
 import { useState, useEffect } from "react";
-import { getWorkflowEnv } from "./utils";
+import { BitwardenApi } from "./api";
 
 const LocalStorageSessionKey = "sessionToken"
-export function useSessionToken(): [string | null | undefined, (sessionToken: string | null) => void] {
+export function useBitwarden(bitwardenApi: BitwardenApi): [string | null | undefined, (sessionToken: string | null) => void] {
   const [sessionToken, setSessionToken] = useState<string | null>();
 
   useEffect(() => {
     async function getSessionToken() {
       const sessionToken = await getLocalStorageItem<string>(LocalStorageSessionKey);
 
-      // Check if last session token is still valid
-      const { stdout: jsonStatus } = await execa(
-        "bw",
-        sessionToken ? ["status", "--session", sessionToken] : ["status"],
-        {env: getWorkflowEnv()}
-      );
-      const { status } = JSON.parse(jsonStatus);
+      const status = await bitwardenApi.getVaultStatus(sessionToken)
 
       if (status === "unlocked") setSessionToken(sessionToken);
       else if (status === "locked") setSessionToken(null);
       else if (status === "unauthenticated") {
         try {
           const toast = await showToast(ToastStyle.Animated, "Login in...", "It may takes some time");
-          await execa("bw", ["login", "--apikey"], {"env": getWorkflowEnv()});
+          await bitwardenApi.login()
           toast.hide();
           setSessionToken(null);
         } catch (error) {
