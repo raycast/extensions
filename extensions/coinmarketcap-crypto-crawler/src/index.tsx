@@ -4,6 +4,12 @@ import $ from "cheerio";
 import fetch from "node-fetch";
 
 const BASE_URL =  'https://coinmarketcap.com/currencies/'
+
+type PriceInfo = {
+  priceValueText : string;
+  priceDiffText : string;
+  coinName : string;
+};
 export default function ArticleList() {
   const [coinName, setCoinName] = useState('')
   const [currencyPrice, setCurrencyPrice] = useState('');
@@ -17,7 +23,8 @@ export default function ArticleList() {
     setIsLoading(true)
     setNotFound(false)
 
-    fetchPrice(search).then(({ priceValueText = '', priceDiffText = '',coinName='' }) => {
+    fetchPrice(search).then((priceInfo: PriceInfo) => {
+      const { priceValueText = '', priceDiffText = '',coinName='' } = priceInfo;
       setCurrencyPrice(priceValueText);
       setPriceDiff(priceDiffText);
       setCoinName(coinName);
@@ -66,7 +73,7 @@ async function fetchPrice(coinName: string) {
       const priceDiffText = `${priceDirection} ${priceDiffValue}`
 
       const priceValueText = priceValue.text()
-      if (!priceValueText) return undefined;
+      if (!priceValueText) return { priceValueText = '', priceDiffText = '',coinName=''};
 
       return { priceValueText, priceDiffText, coinName }
     });
