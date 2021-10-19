@@ -1,7 +1,7 @@
 {
   "name": "opsgenie",
-  "title": "opsgenie",
-  "description": "Manage Opsgenie Alerts",
+  "title": "Opsgenie",
+  "description": "Manage Opsgenie alerts and incidents.",
   "icon": "icon.png",
   "author": "ricoberger",
   "license": "MIT",
