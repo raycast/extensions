@@ -1,14 +1,14 @@
 {
   "name": "google-chrome-go-to-tab",
-  "title": "Google Chrome Go to Tab",
-  "description": "Go to an opened Google Chrome tab.",
+  "title": "Google Chrome Tab Search",
+  "description": "Search and open tabs in Google Chrome.",
   "icon": "google_chrome-icon.png",
   "author": "Codely",
   "license": "MIT",
   "commands": [
     {
       "name": "google-chrome-go-to-tab",
-      "title": "Go to tab",
+      "title": "Search Tabs",
       "subtitle": "Google Chrome",
       "description": "List all tabs and go to the selected.",
       "mode": "view"

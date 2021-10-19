@@ -68,8 +68,7 @@ interface State {
 }
 
 export default function Command() {
-  const { showFavicons } = getPreferenceValues();
-  const hasToShowFavicons = showFavicons as boolean;
+  const { showFavicons } = getPreferenceValues<{ showFavicons: boolean }>();
 
   const [state, setState] = useState<State>({});
 
