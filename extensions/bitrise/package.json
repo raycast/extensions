@@ -1,7 +1,7 @@
 {
   "name": "bitrise",
   "title": "Bitrise Builds",
-  "description": "This extension shows a list of your latest Bitrise builds.\n\nIt requires a Bitrise API key which you can get on https://app.bitrise.io/me/profile#/security",
+  "description": "This extension shows a list of your latest Bitrise builds.\n\nIt requires a Bitrise API key which you can get on https://app.bitrise.io/me/profile#/security.\n\nIcons courtesy of the Bitrise team.",
   "icon": "bitrise-logo.png",
   "author": "ubuntudroid",
   "license": "MIT",
