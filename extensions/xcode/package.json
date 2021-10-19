@@ -1,7 +1,7 @@
 {
   "name": "xcode",
   "title": "Xcode",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "SvenTiigi",
   "license": "MIT",
   "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases and quickly clear Xcode cache files.",
@@ -43,6 +43,13 @@
       "mode": "view"
     },
     {
+      "name": "create-swift-playground.command",
+      "title": "Create Swift Playground",
+      "subtitle": "Xcode",
+      "description": "Create a new Swift Playground and open it directly in Xcode",
+      "mode": "view"
+    },
+    {
       "name": "clear-derived-data.command",
       "title": "Clear Derived Data",
       "subtitle": "Xcode",
@@ -66,11 +73,13 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
+    "dedent": "^0.7.0",
     "node-fetch": "^3.0.0",
     "rxjs": "^7.4.0",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
+    "@types/dedent": "^0.7.0",
     "@types/node": "~16.10.0",
     "@types/node-fetch": "^3.0.3",
     "@types/react": "^17.0.28",
