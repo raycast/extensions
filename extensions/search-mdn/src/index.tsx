@@ -1,79 +1,66 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Icon,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
 import { useState, useEffect } from "react";
-import fetch from "node-fetch";
+import axios from "axios";
 
 export default function ArticleList() {
-  const [query, setQuery] = useState(" ");
+  const [query, setQuery] = useState<null | string>(null);
   const [state, setState] = useState<Document[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     async function fetch() {
-      setLoading(true);
-      const articles = await fetchArticles(query);
-      setState(articles);
-      setLoading(false);
+      if (query) {
+        setIsLoading(true);
+        const articles = await fetchArticles(query);
+        setState(articles);
+        setIsLoading(false);
+      }
     }
     fetch();
   }, [query]);
 
   return (
     <List
-      isLoading={loading}
-      searchBarPlaceholder="Filter articles by name..."
-      throttle
+      isLoading={isLoading}
+      searchBarPlaceholder="Type to search MDN..."
       onSearchTextChange={(text) => setQuery(text)}
+      throttle
     >
-      {state.length ? (
-        state.map((document, idx) => (
-          <List.Item
-            id={idx.toString()}
-            key={idx}
-            title={document.title}
-            // subtitle={document.summary}
-            icon="list-icon.png"
-            // accessoryTitle={document.summary}
-            actions={
-              <ActionPanel>
-                <OpenInBrowserAction url={`https://developer.mozilla.org/${document.mdn_url}`} />
-                {/* <CopyToClipboardAction title="Copy URL" content={article.url} /> */}
-              </ActionPanel>
-            }
-          />
-        ))
-      ) : (
-        <List.Item id="Empty" title="No results" icon={Icon.XmarkCircle} />
-      )}
+      {state.map((document, idx) => (
+        <List.Item
+          id={idx.toString()}
+          key={idx}
+          title={document.title}
+          icon="icon.png"
+          actions={
+            <ActionPanel>
+              <OpenInBrowserAction url={`https://developer.mozilla.org/${document.mdn_url}`} />
+              <CopyToClipboardAction title="Copy URL" content={`https://developer.mozilla.org/${document.mdn_url}`} />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }
 
-async function fetchArticles(query: string): Promise<Document[]> {
-  try {
-    const response = await fetch(`https://developer.mozilla.org/api/v1/search/en-US?q=${query}`);
-    const json = await response.json();
-    console.log(json);
-    if (json.errors) {
-      return Promise.resolve([]);
-    }
-    return (json as Record<string, unknown>).documents as Document[];
-  } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Could not load articles");
-    return Promise.resolve([]);
-  }
-}
-
 type Document = {
-  summary: string;
   title: string;
   mdn_url: string;
 };
+
+async function fetchArticles(query: string): Promise<Document[]> {
+  try {
+    const response = await axios.get<{ documents: Document[] }>("https://developer.mozilla.org/api/v1/search/en-US", {
+      params: {
+        q: query,
+        sort: "best",
+      },
+    });
+    return response.data.documents;
+  } catch (error) {
+    console.error(error);
+    showToast(ToastStyle.Failure, "Could not load MDN results");
+    return Promise.resolve([]);
+  }
+}
