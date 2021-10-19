@@ -41,12 +41,13 @@ const error = `
 export default function Calendly() {
   const [items, setItems] = useState<CalendlyEventType[] | undefined>(undefined);
   const [showError, setShowError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<CalendlyUser | undefined>(undefined);
   const { defaultAction }: Preferences = getPreferenceValues();
 
   async function init() {
     const updated_ts = await getLocalStorageItem("updated_ts");
-    console.log({ updated_ts });
+    console.log("init running...", { updated_ts });
     if (updated_ts === undefined || moment(updated_ts.toString()).isBefore(moment().subtract(24, "hours"))) {
       // either no cache, or cache is 24+ hours old
       console.log("refreshing data");
@@ -56,6 +57,26 @@ export default function Calendly() {
     setUser(user);
     const eventTypes = await getEventTypes();
     setItems(eventTypes);
+
+    setIsLoading(false);
+  }
+
+  function RefreshAction() {
+    return (
+      <ActionPanel.Item
+        title="Refresh Data"
+        icon={Icon.ArrowClockwise}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        onAction={async () => {
+          const toast = new Toast({ style: ToastStyle.Animated, title: "Refreshing..." });
+          await toast.show();
+          setIsLoading(true);
+          await refreshData();
+          await init();
+          await toast.hide();
+        }}
+      />
+    );
   }
 
   useEffect(() => {
@@ -83,7 +104,7 @@ export default function Calendly() {
     );
 
   return (
-    <List isLoading={items === undefined}>
+    <List isLoading={isLoading}>
       <List.Item
         title="Open Calendly Dashboard"
         icon={{
@@ -92,6 +113,7 @@ export default function Calendly() {
         actions={
           <ActionPanel>
             <OpenInBrowserAction url="https://calendly.com/dashboard" />
+            <RefreshAction />
           </ActionPanel>
         }
       />
@@ -104,6 +126,7 @@ export default function Calendly() {
             <ActionPanel>
               <CopyToClipboardAction title="Copy My Link" icon={Icon.Calendar} content={user.scheduling_url} />
               <OpenInBrowserAction url={user.scheduling_url} />
+              <RefreshAction />
             </ActionPanel>
           }
         />
@@ -128,11 +151,24 @@ export default function Calendly() {
                     <CopyMeetingLinkAction event={event} />
                   </>
                 )}
+                <RefreshAction />
               </ActionPanel>
             }
           />
         );
       })}
+      {isLoading || (
+        <List.Item
+          title="Refresh Data"
+          key="refresh"
+          icon={Icon.ArrowClockwise}
+          actions={
+            <ActionPanel>
+              <RefreshAction />
+            </ActionPanel>
+          }
+        />
+      )}
     </List>
   );
 }
@@ -140,6 +176,7 @@ export default function Calendly() {
 function CopyMeetingLinkAction({ event }: { event: CalendlyEventType }) {
   return <CopyToClipboardAction title="Copy Meeting URL" icon={Icon.Calendar} content={event.scheduling_url} />;
 }
+
 function CopyOneTimeLinkAction({ event }: { event: CalendlyEventType }) {
   return (
     <ActionPanel.Item
