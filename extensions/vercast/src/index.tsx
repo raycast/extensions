@@ -18,6 +18,7 @@ import {
   fetchDeployments,
   fetchTeams,
   fetchUsername,
+  Team,
 } from './vercel'
 
 render(<Main />)
@@ -37,7 +38,7 @@ function Main(): JSX.Element {
   // Setup useState objects
   const [username, setUsername] = useState('')
   const [deployments, setDeployments] = useState<Deployment[]>()
-  const [teams, setTeams] = useState<Record<string, string>>()
+  const [teams, setTeams] = useState<Team[]>()
   useEffect(() => {
     const call = async () => setUsername(await fetchUsername())
     if (username === '') {
@@ -46,7 +47,7 @@ function Main(): JSX.Element {
   })
   useEffect(() => {
     const call = async () =>
-      setDeployments(await fetchDeployments(username, teams ?? {}))
+      setDeployments(await fetchDeployments(username, teams ?? []))
     if (!deployments) {
       call()
     }
@@ -60,7 +61,7 @@ function Main(): JSX.Element {
 
   // Refresh deployments every 2 seconds
   useInterval(async () => {
-    setDeployments(await fetchDeployments(username, teams ?? {}))
+    setDeployments(await fetchDeployments(username, teams ?? []))
   }, 2000)
 
   return (
