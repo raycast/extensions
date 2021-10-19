@@ -1,16 +1,16 @@
 {
   "name": "open-dir-in-finder",
-  "title": "Open in Finder",
+  "title": "Open Directory in Finder",
   "description": "Opens directory in finder",
   "icon": "Finder-Icon.png",
   "author": "jawshoeadan",
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "open-dir-in-finder",
       "title": "Open in Finder",
-      "subtitle": "",
-      "description": "Template to run a script without any view",
+      "subtitle": "Open directory in Finder",
+      "description": "Type any directory to open it in Finder",
       "mode": "view"
     }
   ],
