@@ -1,4 +1,4 @@
-import { getPreferenceValues, setLocalStorageItem } from "@raycast/api";
+import { getLocalStorageItem, getPreferenceValues, setLocalStorageItem } from "@raycast/api";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import _ from "lodash";
 
@@ -64,7 +64,7 @@ async function calendlyAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) 
   return resp;
 }
 
-async function getCurrentUser() {
+async function getCurrentUser(): Promise<CalendlyUser> {
   const data = await calendlyAPI<CalendlyUserResource>({ url: "/users/me" });
   const resource = data.data.resource;
   setLocalStorageItem("user", JSON.stringify(resource));
@@ -72,7 +72,14 @@ async function getCurrentUser() {
 }
 
 export async function getEventTypes() {
-  const user = await getCurrentUser();
+  let user: undefined | CalendlyUser = undefined;
+  const cache = await getLocalStorageItem("user");
+  if (cache) {
+    user = JSON.parse(cache.toString());
+  }
+  if (!user) {
+    user = await getCurrentUser();
+  }
   const data = await calendlyAPI<CalendlyEventTypeResponse>({ url: "/event_types", params: { user: user.uri } });
   const collection = _.filter(data.data.collection, "active");
   return collection;

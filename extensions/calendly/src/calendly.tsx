@@ -12,6 +12,7 @@ import {
   showToast,
   getLocalStorageItem,
   getPreferenceValues,
+  ImageMask,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Preferences, CalendlyEventType, CalendlyUser, createSingleUseLink, getEventTypes } from "./services/calendly";
@@ -82,13 +83,11 @@ export default function Calendly() {
         <List.Item
           title="Copy My Link"
           subtitle={"/" + user.slug}
-          icon={{
-            source: "logo.png",
-          }}
+          icon={{ source: user.avatar_url, mask: ImageMask.Circle }}
           actions={
             <ActionPanel>
-              <CopyToClipboardAction title="Copy Scheduling URL" icon={Icon.Calendar} content={user.scheduling_url} />
-              <OpenInBrowserAction url={user.scheduling_url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+              <CopyToClipboardAction title="Copy My Link" icon={Icon.Calendar} content={user.scheduling_url} />
+              <OpenInBrowserAction url={user.scheduling_url} />
             </ActionPanel>
           }
         />
