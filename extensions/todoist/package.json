@@ -1,7 +1,7 @@
 {
   "name": "todoist",
   "title": "Todoist",
-  "description": "Raycast commands for Todoist",
+  "description": "Check your Todoist tasks and quickly create new ones",
   "icon": "todoist.png",
   "author": "thomaslombart",
   "license": "MIT",
