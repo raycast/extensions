@@ -96,19 +96,19 @@ const Command = () => {
       isLoading={loading}
     >
       <>
+        <Form.TextArea id="text" placeholder="Enter or paste text here" />
         <Form.Dropdown id="from" defaultValue="" storeValue={true} title="From">
           <Form.Dropdown.Item value="" title="Detect" />
           {Object.entries(languages).map(([value, title]) => (
             <Form.Dropdown.Item value={value} title={title} key={value} />
           ))}
         </Form.Dropdown>
+        <Form.Separator />
         <Form.Dropdown id="to" defaultValue="EN" storeValue={true} title="To">
           {Object.entries(languages).map(([value, title]) => (
             <Form.Dropdown.Item value={value} title={title} key={value} />
           ))}
         </Form.Dropdown>
-        <Form.Separator />
-        <Form.TextArea id="text" placeholder="Enter or paste text here" />
         <Form.TextArea id="translation" value={translation} />
       </>
     </Form>
