@@ -79,10 +79,10 @@ export class XcodeSwiftPlaygroundService {
     // Initialize template files
     const templateFiles = [
       ...this.scaffoldTemplateFiles,
-      this.swiftSourceContentsTemplateFile(
+      XcodeSwiftPlaygroundService.swiftSourceContentsTemplateFile(
         parameters.template
       ),
-      this.contentsTemplateFile(
+      XcodeSwiftPlaygroundService.contentsTemplateFile(
         parameters.platform
       )
     ];
@@ -153,7 +153,7 @@ export class XcodeSwiftPlaygroundService {
    * @param platform The XcodeSwiftPlaygroundPlatform
    * @private
    */
-  private contentsTemplateFile(
+  private static contentsTemplateFile(
     platform: XcodeSwiftPlaygroundPlatform
   ): TemplateFile {
     return {
@@ -176,7 +176,7 @@ export class XcodeSwiftPlaygroundService {
    * Swift Source Contents TemplateFile
    * @param template The XcodeSwiftPlaygroundTemplate
    */
-  private swiftSourceContentsTemplateFile(
+  private static swiftSourceContentsTemplateFile(
     template: XcodeSwiftPlaygroundTemplate
   ): TemplateFile {
     let contents: string;
