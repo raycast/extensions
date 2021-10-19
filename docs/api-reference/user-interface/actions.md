@@ -34,7 +34,7 @@ export default function Command() {
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | content | <code>string</code> or <code>number</code> | Yes | - | The contents that will be written to the clipboard as string. |
-| icon | <code>[ImageLike](icons-and-images.md#imagelike)</code> | No | [Icon.Clipboard](icons-and-images.md#icon) | A optional icon displayed for the item. See [ImageLike](icons-and-images.md#imagelike) for the supported formats and types. |
+| icon | <code>[ImageLike](../user-interface/icons-and-images.md#imagelike)</code> | No | [Icon.Clipboard](../user-interface/icons-and-images.md#icon) | A optional icon displayed for the item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
 | shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
 | title | <code>string</code> | No | - | An optional title for the action. |
 | onCopy | <code>(content: string \| number) => void</code> | No | - |  |
@@ -70,7 +70,7 @@ export default function Command() {
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | application | <code>string</code> or <code>[Application](../utilities.md#application)</code> | No | - | The application name to use for opening the file. |
-| icon | <code>[ImageLike](icons-and-images.md#imagelike)</code> | No | [Icon.Finder](icons-and-images.md#icon) | The icon displayed for the action. |
+| icon | <code>[ImageLike](../user-interface/icons-and-images.md#imagelike)</code> | No | [Icon.Finder](../user-interface/icons-and-images.md#icon) | The icon displayed for the action. |
 | shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
 | target | <code>string</code> | Yes | - | The file, folder or URL to open. |
 | title | <code>string</code> | Yes | - | The title for the action. |
@@ -105,7 +105,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](icons-and-images.md#imagelike)</code> | No | [Icon.Globe](icons-and-images.md#icon) | The icon displayed for the action. |
+| icon | <code>[ImageLike](../user-interface/icons-and-images.md#imagelike)</code> | No | [Icon.Globe](../user-interface/icons-and-images.md#icon) | The icon displayed for the action. |
 | shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The optional keyboard shortcut for the menu item |
 | title | <code>string</code> | No | - | An optional title for the action. |
 | url | <code>string</code> | Yes | - | The URL to open. |
@@ -144,7 +144,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](icons-and-images.md#imagelike)</code> | No | [Icon.Upload](icons-and-images.md#icon) | The icon displayed for the action. |
+| icon | <code>[ImageLike](../user-interface/icons-and-images.md#imagelike)</code> | No | [Icon.Upload](../user-interface/icons-and-images.md#icon) | The icon displayed for the action. |
 | path | <code>string</code> | Yes | - | The path to open. |
 | shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
 | title | <code>string</code> | No | Open With | The title for the action. |
@@ -180,7 +180,7 @@ export default function Command() {
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | content | <code>string</code> or <code>number</code> | Yes | - | The contents that will be written to the clipboard as string. |
-| icon | <code>[ImageLike](icons-and-images.md#imagelike)</code> | No | [Icon.Clipboard](icons-and-images.md#icon) | The icon displayed for the action. |
+| icon | <code>[ImageLike](../user-interface/icons-and-images.md#imagelike)</code> | No | [Icon.Clipboard](../user-interface/icons-and-images.md#icon) | The icon displayed for the action. |
 | shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
 | title | <code>string</code> | No | - | An optional title for the action. |
 | onPaste | <code>(content: string \| number) => void</code> | No | - |  |
@@ -220,7 +220,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](icons-and-images.md#imagelike)</code> | No | - | The icon displayed for the action. |
+| icon | <code>[ImageLike](../user-interface/icons-and-images.md#imagelike)</code> | No | - | The icon displayed for the action. |
 | shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
 | target | <code>ReactNode</code> | Yes | - | The target view that will be pushed to the navigation stack. |
 | title | <code>string</code> | Yes | - | The title displayed for the item. |
@@ -258,7 +258,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](icons-and-images.md#imagelike)</code> | No | [Icon.Finder](icons-and-images.md#icon) | A optional icon displayed for the item. See [ImageLike](icons-and-images.md#imagelike) for the supported formats and types. |
+| icon | <code>[ImageLike](../user-interface/icons-and-images.md#imagelike)</code> | No | [Icon.Finder](../user-interface/icons-and-images.md#icon) | A optional icon displayed for the item. See [ImageLike](../user-interface/icons-and-images.md#imagelike) for the supported formats and types. |
 | path | <code>PathLike</code> | Yes | - | The path to open. |
 | shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
 | title | <code>string</code> | No | Show in Finder | An optional title for the action. |
@@ -272,7 +272,7 @@ Action that allows to add a submit handler for capturing form values.
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](icons-and-images.md#imagelike)</code> | No | - | The icon displayed for the action. |
+| icon | <code>[ImageLike](../user-interface/icons-and-images.md#imagelike)</code> | No | - | The icon displayed for the action. |
 | shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
 | title | <code>string</code> | No | - | The title displayed for the item. |
 | onSubmit | <code>(input: Values) => void</code> | No | - |  |
@@ -307,7 +307,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](icons-and-images.md#imagelike)</code> | No | [Icon.Trash](icons-and-images.md#icon) | A optional icon displayed for the action. |
+| icon | <code>[ImageLike](../user-interface/icons-and-images.md#imagelike)</code> | No | [Icon.Trash](../user-interface/icons-and-images.md#icon) | A optional icon displayed for the action. |
 | paths | <code>PathLike</code> or <code>PathLike[]</code> | Yes | - | The item or items to move to the trash. |
 | shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The optional keyboard shortcut for the action. |
 | title | <code>string</code> | No | Move to Trash | An optional title for the action. |

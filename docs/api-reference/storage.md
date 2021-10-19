@@ -148,7 +148,7 @@ export default async () => {
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | key | <code>string</code> | Yes | The key you want to create or update the value of. |
-| value | <code>[LocalStorageValue](storage.md#localstoragevalue)</code> | Yes | The value you want to create or update for the given key. |
+| value | <code>[LocalStorageValue](../storage.md#localstoragevalue)</code> | Yes | The value you want to create or update for the given key. |
 
 #### Return
 

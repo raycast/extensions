@@ -62,7 +62,7 @@ export default async () => {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| style | <code>[ToastStyle](toast.md#toaststyle)</code> | Yes | The visual style of the Toast. |
+| style | <code>[ToastStyle](../user-interface/toast.md#toaststyle)</code> | Yes | The visual style of the Toast. |
 | title | <code>string</code> | Yes | The title that will be displayed in the Toast. |
 | message | <code>string</code> | No | The message that will be displayed in the Toast. |
 
@@ -74,7 +74,7 @@ A promise that resolves with the shown toast. The toast can be used to change or
 
 A Toast with a certain style, title, and message.
 
-Use [showToast](toast.md#showtoast) as shortcut for creating and showing a Toast.
+Use [showToast](../user-interface/toast.md#showtoast) as shortcut for creating and showing a Toast.
 
 #### Example
 
@@ -97,14 +97,14 @@ export default async () => {
 
 | Name | Type | Description |
 | :--- | :--- | :--- |
-| constructor | <code>(options: ToastOptions) => [Toast](toast.md#toast)</code> |  |
+| constructor | <code>(options: ToastOptions) => [Toast](../user-interface/toast.md#toast)</code> |  |
 
 #### Accessors
 
 | Name | Type | Description |
 | :--- | :--- | :--- |
 | message | <code>undefined</code> or <code>string</code> |  |
-| style | <code>[ToastStyle](toast.md#toaststyle)</code> |  |
+| style | <code>[ToastStyle](../user-interface/toast.md#toaststyle)</code> |  |
 | title | <code>string</code> |  |
 
 #### Methods
@@ -116,7 +116,7 @@ export default async () => {
 
 ### ToastOptions
 
-The options to create a [Toast](toast.md#toast).
+The options to create a [Toast](../user-interface/toast.md#toast).
 
 #### Example
 
@@ -139,16 +139,16 @@ export default async () => {
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | message | <code>string</code> | No | An additional message for the toast. Useful to show more information, e.g. an identifier of a newly create asset |
-| style | <code>[ToastStyle](toast.md#toaststyle)</code> | Yes | The style of a toast. |
+| style | <code>[ToastStyle](../user-interface/toast.md#toaststyle)</code> | Yes | The style of a toast. |
 | title | <code>string</code> | Yes | The title of a toast. Displayed on the top. |
 
 ### ToastStyle
 
 Defines the visual style of the Toast.
 
-Use [ToastStyle.Success](toast.md#toaststyle) for confirmations and [ToastStyle.Failure](toast.md#toaststyle) for displaying errors.
-Use [ToastStyle.Animated](toast.md#toaststyle) when your Toast should be shown until a process is completed.
-You can hide it later by using [Toast.hide](toast.md#toast) or update the properties of an existing Toast.
+Use [ToastStyle.Success](../user-interface/toast.md#toaststyle) for confirmations and [ToastStyle.Failure](../user-interface/toast.md#toaststyle) for displaying errors.
+Use [ToastStyle.Animated](../user-interface/toast.md#toaststyle) when your Toast should be shown until a process is completed.
+You can hide it later by using [Toast.hide](../user-interface/toast.md#toast) or update the properties of an existing Toast.
 
 #### Enumeration members
 
