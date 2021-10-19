@@ -74,6 +74,24 @@ export function RetweetAction(props: { tweet: TweetV1 }) {
   return <ActionPanel.Item title={title} icon={icon} onAction={retweet} />;
 }
 
+export function LikeAction(props: { tweet: TweetV1 }) {
+  const t = props.tweet;
+  const cmd = t.favorited ? "destroy" : "create";
+  const title = t.favorited ? "Undo Like" : "Like";
+  const icon: ImageLike = t.favorited
+    ? { source: Icon.XmarkCircle, tintColor: Color.Red }
+    : { source: "❤", tintColor: Color.PrimaryText };
+  const retweet = async () => {
+    try {
+      await twitterClient.v1.post(`favorites/${cmd}.json`, { id: t.id_str });
+      showToast(ToastStyle.Success, "Like successful", "Like creation successful");
+    } catch (error: any) {
+      showToast(ToastStyle.Failure, "Could not like tweet", error.message);
+    }
+  };
+  return <ActionPanel.Item title={title} icon={icon} onAction={retweet} />;
+}
+
 export function OpenAuthorProfileAction(props: { tweet: TweetV1 }) {
   return (
     <OpenInBrowserAction

@@ -2,6 +2,7 @@ import { ActionPanel, Detail, Image, ImageMask, List, OpenInBrowserAction } from
 import { TweetV1 } from "twitter-api-v2";
 import {
   DeleteTweetAction,
+  LikeAction,
   OpenAuthorProfileAction,
   ReplyTweetAction,
   RetweetAction,
@@ -40,12 +41,19 @@ export function TweetListItem(props: { tweet: TweetV1 }) {
       accessoryTitle={states.join("  ")}
       actions={
         <ActionPanel>
-          <ShowTweetAction tweet={t} />
-          <OpenInBrowserAction url={getTweetUrl(t)} />
-          <ReplyTweetAction tweet={t} />
-          <RetweetAction tweet={t} />
-          <OpenAuthorProfileAction tweet={t} />
-          <DeleteTweetAction tweet={t} />
+          <ActionPanel.Section title="Tweet">
+            <ShowTweetAction tweet={t} />
+            <OpenInBrowserAction url={getTweetUrl(t)} />
+            <LikeAction tweet={t} />
+            <ReplyTweetAction tweet={t} />
+            <RetweetAction tweet={t} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Info">
+            <OpenAuthorProfileAction tweet={t} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Destructive">
+            <DeleteTweetAction tweet={t} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -68,11 +76,18 @@ export function TweetDetail(props: { tweet: TweetV1 }) {
       markdown={md}
       actions={
         <ActionPanel>
-          <ReplyTweetAction tweet={t} />
-          <RetweetAction tweet={t} />
-          <OpenInBrowserAction url={getTweetUrl(t)} />
-          <OpenAuthorProfileAction tweet={t} />
-          <DeleteTweetAction tweet={t} />
+          <ActionPanel.Section title="Tweet">
+            <ReplyTweetAction tweet={t} />
+            <LikeAction tweet={t} />
+            <RetweetAction tweet={t} />
+            <OpenInBrowserAction url={getTweetUrl(t)} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Info">
+            <OpenAuthorProfileAction tweet={t} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Destructive">
+            <DeleteTweetAction tweet={t} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
