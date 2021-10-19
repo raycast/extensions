@@ -12,11 +12,8 @@ import {
 import { useEffect, useState } from 'react';
 import osascript from 'osascript-tag';
 import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
 import groupBy from 'lodash.groupby';
 import map from 'lodash.map';
-
-dayjs.extend(relativeTime);
 
 enum ListName {
   Inbox = 'Inbox',
@@ -101,6 +98,21 @@ const setTodoProperty = (todoId: string, key: string, value: string) =>
 const getTodoGroupId = (todo: Todo) => todo.project?.id || todo.area?.id;
 const getTodoGroup = (todo: Todo) => todo.project || todo.area;
 
+// Start of day as ISO
+const today = dayjs(dayjs().format('YYYY-MM-DD')).toISOString();
+const formatDueDate = (dueDate: string) => {
+  const diff = dayjs(dueDate).diff(today, 'day');
+  if (diff <= -15 || diff >= 15) {
+    return dayjs(dueDate).format('D MMM');
+  } else if (diff === 0) {
+    return 'today';
+  } else if (diff > 0) {
+    return `${diff} day${diff === 1 ? 's' : ''} left`;
+  } else if (diff < 0) {
+    return `${-diff} day${diff === -1 ? 's' : ''} ago`;
+  }
+};
+
 function TodoListItem(props: { todo: Todo }) {
   const { todo } = props;
   const { id, name, status, dueDate, notes, tags = [], project, area } = todo;
@@ -110,7 +122,7 @@ function TodoListItem(props: { todo: Todo }) {
       title={name}
       subtitle={notes}
       icon={status === 'completed' ? Icon.Checkmark : Icon.Circle}
-      accessoryTitle={dueDate && `⚑  ${dayjs(dueDate).fromNow()}`}
+      accessoryTitle={dueDate && `⚑  ${formatDueDate(dueDate)}`}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={name}>
