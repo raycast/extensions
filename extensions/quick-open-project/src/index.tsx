@@ -124,8 +124,9 @@ function searchProjects(query?: string): {
         .go(query, filtered, {
           keys: ["name", "displayPath"],
           allowTypo: false,
+          threshold: -1000000, // pick a pretty big negative number
           scoreFn: (a) => {
-            let scores = [] as number[];
+            let scores = [-1000001] as number[]; // less than the threshold by default
             if(a[0]) {
               scores = scores.concat(a[0].score)
             }
@@ -133,10 +134,7 @@ function searchProjects(query?: string): {
               // scores are negative, so make displayPath matches worse than direct name matches
               scores = scores.concat(a[1].score * 10)
             }
-            if (scores.length > 0) {
-              return Math.max(...scores)
-            }
-            return null
+            return Math.max(...scores)
           },
         })
         .map((result) => result.obj);
