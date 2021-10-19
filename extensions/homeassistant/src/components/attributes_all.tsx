@@ -1,25 +1,28 @@
-import { ActionPanel, CopyToClipboardAction, List, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, List, ListItem, showToast, ToastStyle } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { createHomeAssistantClient } from "../common";
+import { State } from "../haapi";
+import { useHAStates } from "../hooks";
 
 export const ha = createHomeAssistantClient();
 
-class Attribute {
-  public name = "";
-  public value: any;
-}
-
 export function StatesAttributesList(props: { domain: string }) {
   const [searchText, setSearchText] = useState<string>();
-  const { attributes, error, isLoading } = useSearch(searchText, props.domain);
+  const { states: allStates, error, isLoading } = useHAStates();
+  const { states } = useSearch(searchText, allStates);
 
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search Home Assistant states", error);
   }
 
-  if (!attributes) {
+  if (!states) {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
+
+  const stateTitle = (state: State): string => {
+    const attrs = state.attributes;
+    return attrs.friendly_name ? `${attrs.friendly_name} (${state.entity_id})` : state.entity_id;
+  };
 
   return (
     <List
@@ -27,78 +30,63 @@ export function StatesAttributesList(props: { domain: string }) {
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
     >
-      {attributes?.map((attr) => (
-        <List.Item
-          key={attr.name}
-          title={attr.name}
-          accessoryTitle={`${attr.value}`.substring(0, 50)}
-          actions={
-            <ActionPanel>
-              <CopyToClipboardAction content={`${attr.value}`} />
-            </ActionPanel>
-          }
-        />
+      {states.map((state: State) => (
+        <List.Section key={state.entity_id} title={stateTitle(state)}>
+          <List.Item key={`${state.entity_id}_state`} title="state" accessoryTitle={`${state.state}`} />
+          {Object.entries(state.attributes).map(([k, v]) => (
+            <List.Item
+              key={state.entity_id + k}
+              title={k}
+              accessoryTitle={`${v}`}
+              actions={
+                <ActionPanel>
+                  <CopyToClipboardAction title="Copy Value" content={`${v}`} />
+                  <CopyToClipboardAction title="Copy Name" content={`${k}`} />
+                  <CopyToClipboardAction title="Copy Entity ID" content={`${state.entity_id}`} />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
       ))}
     </List>
   );
 }
 
-export function useSearch(
+function useSearch(
   query: string | undefined,
-  domain: string
+  allStates?: State[]
 ): {
-  attributes?: Attribute[];
-  error?: string;
-  isLoading: boolean;
+  states?: State[];
 } {
-  const [attributes, setAttributes] = useState<Attribute[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  let cancel = false;
+  const [states, setStates] = useState<State[]>();
+  const lquery = query ? query.toLocaleLowerCase().trim() : query;
 
   useEffect(() => {
-    async function fetchData() {
-      if (query === null || cancel) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const haStates = await ha.getStates({ domain: domain, query: "" });
-        let attributesData: Attribute[] = [];
-        haStates.forEach((e) =>
-          Object.entries(e.attributes).forEach(([k, v]) =>
-            attributesData.push({ name: `${e.entity_id}.${k}`, value: v })
-          )
-        );
-        if (query) {
-          const lquery = query.toLocaleLowerCase().trim();
-          attributesData = attributesData.filter((v) => v.name.toLocaleLowerCase().includes(lquery));
+    if (allStates) {
+      let filteredStates: State[] = [];
+      allStates.forEach((s) => {
+        let attrs: Record<string, any> = {};
+        for (const [k, v] of Object.entries(s.attributes)) {
+          if (lquery) {
+            const friendlyName: string = (s.attributes.friendly_name || "").toLocaleLowerCase();
+            const eid = `${s.entity_id}.${k}`.toLocaleLowerCase();
+            if (eid.includes(lquery) || friendlyName.includes(lquery)) {
+              attrs[k] = v;
+            }
+          } else {
+            attrs[k] = v;
+          }
         }
-        attributesData = attributesData.slice(0, 100);
-        if (!cancel) {
-          setAttributes(attributesData);
+        if (Object.keys(attrs).length > 0) {
+          const ns: State = { entity_id: s.entity_id, state: s.state, attributes: attrs };
+          filteredStates.push(ns);
         }
-      } catch (e: any) {
-        if (!cancel) {
-          setError(e.toString());
-        }
-      } finally {
-        if (!cancel) {
-          setIsLoading(false);
-        }
-      }
+      });
+      setStates(filteredStates.slice(0, 100));
+    } else {
+      setStates([]);
     }
-
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, [query]);
-
-  return { attributes, error, isLoading };
+  }, [query, allStates]);
+  return { states };
 }
