@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "find-login",
-      "title": "Find login",
+      "title": "Find Login",
       "subtitle": "",
       "description": "Find login on BugMeNot",
       "mode": "view"
