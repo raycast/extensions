@@ -1,10 +1,13 @@
 import { XcodeSimulatorApplication } from "../models/simulator/xcode-simulator-application.model";
 import { XcodeSimulatorService } from "./xcode-simulator.service";
 import * as fs from "fs";
-import * as Path from "path";
+import * as path from "path";
 import { execAsync } from "../shared/exec-async";
 import { XcodeSimulator } from "../models/simulator/xcode-simulator.model";
 import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
+import { promisify } from "util";
+
+const readDirAsync = promisify(fs.readdir);
 
 /**
  * XcodeSimulatorApplicationService
@@ -75,6 +78,16 @@ export class XcodeSimulatorApplicationService {
   private async findXcodeSimulatorApplications(
     simulator: XcodeSimulator
   ): Promise<XcodeSimulatorApplication[]> {
+    // The container application directory path
+    const containerApplicationDirectoryPath = path.join(
+      simulator.dataPath,
+      "Containers/Bundle/Application"
+    );
+    /// The container sandbox directory path
+    const containerSandboxDirectoryPath = path.join(
+      simulator.dataPath,
+      "Containers/Data/Application"
+    );
     // Declare Application Directory Paths
     let applicationDirectoryPaths: string[];
     // Declare SandBox Directory Paths
@@ -82,14 +95,28 @@ export class XcodeSimulatorApplicationService {
     // Declare SandBox Directory Bundle identifiers
     let sandBoxDirectoryBundleIds: string[];
     try {
-      // Read child directories paths
-      applicationDirectoryPaths = await readChildDirectoryPathsAsync(
-        Path.join(simulator.dataPath, "Containers/Bundle/Application")
-      );
+      // Read application child directories paths
+      applicationDirectoryPaths = await readDirAsync(
+        containerApplicationDirectoryPath,
+        {
+          withFileTypes: true
+        }
+      ).then(entries => {
+        return entries
+          .filter(entry => entry.isDirectory())
+          .map(entry => path.join(containerApplicationDirectoryPath, entry.name))
+      });
       // Read SandBox child directory paths
-      sandBoxDirectoryPaths = await readChildDirectoryPathsAsync(
-        Path.join(simulator.dataPath, "Containers/Data/Application")
-      );
+      sandBoxDirectoryPaths = await readDirAsync(
+        containerSandboxDirectoryPath,
+        {
+          withFileTypes: true
+        }
+      ).then(entries => {
+        return entries
+          .filter(entry => entry.isDirectory())
+          .map(entry => path.join(containerSandboxDirectoryPath, entry.name))
+      });
       // Read SandBox Bundle identifiers for each SandBox directory path
       sandBoxDirectoryBundleIds = (
         await execAsync(
@@ -98,7 +125,7 @@ export class XcodeSimulatorApplicationService {
               return [
                 "defaults",
                 "read",
-                Path.join(
+                path.join(
                   sandBoxDirectoryPath,
                   ".com.apple.mobile_container_manager.metadata.plist"
                 ),
@@ -161,7 +188,7 @@ export class XcodeSimulatorApplicationService {
     let applicationFileName: string;
     try {
       // Retrieve file names in application directory
-      const fileNames = await readDirectoryFileNamesAsync(applicationDirectoryPath);
+      const fileNames = await readDirAsync(applicationDirectoryPath);
       // Initialize matching application file name where file name ends with '.app'
       const matchingApplicationFileName = fileNames.find(fileName => fileName.endsWith(".app"));
       // Check if matching application file name is unavailable
@@ -187,7 +214,7 @@ export class XcodeSimulatorApplicationService {
               "plutil",
               "-convert",
               "json",
-              Path.join(
+              path.join(
                 applicationDirectoryPath,
                 applicationFileName
                   // Escape whitespaces
@@ -245,8 +272,8 @@ export class XcodeSimulatorApplicationService {
     if (primaryAppIconName) {
       try {
         // Read file names in application
-        const applicationFileNames = await readDirectoryFileNamesAsync(
-          Path.join(applicationDirectoryPath, applicationFileName)
+        const applicationFileNames = await readDirAsync(
+          path.join(applicationDirectoryPath, applicationFileName)
         );
         // Find matching application file name that starts with the primary app icon name
         const matchingApplicationFileName = applicationFileNames
@@ -254,7 +281,7 @@ export class XcodeSimulatorApplicationService {
         // Check if a matching application file name is available
         if (matchingApplicationFileName) {
           // Initialize app icon path
-          appIconPath = Path.join(
+          appIconPath = path.join(
             applicationDirectoryPath,
             applicationFileName,
             matchingApplicationFileName
@@ -275,58 +302,9 @@ export class XcodeSimulatorApplicationService {
       simulator: simulator,
       bundlePath: applicationDirectoryPath,
       sandBoxPath: sandBoxDirectoryPath,
-      sandBoxDocumentsPath: Path.join(sandBoxDirectoryPath, "Documents"),
-      sandBoxCachesPath: Path.join(sandBoxDirectoryPath, "Library", "Caches")
+      sandBoxDocumentsPath: path.join(sandBoxDirectoryPath, "Documents"),
+      sandBoxCachesPath: path.join(sandBoxDirectoryPath, "Library", "Caches")
     };
   }
 
-}
-
-/**
- * Read file names in directory
- * @param path The Path
- */
-async function readDirectoryFileNamesAsync(
-  path: string
-): Promise<string[]> {
-  return new Promise((resolve, reject) => {
-    fs.readdir(
-      path,
-      (error, entries) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(entries);
-        }
-      }
-    );
-  });
-}
-
-/**
- * Read child directory paths from a given path
- * @param path The path to read child directory paths from
- */
-async function readChildDirectoryPathsAsync(
-  path: string
-): Promise<string[]> {
-  return new Promise((resolve, reject) => {
-    fs.readdir(
-      path,
-      {
-        withFileTypes: true
-      },
-      (error, entries) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(
-            entries
-              .filter(entry => entry.isDirectory())
-              .map(entry => Path.join(path, entry.name))
-          );
-        }
-      }
-    );
-  });
 }
