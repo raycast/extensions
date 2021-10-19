@@ -1,7 +1,7 @@
 {
   "name": "calendly",
-  "title": "Calendly",
-  "description": "Raycast commands to access Calendly instance",
+  "title": "Calendly Share Meeting Links",
+  "description": "Quickly share your Calendly meeting links",
   "icon": "logo.png",
   "author": "eluce2",
   "license": "MIT",
