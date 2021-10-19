@@ -1,4 +1,5 @@
 import { PersonalShare } from "../types/SketchPersonalShare";
+<<<<<<< HEAD
 import { EntriesEntity } from "../types/SketchProjects";
 import { Share } from "../types/SketchWorkspaceShare";
 
@@ -16,6 +17,10 @@ export const dummyProjects: EntriesEntity[] = [
   { __typename: "", name: "", shortId: ",", identifier: "m", type: "" },
 ];
 
+=======
+import { Share } from "../types/SketchWorkspaceShare";
+
+>>>>>>> 03c01420ef3b43e9aa6fbbd48100f74091d333f5
 export const dummyShares: Share[] | PersonalShare[] = [
   {
     userAccessLevel: "EDIT",

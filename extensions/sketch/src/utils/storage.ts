@@ -23,9 +23,12 @@ export const getLastUsedEmail = async () => {
   if (!lastUsedEmail) return undefined;
   return lastUsedEmail;
 };
+<<<<<<< HEAD
 
 export const getCachedProjects = async () => {
   const cachedProjects : string | undefined = await getLocalStorageItem("cachedProjects");
   if (!cachedProjects) return undefined;
   return JSON.parse(cachedProjects);
 };
+=======
+>>>>>>> 03c01420ef3b43e9aa6fbbd48100f74091d333f5

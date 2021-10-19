@@ -1,7 +1,11 @@
 {
   "name": "sketch",
   "title": "Sketch",
+<<<<<<< HEAD
   "description": "Frictionless Workspace Browsing",
+=======
+  "description": "Browse Workspaces Documents",
+>>>>>>> 03c01420ef3b43e9aa6fbbd48100f74091d333f5
   "icon": "icon.png",
   "author": "aesign",
   "license": "MIT",
@@ -26,6 +30,7 @@
   "commands": [
     {
       "name": "searchDocuments",
+<<<<<<< HEAD
       "title": "Documents",
       "subtitle": "Sketch",
       "description": "Browse your Sketch Documents",
@@ -36,6 +41,11 @@
       "title": "Projects",
       "subtitle": "Sketch",
       "description": "Browse your Sketch Projects",
+=======
+      "title": "Search Documents",
+      "subtitle": "Sketch",
+      "description": "Search your Sketch Documents",
+>>>>>>> 03c01420ef3b43e9aa6fbbd48100f74091d333f5
       "mode": "view"
     }
   ],
