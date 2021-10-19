@@ -1,7 +1,7 @@
 {
   "name": "search-notion",
-  "title": "Search Notion Without Admin Access",
-  "description": "Search Notion pages and open visited ones faster.",
+  "title": "Notion Page Search",
+  "description": "Search Notion pages and open visited ones faster. No admin access required.",
   "icon": "command-icon.png",
   "author": "reckoning-dev",
   "version": "1.0.0",
