@@ -112,7 +112,7 @@ export default function FindLogin() {
               <ActionPanel>
                 <PasteAction
                   content={result.login}
-                  title="Paste login"
+                  title="Paste Login"
                   shortcut={{
                     modifiers: ["opt"],
                     key: "l",
@@ -120,7 +120,7 @@ export default function FindLogin() {
                 />
                 <PasteAction
                   content={result.password}
-                  title="Paste password"
+                  title="Paste Password"
                   shortcut={{
                     modifiers: ["opt"],
                     key: "p",
@@ -129,9 +129,9 @@ export default function FindLogin() {
 
                 <OpenInBrowserAction url={`http://bugmenot.com/view/${state.domain}`} title="View on BugMeNot" />
 
-                <CopyToClipboardAction content={result.login} title="Copy login" />
-                <CopyToClipboardAction content={result.password} title="Copy password" />
-                {result.other && <CopyToClipboardAction content={result.other} title="Copy other" />}
+                <CopyToClipboardAction content={result.login} title="Copy Login" />
+                <CopyToClipboardAction content={result.password} title="Copy Password" />
+                {result.other && <CopyToClipboardAction content={result.other} title="Copy Other" />}
               </ActionPanel>
             }
           ></ListItem>

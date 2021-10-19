@@ -10,7 +10,7 @@
     {
       "name": "find-login",
       "title": "Find Login",
-      "subtitle": "",
+      "subtitle": "BugMeNot",
       "description": "Find login on BugMeNot",
       "mode": "view"
     }
