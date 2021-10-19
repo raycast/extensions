@@ -107,9 +107,9 @@ const formatDueDate = (dueDate: string) => {
   } else if (diff === 0) {
     return 'today';
   } else if (diff > 0) {
-    return `${diff} day${diff === 1 ? 's' : ''} left`;
+    return `${diff} day${diff === 1 ? '' : 's'} left`;
   } else if (diff < 0) {
-    return `${-diff} day${diff === -1 ? 's' : ''} ago`;
+    return `${-diff} day${diff === -1 ? '' : 's'} ago`;
   }
 };
 
