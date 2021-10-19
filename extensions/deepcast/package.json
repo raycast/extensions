@@ -2,7 +2,7 @@
   "name": "deepcast",
   "title": "Deepcast",
   "description": "Translate words, or entire sentences, into 26 different languages using DeepL.",
-  "icon": "logo.png",
+  "icon": "icon.png",
   "author": "mooxl",
   "license": "MIT",
   "commands": [
