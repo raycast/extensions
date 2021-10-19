@@ -75,7 +75,7 @@ export class XcodeProjectService {
       // Filter out null values
       .filter(xcodeProject => !!xcodeProject) as XcodeProject[];
     // Cache XcodeProjects
-    this.cacheXcodeProjects(xcodeProjects);
+    this.cacheXcodeProjects(xcodeProjects).then();
     // Return XcodeProjects
     return xcodeProjects;
   }

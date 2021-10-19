@@ -66,7 +66,7 @@ export class XcodeSimulatorApplicationService {
     // Flat map 2D Array to 1D
     const applications = ([] as XcodeSimulatorApplication[]).concat(...allApplications);
     // Cache Applications
-    this.cacheXcodeSimulatorApplication(applications);
+    this.cacheXcodeSimulatorApplication(applications).then();
     // Return Applications
     return applications;
   }

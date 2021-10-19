@@ -55,7 +55,7 @@ export class XcodeReleaseService {
     // Decode each entry to a XcodeRelease
     const xcodeReleases = jsonArray.map(XcodeReleaseService.decodeXcodeRelease);
     // Cache XcodeReleases
-    this.cacheXcodeReleases(xcodeReleases);
+    this.cacheXcodeReleases(xcodeReleases).then();
     // Return XcodeReleases
     return xcodeReleases;
   }
