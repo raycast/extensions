@@ -22,6 +22,10 @@ class Tab {
   key(): string {
     return `${this.windowsIndex}${Tab.TAB_CONTENTS_SEPARATOR}${this.tabIndex}`;
   }
+
+  urlWithoutScheme(): string {
+    return this.url ? this.url.replace(/(^\w+:|^)\/\//, '').replace('www.', '') : '';
+  }
 }
 
 async function getOpenTabs(showFavicons: boolean): Promise<Tab[]> {
@@ -68,13 +72,13 @@ interface State {
 }
 
 export default function Command() {
-  const { showFavicons } = getPreferenceValues<{ showFavicons: boolean }>();
+  const {showFavicons} = getPreferenceValues<{ showFavicons: boolean }>();
 
   const [state, setState] = useState<State>({});
 
   useEffect(() => {
     async function getTabs() {
-      setState({tabs: await getOpenTabs(hasToShowFavicons)});
+      setState({tabs: await getOpenTabs(showFavicons)});
     }
 
     getTabs();
@@ -83,7 +87,7 @@ export default function Command() {
   return (
     <List>
       {state.tabs?.map((tab) => (
-        <TabListItem key={tab.key()} tab={tab} showFavicon={hasToShowFavicons} />
+        <TabListItem key={tab.key()} tab={tab} showFavicon={showFavicons}/>
       ))}
     </List>
   );
@@ -93,9 +97,9 @@ function TabListItem(props: { tab: Tab; showFavicon: boolean; }) {
   return (
     <List.Item
       title={props.tab.title}
-      subtitle={props.tab.url}
+      subtitle={props.tab.urlWithoutScheme()}
       actions={<Actions tab={props.tab}/>}
-      { ...( props.showFavicon && { icon: props.tab.favicon } ) }
+      {...(props.showFavicon && {icon: props.tab.favicon})}
     />
   );
 }
