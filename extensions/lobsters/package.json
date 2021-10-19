@@ -1,6 +1,6 @@
 {
-  "name": "lobste.rs",
-  "version": "1.0.0",
+  "name": "lobsters",
+  "version": "1.0.1",
   "title": "Lobste.rs Homepage",
   "description": "Read the latest stories of lobste.rs",
   "icon": "lobster.png",
@@ -10,7 +10,7 @@
     {
       "name": "index",
       "title": "Lobste.rs",
-      "subtitle": "",
+      "subtitle": "Homepage Posts",
       "description": "Media",
       "mode": "view"
     }
