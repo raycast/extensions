@@ -8,25 +8,29 @@
   "commands": [
     {
       "name": "today",
-      "title": "Today tasks",
+      "title": "Today Tasks",
+      "subtitle": "Todoist",
       "description": "See your Todoist tasks due today.",
       "mode": "view"
     },
     {
       "name": "upcoming",
-      "title": "Upcoming tasks",
+      "title": "Upcoming Tasks",
+      "subtitle": "Todoist",
       "description": "See your upcoming Todoist tasks grouped by due date.",
       "mode": "view"
     },
     {
       "name": "projects",
-      "title": "All projects",
+      "title": "Search Projects",
+      "subtitle": "Todoist",
       "description": "See your Todoist projects and tasks by project.",
       "mode": "view"
     },
     {
       "name": "create",
-      "title": "Create a task",
+      "title": "Create Task",
+      "subtitle": "Todoist",
       "description": "Create a Todoist task.",
       "mode": "view"
     }
