@@ -27,7 +27,7 @@ console.log(`Is development mode: ${environment.isDevelopment}`);
 
 ### Environment
 
-Holds data about the environment the command is running in. Use the global [environment](../environment.md#environment) object to retrieve values.
+Holds data about the environment the command is running in. Use the global [environment](https://developers.raycast.com/api-reference/environment#environment) object to retrieve values.
 
 #### Properties
 
