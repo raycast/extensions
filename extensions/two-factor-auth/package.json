@@ -1,7 +1,7 @@
 {
   "name": "two-factor-auth",
   "title": "Two-Factor Auth",
-  "description": "Two-factor authentication for Raycast",
+  "description": "Quickly access your two-factor authentication codes.",
   "icon": "command-icon.png",
   "author": "cjdenio",
   "license": "MIT",
