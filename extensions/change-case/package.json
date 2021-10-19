@@ -1,0 +1,36 @@
+{
+  "name": "change-case",
+  "title": "Change Case",
+  "description": "Transform a string between camelCase, snake_case, CONSTANT_CASE, and more",
+  "icon": "command-icon.png",
+  "author": "es183923",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "change-case",
+      "title": "Change Case",
+      "subtitle": "",
+      "description": "Change the text in the clipboard",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "change-case": "^3.0.0",
+    "execa": "^5.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

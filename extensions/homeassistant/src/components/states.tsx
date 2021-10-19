@@ -1,13 +1,9 @@
 import {
   ActionPanel,
-  ActionPanelItem,
   Color,
   CopyToClipboardAction,
   Icon,
-  ImageLike,
-  KeyboardShortcut,
   List,
-  OpenAction,
   popToRoot,
   PushAction,
   showToast,
@@ -17,6 +13,7 @@ import { State } from "../haapi";
 import { useState, useEffect } from "react";
 import { createHomeAssistantClient } from "../common";
 import { EntityAttributesList } from "./attributes";
+import { useHAStates } from "../hooks";
 
 export const ha = createHomeAssistantClient();
 
@@ -37,12 +34,8 @@ export function ShowAttributesAction(props: { state: State }) {
 
 export function StatesList(props: { domain: string }) {
   const [searchText, setSearchText] = useState<string>();
-  const [updateTimestamp, setUpdateTimestamp] = useState<Date>(new Date());
-  const { states, error, isLoading } = useSearch(searchText, props.domain, updateTimestamp);
-
-  const refreshStates = () => {
-    setUpdateTimestamp(new Date());
-  };
+  const { states: allStates, error, isLoading } = useHAStates();
+  const { states } = useSearch(searchText, props.domain, allStates);
 
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search Home Assistant states", error);
@@ -52,6 +45,21 @@ export function StatesList(props: { domain: string }) {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
+  const extraTitle = (state: State): string => {
+    try {
+      const e = state.entity_id;
+      if (e.startsWith("cover") && state.attributes.hasOwnProperty("current_position")) {
+        const p = state.attributes.current_position;
+        if (p > 0 && p < 100) {
+          return `${p}% | `;
+        }
+      } else if (e.startsWith("climate") && state.attributes.hasOwnProperty("current_temperature")) {
+        return `${state.attributes.current_temperature} | `;
+      }
+    } catch (e: any) {}
+    return "";
+  };
+
   return (
     <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
       {states?.map((state) => (
@@ -59,61 +67,41 @@ export function StatesList(props: { domain: string }) {
           key={state.entity_id}
           title={state.attributes.friendly_name || state.entity_id}
           subtitle={state.entity_id}
-          accessoryTitle={state.state}
-          actions={<StateActionPanel state={state} refreshStates={refreshStates} />}
+          accessoryTitle={extraTitle(state) + state.state}
+          actions={<StateActionPanel state={state} />}
         />
       ))}
     </List>
   );
 }
 
-export function StateActionPanel(props: { state: State; refreshStates: () => void }) {
+export function StateActionPanel(props: { state: State }) {
   const state = props.state;
   const domain = props.state.entity_id.split(".")[0];
   const entityID = props.state.entity_id;
-  const refreshStates = props.refreshStates;
-
-  function StateActionItem(props: {
-    title: string;
-    onAction: () => Promise<void>;
-    icon?: ImageLike | undefined;
-    shortcut?: KeyboardShortcut | undefined;
-  }) {
-    return (
-      <ActionPanel.Item
-        title={props.title}
-        onAction={async () => {
-          await props.onAction();
-          refreshStates();
-        }}
-        icon={props.icon}
-        shortcut={props.shortcut}
-      />
-    );
-  }
 
   switch (domain) {
     case "cover": {
       return (
         <ActionPanel>
-          <StateActionItem
+          <ActionPanel.Item
             title="Toggle"
             onAction={async () => await ha.toggleCover(props.state.entity_id)}
             icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
           />
-          <StateActionItem
+          <ActionPanel.Item
             title="Open"
             shortcut={{ modifiers: ["cmd"], key: "o" }}
             onAction={async () => await ha.openCover(props.state.entity_id)}
             icon={{ source: Icon.ChevronUp, tintColor: Color.PrimaryText }}
           />
-          <StateActionItem
+          <ActionPanel.Item
             title="Close"
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             onAction={async () => await ha.closeCover(props.state.entity_id)}
             icon={{ source: Icon.ChevronDown, tintColor: Color.PrimaryText }}
           />
-          <StateActionItem
+          <ActionPanel.Item
             title="Stop"
             shortcut={{ modifiers: ["cmd"], key: "s" }}
             onAction={async () => await ha.stopCover(props.state.entity_id)}
@@ -127,18 +115,18 @@ export function StateActionPanel(props: { state: State; refreshStates: () => voi
     case "light": {
       return (
         <ActionPanel>
-          <StateActionItem
+          <ActionPanel.Item
             title="Toggle"
             onAction={async () => await ha.toggleLight(props.state.entity_id)}
             icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
           />
-          <StateActionItem
+          <ActionPanel.Item
             title="Turn On"
             shortcut={{ modifiers: ["cmd"], key: "o" }}
             onAction={async () => await ha.turnOnLight(props.state.entity_id)}
             icon={{ source: "power.png", tintColor: Color.Green }}
           />
-          <StateActionItem
+          <ActionPanel.Item
             title="Turn Off"
             shortcut={{ modifiers: ["cmd"], key: "f" }}
             onAction={async () => await ha.turnOffLight(props.state.entity_id)}
@@ -152,53 +140,53 @@ export function StateActionPanel(props: { state: State; refreshStates: () => voi
     case "media_player": {
       return (
         <ActionPanel>
-          <StateActionItem
+          <ActionPanel.Item
             title="Play/Pause"
             onAction={async () => await ha.playPauseMedia(entityID)}
             icon={{ source: "play-pause.jpg", tintColor: Color.PrimaryText }}
           />
-          <StateActionItem
+          <ActionPanel.Item
             title="Play"
             onAction={async () => await ha.playMedia(entityID)}
             icon={{ source: "play.png", tintColor: Color.PrimaryText }}
           />
-          <StateActionItem
+          <ActionPanel.Item
             title="Pause"
             shortcut={{ modifiers: ["cmd"], key: "p" }}
             onAction={async () => await ha.pauseMedia(entityID)}
             icon={{ source: "pause.png", tintColor: Color.PrimaryText }}
           />
-          <StateActionItem
+          <ActionPanel.Item
             title="Stop"
             shortcut={{ modifiers: ["cmd"], key: "s" }}
             onAction={async () => await ha.stopMedia(entityID)}
             icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
           />
-          <StateActionItem
+          <ActionPanel.Item
             title="Next"
             shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
             onAction={async () => await ha.nextMedia(entityID)}
             icon={{ source: "next.png", tintColor: Color.PrimaryText }}
           />
-          <StateActionItem
+          <ActionPanel.Item
             title="Previous"
             shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
             onAction={async () => await ha.previousMedia(entityID)}
             icon={{ source: "previous.png", tintColor: Color.PrimaryText }}
           />
-          <StateActionItem
+          <ActionPanel.Item
             title="Volume Up"
             shortcut={{ modifiers: ["cmd"], key: "+" }}
             onAction={async () => await ha.volumeUpMedia(entityID)}
             icon={{ source: Icon.SpeakerArrowUp, tintColor: Color.PrimaryText }}
           />
-          <StateActionItem
+          <ActionPanel.Item
             title="Volume Down"
             shortcut={{ modifiers: ["cmd"], key: "-" }}
             onAction={async () => await ha.volumeDownMedia(entityID)}
             icon={{ source: Icon.SpeakerArrowDown, tintColor: Color.PrimaryText }}
           />
-          <StateActionItem
+          <ActionPanel.Item
             title="Mute"
             onAction={async () => await ha.muteMedia(entityID)}
             icon={{ source: Icon.SpeakerSlash, tintColor: Color.PrimaryText }}
@@ -236,7 +224,7 @@ export function StateActionPanel(props: { state: State; refreshStates: () => voi
               icon={{ source: "thermometer.png", tintColor: Color.PrimaryText }}
             >
               {temps.map((t) => (
-                <StateActionItem
+                <ActionPanel.Item
                   key={t.toString()}
                   title={t.toString()}
                   onAction={async () => {
@@ -254,7 +242,7 @@ export function StateActionPanel(props: { state: State; refreshStates: () => voi
               icon={{ source: Icon.Gear, tintColor: Color.PrimaryText }}
             >
               {state.attributes.hvac_modes?.map((o: string) => (
-                <StateActionItem
+                <ActionPanel.Item
                   key={o}
                   title={o}
                   onAction={async () => {
@@ -273,7 +261,7 @@ export function StateActionPanel(props: { state: State; refreshStates: () => voi
               icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
             >
               {preset_modes?.map((o: string) => (
-                <StateActionItem
+                <ActionPanel.Item
                   key={o}
                   title={o}
                   onAction={async () => {
@@ -286,7 +274,7 @@ export function StateActionPanel(props: { state: State; refreshStates: () => voi
           )}
 
           {upperTemp && changeTempAllowed && (
-            <StateActionItem
+            <ActionPanel.Item
               title={`Increase Temp. 0.5`}
               shortcut={{ modifiers: ["cmd"], key: "+" }}
               onAction={async () => {
@@ -297,7 +285,7 @@ export function StateActionPanel(props: { state: State; refreshStates: () => voi
             />
           )}
           {lowerTemp && changeTempAllowed && (
-            <StateActionItem
+            <ActionPanel.Item
               title={`Decrease Temp. 0.5`}
               shortcut={{ modifiers: ["cmd"], key: "-" }}
               onAction={async () => {
@@ -319,53 +307,33 @@ export function StateActionPanel(props: { state: State; refreshStates: () => voi
   }
 }
 
-export function useSearch(
+function useSearch(
   query: string | undefined,
   domain: string,
-  updateTimestamp: Date
+  allStates?: State[]
 ): {
   states?: State[];
-  error?: string;
-  isLoading: boolean;
 } {
   const [states, setStates] = useState<State[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  let cancel = false;
 
   useEffect(() => {
-    async function fetchData() {
-      if (query === null || cancel) {
-        return;
+    if (allStates) {
+      let haStates: State[] = allStates;
+      if (domain) {
+        haStates = haStates.filter((s) => s.entity_id.startsWith(domain));
       }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const haStates = await ha.getStates({ domain: domain, query: query || "" });
-
-        if (!cancel) {
-          setStates(haStates);
-        }
-      } catch (e: any) {
-        if (!cancel) {
-          setError(e.toString());
-        }
-      } finally {
-        if (!cancel) {
-          setIsLoading(false);
-        }
+      if (query) {
+        haStates = haStates.filter(
+          (e) =>
+            e.entity_id.toLowerCase().includes(query.toLowerCase()) ||
+            (e.attributes.friendly_name.toLowerCase() || "").includes(query.toLowerCase())
+        );
       }
+      haStates = haStates.slice(0, 100);
+      setStates(haStates);
+    } else {
+      setStates([]);
     }
-
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, [query, updateTimestamp]);
-
-  return { states, error, isLoading };
+  }, [query, allStates]);
+  return { states };
 }
