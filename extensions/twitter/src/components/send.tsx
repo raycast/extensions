@@ -17,7 +17,7 @@ async function submit(values: TweetFormValues, replyTweet?: TweetV1 | undefined)
     }
     console.log(text);
     if (replyTweet) {
-      twitterClient.v1.reply(text, replyTweet.id_str);
+      await twitterClient.v1.reply(text, replyTweet.id_str);
       await showToast(ToastStyle.Success, "Tweet created", "Reply Tweet creation successful");
     } else {
       await twitterClient.v1.tweet(text);
