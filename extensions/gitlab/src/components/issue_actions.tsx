@@ -13,6 +13,7 @@ import { gitlab } from "../common";
 import { Issue, Label } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { LabelList } from "./label";
+import { stringToSlug } from "../utils";
 
 export function CloseIssueAction(props: { issue: Issue }) {
   const issue = props.issue;
@@ -31,6 +32,33 @@ export function CloseIssueAction(props: { issue: Issue }) {
       onAction={handleAction}
     />
   );
+}
+
+export function CreateMRAction(props: { issue: Issue }): JSX.Element {
+  const issue = props.issue;
+
+  async function handleAction() {
+    try {
+      const project = await gitlab.getProject(issue.project_id);
+      const branch = await gitlab.post(
+        `projects/${issue.project_id}/repository/branches?branch=${`${issue.iid}-${stringToSlug(issue.title)}`}&ref=${
+          project.default_branch
+        }`
+      );
+      const mr_title = `Resolve: ${issue.title}`;
+      await gitlab.createMR(issue.project_id, {
+        id: issue.project_id,
+        source_branch: branch.name,
+        target_branch: project.default_branch,
+        title: mr_title,
+        assignee_id: project.owner?.id,
+      });
+      showToast(ToastStyle.Success, "MR created successfully", mr_title);
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Failed to create MR", (error instanceof Error && error.message) || "");
+    }
+  }
+  return <ActionPanel.Item title="Create MR" icon={Icon.Star} onAction={handleAction} />;
 }
 
 export function ReopenIssueAction(props: { issue: Issue }) {
@@ -69,6 +97,7 @@ export function IssueItemActions(props: { issue: Issue }) {
   return (
     <React.Fragment>
       <ShowIssueLabelsAction labels={issue.labels} />
+      {issue.state == "opened" && <CreateMRAction issue={issue} />}
       {issue.state == "opened" && <CloseIssueAction issue={issue} />}
       {issue.state == "closed" && <ReopenIssueAction issue={issue} />}
       <CopyToClipboardAction title="Copy Issue Number" content={issue.iid} />
