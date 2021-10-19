@@ -24,12 +24,20 @@ class Tab {
   }
 
   urlWithoutScheme(): string {
-    return this.url ? this.url.replace(/(^\w+:|^)\/\//, '').replace('www.', '') : '';
+    return this.url.replace(/(^\w+:|^)\/\//, '').replace('www.', '');
+  }
+
+  urlDomain(): string {
+    return this.urlWithoutScheme().split('/')[0];
+  }
+
+  googleFavicon(): string {
+    return `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(this.urlDomain())}`;
   }
 }
 
-async function getOpenTabs(showFavicons: boolean): Promise<Tab[]> {
-  const faviconFormula = showFavicons
+async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
+  const faviconFormula = useOriginalFavicon
     ? `execute of tab _tab_index of window _window_index javascript ¬
                     "document.head.querySelector('link[rel~=icon]').href;"`
     : '""'
@@ -54,7 +62,7 @@ async function getOpenTabs(showFavicons: boolean): Promise<Tab[]> {
       return _output
   `);
 
-  return openTabs.split("\n").map(line => Tab.parse(line));
+  return openTabs.split("\n").filter(line => line.length !== 0).map(line => Tab.parse(line));
 }
 
 async function setActiveTab(tab: Tab): Promise<void> {
@@ -72,13 +80,13 @@ interface State {
 }
 
 export default function Command() {
-  const {showFavicons} = getPreferenceValues<{ showFavicons: boolean }>();
+  const {useOriginalFavicon} = getPreferenceValues<{ useOriginalFavicon: boolean }>();
 
   const [state, setState] = useState<State>({});
 
   useEffect(() => {
     async function getTabs() {
-      setState({tabs: await getOpenTabs(showFavicons)});
+      setState({tabs: await getOpenTabs(useOriginalFavicon)});
     }
 
     getTabs();
@@ -87,19 +95,19 @@ export default function Command() {
   return (
     <List>
       {state.tabs?.map((tab) => (
-        <TabListItem key={tab.key()} tab={tab} showFavicon={showFavicons}/>
+        <TabListItem key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon}/>
       ))}
     </List>
   );
 }
 
-function TabListItem(props: { tab: Tab; showFavicon: boolean; }) {
+function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; }) {
   return (
     <List.Item
       title={props.tab.title}
       subtitle={props.tab.urlWithoutScheme()}
       actions={<Actions tab={props.tab}/>}
-      {...(props.showFavicon && {icon: props.tab.favicon})}
+      icon={props.useOriginalFavicon ?  props.tab.favicon : props.tab.googleFavicon()}
     />
   );
 }
