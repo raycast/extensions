@@ -1,18 +1,12 @@
 import { useEffect, useState } from "react";
 import { SelectedWorkspace } from "../types/preferences";
-<<<<<<< HEAD
 import { EntriesEntity } from "../types/SketchProjectShares";
 import { Share } from "../types/SketchWorkspaceShare";
 import { getProjectShares, getShares } from "../utils/functions";
-=======
-import { Share } from "../types/SketchWorkspaceShare";
-import { getShares } from "../utils/functions";
->>>>>>> 03c01420ef3b43e9aa6fbbd48100f74091d333f5
 
 export default function useSearch(
   token: string | undefined,
   selectedWorkspace: SelectedWorkspace | undefined,
-<<<<<<< HEAD
   query: string | undefined,
   shortId?: string
 ): {
@@ -21,15 +15,6 @@ export default function useSearch(
   isLoading: boolean;
 } {
   const [data, setData] = useState<{ shares: Share[] | EntriesEntity[] }>({ shares: [] });
-=======
-  query: string | undefined
-): {
-  data: Record<"shares", Share[]> | undefined;
-  error?: string;
-  isLoading: boolean;
-} {
-  const [data, setData] = useState<{ shares: Share[] }>({ shares: [] });
->>>>>>> 03c01420ef3b43e9aa6fbbd48100f74091d333f5
   const [error, setError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -49,13 +34,9 @@ export default function useSearch(
       setError(undefined);
 
       try {
-<<<<<<< HEAD
         const shares = shortId
           ? await getProjectShares(token, shortId, query)
           : await getShares(token, selectedWorkspace, query);
-=======
-        const shares: Share[] | undefined = await getShares(token, selectedWorkspace, query);
->>>>>>> 03c01420ef3b43e9aa6fbbd48100f74091d333f5
         if (!cancel && shares) {
           setData({
             shares: shares,
@@ -66,11 +47,7 @@ export default function useSearch(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error) {
         if (!cancel) {
-<<<<<<< HEAD
           setError((error as ErrorEvent).message);
-=======
-          setError(error as string);
->>>>>>> 03c01420ef3b43e9aa6fbbd48100f74091d333f5
         }
       } finally {
         if (!cancel) {

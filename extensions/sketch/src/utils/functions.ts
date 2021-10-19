@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-<<<<<<< HEAD
 import { BodyRes, Project, Share } from "../types/SketchWorkspaceShare";
 import fetch, { FetchError } from "node-fetch";
 import { GetWorkspacesBodyRes } from "../types/SketchGetWorkspaces";
@@ -9,13 +8,6 @@ import { EntriesEntity, ProjectSharesBodyRes } from "../types/SketchProjectShare
 import { GetProjectsBodyRes } from "../types/SketchProjects";
 
 // fix non auth error body
-=======
-import { BodyRes, Share } from "../types/SketchWorkspaceShare";
-import fetch, { FetchError } from "node-fetch";
-import { GetWorkspacesBodyRes } from "../types/SketchGetWorkspaces";
-import { SelectedWorkspace } from "../types/preferences";
-import { SketchErrorBody } from "../types/SketchGeneric";
->>>>>>> 03c01420ef3b43e9aa6fbbd48100f74091d333f5
 
 type TokenBody = {
   access_token: string;
@@ -44,11 +36,7 @@ export async function login(email: string, password: string): Promise<string> {
     if (resp.ok) {
       return (json as TokenBody).access_token as string;
     } else {
-<<<<<<< HEAD
       throw new Error((json as SketchAuthErrorBody).message);
-=======
-      throw new Error((json as SketchErrorBody).message);
->>>>>>> 03c01420ef3b43e9aa6fbbd48100f74091d333f5
     }
   } catch (error) {
     throw new Error((error as FetchError).message);
@@ -86,7 +74,6 @@ export async function getShares(
     const json = await resp.json();
 
     if (resp.ok) {
-<<<<<<< HEAD
       const body = json as BodyRes | SketchErrorBody;
       if (body.data) {
         return body.data.workspace.shares.entries as Share[];
@@ -147,17 +134,11 @@ export async function getProjectShares(
       }
     } else {
       throw new Error('Unknown error');
-=======
-      return (json as BodyRes).data.workspace.shares.entries as Share[];
-    } else {
-      throw new Error((json as SketchErrorBody).message);
->>>>>>> 03c01420ef3b43e9aa6fbbd48100f74091d333f5
     }
   } catch (error) {
     throw new Error((error as FetchError).message);
   }
 }
-<<<<<<< HEAD
 
 export async function getProjects(token: string, selectedWorkspace: SelectedWorkspace): Promise<Project[] | undefined> {
   try {
@@ -237,8 +218,6 @@ export async function getWorkspaces(token: string): Promise<GetWorkspacesBodyRes
   }
 }
 
-=======
->>>>>>> 03c01420ef3b43e9aa6fbbd48100f74091d333f5
 // next update
 
 // export async function createProject(token: string, selectedWorkspace: SelectedWorkspace, name: string): Promise<CreateProjectBodyRes> {
@@ -272,33 +251,3 @@ export async function getWorkspaces(token: string): Promise<GetWorkspacesBodyRes
 //   }
 // }
 
-<<<<<<< HEAD
-=======
-export async function getWorkspaces(token: string): Promise<GetWorkspacesBodyRes> {
-  try {
-    const resp = await fetch("https://graphql.sketch.cloud/api", {
-      method: "POST",
-      headers: {
-        Authorization: `bearer ${token}`,
-        "Content-Type": "application/json",
-        Accept: "*/*",
-      },
-      body: JSON.stringify({
-        operationName: "getWorkspaces",
-        variables: {},
-        query:
-          "query getWorkspaces {\n  me {\n    identifier\n    personalWorkspace {\n      ...WorkspaceMinimal\n      __typename\n    }\n    workspaces {\n      ...WorkspaceMinimal\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment WorkspaceMinimal on Workspace {\n  ...WorkspaceMinimalIdentity\n  type\n  avatar {\n    large\n    __typename\n  }\n  customer {\n    identifier\n    ssoEnabled\n    ssoStartUrl\n    tosAgreed\n    billing {\n      status\n      __typename\n    }\n    __typename\n  }\n  status\n  userCanEdit\n  userRole\n  userIsOwner\n  status\n  type\n  __typename\n}\n\nfragment WorkspaceMinimalIdentity on Workspace {\n  identifier\n  name\n  avatar {\n    small\n    __typename\n  }\n  __typename\n}\n",
-      }),
-    });
-    const json = await resp.json();
-
-    if (resp.ok) {
-      return json as GetWorkspacesBodyRes;
-    } else {
-      throw new Error((json as SketchErrorBody).message);
-    }
-  } catch (error) {
-    throw new Error((error as FetchError).message);
-  }
-}
->>>>>>> 03c01420ef3b43e9aa6fbbd48100f74091d333f5
