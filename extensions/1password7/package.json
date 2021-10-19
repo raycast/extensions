@@ -1,6 +1,6 @@
 {
   "name": "1password7",
-  "title": "1Password 7 for Raycast",
+  "title": "1Password 7",
   "description": "Search, open or edit your 1Password 7 passwords from Raycast",
   "icon": "1password-icon.png",
   "author": "khasbilegt",
@@ -9,7 +9,7 @@
     {
       "name": "list",
       "title": "My Passwords",
-      "subtitle": "Command",
+      "subtitle": "1Password",
       "description": "List of all your 1Password 7 passwords in Raycast",
       "mode": "view",
       "keywords": [

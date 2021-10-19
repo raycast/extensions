@@ -15,7 +15,7 @@ const CLI_REQUIRED_MESSAGE = `
 # Spotlight and 3rd party app integrations is not enabled
 
 To use this extension please enable the "Spotlight and 3rd party app integrations" in the 1Password 7 app;
-1. Make sure you have te right 1Password app version, it should be 7.
+1. Make sure you have the right 1Password app version, it should be 7.
 2. Open and unlock 1Password.
 3. Choose 1Password > Preferences and click the Advanced icon.
 4. Turn on “Enable Spotlight and 3rd party app integrations”.
