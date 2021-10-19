@@ -8,15 +8,22 @@
   "commands": [
     {
       "name": "container_list",
-      "title": "Docker Containers",
-      "subtitle": "",
+      "title": "Manage Containers",
+      "subtitle": "Docker",
       "description": "List All Docker Containers",
       "mode": "view"
     },
     {
+      "name": "projects_list",
+      "title": "Manage Projects",
+      "subtitle": "Docker",
+      "description": "Manage Docker Compose Projects",
+      "mode": "view"
+    },
+    {
       "name": "image_list",
-      "title": "Docker Images",
-      "subtitle": "",
+      "title": "Manage Images",
+      "subtitle": "Docker",
       "description": "List Installed Docker images",
       "mode": "view"
     }

@@ -4,16 +4,26 @@ import Dockerode, { ContainerInfo } from '@priithaamer/dockerode';
 
 const containerName = (container: ContainerInfo) => container.Names.map((name) => name.replace(/^\//, '')).join(', ');
 
-const useDocker = (docker: Dockerode) => {
+const filterContainers = (containers: ContainerInfo[], projectFilter?: string) => {
+  if (projectFilter === undefined) {
+    return containers;
+  }
+  return containers.filter((container) => container.Labels['com.docker.compose.project'] === projectFilter);
+};
+
+const useDocker = (docker: Dockerode, options: { projectFilter?: string }) => {
   const [containers, setContainers] = useState<ContainerInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>();
+
+  const updateContainers = (containers: ContainerInfo[]) =>
+    setContainers(filterContainers(containers, options.projectFilter));
 
   const fetchContainers = async () => {
     setLoading(true);
     try {
       const containers = await docker.listContainers({ all: true });
-      setContainers(containers);
+      updateContainers(containers);
     } catch (error) {
       if (error instanceof Error) {
         setError(error);
@@ -27,7 +37,7 @@ const useDocker = (docker: Dockerode) => {
     setLoading(true);
     await docker.getContainer(containerInfo.Id).stop();
     const containers = await docker.listContainers({ all: true });
-    setContainers(containers);
+    updateContainers(containers);
     setLoading(false);
   };
 
@@ -35,7 +45,7 @@ const useDocker = (docker: Dockerode) => {
     setLoading(true);
     await docker.getContainer(containerInfo.Id).start();
     const containers = await docker.listContainers({ all: true });
-    setContainers(containers);
+    updateContainers(containers);
     setLoading(false);
   };
 
@@ -47,11 +57,9 @@ const useDocker = (docker: Dockerode) => {
   return { containers, loading, error, stopContainer, startContainer };
 };
 
-export default function ContainerList() {
+export default function ContainerList(props: { projectFilter?: string }) {
   const docker = useMemo(() => new Dockerode(), []);
-  const { containers, loading, error, stopContainer, startContainer } = useDocker(docker);
-
-  console.log('-', loading, error);
+  const { containers, loading, error, stopContainer, startContainer } = useDocker(docker, props);
 
   if (error) {
     return <Detail markdown={`## Error connecting to Docker\n\n${error.message}\n`} />;
