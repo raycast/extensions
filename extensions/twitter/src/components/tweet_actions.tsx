@@ -10,6 +10,7 @@ import {
 } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
 import { loggedInUserAccount, twitterClient } from "../twitterapi";
+import { Fetcher } from "./mytweets";
 import { TweetSendForm } from "./send";
 import { TweetDetail } from "./tweet";
 
@@ -56,7 +57,7 @@ export function DeleteTweetAction(props: { tweet: TweetV1 }) {
   );
 }
 
-export function RetweetAction(props: { tweet: TweetV1 }) {
+export function RetweetAction(props: { tweet: TweetV1; fetcher?: Fetcher }) {
   const t = props.tweet;
   const cmd = t.retweeted ? "unretweet" : "retweet";
   const title = t.retweeted ? "Unretweet" : "Retweet";
@@ -67,6 +68,9 @@ export function RetweetAction(props: { tweet: TweetV1 }) {
     try {
       await twitterClient.v1.post(`statuses/${cmd}/${t.id_str}.json`);
       showToast(ToastStyle.Success, "Retweet successful", "Retweet creation successful");
+      if (props.fetcher) {
+        await props.fetcher.updateInline();
+      }
     } catch (error: any) {
       showToast(ToastStyle.Failure, "Could not retweet", error.message);
     }
@@ -74,7 +78,7 @@ export function RetweetAction(props: { tweet: TweetV1 }) {
   return <ActionPanel.Item title={title} icon={icon} onAction={retweet} />;
 }
 
-export function LikeAction(props: { tweet: TweetV1 }) {
+export function LikeAction(props: { tweet: TweetV1; fetcher?: Fetcher }) {
   const t = props.tweet;
   const cmd = t.favorited ? "destroy" : "create";
   const title = t.favorited ? "Undo Like" : "Like";
@@ -85,12 +89,14 @@ export function LikeAction(props: { tweet: TweetV1 }) {
     try {
       await twitterClient.v1.post(`favorites/${cmd}.json`, { id: t.id_str });
       showToast(ToastStyle.Success, "Like successful", "Like creation successful");
-      console.log(t.favorited);
+      if (props.fetcher) {
+        await props.fetcher.updateInline();
+      }
     } catch (error: any) {
       showToast(ToastStyle.Failure, "Could not like tweet", error.message);
     }
   };
-  return <ActionPanel.Item title={title} icon={icon} onAction={retweet} />;
+  return <ActionPanel.Item title={title} shortcut={{ modifiers: ["cmd"], key: "l" }} icon={icon} onAction={retweet} />;
 }
 
 export function OpenAuthorProfileAction(props: { tweet: TweetV1 }) {
@@ -99,6 +105,38 @@ export function OpenAuthorProfileAction(props: { tweet: TweetV1 }) {
       title="Open Author Profile"
       url={`https://twitter.com/${props.tweet.user.screen_name}`}
       icon={{ source: Icon.Person, tintColor: Color.PrimaryText }}
+    />
+  );
+}
+
+export function RefreshInlineAction(props: { fetcher?: Fetcher }) {
+  const handle = async () => {
+    if (props.fetcher) {
+      await props.fetcher.updateInline();
+    }
+  };
+  return (
+    <ActionPanel.Item
+      title="Refresh Tweets Inline"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      icon={{ source: Icon.Download, tintColor: Color.PrimaryText }}
+      onAction={handle}
+    />
+  );
+}
+
+export function RefreshAction(props: { fetcher?: Fetcher }) {
+  const handle = async () => {
+    if (props.fetcher) {
+      await props.fetcher.refresh();
+    }
+  };
+  return (
+    <ActionPanel.Item
+      title="Refresh Tweets"
+      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      icon={{ source: Icon.Binoculars, tintColor: Color.PrimaryText }}
+      onAction={handle}
     />
   );
 }

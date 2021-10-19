@@ -1,9 +1,12 @@
 import { ActionPanel, Detail, Image, ImageMask, List, OpenInBrowserAction } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
+import { Fetcher } from "./mytweets";
 import {
   DeleteTweetAction,
   LikeAction,
   OpenAuthorProfileAction,
+  RefreshAction,
+  RefreshInlineAction,
   ReplyTweetAction,
   RetweetAction,
   ShowTweetAction,
@@ -13,8 +16,9 @@ function getTweetUrl(tweet: TweetV1): string {
   return `https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`;
 }
 
-export function TweetListItem(props: { tweet: TweetV1 }) {
+export function TweetListItem(props: { tweet: TweetV1; fetcher?: Fetcher }) {
   const t = props.tweet;
+  const fetcher = props.fetcher;
 
   const maxLength = 70;
   const textRaw = t.full_text ? t.full_text.trim() : "";
@@ -44,15 +48,19 @@ export function TweetListItem(props: { tweet: TweetV1 }) {
           <ActionPanel.Section title="Tweet">
             <ShowTweetAction tweet={t} />
             <OpenInBrowserAction url={getTweetUrl(t)} />
-            <LikeAction tweet={t} />
+            <LikeAction tweet={t} fetcher={fetcher} />
             <ReplyTweetAction tweet={t} />
-            <RetweetAction tweet={t} />
+            <RetweetAction tweet={t} fetcher={fetcher} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Info">
             <OpenAuthorProfileAction tweet={t} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Destructive">
             <DeleteTweetAction tweet={t} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Update">
+            <RefreshInlineAction fetcher={fetcher} />
+            <RefreshAction fetcher={fetcher} />
           </ActionPanel.Section>
         </ActionPanel>
       }
