@@ -1,0 +1,60 @@
+{
+  "name": "file-manager",
+  "title": "File Manager",
+  "description": "Manage files from Raycast",
+  "icon": "command-icon.png",
+  "author": "erics118",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-files",
+      "title": "Manage Files",
+      "subtitle": "Files",
+      "description": "View, create, and delete files in Raycast",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "caseSensitive",
+      "type": "checkbox",
+      "default": false,
+      "required": true,
+      "title": "Case Sensitive",
+      "description": "Show files and directories with uppercase letters before ones with lowercase letters"
+    },
+    {
+      "name": "directoriesFirst",
+      "type": "checkbox",
+      "default": false,
+      "required": true,
+      "title": "Directories First",
+      "description": "Show directories before files"
+    },
+    {
+      "name": "showDots",
+      "type": "checkbox",
+      "default": false,
+      "required": true,
+      "title": "Show Dotfiles",
+      "description": "show dotfiles (files and directories that start with a .)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
