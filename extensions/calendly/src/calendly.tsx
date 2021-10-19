@@ -10,9 +10,11 @@ import {
   OpenInBrowserAction,
   Detail,
   showToast,
+  getLocalStorageItem,
+  keyboardShortcutPropType,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { CalendlyEventType, createSingleUseLink, getEventTypes } from "./services/calendly";
+import { CalendlyEventType, CalendlyUser, createSingleUseLink, getEventTypes } from "./services/calendly";
 
 const tokenURL = "https://calendly.com/integrations/api_webhooks";
 
@@ -29,8 +31,14 @@ const error = `
 export default function Calendly() {
   const [items, setItems] = useState<CalendlyEventType[] | undefined>(undefined);
   const [showError, setShowError] = useState(false);
+  const [user, setUser] = useState<CalendlyUser | undefined>(undefined);
 
   useEffect(() => {
+    getLocalStorageItem("user").then((data) => {
+      if (data) {
+        setUser(JSON.parse(data.toString()));
+      }
+    });
     getEventTypes()
       .then((data) => {
         setItems(data);
@@ -69,6 +77,21 @@ export default function Calendly() {
           </ActionPanel>
         }
       />
+      {user && (
+        <List.Item
+          title="Copy My Link"
+          subtitle={"/" + user.slug}
+          icon={{
+            source: "logo.png",
+          }}
+          actions={
+            <ActionPanel>
+              <CopyToClipboardAction title="Copy Scheduling URL" icon={Icon.Calendar} content={user.scheduling_url} />
+              <OpenInBrowserAction url={user.scheduling_url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+            </ActionPanel>
+          }
+        />
+      )}
       {items?.map((event) => {
         return (
           <List.Item

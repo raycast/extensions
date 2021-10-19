@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, setLocalStorageItem } from "@raycast/api";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import _ from "lodash";
 
@@ -6,20 +6,21 @@ interface Preferences {
   token: string;
 }
 
+export interface CalendlyUser {
+  avatar_url: string;
+  created_at: string;
+  current_organization: string;
+  email: string;
+  name: string;
+  scheduling_url: string;
+  slug: string;
+  timezone: string;
+  updated_at: string;
+  uri: string;
+}
 interface CalendlyUserResource extends AxiosResponse {
   data: {
-    resource: {
-      avatar_url: string;
-      created_at: string;
-      current_organization: string;
-      email: string;
-      name: string;
-      scheduling_url: string;
-      slug: string;
-      timezone: string;
-      updated_at: string;
-      uri: string;
-    };
+    resource: CalendlyUser;
   };
 }
 
@@ -65,6 +66,7 @@ async function calendlyAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) 
 async function getCurrentUser() {
   const data = await calendlyAPI<CalendlyUserResource>({ url: "/users/me" });
   const resource = data.data.resource;
+  setLocalStorageItem("user", JSON.stringify(resource));
   return resource;
 }
 
