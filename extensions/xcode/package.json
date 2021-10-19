@@ -36,6 +36,13 @@
       "mode": "view"
     },
     {
+      "name": "search-apple-developer-documentation.command",
+      "title": "Search Developer Documentation",
+      "subtitle": "Xcode",
+      "description": "Search in Apple Developer Documentation",
+      "mode": "view"
+    },
+    {
       "name": "create-swift-package.command",
       "title": "Create Swift Package",
       "subtitle": "Xcode",
