@@ -11,10 +11,10 @@ import {
   Detail,
   showToast,
   getLocalStorageItem,
-  keyboardShortcutPropType,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { CalendlyEventType, CalendlyUser, createSingleUseLink, getEventTypes } from "./services/calendly";
+import { Preferences, CalendlyEventType, CalendlyUser, createSingleUseLink, getEventTypes } from "./services/calendly";
 
 const tokenURL = "https://calendly.com/integrations/api_webhooks";
 
@@ -32,6 +32,7 @@ export default function Calendly() {
   const [items, setItems] = useState<CalendlyEventType[] | undefined>(undefined);
   const [showError, setShowError] = useState(false);
   const [user, setUser] = useState<CalendlyUser | undefined>(undefined);
+  const { defaultAction }: Preferences = getPreferenceValues();
 
   useEffect(() => {
     getLocalStorageItem("user").then((data) => {
@@ -101,24 +102,42 @@ export default function Calendly() {
             subtitle={event.slug ? `/${event.slug}` : ""}
             actions={
               <ActionPanel title="Calendly">
-                <CopyToClipboardAction title="Copy Meeting URL" icon={Icon.Calendar} content={event.scheduling_url} />
-                <ActionPanel.Item
-                  title="Copy Single Use Link"
-                  icon={Icon.Calendar}
-                  onAction={async () => {
-                    const toast = new Toast({ style: ToastStyle.Animated, title: "Generating Link..." });
-                    await toast.show();
-                    const data = await createSingleUseLink(event);
-                    await copyTextToClipboard(data.booking_url);
-                    await toast.hide();
-                    await showHUD("Single-use Link Copied to Clipboard 📋");
-                  }}
-                />
+                {defaultAction === "meeting" ? (
+                  <>
+                    <CopyMeetingLinkAction event={event} />
+                    <CopyOneTimeLinkAction event={event} />
+                  </>
+                ) : (
+                  <>
+                    <CopyOneTimeLinkAction event={event} />
+                    <CopyMeetingLinkAction event={event} />
+                  </>
+                )}
               </ActionPanel>
             }
           />
         );
       })}
     </List>
+  );
+}
+
+function CopyMeetingLinkAction({ event }: { event: CalendlyEventType }) {
+  return <CopyToClipboardAction title="Copy Meeting URL" icon={Icon.Calendar} content={event.scheduling_url} />;
+}
+function CopyOneTimeLinkAction({ event }: { event: CalendlyEventType }) {
+  return (
+    <ActionPanel.Item
+      title="Copy Single Use Link"
+      icon={Icon.Calendar}
+      onAction={async () => {
+        const toast = new Toast({ style: ToastStyle.Animated, title: "Generating Link..." });
+        await toast.show();
+        const data = await createSingleUseLink(event);
+        await copyTextToClipboard(data.booking_url);
+        await toast.hide();
+        await showHUD("Single-use Link Copied to Clipboard 📋");
+      }}
+    />
   );
 }

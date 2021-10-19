@@ -2,8 +2,9 @@ import { getPreferenceValues, setLocalStorageItem } from "@raycast/api";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import _ from "lodash";
 
-interface Preferences {
+export interface Preferences {
   token: string;
+  defaultAction: "meeting" | "one-time";
 }
 
 export interface CalendlyUser {

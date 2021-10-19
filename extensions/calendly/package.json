@@ -28,6 +28,25 @@
       "description": "Calendly Personal Access token",
       "link": "https://calendly.com/integrations/api_webhooks",
       "placeholder": "Calendly Personal Access token"
+    },
+    {
+      "name": "defaultAction",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Copy Meeting Link",
+          "value": "meeting"
+        },
+        {
+          "title": "Copy Single Use Link",
+          "value": "one-time"
+        }
+      ],
+      "title": "Default Action",
+      "description": "The action to use by default",
+      "required": false,
+      "default": "meeting",
+      "value": "meeting"
     }
   ],
   "devDependencies": {
