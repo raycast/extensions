@@ -1,6 +1,6 @@
 {
   "name": "xkcd",
-  "title": "xkcd",
+  "title": "XKCD Comics",
   "description": "Browse the xkcd comics and keep track of the ones you've read.",
   "icon": "icon.png",
   "author": "maggie",
@@ -8,8 +8,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "xkcd",
-      "subtitle": "https://xkcd.com",
+      "title": "Explore xkcd Comics",
+      "subtitle": "xkcd",
       "description": "Browse the xkcd comics and keep track of the ones you've read.",
       "mode": "view"
     }

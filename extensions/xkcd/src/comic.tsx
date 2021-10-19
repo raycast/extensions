@@ -33,11 +33,28 @@ ${comicData.alt}
       markdown={markdownString}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`${BASE_URL}/${num}/`} />
+          <OpenInBrowserAction
+            icon={{ source: { light: "globe.png", dark: "globe@dark.png" } }}
+            url={`${BASE_URL}/${num}/`}
+          />
           <OpenRandomUnreadComic />
           <OpenRandomComic shortcut={{ key: "j", modifiers: ["cmd"] }} />
-          {num !== 1 && <OpenComic num={num - 1} title="Previous Comic" shortcut={{ key: "h", modifiers: ["cmd"] }} />}
-          {num !== maxNum && <OpenComic num={num + 1} title="Next Comic" shortcut={{ key: "l", modifiers: ["cmd"] }} />}
+          {num !== 1 && (
+            <OpenComic
+              icon={{ source: { light: "arrow-left.png", dark: "arrow-left@dark.png" } }}
+              num={num - 1}
+              title="Previous Comic"
+              shortcut={{ key: "h", modifiers: ["cmd"] }}
+            />
+          )}
+          {num !== maxNum && (
+            <OpenComic
+              icon={{ source: { light: "arrow-right.png", dark: "arrow-right@dark.png" } }}
+              num={num + 1}
+              title="Next Comic"
+              shortcut={{ key: "l", modifiers: ["cmd"] }}
+            />
+          )}
         </ActionPanel>
       }
     />
