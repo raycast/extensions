@@ -24,7 +24,7 @@
       "name": "token",
       "type": "password",
       "required": true,
-      "title": "Calendly Personal Access Token",
+      "title": "Personal Access Token",
       "description": "Calendly Personal Access token",
       "link": "https://calendly.com/integrations/api_webhooks",
       "placeholder": "Calendly Personal Access token"
