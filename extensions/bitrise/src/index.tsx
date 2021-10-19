@@ -121,7 +121,7 @@ function getActions(build: Build) {
     return (
       <ActionPanel>
         <OpenInBrowserAction title="Open Build" url={buildUrl} />
-        <CopyToClipboardAction title="Copy build URL" content={buildUrl} />
+        <CopyToClipboardAction title="Copy Build URL" content={buildUrl} />
         <OpenInBrowserAction title="Open PR" url={build.pull_request_view_url} />
         <CopyToClipboardAction title="Copy PR URL" content={build.pull_request_view_url} />
       </ActionPanel>
