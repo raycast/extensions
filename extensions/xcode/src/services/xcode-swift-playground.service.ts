@@ -9,9 +9,9 @@ import * as os from "os";
 import dedent from "dedent";
 import { XcodeSwiftPlaygroundTemplate } from "../models/swift-playground/xcode-swift-playground-template.model";
 
-const makeDirectory = promisify(fs.mkdir);
-const removeDirectory = promisify(fs.rm);
-const writeFile = promisify(fs.writeFile);
+const makeDirectoryAsync = promisify(fs.mkdir);
+const removeDirectoryAsync = promisify(fs.rm);
+const writeFileAsync = promisify(fs.writeFile);
 
 /**
  * XcodeSwiftPlaygroundService
@@ -75,7 +75,7 @@ export class XcodeSwiftPlaygroundService {
       };
     }
     // Make playground directory
-    await makeDirectory(playgroundPath);
+    await makeDirectoryAsync(playgroundPath);
     // Initialize template files
     const templateFiles = [
       ...this.scaffoldTemplateFiles,
@@ -101,7 +101,7 @@ export class XcodeSwiftPlaygroundService {
                 templateFile.path
               );
               // Make directory
-              await makeDirectory(filePath);
+              await makeDirectoryAsync(filePath);
             }
             // Join current file path with file name
             filePath = path.join(
@@ -112,7 +112,7 @@ export class XcodeSwiftPlaygroundService {
               ].join(".")
             );
             // Write file
-            await writeFile(
+            await writeFileAsync(
               filePath,
               dedent(templateFile.contents)
             );
@@ -122,7 +122,7 @@ export class XcodeSwiftPlaygroundService {
       try {
         // On error perform rollback
         // Try to remove the playground directory
-        await removeDirectory(
+        await removeDirectoryAsync(
           playgroundPath,
           { recursive: true }
         );
