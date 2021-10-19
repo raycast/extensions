@@ -21,7 +21,7 @@
       "required": true,
       "default": "",
       "title": "Path to scan for Git Repos",
-      "description": "Path to scan for Git Repos. ~/ is expanded and use a : to seperate mulitple paths"
+      "description": "Path to scan for Git Repos. ~/ is expanded. Use : to seperate multiple paths"
     },
     {
       "name": "repoScanDepth",

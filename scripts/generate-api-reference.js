@@ -58,6 +58,8 @@ function getLinkName(name) {
   return name;
 }
 
+const BASE_URL = 'https://developers.raycast.com/api-reference/';
+
 function generateLinkDestination(docs, name) {
   const found =
     docs.children.find((x) => x.name === name && x.kindString !== "Namespace") ||
@@ -70,9 +72,9 @@ function generateLinkDestination(docs, name) {
     }
     const subcategory = getSubcategory(found);
     if (!subcategory) {
-      return `../${getFilename(category.title)}.md#${getLinkName(name)}`;
+      return `${BASE_URL}${getFilename(category.title)}#${getLinkName(name)}`;
     }
-    return `../${getFilename(category.title)}/${getFilename(subcategory)}.md#${getLinkName(name)}`;
+    return `${BASE_URL}${getFilename(category.title)}/${getFilename(subcategory)}#${getLinkName(name)}`;
   }
   const foundParent =
     // FIXME another hack to link to parent item based on naming convention
@@ -84,9 +86,9 @@ function generateLinkDestination(docs, name) {
     }
     const subcategory = getSubcategory(foundParent);
     if (!subcategory) {
-      return `../${getFilename(category.title)}.md#${getLinkName(name.split(".")[0])}`;
+      return `${BASE_URL}${getFilename(category.title)}#${getLinkName(name.split(".")[0])}`;
     }
-    return `../${getFilename(category.title)}/${getFilename(subcategory)}.md#${getLinkName(name.split(".")[0])}`;
+    return `${BASE_URL}${getFilename(category.title)}/${getFilename(subcategory)}#${getLinkName(name.split(".")[0])}`;
   }
   console.warn("generateLinkDestination not found for", name);
   return null;

@@ -18,7 +18,7 @@ import { MilestoneList } from "./milestones";
 import { MRList, MRScope } from "./mr";
 import { ProjectNavMenusList } from "./project_nav";
 import { IssueList, IssueScope } from "./issues";
-import { CloneProjectInVSCodeAction } from "./project_actions";
+import { CloneProjectInGitPod, CloneProjectInVSCodeAction } from "./project_actions";
 import { GitLabIcons, useImage } from "../icons";
 import { useCache } from "../cache";
 import { ClearLocalCacheAction } from "./cache_actions";
@@ -91,6 +91,7 @@ export function ProjectListItem(props: { project: Project }) {
             url={webUrl(props.project, "edit")}
           />
           <CloneProjectInVSCodeAction shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} project={project} />
+          <CloneProjectInGitPod shortcut={{ modifiers: ["cmd", "shift"], key: "g" }} project={project} />
           <ClearLocalCacheAction />
         </ActionPanel>
       }
