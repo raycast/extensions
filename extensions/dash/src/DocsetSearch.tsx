@@ -13,10 +13,10 @@ type DashResult = {
   "@_uid": string;
 };
 
-async function searchDash(searchText: string): Promise<DashResult[]> {
+async function searchDash(query: string): Promise<DashResult[]> {
   return new Promise((resolve, reject) => {
     exec(
-      `./dashAlfredWorkflow ${searchText}`,
+      `./dashAlfredWorkflow ${query}`,
       {
         cwd: `${getDashAppPath()}/Contents/Resources`,
       },
@@ -25,8 +25,12 @@ async function searchDash(searchText: string): Promise<DashResult[]> {
 
         const jsonData = parse(data, { ignoreAttributes: false });
 
-        if (jsonData.output !== undefined && Array.isArray(jsonData.output.items.item)) {
-          resolve(jsonData.output.items.item);
+        if (jsonData.output !== undefined) {
+          if (Array.isArray(jsonData.output.items.item)) {
+            resolve(jsonData.output.items.item);
+          } else {
+            resolve([ jsonData.output.items.item ]);
+          }
         } else {
           resolve([]);
         }
@@ -36,14 +40,14 @@ async function searchDash(searchText: string): Promise<DashResult[]> {
 }
 
 export default function DocsetSearch({ docset }: { docset: Docset }) {
-  const [isLoading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [results, setResults] = useState<DashResult[]>([]);
 
   async function fetchDashResults() {
     setLoading(true);
     if (searchText.length) {
-      setResults(await searchDash(`${docset.docsetBundle}:${searchText}`));
+      setResults(await searchDash(`${docset.docsetKeyword}:${searchText}`));
     } else {
       setResults([]);
     }
@@ -63,7 +67,7 @@ export default function DocsetSearch({ docset }: { docset: Docset }) {
     >
       {results.map((result) => (
         <List.Item
-          key={result.quicklookurl}
+          key={result["@_uid"]}
           title={result.title}
           subtitle={result.subtitle[2]}
           icon={result.icon}
@@ -73,7 +77,7 @@ export default function DocsetSearch({ docset }: { docset: Docset }) {
                 id="openDocSet"
                 title="Open in Dash"
                 onAction={() => {
-                  execSync(`open -g "${result["@_uid"]}"`);
+                  execSync(`open dash://${docset.docsetKeyword}:"${result.title}"`);
                   closeMainWindow({ clearRootSearch: true });
                 }}
               />

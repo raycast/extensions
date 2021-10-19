@@ -7,6 +7,9 @@ export type Docset = {
   docsetBundle: string;
   docsetName: string;
   docsetPath: string;
+  docsetKeyword: string;
+  keyword: string;
+  pluginKeyword: string;
 }
 
 export function getDocsets(): Promise<Docset[]> {
@@ -23,7 +26,23 @@ export function getDocsets(): Promise<Docset[]> {
           return reject(err);
         }
 
-        const docSets = JSON.parse(data);
+        const docSets = JSON.parse(data).map((docset:Docset) => {
+          function stripColon(s:string): string {
+            return s.substr(s.length - 1) === ':'
+              ? s.substr(0, s.length - 1)
+              : s
+          }
+
+          return {
+            ...docset,
+            docsetKeyword : 'keyword' in docset
+              ? stripColon(docset.keyword)
+              : 'pluginKeyword' in docset
+                ? stripColon(docset.pluginKeyword)
+                : stripColon(docset.docsetBundle)
+          }
+
+        });
 
         resolve(docSets);
       });
