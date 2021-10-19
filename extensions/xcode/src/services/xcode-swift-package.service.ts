@@ -49,8 +49,8 @@ export class XcodeSwiftPackageService {
             `open ${swiftPackagePath}/Package.swift`
           ).then();
         }
-      }
-    })
+      };
+    });
   }
 
 }
