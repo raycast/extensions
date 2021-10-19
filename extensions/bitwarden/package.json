@@ -44,6 +44,15 @@
       "title": "Bitwarden CLI Installation Path",
       "description": "Location of the local Bitwarden CLI installation. Defaults to '/usr/local/bin/bw'.",
       "placeholder": "CLI Installation Path"
+    },
+    {
+      "name": "fetchFavicons",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Privacy",
+      "label": "Fetch vaut items icons.",
+      "description": "This causes additional networks calls to a service owned by Google."
     }
   ],
   "dependencies": {

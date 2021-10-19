@@ -19,7 +19,7 @@ import { existsSync } from "fs";
 import { BitwardenApi } from "./api";
 import { dirname } from "path";
 
-const { cliPath, clientId, clientSecret } = getPreferenceValues();
+const { cliPath, clientId, clientSecret, fetchFavicons } = getPreferenceValues();
 process.env.PATH = dirname(cliPath)
 const bitwardenApi = new BitwardenApi(clientId, clientSecret);
 
@@ -71,7 +71,7 @@ function ItemList(props: { bitwardenApi: BitwardenApi; sessionToken: string | un
           refreshItems={async () => {
             if (sessionToken) {
               const toast = await showToast(ToastStyle.Animated, "Syncing Items...");
-              await bitwardenApi.sync(sessionToken)
+              await bitwardenApi.syncItems(sessionToken)
               await loadItems(sessionToken);
               await toast.hide();
             }
@@ -95,7 +95,7 @@ function ItemListItem(props: { item: Item; folder: Folder | undefined; refreshIt
   );
 
   let icon: string | Icon | undefined;
-  if (login?.uris?.[0]?.uri?.startsWith("https"))
+  if (fetchFavicons && login?.uris?.[0]?.uri?.startsWith("https"))
     icon = `https://s2.googleusercontent.com/s2/favicons?domain_url=${login?.uris?.[0].uri}`;
   else
     icon = {
