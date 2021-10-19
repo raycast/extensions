@@ -1,6 +1,6 @@
 {
   "name": "bitwarden",
-  "title": "Search Bitwarden Vault Items",
+  "title": "Bitwarden Vault",
   "description": "Access your Bitwarden vault from Raycast. Requires installing the Bitwarden CLI separately.",
   "icon": "bitwarden.png",
   "author": "pomdtr",
@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search Vault Items",
+      "title": "Search Vault",
       "subtitle": "Bitwarden",
       "description": "Search all items in the authenticated Bitwarden vault.",
       "mode": "view"
