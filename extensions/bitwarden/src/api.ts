@@ -9,7 +9,7 @@ export class BitwardenApi {
     };
   }
 
-  async sync(sessionToken: string): Promise<void> {
+  async syncItems(sessionToken: string): Promise<void> {
       await this.exec(["sync", "--session", sessionToken])
   }
 
