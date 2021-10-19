@@ -1,10 +1,10 @@
 import { XcodeSimulatorApplication } from "../models/simulator/xcode-simulator-application.model";
 import { XcodeSimulatorService } from "./xcode-simulator.service";
-import * as path from "path";
 import { execAsync } from "../shared/exec-async";
 import { XcodeSimulator } from "../models/simulator/xcode-simulator.model";
 import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
 import { readDirectoryAsync } from "../shared/fs-async";
+import { joinPathComponents } from "../shared/join-path-components";
 
 /**
  * XcodeSimulatorApplicationService
@@ -76,12 +76,12 @@ export class XcodeSimulatorApplicationService {
     simulator: XcodeSimulator
   ): Promise<XcodeSimulatorApplication[]> {
     // The container application directory path
-    const containerApplicationDirectoryPath = path.join(
+    const containerApplicationDirectoryPath = joinPathComponents(
       simulator.dataPath,
       "Containers/Bundle/Application"
     );
     /// The container sandbox directory path
-    const containerSandboxDirectoryPath = path.join(
+    const containerSandboxDirectoryPath = joinPathComponents(
       simulator.dataPath,
       "Containers/Data/Application"
     );
@@ -101,7 +101,7 @@ export class XcodeSimulatorApplicationService {
       ).then(entries => {
         return entries
           .filter(entry => entry.isDirectory())
-          .map(entry => path.join(containerApplicationDirectoryPath, entry.name));
+          .map(entry => joinPathComponents(containerApplicationDirectoryPath, entry.name));
       });
       // Read SandBox child directory paths
       sandBoxDirectoryPaths = await readDirectoryAsync(
@@ -112,7 +112,7 @@ export class XcodeSimulatorApplicationService {
       ).then(entries => {
         return entries
           .filter(entry => entry.isDirectory())
-          .map(entry => path.join(containerSandboxDirectoryPath, entry.name));
+          .map(entry => joinPathComponents(containerSandboxDirectoryPath, entry.name));
       });
       // Read SandBox Bundle identifiers for each SandBox directory path
       sandBoxDirectoryBundleIds = (
@@ -122,7 +122,7 @@ export class XcodeSimulatorApplicationService {
               return [
                 "defaults",
                 "read",
-                path.join(
+                joinPathComponents(
                   sandBoxDirectoryPath,
                   ".com.apple.mobile_container_manager.metadata.plist"
                 ),
@@ -211,7 +211,7 @@ export class XcodeSimulatorApplicationService {
               "plutil",
               "-convert",
               "json",
-              path.join(
+              joinPathComponents(
                 applicationDirectoryPath,
                 applicationFileName
                   // Escape whitespaces
@@ -270,7 +270,7 @@ export class XcodeSimulatorApplicationService {
       try {
         // Read file names in application
         const applicationFileNames = await readDirectoryAsync(
-          path.join(applicationDirectoryPath, applicationFileName)
+          joinPathComponents(applicationDirectoryPath, applicationFileName)
         );
         // Find matching application file name that starts with the primary app icon name
         const matchingApplicationFileName = applicationFileNames
@@ -278,7 +278,7 @@ export class XcodeSimulatorApplicationService {
         // Check if a matching application file name is available
         if (matchingApplicationFileName) {
           // Initialize app icon path
-          appIconPath = path.join(
+          appIconPath = joinPathComponents(
             applicationDirectoryPath,
             applicationFileName,
             matchingApplicationFileName
@@ -299,8 +299,8 @@ export class XcodeSimulatorApplicationService {
       simulator: simulator,
       bundlePath: applicationDirectoryPath,
       sandBoxPath: sandBoxDirectoryPath,
-      sandBoxDocumentsPath: path.join(sandBoxDirectoryPath, "Documents"),
-      sandBoxCachesPath: path.join(sandBoxDirectoryPath, "Library", "Caches")
+      sandBoxDocumentsPath: joinPathComponents(sandBoxDirectoryPath, "Documents"),
+      sandBoxCachesPath: joinPathComponents(sandBoxDirectoryPath, "Library", "Caches")
     };
   }
 

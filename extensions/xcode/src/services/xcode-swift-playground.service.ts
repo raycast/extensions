@@ -1,12 +1,12 @@
 import { XcodeSwiftPlaygroundCreationParameters } from "../models/swift-playground/xcode-swift-playground-creation-parameters.model";
 import { XcodeSwiftPlayground } from "../models/swift-playground/xcode-swift-playground.model";
 import { XcodeSwiftPlaygroundPlatform } from "../models/swift-playground/xcode-swift-playground-platform.model";
-import * as path from "path";
 import { execAsync } from "../shared/exec-async";
 import * as os from "os";
 import dedent from "dedent";
 import { XcodeSwiftPlaygroundTemplate } from "../models/swift-playground/xcode-swift-playground-template.model";
 import { existsAsync, makeDirectoryAsync, removeDirectoryAsync, writeFileAsync } from "../shared/fs-async";
+import { joinPathComponents } from "../shared/join-path-components";
 
 /**
  * XcodeSwiftPlaygroundService
@@ -50,7 +50,7 @@ export class XcodeSwiftPlaygroundService {
     parameters: XcodeSwiftPlaygroundCreationParameters
   ): Promise<XcodeSwiftPlayground> {
     // Initialize Playground Path
-    const playgroundPath = path.join(
+    const playgroundPath = joinPathComponents(
       // Replace tilde (~) with home directory
       parameters.location.replace(/^~/, os.homedir()),
       `${parameters.name}.playground`
@@ -91,7 +91,7 @@ export class XcodeSwiftPlaygroundService {
             // Check if template file has a path
             if (templateFile.path) {
               // Join current file path with template file path
-              filePath = path.join(
+              filePath = joinPathComponents(
                 filePath,
                 templateFile.path
               );
@@ -99,7 +99,7 @@ export class XcodeSwiftPlaygroundService {
               await makeDirectoryAsync(filePath);
             }
             // Join current file path with file name
-            filePath = path.join(
+            filePath = joinPathComponents(
               filePath,
               [
                 templateFile.name,
