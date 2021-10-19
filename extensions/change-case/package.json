@@ -1,7 +1,7 @@
 {
   "name": "change-case",
   "title": "Change Case",
-  "description": "Change the text in the clipboard",
+  "description": "Transform a string between camelCase, snake_case, CONSTANT_CASE, and more",
   "icon": "command-icon.png",
   "author": "es183923",
   "license": "MIT",
