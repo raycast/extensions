@@ -11,7 +11,7 @@ import {
   Color,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { brewSearchFormula, brewListInstalled, brewInstall } from "./brew";
+import { brewSearchFormula, brewInstalled, brewInstall } from "./brew";
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -121,7 +121,7 @@ async function install(formula: Formula) {
 }
 
 async function listInstalled(): Dictionary<Formula> {
-  const installed = await brewListInstalled();
+  const installed = await brewInstalled();
   let dict = {};
   for (f in installed) {
     dict[f.name] = f;
