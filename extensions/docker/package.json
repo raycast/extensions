@@ -7,6 +7,13 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "container_list",
+      "title": "Docker Containers",
+      "subtitle": "",
+      "description": "List All Docker Containers",
+      "mode": "view"
+    },
+    {
       "name": "image_list",
       "title": "Docker Images",
       "subtitle": "",
