@@ -8,8 +8,8 @@
   "commands": [
     {
       "name": "calendly",
-      "title": "Calendly",
-      "subtitle": "Copy Meeting URL",
+      "title": "Share Meeting Link",
+      "subtitle": "Calendly",
       "description": "Copy Meeting URL",
       "mode": "view"
     }
