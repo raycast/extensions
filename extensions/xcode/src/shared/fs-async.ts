@@ -10,7 +10,7 @@ export const existsAsync = (path: PathLike) => {
     fs.constants.F_OK
   )
     .then(() => true)
-    .catch(() => false)
+    .catch(() => false);
 };
 
 /**
