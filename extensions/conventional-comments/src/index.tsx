@@ -1,4 +1,4 @@
-import { Form, FormValue, ActionPanel, SubmitFormAction, showToast, ToastStyle, pasteText } from "@raycast/api";
+import { Form, FormValue, ActionPanel, SubmitFormAction, showToast, ToastStyle, pasteText, Icon } from "@raycast/api";
 
 export default function Command() {
   async function handleSubmit(values: Record<string, FormValue>) {
@@ -12,7 +12,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={handleSubmit} />
+          <SubmitFormAction icon={Icon.Clipboard} title="Paste" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

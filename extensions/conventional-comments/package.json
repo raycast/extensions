@@ -1,6 +1,6 @@
 {
   "name": "conventional-comments",
-  "title": "Conventional comments",
+  "title": "Conventional Comments",
   "description": "Paste conventional comment into your foremost application",
   "icon": "icon.png",
   "author": "krzysztofzuraw",
@@ -8,9 +8,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "Conventional comments",
+      "title": "Insert Conventional Comment",
       "subtitle": "",
-      "description": "Form to submit conventional comments",
+      "description": "Easily insert conventional comments into the frontmost application.",
       "mode": "view"
     }
   ],
