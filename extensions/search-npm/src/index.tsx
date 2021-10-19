@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react'
 import fetch from 'node-fetch'
 import { FetchResponse, Result } from './npmsResponse.model'
 import { fetchReadme } from 'fetch-readme'
-import parsedRepoUrl from 'parse-github-url'
+import { parseRepoUrl } from './parseRepoUrl'
 
 export default function PackageList() {
   const [results, setResults] = useState<Result[]>([])
@@ -33,16 +33,14 @@ export default function PackageList() {
       onSearchTextChange={onSearchTextChange}
       throttle
     >
-      {results?.length ? (
-        results.map((result) => {
-          if (!result.package.links.repository) {
-            return null
-          }
-          return <PackageListItem key={result.package.name} result={result} />
-        })
-      ) : (
-        <List.Item id="Empty" title="No results" icon={Icon.XmarkCircle} />
-      )}
+      {results?.length
+        ? results.map((result) => {
+            if (!result.package.links.repository) {
+              return null
+            }
+            return <PackageListItem key={result.package.name} result={result} />
+          })
+        : null}
     </List>
   )
 }
@@ -54,8 +52,7 @@ const PackageListItem = ({
   result,
 }: PackageListItemProps): JSX.Element | null => {
   const pkg = result.package
-  const isGithubRepo = pkg.links.repository.includes('github')
-  const parsedRepo = parsedRepoUrl(pkg.links.repository)
+  const { owner, name, type } = parseRepoUrl(pkg.links.repository)
 
   return (
     <List.Item
@@ -68,33 +65,87 @@ const PackageListItem = ({
       keywords={pkg.keywords}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={pkg.links.repository} title="Repository" />
+          <OpenInBrowserAction
+            url={pkg.links.repository}
+            title="Open Repository"
+          />
+
           <OpenInBrowserAction
             url={`https://bundlephobia.com/package/${pkg.name}`}
-            title="Bundlephobia cost"
+            title="Open Bundlephobia"
             icon={Icon.QuestionMark}
           />
-          {isGithubRepo && parsedRepo?.owner && parsedRepo?.name ? (
+
+          {type === 'github' && owner && name ? (
             <PushAction
               title="View readme"
-              target={<Readme user={parsedRepo.owner} repo={parsedRepo.name} />}
+              target={<Readme user={owner} repo={name} />}
               icon={Icon.Eye}
             />
           ) : null}
+
           {pkg.links.homepage !== pkg.links.repository ? (
-            <OpenInBrowserAction url={pkg.links.homepage} title="Homepage" />
+            <OpenInBrowserAction
+              url={pkg.links.homepage}
+              title="Open Homepage"
+            />
           ) : null}
-          <OpenInBrowserAction url={pkg.links.npm} title="npm" />
+
+          {type === 'github' ? (
+            <OpenInBrowserAction
+              url={pkg.links.repository.replace('github.com', 'github.dev')}
+              title="View Code in Github.dev"
+              icon={{
+                source: {
+                  light: 'github-bright.png',
+                  dark: 'github-dark.png',
+                },
+              }}
+              shortcut={{ modifiers: ['opt'], key: 'enter' }}
+            />
+          ) : null}
+
+          {type === 'github' || (type === 'gitlab' && owner && name) ? (
+            <OpenInBrowserAction
+              url={`https://codesandbox.io/s/${
+                type === 'github' ? 'github' : 'gitlab'
+              }/${owner}/${name}`}
+              title="View in CodeSandbox"
+              icon={{
+                source: {
+                  light: 'codesandbox-bright.png',
+                  dark: 'codesandbox-dark.png',
+                },
+              }}
+            />
+          ) : null}
+
+          <OpenInBrowserAction
+            url={pkg.links.npm}
+            title="npm Package Page"
+            icon={{
+              source: 'command-icon.png',
+            }}
+          />
+
           <OpenInBrowserAction
             url={`https://snyk.io/vuln/npm:${pkg.name}`}
-            title="Snyk vulnerability check"
+            title="Open Snyk Vulnerability Check"
+            icon={{
+              source: {
+                light: 'snyk-bright.png',
+                dark: 'snyk-dark.png',
+              },
+            }}
           />
+
           <CopyToClipboardAction
-            title={`Copy "yarn install ${pkg.name}"`}
+            title={`Copy Yarn Install Command`}
             content={`yarn install ${pkg.name}`}
           />
+
           <CopyToClipboardAction
-            title={`Copy "npm install ${pkg.name}"`}
+            title={`Copy npm Install Command`}
             content={`npm install ${pkg.name}`}
           />
         </ActionPanel>
