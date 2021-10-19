@@ -61,8 +61,8 @@ export function RetweetAction(props: { tweet: TweetV1 }) {
   const cmd = t.retweeted ? "unretweet" : "retweet";
   const title = t.retweeted ? "Unretweet" : "Retweet";
   const icon: ImageLike = t.retweeted
-    ? { source: Icon.XmarkCircle, tintColor: Color.Red }
-    : { source: "🔁", tintColor: Color.PrimaryText };
+    ? { source: "retweet.png", tintColor: Color.Green }
+    : { source: "retweet.png", tintColor: Color.PrimaryText };
   const retweet = async () => {
     try {
       await twitterClient.v1.post(`statuses/${cmd}/${t.id_str}.json`);
@@ -79,12 +79,13 @@ export function LikeAction(props: { tweet: TweetV1 }) {
   const cmd = t.favorited ? "destroy" : "create";
   const title = t.favorited ? "Undo Like" : "Like";
   const icon: ImageLike = t.favorited
-    ? { source: Icon.XmarkCircle, tintColor: Color.Red }
-    : { source: "❤", tintColor: Color.PrimaryText };
+    ? { source: "heart_full.png", tintColor: Color.Red }
+    : { source: "heart_empty.png", tintColor: Color.PrimaryText };
   const retweet = async () => {
     try {
       await twitterClient.v1.post(`favorites/${cmd}.json`, { id: t.id_str });
       showToast(ToastStyle.Success, "Like successful", "Like creation successful");
+      console.log(t.favorited);
     } catch (error: any) {
       showToast(ToastStyle.Failure, "Could not like tweet", error.message);
     }
