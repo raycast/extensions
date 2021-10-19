@@ -61,16 +61,8 @@ function Main(): JSX.Element {
 
   // Refresh deployments every 2 seconds
   useInterval(async () => {
-<<<<<<< HEAD
-    setDeployments(await fetchDeployments(username, teams ?? {}))
-  }, 2000)
-||||||| 04a012d
-    setDeployments(await fetchDeployments(username))
-  }, 1000)
-=======
     setDeployments(await fetchDeployments(username, teams ?? []))
   }, 2000)
->>>>>>> upstream/main
 
   return (
     <List isLoading={!deployments}>
