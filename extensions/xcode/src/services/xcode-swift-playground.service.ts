@@ -1,17 +1,12 @@
 import { XcodeSwiftPlaygroundCreationParameters } from "../models/swift-playground/xcode-swift-playground-creation-parameters.model";
 import { XcodeSwiftPlayground } from "../models/swift-playground/xcode-swift-playground.model";
 import { XcodeSwiftPlaygroundPlatform } from "../models/swift-playground/xcode-swift-playground-platform.model";
-import * as fs from "fs";
 import * as path from "path";
-import { promisify } from "util";
 import { execAsync } from "../shared/exec-async";
 import * as os from "os";
 import dedent from "dedent";
 import { XcodeSwiftPlaygroundTemplate } from "../models/swift-playground/xcode-swift-playground-template.model";
-
-const makeDirectoryAsync = promisify(fs.mkdir);
-const removeDirectoryAsync = promisify(fs.rm);
-const writeFileAsync = promisify(fs.writeFile);
+import { existsAsync, makeDirectoryAsync, removeDirectoryAsync, writeFileAsync } from "../shared/fs-async";
 
 /**
  * XcodeSwiftPlaygroundService
@@ -61,7 +56,7 @@ export class XcodeSwiftPlaygroundService {
       `${parameters.name}.playground`
     );
     // Check if Playground already exists
-    if (fs.existsSync(playgroundPath)) {
+    if (await existsAsync(playgroundPath)) {
       // Return existing Swift Playground
       return {
         name: parameters.name,

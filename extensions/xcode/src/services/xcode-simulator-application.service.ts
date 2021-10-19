@@ -1,13 +1,10 @@
 import { XcodeSimulatorApplication } from "../models/simulator/xcode-simulator-application.model";
 import { XcodeSimulatorService } from "./xcode-simulator.service";
-import * as fs from "fs";
 import * as path from "path";
 import { execAsync } from "../shared/exec-async";
 import { XcodeSimulator } from "../models/simulator/xcode-simulator.model";
 import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
-import { promisify } from "util";
-
-const readDirAsync = promisify(fs.readdir);
+import { readDirectoryAsync } from "../shared/fs-async";
 
 /**
  * XcodeSimulatorApplicationService
@@ -96,7 +93,7 @@ export class XcodeSimulatorApplicationService {
     let sandBoxDirectoryBundleIds: string[];
     try {
       // Read application child directories paths
-      applicationDirectoryPaths = await readDirAsync(
+      applicationDirectoryPaths = await readDirectoryAsync(
         containerApplicationDirectoryPath,
         {
           withFileTypes: true
@@ -104,10 +101,10 @@ export class XcodeSimulatorApplicationService {
       ).then(entries => {
         return entries
           .filter(entry => entry.isDirectory())
-          .map(entry => path.join(containerApplicationDirectoryPath, entry.name))
+          .map(entry => path.join(containerApplicationDirectoryPath, entry.name));
       });
       // Read SandBox child directory paths
-      sandBoxDirectoryPaths = await readDirAsync(
+      sandBoxDirectoryPaths = await readDirectoryAsync(
         containerSandboxDirectoryPath,
         {
           withFileTypes: true
@@ -115,7 +112,7 @@ export class XcodeSimulatorApplicationService {
       ).then(entries => {
         return entries
           .filter(entry => entry.isDirectory())
-          .map(entry => path.join(containerSandboxDirectoryPath, entry.name))
+          .map(entry => path.join(containerSandboxDirectoryPath, entry.name));
       });
       // Read SandBox Bundle identifiers for each SandBox directory path
       sandBoxDirectoryBundleIds = (
@@ -188,7 +185,7 @@ export class XcodeSimulatorApplicationService {
     let applicationFileName: string;
     try {
       // Retrieve file names in application directory
-      const fileNames = await readDirAsync(applicationDirectoryPath);
+      const fileNames = await readDirectoryAsync(applicationDirectoryPath);
       // Initialize matching application file name where file name ends with '.app'
       const matchingApplicationFileName = fileNames.find(fileName => fileName.endsWith(".app"));
       // Check if matching application file name is unavailable
@@ -203,7 +200,7 @@ export class XcodeSimulatorApplicationService {
       return undefined;
     }
     // Declare Info.plist JSON
-    let infoPlistJSON: any
+    let infoPlistJSON: any;
     try {
       // Try to parse Info.plist JSON
       // using 'plutil' to convert the Info.plist XML to JSON format
@@ -272,7 +269,7 @@ export class XcodeSimulatorApplicationService {
     if (primaryAppIconName) {
       try {
         // Read file names in application
-        const applicationFileNames = await readDirAsync(
+        const applicationFileNames = await readDirectoryAsync(
           path.join(applicationDirectoryPath, applicationFileName)
         );
         // Find matching application file name that starts with the primary app icon name
