@@ -25,9 +25,6 @@ const towerBookmarksPlistLocation = `${os.homedir()}/Library/Application\ Suppor
 async function main() {
   if (isTowerCliInstalled()) {
     const bookmarks = await fetchBookmarks();
-
-    console.log(towerBookmarksPlistLocation);
-
     render(<BookmarkList bookmarks={bookmarks} />);
   } else {
     render(<Detail navigationTitle="Tower CLI not installed" markdown={towerCliRequiredMessage()}></Detail>);
