@@ -1,6 +1,7 @@
 import { ActionPanel, Color, Detail, Icon, List } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
 import Dockerode, { ContainerInfo } from '@priithaamer/dockerode';
+import { isContainerRunning } from './docker/container';
 
 const containerName = (container: ContainerInfo) => container.Names.map((name) => name.replace(/^\//, '')).join(', ');
 
@@ -73,7 +74,7 @@ export default function ContainerList(props: { projectFilter?: string }) {
           title={containerName(containerInfo)}
           subtitle={containerInfo.Image}
           accessoryTitle={containerInfo.State}
-          icon={{ source: Icon.Terminal, tintColor: containerInfo.State === 'running' ? Color.Green : Color.Red }}
+          icon={{ source: Icon.Terminal, tintColor: isContainerRunning(containerInfo) ? Color.Green : Color.Red }}
           actions={
             <ActionPanel>
               {containerInfo.State === 'running' && (
