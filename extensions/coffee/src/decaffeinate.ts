@@ -6,7 +6,7 @@ export default async function main() {
     await runAppleScript(`do shell script "pgrep caffeinate"`);
     await runAppleScript('do shell script "killall caffeinate"');
     await showHUD("Your Mac is decaffeinated");
-  } catch (error) {
+  } catch (_) {
     await showHUD("Your Mac is already decaffeinated");
   }
 }
