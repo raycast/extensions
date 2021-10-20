@@ -10,6 +10,7 @@ export function appleDeveloperDocumentationListItem(
 ): JSX.Element {
   return (
     <List.Item
+      key={appleDeveloperDocumentationEntry.url}
       icon={icon(appleDeveloperDocumentationEntry)}
       title={appleDeveloperDocumentationEntry.title}
       subtitle={appleDeveloperDocumentationEntry.description}
