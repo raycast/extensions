@@ -3,14 +3,14 @@
   "title": "File Manager",
   "description": "Manage files from Raycast",
   "icon": "command-icon.png",
-  "author": "erics118",
+  "author": "es183923",
   "license": "MIT",
   "commands": [
     {
       "name": "manage-files",
       "title": "Manage Files",
       "subtitle": "Files",
-      "description": "View, create, and delete files in Raycast",
+      "description": "Traverse the file system and create files in Raycast",
       "mode": "view"
     }
   ],
@@ -29,7 +29,7 @@
       "default": false,
       "required": true,
       "title": "Directories First",
-      "description": "Show directories before files"
+      "description": "Show directories before other files"
     },
     {
       "name": "showDots",
@@ -37,7 +37,7 @@
       "default": false,
       "required": true,
       "title": "Show Dotfiles",
-      "description": "show dotfiles (files and directories that start with a .)"
+      "description": "Show dotfiles (files and directories that start with a .)"
     }
   ],
   "dependencies": {
