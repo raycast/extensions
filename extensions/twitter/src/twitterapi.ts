@@ -47,6 +47,14 @@ export async function refreshTweets(tweets?: TweetV1[]): Promise<TweetV1[] | und
     }
 }
 
+export async function refreshTweet(tweet: TweetV1): Promise<TweetV1 | undefined> {
+    const tweets = await refreshTweets([tweet]);
+    if (tweets && tweets.length === 1) {
+        return tweets[0];
+    }
+    return undefined;
+}
+
 export interface Fetcher {
     updateInline: () => Promise<void>;
     refresh: () => Promise<void>;

@@ -1,6 +1,6 @@
-import { ActionPanel, Detail, Image, ImageMask, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, Detail, Image, ImageMask, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
-import { Fetcher } from "../twitterapi";
+import { Fetcher, refreshTweet, useRefresher } from "../twitterapi";
 import {
   DeleteTweetAction,
   LikeAction,
@@ -69,7 +69,19 @@ export function TweetListItem(props: { tweet: TweetV1; fetcher?: Fetcher }) {
 }
 
 export function TweetDetail(props: { tweet: TweetV1 }) {
-  const t = props.tweet;
+  const { data, error, isLoading, fetcher } = useRefresher<TweetV1 | undefined>(
+    async (_): Promise<TweetV1 | undefined> => {
+      if (data === undefined) {
+        return props.tweet;
+      } else {
+        return await refreshTweet(data);
+      }
+    }
+  );
+  if (error) {
+    showToast(ToastStyle.Failure, "Error", error);
+  }
+  const t = data || props.tweet;
   const states = [`💬 ${t.reply_count || 0}`, `🔁 ${t.retweet_count}`, `❤️ ${t.favorite_count}`];
   const urls = t.entities.urls;
   const imgUrl = urls && urls.length > 0 ? urls[0].url : undefined;
@@ -81,13 +93,14 @@ export function TweetDetail(props: { tweet: TweetV1 }) {
   const md = parts.join("\n\n");
   return (
     <Detail
+      isLoading={isLoading}
       markdown={md}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Tweet">
             <ReplyTweetAction tweet={t} />
-            <LikeAction tweet={t} />
-            <RetweetAction tweet={t} />
+            <LikeAction tweet={t} fetcher={fetcher} />
+            <RetweetAction tweet={t} fetcher={fetcher} />
             <OpenInBrowserAction url={getTweetUrl(t)} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Info">
@@ -95,6 +108,9 @@ export function TweetDetail(props: { tweet: TweetV1 }) {
           </ActionPanel.Section>
           <ActionPanel.Section title="Destructive">
             <DeleteTweetAction tweet={t} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Update">
+            <RefreshAction title="Refresh Tweet" fetcher={fetcher} />
           </ActionPanel.Section>
         </ActionPanel>
       }

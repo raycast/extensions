@@ -124,15 +124,16 @@ export function RefreshInlineAction(props: { fetcher?: Fetcher }) {
   );
 }
 
-export function RefreshAction(props: { fetcher?: Fetcher }) {
+export function RefreshAction(props: { title?: string; fetcher?: Fetcher }) {
   const handle = async () => {
     if (props.fetcher) {
       await props.fetcher.refresh();
     }
   };
+  const title = props.title ? props.title : "Refresh Tweets";
   return (
     <ActionPanel.Item
-      title="Refresh Tweets"
+      title={title}
       shortcut={{ modifiers: ["cmd"], key: "r" }}
       icon={{ source: Icon.Binoculars, tintColor: Color.PrimaryText }}
       onAction={handle}
