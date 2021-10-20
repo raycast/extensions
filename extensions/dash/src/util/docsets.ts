@@ -26,23 +26,24 @@ export function getDocsets(): Promise<Docset[]> {
           return reject(err);
         }
 
-        const docSets = JSON.parse(data).map((docset:Docset) => {
-          function stripColon(s:string): string {
-            return s.substr(s.length - 1) === ':'
-              ? s.substr(0, s.length - 1)
-              : s
-          }
+        const docSets = JSON.parse(data)
+          .map((docset:Docset) => {
+            function stripColon(s:string): string {
+              return s.substr(s.length - 1) === ':'
+                ? s.substr(0, s.length - 1)
+                : s
+            }
 
-          return {
-            ...docset,
-            docsetKeyword : 'keyword' in docset
-              ? stripColon(docset.keyword)
-              : 'pluginKeyword' in docset
-                ? stripColon(docset.pluginKeyword)
-                : stripColon(docset.docsetBundle)
-          }
+            return {
+              ...docset,
+              docsetKeyword : 'keyword' in docset
+                ? stripColon(docset.keyword)
+                : 'pluginKeyword' in docset
+                  ? stripColon(docset.pluginKeyword)
+                  : stripColon(docset.docsetBundle)
+            }
 
-        });
+          });
 
         resolve(docSets);
       });
