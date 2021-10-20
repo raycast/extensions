@@ -11,8 +11,8 @@ export default function ArticleList() {
     async function fetch() {
       if (query) {
         setIsLoading(true);
-        const articles = await fetchArticles(query);
-        setState(articles);
+        const documents = await fetchDocumentsByQuery(query);
+        setState(documents);
         setIsLoading(false);
       }
     }
@@ -49,7 +49,7 @@ type Document = {
   mdn_url: string;
 };
 
-async function fetchArticles(query: string): Promise<Document[]> {
+async function fetchDocumentsByQuery(query: string): Promise<Document[]> {
   try {
     const response = await axios.get<{ documents: Document[] }>("https://developer.mozilla.org/api/v1/search/en-US", {
       params: {
