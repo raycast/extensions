@@ -13,7 +13,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import urljoin from "url-join";
 
-export default function ArticleList() {
+export default function MDNSearchResultsList() {
   const [query, setQuery] = useState<null | string>(null);
   const [state, setState] = useState<Result[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
