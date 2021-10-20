@@ -1,6 +1,6 @@
 {
   "name": "brew-services",
-  "title": "Manage Brew Services",
+  "title": "Manage Services",
   "description": "Manage homebrew services",
   "icon": "command-icon.png",
   "author": "es183923",
@@ -8,7 +8,7 @@
   "commands": [
     {
       "name": "manage-services",
-      "title": "Manage Brew Services",
+      "title": "Manage Services",
       "subtitle": "Brew",
       "description": "Manage homebrew services",
       "mode": "view",
@@ -18,7 +18,7 @@
           "type": "textfield",
           "required": false,
           "title": "Brew Installation Path",
-          "description": "Location to the Brew installation (Defaults to `/opt/homebrew/bin/brew` on M1 Macs, and `/usr/local/brew` otherwise)"
+          "description": "Location to the Brew installation (Defaults to `/opt/homebrew/bin/brew` on M1 Macs, and `/usr/local/bin/brew` otherwise)"
         }
       ]
     }
