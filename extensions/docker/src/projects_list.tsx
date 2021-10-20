@@ -3,10 +3,13 @@ import { useEffect, useMemo, useState } from 'react';
 import Dockerode, { ContainerInfo } from '@priithaamer/dockerode';
 import ContainerList from './container_list';
 
+import { isContainerRunning } from './docker/container';
+
 type ComposeProject = {
   name: string;
   configFiles: string;
   workingDir: string;
+  containers: ContainerInfo[];
 };
 
 const containersToProjects = (containers: ContainerInfo[]): ComposeProject[] => {
@@ -18,11 +21,13 @@ const containersToProjects = (containers: ContainerInfo[]): ComposeProject[] => 
       return memo;
     }
 
-    if (memo.find(({ name }) => name === projectName)) {
+    const project = memo.find(({ name }) => name === projectName);
+    if (project !== undefined) {
+      project.containers = [...project.containers, containerInfo];
       return memo;
+    } else {
+      return [...memo, { name: projectName, configFiles, workingDir, containers: [containerInfo] }];
     }
-
-    return [...memo, { name: projectName, configFiles, workingDir }];
   }, [] as ComposeProject[]);
 };
 
@@ -62,8 +67,9 @@ export default function ProjectsList() {
       {projects.map((project) => (
         <List.Item
           id={project.name}
-          title={project.name}
           icon={{ source: Icon.List, tintColor: Color.Blue }}
+          title={project.name}
+          subtitle={projectSubTitle(project)}
           actions={
             <ActionPanel>
               <PushAction title="Show Containers" target={<ContainerList projectFilter={project.name} />} />
@@ -74,3 +80,9 @@ export default function ProjectsList() {
     </List>
   );
 }
+
+const projectSubTitle = ({ containers }: ComposeProject) => {
+  const runningCount = containers.reduce((memo, item) => (memo += isContainerRunning(item) ? 1 : 0), 0);
+  const stoppedCount = containers.length - runningCount;
+  return `${runningCount} Running, ${stoppedCount} Stopped`;
+};
