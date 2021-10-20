@@ -40,9 +40,10 @@ export default function Main(): ReactElement {
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <OpenAction title="Open in Finder" icon={{fileIcon: "/System/Library/CoreServices/Finder.app"}} target={repo.fullPath} application="Finder" />
-                  <OpenWithAction path={repo.fullPath} />
-
+                  <OpenAction title="Open in VSCode" icon={{fileIcon: "/Applications/Visual Studio Code.app"}} target={repo.fullPath} application="Visual Studio Code" />
+                  <OpenAction title="Open in Terminal" icon={{fileIcon: "/Applications/iTerm.app"}} target={repo.fullPath} application="iTerm" />
+                  <OpenWithAction path={repo.fullPath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+                  <OpenAction title="Open in Finder" icon={{fileIcon: "/System/Library/CoreServices/Finder.app"}} target={repo.fullPath} application="Finder" shortcut={{ modifiers: ["cmd"], key: "f" }} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   {gitRemotes(repo.fullPath)
