@@ -34,7 +34,7 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
                 <ActionPanel>
                 <OpenInBrowserAction url={item.url} onOpen={onOpen} />
                 <CopyToClipboardAction title="Copy URL" content={item.url} />
-                <OpenAction title="Open In App" target={item.appUrl} onOpen={onOpen} shortcut={{ modifiers: ["ctrl"], key: "return" }} icon={{source: "command-icon.png"}} />
+                <OpenAction title="Open in App" target={item.appUrl} onOpen={onOpen} shortcut={{ modifiers: ["ctrl"], key: "return" }} icon={{source: "command-icon.png"}} />
               </ActionPanel>
               }
             />
