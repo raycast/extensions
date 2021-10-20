@@ -1,0 +1,13 @@
+{
+    "name": "Angular",
+    "slug": "angular",
+    "type": "angular",
+    "links": {
+      "home": "https://angular.io/",
+      "code": "https://github.com/angular/angular"
+    },
+    "version": "",
+    "release": "12.0.0",
+    "mtime": 1620904483,
+    "db_size": 10863816
+  }
