@@ -13,10 +13,6 @@ import {
 import { useEffect, useState } from "react";
 import { brewSearchFormula, brewInstalled, brewInstall } from "./brew";
 
-interface Dictionary<T> {
-  [Key: string]: T;
-}
-
 /// Main
 
 function Main() {
@@ -27,9 +23,13 @@ function Main() {
 
   useEffect(async () => {
     setIsLoading(true);
+    if (installed == undefined) {
+      setInstalled(await listInstalled());
+      return;
+    }
     try {
       const formulae = await brewSearchFormula(query.trim());
-      await updateInstalled(formulae, installed, setInstalled);
+      await updateInstalled(formulae, installed);
       setFormulae(formulae);
     } catch (err) {
       setFormulae([]);
@@ -37,7 +37,7 @@ function Main() {
       console.log("brewSearchFormula error:", err);
     }
     setIsLoading(false);
-  }, [query]);
+  }, [query, installed]);
 
   function FormulaListItem(props: { formula: Formula }) {
     const formula = props.formula;
@@ -62,12 +62,8 @@ function Main() {
                                shortcut={{ modifiers:["cmd"], key: "i" }}
                                onAction={async () => {
                                  await install(formula);
-                                 // TODO: Need to handle error case...
-                                 const allInstalled = installed;
-                                 allInstalled[formula.name] = formula;
-                                 // TODO: Not sure this is triggering a reload?
-                                 // And formula is also not recognised as installed (also fish).
-                                 setInstalled(allInstalled);
+                                 installed.set(formula.name, formula);
+                                 setInstalled(new Map(installed));
                                }}
               />
             </ActionPanel.Section>
@@ -106,7 +102,7 @@ async function install(formula: Formula) {
   showToast(ToastStyle.Animated, `Installing ${formula.full_name}`);
   try {
     await brewInstall(formula);
-    formula.installed = {version: formula.versions.stable};
+    formula.installed = [{version: formula.versions.stable}];
     showToast(ToastStyle.Success, `Installed ${formula.full_name}`);
   } catch (error) {
     console.error(error);
@@ -114,23 +110,18 @@ async function install(formula: Formula) {
   }
 }
 
-async function listInstalled(): Dictionary<Formula> {
+async function listInstalled(): Map<string, Formula> {
   const installed = await brewInstalled(true);
-  const dict = {};
+  const dict = new Map<string, Formula>();
   for (const formula of installed) {
-    dict[formula.name] = formula;
+    dict.set(formula.name, formula);
   }
   return dict;
 }
 
-async function updateInstalled(formulae: Formula[], installed?: Dictionary<Formula>, setInstalled: () => void) {
-  if (installed === undefined) {
-    installed = await listInstalled();
-    setInstalled(installed);
-  }
-
+async function updateInstalled(formulae: Formula[], installed: Map<string, Formula>) {
   for (formula of formulae) {
-    const info = installed[formula.name];
+    const info = installed.get(formula.name);
     formula.installed = info ? info.installed : [];
   }
 }
