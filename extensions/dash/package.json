@@ -1,7 +1,7 @@
 {
   "name": "dash",
   "title": "Dash",
-  "description": "Interface with the Dash application, allowing users to quickly search through programming documentation.",
+  "description": "Interface with the Dash application, allowing users to quickly search through documentation sets.",
   "icon": "command-icon.png",
   "author": "RSO",
   "license": "MIT",
@@ -9,8 +9,8 @@
     {
       "name": "index",
       "title": "Find in Dash",
-      "subtitle": "",
-      "description": "Search dash for the provided string.\n\n",
+      "subtitle": "Dash",
+      "description": "Filter a Dash docset and search for the provided string in it.",
       "mode": "view"
     }
   ],
