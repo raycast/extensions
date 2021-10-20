@@ -1,4 +1,4 @@
-import { ActionPanel, getPreferenceValues, List, PushAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Color, getPreferenceValues, Icon, List, PushAction, showToast, ToastStyle } from "@raycast/api";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { getIcon, getWindDirectionIcon } from "../icons";
@@ -24,6 +24,7 @@ export function DayListItem(props: { day: WeatherData; title: string }) {
       key={data.date}
       title={wd}
       subtitle={`max: ${getTemp("max")}, min: ${getTemp("min")}`}
+      icon={{ source: Icon.Calendar, tintColor: Color.PrimaryText }}
       actions={
         <ActionPanel>
           <PushAction title="Show Details" target={<DayList day={data} title={`${props.title} - ${wd}`} />} />
