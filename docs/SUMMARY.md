@@ -6,6 +6,7 @@
 
 * [Getting Started](basics/getting-started.md)
 * [Create Your First Extension](basics/create-your-first-extension.md)
+* [Prepare an Extension for Store](basics/prepare-an-extension-for-store.md)
 * [Publish an Extension](basics/publish-an-extension.md)
 * [Debug an Extension](basics/debug-an-extension.md)
 * [Install an Extension](basics/install-an-extension.md)
