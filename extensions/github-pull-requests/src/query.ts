@@ -1,24 +1,20 @@
-const reposQuery = `
-    repositories(last: 50) {
+const pullRequestsQuery = `
+    pullRequests(last: 10, states: OPEN) {
       nodes {
-        pullRequests(last: 10, states: OPEN) {
+        number
+        title
+        author { login }
+        url
+        assignees(last: 8) {
           nodes {
-            number
-            title
-            author { login }
-            url
-            assignees(last: 8) {
-              nodes {
+            login
+          }
+        }
+        reviewRequests(last: 8) {
+          nodes {
+            requestedReviewer {
+              ... on User {
                 login
-              }
-            }
-            reviewRequests(last: 8) {
-              nodes {
-                requestedReviewer {
-                  ... on User {
-                    login
-                  }
-                }
               }
             }
           }
@@ -26,10 +22,20 @@ const reposQuery = `
       }
     }
   `;
+const reposQuery = `
+    repositories(last: 50) {
+      nodes {
+        ${pullRequestsQuery}
+      }
+    }
+  `;
 const query = `
     {
       viewer {
+        ${pullRequestsQuery}
+
         ${reposQuery}
+
         organizations(last: 10) {
           nodes {
             login

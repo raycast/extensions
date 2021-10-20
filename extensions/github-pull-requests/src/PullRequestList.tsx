@@ -8,7 +8,7 @@ export default function PullRequestList() {
   const [state, setState] = useState<PullRequests>({
     pullRequests: [],
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetch() {
@@ -21,6 +21,7 @@ export default function PullRequestList() {
 
       setIsLoading(false);
     }
+
     fetch();
   }, []);
 

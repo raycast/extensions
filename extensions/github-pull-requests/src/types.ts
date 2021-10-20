@@ -22,6 +22,9 @@ export type Repo = {
 export type Data = {
   viewer: {
     repositories: Repo;
+    pullRequests: {
+      nodes: PullRequest[];
+    };
     organizations: {
       nodes: {
         repositories: Repo;
