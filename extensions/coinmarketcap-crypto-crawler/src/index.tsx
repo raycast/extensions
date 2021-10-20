@@ -1,11 +1,11 @@
 import { ActionPanel, CopyToClipboardAction, PasteAction, Icon, List, OpenInBrowserAction, environment } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { fetchAllCrypto } from './api'
 import $ from "cheerio";
 import fetch from "node-fetch";
+const {fetchAllCrypto} = require('./api') 
 
 
-import {writeLIstInToFile, getListFromFile} from './utils'
+const {writeLIstInToFile, getListFromFile} = require( './utils')
 
 
 const BASE_URL = 'https://coinmarketcap.com/currencies/'
@@ -16,6 +16,16 @@ type PriceInfo = {
   coinName: string;
 };
 
+
+
+type ResultData =  {
+  data: {
+    cryptoCurrencyMap: []
+  }, 
+  status: {
+    timestamp: string 
+  }
+}
 
 export default function ArticleList() {
   const [coinName, setCoinName] = useState('')
@@ -28,7 +38,7 @@ export default function ArticleList() {
 
 
   useEffect(() => {
-    getListFromFile((err, data) => {
+    getListFromFile((err:string, data: string) => {
       if (err) {
         console.error(err)
         return
@@ -39,7 +49,7 @@ export default function ArticleList() {
       setCryptoLIst(cryptoList)
     })
 
-    fetchAllCrypto({ limit: 10000, start: 1 }).then(({data:resultData}) => {
+    fetchAllCrypto({ limit: 10000, start: 1 }).then(({data:resultData}: {data: ResultData}) => {
       const { data,status } = resultData
       
       writeLIstInToFile({timestamp:  status.timestamp,cryptoList: data.cryptoCurrencyMap })
@@ -48,7 +58,7 @@ export default function ArticleList() {
 
   }, [])
 
-  
+
   const onSearch = (search: string) => {
     setIsLoading(true)
     setNotFound(false)
@@ -66,7 +76,7 @@ export default function ArticleList() {
   return (
     <List isLoading={isLoading}
       throttle
-      searchBarPlaceholder="enter the crypto name ... "
+      searchBarPlaceholder="Enter the crypto name"
       onSearchTextChange={onSearch}>
 
 
