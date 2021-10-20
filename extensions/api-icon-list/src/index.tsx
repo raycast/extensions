@@ -6,7 +6,7 @@ function enumKeys<O extends object, K extends keyof O = keyof O>(obj: O): K[] {
 }
 
 export default function Command() {
-  const [color, setColor] = useState<keyof typeof Color>("PrimaryText");
+  const [color, setColor] = useState<keyof typeof Color>("SecondaryText");
   const actionPanelItems: Element[] = [];
   for (const colorName of enumKeys(Color)) {
     actionPanelItems.push(
