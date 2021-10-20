@@ -66,7 +66,7 @@ export default function ProjectsList() {
     <List isLoading={loading}>
       {projects.map((project) => (
         <List.Item
-          id={project.name}
+          key={project.name}
           icon={{ source: Icon.List, tintColor: Color.Blue }}
           title={project.name}
           subtitle={projectSubTitle(project)}
