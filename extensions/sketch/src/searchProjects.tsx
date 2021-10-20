@@ -1,62 +1,65 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
   Icon,
   Color,
   List,
-  OpenInBrowserAction,
   showToast,
   ToastStyle,
   getPreferenceValues,
-  OpenAction,
-  ImageMask,
   setLocalStorageItem,
   KeyEquivalent,
   clearLocalStorage,
   useNavigation,
+  CopyToClipboardAction,
+  OpenInBrowserAction,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { Share } from "./types/SketchWorkspaceShare";
-import { getWorkspaces, login } from "./utils/functions";
-import useSearch from "./hooks/useSearch";
-import { Preferences, SelectedWorkspace, StoredCachedData } from "./types/preferences";
-import { PersonalShare } from "./types/SketchPersonalShare";
-import { getAllWorkspaces, getCachedData, getLastUsedEmail, getSelectedWorkspace } from "./utils/storage";
+import { Project } from "./types/SketchWorkspaceShare";
+import { getProjects, getWorkspaces, login } from "./utils/functions";
+import { Preferences, SelectedWorkspace, StoredCachedProjctes } from "./types/preferences";
+import { getAllWorkspaces, getCachedProjects, getLastUsedEmail, getSelectedWorkspace } from "./utils/storage";
 
-import TimeAgo from "javascript-time-ago";
-import en from "javascript-time-ago/locale/en.json";
 import { Me } from "./types/SketchGetWorkspaces";
-import { EntriesEntity } from "./types/SketchProjectShares";
-TimeAgo.addDefaultLocale(en);
+import DocumentsList from "./searchDocuments";
 
-const timeAgo = new TimeAgo("en-US");
-
-export default function DocumentsList(props: { projectName?: string; shortId?: string; token?: string }) {
-  const [query, setQuery] = useState<string>("");
+export default function ProjectsList() {
   const [token, setToken] = useState<string | undefined>();
   const [selectedWorkspace, setSelectedWorkspace] = useState<SelectedWorkspace>();
   const [loginError, setLoginError] = useState<string>();
-  const [cachedData, setCachedData] = useState<StoredCachedData>();
+  const [cachedProjects, setCachedProjects] = useState<StoredCachedProjctes>();
   const [workspaces, setWorkspaces] = useState<Me>();
-  const { pop } = useNavigation();
+  const [projects, setProjects] = useState<Project[] | undefined>();
 
-  const { data, error, isLoading } = useSearch(token, selectedWorkspace, query, props.shortId);
+  // const { data, error, isLoading } = useSearch(token, selectedWorkspace, query);
 
-  if (error) {
-    showToast(ToastStyle.Failure, error);
-  }
+  // if (error) {
+  //   showToast(ToastStyle.Failure, error);
+  // }
 
   if (loginError) {
     showToast(ToastStyle.Failure, loginError);
   }
 
   const pullSelectedWorkspace = async (workspace: SelectedWorkspace) => {
-    if (workspace.identifier !== selectedWorkspace?.identifier) {
-      await setLocalStorageItem("selectedWorkspace", JSON.stringify(workspace));
-      if (props.shortId) pop();
-      setSelectedWorkspace(workspace);
-    }
+    await setLocalStorageItem("selectedWorkspace", JSON.stringify(workspace));
+    setSelectedWorkspace(workspace);
   };
+
+  useEffect(() => {
+    async function otherThings() {
+      if (!selectedWorkspace || !workspaces || !token) return;
+      try {
+        const fetchedProjects = await getProjects(token, selectedWorkspace);
+        setProjects(fetchedProjects);
+        await setLocalStorageItem("cachedProjects", JSON.stringify(fetchedProjects));
+      } catch (error) {
+        console.error(error);
+        console.log("err64");
+        showToast(ToastStyle.Failure, (error as ErrorEvent).message);
+      }
+    }
+    otherThings();
+  }, [selectedWorkspace, workspaces, token]);
 
   useEffect(() => {
     async function otherThings() {
@@ -90,21 +93,21 @@ export default function DocumentsList(props: { projectName?: string; shortId?: s
   }, [workspaces, token]);
 
   const showCache = () => {
-    const doWorkspacesMatch = selectedWorkspace?.identifier === cachedData?.identifier;
-    return doWorkspacesMatch && !data?.shares.length;
+    const doWorkspacesMatch = selectedWorkspace?.identifier === cachedProjects?.identifier;
+    return doWorkspacesMatch && !projects?.length;
   };
 
   useEffect(() => {
     async function cacheData() {
       console.log("caching...");
       await setLocalStorageItem(
-        "cachedData",
-        JSON.stringify({ identifier: selectedWorkspace?.identifier, shares: data?.shares })
+        "cachedProjects",
+        JSON.stringify({ identifier: selectedWorkspace?.identifier, projects: projects })
       );
       console.log("caching done");
     }
-    if (data?.shares.length && selectedWorkspace && !props.shortId) cacheData();
-  }, [data]);
+    if (projects?.length && selectedWorkspace) cacheData();
+  }, [projects]);
 
   useEffect(() => {
     async function fetch() {
@@ -113,13 +116,10 @@ export default function DocumentsList(props: { projectName?: string; shortId?: s
 
       if (storedLasUsedEmail === email) {
         console.log("✓ logging in with *stored* email");
-
-        if (!props.shortId) {
-          const storedCachedData: StoredCachedData = await getCachedData();
-          if (storedCachedData) {
-            console.log("✓ Found cached data");
-            setCachedData(storedCachedData);
-          }
+        const storedCachedProjects: StoredCachedProjctes = await getCachedProjects();
+        if (storedCachedProjects) {
+          console.log("✓ Found cached projects");
+          setCachedProjects(storedCachedProjects);
         }
 
         const storedWorkspaces: Me = await getAllWorkspaces();
@@ -137,13 +137,6 @@ export default function DocumentsList(props: { projectName?: string; shortId?: s
         console.log("✓ logging in with *new* email");
       }
 
-      if (props.token) {
-        setToken(props.token);
-        return console.log("Token got from Projects");
-      }
-
-      await setLocalStorageItem("lastUsedEmail", email);
-
       try {
         const fetchedToken: string = await login(email, password);
         setToken(fetchedToken);
@@ -156,36 +149,37 @@ export default function DocumentsList(props: { projectName?: string; shortId?: s
     fetch();
   }, []);
 
-  if ((!data || !token || !selectedWorkspace) && !error && !loginError && !cachedData) {
-    return <List isLoading={true} searchBarPlaceholder="Search documents by name..." />;
+  if ((!projects || !token || !selectedWorkspace) && !loginError && !cachedProjects) {
+    return <List isLoading={true} searchBarPlaceholder="Search projects by name..." />;
   }
 
   return (
     <List
-      isLoading={isLoading && !error && !loginError}
-      searchBarPlaceholder="Search documents by name..."
-      onSearchTextChange={setQuery}
+      isLoading={!projects?.length && !loginError}
+      searchBarPlaceholder="Search projects by name..."
       throttle={true}
     >
       {selectedWorkspace && (
-        <List.Section title={selectedWorkspace?.name} subtitle={props.projectName ?? `Recent Documents`}>
+        <List.Section title={selectedWorkspace?.name}>
           {showCache()
-            ? cachedData?.shares?.map((share) => (
+            ? cachedProjects?.projects?.map((project) => (
                 <ShareListItem
-                  key={share.identifier}
-                  share={share}
+                  key={project.identifier}
+                  project={project}
                   workspaces={workspaces}
+                  selectedWorkspace={selectedWorkspace}
                   updateWorkspace={pullSelectedWorkspace}
-                  projectName={props.projectName}
+                  token={token}
                 />
               ))
-            : data?.shares?.map((share) => (
+            : projects?.map((project) => (
                 <ShareListItem
-                  key={share.identifier}
-                  share={share}
+                  key={project.identifier}
+                  project={project}
                   workspaces={workspaces}
+                  selectedWorkspace={selectedWorkspace}
                   updateWorkspace={pullSelectedWorkspace}
-                  projectName={props.projectName}
+                  token={token}
                 />
               ))}
         </List.Section>
@@ -195,69 +189,59 @@ export default function DocumentsList(props: { projectName?: string; shortId?: s
 }
 
 function ShareListItem(props: {
-  share: Share | PersonalShare | EntriesEntity;
+  project: Project;
   workspaces: Me | undefined;
+  selectedWorkspace: SelectedWorkspace;
   updateWorkspace: (workspace: SelectedWorkspace) => void;
-  projectName?: string;
+  token: string | undefined;
 }) {
-  const thumbnail = () => {
-    if (props.share.version.previewFiles?.length) {
-      if (props.share.version.previewFiles[0]?.thumbnails?.length) {
-        return props.share.version.previewFiles[0].thumbnails[0].url;
-      } else {
-        return undefined;
-      }
-    } else {
-      return undefined;
-    }
-  };
+  const project = props.project;
+  const wp = props.workspaces;
+  const { push } = useNavigation();
 
-  const sketchUrl = `sketch://sketch.cloud/s/${props.share.identifier}`;
+  const webUrl = `https://www.sketch.com/workspace/${props.selectedWorkspace.identifier}/p/${props.project.shortId}`;
 
   return (
     <List.Item
-      id={props.share.identifier}
-      key={props.share.identifier}
-      title={props.share.name}
-      subtitle={props.projectName?.length ? "" : props.share.project?.name}
-      keywords={props.share.project?.name ? [props.share.project.name] : []}
-      icon={{ source: thumbnail() ?? Icon.Document, tintColor: Color.Yellow, mask: ImageMask.RoundedRectangle }}
-      accessoryTitle={timeAgo.format(new Date(props.share.updatedAt)) as string}
+      id={project.identifier}
+      key={project.identifier}
+      title={project.name}
+      icon={{ source: { dark: "folder-icon@dark.png", light: "folder-icon.png" }}}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenAction
-              icon={{ source: { light: "sketch-symbol-onlight.png", dark: "sketch-symbol-ondark.png" } }}
-              title="Open In Sketch"
-              target={sketchUrl}
-              application="Sketch"
+            <ActionPanel.Item
+              icon={Icon.List}
+              title={`Open`}
+              onAction={() =>
+                push(<DocumentsList shortId={project.shortId} projectName={project.name} token={props.token} />)
+              }
             />
-            <OpenInBrowserAction url={props.share.publicUrl} />
+            <OpenInBrowserAction url={webUrl} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Workspaces">
-            {props.workspaces?.personalWorkspace && (
+            {wp?.personalWorkspace && (
               <ActionPanel.Item
                 icon={Icon.Person}
-                title={props.workspaces.personalWorkspace.name}
+                title={wp.personalWorkspace.name}
                 shortcut={{ modifiers: ["ctrl"], key: "1" }}
                 onAction={() =>
-                  props.workspaces &&
                   props.updateWorkspace({
-                    name: props.workspaces.personalWorkspace.name,
-                    identifier: props.workspaces.personalWorkspace.identifier,
+                    name: wp.personalWorkspace.name,
+                    identifier: wp.personalWorkspace.identifier,
                   })
                 }
               />
             )}
 
-            {props.workspaces?.workspaces?.map((workspace, index) => (
+            {wp?.workspaces?.map((workspace, index) => (
               <ActionPanel.Item
                 key={workspace.identifier}
                 icon={workspace.avatar?.small ?? Icon.Person}
                 title={workspace.name}
                 shortcut={{
                   modifiers: ["ctrl"],
-                  key: (index + (props.workspaces?.personalWorkspace ? 2 : 1)).toString() as KeyEquivalent,
+                  key: (index + (wp?.personalWorkspace ? 2 : 1)).toString() as KeyEquivalent,
                 }}
                 onAction={() =>
                   props.updateWorkspace({
@@ -269,9 +253,8 @@ function ShareListItem(props: {
             ))}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <CopyToClipboardAction title="Copy Web URL" content={props.share.publicUrl} />
-            <CopyToClipboardAction title="Copy Sketch URL" content={sketchUrl} />
-            <CopyToClipboardAction title="Copy Document ID" content={props.share.identifier} />
+            <CopyToClipboardAction title="Copy Web URL" content={webUrl} />
+            <CopyToClipboardAction title="Copy Project ID" content={props.project.shortId} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Other">
             <ActionPanel.Item
