@@ -60,7 +60,7 @@ export interface Fetcher {
     refresh: () => Promise<void>;
 }
 
-export function useRefresher<T>(fn: (updateInline: boolean) => Promise<T>): {
+export function useRefresher<T>(fn: (updateInline: boolean) => Promise<T>, deps?: React.DependencyList | undefined): {
     data: T | undefined;
     error?: string;
     isLoading: boolean;
@@ -70,7 +70,12 @@ export function useRefresher<T>(fn: (updateInline: boolean) => Promise<T>): {
     const [error, setError] = useState<string>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [timestamp, setTimestamp] = useState<Date>(new Date());
-
+    const depsAll = [timestamp];
+    if (deps) {
+        for (const d of deps) {
+            depsAll.push(d);
+        }
+    }
     let cancel = false;
 
     const fetcher: Fetcher = {
@@ -111,7 +116,7 @@ export function useRefresher<T>(fn: (updateInline: boolean) => Promise<T>): {
         return () => {
             cancel = true;
         };
-    }, [timestamp]);
+    }, depsAll);
 
     return { data, error, isLoading, fetcher };
 }

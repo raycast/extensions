@@ -26,6 +26,13 @@
       "subtitle": "Twitter",
       "description": "Send a tweet",
       "mode": "view"
+    },
+    {
+      "name": "user_search",
+      "title": "Search User",
+      "subtitle": "Twitter",
+      "description": "Search Twitter User",
+      "mode": "view"
     }
   ],
   "preferences" : [
