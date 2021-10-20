@@ -8,7 +8,7 @@ const DeleteAllAction = () => {
   const [, setTodoItems] = useAtom(todoAtom);
   return (
     <ActionPanel.Item
-      title="Delete All"
+      title="Delete All Todos"
       onAction={() => setTodoItems(_.cloneDeep(DEFAULT_SECTIONS))}
       shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
       icon={Icon.Trash}
