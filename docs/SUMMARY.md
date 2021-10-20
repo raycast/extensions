@@ -10,6 +10,7 @@
 * [Publish an Extension](basics/publish-an-extension.md)
 * [Debug an Extension](basics/debug-an-extension.md)
 * [Install an Extension](basics/install-an-extension.md)
+* [Import an Extension](basics/import-an-extension.md)
 
 ## Examples
 
