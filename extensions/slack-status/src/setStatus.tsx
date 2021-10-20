@@ -135,6 +135,11 @@ function SetStatusPresetListItem(props: {
             statusPreset={status}
             currentStatusResponseState={props.currentStatusResponseState}
           />
+          <SetStatusWithDuration
+            slackClient={props.slackClient}
+            statusPreset={status}
+            currentStatusResponseState={props.currentStatusResponseState}
+          />
         </ActionPanel>
       }
     />
@@ -188,5 +193,41 @@ function SetStatusAction(props: {
       icon={Icon.Pencil}
       onAction={() => props.slackClient.setStatusFromPreset(props.statusPreset, props.currentStatusResponseState)}
     />
+  );
+}
+
+function SetStatusWithDuration(props: {
+  slackClient: SlackClient;
+  statusPreset: SlackStatusPreset;
+  currentStatusResponseState: SlackStatusResponseState;
+}) {
+  const titleDurationPairs: [string, number][] = [
+    ["Don't clear", 0],
+    ["15 minutes", 15],
+    ["30 minutes", 30],
+    ["45 minutes", 45],
+    ["1 hour", 60],
+    ["1.5 hour", 90],
+    ["2 hours", 120],
+    ["3 hours", 180],
+  ];
+  return (
+    <ActionPanel.Submenu icon={Icon.Clock} title="Set Status with Duration...">
+      {titleDurationPairs.map((titleDurationPair) => {
+        const title = titleDurationPair[0];
+        const duration = titleDurationPair[1];
+        return (
+          <ActionPanel.Item
+            key={title}
+            id={title}
+            title={title}
+            icon={Icon.Clock}
+            onAction={() =>
+              props.slackClient.setStatusFromPreset(props.statusPreset, props.currentStatusResponseState, duration)
+            }
+          />
+        );
+      })}
+    </ActionPanel.Submenu>
   );
 }
