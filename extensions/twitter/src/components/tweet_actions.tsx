@@ -30,6 +30,7 @@ export function ReplyTweetAction(props: { tweet: TweetV1 }) {
       title="Reply"
       target={<TweetSendForm replyTweet={props.tweet} />}
       icon={{ source: Icon.Bubble, tintColor: Color.PrimaryText }}
+      shortcut={{ modifiers: ["cmd"], key: "p" }}
     />
   );
 }
@@ -75,7 +76,7 @@ export function RetweetAction(props: { tweet: TweetV1; fetcher?: Fetcher }) {
       showToast(ToastStyle.Failure, "Could not retweet", error.message);
     }
   };
-  return <ActionPanel.Item title={title} icon={icon} onAction={retweet} />;
+  return <ActionPanel.Item title={title} icon={icon} onAction={retweet} shortcut={{ modifiers: ["cmd"], key: "t" }} />;
 }
 
 export function LikeAction(props: { tweet: TweetV1; fetcher?: Fetcher }) {

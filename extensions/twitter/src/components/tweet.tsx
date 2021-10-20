@@ -48,7 +48,7 @@ export function TweetListItem(props: { tweet: TweetV1; fetcher?: Fetcher }) {
         <ActionPanel>
           <ActionPanel.Section title="Tweet">
             <ShowTweetAction tweet={t} />
-            <OpenInBrowserAction url={getTweetUrl(t)} />
+            <OpenInBrowserAction url={getTweetUrl(t)} shortcut={{ modifiers: ["cmd"], key: "b" }} />
             <LikeAction tweet={t} fetcher={fetcher} />
             <ReplyTweetAction tweet={t} />
             <RetweetAction tweet={t} fetcher={fetcher} />
@@ -104,7 +104,7 @@ export function TweetDetail(props: { tweet: TweetV1 }) {
             <LikeAction tweet={t} fetcher={fetcher} />
             <RetweetAction tweet={t} fetcher={fetcher} />
             <ShowUserTweetsAction username={t.user.screen_name} />
-            <OpenInBrowserAction url={getTweetUrl(t)} />
+            <OpenInBrowserAction url={getTweetUrl(t)} shortcut={{ modifiers: ["cmd"], key: "b" }} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Info">
             <OpenAuthorProfileAction tweet={t} />
