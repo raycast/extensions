@@ -1,8 +1,12 @@
-import { ActionPanel, CopyToClipboardAction, PasteAction, Icon, List, OpenInBrowserAction } from "@raycast/api";
-import { useState,useEffect } from "react";
-import {fetchAllCrypto} from './api'
+import { ActionPanel, CopyToClipboardAction, PasteAction, Icon, List, OpenInBrowserAction, environment } from "@raycast/api";
+import { useState, useEffect } from "react";
+import { fetchAllCrypto } from './api'
 import $ from "cheerio";
 import fetch from "node-fetch";
+
+
+import {writeLIstInToFile, getListFromFile} from './utils'
+
 
 const BASE_URL = 'https://coinmarketcap.com/currencies/'
 
@@ -19,15 +23,32 @@ export default function ArticleList() {
   const [priceDiff, setPriceDiff] = useState('');
   const [notFound, setNotFound] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [cryptoLIst,setCryptoLIst] = useState([])
 
 
 
-  useEffect(()=>{
-    fetchAllCrypto({limit: 10000, start:1}).then((list)=> {
-      const {data} = list 
-      console.log(' :status',data.status.timestamp );
-    }) 
-  }, [] )
+  useEffect(() => {
+    getListFromFile((err, data) => {
+      if (err) {
+        console.error(err)
+        return
+      }
+      const {cryptoList} = JSON.parse(data)
+      
+      if(!cryptoList)  return 
+      setCryptoLIst(cryptoList)
+    })
+
+    fetchAllCrypto({ limit: 10000, start: 1 }).then(({data:resultData}) => {
+      const { data,status } = resultData
+      
+      writeLIstInToFile({timestamp:  status.timestamp,cryptoList: data.cryptoCurrencyMap })
+      
+    })
+
+  }, [])
+
+  
   const onSearch = (search: string) => {
     setIsLoading(true)
     setNotFound(false)
