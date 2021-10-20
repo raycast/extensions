@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Detail, Icon, List } from '@raycast/api';
+import { ActionPanel, Color, Detail, Icon, List, showToast, ToastStyle } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
 import Dockerode, { ContainerInfo } from '@priithaamer/dockerode';
 import { isContainerRunning } from './docker/container';
@@ -81,14 +81,20 @@ export default function ContainerList(props: { projectFilter?: string }) {
                 <ActionPanel.Item
                   title="Stop Container"
                   shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
-                  onAction={() => stopContainer(containerInfo)}
+                  onAction={async () => {
+                    await stopContainer(containerInfo);
+                    await showToast(ToastStyle.Success, `Container ${containerName(containerInfo)} stopped`);
+                  }}
                 />
               )}
               {containerInfo.State !== 'running' && (
                 <ActionPanel.Item
                   title="Start Container"
                   shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
-                  onAction={() => startContainer(containerInfo)}
+                  onAction={async () => {
+                    await startContainer(containerInfo);
+                    await showToast(ToastStyle.Success, `Container ${containerName(containerInfo)} started`);
+                  }}
                 />
               )}
               <ActionPanel.Item
