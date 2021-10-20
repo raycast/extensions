@@ -1,52 +1,49 @@
 import { useState, useEffect } from "react";
 import { List, Icon, showToast, ToastStyle } from "@raycast/api";
 import { TaskListItem } from "../components";
-import { getTasks, getCurrentTimer } from "../api";
-import { Task } from "../types";
+import { getCurrentTimer } from "../api";
+import { createResolvedToast } from "../utils";
 
-export function TaskList({ projectId }: { projectId: string }) {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+const filterTasks = (records: Array<any>, projectId: string) => {
+  return records.filter((record: any) => record.projectId === projectId);
+};
+
+export function TaskList({
+  projectId,
+  timeRecords,
+  refreshRecords,
+}: {
+  projectId: string;
+  timeRecords: Array<any>;
+  refreshRecords: () => Promise<Array<any>>;
+}) {
   const [activeTimerTaskId, setActiveTimerTaskId] = useState<null | string>(null);
+  const [tasks, setTasks] = useState<Array<any>>(filterTasks(timeRecords, projectId));
 
   const refreshActiveTimer = async () => {
+    const toast = await showToast(ToastStyle.Animated, "Refreshing tasks");
     try {
       const activeTimer = await getCurrentTimer();
       setActiveTimerTaskId(activeTimer);
+      createResolvedToast(toast, "Tasks refreshed").success();
     } catch (error) {
-       await showToast(ToastStyle.Failure, "Failed to refresh tasks");
+      createResolvedToast(toast, "Failed to refresh tasks").error();
     }
   };
-
-  const fetchTasks = async () => {
-    const tasksResp = await getTasks(projectId);
-    setTasks(tasksResp);
-  };
-
-  useEffect(() => {
-    async function fetch() {
-      try {
-        await fetchTasks();
-        setIsLoading(false);
-      } catch (error) {
-        const message = (error as { message: string }).message;
-        await showToast(ToastStyle.Failure, message || "Failed to fetch projects");
-        setIsLoading(false);
-      }
-    }
-    fetch();
-  }, []);
 
   useEffect(() => {
     refreshActiveTimer();
   }, [activeTimerTaskId]);
 
   const renderTasks = () => {
-    if (!isLoading && tasks[0]) {
+    if (tasks[0]) {
       return tasks.map((task) => (
         <TaskListItem
           key={task.id}
-          fetchTasks={fetchTasks}
+          refreshRecords={async () => {
+            const records = await refreshRecords();
+            setTasks(filterTasks(records, projectId));
+          }}
           refreshActiveTimer={refreshActiveTimer}
           task={task}
           hasActiveTimer={task.id === activeTimerTaskId}
@@ -54,14 +51,8 @@ export function TaskList({ projectId }: { projectId: string }) {
       ));
     }
 
-    if (!isLoading && !tasks[0]) {
-      return <List.Item title="No tasks found" icon={Icon.XmarkCircle} />;
-    }
+    return <List.Item title="No tasks found" icon={Icon.XmarkCircle} />;
   };
 
-  return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter tasks by name...">
-      {renderTasks()}
-    </List>
-  );
+  return <List searchBarPlaceholder="Filter tasks by name...">{renderTasks()}</List>;
 }
