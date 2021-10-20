@@ -1,0 +1,38 @@
+{
+  "name": "bluetooth-manager",
+  "title": "Bluetooth Manager",
+  "description": "Manage bluetooth devices",
+  "icon": "command-icon.png",
+  "author": "fedevitaledev",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "bluetooth-devices",
+      "title": "Bluetooth Devices",
+      "subtitle": "Bluetooth",
+      "description": "Retrive saved bluetooth devices",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "fp-ts": "^2.11.5",
+    "io-ts": "^2.2.16",
+    "run-applescript": "^6.0.0",
+    "ts-pattern": "^3.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
