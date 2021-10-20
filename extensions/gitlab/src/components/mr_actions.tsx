@@ -1,8 +1,18 @@
-import { ActionPanel, Color, CopyToClipboardAction, Icon, KeyboardShortcut, showToast, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  Color,
+  CopyToClipboardAction,
+  Icon,
+  KeyboardShortcut,
+  PushAction,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 import React from "react";
 import { gitlab } from "../common";
-import { MergeRequest } from "../gitlabapi";
+import { Label, MergeRequest } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
+import { LabelList } from "./label";
 
 async function createNote(mr: MergeRequest, body: string): Promise<any> {
   return await gitlab.post(`projects/${mr.project_id}/merge_requests/${mr.iid}/notes`, { body: body });
@@ -120,6 +130,20 @@ export function CreateTodoMRAction(props: { mr: MergeRequest; shortcut?: Keyboar
   }
 }
 
+function ShowMRLabelsAction(props: { labels: Label[] }) {
+  if (props.labels.length <= 0) {
+    return null;
+  }
+  return (
+    <PushAction
+      title="Show Labels"
+      target={<LabelList labels={props.labels} />}
+      shortcut={{ modifiers: ["cmd"], key: "l" }}
+      icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
+    />
+  );
+}
+
 export function MRItemActions(props: { mr: MergeRequest }) {
   const mr = props.mr;
   return (
@@ -132,6 +156,7 @@ export function MRItemActions(props: { mr: MergeRequest }) {
       <CopyToClipboardAction title="Copy Merge Request Number" content={mr.iid} />
       <CopyToClipboardAction title="Copy Merge Request URL" content={mr.web_url} />
       <CopyToClipboardAction title="Copy Merge Request Title" content={mr.title} />
+      <ShowMRLabelsAction labels={mr.labels} />
     </React.Fragment>
   );
 }

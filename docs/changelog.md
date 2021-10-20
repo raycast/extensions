@@ -1,20 +1,12 @@
 # Changelog
 
-## 15.0.0 - 2042-12-03
+## 1.25.0 - 2021-10-13
 
-### Fixed
+### Hello World
 
-* Removed humans, they weren't doing fine with animals.
+It's happening! We're opening up our API and store for public beta.&#x20;
 
-### Changed
+![](.gitbook/assets/changelog-hello-world.png)
 
-* Animals are now super cute, all of them.
-
-## 14.0.0 - 2042-10-06
-
-### Added
-
-* Introduced animals into the world, we believe they're going to be a neat addition.
-
-
+This is a big milestone for our community. We couldn't have pulled it off without our alpha testers. A massive shoutout to everybody who helped us shape the API. Now let's start building. We can't wait to see what you will come up with.
 

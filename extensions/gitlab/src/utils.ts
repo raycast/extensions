@@ -144,3 +144,46 @@ export function toFormValues(values: any): Record<string, any> {
     }
     return val;
 }
+
+export class Query {
+    query: string | undefined;
+    named: Record<string, string[]> = {};
+    negativeNamed: Record<string, string[]> = {}
+}
+
+export function tokenizeQueryText(query: string | undefined, namedKeywords: string[]): Query {
+    let positivePairs: Record<string, string[]> = {};
+    let negativePairs: Record<string, string[]> = {};
+    let text = query;
+    if (query) {
+        const splits = query.split(" ");
+        const texts: string[] = [];
+        for (const s of splits) {
+            if (s.indexOf("=") > 0) {
+                const parts = s.split("=");
+                const keyRaw = parts[0];
+                const negative = keyRaw.endsWith("!");
+                const key = (negative ? keyRaw.slice(0, keyRaw.length - 1) : keyRaw).toLocaleLowerCase();
+                if (namedKeywords.includes(key)) {
+                    const val = parts.slice(1).join("=");
+                    if (val) {
+                        let pairs = negative ? negativePairs : positivePairs;
+                        if (key in pairs) {
+                            pairs[key].push(val);
+                        } else {
+                            pairs[key] = [val];
+                        }
+                    }
+                    continue;
+                }
+            }
+            texts.push(s);
+        }
+        text = texts.join(" ");
+    }
+    return {
+        query: text,
+        named: positivePairs,
+        negativeNamed: negativePairs
+    };
+}
