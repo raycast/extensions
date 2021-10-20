@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "fuzzysort": "^1.1.4"
+  }
+}

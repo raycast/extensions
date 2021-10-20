@@ -1,11 +1,10 @@
-import { ActionPanel, CopyToClipboardAction, PasteAction, Icon, List, OpenInBrowserAction, environment } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, PasteAction, Icon, List, OpenInBrowserAction, environment, ListItem } from "@raycast/api";
 import { useState, useEffect } from "react";
 import $ from "cheerio";
 import fetch from "node-fetch";
 const { fetchAllCrypto } = require('./api')
-
-
 const { writeLIstInToFile, getListFromFile } = require('./utils')
+const fuzzysort = require('fuzzysort') 
 
 
 const BASE_URL = 'https://coinmarketcap.com/currencies/'
@@ -41,6 +40,8 @@ export default function ArticleList() {
   const [isLoading, setIsLoading] = useState(false)
   const [cryptoList, setCryptoList] = useState([])
 
+  const [fuzzyResult, setFuzzyResult ] = useState([]) 
+
 
   useEffect(() => {
 
@@ -61,7 +62,7 @@ export default function ArticleList() {
       fetchAllCrypto({ limit: 10000, start: 1 }).then(({ data: resultData }: { data: ResultData }) => {
         const { data, status } = resultData
 
-        const cryptoList = data.cryptoCurrencyMap.map(({ slug, name,symbol }) => ({ slug, name,symbol }))
+        const cryptoList = data.cryptoCurrencyMap.map(({ slug, name,symbol }:CryptoList) => ({ slug, name, symbol:symbol.toLowerCase() }))
         writeLIstInToFile({ timestamp: status.timestamp, cryptoList: cryptoList })
       })
     })
@@ -73,15 +74,21 @@ export default function ArticleList() {
   const onSearch = (search: string) => {
     setIsLoading(true)
     setNotFound(false)
-
+    
     const defaultCryptoResult = {
       slug:'',
       name:'', 
       symbol:''
     }
+
+
     
     const { slug: resultSlug }:CryptoList  = cryptoList.find(({ symbol }:CryptoList ) => symbol.toLowerCase() === search.toLowerCase()) ||defaultCryptoResult
     
+    const fuzzyResult = fuzzysort.go(search, cryptoList, {key: 'symbol'} ) 
+    console.log('fuzzyResult :', fuzzyResult);
+    setFuzzyResult(fuzzyResult)
+
     const searchText =  resultSlug || search 
 
     fetchPrice(searchText).then((priceInfo: PriceInfo) => {
@@ -100,8 +107,22 @@ export default function ArticleList() {
       searchBarPlaceholder="Enter the crypto name"
       onSearchTextChange={onSearch}>
 
+        {
 
-      <List.Item
+          fuzzyResult.length ===0 ? 
+          <List.Item title=""  /> :
+          fuzzyResult.map(result=> {
+            const {name} = result.obj
+            
+            return (
+              <List.Item 
+                title={name}
+                icon={Icon.Star} />
+            )
+          })
+        }
+      
+      {/* <List.Item
         title={notFound ? 'Crypto Not Found.' : currencyPrice}
         subtitle={priceDiff}
         icon={Icon.Star}
@@ -111,7 +132,7 @@ export default function ArticleList() {
           </ActionPanel>
         }
 
-      />
+      /> */}
 
     </List>
   );
