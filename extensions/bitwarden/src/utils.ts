@@ -14,3 +14,7 @@ export function filterNullishPropertiesFromObject(obj: any): any {
 
   return noNullish;
 }
+
+export function titleCase(word: string) {
+  return word.charAt(0).toUpperCase() + word.slice(1)
+}

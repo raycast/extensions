@@ -12,7 +12,7 @@ import {
 import { Item, Folder } from "./types";
 import { useEffect, useState } from "react";
 import treeify from "treeify";
-import { filterNullishPropertiesFromObject, codeBlock } from "./utils";
+import { filterNullishPropertiesFromObject, codeBlock, titleCase } from "./utils";
 import { useBitwarden as useSessionToken } from "./hooks";
 import { TroubleshootingGuide, UnlockForm } from "./components";
 import { existsSync } from "fs";
@@ -160,7 +160,7 @@ function ItemListItem(props: { item: Item; folder: Folder | undefined; refreshIt
               ...fieldMap,
               ...uriMap,
             }).map(([title, content], index) =>
-              content ? <CopyToClipboardAction key={index} title={title} content={content as string | number} /> : null
+              content ? <CopyToClipboardAction key={index} title={titleCase(title)} content={content as string | number} /> : null
             )}
           </ActionPanel.Submenu>
           <PushAction
