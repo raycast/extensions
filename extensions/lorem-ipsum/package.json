@@ -2,22 +2,22 @@
   "name": "lorem-ipsum",
   "title": "Lorem Ipsum",
   "description": "Generate placeholder content",
-  "icon": "command-icon.png",
+  "icon": "magic-wand.png",
   "author": "AntonNiklasson",
   "license": "MIT",
   "commands": [
     {
       "name": "paragraph",
       "title": "Generate Paragraph",
-      "subtitle": "",
-      "description": "",
+      "subtitle": "Lorem Ipsum",
+      "description": "Generate a random paragraph and copy it to the clipboard",
       "mode": "no-view"
     },
     {
       "name": "sentence",
       "title": "Generate Sentence",
-      "subtitle": "",
-      "description": "",
+      "subtitle": "Lorem Ipsum",
+      "description": "Generate a random sentence and copy it to the clipboard",
       "mode": "no-view"
     }
   ],
