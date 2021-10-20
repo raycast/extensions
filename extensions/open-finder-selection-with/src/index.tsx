@@ -1,6 +1,13 @@
-import { getApplications, Application, List, ActionPanel, ActionPanelItem } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  ActionPanelItem,
+  Application,
+  getApplications,
+  closeMainWindow,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
-import { execSync } from "child_process";
+import { runAppleScript } from "run-applescript";
 
 export default function ApplicationsList() {
   const [applications, setApplications] = useState<Application[]>([]);
@@ -52,7 +59,8 @@ function ApplicationsListItem(props: { application: Application }) {
           <ActionPanelItem
             title={`Open with ${app.name}`}
             onAction={() => {
-              execSync(`osascript -e '${applescript}'`);
+              closeMainWindow();
+              runAppleScript(applescript);
             }}
           />
         </ActionPanel>
