@@ -43,22 +43,24 @@ export default function ArticleList() {
         console.error(err)
         return
       }
-      const {cryptoListFromFile} = JSON.parse(data)
       
-      if(!cryptoListFromFile)  return 
-      setCryptoList(cryptoListFromFile)
+      const {cryptoList:cryptoListFromFile} = JSON.parse(data)
+      
+      if(!!cryptoListFromFile)  {
+        setCryptoList(cryptoListFromFile)
+        return 
+      }
+      // fetch crypto list mapping if there's no data exist in the local file
+      fetchAllCrypto({ limit: 10000, start: 1 }).then(({data:resultData}: {data: ResultData}) => {
+        const { data,status } = resultData  
+  
+        const cryptoList =  data.cryptoCurrencyMap.map(({slug,name})=>({slug,name})) 
+        writeLIstInToFile({timestamp:  status.timestamp,cryptoList: cryptoList })
+      })
     })
   },[]) 
 
-  useEffect(() => {
-    if(!!cryptoList) return 
-
-    fetchAllCrypto({ limit: 10000, start: 1 }).then(({data:resultData}: {data: ResultData}) => {
-      const { data,status } = resultData  
-      writeLIstInToFile({timestamp:  status.timestamp,cryptoList: data.cryptoCurrencyMap })
-    })
-
-  }, [cryptoList])
+ 
 
 
   const onSearch = (search: string) => {
