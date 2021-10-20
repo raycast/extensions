@@ -40,7 +40,7 @@ function TorrentListItem({ torrent }: { torrent: Torrent }) {
     <List.Item
       id={torrent.id}
       key={torrent.id}
-      title={torrent.comment}
+      title={torrent.fileName}
       subtitle={`${torrent.percentDone}% completed`}
       icon={Icon.Download}
       accessoryTitle={`${formatDistanceToNow(new Date(Date.now() + torrent.eta * 1000))} left`}
@@ -51,7 +51,10 @@ function TorrentListItem({ torrent }: { torrent: Torrent }) {
 async function fetchTorrents(transmission: Transmission): Promise<Torrent[]> {
   try {
     const response = await transmission.active();
-    return response.torrents;
+    return response.torrents.map((torrent: Torrent) => ({
+      ...torrent,
+      fileName: torrent.torrentFile.split("/").slice(-1)[0].split(".").slice(0, -2).join("."),
+    }));
   } catch (error) {
     console.error(error);
     showToast(ToastStyle.Failure, "Could not load torrents");
@@ -61,6 +64,8 @@ async function fetchTorrents(transmission: Transmission): Promise<Torrent[]> {
 
 type Torrent = {
   id: string;
+  torrentFile: string;
+  fileName: string;
   comment: string;
   eta: number;
   percentDone: number;
