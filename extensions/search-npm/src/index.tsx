@@ -78,7 +78,7 @@ const PackageListItem = ({
 
           {type === 'github' && owner && name ? (
             <PushAction
-              title="View readme"
+              title="View README"
               target={<Readme user={owner} repo={name} />}
               icon={Icon.Eye}
             />
