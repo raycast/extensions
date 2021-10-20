@@ -1,7 +1,18 @@
-import { ActionPanel, closeMainWindow, Color, CopyToClipboardAction, Icon, showToast, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  closeMainWindow,
+  Color,
+  CopyToClipboardAction,
+  Icon,
+  PushAction,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 import React from "react";
 import { gitlab } from "../common";
-import { Issue } from "../gitlabapi";
+import { Issue, Label } from "../gitlabapi";
+import { GitLabIcons } from "../icons";
+import { LabelList } from "./label";
 
 export function CloseIssueAction(props: { issue: Issue }) {
   const issue = props.issue;
@@ -39,10 +50,25 @@ export function ReopenIssueAction(props: { issue: Issue }) {
   return <ActionPanel.Item title="Reopen Issue" icon={{ source: Icon.ExclamationMark }} onAction={handleAction} />;
 }
 
+function ShowIssueLabelsAction(props: { labels: Label[] }) {
+  if (props.labels.length <= 0) {
+    return null;
+  }
+  return (
+    <PushAction
+      title="Show attached Labels"
+      target={<LabelList labels={props.labels} />}
+      shortcut={{ modifiers: ["cmd"], key: "l" }}
+      icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
+    />
+  );
+}
+
 export function IssueItemActions(props: { issue: Issue }) {
   const issue = props.issue;
   return (
     <React.Fragment>
+      <ShowIssueLabelsAction labels={issue.labels} />
       {issue.state == "opened" && <CloseIssueAction issue={issue} />}
       {issue.state == "closed" && <ReopenIssueAction issue={issue} />}
       <CopyToClipboardAction title="Copy Issue Number" content={issue.iid} />
