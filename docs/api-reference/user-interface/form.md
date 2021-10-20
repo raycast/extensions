@@ -380,7 +380,7 @@ The item supports multiline text entry.
 #### Example
 
 {% tabs %}
-{% tab title="Controlled text area" %}
+{% tab title="Uncontrolled text area" %}
 
 ```typescript
 import { Form } from "@raycast/api";
@@ -397,7 +397,7 @@ export default function Command() {
 }
 ```
 {% endtab %}
-{% tab title="Uncontrolled text area" %}
+{% tab title="Controlled text area" %}
 
 ```typescript
 import { Form } from "@raycast/api";
