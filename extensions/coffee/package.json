@@ -1,22 +1,22 @@
 {
-  "name": "caffeinate",
-  "title": "Caffeinate",
+  "name": "coffee",
+  "title": "Coffe",
   "description": "Prevent the sleep function on your mac",
-  "icon": "caffeinate.png",
+  "icon": "coffee.png",
   "author": "mooxl",
   "license": "MIT",
   "commands": [
     {
       "name": "caffeinate",
       "title": "Caffeinate",
-      "subtitle": "Caffeinate",
+      "subtitle": "Coffee",
       "description": "Prevent your Mac from sleeping",
       "mode": "no-view"
     },
     {
       "name": "decaffeinate",
       "title": "Decaffeinate",
-      "subtitle": "Caffeinate",
+      "subtitle": "Coffee",
       "description": "Turn off the caffeine",
       "mode": "no-view"
     }
