@@ -1,12 +1,12 @@
 import {
   ActionPanel,
   ActionPanelItem,
-  ActionPanelProps,
   Color,
   CopyToClipboardAction,
   getPreferenceValues,
   Icon,
   ImageLike,
+  List,
   ShowInFinderAction,
   showToast,
   Toast,
@@ -15,7 +15,6 @@ import {
 import execa from "execa";
 import { existsSync } from "fs";
 import { cpus } from "os";
-import { ReactElement } from "react";
 
 export type serviceType = { name: string, status: string, user: string, path: string };
 
@@ -26,41 +25,44 @@ const brewPath: string = (preferences.brewPath && preferences.brewPath.length > 
   : ((cpus()[0].model == "Apple M1") ? "/opt/homebrew/bin/brew" : "/usr/local/bin/brew");
 
 export async function runShellScript(command: string) {
-  const { stdout } = await execa.command(command);
-  return stdout;
+  const { stdout, stderr } = await execa.command(command);
+  return { stdout, stderr };
 }
 
-export async function checkBrewInstallation() {
-  if (!existsSync(brewPath)) {
-    await showToast(ToastStyle.Failure, "Brew Executable Not Found", `Is brew installed at ${brewPath}?`);
-  }
-}
 
 export async function getServices(): Promise<serviceType[]> {
-  await checkBrewInstallation();
+  if (!existsSync(brewPath)) {
+    await showToast(ToastStyle.Failure, "Brew Executable Not Found", `Is brew installed at ${brewPath}?`);
+    return [];
+  }
   const brewServicesData = await runShellScript(`${brewPath} services list`);
-  const lines = brewServicesData.split("\n");
 
-  for (let i = 0; i < lines.length; i++) {
+  const lines = brewServicesData.stdout.split("\n");
+  if (lines.length <= 1) {
+    showToast(ToastStyle.Failure, "Error Parsing Service Data", "There are no services.");
+    return [];
+  }
+  for (let i = 0; i < lines.length - 1; i++) {
     if (lines[i].startsWith("Name")) {
       lines.splice(0, i + 1);
       break;
     }
   }
 
-  const data: serviceType[] = lines.map(l => {
-    const split = l.trim().split(/ +/g);
+  const data: serviceType[] = [];
+  for (const line of lines) {
+    const split = line.trim().split(/ +/g);
     if (split.length < 2) {
       showToast(ToastStyle.Failure, "Error Parsing Service Data", "Service data could not be parsed.");
+      return [];
     }
-    return {
+    data.push({
       name: split[0],
       status: split[1],
       user: split[2] ?? "",
       path: split[3] ?? ""
-    };
-  });
-
+    });
+  }
   return data;
 }
 
@@ -149,51 +151,54 @@ export async function runService(service: string) {
 }
 
 export function createIcon(status: string): ImageLike {
-  if (status === "started") {
-    return {
-      source: Icon.Checkmark,
-      tintColor: Color.Green
-    }
-  } else if (status === "stopped") {
-    return {
-      source: Icon.XmarkCircle,
-      tintColor: Color.Red
-    }
-  } else {
-    return {
-      source: Icon.ExclamationMark,
-      tintColor: Color.Yellow
-    }
-  }
+  if (status === "started") return { source: Icon.Checkmark, tintColor: Color.Green }
+  else if (status === "stopped") return { source: Icon.XmarkCircle, tintColor: Color.Red }
+  else return { source: Icon.ExclamationMark, tintColor: Color.Yellow }
 }
 
-export function createActions(serviceData: serviceType): ReactElement<ActionPanelProps> {
-  if (serviceData.status === "started") {
+export function BrewActions(props: { data: serviceType }) {
+  if (props.data.status === "started") {
     return (
       <ActionPanel >
         <ActionPanel.Section title="Manage Service">
-          <ActionPanelItem title={"Stop Service"} onAction={() => stopService(serviceData.name)} />
-          <ActionPanelItem title={"Restart Service"} onAction={() => restartService(serviceData.name)} />
+          <ActionPanelItem title={"Stop Service"} onAction={() => stopService(props.data.name)} />
+          <ActionPanelItem title={"Restart Service"} onAction={() => restartService(props.data.name)} />
         </ActionPanel.Section>
         <ActionPanel.Section title="Plist">
-          <ShowInFinderAction title={"Reveal Plist File in Finder"} path={serviceData.path} />
-          <CopyToClipboardAction title={"Copy Plist File Path"} content={serviceData.path} />
+          <ShowInFinderAction title={"Reveal Plist File in Finder"} path={props.data.path} />
+          <CopyToClipboardAction title={"Copy Plist File Path"} content={props.data.path} />
         </ActionPanel.Section>
       </ActionPanel>
     );
-  } else if (serviceData.status === "stopped") {
+  } else if (props.data.status === "stopped") {
     return (
       <ActionPanel title="Manage Service">
-        <ActionPanelItem title={"Start Service"} onAction={() => startService(serviceData.name)} />
-        <ActionPanelItem title={"Run Service"} onAction={() => runService(serviceData.name)} />
+        <ActionPanelItem title={"Start Service"} onAction={() => startService(props.data.name)} />
+        <ActionPanelItem title={"Run Service"} onAction={() => runService(props.data.name)} />
       </ActionPanel>
     );
   } else {
     return (
       <ActionPanel title="Manage Service">
-        <ActionPanelItem title={"Stop Service"} onAction={() => stopService(serviceData.name)} />
-        <ActionPanelItem title={"Restart Service"} onAction={() => restartService(serviceData.name)} />
+        <ActionPanelItem title={"Stop Service"} onAction={() => stopService(props.data.name)} />
+        <ActionPanelItem title={"Restart Service"} onAction={() => restartService(props.data.name)} />
       </ActionPanel>
     );
   }
+}
+
+export function BrewItemList(props: { services: serviceType[] | undefined }) {
+  return <List isLoading={!props.services} searchBarPlaceholder="Search for services...">
+    {(props.services ?? []).map(d =>
+      <List.Item
+        id={d.name}
+        key={d.name}
+        title={d.name}
+        subtitle={d.status}
+        accessoryTitle={d.user}
+        icon={createIcon(d.status)}
+        actions={<BrewActions data={d} />}
+      />
+    )}
+  </List>
 }
