@@ -1,7 +1,7 @@
 {
   "name": "coinmarketcap-crypto-price-crawler",
-  "title": "CoinMarketCap Crypto Price Crawler",
-  "description": "A price crawler to search crypto price from coinmarketcap.",
+  "title": "CoinMarketCap Crypto Search",
+  "description": "A price crawler to search crypto price from Coinmarketcap.",
   "icon": "command-icon.ico",
   "author": "SonicSpark",
   "license": "MIT",
