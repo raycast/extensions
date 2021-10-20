@@ -50,17 +50,25 @@ const useDocker = (docker: Dockerode, options: { projectFilter?: string }) => {
     setLoading(false);
   };
 
+  const restartContainer = async (containerInfo: ContainerInfo) => {
+    setLoading(true);
+    await docker.getContainer(containerInfo.Id).restart();
+    const containers = await docker.listContainers({ all: true });
+    updateContainers(containers);
+    setLoading(false);
+  };
+
   useEffect(() => {
     fetchContainers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { containers, loading, error, stopContainer, startContainer };
+  return { containers, loading, error, stopContainer, startContainer, restartContainer };
 };
 
 export default function ContainerList(props: { projectFilter?: string }) {
   const docker = useMemo(() => new Dockerode(), []);
-  const { containers, loading, error, stopContainer, startContainer } = useDocker(docker, props);
+  const { containers, loading, error, stopContainer, startContainer, restartContainer } = useDocker(docker, props);
 
   if (error) {
     return <Detail markdown={`## Error connecting to Docker\n\n${error.message}\n`} />;
@@ -78,14 +86,25 @@ export default function ContainerList(props: { projectFilter?: string }) {
           actions={
             <ActionPanel>
               {containerInfo.State === 'running' && (
-                <ActionPanel.Item
-                  title="Stop Container"
-                  shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
-                  onAction={async () => {
-                    await stopContainer(containerInfo);
-                    await showToast(ToastStyle.Success, `Container ${containerName(containerInfo)} stopped`);
-                  }}
-                />
+                <>
+                  <ActionPanel.Item
+                    title="Stop Container"
+                    shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
+                    onAction={async () => {
+                      await stopContainer(containerInfo);
+                      await showToast(ToastStyle.Success, `Container ${containerName(containerInfo)} stopped`);
+                    }}
+                  />
+                  <ActionPanel.Item
+                    title="Restart Container"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ modifiers: ['opt'], key: 'r' }}
+                    onAction={async () => {
+                      await restartContainer(containerInfo);
+                      await showToast(ToastStyle.Success, `Container ${containerName(containerInfo)} restarted`);
+                    }}
+                  />
+                </>
               )}
               {containerInfo.State !== 'running' && (
                 <ActionPanel.Item
