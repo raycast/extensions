@@ -1,18 +1,30 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  CopyToClipboardAction,
+  Detail,
+  Icon,
+  List,
+  OpenInBrowserAction,
+  showToast,
+  ToastStyle,
+  useNavigation,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import urljoin from "url-join";
 
 export default function ArticleList() {
   const [query, setQuery] = useState<null | string>(null);
-  const [state, setState] = useState<Document[]>([]);
+  const [state, setState] = useState<Result[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { push } = useNavigation();
 
   useEffect(() => {
     async function fetch() {
       if (query) {
         setIsLoading(true);
-        const documents = await fetchDocumentsByQuery(query);
-        setState(documents);
+        const results = await searchMDNByQuery(query);
+        setState(results);
         setIsLoading(false);
       }
     }
@@ -26,16 +38,22 @@ export default function ArticleList() {
       onSearchTextChange={(text) => setQuery(text)}
       throttle
     >
-      {state.map((document, idx) => (
+      {state.map((result, idx) => (
         <List.Item
           id={idx.toString()}
           key={idx}
-          title={document.title}
+          title={result.title}
           icon="icon.png"
+          subtitle={result.summary}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={`https://developer.mozilla.org/${document.mdn_url}`} />
-              <CopyToClipboardAction title="Copy URL" content={`https://developer.mozilla.org/${document.mdn_url}`} />
+              <OpenInBrowserAction url={result.url} />
+              <CopyToClipboardAction title="Copy URL" content={result.url} />
+              <ActionPanel.Item
+                title="Show Details"
+                icon={Icon.Sidebar}
+                onAction={() => push(<Details {...result} />)}
+              />
             </ActionPanel>
           }
         />
@@ -44,20 +62,49 @@ export default function ArticleList() {
   );
 }
 
-type Document = {
-  title: string;
-  mdn_url: string;
+function Details(props: Result) {
+  const { title, summary, url } = props;
+
+  return (
+    <Detail
+      markdown={`# ${title}\n## Summary\n${summary}`}
+      actions={
+        <ActionPanel>
+          <OpenInBrowserAction url={url} />
+          <CopyToClipboardAction title="Copy URL" content={url} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+type MDNResponse = {
+  documents: Array<{
+    title: string;
+    mdn_url: string;
+    summary: string;
+  }>;
 };
 
-async function fetchDocumentsByQuery(query: string): Promise<Document[]> {
+type Result = {
+  title: string;
+  url: string;
+  summary: string;
+};
+
+async function searchMDNByQuery(query: string): Promise<Result[]> {
   try {
-    const response = await axios.get<{ documents: Document[] }>("https://developer.mozilla.org/api/v1/search/en-US", {
+    const response = await axios.get<MDNResponse>("https://developer.mozilla.org/api/v1/search/en-US", {
       params: {
         q: query,
         sort: "best",
       },
     });
-    return response.data.documents;
+    return response.data.documents.map((document) => ({
+      title: document.title,
+      summary: document.summary,
+      url: urljoin("https://developer.mozilla.org", document.mdn_url),
+    }));
   } catch (error) {
     console.error(error);
     showToast(ToastStyle.Failure, "Could not load MDN results");
