@@ -2,10 +2,10 @@ import { ActionPanel, CopyToClipboardAction, PasteAction, Icon, List, OpenInBrow
 import { useState, useEffect } from "react";
 import $ from "cheerio";
 import fetch from "node-fetch";
-const {fetchAllCrypto} = require('./api') 
+const { fetchAllCrypto } = require('./api')
 
 
-const {writeLIstInToFile, getListFromFile} = require( './utils')
+const { writeLIstInToFile, getListFromFile } = require('./utils')
 
 
 const BASE_URL = 'https://coinmarketcap.com/currencies/'
@@ -18,13 +18,19 @@ type PriceInfo = {
 
 
 
-type ResultData =  {
+type ResultData = {
   data: {
     cryptoCurrencyMap: []
-  }, 
+  },
   status: {
-    timestamp: string 
+    timestamp: string
   }
+}
+
+type CryptoList = { 
+  name: string,
+  slug:string,
+  symbol:string 
 }
 
 export default function ArticleList() {
@@ -33,41 +39,52 @@ export default function ArticleList() {
   const [priceDiff, setPriceDiff] = useState('');
   const [notFound, setNotFound] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [cryptoList,setCryptoList] = useState([])
+  const [cryptoList, setCryptoList] = useState([])
 
 
-  useEffect(()=> {
+  useEffect(() => {
 
-    getListFromFile((err:string, data: string) => {
+    getListFromFile((err: string, data: string) => {
       if (err) {
         console.error(err)
         return
       }
-      
-      const {cryptoList:cryptoListFromFile} = JSON.parse(data)
-      
-      if(!!cryptoListFromFile)  {
+
+      const { cryptoList: cryptoListFromFile } = JSON.parse(data)
+
+      if (!!cryptoListFromFile) {
         setCryptoList(cryptoListFromFile)
-        return 
+        return
       }
       // fetch crypto list mapping if there's no data exist in the local file
-      fetchAllCrypto({ limit: 10000, start: 1 }).then(({data:resultData}: {data: ResultData}) => {
-        const { data,status } = resultData  
-  
-        const cryptoList =  data.cryptoCurrencyMap.map(({slug,name})=>({slug,name})) 
-        writeLIstInToFile({timestamp:  status.timestamp,cryptoList: cryptoList })
+      // the api has an limit num per request. 
+      fetchAllCrypto({ limit: 10000, start: 1 }).then(({ data: resultData }: { data: ResultData }) => {
+        const { data, status } = resultData
+
+        const cryptoList = data.cryptoCurrencyMap.map(({ slug, name,symbol }) => ({ slug, name,symbol }))
+        writeLIstInToFile({ timestamp: status.timestamp, cryptoList: cryptoList })
       })
     })
-  },[]) 
+  }, [])
 
- 
+
 
 
   const onSearch = (search: string) => {
     setIsLoading(true)
     setNotFound(false)
 
-    fetchPrice(search).then((priceInfo: PriceInfo) => {
+    const defaultCryptoResult = {
+      slug:'',
+      name:'', 
+      symbol:''
+    }
+    
+    const { slug: resultSlug }:CryptoList  = cryptoList.find(({ symbol }:CryptoList ) => symbol.toLowerCase() === search.toLowerCase()) ||defaultCryptoResult
+    
+    const searchText =  resultSlug || search 
+
+    fetchPrice(searchText).then((priceInfo: PriceInfo) => {
       const { priceValueText = '', priceDiffText = '', coinName = '' } = priceInfo;
       setCurrencyPrice(priceValueText);
       setPriceDiff(priceDiffText);
