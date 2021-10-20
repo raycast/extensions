@@ -1,6 +1,5 @@
 import { List } from "@raycast/api";
 import { getIcon, getWindDirectionIcon } from "../icons";
-import { getLanguage, getTs } from "../lang";
 import { getWindUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
 import { Hourly, WeatherData } from "../wttr";
 
@@ -13,19 +12,12 @@ function getTime(time: string): string {
 export function DayList(props: { day: WeatherData; title: string }) {
   const day = props.day;
 
-  const getWeatherDescLang = (data: any): string | undefined => {
-    try {
-      const lang = getLanguage();
-      return data[`lang_${lang}`][0].value;
-    } catch (error) {
-      return undefined;
-    }
-  };
-
   const getWeatherDesc = (hour: Hourly): string => {
-    const data = hour as any;
-    const weatherDesc = getWeatherDescLang(data) || hour.weatherDesc[0].value;
-    return weatherDesc;
+    try {
+      return hour.weatherDesc[0].value;
+    } catch (e: any) {
+      return "?";
+    }
   };
 
   const getWind = (hour: Hourly): string => {
@@ -57,9 +49,9 @@ export function DayList(props: { day: WeatherData; title: string }) {
             title={`${getTime(data.time)}`}
             subtitle={`${getTemp(data)} , ${getWeatherDesc(data)}`}
             icon={getIcon(data.weatherCode)}
-            accessoryTitle={`${getTs("humidity")}: ${data.humidity}% | ${getTs("wind")}: ${getWind(
-              data
-            )} ${getWindDirectionIcon(data.winddirDegree)}`}
+            accessoryTitle={`humidity: ${data.humidity}% | wind: ${getWind(data)} ${getWindDirectionIcon(
+              data.winddirDegree
+            )}`}
           />
         ))}
       </List.Section>

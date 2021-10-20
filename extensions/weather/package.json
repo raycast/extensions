@@ -16,19 +16,6 @@
   ],
   "preferences" : [
     {
-      "name" : "language",
-      "type" : "dropdown",
-      "title" : "Language",
-      "required" : false,
-      "default" : "en",
-      "description" : "Display Language",
-      "data" : [
-        { "title" : "English", "value" : "en" },
-        { "title" : "German", "value" : "de" },
-        { "title" : "French", "value" : "fr" }
-      ]
-    },
-    {
       "name" : "unitsystem",
       "type" : "dropdown",
       "title" : "Unit System",
