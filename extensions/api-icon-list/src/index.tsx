@@ -6,7 +6,7 @@ function enumKeys<O extends object, K extends keyof O = keyof O>(obj: O): K[] {
 }
 
 export default function Command() {
-  const [color, setColor] = useState<Color>();
+  const [color, setColor] = useState<keyof typeof Color>("SecondaryText");
   const actionPanelItems: Element[] = [];
   for (const colorName of enumKeys(Color)) {
     actionPanelItems.push(
@@ -14,7 +14,7 @@ export default function Command() {
         icon={{ source: Icon.Dot, tintColor: Color[colorName] }}
         title={colorName}
         key={colorName}
-        onAction={() => setColor(colorName as SetStateAction<Color | undefined>)}
+        onAction={() => setColor(colorName)}
       />
     );
   }
@@ -23,7 +23,7 @@ export default function Command() {
     items.push(
       <List.Item
         title={iconName}
-        icon={{ source: Icon[iconName], tintColor: color }}
+        icon={{ source: Icon[iconName], tintColor: Color[color] }}
         id={iconName}
         key={iconName}
         actions={
