@@ -58,17 +58,28 @@ const useDocker = (docker: Dockerode, options: { projectFilter?: string }) => {
     setLoading(false);
   };
 
+  const removeContainer = async (containerInfo: ContainerInfo) => {
+    setLoading(true);
+    await docker.getContainer(containerInfo.Id).remove();
+    const containers = await docker.listContainers({ all: true });
+    updateContainers(containers);
+    setLoading(false);
+  };
+
   useEffect(() => {
     fetchContainers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { containers, loading, error, stopContainer, startContainer, restartContainer };
+  return { containers, loading, error, stopContainer, startContainer, restartContainer, removeContainer };
 };
 
 export default function ContainerList(props: { projectFilter?: string }) {
   const docker = useMemo(() => new Dockerode(), []);
-  const { containers, loading, error, stopContainer, startContainer, restartContainer } = useDocker(docker, props);
+  const { containers, loading, error, stopContainer, startContainer, restartContainer, removeContainer } = useDocker(
+    docker,
+    props
+  );
 
   if (error) {
     return <Detail markdown={`## Error connecting to Docker\n\n${error.message}\n`} />;
@@ -120,6 +131,10 @@ export default function ContainerList(props: { projectFilter?: string }) {
                 title="Remove Container"
                 icon={Icon.Trash}
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 'x' }}
+                onAction={async () => {
+                  await removeContainer(containerInfo);
+                  await showToast(ToastStyle.Success, `Container ${containerName(containerInfo)} removed`);
+                }}
               />
             </ActionPanel>
           }
