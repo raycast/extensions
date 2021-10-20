@@ -12,6 +12,7 @@ import { TweetV1 } from "twitter-api-v2";
 import { loggedInUserAccount, twitterClient, Fetcher } from "../twitterapi";
 import { TweetSendForm } from "./send";
 import { TweetDetail } from "./tweet";
+import UserTweetList from "./usertweets";
 
 export function ShowTweetAction(props: { tweet: TweetV1 }) {
   return (
@@ -137,6 +138,17 @@ export function RefreshAction(props: { title?: string; fetcher?: Fetcher }) {
       shortcut={{ modifiers: ["cmd"], key: "r" }}
       icon={{ source: Icon.Binoculars, tintColor: Color.PrimaryText }}
       onAction={handle}
+    />
+  );
+}
+
+export function ShowUserTweetsAction(props: { username: string; title?: string }) {
+  return (
+    <PushAction
+      title={props.title || `Tweets from @${props.username}`}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+      icon={{ source: Icon.Sidebar, tintColor: Color.PrimaryText }}
+      target={<UserTweetList username={props.username} />}
     />
   );
 }

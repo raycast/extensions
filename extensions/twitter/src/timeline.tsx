@@ -15,7 +15,7 @@ async function getHomeTimelineTweets(): Promise<TweetV1[]> {
   return tweets;
 }
 
-export default function TweetList() {
+export default function HomeTimelineList() {
   const { data, error, isLoading, fetcher } = useRefresher<TweetV1[] | undefined>(
     async (updateInline): Promise<TweetV1[] | undefined> => {
       return updateInline ? await refreshTweets(data) : await getHomeTimelineTweets();

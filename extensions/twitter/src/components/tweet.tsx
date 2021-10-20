@@ -10,6 +10,7 @@ import {
   ReplyTweetAction,
   RetweetAction,
   ShowTweetAction,
+  ShowUserTweetsAction,
 } from "./tweet_actions";
 
 function getTweetUrl(tweet: TweetV1): string {
@@ -51,6 +52,7 @@ export function TweetListItem(props: { tweet: TweetV1; fetcher?: Fetcher }) {
             <LikeAction tweet={t} fetcher={fetcher} />
             <ReplyTweetAction tweet={t} />
             <RetweetAction tweet={t} fetcher={fetcher} />
+            <ShowUserTweetsAction username={t.user.screen_name} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Info">
             <OpenAuthorProfileAction tweet={t} />
@@ -101,6 +103,7 @@ export function TweetDetail(props: { tweet: TweetV1 }) {
             <ReplyTweetAction tweet={t} />
             <LikeAction tweet={t} fetcher={fetcher} />
             <RetweetAction tweet={t} fetcher={fetcher} />
+            <ShowUserTweetsAction username={t.user.screen_name} />
             <OpenInBrowserAction url={getTweetUrl(t)} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Info">
