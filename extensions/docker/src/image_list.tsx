@@ -1,13 +1,14 @@
 import { Color, Detail, Icon, List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import Dockerode, { ImageInfo } from '@priithaamer/dockerode';
+import { formatBytes } from './docker/image';
 
 export default function ImageList() {
   const [images, setImages] = useState<{ images: ImageInfo[] }>({ images: [] });
   const [error, setError] = useState<Error>();
 
   useEffect(() => {
-    async function fetchContainers() {
+    async function fetchImages() {
       try {
         const docker = new Dockerode();
         const images = await docker.listImages();
@@ -18,7 +19,7 @@ export default function ImageList() {
         }
       }
     }
-    fetchContainers();
+    fetchImages();
   }, []);
 
   if (error) {
@@ -38,14 +39,3 @@ export default function ImageList() {
     </List>
   );
 }
-
-const formatBytes = (bytes: number, decimals = 2) => {
-  if (bytes === 0) {
-    return '0 Bytes';
-  }
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-};
