@@ -1,4 +1,15 @@
-import { Form, FormValue, ActionPanel, SubmitFormAction, showToast, ToastStyle, pasteText, Icon } from "@raycast/api";
+import {
+  Form,
+  FormValue,
+  ActionPanel,
+  SubmitFormAction,
+  showToast,
+  ToastStyle,
+  pasteText,
+  Icon,
+  copyTextToClipboard,
+  OpenInBrowserAction,
+} from "@raycast/api";
 
 export default function Command() {
   async function handleSubmit(values: Record<string, FormValue>) {
@@ -13,6 +24,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <SubmitFormAction icon={Icon.Clipboard} title="Paste" onSubmit={handleSubmit} />
+          <OpenInBrowserAction title="Open Reference Website" url="https://conventionalcomments.org/" />
         </ActionPanel>
       }
     >
