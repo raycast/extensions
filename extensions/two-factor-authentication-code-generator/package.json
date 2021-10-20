@@ -1,15 +1,21 @@
 {
-  "name": "two-factor-auth",
-  "title": "Two-Factor Auth",
+  "name": "two-factor-authentication-code-generator",
+  "title": "Two-Factor Authentication Code Generator",
   "description": "Quickly access your two-factor authentication codes.",
   "icon": "command-icon.png",
   "author": "cjdenio",
   "license": "MIT",
+  "keywords": [
+    "auth",
+    "2fa",
+    "authentication",
+    "login"
+  ],
   "commands": [
     {
       "name": "index",
-      "title": "Two-Factor Auth",
-      "description": "Two-factor authentication for Raycast",
+      "title": "Generate 2FA Code",
+      "description": "Quickly access your two-factor authentication codes.",
       "mode": "view"
     }
   ],
