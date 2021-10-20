@@ -1,5 +1,6 @@
 import { ActionPanel, CopyToClipboardAction, PasteAction, Icon, List, OpenInBrowserAction } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState,useEffect } from "react";
+import {fetchAllCrypto} from './api'
 import $ from "cheerio";
 import fetch from "node-fetch";
 
@@ -10,6 +11,8 @@ type PriceInfo = {
   priceDiffText: string;
   coinName: string;
 };
+
+
 export default function ArticleList() {
   const [coinName, setCoinName] = useState('')
   const [currencyPrice, setCurrencyPrice] = useState('');
@@ -19,6 +22,12 @@ export default function ArticleList() {
 
 
 
+  useEffect(()=>{
+    fetchAllCrypto({limit: 10000, start:1}).then((list)=> {
+      const {data} = list 
+      console.log(' :status',data.status.timestamp );
+    }) 
+  }, [] )
   const onSearch = (search: string) => {
     setIsLoading(true)
     setNotFound(false)
