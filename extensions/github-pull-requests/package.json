@@ -1,0 +1,55 @@
+{
+  "name": "github-pull-requests",
+  "title": "GitHub Pull Requests",
+  "description": "Shows Pull Requests where you’re either an asignee or a reviewer",
+  "icon": "github-logo.png",
+  "author": "rolandleth",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "GitHub Pull Requests",
+      "subtitle": "Assigned Pull Requests",
+      "description": "Shows Pull Requests where you’re either an asignee or a reviewer",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  },
+  "preferences": [
+    {
+      "name": "accessToken",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "Your GitHub Access Token",
+      "link": "https://github.com/settings/tokens",
+      "placeholder": "Enter your GitHub access token"
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "title": "Username",
+      "description": "Your GitHub username",
+      "link": "",
+      "placeholder": "Enter your GitHub username"
+    }
+  ]
+}
