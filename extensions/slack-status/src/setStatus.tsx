@@ -130,16 +130,24 @@ function SetStatusPresetListItem(props: {
       subtitle={durationToString(status.defaultDuration)}
       actions={
         <ActionPanel>
-          <SetStatusAction
-            slackClient={props.slackClient}
-            statusPreset={status}
-            currentStatusResponseState={props.currentStatusResponseState}
-          />
-          <SetStatusWithDuration
-            slackClient={props.slackClient}
-            statusPreset={status}
-            currentStatusResponseState={props.currentStatusResponseState}
-          />
+          <ActionPanel.Section key="main">
+            <SetStatusAction
+              slackClient={props.slackClient}
+              statusPreset={status}
+              currentStatusResponseState={props.currentStatusResponseState}
+            />
+            <SetStatusWithDuration
+              slackClient={props.slackClient}
+              statusPreset={status}
+              currentStatusResponseState={props.currentStatusResponseState}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section key="global">
+            <SetCustomStatusAction
+              slackClient={props.slackClient}
+              currentStatusResponseState={props.currentStatusResponseState}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -158,6 +166,7 @@ function SetCustomStatusAction(props: {
       id="setCustomStatus"
       title="Set Custom Status"
       icon={Icon.Pencil}
+      shortcut={{ modifiers: ["cmd"], key: "n" }}
       onAction={() => {
         push(
           <CustomStatusForm
