@@ -10,6 +10,36 @@ const headers = {
   "Content-Type": "application/json",
 };
 
+export const getCurrentUser = async () => {
+  const response = await fetch("https://api.everhour.com/users/me", {
+    headers,
+  });
+
+  return (await response.json()) as any;
+};
+
+export const getTimeRecords = async (userId: string | null) => {
+  const [currentDate] = new Date().toISOString().split("T");
+  const response = await fetch(`https://api.everhour.com/users/${userId}/time?limit=100&from=${currentDate}`, {
+    headers,
+  });
+
+  const recordsJson = (await response.json()) as any;
+
+  return recordsJson
+    .map(({ task, time }: { task: any; time: number }) => {
+      if (task) {
+        return {
+          id: task.id,
+          name: task.name,
+          timeInMin: time ? Math.round(time / 60) : 0,
+          projectId: task.projects[0],
+        };
+      }
+    })
+    .filter(Boolean);
+};
+
 export const getProjects = async (): Promise<Project[]> => {
   const response = await fetch("https://api.everhour.com/projects?limit=100&query=", {
     headers,
@@ -25,25 +55,7 @@ export const getProjects = async (): Promise<Project[]> => {
     name,
   }));
 };
-export const getTasks = async (projectId: string): Promise<Task[]> => {
-  const response = await fetch(
-    `https://api.everhour.com/projects/${projectId}/tasks?page=1&limit=250&excludeClosed=true&query=`,
-    {
-      headers,
-    }
-  );
-  const tasks = (await response.json()) as any;
 
-  if (tasks.code) {
-    throw new Error(tasks.message);
-  }
-
-  return tasks.map(({ id, name, time }: TaskResp) => ({
-    id,
-    name,
-    timeInMin: time ? Math.round(time.total / 60) : 0,
-  }));
-};
 export const getCurrentTimer = async (): Promise<string | null> => {
   const response = await fetch("https://api.everhour.com/timers/current", {
     headers,
