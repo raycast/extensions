@@ -2,6 +2,11 @@ import { showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 export default async function main() {
-  runAppleScript('do shell script "caffeinate -di"');
-  await showHUD("Your Mac is caffeinated");
+  try {
+    await runAppleScript(`do shell script "pgrep caffeinate"`);
+    await showHUD("Your Mac is already caffeinated");
+  } catch (error) {
+    runAppleScript('do shell script "caffeinate -di"');
+    await showHUD("Your Mac is caffeinated");
+  }
 }
