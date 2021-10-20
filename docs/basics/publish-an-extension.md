@@ -4,7 +4,7 @@ description: Learn how to share your extension with our community.
 
 # Publish an Extension
 
-Before you publish your extension, take a look at the [review process](../information/review-process.md) and [how to prepare your extension](prepare-an-extension-for-store.md) for the Store. Making sure you follow the guidelines is the best way to help your extension pass the review.
+Before you publish your extension, take a look at [how to prepare your extension](prepare-an-extension-for-store.md) for the Store. Making sure you follow the guidelines is the best way to help your extension pass the review.
 
 ### Validate your extension
 
