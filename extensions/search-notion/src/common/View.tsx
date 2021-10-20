@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, Icon } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, Icon, OpenAction } from "@raycast/api";
 import type { QueryResultItem } from "./notionApi";
 import { useVisitedUrls } from "./useVisitedUrls";
 
@@ -34,6 +34,7 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
                 <ActionPanel>
                 <OpenInBrowserAction url={item.url} onOpen={onOpen} />
                 <CopyToClipboardAction title="Copy URL" content={item.url} />
+                <OpenAction title="Open In App" target={item.appUrl} onOpen={onOpen} shortcut={{ modifiers: ["ctrl"], key: "return" }} icon={{source: "command-icon.png"}} />
               </ActionPanel>
               }
             />
