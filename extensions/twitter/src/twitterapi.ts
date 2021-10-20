@@ -120,3 +120,15 @@ export function useRefresher<T>(fn: (updateInline: boolean) => Promise<T>, deps?
 
     return { data, error, isLoading, fetcher };
 }
+
+export function getPhotoUrlFromTweet(tweet: TweetV1): string | undefined {
+    const media = tweet.entities.media;
+    if (media) {
+        for (const m of media) {
+            if (m.type === "photo" && m.media_url_https) {
+                return m.media_url_https;
+            }
+        }
+    }
+    return undefined;
+}
