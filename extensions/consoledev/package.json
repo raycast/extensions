@@ -9,21 +9,21 @@
     {
       "name": "tools_list",
       "title": "Tools List",
-      "subtitle": "Console - interesting developers tools",
+      "subtitle": "Console Dev",
       "description": "Each week Console reviews the best tools for developers.",
       "mode": "view"
     },
     {
       "name": "betas_list",
       "title": "Betas List",
-      "subtitle": "Beta Console - developer tool beta release",
+      "subtitle": "Beta Console Dev",
       "description": "Each week Console reviews the best tools for developers.",
       "mode": "view"
     },
     {
       "name": "interviews_list",
       "title": "Interviews List",
-      "subtitle": "Console - Developer interviews",
+      "subtitle": "Console Dev",
       "description": "A series of interviews with the developers behind the tools featured on console.dev",
       "mode": "view"
     }
