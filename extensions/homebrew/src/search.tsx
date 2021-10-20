@@ -14,13 +14,13 @@ import { useEffect, useState } from "react";
 import { brewSearchFormula, brewInstalled, brewInstall } from "./brew";
 
 interface Dictionary<T> {
-    [Key: string]: T;
+  [Key: string]: T;
 }
 
 /// Main
 
 function Main() {
-  const [formulas, setFormulas] = useState([]);
+  const [formulae, setFormulae] = useState([]);
   const [installed, setInstalled] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -28,18 +28,13 @@ function Main() {
   useEffect(async () => {
     setIsLoading(true);
     try {
-      let allInstalled = installed;
-      if (allInstalled === undefined) {
-        allInstalled = await listInstalled();
-        setInstalled(allInstalled);
-      }
-      const formulas = await brewSearchFormula(query);
-      updateInstalled(formulas, allInstalled);
-      setFormulas(formulas);
-      console.log("formulas:", formulas[0]);
+      const formulae = await brewSearchFormula(query.trim());
+      await updateInstalled(formulae, installed, setInstalled);
+      setFormulae(formulae);
     } catch (err) {
-      console.log("brewSearchFormula error:", err);
+      setFormulae([]);
       showToast(ToastStyle.Failure, "Package search error", err);
+      console.log("brewSearchFormula error:", err);
     }
     setIsLoading(false);
   }, [query]);
@@ -48,7 +43,7 @@ function Main() {
     const formula = props.formula;
     let version = formula.versions.stable;
     let tintColor = Color.SecondaryText;
-    if (formula.installed[0]) {
+    if (formula.installed.length > 0) {
       version = formula.installed[0].version;
       tintColor = Color.Green;
     }
@@ -68,7 +63,7 @@ function Main() {
                                onAction={async () => {
                                  await install(formula);
                                  // TODO: Need to handle error case...
-                                 let allInstalled = installed;
+                                 const allInstalled = installed;
                                  allInstalled[formula.name] = formula;
                                  // TODO: Not sure this is triggering a reload?
                                  // And formula is also not recognised as installed (also fish).
@@ -86,8 +81,8 @@ function Main() {
     );
   }
 
-  function ForumulaList(props: { formulas: Formula[], isLoading: bool, onSearchTextChange: () => void }) {
-    const results = props.formulas ? props.formulas.slice(0, 200) : [];
+  function ForumulaList(props: { formulae: Formula[], isLoading: bool, onSearchTextChange: () => void }) {
+    const results = props.formulae ? props.formulae.slice(0, 200) : [];
     return (
       <List searchBarPlaceholder="Search formula by name..." isLoading={props.isLoading} onSearchTextChange={props.onSearchTextChange} >
         {results.map((formula) => (
@@ -97,8 +92,7 @@ function Main() {
     );
   }
 
-  console.log("Render FormulaList");
-  return <ForumulaList formulas={formulas} isLoading={isLoading} onSearchTextChange={setQuery} />;
+  return <ForumulaList formulae={formulae} isLoading={isLoading} onSearchTextChange={setQuery} />;
 }
 
 async function main() {
@@ -121,19 +115,22 @@ async function install(formula: Formula) {
 }
 
 async function listInstalled(): Dictionary<Formula> {
-  const installed = await brewInstalled();
-  let dict = {};
-  for (f in installed) {
-    dict[f.name] = f;
+  const installed = await brewInstalled(true);
+  const dict = {};
+  for (const formula of installed) {
+    dict[formula.name] = formula;
   }
   return dict;
 }
 
-function updateInstalled(formulas: Formula[], installed: Dictionary<Formula>) {
-  console.log("updateInstalled", formulas.length, installed.length);
-  for (formula in formulas) {
-    if (installed[formula.name]) {
-      formula.installed == installed[formula.name].installed;
-    }
+async function updateInstalled(formulae: Formula[], installed?: Dictionary<Formula>, setInstalled: () => void) {
+  if (installed === undefined) {
+    installed = await listInstalled();
+    setInstalled(installed);
+  }
+
+  for (formula of formulae) {
+    const info = installed[formula.name];
+    formula.installed = info ? info.installed : [];
   }
 }

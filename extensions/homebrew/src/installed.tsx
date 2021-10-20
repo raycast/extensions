@@ -14,25 +14,22 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { brewInstalled, brewUninstall } from "./brew";
-import * as utils from "./utils";
 
 interface Installed {
-  formulas: Formula[];
+  formulae: Formula[];
   isLoading: bool;
 }
 
-const cachePath = utils.cachePath('installed.json');
-
 function Main() {
-  const [installed, setInstalled] = useState({formulas: [], isLoading: true});
+  const [installed, setInstalled] = useState({formulae: [], isLoading: true});
 
   useEffect(async () => {
     try {
-      setInstalled({formulas: await brewInstalled(cachePath), isLoading: false});
+      setInstalled({formulae: await brewInstalled(true), isLoading: false});
     } catch (err) {
       console.log("brewInstalled error:", err);
       showToast(ToastStyle.Failure, "Brew list failed");
-      setInstalled({formulas: [], isLoading: false});
+      setInstalled({formulae: [], isLoading: false});
     }
   }, []); // trigger once
 
@@ -71,7 +68,7 @@ function Main() {
       <List searchBarPlaceholder="Filter formula by name..." isLoading={props.installed.isLoading}>
         <ListSection title="Installed">
           {
-            props.installed.formulas.map((formula) => (
+            props.installed.formulae.map((formula) => (
               <FormulaListItem key={formula.name} formula={formula} />
             ))
           }
@@ -92,8 +89,8 @@ function uninstall(formula: Formula, setInstalled: () => void) {
   showToast(ToastStyle.Animated, `Uninstalling ${formula.full_name}`);
   return brewUninstall(formula)
     .then(brewInstalled)
-    .then(formulas => {
-      setInstalled({ formulas: formulas, isLoading: false });
+    .then(formulae => {
+      setInstalled({ formulae: formulae, isLoading: false });
       showToast(ToastStyle.Success, `Uninstalled ${formula.full_name}`);
     })
     .catch(error => {

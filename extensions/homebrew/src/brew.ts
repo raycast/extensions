@@ -1,8 +1,9 @@
 import { exec } from "child_process";
 import { promisify } from "util";
 import { stat, readFile, writeFile } from "fs/promises";
-import { fetch } from "node-fetch";
 import { join as path_join } from "path";
+import fetch from "node-fetch";
+import * as utils from "./utils";
 
 const execp = promisify(exec);
 
@@ -30,6 +31,8 @@ export interface ForumulaVersions {
   bottle: bool;
 }
 
+const installedCache = utils.cachePath('installed.json');
+
 export async function brewPrefix(): Promise<string> {
   return (await execp(`brew --prefix`)).stdout.trim();
 }
@@ -39,19 +42,19 @@ export async function brewPath(suffix: string): Promise<string> {
   return path_join(prefix, suffix);
 }
 
-export async function brewInstalled(cachePath?: string): Promise<Formula[]> {
+export async function brewInstalled(useCache: bool): Promise<Formula[]> {
   async function installed(): Promise<string> {
     return (await execp(`brew info --json --installed`)).stdout;
   }
 
-  if (cachePath === undefined) {
+  if (!useCache) {
     return JSON.parse(await installed());
   }
 
   async function updateCache(): Promise<Formula[]> {
     const info = await installed();
     try {
-      await writeFile(cachePath, info);
+      await writeFile(installedCache, info);
     } catch (err) {
       console.error("Failed to write installed cache:", err)
     }
@@ -61,9 +64,9 @@ export async function brewInstalled(cachePath?: string): Promise<Formula[]> {
   async function readCache(): Promise<Formula[]> {
     const cellarPath = await brewPath("Cellar");
     const cellarTime = (await stat(cellarPath)).mtimeMs;
-    const cacheTime = (await stat(cachePath)).mtimeMs;
+    const cacheTime = (await stat(installedCache)).mtimeMs;
     if (cellarTime < cacheTime) {
-      return JSON.parse(await readFile(cachePath));
+      return JSON.parse(await readFile(installedCache));
     } else {
       throw 'Invalid cache';
     }

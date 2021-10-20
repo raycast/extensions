@@ -7,12 +7,14 @@
     {
       "name": "installed",
       "title": "Show Installed",
+      "subtitle": "Homebrew",
       "description": "List installed formulas",
       "mode": "view"
     },
     {
       "name": "search",
       "title": "Search Packages",
+      "subtitle": "Homebrew",
       "description": "Search ",
       "mode": "view"
     }
