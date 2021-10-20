@@ -2,7 +2,7 @@
   "name": "coffee",
   "title": "Coffe",
   "description": "Prevent the sleep function on your mac",
-  "icon": "coffee.png",
+  "icon": "logo.png",
   "author": "mooxl",
   "license": "MIT",
   "commands": [
