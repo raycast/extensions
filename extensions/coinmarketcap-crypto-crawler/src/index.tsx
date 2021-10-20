@@ -33,30 +33,32 @@ export default function ArticleList() {
   const [priceDiff, setPriceDiff] = useState('');
   const [notFound, setNotFound] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [cryptoLIst,setCryptoLIst] = useState([])
+  const [cryptoList,setCryptoList] = useState([])
 
 
+  useEffect(()=> {
 
-  useEffect(() => {
     getListFromFile((err:string, data: string) => {
       if (err) {
         console.error(err)
         return
       }
-      const {cryptoList} = JSON.parse(data)
+      const {cryptoListFromFile} = JSON.parse(data)
       
-      if(!cryptoList)  return 
-      setCryptoLIst(cryptoList)
+      if(!cryptoListFromFile)  return 
+      setCryptoList(cryptoListFromFile)
     })
+  },[]) 
+
+  useEffect(() => {
+    if(!!cryptoList) return 
 
     fetchAllCrypto({ limit: 10000, start: 1 }).then(({data:resultData}: {data: ResultData}) => {
-      const { data,status } = resultData
-      
+      const { data,status } = resultData  
       writeLIstInToFile({timestamp:  status.timestamp,cryptoList: data.cryptoCurrencyMap })
-      
     })
 
-  }, [])
+  }, [cryptoList])
 
 
   const onSearch = (search: string) => {
