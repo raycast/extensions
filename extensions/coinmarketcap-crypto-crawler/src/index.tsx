@@ -1,10 +1,10 @@
-import { ActionPanel, CopyToClipboardAction, PasteAction, Icon, List, OpenInBrowserAction, environment, ListItem } from "@raycast/api";
+import { ActionPanel, useNavigation, Icon, List, OpenInBrowserAction, Detail } from "@raycast/api";
 import { useState, useEffect } from "react";
 import $ from "cheerio";
 import fetch from "node-fetch";
 const { fetchAllCrypto } = require('./api')
 const { writeLIstInToFile, getListFromFile } = require('./utils')
-const fuzzysort = require('fuzzysort') 
+const fuzzysort = require('fuzzysort')
 
 
 const BASE_URL = 'https://coinmarketcap.com/currencies/'
@@ -26,21 +26,32 @@ type ResultData = {
   }
 }
 
-type CryptoList = { 
+type CryptoList = {
   name: string,
-  slug:string,
-  symbol:string 
+  slug: string,
+  symbol: string
+}
+
+type FuzzySortResult = {
+  obj: CryptoList,
+  score: number
+}
+
+type CryptoInfo = {
+  currencyPrice: string,
+  priceDiff: string
+  name: string,
+  slug: string
 }
 
 export default function ArticleList() {
-  const [coinName, setCoinName] = useState('')
-  const [currencyPrice, setCurrencyPrice] = useState('');
-  const [priceDiff, setPriceDiff] = useState('');
-  const [notFound, setNotFound] = useState(false)
+  const [currentSearchText,setCurrehtSearchText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [cryptoList, setCryptoList] = useState([])
+  const [fuzzyResult, setFuzzyResult] = useState([])
 
-  const [fuzzyResult, setFuzzyResult ] = useState([]) 
+
+  const { push } = useNavigation();
 
 
   useEffect(() => {
@@ -62,77 +73,65 @@ export default function ArticleList() {
       fetchAllCrypto({ limit: 10000, start: 1 }).then(({ data: resultData }: { data: ResultData }) => {
         const { data, status } = resultData
 
-        const cryptoList = data.cryptoCurrencyMap.map(({ slug, name,symbol }:CryptoList) => ({ slug, name, symbol:symbol.toLowerCase() }))
+        const cryptoList = data.cryptoCurrencyMap.map(({ slug, name, symbol }: CryptoList) => ({ slug, name, symbol: symbol.toLowerCase() }))
         writeLIstInToFile({ timestamp: status.timestamp, cryptoList: cryptoList })
       })
     })
   }, [])
 
-
-
-
-  const onSearch = (search: string) => {
-    setIsLoading(true)
-    setNotFound(false)
-    
-    const defaultCryptoResult = {
-      slug:'',
-      name:'', 
-      symbol:''
-    }
-
-
-    
-    const { slug: resultSlug }:CryptoList  = cryptoList.find(({ symbol }:CryptoList ) => symbol.toLowerCase() === search.toLowerCase()) ||defaultCryptoResult
-    
-    const fuzzyResult = fuzzysort.go(search, cryptoList, {key: 'symbol'} ) 
-    console.log('fuzzyResult :', fuzzyResult);
-    setFuzzyResult(fuzzyResult)
-
-    const searchText =  resultSlug || search 
-
-    fetchPrice(searchText).then((priceInfo: PriceInfo) => {
-      const { priceValueText = '', priceDiffText = '', coinName = '' } = priceInfo;
-      setCurrencyPrice(priceValueText);
-      setPriceDiff(priceDiffText);
-      setCoinName(coinName);
-      if (!priceValueText) setNotFound(true)
-      setIsLoading(false)
-    });
-
+  const onSelectCrypto = async (searchText: string) => {
+    const priceInfo = await fetchPrice(searchText) 
+    setIsLoading(false);
+    return priceInfo
   }
+
+  const onSearchChange = (search:string)=>{
+    setIsLoading(true)
+    setCurrehtSearchText(search);
+
+    const fuzzyResult = fuzzysort.go(search, cryptoList, { key: 'symbol' })
+
+    setFuzzyResult(fuzzyResult)
+  } 
+  
   return (
     <List isLoading={isLoading}
       throttle
       searchBarPlaceholder="Enter the crypto name"
-      onSearchTextChange={onSearch}>
+      onSearchTextChange={onSearchChange}>
 
-        {
+      {
+        fuzzyResult.length === 0 ?
+          <List.Item title="" /> :
+          fuzzyResult.map((result: FuzzySortResult) => {
+            const { name,slug } = result.obj
 
-          fuzzyResult.length ===0 ? 
-          <List.Item title=""  /> :
-          fuzzyResult.map(result=> {
-            const {name} = result.obj
-            
             return (
-              <List.Item 
+              <List.Item
+                key={name}
                 title={name}
-                icon={Icon.Star} />
+                icon={Icon.Star}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Item title="Pop" onAction={() => {
+                      onSelectCrypto(slug).then(({ currencyPrice = '', priceDiff = '' })=>{
+
+                      push(
+                        <CryptoDetail 
+                            currencyPrice={currencyPrice} 
+                            priceDiff={priceDiff}
+                            name={name}
+                            slug={slug}/>
+                        )  
+                      }) 
+                      
+                    }}/>
+                  </ActionPanel>
+                }
+              />
             )
           })
-        }
-      
-      {/* <List.Item
-        title={notFound ? 'Crypto Not Found.' : currencyPrice}
-        subtitle={priceDiff}
-        icon={Icon.Star}
-        actions={
-          <ActionPanel>
-            <OpenInBrowserAction url={`${BASE_URL}${coinName}`} />
-          </ActionPanel>
-        }
-
-      /> */}
+      }
 
     </List>
   );
@@ -140,24 +139,45 @@ export default function ArticleList() {
 
 
 
-async function fetchPrice(coinName: string) {
-  return fetch(`${BASE_URL}${coinName}/`)
+
+function CryptoDetail({ currencyPrice, priceDiff,name,slug }: CryptoInfo) {
+  const { pop } = useNavigation();
+  return (
+    <Detail
+      navigationTitle={name}
+      markdown={`## ${currencyPrice} \n ### ${priceDiff}`}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Item title="Pop" onAction={pop} />
+          <OpenInBrowserAction url={`${BASE_URL}${slug}`} />
+        </ActionPanel>
+      }
+    />
+  )
+}
+
+
+async function fetchPrice(slug: string) {
+  return fetch(`${BASE_URL}${slug}/`)
     .then((r) => r.text())
     .then((html) => {
       const $html = $.load(html);
 
       const priceValue = $html(".priceValue")
 
+      // get price diff element className 
       const priceDirectionClassName = $html(".priceValue + span > span[class^=icon-Caret]").attr('class');
       const priceDirection = priceDirectionClassName && priceDirectionClassName.split('-').includes('up') ? '+' : '-'
       const priceDiffValue = priceValue.next("span").text()
-
+      
       const priceDiffText = `${priceDirection} ${priceDiffValue}`
 
       const priceValueText = priceValue.text()
       if (!priceValueText) return { priceValueText: '', priceDiffText: '', coinName: '' };
 
-      return { priceValueText, priceDiffText, coinName }
+
+ 
+      return { currencyPrice:priceValueText, priceDiff:priceDiffText, slug }
     });
 
 }
