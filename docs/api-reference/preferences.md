@@ -40,7 +40,7 @@ An object with the preference names as property key and the typed value as prope
 ### preferences
 
 ```typescript
-preferences: Preferences = ...
+preferences: Preferences = workerData.preferences
 ```
 
 Contains the preference values that have been passed to the command.
@@ -56,10 +56,10 @@ The object maps to a defined preference in the `package.json` manifest file.
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| data | <code>unknown[]</code> | No | The data that is used for dropdowns. |
-| default | <code>unknown</code> | No | The default value of the preference if there is no `value` specified. |
+| data | <code>unknown[]</code> | No | The data that is used for dropdowns. For the dropdown items, add an array of objects with `title` and `value` properties, such as: `{"title": "Foo", "value": "bar"}` |
+| default | <code>unknown</code> | No | The default value of the preference if there is no `value` specified. For dropdowns, this references the `value` property of an object in the data array. |
 | description | <code>string</code> | Yes | The description of the preference. |
-| label | <code>string</code> | No | A label that is used for checkboxes. |
+| label | <code>string</code> | No | A label that is used for checkboxes. You can create checkbox groups by setting this property and leaving the title property empty for all checkboxes except the first. |
 | name | <code>string</code> | Yes | The name of the preference. |
 | placeholder | <code>string</code> | No | A placeholder that is used for text fields and passwords. |
 | required | <code>boolean</code> | Yes | Specifies if the preference is required. |
