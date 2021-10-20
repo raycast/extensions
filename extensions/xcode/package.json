@@ -1,10 +1,10 @@
 {
   "name": "xcode",
   "title": "Xcode",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "SvenTiigi",
   "license": "MIT",
-  "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases and quickly clear Xcode cache files.",
+  "description": "Search and open your recent Xcode Projects, manage your Simulators & Apps, view the latest Releases, search the Apple Developer Documentation and quickly clear Xcode cache files.",
   "icon": "icon.png",
   "commands": [
     {
@@ -33,6 +33,13 @@
       "title": "Xcode Releases",
       "subtitle": "Xcode",
       "description": "Search, download and view the latest Xcode Releases",
+      "mode": "view"
+    },
+    {
+      "name": "search-apple-developer-documentation.command",
+      "title": "Search Developer Documentation",
+      "subtitle": "Xcode",
+      "description": "Search in Apple Developer Documentation",
       "mode": "view"
     },
     {
@@ -69,7 +76,9 @@
     "Simulator",
     "Swift",
     "Swift Package",
-    "SPM"
+    "SPM",
+    "Apple",
+    "Apple Developer"
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",

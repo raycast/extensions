@@ -51,7 +51,7 @@ export default () => {
           setXcodeSimulatorApplication({
             value: [],
             isCache: false
-          })
+          });
         }
         // Log Error
         console.error(error);
