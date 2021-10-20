@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Icon, List, PushAction } from '@raycast/api';
+import { ActionPanel, Color, Icon, List, PushAction, showToast, ToastStyle } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
 import Dockerode, { ContainerInfo } from '@priithaamer/dockerode';
 import ContainerList from './container_list';
@@ -50,17 +50,41 @@ const useDocker = (docker: Dockerode) => {
     }
   };
 
+  const stopProject = async (project: ComposeProject) => {
+    setLoading(true);
+    await Promise.all(
+      project.containers
+        .filter((container) => isContainerRunning(container))
+        .map((container) => docker.getContainer(container.Id).stop())
+    );
+    const containers = await docker.listContainers({ all: true });
+    setProjects(containersToProjects(containers));
+    setLoading(false);
+  };
+
+  const startProject = async (project: ComposeProject) => {
+    setLoading(true);
+    await Promise.all(
+      project.containers
+        .filter((container) => !isContainerRunning(container))
+        .map((container) => docker.getContainer(container.Id).start())
+    );
+    const containers = await docker.listContainers({ all: true });
+    setProjects(containersToProjects(containers));
+    setLoading(false);
+  };
+
   useEffect(() => {
     fetchContainers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { projects, loading, error };
+  return { projects, loading, error, startProject, stopProject };
 };
 
 export default function ProjectsList() {
   const docker = useMemo(() => new Dockerode(), []);
-  const { projects, loading } = useDocker(docker);
+  const { projects, loading, startProject, stopProject } = useDocker(docker);
 
   return (
     <List isLoading={loading}>
@@ -73,6 +97,22 @@ export default function ProjectsList() {
           actions={
             <ActionPanel>
               <PushAction title="Show Containers" target={<ContainerList projectFilter={project.name} />} />
+              <ActionPanel.Item
+                title="Start All Containers"
+                shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
+                onAction={async () => {
+                  await startProject(project);
+                  await showToast(ToastStyle.Success, `Started ${project.name}`);
+                }}
+              />
+              <ActionPanel.Item
+                title="Stop All Containers"
+                shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
+                onAction={async () => {
+                  await stopProject(project);
+                  await showToast(ToastStyle.Success, `Stopped ${project.name}`);
+                }}
+              />
             </ActionPanel>
           }
         />
