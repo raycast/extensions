@@ -87,3 +87,20 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 * Add ellipses `...` for actions that will have submenu. Don't repeat parent action name in submenu
   * ✅ `Set Priority...` and submenu would just have `Low`, `Medium`, `High`
   * ❌ `Set Priority` and submenu would have `Set Priority Low`, `Set Priority Medium`, etc
+
+### Navigation
+
+* Use [Navigation API](https://developers.raycast.com/api-reference/user-interface/navigation) for pushing new screens. This will ensure that a user can navigate in your extension the same way as in the rest of the application.
+* Avoid introducing your own navigation stack. Extensions that just replace the view's content when it's expected to push a new screen will be rejected.
+
+### Empty States
+
+* When you update lists with empty array of elements, "No results" view will be shown. Avoid introducing your own UI to achieve similar effect (e.g. showing list item).
+  * **Known issue:** Sometimes there is nothing you can show when search query is empty and an extension shows "No results" when you open it (often in search commands). We have plans to provide API that would improve that experience. In the meantime you might want to consider introducing some sections that could be helpful in an empty state – e.g. suggestions or recently visited items.
+* **Common mistake** – "flickering empty state view" on start
+  * If you try render empty list before real data arrives (e.g. from the network or disk), you might see flickering "No results" view when opening extension. To prevent this make sure to not return empty list of items before you get the data you want to display. In the meantime you can show loading indicator. See [this example](https://developers.raycast.com/information/best-practices#show-loading-indicator).
+
+### Localization / Language
+
+* At the moment Raycast doesn't support localization and only supports US English. Therefore, please avoid introducing your custom way to localize your extension. If locale might affect functionality (e.g. using the correct unit of measurement), please use preferences API.
+* Use US English spelling (not British)
