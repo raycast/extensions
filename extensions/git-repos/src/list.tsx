@@ -87,18 +87,21 @@ export default function Main(): ReactElement {
                               title={`Code`}
                               key={`code ${remote.name}`}
                               url={remote.url}
+                              icon = {{ source: { dark: "github-code-icon-dark.png", light: "github-code-icon-light.png" } }}
                               shortcut={{modifiers: ["shift", "cmd"], key: "c"}}
                             />
                             <OpenInBrowserAction
                               title={`Issues`}
                               key={`issues ${remote.name}`}
                               url={`${remote.url}/issues`}
+                              icon = {{ source: { dark: "github-issues-icon-dark.png", light: "github-issues-icon-light.png" } }}
                               shortcut={{modifiers: ["shift", "cmd"], key: "i"}}
                             />
                             <OpenInBrowserAction
                               title={`Pull Requests`}
                               key={`pulls ${remote.name}`}
                               url={`${remote.url}/pulls`}
+                              icon = {{ source: { dark: "github-pulls-icon-dark.png", light: "github-pulls-icon-light.png" } }}
                               shortcut={{modifiers: ["shift", "cmd"], key: "p"}}
                             />
                           </ActionPanel.Submenu>
