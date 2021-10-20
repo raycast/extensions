@@ -9,8 +9,7 @@ import {
   ToastStyle,
 } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
-import { loggedInUserAccount, twitterClient } from "../twitterapi";
-import { Fetcher } from "./mytweets";
+import { loggedInUserAccount, twitterClient, Fetcher } from "../twitterapi";
 import { TweetSendForm } from "./send";
 import { TweetDetail } from "./tweet";
 
@@ -117,7 +116,7 @@ export function RefreshInlineAction(props: { fetcher?: Fetcher }) {
   };
   return (
     <ActionPanel.Item
-      title="Refresh Tweets Inline"
+      title="Refresh Existing Tweets"
       shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
       icon={{ source: Icon.Download, tintColor: Color.PrimaryText }}
       onAction={handle}

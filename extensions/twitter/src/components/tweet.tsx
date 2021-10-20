@@ -1,6 +1,6 @@
 import { ActionPanel, Detail, Image, ImageMask, List, OpenInBrowserAction } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
-import { Fetcher } from "./mytweets";
+import { Fetcher } from "../twitterapi";
 import {
   DeleteTweetAction,
   LikeAction,

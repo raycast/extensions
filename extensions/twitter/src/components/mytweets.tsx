@@ -1,11 +1,14 @@
 import { List, showToast, ToastStyle } from "@raycast/api";
-import { useState, useEffect } from "react";
 import { TweetV1 } from "twitter-api-v2";
 import { TweetListItem } from "../components/tweet";
-import { loggedInUserAccount, twitterClient } from "../twitterapi";
+import { loggedInUserAccount, refreshTweets, twitterClient, useRefresher } from "../twitterapi";
 
 export default function MyTweetList() {
-  const { data, error, isLoading, fetcher } = useTweets();
+  const { data, error, isLoading, fetcher } = useRefresher<TweetV1[] | undefined>(
+    async (updateInline): Promise<TweetV1[] | undefined> => {
+      return updateInline ? await refreshTweets(data) : await getMyTweets();
+    }
+  );
   if (error) {
     showToast(ToastStyle.Failure, "Error", error);
   }
@@ -18,29 +21,6 @@ export default function MyTweetList() {
   );
 }
 
-export interface Fetcher {
-  updateInline: () => Promise<void>;
-  refresh: () => Promise<void>;
-}
-
-async function refreshTweets(tweets?: TweetV1[]): Promise<TweetV1[] | undefined> {
-  if (tweets) {
-    const tweetIds = tweets.map((t) => t.id_str);
-    const unorderedFreshTweets = await twitterClient.v1.tweets(tweetIds);
-
-    let freshTweets: TweetV1[] = [];
-    for (const tid of tweetIds) {
-      const t = unorderedFreshTweets.find((t) => tid === t.id_str);
-      if (t) {
-        freshTweets.push(t);
-      }
-    }
-    return freshTweets;
-  } else {
-    return undefined;
-  }
-}
-
 async function getMyTweets(): Promise<TweetV1[]> {
   const account = await loggedInUserAccount();
   const mytweets = await twitterClient.v1.userTimelineByUsername(account.screen_name);
@@ -49,60 +29,4 @@ async function getMyTweets(): Promise<TweetV1[]> {
     tweets.push(t);
   }
   return tweets;
-}
-
-export function useTweets(): {
-  data: TweetV1[] | undefined;
-  error?: string;
-  isLoading: boolean;
-  fetcher: Fetcher;
-} {
-  const [data, setData] = useState<TweetV1[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [timestamp, setTimestamp] = useState<Date>(new Date());
-
-  let cancel = false;
-
-  const fetcher: Fetcher = {
-    updateInline: async () => {
-      await fetchData(true);
-    },
-    refresh: async () => {
-      setTimestamp(new Date());
-    },
-  };
-
-  async function fetchData(updateInline = false) {
-    if (cancel) {
-      return;
-    }
-
-    setIsLoading(true);
-    setError(undefined);
-
-    try {
-      const tweets = updateInline ? await refreshTweets(data) : await getMyTweets();
-      if (!cancel) {
-        setData(tweets);
-      }
-    } catch (e: any) {
-      if (!cancel) {
-        setError(e.message);
-      }
-    } finally {
-      if (!cancel) {
-        setIsLoading(false);
-      }
-    }
-  }
-  useEffect(() => {
-    fetchData();
-
-    return () => {
-      cancel = true;
-    };
-  }, [timestamp]);
-
-  return { data, error, isLoading, fetcher };
 }
