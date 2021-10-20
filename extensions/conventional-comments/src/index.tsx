@@ -24,7 +24,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <SubmitFormAction icon={Icon.Clipboard} title="Paste" onSubmit={handleSubmit} />
-          <OpenInBrowserAction title="Open reference website" url="https://conventionalcomments.org/" />
+          <OpenInBrowserAction title="Open Reference Website" url="https://conventionalcomments.org/" />
         </ActionPanel>
       }
     >
