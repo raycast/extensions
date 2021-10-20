@@ -82,13 +82,6 @@
       "subtitle": "Spotify",
       "description": "Seeks Backward by 10 seconds.",
       "mode": "no-view"
-    },
-    {
-      "name": "nowplaying",
-      "title": "Now Playing",
-      "subtitle": "Spotify",
-      "description": "Display the current playing song in Spotify or Apple Music.",
-      "mode": "inline"
     }
   ],
   "dependencies": {
