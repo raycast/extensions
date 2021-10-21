@@ -1,4 +1,5 @@
 import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from '@raycast/api';
+import dayjs from 'dayjs';
 import { NodeEntity, ObjEntity, UserEntity, NodeType, isNodeEntity } from '../services/space';
 
 export interface SpaceListItemProps {
@@ -21,7 +22,7 @@ export const SpaceListItem: React.FC<SpaceListItemProps> = ({ node, owner }) => 
       node.type === NodeType.Box
         ? `space-icons/type-${node.type}-${node.extra.subtype}.png`
         : `space-icons/type-${node.type}.png`;
-    accessoryTitle = new Date(node.activity_time * 1000).toLocaleDateString();
+    accessoryTitle = dayjs(node.activity_time * 1000).format('YYYY-MM-DD');
   } else {
     id = node.token;
     title = node.title;
