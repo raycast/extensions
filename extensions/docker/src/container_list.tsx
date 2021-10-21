@@ -125,7 +125,7 @@ export default function ContainerList(props: { projectFilter?: string }) {
               )}
               <ActionPanel.Item
                 title="Remove Container"
-                icon={Icon.Trash}
+                icon={{ source: Icon.Trash, tintColor: Color.Red }}
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 'x' }}
                 onAction={async () => {
                   await removeContainer(containerInfo);

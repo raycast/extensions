@@ -72,7 +72,7 @@ export default function ImageList() {
               />
               <ActionPanel.Item
                 title="Remove Image"
-                icon={{ source: Icon.Trash }}
+                icon={{ source: Icon.Trash, tintColor: Color.Red }}
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 'x' }}
                 onAction={async () => {
                   await removeImage(image);

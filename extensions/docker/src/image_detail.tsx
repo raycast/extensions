@@ -20,6 +20,6 @@ export default function ImageDetail({ imageId }: { imageId: string }) {
   }, []);
 
   return (
-    <Detail navigationTitle="Navigation Title" isLoading={isLoading} markdown={formatImageDetailMarkdown(imageInfo)} />
+    <Detail navigationTitle="Image Details" isLoading={isLoading} markdown={formatImageDetailMarkdown(imageInfo)} />
   );
 }
