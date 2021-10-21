@@ -9,7 +9,9 @@ import {
   getSelectedText,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
+import fetch from "node-fetch";
 import { Bookmark, addBookmark } from "./api";
+import he from "he";
 
 export default function Command() {
   const [state, setState] = useState<{ url: string; title: string }>({ url: "", title: "" });
@@ -38,6 +40,12 @@ export default function Command() {
 
   async function handleSubmit(values: Bookmark) {
     console.log("bookmark", values);
+    const url = values.url.trim();
+    const title = values.title.trim();
+    if (!isValidURL(url) || title.length === 0) {
+      showToast(ToastStyle.Failure, "Enter a valid URL and title for the bookmark");
+      return;
+    }
     showToast(ToastStyle.Animated, "Pinning bookmark...");
     try {
       await addBookmark(values);
@@ -65,7 +73,13 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="url" title="URL" placeholder="Enter URL" value={state.url} onChange={handleURLChange} />
+      <Form.TextField
+        id="url"
+        title="URL"
+        placeholder="Enter URL (Tip: Select a URL before opening this form)"
+        value={state.url}
+        onChange={handleURLChange}
+      />
       <Form.TextField
         id="title"
         title="Title"
@@ -90,7 +104,8 @@ async function loadDocumentTitle(url: string): Promise<string> {
 }
 
 function extractDocumentTitle(document: string): string {
-  return document.match(/<title>(.*?)<\/title>/)?.[1] ?? "";
+  const title = document.match(/<title>(.*?)<\/title>/)?.[1] ?? "";
+  return he.decode(title);
 }
 
 function isValidURL(url: string): boolean {
