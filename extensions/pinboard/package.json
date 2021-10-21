@@ -1,0 +1,53 @@
+{
+  "name": "pinboard",
+  "title": "Pinboard",
+  "description": "Post new bookmarks to Pinboard and search your Pinboard bookmarks.\nTip: Assign a global shortcut to the \"Add Bookmark\" command, select a URL, and then run the command ✨",
+  "icon": "extension-icon.png",
+  "author": "fe9lix",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "addBookmark",
+      "title": "Add Bookmark",
+      "subtitle": "Pinboard",
+      "description": "Posts a new bookmark to Pinboard.",
+      "mode": "view"
+    },
+    {
+      "name": "searchBookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Pinboard",
+      "description": "Searches your Pinboard bookmarks by tags.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Enter your API Token (Pinboard Settings > Password)",
+      "placeholder": "Enter your API Token (Pinboard Settings > Password)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "he": "^1.2.0",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/he": "^1.1.2",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
