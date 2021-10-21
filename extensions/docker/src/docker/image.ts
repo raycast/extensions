@@ -1,4 +1,5 @@
 import { ImageInfo, ImageInspectInfo } from '@priithaamer/dockerode';
+import * as markdown from '../utils/markdown';
 
 export const imageTitle = (image: ImageInfo | ImageInspectInfo) => image.RepoTags.join(' ');
 
@@ -13,16 +14,25 @@ export const formatImageId = (imageId: string, length?: number) => {
 export const formatImageDetailMarkdown = (image: ImageInspectInfo | undefined) =>
   image !== undefined
     ? `## ${imageTitle(image)}` +
-      `\n\n**ID:** ${formatImageId(image.Id, 12)}` +
-      `\n\n**Size:** ${formatBytes(image.Size)}` +
-      `\n\n**OS:** ${image.Os}` +
-      `\n\n**Architecture:** ${[image.Architecture]}` +
-      `\n\n**Command:** ${formatImageCommand(image.Config.Cmd)}` +
-      `\n\n**Entrypoint:** ${formatEntryPoint(image.Config.Entrypoint)}` +
-      (image.Config.Env.length > 0 ? `\n\n## Environment\n\n` : '') +
-      image.Config.Env.join('\n\n') +
+      markdown.attributes([
+        ['ID', formatImageId(image.Id, 12)],
+        ['Size', formatBytes(image.Size)],
+        ['OS', image.Os],
+        ['Architecture', image.Architecture],
+        ['Command', markdown.codeBlock(formatImageCommand(image.Config.Cmd))],
+        ['Entrypoint', markdown.codeBlock(formatEntryPoint(image.Config.Entrypoint))],
+      ]) +
+      renderEnvSection(image.Config.Env) +
       `\n`
     : '';
+
+const renderEnvSection = (env: string[]) => {
+  if (env.length === 0) {
+    return '';
+  }
+
+  return [`\n\n## Environment`, markdown.codeBlock(env.join('\n'))].join('\n');
+};
 
 export const formatImageCommand = (cmd: string[]) => cmd.join(' ');
 
