@@ -8,7 +8,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Youdao Translate",
+      "title": "Translate",
       "subtitle": "Translate Content",
       "description": "Translate Content By Youdao API",
       "mode": "view"
