@@ -101,6 +101,14 @@
           "value": "desc"
         }
       ]
+    },
+    {
+      "name": "quickPaths",
+      "title": "Quick Paths",
+      "required": true,
+      "description": "Comma-separated list of paths where you often download your torrents",
+      "type": "textfield",
+      "default": ""
     }
   ],
   "dependencies": {
