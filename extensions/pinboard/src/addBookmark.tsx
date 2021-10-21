@@ -6,20 +6,10 @@ import {
   ToastStyle,
   OpenInBrowserAction,
   Icon,
-  preferences,
   getSelectedText,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import fetch from "node-fetch";
-
-interface Bookmark {
-  url: string;
-  title: string;
-  description?: string;
-  tags?: string;
-  private: boolean;
-  readLater: boolean;
-}
+import { Bookmark, addBookmark } from "./api";
 
 export default function Command() {
   const [state, setState] = useState<{ url: string; title: string }>({ url: "", title: "" });
@@ -91,35 +81,12 @@ export default function Command() {
   );
 }
 
-async function addBookmark(bookmark: Bookmark): Promise<unknown> {
-  const params = new URLSearchParams();
-  params.append("url", bookmark.url);
-  params.append("description", bookmark.title ?? "New Bookmark");
-  params.append("tags", bookmark.tags ?? "");
-  params.append("shared", bookmark.private ? "no" : "yes");
-  params.append("toread", bookmark.readLater ? "yes" : "no");
-  params.append("format", "json");
-  params.append("auth_token", preferences.apiToken.value as string);
-
-  const response = await fetch("https://api.pinboard.in/v1/posts/add?" + params.toString(), {
-    method: "post",
-    headers: { "Content-Type": "application/json" },
-  });
-
-  if (response.ok) {
-    return response.json();
-  } else {
-    return Promise.reject(response.statusText);
-  }
-}
-
 async function loadDocumentTitle(url: string): Promise<string> {
   const response = await fetch(url);
-  if (response.ok) {
-    return extractDocumentTitle(await response.text());
-  } else {
+  if (!response.ok) {
     return Promise.reject(response.statusText);
   }
+  return extractDocumentTitle(await response.text());
 }
 
 function extractDocumentTitle(document: string): string {

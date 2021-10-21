@@ -1,7 +1,7 @@
 {
   "name": "pinboard",
   "title": "Pinboard",
-  "description": "Post new bookmark entries to Pinboard.",
+  "description": "Post new bookmarks to Pinboard and search your Pinboard bookmarks.\nTip: Assign a global shortcut to the \"Add Bookmark\" command, select a URL, and then run the command ✨",
   "icon": "extension-icon.png",
   "author": "fe9lix",
   "license": "MIT",
@@ -11,6 +11,13 @@
       "title": "Add Bookmark",
       "subtitle": "Pinboard",
       "description": "Posts a new bookmark to Pinboard.",
+      "mode": "view"
+    },
+    {
+      "name": "searchBookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Pinboard",
+      "description": "Searches your Pinboard bookmarks.",
       "mode": "view"
     }
   ],
