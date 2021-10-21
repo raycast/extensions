@@ -5,11 +5,11 @@ import { State } from "./haapi";
 
 export function useHAStates(): {
   states?: State[];
-  error?: string;
+  error?: Error;
   isLoading: boolean;
 } {
   const [states, setStates] = useState<State[]>();
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const hawsRef = useRef<Connection>();
 
@@ -44,7 +44,8 @@ export function useHAStates(): {
         }
       } catch (e: any) {
         if (!cancel) {
-          setError(e.toString());
+          const err = e instanceof Error ? e : new Error(e);
+          setError(err);
         }
       }
     }

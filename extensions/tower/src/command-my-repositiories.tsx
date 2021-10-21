@@ -14,6 +14,7 @@ import { exec } from "child_process";
 import fs from "fs";
 import os from "os";
 import plist from "plist";
+import tildify from "tildify";
 import { promisify } from "util";
 import Bookmark from "./dtos/Bookmark.dto";
 import ImportedTowerBookmarks, { ImportedTowerBookmark } from "./interfaces/imported-tower-bookmark";

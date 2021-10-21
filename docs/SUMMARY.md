@@ -2,13 +2,22 @@
 
 * [Introduction](README.md)
 
+## Links
+
+* [Community](https://raycast.com/community)
+* [GitHub](https://github.com/raycast/extensions)
+* [Store](https://raycast.com/store)
+* [Extension Icon Template](https://www.figma.com/community/file/1030764827259035122)
+
 ## Basics
 
 * [Getting Started](basics/getting-started.md)
 * [Create Your First Extension](basics/create-your-first-extension.md)
+* [Prepare an Extension for Store](basics/prepare-an-extension-for-store.md)
 * [Publish an Extension](basics/publish-an-extension.md)
 * [Debug an Extension](basics/debug-an-extension.md)
 * [Install an Extension](basics/install-an-extension.md)
+* [Import an Extension](basics/import-an-extension.md)
 
 ## Examples
 
@@ -24,7 +33,6 @@
 * [File Structure](information/file-structure.md)
 * [Lifecycle](information/lifecycle.md)
 * [Manifest](information/manifest.md)
-* [Review Process](information/review-process.md)
 * [Terminology](information/terminology.md)
 
 ## API Reference
@@ -52,6 +60,4 @@
 ***
 
 * [Changelog](changelog.md)
-* [Community](https://raycast.com/community)
-* [GitHub](https://github.com/raycast/extensions)
 * [FAQ](faq.md)

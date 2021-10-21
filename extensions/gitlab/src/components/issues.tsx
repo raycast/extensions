@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
 import { Group, Issue, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { optimizeMarkdownText, toDateString } from "../utils";
+import { optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
 import { IssueItemActions } from "./issue_actions";
 
 export enum IssueScope {
@@ -43,9 +43,17 @@ export function IssueDetail(props: { issue: Issue }) {
     showToast(ToastStyle.Failure, "Could not get issue details", error);
   }
 
+  const desc = (description ? description : props.issue.description) || "";
+
+  let md = "";
+  if (props.issue) {
+    md = props.issue.labels.map((i) => `\`${i.name}\``).join(" ") + "  \n";
+  }
+  md += "## Description\n" + optimizeMarkdownText(desc);
+
   return (
     <Detail
-      markdown={optimizeMarkdownText(description)}
+      markdown={md}
       isLoading={isLoading}
       navigationTitle={`${props.issue.reference_full}`}
       actions={
@@ -59,11 +67,11 @@ export function IssueDetail(props: { issue: Issue }) {
 }
 
 export function useDetail(issueID: number): {
-  description: string;
+  description?: string;
   error?: string;
   isLoading: boolean;
 } {
-  const [description, setDescription] = useState<string>("");
+  const [description, setDescription] = useState<string>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -188,6 +196,53 @@ export function IssueList({
   );
 }
 
+function getIssueQuery(query: string | undefined) {
+  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee"]);
+}
+
+function injectQueryNamedParameters(
+  requestParams: Record<string, any>,
+  query: Query,
+  scope: IssueScope,
+  isNegative: boolean
+) {
+  const namedParams = isNegative ? query.negativeNamed : query.named;
+  for (const extraParam of Object.keys(namedParams)) {
+    const extraParamVal = namedParams[extraParam];
+    const prefixed = (text: string): string => {
+      return isNegative ? `not[${text}]` : text;
+    };
+    if (extraParamVal) {
+      switch (extraParam) {
+        case "label":
+          {
+            requestParams[prefixed("labels")] = extraParamVal.join(",");
+          }
+          break;
+        case "author":
+          {
+            if (scope === IssueScope.all) {
+              requestParams[prefixed("author_username")] = extraParamVal.join(",");
+            }
+          }
+          break;
+        case "milestone":
+          {
+            requestParams[prefixed("milestone")] = extraParamVal.join(",");
+          }
+          break;
+        case "assignee":
+          {
+            if (scope === IssueScope.all) {
+              requestParams[prefixed("assignee_username")] = extraParamVal.join(",");
+            }
+          }
+          break;
+      }
+    }
+  }
+}
+
 export function useSearch(
   query: string | undefined,
   scope: IssueScope,
@@ -215,29 +270,23 @@ export function useSearch(
       setError(undefined);
 
       try {
+        const qd = getIssueQuery(query);
+        query = qd.query;
+        const requestParams: Record<string, any> = {
+          state: state,
+          scope: scope,
+          search: query || "",
+          in: "title",
+        };
+        injectQueryNamedParameters(requestParams, qd, scope, false);
+        injectQueryNamedParameters(requestParams, qd, scope, true);
         if (group) {
-          const glIssues = await gitlab.getGroupIssues(
-            {
-              state: state,
-              scope: scope,
-              search: query || "",
-              in: "title",
-            },
-            group.id
-          );
+          const glIssues = await gitlab.getGroupIssues(requestParams, group.id);
           if (!cancel) {
             setIssues(glIssues);
           }
         } else {
-          const glIssues = await gitlab.getIssues(
-            {
-              state: state,
-              scope: scope,
-              search: query || "",
-              in: "title",
-            },
-            project
-          );
+          const glIssues = await gitlab.getIssues(requestParams, project);
           if (!cancel) {
             setIssues(glIssues);
           }
