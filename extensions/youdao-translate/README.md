@@ -1,6 +1,6 @@
 # Raycast Youdao Translate
 
-This extension brings Youdao translate to raycast!
+This extension brings Youdao translate to Raycast!
 
 **Support cross word translation, Supports 111 languages**
 
