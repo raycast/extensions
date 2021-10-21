@@ -1,22 +1,25 @@
 import {
   ActionPanel,
+  closeMainWindow,
   CopyToClipboardAction,
+  environment,
   Icon,
   Image,
+  ImageLike,
   KeyboardShortcut,
   List,
   OpenInBrowserAction,
   OpenWithAction,
-  ShowInFinderAction,
-  closeMainWindow,
-  environment,
   preferences,
   render,
+  ShowInFinderAction,
 } from "@raycast/api";
+import parser from 'fast-xml-parser'
 import Frecency from "frecency";
-import { mkdirSync, statSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "fs";
 import { sync } from "glob";
 import { homedir } from "os";
+import path from 'path'
 import { useEffect, useState } from "react";
 import open = require("open");
 import fuzzysort = require("fuzzysort");
@@ -37,6 +40,73 @@ type ProjectState = {
   isLoading: boolean;
 };
 
+enum SupportedIDE {
+  WebStorm,
+  PyCharm,
+  VSCode,
+}
+
+function getIDEName(ide: SupportedIDE): string {
+  switch (ide) {
+    case SupportedIDE.WebStorm: return 'WebStorm'
+    case SupportedIDE.PyCharm: return 'PyCharm'
+    case SupportedIDE.VSCode: return 'Visual Studio Code'
+    default: return 'Unknown'
+  }
+}
+
+function getJetbrainsPath(appName: string): string | undefined {
+  let appPath: string | null = path.join('/Applications/', appName)
+  if (!existsSync(appPath)) {
+    appPath = path.join(homedir(), 'Applications/JetBrains Toolbox/', appName)
+  }
+  if (!existsSync(appPath)) {
+    return undefined
+  }
+  return appPath
+}
+function checkPathExists(v: string): string | undefined {
+  return existsSync(v) ? v : undefined
+}
+
+const installedIDEsPaths = new Map<SupportedIDE, string | undefined>([
+  [SupportedIDE.WebStorm, getJetbrainsPath('WebStorm.app')],
+  [
+    SupportedIDE.PyCharm,
+    // todo: add "Prefer Professional Edition" to configuration
+    getJetbrainsPath('PyCharm.app')
+    ?? getJetbrainsPath('PyCharm Professional Edition.app')
+    ?? getJetbrainsPath('PyCharm Community Edition.app'),
+  ],
+  // todo: add vscode insiders
+  [SupportedIDE.VSCode, checkPathExists('/Applications/Visual Studio Code.app')],
+])
+function getIDEPath(ide: SupportedIDE): string | undefined {
+  return installedIDEsPaths.get(ide)
+}
+
+function getIDEIcon(ide: SupportedIDE): ImageLike {
+  const idePath = installedIDEsPaths.get(ide)
+  if (idePath) {
+    return {fileIcon: idePath}
+  }
+  return Icon.TextDocument
+}
+
+let fallbackIDEPath: string | undefined
+let fallbackIDEName: string = 'Unknown'
+// todo: support fallback ide configuration
+for (const [ide, idePath] of installedIDEsPaths.entries()) {
+  if (idePath) {
+    fallbackIDEPath = idePath
+    fallbackIDEName = getIDEName(ide)
+    break
+  }
+}
+
+const forkPath = '/Applications/Fork.app'
+const forkInstalled = existsSync(forkPath)
+
 class Project {
   name: string;
   displayPath: string;
@@ -51,6 +121,35 @@ class Project {
     const parts = path.split("/");
     this.name = parts[parts.length - 1];
   }
+
+  isGitRepo(): boolean {
+    const gitConfig = config.sync({ cwd: this.fullPath, path: ".git/config", expandKeys: true });
+    return !!gitConfig.core
+  }
+
+  detectIDE(): SupportedIDE | null {
+    try {
+      const ideaPath = path.join(this.fullPath, '.idea')
+      if (existsSync(ideaPath)) {
+        const imlFiles = sync(path.join(ideaPath, '*.iml'))
+        for (const filePath of imlFiles) {
+          const contents = readFileSync(filePath, 'utf8')
+          const parsedContents = parser.parse(contents, {ignoreAttributes: false})
+          switch (parsedContents?.module?.['@_type']) {
+            case 'PYTHON_MODULE': return SupportedIDE.PyCharm
+            case 'WEB_MODULE': return SupportedIDE.WebStorm
+          }
+        }
+      }
+      if (existsSync(path.join(this.fullPath, '.vscode'))) {
+        return SupportedIDE.VSCode
+      }
+    } catch (error) {
+      console.error('Unable to detect IDE', error)
+    }
+    return null
+  }
+
   gitRemotes(): Repo[] {
     let repos = [] as Repo[];
     const gitConfig = config.sync({ cwd: this.fullPath, path: ".git/config", expandKeys: true });
@@ -140,92 +239,106 @@ function Command() {
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchQuery} selectedItemId={(projects && projects[0]) ? projects[0].fullPath : ""}>
-      {projects?.map((project) => (
-        <List.Item
-          id={project.fullPath}
-          key={project.fullPath}
-          title={project.name}
-          accessoryTitle={project.displayPath}
-          icon={Icon.TextDocument}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Item
-                title="Open in VSCode"
-                key="editor"
-                onAction={() => {
-                  updateFrecency(searchQuery, project);
-                  open(project.fullPath, { app: { name: "/Applications/Visual Studio Code.app" } });
-                  closeMainWindow();
-                }}
-                icon={{ fileIcon: "/Applications/Visual Studio Code.app" }}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
-              />
-              <ActionPanel.Item
-                title="Open in Terminal"
-                key="terminal"
-                onAction={() => {
-                  updateFrecency(searchQuery, project);
-                  open(project.fullPath, { app: { name: "/Applications/iTerm.app", arguments: [project.fullPath] } });
-                  closeMainWindow();
-                }}
-                icon={{ fileIcon: "/Applications/iTerm.app" }}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
-              />
-              <ActionPanel.Item
-                title="Open in VSCode and Terminal"
-                key="both"
-                onAction={() => {
-                  updateFrecency(searchQuery, project);
-                  open(project.fullPath, { app: { name: "/Applications/iTerm.app", arguments: [project.fullPath] } });
-                  open(project.fullPath, { app: { name: "/Applications/Visual Studio Code.app" } });
-                  closeMainWindow();
-                }}
-                icon={Icon.Window}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-              />
-              {project.gitRemotes().map((remote, i) => {
-                const shortcut = i === 0 ? ({ modifiers: ["cmd"], key: "b" } as KeyboardShortcut) : undefined;
-                let icon = undefined as Image | undefined;
-                if (remote.host == "github.com") {
-                  icon = { source: { dark: "github-brands-dark.png", light: "github-brands-light.png" } };
-                } else if (remote.host == "gitlab.com") {
-                  icon = { source: { dark: "gitlab-brands-dark.png", light: "gitlab-brands-light.png" } };
-                }
-                return (
-                  <OpenInBrowserAction
-                    title={`Open on ${remote.host} (${remote.name})`}
-                    key={`open remote ${remote.name}`}
-                    url={remote.url}
-                    onOpen={() => updateFrecency(searchQuery, project)}
-                    shortcut={shortcut}
-                    icon={icon}
-                  />
-                );
-              })}
-              <OpenWithAction
-                key="openwith"
-                path={project.fullPath}
-                onOpen={() => updateFrecency(searchQuery, project)}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
-              />
-              <ShowInFinderAction
-                title={"Open in Finder"}
-                key="finder"
-                onShow={() => updateFrecency(searchQuery, project)}
-                path={project.fullPath}
-                shortcut={{ modifiers: ["cmd"], key: "f" }}
-              />
-              <CopyToClipboardAction
-                title={"Copy Path to Clipboard"}
-                key="clipboard"
-                onCopy={() => updateFrecency(searchQuery, project)}
-                content={project.fullPath}
-                shortcut={{ modifiers: ["cmd"], key: "p" }}
-              />
-            </ActionPanel>
-          }
-        ></List.Item>
-      ))}
+      {projects?.map((project) => {
+        const ide = project.detectIDE()
+
+        let idePath: string | undefined
+        let ideName: string | undefined
+        if (ide !== null) {
+          idePath = getIDEPath(ide)
+          ideName = getIDEName(ide)
+        }
+        if (!idePath) {
+          // fallback
+          idePath = fallbackIDEPath
+          ideName = fallbackIDEName
+        }
+        return (
+          <List.Item
+            id={project.fullPath}
+            key={project.fullPath}
+            title={project.name}
+            accessoryTitle={project.displayPath}
+            icon={ide !== null ? getIDEIcon(ide) : Icon.TextDocument}
+            actions={
+              <ActionPanel>
+                {idePath && (<ActionPanel.Item
+                  title={`Open in ${ideName}`}
+                  key="editor"
+                  onAction={() => {
+                    updateFrecency(searchQuery, project)
+                    open(project.fullPath, {app: {name: idePath || '', arguments: [project.fullPath]}})
+                    closeMainWindow()
+                  }}
+                  icon={{fileIcon: idePath}}
+                  shortcut={{modifiers: ['cmd'], key: 'e'}}
+                />)}
+                <ActionPanel.Item
+                  title="Open in Terminal"
+                  key="terminal"
+                  onAction={() => {
+                    updateFrecency(searchQuery, project)
+                    open(project.fullPath, {app: {name: '/Applications/iTerm.app', arguments: [project.fullPath]}})
+                    closeMainWindow()
+                  }}
+                  icon={{fileIcon: '/Applications/iTerm.app'}}
+                  shortcut={{modifiers: ['cmd'], key: 't'}}
+                />
+                {forkInstalled && project.isGitRepo() && (<ActionPanel.Item
+                  title="Open in Fork"
+                  key="git-fork"
+                  onAction={() => {
+                    updateFrecency(searchQuery, project)
+                    open(project.fullPath, {app: {name: forkPath, arguments: [project.fullPath]}})
+                    closeMainWindow()
+                  }}
+                  icon={{fileIcon: '/Applications/Fork.app'}}
+                  shortcut={{modifiers: ['cmd'], key: 'g'}}
+                />)}
+                {project.gitRemotes().map((remote, i) => {
+                  const shortcut = i === 0 ? ({modifiers: ['cmd'], key: 'b'} as KeyboardShortcut) : undefined
+                  let icon = undefined as Image | undefined
+                  if (remote.host == 'github.com') {
+                    icon = {source: {dark: 'github-brands-dark.png', light: 'github-brands-light.png'}}
+                  } else if (remote.host == 'gitlab.com') {
+                    icon = {source: {dark: 'gitlab-brands-dark.png', light: 'gitlab-brands-light.png'}}
+                  }
+                  return (
+                    <OpenInBrowserAction
+                      title={`Open on ${remote.host} (${remote.name})`}
+                      key={`open remote ${remote.name}`}
+                      url={remote.url}
+                      onOpen={() => updateFrecency(searchQuery, project)}
+                      shortcut={shortcut}
+                      icon={icon}
+                    />
+                  )
+                })}
+                <OpenWithAction
+                  key="openwith"
+                  path={project.fullPath}
+                  onOpen={() => updateFrecency(searchQuery, project)}
+                  shortcut={{modifiers: ['cmd'], key: 'o'}}
+                />
+                <ShowInFinderAction
+                  title={'Open in Finder'}
+                  key="finder"
+                  onShow={() => updateFrecency(searchQuery, project)}
+                  path={project.fullPath}
+                  shortcut={{modifiers: ['cmd'], key: 'f'}}
+                />
+                <CopyToClipboardAction
+                  title={'Copy Path to Clipboard'}
+                  key="clipboard"
+                  onCopy={() => updateFrecency(searchQuery, project)}
+                  content={project.fullPath}
+                  shortcut={{modifiers: ['cmd'], key: 'p'}}
+                />
+              </ActionPanel>
+            }
+          />
+        )
+      })}
     </List>
   );
 }
