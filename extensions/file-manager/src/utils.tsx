@@ -72,14 +72,14 @@ export function CreateDirectory(props: { path: string }) {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={(values: { fileName: string, fileContents: string }) => {
-            const filePath = `${props.path}/${values.fileName}`;
+          <SubmitFormAction onSubmit={(values: { directoryName: string }) => {
+            const filePath = `${props.path}/${values.directoryName}`;
             console.log(filePath)
             if (fs.existsSync(filePath)) {
-              showToast(ToastStyle.Failure, 'Error Creating File', 'File already exists');
+              showToast(ToastStyle.Failure, 'Error Creating Directory', 'Directory already exists');
             } else {
-              fs.writeFileSync(filePath, values.fileContents);
-              showToast(ToastStyle.Success, 'File Created', 'File successfully created');
+              fs.mkdirSync(filePath);
+              showToast(ToastStyle.Success, 'Directory Created', 'Directory successfully created');
               pop();
             }
           }} />
