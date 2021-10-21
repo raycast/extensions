@@ -10,7 +10,7 @@
       "name": "index",
       "title": "Translate",
       "subtitle": "Translate Content",
-      "description": "Translate Content By Youdao API",
+      "description": "Translate text using Youdao",
       "mode": "view"
     }
   ],
