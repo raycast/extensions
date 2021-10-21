@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Icon,
   Color,
@@ -8,6 +8,7 @@ import {
   ActionPanel,
   CopyToClipboardAction,
   OpenInBrowserAction,
+  SubmitFormAction,
   getPreferenceValues,
   getSelectedText,
   useNavigation,
@@ -17,19 +18,25 @@ import fetch from "node-fetch";
 import crypto from "crypto";
 import qs from "querystring";
 
-type translateResult = {
-  translation?: Array<string>
-  isWord: boolean
-  basic?: { phonetic?: string, explains?: Array<string> }
-  l: string
-  web?: Array<translateWebResult>
-  webdict?: { url: string }
-  errorCode: string
+interface translateResult {
+  translation?: Array<string>;
+  isWord: boolean;
+  basic?: { phonetic?: string, explains?: Array<string> };
+  l: string;
+  web?: Array<translateWebResult>;
+  webdict?: { url: string };
+  errorCode: string;
 }
 
-type translateWebResult = {
-  value: Array<string>
-  key: string
+interface translateWebResult {
+  value: Array<string>;
+  key: string;
+}
+
+interface translateRequest {
+  content: string;
+  from_language: string;
+  to_language: string;
 }
 
 function generateSign(content: string, salt: number, app_key: string, app_secret: string) {
@@ -51,10 +58,10 @@ function translateAPI(content: string, from_language: string, to_language: strin
   });
 }
 
-function LanguageFormDDropdown(props: { id: string, title: string, language: string, set_language: React.Dispatch<React.SetStateAction<string>> }) {
-  const { id, title, language, set_language } = props;
+function LanguageFormDDropdown(props: { id: string, title: string }) {
+  const { id, title } = props;
 
-  return <Form.Dropdown id={id} title={title} value={language} onChange={set_language}>
+  return <Form.Dropdown id={id} title={title} defaultValue="auto">
     <Form.Dropdown.Section title="Auto">
       <Form.Dropdown.Item value="auto" title="Auto choose language(自动选取)" />
     </Form.Dropdown.Section>
@@ -266,10 +273,7 @@ function Translate(props: { content: string | undefined; from_language: string; 
 }
 
 function Main() {
-  const [input, set_input] = useState<string>();
   const [select, set_select] = useState<string>();
-  const [from_language, set_from_language] = useState<string>("auto");
-  const [to_language, set_to_language] = useState<string>("auto");
 
   const { push } = useNavigation();
   useEffect(() => {
@@ -286,16 +290,19 @@ function Main() {
   return (
     <Form navigationTitle="Please enter what you want translated (输入内容)" actions={
       <ActionPanel title="Translate">
-        <ActionPanel.Item title="Translate" onAction={() => push(
-          <Translate content={input || select} to_language={to_language} from_language={from_language} />
-        )} />
+        <SubmitFormAction title="Translate" onSubmit={(input: translateRequest) => {
+          push(
+            <Translate content={input.content || select} to_language={input.to_language}
+                       from_language={input.from_language} />
+          );
+        }} />
       </ActionPanel>
     }>
-      <Form.TextArea title="Content(内容)" id="content" value={input} onChange={set_input}
+      <Form.TextArea title="Content(内容)" id="content"
                      placeholder={select !== "" ? `you selected ${select}` : "please enter content"} />
       <Form.Separator />
-      <LanguageFormDDropdown id="from" title="From(源语言)" language={from_language} set_language={set_from_language} />
-      <LanguageFormDDropdown id="to" title="To(目标语言)" language={to_language} set_language={set_to_language} />
+      <LanguageFormDDropdown id="from_language" title="From(源语言)" />
+      <LanguageFormDDropdown id="to_language" title="To(目标语言)" />
     </Form>
   );
 }

@@ -7,7 +7,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "youdao_translate",
       "title": "Translate",
       "subtitle": "Youdao",
       "description": "Translate text using Youdao",
@@ -37,7 +37,7 @@
     "youdao"
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.25.1",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
