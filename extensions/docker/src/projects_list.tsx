@@ -4,6 +4,7 @@ import Dockerode, { ContainerInfo } from '@priithaamer/dockerode';
 import ContainerList from './container_list';
 
 import { isContainerRunning } from './docker/container';
+import ErrorDetail from './error_detail';
 
 type ComposeProject = {
   name: string;
@@ -84,7 +85,11 @@ const useDocker = (docker: Dockerode) => {
 
 export default function ProjectsList() {
   const docker = useMemo(() => new Dockerode(), []);
-  const { projects, loading, startProject, stopProject } = useDocker(docker);
+  const { projects, loading, error, startProject, stopProject } = useDocker(docker);
+
+  if (error) {
+    return <ErrorDetail error={error} />;
+  }
 
   return (
     <List isLoading={loading}>

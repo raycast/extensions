@@ -1,7 +1,8 @@
-import { ActionPanel, Color, Detail, Icon, List, showToast, ToastStyle } from '@raycast/api';
-import { useEffect, useMemo, useState } from 'react';
 import Dockerode, { ContainerInfo } from '@priithaamer/dockerode';
+import { ActionPanel, Color, Icon, List, showToast, ToastStyle } from '@raycast/api';
+import { useEffect, useMemo, useState } from 'react';
 import { isContainerRunning } from './docker/container';
+import ErrorDetail from './error_detail';
 
 const containerName = (container: ContainerInfo) => container.Names.map((name) => name.replace(/^\//, '')).join(', ');
 
@@ -82,7 +83,7 @@ export default function ContainerList(props: { projectFilter?: string }) {
   );
 
   if (error) {
-    return <Detail markdown={`## Error connecting to Docker\n\n${error.message}\n`} />;
+    return <ErrorDetail error={error} />;
   }
 
   return (

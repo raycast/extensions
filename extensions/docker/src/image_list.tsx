@@ -1,8 +1,9 @@
-import { ActionPanel, Color, Detail, Icon, List, PushAction, showToast, ToastStyle } from '@raycast/api';
-import { useEffect, useMemo, useState } from 'react';
 import Dockerode, { ImageInfo } from '@priithaamer/dockerode';
-import ImageDetail from './image_detail';
+import { ActionPanel, Color, Icon, List, PushAction, showToast, ToastStyle } from '@raycast/api';
+import { useEffect, useMemo, useState } from 'react';
 import { formatBytes, imageTitle } from './docker/image';
+import ErrorDetail from './error_detail';
+import ImageDetail from './image_detail';
 
 const useDocker = (docker: Dockerode) => {
   const [isLoading, setLoading] = useState(false);
@@ -50,7 +51,7 @@ export default function ImageList() {
   useImages();
 
   if (error) {
-    return <Detail markdown={`## Error connecting to Docker\n\n${error.message}\n`} />;
+    return <ErrorDetail error={error} />;
   }
 
   return (
