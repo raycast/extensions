@@ -17,6 +17,7 @@ import {
 import { promisify } from 'util';
 import { exec as _exec } from 'child_process';
 const exec = promisify(_exec);
+import filesize from 'filesize'
 import * as fs from "fs";
 
 export type FileType = 'directory' | 'file' | 'symlink' | 'other';
@@ -33,6 +34,8 @@ export type PreferencesType = {
   showDots: boolean;
   directoriesFirst: boolean;
   caseSensitive: boolean;
+  showFilePermissions: boolean;
+  showFileSize: boolean;
 }
 
 export async function runShellScript(command: string) {
@@ -92,12 +95,14 @@ export function CreateDirectory(props: { path: string }) {
 }
 
 export function DirectoryItem(props: { fileData: FileDataType }) {
+  const preferences: PreferencesType = getPreferenceValues();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
   return (
     <List.Item
       key={filePath}
       id={filePath}
       title={props.fileData.name}
+      subtitle={preferences.showFilePermissions ? props.fileData.permissions : ''}
       icon={{ fileIcon: filePath }}
       actions={
         <ActionPanel>
@@ -113,6 +118,7 @@ export function DirectoryItem(props: { fileData: FileDataType }) {
 }
 
 export function FileItem(props: { fileData: FileDataType }) {
+  const preferences: PreferencesType = getPreferenceValues();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
   return (
     <List.Item
@@ -120,6 +126,8 @@ export function FileItem(props: { fileData: FileDataType }) {
       id={filePath}
       title={props.fileData.name}
       icon={{ fileIcon: filePath }}
+      subtitle={preferences.showFilePermissions ? props.fileData.permissions : ''}
+      accessoryTitle={preferences.showFileSize ? filesize(props.fileData.size, { round: 0, roundingMethod: 'floor', spacer: '' }) : ''}
       actions={
         <ActionPanel>
           <OpenAction title="Open File" target={filePath} />
