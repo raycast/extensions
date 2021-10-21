@@ -15,7 +15,7 @@ export const formatContainerDetailMarkdown = (container: ContainerInspectInfo | 
       markdown.attributes([
         ['Image', container.Config.Image],
         ['Status', container.State.Status],
-        ['Command', '`' + container.Config.Cmd.join(' ') + '`'],
+        ['Command', '`' + container.Config.Cmd?.join(' ') + '`'],
       ]) +
       renderEnvSection(container.Config.Env) +
       `\n`
