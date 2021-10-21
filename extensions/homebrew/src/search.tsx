@@ -1,17 +1,19 @@
 import {
   ActionPanel,
   ActionPanelItem,
+  CopyToClipboardAction,
+  Color,
+  Icon,
   List,
+  OpenInBrowserAction,
+  PushAction,
   render,
   showToast,
   ToastStyle,
-  OpenInBrowserAction,
-  CopyToClipboardAction,
-  Icon,
-  Color,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { brewSearchFormula, brewInstalled, brewInstall } from "./brew";
+import { FormulaInfo } from "./components";
 
 /// Main
 
@@ -41,12 +43,14 @@ function Main() {
 
   function FormulaListItem(props: { formula: Formula }) {
     const formula = props.formula;
+    const isInstalled = formula.installed.length > 0;
     let version = formula.versions.stable;
     let tintColor = Color.SecondaryText;
-    if (formula.installed.length > 0) {
+    if (isInstalled) {
       version = formula.installed[0].version;
       tintColor = Color.Green;
     }
+
     return (
       <List.Item
         id={formula.name}
@@ -57,9 +61,10 @@ function Main() {
         actions={
           <ActionPanel>
             <ActionPanel.Section>
-              <ActionPanelItem title="Install"
+              <PushAction title="Show Details" target={<FormulaInfo formula={formula} isInstalled={isInstalled} />} />
+              <ActionPanelItem title={"Install"}
                                icon={Icon.Plus}
-                               shortcut={{ modifiers:["cmd"], key: "i" }}
+                               shortcut={{ modifiers:["cmd"], key: isInstalled ? "x" : "i" }}
                                onAction={async () => {
                                  await install(formula);
                                  installed.set(formula.name, formula);

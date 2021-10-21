@@ -1,19 +1,21 @@
 import {
   ActionPanel,
   ActionPanelItem,
-  List,
-  ListSection,
-  render,
-  showToast,
-  ToastStyle,
-  OpenInBrowserAction,
-  ShowInFinderAction,
+  Color,
   CopyToClipboardAction,
   Icon,
-  Color,
+  List,
+  ListSection,
+  OpenInBrowserAction,
+  PushAction,
+  render,
+  ShowInFinderAction,
+  showToast,
+  ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { brewInstalled, brewUninstall } from "./brew";
+import { FormulaInfo } from "./components";
 
 interface Installed {
   formulae: Formula[];
@@ -35,7 +37,8 @@ function Main() {
 
   function FormulaListItem(props: { formula: Formula }) {
     const formula = props.formula;
-    const version = formula.installed[0] ? formula.installed[0].version : "";
+    const isInstalled = formula.installed.length > 0;
+    const version = isInstalled ? formula.installed[0].version : "";
     return (
       <List.Item id={formula.name}
                  title={formula.name}
@@ -46,6 +49,7 @@ function Main() {
                    <ActionPanel>
                      <ActionPanel.Section>
                        <ShowInFinderAction path={`/usr/local/bin/${formula.name}`} />
+                       <PushAction title="Show Details" target={<FormulaInfo formula={formula} isInstalled={isInstalled} />} />
                        <OpenInBrowserAction url={formula.homepage} />
                        <CopyToClipboardAction title="Copy URL" content={formula.homepage} />
                      </ActionPanel.Section>
