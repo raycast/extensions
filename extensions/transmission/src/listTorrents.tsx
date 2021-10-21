@@ -45,7 +45,7 @@ const statusToLabel = (status: TorrentStatus, percentDone: number) => {
 const statusIconSource = (status: TorrentStatus, percentDone: number): string => {
   switch (status) {
     case TorrentStatus.Stopped:
-      return "status-stopped.png";
+      return percentDone === 1 ? Icon.Checkmark : "status-stopped.png";
     case TorrentStatus.QueuedToCheckFiles:
     case TorrentStatus.CheckingFiles:
     case TorrentStatus.QueuedToDownload:
