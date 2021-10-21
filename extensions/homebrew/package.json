@@ -1,7 +1,9 @@
 {
   "name": "homebrew",
   "title": "Homebrew",
-  "description": "Integrate Homebrew package manager in Raycast",
+  "description": "Search and install Homebrew formulae",
+  "author": "nhojb",
+  "license": "MIT",
   "icon": "command-icon.png",
   "commands": [
     {
@@ -13,14 +15,14 @@
     },
     {
       "name": "search",
-      "title": "Search Packages",
+      "title": "Search Formulae",
       "subtitle": "Homebrew",
       "description": "Search ",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "file:///Users/john/Projects/Raycast/raycast-team/api",
+    "@raycast/api": "^1.25.0",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
