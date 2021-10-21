@@ -8,7 +8,7 @@
   "commands": [
     {
       "name": "switchhosts",
-      "title": "SwitchHosts",
+      "title": "Search Hosts",
       "subtitle": "SwitchHosts",
       "description": "Show hosts And Switch hosts quickly!",
       "mode": "view"
