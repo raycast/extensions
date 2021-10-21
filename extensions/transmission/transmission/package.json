@@ -100,6 +100,7 @@
     "@raycast/api": "^1.25.0",
     "date-fns": "^2.25.0",
     "node-fetch": "^3.0.0",
+    "pretty-bytes": "^5.6.0",
     "transmission-promise": "^1.1.5"
   },
   "devDependencies": {

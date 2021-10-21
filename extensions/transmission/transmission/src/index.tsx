@@ -6,8 +6,9 @@ import { List, showToast, ToastStyle, Icon, ActionPanel, Color, getPreferenceVal
 import { useState, useMemo, useCallback, useEffect } from "react";
 import Transmission from "transmission-promise";
 import { formatDistanceToNow } from "date-fns";
+import prettyBytes from "pretty-bytes";
 import { useInterval } from "./utils/hooks";
-import { capitalize } from "./utils/string";
+import { capitalize, truncate, padStart } from "./utils/string";
 
 enum TorrentStatus {
   Stopped = 0,
@@ -186,12 +187,18 @@ function TorrentListItem({
     <List.Item
       id={String(torrent.id)}
       key={torrent.id}
-      title={torrent.fileName}
+      title={truncate(torrent.fileName, 60)}
       icon={{
         source: statusIconSource(torrent.status, torrent.percentDone),
         tintColor: statusIconColor(torrent.status),
       }}
-      accessoryTitle={`${Math.round(torrent.percentDone * 100)}%`}
+      accessoryTitle={[
+        `⬇️ ${padStart(prettyBytes(torrent.rateDownload), 4)}/s`,
+        " - ",
+        `⬆️ ${padStart(prettyBytes(torrent.rateUpload), 4)}/s`,
+        " - ",
+        `${padStart(Math.round(torrent.percentDone * 100), 3)}%`,
+      ].join(" ")}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={`ETA: ${formatStatus(torrent)}`}>
@@ -228,4 +235,6 @@ type Torrent = {
   eta: number;
   percentDone: number;
   status: TorrentStatus;
+  rateDownload: number;
+  rateUpload: number;
 };
