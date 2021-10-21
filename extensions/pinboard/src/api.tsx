@@ -116,5 +116,10 @@ export async function addBookmark(bookmark: Bookmark): Promise<unknown> {
     return Promise.reject(response.statusText);
   }
 
-  return response.json();
+  const result = (await response.json()) as Record<string, unknown>;
+  if (result?.result_code !== "done") {
+    return Promise.reject(result?.result_code ?? "Response Error");
+  }
+
+  return result;
 }
