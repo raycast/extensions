@@ -1,8 +1,7 @@
+import Dockerode, { ContainerInfo } from '@priithaamer/dockerode';
 import { ActionPanel, Color, Icon, List, PushAction, showToast, ToastStyle } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
-import Dockerode, { ContainerInfo } from '@priithaamer/dockerode';
 import ContainerList from './container_list';
-
 import { isContainerRunning } from './docker/container';
 import ErrorDetail from './error_detail';
 
@@ -109,7 +108,7 @@ export default function ProjectsList() {
               <ActionPanel.Item
                 title="Start All Containers"
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
-                icon={{ source: { light: 'icon-startall-light.png', dark: 'icon-startall-dark.png' } }}
+                icon={{ source: 'icon-startall.png', tintColor: Color.PrimaryText }}
                 onAction={async () => {
                   await startProject(project);
                   await showToast(ToastStyle.Success, `Started ${project.name}`);
@@ -118,7 +117,7 @@ export default function ProjectsList() {
               <ActionPanel.Item
                 title="Stop All Containers"
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
-                icon={{ source: { light: 'icon-stopall-light.png', dark: 'icon-stopall-dark.png' } }}
+                icon={{ source: 'icon-stopall.png', tintColor: Color.PrimaryText }}
                 onAction={async () => {
                   await stopProject(project);
                   await showToast(ToastStyle.Success, `Stopped ${project.name}`);

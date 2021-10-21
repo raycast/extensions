@@ -40,7 +40,7 @@ export default function ContainerList(props: { projectFilter?: string }) {
                   <ActionPanel.Item
                     title="Stop Container"
                     shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
-                    icon={{ source: { light: 'icon-stop-light.png', dark: 'icon-stop-dark.png' } }}
+                    icon={{ source: 'icon-stop.png', tintColor: Color.PrimaryText }}
                     onAction={async () => {
                       await stopContainer(containerInfo);
                       await showToast(ToastStyle.Success, `Container ${containerName(containerInfo)} stopped`);
@@ -61,7 +61,7 @@ export default function ContainerList(props: { projectFilter?: string }) {
                 <ActionPanel.Item
                   title="Start Container"
                   shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
-                  icon={{ source: { light: 'icon-start-light.png', dark: 'icon-start-dark.png' } }}
+                  icon={{ source: 'icon-start.png', tintColor: Color.PrimaryText }}
                   onAction={async () => {
                     await startContainer(containerInfo);
                     await showToast(ToastStyle.Success, `Container ${containerName(containerInfo)} started`);
