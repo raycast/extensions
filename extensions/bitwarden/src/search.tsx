@@ -139,7 +139,7 @@ function ItemListItem(props: { item: Item; folder: Folder | undefined; refreshIt
                   markdown={codeBlock(item.notes)}
                   actions={
                     <ActionPanel>
-                      <CopyToClipboardAction content={item.notes} />
+                      <CopyToClipboardAction title="Copy Secure Notes" content={item.notes} />
                     </ActionPanel>
                   }
                 />
