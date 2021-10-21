@@ -1,7 +1,7 @@
 {
   "name": "buildkite",
   "title": "Buildkite",
-  "description": "Open Buildkite pipelines and view Buildkite builds",
+  "description": "Search Buildkite pipelines and builds",
   "icon": "buildkite.png",
   "author": "mskelton",
   "license": "MIT",
