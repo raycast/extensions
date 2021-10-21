@@ -7,7 +7,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "pipelines",
+      "name": "search-pipelines",
       "title": "Search Pipelines",
       "subtitle": "Buildkite",
       "description": "Search Buildkite pipelines in your organization.",
