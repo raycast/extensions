@@ -8,7 +8,7 @@
   "commands": [
     {
       "name": "set-output-device",
-      "title": "Set output device",
+      "title": "Set Output Device",
       "subtitle": "Audio Device",
       "description": "Sets the active audio output device.",
       "keywords": [
@@ -20,7 +20,7 @@
     },
     {
       "name": "set-input-device",
-      "title": "Set input device",
+      "title": "Set Input Device",
       "subtitle": "Audio Device",
       "description": "Sets the active audio input device.",
       "keywords": [
