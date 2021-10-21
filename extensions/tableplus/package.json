@@ -1,0 +1,36 @@
+{
+  "name": "tableplus",
+  "title": "TablePlus",
+  "description": "Search and open database connections in TablePlus",
+  "icon": "icon.png",
+  "author": "pernielsentikaer",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "database_list",
+      "title": "Search Databases",
+      "subtitle": "TablePlus",
+      "description": "List all databases",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.1",
+    "plist": "^3.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/plist": "^3.0.2",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
