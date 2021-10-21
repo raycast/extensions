@@ -56,12 +56,7 @@ export const useDocker = (docker: Dockerode) => {
 
   const useContainers = () => {
     useEffect(() => {
-      console.log('--- Fetch containers');
       fetchContainers();
-
-      return () => {
-        console.log('--- Stop fetch containers');
-      };
     }, []);
 
     return { containers, isLoading: loading };
@@ -78,13 +73,7 @@ export const useDocker = (docker: Dockerode) => {
         setContainerInfo(response);
         setLoading(false);
       }
-      console.log('-- Fetch container info');
-
       fetchContainerInfo();
-
-      return () => {
-        console.log('-- Stop container info');
-      };
     }, [containerId]);
 
     return {

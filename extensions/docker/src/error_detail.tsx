@@ -9,10 +9,6 @@ export default function ErrorDetail({ error }: { error: Error }) {
     async function fetchApplications() {
       const applications = await getApplications();
       setApplications(applications);
-
-      for (const application of applications) {
-        console.log(application.bundleId);
-      }
     }
     fetchApplications();
   }, []);
