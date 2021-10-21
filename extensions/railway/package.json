@@ -8,7 +8,7 @@
   "commands": [
     {
       "name": "railway-projects",
-      "title": "Railway Projects",
+      "title": "Search Projects",
       "subtitle": "Railway",
       "description": "Search and navigate to your Railway projects",
       "mode": "view"
