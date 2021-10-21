@@ -20,28 +20,50 @@
       "type": "checkbox",
       "default": false,
       "required": true,
-      "title": "Case Sensitive",
-      "description": "Show files and directories with uppercase letters before ones with lowercase letters"
+      "title": "Files",
+      "description": "Show files and directories with uppercase letters before ones with lowercase letters",
+      "label": "Case Sensitive"
     },
     {
       "name": "directoriesFirst",
       "type": "checkbox",
       "default": false,
       "required": true,
-      "title": "Directories First",
-      "description": "Show directories before other files"
+      "title": "",
+      "description": "Show directories before other files",
+      "label": "Directories First"
     },
     {
       "name": "showDots",
       "type": "checkbox",
       "default": false,
       "required": true,
-      "title": "Show Dotfiles",
-      "description": "Show dotfiles (files and directories that start with a .)"
+      "title": "",
+      "description": "Show dotfiles (files and directories that start with a .)",
+      "label": "Show Dotfiles"
+    },
+    {
+      "name": "showFilePermissions",
+      "type": "checkbox",
+      "default": true,
+      "required": true,
+      "title": "",
+      "description": "Show the permissions of files",
+      "label": "Show File Permissions"
+    },
+    {
+      "name": "showFileSize",
+      "type": "checkbox",
+      "default": true,
+      "required": true,
+      "title": "",
+      "description": "Show file size",
+      "label": "Show File Size"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0"
+    "@raycast/api": "^1.25.0",
+    "filesize": "^8.0.3"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
