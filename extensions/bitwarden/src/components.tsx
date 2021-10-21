@@ -8,7 +8,7 @@ import {
   CopyToClipboardAction,
   getPreferenceValues,
 } from "@raycast/api";
-import { BitwardenApi } from "./api";
+import { Bitwarden } from "./api";
 
 export function TroubleshootingGuide(): JSX.Element {
   showToast(ToastStyle.Failure, "Bitwarden CLI not found");
@@ -18,7 +18,7 @@ export function TroubleshootingGuide(): JSX.Element {
 
 1. The Bitwarden CLI is [correctly installed](https://bitwarden.com/help/article/cli/#download-and-install)
 1. The path of the installation matches the Bitwarden CLI Installation Path extension setting
-> Currently set to: \`${path}\`
+  > Currently set to: \`${path}\`
 `;
 
   return (
@@ -33,17 +33,16 @@ export function TroubleshootingGuide(): JSX.Element {
   );
 }
 
-export function UnlockForm(props: { setSessionToken: (session: string) => void, bitwardenApi: BitwardenApi }): JSX.Element {
+export function UnlockForm(props: { setSessionToken: (session: string) => void, bitwardenApi: Bitwarden }): JSX.Element {
   async function onSubmit(values: { password: string }) {
     try {
       const toast = await showToast(ToastStyle.Animated, "Unlocking Vault...", "Please wait");
-      const sessionToken = await props.bitwardenApi.unlockVault(values.password)
+      const sessionToken = await props.bitwardenApi.unlock(values.password)
       toast.hide();
 
       props.setSessionToken(sessionToken);
     } catch (error) {
-      console.log(error);
-      showToast(ToastStyle.Failure, "Failed to unlock vault", "Invalid password");
+      showToast(ToastStyle.Failure, "Failed to unlock vault", "Invalid credentials");
     }
   }
   return (

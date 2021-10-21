@@ -13,17 +13,17 @@ import { Item, Folder } from "./types";
 import { useEffect, useState } from "react";
 import treeify from "treeify";
 import { filterNullishPropertiesFromObject, codeBlock, titleCase } from "./utils";
-import { useBitwarden as useSessionToken } from "./hooks";
+import { useSessionToken } from "./hooks";
 import { TroubleshootingGuide, UnlockForm } from "./components";
 import { existsSync } from "fs";
-import { BitwardenApi } from "./api";
+import { Bitwarden } from "./api";
 import { dirname } from "path";
 
 const { cliPath, clientId, clientSecret, fetchFavicons } = getPreferenceValues();
 process.env.PATH = dirname(cliPath)
-const bitwardenApi = new BitwardenApi(clientId, clientSecret);
+const bitwardenApi = new Bitwarden(clientId, clientSecret);
 
-export default function ListCommand(): JSX.Element {
+export default function Search(): JSX.Element {
   if (!existsSync(cliPath)) {
     return <TroubleshootingGuide />;
   }
@@ -35,7 +35,7 @@ export default function ListCommand(): JSX.Element {
   return <ItemList bitwardenApi={bitwardenApi} sessionToken={sessionToken}/>;
 }
 
-function ItemList(props: { bitwardenApi: BitwardenApi; sessionToken: string | undefined }) {
+function ItemList(props: { bitwardenApi: Bitwarden; sessionToken: string | undefined }) {
   const { bitwardenApi, sessionToken } = props;
   const [state, setState] = useState<{ folders: Folder[]; items: Item[] }>();
 
@@ -71,7 +71,7 @@ function ItemList(props: { bitwardenApi: BitwardenApi; sessionToken: string | un
           refreshItems={async () => {
             if (sessionToken) {
               const toast = await showToast(ToastStyle.Animated, "Syncing Items...");
-              await bitwardenApi.syncItems(sessionToken)
+              await bitwardenApi.sync(sessionToken)
               await loadItems(sessionToken);
               await toast.hide();
             }

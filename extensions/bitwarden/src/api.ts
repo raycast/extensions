@@ -1,6 +1,6 @@
 import execa from "execa";
 
-export class BitwardenApi {
+export class Bitwarden {
   private env: Record<string, string>;
   constructor(clientId: string, clientSecret: string) {
     this.env = {
@@ -9,7 +9,7 @@ export class BitwardenApi {
     };
   }
 
-  async syncItems(sessionToken: string): Promise<void> {
+  async sync(sessionToken: string): Promise<void> {
       await this.exec(["sync", "--session", sessionToken])
   }
 
@@ -22,12 +22,12 @@ export class BitwardenApi {
     return JSON.parse(stdout)
   }
 
-  async unlockVault(password: string): Promise<string> {
+  async unlock(password: string): Promise<string> {
       const {stdout: sessionToken} = await this.exec(["unlock", password, "--raw"])
       return sessionToken
   }
 
-  async getVaultStatus(sessionToken: string | undefined): Promise<"unlocked" | "locked" | "unauthenticated"> {
+  async status(sessionToken: string | undefined): Promise<"unlocked" | "locked" | "unauthenticated"> {
     const {stdout} = await this.exec(sessionToken ? ["status", "--session", sessionToken]: ["status"]);
     return JSON.parse(stdout).status
   }

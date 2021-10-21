@@ -1,16 +1,16 @@
 import { getLocalStorageItem, showToast, ToastStyle, removeLocalStorageItem, setLocalStorageItem } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { BitwardenApi } from "./api";
+import { Bitwarden } from "./api";
 
-const LocalStorageSessionKey = "sessionToken"
-export function useBitwarden(bitwardenApi: BitwardenApi): [string | null | undefined, (sessionToken: string | null) => void] {
+const sessionKey = "sessionToken"
+export function useSessionToken(bitwardenApi: Bitwarden): [string | null | undefined, (sessionToken: string | null) => void] {
   const [sessionToken, setSessionToken] = useState<string | null>();
 
   useEffect(() => {
     async function getSessionToken() {
-      const sessionToken = await getLocalStorageItem<string>(LocalStorageSessionKey);
+      const sessionToken = await getLocalStorageItem<string>(sessionKey);
 
-      const status = await bitwardenApi.getVaultStatus(sessionToken)
+      const status = await bitwardenApi.status(sessionToken)
 
       if (status === "unlocked") setSessionToken(sessionToken);
       else if (status === "locked") setSessionToken(null);
@@ -31,12 +31,12 @@ export function useBitwarden(bitwardenApi: BitwardenApi): [string | null | undef
   return [
     sessionToken,
     async (sessionToken: string | null) => {
-      if (!sessionToken) {
-        removeLocalStorageItem(LocalStorageSessionKey);
-        setSessionToken(null);
-      } else {
-        setLocalStorageItem(LocalStorageSessionKey, sessionToken);
+      if (sessionToken) {
+        setLocalStorageItem(sessionKey, sessionToken);
         setSessionToken(sessionToken);
+      } else {
+        removeLocalStorageItem(sessionKey);
+        setSessionToken(null);
       }
     },
   ];
