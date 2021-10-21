@@ -1,8 +1,13 @@
-import { List, showToast, ToastStyle, Icon, ActionPanel } from "@raycast/api";
+/**
+ * RPC spec is available at https://trac.transmissionbt.com/browser/trunk/extras/rpc-spec.txt
+ */
+
+import { List, showToast, ToastStyle, Icon, ActionPanel, Color, getPreferenceValues } from "@raycast/api";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import Transmission from "transmission-promise";
 import { formatDistanceToNow } from "date-fns";
-import { useInterval } from "./utils/useInterval";
+import { useInterval } from "./utils/hooks";
+import { capitalize } from "./utils/string";
 
 enum TorrentStatus {
   Stopped = 0,
@@ -14,10 +19,12 @@ enum TorrentStatus {
   Seeding = 6,
 }
 
-const statusToLabel = (status: TorrentStatus) => {
+const preferences = getPreferenceValues();
+
+const statusToLabel = (status: TorrentStatus, percentDone: number) => {
   switch (status) {
     case TorrentStatus.Stopped:
-      return "Stopped";
+      return percentDone === 1 ? "Completed" : "Stopped";
     case TorrentStatus.QueuedToCheckFiles:
       return "Queued to check files";
     case TorrentStatus.CheckingFiles:
@@ -33,16 +40,100 @@ const statusToLabel = (status: TorrentStatus) => {
   }
 };
 
-/**
- * RPC spec is available at https://trac.transmissionbt.com/browser/trunk/extras/rpc-spec.txt
- */
+const statusIconSource = (status: TorrentStatus, percentDone: number): string => {
+  switch (status) {
+    case TorrentStatus.Stopped:
+      return "status-stopped.png";
+    case TorrentStatus.QueuedToCheckFiles:
+    case TorrentStatus.CheckingFiles:
+    case TorrentStatus.QueuedToDownload:
+      return Icon.Dot;
+    case TorrentStatus.Downloading:
+      switch (Math.round(percentDone / 10)) {
+        case 0:
+          return "status-progress-0.png";
+        case 1:
+          return "status-progress-1.png";
+        case 2:
+          return "status-progress-2.png";
+        case 3:
+          return "status-progress-3.png";
+        case 4:
+          return "status-progress-4.png";
+        case 5:
+          return "status-progress-5.png";
+        case 6:
+          return "status-progress-6.png";
+        case 7:
+          return "status-progress-7.png";
+        case 8:
+          return "status-progress-8.png";
+        case 9:
+          return "status-progress-9.png";
+        case 10:
+        default:
+          return "status-progress-10.png";
+      }
+      break;
+    case TorrentStatus.QueuedToSeed:
+      return "Queued to seed";
+    case TorrentStatus.Seeding:
+      return "Seeding";
+    default:
+      return Icon.XmarkCircle;
+  }
+};
+
+const formatEta = (eta: number): string => {
+  console.log(eta);
+  switch (eta) {
+    case -1:
+      return "Unavailable";
+    case -2:
+      return "Unknown";
+    default:
+      return `${capitalize(formatDistanceToNow(new Date(Date.now() + eta * 1000)))} Left`;
+  }
+};
+
+const formatStatus = (torrent: Torrent): string => {
+  return torrent.status === TorrentStatus.Downloading
+    ? formatEta(torrent.eta)
+    : statusToLabel(torrent.status, torrent.percentDone);
+};
+
+const statusIconColor = (status: TorrentStatus): string => {
+  switch (status) {
+    case TorrentStatus.Downloading:
+      return Color.Green;
+    default:
+      return Color.SecondaryText;
+  }
+};
+
+const sortTorrents = (t1: Torrent, t2: Torrent): number => {
+  const direction = preferences.sortDirection === "asc" ? 1 : -1;
+  switch (preferences.sortBy) {
+    case "progress":
+      return (t1.percentDone - t2.percentDone) * direction;
+    case "name":
+      return t1.fileName.localeCompare(t2.fileName) * direction;
+    case "status":
+      return (t2.status - t1.status) * direction;
+    default:
+      return 0;
+  }
+};
 
 export default function TorrentList() {
   const transmission = useMemo(
     () =>
       new Transmission({
-        host: "10.0.0.27",
-        port: 9091,
+        host: preferences.host,
+        port: Number(preferences.port),
+        username: preferences.username,
+        password: preferences.password,
+        ssl: preferences.ssl,
       }),
     []
   );
@@ -62,7 +153,7 @@ export default function TorrentList() {
 
   return (
     <List isLoading={torrents.length === 0} searchBarPlaceholder="Filter torrents by name...">
-      {torrents.map((torrent) => (
+      {torrents.sort(sortTorrents).map((torrent) => (
         <TorrentListItem
           key={torrent.id}
           torrent={torrent}
@@ -96,18 +187,16 @@ function TorrentListItem({
       id={String(torrent.id)}
       key={torrent.id}
       title={torrent.fileName}
-      subtitle={`${torrent.percentDone}% completed`}
-      icon={Icon.Download}
-      accessoryTitle={
-        torrent.status === TorrentStatus.Downloading
-          ? `${formatDistanceToNow(new Date(Date.now() + torrent.eta * 1000))} left`
-          : statusToLabel(torrent.status)
-      }
+      icon={{
+        source: statusIconSource(torrent.status, torrent.percentDone),
+        tintColor: statusIconColor(torrent.status),
+      }}
+      accessoryTitle={`${Math.round(torrent.percentDone * 100)}%`}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
+          <ActionPanel.Section title={`ETA: ${formatStatus(torrent)}`}>
             <ActionPanel.Item
-              title={torrent.status === TorrentStatus.Stopped ? "Start" : "Stop"}
+              title={torrent.status === TorrentStatus.Stopped ? "Start Torrent" : "Stop Torrent"}
               onAction={() => (torrent.status === TorrentStatus.Stopped ? onStart(torrent) : onStop(torrent))}
             />
           </ActionPanel.Section>

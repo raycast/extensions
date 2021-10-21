@@ -14,6 +14,88 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "host",
+      "title": "Host",
+      "required": true,
+      "description": "The hostname of the Transmission server",
+      "type": "textfield",
+      "default": "localhost"
+    },
+    {
+      "name": "port",
+      "title": "Port",
+      "required": true,
+      "description": "The port of the Transmission server",
+      "type": "textfield",
+      "default": "9091"
+    },
+    {
+      "name": "ssl",
+      "title": "Use SSL",
+      "required": false,
+      "description": "Use SSL to connect to the Transmission server",
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "username",
+      "title": "Username",
+      "required": false,
+      "description": "The username to use for authentication",
+      "type": "textfield",
+      "default": ""
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "required": false,
+      "description": "The password to use for authentication",
+      "type": "textfield",
+      "default": ""
+    },
+    {
+      "name": "sortBy",
+      "title": "Sort By",
+      "required": true,
+      "description": "The field to sort the torrent list by",
+      "type": "dropdown",
+      "default": "progress",
+      "data": [
+        {
+          "title": "Progress",
+          "value": "progress"
+        },
+        {
+          "title": "Name",
+          "value": "name"
+        },
+        {
+          "title": "Status",
+          "value": "status"
+        }
+      ]
+    },
+    {
+      "name": "sortDirection",
+      "title": "Sort Direction",
+      "required": true,
+      "description": "The direction to sort the torrent list",
+      "type": "dropdown",
+      "default": "progress",
+      "data": [
+        {
+          "title": "Ascending",
+          "value": "asc"
+        },
+        {
+          "title": "Descending",
+          "value": "desc"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "date-fns": "^2.25.0",
