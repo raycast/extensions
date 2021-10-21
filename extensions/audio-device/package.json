@@ -1,6 +1,6 @@
 {
   "name": "audio-device",
-  "title": "Audio Device",
+  "title": "Set Audio Device",
   "description": "Switch the active audio device of your mac.",
   "icon": "command-icon.png",
   "author": "benvp",
