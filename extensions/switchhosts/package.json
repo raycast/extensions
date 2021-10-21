@@ -9,7 +9,7 @@
     {
       "name": "switchhosts",
       "title": "SwitchHosts",
-      "subtitle": "Switch hosts",
+      "subtitle": "SwitchHosts",
       "description": "Show hosts And Switch hosts quickly!",
       "mode": "view"
     }
