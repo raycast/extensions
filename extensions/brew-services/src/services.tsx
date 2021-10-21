@@ -29,7 +29,6 @@ export async function runShellScript(command: string) {
   return { stdout, stderr };
 }
 
-
 export async function getServices(): Promise<serviceType[]> {
   if (!existsSync(brewPath)) {
     await showToast(ToastStyle.Failure, "Brew Executable Not Found", `Is brew installed at ${brewPath}?`);
@@ -161,27 +160,27 @@ export function BrewActions(props: { data: serviceType }) {
     return (
       <ActionPanel >
         <ActionPanel.Section title="Manage Service">
-          <ActionPanelItem title={"Stop Service"} onAction={() => stopService(props.data.name)} />
-          <ActionPanelItem title={"Restart Service"} onAction={() => restartService(props.data.name)} />
+          <ActionPanelItem title="Stop Service" onAction={() => stopService(props.data.name)} />
+          <ActionPanelItem title="Restart Service" onAction={() => restartService(props.data.name)} />
         </ActionPanel.Section>
         <ActionPanel.Section title="Plist">
-          <ShowInFinderAction title={"Reveal Plist File in Finder"} path={props.data.path} />
-          <CopyToClipboardAction title={"Copy Plist File Path"} content={props.data.path} />
+          <ShowInFinderAction title="Reveal Plist File in Finder" path={props.data.path} />
+          <CopyToClipboardAction title="Copy Plist File Path" content={props.data.path} />
         </ActionPanel.Section>
       </ActionPanel>
     );
   } else if (props.data.status === "stopped") {
     return (
       <ActionPanel title="Manage Service">
-        <ActionPanelItem title={"Start Service"} onAction={() => startService(props.data.name)} />
-        <ActionPanelItem title={"Run Service"} onAction={() => runService(props.data.name)} />
+        <ActionPanelItem title="Start Service" onAction={() => startService(props.data.name)} />
+        <ActionPanelItem title="Run Service" onAction={() => runService(props.data.name)} />
       </ActionPanel>
     );
   } else {
     return (
       <ActionPanel title="Manage Service">
-        <ActionPanelItem title={"Stop Service"} onAction={() => stopService(props.data.name)} />
-        <ActionPanelItem title={"Restart Service"} onAction={() => restartService(props.data.name)} />
+        <ActionPanelItem title="Stop Service" onAction={() => stopService(props.data.name)} />
+        <ActionPanelItem title="Restart Service" onAction={() => restartService(props.data.name)} />
       </ActionPanel>
     );
   }
