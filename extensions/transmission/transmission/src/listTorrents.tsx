@@ -130,6 +130,7 @@ const sortTorrents = (t1: Torrent, t2: Torrent): number => {
 export default function TorrentList() {
   const transmission = useMemo(() => createClient(), []);
   const [torrents, setTorrents] = useState<Torrent[]>([]);
+  const [didLoad, setDidLoad] = useState(false);
 
   const updateTorrents = useCallback(async () => {
     const torrents = await fetchTorrents(transmission);
@@ -137,14 +138,14 @@ export default function TorrentList() {
   }, [transmission]);
 
   useEffect(() => {
-    updateTorrents();
+    updateTorrents().finally(() => setDidLoad(true));
   }, []);
   useInterval(() => {
     updateTorrents();
   }, 5000);
 
   return (
-    <List isLoading={torrents.length === 0} searchBarPlaceholder="Filter torrents by name...">
+    <List isLoading={!didLoad} searchBarPlaceholder="Filter torrents by name...">
       {torrents.sort(sortTorrents).map((torrent) => (
         <TorrentListItem
           key={torrent.id}
