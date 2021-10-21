@@ -31,7 +31,8 @@ export interface ForumulaVersions {
   bottle: bool;
 }
 
-const installedCache = utils.cachePath('installed.json');
+const installedCachePath = utils.cachePath('installed.json');
+const formulaCachePath = utils.cachePath('formula.json');
 
 export async function brewPrefix(): Promise<string> {
   return (await execp(`brew --prefix`)).stdout.trim();
@@ -54,7 +55,7 @@ export async function brewInstalled(useCache: bool): Promise<Formula[]> {
   async function updateCache(): Promise<Formula[]> {
     const info = await installed();
     try {
-      await writeFile(installedCache, info);
+      await writeFile(installedCachePath, info);
     } catch (err) {
       console.error("Failed to write installed cache:", err)
     }
@@ -64,9 +65,9 @@ export async function brewInstalled(useCache: bool): Promise<Formula[]> {
   async function readCache(): Promise<Formula[]> {
     const cellarPath = await brewPath("Cellar");
     const cellarTime = (await stat(cellarPath)).mtimeMs;
-    const cacheTime = (await stat(installedCache)).mtimeMs;
+    const cacheTime = (await stat(installedCachePath)).mtimeMs;
     if (cellarTime < cacheTime) {
-      return JSON.parse(await readFile(installedCache));
+      return JSON.parse(await readFile(installedCachePath));
     } else {
       throw 'Invalid cache';
     }
@@ -80,18 +81,44 @@ export async function brewInstalled(useCache: bool): Promise<Formula[]> {
 }
 
 let formulaCache: Formula[] = [];
+const formulaURL = "https://formulae.brew.sh/api/formula.json";
 
 export async function brewFetchFormula(): Promise<Formula[]> {
   if (formulaCache.length > 0) {
     return formulaCache;
   }
+
+  async function readCache(): Promise<Formula[]> {
+    const cacheTime = (await stat(formulaCachePath)).mtimeMs;
+    const response = await fetch(formulaURL, {method: "HEAD"});
+    const lastModified = Date.parse(response.headers.get('last-modified'));
+
+    if (!isNaN(lastModified) && lastModified < cacheTime) {
+      return JSON.parse(await readFile(formulaCachePath));
+    } else {
+      throw 'Invalid cache';
+    }
+  }
+
+  async function fetchFormula(): Promise<Formula[]> {
+    try {
+      const response = await fetch("https://formulae.brew.sh/api/formula.json");
+      formulaCache = await response.json();
+      try {
+        await writeFile(formulaCachePath, JSON.stringify(formulaCache));
+      } catch (err) {
+        console.error("Failed to write formula cache:", err)
+      }
+      return formulaCache;
+    } catch (e) {
+      console.log("fetch error:", e);
+    }
+  }
+
   try {
-    const response = await fetch("https://formulae.brew.sh/api/formula.json");
-    const json = await response.json()
-    formulaCache = json as Formula[];
-    return formulaCache;
-  } catch (e) {
-    console.log("fetch error:", e);
+    return await readCache();
+  } catch {
+    return await fetchFormula();
   }
 }
 
