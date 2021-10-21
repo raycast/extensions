@@ -13,19 +13,16 @@ const filterContainers = (containers: ContainerInfo[], projectFilter?: string) =
   return containers.filter((container) => container.Labels['com.docker.compose.project'] === projectFilter);
 };
 
-const useDocker = (docker: Dockerode, options: { projectFilter?: string }) => {
+const useDocker = (docker: Dockerode) => {
   const [containers, setContainers] = useState<ContainerInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>();
-
-  const updateContainers = (containers: ContainerInfo[]) =>
-    setContainers(filterContainers(containers, options.projectFilter));
 
   const fetchContainers = async () => {
     setLoading(true);
     try {
       const containers = await docker.listContainers({ all: true });
-      updateContainers(containers);
+      setContainers(containers);
     } catch (error) {
       if (error instanceof Error) {
         setError(error);
@@ -39,7 +36,7 @@ const useDocker = (docker: Dockerode, options: { projectFilter?: string }) => {
     setLoading(true);
     await docker.getContainer(containerInfo.Id).stop();
     const containers = await docker.listContainers({ all: true });
-    updateContainers(containers);
+    setContainers(containers);
     setLoading(false);
   };
 
@@ -47,7 +44,7 @@ const useDocker = (docker: Dockerode, options: { projectFilter?: string }) => {
     setLoading(true);
     await docker.getContainer(containerInfo.Id).start();
     const containers = await docker.listContainers({ all: true });
-    updateContainers(containers);
+    setContainers(containers);
     setLoading(false);
   };
 
@@ -55,7 +52,7 @@ const useDocker = (docker: Dockerode, options: { projectFilter?: string }) => {
     setLoading(true);
     await docker.getContainer(containerInfo.Id).restart();
     const containers = await docker.listContainers({ all: true });
-    updateContainers(containers);
+    setContainers(containers);
     setLoading(false);
   };
 
@@ -63,7 +60,7 @@ const useDocker = (docker: Dockerode, options: { projectFilter?: string }) => {
     setLoading(true);
     await docker.getContainer(containerInfo.Id).remove();
     const containers = await docker.listContainers({ all: true });
-    updateContainers(containers);
+    setContainers(containers);
     setLoading(false);
   };
 
@@ -77,10 +74,8 @@ const useDocker = (docker: Dockerode, options: { projectFilter?: string }) => {
 
 export default function ContainerList(props: { projectFilter?: string }) {
   const docker = useMemo(() => new Dockerode(), []);
-  const { containers, loading, error, stopContainer, startContainer, restartContainer, removeContainer } = useDocker(
-    docker,
-    props
-  );
+  const { containers, loading, error, stopContainer, startContainer, restartContainer, removeContainer } =
+    useDocker(docker);
 
   if (error) {
     return <ErrorDetail error={error} />;
@@ -88,7 +83,7 @@ export default function ContainerList(props: { projectFilter?: string }) {
 
   return (
     <List isLoading={loading}>
-      {containers.map((containerInfo) => (
+      {filterContainers(containers, props.projectFilter).map((containerInfo) => (
         <List.Item
           key={containerInfo.Id}
           title={containerName(containerInfo)}
