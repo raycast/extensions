@@ -1,10 +1,10 @@
 import Dockerode, { ContainerInfo } from '@priithaamer/dockerode';
-import { ActionPanel, Color, Icon, List, showToast, ToastStyle } from '@raycast/api';
-import { useEffect, useMemo, useState } from 'react';
-import { isContainerRunning } from './docker/container';
+import { ActionPanel, Color, Icon, List, PushAction, showToast, ToastStyle } from '@raycast/api';
+import { useMemo } from 'react';
+import ContainerDetail from './container_detail';
+import { useDocker } from './docker';
+import { containerName, isContainerRunning } from './docker/container';
 import ErrorDetail from './error_detail';
-
-const containerName = (container: ContainerInfo) => container.Names.map((name) => name.replace(/^\//, '')).join(', ');
 
 const filterContainers = (containers: ContainerInfo[], projectFilter?: string) => {
   if (projectFilter === undefined) {
@@ -13,76 +13,19 @@ const filterContainers = (containers: ContainerInfo[], projectFilter?: string) =
   return containers.filter((container) => container.Labels['com.docker.compose.project'] === projectFilter);
 };
 
-const useDocker = (docker: Dockerode) => {
-  const [containers, setContainers] = useState<ContainerInfo[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error>();
-
-  const fetchContainers = async () => {
-    setLoading(true);
-    try {
-      const containers = await docker.listContainers({ all: true });
-      setContainers(containers);
-    } catch (error) {
-      if (error instanceof Error) {
-        setError(error);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const stopContainer = async (containerInfo: ContainerInfo) => {
-    setLoading(true);
-    await docker.getContainer(containerInfo.Id).stop();
-    const containers = await docker.listContainers({ all: true });
-    setContainers(containers);
-    setLoading(false);
-  };
-
-  const startContainer = async (containerInfo: ContainerInfo) => {
-    setLoading(true);
-    await docker.getContainer(containerInfo.Id).start();
-    const containers = await docker.listContainers({ all: true });
-    setContainers(containers);
-    setLoading(false);
-  };
-
-  const restartContainer = async (containerInfo: ContainerInfo) => {
-    setLoading(true);
-    await docker.getContainer(containerInfo.Id).restart();
-    const containers = await docker.listContainers({ all: true });
-    setContainers(containers);
-    setLoading(false);
-  };
-
-  const removeContainer = async (containerInfo: ContainerInfo) => {
-    setLoading(true);
-    await docker.getContainer(containerInfo.Id).remove();
-    const containers = await docker.listContainers({ all: true });
-    setContainers(containers);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchContainers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return { containers, loading, error, stopContainer, startContainer, restartContainer, removeContainer };
-};
-
 export default function ContainerList(props: { projectFilter?: string }) {
   const docker = useMemo(() => new Dockerode(), []);
-  const { containers, loading, error, stopContainer, startContainer, restartContainer, removeContainer } =
-    useDocker(docker);
+  const dockerState = useDocker(docker);
+  const { error, stopContainer, startContainer, restartContainer, removeContainer, useContainers } = dockerState;
+
+  const { isLoading, containers } = useContainers();
 
   if (error) {
     return <ErrorDetail error={error} />;
   }
 
   return (
-    <List isLoading={loading}>
+    <List isLoading={isLoading}>
       {filterContainers(containers, props.projectFilter).map((containerInfo) => (
         <List.Item
           key={containerInfo.Id}
@@ -123,6 +66,12 @@ export default function ContainerList(props: { projectFilter?: string }) {
                   }}
                 />
               )}
+              <PushAction
+                title="Inspect"
+                icon={{ source: Icon.Binoculars }}
+                shortcut={{ modifiers: ['cmd'], key: 'i' }}
+                target={<ContainerDetail docker={dockerState} containerId={containerInfo.Id} />}
+              />
               <ActionPanel.Item
                 title="Remove Container"
                 icon={{ source: Icon.Trash, tintColor: Color.Red }}
