@@ -96,15 +96,20 @@ export default function ProjectsList() {
       {projects.map((project) => (
         <List.Item
           key={project.name}
-          icon={{ source: Icon.List, tintColor: Color.Blue }}
+          icon={{ source: Icon.List }}
           title={project.name}
           subtitle={projectSubTitle(project)}
           actions={
             <ActionPanel>
-              <PushAction title="Show Containers" target={<ContainerList projectFilter={project.name} />} />
+              <PushAction
+                title="Show Containers"
+                icon={{ source: Icon.Binoculars }}
+                target={<ContainerList projectFilter={project.name} />}
+              />
               <ActionPanel.Item
                 title="Start All Containers"
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
+                icon={{ source: { light: 'icon-startall-light.png', dark: 'icon-startall-dark.png' } }}
                 onAction={async () => {
                   await startProject(project);
                   await showToast(ToastStyle.Success, `Started ${project.name}`);
@@ -113,6 +118,7 @@ export default function ProjectsList() {
               <ActionPanel.Item
                 title="Stop All Containers"
                 shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
+                icon={{ source: { light: 'icon-stopall-light.png', dark: 'icon-stopall-dark.png' } }}
                 onAction={async () => {
                   await stopProject(project);
                   await showToast(ToastStyle.Success, `Stopped ${project.name}`);

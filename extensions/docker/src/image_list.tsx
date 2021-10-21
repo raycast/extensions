@@ -60,7 +60,7 @@ export default function ImageList() {
         <List.Item
           key={image.Id}
           title={imageTitle(image)}
-          icon={{ source: Icon.Document, tintColor: Color.Yellow }}
+          icon={{ source: Icon.Document }}
           accessoryTitle={formatBytes(image.Size) ?? ''}
           actions={
             <ActionPanel title={imageTitle(image)}>
