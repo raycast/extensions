@@ -9,6 +9,7 @@ import { formatDistanceToNow } from "date-fns";
 import prettyBytes from "pretty-bytes";
 import { useInterval } from "./utils/hooks";
 import { capitalize, truncate, padStart } from "./utils/string";
+import { createClient } from "./modules/client";
 
 enum TorrentStatus {
   Stopped = 0,
@@ -127,17 +128,7 @@ const sortTorrents = (t1: Torrent, t2: Torrent): number => {
 };
 
 export default function TorrentList() {
-  const transmission = useMemo(
-    () =>
-      new Transmission({
-        host: preferences.host,
-        port: Number(preferences.port),
-        username: preferences.username,
-        password: preferences.password,
-        ssl: preferences.ssl,
-      }),
-    []
-  );
+  const transmission = useMemo(() => createClient(), []);
   const [torrents, setTorrents] = useState<Torrent[]>([]);
 
   const updateTorrents = useCallback(async () => {
@@ -168,6 +159,11 @@ export default function TorrentList() {
             await updateTorrents();
             showToast(ToastStyle.Success, `Torrent ${torrent.fileName} started`);
           }}
+          onRemove={async (torrent, deleteLocalData) => {
+            await transmission.remove([torrent.id], deleteLocalData);
+            await updateTorrents();
+            showToast(ToastStyle.Success, `Torrent ${torrent.fileName} deleted`);
+          }}
         />
       ))}
     </List>
@@ -178,10 +174,12 @@ function TorrentListItem({
   torrent,
   onStop,
   onStart,
+  onRemove,
 }: {
   torrent: Torrent;
   onStop: (torrent: Torrent) => Promise<void>;
   onStart: (torrent: Torrent) => Promise<void>;
+  onRemove: (torrent: Torrent, deleteLocalData: boolean) => Promise<void>;
 }) {
   return (
     <List.Item
@@ -206,6 +204,10 @@ function TorrentListItem({
               title={torrent.status === TorrentStatus.Stopped ? "Start Torrent" : "Stop Torrent"}
               onAction={() => (torrent.status === TorrentStatus.Stopped ? onStart(torrent) : onStop(torrent))}
             />
+            <ActionPanel.Submenu title="Remove Torrent">
+              <ActionPanel.Item title="Preserve Local Data" onAction={() => onRemove(torrent, false)} />
+              <ActionPanel.Item title="Delete Local Data" onAction={() => onRemove(torrent, true)} />
+            </ActionPanel.Submenu>
           </ActionPanel.Section>
         </ActionPanel>
       }

@@ -7,10 +7,17 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Show Torrents",
+      "name": "listTorrents",
+      "title": "List Torrents",
       "subtitle": "",
       "description": "Show the list of torrents",
+      "mode": "view"
+    },
+    {
+      "name": "addNewTorrent",
+      "title": "Add New Torrent",
+      "subtitle": "",
+      "description": "Add a new torrent from a magnet link",
       "mode": "view"
     }
   ],
