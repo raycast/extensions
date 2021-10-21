@@ -14,7 +14,6 @@ import { exec } from "child_process";
 import fs from "fs";
 import os from "os";
 import plist from "plist";
-import tildify from "tildify";
 import { promisify } from "util";
 import Bookmark from "./dtos/Bookmark.dto";
 import ImportedTowerBookmarks, { ImportedTowerBookmark } from "./interfaces/imported-tower-bookmark";
@@ -33,6 +32,31 @@ async function main() {
 
 main();
 
+async function extractBookmarks(obj: ImportedTowerBookmark[]): Promise<Bookmark[]> {
+  let bookmarks: Bookmark[] = [];
+  if (!obj || obj.length === 0) {
+    return Promise.resolve(bookmarks);
+  }
+
+  obj.forEach(async (bookmark: ImportedTowerBookmark) => {
+    const childBookmarks = await extractBookmarks(bookmark.children);
+
+    if (childBookmarks && childBookmarks.length > 0) {
+      childBookmarks.forEach((item) => {
+        if (item.isComplete) {
+          bookmarks.push(item);
+        }
+      });
+    }
+
+    bookmarks.push(
+      new Bookmark(bookmark.fileURL, bookmark.name, bookmark.lastOpenedDate, bookmark.repositoryIdentifier)
+    );
+  });
+
+  return Promise.resolve(bookmarks);
+}
+
 async function fetchBookmarks(): Promise<Bookmark[]> {
   try {
     const bookmarksFile = towerBookmarksPlistLocation;
@@ -44,15 +68,10 @@ async function fetchBookmarks(): Promise<Bookmark[]> {
       return Promise.resolve([]);
     }
 
-    const bookmarks = obj.children
-      .map((bookmark: ImportedTowerBookmark) => {
-        return new Bookmark(
-          tildify(bookmark.fileURL.replace("file:/", "")),
-          bookmark.name,
-          bookmark.lastOpenedDate,
-          bookmark.repositoryIdentifier
-        );
-      })
+    let bookmarks = await extractBookmarks(obj.children);
+
+    bookmarks = bookmarks
+      .filter((b: Bookmark) => b.Folder !== "")
       .sort(function (a: Bookmark, b: Bookmark) {
         return ("" + b.LastOpenedDate).localeCompare("" + a.LastOpenedDate);
       });
@@ -81,9 +100,9 @@ function BookmarkListItem(props: { bookmark: Bookmark }) {
     <List.Item
       id={bookmark.RepositoryIdentifier}
       title={bookmark.Name}
-      subtitle={bookmark.Folder}
+      subtitle={bookmark.getFolder}
       icon={Icon.Circle}
-      accessoryTitle={"Repository"}
+      accessoryTitle={""}
       actions={
         <ActionPanel>
           <OpenBookMarkAction bookmark={bookmark} />
@@ -103,8 +122,6 @@ export const OpenBookMarkAction = ({ bookmark, ...props }: OpenBookMarkActionPro
     icon={Icon.Link}
     title="Open repository"
     onAction={async () => {
-      console.log(bookmark);
-
       try {
         const towerCliPath = preferences.towerCliPath.value as string;
         await execp(`${towerCliPath} ${bookmark.Folder}`);
