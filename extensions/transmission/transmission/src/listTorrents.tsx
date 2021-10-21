@@ -51,7 +51,7 @@ const statusIconSource = (status: TorrentStatus, percentDone: number): string =>
     case TorrentStatus.QueuedToDownload:
       return Icon.Dot;
     case TorrentStatus.Downloading:
-      switch (Math.round(percentDone / 10)) {
+      switch (Math.round(percentDone * 10)) {
         case 0:
           return "status-progress-0.png";
         case 1:
