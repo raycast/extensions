@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { exec, execSync } from "child_process";
 import { promisify } from "util";
 import { stat, readFile, writeFile } from "fs/promises";
 import { join as path_join } from "path";
@@ -14,18 +14,21 @@ export interface Formula {
   license: string;
   homepage: string;
   dependencies: string[];
-  installed: InstalledVersion[];
-  versions: ForumulaVersions;
+  build_dependencies: string[];
+  installed: Installed[];
+  versions: Versions;
   keg_only: bool,
   linked_key: string;
   aliases: string[];
 }
 
-export interface InstalledVersion {
+export interface Installed {
   version: string;
+  installed_as_dependency: bool;
+  installed_on_request: bool;
 }
 
-export interface ForumulaVersions {
+export interface Versions {
   stable: string;
   head?: string;
   bottle: bool;
@@ -34,13 +37,21 @@ export interface ForumulaVersions {
 const installedCachePath = utils.cachePath('installed.json');
 const formulaCachePath = utils.cachePath('formula.json');
 
-export async function brewPrefix(): Promise<string> {
-  return (await execp(`brew --prefix`)).stdout.trim();
+const brewPrefix = (() => {
+  return execSync('brew --prefix', {encoding: 'utf8'}).trim();
+})();
+
+export function brewPath(suffix: string): string {
+  return path_join(brewPrefix, suffix);
 }
 
-export async function brewPath(suffix: string): Promise<string> {
-  const prefix = await brewPrefix();
-  return path_join(prefix, suffix);
+export function brewInstallPath(formula: Formula): string {
+  const basePath = brewPath(path_join('Cellar', formula.name));
+  if (formula.installed.length) {
+    return path_join(basePath, formula.installed[0].version);
+  } else {
+    return basePath;
+  }
 }
 
 export async function brewInstalled(useCache: bool): Promise<Formula[]> {
@@ -63,7 +74,7 @@ export async function brewInstalled(useCache: bool): Promise<Formula[]> {
   }
 
   async function readCache(): Promise<Formula[]> {
-    const cellarPath = await brewPath("Cellar");
+    const cellarPath = brewPath("Cellar");
     const cellarTime = (await stat(cellarPath)).mtimeMs;
     const cacheTime = (await stat(installedCachePath)).mtimeMs;
     if (cellarTime < cacheTime) {

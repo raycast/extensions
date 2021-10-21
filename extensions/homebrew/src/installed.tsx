@@ -14,7 +14,7 @@ import {
   ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { brewInstalled, brewUninstall } from "./brew";
+import { brewInstalled, brewUninstall, brewInstallPath } from "./brew";
 import { FormulaInfo } from "./components";
 
 interface Installed {
@@ -39,6 +39,8 @@ function Main() {
     const formula = props.formula;
     const isInstalled = formula.installed.length > 0;
     const version = isInstalled ? formula.installed[0].version : "";
+    const installPath = brewInstallPath(formula);
+
     return (
       <List.Item id={formula.name}
                  title={formula.name}
@@ -48,8 +50,8 @@ function Main() {
                  actions={
                    <ActionPanel>
                      <ActionPanel.Section>
-                       <ShowInFinderAction path={`/usr/local/bin/${formula.name}`} />
                        <PushAction title="Show Details" target={<FormulaInfo formula={formula} isInstalled={isInstalled} />} />
+                       <ShowInFinderAction path={installPath} />
                        <OpenInBrowserAction url={formula.homepage} />
                        <CopyToClipboardAction title="Copy URL" content={formula.homepage} />
                      </ActionPanel.Section>
