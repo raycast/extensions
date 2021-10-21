@@ -1,24 +1,24 @@
 {
   "name": "lark",
-  "title": "Lark",
+  "title": "Lark Documents",
   "version": "0.0.1",
-  "description": "Search docs, .etc.",
+  "description": "Quickly search documents from Feishu/Lark.",
   "icon": "logo.png",
   "author": "tmk",
   "license": "MIT",
   "commands": [
     {
-      "name": "recent-list",
-      "title": "Recent List",
+      "name": "recent-docs",
+      "title": "Recent Documents",
       "subtitle": "Lark",
-      "description": "Open Recent List",
+      "description": "Open recently used documents",
       "mode": "view"
     },
     {
       "name": "search-docs",
-      "title": "Search Docs",
+      "title": "Search Documents",
       "subtitle": "Lark",
-      "description": "Search Docs",
+      "description": "Search and open documents in browser",
       "mode": "view"
     }
   ],
@@ -29,7 +29,6 @@
       "required": true,
       "title": "Type",
       "description": "Your app type",
-      "placeholder": "Select your app type",
       "data": [
         {
           "title": "Feishu",
