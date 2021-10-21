@@ -17,7 +17,7 @@
       "name": "searchBookmarks",
       "title": "Search Bookmarks",
       "subtitle": "Pinboard",
-      "description": "Searches your Pinboard bookmarks.",
+      "description": "Searches your Pinboard bookmarks by tags.",
       "mode": "view"
     }
   ],

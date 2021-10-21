@@ -1,33 +1,17 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from "@raycast/api";
-import { Bookmark, useSearchBookmarks } from "./api";
+import { List } from "@raycast/api";
+import { useSearchBookmarks, SearchKind } from "./api";
+import { BookmarkListItem } from "./components";
 
 export default function Command() {
-  const { state, search } = useSearchBookmarks();
+  const { state, search } = useSearchBookmarks(SearchKind.All);
 
   return (
     <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search by tags..." throttle>
-      {state.bookmarks.map((bookmark) => (
-        <BookmarkListItem key={bookmark.id} bookmark={bookmark} />
-      ))}
+      <List.Section title={state.title} subtitle={state.bookmarks.length + ""}>
+        {state.bookmarks.map((bookmark) => (
+          <BookmarkListItem key={bookmark.id} bookmark={bookmark} />
+        ))}
+      </List.Section>
     </List>
-  );
-}
-
-function BookmarkListItem(props: { bookmark: Bookmark }) {
-  const bookmark = props.bookmark;
-
-  return (
-    <List.Item
-      id={bookmark.id}
-      title={bookmark.title}
-      icon="list-icon.png"
-      accessoryTitle={bookmark.tags}
-      actions={
-        <ActionPanel>
-          <OpenInBrowserAction url={bookmark.url} />
-          <CopyToClipboardAction title="Copy URL" content={bookmark.url} />
-        </ActionPanel>
-      }
-    />
   );
 }

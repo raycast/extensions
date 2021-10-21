@@ -13,8 +13,18 @@ export interface Bookmark {
   readLater: boolean;
 }
 
-export function useSearchBookmarks() {
-  const [state, setState] = useState<{ bookmarks: Bookmark[]; isLoading: boolean }>({ bookmarks: [], isLoading: true });
+export interface BookmarksState {
+  bookmarks: Bookmark[];
+  isLoading: boolean;
+  title: string;
+}
+
+export enum SearchKind {
+  All,
+}
+
+export function useSearchBookmarks(searchKind: SearchKind) {
+  const [state, setState] = useState<BookmarksState>({ bookmarks: [], isLoading: true, title: "" });
   const cancel = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -32,11 +42,12 @@ export function useSearchBookmarks() {
         ...oldState,
         isLoading: true,
       }));
-      const bookmarks = await searchBookmarks(searchText, cancel.current.signal);
+      const bookmarks = await searchBookmarks(searchText, searchKind, cancel.current.signal);
       setState((oldState) => ({
         ...oldState,
         bookmarks: bookmarks,
         isLoading: false,
+        title: searchKind === SearchKind.All && searchText.length === 0 ? "Recent Bookmarks" : "Found Bookmarks",
       }));
     } catch (error) {
       if (error instanceof AbortError) {
@@ -53,29 +64,8 @@ export function useSearchBookmarks() {
   };
 }
 
-export async function addBookmark(bookmark: Bookmark): Promise<unknown> {
-  const params = new URLSearchParams();
-  params.append("url", bookmark.url);
-  params.append("description", bookmark.title ?? "New Bookmark");
-  params.append("tags", bookmark.tags ?? "");
-  params.append("shared", bookmark.private ? "no" : "yes");
-  params.append("toread", bookmark.readLater ? "yes" : "no");
-  params.append("format", "json");
-  params.append("auth_token", preferences.apiToken.value as string);
-
-  const response = await fetch(apiBasePath + "/posts/add?" + params.toString(), {
-    method: "post",
-  });
-
-  if (!response.ok) {
-    return Promise.reject(response.statusText);
-  }
-
-  return response.json();
-}
-
-async function searchBookmarks(searchText: string, signal: AbortSignal): Promise<Bookmark[]> {
-  const path = searchText.length === 0 ? "/posts/recent" : "/posts/all";
+async function searchBookmarks(searchText: string, kind: SearchKind, signal: AbortSignal): Promise<Bookmark[]> {
+  const path = kind == SearchKind.All && searchText.length === 0 ? "/posts/recent" : "/posts/all";
 
   const params = new URLSearchParams();
   if (searchText.length > 0) {
@@ -106,4 +96,25 @@ async function searchBookmarks(searchText: string, signal: AbortSignal): Promise
       readLater: (post.toread as string) === "yes",
     };
   });
+}
+
+export async function addBookmark(bookmark: Bookmark): Promise<unknown> {
+  const params = new URLSearchParams();
+  params.append("url", bookmark.url);
+  params.append("description", bookmark.title ?? "New Bookmark");
+  params.append("tags", bookmark.tags ?? "");
+  params.append("shared", bookmark.private ? "no" : "yes");
+  params.append("toread", bookmark.readLater ? "yes" : "no");
+  params.append("format", "json");
+  params.append("auth_token", preferences.apiToken.value as string);
+
+  const response = await fetch(apiBasePath + "/posts/add?" + params.toString(), {
+    method: "post",
+  });
+
+  if (!response.ok) {
+    return Promise.reject(response.statusText);
+  }
+
+  return response.json();
 }
