@@ -8,14 +8,14 @@
   "commands": [
     {
       "name": "switchhosts",
-      "title": "Search Hosts",
+      "title": "Switch Hosts",
       "subtitle": "SwitchHosts",
-      "description": "Show and swith hosts quickly!",
+      "description": "Show and switch hosts quickly!",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.25.1",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
