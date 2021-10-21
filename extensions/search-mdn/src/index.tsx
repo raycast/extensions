@@ -21,12 +21,14 @@ export default function MDNSearchResultsList() {
 
   useEffect(() => {
     async function fetch() {
-      if (query) {
-        setIsLoading(true);
-        const results = await searchMDNByQuery(query);
-        setState(results);
-        setIsLoading(false);
+      if (!query) {
+        setState([]);
+        return;
       }
+      setIsLoading(true);
+      const results = await searchMDNByQuery(query);
+      setState(results);
+      setIsLoading(false);
     }
     fetch();
   }, [query]);
@@ -47,12 +49,16 @@ export default function MDNSearchResultsList() {
           subtitle={result.summary}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={result.url} />
-              <CopyToClipboardAction title="Copy URL" content={result.url} />
               <ActionPanel.Item
                 title="Show Details"
                 icon={Icon.Sidebar}
                 onAction={() => push(<Details {...result} />)}
+              />
+              <OpenInBrowserAction url={result.url} />
+              <CopyToClipboardAction
+                title="Copy URL"
+                content={result.url}
+                shortcut={{ modifiers: ["cmd"], key: "." }}
               />
             </ActionPanel>
           }
