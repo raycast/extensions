@@ -37,8 +37,9 @@ export function CloseIssueAction(props: { issue: Issue }) {
 export function CreateMRAction({ issue }: { issue: Issue }): JSX.Element {
   return (
     <PushAction
-      title="Create Merge Request"
       icon={Icon.Pencil}
+      title="Create Merge Request"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
       target={<IssueMRCreateForm issue={issue} projectID={issue.project_id} title={`Draft: Resolve: ${issue.title}`} />}
     />
   );
