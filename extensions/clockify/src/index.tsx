@@ -12,7 +12,7 @@ import {
   ToastStyle,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import isEmpty from "lodash.isempty";
 import uniqWith from "lodash.uniqwith";
 import useConfig from "./useConfig";
@@ -39,19 +39,11 @@ export default function Main() {
         setEntries(JSON.parse(storedEntries));
       }
 
-      const { data } = await fetcher(
-        `/workspaces/${config.workspaceId}/user/${config.userId}/time-entries?hydrated=true&page-size=500`
-      );
+      const filteredEntries = await getTimeEntries();
 
-      if (data?.length) {
-        const filteredEntries: TimeEntry[] = uniqWith(
-          data,
-          (a: TimeEntry, b: TimeEntry) => a.projectId === b.projectId && a.description === b.description
-        );
+      if (filteredEntries) {
         setEntries(filteredEntries);
         setLocalStorageItem("entries", JSON.stringify(filteredEntries));
-      } else {
-        showToast(ToastStyle.Failure, "No time entries");
       }
 
       setIsLoading(false);
@@ -59,6 +51,21 @@ export default function Main() {
 
     fetchTimeEntries();
   }, [config, isValidToken]);
+
+  const updateTimeEntries = useCallback((): void => {
+    setIsLoading(true);
+
+    getTimeEntries()
+      .then((entries) => {
+        if (entries) {
+          setEntries(entries);
+          setLocalStorageItem("entries", JSON.stringify(entries));
+        }
+
+        setIsLoading(false);
+      })
+      .catch(() => setIsLoading(false));
+  }, [getTimeEntries]);
 
   if (!isValidToken) {
     return <Detail markdown={`Invalid token.`} />;
@@ -72,7 +79,10 @@ export default function Main() {
           title="Start timer"
           actions={
             <ActionPanel>
-              <ActionPanel.Item title="Start new timer" onAction={() => push(<NewEntry />)} />
+              <ActionPanel.Item
+                title="Start new timer"
+                onAction={() => push(<NewEntry updateTimeEntries={updateTimeEntries} />)}
+              />
             </ActionPanel>
           }
         />
@@ -81,7 +91,12 @@ export default function Main() {
           title="Stop current"
           actions={
             <ActionPanel>
-              <ActionPanel.Item title="Stop current timer" onAction={() => stopCurrentTimer()} />
+              <ActionPanel.Item
+                title="Stop current timer"
+                onAction={async () => {
+                  stopCurrentTimer().then(() => updateTimeEntries());
+                }}
+              />
             </ActionPanel>
           }
         />
@@ -92,18 +107,18 @@ export default function Main() {
           <List.Item
             id={entry.id}
             key={entry.id}
-            title={`${entry.project.clientName}`}
-            subtitle={`${entry.description}`}
-            accessoryTitle={`${entry.project.name}`}
-            icon={{ source: isInProgress(entry) ? Icon.Clock : Icon.Circle, tintColor: entry.project.color }}
-            keywords={[...entry.description.split(" "), ...entry.project.name.split(" ")]}
-            accessoryIcon={{ source: Icon.Dot, tintColor: entry.project.color }}
+            title={entry.project?.clientName || "No client"}
+            subtitle={entry.description}
+            accessoryTitle={entry.project?.name}
+            icon={{ source: isInProgress(entry) ? Icon.Clock : Icon.Circle, tintColor: entry.project?.color }}
+            keywords={[...entry.description.split(" "), ...entry.project?.name.split(" ")]}
+            accessoryIcon={{ source: Icon.Dot, tintColor: entry.project?.color }}
             actions={
               <ActionPanel>
                 <ActionPanelItem
                   title="Start timer"
                   onAction={() => {
-                    addNewTimeEntry(entry.description, entry.projectId);
+                    addNewTimeEntry(entry.description, entry.projectId).then(() => updateTimeEntries());
                   }}
                 />
               </ActionPanel>
@@ -115,7 +130,7 @@ export default function Main() {
   );
 }
 
-function NewEntry() {
+function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
   const { config } = useConfig();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -130,7 +145,6 @@ function NewEntry() {
       const storedProjects: string | undefined = await getLocalStorageItem("projects");
       if (storedProjects) setProjects(JSON.parse(storedProjects));
 
-      // const { data }: { data: Project[] } = await fetcher(`/workspaces/${config.workspaceId}/projects?page-size=1000`);
       const { data } = await fetcher(`/workspaces/${config.workspaceId}/projects?page-size=1000`);
 
       setProjects(data || []);
@@ -151,7 +165,7 @@ function NewEntry() {
             title="Start"
             onSubmit={({ description, projectId }) => {
               if (description && projectId) {
-                addNewTimeEntry(description, projectId);
+                addNewTimeEntry(description, projectId).then(() => updateTimeEntries());
                 pop();
               } else {
                 showToast(ToastStyle.Failure, "All fields are required");
@@ -175,6 +189,24 @@ function NewEntry() {
       <Form.TextField id="description" defaultValue="" title="Description" />
     </Form>
   );
+}
+
+async function getTimeEntries(): Promise<TimeEntry[]> {
+  const workspaceId = await getLocalStorageItem("workspaceId");
+  const userId = await getLocalStorageItem("userId");
+
+  const { data } = await fetcher(`/workspaces/${workspaceId}/user/${userId}/time-entries?hydrated=true&page-size=500`);
+
+  if (data?.length) {
+    const filteredEntries: TimeEntry[] = uniqWith(
+      data,
+      (a: TimeEntry, b: TimeEntry) => a.projectId === b.projectId && a.description === b.description
+    );
+
+    return filteredEntries;
+  } else {
+    return [];
+  }
 }
 
 async function stopCurrentTimer(): Promise<void> {
