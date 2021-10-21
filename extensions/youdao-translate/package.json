@@ -1,7 +1,7 @@
 {
   "name": "youdao-translate",
   "title": "Youdao Translate",
-  "description": "Translate Content By Youdao API",
+  "description": "Translate text using Youdao",
   "icon": "translate.png",
   "author": "tiancheng92",
   "license": "MIT",
