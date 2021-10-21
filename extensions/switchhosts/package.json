@@ -1,7 +1,7 @@
 {
   "name": "switchhosts",
   "title": "SwitchHosts",
-  "description": "Show hosts And Switch hosts quickly!",
+  "description": "An extension for hosts management & switching",
   "icon": "icon.png",
   "author": "tiancheng92",
   "license": "MIT",
