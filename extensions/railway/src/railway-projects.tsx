@@ -149,7 +149,7 @@ const RailwayLogin = () => {
           title="Login to Railway"
           actions={
             <ActionPanel title="#1 in raycast/extensions">
-              <PushAction title="Start Railway login" target={<LoginWaiting loginSession={loginSession} />} />
+              <PushAction title="Start Railway Login" target={<LoginWaiting loginSession={loginSession} />} />
             </ActionPanel>
           }
         />
