@@ -1,6 +1,6 @@
 import { preferences } from "@raycast/api";
 import { Octokit } from "octokit";
-import useSWR from "swr";
+import { useEffect, useState } from "react";
 import { SearchRepositoriesResponse } from "./types";
 
 const octokit = new Octokit({ auth: preferences.token.value });
@@ -31,17 +31,50 @@ query SearchRepositories($searchText: String!) {
   }
 }`;
 
-async function searchRepositories(searchText: string) {
-  const { search } = await octokit.graphql<SearchRepositoriesResponse>(SEARCH_REPOSITORIES_QUERY, { searchText });
-  return search;
-}
+export function useRepositories(searchText: string | undefined) {
+  const [state, setState] = useState<{
+    data?: SearchRepositoriesResponse["search"];
+    error?: Error;
+    isLoading: boolean;
+  }>({ isLoading: false });
 
-export function useRepositories(query: string | undefined) {
-  const { data, error } = useSWR(query ?? null, searchRepositories);
+  useEffect(() => {
+    if (!searchText) {
+      setState({ isLoading: false });
+      return;
+    }
 
-  return {
-    data,
-    isLoading: !!query && !error && !data,
-    error: error,
-  };
+    let isCanceled = false;
+
+    async function fetchData() {
+      setState((oldState) => ({ ...oldState, isLoading: true }));
+
+      try {
+        const { search } = await octokit.graphql<SearchRepositoriesResponse>(SEARCH_REPOSITORIES_QUERY, { searchText });
+
+        if (!isCanceled) {
+          setState((oldState) => ({ ...oldState, data: search }));
+        }
+      } catch (e) {
+        if (!isCanceled) {
+          setState((oldState) => ({
+            ...oldState,
+            error: e instanceof Error ? e : new Error("Something went wrong"),
+          }));
+        }
+      } finally {
+        if (!isCanceled) {
+          setState((oldState) => ({ ...oldState, isLoading: false }));
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      isCanceled = true;
+    };
+  }, [searchText]);
+
+  return { ...state };
 }
