@@ -10,7 +10,7 @@
       "name": "switchhosts",
       "title": "Search Hosts",
       "subtitle": "SwitchHosts",
-      "description": "Show hosts And Switch hosts quickly!",
+      "description": "Show and swith hosts quickly!",
       "mode": "view"
     }
   ],
