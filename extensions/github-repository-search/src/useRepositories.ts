@@ -1,9 +1,7 @@
 import { preferences } from "@raycast/api";
 import { Octokit } from "octokit";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SearchRepositoriesResponse } from "./types";
-
-const octokit = new Octokit({ auth: preferences.token.value });
 
 const SEARCH_REPOSITORIES_QUERY = `
 query SearchRepositories($searchText: String!) {
@@ -31,12 +29,15 @@ query SearchRepositories($searchText: String!) {
   }
 }`;
 
+const octokit = new Octokit({ auth: preferences.token.value });
+
 export function useRepositories(searchText: string | undefined) {
   const [state, setState] = useState<{
     data?: SearchRepositoriesResponse["search"];
     error?: Error;
     isLoading: boolean;
   }>({ isLoading: false });
+  const abortController = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (!searchText) {
@@ -44,35 +45,34 @@ export function useRepositories(searchText: string | undefined) {
       return;
     }
 
-    let isCanceled = false;
-
     async function fetchData() {
       setState((oldState) => ({ ...oldState, isLoading: true }));
 
-      try {
-        const { search } = await octokit.graphql<SearchRepositoriesResponse>(SEARCH_REPOSITORIES_QUERY, { searchText });
+      abortController.current?.abort();
+      abortController.current = new AbortController();
 
-        if (!isCanceled) {
-          setState((oldState) => ({ ...oldState, data: search }));
-        }
-      } catch (e) {
-        if (!isCanceled) {
-          setState((oldState) => ({
-            ...oldState,
-            error: e instanceof Error ? e : new Error("Something went wrong"),
-          }));
-        }
-      } finally {
-        if (!isCanceled) {
-          setState((oldState) => ({ ...oldState, isLoading: false }));
-        }
+      try {
+        const { search } = await octokit.graphql<SearchRepositoriesResponse>(SEARCH_REPOSITORIES_QUERY, {
+          searchText,
+          request: { signal: abortController.current.signal },
+        });
+
+        setState((oldState) => ({ ...oldState, data: search, isLoading: false }));
+      } catch (error) {
+        console.error("Failed searching repositories", error);
+
+        setState((oldState) => ({
+          ...oldState,
+          error: error instanceof Error ? error : new Error("Something went wrong"),
+          isLoading: false,
+        }));
       }
     }
 
     fetchData();
 
     return () => {
-      isCanceled = true;
+      abortController.current?.abort();
     };
   }, [searchText]);
 
