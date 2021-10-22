@@ -18,9 +18,13 @@ type RaycastPreferences = {
 
 const prefs: RaycastPreferences = getPreferenceValues()
 
-const cache = setupCache({
-	maxAge: 1000 * 60 * 15 // 15 min cache
-})
+export const cache = setupCache({
+	maxAge: 1000 * 60 * 15, // 15 min cache
+	exclude: {
+		query: false,
+	}
+});
+
 
 const api = axios.create({
 	adapter: cache.adapter,
