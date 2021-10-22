@@ -18,7 +18,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Clockify",
+      "title": "Time Tracking",
       "subtitle": "",
       "description": "Manage Clockify time entries with Raycast",
       "mode": "view"
