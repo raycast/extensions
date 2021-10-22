@@ -6,6 +6,7 @@ export default function ProcessList() {
   const [state, setState] = useState<Process[]>([]);
   const [query, setQuery] = useState<string | undefined>(undefined);
   const shouldIncludePaths = (preferences.shouldSearchInPaths?.value as boolean) ?? false;
+  const shouldPrioritizeAppsWhenFiltering = (preferences.shouldPrioritizeAppsWhenFiltering?.value as boolean) ?? false;
 
   useEffect(() => {
     exec(`ps -eo pid,pcpu,comm | sort -nrk 2,3`, (err, stdout) => {
@@ -74,6 +75,19 @@ export default function ProcessList() {
             process.path?.toLowerCase().match(new RegExp(`.+${query}.*\\.[app|framework|prefpane]`, "ig")) != null;
 
           return nameMatches || (shouldIncludePaths && pathMatches);
+        })
+        .sort((a, b) => {
+          // If this flag is true, we bring apps to the top.
+          if (shouldPrioritizeAppsWhenFiltering) {
+            if (a.type === "app" && b.type !== "app") {
+              return -1;
+            } else if (a.type !== "app" && b.type === "app") {
+              return 1;
+            }
+          }
+
+          // Otherwise, we leave the order as it is.
+          return 0;
         })
         .map((process, index) => {
           const icon = fileIcon(process);

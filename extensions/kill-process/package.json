@@ -39,6 +39,13 @@
       "required": true,
       "title": "Filtering should search process paths",
       "description": "Some processes are named differently than the app itself. This flag determines whether the path of the process should be searched for the query, or only the process name."
+    },
+    {
+      "name": "shouldPrioritizeAppsWhenFiltering",
+      "type": "checkbox",
+      "required": true,
+      "title": "Prioritize apps when filtering",
+      "description": "Determines whether apps are listed before other results when filtering."
     }
   ]
 }
