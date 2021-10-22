@@ -110,7 +110,7 @@ const ListProjects: React.FC<{ token: string }> = ({ token }) => {
                       url={projectUrl(p.id, "settings")}
                     />
                     <OpenInBrowserAction
-                      title="Project deployments"
+                      title="Project Deployments"
                       url={projectUrl(p.id, "deployments")}
                     />
                     <OpenInBrowserAction
