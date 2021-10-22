@@ -32,6 +32,7 @@ async function submit(values: TweetFormValues, replyTweet?: TweetV1 | undefined)
 export function TweetSendForm(props: { replyTweet?: TweetV1 | undefined }) {
   const rt = props.replyTweet;
   const submitText = rt ? "Send Reply" : "Send Tweet";
+  const fromTitle = rt ? "Reply" : "Tweet";
   return (
     <Form
       onSubmit={submit}
@@ -41,7 +42,7 @@ export function TweetSendForm(props: { replyTweet?: TweetV1 | undefined }) {
         </ActionPanel>
       }
     >
-      <FormTextArea id="text" title="Text" placeholder="What's happening?" />
+      <FormTextArea id="text" title={fromTitle} placeholder="What's happening?" />
     </Form>
   );
 }
