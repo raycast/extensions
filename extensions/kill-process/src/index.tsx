@@ -29,7 +29,7 @@ export default function ProcessList() {
             type: isPrefPane ? "prefPane" : isApp ? "app" : "binary",
           } as Process;
         })
-        .filter((process) => process.name === "");
+        .filter((process) => process.name !== "");
 
       setState(processes);
     });
