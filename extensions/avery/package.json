@@ -1,0 +1,69 @@
+{
+  "name": "avery",
+  "title": "Tweet with Avery",
+  "description": "This extension allows you to easily Tweet without opening Twitter 😌",
+  "icon": "icon.png",
+  "author": "Garrett",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Tweet with Avery",
+      "subtitle": "",
+      "description": "This extension allows you to easily Tweet without opening Twitter 😌",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "consumer_key",
+      "type": "password",
+      "required": true,
+      "title": "Consumer Key",
+      "description": "The consumer key generated in the Twitter Developer Portal.",
+      "placeholder": "Enter your consumer key" 
+    },
+    {
+      "name": "consumer_secret",
+      "type": "password",
+      "required": true,
+      "title": "Consumer Secret",
+      "description": "The consumer secret generated in the Twitter Developer Portal.",
+      "placeholder": "Enter your consumer secret" 
+    },
+    {
+      "name": "access_token",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "The access token generated in the Twitter Developer Portal.",
+      "placeholder": "Enter your access token" 
+    },
+    {
+      "name": "access_token_secret",
+      "type": "password",
+      "required": true,
+      "title": "Access Token Secret",
+      "description": "The access token secret generated in the Twitter Developer Portal.",
+      "placeholder": "Enter your access token secret" 
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.1",
+    "got": "^11.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
