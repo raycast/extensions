@@ -106,7 +106,7 @@ const ListProjects: React.FC<{ token: string }> = ({ token }) => {
                 <ActionPanel>
                   <ActionPanel.Section>
                     <OpenInBrowserAction
-                      title="Project settings"
+                      title="Project Settings"
                       url={projectUrl(p.id, "settings")}
                     />
                     <OpenInBrowserAction
