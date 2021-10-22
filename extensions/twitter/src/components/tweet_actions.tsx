@@ -107,12 +107,12 @@ export function LikeAction(props: { tweet: TweetV1; fetcher?: Fetcher }) {
   const retweet = async () => {
     try {
       await twitterClient.v1.post(`favorites/${cmd}.json`, { id: t.id_str });
-      showToast(ToastStyle.Success, "Like successful", "Like creation successful");
+      showToast(ToastStyle.Success, `${title} successful`, `${title} operation successful`);
       if (props.fetcher) {
         await props.fetcher.updateInline();
       }
     } catch (error) {
-      showToast(ToastStyle.Failure, "Could not like tweet", getErrorMessage(error));
+      showToast(ToastStyle.Failure, `${title} failed`, getErrorMessage(error));
     }
   };
   return <ActionPanel.Item title={title} shortcut={{ modifiers: ["cmd"], key: "l" }} icon={icon} onAction={retweet} />;
