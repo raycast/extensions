@@ -114,7 +114,7 @@ const ListProjects: React.FC<{ token: string }> = ({ token }) => {
                       url={projectUrl(p.id, "deployments")}
                     />
                     <OpenInBrowserAction
-                      title="Latest deployment"
+                      title="Latest Deployment"
                       url={projectUrl(p.id, "deployments?open=true")}
                       shortcut={{ modifiers: ["cmd"], key: "l" }}
                     />
