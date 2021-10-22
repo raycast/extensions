@@ -159,6 +159,13 @@ class Project {
   }
 }
 
+function resolveHomedir(path: string): string {
+  if (path.startsWith("~")) {
+    path = homedir() + path.slice(1)
+  }
+  return path
+}
+
 // SupportStorage implements the minimal API required by frecency
 class SupportStorage {
   getItem(key: string): string | undefined {
@@ -188,16 +195,11 @@ function searchProjects(query?: string): {
   const [projects, setProjects] = useState<ProjectList>();
 
   useEffect(() => {
-    const projectScanPathsRaw = (preferences.paths.value as string).split(",").map((s) => s.trim());
+    const projectScanPaths = (preferences.paths.value as string)
+      .split(",")
+      .map((s) => s.trim())
+      .map(resolveHomedir)
     const maxScanDepth: number = Number(preferences.maxScanDepth.value as string) || 1
-
-    const projectScanPaths = projectScanPathsRaw
-      .flatMap((base) => {
-        if (base.startsWith("~")) {
-          base = homedir() + base.slice(1)
-        }
-        return base
-      })
 
     /**
      * Performs recursive scanning.
