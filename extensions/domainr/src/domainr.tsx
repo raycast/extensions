@@ -1,14 +1,12 @@
-import { ActionPanel, Color, Icon, ImageMask, List, OpenInBrowserAction, showToast, ToastStyle } from '@raycast/api'
-import { useEffect, useState } from 'react'
-import { fullSearch, search } from './util/api'
-import { PathReporter } from 'io-ts/PathReporter'
-import * as E from 'fp-ts/Either'
-import * as TE from 'fp-ts/TaskEither'
+import { ActionPanel, ImageMask, List, OpenInBrowserAction, showToast, ToastStyle } from '@raycast/api'
+import { pipe } from 'fp-ts/lib/function'
 import * as O from 'fp-ts/Option'
 import * as A from 'fp-ts/ReadonlyArray'
-import { DomainStatus, getStatusIcon, isAvailable, parseDomainStatus, SearchResultWithStatus, statusDescriptionMapping, statusMapping } from './util/types'
-import { pipe } from 'fp-ts/lib/function'
+import * as TE from 'fp-ts/TaskEither'
+import { useEffect, useState } from 'react'
+import { fullSearch } from './util/api'
 import { is, isError } from './util/conditional'
+import { DomainStatus, getStatusIcon, SearchResultWithStatus, statusDescriptionMapping, statusMapping } from './util/types'
 
 function DomainrSearch() {
 	const [ results, setResults ] = useState<ReadonlyArray<SearchResultWithStatus>>([])

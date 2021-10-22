@@ -1,5 +1,4 @@
 import { Color, Icon } from '@raycast/api'
-import { string } from 'fp-ts'
 import * as t from 'io-ts'
 import { match } from 'ts-pattern'
 

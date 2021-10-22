@@ -1,17 +1,15 @@
-// API_KEY: aOnBoyjHYgmshM8uxKMI35B6Tbelp1LzKJ7jsnOlnsQOnkXKys
-
+import { getPreferenceValues } from '@raycast/api'
 import axios from 'axios'
-import { pipe } from 'fp-ts/lib/function'
-import * as TE from 'fp-ts/TaskEither'
-import * as E from 'fp-ts/Either'
-import * as O from 'fp-ts/Option'
 import * as A from 'fp-ts/Array'
+import * as E from 'fp-ts/Either'
+import { pipe } from 'fp-ts/lib/function'
+import * as O from 'fp-ts/Option'
 import * as R from 'fp-ts/Reader'
-
-import { getPreferenceValues  } from '@raycast/api'
-
-import { SearchResponse, ISearchResult, ISearchResponse, IStatusResponse, StatusResponse, SearchResultWithStatus } from './types'
+import * as TE from 'fp-ts/TaskEither'
 import { Errors } from 'io-ts'
+import { ISearchResponse, ISearchResult, IStatusResponse, SearchResponse, SearchResultWithStatus, StatusResponse } from './types'
+
+
 
 type RaycastPreferences = {
 	rapidApiToken: string
