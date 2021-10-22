@@ -1,16 +1,16 @@
 {
-  "name": "open-finder-selection-with",
-  "title": "Open Finder Selection With",
-  "description": "Filter an application to open selected Finder items.",
-  "icon": "Finder.icns",
+  "name": "open-with-app",
+  "title": "Open With App",
+  "description": "Choose an application to open the selected Finder items.",
+  "icon": "extension-icon.png",
   "author": "fturcheti",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Open Selection With…",
+      "title": "Open With",
       "subtitle": "Finder",
-      "description": "Filter an application to open selected Finder items.",
+      "description": "Choose an application to open the selected Finder items.",
       "mode": "view"
     }
   ],
