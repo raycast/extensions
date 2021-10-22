@@ -7,22 +7,7 @@ export type DockerState = ReturnType<typeof useDocker>;
 
 export const useDocker = (docker: Dockerode) => {
   const [containers, setContainers] = useState<ContainerInfo[]>();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error>();
-
-  const fetchContainers = async () => {
-    setLoading(true);
-    try {
-      const containers = await docker.listContainers({ all: true });
-      setContainers(containers);
-    } catch (error) {
-      if (error instanceof Error) {
-        setError(error);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [isLoading, setLoading] = useState(false);
 
   const stopContainer = async (containerInfo: { Id: string }) => {
     setLoading(true);
@@ -110,11 +95,26 @@ export const useDocker = (docker: Dockerode) => {
   };
 
   const useContainers = () => {
+    const [error, setError] = useState<Error>();
+
     useEffect(() => {
+      async function fetchContainers() {
+        setLoading(true);
+        try {
+          const containers = await docker.listContainers({ all: true });
+          setContainers(containers);
+        } catch (error) {
+          if (error instanceof Error) {
+            setError(error);
+          }
+        } finally {
+          setLoading(false);
+        }
+      }
       fetchContainers();
     }, []);
 
-    return { containers, isLoading: loading };
+    return { containers, isLoading, error, stopContainer, startContainer, restartContainer, removeContainer };
   };
 
   const useContainerInfo = (containerId: string) => {
@@ -147,7 +147,7 @@ export const useDocker = (docker: Dockerode) => {
     const [error, setError] = useState<Error>();
 
     useEffect(() => {
-      const fetchContainers = async () => {
+      async function fetchContainers() {
         setLoading(true);
         try {
           const containers = await docker.listContainers({ all: true });
@@ -159,7 +159,7 @@ export const useDocker = (docker: Dockerode) => {
         } finally {
           setLoading(false);
         }
-      };
+      }
       fetchContainers();
     }, []);
 
@@ -193,11 +193,6 @@ export const useDocker = (docker: Dockerode) => {
   };
 
   return {
-    error,
-    stopContainer,
-    startContainer,
-    restartContainer,
-    removeContainer,
     useImages,
     useImageInfo,
     useContainers,

@@ -6,19 +6,13 @@ import { useDocker } from './docker';
 import { containerName, isContainerRunning } from './docker/container';
 import ErrorDetail from './error_detail';
 
-const filterContainers = (containers: ContainerInfo[] | undefined, projectFilter?: string) => {
-  if (projectFilter === undefined || containers === undefined) {
-    return containers;
-  }
-  return containers.filter((container) => container.Labels['com.docker.compose.project'] === projectFilter);
-};
-
 export default function ContainerList(props: { projectFilter?: string }) {
   const docker = useMemo(() => new Dockerode(), []);
   const dockerState = useDocker(docker);
-  const { error, stopContainer, startContainer, restartContainer, removeContainer, useContainers } = dockerState;
+  const { useContainers } = dockerState;
 
-  const { isLoading, containers } = useContainers();
+  const { containers, isLoading, error, startContainer, restartContainer, stopContainer, removeContainer } =
+    useContainers();
 
   if (error) {
     return <ErrorDetail error={error} />;
@@ -90,3 +84,10 @@ export default function ContainerList(props: { projectFilter?: string }) {
     </List>
   );
 }
+
+const filterContainers = (containers: ContainerInfo[] | undefined, projectFilter?: string) => {
+  if (projectFilter === undefined || containers === undefined) {
+    return containers;
+  }
+  return containers.filter((container) => container.Labels['com.docker.compose.project'] === projectFilter);
+};
