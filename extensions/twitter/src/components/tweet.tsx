@@ -30,8 +30,10 @@ export function TweetListItem(props: { tweet: TweetV1; fetcher?: Fetcher }) {
     ? { source: t.user.profile_image_url_https, mask: ImageMask.Circle }
     : undefined;
 
+  const ownFavoriteCount = t.favorited && textRaw.startsWith("RT @") ? 1 : 0;
+
   const hasImage = getPhotoUrlFromTweet(t) ? true : false;
-  let states = [`💬 ${t.reply_count || 0}`, `🔁 ${t.retweet_count}`, `❤️ ${t.favorite_count}`];
+  let states = [`💬 ${t.reply_count || 0}`, `🔁 ${t.retweet_count}`, `❤️ ${t.favorite_count + ownFavoriteCount}`];
   if (hasImage) {
     states = ["🖼️", ...states];
   }
@@ -83,7 +85,8 @@ export function TweetDetail(props: { tweet: TweetV1 }) {
     showToast(ToastStyle.Failure, "Error", error);
   }
   const t = data || props.tweet;
-  const states = [`💬 ${t.reply_count || 0}`, `🔁 ${t.retweet_count}`, `❤️ ${t.favorite_count}`];
+  const ownFavoriteCount = t.favorited && t.full_text && t.full_text.startsWith("RT @") ? 1 : 0;
+  const states = [`💬 ${t.reply_count || 0}`, `🔁 ${t.retweet_count}`, `❤️ ${t.favorite_count + ownFavoriteCount}`];
   const imgUrl = getPhotoUrlFromTweet(t);
   const parts = [`## ${t.user.name} \`@${t.user.screen_name}\``, t.full_text || "", `\`${t.created_at}\``];
   if (imgUrl) {
