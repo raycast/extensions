@@ -69,18 +69,7 @@ function checkPathExists(v: string): string | undefined {
   return existsSync(v) ? v : undefined
 }
 
-const installedIDEsPaths = new Map<SupportedIDE, string | undefined>([
-  [SupportedIDE.WebStorm, getJetbrainsPath('WebStorm.app')],
-  [
-    SupportedIDE.PyCharm,
-    // todo: add "Prefer Professional Edition" to configuration
-    getJetbrainsPath('PyCharm.app')
-    ?? getJetbrainsPath('PyCharm Professional Edition.app')
-    ?? getJetbrainsPath('PyCharm Community Edition.app'),
-  ],
-  // todo: add vscode insiders
-  [SupportedIDE.VSCode, checkPathExists('/Applications/Visual Studio Code.app')],
-])
+let installedIDEsPaths: Map<SupportedIDE, string | undefined>
 function getIDEPath(ide: SupportedIDE): string | undefined {
   return installedIDEsPaths.get(ide)
 }
@@ -92,20 +81,6 @@ function getIDEIcon(ide: SupportedIDE): ImageLike {
   }
   return Icon.TextDocument
 }
-
-let fallbackIDEPath: string | undefined
-let fallbackIDEName: string = 'Unknown'
-// todo: support fallback ide configuration
-for (const [ide, idePath] of installedIDEsPaths.entries()) {
-  if (idePath) {
-    fallbackIDEPath = idePath
-    fallbackIDEName = getIDEName(ide)
-    break
-  }
-}
-
-const forkPath = '/Applications/Fork.app'
-const forkInstalled = existsSync(forkPath)
 
 class Project {
   name: string;
@@ -234,6 +209,33 @@ function updateFrecency(searchQuery: string | undefined, project: Project) {
 }
 
 function Command() {
+  installedIDEsPaths = new Map<SupportedIDE, string | undefined>([
+    [SupportedIDE.WebStorm, getJetbrainsPath('WebStorm.app')],
+    [
+      SupportedIDE.PyCharm,
+      // todo: add "Prefer Professional Edition" to configuration
+      getJetbrainsPath('PyCharm.app')
+      ?? getJetbrainsPath('PyCharm Professional Edition.app')
+      ?? getJetbrainsPath('PyCharm Community Edition.app'),
+    ],
+    // todo: add vscode insiders
+    [SupportedIDE.VSCode, checkPathExists('/Applications/Visual Studio Code.app')],
+  ])
+
+  let fallbackIDEPath: string | undefined
+  let fallbackIDEName: string = 'Unknown'
+  // todo: support fallback ide configuration
+  for (const [ide, idePath] of installedIDEsPaths.entries()) {
+    if (idePath) {
+      fallbackIDEPath = idePath
+      fallbackIDEName = getIDEName(ide)
+      break
+    }
+  }
+
+  const forkPath = '/Applications/Fork.app'
+  const forkInstalled = existsSync(forkPath)
+
   const [searchQuery, setSearchQuery] = useState<string>();
   const { projects, isLoading } = searchProjects(searchQuery);
 
