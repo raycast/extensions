@@ -19,7 +19,7 @@
     {
       "name": "index",
       "title": "Time Tracking",
-      "subtitle": "",
+      "subtitle": "Clockify",
       "description": "Manage Clockify time entries with Raycast",
       "mode": "view"
     }
