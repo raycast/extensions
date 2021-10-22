@@ -18,7 +18,7 @@ export default function Command(): ReactElement {
     </List>);
 }
 
-const getFavicon = (url): string => {
+const getFavicon = (url: string): string => {
     const domain = new URL(url).hostname
     return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`
 }
