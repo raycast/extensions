@@ -1,7 +1,7 @@
 {
   "name": "homeassistant",
   "title": "Home Assistant",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "author": "tonka3000",
   "license": "MIT",
   "description": "Home Assistant remote control. Control your house with Raycast 🚀",
