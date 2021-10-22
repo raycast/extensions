@@ -34,8 +34,10 @@ export default function Command() {
     );
   }
 
+  const isLoading = searchText !== debouncedSearchText || isLoadingVisitedRepositories || isLoadingRepositories;
+
   return (
-    <List isLoading={isLoadingVisitedRepositories || isLoadingRepositories} onSearchTextChange={setSearchText}>
+    <List isLoading={isLoading} onSearchTextChange={setSearchText}>
       <List.Section
         title="Visited Repositories"
         subtitle={visitedRepositories ? String(visitedRepositories.length) : undefined}
