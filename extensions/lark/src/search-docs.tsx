@@ -80,27 +80,27 @@ const isRecentList = (list: RecentList | SearchResults): list is RecentList => {
 
 const RecentListView: React.FC<{ list: RecentList }> = ({ list }) => {
   return (
-    <>
+    <List.Section title="Recent List" subtitle={`${list.node_list.length}`}>
       {list.node_list.map((nodeId) => {
         const nodeEntity = list.entities.nodes[nodeId];
         const ownerEntity = list.entities.users[nodeEntity.owner_id];
 
         return <SpaceListItem key={nodeId} node={nodeEntity} owner={ownerEntity} />;
       })}
-    </>
+    </List.Section>
   );
 };
 
 const SearchResultView: React.FC<{ list: SearchResults }> = ({ list }) => {
   return (
-    <>
+    <List.Section title="Search Results" subtitle={`${list.tokens.length}`}>
       {list.tokens.map((nodeId) => {
         const objEntity = list.entities.objs[nodeId];
         const ownerEntity = list.entities.users[objEntity.owner_id];
 
         return <SpaceListItem key={nodeId} node={objEntity} owner={ownerEntity} />;
       })}
-    </>
+    </List.Section>
   );
 };
 
