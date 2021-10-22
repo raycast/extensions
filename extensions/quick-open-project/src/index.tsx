@@ -211,6 +211,7 @@ function searchProjects(query?: string): {
      * If the folder _a_ is not a project itself, tries to scan its subdirectories.
      * If any of its subdirectories (up to maxScanDepth) are projects, _a_ is not included to projects list.
      * If none of its subdirectories (up to maxScanDepth) are projects and _a_ is on depth level 1, _a_ is included to projects list.
+     * If none of its subdirectories (up to maxScanDepth) are projects and some of the siblings of _a_ are projects, _a_ is included to projects list.
      * `depth` is current depth of scanning. 0 for base path from preferences, 1 for its subdirectories etc.
      */
     function* scan(basePath: string, depth: number): Generator<string> {
@@ -220,21 +221,85 @@ function searchProjects(query?: string): {
       const subdirectories = readdirSync(basePath)
         .map((dir) => join(basePath, dir))
         .filter((path) => statSync(path)?.isDirectory())
+      /**
+       * Explanation on `arguablyProjects`
+       * Given this tree (~ is project scan path)
+       * ~
+       * |-a
+       *   |-b
+       *   |-c
+       *     |-.git
+       * `c` is a project. It is detected just fine.
+       * Without `arguablyProjects`, `b` is discarded because it is not a project itself, none of its subdirectories are
+       * projects and it's not on depth level 1.
+       * `a` is also discarded because some of its subdirectories are projects.
+       * But we want `b` to be included because now it is lost completely.
+       *
+       * Another example:
+       * Given this tree (~ is project scan path)
+       * ~
+       * |-a
+       *   |-b
+       *   |-c
+       * `b` and `c` are not projects. They are discarded.
+       * `a` is not discarded because none of its subdirectories are projects.
+       *
+       * Notably, whether to include `b` or not is determined not by `b` itself, not by its parent (`a`), but by its
+       * sibling (`c`). And that's why we use `arguablyProjects`.
+       *
+       * So `arguablyProjects` are those directories that are not projects itself but might need to be added as projects
+       * if some of their siblings are projects.
+       *
+       * While scanning for subdirectories in `a`, we keep track of whether any of `a`'s subdirectories are projects.
+       * If we find a directory that is not a project itself, none of its subdirectories are projects and it's not on
+       * depth level 1, we add it to `arguablyProjects`.
+       * If we find a directory that is a project itself or has projects inside it, we mark `directoryHasProjects` true.
+       *
+       * After scanning for all subdirectories, we check whether `directoryHasProjects` is true, and if it is we yield
+       * all `arguablyProjects` as real projects.
+       *
+       * So in the first example:
+       * 1. `b` is added to `arguablyProjects`
+       * 2. `c` is yielded as a project. `directoryHasProjects` is now true.
+       * 3. `directoryHasProjects` is true, so `b` is also yielded.
+       *
+       * And for the second example:
+       * 1. `b` is added to `arguablyProjects`
+       * 2. `c` is added to `arguablyProjects`
+       * 3. `directoryHasProjects` is false, so `b` and `c` are not yielded.
+       * 4. `a` is yielded as a project instead.
+       *
+       * Notably, the order of yields might be wrong but it's not important here.
+       */
+      let arguablyProjects: string[] = []
+      let directoryHasProjects = false
       for (const directory of subdirectories) {
         if (ignoredPaths.includes(directory)) {
           return
         }
         if (isProject(directory)) {
+          directoryHasProjects = true
           yield directory
         } else {
           let addedRecursiveSubdirectories = 0
           for (const subdirectory of scan(directory, depth + 1)) {
+            directoryHasProjects = true
             addedRecursiveSubdirectories++
             yield subdirectory
           }
-          if (depth === 0 && addedRecursiveSubdirectories === 0) {
-            yield directory
+          if (addedRecursiveSubdirectories === 0) {
+            if (depth === 0) {
+              directoryHasProjects = true
+              yield directory
+            } else {
+              arguablyProjects = arguablyProjects.concat(directory)
+            }
           }
+        }
+      }
+      if (directoryHasProjects) {
+        for (const directory of arguablyProjects) {
+          yield directory
         }
       }
     }
