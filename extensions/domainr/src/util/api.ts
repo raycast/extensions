@@ -8,6 +8,7 @@ import * as R from 'fp-ts/Reader'
 import * as TE from 'fp-ts/TaskEither'
 import { Errors } from 'io-ts'
 import { ISearchResponse, ISearchResult, IStatusResponse, SearchResponse, SearchResultWithStatus, StatusResponse } from './types'
+import { setupCache } from 'axios-cache-adapter'
 
 
 
@@ -17,7 +18,12 @@ type RaycastPreferences = {
 
 const prefs: RaycastPreferences = getPreferenceValues()
 
+const cache = setupCache({
+	maxAge: 1000 * 60 * 15 // 15 min cache
+})
+
 const api = axios.create({
+	adapter: cache.adapter,
 	baseURL: 'https://domainr.p.rapidapi.com/v2/',
 	headers: {
 		'x-rapidapi-host': 'domainr.p.rapidapi.com',

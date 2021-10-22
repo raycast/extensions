@@ -52,9 +52,12 @@ function DomainrSearch() {
 					key={result.domain + result.path}
 					title={result.domain + result.path}
 					subtitle={statusMapping[result.status]}
-					icon={Icon.Globe}
+					icon={{
+						...getStatusIcon(statusMapping[result.status]),
+						// source: Icon.Globe
+					}}
 					accessoryTitle={statusDescriptionMapping[result.status]}
-					accessoryIcon={getStatusIcon(statusMapping[result.status])}
+					// accessoryIcon={getStatusIcon(statusMapping[result.status]).source}
 					actions={
 						<ActionPanel>
 							{[DomainStatus.Available, DomainStatus.Aftermarket].includes(statusMapping[result.status]) && (

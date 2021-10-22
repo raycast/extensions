@@ -27,6 +27,7 @@
   "dependencies": {
     "@raycast/api": "^1.25.1",
     "axios": "^0.23.0",
+    "axios-cache-adapter": "^2.7.3",
     "fp-ts": "^2.11.5",
     "io-ts": "^2.2.16",
     "ts-pattern": "^3.3.3"
