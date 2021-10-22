@@ -8,6 +8,7 @@ import {
   showToast,
   ToastStyle,
 } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { TweetV1 } from "twitter-api-v2";
 import { loggedInUserAccount, twitterClient, Fetcher } from "../twitterapi";
 import { getErrorMessage } from "../utils";
@@ -37,6 +38,18 @@ export function ReplyTweetAction(props: { tweet: TweetV1 }) {
 }
 
 export function DeleteTweetAction(props: { tweet: TweetV1 }) {
+  const [user, setUser] = useState<string | undefined>();
+  useEffect(() => {
+    async function fetch() {
+      try {
+        const u = await loggedInUserAccount();
+        setUser(u.screen_name);
+      } catch (error) {
+        // ignore
+      }
+    }
+    fetch();
+  }, []);
   const t = props.tweet;
   const deleteTweet = async () => {
     try {
@@ -50,13 +63,17 @@ export function DeleteTweetAction(props: { tweet: TweetV1 }) {
       showToast(ToastStyle.Failure, "Could not delete Tweet", getErrorMessage(error));
     }
   };
-  return (
-    <ActionPanel.Item
-      title="Delete Tweet"
-      icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
-      onAction={deleteTweet}
-    />
-  );
+  if (user === t.user.screen_name) {
+    return (
+      <ActionPanel.Item
+        title="Delete Tweet"
+        icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+        onAction={deleteTweet}
+      />
+    );
+  } else {
+    return null;
+  }
 }
 
 export function RetweetAction(props: { tweet: TweetV1; fetcher?: Fetcher }) {
