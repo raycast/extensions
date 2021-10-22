@@ -15,9 +15,9 @@
     },
     {
       "name": "search",
-      "title": "Search Formulae",
+      "title": "Search Formula",
       "subtitle": "Homebrew",
-      "description": "Search ",
+      "description": "Search homebrew formula",
       "mode": "view"
     }
   ],

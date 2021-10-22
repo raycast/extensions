@@ -8,7 +8,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { brewSearchFormula, brewFetchInstalled, brewIsInstalled } from "./brew";
-import { FormulaActionPanel } from "./components";
+import FormulaActionPanel from "./components/formulaActionPanel";
 
 /// Main
 
