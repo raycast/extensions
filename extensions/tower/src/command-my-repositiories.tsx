@@ -14,19 +14,17 @@ import { exec } from "child_process";
 import fs from "fs";
 import os from "os";
 import plist from "plist";
+import tildify from "tildify";
 import { promisify } from "util";
 import Bookmark from "./dtos/Bookmark.dto";
 import ImportedTowerBookmarks, { ImportedTowerBookmark } from "./interfaces/imported-tower-bookmark";
-import tildify from "tildify";
 
 const execp = promisify(exec);
-
-const towerBookmarksPlistLocation = "/Library/Application Support/com.fournova.Tower3/bookmarks-v2.plist";
+const towerBookmarksPlistLocation = `${os.homedir()}/Library/Application\ Support/com.fournova.Tower3/bookmarks-v2.plist`;
 
 async function main() {
   if (isTowerCliInstalled()) {
     const bookmarks = await fetchBookmarks();
-
     render(<BookmarkList bookmarks={bookmarks} />);
   } else {
     render(<Detail navigationTitle="Tower CLI not installed" markdown={towerCliRequiredMessage()}></Detail>);
@@ -37,7 +35,7 @@ main();
 
 async function fetchBookmarks(): Promise<Bookmark[]> {
   try {
-    const bookmarksFile = os.homedir() + towerBookmarksPlistLocation;
+    const bookmarksFile = towerBookmarksPlistLocation;
     const obj = plist.parse(fs.readFileSync(bookmarksFile, "utf8")) as unknown as ImportedTowerBookmarks;
 
     if (obj.children.length === 0) {

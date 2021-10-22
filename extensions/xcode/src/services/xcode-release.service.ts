@@ -1,7 +1,7 @@
 import { XcodeRelease } from "../models/release/xcode-release.model";
 import { XcodeReleaseSDK } from "../models/release/xcode-release-sdk.model";
 import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 
 /**
  * XcodeReleaseService
@@ -55,7 +55,7 @@ export class XcodeReleaseService {
     // Decode each entry to a XcodeRelease
     const xcodeReleases = jsonArray.map(XcodeReleaseService.decodeXcodeRelease);
     // Cache XcodeReleases
-    this.cacheXcodeReleases(xcodeReleases);
+    this.cacheXcodeReleases(xcodeReleases).then();
     // Return XcodeReleases
     return xcodeReleases;
   }

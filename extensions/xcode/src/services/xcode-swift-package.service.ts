@@ -1,7 +1,7 @@
 import { XcodeSwiftPackage } from "../models/swift-package/xcode-swift-package.model";
 import { execAsync } from "../shared/exec-async";
 import { XcodeSwiftPackageCreationParameters } from "../models/swift-package/xcode-swift-package-creation-parameters.model";
-import * as Path from "path";
+import { joinPathComponents } from "../shared/join-path-components";
 
 /**
  * XcodeSwiftPackageService
@@ -15,7 +15,10 @@ export class XcodeSwiftPackageService {
     parameters: XcodeSwiftPackageCreationParameters
   ): Promise<XcodeSwiftPackage> {
     // Initialize Swift Package path
-    const swiftPackagePath = Path.join(parameters.location, parameters.name)
+    const swiftPackagePath = joinPathComponents(
+      parameters.location,
+      parameters.name
+    );
     // Execute command
     return execAsync(
       [
@@ -46,8 +49,8 @@ export class XcodeSwiftPackageService {
             `open ${swiftPackagePath}/Package.swift`
           ).then();
         }
-      }
-    })
+      };
+    });
   }
 
 }
