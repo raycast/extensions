@@ -225,7 +225,8 @@ function Command() {
   let fallbackIDEPath: string | undefined
   let fallbackIDEName: string = 'Unknown'
   // todo: support fallback ide configuration
-  for (const [ide, idePath] of installedIDEsPaths.entries()) {
+  for (const ide of [SupportedIDE.VSCode, SupportedIDE.WebStorm, SupportedIDE.PyCharm]) {
+    const idePath = installedIDEsPaths.get(ide)
     if (idePath) {
       fallbackIDEPath = idePath
       fallbackIDEName = getIDEName(ide)
