@@ -19,7 +19,7 @@ import Frecency from "frecency";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "fs";
 import { sync } from "glob";
 import { homedir } from "os";
-import { join } from 'path'
+import { join, normalize } from 'path'
 import { useEffect, useState } from "react";
 import open = require("open");
 import fuzzysort = require("fuzzysort");
@@ -165,6 +165,13 @@ function resolveHomedir(path: string): string {
   }
   return path
 }
+function parsePreferencesPaths(value: string): string[] {
+  return value
+    .split(",")
+    .map((s) => s.trim())
+    .map((path) => normalize(path))
+    .map(resolveHomedir)
+}
 
 // SupportStorage implements the minimal API required by frecency
 class SupportStorage {
@@ -195,11 +202,9 @@ function searchProjects(query?: string): {
   const [projects, setProjects] = useState<ProjectList>();
 
   useEffect(() => {
-    const projectScanPaths = (preferences.paths.value as string)
-      .split(",")
-      .map((s) => s.trim())
-      .map(resolveHomedir)
+    const projectScanPaths = parsePreferencesPaths((preferences.paths.value || '') as string)
     const maxScanDepth: number = Number(preferences.maxScanDepth.value as string) || 1
+    const ignoredPaths = parsePreferencesPaths((preferences.ignoredPaths.value || '') as string)
 
     /**
      * Performs recursive scanning.
@@ -216,6 +221,9 @@ function searchProjects(query?: string): {
         .map((dir) => join(basePath, dir))
         .filter((path) => statSync(path)?.isDirectory())
       for (const directory of subdirectories) {
+        if (ignoredPaths.includes(directory)) {
+          return
+        }
         if (isProject(directory)) {
           yield directory
         } else {

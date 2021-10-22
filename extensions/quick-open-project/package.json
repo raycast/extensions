@@ -54,6 +54,14 @@
           ],
           "description": "Maximum depth to index. For example, 3 will detect ~/projects/a/b/project",
           "default": "3"
+        },
+        {
+          "name": "ignoredPaths",
+          "type": "textfield",
+          "required": false,
+          "title": "Paths to ignore",
+          "description": "Comma-separated list of paths to ignore. No trailing separators. Example: '~/projects/ignored,~/projects/ignored2'",
+          "default": ""
         }
       ]
     }
