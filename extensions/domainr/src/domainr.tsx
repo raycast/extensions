@@ -7,14 +7,18 @@ import { useEffect, useState } from 'react'
 import { fullSearch } from './util/api'
 import { is, isError } from './util/conditional'
 import { DomainStatus, getStatusIcon, SearchResultWithStatus, statusDescriptionMapping, statusMapping } from './util/types'
+import useLoading from './util/useLoading'
 
 function DomainrSearch() {
+	const loading = useLoading(true)
 	const [ results, setResults ] = useState<ReadonlyArray<SearchResultWithStatus>>([])
 	const [ query, setQuery ] = useState('')
 
 
 	useEffect(() => {
 		if ( query.length < 3 ) return
+
+		loading.start()
 
 		pipe(
 			query,
@@ -23,7 +27,8 @@ function DomainrSearch() {
 				results,
 				A.filter(O.isSome),
 				A.map(o => o.value),
-				setResults
+				setResults,
+				loading.stop
 			)),
 			TE.mapLeft(err => pipe(
 				err,
@@ -32,14 +37,15 @@ function DomainrSearch() {
 				O.fold(
 					() => showToast(ToastStyle.Failure, 'Failed to perform search', 'Invalid response body'),
 					() => showToast(ToastStyle.Failure, 'Failed to perform search', (err as Error).message)
-				)
+				),
+				loading.stop
 			))
 		)()
 	}, [query])
 
 
 	return (
-		<List isLoading={results.length === 0} onSearchTextChange={setQuery} throttle searchBarPlaceholder='Search domains'>
+		<List isLoading={loading.status} onSearchTextChange={setQuery} throttle searchBarPlaceholder='Search domains'>
 			{results.map(result => (
 				<List.Item
 					id={result.domain + result.path}
