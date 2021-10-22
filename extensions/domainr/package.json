@@ -8,9 +8,9 @@
   "commands": [
     {
       "name": "domainr",
-      "title": "domainr",
-      "subtitle": "",
-      "description": "Search for domains on domainr",
+      "title": "Search Domain",
+      "subtitle": "Domainr",
+      "description": "Search domains availability with Domainr.",
       "mode": "view",
       "preferences": [
         {
