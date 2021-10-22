@@ -30,3 +30,5 @@ export type SlackStatusResponseState = [
   SlackStatusResponse | undefined,
   (response: SlackStatusResponse | undefined) => void
 ];
+
+export type SlackStatusPresetsListState = [SlackStatusPreset[], (presets: SlackStatusPreset[]) => void];

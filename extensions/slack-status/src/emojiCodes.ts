@@ -1137,6 +1137,7 @@ export const slackEmojiCodeMap = {
   ":ng:": "🆖",
   ":night_with_stars:": "🌃",
   ":nine:": "9️⃣",
+  ":ninja:": "🥷",
   ":no_bell:": "🔕",
   ":no_bicycles:": "🚳",
   ":no_entry:": "⛔",
