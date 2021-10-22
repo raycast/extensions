@@ -1,4 +1,4 @@
-import Dockerode, { ContainerInfo, ContainerInspectInfo } from '@priithaamer/dockerode';
+import Dockerode, { ContainerInfo, ContainerInspectInfo, ImageInfo } from '@priithaamer/dockerode';
 import { useEffect, useState } from 'react';
 
 export type DockerState = ReturnType<typeof useDocker>;
@@ -54,6 +54,42 @@ export const useDocker = (docker: Dockerode) => {
     setLoading(false);
   };
 
+  const useImages = () => {
+    const [images, setImages] = useState<ImageInfo[]>();
+    const [isLoading, setLoading] = useState(false);
+    const [error, setError] = useState<Error>();
+
+    useEffect(() => {
+      async function fetchImages() {
+        setLoading(true);
+        try {
+          const images = await docker.listImages();
+          setImages(images);
+        } catch (error) {
+          if (error instanceof Error) {
+            setError(error);
+          }
+        } finally {
+          setLoading(false);
+        }
+      }
+      fetchImages();
+    }, []);
+
+    return {
+      images,
+      error,
+      isLoading,
+      removeImage: async ({ Id }: { Id: string }) => {
+        setLoading(true);
+        await docker.getImage(Id).remove();
+        const images = await docker.listImages();
+        setImages(images);
+        setLoading(false);
+      },
+    };
+  };
+
   const useContainers = () => {
     useEffect(() => {
       fetchContainers();
@@ -92,6 +128,7 @@ export const useDocker = (docker: Dockerode) => {
     startContainer,
     restartContainer,
     removeContainer,
+    useImages,
     useContainers,
     useContainerInfo,
   };
