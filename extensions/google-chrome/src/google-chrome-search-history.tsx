@@ -1,7 +1,7 @@
 import { List, ToastStyle, showToast, ActionPanel, OpenInBrowserAction, CopyToClipboardAction } from "@raycast/api";
 import { useState, ReactElement } from "react"
-import { URL } from "url";
 import { HistoryEntry, useChromeHistorySearch } from "./browserHistory"
+import { faviconUrl } from "./utils"
 
 export default function Command(): ReactElement {
     const [searchText, setSearchText] = useState<string>()
@@ -18,15 +18,10 @@ export default function Command(): ReactElement {
     </List>);
 }
 
-const getFavicon = (url: string): string => {
-    const domain = new URL(url).hostname
-    return `https://www.google.com/s2/favicons?sz=64&domain=${domain}`
-}
-
 const HistoryItem = (props: { entry: HistoryEntry }): ReactElement => {
     const { url, title } = props.entry
     const id = props.entry.id.toString()
-    const favicon = getFavicon(url)
+    const favicon = faviconUrl(64, url)
 
     return (
         <List.Item
