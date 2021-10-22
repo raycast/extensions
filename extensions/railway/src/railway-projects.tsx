@@ -1,5 +1,6 @@
 import {
   ActionPanel,
+  CopyToClipboardAction,
   Detail,
   environment,
   List,
@@ -104,11 +105,37 @@ const ListProjects: React.FC<{ token: string }> = ({ token }) => {
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <OpenInBrowserAction title="Project settings" url={projectUrl(p.id, "settings")} />
-                    <OpenInBrowserAction title="Project deployments" url={projectUrl(p.id, "deployments")} />
-                    <OpenInBrowserAction title="Latest deployment" url={projectUrl(p.id, "deployments?open=true")} />
-                    <OpenInBrowserAction title="Project variables" url={projectUrl(p.id, "variables")} />
-                    <OpenInBrowserAction title="Project metrics" url={projectUrl(p.id, "metrics")} />
+                    <OpenInBrowserAction
+                      title="Project settings"
+                      url={projectUrl(p.id, "settings")}
+                    />
+                    <OpenInBrowserAction
+                      title="Project deployments"
+                      url={projectUrl(p.id, "deployments")}
+                    />
+                    <OpenInBrowserAction
+                      title="Latest deployment"
+                      url={projectUrl(p.id, "deployments?open=true")}
+                      shortcut={{ modifiers: ["cmd"], key: "l" }}
+                    />
+                    <OpenInBrowserAction
+                      title="Project variables"
+                      url={projectUrl(p.id, "variables")}
+                      shortcut={{ modifiers: ["cmd"], key: "v" }}
+                    />
+                    <OpenInBrowserAction
+                      title="Project metrics"
+                      url={projectUrl(p.id, "metrics")}
+                      shortcut={{ modifiers: ["cmd"], key: "m" }}
+                    />
+                  </ActionPanel.Section>
+
+                  <ActionPanel.Section>
+                    <CopyToClipboardAction
+                      title="Copy Project URL"
+                      content={projectUrl(p.id)}
+                      shortcut={{ modifiers: ["opt"], key: "c" }}
+                    />
                   </ActionPanel.Section>
 
                   <ActionPanel.Section>
@@ -149,7 +176,10 @@ const RailwayLogin = () => {
           title="Login to Railway"
           actions={
             <ActionPanel title="#1 in raycast/extensions">
-              <PushAction title="Start Railway Login" target={<LoginWaiting loginSession={loginSession} />} />
+              <PushAction
+                title="Start Railway Login"
+                target={<LoginWaiting loginSession={loginSession} />}
+              />
             </ActionPanel>
           }
         />
