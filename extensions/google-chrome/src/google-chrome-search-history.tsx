@@ -8,7 +8,7 @@ export default function Command(): ReactElement {
     const { isLoading, error, response } = useChromeHistorySearch(searchText)
 
     if (error) {
-        showToast(ToastStyle.Failure, "An Error Occurred", error)
+        showToast(ToastStyle.Failure, "An Error Occurred", error.toString())
     }
 
     return (<List onSearchTextChange={setSearchText} isLoading={isLoading} throttle={true}>
