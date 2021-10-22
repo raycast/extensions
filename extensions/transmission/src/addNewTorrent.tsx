@@ -38,9 +38,9 @@ export default function AddNewTorrent() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="url" placeholder="Magnet Link" />
-      <Form.Dropdown id="quickPath" onChange={setDownloadDir}>
-        <Form.Dropdown.Item value="" title="Choose an option, or type below" />
+      <Form.TextField title="Magnet Link" id="url" placeholder="magnet:" />
+      <Form.Dropdown title="Quickly insert a path" id="quickPath" onChange={setDownloadDir}>
+        <Form.Dropdown.Item value="" title="" />
         {preferences.quickPaths
           .split(",")
           .map((path: string) => path.trim())
@@ -48,7 +48,7 @@ export default function AddNewTorrent() {
             <Form.Dropdown.Item key={index} value={path} title={path} />
           ))}
       </Form.Dropdown>
-      <Form.TextField id="downloadDir" placeholder="Download Directory" value={downloadDir} onChange={setDownloadDir} />
+      <Form.TextField title="Download Directory" id="downloadDir" value={downloadDir} onChange={setDownloadDir} />
     </Form>
   );
 }
