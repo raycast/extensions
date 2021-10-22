@@ -80,7 +80,7 @@ export default function Main() {
           actions={
             <ActionPanel>
               <ActionPanel.Item
-                title="Start new timer"
+                title="Start New Timer"
                 onAction={() => push(<NewEntry updateTimeEntries={updateTimeEntries} />)}
               />
             </ActionPanel>
