@@ -6,7 +6,7 @@ export const API_URL = `https://api.clockify.me/api/v1`;
 
 export const isInProgress = (entry: TimeEntry) => !entry?.timeInterval?.end;
 
-export const TOKEN = preferences.token.value;
+export const TOKEN = preferences.token?.value;
 
 export async function fetcher(
   url: string,

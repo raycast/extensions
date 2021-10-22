@@ -5,7 +5,6 @@ import {
   getLocalStorageItem,
   Icon,
   List,
-  popToRoot,
   setLocalStorageItem,
   showToast,
   SubmitFormAction,
@@ -16,12 +15,10 @@ import { useCallback, useEffect, useState } from "react";
 import isEmpty from "lodash.isempty";
 import uniqWith from "lodash.uniqwith";
 import useConfig from "./useConfig";
-// import useToken from "./useToken";
 import { fetcher, isInProgress } from "./utils";
 import { TimeEntry, Project } from "./types";
 
 export default function Main() {
-  // const isValidToken = useToken();
   const { config, isValidToken } = useConfig();
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -74,11 +71,6 @@ export default function Main() {
           icon={Icon.ExclamationMark}
           title="Invalid API Key detected"
           accessoryTitle={`Go to Extensions → Clockify`}
-          actions={
-            <ActionPanel>
-              <ActionPanelItem title="Go Back" onAction={popToRoot} />
-            </ActionPanel>
-          }
         />
       ) : (
         <>
