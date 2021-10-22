@@ -16,7 +16,6 @@ async function submit(values: TweetFormValues, replyTweet?: TweetV1 | undefined)
     if (text.length > 280) {
       throw Error("Tweet text could not be longer than 280 characters");
     }
-    console.log(text);
     if (replyTweet) {
       await twitterClient.v1.reply(text, replyTweet.id_str);
       await showToast(ToastStyle.Success, "Tweet created", "Reply Tweet creation successful");
