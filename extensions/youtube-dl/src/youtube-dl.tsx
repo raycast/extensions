@@ -110,8 +110,6 @@ export default function command() {
         toast.style = ToastStyle.Success;
         toast.title = "Complete";
         toast.message = "Download finished";
-      } else {
-        toast.style = ToastStyle.Failure;
       }
       console.log(`child process exited with code ${code}`);
     });
@@ -119,17 +117,25 @@ export default function command() {
     videoDownload.on("error", (err: Error) => {
       if (err.message.includes("ENOENT")) {
         // try to install youtube-dl
-        toast.title = "Installing";
-        toast.message = "An utility is installing nessesary dependecies.";
-        const youtubeDlInstaller = spawn("osascript", [
-          "-e",
-          "'do shell script \" curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl;chmod a+rx /usr/local/bin/youtube-dl \" with administrator privileges '",
-        ]);
-        youtubeDlInstaller.on("error", (err) => {
-          toast.style = ToastStyle.Failure;
-          toast.title = "Installation failed";
-          toast.message = "You can manuelly install by visiting youtube-dl.org";
-        });
+        toast.style = ToastStyle.Animated;
+        toast.title = "Youtube-dl Not Found";
+        toast.message = "A utility is installing necessary dependencies";
+        setTimeout(() => {
+          const dlInstall = spawn("sh", [__dirname + "/assets/install.sh"]);
+          dlInstall.stdout.on("data", (data) => {
+            console.log("[DL Install]: ", data.toString());
+          });
+          dlInstall.stderr.on("data", (data) => {
+            console.log("[DL Install]: ", data.toString());
+            toast.title = "Installation failed";
+            toast.message = "You can manually install by visiting youtube-dl.org";
+          });
+          dlInstall.on("error", (err) => {
+            console.log(err);
+            toast.title = "Installation failed";
+            toast.message = "You can manually install by visiting youtube-dl.org";
+          });
+        }, 5000);
       } else {
         toast.style = ToastStyle.Failure;
         toast.title = "Error";
@@ -138,7 +144,7 @@ export default function command() {
       }
     });
     videoDownload.on("spawn", () => {
-      toast.message = "Estabolising connection";
+      toast.message = "Establishing connection";
     });
   }
   //rendering
