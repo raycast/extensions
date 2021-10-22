@@ -36,6 +36,7 @@
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "node-fetch": "^2.6.1",
+    "node-git-current-branch": "^2.0.1",
     "plist": "^3.0.3",
     "tildify": "^3.0.0"
   },

@@ -9,9 +9,8 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
     <List.Item
       id={bookmark.RepositoryIdentifier}
       title={bookmark.Name}
-      subtitle={bookmark.getFolder}
       icon={Icon.Circle}
-      accessoryTitle={""}
+      accessoryTitle={bookmark.getBranch}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

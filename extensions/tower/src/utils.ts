@@ -1,7 +1,7 @@
 import { preferences, showToast, ToastStyle } from "@raycast/api";
 import fs from "fs";
-import plist from "plist";
 import os from "os";
+import plist from "plist";
 import Bookmark from "./dtos/bookmark-dto";
 import ImportedTowerBookmarks, { ImportedTowerBookmark } from "./interfaces/imported-tower-bookmark";
 
@@ -27,25 +27,24 @@ export function towerCliRequiredMessage(): string {
       `;
 }
 
-async function extractBookmarks(obj: ImportedTowerBookmark[]): Promise<Bookmark[]> {
+async function extractBookmarks(obj: ImportedTowerBookmark[], parents?: string): Promise<Bookmark[]> {
   let bookmarks: Bookmark[] = [];
+
   if (!obj || obj.length === 0) {
     return Promise.resolve(bookmarks);
   }
 
   obj.forEach(async (bookmark: ImportedTowerBookmark) => {
-    const childBookmarks = await extractBookmarks(bookmark.children);
+    let name = parents ? `${parents} / ${bookmark.name}` : bookmark.name;
 
-    if (childBookmarks && childBookmarks.length > 0) {
-      childBookmarks.forEach((item) => {
-        if (item.isComplete) {
-          bookmarks.push(item);
-        }
-      });
+    if (bookmark.children && bookmark.children.length > 0) {
+      const childBookmarks = await extractBookmarks(bookmark.children, name);
+
+      childBookmarks.forEach((bookmark) => bookmarks.push(bookmark));
     }
 
     bookmarks.push(
-      new Bookmark(bookmark.fileURL, bookmark.name, bookmark.lastOpenedDate, bookmark.repositoryIdentifier)
+      new Bookmark(bookmark.fileURL, name, bookmark.lastOpenedDate, bookmark.repositoryIdentifier, bookmark.type)
     );
   });
 
