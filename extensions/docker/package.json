@@ -15,7 +15,7 @@
     },
     {
       "name": "projects_list",
-      "title": "Manage Projects",
+      "title": "Manage Compose Projects",
       "subtitle": "Docker",
       "description": "Manage Docker Compose Projects",
       "mode": "view"
