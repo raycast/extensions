@@ -2,14 +2,13 @@ import { getPreferenceValues } from '@raycast/api'
 import axios from 'axios'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
-import { pipe } from 'fp-ts/lib/function'
+import { flow, pipe } from 'fp-ts/lib/function'
 import * as O from 'fp-ts/Option'
 import * as R from 'fp-ts/Reader'
 import * as TE from 'fp-ts/TaskEither'
 import { Errors } from 'io-ts'
-import { ISearchResponse, ISearchResult, IStatusResponse, SearchResponse, SearchResultWithStatus, StatusResponse } from './types'
+import { ISearchResponse, ISearchResult, IStatusResponse, SearchResponse, SearchResultWithStatus, Status, StatusResponse } from './types'
 import { setupCache } from 'axios-cache-adapter'
-
 
 
 type RaycastPreferences = {
@@ -49,15 +48,15 @@ export const getDomainStatus: R.Reader<ISearchResult, TE.TaskEither<Error | Erro
 			}),
 			E.toError
 		),
-		TE.chainEitherKW(r => pipe(
-			r.data,
+		TE.chainEitherKW(flow(
+			r => r.data,
 			StatusResponse.decode
 		)),
-		TE.map(r => pipe(
-			r.status,
+		TE.map(flow(
+			r => r.status,
 			A.map(d => ({
 				...result,
-				status: d.summary
+				status: d.summary as Status
 			})),
 			A.head,
 		))
@@ -73,8 +72,8 @@ export const search = (query: string): TE.TaskEither<Errors | Error, ISearchResu
 		}),
 		E.toError
 	),
-	TE.chainEitherKW(r => pipe(
-		r.data,
+	TE.chainEitherKW(flow(
+		r => r.data,
 		SearchResponse.decode,
 	)),
 	TE.map(({ results }) => results)
@@ -83,8 +82,7 @@ export const search = (query: string): TE.TaskEither<Errors | Error, ISearchResu
 
 
 
-export const fullSearch = (query: string) => pipe(
-	query,
+export const fullSearch = flow(
 	search,
 	TE.chain(domains => pipe(
 		domains,
