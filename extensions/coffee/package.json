@@ -19,6 +19,13 @@
       "subtitle": "Coffee",
       "description": "Turn off the caffeine",
       "mode": "no-view"
+    },
+    {
+      "name": "caffeinateWhile",
+      "title": "Caffeinate while",
+      "subtitle": "Coffee",
+      "description": "Prevent your Mac from going to sleep mode while that particular app is running",
+      "mode": "view"
     }
   ],
   "dependencies": {
