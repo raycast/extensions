@@ -19,7 +19,7 @@ import Frecency from "frecency";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "fs";
 import { sync } from "glob";
 import { homedir } from "os";
-import path from 'path'
+import { join } from 'path'
 import { useEffect, useState } from "react";
 import open = require("open");
 import fuzzysort = require("fuzzysort");
@@ -56,9 +56,9 @@ function getIDEName(ide: SupportedIDE): string {
 }
 
 function getJetbrainsPath(appName: string): string | undefined {
-  let appPath: string | null = path.join('/Applications/', appName)
+  let appPath: string | null = join('/Applications/', appName)
   if (!existsSync(appPath)) {
-    appPath = path.join(homedir(), 'Applications/JetBrains Toolbox/', appName)
+    appPath = join(homedir(), 'Applications/JetBrains Toolbox/', appName)
   }
   if (!existsSync(appPath)) {
     return undefined
@@ -104,9 +104,9 @@ class Project {
 
   detectIDE(): SupportedIDE | null {
     try {
-      const ideaPath = path.join(this.fullPath, '.idea')
+      const ideaPath = join(this.fullPath, '.idea')
       if (existsSync(ideaPath)) {
-        const imlFiles = sync(path.join(ideaPath, '*.iml'))
+        const imlFiles = sync(join(ideaPath, '*.iml'))
         for (const filePath of imlFiles) {
           const contents = readFileSync(filePath, 'utf8')
           const parsedContents = parser.parse(contents, {ignoreAttributes: false})
@@ -116,7 +116,7 @@ class Project {
           }
         }
       }
-      if (existsSync(path.join(this.fullPath, '.vscode'))) {
+      if (existsSync(join(this.fullPath, '.vscode'))) {
         return SupportedIDE.VSCode
       }
     } catch (error) {
