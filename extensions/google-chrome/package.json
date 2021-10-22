@@ -3,7 +3,8 @@
   "title": "Google Chrome",
   "description": "Search and open tabs and history in Google Chrome.",
   "icon": "google_chrome-icon.png",
-  "author": "Codely & bromanko",
+  "author": "Codely",
+  "contributors": ["bromanko"],
   "license": "MIT",
   "commands": [
     {
