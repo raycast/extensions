@@ -119,7 +119,7 @@ const ListProjects: React.FC<{ token: string }> = ({ token }) => {
                       shortcut={{ modifiers: ["cmd"], key: "l" }}
                     />
                     <OpenInBrowserAction
-                      title="Project variables"
+                      title="Project Variables"
                       url={projectUrl(p.id, "variables")}
                       shortcut={{ modifiers: ["cmd"], key: "v" }}
                     />
