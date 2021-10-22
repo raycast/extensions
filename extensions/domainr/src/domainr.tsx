@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, ImageMask, List, OpenInBrowserAction, showToast, ToastStyle } from '@raycast/api'
+import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle } from '@raycast/api'
 import { pipe } from 'fp-ts/lib/function'
 import * as O from 'fp-ts/Option'
 import * as A from 'fp-ts/ReadonlyArray'
