@@ -107,7 +107,7 @@ export default function Main() {
           <List.Item
             id={entry.id}
             key={entry.id}
-            title={entry.project?.clientName || "No client"}
+            title={entry.project?.clientName || "No Client"}
             subtitle={entry.description}
             accessoryTitle={entry.project?.name}
             icon={{ source: isInProgress(entry) ? Icon.Clock : Icon.Circle, tintColor: entry.project?.color }}
