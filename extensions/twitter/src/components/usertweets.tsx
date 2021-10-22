@@ -15,11 +15,9 @@ export default function UserTweetList(props: { username: string }) {
   }
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter Tweets by name...">
-      <List.Section title={`Tweets from @${username}`}>
-        {data?.map((tweet) => (
-          <TweetListItem key={tweet.id_str} tweet={tweet} fetcher={fetcher} />
-        ))}
-      </List.Section>
+      {data?.map((tweet) => (
+        <TweetListItem key={tweet.id_str} tweet={tweet} fetcher={fetcher} />
+      ))}
     </List>
   );
 }
