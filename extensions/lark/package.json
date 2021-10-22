@@ -1,19 +1,12 @@
 {
   "name": "lark",
   "title": "Lark Documents",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Quickly search documents from Feishu/Lark.",
   "icon": "logo.png",
   "author": "tmk",
   "license": "MIT",
   "commands": [
-    {
-      "name": "recent-docs",
-      "title": "Recent Documents",
-      "subtitle": "Lark",
-      "description": "Open recently used documents",
-      "mode": "view"
-    },
     {
       "name": "search-docs",
       "title": "Search Documents",
