@@ -6,11 +6,12 @@ import { twitterClient, useRefresher } from "./twitterapi";
 
 export default function UserList() {
   const [query, setQuery] = useState<string | undefined>();
+  // eslint-disable-next-line
   const { data, error, isLoading, fetcher } = useRefresher<UserV1[] | undefined>(
-    async (_): Promise<UserV1[] | undefined> => {
+    async (): Promise<UserV1[] | undefined> => {
       if (query && query.length > 0 && query !== "@") {
         const userdata = await twitterClient.v1.searchUsers(query);
-        let users: UserV1[] = [];
+        const users: UserV1[] = [];
         for (const u of userdata) {
           users.push(u);
         }

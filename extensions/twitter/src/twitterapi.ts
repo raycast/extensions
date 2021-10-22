@@ -34,7 +34,7 @@ export async function refreshTweets(tweets?: TweetV1[]): Promise<TweetV1[] | und
         const tweetIds = tweets.map((t) => t.id_str);
         const unorderedFreshTweets = await twitterClient.v1.tweets(tweetIds);
 
-        let freshTweets: TweetV1[] = [];
+        const freshTweets: TweetV1[] = [];
         for (const tid of tweetIds) {
             const t = unorderedFreshTweets.find((t) => tid === t.id_str);
             if (t) {

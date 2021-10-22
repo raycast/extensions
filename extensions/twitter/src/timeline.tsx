@@ -7,7 +7,7 @@ async function getHomeTimelineTweets(): Promise<TweetV1[]> {
   const homeTimeline = await twitterClient.v1.homeTimeline({
     exclude_replies: true,
   });
-  let tweets: TweetV1[] = [];
+  const tweets: TweetV1[] = [];
   const tweetsRaw = await homeTimeline.fetchLast(0);
   for (const t of tweetsRaw) {
     tweets.push(t);

@@ -71,7 +71,7 @@ export function TweetListItem(props: { tweet: TweetV1; fetcher?: Fetcher }) {
 
 export function TweetDetail(props: { tweet: TweetV1 }) {
   const { data, error, isLoading, fetcher } = useRefresher<TweetV1 | undefined>(
-    async (_): Promise<TweetV1 | undefined> => {
+    async (): Promise<TweetV1 | undefined> => {
       if (data === undefined) {
         return props.tweet;
       } else {
@@ -84,9 +84,8 @@ export function TweetDetail(props: { tweet: TweetV1 }) {
   }
   const t = data || props.tweet;
   const states = [`💬 ${t.reply_count || 0}`, `🔁 ${t.retweet_count}`, `❤️ ${t.favorite_count}`];
-  const media = t.entities.media;
   const imgUrl = getPhotoUrlFromTweet(t);
-  let parts = [`\`${t.user.name}\`  \n\`@${t.user.screen_name}\``, t.full_text || "", `\`${t.created_at}\``];
+  const parts = [`\`${t.user.name}\`  \n\`@${t.user.screen_name}\``, t.full_text || "", `\`${t.created_at}\``];
   if (imgUrl) {
     parts.push(`![${imgUrl}](${imgUrl})`);
   }
