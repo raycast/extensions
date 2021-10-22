@@ -1,19 +1,14 @@
 import {
-  ActionPanel,
-  ActionPanelItem,
-  CopyToClipboardAction,
   Color,
   Icon,
   List,
-  OpenInBrowserAction,
-  PushAction,
   render,
   showToast,
   ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { brewSearchFormula, brewInstalled, brewInstall } from "./brew";
-import { FormulaInfo } from "./components";
+import { brewSearchFormula, brewFetchInstalled, brewIsInstalled } from "./brew";
+import { FormulaActionPanel } from "./components";
 
 /// Main
 
@@ -43,10 +38,10 @@ function Main() {
 
   function FormulaListItem(props: { formula: Formula }) {
     const formula = props.formula;
-    const isInstalled = formula.installed.length > 0;
     let version = formula.versions.stable;
     let tintColor = Color.SecondaryText;
-    if (isInstalled) {
+
+    if (brewIsInstalled(formula)) {
       version = formula.installed[0].version;
       tintColor = Color.Green;
     }
@@ -58,32 +53,17 @@ function Main() {
         subtitle={formula.desc}
         accessoryTitle={version}
         icon={ {source: Icon.Checkmark, tintColor: tintColor} }
-        actions={
-          <ActionPanel>
-            <ActionPanel.Section>
-              <PushAction title="Show Details" target={<FormulaInfo formula={formula} isInstalled={isInstalled} />} />
-              <ActionPanelItem title={"Install"}
-                               icon={Icon.Plus}
-                               shortcut={{ modifiers:["cmd"], key: isInstalled ? "x" : "i" }}
-                               onAction={async () => {
-                                 await install(formula);
-                                 installed.set(formula.name, formula);
-                                 setInstalled(new Map(installed));
-                               }}
-              />
-            </ActionPanel.Section>
-            <ActionPanel.Section>
-              <OpenInBrowserAction url={formula.homepage} />
-              <CopyToClipboardAction title="Copy URL" content={formula.homepage} />
-            </ActionPanel.Section>
-          </ActionPanel>
-        }
+        actions={<FormulaActionPanel formula={formula} installCallback={() => {
+          setFormulae([...formulae]);
+        }}
+        />}
       />
     );
   }
 
   function ForumulaList(props: { formulae: Formula[], isLoading: bool, onSearchTextChange: () => void }) {
-    const results = props.formulae ? props.formulae.slice(0, 200) : [];
+    // Truncate results: otherwise we can run out of JS heap memory...
+    const results = props.formulae.slice(0, 200);
     return (
       <List searchBarPlaceholder="Search formula by name..." isLoading={props.isLoading} onSearchTextChange={props.onSearchTextChange} >
         {results.map((formula) => (
@@ -103,20 +83,8 @@ main();
 
 /// Private
 
-async function install(formula: Formula) {
-  showToast(ToastStyle.Animated, `Installing ${formula.full_name}`);
-  try {
-    await brewInstall(formula);
-    formula.installed = [{version: formula.versions.stable}];
-    showToast(ToastStyle.Success, `Installed ${formula.full_name}`);
-  } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Install failed");
-  }
-}
-
 async function listInstalled(): Map<string, Formula> {
-  const installed = await brewInstalled(true);
+  const installed = await brewFetchInstalled(true);
   const dict = new Map<string, Formula>();
   for (const formula of installed) {
     dict.set(formula.name, formula);

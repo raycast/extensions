@@ -5,19 +5,21 @@ import {
   Detail,
   Icon,
   OpenInBrowserAction,
+  PushAction,
   ShowInFinderAction,
   showToast,
   ToastStyle,
 } from "@raycast/api";
-import { brewFormulaPath } from "./brew";
+import { brewIsInstalled, brewInstall, brewUninstall, brewInstallPath } from "./brew";
 
-export function FormulaInfo(props: {formula: Formula, isInstalled: bool}) {
-  console.log('FormulaInfo:', props.formula.name);
+// FormulaInfo
 
-  return <Detail markdown={formatInfo(props.formula, props.isInstalled)} />;
+export function FormulaInfo(props: {formula: Formula}): Component {
+  // TD: We also need actions here...
+  return <Detail markdown={formatInfo(props.formula)} />;
 }
 
-function formatInfo(formula: Formula, isInstalled: bool): string {
+function formatInfo(formula: Formula): string {
   return `
 # ${formula.full_name}
 ${formula.desc}
@@ -70,10 +72,82 @@ ${markdown}
   }
 }
 
-  // aalib: stable 1.4rc5 (bottled)
-  // Portable ASCII art graphics library
-  // https://aa-project.sourceforge.io/aalib/
-  // /usr/local/Cellar/aalib/1.4rc5_2 (83 files, 791.9KB) *
-  // Poured from bottle on 2021-10-20 at 23:10:54
-  // From: https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/aalib.rb
-  // License: GPL-2.0-or-later
+// FormulaActionPanel
+
+export function FormulaActionPanel(props: {formula: Formula, installCallback: () => void}): Component {
+  if (brewIsInstalled(props.formula)) {
+    return installedActionPanel(props.formula, props.installCallback);
+  } else {
+    return uninstalledActionPanel(props.formula, props.installCallback);
+  }
+}
+
+function installedActionPanel(formula: Formula, didUninstall: () => void): Component {
+  async function uninstall(): Promise<bool> {
+    showToast(ToastStyle.Animated, `Uninstalling ${formula.full_name}`);
+    try {
+      await brewUninstall(formula);
+      formula.installed = [];
+      showToast(ToastStyle.Success, `Uninstalled ${formula.full_name}`);
+      return true;
+    } catch (err) {
+      console.error(err);
+      showToast(ToastStyle.Failure, "Uninstall failed");
+      return false;
+    }
+  }
+
+  return (<ActionPanel>
+    <ActionPanel.Section>
+      <PushAction title="Show Details" target={<FormulaInfo formula={formula} />} />
+      <ShowInFinderAction path={brewInstallPath(formula)} />
+      <OpenInBrowserAction url={formula.homepage} />
+      <CopyToClipboardAction title="Copy URL" content={formula.homepage} />
+    </ActionPanel.Section>
+    <ActionPanel.Section>
+      <ActionPanelItem title="Uninstall"
+                       icon={Icon.Trash}
+                       shortcut={{ modifiers:["ctrl"], key: "x" }}
+                       onAction={async () => {
+                         const result = await uninstall();
+                         didUninstall(result);
+                       }} />
+    </ActionPanel.Section>
+  </ActionPanel>);
+}
+
+function uninstalledActionPanel(formula: Formula, didInstall: () => void): Component {
+  async function install(): Promise<bool> {
+    showToast(ToastStyle.Animated, `Installing ${formula.full_name}`);
+    try {
+      await brewInstall(formula);
+      formula.installed = [{version: formula.versions.stable}];
+      showToast(ToastStyle.Success, `Installed ${formula.full_name}`);
+      return true;
+    } catch (error) {
+      console.error(error);
+      showToast(ToastStyle.Failure, "Install failed");
+      return false;
+    }
+  }
+
+  return (<ActionPanel>
+    <ActionPanel.Section>
+      <PushAction title="Show Details" target={<FormulaInfo formula={formula} />} />
+      <ActionPanelItem title={"Install"}
+                       icon={Icon.Plus}
+                       shortcut={{ modifiers:["cmd"], key: "i" }}
+                       onAction={async () => {
+                         const result =  await install();
+                         didInstall(result);
+                         // installed.set(formula.name, formula);
+                         // setInstalled(new Map(installed));
+                       }}
+      />
+    </ActionPanel.Section>
+    <ActionPanel.Section>
+      <OpenInBrowserAction url={formula.homepage} />
+      <CopyToClipboardAction title="Copy URL" content={formula.homepage} />
+    </ActionPanel.Section>
+  </ActionPanel>);
+}

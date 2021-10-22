@@ -54,7 +54,7 @@ export function brewInstallPath(formula: Formula): string {
   }
 }
 
-export async function brewInstalled(useCache: bool): Promise<Formula[]> {
+export async function brewFetchInstalled(useCache: bool): Promise<Formula[]> {
   async function installed(): Promise<string> {
     return (await execp(`brew info --json --installed`)).stdout;
   }
@@ -105,7 +105,8 @@ export async function brewFetchFormula(): Promise<Formula[]> {
     const lastModified = Date.parse(response.headers.get('last-modified'));
 
     if (!isNaN(lastModified) && lastModified < cacheTime) {
-      return JSON.parse(await readFile(formulaCachePath));
+      formulaCache = JSON.parse(await readFile(formulaCachePath));
+      return formulaCache;
     } else {
       throw 'Invalid cache';
     }
@@ -153,25 +154,15 @@ export async function brewUninstall(formula: Formula): Promise<void> {
   await execp(`brew rm ${formula.name}`);
 }
 
+export function brewIsInstalled(formula: Formula): bool {
+  return formula.installed.length > 0;
+}
+
 // TODO: Actions
+// show details / info (Markdown)
 // brew doctor
 // brew install
 // brew uninstall
-// search via //registry.npmjs.org/algoliasearch ??
-// OR we just GET https://formulae.brew.sh/api/formula.json and keep list in memory?
-// Not optimal, but might be best for v1
-
-/*
-      function loadSearch(lang, site) {
-        docsearch(Object.assign(
-          { algoliaOptions: { facetFilters: ['lang: ' + lang, 'site: ' + site] } },
-          {"apiKey":"a57ef92bf2adfae863a201ee43d6b5a1","indexName":"brew_all","inputSelector":"#search-bar"}
-        ));
-        window.location.hash || document.querySelector("#search-bar").focus();
-        document.querySelector("#search-bar").value = new URLSearchParams(window.location.search).get('search');
-      };
-*/
-
 
 /*
   {
