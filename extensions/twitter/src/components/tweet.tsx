@@ -85,7 +85,7 @@ export function TweetDetail(props: { tweet: TweetV1 }) {
   const t = data || props.tweet;
   const states = [`💬 ${t.reply_count || 0}`, `🔁 ${t.retweet_count}`, `❤️ ${t.favorite_count}`];
   const imgUrl = getPhotoUrlFromTweet(t);
-  const parts = [`\`${t.user.name}\`  \n\`@${t.user.screen_name}\``, t.full_text || "", `\`${t.created_at}\``];
+  const parts = [`## ${t.user.name} \`@${t.user.screen_name}\``, t.full_text || "", `\`${t.created_at}\``];
   if (imgUrl) {
     parts.push(`![${imgUrl}](${imgUrl})`);
   }
