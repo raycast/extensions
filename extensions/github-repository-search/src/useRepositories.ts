@@ -2,7 +2,6 @@ import { preferences } from "@raycast/api";
 import { Octokit } from "octokit";
 import { useEffect, useRef, useState } from "react";
 import { SearchRepositoriesResponse } from "./types";
-import { isAbortError } from "./utils";
 
 const SEARCH_REPOSITORIES_QUERY = `
 query SearchRepositories($searchText: String!) {
@@ -60,11 +59,6 @@ export function useRepositories(searchText: string | undefined) {
 
         setState((oldState) => ({ ...oldState, data: search, isLoading: false }));
       } catch (error) {
-        if (isAbortError(error)) {
-          console.debug("Aborted searching repositories", error);
-          return;
-        }
-
         console.error("Failed searching repositories", error);
 
         setState((oldState) => ({
