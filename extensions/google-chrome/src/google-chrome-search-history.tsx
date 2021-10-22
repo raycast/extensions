@@ -48,7 +48,7 @@ const Actions = (props: { entry: HistoryEntry }): ReactElement => {
             <CopyToClipboardAction
                 title="Copy URL"
                 content={url}
-                shortcut={{ modifiers: ["cmd"], key: "c" }} />
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
         </ActionPanel>
     )
 }
