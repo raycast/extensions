@@ -113,7 +113,7 @@ async function searchMDNByQuery(query: string): Promise<Result[]> {
     }));
   } catch (error) {
     console.error(error);
-    showToast(ToastStyle.Failure, "Could not load MDN results");
+    showToast(ToastStyle.Failure, `Could not load MDN results. ${error}`);
     return Promise.resolve([]);
   }
 }
