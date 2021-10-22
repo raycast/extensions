@@ -1,5 +1,7 @@
 import Dockerode, { ContainerInfo, ContainerInspectInfo, ImageInfo, ImageInspectInfo } from '@priithaamer/dockerode';
 import { useEffect, useState } from 'react';
+import { ComposeProject, containersToProjects } from './compose';
+import { isContainerRunning } from './container';
 
 export type DockerState = ReturnType<typeof useDocker>;
 
@@ -139,6 +141,57 @@ export const useDocker = (docker: Dockerode) => {
     };
   };
 
+  const useProjects = () => {
+    const [projects, setProjects] = useState<ComposeProject[]>();
+    const [isLoading, setLoading] = useState(false);
+    const [error, setError] = useState<Error>();
+
+    useEffect(() => {
+      const fetchContainers = async () => {
+        setLoading(true);
+        try {
+          const containers = await docker.listContainers({ all: true });
+          setProjects(containersToProjects(containers));
+        } catch (error) {
+          if (error instanceof Error) {
+            setError(error);
+          }
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchContainers();
+    }, []);
+
+    return {
+      projects,
+      isLoading,
+      error,
+      startProject: async (project: ComposeProject) => {
+        setLoading(true);
+        await Promise.all(
+          project.containers
+            .filter((container) => !isContainerRunning(container))
+            .map((container) => docker.getContainer(container.Id).start())
+        );
+        const containers = await docker.listContainers({ all: true });
+        setProjects(containersToProjects(containers));
+        setLoading(false);
+      },
+      stopProject: async (project: ComposeProject) => {
+        setLoading(true);
+        await Promise.all(
+          project.containers
+            .filter((container) => isContainerRunning(container))
+            .map((container) => docker.getContainer(container.Id).stop())
+        );
+        const containers = await docker.listContainers({ all: true });
+        setProjects(containersToProjects(containers));
+        setLoading(false);
+      },
+    };
+  };
+
   return {
     error,
     stopContainer,
@@ -149,5 +202,6 @@ export const useDocker = (docker: Dockerode) => {
     useImageInfo,
     useContainers,
     useContainerInfo,
+    useProjects,
   };
 };
