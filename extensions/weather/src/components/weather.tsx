@@ -1,18 +1,30 @@
-import { ActionPanel, List, PushAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Color, getPreferenceValues, Icon, List, PushAction, showToast, ToastStyle } from "@raycast/api";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { getIcon, getWindDirectionIcon } from "../icons";
+import { getTemperatureUnit, getWindUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
 import { Weather, WeatherData, wttr } from "../wttr";
 import { DayList } from "./day";
 
 export function DayListItem(props: { day: WeatherData; title: string }) {
   const data = props.day;
   const wd = getWeekday(data.date);
+  const getTemp = (prefix: string) => {
+    const unit = getWttrTemperaturePostfix();
+    const key = `${prefix}temp${unit}`;
+    const rec = data as Record<string, any>;
+    let val = "?";
+    if (rec[key]) {
+      val = `${rec[key]}`;
+    }
+    return `${val} ${getTemperatureUnit()}`;
+  };
   return (
     <List.Item
       key={data.date}
       title={wd}
-      subtitle={`max: ${data.maxtempC} °C, min: ${data.mintempC} °C`}
+      subtitle={`max: ${getTemp("max")}, min: ${getTemp("min")}`}
+      icon={{ source: Icon.Calendar, tintColor: Color.PrimaryText }}
       actions={
         <ActionPanel>
           <PushAction title="Show Details" target={<DayList day={data} title={`${props.title} - ${wd}`} />} />
@@ -24,10 +36,10 @@ export function DayListItem(props: { day: WeatherData; title: string }) {
 
 function getWeekday(date: string): string {
   const d = moment(date);
-  return d.format("dddd");
+  return d.locale("en").format("dddd");
 }
 
-export function WeatherList(props: {}) {
+export function WeatherList() {
   const [query, setQuery] = useState<string>("");
   const { data, error, isLoading } = useSearch(query);
   if (error) {
@@ -39,9 +51,31 @@ export function WeatherList(props: {}) {
 
   const area = data.nearest_area[0];
   const curcon = data.current_condition[0];
+  const curcon_data = curcon as any;
 
   const title = `${area.areaName[0].value}, ${area.region[0].value}, ${area.country[0].value}`;
 
+  const weatherDesc = curcon.weatherDesc[0].value;
+
+  const getWind = (): string => {
+    const data = curcon as Record<string, any>;
+    const key = `windspeed${getWttrWindPostfix()}`;
+    let val = "?";
+    if (data[key]) {
+      val = data[key] || "?";
+    }
+    return `${val} ${getWindUnit()}`;
+  };
+
+  const getTemp = (): string => {
+    const key = `temp_${getWttrTemperaturePostfix()}`;
+    const f = curcon as Record<string, any>;
+    let val = "?";
+    if (f[key]) {
+      val = f[key];
+    }
+    return `${val} ${getTemperatureUnit()}`;
+  };
   return (
     <List
       isLoading={isLoading}
@@ -49,13 +83,13 @@ export function WeatherList(props: {}) {
       onSearchTextChange={setQuery}
       throttle={true}
     >
-      <List.Section title={`Current (${title})`}>
+      <List.Section title={`Weather report (${title})`}>
         <List.Item
           key="_"
-          title={`${curcon.temp_C}°C`}
-          subtitle={curcon.weatherDesc[0].value}
+          title={getTemp()}
+          subtitle={weatherDesc}
           icon={getIcon(curcon.weatherCode)}
-          accessoryTitle={`humidity: ${curcon.humidity}% | wind: ${curcon.windspeedKmph} km/h ${getWindDirectionIcon(
+          accessoryTitle={`humidity: ${curcon.humidity}% | wind ${getWind()} ${getWindDirectionIcon(
             curcon.winddirDegree
           )}`}
         />
@@ -67,6 +101,12 @@ export function WeatherList(props: {}) {
       </List.Section>
     </List>
   );
+}
+
+function getDefaultQuery(): string | undefined {
+  const pref = getPreferenceValues();
+  const q = (pref.defaultquery as string) || undefined;
+  return q;
 }
 
 export function useSearch(query: string | undefined): {
@@ -82,6 +122,12 @@ export function useSearch(query: string | undefined): {
 
   useEffect(() => {
     async function fetchData() {
+      if (!query) {
+        const dq = getDefaultQuery();
+        if (dq && dq.length > 0) {
+          query = dq;
+        }
+      }
       if (query === null || cancel) {
         return;
       }

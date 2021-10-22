@@ -40,9 +40,10 @@ export default function Main(): ReactElement {
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <OpenAction title="Open in Finder" icon={{fileIcon: "/System/Library/CoreServices/Finder.app"}} target={repo.fullPath} application="Finder" />
-                  <OpenWithAction path={repo.fullPath} />
-
+                  <OpenAction title="Open in VSCode" icon={{fileIcon: "/Applications/Visual Studio Code.app"}} target={repo.fullPath} application="Visual Studio Code" />
+                  <OpenAction title="Open in Terminal" icon={{fileIcon: "/Applications/iTerm.app"}} target={repo.fullPath} application="iTerm" />
+                  <OpenWithAction path={repo.fullPath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+                  <OpenAction title="Open in Finder" icon={{fileIcon: "/System/Library/CoreServices/Finder.app"}} target={repo.fullPath} application="Finder" shortcut={{ modifiers: ["cmd"], key: "f" }} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   {gitRemotes(repo.fullPath)
@@ -50,10 +51,10 @@ export default function Main(): ReactElement {
                       let shortcut = undefined as KeyboardShortcut | undefined
                       switch (remote.name) {
                         case "origin":
-                          shortcut = { modifiers: ["cmd"], key: "o" }
+                          shortcut = { modifiers: ["shift", "cmd"], key: "o" }
                           break
                         case "upstream":
-                          shortcut = { modifiers: ["cmd"], key: "u" }
+                          shortcut = { modifiers: ["shift", "cmd"], key: "u" }
                           break
 
                         default:
@@ -86,18 +87,21 @@ export default function Main(): ReactElement {
                               title={`Code`}
                               key={`code ${remote.name}`}
                               url={remote.url}
+                              icon = {{ source: { dark: "github-code-icon-dark.png", light: "github-code-icon-light.png" } }}
                               shortcut={{modifiers: ["shift", "cmd"], key: "c"}}
                             />
                             <OpenInBrowserAction
                               title={`Issues`}
                               key={`issues ${remote.name}`}
                               url={`${remote.url}/issues`}
+                              icon = {{ source: { dark: "github-issues-icon-dark.png", light: "github-issues-icon-light.png" } }}
                               shortcut={{modifiers: ["shift", "cmd"], key: "i"}}
                             />
                             <OpenInBrowserAction
                               title={`Pull Requests`}
                               key={`pulls ${remote.name}`}
                               url={`${remote.url}/pulls`}
+                              icon = {{ source: { dark: "github-pulls-icon-dark.png", light: "github-pulls-icon-light.png" } }}
                               shortcut={{modifiers: ["shift", "cmd"], key: "p"}}
                             />
                           </ActionPanel.Submenu>

@@ -1,17 +1,12 @@
 import { XcodeSwiftPlaygroundCreationParameters } from "../models/swift-playground/xcode-swift-playground-creation-parameters.model";
 import { XcodeSwiftPlayground } from "../models/swift-playground/xcode-swift-playground.model";
 import { XcodeSwiftPlaygroundPlatform } from "../models/swift-playground/xcode-swift-playground-platform.model";
-import * as fs from "fs";
-import * as path from "path";
-import { promisify } from "util";
 import { execAsync } from "../shared/exec-async";
 import * as os from "os";
 import dedent from "dedent";
 import { XcodeSwiftPlaygroundTemplate } from "../models/swift-playground/xcode-swift-playground-template.model";
-
-const makeDirectory = promisify(fs.mkdir);
-const removeDirectory = promisify(fs.rm);
-const writeFile = promisify(fs.writeFile);
+import { existsAsync, makeDirectoryAsync, removeDirectoryAsync, writeFileAsync } from "../shared/fs-async";
+import { joinPathComponents } from "../shared/join-path-components";
 
 /**
  * XcodeSwiftPlaygroundService
@@ -55,13 +50,13 @@ export class XcodeSwiftPlaygroundService {
     parameters: XcodeSwiftPlaygroundCreationParameters
   ): Promise<XcodeSwiftPlayground> {
     // Initialize Playground Path
-    const playgroundPath = path.join(
+    const playgroundPath = joinPathComponents(
       // Replace tilde (~) with home directory
       parameters.location.replace(/^~/, os.homedir()),
       `${parameters.name}.playground`
     );
     // Check if Playground already exists
-    if (fs.existsSync(playgroundPath)) {
+    if (await existsAsync(playgroundPath)) {
       // Return existing Swift Playground
       return {
         name: parameters.name,
@@ -75,14 +70,14 @@ export class XcodeSwiftPlaygroundService {
       };
     }
     // Make playground directory
-    await makeDirectory(playgroundPath);
+    await makeDirectoryAsync(playgroundPath);
     // Initialize template files
     const templateFiles = [
       ...this.scaffoldTemplateFiles,
-      this.swiftSourceContentsTemplateFile(
+      XcodeSwiftPlaygroundService.swiftSourceContentsTemplateFile(
         parameters.template
       ),
-      this.contentsTemplateFile(
+      XcodeSwiftPlaygroundService.contentsTemplateFile(
         parameters.platform
       )
     ];
@@ -96,15 +91,15 @@ export class XcodeSwiftPlaygroundService {
             // Check if template file has a path
             if (templateFile.path) {
               // Join current file path with template file path
-              filePath = path.join(
+              filePath = joinPathComponents(
                 filePath,
                 templateFile.path
               );
               // Make directory
-              await makeDirectory(filePath);
+              await makeDirectoryAsync(filePath);
             }
             // Join current file path with file name
-            filePath = path.join(
+            filePath = joinPathComponents(
               filePath,
               [
                 templateFile.name,
@@ -112,7 +107,7 @@ export class XcodeSwiftPlaygroundService {
               ].join(".")
             );
             // Write file
-            await writeFile(
+            await writeFileAsync(
               filePath,
               dedent(templateFile.contents)
             );
@@ -122,7 +117,7 @@ export class XcodeSwiftPlaygroundService {
       try {
         // On error perform rollback
         // Try to remove the playground directory
-        await removeDirectory(
+        await removeDirectoryAsync(
           playgroundPath,
           { recursive: true }
         );
@@ -153,7 +148,7 @@ export class XcodeSwiftPlaygroundService {
    * @param platform The XcodeSwiftPlaygroundPlatform
    * @private
    */
-  private contentsTemplateFile(
+  private static contentsTemplateFile(
     platform: XcodeSwiftPlaygroundPlatform
   ): TemplateFile {
     return {
@@ -176,7 +171,7 @@ export class XcodeSwiftPlaygroundService {
    * Swift Source Contents TemplateFile
    * @param template The XcodeSwiftPlaygroundTemplate
    */
-  private swiftSourceContentsTemplateFile(
+  private static swiftSourceContentsTemplateFile(
     template: XcodeSwiftPlaygroundTemplate
   ): TemplateFile {
     let contents: string;
