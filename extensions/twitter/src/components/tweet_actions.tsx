@@ -32,7 +32,7 @@ export function ReplyTweetAction(props: { tweet: TweetV1 }) {
       title="Reply"
       target={<TweetSendForm replyTweet={props.tweet} />}
       icon={{ source: Icon.Bubble, tintColor: Color.PrimaryText }}
-      shortcut={{ modifiers: ["cmd"], key: "p" }}
+      shortcut={{ modifiers: ["cmd"], key: "w" }}
     />
   );
 }
