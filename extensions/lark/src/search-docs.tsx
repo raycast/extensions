@@ -80,7 +80,7 @@ const isRecentList = (list: RecentList | SearchResults): list is RecentList => {
 
 const RecentListView: React.FC<{ list: RecentList }> = ({ list }) => {
   return (
-    <List.Section title="Recent List" subtitle={`${list.node_list.length}`}>
+    <List.Section title="Recent Documents" subtitle={`${list.node_list.length}`}>
       {list.node_list.map((nodeId) => {
         const nodeEntity = list.entities.nodes[nodeId];
         const ownerEntity = list.entities.users[nodeEntity.owner_id];
