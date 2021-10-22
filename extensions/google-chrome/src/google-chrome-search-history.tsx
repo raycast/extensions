@@ -42,7 +42,9 @@ const Actions = (props: { entry: HistoryEntry }): ReactElement => {
 
     return (
         <ActionPanel title={title}>
-            <OpenInBrowserAction url={url} />
+            <OpenInBrowserAction
+                title="Open in Browser"
+                url={url} />
             <CopyToClipboardAction
                 title="Copy URL"
                 content={url}
