@@ -21,7 +21,7 @@
       "required": true,
       "title": "Access Token",
       "description": "Your Slack access token.",
-      "placeholder": "Enter your Slack access token"
+      "placeholder": "See tinyurl.com/raycast-slack-status"
     }
   ],
   "dependencies": {
