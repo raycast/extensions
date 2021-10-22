@@ -1,4 +1,4 @@
-import { ActionPanel, ImageMask, List, OpenInBrowserAction, showToast, ToastStyle } from '@raycast/api'
+import { ActionPanel, Icon, ImageMask, List, OpenInBrowserAction, showToast, ToastStyle } from '@raycast/api'
 import { pipe } from 'fp-ts/lib/function'
 import * as O from 'fp-ts/Option'
 import * as A from 'fp-ts/ReadonlyArray'
@@ -52,10 +52,7 @@ function DomainrSearch() {
 					key={result.domain + result.path}
 					title={result.domain + result.path}
 					subtitle={statusMapping[result.status]}
-					icon={{
-						source: `https://${result.domain}/favicon.ico`,
-						mask: ImageMask.RoundedRectangle
-					}}
+					icon={Icon.Globe}
 					accessoryTitle={statusDescriptionMapping[result.status]}
 					accessoryIcon={getStatusIcon(statusMapping[result.status])}
 					actions={
