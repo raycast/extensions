@@ -49,7 +49,7 @@ export const getDomainStatus: R.Reader<ISearchResult, TE.TaskEither<Error | Erro
 			r.status,
 			A.map(d => ({
 				...result,
-				status: d.status
+				status: d.summary
 			})),
 			A.head,
 		))

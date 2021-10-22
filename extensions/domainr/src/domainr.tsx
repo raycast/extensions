@@ -6,7 +6,7 @@ import * as E from 'fp-ts/Either'
 import * as TE from 'fp-ts/TaskEither'
 import * as O from 'fp-ts/Option'
 import * as A from 'fp-ts/ReadonlyArray'
-import { getStatusIcon, isAvailable, parseDomainStatus, SearchResultWithStatus } from './util/types'
+import { DomainStatus, getStatusIcon, isAvailable, parseDomainStatus, SearchResultWithStatus, statusDescriptionMapping, statusMapping } from './util/types'
 import { pipe } from 'fp-ts/lib/function'
 import { is, isError } from './util/conditional'
 
@@ -47,18 +47,22 @@ function DomainrSearch() {
 					id={result.domain + result.path}
 					key={result.domain + result.path}
 					title={result.domain + result.path}
-					subtitle={parseDomainStatus(result.status)}
+					subtitle={statusMapping[result.status]}
 					icon={{
 						source: `https://${result.domain}/favicon.ico`,
 						mask: ImageMask.RoundedRectangle
 					}}
-					accessoryIcon={getStatusIcon(parseDomainStatus(result.status))}
+					accessoryTitle={statusDescriptionMapping[result.status]}
+					accessoryIcon={getStatusIcon(statusMapping[result.status])}
 					actions={
 						<ActionPanel>
-							{isAvailable(parseDomainStatus(result.status)) && (
+							{[DomainStatus.Available, DomainStatus.Aftermarket].includes(statusMapping[result.status]) && (
 								<OpenInBrowserAction title='Register' url={result.registerURL} />
 							)}
-							<OpenInBrowserAction title='Visit' url={`https://${result.domain}`} />
+
+							{![DomainStatus.Disallowed, DomainStatus.Reserved, DomainStatus.Invalid].includes(statusMapping[result.status]) && (
+								<OpenInBrowserAction title='Visit' url={`https://${result.domain}`} />
+							)}
 						</ActionPanel>
 					}
 				/>
