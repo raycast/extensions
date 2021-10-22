@@ -15,7 +15,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.25.1",
     "dayjs": "^1.10.7",
     "jotai": "^1.4.0",
     "lodash": "^4.17.21"
