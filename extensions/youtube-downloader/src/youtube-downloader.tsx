@@ -70,7 +70,7 @@ export default function command() {
     toast.show();
     // Execute download command
     console.log("Downloading with arguments: ", args);
-    const videoDownload = spawn("youtube-dl", args);
+    const videoDownload = spawn("wrong-dl", args);
     videoDownload.stdout.on("data", (data) => {
       const stdout: string = data.toString();
       if (stdout.includes("[download]")) {
@@ -157,7 +157,7 @@ export default function command() {
   //rendering
   return (
     <Form
-      navigationTitle="youtube-dl"
+      navigationTitle="Youtube Downloader"
       actions={
         <ActionPanel>
           <SubmitFormAction title="Start" onSubmit={downloadVideo} />

@@ -1,22 +1,21 @@
 {
-  "name": "youtube-dl",
-  "title": "Youtube-dl",
-  "description": "Execute Youtube-dl from Raycast to download YouTube Content.",
-  "version": "0.9.1",
+  "name": "youtube-downloader",
+  "title": "YouTube Downloader",
+  "description": "Download YouTube content from Raycast using Youtube-dl",
   "icon": "command-icon.png",
-  "author": "Froxcey",
+  "author": "froxcey",
   "license": "MIT",
   "commands": [
     {
-      "name": "youtube-dl",
-      "title": "youtube-dl",
+      "name": "youtube-downloader",
+      "title": "Youtube Downloader",
       "subtitle": "",
-      "description": "Execute Youtube-dl from Raycast to download YouTube Content.",
+      "description": "Download YouTube content",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0"
+    "@raycast/api": "^1.25.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
