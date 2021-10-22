@@ -1,11 +1,11 @@
 import {
   ActionPanel,
   ActionPanelItem,
-  Detail,
   Form,
   getLocalStorageItem,
   Icon,
   List,
+  popToRoot,
   setLocalStorageItem,
   showToast,
   SubmitFormAction,
@@ -16,13 +16,13 @@ import { useCallback, useEffect, useState } from "react";
 import isEmpty from "lodash.isempty";
 import uniqWith from "lodash.uniqwith";
 import useConfig from "./useConfig";
-import useToken from "./useToken";
+// import useToken from "./useToken";
 import { fetcher, isInProgress } from "./utils";
 import { TimeEntry, Project } from "./types";
 
 export default function Main() {
-  const isValidToken = useToken();
-  const { config } = useConfig();
+  // const isValidToken = useToken();
+  const { config, isValidToken } = useConfig();
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { push } = useNavigation();
@@ -67,65 +67,75 @@ export default function Main() {
       .catch(() => setIsLoading(false));
   }, [getTimeEntries]);
 
-  if (!isValidToken) {
-    return <Detail markdown={`Invalid token.`} />;
-  }
-
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search time entries">
-      <List.Section title="Manual">
+      {!isValidToken ? (
         <List.Item
-          icon="▶️"
-          title="Start timer"
+          icon={Icon.ExclamationMark}
+          title="Invalid API Key detected"
+          accessoryTitle={`Go to Extensions → Clockify`}
           actions={
             <ActionPanel>
-              <ActionPanel.Item
-                title="Start New Timer"
-                onAction={() => push(<NewEntry updateTimeEntries={updateTimeEntries} />)}
-              />
+              <ActionPanelItem title="Go Back" onAction={popToRoot} />
             </ActionPanel>
           }
         />
-        <List.Item
-          icon="⏹️"
-          title="Stop current"
-          actions={
-            <ActionPanel>
-              <ActionPanel.Item
-                title="Stop current timer"
-                onAction={async () => {
-                  stopCurrentTimer().then(() => updateTimeEntries());
-                }}
+      ) : (
+        <>
+          <List.Section title="Manual">
+            <List.Item
+              icon="▶️"
+              title="Start timer"
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Item
+                    title="Start New Timer"
+                    onAction={() => push(<NewEntry updateTimeEntries={updateTimeEntries} />)}
+                  />
+                </ActionPanel>
+              }
+            />
+            <List.Item
+              icon="⏹️"
+              title="Stop current"
+              actions={
+                <ActionPanel>
+                  <ActionPanel.Item
+                    title="Stop Current Timer"
+                    onAction={async () => {
+                      stopCurrentTimer().then(() => updateTimeEntries());
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          </List.Section>
+          <List.Section title="Latest entries">
+            {entries.map((entry) => (
+              <List.Item
+                id={entry.id}
+                key={entry.id}
+                title={entry.project?.clientName || "No Client"}
+                subtitle={entry.description}
+                accessoryTitle={entry.project?.name}
+                icon={{ source: isInProgress(entry) ? Icon.Clock : Icon.Circle, tintColor: entry.project?.color }}
+                keywords={[...entry.description.split(" "), ...entry.project?.name.split(" ")]}
+                accessoryIcon={{ source: Icon.Dot, tintColor: entry.project?.color }}
+                actions={
+                  <ActionPanel>
+                    <ActionPanelItem
+                      title="Start Timer"
+                      onAction={() => {
+                        addNewTimeEntry(entry.description, entry.projectId).then(() => updateTimeEntries());
+                      }}
+                    />
+                  </ActionPanel>
+                }
               />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-
-      <List.Section title="Latest entries">
-        {entries.map((entry) => (
-          <List.Item
-            id={entry.id}
-            key={entry.id}
-            title={entry.project?.clientName || "No Client"}
-            subtitle={entry.description}
-            accessoryTitle={entry.project?.name}
-            icon={{ source: isInProgress(entry) ? Icon.Clock : Icon.Circle, tintColor: entry.project?.color }}
-            keywords={[...entry.description.split(" "), ...entry.project?.name.split(" ")]}
-            accessoryIcon={{ source: Icon.Dot, tintColor: entry.project?.color }}
-            actions={
-              <ActionPanel>
-                <ActionPanelItem
-                  title="Start timer"
-                  onAction={() => {
-                    addNewTimeEntry(entry.description, entry.projectId).then(() => updateTimeEntries());
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+            ))}
+          </List.Section>
+        </>
+      )}
     </List>
   );
 }

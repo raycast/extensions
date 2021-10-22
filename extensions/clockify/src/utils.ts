@@ -1,7 +1,6 @@
-import { preferences } from "@raycast/api";
-import { TimeEntry } from "./types";
+import { getPreferenceValues, preferences, showToast, ToastStyle } from "@raycast/api";
 import fetch from "node-fetch";
-import { FetcherArgs, FetcherResponse } from "./types";
+import { FetcherArgs, FetcherResponse, PreferenceValues, TimeEntry } from "./types";
 
 export const API_URL = `https://api.clockify.me/api/v1`;
 
@@ -30,4 +29,16 @@ export async function fetcher(
   } catch (error) {
     return { error: error as Error };
   }
+}
+
+export function validateToken(): boolean {
+  const preferences: PreferenceValues = getPreferenceValues();
+  const token = String(preferences?.token);
+
+  if (token.length !== 48) {
+    showToast(ToastStyle.Failure, "Invalid API Key detected");
+    return false;
+  }
+
+  return true;
 }

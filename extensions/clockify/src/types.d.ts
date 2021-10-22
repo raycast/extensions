@@ -30,3 +30,13 @@ export interface FetcherResponse {
   data?: any;
   error?: string | Error;
 }
+
+export interface PreferenceValues {
+  token: string;
+}
+
+export interface DataValues {
+  userId: LocalStorageValue;
+  workspaceId: LocalStorageValue;
+  name: LocalStorageValue;
+}

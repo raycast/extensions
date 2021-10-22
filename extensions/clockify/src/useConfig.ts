@@ -1,17 +1,15 @@
-import { getLocalStorageItem, LocalStorageValue, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
+import { getLocalStorageItem, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { fetcher } from "./utils";
-
-interface DataValues {
-  userId: LocalStorageValue;
-  workspaceId: LocalStorageValue;
-  name: LocalStorageValue;
-}
+import { fetcher, validateToken } from "./utils";
+import { DataValues } from "./types";
 
 export default function useConfig() {
+  const [isValidToken, setIsValidToken] = useState(validateToken());
   const [data, setData] = useState<DataValues>({} as DataValues);
 
   useEffect(() => {
+    if (!isValidToken) return;
+
     async function getStorage() {
       const name = await getLocalStorageItem("name");
       const userId = await getLocalStorageItem("userId");
@@ -25,7 +23,7 @@ export default function useConfig() {
       async function fetchUser() {
         showToast(ToastStyle.Animated, "Loading…");
 
-        const { data } = await fetcher(`/user`);
+        const { data, error } = await fetcher(`/user`);
 
         if (data) {
           setLocalStorageItem("userId", data.id);
@@ -33,6 +31,9 @@ export default function useConfig() {
           setLocalStorageItem("name", data.name);
           setData({ userId: data.id, workspaceId: data.defaultWorkspace, name: data.name });
           showToast(ToastStyle.Success, "Clockify is ready");
+        } else if (error === "Unauthorized") {
+          showToast(ToastStyle.Failure, "Invalid API Key detected");
+          setIsValidToken(false);
         } else {
           showToast(ToastStyle.Failure, "An error ccurred");
         }
@@ -44,5 +45,5 @@ export default function useConfig() {
     getStorage();
   }, []);
 
-  return { config: data };
+  return { config: data, isValidToken };
 }
