@@ -1,10 +1,11 @@
-import { ActionPanel, CopyToClipboardAction, FileIcon, Icon, List, showHUD } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, Icon, List, preferences, showHUD } from "@raycast/api";
 import { exec } from "child_process";
 import { useEffect, useState } from "react";
 
 export default function ProcessList() {
   const [state, setState] = useState<Process[]>([]);
   const [query, setQuery] = useState<string | undefined>(undefined);
+  const shouldIncludePaths = (preferences.shouldSearchInPaths?.value as boolean) ?? false;
 
   useEffect(() => {
     exec(`ps -eo pid,pcpu,comm | sort -nrk 2,3`, (err, stdout) => {
@@ -12,20 +13,23 @@ export default function ProcessList() {
         return;
       }
 
-      const processes = stdout.split("\n").map((line) => {
-        const [, id, cpu, path] = line.match(/(\d+)\s+(\d+[\.|\,]\d+)\s+(.*)/) ?? ["", "", "", ""];
-        const name = path.match(/[^\/]*[^\/]*$/i)?.[0] ?? "";
-        const isPrefPane = path.includes(".prefPane/");
-        const isApp = path.includes(".app/");
+      const processes = stdout
+        .split("\n")
+        .map((line) => {
+          const [, id, cpu, path] = line.match(/(\d+)\s+(\d+[.|,]\d+)\s+(.*)/) ?? ["", "", "", ""];
+          const name = path.match(/[^/]*[^/]*$/i)?.[0] ?? "";
+          const isPrefPane = path.includes(".prefPane");
+          const isApp = path.includes(".app");
 
-        return {
-          id,
-          cpu,
-          path,
-          name,
-          type: isPrefPane ? "prefPane" : isApp ? "app" : "binary",
-        } as Process;
-      });
+          return {
+            id,
+            cpu,
+            path,
+            name,
+            type: isPrefPane ? "prefPane" : isApp ? "app" : "binary",
+          } as Process;
+        })
+        .filter((process) => process.name === "");
 
       setState(processes);
     });
@@ -33,11 +37,11 @@ export default function ProcessList() {
 
   const fileIcon = (process: Process) => {
     if (process.type === "prefPane") {
-      return { fileIcon: process.path!.replace(/(.+\.prefPane)(.+)/, "$1") };
+      return { fileIcon: process.path?.replace(/(.+\.prefPane)(.+)/, "$1") ?? "" };
     }
 
     if (process.type === "app") {
-      return { fileIcon: process.path!.replace(/(.+\.app)(.+)/, "$1") };
+      return { fileIcon: process.path?.replace(/(.+\.app)(.+)/, "$1") ?? "" };
     }
 
     return "/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/ExecutableBinaryIcon.icns";
@@ -45,7 +49,8 @@ export default function ProcessList() {
 
   const killProcess = (process: Process) => {
     exec(`kill -9 ${process.id}`);
-    showHUD(`Killed ${process.name === "-" ? `process ${process.id}` : process.name}`);
+    setState(state.filter((p) => p.id !== process.id));
+    showHUD(`✅ Killed ${process.name === "-" ? `process ${process.id}` : process.name}`);
   };
 
   const copyToClipboardAction = (process: Process) => {
@@ -59,12 +64,17 @@ export default function ProcessList() {
       onSearchTextChange={(query) => setQuery(query)}
     >
       {state
-        .filter(
-          (process) =>
-            (query == null || process.name.toLowerCase().includes(query.toLowerCase())) &&
-            process.name !== "" &&
-            process.name !== "Raycast"
-        )
+        .filter((process) => {
+          if (query == null) {
+            return true;
+          }
+
+          const nameMatches = process.name.toLowerCase().includes(query.toLowerCase());
+          const pathMatches =
+            process.path?.toLowerCase().match(new RegExp(`.+${query}.*\\.[app|framework|prefpane]`, "ig")) != null;
+
+          return nameMatches || (shouldIncludePaths && pathMatches);
+        })
         .map((process, index) => {
           const icon = fileIcon(process);
           return (
