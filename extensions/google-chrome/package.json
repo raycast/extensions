@@ -8,15 +8,15 @@
   "commands": [
     {
       "name": "google-chrome-go-to-tab",
-      "title": "Search Google Chrome Tabs",
+      "title": "Search Tabs",
       "subtitle": "Google Chrome",
       "description": "List all tabs and go to the selected.",
       "mode": "view"
     },
     {
       "name": "google-chrome-search-history",
-      "title": "Search Google Chrome History",
-      "subtitle": "",
+      "title": "Search History",
+      "subtitle": "Google Chrome",
       "description": "Search browser history.",
       "mode": "view"
     }
