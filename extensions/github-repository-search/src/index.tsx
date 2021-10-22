@@ -122,7 +122,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
         />
         <CopyToClipboardAction
           title="Copy Clone Command"
-          content={`git clonse ${props.repository.url}`}
+          content={`git clone ${props.repository.url}`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         />
       </ActionPanel.Section>
