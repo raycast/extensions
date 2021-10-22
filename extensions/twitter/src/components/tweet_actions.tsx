@@ -166,7 +166,7 @@ export function ShowUserTweetsAction(props: { username: string; title?: string }
     <PushAction
       title={props.title || `Tweets from @${props.username}`}
       shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-      icon={{ source: Icon.Sidebar, tintColor: Color.PrimaryText }}
+      icon={{ source: "twitter.png", tintColor: Color.PrimaryText }}
       target={<UserTweetList username={props.username} />}
     />
   );
