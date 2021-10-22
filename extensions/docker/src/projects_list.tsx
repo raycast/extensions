@@ -32,7 +32,7 @@ const containersToProjects = (containers: ContainerInfo[]): ComposeProject[] => 
 };
 
 const useDocker = (docker: Dockerode) => {
-  const [projects, setProjects] = useState<ComposeProject[]>([]);
+  const [projects, setProjects] = useState<ComposeProject[]>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>();
 
@@ -92,7 +92,7 @@ export default function ProjectsList() {
 
   return (
     <List isLoading={loading}>
-      {projects.map((project) => (
+      {projects?.map((project) => (
         <List.Item
           key={project.name}
           icon={{ source: Icon.List }}

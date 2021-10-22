@@ -6,8 +6,8 @@ import ErrorDetail from './error_detail';
 import ImageDetail from './image_detail';
 
 const useDocker = (docker: Dockerode) => {
+  const [images, setImages] = useState<ImageInfo[]>();
   const [isLoading, setLoading] = useState(false);
-  const [images, setImages] = useState<ImageInfo[]>([]);
   const [error, setError] = useState<Error>();
 
   const removeImage = async (image: ImageInfo) => {
@@ -56,7 +56,7 @@ export default function ImageList() {
 
   return (
     <List isLoading={isLoading}>
-      {images.map((image) => (
+      {images?.map((image) => (
         <List.Item
           key={image.Id}
           title={imageTitle(image)}

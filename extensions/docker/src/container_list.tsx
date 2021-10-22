@@ -6,8 +6,8 @@ import { useDocker } from './docker';
 import { containerName, isContainerRunning } from './docker/container';
 import ErrorDetail from './error_detail';
 
-const filterContainers = (containers: ContainerInfo[], projectFilter?: string) => {
-  if (projectFilter === undefined) {
+const filterContainers = (containers: ContainerInfo[] | undefined, projectFilter?: string) => {
+  if (projectFilter === undefined || containers === undefined) {
     return containers;
   }
   return containers.filter((container) => container.Labels['com.docker.compose.project'] === projectFilter);
@@ -26,7 +26,7 @@ export default function ContainerList(props: { projectFilter?: string }) {
 
   return (
     <List isLoading={isLoading}>
-      {filterContainers(containers, props.projectFilter).map((containerInfo) => (
+      {filterContainers(containers, props.projectFilter)?.map((containerInfo) => (
         <List.Item
           key={containerInfo.Id}
           title={containerName(containerInfo)}

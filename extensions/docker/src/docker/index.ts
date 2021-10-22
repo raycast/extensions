@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 export type DockerState = ReturnType<typeof useDocker>;
 
 export const useDocker = (docker: Dockerode) => {
-  const [containers, setContainers] = useState<ContainerInfo[]>([]);
+  const [containers, setContainers] = useState<ContainerInfo[]>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error>();
 
