@@ -16,7 +16,7 @@ import {
 } from "@raycast/api";
 import parser from 'fast-xml-parser'
 import Frecency from "frecency";
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "fs";
 import { sync } from "glob";
 import { homedir } from "os";
 import { join } from 'path'
@@ -80,6 +80,20 @@ function getIDEIcon(ide: SupportedIDE): ImageLike {
     return {fileIcon: idePath}
   }
   return Icon.TextDocument
+}
+
+
+/**
+ * Detects whether directory is a project based on common directories for projects (.git, .idea, .vscode etc).
+ * Not 100% accurate, but it doesn't need to
+ */
+function isProject(dirPath: string): boolean {
+  const directoriesToCheck = [
+    '.git',
+    '.idea',
+    '.vscode',
+  ]
+  return directoriesToCheck.some((v) => existsSync(join(dirPath, v)))
 }
 
 class Project {
@@ -174,15 +188,56 @@ function searchProjects(query?: string): {
   const [projects, setProjects] = useState<ProjectList>();
 
   useEffect(() => {
-    const projectPaths = (preferences.paths.value as string).split(",").map((s) => s.trim());
-    const projects = projectPaths
+    const projectScanPathsRaw = (preferences.paths.value as string).split(",").map((s) => s.trim());
+    const maxScanDepth: number = Number(preferences.maxScanDepth.value as string) || 1
+
+    const projectScanPaths = projectScanPathsRaw
       .flatMap((base) => {
         if (base.startsWith("~")) {
-          base = homedir() + base.slice(1);
+          base = homedir() + base.slice(1)
         }
-        return sync(base + "/*");
+        return base
       })
-      .filter((path) => statSync(path)?.isDirectory())
+
+    /**
+     * Performs recursive scanning.
+     * If the folder _a_ is not a project itself, tries to scan its subdirectories.
+     * If any of its subdirectories (up to maxScanDepth) are projects, _a_ is not included to projects list.
+     * If none of its subdirectories (up to maxScanDepth) are projects and _a_ is on depth level 1, _a_ is included to projects list.
+     * `depth` is current depth of scanning. 0 for base path from preferences, 1 for its subdirectories etc.
+     */
+    function* scan(basePath: string, depth: number): Generator<string> {
+      if (depth >= maxScanDepth) {
+        return
+      }
+      const subdirectories = readdirSync(basePath)
+        .map((dir) => join(basePath, dir))
+        .filter((path) => statSync(path)?.isDirectory())
+      for (const directory of subdirectories) {
+        if (isProject(directory)) {
+          yield directory
+        } else {
+          let addedRecursiveSubdirectories = 0
+          for (const subdirectory of scan(directory, depth + 1)) {
+            addedRecursiveSubdirectories++
+            yield subdirectory
+          }
+          if (depth === 0 && addedRecursiveSubdirectories === 0) {
+            yield directory
+          }
+        }
+      }
+    }
+
+    function* scanAll(): Generator<string> {
+      for (const path of projectScanPaths) {
+        yield* scan(path, 0)
+      }
+    }
+
+    const projectPaths = Array.from(scanAll())
+
+    const projects = projectPaths
       .map((path) => new Project(path))
       .sort((a, b) => (a.displayPath.toLowerCase > b.displayPath.toLowerCase ? -1 : 1));
     setProjectList({ projectList: projects, isLoading: false });

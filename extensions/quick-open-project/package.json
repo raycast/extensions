@@ -20,6 +20,40 @@
           "title": "Paths to index",
           "description": "Comma-separated list of paths to index. Example: '~/work,~/projects'",
           "default": ""
+        },
+        {
+          "name": "maxScanDepth",
+          "type": "dropdown",
+          "required": true,
+          "title": "Maximum scan depth",
+          "data": [
+            {
+              "title": "1",
+              "value": "1"
+            },
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            }
+          ],
+          "description": "Maximum depth to index. For example, 3 will detect ~/projects/a/b/project",
+          "default": "3"
         }
       ]
     }
