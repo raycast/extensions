@@ -7,7 +7,7 @@ import {
   OpenInBrowserAction,
   showToast,
   ToastStyle,
-  Icon,
+  ImageMask,
 } from "@raycast/api";
 
 const parser = new Parser();
@@ -34,7 +34,10 @@ export default function Command() {
         const feed = await parser.parseURL("https://lobste.rs/rss");
         setState({ items: feed.items as ParsedItem[] });
       } catch (error) {
-        setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
+        setState({
+          error:
+            error instanceof Error ? error : new Error("Something went wrong"),
+        });
       }
     }
 
@@ -42,7 +45,11 @@ export default function Command() {
   }, []);
 
   if (state.error) {
-    void showToast(ToastStyle.Failure, "Failed loading stories", state.error.message);
+    void showToast(
+      ToastStyle.Failure,
+      "Failed loading stories",
+      state.error.message
+    );
   }
 
   const isLoading = !state.items && !state.error;
@@ -57,16 +64,17 @@ export default function Command() {
 }
 
 function StoryListItem({ item }: { item: ParsedItem }) {
-  const icon = getIcon();
-  const author = getAuthor(item.creator);
+  const { authoredBy, nickname } = getAuthor(item.creator);
+  const icon = getIcon(nickname);
+  const keywords = [...(item?.categories ?? []), nickname];
 
   return (
     <List.Item
       icon={icon}
       title={item.title ?? "No title"}
       subtitle={item.categories?.join(", ")}
-      keywords={item.categories}
-      accessoryTitle={author}
+      keywords={keywords}
+      accessoryTitle={authoredBy}
       actions={<Actions title={item.title} link={item.link} guid={item.guid} />}
     />
   );
@@ -79,27 +87,35 @@ function Actions({ title, link, guid }: ActionItem) {
     <ActionPanel title={title}>
       <ActionPanel.Section>
         {link && <OpenInBrowserAction url={link} />}
-        {guid && <OpenInBrowserAction url={guid} title="Open Comments in Browser" />}
+        {guid && (
+          <OpenInBrowserAction url={guid} title="Open Comments in Browser" />
+        )}
       </ActionPanel.Section>
       <ActionPanel.Section>
-        {link && <CopyToClipboardAction content={link} title="Copy Link" shortcut={{ modifiers: ["cmd"], key: "." }} />}
+        {link && (
+          <CopyToClipboardAction
+            content={link}
+            title="Copy Link"
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+          />
+        )}
       </ActionPanel.Section>
     </ActionPanel>
   );
 }
 
-function randomNum(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-function getIcon() {
-  const colors = ["Brown", "Green", "Orange", "PrimaryText", "Purple", "Red", "SecondaryText"];
-
-  return { source: Icon.Document, tintColor: colors[randomNum(0, colors?.length)] };
+function getIcon(nickname: string) {
+  return {
+    source: `https://lobste.rs/avatars/${nickname}-100.png`,
+    mask: ImageMask.Circle,
+  };
 }
 
 function getAuthor(creator: string) {
-  const author = creator?.match(/\((.*)\)/)?.[1];
+  const nickname = creator?.match(/\((.*)\)/)?.[1];
 
-  return author ? `by ${author} 🦞` : "untitled";
+  return {
+    authoredBy: nickname ? `by ${nickname} 🦞` : "untitled",
+    nickname: nickname ?? "",
+  };
 }
