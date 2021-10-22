@@ -10,6 +10,7 @@ import {
 } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
 import { loggedInUserAccount, twitterClient, Fetcher } from "../twitterapi";
+import { getErrorMessage } from "../utils";
 import { TweetSendForm } from "./send";
 import { TweetDetail } from "./tweet";
 import UserTweetList from "./usertweets";
@@ -45,8 +46,8 @@ export function DeleteTweetAction(props: { tweet: TweetV1 }) {
       }
       await twitterClient.v1.deleteTweet(t.id_str);
       showToast(ToastStyle.Success, "Tweet deleted", "Tweet deletion successful");
-    } catch (error: any) {
-      showToast(ToastStyle.Failure, "Could not delete Tweet", error.message);
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Could not delete Tweet", getErrorMessage(error));
     }
   };
   return (
@@ -72,8 +73,8 @@ export function RetweetAction(props: { tweet: TweetV1; fetcher?: Fetcher }) {
       if (props.fetcher) {
         await props.fetcher.updateInline();
       }
-    } catch (error: any) {
-      showToast(ToastStyle.Failure, "Could not retweet", error.message);
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Could not retweet", getErrorMessage(error));
     }
   };
   return <ActionPanel.Item title={title} icon={icon} onAction={retweet} shortcut={{ modifiers: ["cmd"], key: "t" }} />;
@@ -93,8 +94,8 @@ export function LikeAction(props: { tweet: TweetV1; fetcher?: Fetcher }) {
       if (props.fetcher) {
         await props.fetcher.updateInline();
       }
-    } catch (error: any) {
-      showToast(ToastStyle.Failure, "Could not like tweet", error.message);
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Could not like tweet", getErrorMessage(error));
     }
   };
   return <ActionPanel.Item title={title} shortcut={{ modifiers: ["cmd"], key: "l" }} icon={icon} onAction={retweet} />;

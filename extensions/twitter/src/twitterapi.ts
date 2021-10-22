@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { AccountSettingsV1, TweetV1, TwitterApi } from "twitter-api-v2";
+import { getErrorMessage } from "./utils";
 
 function createClient(): TwitterApi {
     const pref = getPreferenceValues();
@@ -100,9 +101,9 @@ export function useRefresher<T>(fn: (updateInline: boolean) => Promise<T>, deps?
             if (!cancel) {
                 setData(data);
             }
-        } catch (e: any) {
+        } catch (e) {
             if (!cancel) {
-                setError(e.message);
+                setError(getErrorMessage(e));
             }
         } finally {
             if (!cancel) {

@@ -1,6 +1,7 @@
 import { ActionPanel, Form, FormTextArea, popToRoot, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
 import { twitterClient } from "../twitterapi";
+import { getErrorMessage } from "../utils";
 
 interface TweetFormValues {
   text: string;
@@ -24,8 +25,8 @@ async function submit(values: TweetFormValues, replyTweet?: TweetV1 | undefined)
       await showToast(ToastStyle.Success, "Tweet created", "Tweet creation successful");
     }
     popToRoot();
-  } catch (error: any) {
-    await showToast(ToastStyle.Failure, "Error", error.message);
+  } catch (error) {
+    await showToast(ToastStyle.Failure, "Error", getErrorMessage(error));
   }
 }
 
