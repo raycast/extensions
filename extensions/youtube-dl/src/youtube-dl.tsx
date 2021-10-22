@@ -127,13 +127,20 @@ export default function command() {
           });
           dlInstall.stderr.on("data", (data) => {
             console.log("[DL Install]: ", data.toString());
-            toast.title = "Installation failed";
-            toast.message = "You can manually install by visiting youtube-dl.org";
           });
           dlInstall.on("error", (err) => {
             console.log(err);
-            toast.title = "Installation failed";
-            toast.message = "You can manually install by visiting youtube-dl.org";
+          });
+          dlInstall.on("exit", (code: number) => {
+            if (code == 0) {
+              toast.style = ToastStyle.Success;
+              toast.title = "Installation Finished";
+              toast.message = "You can now download videos";
+            } else {
+              toast.style = ToastStyle.Failure;
+              toast.title = "Installation Failed";
+              toast.message = "You can manually install by visiting youtube-dl.org";
+            }
           });
         }, 5000);
       } else {
