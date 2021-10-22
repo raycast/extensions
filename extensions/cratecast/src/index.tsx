@@ -23,7 +23,11 @@ function Main(): JSX.Element {
   }, 500)
 
   return (
-    <List isLoading={loading} onSearchTextChange={(v) => debounced(v)}>
+    <List
+      isLoading={loading}
+      onSearchTextChange={(v) => debounced(v)}
+      searchBarPlaceholder="Search for a crate..."
+    >
       {crates.map((c) => {
         const id = c.name + randomUUID()
         return (

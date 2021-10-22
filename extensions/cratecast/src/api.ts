@@ -10,6 +10,9 @@ export interface Crate {
 }
 
 export async function getCrates(search: string): Promise<Crate[]> {
+  if (search === '') {
+    return []
+  }
   const response = await fetch(
     'https://crates.io/api/v1/crates?page=1&per_page=100&q=' +
       encodeURIComponent(search)
