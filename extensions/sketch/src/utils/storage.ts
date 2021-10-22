@@ -23,3 +23,9 @@ export const getLastUsedEmail = async () => {
   if (!lastUsedEmail) return undefined;
   return lastUsedEmail;
 };
+
+export const getCachedProjects = async () => {
+  const cachedProjects : string | undefined = await getLocalStorageItem("cachedProjects");
+  if (!cachedProjects) return undefined;
+  return JSON.parse(cachedProjects);
+};

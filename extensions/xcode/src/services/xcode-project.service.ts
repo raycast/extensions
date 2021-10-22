@@ -36,7 +36,7 @@ export class XcodeProjectService {
    */
   private cacheXcodeProjects(
     xcodeProjects: XcodeProject[]
-  ):  Promise<void> {
+  ): Promise<void> {
     // Store XcodeProjects JSON in LocalStorage
     return setLocalStorageItem(
       this.xcodeProjectsJSONLocalStorageKey,
@@ -53,12 +53,12 @@ export class XcodeProjectService {
       "kMDItemDisplayName == *.xcodeproj",
       "kMDItemDisplayName == *.xcworkspace",
       "kMDItemDisplayName == Package.swift",
-      "kMDItemDisplayName == *.playground",
-    ]
+      "kMDItemDisplayName == *.playground"
+    ];
     // Execute command
     const output = await execAsync(
       `mdfind '${spotlightSearchParameters.join(" || ")}'`
-    )
+    );
     // Initialize XcodeProjects
     const xcodeProjects = output
       .stdout
@@ -75,7 +75,7 @@ export class XcodeProjectService {
       // Filter out null values
       .filter(xcodeProject => !!xcodeProject) as XcodeProject[];
     // Cache XcodeProjects
-    this.cacheXcodeProjects(xcodeProjects);
+    this.cacheXcodeProjects(xcodeProjects).then();
     // Return XcodeProjects
     return xcodeProjects;
   }
@@ -92,7 +92,7 @@ export class XcodeProjectService {
     // Initialize the file extension
     const fileExtension = lastPathComponent.split(".").at(-1);
     // Declare name
-    let name: string
+    let name: string;
     // Switch on file extension
     switch (fileExtension) {
       case XcodeProjectType.project:

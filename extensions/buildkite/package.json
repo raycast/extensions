@@ -1,0 +1,70 @@
+{
+  "name": "buildkite",
+  "title": "Buildkite",
+  "description": "Search Buildkite pipelines and builds",
+  "icon": "buildkite.png",
+  "author": "mskelton",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-pipelines",
+      "title": "Search Pipelines",
+      "subtitle": "Buildkite",
+      "description": "Search Buildkite pipelines in your organization.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "org",
+          "type": "textfield",
+          "required": true,
+          "title": "Organization Slug",
+          "description": "Your organization slug",
+          "placeholder": "Enter your Buildkite organization slug."
+        },
+        {
+          "name": "favoriteBranches",
+          "type": "textfield",
+          "required": false,
+          "default": "main, master",
+          "title": "Favorite Branches",
+          "description": "A comma separated list of branches to always show at the top of the build list.",
+          "placeholder": "Enter your favorite branches."
+        }
+      ]
+    },
+    {
+      "name": "my-builds",
+      "title": "My Builds",
+      "subtitle": "Buildkite",
+      "description": "View your recent Buildkite builds.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your Buildkite API access token. GraphQL API Access is required.",
+      "placeholder": "Enter your Buildkite API token."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

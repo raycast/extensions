@@ -12,7 +12,7 @@ export function StatesAttributesList(props: { domain: string }) {
   const { states } = useSearch(searchText, allStates);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Home Assistant states", error);
+    showToast(ToastStyle.Failure, "Cannot search Home Assistant states", error.message);
   }
 
   if (!states) {

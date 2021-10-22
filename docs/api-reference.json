@@ -100,7 +100,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								}
 							],
 							"groups": [
@@ -210,7 +210,7 @@
 																						],
 																						"name": "Requireable"
 																					},
-																					"defaultValue": "..."
+																					"defaultValue": "PropTypes.string"
 																				}
 																			],
 																			"groups": [
@@ -307,7 +307,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														},
 																														{
 																															"id": 108,
@@ -325,7 +325,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														}
 																													],
 																													"groups": [
@@ -394,7 +394,7 @@
 																																],
 																																"name": "Requireable"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.bool"
 																														},
 																														{
 																															"id": 114,
@@ -412,7 +412,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														},
 																														{
 																															"id": 113,
@@ -430,7 +430,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														}
 																													],
 																													"groups": [
@@ -481,7 +481,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "imagePropType"
 								},
 								{
 									"id": 100,
@@ -499,7 +499,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 120,
@@ -554,7 +554,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.func"
 								},
 								{
 									"id": 116,
@@ -596,7 +596,7 @@
 																				],
 																				"name": "Validator"
 																			},
-																			"defaultValue": "..."
+																			"defaultValue": "PropTypes.string.isRequired"
 																		},
 																		{
 																			"id": 118,
@@ -654,7 +654,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "keyboardShortcutPropType"
 								},
 								{
 									"id": 101,
@@ -672,7 +672,7 @@
 										],
 										"name": "Validator"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string.isRequired"
 								}
 							],
 							"groups": [
@@ -752,7 +752,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								}
 							],
 							"groups": [
@@ -859,7 +859,7 @@
 																						],
 																						"name": "Requireable"
 																					},
-																					"defaultValue": "..."
+																					"defaultValue": "PropTypes.string"
 																				}
 																			],
 																			"groups": [
@@ -956,7 +956,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														},
 																														{
 																															"id": 139,
@@ -974,7 +974,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														}
 																													],
 																													"groups": [
@@ -1043,7 +1043,7 @@
 																																],
 																																"name": "Requireable"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.bool"
 																														},
 																														{
 																															"id": 145,
@@ -1061,7 +1061,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														},
 																														{
 																															"id": 144,
@@ -1079,7 +1079,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														}
 																													],
 																													"groups": [
@@ -1130,7 +1130,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "imagePropType"
 								},
 								{
 									"id": 131,
@@ -1148,7 +1148,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 147,
@@ -1190,7 +1190,7 @@
 																				],
 																				"name": "Validator"
 																			},
-																			"defaultValue": "..."
+																			"defaultValue": "PropTypes.string.isRequired"
 																		},
 																		{
 																			"id": 149,
@@ -1248,7 +1248,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "keyboardShortcutPropType"
 								},
 								{
 									"id": 132,
@@ -1266,7 +1266,7 @@
 										],
 										"name": "Validator"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string.isRequired"
 								}
 							],
 							"groups": [
@@ -1345,7 +1345,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.bool"
 								},
 								{
 									"id": 181,
@@ -1363,7 +1363,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 179,
@@ -1381,7 +1381,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								}
 							],
 							"groups": [
@@ -1609,7 +1609,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.bool"
 								},
 								{
 									"id": 196,
@@ -1627,7 +1627,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 198,
@@ -1682,7 +1682,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.func"
 								},
 								{
 									"id": 195,
@@ -1700,7 +1700,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								}
 							],
 							"groups": [
@@ -1789,7 +1789,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.bool"
 								},
 								{
 									"id": 253,
@@ -1807,7 +1807,7 @@
 										],
 										"name": "Validator"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string.isRequired"
 								},
 								{
 									"id": 258,
@@ -1825,7 +1825,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 259,
@@ -1880,7 +1880,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.func"
 								},
 								{
 									"id": 255,
@@ -1898,7 +1898,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.bool"
 								},
 								{
 									"id": 254,
@@ -1916,7 +1916,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 256,
@@ -1934,7 +1934,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.bool"
 								}
 							],
 							"groups": [
@@ -2034,7 +2034,7 @@
 										],
 										"name": "Validator"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string.isRequired"
 								},
 								{
 									"id": 275,
@@ -2089,7 +2089,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.func"
 								},
 								{
 									"id": 272,
@@ -2107,7 +2107,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.bool"
 								},
 								{
 									"id": 271,
@@ -2125,7 +2125,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 273,
@@ -2254,7 +2254,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 290,
@@ -2272,7 +2272,7 @@
 										],
 										"name": "Validator"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string.isRequired"
 								},
 								{
 									"id": 295,
@@ -2327,7 +2327,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.func"
 								},
 								{
 									"id": 292,
@@ -2345,7 +2345,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.bool"
 								},
 								{
 									"id": 291,
@@ -2363,7 +2363,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 293,
@@ -2381,7 +2381,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								}
 							],
 							"groups": [
@@ -2495,7 +2495,7 @@
 																						],
 																						"name": "Requireable"
 																					},
-																					"defaultValue": "..."
+																					"defaultValue": "PropTypes.string"
 																				}
 																			],
 																			"groups": [
@@ -2592,7 +2592,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														},
 																														{
 																															"id": 324,
@@ -2610,7 +2610,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														}
 																													],
 																													"groups": [
@@ -2679,7 +2679,7 @@
 																																],
 																																"name": "Requireable"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.bool"
 																														},
 																														{
 																															"id": 330,
@@ -2697,7 +2697,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														},
 																														{
 																															"id": 329,
@@ -2715,7 +2715,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														}
 																													],
 																													"groups": [
@@ -2766,7 +2766,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "imagePropType"
 								},
 								{
 									"id": 317,
@@ -2784,7 +2784,7 @@
 										],
 										"name": "Validator"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string.isRequired"
 								},
 								{
 									"id": 316,
@@ -2802,7 +2802,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								}
 							],
 							"groups": [
@@ -2880,7 +2880,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								}
 							],
 							"groups": [
@@ -3034,7 +3034,7 @@
 										],
 										"name": "Validator"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string.isRequired"
 								},
 								{
 									"id": 345,
@@ -3089,7 +3089,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.func"
 								},
 								{
 									"id": 342,
@@ -3107,7 +3107,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 341,
@@ -3125,7 +3125,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.bool"
 								},
 								{
 									"id": 340,
@@ -3143,7 +3143,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 343,
@@ -3291,7 +3291,7 @@
 																						],
 																						"name": "Requireable"
 																					},
-																					"defaultValue": "..."
+																					"defaultValue": "PropTypes.string"
 																				}
 																			],
 																			"groups": [
@@ -3388,7 +3388,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														},
 																														{
 																															"id": 365,
@@ -3406,7 +3406,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														}
 																													],
 																													"groups": [
@@ -3475,7 +3475,7 @@
 																																],
 																																"name": "Requireable"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.bool"
 																														},
 																														{
 																															"id": 371,
@@ -3493,7 +3493,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														},
 																														{
 																															"id": 370,
@@ -3511,7 +3511,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														}
 																													],
 																													"groups": [
@@ -3562,7 +3562,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "imagePropType"
 								},
 								{
 									"id": 358,
@@ -3580,7 +3580,7 @@
 										],
 										"name": "Validator"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string.isRequired"
 								},
 								{
 									"id": 357,
@@ -3598,7 +3598,7 @@
 										],
 										"name": "Validator"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string.isRequired"
 								}
 							],
 							"groups": [
@@ -3676,7 +3676,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 236,
@@ -3694,7 +3694,7 @@
 										],
 										"name": "Validator"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string.isRequired"
 								},
 								{
 									"id": 242,
@@ -3749,7 +3749,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.func"
 								},
 								{
 									"id": 241,
@@ -3767,7 +3767,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 238,
@@ -3785,7 +3785,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.bool"
 								},
 								{
 									"id": 237,
@@ -3803,7 +3803,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 239,
@@ -3821,7 +3821,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								}
 							],
 							"groups": [
@@ -3903,7 +3903,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 219,
@@ -3921,7 +3921,7 @@
 										],
 										"name": "Validator"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string.isRequired"
 								},
 								{
 									"id": 225,
@@ -3976,7 +3976,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.func"
 								},
 								{
 									"id": 224,
@@ -3994,7 +3994,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 221,
@@ -4012,7 +4012,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.bool"
 								},
 								{
 									"id": 220,
@@ -4030,7 +4030,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 222,
@@ -4048,7 +4048,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								}
 							],
 							"groups": [
@@ -4226,7 +4226,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.func"
 								},
 								{
 									"id": 482,
@@ -4281,7 +4281,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.func"
 								},
 								{
 									"id": 476,
@@ -4299,7 +4299,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 475,
@@ -4317,7 +4317,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 477,
@@ -4335,7 +4335,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.bool"
 								}
 							],
 							"groups": [
@@ -4417,7 +4417,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 510,
@@ -4466,7 +4466,7 @@
 																						],
 																						"name": "Requireable"
 																					},
-																					"defaultValue": "..."
+																					"defaultValue": "PropTypes.string"
 																				}
 																			],
 																			"groups": [
@@ -4563,7 +4563,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														},
 																														{
 																															"id": 516,
@@ -4581,7 +4581,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														}
 																													],
 																													"groups": [
@@ -4650,7 +4650,7 @@
 																																],
 																																"name": "Requireable"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.bool"
 																														},
 																														{
 																															"id": 522,
@@ -4668,7 +4668,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														},
 																														{
 																															"id": 521,
@@ -4686,7 +4686,7 @@
 																																],
 																																"name": "Validator"
 																															},
-																															"defaultValue": "..."
+																															"defaultValue": "PropTypes.string.isRequired"
 																														}
 																													],
 																													"groups": [
@@ -4737,7 +4737,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "imagePropType"
 								},
 								{
 									"id": 505,
@@ -4755,7 +4755,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 509,
@@ -4807,7 +4807,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 506,
@@ -4825,7 +4825,7 @@
 										],
 										"name": "Validator"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string.isRequired"
 								}
 							],
 							"groups": [
@@ -4906,7 +4906,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 497,
@@ -4924,7 +4924,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								},
 								{
 									"id": 496,
@@ -4942,7 +4942,7 @@
 										],
 										"name": "Requireable"
 									},
-									"defaultValue": "..."
+									"defaultValue": "PropTypes.string"
 								}
 							],
 							"groups": [
@@ -11266,7 +11266,7 @@
 						"isOptional": true
 					},
 					"comment": {
-						"shortText": "The data that is used for dropdowns."
+						"shortText": "The data that is used for dropdowns.\nFor the dropdown items, add an array of objects with `title` and `value` properties, such as: `{\"title\": \"Foo\", \"value\": \"bar\"}`"
 					},
 					"type": {
 						"type": "array",
@@ -11285,7 +11285,7 @@
 						"isOptional": true
 					},
 					"comment": {
-						"shortText": "The default value of the preference if there is no `value` specified."
+						"shortText": "The default value of the preference if there is no `value` specified.\nFor dropdowns, this references the `value` property of an object in the data array."
 					},
 					"type": {
 						"type": "intrinsic",
@@ -11321,7 +11321,7 @@
 						"isOptional": true
 					},
 					"comment": {
-						"shortText": "A label that is used for checkboxes."
+						"shortText": "A label that is used for checkboxes.\nYou can create checkbox groups by setting this property and leaving the title property empty for all checkboxes except the first."
 					},
 					"type": {
 						"type": "intrinsic",
@@ -12971,7 +12971,7 @@
 				"id": 673,
 				"name": "Preferences"
 			},
-			"defaultValue": "..."
+			"defaultValue": "workerData.preferences"
 		},
 		{
 			"id": 75,
@@ -13827,11 +13827,11 @@
 						"tags": [
 							{
 								"tag": "example",
-								"text": "\nControlled text area\n\n```typescript\nimport { Form } from \"@raycast/api\";\n\nconst DESCRIPTION =\n  \"We spend too much time starring at loading indicators. The Raycast team is dedicated to make everybody interact faster with their computers.\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TextArea id=\"description\" defaultValue={DESCRIPTION} />\n    </Form>\n  );\n}\n```\n"
+								"text": "\nUncontrolled text area\n\n```typescript\nimport { Form } from \"@raycast/api\";\n\nconst DESCRIPTION =\n  \"We spend too much time starring at loading indicators. The Raycast team is dedicated to make everybody interact faster with their computers.\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TextArea id=\"description\" defaultValue={DESCRIPTION} />\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "example",
-								"text": "\nUncontrolled text area\n\n```typescript\nimport { Form } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [text, setText] = useState<string>();\n\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TextArea id=\"textarea\" value={text} onChange={setText} />\n    </Form>\n  );\n}\n```\n"
+								"text": "\nControlled text area\n\n```typescript\nimport { Form } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [text, setText] = useState<string>();\n\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TextArea id=\"textarea\" value={text} onChange={setText} />\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "subcategory",
@@ -15473,7 +15473,7 @@
 					"kindString": "Call signature",
 					"flags": {},
 					"comment": {
-						"shortText": "Takes a React Components and renders it in Raycast for command types that show a `view`.",
+						"shortText": "Takes a React Component and renders it in Raycast for command types that show a `view`.",
 						"tags": [
 							{
 								"tag": "example",
@@ -15940,7 +15940,7 @@
 									]
 								}
 							},
-							"defaultValue": "..."
+							"defaultValue": "randomId"
 						}
 					],
 					"type": {

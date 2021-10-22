@@ -1,7 +1,7 @@
 {
   "name": "sketch",
   "title": "Sketch",
-  "description": "Browse Workspaces Documents",
+  "description": "Frictionless Workspace Browsing",
   "icon": "icon.png",
   "author": "aesign",
   "license": "MIT",
@@ -26,9 +26,16 @@
   "commands": [
     {
       "name": "searchDocuments",
-      "title": "Search Documents",
+      "title": "Documents",
       "subtitle": "Sketch",
-      "description": "Search your Sketch Documents",
+      "description": "Browse your Sketch Documents",
+      "mode": "view"
+    },
+    {
+      "name": "searchProjects",
+      "title": "Projects",
+      "subtitle": "Sketch",
+      "description": "Browse your Sketch Projects",
       "mode": "view"
     }
   ],
