@@ -50,11 +50,34 @@ const loadDb = async (profileName: string): Promise<Database> => {
     return new SQL.Database(fileBuffer)
 }
 
+const termsAsParamNames = (terms: string[]): string[] => {
+    const p = []
+    for (let i = 0; i < terms.length; i++) {
+        p.push(`@t_${i}`)
+    }
+    return p
+}
+
+const termsAsParams = (terms: string[]) => {
+    return termsAsParamNames(terms).reduce((all: { [key: string]: string }, t, i) => {
+        all[t] = `%${terms[i]}%`
+        return all
+    }, {})
+}
+
+const whereClauses = (terms: string[]) => {
+    return termsAsParamNames(terms)
+        .map(t => `urls.title LIKE ${t}`)
+        .join(' AND ')
+}
+
 const searchHistory = async (db: Database, query: string | undefined): Promise<HistoryEntry[]> => {
-    const where = query ? "WHERE title LIKE @query" : ""
-    const results = db.exec(
-        `SELECT id, url, title from urls ${where} ORDER BY last_visit_time DESC LIMIT 30`,
-        { '@query': `%${query}%` })
+    const terms = query ? query.trim().split(' ') : ['']
+    const queries =
+        `SELECT id, url, title from urls
+          WHERE ${whereClauses(terms)}
+          ORDER BY last_visit_time DESC LIMIT 30;`
+    const results = db.exec(queries, termsAsParams(terms))
     if (results.length !== 1) {
         return []
     }
