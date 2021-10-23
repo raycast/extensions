@@ -32,9 +32,11 @@ type CryptoList = {
   symbol: string
 }
 
-type FuzzySortResult = {
+type SearchResult = {
   obj: CryptoList,
-  score: number
+  score: number,
+  currencyPrice?: string,
+  priceDiff?: string
 }
 
 type CryptoInfo = {
@@ -44,19 +46,19 @@ type CryptoInfo = {
   slug: string
 }
 
-export default function ArticleList() {
+export default function CryptoList() {
   const [isLoading, setIsLoading] = useState(false)
   const [cryptoList, setCryptoList] = useState<CryptoList[]>([])
-  const [fuzzyResult, setFuzzyResult] = useState([])
+  const [searchResult, setSearchResult] = useState<SearchResult[]>([])
 
   const { push } = useNavigation();
 
   useEffect(() => {
-    
+
     getListFromFile((err: string, data: string) => {
 
       if (err) {
-        console.error('ReadListError:'+ err)
+        console.error('ReadListError:' + err)
         // fetch crypto list mapping if there's no data exist in the local file
         // the api has an limit num per request. 
         fetchAllCrypto({ limit: 10000, start: 1 }).then(({ data: resultData }: { data: ResultData }) => {
@@ -96,46 +98,62 @@ export default function ArticleList() {
 
   const onSearchChange = (search: string) => {
     setIsLoading(true)
-
     const fuzzyResult = fuzzysort.go(search, cryptoList, { key: 'symbol' })
 
-    setFuzzyResult(fuzzyResult)
+    setSearchResult(fuzzyResult)
   }
+  const onSelectChange = (id?: string) => {
+    if (!id) return;
+
+    const [slug] = id.split('_')
+    const targetCryptoIndex = searchResult.findIndex(({ obj }) => obj.slug === slug)
+    const targetCrypto = searchResult.find(({ obj }) => obj.slug === slug) 
+
+    if (targetCrypto && !!targetCrypto.currencyPrice) return
+
+    onSelectCrypto(slug).then(({ currencyPrice = '', priceDiff = '' }) => {
+
+      setSearchResult(prev => {
+        const temp = [...prev]
+
+        if(!targetCrypto) return prev
+        
+        temp.splice(targetCryptoIndex,1 ,{ ...targetCrypto,currencyPrice,priceDiff} )
+        return temp
+      })
+    })
+
+
+  }
+
 
   return (
     <List isLoading={isLoading}
       throttle
       searchBarPlaceholder="Enter the crypto name"
-      onSearchTextChange={onSearchChange}>
+      onSearchTextChange={onSearchChange}
+      onSelectionChange={onSelectChange}>
 
       {
-        fuzzyResult.length === 0 ?
-          null:
-          fuzzyResult.map((result: FuzzySortResult) => {
-            const { name, slug } = result.obj
+        searchResult.length === 0 ?
+          null :
+          searchResult.map((result, index: number) => {
+            const {currencyPrice='', priceDiff=''} = result
+            const { name, slug, symbol} = result.obj
 
             return (
               <List.Item
+                id={`${slug}_${symbol}_${index}`}
                 key={name}
                 title={name}
+                subtitle={currencyPrice}
                 icon={Icon.Star}
+                accessoryTitle={priceDiff}
                 actions={
                   <ActionPanel>
-                    <ActionPanel.Item title="Show Details" onAction={() => {
-                      onSelectCrypto(slug).then(({ currencyPrice = '', priceDiff = '' }) => {
-
-                        push(
-                          <CryptoDetail
-                            currencyPrice={currencyPrice}
-                            priceDiff={priceDiff}
-                            name={name}
-                            slug={slug} />
-                        )
-                      })
-
-                    }} />
+                    <OpenInBrowserAction url={`${BASE_URL}${slug}`} />
                   </ActionPanel>
-                }
+                }          
               />
             )
           })
@@ -144,25 +162,6 @@ export default function ArticleList() {
     </List>
   );
 }
-
-
-
-
-function CryptoDetail({ currencyPrice, priceDiff, name, slug }: CryptoInfo) {
-  const { pop } = useNavigation();
-  return (
-    <Detail
-      navigationTitle={name}
-      markdown={`## ${currencyPrice} \n ### ${priceDiff}`}
-      actions={
-        <ActionPanel>
-          <OpenInBrowserAction url={`${BASE_URL}${slug}`} />
-        </ActionPanel>
-      }
-    />
-  )
-}
-
 
 async function fetchPrice(slug: string) {
   return fetch(`${BASE_URL}${slug}/`)
