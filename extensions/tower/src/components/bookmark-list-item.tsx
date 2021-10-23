@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, Icon, List, OpenAction, ShowInFinderAction } from "@raycast/api";
+import { ActionPanel, Color, CopyToClipboardAction, Icon, List, OpenAction, ShowInFinderAction } from "@raycast/api";
 import Bookmark from "../dtos/bookmark-dto";
 import OpenBookMarkAction from "./open-bookmark-action";
 
@@ -9,8 +9,9 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
     <List.Item
       id={bookmark.RepositoryIdentifier}
       title={bookmark.Name}
-      icon={Icon.Circle}
+      icon={{ source: "icon-folder.png", tintColor: Color.Blue }}
       accessoryTitle={bookmark.getBranch}
+      accessoryIcon={{ source: "icon-branches.png", tintColor: Color.PrimaryText }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -18,10 +19,17 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
             <ShowInFinderAction path={bookmark.getPath} />
             <OpenAction
               title="Open in Code"
-              icon="vscode-icon.png"
+              icon="icon-vscode.png"
               target={bookmark.getPath}
               application="Visual Studio Code"
               shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+            />
+            <OpenAction
+              title="Open in iTerm"
+              icon="icon-iterm.png"
+              target={bookmark.getPath}
+              application="iTerm"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
