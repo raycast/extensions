@@ -159,6 +159,7 @@ const startAllTorrents = async (transmission: Transmission) => {
 };
 
 export default function TorrentList() {
+  const [search, setSearch] = useState("");
   const transmission = useMemo(() => createClient(), []);
   const [torrents, setTorrents] = useState<Torrent[]>([]);
   const [sessionStats, setSessionStats] = useState<SessionStats | null>(null);
@@ -194,42 +195,45 @@ export default function TorrentList() {
   );
 
   return (
-    <List isLoading={!didLoad} searchBarPlaceholder="Filter torrents by name...">
-      {sortedTorrents.map((torrent, index) => (
-        <TorrentListItem
-          key={torrent.id}
-          torrent={torrent}
-          rateDownload={paddedRateDownloads[index]}
-          rateUpload={paddedRateUploads[index]}
-          percentDone={paddedPercentDones[index]}
-          sessionStats={sessionStats}
-          onStop={async (torrent) => {
-            await transmission.stop([torrent.id]);
-            await updateData();
-            showToast(ToastStyle.Success, `Torrent ${torrent.fileName} stopped`);
-          }}
-          onStart={async (torrent) => {
-            await transmission.start([torrent.id]);
-            await updateData();
-            showToast(ToastStyle.Success, `Torrent ${torrent.fileName} started`);
-          }}
-          onRemove={async (torrent, deleteLocalData) => {
-            await transmission.remove([torrent.id], deleteLocalData);
-            await updateData();
-            showToast(ToastStyle.Success, `Torrent ${torrent.fileName} deleted`);
-          }}
-          onStartAll={async () => {
-            await startAllTorrents(transmission);
-            await updateData();
-            showToast(ToastStyle.Success, `All torrents started`);
-          }}
-          onStopAll={async () => {
-            await stopAllTorrents(transmission);
-            await updateData();
-            showToast(ToastStyle.Success, `All torrents stopped`);
-          }}
-        />
-      ))}
+    <List isLoading={!didLoad} searchBarPlaceholder="Filter torrents by name..." onSearchTextChange={setSearch}>
+      {sortedTorrents
+        // fuzzy search
+        .filter((x) => x.fileName.toLowerCase().includes(search.toLowerCase()))
+        .map((torrent, index) => (
+          <TorrentListItem
+            key={torrent.id}
+            torrent={torrent}
+            rateDownload={paddedRateDownloads[index]}
+            rateUpload={paddedRateUploads[index]}
+            percentDone={paddedPercentDones[index]}
+            sessionStats={sessionStats}
+            onStop={async (torrent) => {
+              await transmission.stop([torrent.id]);
+              await updateData();
+              showToast(ToastStyle.Success, `Torrent ${torrent.fileName} stopped`);
+            }}
+            onStart={async (torrent) => {
+              await transmission.start([torrent.id]);
+              await updateData();
+              showToast(ToastStyle.Success, `Torrent ${torrent.fileName} started`);
+            }}
+            onRemove={async (torrent, deleteLocalData) => {
+              await transmission.remove([torrent.id], deleteLocalData);
+              await updateData();
+              showToast(ToastStyle.Success, `Torrent ${torrent.fileName} deleted`);
+            }}
+            onStartAll={async () => {
+              await startAllTorrents(transmission);
+              await updateData();
+              showToast(ToastStyle.Success, `All torrents started`);
+            }}
+            onStopAll={async () => {
+              await stopAllTorrents(transmission);
+              await updateData();
+              showToast(ToastStyle.Success, `All torrents stopped`);
+            }}
+          />
+        ))}
     </List>
   );
 }
@@ -297,7 +301,8 @@ async function fetchTorrents(transmission: Transmission): Promise<Torrent[]> {
     const response = await transmission.get(false);
     return response.torrents.map((torrent: Torrent) => ({
       ...torrent,
-      fileName: torrent.torrentFile.split("/").slice(-1)[0].split(".").slice(0, -2).join(".") || torrent.files[0]?.name,
+      fileName:
+        torrent.torrentFile.split("/").slice(-1)[0].split(".").slice(0, -2).join(".") || torrent.files[0]?.name || "",
     }));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
