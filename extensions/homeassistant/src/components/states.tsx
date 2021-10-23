@@ -107,12 +107,12 @@ export function StatesList(props: { domain: string }): JSX.Element {
   const extraTitle = (state: State): string => {
     try {
       const e = state.entity_id;
-      if (e.startsWith("cover") && state.attributes.hasOwnProperty("current_position")) {
+      if (e.startsWith("cover") && "current_position" in state.attributes) {
         const p = state.attributes.current_position;
         if (p > 0 && p < 100) {
           return `${p}% | `;
         }
-      } else if (e.startsWith("climate") && state.attributes.hasOwnProperty("current_temperature")) {
+      } else if (e.startsWith("climate") && "current_temperature" in state.attributes) {
         return `${state.attributes.current_temperature} | `;
       }
     } catch (e) {
