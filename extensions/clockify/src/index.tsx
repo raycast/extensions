@@ -74,29 +74,15 @@ export default function Main() {
         />
       ) : (
         <>
-          <List.Section title="Manual">
+          <List.Section title="What are you working on?">
             <List.Item
               icon="▶️"
-              title="Start timer"
+              title="Start new timer"
               actions={
                 <ActionPanel>
                   <ActionPanel.Item
                     title="Start New Timer"
                     onAction={() => push(<NewEntry updateTimeEntries={updateTimeEntries} />)}
-                  />
-                </ActionPanel>
-              }
-            />
-            <List.Item
-              icon="⏹️"
-              title="Stop current"
-              actions={
-                <ActionPanel>
-                  <ActionPanel.Item
-                    title="Stop Current Timer"
-                    onAction={async () => {
-                      stopCurrentTimer().then(() => updateTimeEntries());
-                    }}
                   />
                 </ActionPanel>
               }
@@ -116,9 +102,11 @@ export default function Main() {
                 actions={
                   <ActionPanel>
                     <ActionPanelItem
-                      title={isInProgress(entry) ? "Stop Timer": "Start Timer"}
+                      title={isInProgress(entry) ? "Stop Timer" : "Start Timer"}
                       onAction={() => {
-                        isInProgress(entry) ? stopCurrentTimer().then(() => updateTimeEntries()) : addNewTimeEntry(entry.description, entry.projectId).then(() => updateTimeEntries());
+                        isInProgress(entry)
+                          ? stopCurrentTimer().then(() => updateTimeEntries())
+                          : addNewTimeEntry(entry.description, entry.projectId).then(() => updateTimeEntries());
                       }}
                     />
                   </ActionPanel>
