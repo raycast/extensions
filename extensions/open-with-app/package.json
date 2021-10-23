@@ -8,7 +8,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Open With",
+      "title": "Open With…",
       "subtitle": "Finder",
       "description": "Choose an application to open the selected Finder items.",
       "mode": "view"
