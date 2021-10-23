@@ -21,7 +21,7 @@
       "required": true,
       "title": "Consumer Key",
       "description": "The consumer key generated in the Twitter Developer Portal.",
-      "placeholder": "Enter your consumer key" 
+      "placeholder": "Enter your consumer key"
     },
     {
       "name": "consumer_secret",
@@ -29,7 +29,7 @@
       "required": true,
       "title": "Consumer Secret",
       "description": "The consumer secret generated in the Twitter Developer Portal.",
-      "placeholder": "Enter your consumer secret" 
+      "placeholder": "Enter your consumer secret"
     },
     {
       "name": "access_token",
@@ -37,7 +37,7 @@
       "required": true,
       "title": "Access Token",
       "description": "The access token generated in the Twitter Developer Portal.",
-      "placeholder": "Enter your access token" 
+      "placeholder": "Enter your access token"
     },
     {
       "name": "access_token_secret",
@@ -45,16 +45,17 @@
       "required": true,
       "title": "Access Token Secret",
       "description": "The access token secret generated in the Twitter Developer Portal.",
-      "placeholder": "Enter your access token secret" 
+      "placeholder": "Enter your access token secret"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.25.1",
-    "got": "^11.8.2"
+    "twit": "^2.2.11"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
+    "@types/twit": "^2.2.30",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
