@@ -20,12 +20,16 @@
       "type": "textfield",
       "required": true,
       "title":"First Language",
+      "default": "en",
+      "placeholder": "Lang code, ex. 'en'",
       "description":"First language for translating"
     },
     {
       "name": "lang2",
       "type": "textfield",
       "required": true,
+      "default": "de",
+      "placeholder": "Lang code, ex. 'de'",
       "title":"Second Language",
       "description":"Second language for translating"
     }
