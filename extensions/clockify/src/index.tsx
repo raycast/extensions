@@ -116,7 +116,7 @@ export default function Main() {
                 actions={
                   <ActionPanel>
                     <ActionPanelItem
-                      title="Start Timer"
+                      title={isInProgress(entry) ? "Stop Timer": "Start Timer"}
                       onAction={() => {
                         addNewTimeEntry(entry.description, entry.projectId).then(() => updateTimeEntries());
                       }}
