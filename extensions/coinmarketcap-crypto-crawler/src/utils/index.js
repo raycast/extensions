@@ -1,18 +1,13 @@
 import { environment } from "@raycast/api";
 
 const fs = require('fs')
+const cryptoListPath = `${environment.supportPath}/cryptoList.json`
 
-export function writeLIstInToFile(data) {
-    
-    fs.writeFile(`${environment.supportPath}/cryptoList.json`, JSON.stringify(data), err => {
-      if (err) {
-        console.error(err)
-        return
-      }
-    })
-  }
+export function writeLIstInToFile(data, callback) {
+  fs.writeFile(cryptoListPath, JSON.stringify(data), callback)
+}
 
 
-  export function getListFromFile(cb){
-    return fs.readFile(`${environment.supportPath}/cryptoList.json`, 'utf8',cb )
-  }
+export function getListFromFile(callback) {
+  return fs.readFile(cryptoListPath, 'utf8', callback)
+}

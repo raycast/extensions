@@ -45,55 +45,63 @@ type CryptoInfo = {
 }
 
 export default function ArticleList() {
-  const [currentSearchText,setCurrehtSearchText] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [cryptoList, setCryptoList] = useState([])
+  const [cryptoList, setCryptoList] = useState<CryptoList[]>([])
   const [fuzzyResult, setFuzzyResult] = useState([])
-
 
   const { push } = useNavigation();
 
-
   useEffect(() => {
-
+    
     getListFromFile((err: string, data: string) => {
+
       if (err) {
-        console.error(err)
-        return
+        console.error('ReadListError:'+ err)
+        // fetch crypto list mapping if there's no data exist in the local file
+        // the api has an limit num per request. 
+        fetchAllCrypto({ limit: 10000, start: 1 }).then(({ data: resultData }: { data: ResultData }) => {
+          const { data, status } = resultData
+
+          const cryptoList = data.cryptoCurrencyMap.map(({ slug, name, symbol }: CryptoList) => ({ slug, name, symbol: symbol.toLowerCase() }))
+
+          writeLIstInToFile({
+            timestamp: status.timestamp,
+            cryptoList: cryptoList
+          }, (writeFileError: string) => {
+            if (writeFileError) {
+              console.error('WriteFileError:' + writeFileError)
+              return
+            }
+            setCryptoList(cryptoList)
+          })
+        })
+
+      } else {
+        const { cryptoList: cryptoListFromFile } = JSON.parse(data)
+
+        if (!!cryptoListFromFile) {
+          setCryptoList(cryptoListFromFile)
+        }
       }
 
-      const { cryptoList: cryptoListFromFile } = JSON.parse(data)
 
-      if (!!cryptoListFromFile) {
-        setCryptoList(cryptoListFromFile)
-        return
-      }
-      // fetch crypto list mapping if there's no data exist in the local file
-      // the api has an limit num per request. 
-      fetchAllCrypto({ limit: 10000, start: 1 }).then(({ data: resultData }: { data: ResultData }) => {
-        const { data, status } = resultData
-
-        const cryptoList = data.cryptoCurrencyMap.map(({ slug, name, symbol }: CryptoList) => ({ slug, name, symbol: symbol.toLowerCase() }))
-        writeLIstInToFile({ timestamp: status.timestamp, cryptoList: cryptoList })
-      })
     })
   }, [])
 
   const onSelectCrypto = async (searchText: string) => {
-    const priceInfo = await fetchPrice(searchText) 
+    const priceInfo = await fetchPrice(searchText)
     setIsLoading(false);
     return priceInfo
   }
 
-  const onSearchChange = (search:string)=>{
+  const onSearchChange = (search: string) => {
     setIsLoading(true)
-    setCurrehtSearchText(search);
 
     const fuzzyResult = fuzzysort.go(search, cryptoList, { key: 'symbol' })
 
     setFuzzyResult(fuzzyResult)
-  } 
-  
+  }
+
   return (
     <List isLoading={isLoading}
       throttle
@@ -104,7 +112,7 @@ export default function ArticleList() {
         fuzzyResult.length === 0 ?
           <List.Item title="" /> :
           fuzzyResult.map((result: FuzzySortResult) => {
-            const { name,slug } = result.obj
+            const { name, slug } = result.obj
 
             return (
               <List.Item
@@ -114,18 +122,18 @@ export default function ArticleList() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Item title="Pop" onAction={() => {
-                      onSelectCrypto(slug).then(({ currencyPrice = '', priceDiff = '' })=>{
+                      onSelectCrypto(slug).then(({ currencyPrice = '', priceDiff = '' }) => {
 
-                      push(
-                        <CryptoDetail 
-                            currencyPrice={currencyPrice} 
+                        push(
+                          <CryptoDetail
+                            currencyPrice={currencyPrice}
                             priceDiff={priceDiff}
                             name={name}
-                            slug={slug}/>
-                        )  
-                      }) 
-                      
-                    }}/>
+                            slug={slug} />
+                        )
+                      })
+
+                    }} />
                   </ActionPanel>
                 }
               />
@@ -140,7 +148,7 @@ export default function ArticleList() {
 
 
 
-function CryptoDetail({ currencyPrice, priceDiff,name,slug }: CryptoInfo) {
+function CryptoDetail({ currencyPrice, priceDiff, name, slug }: CryptoInfo) {
   const { pop } = useNavigation();
   return (
     <Detail
@@ -169,15 +177,15 @@ async function fetchPrice(slug: string) {
       const priceDirectionClassName = $html(".priceValue + span > span[class^=icon-Caret]").attr('class');
       const priceDirection = priceDirectionClassName && priceDirectionClassName.split('-').includes('up') ? '+' : '-'
       const priceDiffValue = priceValue.next("span").text()
-      
+
       const priceDiffText = `${priceDirection} ${priceDiffValue}`
 
       const priceValueText = priceValue.text()
       if (!priceValueText) return { priceValueText: '', priceDiffText: '', coinName: '' };
 
 
- 
-      return { currencyPrice:priceValueText, priceDiff:priceDiffText, slug }
+
+      return { currencyPrice: priceValueText, priceDiff: priceDiffText, slug }
     });
 
 }
