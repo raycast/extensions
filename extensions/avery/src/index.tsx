@@ -20,6 +20,10 @@ export default function Command() {
       showToast(ToastStyle.Failure, "Tweet is required");
       return;
     }
+    if (tweet.length > 280) {
+      showToast(ToastStyle.Failure, `${280 - tweet.length} characters`, "Tweet is too long");
+      return;
+    }
     const toast = new Toast({ style: ToastStyle.Animated, title: "Tweeting 🐣" });
     await toast.show();
 
