@@ -609,6 +609,9 @@ export class GitLab {
             delete params.scope;
         }
 
+        params.include_ancestor_groups = false;
+        params.include_descendant_groups = false;
+
         const groups = await this.getUserGroups();
         let epics: Epic[] = [];
         for (const g of groups) {
