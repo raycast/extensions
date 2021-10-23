@@ -1,10 +1,11 @@
-import { ActionPanel, Form, SubmitFormAction, Toast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Detail, Form, SubmitFormAction, Toast, ToastStyle, useNavigation } from "@raycast/api";
 import { spawn } from "child_process";
 
 export default function command() {
   // Will be removed after issue#170 is fixed
   process.env.PATH = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin";
 
+  const { push } = useNavigation();
   // Download video handler
   function downloadVideo(values: { url: string; directory: string; playlist: number; format: string }) {
     var args = [];
@@ -117,32 +118,10 @@ export default function command() {
     videoDownload.on("error", (err: Error) => {
       if (err.message.includes("ENOENT")) {
         // try to install youtube-dl
-        toast.style = ToastStyle.Animated;
+        toast.style = ToastStyle.Failure;
         toast.title = "Youtube-dl Not Found";
-        toast.message = "A utility is installing necessary dependencies";
-        setTimeout(() => {
-          const dlInstall = spawn("sh", [__dirname + "/assets/install.sh"]);
-          dlInstall.stdout.on("data", (data) => {
-            console.log("[DL Install]: ", data.toString());
-          });
-          dlInstall.stderr.on("data", (data) => {
-            console.log("[DL Install]: ", data.toString());
-          });
-          dlInstall.on("error", (err) => {
-            console.log(err);
-          });
-          dlInstall.on("exit", (code: number) => {
-            if (code == 0) {
-              toast.style = ToastStyle.Success;
-              toast.title = "Installation Finished";
-              toast.message = "You can now download videos";
-            } else {
-              toast.style = ToastStyle.Failure;
-              toast.title = "Installation Failed";
-              toast.message = "You can manually install by visiting youtube-dl.org";
-            }
-          });
-        }, 5000);
+        toast.message = "A utility should help you install dependencies";
+        push(<InstallScreen />);
       } else {
         toast.style = ToastStyle.Failure;
         toast.title = "Error";
@@ -188,4 +167,76 @@ export default function command() {
       <Form.TextField id="directory" title="Directory" placeholder="~/Downloads/" />
     </Form>
   );
+}
+
+function InstallScreen() {
+  const { push } = useNavigation();
+  function install() {
+    push(<InstallingScreen />);
+    const dlInstall = spawn("sh", [__dirname + "/assets/install.sh"]);
+    dlInstall.stdout.on("data", (data) => {
+      console.log("[DL Install]: ", data.toString());
+    });
+    dlInstall.stderr.on("data", (data) => {
+      console.log("[DL Install]: ", data.toString());
+    });
+    dlInstall.on("error", (err) => {
+      console.log(err);
+    });
+    dlInstall.on("exit", (code: number) => {
+      installInfo.props.isLoading = false;
+      if (code == 0) {
+        const installSuccess = new Toast({
+          style: ToastStyle.Success,
+          title: "Success",
+          message: "You can start using YouTube Downloader now",
+        });
+        installSuccess.show();
+      } else {
+        const installSuccess = new Toast({
+          style: ToastStyle.Failure,
+          title: "Failure",
+          message: "You can still manuelly install from youtube-dl.org",
+        });
+        installSuccess.show();
+      }
+    });
+  }
+  const installInfo = (
+    <Detail
+      navigationTitle="Install Dependencies"
+      isLoading={false}
+      markdown="# Installing Dependencies
+You need to install some tools for YouTube Downloader to work. By clicking continue or enter, the following three packages will be automatically installed:
+- Brew
+- Youtube-dl
+- FFmpeg"
+      actions={
+        <ActionPanel title="Continue">
+          <ActionPanel.Item title="Continue" onAction={install} />
+        </ActionPanel>
+      }
+    ></Detail>
+  );
+  return installInfo;
+}
+
+function InstallingScreen() {
+  const installInfo = (
+    <Detail
+      navigationTitle="Install Dependencies"
+      isLoading={true}
+      markdown="# Installing Dependencies
+You need to install some tools for YouTube Downloader to work. By clicking continue or enter, the following three packages will be automatically installed:
+- Brew
+- Youtube-dl
+- FFmpeg"
+      actions={
+        <ActionPanel title="Continue">
+          <ActionPanel.Item title="Continue" />
+        </ActionPanel>
+      }
+    ></Detail>
+  );
+  return installInfo;
 }
