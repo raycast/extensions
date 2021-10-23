@@ -28,13 +28,9 @@
       "type": "password",
       "required": true,
       "title": "APP Secret",
-      "description": "Secret of your Youdao Translate APP",
-      "placeholder": "Enter your Youdao Translate APP Secret. (you can find it in https://ai.youdao.com/console/)"
+      "description": "You can get Youdao Translate APP secret at https://ai.youdao.com/console/",
+      "placeholder": "Youdao Translate APP Secret"
     }
-  ],
-  "keywords": [
-    "tranlate",
-    "youdao"
   ],
   "dependencies": {
     "@raycast/api": "^1.25.1",

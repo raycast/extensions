@@ -299,7 +299,7 @@ function Main() {
       </ActionPanel>
     }>
       <Form.TextArea title="Content(内容)" id="content"
-                     placeholder={select !== "" ? `you selected ${select}` : "please enter content"} />
+                     placeholder={select !== "" ? select : "Text to translate"} />
       <Form.Separator />
       <LanguageFormDDropdown id="from_language" title="From(源语言)" />
       <LanguageFormDDropdown id="to_language" title="To(目标语言)" />
