@@ -113,6 +113,8 @@ export interface Branch {
 
 export interface Epic {
     id: number;
+    iid: number;
+    group_id: number;
     title: string;
     state: string;
     web_url: string;
