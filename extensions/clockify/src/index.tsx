@@ -19,7 +19,7 @@ import { fetcher, isInProgress } from "./utils";
 import { TimeEntry, Project } from "./types";
 
 export default function Main() {
-  const { config, isValidToken } = useConfig();
+  const { config, isValidToken, setIsValidToken } = useConfig();
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { push } = useNavigation();
@@ -36,7 +36,7 @@ export default function Main() {
         setEntries(JSON.parse(storedEntries));
       }
 
-      const filteredEntries = await getTimeEntries();
+      const filteredEntries = await getTimeEntries({ onError: setIsValidToken });
 
       if (filteredEntries) {
         setEntries(filteredEntries);
@@ -52,7 +52,7 @@ export default function Main() {
   const updateTimeEntries = useCallback((): void => {
     setIsLoading(true);
 
-    getTimeEntries()
+    getTimeEntries({ onError: setIsValidToken })
       .then((entries) => {
         if (entries) {
           setEntries(entries);
@@ -183,7 +183,7 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
           <Form.Dropdown.Item
             key={project.id}
             value={project.id}
-            title={`${project.name} - ${project.clientName}`}
+            title={`${project.name} - ${project?.clientName || "No Client"}`}
             icon={{ source: Icon.Circle, tintColor: project.color }}
           />
         ))}
@@ -193,11 +193,18 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
   );
 }
 
-async function getTimeEntries(): Promise<TimeEntry[]> {
+async function getTimeEntries({ onError }: { onError?: (state: boolean) => void }): Promise<TimeEntry[]> {
   const workspaceId = await getLocalStorageItem("workspaceId");
   const userId = await getLocalStorageItem("userId");
 
-  const { data } = await fetcher(`/workspaces/${workspaceId}/user/${userId}/time-entries?hydrated=true&page-size=500`);
+  const { data, error } = await fetcher(
+    `/workspaces/${workspaceId}/user/${userId}/time-entries?hydrated=true&page-size=500`
+  );
+
+  if (error === "Unauthorized") {
+    onError && onError(false);
+    return [];
+  }
 
   if (data?.length) {
     const filteredEntries: TimeEntry[] = uniqWith(

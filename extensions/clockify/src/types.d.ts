@@ -11,7 +11,7 @@ export interface TimeEntry {
 
 export interface Project {
   id: string;
-  clientName: string;
+  clientName?: string;
   description?: string;
   name: string;
   color: string;

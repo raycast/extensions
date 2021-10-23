@@ -1,14 +1,23 @@
-import { getLocalStorageItem, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
+import { clearLocalStorage, getLocalStorageItem, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { fetcher, validateToken } from "./utils";
 import { DataValues } from "./types";
 
-export default function useConfig() {
-  const [isValidToken, setIsValidToken] = useState(validateToken());
+interface ConfigProps {
+  config: DataValues;
+  isValidToken: boolean;
+  setIsValidToken: (state: boolean) => void;
+}
+
+export default function useConfig(): ConfigProps {
+  const [isValidToken, setIsValidToken] = useState<boolean>(() => validateToken());
   const [data, setData] = useState<DataValues>({} as DataValues);
 
   useEffect(() => {
-    if (!isValidToken) return;
+    if (!isValidToken) {
+      clearLocalStorage();
+      return;
+    }
 
     async function getStorage() {
       const name = await getLocalStorageItem("name");
@@ -43,7 +52,7 @@ export default function useConfig() {
     }
 
     getStorage();
-  }, []);
+  }, [isValidToken]);
 
-  return { config: data, isValidToken };
+  return { config: data, isValidToken, setIsValidToken };
 }
