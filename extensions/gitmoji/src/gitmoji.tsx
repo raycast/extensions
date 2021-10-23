@@ -24,7 +24,7 @@ function GitmojiListItem(props: { gitmoji: Gitmoji }) {
       keywords={[gitmoji.code.replace(":", ""), gitmoji.name]}
       actions={
         <ActionPanel>
-          <CopyToClipboardAction content={gitmoji.code} />
+          <CopyToClipboardAction content={gitmoji.emoji} />
         </ActionPanel>
       }
     />
