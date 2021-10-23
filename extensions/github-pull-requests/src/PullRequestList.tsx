@@ -26,7 +26,7 @@ export default function PullRequestList() {
   }, []);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter Pull Requests by name...">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter by name...">
       {state.pullRequests.map((pr) => (
         <PullRequestItem key={pr.url} {...pr} />
       ))}
