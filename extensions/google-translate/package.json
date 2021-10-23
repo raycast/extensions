@@ -1,0 +1,51 @@
+{
+  "name": "translate",
+  "title": "GTranslate",
+  "description": "Simple translation using Google Translate",
+  "icon": "google-translate.png",
+  "author": "ospfranco",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "translate",
+      "title": "translate",
+      "subtitle": "Google Translate",
+      "description": "Simple translation via Google Translate",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "lang1",
+      "type": "textfield",
+      "required": true,
+      "title":"First Language",
+      "description":"First language for translating"
+    },
+    {
+      "name": "lang2",
+      "type": "textfield",
+      "required": true,
+      "title":"Second Language",
+      "description":"Second language for translating"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.1",
+    "@vitalets/google-translate-api": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
