@@ -1,8 +1,10 @@
 import {
   ActionPanel,
   Color,
+  ColorLike,
   CopyToClipboardAction,
   Icon,
+  ImageLike,
   List,
   popToRoot,
   PushAction,
@@ -29,6 +31,64 @@ export function ShowAttributesAction(props: { state: State }) {
     );
   } else {
     return null;
+  }
+}
+
+const lightColor: Record<string, ColorLike> = {
+  on: Color.Yellow,
+  off: Color.Blue,
+};
+
+const coverStateIconSource: Record<string, string> = {
+  opening: "cover-up.png",
+  closing: "cover-down.png",
+  open: "cover-open.png",
+  closed: "cover-close.png",
+};
+
+const deviceClassIconSource: Record<string, string> = {
+  temperature: "temperature.png",
+  power: "power.png",
+  update: "update.png",
+  connectivity: "connectivity.png",
+  carbon_dioxide: "carbon-dioxide.png",
+  pressure: "pressure.png",
+  humidity: "humidity.png",
+};
+
+function getDeviceClassIcon(state: State): ImageLike | undefined {
+  if (state.attributes.device_class) {
+    const dc = state.attributes.device_class;
+    const source2 = deviceClassIconSource[dc] || "entity.png";
+    console.log(source2);
+    return { source: source2, tintColor: Color.PrimaryText };
+  } else {
+    return undefined;
+  }
+}
+
+function getIcon(state: State): ImageLike | undefined {
+  const e = state.entity_id;
+  const attr = state.attributes;
+  if (e.startsWith("light")) {
+    const color = lightColor[state.state.toLocaleLowerCase()] || Color.PrimaryText;
+    const source = attr.icon && attr.icon === "mdi:lightbulb-group" ? "lightbulb-group.png" : "lightbulb.png";
+    return { source: source, tintColor: color };
+  } else if (e.startsWith("person")) {
+    return { source: "person.png", tintColor: Color.PrimaryText };
+  } else if (e.startsWith("cover")) {
+    const source = coverStateIconSource[`${state.state}`] || "cover-opened.png";
+    console.log(source);
+    return { source: source, tintColor: Color.PrimaryText };
+  } else if (e.startsWith("automation")) {
+    return { source: "automation.png", tintColor: Color.PrimaryText };
+  } else if (e.startsWith("climate")) {
+    return { source: "climate.png", tintColor: Color.PrimaryText };
+  } else if (e.startsWith("media_player")) {
+    return { source: "mediaplayer.png", tintColor: Color.PrimaryText };
+  } else {
+    const di = getDeviceClassIcon(state);
+    return di ? di : { source: "entity.png", tintColor: Color.PrimaryText };
   }
 }
 
@@ -69,6 +129,7 @@ export function StatesList(props: { domain: string }) {
           subtitle={state.entity_id}
           accessoryTitle={extraTitle(state) + state.state}
           actions={<StateActionPanel state={state} />}
+          icon={getIcon(state)}
         />
       ))}
     </List>
@@ -124,13 +185,13 @@ export function StateActionPanel(props: { state: State }) {
             title="Turn On"
             shortcut={{ modifiers: ["cmd"], key: "o" }}
             onAction={async () => await ha.turnOnLight(props.state.entity_id)}
-            icon={{ source: "power.png", tintColor: Color.Green }}
+            icon={{ source: "power-btn.png", tintColor: Color.Green }}
           />
           <ActionPanel.Item
             title="Turn Off"
             shortcut={{ modifiers: ["cmd"], key: "f" }}
             onAction={async () => await ha.turnOffLight(props.state.entity_id)}
-            icon={{ source: "power.png", tintColor: Color.Red }}
+            icon={{ source: "power-btn.png", tintColor: Color.Red }}
           />
           <ShowAttributesAction state={props.state} />
           <CopyToClipboardAction title="Copy value" content={props.state.state} />
@@ -221,7 +282,7 @@ export function StateActionPanel(props: { state: State }) {
             <ActionPanel.Submenu
               title={`Temperature (${currentTemp || "?"})`}
               shortcut={{ modifiers: ["cmd"], key: "t" }}
-              icon={{ source: "thermometer.png", tintColor: Color.PrimaryText }}
+              icon={{ source: "temperature.png", tintColor: Color.PrimaryText }}
             >
               {temps.map((t) => (
                 <ActionPanel.Item
@@ -302,7 +363,11 @@ export function StateActionPanel(props: { state: State }) {
       );
     }
     default: {
-      return <ActionPanel></ActionPanel>;
+      return (
+        <ActionPanel>
+          <ShowAttributesAction state={props.state} />
+        </ActionPanel>
+      );
     }
   }
 }
