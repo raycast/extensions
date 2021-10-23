@@ -25,7 +25,7 @@ enum TorrentStatus {
 type Torrent = {
   id: number;
   torrentFile: string;
-  fileName: string;
+  name: string;
   comment: string;
   eta: number;
   percentDone: number;
@@ -100,9 +100,8 @@ const statusIconSource = (status: TorrentStatus, percentDone: number): string =>
       }
       break;
     case TorrentStatus.QueuedToSeed:
-      return "Queued to seed";
     case TorrentStatus.Seeding:
-      return "Seeding";
+      return Icon.ChevronUp;
     default:
       return Icon.XmarkCircle;
   }
@@ -140,7 +139,7 @@ const sortTorrents = (t1: Torrent, t2: Torrent): number => {
     case "progress":
       return (t1.percentDone - t2.percentDone) * direction;
     case "name":
-      return t1.fileName.localeCompare(t2.fileName) * direction;
+      return t1.name.localeCompare(t2.name) * direction;
     case "status":
       return (t2.status - t1.status) * direction;
     default:
@@ -198,7 +197,7 @@ export default function TorrentList() {
     <List isLoading={!didLoad} searchBarPlaceholder="Filter torrents by name..." onSearchTextChange={setSearch}>
       {sortedTorrents
         // fuzzy search
-        .filter((x) => x.fileName.toLowerCase().includes(search.toLowerCase()))
+        .filter((x) => x.name.toLowerCase().includes(search.toLowerCase()))
         .map((torrent, index) => (
           <TorrentListItem
             key={torrent.id}
@@ -210,17 +209,17 @@ export default function TorrentList() {
             onStop={async (torrent) => {
               await transmission.stop([torrent.id]);
               await updateData();
-              showToast(ToastStyle.Success, `Torrent ${torrent.fileName} stopped`);
+              showToast(ToastStyle.Success, `Torrent ${torrent.name} stopped`);
             }}
             onStart={async (torrent) => {
               await transmission.start([torrent.id]);
               await updateData();
-              showToast(ToastStyle.Success, `Torrent ${torrent.fileName} started`);
+              showToast(ToastStyle.Success, `Torrent ${torrent.name} started`);
             }}
             onRemove={async (torrent, deleteLocalData) => {
               await transmission.remove([torrent.id], deleteLocalData);
               await updateData();
-              showToast(ToastStyle.Success, `Torrent ${torrent.fileName} deleted`);
+              showToast(ToastStyle.Success, `Torrent ${torrent.name} deleted`);
             }}
             onStartAll={async () => {
               await startAllTorrents(transmission);
@@ -268,7 +267,7 @@ function TorrentListItem({
     <List.Item
       id={String(torrent.id)}
       key={torrent.id}
-      title={truncate(torrent.fileName, 60)}
+      title={truncate(torrent.name, 60)}
       icon={{
         source: statusIconSource(torrent.status, torrent.percentDone),
         tintColor: statusIconColor(torrent.status),
@@ -299,11 +298,7 @@ function TorrentListItem({
 async function fetchTorrents(transmission: Transmission): Promise<Torrent[]> {
   try {
     const response = await transmission.get(false);
-    return response.torrents.map((torrent: Torrent) => ({
-      ...torrent,
-      fileName:
-        torrent.torrentFile.split("/").slice(-1)[0].split(".").slice(0, -2).join(".") || torrent.files[0]?.name || "",
-    }));
+    return response.torrents;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error(error);
