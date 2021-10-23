@@ -128,6 +128,16 @@ const sortTorrents = (t1: Torrent, t2: Torrent): number => {
   }
 };
 
+const stopAllTorrents = async (transmission: Transmission) => {
+  const allTorrents = await fetchTorrents(transmission);
+  await transmission.stop(allTorrents.map((t) => t.id));
+};
+
+const startAllTorrents = async (transmission: Transmission) => {
+  const allTorrents = await fetchTorrents(transmission);
+  await transmission.start(allTorrents.map((t) => t.id));
+};
+
 export default function TorrentList() {
   const transmission = useMemo(() => createClient(), []);
   const [torrents, setTorrents] = useState<Torrent[]>([]);
@@ -184,6 +194,16 @@ export default function TorrentList() {
             await updateTorrents();
             showToast(ToastStyle.Success, `Torrent ${torrent.fileName} deleted`);
           }}
+          onStartAll={async () => {
+            await startAllTorrents(transmission);
+            await updateTorrents();
+            showToast(ToastStyle.Success, `All torrents started`);
+          }}
+          onStopAll={async () => {
+            await stopAllTorrents(transmission);
+            await updateTorrents();
+            showToast(ToastStyle.Success, `All torrents stopped`);
+          }}
         />
       ))}
     </List>
@@ -195,6 +215,8 @@ function TorrentListItem({
   onStop,
   onStart,
   onRemove,
+  onStartAll,
+  onStopAll,
   rateDownload,
   rateUpload,
   percentDone,
@@ -202,6 +224,8 @@ function TorrentListItem({
   torrent: Torrent;
   onStop: (torrent: Torrent) => Promise<void>;
   onStart: (torrent: Torrent) => Promise<void>;
+  onStartAll: (torrent: Torrent) => Promise<void>;
+  onStopAll: (torrent: Torrent) => Promise<void>;
   onRemove: (torrent: Torrent, deleteLocalData: boolean) => Promise<void>;
   rateDownload: string;
   rateUpload: string;
@@ -219,7 +243,7 @@ function TorrentListItem({
       accessoryTitle={[`⬇️ ${rateDownload}`, " - ", `⬆️ ${rateUpload}`, " - ", percentDone].join(" ")}
       actions={
         <ActionPanel>
-          <ActionPanel.Section title={`ETA: ${formatStatus(torrent)}`}>
+          <ActionPanel.Section title={`Selected Torrent (ETA: ${formatStatus(torrent)})`}>
             <ActionPanel.Item
               title={torrent.status === TorrentStatus.Stopped ? "Start Torrent" : "Stop Torrent"}
               onAction={() => (torrent.status === TorrentStatus.Stopped ? onStart(torrent) : onStop(torrent))}
@@ -228,6 +252,10 @@ function TorrentListItem({
               <ActionPanel.Item title="Preserve Local Data" onAction={() => onRemove(torrent, false)} />
               <ActionPanel.Item title="Delete Local Data" onAction={() => onRemove(torrent, true)} />
             </ActionPanel.Submenu>
+          </ActionPanel.Section>
+          <ActionPanel.Section title="All Torrents">
+            <ActionPanel.Item title="Start All" onAction={() => onStartAll(torrent)} />
+            <ActionPanel.Item title="Stop All" onAction={() => onStopAll(torrent)} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -240,11 +268,12 @@ async function fetchTorrents(transmission: Transmission): Promise<Torrent[]> {
     const response = await transmission.get(false);
     return response.torrents.map((torrent: Torrent) => ({
       ...torrent,
-      fileName: torrent.torrentFile.split("/").slice(-1)[0].split(".").slice(0, -2).join("."),
+      fileName: torrent.torrentFile.split("/").slice(-1)[0].split(".").slice(0, -2).join(".") || torrent.files[0]?.name,
     }));
-  } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error(error);
-    showToast(ToastStyle.Failure, "Could not load torrents");
+    showToast(ToastStyle.Failure, `Could not load torrents: ${error.code}`);
     return Promise.resolve([]);
   }
 }
@@ -259,4 +288,5 @@ type Torrent = {
   status: TorrentStatus;
   rateDownload: number;
   rateUpload: number;
+  files: { name: string }[];
 };
