@@ -1,0 +1,46 @@
+{
+  "name": "envato",
+  "title": "Envato Sales",
+  "version": "1.0.0",
+  "description": "Tracking New Sales For Envato Author",
+  "icon": "icon.png",
+  "author": "astroon",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "envato",
+      "title": "envato",
+      "description": "Tracking New Sales For Envato Author",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "textfield",
+      "required": true,
+      "title": "Envato Token",
+      "description": "Please paste your token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "dateformat": "^5.0.2",
+    "envato": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/dateformat": "^3.0.1",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
