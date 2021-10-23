@@ -8,7 +8,8 @@ import Transmission from "transmission-promise";
 import { formatDistanceToNow } from "date-fns";
 import prettyBytes from "pretty-bytes";
 import { useInterval } from "./utils/hooks";
-import { capitalize, truncate, padStart } from "./utils/string";
+import { capitalize, truncate } from "./utils/string";
+import { padList } from "./utils/list";
 import { createClient } from "./modules/client";
 
 enum TorrentStatus {
@@ -144,12 +145,30 @@ export default function TorrentList() {
     updateTorrents();
   }, 5000);
 
+  const sortedTorrents = useMemo(() => torrents.sort(sortTorrents), [torrents]);
+
+  const paddedRateDownloads = useMemo(
+    () => padList(sortedTorrents.map((t) => `${prettyBytes(t.rateDownload)}/s`)),
+    [torrents]
+  );
+  const paddedRateUploads = useMemo(
+    () => padList(sortedTorrents.map((t) => `${prettyBytes(t.rateUpload)}/s`)),
+    [torrents]
+  );
+  const paddedPercentDones = useMemo(
+    () => padList(sortedTorrents.map((t) => `${Math.round(t.percentDone * 100)}%`)),
+    [torrents]
+  );
+
   return (
     <List isLoading={!didLoad} searchBarPlaceholder="Filter torrents by name...">
-      {torrents.sort(sortTorrents).map((torrent) => (
+      {sortedTorrents.map((torrent, index) => (
         <TorrentListItem
           key={torrent.id}
           torrent={torrent}
+          rateDownload={paddedRateDownloads[index]}
+          rateUpload={paddedRateUploads[index]}
+          percentDone={paddedPercentDones[index]}
           onStop={async (torrent) => {
             await transmission.stop([torrent.id]);
             await updateTorrents();
@@ -176,11 +195,17 @@ function TorrentListItem({
   onStop,
   onStart,
   onRemove,
+  rateDownload,
+  rateUpload,
+  percentDone,
 }: {
   torrent: Torrent;
   onStop: (torrent: Torrent) => Promise<void>;
   onStart: (torrent: Torrent) => Promise<void>;
   onRemove: (torrent: Torrent, deleteLocalData: boolean) => Promise<void>;
+  rateDownload: string;
+  rateUpload: string;
+  percentDone: string;
 }) {
   return (
     <List.Item
@@ -191,13 +216,7 @@ function TorrentListItem({
         source: statusIconSource(torrent.status, torrent.percentDone),
         tintColor: statusIconColor(torrent.status),
       }}
-      accessoryTitle={[
-        `⬇️ ${padStart(prettyBytes(torrent.rateDownload), 4)}/s`,
-        " - ",
-        `⬆️ ${padStart(prettyBytes(torrent.rateUpload), 4)}/s`,
-        " - ",
-        `${padStart(Math.round(torrent.percentDone * 100), 3)}%`,
-      ].join(" ")}
+      accessoryTitle={[`⬇️ ${rateDownload}`, " - ", `⬆️ ${rateUpload}`, " - ", percentDone].join(" ")}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={`ETA: ${formatStatus(torrent)}`}>
