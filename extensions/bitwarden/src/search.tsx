@@ -9,18 +9,18 @@ import {
   CopyToClipboardAction,
   getPreferenceValues,
 } from "@raycast/api";
-import { Item, Folder } from "./types";
+import { Item, Folder, VaultStatus } from "./types";
 import { useEffect, useState } from "react";
 import treeify from "treeify";
-import { filterNullishPropertiesFromObject, codeBlock, titleCase } from "./utils";
-import { useSessionToken } from "./hooks";
+import { filterNullishPropertiesFromObject, codeBlock, titleCase, faviconUrl } from "./utils";
+import { useBitwarden } from "./hooks";
 import { TroubleshootingGuide, UnlockForm } from "./components";
 import { existsSync } from "fs";
 import { Bitwarden } from "./api";
 import { dirname } from "path";
 
 const { cliPath, clientId, clientSecret, fetchFavicons } = getPreferenceValues();
-process.env.PATH = dirname(cliPath)
+process.env.PATH = dirname(cliPath);
 const bitwardenApi = new Bitwarden(clientId, clientSecret);
 
 export default function Search(): JSX.Element {
@@ -28,20 +28,28 @@ export default function Search(): JSX.Element {
     return <TroubleshootingGuide />;
   }
 
-  const [sessionToken, setSessionToken] = useSessionToken(bitwardenApi);
+  const [state, setSessionToken] = useBitwarden(bitwardenApi);
 
-  if (sessionToken === null) return <UnlockForm setSessionToken={setSessionToken} bitwardenApi={bitwardenApi} />;
+  if (state.vaultStatus === "locked") {
+    return <UnlockForm setSessionToken={setSessionToken} bitwardenApi={bitwardenApi} />;
+  }
 
-  return <ItemList bitwardenApi={bitwardenApi} sessionToken={sessionToken}/>;
+  return <ItemList bitwardenApi={bitwardenApi} sessionToken={state.sessionToken} vaultStatus={state.vaultStatus} />;
 }
 
-function ItemList(props: { bitwardenApi: Bitwarden; sessionToken: string | undefined }) {
-  const { bitwardenApi, sessionToken } = props;
+function ItemList(props: {
+  bitwardenApi: Bitwarden;
+  sessionToken: string | undefined;
+  vaultStatus: VaultStatus | undefined;
+}) {
+  const { bitwardenApi, sessionToken, vaultStatus } = props;
   const [state, setState] = useState<{ folders: Folder[]; items: Item[] }>();
 
   const folderMap: Record<string, Folder> = {};
   for (const folder of state?.folders || []) {
-    if (folder.id) folderMap[folder.id] = folder;
+    if (folder.id) {
+      folderMap[folder.id] = folder;
+    }
   }
 
   async function loadItems(sessionToken: string) {
@@ -53,12 +61,14 @@ function ItemList(props: { bitwardenApi: Bitwarden; sessionToken: string | undef
 
       setState({ items, folders });
     } catch (error) {
-      showToast(ToastStyle.Failure, "Failed to search vault", "Vault is locked");
+      showToast(ToastStyle.Failure, "Failed to search vault");
     }
   }
 
   useEffect(() => {
-    if (sessionToken) loadItems(sessionToken);
+    if (vaultStatus === "unlocked" && sessionToken) {
+      loadItems(sessionToken);
+    }
   }, [sessionToken]);
 
   return (
@@ -71,7 +81,7 @@ function ItemList(props: { bitwardenApi: Bitwarden; sessionToken: string | undef
           refreshItems={async () => {
             if (sessionToken) {
               const toast = await showToast(ToastStyle.Animated, "Syncing Items...");
-              await bitwardenApi.sync(sessionToken)
+              await bitwardenApi.sync(sessionToken);
               await loadItems(sessionToken);
               await toast.hide();
             }
@@ -82,28 +92,28 @@ function ItemList(props: { bitwardenApi: Bitwarden; sessionToken: string | undef
   );
 }
 
+function getIcon(item: Item) {
+  const iconUri = item.login?.uris?.[0]?.uri;
+  if (fetchFavicons && iconUri) return faviconUrl(64, iconUri);
+  return {
+    1: Icon.Globe,
+    2: Icon.TextDocument,
+    3: Icon.List,
+    4: Icon.Person,
+  }[item.type];
+}
+
 function ItemListItem(props: { item: Item; folder: Folder | undefined; refreshItems?: () => void }) {
   const { item, folder, refreshItems } = props;
-  const { type, name, notes, identity, login, secureNote, fields, passwordHistory, card } = item;
+  const { name, notes, identity, login, secureNote, fields, passwordHistory, card } = item;
   const accessoryIcons = [];
+
   if (folder) accessoryIcons.push(`📂 ${folder.name}`);
   if (item.favorite) accessoryIcons.push(`⭐️`);
-
   const fieldMap = Object.fromEntries(fields?.map((field) => [field.name, field.value]) || []);
   const uriMap = Object.fromEntries(
     login?.uris?.filter((uri) => uri.uri).map((uri, index) => [`uri${index + 1}`, uri.uri]) || []
   );
-
-  let icon: string | Icon | undefined;
-  if (fetchFavicons && login?.uris?.[0]?.uri?.startsWith("https"))
-    icon = `https://s2.googleusercontent.com/s2/favicons?domain_url=${login?.uris?.[0].uri}`;
-  else
-    icon = {
-      1: Icon.Globe,
-      2: Icon.TextDocument,
-      3: Icon.List,
-      4: Icon.Person,
-    }[type];
 
   const cleanItem = filterNullishPropertiesFromObject({
     name,
@@ -123,9 +133,9 @@ function ItemListItem(props: { item: Item; folder: Folder | undefined; refreshIt
     <List.Item
       id={item.id}
       title={item.name}
-      keywords={item.name.split(".")}
+      keywords={item.name.split(/\W/)}
       accessoryTitle={accessoryIcons ? accessoryIcons.join("  ") : undefined}
-      icon={icon}
+      icon={getIcon(item)}
       subtitle={item.login?.username || undefined}
       actions={
         <ActionPanel>
@@ -160,7 +170,9 @@ function ItemListItem(props: { item: Item; folder: Folder | undefined; refreshIt
               ...fieldMap,
               ...uriMap,
             }).map(([title, content], index) =>
-              content ? <CopyToClipboardAction key={index} title={titleCase(title)} content={content as string | number} /> : null
+              content ? (
+                <CopyToClipboardAction key={index} title={titleCase(title)} content={content as string | number} />
+              ) : null
             )}
           </ActionPanel.Submenu>
           <PushAction

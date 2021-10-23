@@ -1,4 +1,5 @@
 import execa from "execa";
+import { VaultStatus } from "./types";
 
 export class Bitwarden {
   private env: Record<string, string>;
@@ -27,7 +28,7 @@ export class Bitwarden {
       return sessionToken
   }
 
-  async status(sessionToken: string | undefined): Promise<"unlocked" | "locked" | "unauthenticated"> {
+  async status(sessionToken: string | undefined): Promise<VaultStatus> {
     const {stdout} = await this.exec(sessionToken ? ["status", "--session", sessionToken]: ["status"]);
     return JSON.parse(stdout).status
   }

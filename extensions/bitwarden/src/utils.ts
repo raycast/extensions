@@ -1,3 +1,6 @@
+import { Icon } from "@raycast/api";
+import { URL } from "url";
+
 export function codeBlock(content: string): string {
   return "```\n" + content + "\n```";
 }
@@ -13,6 +16,15 @@ export function filterNullishPropertiesFromObject(obj: any): any {
   }
 
   return noNullish;
+}
+
+export function faviconUrl(size: number, url: string): string {
+    try {
+      const domain = new URL(url).hostname
+      return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`
+    } catch(err) {
+      return Icon.Globe
+    }
 }
 
 export function titleCase(word: string) {
