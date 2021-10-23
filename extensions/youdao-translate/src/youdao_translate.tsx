@@ -288,7 +288,7 @@ function Main() {
   }, []);
 
   return (
-    <Form navigationTitle="Please enter what you want translated (输入内容)" actions={
+    <Form actions={
       <ActionPanel title="Translate">
         <SubmitFormAction title="Translate" onSubmit={(input: translateRequest) => {
           push(
