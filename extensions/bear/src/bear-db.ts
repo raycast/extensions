@@ -28,16 +28,25 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
   ZSFNOTETAG AS tags ON notes_to_tags.Z_14TAGS = tags.Z_PK
 WHERE
+  -- When there is a query, filter the body by that query, otherwise
+  -- ignore the query
   (
-    lower(notes.ZTITLE) like lower('%' || :query || '%')
+    lower(notes.ZTEXT) like lower('%' || :query || '%')
     OR :query = ''
   )
+  -- Ignore trashed, archived, and empty notes
   AND notes.ZARCHIVED = 0
   AND notes.ZTRASHED = 0
   AND notes.ZTEXT IS NOT NULL
 GROUP BY
   notes.ZUNIQUEIDENTIFIER
 ORDER BY
+  -- Sort title matches ahead of body matches
+  CASE WHEN (
+    lower(notes.ZTITLE) like lower('%' || :query || '%')
+    OR :query = ''
+  ) THEN 0 ELSE 1 END,
+  -- When there are multiple title matches, sort by last modified
   notes.ZMODIFICATIONDATE DESC
 LIMIT
   20
