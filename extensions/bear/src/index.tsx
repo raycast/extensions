@@ -5,7 +5,7 @@ import { Note } from "./bear-db";
 import { useBearDb } from "./hooks";
 import PreviewNote from "./preview-note";
 
-export default function main() {
+export default function SearchNotes() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [db, error] = useBearDb();
   const [notes, setNotes] = useState<Note[]>();
