@@ -1,0 +1,53 @@
+{
+  "name": "are-na",
+  "title": "Are.na",
+  "description": "interact with your are.na channels and blocks",
+  "icon": "command-icon-64px.png",
+  "author": "talor",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Are.na profile",
+      "subtitle": "display my user",
+      "description": "hello world command",
+      "mode": "view"
+    },
+    {
+      "name": "channels",
+      "title": "Go to a channel",
+      "subtitle": "navigate to a channel on are.na",
+      "description": "todo",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accesstoken",
+      "type": "textfield",
+      "required": true,
+      "title": "Are.na Access token (raycast-arena.up.railway.app)",
+      "description": "get one from https://raycast-arena.up.railway.app/",
+      "placeholder": "xxxxxxxxxxxxxxxx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "are.na": "^0.1.5",
+    "node-fetch": "^3.0.0",
+    "react-async": "^10.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
