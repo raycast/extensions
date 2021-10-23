@@ -1,14 +1,32 @@
-import { List, ActionPanel, OpenInBrowserAction, environment } from '@raycast/api';
+import { List, ActionPanel, OpenInBrowserAction, environment, OpenAction } from '@raycast/api';
 import { useState, useEffect, useCallback } from 'react';
 import os from 'os';
 import path from 'path';
+import { execSync } from 'child_process';
 import { promisify } from 'util';
 import { readFile } from 'fs';
 import _ from 'lodash';
 import initSqlJs, { Database, ParamsObject } from 'sql.js';
+import execa from 'execa';
+
+// TODO
+// - add try/catch + instructions if missing permissions
+// - current device on top
+// - position
+// - (?) show active tab
 
 const asyncReadFile = promisify(readFile);
+
 const cloudTabsDbPath = `${os.homedir()}/Library/Safari/CloudTabs.db`;
+
+const getCurrentDeviceName = (): string => {
+  try {
+    return execa.commandSync('/usr/sbin/scutil --get ComputerName').stdout;
+  } catch (err) {
+    console.error(err);
+    return '';
+  }
+};
 
 const loadDb = async (): Promise<Database> => {
   const fileBuffer = await asyncReadFile(cloudTabsDbPath);
@@ -31,12 +49,19 @@ const executeQuery = async (db: Database, query: string): Promise<ParamsObject[]
 };
 
 interface Tab {
-  tab_uuid: string;
-  device_uuid: string;
-  device_name: string;
+  uuid: string;
   title: string;
   url: string;
   position: string;
+  device_uuid: string;
+  device_name: string;
+}
+
+interface Device {
+  uuid: string;
+  name: string;
+  is_current: boolean;
+  tabs: Tab[];
 }
 
 const formatTitle = (title: string) => _.truncate(title, { length: 75 });
@@ -47,38 +72,54 @@ const getFaviconUrl = (url: string) => {
 };
 
 export default function Command() {
-  const [tabs, setTabs] = useState<Tab[]>();
+  const [devices, setDevices] = useState<Device[]>();
 
-  const fetchTabs = useCallback(async () => {
+  const fetchDevices = useCallback(async () => {
     const db = await loadDb();
+    const currentDeviceName = getCurrentDeviceName();
     const tabs = (await executeQuery(
       db,
-      `SELECT t.tab_uuid, d.device_uuid, d.device_name, t.title, t.url, t.position
+      `SELECT t.tab_uuid as uuid, d.device_uuid, d.device_name, t.title, t.url, t.position
        FROM cloud_tabs t
        INNER JOIN cloud_tab_devices d ON t.device_uuid = d.device_uuid`
     )) as unknown as Tab[];
 
-    setTabs(tabs);
+    const devices = _.chain(tabs)
+      .groupBy('device_uuid')
+      .reduce((devices: Device[], tabs: Tab[], device_uuid: string) => {
+        devices.push({
+          uuid: device_uuid,
+          name: tabs[0].device_name,
+          is_current: currentDeviceName === tabs[0].device_name,
+          tabs,
+        });
+
+        return devices;
+      }, [])
+      .orderBy('is_current', 'desc')
+      .value();
+
+    setDevices(devices);
   }, []);
 
   useEffect(() => {
-    fetchTabs();
-  }, [fetchTabs]);
-
-  const groupedTabs = _.groupBy(tabs, 'device_uuid');
+    fetchDevices();
+  }, [fetchDevices]);
 
   return (
-    <List isLoading={!tabs}>
-      {_.map(groupedTabs, (tabs: Tab[], deviceId: string) => (
-        <List.Section key={deviceId} title={tabs[0].device_name}>
-          {_.map(tabs, (tab: Tab) => (
+    <List isLoading={!devices}>
+      {_.map(devices, (device: Device) => (
+        <List.Section key={device.uuid} title={device.name}>
+          {_.map(device.tabs, (tab: Tab) => (
             <List.Item
-              key={tab.tab_uuid}
+              key={tab.uuid}
               title={formatTitle(tab.title)}
               subtitle={getProtocolLessUrl(tab.url)}
+              keywords={[getProtocolLessUrl(tab.url)]}
               icon={getFaviconUrl(tab.url)}
               actions={
                 <ActionPanel>
+                  <OpenAction title="Open in Safari" target={tab.url} application="Safari" />
                   <OpenInBrowserAction url={tab.url} />
                   {environment.isDevelopment && <ActionPanel.Item title="Log" onAction={() => console.log(tab)} />}
                 </ActionPanel>
