@@ -9,11 +9,11 @@ import {
   closeMainWindow,
   getPreferenceValues,
 } from "@raycast/api";
-import got from "got";
-import { Tweet } from "./types";
+import Twitter from "./twitter";
+import { Preferences, Tweet } from "./types";
 
 export default function Command() {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
 
   async function handleSubmit({ tweet }: Tweet) {
     if (!tweet) {
@@ -24,11 +24,10 @@ export default function Command() {
     await toast.show();
 
     try {
-      const { body } = await got.post("https://daily-actions.vercel.app/api", {
-        json: { tweet, preferences },
-        responseType: "json",
-      });
-      await copyTextToClipboard((body as Tweet).tweet);
+      const twitter = new Twitter(preferences);
+      const { handle, id } = await twitter.tweet(tweet);
+      await copyTextToClipboard(`https://twitter.com/${handle}/status/${id}`);
+
       toast.style = ToastStyle.Success;
       toast.title = "Tweet sent";
       toast.message = "Copied link to clipboard";
