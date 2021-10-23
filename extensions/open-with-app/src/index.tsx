@@ -34,18 +34,18 @@ export default function ApplicationsList() {
 }
 
 async function getFinderSelection():Promise<string[]> {
-  // The applescript below returns a string with a list
-  // of the items selected in Finder separated by commas
+  // The applescript below returns a string with a list of the items
+  // selected in Finder separated by return characters
   const applescript = `
   tell application "Finder"
     set theItems to selection
   end tell
 
-  set itemsPaths to {}
+  set itemsPaths to ""
 
   repeat with itemRef in theItems
     set theItem to POSIX path of (itemRef as string)
-    set end of itemsPaths to the theItem
+    set itemsPaths to itemsPaths & theItem & return
   end repeat
 
   return itemsPaths
@@ -55,7 +55,7 @@ async function getFinderSelection():Promise<string[]> {
 
   return (response === '')
     ? []
-    : response.split(',').map((item) => item.trim());
+    : response.split('\r').map((item) => item.replace(/"/g, '\\"'));
 }
 
 function ApplicationsListItem(props: { application: Application }) {
