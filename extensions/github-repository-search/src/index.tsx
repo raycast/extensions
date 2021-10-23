@@ -74,6 +74,12 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
     <ActionPanel title={props.repository.nameWithOwner}>
       <ActionPanel.Section>
         <OpenInBrowserAction url={props.repository.url} onOpen={() => props.onVisit(props.repository)} />
+        <OpenInBrowserAction
+          icon={{ source: "github-dev.png", tintColor: Color.PrimaryText }}
+          title="Open in Web Editor"
+          url={props.repository.url.replace("https://github.com", "https://github.dev")}
+          onOpen={() => props.onVisit(props.repository)}
+        />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <OpenInBrowserAction
