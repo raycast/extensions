@@ -19,7 +19,7 @@ import { useHAStates } from "../hooks";
 
 export const ha = createHomeAssistantClient();
 
-export function ShowAttributesAction(props: { state: State }) {
+export function ShowAttributesAction(props: { state: State }): JSX.Element | null {
   if (props.state.attributes) {
     return (
       <PushAction
@@ -59,9 +59,8 @@ const deviceClassIconSource: Record<string, string> = {
 function getDeviceClassIcon(state: State): ImageLike | undefined {
   if (state.attributes.device_class) {
     const dc = state.attributes.device_class;
-    const source2 = deviceClassIconSource[dc] || "entity.png";
-    console.log(source2);
-    return { source: source2, tintColor: Color.PrimaryText };
+    const src = deviceClassIconSource[dc] || "entity.png";
+    return { source: src, tintColor: Color.PrimaryText };
   } else {
     return undefined;
   }
@@ -92,7 +91,7 @@ function getIcon(state: State): ImageLike | undefined {
   }
 }
 
-export function StatesList(props: { domain: string }) {
+export function StatesList(props: { domain: string }): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useSearch(searchText, props.domain, allStates);
@@ -116,7 +115,9 @@ export function StatesList(props: { domain: string }) {
       } else if (e.startsWith("climate") && state.attributes.hasOwnProperty("current_temperature")) {
         return `${state.attributes.current_temperature} | `;
       }
-    } catch (e: any) {}
+    } catch (e) {
+      // ignore
+    }
     return "";
   };
 
@@ -136,7 +137,7 @@ export function StatesList(props: { domain: string }) {
   );
 }
 
-export function StateActionPanel(props: { state: State }) {
+export function StateActionPanel(props: { state: State }): JSX.Element {
   const state = props.state;
   const domain = props.state.entity_id.split(".")[0];
   const entityID = props.state.entity_id;
@@ -268,7 +269,7 @@ export function StateActionPanel(props: { state: State }) {
       const upperTemp = currentTemp ? currentTemp + 0.5 : undefined;
       const lowerTemp = currentTemp ? currentTemp - 0.5 : undefined;
 
-      let temps: number[] = [];
+      const temps: number[] = [];
       for (let i = 26; i > 16; i--) {
         temps.push(i);
       }
