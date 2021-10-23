@@ -35,46 +35,47 @@
       "mode": "view"
     }
   ],
-  "preferences" : [
+  "preferences": [
     {
-      "name" : "appkey",
-      "type" : "password",
-      "title" : "API-key",
-      "placeholder" : "",
-      "required" : true,
-      "default" : "",
-      "description" : "Twitter API API-key"
+      "name": "appkey",
+      "type": "password",
+      "title": "API-key",
+      "placeholder": "",
+      "required": true,
+      "default": "",
+      "description": "Twitter API API-key"
     },
     {
-      "name" : "appsecret",
-      "type" : "password",
-      "title" : "App secret",
-      "placeholder" : "",
-      "required" : true,
-      "default" : "",
-      "description" : "Twitter API App secret"
+      "name": "appsecret",
+      "type": "password",
+      "title": "App secret",
+      "placeholder": "",
+      "required": true,
+      "default": "",
+      "description": "Twitter API App secret"
     },
     {
-      "name" : "accesstoken",
-      "type" : "password",
-      "title" : "Access token",
-      "placeholder" : "",
-      "required" : true,
-      "default" : "",
-      "description" : "Twitter API access token"
+      "name": "accesstoken",
+      "type": "password",
+      "title": "Access token",
+      "placeholder": "",
+      "required": true,
+      "default": "",
+      "description": "Twitter API access token"
     },
     {
-      "name" : "accesssecret",
-      "type" : "password",
-      "title" : "Access secret",
-      "placeholder" : "",
-      "required" : true,
-      "default" : "",
-      "description" : "Twitter API access secret"
+      "name": "accesssecret",
+      "type": "password",
+      "title": "Access secret",
+      "placeholder": "",
+      "required": true,
+      "default": "",
+      "description": "Twitter API access secret"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
+    "millify": "^4.0.0",
     "node-fetch": "^3.0.0",
     "twitter-api-v2": "^1.6.1"
   },

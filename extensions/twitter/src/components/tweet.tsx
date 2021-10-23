@@ -1,4 +1,5 @@
 import { ActionPanel, Detail, Image, ImageMask, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import millify from "millify";
 import { TweetV1 } from "twitter-api-v2";
 import { Fetcher, getPhotoUrlFromTweet, refreshTweet, useRefresher } from "../twitterapi";
 import { padStart } from "../utils";
@@ -24,9 +25,11 @@ export function TweetListItem(props: {
   maxRTDigits?: number;
   maxCommentDigits?: number;
   maxFavDigits?: number;
+  millifyState?: boolean;
 }) {
   const t = props.tweet;
   const fetcher = props.fetcher;
+  const millifyState = props.millifyState !== undefined ? props.millifyState : true;
 
   const maxLength = 70;
   const textRaw = t.full_text ? t.full_text.trim() : "";
@@ -40,7 +43,13 @@ export function TweetListItem(props: {
   const ownFavoriteCount = t.favorited && textRaw.startsWith("RT @") ? 1 : 0;
 
   const hasImage = getPhotoUrlFromTweet(t) ? true : false;
-  const p = padStart;
+  const p = (num: number | undefined, length: number): string => {
+    if (num === undefined) {
+      return "0";
+    }
+    const text = millifyState ? millify(num) : `${num}`;
+    return padStart(text, length);
+  };
   const minPadding = 1;
   const maxPadding = 3;
   const calcPadding = (num: number | undefined): number => {
@@ -155,14 +164,21 @@ export function TweetList(props: {
   tweets: TweetV1[] | undefined;
   isLoading?: boolean | undefined;
   fetcher?: Fetcher | undefined;
+  millifyState?: boolean;
 }) {
   const tweets = props.tweets;
+  const millifyState = props.millifyState !== undefined ? props.millifyState : true;
   let maxFavDigits = 1;
   let maxRTDigits = 1;
   let maxCDigits = 1;
   const getStringLength = (num: number | undefined): number => {
-    return num === undefined ? 0 : `${num}`.length;
+    if (num === undefined) {
+      return 0;
+    }
+    const text = millifyState ? millify(num) : `${num}`;
+    return text.length;
   };
+
   if (tweets) {
     for (const t of tweets) {
       const lenF = getStringLength(t.favorite_count);
@@ -189,6 +205,7 @@ export function TweetList(props: {
           maxCommentDigits={maxCDigits}
           maxFavDigits={maxFavDigits}
           maxRTDigits={maxRTDigits}
+          millifyState={millifyState}
         />
       ))}
     </List>
