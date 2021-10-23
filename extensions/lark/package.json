@@ -1,7 +1,7 @@
 {
   "name": "lark",
   "title": "Lark Documents",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Quickly search documents from Feishu/Lark.",
   "icon": "logo.png",
   "author": "tmk",

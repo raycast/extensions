@@ -1,6 +1,7 @@
 import { showToast, setLocalStorageItem, getLocalStorageItem, ToastStyle } from '@raycast/api';
 import axios, { AxiosResponse } from 'axios';
-import { getPreference } from '../utils/raycast';
+import { stringify } from 'querystring';
+import { API_DOMAIN, INTERNAL_API_DOMAIN, preference } from '../utils/config';
 import { trimTagsAndDecodeEntities } from '../utils/string';
 
 interface LarkSpaceResponse<D = unknown> {
@@ -137,14 +138,21 @@ export interface SearchDocsResponse {
   };
 }
 
-const preference = getPreference();
-
 const instance = axios.create({
-  baseURL: `https://${preference.subdomain}.${preference.type === 'feishu' ? 'feishu.cn' : 'larksuite.com'}/space/api/`,
+  baseURL: `${API_DOMAIN}/space/api/`,
   headers: {
     Cookie: `session=${preference.spaceSession}`,
   },
   validateStatus: () => true,
+});
+
+instance.interceptors.request.use((config) => {
+  config.headers = {
+    ...config.headers,
+    Referer: API_DOMAIN,
+  };
+
+  return config;
 });
 
 instance.interceptors.response.use((response) => {
@@ -171,7 +179,7 @@ export async function fetchRecentList(length = preference.recentListCount): Prom
   } catch (error) {
     console.error(error);
 
-    let errorMessage = 'Could not load recent list';
+    let errorMessage = 'Could not load recent documents';
     if (error instanceof Error) {
       errorMessage = `${errorMessage} (${error.message})`;
     }
@@ -213,7 +221,7 @@ export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsRe
   } catch (error) {
     console.error(error);
 
-    let errorMessage = 'Could not search docs';
+    let errorMessage = 'Could not search documents';
     if (error instanceof Error) {
       errorMessage = `${errorMessage} (${error.message})`;
     }
@@ -247,4 +255,27 @@ export async function getRecentListCache(): Promise<RecentListResponse | null> {
     return JSON.parse(cache) as RecentListResponse;
   }
   return null;
+}
+
+export async function removeRecentDocument(objToken: string): Promise<boolean> {
+  try {
+    await instance.post(
+      `${INTERNAL_API_DOMAIN}/space/api/explorer/recent/delete/`,
+      stringify({
+        obj_token: objToken,
+      })
+    );
+
+    return true;
+  } catch (error) {
+    console.error(error);
+
+    let errorMessage = 'Could not remove the document from recent list';
+    if (error instanceof Error) {
+      errorMessage = `${errorMessage} (${error.message})`;
+    }
+
+    showToast(ToastStyle.Failure, errorMessage);
+    return false;
+  }
 }
