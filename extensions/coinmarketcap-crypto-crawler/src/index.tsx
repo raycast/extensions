@@ -110,7 +110,7 @@ export default function ArticleList() {
 
       {
         fuzzyResult.length === 0 ?
-          <List.Item title="" /> :
+          null:
           fuzzyResult.map((result: FuzzySortResult) => {
             const { name, slug } = result.obj
 
@@ -121,7 +121,7 @@ export default function ArticleList() {
                 icon={Icon.Star}
                 actions={
                   <ActionPanel>
-                    <ActionPanel.Item title="Pop" onAction={() => {
+                    <ActionPanel.Item title="Show Details" onAction={() => {
                       onSelectCrypto(slug).then(({ currencyPrice = '', priceDiff = '' }) => {
 
                         push(
@@ -156,7 +156,6 @@ function CryptoDetail({ currencyPrice, priceDiff, name, slug }: CryptoInfo) {
       markdown={`## ${currencyPrice} \n ### ${priceDiff}`}
       actions={
         <ActionPanel>
-          <ActionPanel.Item title="Pop" onAction={pop} />
           <OpenInBrowserAction url={`${BASE_URL}${slug}`} />
         </ActionPanel>
       }
