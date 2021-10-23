@@ -34,15 +34,6 @@
   },
   "preferences": [
     {
-      "name": "accessToken",
-      "type": "password",
-      "required": true,
-      "title": "Access Token",
-      "description": "Your GitHub Access Token",
-      "link": "https://github.com/settings/tokens",
-      "placeholder": "Enter your GitHub access token"
-    },
-    {
       "name": "username",
       "type": "textfield",
       "required": true,
@@ -50,6 +41,15 @@
       "description": "Your GitHub username",
       "link": "",
       "placeholder": "Enter your GitHub username"
+    },
+    {
+      "name": "accessToken",
+      "type": "password",
+      "required": true,
+      "title": "Access Token",
+      "description": "Your GitHub Access Token",
+      "link": "https://github.com/settings/tokens",
+      "placeholder": "Enter your GitHub access token"
     }
   ]
 }
