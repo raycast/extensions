@@ -22,6 +22,27 @@ enum TorrentStatus {
   Seeding = 6,
 }
 
+type Torrent = {
+  id: number;
+  torrentFile: string;
+  fileName: string;
+  comment: string;
+  eta: number;
+  percentDone: number;
+  status: TorrentStatus;
+  rateDownload: number;
+  rateUpload: number;
+  files: { name: string }[];
+};
+
+type SessionStats = {
+  activeTorrentCount: number;
+  downloadSpeed: number;
+  uploadSpeed: number;
+  pausedTorrentCount: number;
+  torrentCount: number;
+};
+
 const preferences = getPreferenceValues();
 
 const statusToLabel = (status: TorrentStatus, percentDone: number) => {
@@ -88,7 +109,6 @@ const statusIconSource = (status: TorrentStatus, percentDone: number): string =>
 };
 
 const formatEta = (eta: number): string => {
-  console.log(eta);
   switch (eta) {
     case -1:
       return "Unavailable";
@@ -141,18 +161,21 @@ const startAllTorrents = async (transmission: Transmission) => {
 export default function TorrentList() {
   const transmission = useMemo(() => createClient(), []);
   const [torrents, setTorrents] = useState<Torrent[]>([]);
+  const [sessionStats, setSessionStats] = useState<SessionStats | null>(null);
   const [didLoad, setDidLoad] = useState(false);
 
-  const updateTorrents = useCallback(async () => {
+  const updateData = useCallback(async () => {
     const torrents = await fetchTorrents(transmission);
+    const sessionStats = await transmission.sessionStats();
     setTorrents(torrents);
+    setSessionStats(sessionStats);
   }, [transmission]);
 
   useEffect(() => {
-    updateTorrents().finally(() => setDidLoad(true));
+    updateData().finally(() => setDidLoad(true));
   }, []);
   useInterval(() => {
-    updateTorrents();
+    updateData();
   }, 5000);
 
   const sortedTorrents = useMemo(() => torrents.sort(sortTorrents), [torrents]);
@@ -179,29 +202,30 @@ export default function TorrentList() {
           rateDownload={paddedRateDownloads[index]}
           rateUpload={paddedRateUploads[index]}
           percentDone={paddedPercentDones[index]}
+          sessionStats={sessionStats}
           onStop={async (torrent) => {
             await transmission.stop([torrent.id]);
-            await updateTorrents();
+            await updateData();
             showToast(ToastStyle.Success, `Torrent ${torrent.fileName} stopped`);
           }}
           onStart={async (torrent) => {
             await transmission.start([torrent.id]);
-            await updateTorrents();
+            await updateData();
             showToast(ToastStyle.Success, `Torrent ${torrent.fileName} started`);
           }}
           onRemove={async (torrent, deleteLocalData) => {
             await transmission.remove([torrent.id], deleteLocalData);
-            await updateTorrents();
+            await updateData();
             showToast(ToastStyle.Success, `Torrent ${torrent.fileName} deleted`);
           }}
           onStartAll={async () => {
             await startAllTorrents(transmission);
-            await updateTorrents();
+            await updateData();
             showToast(ToastStyle.Success, `All torrents started`);
           }}
           onStopAll={async () => {
             await stopAllTorrents(transmission);
-            await updateTorrents();
+            await updateData();
             showToast(ToastStyle.Success, `All torrents stopped`);
           }}
         />
@@ -220,6 +244,7 @@ function TorrentListItem({
   rateDownload,
   rateUpload,
   percentDone,
+  sessionStats,
 }: {
   torrent: Torrent;
   onStop: (torrent: Torrent) => Promise<void>;
@@ -230,7 +255,11 @@ function TorrentListItem({
   rateDownload: string;
   rateUpload: string;
   percentDone: string;
+  sessionStats: SessionStats | null;
 }) {
+  const totalRateDownload = sessionStats != null ? `${prettyBytes(sessionStats.downloadSpeed)}/s` : "N/A";
+  const totalRateUpload = sessionStats != null ? `${prettyBytes(sessionStats.uploadSpeed)}/s` : "N/A";
+
   return (
     <List.Item
       id={String(torrent.id)}
@@ -240,7 +269,7 @@ function TorrentListItem({
         source: statusIconSource(torrent.status, torrent.percentDone),
         tintColor: statusIconColor(torrent.status),
       }}
-      accessoryTitle={[`⬇️ ${rateDownload}`, " - ", `⬆️ ${rateUpload}`, " - ", percentDone].join(" ")}
+      accessoryTitle={[`↓ ${rateDownload}`, " - ", `↑ ${rateUpload}`, " - ", percentDone].join(" ")}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={`Selected Torrent (ETA: ${formatStatus(torrent)})`}>
@@ -253,7 +282,7 @@ function TorrentListItem({
               <ActionPanel.Item title="Delete Local Data" onAction={() => onRemove(torrent, true)} />
             </ActionPanel.Submenu>
           </ActionPanel.Section>
-          <ActionPanel.Section title="All Torrents">
+          <ActionPanel.Section title={`All Torrents (↓ ${totalRateDownload} - ↑ ${totalRateUpload})`}>
             <ActionPanel.Item title="Start All" onAction={() => onStartAll(torrent)} />
             <ActionPanel.Item title="Stop All" onAction={() => onStopAll(torrent)} />
           </ActionPanel.Section>
@@ -277,16 +306,3 @@ async function fetchTorrents(transmission: Transmission): Promise<Torrent[]> {
     return Promise.resolve([]);
   }
 }
-
-type Torrent = {
-  id: number;
-  torrentFile: string;
-  fileName: string;
-  comment: string;
-  eta: number;
-  percentDone: number;
-  status: TorrentStatus;
-  rateDownload: number;
-  rateUpload: number;
-  files: { name: string }[];
-};
