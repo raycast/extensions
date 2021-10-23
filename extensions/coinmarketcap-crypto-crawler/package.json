@@ -8,9 +8,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "coin",
-      "subtitle": "",
-      "description": "get coin current price.",
+      "title": "Search Crypto",
+      "subtitle": "CoinMarketCap",
+      "description": "Search for Coin Prices",
       "mode": "view"
     }
   ],
