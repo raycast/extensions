@@ -71,7 +71,7 @@ export default function command() {
     toast.show();
     // Execute download command
     console.log("Downloading with arguments: ", args);
-    const videoDownload = spawn("wrong-dl", args);
+    const videoDownload = spawn("youtube-dl", args);
     videoDownload.stdout.on("data", (data) => {
       const stdout: string = data.toString();
       if (stdout.includes("[download]")) {
