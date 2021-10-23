@@ -1,6 +1,7 @@
 import { ActionPanel, Detail, Image, ImageMask, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
 import { Fetcher, getPhotoUrlFromTweet, refreshTweet, useRefresher } from "../twitterapi";
+import { padStart } from "../utils";
 import {
   DeleteTweetAction,
   LikeAction,
@@ -17,7 +18,13 @@ function getTweetUrl(tweet: TweetV1): string {
   return `https://twitter.com/${tweet.user.screen_name}/status/${tweet.id_str}`;
 }
 
-export function TweetListItem(props: { tweet: TweetV1; fetcher?: Fetcher }) {
+export function TweetListItem(props: {
+  tweet: TweetV1;
+  fetcher?: Fetcher;
+  maxRTDigits?: number;
+  maxCommentDigits?: number;
+  maxFavDigits?: number;
+}) {
   const t = props.tweet;
   const fetcher = props.fetcher;
 
@@ -33,7 +40,29 @@ export function TweetListItem(props: { tweet: TweetV1; fetcher?: Fetcher }) {
   const ownFavoriteCount = t.favorited && textRaw.startsWith("RT @") ? 1 : 0;
 
   const hasImage = getPhotoUrlFromTweet(t) ? true : false;
-  let states = [`💬 ${t.reply_count || 0}`, `🔁 ${t.retweet_count}`, `❤️ ${t.favorite_count + ownFavoriteCount}`];
+  const p = padStart;
+  const minPadding = 1;
+  const maxPadding = 3;
+  const calcPadding = (num: number | undefined): number => {
+    if (num === undefined) {
+      return minPadding;
+    }
+    if (num < minPadding) {
+      return minPadding;
+    }
+    if (num > maxPadding) {
+      return maxPadding;
+    }
+    return num;
+  };
+  const maxReplyDigits = calcPadding(props.maxCommentDigits);
+  const maxRTDigits = calcPadding(props.maxRTDigits);
+  const maxFavDigits = calcPadding(props.maxFavDigits);
+  let states = [
+    `💬 ${p(t.reply_count || 0, maxReplyDigits)}`,
+    `🔁 ${p(t.retweet_count, maxRTDigits)}`,
+    `❤️ ${p(t.favorite_count + ownFavoriteCount, maxFavDigits)}`,
+  ];
   if (hasImage) {
     states = ["🖼️", ...states];
   }
@@ -119,5 +148,49 @@ export function TweetDetail(props: { tweet: TweetV1 }) {
         </ActionPanel>
       }
     />
+  );
+}
+
+export function TweetList(props: {
+  tweets: TweetV1[] | undefined;
+  isLoading?: boolean | undefined;
+  fetcher?: Fetcher | undefined;
+}) {
+  const tweets = props.tweets;
+  let maxFavDigits = 1;
+  let maxRTDigits = 1;
+  let maxCDigits = 1;
+  const getStringLength = (num: number | undefined): number => {
+    return num === undefined ? 0 : `${num}`.length;
+  };
+  if (tweets) {
+    for (const t of tweets) {
+      const lenF = getStringLength(t.favorite_count);
+      if (lenF > maxFavDigits) {
+        maxFavDigits = lenF;
+      }
+      const lenRT = getStringLength(t.retweet_count);
+      if (lenRT > maxRTDigits) {
+        maxRTDigits = lenRT;
+      }
+      const lenC = getStringLength(t.reply_count);
+      if (lenC > maxCDigits) {
+        maxCDigits = lenC;
+      }
+    }
+  }
+  return (
+    <List isLoading={props.isLoading} searchBarPlaceholder="Filter Tweets by name...">
+      {tweets?.map((tweet) => (
+        <TweetListItem
+          key={tweet.id_str}
+          tweet={tweet}
+          fetcher={props.fetcher}
+          maxCommentDigits={maxCDigits}
+          maxFavDigits={maxFavDigits}
+          maxRTDigits={maxRTDigits}
+        />
+      ))}
+    </List>
   );
 }

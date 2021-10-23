@@ -1,6 +1,6 @@
 import { List, showToast, ToastStyle } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
-import { TweetListItem } from "../components/tweet";
+import { TweetList } from "../components/tweet";
 import { refreshTweets, twitterClient, useRefresher } from "../twitterapi";
 
 export default function UserTweetList(props: { username: string }) {
@@ -13,13 +13,7 @@ export default function UserTweetList(props: { username: string }) {
   if (error) {
     showToast(ToastStyle.Failure, "Error", error);
   }
-  return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter Tweets by name...">
-      {data?.map((tweet) => (
-        <TweetListItem key={tweet.id_str} tweet={tweet} fetcher={fetcher} />
-      ))}
-    </List>
-  );
+  return <TweetList isLoading={isLoading} tweets={data} fetcher={fetcher} />;
 }
 
 async function getTweets(username: string): Promise<TweetV1[]> {
