@@ -13,7 +13,7 @@ export interface Note {
 }
 
 const BEAR_DB_PATH = homedir() + '/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite';
-const BEAR_EPOCH = 978325200; // Start of 2001 as a timestamp
+const BEAR_EPOCH = 978307200; // Start of 2001 as a timestamp
 const SEARCH_NOTES_QUERY = `
 SELECT
   notes.ZUNIQUEIDENTIFIER AS id,

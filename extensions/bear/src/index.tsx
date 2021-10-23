@@ -1,6 +1,6 @@
 import { ActionPanel, List, OpenAction, PushAction, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { formatDistance } from "date-fns";
+import { formatDistanceToNowStrict } from "date-fns";
 import { Note } from "./bear-db";
 import { useBearDb } from "./hooks";
 import PreviewNote from "./preview-note";
@@ -33,7 +33,7 @@ export default function SearchNotes() {
               <PushAction title="Show Note Preview" target={<PreviewNote note={note} />} />
             </ActionPanel>
           }
-          accessoryTitle={`modified ${formatDistance(note.modifiedAt, new Date(), { addSuffix: true })}`}
+          accessoryTitle={`modified ${formatDistanceToNowStrict(note.modifiedAt, { addSuffix: true })}`}
         />
       ))}
     </List>
