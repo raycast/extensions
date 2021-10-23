@@ -15,8 +15,40 @@ import { useCallback, useEffect, useState } from "react";
 import isEmpty from "lodash.isempty";
 import uniqWith from "lodash.uniqwith";
 import useConfig from "./useConfig";
-import { fetcher, isInProgress } from "./utils";
+import { fetcher, isInProgress, showElapsedTime } from "./utils";
 import { TimeEntry, Project } from "./types";
+
+function useClock(entry: TimeEntry) {
+  const [time, setTime] = useState(showElapsedTime(entry));
+
+  useEffect(() => {
+    const interval = setInterval(() => setTime(showElapsedTime(entry)), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return time;
+}
+
+function ItemInProgress({ entry, updateTimeEntries }: { entry: TimeEntry; updateTimeEntries: () => void }) {
+  const time = useClock(entry);
+
+  return (
+    <List.Item
+      id={entry.id}
+      title={entry.project?.clientName || "No Client"}
+      subtitle={`${entry.description}`}
+      accessoryTitle={`${time}  -  ${entry.project?.name}`}
+      icon={{ source: Icon.Clock, tintColor: entry.project?.color }}
+      keywords={[...entry.description.split(" "), ...(entry.project?.name.split(" ") ?? [])]}
+      accessoryIcon={{ source: Icon.Dot, tintColor: entry.project?.color }}
+      actions={
+        <ActionPanel>
+          <ActionPanelItem title="Stop Timer" onAction={() => stopCurrentTimer().then(() => updateTimeEntries())} />
+        </ActionPanel>
+      }
+    />
+  );
+}
 
 export default function Main() {
   const { config, isValidToken, setIsValidToken } = useConfig();
@@ -89,30 +121,32 @@ export default function Main() {
             />
           </List.Section>
           <List.Section title="Latest entries">
-            {entries.map((entry) => (
-              <List.Item
-                id={entry.id}
-                key={entry.id}
-                title={entry.project?.clientName || "No Client"}
-                subtitle={entry.description}
-                accessoryTitle={entry.project?.name}
-                icon={{ source: isInProgress(entry) ? Icon.Clock : Icon.Circle, tintColor: entry.project?.color }}
-                keywords={[...entry.description.split(" "), ...(entry.project?.name.split(" ") ?? [])]}
-                accessoryIcon={{ source: Icon.Dot, tintColor: entry.project?.color }}
-                actions={
-                  <ActionPanel>
-                    <ActionPanelItem
-                      title={isInProgress(entry) ? "Stop Timer" : "Start Timer"}
-                      onAction={() => {
-                        isInProgress(entry)
-                          ? stopCurrentTimer().then(() => updateTimeEntries())
-                          : addNewTimeEntry(entry.description, entry.projectId).then(() => updateTimeEntries());
-                      }}
-                    />
-                  </ActionPanel>
-                }
-              />
-            ))}
+            {entries.map((entry) =>
+              isInProgress(entry) ? (
+                <ItemInProgress key={entry.id} entry={entry} updateTimeEntries={updateTimeEntries} />
+              ) : (
+                <List.Item
+                  id={entry.id}
+                  key={entry.id}
+                  title={entry.project?.clientName || "No Client"}
+                  subtitle={entry.description}
+                  accessoryTitle={entry.project?.name}
+                  icon={{ source: Icon.Circle, tintColor: entry.project?.color }}
+                  keywords={[...entry.description.split(" "), ...(entry.project?.name.split(" ") ?? [])]}
+                  accessoryIcon={{ source: Icon.Dot, tintColor: entry.project?.color }}
+                  actions={
+                    <ActionPanel>
+                      <ActionPanelItem
+                        title="Start Timer"
+                        onAction={() => {
+                          addNewTimeEntry(entry.description, entry.projectId).then(() => updateTimeEntries());
+                        }}
+                      />
+                    </ActionPanel>
+                  }
+                />
+              )
+            )}
           </List.Section>
         </>
       )}
