@@ -20,7 +20,7 @@
       "type": "textfield",
       "required": true,
       "title": "APP Key",
-      "description": "Key of your Youdao Translate APP code",
+      "description": "You can get Youdao Translate APP code at https://ai.youdao.com/console/",
       "placeholder": "Youdao Translate APP code"
     },
     {
