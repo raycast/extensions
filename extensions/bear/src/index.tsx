@@ -20,7 +20,7 @@ export default function main() {
   }
 
   return (
-    <List navigationTitle="Search Bear notes" isLoading={!db} onSearchTextChange={setSearchQuery}>
+    <List navigationTitle="Search Bear Notes" isLoading={!db} onSearchTextChange={setSearchQuery}>
       {notes?.map((note) => (
         <List.Item
           key={note.id}
@@ -29,8 +29,8 @@ export default function main() {
           icon={{ source: "command-icon.png" }}
           actions={
             <ActionPanel>
-              <OpenAction title="Open note in Bear" target={`bear://x-callback-url/open-note?id=${note.id}`} />
-              <PushAction title="Show note preview" target={<PreviewNote note={note} />} />
+              <OpenAction title="Open Note in Bear" target={`bear://x-callback-url/open-note?id=${note.id}`} />
+              <PushAction title="Show Note Preview" target={<PreviewNote note={note} />} />
             </ActionPanel>
           }
           accessoryTitle={`modified ${formatDistance(note.modifiedAt, new Date(), { addSuffix: true })}`}

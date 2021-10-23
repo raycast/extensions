@@ -8,7 +8,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search notes",
+      "title": "Search Notes",
       "subtitle": "Bear",
       "description": "Search and open Bear notes",
       "mode": "view"
