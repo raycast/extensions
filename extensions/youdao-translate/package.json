@@ -21,7 +21,7 @@
       "required": true,
       "title": "APP Key",
       "description": "Key of your Youdao Translate APP code",
-      "placeholder": "Enter your Youdao Translate APP code. (you can find it in https://ai.youdao.com/console/)"
+      "placeholder": "Youdao Translate APP code"
     },
     {
       "name": "app_secret",
