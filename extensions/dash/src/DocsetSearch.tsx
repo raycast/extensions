@@ -1,4 +1,4 @@
-import { List, ActionPanel, ActionPanelItem, closeMainWindow } from "@raycast/api";
+import { List, ActionPanel, ActionPanelItem, closeMainWindow, OpenAction } from "@raycast/api";
 import { exec, execSync } from "child_process";
 import { useState, useEffect } from "react";
 import { getDashAppPath } from "./util/dashApp";
@@ -65,7 +65,7 @@ export default function DocsetSearch({ docset }: { docset: Docset }) {
       searchBarPlaceholder={`Search in ${docset.docsetName}`}
       onSearchTextChange={setSearchText}
     >
-      {results.map((result) => (
+      {results.map((result, i) => (
         <List.Item
           key={result["@_uid"]}
           title={result.title}
@@ -73,14 +73,7 @@ export default function DocsetSearch({ docset }: { docset: Docset }) {
           icon={result.icon}
           actions={
             <ActionPanel>
-              <ActionPanelItem
-                id="openDocSet"
-                title="Open in Dash"
-                onAction={() => {
-                  execSync(`open dash://${docset.docsetKeyword}:"${result.title}"`);
-                  closeMainWindow({ clearRootSearch: true });
-                }}
-              />
+              <OpenAction title="Open in Dash" target={`dash-workflow-callback://${i}`} />
             </ActionPanel>
           }
         />
