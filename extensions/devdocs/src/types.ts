@@ -10,8 +10,8 @@ export interface Doc {
 }
 
 export interface Links {
-    home: string;
-    code: string;
+    home?: string;
+    code?: string;
 }
 
 export interface Index {

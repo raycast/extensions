@@ -7,20 +7,21 @@ import {
   List,
   OpenInBrowserAction,
   PushAction,
-  render,
   showToast,
   ToastStyle,
 } from "@raycast/api";
 import open from "open";
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { IndexCache, DEVDOCS_BASE_URL } from "./api";
+import { Dispatch, Fragment, SetStateAction, useEffect, useMemo, useState } from "react";
+import { IndexCache, DEVDOCS_BASE_URL, faviconUrl } from "./api";
 import { Doc, Entry } from "./types";
 import Fuse from "fuse.js";
+import { useVisitedDocs } from "./useVisitedDocs";
 
 const cache = new IndexCache(environment.supportPath);
 
 export default function DocList(): JSX.Element {
   const [docs, setDocs] = useState<Doc[]>([]);
+  const { docs: visitedDocs, visitDoc, isLoading } = useVisitedDocs();
 
   useEffect(() => {
     (async () => {
@@ -30,10 +31,21 @@ export default function DocList(): JSX.Element {
   }, []);
 
   return (
-    <List isLoading={docs.length === 0}>
-      {docs.map((doc) => (
-        <DocItem key={doc.slug} doc={doc} />
-      ))}
+    <List isLoading={isLoading}>
+      {isLoading ? null : (
+        <Fragment>
+          <List.Section title="Last Visited">
+            {visitedDocs?.map((doc) => (
+              <DocItem key={doc.slug} doc={doc} onVisit={() => visitDoc(doc)} />
+            ))}
+          </List.Section>
+          <List.Section title="All">
+            {docs.map((doc) => (
+              <DocItem key={doc.slug} doc={doc} onVisit={() => visitDoc(doc)} />
+            ))}
+          </List.Section>
+        </Fragment>
+      )}
     </List>
   );
 }
@@ -110,26 +122,27 @@ function OpenInDevdocsAction(props: { url: string }) {
   );
 }
 
-function DocItem(props: { doc: Doc }) {
-  const { doc } = props;
+function DocItem(props: { doc: Doc; onVisit: () => void }) {
+  const { doc, onVisit } = props;
+  const { name, slug, links, version, release } = doc;
   return (
     <List.Item
-      key={doc.slug}
-      id={doc.slug}
-      title={doc.name}
-      subtitle={doc.version}
-      keywords={[doc.release]}
-      accessoryTitle={doc.release}
+      key={slug}
+      title={name}
+      icon={links?.home ? faviconUrl(64, links.home) : Icon.Dot}
+      subtitle={version}
+      keywords={[release]}
+      accessoryTitle={release}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction title="Browse Entries" target={<EntryList doc={doc} />} />
+            <PushAction title="Browse Entries" target={<EntryList doc={doc} />} onPush={onVisit} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <OpenInBrowserAction url={`${DEVDOCS_BASE_URL}/${doc.slug}`} />
-            <OpenInDevdocsAction url={`${DEVDOCS_BASE_URL}/${doc.slug}`} />
-            <OpenInBrowserAction title="Open Project Homepage" url={doc.links?.home} />
-            <OpenInBrowserAction title="Open Code Repository" url={doc.links?.code} />
+            <OpenInBrowserAction url={`${DEVDOCS_BASE_URL}/${slug}`} />
+            <OpenInDevdocsAction url={`${DEVDOCS_BASE_URL}/${slug}`} />
+            {links?.home ? <OpenInBrowserAction title="Open Project Homepage" url={links.home} /> : null}
+            {links?.code ? <OpenInBrowserAction title="Open Code Repository" url={links.code} /> : null}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <ClearDocCache doc={doc} />

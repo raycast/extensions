@@ -1,10 +1,20 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { Icon, showToast, ToastStyle } from "@raycast/api";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
 import fetch from "node-fetch";
 import { dirname, resolve } from "path/posix";
+import { URL } from "url";
 import { Doc, Entry, Index } from "./types";
 
 export const DEVDOCS_BASE_URL = "https://devdocs.io";
+
+export function faviconUrl(size: number, url: string): string {
+    try {
+      const domain = new URL(url).hostname
+      return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`
+    } catch(err) {
+      return Icon.Globe
+    }
+}
 
 export class IndexCache {
   _path: string;
