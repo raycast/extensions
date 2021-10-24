@@ -1,7 +1,7 @@
 {
-  "name": "safari-cloud-tabs",
-  "title": "Safari Cloud Tabs",
-  "description": "List Safari Tabs from all your devices using iCloud",
+  "name": "safari",
+  "title": "Safari",
+  "description": "List your Safari Cloud Tabs and Reading List Bookmarks",
   "icon": "safari-icon.png",
   "author": "loris",
   "license": "MIT",
@@ -12,12 +12,20 @@
       "subtitle": "Safari",
       "description": "",
       "mode": "view"
+    },
+    {
+      "name": "reading-list",
+      "title": "Reading List",
+      "subtitle": "Safari",
+      "description": "",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "execa": "^5.1.1",
     "lodash": "^4.17.21",
+    "simple-plist": "^1.1.1",
     "sql.js": "^1.6.2"
   },
   "devDependencies": {

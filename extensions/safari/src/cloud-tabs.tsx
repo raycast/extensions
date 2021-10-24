@@ -7,6 +7,7 @@ import { readFile } from 'fs';
 import _ from 'lodash';
 import initSqlJs, { Database, ParamsObject } from 'sql.js';
 import execa from 'execa';
+import { getUrlDomain, getFaviconUrl, plural, permissionErrorMarkdown } from './shared';
 
 const asyncReadFile = promisify(readFile);
 
@@ -30,17 +31,6 @@ const loadDb = async (): Promise<Database> => {
   return new SQL.Database(fileBuffer);
 };
 
-// @TODO: This screen should be handled by Raycast itself (https://github.com/raycast/extensions/issues/101)
-const permissionErrorMarkdown = `## Raycast needs full disk access in order to display your Safari Cloub Tabs.
-
-![Full Disk Access Preferences Pane](https://i.imgur.com/3SAUwrx.png)
-
-1. Open the **Security & Privacy** Preferences pane and select the **Privacy** tab
-2. Select **Full Disk Access** from the list of services
-3. Click the lock icon in the bottom left corner to unlock the interface
-4. Enter your macOS administrator password
-5. Drag and Drop the icon for the **Raycast** application into the list as seen above`;
-
 const executeQuery = async (db: Database, query: string): Promise<ParamsObject[]> => {
   const results = [];
   const stmt = db.prepare(query);
@@ -56,6 +46,7 @@ interface Tab {
   uuid: string;
   title: string;
   url: string;
+  domain: string;
   position: string; // @TODO handle value to sort tabs
   device_uuid: string;
   device_name: string;
@@ -69,11 +60,6 @@ interface Device {
 }
 
 const formatTitle = (title: string) => _.truncate(title, { length: 75 });
-const getProtocolLessUrl = (url: string) => url.replace(/(^\w+:|^)\/\//, '').replace('www.', '');
-const getFaviconUrl = (url: string) => {
-  const domain = getProtocolLessUrl(url).split('/')[0];
-  return `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(domain)}`;
-};
 
 export default function Command() {
   const [hasPermissionError, setHasPermissionError] = useState(false);
@@ -97,7 +83,7 @@ export default function Command() {
             uuid: device_uuid,
             name: tabs[0].device_name,
             is_current: currentDeviceName === tabs[0].device_name,
-            tabs,
+            tabs: _.map(tabs, (tab) => ({ ...tab, domain: getUrlDomain(tab.url) })),
           });
 
           return devices;
@@ -126,14 +112,14 @@ export default function Command() {
   return (
     <List isLoading={!devices}>
       {_.map(devices, (device: Device) => (
-        <List.Section key={device.uuid} title={device.name}>
+        <List.Section key={device.uuid} title={device.name} subtitle={plural(device.tabs.length, 'tab')}>
           {_.map(device.tabs, (tab: Tab) => (
             <List.Item
               key={tab.uuid}
               title={formatTitle(tab.title)}
-              subtitle={getProtocolLessUrl(tab.url)}
-              keywords={[getProtocolLessUrl(tab.url)]}
-              icon={getFaviconUrl(tab.url)}
+              accessoryTitle={tab.domain}
+              keywords={[tab.url, tab.domain]}
+              icon={getFaviconUrl(tab.domain)}
               actions={
                 <ActionPanel>
                   <OpenAction title="Open in Safari" target={tab.url} application="Safari" icon={Icon.Globe} />
