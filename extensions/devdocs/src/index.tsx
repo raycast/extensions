@@ -3,6 +3,7 @@ import {
   ActionPanelItem,
   getLocalStorageItem,
   Icon,
+  ImageLike,
   List,
   OpenInBrowserAction,
   PushAction,
@@ -110,8 +111,8 @@ function useFuse<U>(items: U[], options: Fuse.IFuseOptions<U>, limit: number): [
   return [results.map((result) => result.item), setQuery];
 }
 
-function EntryList(props: { doc: Doc }) {
-  const { doc } = props;
+function EntryList(props: { doc: Doc; icon: ImageLike }) {
+  const { doc, icon } = props;
   const [entries, setEntries] = useState<Entry[]>([]);
   const [results, setQuery] = useFuse(entries, { keys: ["name", "type"] }, 500);
 
@@ -142,17 +143,18 @@ function EntryList(props: { doc: Doc }) {
       }}
     >
       {results.map((entry) => (
-        <EntryItem entry={entry} key={entry.name + entry.path + entry.type} doc={doc} />
+        <EntryItem entry={entry} icon={icon} key={entry.name + entry.path + entry.type} doc={doc} />
       ))}
     </List>
   );
 }
 
-function EntryItem(props: { entry: Entry; doc: Doc }) {
-  const { entry, doc } = props;
+function EntryItem(props: { entry: Entry; doc: Doc; icon: ImageLike }) {
+  const { entry, doc, icon } = props;
   return (
     <List.Item
       title={entry.name}
+      icon={icon}
       key={entry.name + entry.path}
       accessoryTitle={entry.type}
       keywords={[entry.type].concat(entry.name.split("."))}
@@ -181,18 +183,24 @@ function OpenInDevdocsAction(props: { url: string }) {
 function DocItem(props: { doc: Doc; onVisit: () => void }) {
   const { doc, onVisit } = props;
   const { name, slug, links, version, release } = doc;
+  const icon = links?.home ? faviconUrl(64, links.home) : Icon.Dot;
   return (
     <List.Item
       key={slug}
       title={name}
-      icon={links?.home ? faviconUrl(64, links.home) : Icon.Dot}
+      icon={icon}
       subtitle={version}
       keywords={[release]}
       accessoryTitle={release}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction title="Browse Entries" icon={Icon.ArrowRight} target={<EntryList doc={doc} />} onPush={onVisit} />
+            <PushAction
+              title="Browse Entries"
+              icon={Icon.ArrowRight}
+              target={<EntryList doc={doc} icon={icon} />}
+              onPush={onVisit}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <OpenInBrowserAction url={`${DEVDOCS_BASE_URL}/${slug}`} />
