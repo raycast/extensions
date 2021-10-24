@@ -1,0 +1,11 @@
+{
+  "name": "lint",
+  "version": "1.0.0",
+  "description": "Lint extensions",
+  "main": "main.js",
+  "author": "Matt Gleich <git@mattglei.ch>",
+  "license": "MIT",
+  "dependencies": {
+    "image-size": "^1.0.0"
+  }
+}
