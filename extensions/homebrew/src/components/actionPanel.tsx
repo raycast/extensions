@@ -10,7 +10,7 @@ import {
   showToast,
   ToastStyle,
 } from "@raycast/api";
-import FormulaInfo from "./formulaInfo";
+import FormulaInfo from "./info";
 import { brewIsInstalled, brewInstall, brewUninstall, brewInstallPath } from "../brew";
 
 export default function FormulaActionPanel(props: {formula: Formula, installCallback: () => void}): Component {
