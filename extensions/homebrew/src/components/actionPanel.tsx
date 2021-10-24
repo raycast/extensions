@@ -13,15 +13,15 @@ import {
 import FormulaInfo from "./info";
 import { brewIsInstalled, brewInstall, brewUninstall, brewInstallPath } from "../brew";
 
-export default function FormulaActionPanel(props: {formula: Formula, installCallback: () => void}): Component {
+export default function FormulaActionPanel(props: {formula: Formula, showDetails: bool, onInstall: () => void}): Component {
   if (brewIsInstalled(props.formula)) {
-    return installedActionPanel(props.formula, props.installCallback);
+    return installedActionPanel(props.formula, props.showDetails, props.onInstall);
   } else {
-    return uninstalledActionPanel(props.formula, props.installCallback);
+    return uninstalledActionPanel(props.formula, props.showDetails, props.onInstall);
   }
 }
 
-function installedActionPanel(formula: Formula, didUninstall: () => void): Component {
+function installedActionPanel(formula: Formula, showDetails: bool, onInstall: () => void): Component {
   async function uninstall(): Promise<bool> {
     showToast(ToastStyle.Animated, `Uninstalling ${formula.full_name}`);
     try {
@@ -38,7 +38,7 @@ function installedActionPanel(formula: Formula, didUninstall: () => void): Compo
 
   return (<ActionPanel>
     <ActionPanel.Section>
-      <PushAction title="Show Details" target={<FormulaInfo formula={formula} />} />
+      {showDetails && <PushAction title="Show Details" target={<FormulaInfo formula={formula} onInstall={onInstall} />} />}
       <ShowInFinderAction path={brewInstallPath(formula)} />
       <OpenInBrowserAction url={formula.homepage} />
       <CopyToClipboardAction title="Copy URL" content={formula.homepage} />
@@ -49,13 +49,13 @@ function installedActionPanel(formula: Formula, didUninstall: () => void): Compo
                        shortcut={{ modifiers:["ctrl"], key: "x" }}
                        onAction={async () => {
                          const result = await uninstall();
-                         didUninstall(result);
+                         onInstall(result);
                        }} />
     </ActionPanel.Section>
   </ActionPanel>);
 }
 
-function uninstalledActionPanel(formula: Formula, didInstall: () => void): Component {
+function uninstalledActionPanel(formula: Formula, showDetails: bool, onInstall: () => void): Component {
   async function install(): Promise<bool> {
     showToast(ToastStyle.Animated, `Installing ${formula.full_name}`);
     try {
@@ -72,15 +72,12 @@ function uninstalledActionPanel(formula: Formula, didInstall: () => void): Compo
 
   return (<ActionPanel>
     <ActionPanel.Section>
-      <PushAction title="Show Details" target={<FormulaInfo formula={formula} />} />
+      {showDetails && <PushAction title="Show Details" target={<FormulaInfo formula={formula} onInstall={onInstall} />} />}
       <ActionPanelItem title={"Install"}
                        icon={Icon.Plus}
                        shortcut={{ modifiers:["cmd"], key: "i" }}
                        onAction={async () => {
-                         const result =  await install();
-                         didInstall(result);
-                         // installed.set(formula.name, formula);
-                         // setInstalled(new Map(installed));
+                         onInstall(await install());
                        }}
       />
     </ActionPanel.Section>

@@ -1,8 +1,18 @@
-import { Detail } from "@raycast/api";
+import { Detail, useNavigation } from "@raycast/api";
+import FormulaActionPanel from "./actionPanel";
 
-export default function FormulaInfo(props: {formula: Formula}): Component {
-  // TD: We also need actions here...
-  return <Detail markdown={formatInfo(props.formula)} />;
+export default function FormulaInfo(props: {formula: Formula, onInstall: () => void}): Component {
+  const { pop } = useNavigation();
+
+  return (
+    <Detail
+    markdown={formatInfo(props.formula)}
+    actions={<FormulaActionPanel formula={props.formula} showDetails={false} onInstall={(result) => {
+      pop();
+      props.onInstall(result);
+    }} />}
+    />
+  );
 }
 
 function formatInfo(formula: Formula): string {

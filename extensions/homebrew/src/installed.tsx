@@ -38,7 +38,7 @@ function Main() {
                  subtitle={formula.desc}
                  accessoryTitle={version}
                  icon={ {source: Icon.Checkmark, tintColor: Color.Green} }
-                 actions={<FormulaActionPanel formula={formula} installCallback={() => {
+                 actions={<FormulaActionPanel formula={formula} showDetails={true} onInstall={() => {
                    setFormulae(formulae.filter(f => brewIsInstalled(f) ));
                  }}
                  />}
