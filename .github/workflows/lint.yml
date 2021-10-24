@@ -1,0 +1,21 @@
+name: Lint Extensions
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node.js
+        use: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - name: Run Linter
+        working-directory: scripts/lint
+        run:
+          - node install
+          - node main.js
