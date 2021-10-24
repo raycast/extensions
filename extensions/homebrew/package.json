@@ -4,7 +4,7 @@
   "description": "Search and install Homebrew formulae",
   "author": "nhojb",
   "license": "MIT",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "commands": [
     {
       "name": "installed",
