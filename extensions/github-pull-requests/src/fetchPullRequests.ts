@@ -25,9 +25,9 @@ async function fetchPullRequests(): Promise<PullRequest[]> {
 
     /**
      * Appends the pull request to the list of pull requests if it's in some way assigned to us.
-     * @param includeCondition If there are no assignees and no reviewers, the pull request is included if we are the author or if this parameter is true. This exists because we want to check the pull requests we authored, but also any pull requests that have been opened on our own repositories, so the flag must be passed in from the outside, depending on the context.
+     * @param forceIncludeCondition The pull request is included if we are the author or if this parameter is true. This exists because we want to check the pull requests we authored, but also any pull requests that have been opened on our own repositories, so the flag must be passed in from the outside, depending on the context.
      */
-    const extractPR = (pr: PullRequest, includeCondition: boolean) => {
+    const extractPR = (pr: PullRequest, forceIncludeCondition: boolean) => {
       const author = pr.author.login;
       const assignees = pr.assignees?.nodes.map((assignee) => assignee.login) ?? [];
       const reviewers = pr.reviewRequests?.nodes.map((reviewer) => reviewer.requestedReviewer?.login) ?? [];
@@ -38,9 +38,10 @@ async function fetchPullRequests(): Promise<PullRequest[]> {
       }
 
       if (
+        forceIncludeCondition ||
+        author === username ||
         assignees.includes(username) ||
-        reviewers.includes(username) ||
-        ((author === username || includeCondition) && reviewers.length === 0 && assignees.length === 0)
+        reviewers.includes(username)
       ) {
         pullRequests.push(pr);
       }
@@ -50,7 +51,17 @@ async function fetchPullRequests(): Promise<PullRequest[]> {
 
     orgs.forEach((org) => {
       org.repositories.nodes.forEach((repo) => {
-        repo.pullRequests.nodes.forEach((pr) => extractPR(pr, ownRepos.includes(repo)));
+        repo.pullRequests.nodes.forEach((pr) => extractPR(pr, false));
+      });
+    });
+
+    ownRepos.forEach((repo) => {
+      repo.pullRequests.nodes.forEach((pr) => {
+        const assignees = pr.assignees?.nodes.map((assignee) => assignee.login) ?? [];
+        const reviewers = pr.reviewRequests?.nodes.map((reviewer) => reviewer.requestedReviewer?.login) ?? [];
+
+        // For own repos, only forcefully include PRs if there are no assignees and no reviewers.
+        extractPR(pr, assignees.length === 0 && reviewers.length === 0);
       });
     });
 
