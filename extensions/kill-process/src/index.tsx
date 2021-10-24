@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, Icon, List, preferences, showHUD } from "@raycast/api";
+import { ActionPanel, clearSearchBar, CopyToClipboardAction, Icon, List, preferences, showHUD } from "@raycast/api";
 import { exec } from "child_process";
 import { useEffect, useState } from "react";
 
@@ -51,6 +51,7 @@ export default function ProcessList() {
   const killProcess = (process: Process) => {
     exec(`kill -9 ${process.id}`);
     setState(state.filter((p) => p.id !== process.id));
+    clearSearchBar({ forceScrollToTop: true });
     showHUD(`✅ Killed ${process.name === "-" ? `process ${process.id}` : process.name}`);
   };
 
