@@ -12,7 +12,7 @@ main();
 
 function main() {
   const extensions = getExtensions();
-  validateManifests(extensions);
+  validateExtensions(extensions);
 }
 
 function getExtensions() {
@@ -28,8 +28,8 @@ function getExtensions() {
   return extensions;
 }
 
-function validateManifests(extensions) {
-  console.log(infoEmoji, "Validating manifests\n");
+function validateExtensions(extensions) {
+  console.log(infoEmoji, "Validating extensions...\n");
   const requiredFields = [
     { name: "name", emptyValue: "" },
     { name: "title", emptyValue: "" },
@@ -100,5 +100,5 @@ function validateManifests(extensions) {
       process.exit(1);
     }
   }
-  console.log(successEmoji, "Validated manifests");
+  console.log(successEmoji, "Validated extensions");
 }
