@@ -13,6 +13,7 @@ import { gitlab } from "../common";
 import { Issue, Label } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { LabelList } from "./label";
+import { IssueMRCreateForm } from "./mr_create";
 
 export function CloseIssueAction(props: { issue: Issue }) {
   const issue = props.issue;
@@ -29,6 +30,17 @@ export function CloseIssueAction(props: { issue: Issue }) {
       title="Close Issue"
       icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
       onAction={handleAction}
+    />
+  );
+}
+
+export function CreateMRAction({ issue }: { issue: Issue }): JSX.Element {
+  return (
+    <PushAction
+      icon={Icon.Pencil}
+      title="Create Merge Request"
+      shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+      target={<IssueMRCreateForm issue={issue} projectID={issue.project_id} title={`Draft: Resolve: ${issue.title}`} />}
     />
   );
 }
@@ -69,6 +81,7 @@ export function IssueItemActions(props: { issue: Issue }) {
   return (
     <React.Fragment>
       <ShowIssueLabelsAction labels={issue.labels} />
+      {issue.state == "opened" && <CreateMRAction issue={issue} />}
       {issue.state == "opened" && <CloseIssueAction issue={issue} />}
       {issue.state == "closed" && <ReopenIssueAction issue={issue} />}
       <CopyToClipboardAction title="Copy Issue Number" content={issue.iid} />

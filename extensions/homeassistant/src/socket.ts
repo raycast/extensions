@@ -4,6 +4,7 @@ https://github.com/keesschollaart81/vscode-home-assistant/blob/master/src/langua
 */
 
 import type { Auth } from "home-assistant-js-websocket/dist/auth";
+import { ERR_INVALID_AUTH } from "home-assistant-js-websocket";
 
 // eslint-disable-next-line import/order
 import WebSocket = require("ws");
@@ -11,8 +12,6 @@ import WebSocket = require("ws");
 const MSG_TYPE_AUTH_REQUIRED = "auth_required";
 const MSG_TYPE_AUTH_INVALID = "auth_invalid";
 const MSG_TYPE_AUTH_OK = "auth_ok";
-const ERR_CANNOT_CONNECT = 1;
-const ERR_INVALID_AUTH = 2;
 
 export function createSocket(
     auth: Auth,
@@ -29,7 +28,7 @@ export function createSocket(
     function connect(
         triesLeft: number,
         promResolve: (socket: any) => void,
-        promReject: (err: number) => void
+        promReject: (err: Error) => void
     ) {
         console.log(
             `[Auth Phase] Connecting to Home Assistant... Tries left: ${triesLeft}`,
@@ -79,14 +78,18 @@ export function createSocket(
                 );
             }
             if (invalidAuth) {
-                promReject(ERR_INVALID_AUTH);
+                const e = new Error('Authentication failed.');
+                e.name = 'AuthError';
+                promReject(e);
                 return;
             }
 
             // Reject if we no longer have to retry
             if (triesLeft === 0) {
                 // We never were connected and will not retry
-                promReject(ERR_CANNOT_CONNECT);
+                const e = new Error(`Connection to "${url}" failed.`);
+                e.name = 'ConnectionError';
+                promReject(e);
                 return;
             }
 
