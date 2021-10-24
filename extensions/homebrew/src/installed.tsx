@@ -8,7 +8,7 @@ import {
   ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { brewFetchInstalled, brewIsInstalled } from "./brew";
+import { brewFetchInstalled } from "./brew";
 import FormulaActionPanel from "./components/actionPanel";
 
 function Main() {
@@ -29,8 +29,15 @@ function Main() {
 
   function FormulaListItem(props: { formula: Formula }) {
     const formula = props.formula;
-    const isInstalled = brewIsInstalled(formula);
-    const version = isInstalled ? formula.installed[0].version : "";
+    let version = "";
+    if (formula.installed.length > 0) {
+      const installed_version = formula.installed[0];
+      if (installed_version.installed_as_dependency) {
+        version = `${installed_version.version} (D)`;
+      } else {
+        version = installed_version.version;
+      }
+    }
 
     return (
       <List.Item id={formula.name}
