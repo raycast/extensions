@@ -99,7 +99,7 @@ export default function DocList(): JSX.Element {
   );
 }
 
-function useFuse<U>(items: U[], options: Fuse.IFuseOptions<U>, limit = 100): [U[], Dispatch<SetStateAction<string>>] {
+function useFuse<U>(items: U[], options: Fuse.IFuseOptions<U>, limit: number): [U[], Dispatch<SetStateAction<string>>] {
   const [query, setQuery] = useState("");
   const fuse = useMemo(() => {
     return new Fuse(items, options);
@@ -113,7 +113,7 @@ function useFuse<U>(items: U[], options: Fuse.IFuseOptions<U>, limit = 100): [U[
 function EntryList(props: { doc: Doc }) {
   const { doc } = props;
   const [entries, setEntries] = useState<Entry[]>([]);
-  const [results, setQuery] = useFuse(entries, { keys: ["name", "type"] });
+  const [results, setQuery] = useFuse(entries, { keys: ["name", "type"] }, 500);
 
   useEffect(() => {
     let shouldUpdate = true;
@@ -192,7 +192,7 @@ function DocItem(props: { doc: Doc; onVisit: () => void }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction title="Browse Entries" target={<EntryList doc={doc} />} onPush={onVisit} />
+            <PushAction title="Browse Entries" icon={Icon.ArrowRight} target={<EntryList doc={doc} />} onPush={onVisit} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <OpenInBrowserAction url={`${DEVDOCS_BASE_URL}/${slug}`} />
