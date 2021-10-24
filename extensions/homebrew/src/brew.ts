@@ -96,7 +96,7 @@ const formulaURL = "https://formulae.brew.sh/api/formula.json";
 
 export async function brewFetchFormula(): Promise<Formula[]> {
   if (formulaCache.length > 0) {
-    return formulaCache;
+    return [...formulaCache];
   }
 
   async function readCache(): Promise<Formula[]> {
@@ -106,7 +106,7 @@ export async function brewFetchFormula(): Promise<Formula[]> {
 
     if (!isNaN(lastModified) && lastModified < cacheTime) {
       formulaCache = JSON.parse(await readFile(formulaCachePath));
-      return formulaCache;
+      return [...formulaCache];
     } else {
       throw 'Invalid cache';
     }
@@ -121,7 +121,7 @@ export async function brewFetchFormula(): Promise<Formula[]> {
       } catch (err) {
         console.error("Failed to write formula cache:", err)
       }
-      return formulaCache;
+      return [...formulaCache];
     } catch (e) {
       console.log("fetch error:", e);
     }
@@ -157,81 +157,3 @@ export async function brewUninstall(formula: Formula): Promise<void> {
 export function brewIsInstalled(formula: Formula): bool {
   return formula.installed.length > 0;
 }
-
-// TODO: Actions
-// show details / info (Markdown)
-// brew doctor
-// brew install
-// brew uninstall
-
-/*
-  {
-    "name": "autoconf",
-    "full_name": "autoconf",
-    "tap": "homebrew/core",
-    "aliases": [
-      "autoconf@2.71"
-    ],
-    "versioned_formulae": [
-      "autoconf@2.69",
-      "autoconf@2.13"
-    ],
-    "desc": "Automatic configure script builder",
-    "license": "GPL-3.0-or-later and (GPL-3.0-or-later with Autoconf-exception-3.0)",
-    "homepage": "https://www.gnu.org/software/autoconf",
-    "versions": {
-      "stable": "2.71",
-      "head": null,
-      "bottle": true
-    },
-    "urls": {
-      "stable": {
-        "url": "https://ftp.gnu.org/gnu/autoconf/autoconf-2.71.tar.gz",
-        "tag": null,
-        "revision": null
-      }
-    },
-    "revision": 0,
-    "version_scheme": 0,
-    "keg_only": false,
-    "build_dependencies": [
-
-    ],
-    "dependencies": [
-      "m4"
-    ],
-    "requirements": [
-
-    ],
-    "conflicts_with": [
-
-    ],
-    "installed": [
-      {
-        "version": "2.71",
-        "used_options": [
-
-        ],
-        "built_as_bottle": true,
-        "poured_from_bottle": true,
-        "runtime_dependencies": [
-          {
-            "full_name": "m4",
-            "version": "1.4.18"
-          }
-        ],
-        "installed_as_dependency": false,
-        "installed_on_request": true
-      }
-    ],
-    "linked_keg": "2.71",
-    "pinned": false,
-    "outdated": false,
-    "deprecated": false,
-    "deprecation_date": null,
-    "deprecation_reason": null,
-    "disabled": false,
-    "disable_date": null,
-    "disable_reason": null
-  },
-*/
