@@ -62,11 +62,12 @@ const extractReadingListBookmarks = (bookmarks: BookmarkPListResult): ReadingLis
 
 export default function Command() {
   const [hasPermissionError, setHasPermissionError] = useState(false);
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>();
+  const [bookmarks, setBookmarks] = useState<ReadingListBookmark[]>();
 
   const fetchItems = useCallback(async () => {
     try {
-      const bookmarks = await readPlist(safariBookmarksPlistPath).then(extractReadingListBookmarks);
+      const safariBookmarksPlist = (await readPlist(safariBookmarksPlistPath)) as BookmarkPListResult;
+      const bookmarks = extractReadingListBookmarks(safariBookmarksPlist);
       setBookmarks(bookmarks);
     } catch (err) {
       // TODO check error
