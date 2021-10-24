@@ -1,16 +1,16 @@
 {
   "name": "github-pull-requests",
   "title": "GitHub Pull Requests",
-  "description": "Shows Pull Requests where you’re either an asignee or a reviewer",
-  "icon": "github-logo.png",
+  "description": "Shows Pull Requests where you’re, an asignee, a reviewer, or author",
+  "icon": "icon.png",
   "author": "rolandleth",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "GitHub Pull Requests",
-      "subtitle": "Assigned Pull Requests",
-      "description": "Shows Pull Requests where you’re either an asignee or a reviewer",
+      "title": "Pull Requests",
+      "subtitle": "GitHub",
+      "description": "Shows Pull Requests where you’re, an asignee, a reviewer, or author",
       "mode": "view"
     }
   ],
