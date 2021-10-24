@@ -1,8 +1,6 @@
 import {
   ActionPanel,
   ActionPanelItem,
-  Color,
-  environment,
   Icon,
   List,
   OpenInBrowserAction,
@@ -12,22 +10,53 @@ import {
 } from "@raycast/api";
 import open from "open";
 import { Dispatch, Fragment, SetStateAction, useEffect, useMemo, useState } from "react";
-import { IndexCache, DEVDOCS_BASE_URL, faviconUrl } from "./api";
-import { Doc, Entry } from "./types";
+import { Doc, Entry, Index } from "./types";
 import Fuse from "fuse.js";
 import { useVisitedDocs } from "./useVisitedDocs";
+import fetch from "node-fetch";
+import { URL } from "url";
 
-const cache = new IndexCache(environment.supportPath);
+export const DEVDOCS_BASE_URL = "https://devdocs.io";
+
+export function faviconUrl(size: number, url: string): string {
+    try {
+      const domain = new URL(url).hostname
+      return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`
+    } catch(err) {
+      return Icon.Globe
+    }
+}
+
+export async function fetchDocIndex(): Promise<Doc[]> {
+  try {
+    const response = await fetch(`${DEVDOCS_BASE_URL}/docs/docs.json`);
+    const json = await response.json();
+    return json as Doc[];
+  } catch (error) {
+    console.error(error);
+    showToast(ToastStyle.Failure, "Could not load doc", "Please check your connexion.");
+    return Promise.resolve([]);
+  }
+}
+
+export async function fetchEntries(slug: string): Promise<Entry[]> {
+  try {
+    const response = await fetch(`${DEVDOCS_BASE_URL}/docs/${slug}/index.json`);
+    const json = await response.json();
+    return (json as Index).entries;
+  } catch (error) {
+    console.error(error);
+    showToast(ToastStyle.Failure, "Could not load doc. Please check your connexion.");
+    return Promise.resolve([]);
+  }
+}
 
 export default function DocList(): JSX.Element {
   const [docs, setDocs] = useState<Doc[]>([]);
   const { docs: visitedDocs, visitDoc, isLoading } = useVisitedDocs();
 
   useEffect(() => {
-    (async () => {
-      const docs = await cache.get();
-      setDocs(docs);
-    })();
+    fetchDocIndex().then(setDocs);
   }, []);
 
   return (
@@ -69,8 +98,11 @@ function EntryList(props: { doc: Doc }) {
   useEffect(() => {
     let shouldUpdate = true;
     async function updateEntries() {
-      const entries = await cache.get(doc);
-      if (shouldUpdate) setEntries(entries);
+      fetchEntries(doc.slug).then((entries) => {
+        if (shouldUpdate) {
+          setEntries(entries);
+        }
+      });
     }
     updateEntries();
     return () => {
@@ -144,39 +176,8 @@ function DocItem(props: { doc: Doc; onVisit: () => void }) {
             {links?.home ? <OpenInBrowserAction title="Open Project Homepage" url={links.home} /> : null}
             {links?.code ? <OpenInBrowserAction title="Open Code Repository" url={links.code} /> : null}
           </ActionPanel.Section>
-          <ActionPanel.Section>
-            <ClearDocCache doc={doc} />
-            <ClearIndexCache />
-          </ActionPanel.Section>
         </ActionPanel>
       }
-    />
-  );
-}
-
-function ClearIndexCache() {
-  return (
-    <ActionPanelItem
-      title={`Clear Index Cache`}
-      icon={{ tintColor: Color.Red, source: Icon.Trash }}
-      onAction={() => {
-        cache.clear();
-        showToast(ToastStyle.Success, "Cache Cleared!");
-      }}
-    />
-  );
-}
-
-function ClearDocCache(props: { doc: Doc }) {
-  const { doc } = props;
-  return (
-    <ActionPanelItem
-      title={`Clear ${doc.name} Cache`}
-      icon={{ tintColor: Color.Red, source: Icon.Trash }}
-      onAction={() => {
-        cache.clear(doc);
-        showToast(ToastStyle.Success, "Cache Cleared!");
-      }}
     />
   );
 }
