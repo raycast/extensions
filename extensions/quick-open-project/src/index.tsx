@@ -310,7 +310,7 @@ function searchProjects(query?: string): {
       }
     }
 
-    const projectPaths = Array.from(scanAll())
+    const projectPaths = [...new Set(scanAll())]
 
     const projects = projectPaths
       .map((path) => new Project(path))
