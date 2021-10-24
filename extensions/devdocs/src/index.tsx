@@ -52,29 +52,25 @@ export async function fetchEntries(slug: string): Promise<Entry[]> {
 }
 
 export default function DocList(): JSX.Element {
-  const [docs, setDocs] = useState<Doc[]>([]);
+  const [state, setState] = useState<{docs?: Doc[], isLoading: boolean}>({isLoading: true});
   const { docs: visitedDocs, visitDoc, isLoading } = useVisitedDocs();
 
   useEffect(() => {
-    fetchDocIndex().then(setDocs);
+    fetchDocIndex().then(docs => setState({docs: docs, isLoading: false}));
   }, []);
 
   return (
-    <List isLoading={isLoading}>
-      {isLoading ? null : (
-        <Fragment>
+    <List isLoading={state.isLoading || isLoading}>
           <List.Section title="Last Visited">
             {visitedDocs?.map((doc) => (
               <DocItem key={doc.slug} doc={doc} onVisit={() => visitDoc(doc)} />
             ))}
           </List.Section>
           <List.Section title="All">
-            {docs.map((doc) => (
+            {state.docs?.map((doc) => (
               <DocItem key={doc.slug} doc={doc} onVisit={() => visitDoc(doc)} />
             ))}
           </List.Section>
-        </Fragment>
-      )}
     </List>
   );
 }
