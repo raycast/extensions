@@ -2,7 +2,7 @@
   "name": "lorem-ipsum",
   "title": "Lorem Ipsum",
   "description": "Generate placeholder content",
-  "icon": "magic-wand.png",
+  "icon": "paragraph-icon.png",
   "author": "AntonNiklasson",
   "license": "MIT",
   "commands": [
