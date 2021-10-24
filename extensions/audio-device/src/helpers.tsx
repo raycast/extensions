@@ -91,7 +91,7 @@ type SetAudioDeviceActionProps = {
 function SetAudioDeviceAction({ device }: SetAudioDeviceActionProps) {
   return (
     <ActionPanel.Item
-      title="Make active"
+      title="Select"
       onAction={async () => {
         try {
           await execp(`${switchAudioPath()} -t ${device.type} -u ${device.uid}`);
