@@ -21,7 +21,7 @@ export default function ProjectsList() {
       {projects?.map((project) => (
         <List.Item
           key={project.name}
-          icon={{ source: Icon.List }}
+          icon={{ source: 'icon-compose.png', tintColor: Color.SecondaryText }}
           title={project.name}
           subtitle={projectSubTitle(project)}
           actions={
