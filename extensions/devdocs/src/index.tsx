@@ -1,15 +1,17 @@
 import {
   ActionPanel,
   ActionPanelItem,
+  getLocalStorageItem,
   Icon,
   List,
   OpenInBrowserAction,
   PushAction,
+  setLocalStorageItem,
   showToast,
   ToastStyle,
 } from "@raycast/api";
 import open from "open";
-import { Dispatch, Fragment, SetStateAction, useEffect, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { Doc, Entry, Index } from "./types";
 import Fuse from "fuse.js";
 import { useVisitedDocs } from "./useVisitedDocs";
@@ -19,12 +21,12 @@ import { URL } from "url";
 export const DEVDOCS_BASE_URL = "https://devdocs.io";
 
 export function faviconUrl(size: number, url: string): string {
-    try {
-      const domain = new URL(url).hostname
-      return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`
-    } catch(err) {
-      return Icon.Globe
-    }
+  try {
+    const domain = new URL(url).hostname;
+    return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`;
+  } catch (err) {
+    return Icon.Globe;
+  }
 }
 
 export async function fetchDocIndex(): Promise<Doc[]> {
@@ -34,7 +36,7 @@ export async function fetchDocIndex(): Promise<Doc[]> {
     return json as Doc[];
   } catch (error) {
     console.error(error);
-    showToast(ToastStyle.Failure, "Could not load doc", "Please check your connexion.");
+    showToast(ToastStyle.Animated, "Could not refresh doc", "Please check your connexion.");
     return Promise.resolve([]);
   }
 }
@@ -52,25 +54,47 @@ export async function fetchEntries(slug: string): Promise<Entry[]> {
 }
 
 export default function DocList(): JSX.Element {
-  const [state, setState] = useState<{docs?: Doc[], isLoading: boolean}>({isLoading: true});
+  const [state, setState] = useState<{ docs?: Doc[]; isLoading: boolean }>({ isLoading: true });
   const { docs: visitedDocs, visitDoc, isLoading } = useVisitedDocs();
 
   useEffect(() => {
-    fetchDocIndex().then(docs => setState({docs: docs, isLoading: false}));
+    let shouldUpdate = true;
+    async function refreshIndex() {
+      await getLocalStorageItem("index").then((content) => {
+        content && shouldUpdate ? setState({ docs: JSON.parse(content as string), isLoading: false }) : null;
+      });
+      await fetchDocIndex().then((docs) => {
+        if (shouldUpdate) {
+          setState({ docs, isLoading: false });
+          setLocalStorageItem("index", JSON.stringify(docs));
+        }
+      });
+      return () => {
+        shouldUpdate = false;
+      };
+    }
+    refreshIndex();
+  }, []);
+
+  useEffect(() => {
+    fetchDocIndex().then((docs) => {
+      setState({ docs: docs, isLoading: false });
+      setLocalStorageItem("index", JSON.stringify(docs));
+    });
   }, []);
 
   return (
     <List isLoading={state.isLoading || isLoading}>
-          <List.Section title="Last Visited">
-            {visitedDocs?.map((doc) => (
-              <DocItem key={doc.slug} doc={doc} onVisit={() => visitDoc(doc)} />
-            ))}
-          </List.Section>
-          <List.Section title="All">
-            {state.docs?.map((doc) => (
-              <DocItem key={doc.slug} doc={doc} onVisit={() => visitDoc(doc)} />
-            ))}
-          </List.Section>
+      <List.Section title="Last Visited">
+        {visitedDocs?.map((doc) => (
+          <DocItem key={doc.slug} doc={doc} onVisit={() => visitDoc(doc)} />
+        ))}
+      </List.Section>
+      <List.Section title="All">
+        {state.docs?.map((doc) => (
+          <DocItem key={doc.slug} doc={doc} onVisit={() => visitDoc(doc)} />
+        ))}
+      </List.Section>
     </List>
   );
 }
@@ -93,14 +117,18 @@ function EntryList(props: { doc: Doc }) {
 
   useEffect(() => {
     let shouldUpdate = true;
-    async function updateEntries() {
-      fetchEntries(doc.slug).then((entries) => {
+    async function refreshEntries() {
+      await getLocalStorageItem(doc.slug).then((content) => {
+        content && shouldUpdate ? setEntries(JSON.parse(content as string)) : null;
+      });
+      await fetchEntries(doc.slug).then((entries) => {
         if (shouldUpdate) {
           setEntries(entries);
+          setLocalStorageItem(doc.slug, JSON.stringify(entries));
         }
       });
     }
-    updateEntries();
+    refreshEntries();
     return () => {
       shouldUpdate = false;
     };
