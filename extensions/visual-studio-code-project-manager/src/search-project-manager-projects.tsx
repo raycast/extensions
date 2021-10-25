@@ -130,9 +130,14 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
 function DevelopmentActionSection() {
   return environment.isDevelopment ? (
     <ActionPanel.Section title="Development">
-      <OpenAction title="Open Storage File in Code" icon="icon.png" target={STORAGE} application="Visual Studio Code" />
-      <ShowInFinderAction title="Show Storage File in Finder" path={STORAGE} />
-      <CopyToClipboardAction title="Copy Storage File Path" content={STORAGE} />
+      <OpenAction
+        title="Open projects.json File in Code"
+        icon="icon.png"
+        target={STORAGE}
+        application="Visual Studio Code"
+      />
+      <ShowInFinderAction title="Show projects.json File in Finder" path={STORAGE} />
+      <CopyToClipboardAction title="Copy projects.json File Path" content={STORAGE} />
     </ActionPanel.Section>
   ) : null;
 }
