@@ -34,6 +34,8 @@ export function ShowAttributesAction(props: { state: State }): JSX.Element | nul
   }
 }
 
+const PrimaryIconColor = Color.Blue;
+
 const lightColor: Record<string, ColorLike> = {
   on: Color.Yellow,
   off: Color.Blue,
@@ -60,7 +62,7 @@ function getDeviceClassIcon(state: State): ImageLike | undefined {
   if (state.attributes.device_class) {
     const dc = state.attributes.device_class;
     const src = deviceClassIconSource[dc] || "entity.png";
-    return { source: src, tintColor: Color.PrimaryText };
+    return { source: src, tintColor: PrimaryIconColor };
   } else {
     return undefined;
   }
@@ -70,24 +72,23 @@ function getIcon(state: State): ImageLike | undefined {
   const e = state.entity_id;
   const attr = state.attributes;
   if (e.startsWith("light")) {
-    const color = lightColor[state.state.toLocaleLowerCase()] || Color.PrimaryText;
+    const color = lightColor[state.state.toLocaleLowerCase()] || PrimaryIconColor;
     const source = attr.icon && attr.icon === "mdi:lightbulb-group" ? "lightbulb-group.png" : "lightbulb.png";
     return { source: source, tintColor: color };
   } else if (e.startsWith("person")) {
-    return { source: "person.png", tintColor: Color.PrimaryText };
+    return { source: "person.png", tintColor: PrimaryIconColor };
   } else if (e.startsWith("cover")) {
     const source = coverStateIconSource[`${state.state}`] || "cover-opened.png";
-    console.log(source);
-    return { source: source, tintColor: Color.PrimaryText };
+    return { source: source, tintColor: PrimaryIconColor };
   } else if (e.startsWith("automation")) {
-    return { source: "automation.png", tintColor: Color.PrimaryText };
+    return { source: "automation.png", tintColor: PrimaryIconColor };
   } else if (e.startsWith("climate")) {
-    return { source: "climate.png", tintColor: Color.PrimaryText };
+    return { source: "climate.png", tintColor: PrimaryIconColor };
   } else if (e.startsWith("media_player")) {
-    return { source: "mediaplayer.png", tintColor: Color.PrimaryText };
+    return { source: "mediaplayer.png", tintColor: PrimaryIconColor };
   } else {
     const di = getDeviceClassIcon(state);
-    return di ? di : { source: "entity.png", tintColor: Color.PrimaryText };
+    return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
   }
 }
 
