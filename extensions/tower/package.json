@@ -4,7 +4,7 @@
   "description": "Navigate and open your repositories in Tower.",
   "icon": "icon.png",
   "author": "tdwesten",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "license": "MIT",
   "commands": [
     {
@@ -36,6 +36,7 @@
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "node-fetch": "^2.6.1",
+    "node-git-current-branch": "^2.0.1",
     "plist": "^3.0.3",
     "tildify": "^3.0.0"
   },
@@ -49,6 +50,7 @@
     "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.31.0",
     "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.20.1",
     "typescript": "^4.3.5"
   },
   "scripts": {
