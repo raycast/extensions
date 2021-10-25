@@ -1,8 +1,8 @@
 {
   "name": "huggingcast",
   "title": "Huggingcast",
-  "description": "",
-  "icon": "command-icon.png",
+  "description": "Use Huggingface models for summarization, translation, ...",
+  "icon": "huggingface.png",
   "author": "ragnor",
   "license": "MIT",
   "commands": [
