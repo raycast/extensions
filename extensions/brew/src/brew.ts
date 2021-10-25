@@ -17,14 +17,16 @@ export interface Formula extends FormulaBase {
   desc: string;
   license: string;
   homepage: string;
+  aliases: string[];
   dependencies: string[];
   build_dependencies: string[];
+  conflicts_with: string[];
   installed: Installed[];
   versions: Versions;
   keg_only: bool,
   linked_key: string;
-  aliases: string[];
   outdated: bool;
+  caveats?: string;
 }
 
 export interface OutdatedFormula extends FormulaBase {
@@ -48,7 +50,7 @@ export interface Versions {
 const installedCachePath = utils.cachePath('installed.json');
 const formulaCachePath = utils.cachePath('formula.json');
 
-const brewPrefix = (() => {
+export const brewPrefix = (() => {
   return execSync('brew --prefix', {encoding: 'utf8'}).trim();
 })();
 

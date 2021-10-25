@@ -1,5 +1,6 @@
 import { Detail, useNavigation } from "@raycast/api";
 import { FormulaActionPanel } from "./actionPanel";
+import { brewIsInstalled, brewPrefix } from '../brew';
 
 export function FormulaInfo(props: {formula: Formula, onAction: () => void}): Component {
   const { pop } = useNavigation();
@@ -30,14 +31,25 @@ ${formula.desc}
 ${formatVersions(formula)}
 
 ${formatDependencies(formula)}
+
+${formatConflicts(formula)}
+
+${formatCaveats(formula)}
   `;
 }
 
 function formatVersions(formula: Formula): string {
   const versions = formula.versions;
+  const status = [];
+  if (versions.bottle) {
+    status.push('bottled');
+  }
+  if (brewIsInstalled(formula)) {
+    status.push('installed');
+  }
   let markdown = `
 #### Versions:
-Stable: ${versions.stable} ${versions.bottle ? '(bottled)' : ''}
+Stable: ${versions.stable} ${status ? `(${status.join(', ')})` : ''}
 
   `;
   if (versions.head) {
@@ -65,6 +77,38 @@ Build: ${formula.build_dependencies.join(', ')}
     return `#### Dependencies
 ${markdown}
     `;
+  } else {
+    return '';
+  }
+}
+
+function formatConflicts(formula: Formula): string {
+  if (formula.conflicts_with.length == 0) { return ''; }
+
+  return `#### Conflicts With:
+${formula.conflicts_with.join(', ')}
+  `;
+}
+
+function formatCaveats(formula: Formula): string {
+  let caveats = '';
+
+  if (formula.keg_only) {
+    caveats += `
+${formula.name} is keg-only, which means it is not symlinked into ${brewPrefix}.
+    `;
+  }
+
+  if (formula.caveats) {
+    caveats += `
+${formula.caveats}
+    `;
+  }
+
+  if (caveats) {
+    return `#### Caveats:
+${caveats}
+    `
   } else {
     return '';
   }
