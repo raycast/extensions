@@ -1,6 +1,6 @@
 import { exec } from "child_process";
 import { getDashAppPath } from "./dashApp";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { parse } from "fast-xml-parser";
 
 export type DashResult = {
@@ -11,14 +11,16 @@ export type DashResult = {
   "@_uid": string;
 };
 
-async function searchDash(query: string): Promise<DashResult[]> {
+async function searchDash(query: string, signal: AbortSignal): Promise<DashResult[]> {
   return new Promise((resolve, reject) => {
     exec(
       `./dashAlfredWorkflow ${query}`,
       {
         cwd: `${getDashAppPath()}/Contents/Resources`,
+        signal,
       },
       (err, data) => {
+        if (err && err.name === "AbortError") return;
         if (err) reject(err);
 
         const jsonData = parse(data, { ignoreAttributes: false });
@@ -40,11 +42,15 @@ async function searchDash(query: string): Promise<DashResult[]> {
 export function useDocsetSearch(searchText: string, keyword = ""): [DashResult[], boolean] {
   const [isLoading, setLoading] = useState<boolean>(false);
   const [results, setResults] = useState<DashResult[]>([]);
+  const cancel = useRef<AbortController>(new AbortController());
 
   async function fetchDashResults() {
+    cancel.current.abort();
+    cancel.current = new AbortController();
+
     setLoading(true);
     if (searchText.length) {
-      setResults(await searchDash(`${keyword ? `${keyword}:`: ''}${searchText}`));
+      setResults(await searchDash(`${keyword ? `${keyword}:`: ''}${searchText}`, cancel.current.signal));
     } else {
       setResults([]);
     }
