@@ -1,5 +1,5 @@
 {
-  "name": "homebrew",
+  "name": "brew",
   "title": "Homebrew",
   "description": "Search and install Homebrew formulae",
   "author": "nhojb",
@@ -9,14 +9,14 @@
     {
       "name": "installed",
       "title": "Show Installed",
-      "subtitle": "Homebrew",
+      "subtitle": "Brew",
       "description": "List installed formulas",
       "mode": "view"
     },
     {
       "name": "search",
       "title": "Search Formula",
-      "subtitle": "Homebrew",
+      "subtitle": "Brew",
       "description": "Search homebrew formula",
       "mode": "view"
     }

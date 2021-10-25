@@ -2,7 +2,6 @@ import {
   ActionPanel,
   ActionPanelItem,
   CopyToClipboardAction,
-  Detail,
   Icon,
   OpenInBrowserAction,
   PushAction,
