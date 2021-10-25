@@ -1,4 +1,4 @@
-import { ActionPanel, List } from "@raycast/api";
+import { ActionPanel, ImageMask, List } from "@raycast/api";
 import { UserV1 } from "twitter-api-v2";
 import { ShowUserTweetsAction } from "./user_actions";
 
@@ -9,7 +9,7 @@ export function UserListItem(props: { user: UserV1 }) {
       key={u.screen_name}
       title={u.name}
       subtitle={`@${u.screen_name}`}
-      icon={{ source: u.profile_image_url_https }}
+      icon={{ source: u.profile_image_url_https, mask: ImageMask.Circle }}
       accessoryTitle={`${u.followers_count}`}
       accessoryIcon={{ source: "👀" }}
       actions={
