@@ -1,5 +1,6 @@
-import { List, ActionPanel, OpenAction } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useState } from "react";
+import DashResult from "./components/DashResult";
 import { Docset } from "./util/docsets";
 import { useDocsetSearch } from "./util/useDocsetSearch";
 
@@ -13,18 +14,8 @@ export default function DocsetSearch({ docset }: { docset: Docset }) {
       searchBarPlaceholder={`Search in ${docset.docsetName}`}
       onSearchTextChange={setSearchText}
     >
-      {results.map((result, i) => (
-        <List.Item
-          key={result["@_uid"]}
-          title={result.title}
-          subtitle={result.subtitle[2]}
-          icon={result.icon}
-          actions={
-            <ActionPanel>
-              <OpenAction title="Open in Dash" target={`dash-workflow-callback://${i}`} />
-            </ActionPanel>
-          }
-        />
+      {results.map((result, index) => (
+        <DashResult result={result} index={index} key={index} />
       ))}
     </List>
   );
