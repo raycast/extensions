@@ -8,7 +8,7 @@ import {
   ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { brewFetchInstalled, brewIsInstalled, brewFormatVersion } from "./brew";
+import { brewFetchInstalled, brewFormatVersion } from "./brew";
 import { FormulaActionPanel } from "./components/actionPanel";
 
 function Main() {
@@ -16,7 +16,7 @@ function Main() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(async () => {
-    setIsLoading(true);
+    if (!isLoading) { return; }
     try {
       setFormulae(await brewFetchInstalled(true));
     } catch (err) {
@@ -25,7 +25,7 @@ function Main() {
       setFormulae([]);
     }
     setIsLoading(false);
-  }, []);
+  }, [isLoading]);
 
   function FormulaListItem(props: { formula: Formula }) {
     const formula = props.formula;
@@ -38,8 +38,7 @@ function Main() {
                  accessoryTitle={brewFormatVersion(formula)}
                  icon={ {source: Icon.Checkmark, tintColor: tintColor} }
                  actions={<FormulaActionPanel formula={formula} showDetails={true} onAction={() => {
-                   // Uninstall does not (currently) include dependencies, so just reload formulae.
-                   setFormulae(formulae.filter(f => brewIsInstalled(f) ));
+                   setIsLoading(true);
                  }}
                  />}
       />

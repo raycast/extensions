@@ -95,6 +95,8 @@ async function listInstalled(): Map<string, Formula> {
 async function updateInstalled(formulae: Formula[], installed: Map<string, Formula>) {
   for (formula of formulae) {
     const info = installed.get(formula.name);
-    formula.installed = info ? info.installed : [];
+    formula.installed = info?.installed ?? [];
+    formula.outdated = info?.outdated ?? false;
+    formula.pinned = info?.pinned ?? false;
   }
 }

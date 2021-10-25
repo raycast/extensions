@@ -99,7 +99,6 @@ export function FormulaUninstallAction(props: {formula: Formula, onAction: () =>
     showToast(ToastStyle.Animated, `Uninstalling ${formula.full_name}`);
     try {
       await brewUninstall(formula);
-      formula.installed = [];
       showToast(ToastStyle.Success, `Uninstalled ${formula.full_name}`);
       return true;
     } catch (err) {

@@ -15,6 +15,8 @@ export function FormulaInfo(props: {formula: Formula, onAction: () => void}): Co
   );
 }
 
+/// Private
+
 function formatInfo(formula: Formula): string {
   return `
 # ${formula.full_name}

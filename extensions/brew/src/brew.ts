@@ -84,11 +84,25 @@ export async function brewFetchInstalled(useCache: bool): Promise<Formula[]> {
     return JSON.parse(info);
   }
 
+  async function mtimeMs(path: string): Promise<number> {
+    return (await stat(path)).mtimeMs;
+  }
+
   async function readCache(): Promise<Formula[]> {
-    const cellarPath = brewPath("Cellar");
-    const cellarTime = (await stat(cellarPath)).mtimeMs;
-    const cacheTime = (await stat(installedCachePath)).mtimeMs;
-    if (cellarTime < cacheTime) {
+    const cacheTime = await mtimeMs(installedCachePath);
+    // 'var/homebrew/locks' is updated after installed keg_only or linked formula.
+    const locksTime = await mtimeMs(brewPath('var/homebrew/locks'));
+    // Because '/var/homebrew/pinned can be removed, we need to also check the parent directory'
+    const homebrewTime = await mtimeMs(brewPath('var/homebrew'));
+    // 'var/homebrew/pinned' is updated after pin/unpin actions (but does not exist if there are no pinned formula).
+    let pinnedTime;
+    try {
+      pinnedTime = await mtimeMs(brewPath('var/homebrew/pinned'));
+    } catch {
+      pinnedTime = 0;
+    }
+
+    if (homebrewTime < cacheTime && locksTime < cacheTime && pinnedTime < cacheTime) {
       return JSON.parse(await readFile(installedCachePath));
     } else {
       throw 'Invalid cache';
@@ -154,7 +168,6 @@ export async function brewFetchFormula(): Promise<Formula[]> {
 export async function brewSearchFormula(searchText: string): Promise<Formula[]> {
   if (searchText == undefined) { return [] }
 
-  console.log(`brewSearchFormula: ${searchText}`);
   const formulas = await brewFetchFormula();
   const target = searchText.toLowerCase();
   const results = formulas?.filter(formula => {
@@ -176,18 +189,15 @@ export async function brewUninstall(formula: Formula): Promise<void> {
 export async function brewPinFormula(formula: FormulaBase): Promise<void> {
   await execp(`brew pin ${formula.name}`);
   formula.pinned = true;
-  await brewClearInstalledCache();
 }
 
 export async function brewUnpinFormula(formula: FormulaBase): Promise<void> {
   await execp(`brew unpin ${formula.name}`);
   formula.pinned = false;
-  await brewClearInstalledCache();
 }
 
 export async function brewUpgrade(formula: FormulaBase): Promise<void> {
   await execp(`brew upgrade ${formula.name}`);
-  await brewClearInstalledCache();
 }
 
 export async function brewUpgradeAll(): Promise<void> {
@@ -220,14 +230,4 @@ export function brewFormatVersion(formula: Formula): string {
 
 export function brewIsInstalled(formula: Formula): bool {
   return formula.installed.length > 0;
-}
-
-/// Private
-
-async function brewClearInstalledCache(): Promise<void> {
-  try {
-    await rm(installedCachePath, {force: true});
-  } catch (err) {
-    console.log('Warning, brewClearInstalledCache error:', err);
-  }
 }
