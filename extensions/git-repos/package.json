@@ -64,7 +64,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.25.1",
     "node-fetch": "^2.6.1",
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2"

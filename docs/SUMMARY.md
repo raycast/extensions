@@ -33,7 +33,6 @@
 * [File Structure](information/file-structure.md)
 * [Lifecycle](information/lifecycle.md)
 * [Manifest](information/manifest.md)
-* [Review Process](information/review-process.md)
 * [Terminology](information/terminology.md)
 
 ## API Reference
