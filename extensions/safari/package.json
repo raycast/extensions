@@ -8,14 +8,14 @@
   "commands": [
     {
       "name": "cloud-tabs",
-      "title": "Cloud Tabs",
+      "title": "Search Cloud Tabs",
       "subtitle": "Safari",
       "description": "",
       "mode": "view"
     },
     {
       "name": "reading-list",
-      "title": "Reading List",
+      "title": "Search Reading List",
       "subtitle": "Safari",
       "description": "",
       "mode": "view"
