@@ -8,6 +8,9 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useState, useCallback, useMemo } from "react";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import expandTidle from "expand-tilde";
 import { createClient } from "./modules/client";
 
 const preferences = getPreferenceValues();
@@ -19,12 +22,13 @@ export default function AddNewTorrent() {
   const handleSubmit = useCallback(async (values: { url: string; downloadDir: string }) => {
     try {
       await transmission.addUrl(values.url, {
-        "download-dir": values.downloadDir,
+        "download-dir": expandTidle(values.downloadDir),
       });
 
       showToast(ToastStyle.Success, `Torrent added to your list`);
-    } catch (error) {
-      showToast(ToastStyle.Failure, `The torrent couldn't be added`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      showToast(ToastStyle.Failure, `The torrent couldn't be added: ${error.code}`);
     } finally {
       popToRoot({ clearSearchBar: true });
     }

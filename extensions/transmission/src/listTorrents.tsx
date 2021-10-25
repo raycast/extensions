@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * RPC spec is available at https://trac.transmissionbt.com/browser/trunk/extras/rpc-spec.txt
  */
@@ -148,13 +149,23 @@ const sortTorrents = (t1: Torrent, t2: Torrent): number => {
 };
 
 const stopAllTorrents = async (transmission: Transmission) => {
-  const allTorrents = await fetchTorrents(transmission);
-  await transmission.stop(allTorrents.map((t) => t.id));
+  try {
+    const { torrents } = (await transmission.get(false)) as { torrents: Torrent[] };
+    await transmission.stop(torrents.map((t) => t.id));
+  } catch (error: any) {
+    console.error(error);
+    showToast(ToastStyle.Failure, `Could not stop torrents: ${error.code}`);
+  }
 };
 
 const startAllTorrents = async (transmission: Transmission) => {
-  const allTorrents = await fetchTorrents(transmission);
-  await transmission.start(allTorrents.map((t) => t.id));
+  try {
+    const { torrents } = (await transmission.get(false)) as { torrents: Torrent[] };
+    await transmission.start(torrents.map((t) => t.id));
+  } catch (error: any) {
+    console.error(error);
+    showToast(ToastStyle.Failure, `Could not start torrents: ${error.code}`);
+  }
 };
 
 export default function TorrentList() {
@@ -165,10 +176,14 @@ export default function TorrentList() {
   const [didLoad, setDidLoad] = useState(false);
 
   const updateData = useCallback(async () => {
-    const torrents = await fetchTorrents(transmission);
-    const sessionStats = await transmission.sessionStats();
-    setTorrents(torrents);
-    setSessionStats(sessionStats);
+    try {
+      const [data, sessionStats] = await Promise.all([transmission.get(false), transmission.sessionStats()]);
+      setTorrents(data.torrents);
+      setSessionStats(sessionStats);
+    } catch (error: any) {
+      console.error(error);
+      showToast(ToastStyle.Failure, `Could not load torrents: ${error.code}`);
+    }
   }, [transmission]);
 
   useEffect(() => {
@@ -207,17 +222,35 @@ export default function TorrentList() {
             percentDone={paddedPercentDones[index]}
             sessionStats={sessionStats}
             onStop={async (torrent) => {
-              await transmission.stop([torrent.id]);
+              try {
+                await transmission.stop([torrent.id]);
+              } catch (error: any) {
+                console.error(error);
+                showToast(ToastStyle.Failure, `Could not stop torrent: ${torrent.name}`);
+                return;
+              }
               await updateData();
               showToast(ToastStyle.Success, `Torrent ${torrent.name} stopped`);
             }}
             onStart={async (torrent) => {
-              await transmission.start([torrent.id]);
+              try {
+                await transmission.start([torrent.id]);
+              } catch (error: any) {
+                console.error(error);
+                showToast(ToastStyle.Failure, `Could not start torrent: ${torrent.name}`);
+                return;
+              }
               await updateData();
               showToast(ToastStyle.Success, `Torrent ${torrent.name} started`);
             }}
             onRemove={async (torrent, deleteLocalData) => {
-              await transmission.remove([torrent.id], deleteLocalData);
+              try {
+                await transmission.remove([torrent.id], deleteLocalData);
+              } catch (error: any) {
+                console.error(error);
+                showToast(ToastStyle.Failure, `Could not start torrent: ${torrent.name}`);
+                return;
+              }
               await updateData();
               showToast(ToastStyle.Success, `Torrent ${torrent.name} deleted`);
             }}
@@ -293,16 +326,4 @@ function TorrentListItem({
       }
     />
   );
-}
-
-async function fetchTorrents(transmission: Transmission): Promise<Torrent[]> {
-  try {
-    const response = await transmission.get(false);
-    return response.torrents;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    console.error(error);
-    showToast(ToastStyle.Failure, `Could not load torrents: ${error.code}`);
-    return Promise.resolve([]);
-  }
 }
