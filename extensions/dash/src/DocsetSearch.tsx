@@ -1,63 +1,11 @@
 import { List, ActionPanel, OpenAction } from "@raycast/api";
-import { exec } from "child_process";
-import { useState, useEffect } from "react";
-import { getDashAppPath } from "./util/dashApp";
+import { useState } from "react";
 import { Docset } from "./util/docsets";
-import { parse } from "fast-xml-parser";
-
-type DashResult = {
-  title: string;
-  subtitle: string[];
-  icon: string;
-  quicklookurl: string;
-  "@_uid": string;
-};
-
-async function searchDash(query: string): Promise<DashResult[]> {
-  return new Promise((resolve, reject) => {
-    exec(
-      `./dashAlfredWorkflow ${query}`,
-      {
-        cwd: `${getDashAppPath()}/Contents/Resources`,
-      },
-      (err, data) => {
-        if (err) reject(err);
-
-        const jsonData = parse(data, { ignoreAttributes: false });
-
-        if (jsonData.output !== undefined) {
-          if (Array.isArray(jsonData.output.items.item)) {
-            resolve(jsonData.output.items.item);
-          } else {
-            resolve([ jsonData.output.items.item ]);
-          }
-        } else {
-          resolve([]);
-        }
-      }
-    );
-  });
-}
+import { useDocsetSearch } from "./util/useDocsetSearch";
 
 export default function DocsetSearch({ docset }: { docset: Docset }) {
-  const [isLoading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [results, setResults] = useState<DashResult[]>([]);
-
-  async function fetchDashResults() {
-    setLoading(true);
-    if (searchText.length) {
-      setResults(await searchDash(`${docset.docsetKeyword}:${searchText}`));
-    } else {
-      setResults([]);
-    }
-
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    fetchDashResults();
-  }, [searchText]);
+  const [results, isLoading] = useDocsetSearch(searchText, docset.docsetKeyword);
 
   return (
     <List
