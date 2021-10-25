@@ -101,7 +101,7 @@ export default function Main() {
       {!isValidToken ? (
         <List.Item
           icon={Icon.ExclamationMark}
-          title="Invalid API Key detected"
+          title="Invalid API Key Detected"
           accessoryTitle={`Go to Extensions → Clockify`}
         />
       ) : (
