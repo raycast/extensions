@@ -5,20 +5,21 @@ import {Color, Icon} from '@raycast/api'
 type DisplayableStatus = Pick<ProposalUISectionItem, 'icon'> & {display: string, order: number}
 
 const displayableStatusMap: Record<string, DisplayableStatus> = {
+  ".awaitingReview": {display: "Awaiting Review", icon: {source: Icon.Clock, tintColor: Color.Orange}, order: 0},
   ".scheduledForReview": {
     display: "Scheduled For Review",
     icon: {source: Icon.Calendar, tintColor: Color.Orange},
-    order: 0
+    order: 1
   },
-  ".activeReview": {display: "In Review", icon: {source: Icon.Bubble, tintColor: Color.Orange}, order: 1},
-  ".accepted": {display: "Accepted", icon: {source: Icon.Checkmark, tintColor: Color.Green}, order: 2},
-  ".acceptedWithRevisions": {display: "Accepted", icon: {source: Icon.Checkmark, tintColor: Color.Green}, order: 3},
-  ".previewing": {display: "Previewing", icon: {source: Icon.Checkmark, tintColor: Color.Magenta}, order: 4},
-  ".implemented": {display: "Implemented", icon: {source: Icon.Checkmark, tintColor: Color.Blue}, order: 5},
-  ".returnedForRevision": {display: "Returned", icon: {source: Icon.ArrowClockwise, tintColor: Color.Purple}, order: 6},
-  ".deferred": {display: "Deferred", icon: {source: Icon.Calendar, tintColor: Color.Purple}, order: 7},
-  ".rejected": {display: "Rejected", icon: {source: Icon.ExclamationMark, tintColor: Color.Red}, order: 8},
-  ".withdrawn": {display: "Withdrawn", icon: {source: Icon.Trash, tintColor: Color.Red}, order: 9},
+  ".activeReview": {display: "In Review", icon: {source: Icon.Bubble, tintColor: Color.Orange}, order: 2},
+  ".accepted": {display: "Accepted", icon: {source: Icon.Checkmark, tintColor: Color.Green}, order: 3},
+  ".acceptedWithRevisions": {display: "Accepted", icon: {source: Icon.Checkmark, tintColor: Color.Green}, order: 4},
+  ".previewing": {display: "Previewing", icon: {source: Icon.Checkmark, tintColor: Color.Magenta}, order: 5},
+  ".implemented": {display: "Implemented", icon: {source: Icon.Checkmark, tintColor: Color.Blue}, order: 6},
+  ".returnedForRevision": {display: "Returned", icon: {source: Icon.ArrowClockwise, tintColor: Color.Purple}, order: 7},
+  ".deferred": {display: "Deferred", icon: {source: Icon.Calendar, tintColor: Color.Purple}, order: 8},
+  ".rejected": {display: "Rejected", icon: {source: Icon.ExclamationMark, tintColor: Color.Red}, order: 9},
+  ".withdrawn": {display: "Withdrawn", icon: {source: Icon.Trash, tintColor: Color.Red}, order: 10},
 }
 
 type ProposalJson = {
