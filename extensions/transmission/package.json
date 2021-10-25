@@ -9,7 +9,7 @@
     {
       "name": "listTorrents",
       "title": "List Torrents",
-      "subtitle": "",
+      "subtitle": "Transmission",
       "description": "Show the list of torrents",
       "mode": "view"
     },
