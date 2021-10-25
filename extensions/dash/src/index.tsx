@@ -7,12 +7,12 @@ import DashResult from "./components/DashResult";
 
 export default function MultiDocsetSearch() {
   const [searchText, setSearchText] = useState("");
-  const [docsets] = useDocsets(searchText);
+  const [docsets, isLoadingDocsets] = useDocsets(searchText);
   const [searchResults, isLoadingSearchResults] = useDocsetSearch(searchText);
 
   return (
     <List
-      isLoading={docsets.length === 0 || isLoadingSearchResults}
+      isLoading={isLoadingDocsets || isLoadingSearchResults}
       searchBarPlaceholder="Filter docsets by name or keyword..."
       onSearchTextChange={setSearchText}
     >

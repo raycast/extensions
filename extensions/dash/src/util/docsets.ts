@@ -13,12 +13,17 @@ export type Docset = {
   pluginKeyword: string;
 }
 
-export function useDocsets(searchText: string): [Docset[]] {
+export function useDocsets(searchText: string): [Docset[], boolean] {
+  const [isLoading, setLoading] = useState<boolean>(false);
   const [docsets, setDocsets] = useState<Docset[]>([]);
   const [filteredDocsets, setFilteredDocsets] = useState<Docset[]>([]);
 
   useEffect(() => {
-    getDocsets().then(setDocsets);
+    setLoading(true);
+    getDocsets().then((docsets) => {
+      setDocsets(docsets);
+      setLoading(false);
+    });
   }, []);
 
   useEffect(() => {
@@ -30,7 +35,7 @@ export function useDocsets(searchText: string): [Docset[]] {
     );
   }, [searchText]);
 
-  return [searchText.length ? filteredDocsets : docsets];
+  return [searchText.length ? filteredDocsets : docsets, isLoading];
 }
 
 export function getDocsets(): Promise<Docset[]> {
