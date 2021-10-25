@@ -8,7 +8,7 @@ import fuzzysort from 'fuzzysort'
 
 
 const BASE_URL = 'https://coinmarketcap.com/currencies/'
-import { CryptoList, SearchResult,ResultData } from './types'
+import { CryptoList, SearchResult } from './types'
 
 
 export default function CryptoList() {
@@ -18,8 +18,7 @@ export default function CryptoList() {
 
   useEffect(() => {
 
-    getListFromFile((err: string, data: string) => {
-
+    getListFromFile((err, data) => {
 
       if (err) {
         console.error('ReadListError:' + err)
@@ -32,16 +31,17 @@ export default function CryptoList() {
         fetchAllCrypto({ limit: 10000, start: 1 }).then(({ data: resultData }) => {
           const { data, status } = resultData
 
-          const cryptoList = data.cryptoCurrencyMap.map(({ slug, name, symbol }: CryptoList) => ({ slug, name, symbol: symbol.toLowerCase() }))
+          const cryptoList = data.cryptoCurrencyMap.map(({ slug, name, symbol}) => ({ slug, name, symbol: symbol.toLowerCase()}))
 
           writeListInToFile({
             timestamp: status.timestamp,
             cryptoList: cryptoList
-          }, (writeFileError: string) => {
+          }, (writeFileError) => {
             if (writeFileError) {
               console.error('WriteFileError:' + writeFileError)
               return
             }
+
             setCryptoList(cryptoList)
           })
         })
@@ -66,7 +66,8 @@ export default function CryptoList() {
 
   const onSearchChange = (search: string) => {
     setIsLoading(true)
-    const fuzzyResult = fuzzysort.go(search, cryptoList, { key: 'symbol' })
+
+    const fuzzyResult = fuzzysort.go(search, cryptoList, { keys: ['symbol','name'] })
     
     setSearchResult(fuzzyResult.map(result => ({ obj: result.obj })))
   }

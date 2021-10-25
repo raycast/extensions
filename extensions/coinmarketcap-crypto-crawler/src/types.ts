@@ -1,12 +1,19 @@
 
 export type ResultData = {
   data: {
-    cryptoCurrencyMap: []
+    cryptoCurrencyMap: CryptoCurrency[]
   },
   status: {
     timestamp: string
   }
 }
+
+
+export type CryptoCurrency = {
+    name: string,
+    slug: string,
+    symbol: string
+  }
 
 export type CryptoList = {
   name: string,

@@ -16,13 +16,14 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
-    "@types/fs-extra": "^9.0.13",
     "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.10",
+    "fs-extra": "^10.0.0",
     "fuzzysort": "^1.1.4",
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

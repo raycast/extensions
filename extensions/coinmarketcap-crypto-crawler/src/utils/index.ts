@@ -10,14 +10,12 @@ type FileCoinListData = {
   timestamp: string,
   cryptoList: CryptoList[]
 }
-type FileStreamCallback = (err: string, data: string) => void;
 
-
-export function writeListInToFile(data: FileCoinListData, callback: FileStreamCallback) {
+export function writeListInToFile(data: FileCoinListData, callback: fs.NoParamCallback) {
   fs.writeFile(cryptoListPath, JSON.stringify(data), callback)
 }
 
 
-export function getListFromFile(callback: FileStreamCallback) {
-  return fs.readFile(cryptoListPath, 'utf8')
+export function getListFromFile(callback: (err: NodeJS.ErrnoException | null, data: string) => void) {
+  return fs.readFile(cryptoListPath, 'utf8', callback)
 }
