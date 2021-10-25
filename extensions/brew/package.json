@@ -1,6 +1,6 @@
 {
   "name": "brew",
-  "title": "Homebrew",
+  "title": "Brew",
   "description": "Search and install Homebrew formulae",
   "author": "nhojb",
   "license": "MIT",
@@ -10,21 +10,21 @@
       "name": "installed",
       "title": "Show Installed",
       "subtitle": "Brew",
-      "description": "List installed formulas",
+      "description": "List installed brew formulae",
       "mode": "view"
     },
     {
       "name": "search",
       "title": "Search Formula",
       "subtitle": "Brew",
-      "description": "Search homebrew formula",
+      "description": "Search brew formula",
       "mode": "view"
     },
     {
       "name": "outdated",
       "title": "Show Outdated",
       "subtitle": "Brew",
-      "description": "Show outdated formula",
+      "description": "Show outdated brew formulae",
       "mode": "view"
     }
   ],
