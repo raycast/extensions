@@ -55,7 +55,7 @@ async function getFinderSelection():Promise<string[]> {
 
   return (response === '')
     ? []
-    : response.split('\r').map((item) => item.replace(/"/g, '\\"'));
+    : response.split('\r');
 }
 
 function ApplicationsListItem(props: { application: Application }) {
@@ -77,7 +77,7 @@ function ApplicationsListItem(props: { application: Application }) {
                 await showHUD(`⚠️  No Finder selection to open.`);
               } else {
                 selectedItems.forEach((item) => {
-                  execSync(`open -b ${application.bundleId} "${item}"`);
+                  execSync(`open -b ${application.bundleId} "${item.replace(/"/g, '\\"')}"`);
                 })
               }
             }}
