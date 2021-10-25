@@ -1,5 +1,5 @@
+import { showToast, ToastStyle } from "@raycast/api";
 import fetch from "node-fetch";
-import path from "path";
 import urljoin from "url-join";
 
 function paramString(params: { [key: string]: string }): string {
@@ -73,7 +73,11 @@ export class HomeAssistant {
     }
 
     async callService(domain: string, service: string, params: { [key: string]: any }) {
-        await this.post(`services/${domain}/${service}`, params = params);
+        try {
+            await this.post(`services/${domain}/${service}`, params = params);
+        } catch (error: any) {
+            showToast(ToastStyle.Failure, "Error", `${error.message}`)
+        }
     }
 
     async openCover(entityID: string) {

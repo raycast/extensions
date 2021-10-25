@@ -1,0 +1,46 @@
+{
+  "name": "rss-reader",
+  "title": "RSS Reader",
+  "description": "Browse last news from your favourite source",
+  "icon": "command-icon.png",
+  "author": "fuksman",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Read News",
+      "subtitle": "RSS",
+      "description": "Get the latest from your favourite source",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "feed",
+      "type": "textfield",
+      "required": true,
+      "title": "RSS Feed",
+      "description": "Paste feed URL"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "javascript-time-ago": "^2.3.9",
+    "node-fetch": "^3.0.0",
+    "rss-parser": "^3.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
