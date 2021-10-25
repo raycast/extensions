@@ -1,7 +1,7 @@
 import { ActionPanel, List, useNavigation } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Docset, getDocsetIconPath, getDocsets } from "./util/docsets";
-import DocsetSearch from "./DocsetSearch";
+import SingleDocsetSearch from "./SingleDocsetSearch";
 
 export default function DocSetList() {
   const [docsets, setDocsets] = useState<Docset[]>([]);
@@ -46,7 +46,7 @@ function DocsetListItem({ docset }: { docset: Docset }) {
       icon={getDocsetIconPath(docset)}
       actions={
         <ActionPanel>
-          <ActionPanel.Item title="Open" onAction={() => push(<DocsetSearch docset={docset} />)} />
+          <ActionPanel.Item title="Open" onAction={() => push(<SingleDocsetSearch docset={docset} />)} />
         </ActionPanel>
       }
     />
