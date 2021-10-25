@@ -1,5 +1,5 @@
-import { List, ActionPanel, ActionPanelItem, closeMainWindow, OpenAction } from "@raycast/api";
-import { exec, execSync } from "child_process";
+import { List, ActionPanel, OpenAction } from "@raycast/api";
+import { exec } from "child_process";
 import { useState, useEffect } from "react";
 import { getDashAppPath } from "./util/dashApp";
 import { Docset } from "./util/docsets";
