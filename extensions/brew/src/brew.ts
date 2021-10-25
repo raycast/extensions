@@ -1,14 +1,18 @@
 import { exec, execSync } from "child_process";
 import { promisify } from "util";
-import { stat, readFile, writeFile } from "fs/promises";
+import { stat, readFile, writeFile, rm } from "fs/promises";
 import { join as path_join } from "path";
 import fetch from "node-fetch";
 import * as utils from "./utils";
 
 const execp = promisify(exec);
 
-export interface Formula {
+export interface FormulaBase {
   name: string;
+  pinned: bool;
+}
+
+export interface Formula extends FormulaBase {
   full_name: string;
   desc: string;
   license: string;
@@ -20,6 +24,13 @@ export interface Formula {
   keg_only: bool,
   linked_key: string;
   aliases: string[];
+  outdated: bool;
+}
+
+export interface OutdatedFormula extends FormulaBase {
+  installed_versions: string[];
+  current_version: string;
+  pinned_vesion?: string;
 }
 
 export interface Installed {
@@ -91,6 +102,12 @@ export async function brewFetchInstalled(useCache: bool): Promise<Formula[]> {
   }
 }
 
+export async function brewFetchOutdated(): Promise<OutdatedFormula[]> {
+  // TD: Handle casks
+  const outdated = JSON.parse((await execp(`brew outdated --json`)).stdout);
+  return outdated['formulae'] ?? [];
+}
+
 let formulaCache: Formula[] = [];
 const formulaURL = "https://formulae.brew.sh/api/formula.json";
 
@@ -146,6 +163,8 @@ export async function brewSearchFormula(searchText: string): Promise<Formula[]> 
   return results;
 }
 
+/// Actions
+
 export async function brewInstall(formula: Formula): Promise<void> {
   await execp(`brew install ${formula.name}`);
 }
@@ -154,6 +173,61 @@ export async function brewUninstall(formula: Formula): Promise<void> {
   await execp(`brew rm ${formula.name}`);
 }
 
+export async function brewPinFormula(formula: FormulaBase): Promise<void> {
+  await execp(`brew pin ${formula.name}`);
+  formula.pinned = true;
+  await brewClearInstalledCache();
+}
+
+export async function brewUnpinFormula(formula: FormulaBase): Promise<void> {
+  await execp(`brew unpin ${formula.name}`);
+  formula.pinned = false;
+  await brewClearInstalledCache();
+}
+
+export async function brewUpgrade(formula: FormulaBase): Promise<void> {
+  await execp(`brew upgrade ${formula.name}`);
+  await brewClearInstalledCache();
+}
+
+export async function brewUpgradeAll(): Promise<void> {
+  await execp(`brew upgrade`);
+}
+
+/// Utilities
+
+export function brewFormatVersion(formula: Formula): string {
+  let version = "";
+  if (formula.installed.length > 0) {
+    const installed_version = formula.installed[0];
+    version = installed_version.version;
+    let status = "";
+    if (installed_version.installed_as_dependency) {
+      status += 'D';
+    }
+    if (formula.pinned) {
+      status += 'P';
+    }
+    if (formula.outdated) {
+      status += 'O';
+    }
+    if (status) {
+      version += ` (${status})`;
+    }
+  }
+  return version;
+}
+
 export function brewIsInstalled(formula: Formula): bool {
   return formula.installed.length > 0;
+}
+
+/// Private
+
+async function brewClearInstalledCache(): Promise<void> {
+  try {
+    await rm(installedCachePath, {force: true});
+  } catch (err) {
+    console.log('Warning, brewClearInstalledCache error:', err);
+  }
 }

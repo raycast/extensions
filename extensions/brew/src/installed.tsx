@@ -8,8 +8,8 @@ import {
   ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { brewFetchInstalled, brewIsInstalled } from "./brew";
-import FormulaActionPanel from "./components/actionPanel";
+import { brewFetchInstalled, brewIsInstalled, brewFormatVersion } from "./brew";
+import { FormulaActionPanel } from "./components/actionPanel";
 
 function Main() {
   const [formulae, setFormulae] = useState<Formula[]>([]);
@@ -29,23 +29,15 @@ function Main() {
 
   function FormulaListItem(props: { formula: Formula }) {
     const formula = props.formula;
-    let version = "";
-    if (formula.installed.length > 0) {
-      const installed_version = formula.installed[0];
-      if (installed_version.installed_as_dependency) {
-        version = `${installed_version.version} (D)`;
-      } else {
-        version = installed_version.version;
-      }
-    }
+    const tintColor = formula.outdated ? Color.Red : Color.Green;
 
     return (
       <List.Item id={formula.name}
                  title={formula.name}
                  subtitle={formula.desc}
-                 accessoryTitle={version}
-                 icon={ {source: Icon.Checkmark, tintColor: Color.Green} }
-                 actions={<FormulaActionPanel formula={formula} showDetails={true} onInstall={() => {
+                 accessoryTitle={brewFormatVersion(formula)}
+                 icon={ {source: Icon.Checkmark, tintColor: tintColor} }
+                 actions={<FormulaActionPanel formula={formula} showDetails={true} onAction={() => {
                    // Uninstall does not (currently) include dependencies, so just reload formulae.
                    setFormulae(formulae.filter(f => brewIsInstalled(f) ));
                  }}

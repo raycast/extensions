@@ -19,6 +19,13 @@
       "subtitle": "Brew",
       "description": "Search homebrew formula",
       "mode": "view"
+    },
+    {
+      "name": "outdated",
+      "title": "Show Outdated",
+      "subtitle": "Brew",
+      "description": "Show outdated formula",
+      "mode": "view"
     }
   ],
   "dependencies": {

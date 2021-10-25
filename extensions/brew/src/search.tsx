@@ -7,8 +7,8 @@ import {
   ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { brewSearchFormula, brewFetchInstalled, brewIsInstalled } from "./brew";
-import FormulaActionPanel from "./components/actionPanel";
+import { brewSearchFormula, brewFetchInstalled, brewIsInstalled, brewFormatVersion } from "./brew";
+import { FormulaActionPanel } from "./components/actionPanel";
 
 /// Main
 
@@ -42,8 +42,8 @@ function Main() {
     let tintColor = Color.SecondaryText;
 
     if (brewIsInstalled(formula)) {
-      version = formula.installed[0].version;
-      tintColor = Color.Green;
+      version = brewFormatVersion(formula);
+      tintColor = formula.outdated ? Color.Red : Color.Green;
     }
 
     return (
@@ -53,7 +53,7 @@ function Main() {
         subtitle={formula.desc}
         accessoryTitle={version}
         icon={ {source: Icon.Checkmark, tintColor: tintColor} }
-        actions={<FormulaActionPanel formula={formula} showDetails={true} onInstall={() => {
+        actions={<FormulaActionPanel formula={formula} showDetails={true} onAction={() => {
           setInstalled(undefined);
         }}
         />}
