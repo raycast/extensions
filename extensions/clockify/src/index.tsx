@@ -109,7 +109,7 @@ export default function Main() {
           <List.Section title="What are you working on?">
             <List.Item
               icon="▶️"
-              title="Start new timer"
+              title="Start New timer"
               actions={
                 <ActionPanel>
                   <ActionPanel.Item
