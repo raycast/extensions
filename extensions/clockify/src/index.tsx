@@ -108,7 +108,7 @@ export default function Main() {
         <>
           <List.Section title="What are you working on?">
             <List.Item
-              icon="▶️"
+              icon={{ source: Icon.ArrowRight}}
               title="Start New timer"
               actions={
                 <ActionPanel>
