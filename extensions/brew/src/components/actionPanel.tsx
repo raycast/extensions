@@ -21,20 +21,6 @@ export default function FormulaActionPanel(props: {formula: Formula, showDetails
 }
 
 function installedActionPanel(formula: Formula, showDetails: bool, onInstall: () => void): Component {
-  async function uninstall(): Promise<bool> {
-    showToast(ToastStyle.Animated, `Uninstalling ${formula.full_name}`);
-    try {
-      await brewUninstall(formula);
-      formula.installed = [];
-      showToast(ToastStyle.Success, `Uninstalled ${formula.full_name}`);
-      return true;
-    } catch (err) {
-      console.error(err);
-      showToast(ToastStyle.Failure, "Uninstall failed");
-      return false;
-    }
-  }
-
   return (<ActionPanel>
     <ActionPanel.Section>
       {showDetails && <PushAction title="Show Details" target={<FormulaInfo formula={formula} onInstall={onInstall} />} />}
@@ -43,19 +29,27 @@ function installedActionPanel(formula: Formula, showDetails: bool, onInstall: ()
       <CopyToClipboardAction title="Copy URL" content={formula.homepage} />
     </ActionPanel.Section>
     <ActionPanel.Section>
-      <ActionPanelItem title="Uninstall"
-                       icon={Icon.Trash}
-                       shortcut={{ modifiers:["ctrl"], key: "x" }}
-                       onAction={async () => {
-                         const result = await uninstall();
-                         onInstall(result);
-                       }} />
+      <FormulaUninstallAction formula={formula} onInstall={onInstall} />
     </ActionPanel.Section>
   </ActionPanel>);
 }
 
 function uninstalledActionPanel(formula: Formula, showDetails: bool, onInstall: () => void): Component {
+  return (<ActionPanel>
+    <ActionPanel.Section>
+      {showDetails && <PushAction title="Show Details" target={<FormulaInfo formula={formula} onInstall={onInstall} />} />}
+      <FormulaInstallAction formula={formula} onInstall={onInstall} />
+    </ActionPanel.Section>
+    <ActionPanel.Section>
+      <OpenInBrowserAction url={formula.homepage} />
+      <CopyToClipboardAction title="Copy URL" content={formula.homepage} />
+    </ActionPanel.Section>
+  </ActionPanel>);
+}
+
+export function FormulaInstallAction(props: {formula: Formula, onInstall: () => void}): Component {
   async function install(): Promise<bool> {
+    const formula = props.formula;
     showToast(ToastStyle.Animated, `Installing ${formula.full_name}`);
     try {
       await brewInstall(formula);
@@ -69,20 +63,39 @@ function uninstalledActionPanel(formula: Formula, showDetails: bool, onInstall: 
     }
   }
 
-  return (<ActionPanel>
-    <ActionPanel.Section>
-      {showDetails && <PushAction title="Show Details" target={<FormulaInfo formula={formula} onInstall={onInstall} />} />}
-      <ActionPanelItem title={"Install"}
-                       icon={Icon.Plus}
-                       shortcut={{ modifiers:["cmd"], key: "i" }}
-                       onAction={async () => {
-                         onInstall(await install());
-                       }}
-      />
-    </ActionPanel.Section>
-    <ActionPanel.Section>
-      <OpenInBrowserAction url={formula.homepage} />
-      <CopyToClipboardAction title="Copy URL" content={formula.homepage} />
-    </ActionPanel.Section>
-  </ActionPanel>);
+  // TD: Support installing other versions?
+
+  return (<ActionPanelItem title={"Install"}
+    icon={Icon.Plus}
+    shortcut={{ modifiers:["cmd"], key: "i" }}
+    onAction={async () => {
+      props.onInstall(await install());
+    }}
+    />);
+}
+
+export function FormulaUninstallAction(props: {formula: Formula, onInstall: () => void}): Component {
+  async function uninstall(): Promise<bool> {
+    const formula = props.formula
+    showToast(ToastStyle.Animated, `Uninstalling ${formula.full_name}`);
+    try {
+      await brewUninstall(formula);
+      formula.installed = [];
+      showToast(ToastStyle.Success, `Uninstalled ${formula.full_name}`);
+      return true;
+    } catch (err) {
+      console.error(err);
+      showToast(ToastStyle.Failure, "Uninstall failed");
+      return false;
+    }
+  }
+
+  return (<ActionPanelItem title="Uninstall"
+    icon={Icon.Trash}
+    shortcut={{ modifiers:["ctrl"], key: "x" }}
+    onAction={async () => {
+      const result = await uninstall();
+      props.onInstall(result);
+    }}
+    />);
 }

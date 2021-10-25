@@ -8,7 +8,7 @@ import {
   ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { brewFetchInstalled } from "./brew";
+import { brewFetchInstalled, brewIsInstalled } from "./brew";
 import FormulaActionPanel from "./components/actionPanel";
 
 function Main() {
