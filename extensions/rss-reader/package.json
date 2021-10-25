@@ -1,7 +1,7 @@
 {
   "name": "rss-reader",
   "title": "RSS Reader",
-  "description": "Browse last news from your favourite source",
+  "description": "Browse latest news from your favourite sources",
   "icon": "command-icon.png",
   "author": "fuksman",
   "license": "MIT",
@@ -10,17 +10,8 @@
       "name": "index",
       "title": "Read News",
       "subtitle": "RSS",
-      "description": "Get the latest from your favourite source",
+      "description": "Get the latest from your favourite sources",
       "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "feed",
-      "type": "textfield",
-      "required": true,
-      "title": "RSS Feed",
-      "description": "Paste feed URL"
     }
   ],
   "dependencies": {
