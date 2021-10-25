@@ -1,9 +1,9 @@
 {
-  "name": "clockify-controls",
-  "title": "Clockify Controls",
+  "name": "clockify",
+  "title": "Clockify",
   "description": "Control Clockify time tracking from Raycast",
   "icon": "command-icon.png",
-  "author": "ismamz",
+  "author": "isma",
   "license": "MIT",
   "preferences": [
     {
