@@ -94,7 +94,7 @@ function SetAudioDeviceAction({ device }: SetAudioDeviceActionProps) {
       title="Select"
       onAction={async () => {
         try {
-          await execp(`${switchAudioPath()} -t ${device.type} -u ${device.uid}`);
+          await execp(`${switchAudioPath()} -t ${device.type} -i ${device.id}`);
           closeMainWindow({ clearRootSearch: true });
           popToRoot({ clearSearchBar: true });
           showHUD(`${deviceIcon(device)} Active audio device set to ${device.name}`);
