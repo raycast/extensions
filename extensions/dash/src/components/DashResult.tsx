@@ -6,7 +6,7 @@ export default function ({ result, index }: { result: DashResult; index: number 
   return (
     <List.Item
       key={result["@_uid"]}
-      title={result.title}
+      title={result.title.toString()}
       subtitle={subtitle}
       accessoryTitle={docsetName}
       icon={result.icon}
