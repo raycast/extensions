@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from '@raycast/api';
+import { showToast, setLocalStorageItem, getLocalStorageItem, ToastStyle } from '@raycast/api';
 import axios, { AxiosResponse } from 'axios';
 import { getPreference } from '../utils/raycast';
 import { trimTagsAndDecodeEntities } from '../utils/string';
@@ -206,6 +206,7 @@ export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsRe
         ...objEntity,
         title: trimTagsAndDecodeEntities(objEntity.title),
         preview: trimTagsAndDecodeEntities(objEntity.preview),
+        url: computeRedirectedUrl(objEntity),
       };
     });
     return data;
@@ -228,4 +229,22 @@ export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsRe
       },
     });
   }
+}
+
+const computeRedirectedUrl = (objEntity: ObjEntity) => {
+  return objEntity.url.replace(/\/space\//, '/');
+};
+
+const CACHE_DOCS_RECENT_LIST = 'CACHE_DOCS_RECENT_LIST';
+
+export function setRecentListCache(recentList: RecentListResponse): Promise<void> {
+  return setLocalStorageItem(CACHE_DOCS_RECENT_LIST, JSON.stringify(recentList));
+}
+
+export async function getRecentListCache(): Promise<RecentListResponse | null> {
+  const cache = await getLocalStorageItem(CACHE_DOCS_RECENT_LIST);
+  if (typeof cache === 'string') {
+    return JSON.parse(cache) as RecentListResponse;
+  }
+  return null;
 }
