@@ -9,4 +9,5 @@ export interface ImportedTowerBookmark {
   repositoryIdentifier: string;
   type: number;
   valid: boolean;
+  children: ImportedTowerBookmark[];
 }
