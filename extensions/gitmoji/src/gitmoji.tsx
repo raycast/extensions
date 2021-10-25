@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, PasteAction, List } from "@raycast/api";
 import { gitmojis } from "gitmojis";
 
 export default function GitmojiList() {
@@ -24,6 +24,7 @@ function GitmojiListItem(props: { gitmoji: Gitmoji }) {
       keywords={[gitmoji.code.replace(":", ""), gitmoji.name]}
       actions={
         <ActionPanel>
+          <PasteAction content={gitmoji.emoji} />
           <CopyToClipboardAction content={gitmoji.emoji} />
         </ActionPanel>
       }
