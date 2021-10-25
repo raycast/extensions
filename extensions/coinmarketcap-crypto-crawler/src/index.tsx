@@ -113,7 +113,7 @@ export default function CryptoList() {
             return (
               <List.Item
                 id={`${slug}_${symbol}_${index}`}
-                key={name}
+                key={`${name}_${index}`}
                 title={name}
                 subtitle={currencyPrice}
                 icon={Icon.Star}
