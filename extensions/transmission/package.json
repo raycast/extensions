@@ -16,7 +16,7 @@
     {
       "name": "addNewTorrent",
       "title": "Add New Torrent",
-      "subtitle": "",
+      "subtitle": "Transmission",
       "description": "Add a new torrent from a magnet link",
       "mode": "view"
     }
