@@ -2,11 +2,14 @@ import { ActionPanel, List, useNavigation } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Docset, getDocsetIconPath, getDocsets } from "./util/docsets";
 import SingleDocsetSearch from "./SingleDocsetSearch";
+import { useDocsetSearch } from "./util/useDocsetSearch";
+import DashResult from "./components/DashResult";
 
-export default function DocSetList() {
+export default function MultiDocsetSearch() {
   const [docsets, setDocsets] = useState<Docset[]>([]);
   const [searchText, setSearchText] = useState("");
   const [filteredDocsets, setFilteredDocsets] = useState<Docset[]>([]);
+  const [searchResults, isLoadingSearchResults] = useDocsetSearch(searchText);
 
   useEffect(() => {
     getDocsets().then(setDocsets);
@@ -25,13 +28,20 @@ export default function DocSetList() {
 
   return (
     <List
-      isLoading={docsets.length === 0}
+      isLoading={docsets.length === 0 || isLoadingSearchResults}
       searchBarPlaceholder="Filter docsets by name or keyword..."
       onSearchTextChange={searchInDocsets}
     >
-      {(searchText.length > 0 ? filteredDocsets : docsets).map((docset) => (
-        <DocsetListItem key={docset.docsetKeyword} docset={docset} />
-      ))}
+      <List.Section title="Docsets">
+        {(searchText.length > 0 ? filteredDocsets : docsets).map((docset) => (
+          <DocsetListItem key={docset.docsetKeyword} docset={docset} />
+        ))}
+      </List.Section>
+      <List.Section title="Search Results">
+        {searchResults.map((result, index) => (
+          <DashResult result={result} index={index} key={index} />
+        ))}
+      </List.Section>
     </List>
   );
 }
