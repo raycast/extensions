@@ -16,8 +16,7 @@ export type QueryResultItem = {
   id: string;
   title: string;
   subtitle: string;
-  url: string;
-  appUrl: string;
+  fileId: string;
   accessoryTitle: string;
   icon: string;
 };
@@ -33,8 +32,7 @@ const parseRepositoryItem = (data: any) => {
         id: `${item.id}`,
         title: `${reg_title}`,
         subtitle: '',
-        url: `https://www.notion.so/`+ `${item.id}`.replace(/-/g, ''),
-        appUrl: `notion://www.notion.so/`+ `${item.id}`.replace(/-/g, ''),
+        fileId: `${item.id}`.replace(/-/g, ''),
         accessoryTitle: acc_title,
         icon: page_icon,
       };
