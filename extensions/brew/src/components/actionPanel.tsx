@@ -19,12 +19,13 @@ import {
   brewUpgrade,
   brewUpgradeAll,
 } from "../brew";
+import { Formula, FormulaBase, OutdatedFormula } from "../brew";
 import { FormulaInfo } from "./info";
 
-export function FormulaActionPanel(props: {formula: Formula, showDetails: bool, onAction: () => void}): Component {
+export function FormulaActionPanel(props: {formula: Formula, showDetails: boolean, onAction: (result: boolean) => void}) {
   const formula = props.formula;
 
-  function installedActionPanel(): Component {
+  function installedActionPanel() {
     return (
       <ActionPanel>
         <ActionPanel.Section>
@@ -42,7 +43,7 @@ export function FormulaActionPanel(props: {formula: Formula, showDetails: bool, 
     );
   }
 
-  function uninstalledActionPanel(): Component {
+  function uninstalledActionPanel() {
     return (
       <ActionPanel>
         <ActionPanel.Section>
@@ -64,14 +65,14 @@ export function FormulaActionPanel(props: {formula: Formula, showDetails: bool, 
   }
 }
 
-export function FormulaInstallAction(props: {formula: Formula, onAction: () => void}): Component {
-  async function install(): Promise<bool> {
+export function FormulaInstallAction(props: {formula: Formula, onAction: (result: boolean) => void}) {
+  async function install(): Promise<boolean> {
     const formula = props.formula;
-    showToast(ToastStyle.Animated, `Installing ${formula.full_name}`);
+    showToast(ToastStyle.Animated, `Installing ${formula.name}`);
     try {
       await brewInstall(formula);
-      formula.installed = [{version: formula.versions.stable}];
-      showToast(ToastStyle.Success, `Installed ${formula.full_name}`);
+      formula.installed = [{version: formula.versions.stable, installed_as_dependency: false, installed_on_request: true}];
+      showToast(ToastStyle.Success, `Installed ${formula.name}`);
       return true;
     } catch (error) {
       console.error(error);
@@ -93,13 +94,13 @@ export function FormulaInstallAction(props: {formula: Formula, onAction: () => v
   );
 }
 
-export function FormulaUninstallAction(props: {formula: Formula, onAction: () => void}): Component {
-  async function uninstall(): Promise<bool> {
+export function FormulaUninstallAction(props: {formula: Formula, onAction: (result: boolean) => void}) {
+  async function uninstall(): Promise<boolean> {
     const formula = props.formula
-    showToast(ToastStyle.Animated, `Uninstalling ${formula.full_name}`);
+    showToast(ToastStyle.Animated, `Uninstalling ${formula.name}`);
     try {
       await brewUninstall(formula);
-      showToast(ToastStyle.Success, `Uninstalled ${formula.full_name}`);
+      showToast(ToastStyle.Success, `Uninstalled ${formula.name}`);
       return true;
     } catch (err) {
       console.error(err);
@@ -121,10 +122,10 @@ export function FormulaUninstallAction(props: {formula: Formula, onAction: () =>
 }
 
 
-export function FormulaUpgradeAction(props: {formula: FormulaBase, onAction: () => void}): Component {
+export function FormulaUpgradeAction(props: {formula: FormulaBase, onAction: (result: boolean) => void}) {
   const formula = props.formula;
 
-  async function upgrade(): Promise<bool> {
+  async function upgrade(): Promise<boolean> {
     showToast(ToastStyle.Animated, `Upgrading ${formula.name}`);
     try {
       await brewUpgrade(formula);
@@ -149,16 +150,16 @@ export function FormulaUpgradeAction(props: {formula: FormulaBase, onAction: () 
   );
 }
 
-export function FormulaPinAction(props: {formula: Formula, onAction: () => void}): Component {
+export function FormulaPinAction(props: {formula: FormulaBase, onAction: (result: boolean) => void}): JSX.Element {
   const formula = props.formula
   const isPinned = formula.pinned;
 
-  async function pin(): Promise<bool> {
-    showToast(ToastStyle.Animated, `Pinning ${formula.full_name}`);
+  async function pin(): Promise<boolean> {
+    showToast(ToastStyle.Animated, `Pinning ${formula.name}`);
     try {
       await brewPinFormula(formula);
       formula.pinned = true;
-      showToast(ToastStyle.Success, `Pinned ${formula.full_name}`);
+      showToast(ToastStyle.Success, `Pinned ${formula.name}`);
       return true;
     } catch (err) {
       console.error(err);
@@ -167,12 +168,12 @@ export function FormulaPinAction(props: {formula: Formula, onAction: () => void}
     }
   }
 
-  async function unpin(): Promise<bool> {
-    showToast(ToastStyle.Animated, `Unpinning ${formula.full_name}`);
+  async function unpin(): Promise<boolean> {
+    showToast(ToastStyle.Animated, `Unpinning ${formula.name}`);
     try {
       await brewUnpinFormula(formula);
       formula.pinned = false;
-      showToast(ToastStyle.Success, `Unpinned ${formula.full_name}`);
+      showToast(ToastStyle.Success, `Unpinned ${formula.name}`);
       return true;
     } catch (err) {
       console.error(err);
@@ -194,10 +195,10 @@ export function FormulaPinAction(props: {formula: Formula, onAction: () => void}
   />);
 }
 
-export function OutdatedActionPanel(props: {outdated: OutdatedFormula, onAction: () => void}): Component {
+export function OutdatedActionPanel(props: {outdated: OutdatedFormula, onAction: (result: boolean) => void}): JSX.Element {
   const outdated = props.outdated;
 
-  async function updateAll(): Promise<bool> {
+  async function updateAll(): Promise<boolean> {
     showToast(ToastStyle.Animated, `Upgrading all`)
     try {
       await brewUpgradeAll();

@@ -8,25 +8,26 @@ import {
   ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { brewFetchOutdated } from "./brew";
+import { OutdatedFormula, brewFetchOutdated } from "./brew";
 import { OutdatedActionPanel } from "./components/actionPanel";
 
 function Main() {
   const [outdatedFormulae, setOutdatedFormulae] = useState<OutdatedFormula[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(async () => {
+  useEffect(() => {
     if (!isLoading) { return; }
-    try {
-      const outdated = await brewFetchOutdated();
-      console.log('outdated:', outdated);
+    brewFetchOutdated()
+    .then(outdated => {
       setOutdatedFormulae(outdated);
-    } catch (err) {
+      setIsLoading(false);
+    })
+    .catch (err => {
       console.log("brewFetchOutdated error:", err);
       showToast(ToastStyle.Failure, "Brew outdated failed");
       setOutdatedFormulae([]);
-    }
-    setIsLoading(false);
+      setIsLoading(false);
+    });
   }, [isLoading]);
 
   function OutdatedListItem(props: { outdated: OutdatedFormula }) {
@@ -50,7 +51,7 @@ function Main() {
     );
   }
 
-  function OutdatedList(props: { outdatedFormulae: OutdatedFormula[], isLoading: bool }) {
+  function OutdatedList(props: { outdatedFormulae: OutdatedFormula[], isLoading: boolean }) {
     return (
       <List searchBarPlaceholder="Filter formula by name..." isLoading={props.isLoading}>
         <ListSection title="Outdated">

@@ -1,6 +1,6 @@
 import { exec, execSync } from "child_process";
 import { promisify } from "util";
-import { stat, readFile, writeFile, rm } from "fs/promises";
+import { stat, readFile, writeFile } from "fs/promises";
 import { join as path_join } from "path";
 import fetch from "node-fetch";
 import * as utils from "./utils";
@@ -9,7 +9,7 @@ const execp = promisify(exec);
 
 export interface FormulaBase {
   name: string;
-  pinned: bool;
+  pinned: boolean;
 }
 
 export interface Formula extends FormulaBase {
@@ -23,9 +23,9 @@ export interface Formula extends FormulaBase {
   conflicts_with: string[];
   installed: Installed[];
   versions: Versions;
-  keg_only: bool,
+  keg_only: boolean,
   linked_key: string;
-  outdated: bool;
+  outdated: boolean;
   caveats?: string;
 }
 
@@ -37,14 +37,14 @@ export interface OutdatedFormula extends FormulaBase {
 
 export interface Installed {
   version: string;
-  installed_as_dependency: bool;
-  installed_on_request: bool;
+  installed_as_dependency: boolean;
+  installed_on_request: boolean;
 }
 
 export interface Versions {
   stable: string;
   head?: string;
-  bottle: bool;
+  bottle: boolean;
 }
 
 const installedCachePath = utils.cachePath('installed.json');
@@ -67,7 +67,7 @@ export function brewInstallPath(formula: Formula): string {
   }
 }
 
-export async function brewFetchInstalled(useCache: bool): Promise<Formula[]> {
+export async function brewFetchInstalled(useCache: boolean): Promise<Formula[]> {
   async function installed(): Promise<string> {
     return (await execp(`brew info --json --installed`)).stdout;
   }
@@ -105,7 +105,8 @@ export async function brewFetchInstalled(useCache: bool): Promise<Formula[]> {
     }
 
     if (homebrewTime < cacheTime && locksTime < cacheTime && pinnedTime < cacheTime) {
-      return JSON.parse(await readFile(installedCachePath));
+      const cacheBuffer = await readFile(installedCachePath);
+      return JSON.parse(cacheBuffer.toString());
     } else {
       throw 'Invalid cache';
     }
@@ -135,10 +136,11 @@ export async function brewFetchFormula(): Promise<Formula[]> {
   async function readCache(): Promise<Formula[]> {
     const cacheTime = (await stat(formulaCachePath)).mtimeMs;
     const response = await fetch(formulaURL, {method: "HEAD"});
-    const lastModified = Date.parse(response.headers.get('last-modified'));
+    const lastModified = Date.parse(response.headers.get('last-modified') ?? "");
 
     if (!isNaN(lastModified) && lastModified < cacheTime) {
-      formulaCache = JSON.parse(await readFile(formulaCachePath));
+      const cacheBuffer = await readFile(formulaCachePath);
+      formulaCache = JSON.parse(cacheBuffer.toString());
       return [...formulaCache];
     } else {
       throw 'Invalid cache';
@@ -157,6 +159,7 @@ export async function brewFetchFormula(): Promise<Formula[]> {
       return [...formulaCache];
     } catch (e) {
       console.log("fetch error:", e);
+      return [];
     }
   }
 
@@ -167,7 +170,7 @@ export async function brewFetchFormula(): Promise<Formula[]> {
   }
 }
 
-export async function brewSearchFormula(searchText: string): Promise<Formula[]> {
+export async function brewSearchFormula(searchText?: string): Promise<Formula[]> {
   if (searchText == undefined) { return [] }
 
   const formulas = await brewFetchFormula();
@@ -230,6 +233,6 @@ export function brewFormatVersion(formula: Formula): string {
   return version;
 }
 
-export function brewIsInstalled(formula: Formula): bool {
+export function brewIsInstalled(formula: Formula): boolean {
   return formula.installed.length > 0;
 }

@@ -8,23 +8,26 @@ import {
   ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { brewFetchInstalled, brewFormatVersion } from "./brew";
+import { Formula, brewFetchInstalled, brewFormatVersion } from "./brew";
 import { FormulaActionPanel } from "./components/actionPanel";
 
 function Main() {
   const [formulae, setFormulae] = useState<Formula[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(async () => {
+  useEffect(() => {
     if (!isLoading) { return; }
-    try {
-      setFormulae(await brewFetchInstalled(true));
-    } catch (err) {
-      console.log("brewFetchInstalled error:", err);
-      showToast(ToastStyle.Failure, "Brew list failed");
-      setFormulae([]);
-    }
-    setIsLoading(false);
+    brewFetchInstalled(true)
+      .then(formulae => {
+        setFormulae(formulae);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.log("brewFetchInstalled error:", err);
+        showToast(ToastStyle.Failure, "Brew list failed");
+        setFormulae([]);
+        setIsLoading(false);
+      });
   }, [isLoading]);
 
   function FormulaListItem(props: { formula: Formula }) {
@@ -45,7 +48,7 @@ function Main() {
     );
   }
 
-  function ForumulaList(props: { formulae: Formulae[], isLoading: bool }) {
+  function ForumulaList(props: { formulae: Formula[], isLoading: boolean }) {
     return (
       <List searchBarPlaceholder="Filter formula by name..." isLoading={props.isLoading}>
         <ListSection title="Installed">

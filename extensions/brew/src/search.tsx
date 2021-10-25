@@ -7,33 +7,35 @@ import {
   ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { brewSearchFormula, brewFetchInstalled, brewIsInstalled, brewFormatVersion } from "./brew";
+import { Formula, brewSearchFormula, brewFetchInstalled, brewIsInstalled, brewFormatVersion } from "./brew";
 import { FormulaActionPanel } from "./components/actionPanel";
 
 /// Main
 
 function Main() {
-  const [formulae, setFormulae] = useState([]);
-  const [installed, setInstalled] = useState(undefined);
-  const [isLoading, setIsLoading] = useState(true);
-  const [query, setQuery] = useState("");
+  const [formulae, setFormulae] = useState<Formula[]>([]);
+  const [installed, setInstalled] = useState<Map<string, Formula> | undefined>();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [query, setQuery] = useState<string>("");
 
-  useEffect(async () => {
+  useEffect(() => {
     setIsLoading(true);
     if (installed == undefined) {
-      setInstalled(await listInstalled());
+      listInstalled().then(setInstalled);
       return;
     }
-    try {
-      const formulae = await brewSearchFormula(query.trim());
-      await updateInstalled(formulae, installed);
+    brewSearchFormula(query.trim())
+    .then(formulae => {
+      updateInstalled(formulae, installed);
       setFormulae(formulae);
-    } catch (err) {
+      setIsLoading(false);
+    })
+    .catch (err => {
       setFormulae([]);
-      showToast(ToastStyle.Failure, "Package search error", err);
+      setIsLoading(false);
+      showToast(ToastStyle.Failure, "Package search error");
       console.log("brewSearchFormula error:", err);
-    }
-    setIsLoading(false);
+    });
   }, [query, installed]);
 
   function FormulaListItem(props: { formula: Formula }) {
@@ -61,7 +63,7 @@ function Main() {
     );
   }
 
-  function ForumulaList(props: { formulae: Formula[], isLoading: bool, onSearchTextChange: () => void }) {
+  function ForumulaList(props: { formulae: Formula[], isLoading: boolean, onSearchTextChange: (query: string) => void }) {
     // Truncate results: otherwise we can run out of JS heap memory...
     const results = props.formulae.slice(0, 200);
     return (
@@ -83,7 +85,7 @@ main();
 
 /// Private
 
-async function listInstalled(): Map<string, Formula> {
+async function listInstalled(): Promise<Map<string, Formula>> {
   const installed = await brewFetchInstalled(true);
   const dict = new Map<string, Formula>();
   for (const formula of installed) {
@@ -92,8 +94,8 @@ async function listInstalled(): Map<string, Formula> {
   return dict;
 }
 
-async function updateInstalled(formulae: Formula[], installed: Map<string, Formula>) {
-  for (formula of formulae) {
+function updateInstalled(formulae: Formula[], installed: Map<string, Formula>) {
+  for (const formula of formulae) {
     const info = installed.get(formula.name);
     formula.installed = info?.installed ?? [];
     formula.outdated = info?.outdated ?? false;

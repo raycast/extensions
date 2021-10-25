@@ -1,8 +1,8 @@
 import { Detail, useNavigation } from "@raycast/api";
 import { FormulaActionPanel } from "./actionPanel";
-import { brewIsInstalled, brewPrefix } from '../brew';
+import { Formula, brewIsInstalled, brewPrefix } from '../brew';
 
-export function FormulaInfo(props: {formula: Formula, onAction: () => void}): Component {
+export function FormulaInfo(props: {formula: Formula, onAction: (result: boolean) => void}) {
   const { pop } = useNavigation();
 
   return (
