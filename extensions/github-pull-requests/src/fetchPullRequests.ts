@@ -6,6 +6,8 @@ import { PullRequest, DataJson } from "./types";
 async function fetchPullRequests(): Promise<PullRequest[]> {
   const token = preferences.accessToken.value as string | undefined;
   const username = preferences.username.value as string | undefined;
+  const ignoredRepos = ((preferences.ignoredRepos.value as string) ?? "").replace(/\s/g, "").split(",");
+  const ignoredAuthors = ((preferences.ignoredAuthors.value as string) ?? "").replace(/\s/g, "").split(",");
 
   if (token == null || username == null) {
     return [];
@@ -33,7 +35,12 @@ async function fetchPullRequests(): Promise<PullRequest[]> {
       const reviewers = pr.reviewRequests?.nodes.map((reviewer) => reviewer.requestedReviewer?.login) ?? [];
 
       // Skip adding the PR if it's already in the list. This might happen if a PR was authored by us, in one of our own repos or orgs, because `viewer.pullRequests` returns all authored PRs.
-      if (pullRequests.find((p) => p.url === pr.url) != null) {
+      // Also ignore PRs authored by an ignored author or in an ignored repo.
+      if (
+        pullRequests.find((p) => p.url === pr.url) != null ||
+        ignoredAuthors.includes(author) ||
+        ignoredRepos.includes(pr.repository.name)
+      ) {
         return;
       }
 
@@ -47,11 +54,15 @@ async function fetchPullRequests(): Promise<PullRequest[]> {
       }
     };
 
-    viewer.pullRequests?.nodes.forEach((pr) => extractPR(pr, true));
+    viewer.pullRequests?.nodes.forEach((pr) => {
+      extractPR(pr, true);
+    });
 
     orgs.forEach((org) => {
       org.repositories.nodes.forEach((repo) => {
-        repo.pullRequests.nodes.forEach((pr) => extractPR(pr, false));
+        repo.pullRequests.nodes.forEach((pr) => {
+          extractPR(pr, false);
+        });
       });
     });
 

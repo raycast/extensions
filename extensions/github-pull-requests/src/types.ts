@@ -7,6 +7,7 @@ export type PullRequest = {
   title: string;
   url: string;
   author: { login: string };
+  repository: { name: string };
   assignees: { nodes: { login: string }[] } | undefined;
   reviewRequests: { nodes: { requestedReviewer: { login: string } }[] } | undefined;
 };

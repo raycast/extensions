@@ -5,6 +5,9 @@ const pullRequestsQuery = `
         title
         author { login }
         url
+        repository {
+          name
+        }
         assignees(last: 8) {
           nodes {
             login

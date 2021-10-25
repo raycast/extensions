@@ -50,6 +50,20 @@
       "description": "Your GitHub Access Token",
       "link": "https://github.com/settings/tokens",
       "placeholder": "Enter your GitHub access token"
+    },
+    {
+      "name": "ignoredRepos",
+      "type": "textfield",
+      "required": false,
+      "title": "Ignored repositories",
+      "description": "Comma separated ids"
+    },
+    {
+      "name": "ignoredAuthors",
+      "type": "textfield",
+      "required": false,
+      "title": "Ignored authors",
+      "description": "Comma separated ids"
     }
   ]
 }
