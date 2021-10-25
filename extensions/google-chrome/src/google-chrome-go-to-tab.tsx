@@ -106,10 +106,9 @@ function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; }) {
     <List.Item
       title={props.tab.title}
       subtitle={props.tab.urlWithoutScheme()}
-      actions={
-        <Actions tab={props.tab}/>
-      }
-      icon={props.useOriginalFavicon ?  props.tab.favicon : props.tab.googleFavicon()}
+      keywords={[props.tab.urlWithoutScheme()]}
+      actions={<Actions tab={props.tab} />}
+      icon={props.useOriginalFavicon ? props.tab.favicon : props.tab.googleFavicon()}
     />
   );
 }
