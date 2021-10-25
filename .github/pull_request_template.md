@@ -12,10 +12,12 @@
 - Documentation update
 - Other (Specify)
 
-## Screenshot
+## Screencast
 
-<!-- If you add a new extension or command, include a screenshot or better a screencast of how it works. -->
+<!-- If you add a new extension or command, include a screencast (or screenshot for a small change). Good screencast will make the review much faster, especially your extension requires registration in other services.  -->
 
 ## Checklist
 
-- [ ] I read the [contribution guidelines](contributing.md)
+- [ ] I read the [extension guidelines](https://developers.raycast.com/basics/prepare-an-extension-for-store)
+- [ ] I read the [documentation about publishing](https://developers.raycast.com/basics/publish-an-extension)
+- [ ] I checked that extension's icon has size of `512x512`

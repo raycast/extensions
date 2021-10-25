@@ -185,6 +185,15 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
       } else {
         foundRepos = foundRepos.concat(repos)
       }
+      // Search for git worktrees
+      const worktrees = await findWorktrees(path, maxDepth)
+      worktrees.forEach(function(worktree) {
+        // Only add if a repo.fullPath is not already in array
+        const found = foundRepos.findIndex(r => r.fullPath === worktree.fullPath)
+        if (found === -1) {
+          foundRepos.push(worktree)
+        }
+      })
     })
   )
   foundRepos.sort((a, b) => {
@@ -200,9 +209,9 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
   cache.setRepos(foundRepos)
   cache.save()
   return foundRepos
- }
+}
 
- async function findSubmodules(path: string): Promise<string[]> {
+async function findSubmodules(path: string): Promise<string[]> {
    const { stdout } = await execp(`grep "\\[submodule"  ${path + "/.gitmodules"} | sed "s%\\[submodule \\"%\${1%/.git}/%g" | sed "s/\\"]//g"`)
    const paths = stdout.split("\n").filter(e => e)
    const submodulePaths = paths.map((subPath) => {
@@ -210,7 +219,20 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
      return temp
    })
    return submodulePaths
- }
+}
+
+async function findWorktrees(path: string, maxDepth: number): Promise<GitRepo[]> {
+  let foundRepos: GitRepo[] = []
+  const findCmd = `find -L ${path} -maxdepth ${maxDepth} -name .git -type f`
+  const { stdout, stderr } = await execp(findCmd)
+  if (!stderr) {
+    const repoPaths = stdout.split("\n").filter(e => e)
+    const repos = parseRepoPaths(path, repoPaths, false)
+    foundRepos = foundRepos.concat(repos)
+    foundRepos.map((repo) => repo.icon = "git-worktree-icon.png")
+  }
+  return foundRepos
+}
 
 export function useRepoCache(query: string | undefined): {
   response?: RepoSearchResponse
@@ -219,7 +241,7 @@ export function useRepoCache(query: string | undefined): {
 } {
   const [response, setResponse] = useState<RepoSearchResponse>()
   const [error, setError] = useState<string>()
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const [fetched, setIsFetched] = useState<boolean>(false)
   const cache = new Cache()
 
@@ -235,8 +257,6 @@ export function useRepoCache(query: string | undefined): {
       if (cancel || fetched) {
         return
       }
-
-      setIsLoading(true)
       setError(undefined)
 
       try {
@@ -277,7 +297,10 @@ export function useRepoCache(query: string | undefined): {
       repos = filterRepos(repos, query)
       sectionTitle = `${repos.length} Repo${repos.length != 1 ? "s" : ""} Found`
     }
-    setResponse({ sectionTitle: sectionTitle, repos: repos })
+
+    if (cache.repos.length > 0) {
+      setResponse({ sectionTitle: sectionTitle, repos: repos })
+    }
 
     if (!fetched) {
       fetchRepos()

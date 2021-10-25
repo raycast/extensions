@@ -30,7 +30,7 @@ Alternatively to exporting a React component, you can call the [`render`](render
 
 ### render
 
-Takes a React Components and renders it in Raycast for command types that show a `view`.
+Takes a React Component and renders it in Raycast for command types that show a `view`.
 
 #### Signature
 

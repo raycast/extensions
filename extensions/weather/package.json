@@ -1,7 +1,7 @@
 {
   "name": "weather",
   "title": "Weather",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Weather forecast via wttr.in",
   "icon": "weather.png",
   "author": "tonka3000",
@@ -12,6 +12,29 @@
       "title": "Weather",
       "description": "Weather forecast via wttr.in",
       "mode": "view"
+    }
+  ],
+  "preferences" : [
+    {
+      "name" : "unitsystem",
+      "type" : "dropdown",
+      "title" : "Unit System",
+      "required" : false,
+      "default" : "metric",
+      "description" : "Unit System",
+      "data" : [
+        { "title" : "Metric System", "value" : "metric" },
+        { "title" : "Imperial Units", "value" : "imperial" }
+      ]
+    },
+    {
+      "name" : "defaultquery",
+      "type" : "textfield",
+      "title" : "Default query",
+      "placeholder" : "Empty or location (e.g. London)",
+      "required" : false,
+      "default" : "",
+      "description" : "Default query when search bar is empty. Same content as in the search bar."
     }
   ],
   "dependencies": {

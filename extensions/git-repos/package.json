@@ -21,7 +21,7 @@
       "required": true,
       "default": "",
       "title": "Path to scan for Git Repos",
-      "description": "Path to scan for Git Repos. ~/ is expanded and use a : to seperate mulitple paths"
+      "description": "Path to scan for Git Repos. ~/ is expanded. Use : to seperate multiple paths"
     },
     {
       "name": "repoScanDepth",
@@ -64,7 +64,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.25.1",
     "node-fetch": "^2.6.1",
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2"
