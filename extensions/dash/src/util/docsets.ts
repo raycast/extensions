@@ -1,4 +1,5 @@
 import tempy from "tempy";
+import { useState, useEffect } from "react";
 import { exec } from "child_process";
 import { existsSync, readFile } from "fs";
 import { getDashAppPath } from "./dashApp";
@@ -10,6 +11,26 @@ export type Docset = {
   docsetKeyword: string;
   keyword: string;
   pluginKeyword: string;
+}
+
+export function useDocsets(searchText: string): [Docset[]] {
+  const [docsets, setDocsets] = useState<Docset[]>([]);
+  const [filteredDocsets, setFilteredDocsets] = useState<Docset[]>([]);
+
+  useEffect(() => {
+    getDocsets().then(setDocsets);
+  }, []);
+
+  useEffect(() => {
+    setFilteredDocsets(
+      docsets.filter((docset) =>
+        docset.docsetName.toLowerCase().includes(searchText.toLowerCase())
+        || docset.docsetKeyword.toLowerCase().includes(searchText.toLowerCase())
+      )
+    );
+  }, [searchText]);
+
+  return [searchText.length ? filteredDocsets : docsets];
 }
 
 export function getDocsets(): Promise<Docset[]> {
