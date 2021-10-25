@@ -1,8 +1,10 @@
 import {
   ActionPanel,
+  Application,
   closeMainWindow,
   CopyToClipboardAction,
   environment,
+  getApplications,
   Icon,
   Image,
   ImageLike,
@@ -54,34 +56,6 @@ function getIDEName(ide: SupportedIDE): string {
     default: return 'Unknown'
   }
 }
-
-function getJetbrainsPath(appName: string): string | undefined {
-  let appPath: string | null = join('/Applications/', appName)
-  if (!existsSync(appPath)) {
-    appPath = join(homedir(), 'Applications/JetBrains Toolbox/', appName)
-  }
-  if (!existsSync(appPath)) {
-    return undefined
-  }
-  return appPath
-}
-function checkPathExists(v: string): string | undefined {
-  return existsSync(v) ? v : undefined
-}
-
-let installedIDEsPaths: Map<SupportedIDE, string | undefined>
-function getIDEPath(ide: SupportedIDE): string | undefined {
-  return installedIDEsPaths.get(ide)
-}
-
-function getIDEIcon(ide: SupportedIDE): ImageLike {
-  const idePath = installedIDEsPaths.get(ide)
-  if (idePath) {
-    return {fileIcon: idePath}
-  }
-  return Icon.TextDocument
-}
-
 
 /**
  * Detects whether directory is a project based on common directories for projects (.git, .idea, .vscode etc).
@@ -339,18 +313,36 @@ function updateFrecency(searchQuery: string | undefined, project: Project) {
 }
 
 function Command() {
-  installedIDEsPaths = new Map<SupportedIDE, string | undefined>([
-    [SupportedIDE.WebStorm, getJetbrainsPath('WebStorm.app')],
-    [
-      SupportedIDE.PyCharm,
-      // todo: add "Prefer Professional Edition" to configuration
-      getJetbrainsPath('PyCharm.app')
-      ?? getJetbrainsPath('PyCharm Professional Edition.app')
-      ?? getJetbrainsPath('PyCharm Community Edition.app'),
-    ],
-    // todo: add vscode insiders
-    [SupportedIDE.VSCode, checkPathExists('/Applications/Visual Studio Code.app')],
-  ])
+  const [applications, setApplications] = useState<Application[]>(() => [])
+  useEffect(() => {
+    getApplications().then(setApplications)
+  }, [])
+  const [installedIDEsPaths, setInstalledIDEsPaths] = useState<Map<SupportedIDE, string|undefined>>(() => new Map<SupportedIDE, string | undefined>())
+  useEffect(() => {
+    setInstalledIDEsPaths(new Map<SupportedIDE, string | undefined>([
+      [SupportedIDE.WebStorm, applications.find((v) => v.name === 'WebStorm')?.path],
+      [
+        SupportedIDE.PyCharm,
+        applications.find((v) => v.name.startsWith('PyCharm'))?.path,
+        // todo: support multiple installations of pycharm
+        // todo: add "Prefer Professional Edition" to configuration
+      ],
+      // todo: add vscode insiders
+      [SupportedIDE.VSCode, applications.find((v) => v.name === 'Visual Studio Code')?.path],
+    ]))
+  }, [applications])
+
+  function getIDEPath(ide: SupportedIDE): string | undefined {
+    return installedIDEsPaths.get(ide)
+  }
+
+  function getIDEIcon(ide: SupportedIDE): ImageLike {
+    const idePath = installedIDEsPaths.get(ide)
+    if (idePath) {
+      return {fileIcon: idePath}
+    }
+    return Icon.TextDocument
+  }
 
   let fallbackIDEPath: string | undefined
   let fallbackIDEName: string = 'Unknown'
