@@ -54,7 +54,7 @@ function Main() {
         accessoryTitle={version}
         icon={ {source: Icon.Checkmark, tintColor: tintColor} }
         actions={<FormulaActionPanel formula={formula} showDetails={true} onInstall={() => {
-          setFormulae([...formulae]);
+          setInstalled(undefined);
         }}
         />}
       />

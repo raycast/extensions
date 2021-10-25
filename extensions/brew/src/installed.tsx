@@ -46,6 +46,7 @@ function Main() {
                  accessoryTitle={version}
                  icon={ {source: Icon.Checkmark, tintColor: Color.Green} }
                  actions={<FormulaActionPanel formula={formula} showDetails={true} onInstall={() => {
+                   // Uninstall does not (currently) include dependencies, so just reload formulae.
                    setFormulae(formulae.filter(f => brewIsInstalled(f) ));
                  }}
                  />}
