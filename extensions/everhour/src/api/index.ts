@@ -76,6 +76,7 @@ export const getTasks = async (projectId: string): Promise<Task[]> => {
   }));
 };
 
+
 export const getCurrentTimer = async (): Promise<string | null> => {
   const response = await fetch("https://api.everhour.com/timers/current", {
     headers,
