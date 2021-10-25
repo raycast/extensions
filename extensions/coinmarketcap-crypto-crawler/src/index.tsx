@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import $ from "cheerio";
 import fetch from "node-fetch";
 const { fetchAllCrypto } = require('./api')
-const { writeLIstInToFile, getListFromFile } = require('./utils')
+const { writeListInToFile, getListFromFile } = require('./utils')
 const fuzzysort = require('fuzzysort')
 
 
@@ -69,7 +69,7 @@ export default function CryptoList() {
 
           const cryptoList = data.cryptoCurrencyMap.map(({ slug, name, symbol }: CryptoList) => ({ slug, name, symbol: symbol.toLowerCase() }))
 
-          writeLIstInToFile({
+          writeListInToFile({
             timestamp: status.timestamp,
             cryptoList: cryptoList
           }, (writeFileError: string) => {

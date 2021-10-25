@@ -5,7 +5,7 @@ const fs = require('fs')
 const cryptoListPath = `${environment.supportPath}/cryptoList.json`
 fse.ensureFileSync(cryptoListPath)
 
-export function writeLIstInToFile(data, callback) {
+export function writeListInToFile(data, callback) {
   fs.writeFile(cryptoListPath, JSON.stringify(data), callback)
 }
 
