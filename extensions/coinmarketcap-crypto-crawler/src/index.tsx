@@ -51,14 +51,17 @@ export default function CryptoList() {
   const [cryptoList, setCryptoList] = useState<CryptoList[]>([])
   const [searchResult, setSearchResult] = useState<SearchResult[]>([])
 
-  const { push } = useNavigation();
-
   useEffect(() => {
 
     getListFromFile((err: string, data: string) => {
+    
 
       if (err) {
         console.error('ReadListError:' + err)
+        return 
+      }
+
+      if(!data){
         // fetch crypto list mapping if there's no data exist in the local file
         // the api has an limit num per request. 
         fetchAllCrypto({ limit: 10000, start: 1 }).then(({ data: resultData }: { data: ResultData }) => {
