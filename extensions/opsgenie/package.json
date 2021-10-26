@@ -8,16 +8,23 @@
   "commands": [
     {
       "name": "alerts",
-      "title": "Opsgenie Alerts",
-      "subtitle": "",
+      "title": "Alerts",
+      "subtitle": "Opsgenie",
       "description": "Show a list of Opsgenie alerts",
       "mode": "view"
     },
     {
       "name": "incidents",
-      "title": "Opsgenie Incidents",
-      "subtitle": "",
+      "title": "Incidents",
+      "subtitle": "Opsgenie",
       "description": "Show a list of Opsgenie incidents",
+      "mode": "view"
+    },
+    {
+      "name": "savedSearches",
+      "title": "Saved Searches",
+      "subtitle": "Opsgenie",
+      "description": "Show a list of saved searches from Opsgenie",
       "mode": "view"
     }
   ],

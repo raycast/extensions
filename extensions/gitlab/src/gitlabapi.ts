@@ -50,7 +50,7 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
         author: userFromJson(mr.author),
         project_id: mr.project_id,
         description: mr.description,
-        reference_full: mr.references.full,
+        reference_full: mr.references?.full,
         labels: mr.labels as Label[]
     }
 }
@@ -71,7 +71,7 @@ export function jsonDataToIssue(issue: any): Issue {
         web_url: issue.web_url,
         id: issue.id,
         iid: issue.iid,
-        reference_full: issue.references.full,
+        reference_full: issue.references?.full,
         state: issue.state,
         updated_at: new Date(issue.updated_at),
         author: userFromJson(issue.author),
