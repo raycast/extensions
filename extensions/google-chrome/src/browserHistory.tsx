@@ -11,6 +11,7 @@ export interface HistoryEntry {
     id: number
     url: string
     title: string
+    lastVisited: Date
 }
 
 export interface ChromeHistorySearch {
@@ -74,7 +75,10 @@ const whereClauses = (terms: string[]) => {
 const searchHistory = async (db: Database, query: string | undefined): Promise<HistoryEntry[]> => {
     const terms = query ? query.trim().split(' ') : ['']
     const queries =
-        `SELECT id, url, title from urls
+        `SELECT
+            id, url, title,
+            datetime(last_visit_time / 1000000 + (strftime('%s', '1601-01-01')), 'unixepoch', 'localtime')
+          FROM urls
           WHERE ${whereClauses(terms)}
           ORDER BY last_visit_time DESC LIMIT 30;`
     const results = db.exec(queries, termsAsParams(terms))
@@ -82,11 +86,14 @@ const searchHistory = async (db: Database, query: string | undefined): Promise<H
         return []
     }
 
-    return results[0].values.map(v => ({
-        id: v[0] as number,
-        url: v[1] as string,
-        title: v[2] as string
-    }))
+    return results[0].values.map(v => (
+        {
+            id: v[0] as number,
+            url: v[1] as string,
+            title: v[2] as string,
+            lastVisited: new Date(v[3] as string)
+        }
+    ))
 }
 
 export function useChromeHistorySearch(query: string | undefined): ChromeHistorySearch {
