@@ -83,8 +83,8 @@ export default function ProcessList() {
           return nameMatches || (shouldIncludePaths && pathMatches);
         })
         .sort((a, b) => {
-          // If this flag is true, we bring apps to the top.
-          if (shouldPrioritizeAppsWhenFiltering) {
+          // If this flag is true, we bring apps to the top, but only if we have a query.
+          if (query != null && shouldPrioritizeAppsWhenFiltering) {
             if (a.type === "app" && b.type !== "app") {
               return -1;
             } else if (a.type !== "app" && b.type === "app") {
@@ -92,7 +92,7 @@ export default function ProcessList() {
             }
           }
 
-          // Otherwise, we leave the order as it is.
+          // Otherwise, we leave the order as is.
           return 0;
         })
         .map((process, index) => {
