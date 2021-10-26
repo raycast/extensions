@@ -15,6 +15,27 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "defaultCopyAction",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "yarn",
+          "value": "yarn"
+        },
+        {
+          "title": "npm",
+          "value": "npm"
+        }
+      ],
+      "title": "Default Package Manager",
+      "description": "The package manager to use by default",
+      "required": false,
+      "default": "npm",
+      "value": "npm"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "fetch-readme": "^1.0.0",
