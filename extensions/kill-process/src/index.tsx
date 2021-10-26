@@ -7,8 +7,7 @@ export default function ProcessList() {
   const [query, setQuery] = useState<string | undefined>(undefined);
   const shouldIncludePaths = (preferences.shouldSearchInPaths?.value as boolean) ?? false;
   const shouldPrioritizeAppsWhenFiltering = (preferences.shouldPrioritizeAppsWhenFiltering?.value as boolean) ?? false;
-
-  useEffect(() => {
+  const fetchProcesses = () => {
     exec(`ps -eo pid,pcpu,comm | sort -nrk 2,3`, (err, stdout) => {
       if (err != null) {
         return;
@@ -34,6 +33,10 @@ export default function ProcessList() {
 
       setState(processes);
     });
+  };
+
+  useEffect(() => {
+    fetchProcesses();
   }, []);
 
   const fileIcon = (process: Process) => {
@@ -103,6 +106,12 @@ export default function ProcessList() {
                 <ActionPanel>
                   <ActionPanel.Item title="Kill" icon={Icon.XmarkCircle} onAction={() => killProcess(process)} />
                   {copyToClipboardAction(process)}
+                  <ActionPanel.Item
+                    title="Reload"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ key: "r", modifiers: ["cmd"] }}
+                    onAction={() => fetchProcesses()}
+                  />
                 </ActionPanel>
               }
             />
