@@ -4,7 +4,6 @@
   "description": "Get the latest products from the fontpage of Product Hunt.",
   "icon": "icon.png",
   "author": "ragnor",
-  "license": "MIT",
   "commands": [
     {
       "name": "frontpage",

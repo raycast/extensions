@@ -4,7 +4,6 @@
   "description": "Control the Spotify app for macOS with your keyboard.",
   "icon": "icon.png",
   "author": "thomas",
-  "license": "MIT",
   "commands": [
     {
       "name": "play",

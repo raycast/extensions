@@ -4,7 +4,6 @@
   "description": "Share sensitive data (a \"secret\") with friends, teammates, or strangers on the internet.",
   "icon": "icon.png",
   "author": "thomas",
-  "license": "MIT",
   "commands": [
     {
       "name": "index",
