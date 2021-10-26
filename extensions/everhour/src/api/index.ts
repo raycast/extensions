@@ -56,6 +56,27 @@ export const getProjects = async (): Promise<Project[]> => {
   }));
 };
 
+export const getTasks = async (projectId: string): Promise<Task[]> => {
+  const response = await fetch(
+    `https://api.everhour.com/projects/${projectId}/tasks?page=1&limit=250&excludeClosed=true&query=`,
+    {
+      headers,
+    }
+  );
+  const tasks = (await response.json()) as any;
+
+  if (tasks.code) {
+    throw new Error(tasks.message);
+  }
+
+  return tasks.map(({ id, name, time }: TaskResp) => ({
+    id,
+    name,
+    timeInMin: time ? Math.round(time.total / 60) : 0,
+  }));
+};
+
+
 export const getCurrentTimer = async (): Promise<string | null> => {
   const response = await fetch("https://api.everhour.com/timers/current", {
     headers,

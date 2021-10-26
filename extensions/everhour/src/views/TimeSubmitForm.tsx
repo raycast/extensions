@@ -1,32 +1,28 @@
-import { Form, ActionPanel, SubmitFormAction, showToast, ToastStyle, useNavigation } from "@raycast/api";
+import { Form, ActionPanel, SubmitFormAction, showToast, ToastStyle } from "@raycast/api";
 import { submitTaskHours } from "../api";
 import { createResolvedToast } from "../utils";
 
 const timeOptions = [
-  "0.10",
-  "0.15",
-  "0.25",
-  "0.5",
-  "1",
-  "1.5",
-  "2",
-  "2.5",
-  "3",
-  "3.5",
-  "4",
-  "4.5",
-  "5",
-  "5.5",
-  "6",
-  "6.5",
-  "7",
-  "7.5",
-  "8",
+  { title: "15 min", value: "0.25" },
+  { title: "30 min", value: "0.5" },
+  { title: "45 min", value: "0.75" },
+  { title: "1 hour", value: "1" },
+  { title: "1 hour 30 min", value: "1.5" },
+  { title: "2 hour", value: "2" },
+  { title: "2 hour 30 min", value: "2.5" },
+  { title: "3 hour", value: "3" },
+  { title: "3 hour 30 min", value: "3.5" },
+  { title: "4 hour", value: "4" },
+  { title: "4 hour 30 min", value: "4.5" },
+  { title: "5 hour", value: "5" },
+  { title: "5 hour 30 min", value: "5.5" },
+  { title: "6 hour", value: "6" },
+  { title: "6 hour 30 min", value: "6.5" },
+  { title: "7 hour", value: "7" },
+  { title: "7 hour 30 min", value: "7.5" },
 ];
 
 export function TimeSubmitForm({ taskId, refreshRecords }: { taskId: string; refreshRecords: () => Promise<void> }) {
-  const { pop } = useNavigation();
-
   const handleSubmit = async ({ hours }: { hours: string }) => {
     const toast = await showToast(ToastStyle.Animated, "Adding Time");
     try {
@@ -34,7 +30,6 @@ export function TimeSubmitForm({ taskId, refreshRecords }: { taskId: string; ref
 
       if (taskName) {
         await refreshRecords();
-        pop();
         createResolvedToast(
           toast,
           `Added ${hours} ${parseInt(hours) === 1 ? "hour" : "hours"} to ${taskName}`
@@ -51,13 +46,13 @@ export function TimeSubmitForm({ taskId, refreshRecords }: { taskId: string; ref
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Add Hours" onSubmit={handleSubmit} />
+          <SubmitFormAction title="Add Time" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="hours" title="Hours" defaultValue="0.25">
-        {timeOptions.map((option) => (
-          <Form.Dropdown.Item value={option} title={option} icon="⏱" />
+      <Form.Dropdown id="hours" title="Time Spent" defaultValue="0.25">
+        {timeOptions.map(({ value, title }) => (
+          <Form.Dropdown.Item key={value} value={value} title={title} icon="⏱" />
         ))}
       </Form.Dropdown>
     </Form>
