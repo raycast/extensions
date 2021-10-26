@@ -58,7 +58,7 @@ const target_languages = {
   LT: "Lithuanian",
   PL: "Polish",
   "PT-PT": "Portuguese",
-  "PT-BR": "Portuguese (Brazilian)",
+  "PT-BR": "Portuguese (Brazil)",
   RO: "Romanian",
   RU: "Russian",
   SK: "Slovak",
