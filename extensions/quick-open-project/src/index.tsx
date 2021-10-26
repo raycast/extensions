@@ -392,7 +392,10 @@ function Command() {
                   key="editor"
                   onAction={() => {
                     updateFrecency(searchQuery, project)
-                    open(project.fullPath, {app: {name: idePath || '', arguments: [project.fullPath]}})
+                    open(project.fullPath, {
+                      app: {name: idePath || '', arguments: [project.fullPath]},
+                      newInstance: true,
+                    })
                     closeMainWindow()
                   }}
                   icon={{fileIcon: idePath}}
