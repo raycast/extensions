@@ -57,8 +57,8 @@
       "required": false,
       "default": false,
       "title": "",
-      "label": "Hide pid and CPU labels",
-      "description": "Hides the \"pid:\" and \"CPU\" text."
+      "label": "Hide PID and CPU labels",
+      "description": "Hides the \"PID:\" and \"CPU\" text."
     },
     {
       "name": "shouldHidePID",
@@ -66,8 +66,8 @@
       "required": false,
       "default": false,
       "title": "",
-      "label": "Hide pid altogether",
-      "description": "Hides any pid info."
+      "label": "Hide PID altogether",
+      "description": "Hides any PID info."
     }
   ]
 }

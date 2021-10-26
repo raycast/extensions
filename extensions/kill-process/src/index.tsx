@@ -102,7 +102,7 @@ export default function ProcessList() {
             <List.Item
               key={index}
               title={process.name}
-              subtitle={shouldHidePID ? undefined : isCompact ? process.id : `pid: ${process.id}`}
+              subtitle={shouldHidePID ? undefined : isCompact ? process.id : `PID: ${process.id}`}
               icon={icon}
               accessoryTitle={`${isCompact ? "" : "CPU"} ${process.cpu}%`}
               actions={
