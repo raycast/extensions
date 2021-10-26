@@ -15,7 +15,7 @@ export interface HistoryEntry {
 }
 
 export interface ChromeHistorySearch {
-    response?: HistoryEntry[]
+    entries?: HistoryEntry[]
     error?: string
     isLoading: boolean
 }
@@ -97,7 +97,7 @@ const searchHistory = async (db: Database, query: string | undefined): Promise<H
 }
 
 export function useChromeHistorySearch(query: string | undefined): ChromeHistorySearch {
-    const [response, setResponse] = useState<HistoryEntry[]>()
+    const [entries, setEntries] = useState<HistoryEntry[]>()
     const [error, setError] = useState<string>()
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const dbRef = useRef<Database>()
@@ -115,8 +115,8 @@ export function useChromeHistorySearch(query: string | undefined): ChromeHistory
 
             setError(undefined)
             try {
-                const response = await searchHistory(dbRef.current, query)
-                setResponse(response)
+                const dbEntries = await searchHistory(dbRef.current, query)
+                setEntries(dbEntries)
             } catch (e) {
                 if (!cancel) {
                     setError(e as string)
@@ -142,5 +142,5 @@ export function useChromeHistorySearch(query: string | undefined): ChromeHistory
         }
     }, [])
 
-    return { response, error, isLoading }
+    return { entries, error, isLoading }
 }
