@@ -113,6 +113,8 @@ export interface Branch {
 
 export interface Epic {
     id: number;
+    iid: number;
+    group_id: number;
     title: string;
     state: string;
     web_url: string;
@@ -173,6 +175,17 @@ export class MergeRequest {
     public labels: Label[] = [];
 }
 
+export interface TodoGroup {
+    id: number;
+    name: string;
+    path: string;
+    kind: string;
+    full_path: string;
+    parent_id: number;
+    avatar_url?: string;
+    web_url: string;
+}
+
 export class Todo {
     public title: string = "";
     public target_url = "";
@@ -181,6 +194,7 @@ export class Todo {
     public id: number = 0;
     public action_name = "";
     public project_with_namespace = "";
+    public group?: TodoGroup;
     public author?: User = undefined;
 }
 
@@ -552,7 +566,8 @@ export class GitLab {
                     target_type: issue.target_type,
                     target: issue.target,
                     id: issue.id,
-                    project_with_namespace: issue.project.name_with_namespace,
+                    project_with_namespace: issue.project ? issue.project.name_with_namespace : undefined,
+                    group: issue.group ? issue.group as TodoGroup : undefined,
                     author: userFromJson(issue.author)
                 }))
             });
@@ -608,6 +623,9 @@ export class GitLab {
             }
             delete params.scope;
         }
+
+        params.include_ancestor_groups = false;
+        params.include_descendant_groups = false;
 
         const groups = await this.getUserGroups();
         let epics: Epic[] = [];
