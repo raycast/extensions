@@ -3,6 +3,8 @@ import {
   getPreferenceValues,
   ActionPanel,
   CopyToClipboardAction,
+  showToast,
+  ToastStyle,
 } from "@raycast/api";
 import { ReactElement, useEffect, useState } from "react";
 import translate from "@vitalets/google-translate-api";
@@ -62,8 +64,8 @@ export default function Command(): ReactElement {
           ]);
         }
       })
-      .catch((err) => {
-        console.error(err);
+      .catch((errors) => {
+        showToast(ToastStyle.Failure, "Could not translate", errors);
       })
       .then(() => {
         setIsLoading(false);
