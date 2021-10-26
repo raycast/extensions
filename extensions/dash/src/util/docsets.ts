@@ -77,8 +77,8 @@ export function getDocsets(): Promise<Docset[]> {
   });
 }
 
-export function getDocsetIconPath(docset: Docset): string {
-  const dashAppPath = getDashAppPath();
+export async function getDocsetIconPath(docset: Docset): Promise<string> {
+  const dashAppPath = await getDashAppPath();
 
   return [
     `${docset.docsetPath}/icon@2x.png`,

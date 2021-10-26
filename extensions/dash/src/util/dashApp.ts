@@ -1,14 +1,11 @@
-import { existsSync } from "fs";
+import { getApplications } from "@raycast/api";
 
-export function getDashAppPath(): string {
-  const path = [
-    "/Applications/Dash.app",
-    "/Applications/Setapp/Dash.app"
-  ].find(existsSync)
+export async function getDashAppPath(): Promise<string> {
+  const dashApp = (await getApplications()).find(app => app.bundleId?.indexOf("com.kapeli.dash") === 0);
 
-  if (!path) {
+  if (!dashApp?.path) {
     throw new Error("Dash.app not found");
   }
 
-  return path;
+  return dashApp.path;
 }
