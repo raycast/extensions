@@ -1,71 +1,37 @@
-import {
-  Color,
-  Icon,
-  List,
-  ListSection,
-  render,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Formula, brewFetchInstalled, brewFormatVersion } from "./brew";
-import { FormulaActionPanel } from "./components/actionPanel";
+import { Formula, brewFetchInstalled } from "./brew";
+import { FormulaList } from "./components/list";
 
-function Main() {
-  const [formulae, setFormulae] = useState<Formula[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+interface State {
+  formulae: Formula[];
+  isLoading: boolean;
+}
+
+export default function Main() {
+  const [state, setState] = useState<State>({formulae: [], isLoading: true});
 
   useEffect(() => {
-    if (!isLoading) { return; }
+    if (!state.isLoading) { return; }
     brewFetchInstalled(true)
       .then(formulae => {
-        setFormulae(formulae);
-        setIsLoading(false);
+        setState({formulae: formulae, isLoading: false});
       })
       .catch(err => {
         console.log("brewFetchInstalled error:", err);
         showToast(ToastStyle.Failure, "Brew list failed");
-        setFormulae([]);
-        setIsLoading(false);
+        setState({formulae: [], isLoading: false});
       });
-  }, [isLoading]);
+  }, [state]);
 
-  function FormulaListItem(props: { formula: Formula }) {
-    const formula = props.formula;
-    const tintColor = formula.outdated ? Color.Red : Color.Green;
-
-    return (
-      <List.Item id={formula.name}
-                 title={formula.name}
-                 subtitle={formula.desc}
-                 accessoryTitle={brewFormatVersion(formula)}
-                 icon={ {source: Icon.Checkmark, tintColor: tintColor} }
-                 actions={<FormulaActionPanel formula={formula} showDetails={true} onAction={() => {
-                   setIsLoading(true);
+  return (
+    <FormulaList formulae={state.formulae}
+                 searchBarPlaceholder="Filter formulae by name"
+                 sectionTitle="Installed"
+                 isLoading={state.isLoading}
+                 onAction={() => {
+                   setState((oldState) => ({ ...oldState, isLoading: true}));
                  }}
-                 />}
-      />
-    );
-  }
-
-  function ForumulaList(props: { formulae: Formula[], isLoading: boolean }) {
-    return (
-      <List searchBarPlaceholder="Filter formula by name..." isLoading={props.isLoading}>
-        <ListSection title="Installed">
-          {
-            props.formulae.map((formula) => (
-              <FormulaListItem key={formula.name} formula={formula} />
-            ))
-          }
-        </ListSection>
-      </List>
-    );
-  }
-
-  return <ForumulaList formulae={formulae} isLoading={isLoading} />
+    />
+  );
 }
-
-async function main() {
-  render(<Main />);
-}
-main();

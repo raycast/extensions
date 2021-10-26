@@ -1,87 +1,55 @@
-import {
-  Color,
-  Icon,
-  List,
-  render,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Formula, brewSearchFormula, brewFetchInstalled, brewIsInstalled, brewFormatVersion } from "./brew";
-import { FormulaActionPanel } from "./components/actionPanel";
+import { Formula, brewSearchFormula, brewFetchInstalled } from "./brew";
+import { FormulaList } from "./components/list";
 
 /// Main
 
-function Main() {
-  const [formulae, setFormulae] = useState<Formula[]>([]);
-  const [installed, setInstalled] = useState<Map<string, Formula> | undefined>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [query, setQuery] = useState<string>("");
+interface State {
+  formulae: Formula[];
+  isLoading: boolean;
+  installed?: Map<string, Formula>;
+  query?: string;
+}
+
+export default function Main() {
+  const [state, setState] = useState<State>({formulae: [], isLoading: true});
 
   useEffect(() => {
-    setIsLoading(true);
-    if (installed == undefined) {
-      listInstalled().then(setInstalled);
+    if (!state.isLoading) { return; }
+
+    if (state.installed == undefined) {
+      listInstalled().then((installed: Map<string, Formula>) => {
+        setState((oldState) => ({ ...oldState, installed: installed}));
+      });
       return;
     }
-    brewSearchFormula(query.trim())
-    .then(formulae => {
-      updateInstalled(formulae, installed);
-      setFormulae(formulae);
-      setIsLoading(false);
-    })
-    .catch (err => {
-      setFormulae([]);
-      setIsLoading(false);
-      showToast(ToastStyle.Failure, "Package search error");
-      console.log("brewSearchFormula error:", err);
-    });
-  }, [query, installed]);
 
-  function FormulaListItem(props: { formula: Formula }) {
-    const formula = props.formula;
-    let version = formula.versions.stable;
-    let tintColor = Color.SecondaryText;
+    brewSearchFormula(state.query?.trim())
+      .then(formulae => {
+        updateInstalled(formulae, state.installed);
+        setState((oldState) => ({...oldState, formulae: formulae, isLoading: false}));
+      })
+      .catch (err => {
+        console.log("brewSearchFormula error:", err);
+        setState((oldState) => ({...oldState, formulae: [], isLoading: false}));
+        showToast(ToastStyle.Failure, "Package search error");
+      });
+  }, [state]);
 
-    if (brewIsInstalled(formula)) {
-      version = brewFormatVersion(formula);
-      tintColor = formula.outdated ? Color.Red : Color.Green;
-    }
-
-    return (
-      <List.Item
-        id={formula.name}
-        title={formula.full_name}
-        subtitle={formula.desc}
-        accessoryTitle={version}
-        icon={ {source: Icon.Checkmark, tintColor: tintColor} }
-        actions={<FormulaActionPanel formula={formula} showDetails={true} onAction={() => {
-          setInstalled(undefined);
-        }}
-        />}
-      />
-    );
-  }
-
-  function ForumulaList(props: { formulae: Formula[], isLoading: boolean, onSearchTextChange: (query: string) => void }) {
-    // Truncate results: otherwise we can run out of JS heap memory...
-    const results = props.formulae.slice(0, 200);
-    return (
-      <List searchBarPlaceholder="Search formula by name..." isLoading={props.isLoading} onSearchTextChange={props.onSearchTextChange} >
-        {results.map((formula) => (
-          <FormulaListItem key={formula.name} formula={formula} />
-        ))}
-      </List>
-    );
-  }
-
-  return <ForumulaList formulae={formulae} isLoading={isLoading} onSearchTextChange={setQuery} />;
+  return (
+    <FormulaList formulae={state.formulae}
+                 searchBarPlaceholder="Search formulae by name..."
+                 isLoading={state.isLoading}
+                 onSearchTextChange={(query: string) => {
+                   setState((oldState) => ({ ...oldState, query: query}));
+                 }}
+                 onAction={() => {
+                   setState((oldState) => ({ ...oldState, installed: undefined, isLoading: true}));
+                 }}
+    />
+  );
 }
-
-async function main() {
-  render(<Main />);
-}
-main();
 
 /// Private
 
@@ -94,7 +62,9 @@ async function listInstalled(): Promise<Map<string, Formula>> {
   return dict;
 }
 
-function updateInstalled(formulae: Formula[], installed: Map<string, Formula>) {
+function updateInstalled(formulae: Formula[], installed?: Map<string, Formula>) {
+  if (installed === undefined) { return; }
+
   for (const formula of formulae) {
     const info = installed.get(formula.name);
     formula.installed = info?.installed ?? [];

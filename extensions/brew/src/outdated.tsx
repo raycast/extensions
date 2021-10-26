@@ -3,7 +3,6 @@ import {
   Icon,
   List,
   ListSection,
-  render,
   showToast,
   ToastStyle,
 } from "@raycast/api";
@@ -11,64 +10,66 @@ import { useEffect, useState } from "react";
 import { OutdatedFormula, brewFetchOutdated } from "./brew";
 import { OutdatedActionPanel } from "./components/actionPanel";
 
-function Main() {
-  const [outdatedFormulae, setOutdatedFormulae] = useState<OutdatedFormula[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+interface State {
+  outdated: OutdatedFormula[];
+  isLoading: boolean;
+}
+
+export default function Main() {
+  const [state, setState] = useState<State>({outdated: [], isLoading: true});
 
   useEffect(() => {
-    if (!isLoading) { return; }
+    if (!state.isLoading) { return; }
     brewFetchOutdated()
     .then(outdated => {
-      setOutdatedFormulae(outdated);
-      setIsLoading(false);
+      setState({outdated: outdated, isLoading: false});
     })
     .catch (err => {
       console.log("brewFetchOutdated error:", err);
       showToast(ToastStyle.Failure, "Brew outdated failed");
-      setOutdatedFormulae([]);
-      setIsLoading(false);
+      setState({outdated: [], isLoading: false});
     });
-  }, [isLoading]);
+  }, [state]);
 
-  function OutdatedListItem(props: { outdated: OutdatedFormula }) {
-    const outdated = props.outdated;
-    let version = "";
-    if (outdated.installed_versions.length > 0) {
-      version = `${outdated.installed_versions[0]} -> ${outdated.current_version}`
-    }
 
-    return (
-      <List.Item id={outdated.name}
-                 title={outdated.name}
-                 subtitle={outdated.pinned ? "Pinned" : ""}
-                 accessoryTitle={version}
-                 icon={ {source: Icon.Checkmark, tintColor: Color.Red} }
-                 actions={<OutdatedActionPanel outdated={outdated} onAction={() => {
-                   setIsLoading(true);
-                 }}
-                 />}
-      />
-    );
-  }
-
-  function OutdatedList(props: { outdatedFormulae: OutdatedFormula[], isLoading: boolean }) {
-    return (
-      <List searchBarPlaceholder="Filter formula by name..." isLoading={props.isLoading}>
-        <ListSection title="Outdated">
-          {
-            props.outdatedFormulae.map((outdated) => (
-              <OutdatedListItem key={outdated.name} outdated={outdated} />
-            ))
-          }
-        </ListSection>
-      </List>
-    );
-  }
-
-  return <OutdatedList outdatedFormulae={outdatedFormulae} isLoading={isLoading} />
+  return (
+    <OutdatedList outdatedFormulae={state.outdated}
+                  isLoading={state.isLoading}
+                  onAction={() => {
+                    setState((oldState) => ({...oldState, isLoading: true}));
+                  }}
+    />
+  );
 }
 
-async function main() {
-  render(<Main />);
+function OutdatedListItem(props: { outdated: OutdatedFormula, onAction: () => void }) {
+  const outdated = props.outdated;
+  let version = "";
+  if (outdated.installed_versions.length > 0) {
+    version = `${outdated.installed_versions[0]} -> ${outdated.current_version}`
+  }
+
+  return (
+    <List.Item id={outdated.name}
+               title={outdated.name}
+               subtitle={outdated.pinned ? "Pinned" : ""}
+               accessoryTitle={version}
+               icon={ {source: Icon.Checkmark, tintColor: Color.Red} }
+               actions={<OutdatedActionPanel outdated={outdated} onAction={props.onAction} />}
+    />
+  );
 }
-main();
+
+function OutdatedList(props: { outdatedFormulae: OutdatedFormula[], isLoading: boolean, onAction: () => void }) {
+  return (
+    <List searchBarPlaceholder="Filter formulae by name..." isLoading={props.isLoading}>
+      <ListSection title="Outdated">
+        {
+          props.outdatedFormulae.map((outdated) => (
+            <OutdatedListItem key={outdated.name} outdated={outdated} onAction={props.onAction} />
+          ))
+        }
+      </ListSection>
+    </List>
+  );
+}
