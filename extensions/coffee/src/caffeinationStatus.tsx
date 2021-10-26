@@ -1,14 +1,13 @@
 import { showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
-const Caffeinate = async (pid?: string) => {
+const CaffeinateStatus = async () => {
   try {
     await runAppleScript(`do shell script "pgrep caffeinate"`);
-    await showHUD("Your Mac is already caffeinated");
-  } catch (_) {
-    runAppleScript(`do shell script "caffeinate -di${pid ? pid : ""}"`);
     await showHUD("Your Mac is caffeinated");
+  } catch (_) {
+    await showHUD("Your Mac is decaffeinated");
   }
 };
 
-export default Caffeinate;
+export default CaffeinateStatus;
