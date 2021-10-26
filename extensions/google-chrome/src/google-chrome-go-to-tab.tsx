@@ -1,6 +1,7 @@
-import {ActionPanel, closeMainWindow, CopyToClipboardAction, getPreferenceValues, Icon, List} from "@raycast/api";
-import {runAppleScript} from "run-applescript";
-import {useEffect, useState} from "react";
+import { ActionPanel, closeMainWindow, CopyToClipboardAction, getPreferenceValues, Icon, List } from "@raycast/api";
+import { runAppleScript } from "run-applescript";
+import { useEffect, useState } from "react";
+import { faviconUrl } from "./utils"
 
 class Tab {
   static readonly TAB_CONTENTS_SEPARATOR: string = '~~~';
@@ -11,7 +12,7 @@ class Tab {
     public readonly favicon: string,
     public readonly windowsIndex: number,
     public readonly tabIndex: number
-  ) {}
+  ) { }
 
   static parse(line: string): Tab {
     const parts = line.split(this.TAB_CONTENTS_SEPARATOR);
@@ -32,7 +33,7 @@ class Tab {
   }
 
   googleFavicon(): string {
-    return `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(this.urlDomain())}`;
+    return faviconUrl(64, this.url)
   }
 }
 
@@ -80,13 +81,13 @@ interface State {
 }
 
 export default function Command() {
-  const {useOriginalFavicon} = getPreferenceValues<{ useOriginalFavicon: boolean }>();
+  const { useOriginalFavicon } = getPreferenceValues<{ useOriginalFavicon: boolean }>();
 
   const [state, setState] = useState<State>({});
 
   useEffect(() => {
     async function getTabs() {
-      setState({tabs: await getOpenTabs(useOriginalFavicon)});
+      setState({ tabs: await getOpenTabs(useOriginalFavicon) });
     }
 
     getTabs();
@@ -95,7 +96,7 @@ export default function Command() {
   return (
     <List>
       {state.tabs?.map((tab) => (
-        <TabListItem key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon}/>
+        <TabListItem key={tab.key()} tab={tab} useOriginalFavicon={useOriginalFavicon} />
       ))}
     </List>
   );
@@ -116,7 +117,7 @@ function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; }) {
 function Actions(props: { tab: Tab }) {
   return (
     <ActionPanel title={props.tab.title}>
-      <GoogleChromeGoToTab tab={props.tab}/>
+      <GoogleChromeGoToTab tab={props.tab} />
       <CopyToClipboardAction title="Copy URL" content={props.tab.url} />
     </ActionPanel>
   );
@@ -128,5 +129,5 @@ function GoogleChromeGoToTab(props: { tab: Tab }) {
     await closeMainWindow();
   }
 
-  return <ActionPanel.Item title="Open tab" icon={{source: Icon.Eye}} onAction={handleAction}/>;
+  return <ActionPanel.Item title="Open tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
