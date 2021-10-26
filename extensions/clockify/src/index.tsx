@@ -36,10 +36,10 @@ function ItemInProgress({ entry, updateTimeEntries }: { entry: TimeEntry; update
     <List.Item
       id={entry.id}
       title={entry.project?.clientName || "No Client"}
-      subtitle={`${entry.description}`}
+      subtitle={`${entry.description || "No Description"}`}
       accessoryTitle={`${time}  -  ${entry.project?.name}`}
       icon={{ source: Icon.Clock, tintColor: entry.project?.color }}
-      keywords={[...entry.description.split(" "), ...(entry.project?.name.split(" ") ?? [])]}
+      keywords={[...(entry.description.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
       accessoryIcon={{ source: Icon.Dot, tintColor: entry.project?.color }}
       actions={
         <ActionPanel>
@@ -108,8 +108,8 @@ export default function Main() {
         <>
           <List.Section title="What are you working on?">
             <List.Item
-              icon={{ source: Icon.ArrowRight}}
-              title="Start New timer"
+              icon={{ source: Icon.ArrowRight }}
+              title="Start New Timer"
               actions={
                 <ActionPanel>
                   <ActionPanel.Item
@@ -129,10 +129,10 @@ export default function Main() {
                   id={entry.id}
                   key={entry.id}
                   title={entry.project?.clientName || "No Client"}
-                  subtitle={entry.description}
+                  subtitle={entry.description || "No Description"}
                   accessoryTitle={entry.project?.name}
                   icon={{ source: Icon.Circle, tintColor: entry.project?.color }}
-                  keywords={[...entry.description.split(" "), ...(entry.project?.name.split(" ") ?? [])]}
+                  keywords={[...(entry.description.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
                   accessoryIcon={{ source: Icon.Dot, tintColor: entry.project?.color }}
                   actions={
                     <ActionPanel>
