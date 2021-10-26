@@ -20,7 +20,7 @@ export default function SearchNotes() {
   }
 
   return (
-    <List isLoading={!db} onSearchTextChange={setSearchQuery}>
+    <List isLoading={notes == undefined} onSearchTextChange={setSearchQuery}>
       {notes?.map((note) => (
         <List.Item
           key={note.id}
