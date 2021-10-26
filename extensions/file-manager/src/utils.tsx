@@ -12,12 +12,13 @@ import {
   getPreferenceValues,
   PushAction,
   useNavigation,
-  Icon
+  Icon,
+  ToastStyle
 } from "@raycast/api";
 import { promisify } from "util";
 import { exec as _exec } from "child_process";
 const exec = promisify(_exec);
-import filesize from "filesize"
+import filesize from "filesize";
 import * as fs from "fs";
 
 export type FileType = "directory" | "file" | "symlink" | "other";
@@ -65,7 +66,7 @@ export function CreateFile(props: { path: string }) {
       <Form.TextField title="File Name" placeholder="file.txt" id="fileName" />
       <Form.TextArea title="File Contents" placeholder="contents" id="fileContents" />
     </Form>
-  )
+  );
 }
 
 export function CreateDirectory(props: { path: string }) {
@@ -89,7 +90,7 @@ export function CreateDirectory(props: { path: string }) {
     >
       <Form.TextField title="Directory Name" placeholder="folder name" id="directoryName" />
     </Form>
-  )
+  );
 }
 
 export function DirectoryItem(props: { fileData: FileDataType }) {
@@ -144,7 +145,7 @@ export function SymlinkItem(props: { fileData: FileDataType }) {
   const preferences: PreferencesType = getPreferenceValues();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
   const a = fs.readlinkSync(filePath);
-  const originalPath = a.startsWith('/') ? a : `${props.fileData.path}/${a}`;
+  const originalPath = a.startsWith("/") ? a : `${props.fileData.path}/${a}`;
   const originalFileData = fs.lstatSync(originalPath);
   if (originalFileData.isDirectory()) {
     return (
@@ -166,7 +167,7 @@ export function SymlinkItem(props: { fileData: FileDataType }) {
         }
       />
     );
-  } else { // originalFileData.isFile()
+  } else {
     return (
       <List.Item
         key={filePath}
@@ -191,13 +192,13 @@ export function SymlinkItem(props: { fileData: FileDataType }) {
 
 export function createItem(fileData: FileDataType) {
   if (fileData.type === "directory") {
-    return (<DirectoryItem fileData={fileData} />)
+    return (<DirectoryItem fileData={fileData} />);
   } else if (fileData.type === "file") {
-    return (<FileItem fileData={fileData} />)
+    return (<FileItem fileData={fileData} />);
   } else if (fileData.type === "symlink") {
-    return (<SymlinkItem fileData={fileData} />)
+    return (<SymlinkItem fileData={fileData} />);
   } else {
-    // todo
+    showToast(ToastStyle.Failure, "Unsupported file type", `file type: ${fileData.type}`);
   }
 }
 
@@ -224,10 +225,9 @@ export function getDirectoryData(path: string): FileDataType[] {
     if (fileData.isFile()) fileType = "file";
     if (fileData.isSymbolicLink()) fileType = "symlink";
 
-    const permissions: string = (fileData.mode & parseInt("777", 8)).toString(8); // converts from number to octal
+    const permissions: string = (fileData.mode & parseInt("777", 8)).toString(8); // convert from number to octal
     const size: number = fileData.size;
 
-    // -rw-r--r--@ 1 eric  staff  hidden 2378 Sep 29 13:10 date.txt
     const d: FileDataType = {
       type: fileType,
       name: file,
@@ -235,7 +235,7 @@ export function getDirectoryData(path: string): FileDataType[] {
       permissions: permissions,
       path: path
     }
-    data.push(d)
+    data.push(d);
   }
   return data;
 }
@@ -255,7 +255,7 @@ export function Directory(props: { path: string }) {
           {nonDirectories.map(data => createItem(data))}
         </List.Section>
       </List>
-    )
+    );
   } else {
     return (
       <List navigationTitle={props.path} searchBarPlaceholder="Search for a file or directory...">
