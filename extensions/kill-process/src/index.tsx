@@ -104,7 +104,7 @@ export default function ProcessList() {
               title={process.name}
               subtitle={shouldHidePID ? undefined : isCompact ? process.id : `PID: ${process.id}`}
               icon={icon}
-              accessoryTitle={`${isCompact ? "" : "CPU"} ${process.cpu}%`}
+              accessoryTitle={`${isCompact ? "" : "CPU:"} ${process.cpu}%`}
               actions={
                 <ActionPanel>
                   <ActionPanel.Item title="Kill" icon={Icon.XmarkCircle} onAction={() => killProcess(process)} />

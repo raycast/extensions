@@ -58,7 +58,7 @@
       "default": false,
       "title": "",
       "label": "Hide PID and CPU labels",
-      "description": "Hides the \"PID:\" and \"CPU\" text."
+      "description": "Hides the \"PID:\" and \"CPU:\" text."
     },
     {
       "name": "shouldHidePID",
