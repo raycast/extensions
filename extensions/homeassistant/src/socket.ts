@@ -3,10 +3,11 @@ This is slightly modified version of
 https://github.com/keesschollaart81/vscode-home-assistant/blob/master/src/language-service/src/home-assistant/socket.ts
 */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { Auth } from "home-assistant-js-websocket/dist/auth";
 import { ERR_INVALID_AUTH } from "home-assistant-js-websocket";
 
-// eslint-disable-next-line import/order
 import WebSocket = require("ws");
 
 const MSG_TYPE_AUTH_REQUIRED = "auth_required";
