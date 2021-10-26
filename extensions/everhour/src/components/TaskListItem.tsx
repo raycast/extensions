@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { List, ActionPanel, PushAction, Icon, Color, showToast, ToastStyle } from "@raycast/api";
 import { TimeSubmitForm } from "../views";
 import { Task } from "../types";
@@ -9,12 +10,16 @@ export function TaskListItem({
   hasActiveTimer,
   refreshActiveTimer,
   refreshRecords,
+  todaysTimeRecords,
 }: {
   task: Task;
   hasActiveTimer: boolean;
   refreshActiveTimer: () => Promise<void>;
-  refreshRecords: () => Promise<void>;
+  refreshRecords: () => Promise<any>;
+  todaysTimeRecords: Array<Array<Task>>;
 }) {
+  const [timeRecords, setTimeRecords] = useState<Array<any>>(todaysTimeRecords);
+
   const enableTaskTimer = async () => {
     const toast = await showToast(ToastStyle.Animated, "Starting timer");
     try {
@@ -42,7 +47,13 @@ export function TaskListItem({
   };
 
   const resolveTaskTime = (): string => {
-    const { timeInMin } = task;
+    const taskTimeToday = timeRecords.find((timeRecord) => timeRecord.id === task.id);
+
+    if (!taskTimeToday) {
+      return "0 min";
+    }
+
+    const { timeInMin } = taskTimeToday;
     if (timeInMin >= 60) {
       const hours = Math.floor(timeInMin / 60);
       const min = timeInMin % 60;
@@ -56,14 +67,22 @@ export function TaskListItem({
     <List.Item
       id={task.id}
       key={task.id}
-      title={`${task.name} - ${resolveTaskTime()}`}
+      title={`${task.name} - ${resolveTaskTime()} today`}
       subtitle={hasActiveTimer ? "Timer Active" : ""}
       icon={{ source: Icon.Dot, tintColor: Color.Green }}
       actions={
         <ActionPanel>
           <PushAction
-            title="Submit Hours"
-            target={<TimeSubmitForm refreshRecords={refreshRecords} taskId={task.id} />}
+            title="Submit Custom Time"
+            target={
+              <TimeSubmitForm
+                refreshRecords={async () => {
+                  const records = await refreshRecords();
+                  setTimeRecords(records);
+                }}
+                taskId={task.id}
+              />
+            }
           />
           <ActionPanel.Item title="Start Timer" onAction={enableTaskTimer} />
           <ActionPanel.Item title="Stop Active Timer" onAction={disableActiveTimer} />
