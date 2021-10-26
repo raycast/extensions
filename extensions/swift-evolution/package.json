@@ -8,7 +8,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Swift Evolution",
+      "title": "Search Proposals",
       "subtitle": "Swift Evolution",
       "description": "Search and see details for the Swift langauge proposals from swift evolution web page https://apple.github.io/swift-evolution/",
       "mode": "view"
