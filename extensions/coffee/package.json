@@ -26,6 +26,13 @@
       "subtitle": "Coffee",
       "description": "Prevent your Mac from sleeping while an certain app is running",
       "mode": "view"
+    },
+    {
+      "name": "caffeinationStatus",
+      "title": "Caffeination status",
+      "subtitle": "Coffee",
+      "description": "Get the status of the current caffeination",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
