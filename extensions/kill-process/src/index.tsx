@@ -7,6 +7,9 @@ export default function ProcessList() {
   const [query, setQuery] = useState<string | undefined>(undefined);
   const shouldIncludePaths = (preferences.shouldSearchInPaths?.value as boolean) ?? false;
   const shouldPrioritizeAppsWhenFiltering = (preferences.shouldPrioritizeAppsWhenFiltering?.value as boolean) ?? false;
+  const isCompact = (preferences.isCompact?.value as boolean) ?? false;
+  const shouldHidePID = (preferences.shouldHidePID?.value as boolean) ?? false;
+
   const fetchProcesses = () => {
     exec(`ps -eo pid,pcpu,comm | sort -nrk 2,3`, (err, stdout) => {
       if (err != null) {
@@ -99,9 +102,9 @@ export default function ProcessList() {
             <List.Item
               key={index}
               title={process.name}
-              subtitle={process.id}
+              subtitle={shouldHidePID ? undefined : isCompact ? process.id : `pid: ${process.id}`}
               icon={icon}
-              accessoryTitle={`CPU ${process.cpu}%`}
+              accessoryTitle={`${isCompact ? "" : "CPU"} ${process.cpu}%`}
               actions={
                 <ActionPanel>
                   <ActionPanel.Item title="Kill" icon={Icon.XmarkCircle} onAction={() => killProcess(process)} />
