@@ -29,7 +29,7 @@
     },
     {
       "name": "caffeinationStatus",
-      "title": "Caffeination status",
+      "title": "Caffeination Status",
       "subtitle": "Coffee",
       "description": "Get the status of the current caffeination",
       "mode": "no-view"
