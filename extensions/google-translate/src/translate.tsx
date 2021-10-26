@@ -1,13 +1,21 @@
-import { List, getPreferenceValues, ActionPanel, CopyToClipboardAction } from "@raycast/api";
+import {
+  List,
+  getPreferenceValues,
+  ActionPanel,
+  CopyToClipboardAction,
+} from "@raycast/api";
 import { ReactElement, useEffect, useState } from "react";
 import translate from "@vitalets/google-translate-api";
+import supportedLanguagesByCode from "./supportedLanguagesByCode.json";
 
 let count = 0;
 
 export default function Command(): ReactElement {
   const [isLoading, setIsLoading] = useState(false);
   const [toTranslate, setToTranslate] = useState("");
-  const [results, setResults] = useState<{ text: string; languages: string }[]>([]);
+  const [results, setResults] = useState<{ text: string; languages: string }[]>(
+    []
+  );
 
   useEffect(() => {
     if (toTranslate === "") {
@@ -23,21 +31,33 @@ export default function Command(): ReactElement {
     const preferences = getPreferenceValues();
 
     const promises = Promise.all([
-      translate(toTranslate, { from: preferences.lang1, to: preferences.lang2 }),
-      translate(toTranslate, { from: preferences.lang2, to: preferences.lang1 }),
+      translate(toTranslate, {
+        from: preferences.lang1,
+        to: preferences.lang2,
+      }),
+      translate(toTranslate, {
+        from: preferences.lang2,
+        to: preferences.lang1,
+      }),
     ]);
 
     promises
       .then((res) => {
         if (localCount === count) {
+          const lang1Rep =
+            (supportedLanguagesByCode as any)[preferences.lang1].flag ??
+            (supportedLanguagesByCode as any)[preferences.lang1].code;
+          const lang2Rep =
+            (supportedLanguagesByCode as any)[preferences.lang2].flag ??
+            (supportedLanguagesByCode as any)[preferences.lang2].code;
           setResults([
             {
               text: res[0].text,
-              languages: `${preferences.lang1} -> ${preferences.lang2}`,
+              languages: `${lang1Rep} -> ${lang2Rep}`,
             },
             {
               text: res[1].text,
-              languages: `${preferences.lang2} -> ${preferences.lang1}`,
+              languages: `${lang2Rep} -> ${lang1Rep}`,
             },
           ]);
         }
