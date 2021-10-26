@@ -18,6 +18,7 @@
     "@raycast/api": "^1.25.0",
     "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.10",
+    "dayjs": "^1.10.7",
     "fs-extra": "^10.0.0",
     "fuzzysort": "^1.1.4",
     "node-fetch": "^3.0.0"

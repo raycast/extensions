@@ -3,8 +3,12 @@ import { useState, useEffect } from "react";
 import $ from "cheerio";
 import fetch from "node-fetch";
 import { fetchAllCrypto } from './api';
-import { writeListInToFile, getListFromFile } from './utils'
-import fuzzysort from 'fuzzysort'
+import { writeListInToFile, getListFromFile, CRYPTO_LIST_PATH } from './utils';
+import fuzzysort from 'fuzzysort';
+import fs from 'fs';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 
 
 const BASE_URL = 'https://coinmarketcap.com/currencies/'
@@ -31,7 +35,7 @@ export default function CryptoList() {
         fetchAllCrypto({ limit: 10000, start: 1 }).then(({ data: resultData }) => {
           const { data, status } = resultData
 
-          const cryptoList = data.cryptoCurrencyMap.map(({ slug, name, symbol}) => ({ slug, name, symbol: symbol.toLowerCase()}))
+          const cryptoList = data.cryptoCurrencyMap.map(({ slug, name, symbol }) => ({ slug, name, symbol: symbol.toLowerCase() }))
 
           writeListInToFile({
             timestamp: status.timestamp,
@@ -47,7 +51,18 @@ export default function CryptoList() {
         })
 
       } else {
-        const { cryptoList: cryptoListFromFile } = JSON.parse(data)
+        const now = dayjs();
+        const { cryptoList: cryptoListFromFile, timestamp } = JSON.parse(data)
+        const fileCachedTimeDiff = now.diff(dayjs(timestamp), 'month')
+
+        //Remove cache file if it has been more than 3 month since last time saved.
+        if (fileCachedTimeDiff >= 3) {
+          fs.unlink(CRYPTO_LIST_PATH, (err) => {
+            if (err) throw err;
+            console.log('Crypto list cache has been cleared.');
+          });
+        }
+
 
         if (cryptoListFromFile) {
           setCryptoList(cryptoListFromFile)
@@ -67,8 +82,8 @@ export default function CryptoList() {
   const onSearchChange = (search: string) => {
     setIsLoading(true)
 
-    const fuzzyResult = fuzzysort.go(search, cryptoList, { keys: ['symbol','name'] })
-    
+    const fuzzyResult = fuzzysort.go(search, cryptoList, { keys: ['symbol', 'name'] })
+
     setSearchResult(fuzzyResult.map(result => ({ obj: result.obj })))
   }
   const onSelectChange = (id?: string) => {
