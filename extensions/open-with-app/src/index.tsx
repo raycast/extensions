@@ -5,6 +5,7 @@ import {
   Application,
   getApplications,
   closeMainWindow,
+  popToRoot,
   showHUD,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
@@ -71,7 +72,6 @@ function ApplicationsListItem(props: { application: Application }) {
           <ActionPanelItem
             title={`Open with ${application.name}`}
             onAction={async () => {
-              closeMainWindow();
               const selectedItems = await getFinderSelection();
               if (selectedItems.length === 0) {
                 await showHUD(`⚠️  No Finder selection to open.`);
@@ -80,6 +80,8 @@ function ApplicationsListItem(props: { application: Application }) {
                   execSync(`open -b ${application.bundleId} "${item.replace(/"/g, '\\"')}"`);
                 })
               }
+              closeMainWindow();
+              popToRoot({ clearSearchBar: true });
             }}
           />
         </ActionPanel>
