@@ -110,7 +110,7 @@ const RecentDocumentsView: React.FC<{ list: RecentList; onRemove?: (objToken: st
                 <ActionPanelItem
                   icon={Icon.Trash}
                   title="Remove from recent documents"
-                  shortcut={{ key: 'backspace', modifiers: ['cmd'] }}
+                  shortcut={{ key: 'x', modifiers: ['ctrl'] }}
                   onAction={() => onRemove?.(nodeId)}
                 />
               </>
