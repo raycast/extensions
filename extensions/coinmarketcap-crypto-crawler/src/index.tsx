@@ -74,8 +74,12 @@ export default function CryptoList() {
   }, [])
 
   const onSelectCrypto = async (searchText: string) => {
+    setIsLoading(true)
     const priceInfo = await fetchPrice(searchText)
-    setIsLoading(false);
+
+    // prevent react to batch setting the loading status.
+    setTimeout(() => setIsLoading(false),0)
+    
     return priceInfo
   }
 
@@ -83,8 +87,13 @@ export default function CryptoList() {
     setIsLoading(true)
 
     const fuzzyResult = fuzzysort.go(search, cryptoList, { keys: ['symbol', 'name'] })
+    const transformedFuzzyResult = fuzzyResult.map(result => ({ obj: result.obj }))
 
-    setSearchResult(fuzzyResult.map(result => ({ obj: result.obj })))
+    if(!transformedFuzzyResult.length){
+      setIsLoading(false);  
+    }
+
+    setSearchResult(transformedFuzzyResult)
   }
   const onSelectChange = (id?: string) => {
     if (!id) return;
@@ -96,7 +105,6 @@ export default function CryptoList() {
     if (targetCrypto && !!targetCrypto.currencyPrice) return
 
     onSelectCrypto(slug).then(({ currencyPrice = '', priceDiff = '' }) => {
-
       setSearchResult(prev => {
         const temp = [...prev]
 
