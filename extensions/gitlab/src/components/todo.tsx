@@ -53,11 +53,12 @@ export function TodoList() {
 
 export function TodoListItem(props: { todo: Todo }) {
   const todo = props.todo;
+  const subtitle = todo.group ? todo.group.full_path : todo.project_with_namespace || "";
   return (
     <List.Item
       id={todo.id.toString()}
       title={todo.title}
-      subtitle={todo.project_with_namespace}
+      subtitle={subtitle}
       accessoryTitle={todo.action_name}
       accessoryIcon={userToIcon(todo.author)}
       icon={{ source: GitLabIcons.todo, tintColor: Color.Green }}

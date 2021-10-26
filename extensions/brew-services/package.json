@@ -1,0 +1,44 @@
+{
+  "name": "brew-services",
+  "title": "Manage Services",
+  "description": "Manage homebrew services",
+  "icon": "command-icon.png",
+  "author": "es183923",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-services",
+      "title": "Manage Services",
+      "subtitle": "Brew",
+      "description": "Manage homebrew services",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "brewPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Brew Installation Path",
+          "description": "Location to the Brew installation (Defaults to `/opt/homebrew/bin/brew` on M1 Macs, and `/usr/local/bin/brew` otherwise)"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "execa": "^5.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

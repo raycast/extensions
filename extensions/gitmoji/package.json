@@ -1,0 +1,35 @@
+{
+  "name": "gitmoji",
+  "title": "Gitmoji Search",
+  "description": "Gitmoji is an emoji guide for your commit messages",
+  "icon": "icon.png",
+  "author": "ricoberger",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "gitmoji",
+      "title": "gitmoji",
+      "subtitle": "",
+      "description": "Search your gitmoji",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "gitmojis": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.30",
+    "@typescript-eslint/eslint-plugin": "^5.1.0",
+    "@typescript-eslint/parser": "^5.1.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.20.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

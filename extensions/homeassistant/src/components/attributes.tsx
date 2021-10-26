@@ -1,7 +1,7 @@
 import { ActionPanel, CopyToClipboardAction, List } from "@raycast/api";
 import { State } from "../haapi";
 
-export function EntityAttributesList(props: { state: State }) {
+export function EntityAttributesList(props: { state: State }): JSX.Element {
   const state = props.state;
   const title = state.attributes.friendly_name
     ? `${state.attributes.friendly_name} (${state.entity_id})`
