@@ -15,9 +15,9 @@
     },
     {
       "name": "search",
-      "title": "Search Formula",
+      "title": "Search Formulae",
       "subtitle": "Brew",
-      "description": "Search brew formula",
+      "description": "Search brew formulae",
       "mode": "view"
     },
     {

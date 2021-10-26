@@ -171,14 +171,13 @@ export async function brewFetchFormula(): Promise<Formula[]> {
 }
 
 export async function brewSearchFormula(searchText?: string): Promise<Formula[]> {
-  if (searchText == undefined) { return [] }
-
   const formulas = await brewFetchFormula();
+  if (!searchText) { return formulas; }
+
   const target = searchText.toLowerCase();
-  const results = formulas?.filter(formula => {
+  return formulas?.filter(formula => {
     return formula.name.toLowerCase().includes(target);
   });
-  return results;
 }
 
 /// Actions
@@ -212,23 +211,23 @@ export async function brewUpgradeAll(): Promise<void> {
 /// Utilities
 
 export function brewFormatVersion(formula: Formula): string {
+  if (!formula.installed.length) { return ""; }
+
   let version = "";
-  if (formula.installed.length > 0) {
-    const installed_version = formula.installed[0];
-    version = installed_version.version;
-    let status = "";
-    if (installed_version.installed_as_dependency) {
-      status += 'D';
-    }
-    if (formula.pinned) {
-      status += 'P';
-    }
-    if (formula.outdated) {
-      status += 'O';
-    }
-    if (status) {
-      version += ` (${status})`;
-    }
+  const installed_version = formula.installed[0];
+  version = installed_version.version;
+  let status = "";
+  if (installed_version.installed_as_dependency) {
+    status += 'D';
+  }
+  if (formula.pinned) {
+    status += 'P';
+  }
+  if (formula.outdated) {
+    status += 'O';
+  }
+  if (status) {
+    version += ` (${status})`;
   }
   return version;
 }
