@@ -19,8 +19,8 @@ export const formatImageDetailMarkdown = (image: ImageInspectInfo | undefined) =
         ['Size', formatBytes(image.Size)],
         ['OS', image.Os],
         ['Architecture', image.Architecture],
-        ['Command', markdown.codeBlock(formatImageCommand(image.Config.Cmd))],
-        ['Entrypoint', markdown.codeBlock(formatEntryPoint(image.Config.Entrypoint))],
+        ['Command', markdown.inlineCode(formatImageCommand(image.Config.Cmd))],
+        ['Entrypoint', markdown.inlineCode(formatEntryPoint(image.Config.Entrypoint))],
       ]) +
       renderEnvSection(image.Config.Env) +
       `\n`
