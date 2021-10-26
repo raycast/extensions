@@ -45,7 +45,7 @@ const target_languages = {
   DA: "Danish",
   NL: "Dutch",
   "EN-GB": "English (British)",
-  "EN-US": "English (American)",
+  "EN-US": "English (US)",
   ET: "Estonian",
   FI: "Finnish",
   FR: "French",
