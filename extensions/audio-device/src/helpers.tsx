@@ -27,12 +27,10 @@ type UseAudioDevicesResponse = {
 };
 
 export function useAudioDevices(type: "input" | "output") {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [audioDevices, setAudioDevices] = useState<UseAudioDevicesResponse["data"]>();
 
   useEffect(() => {
-    setIsLoading(true);
-
     const fetchDevices = async () => {
       const allDevicesResult = await execp(`${switchAudioPath()} -a -t ${type} -f json`);
       const currentDeviceResult = await execp(`${switchAudioPath()} -c -t ${type} -f json`);
