@@ -199,14 +199,14 @@ export function OutdatedActionPanel(props: {outdated: OutdatedFormula, onAction:
   const outdated = props.outdated;
 
   async function updateAll(): Promise<boolean> {
-    showToast(ToastStyle.Animated, `Upgrading all`)
+    showToast(ToastStyle.Animated, `Upgrading all formula`)
     try {
       await brewUpgradeAll();
-      showToast(ToastStyle.Success, `Upgraded succeeded`)
+      showToast(ToastStyle.Success, `Upgrade formula succeeded`)
       return true;
     } catch (err) {
       console.log(err);
-      showToast(ToastStyle.Failure, 'Upgrade failed');
+      showToast(ToastStyle.Failure, 'Upgrade formula failed');
       return false;
     }
   }
