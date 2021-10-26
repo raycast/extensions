@@ -5,16 +5,16 @@ import { Connection, createConnection, createLongLivedTokenAuth } from "home-ass
 import { HomeAssistant } from "./haapi";
 import { createSocket } from "./socket";
 
-export function createHomeAssistantClient() {
+export function createHomeAssistantClient(): HomeAssistant {
     const instance = preferences.instance?.value as string;
     const token = preferences.token?.value as string;
     const ha = new HomeAssistant(instance, token);
     return ha;
 }
 
-var con: Connection;
+let con: Connection;
 
-export async function getHAWSConnection() {
+export async function getHAWSConnection(): Promise<Connection> {
     if (con) {
         console.log("return existing ws con");
         return con;
