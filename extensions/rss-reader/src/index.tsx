@@ -1,6 +1,7 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle, Icon, Color, getLocalStorageItem, setLocalStorageItem, clearSearchBar, useNavigation, Detail } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle, Icon, Color, getLocalStorageItem, setLocalStorageItem, PushAction } from "@raycast/api";
 import { useEffect, useState } from "react";
-import FeedsList from "./feeds";
+import { Feed } from "./feeds";
+import { AddFeedForm } from "./add-feed"
 import Parser from "rss-parser";
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en.json'
@@ -20,12 +21,11 @@ interface State {
   items?: Story[];
   lastViewed?: number;
   error?: Error;
-  feeds?: string[];
+  feeds?: Feed[];
 }
 
 export default function Index() {
   const [state, setState] = useState<State>({});
-  const [newFeed, setNewFeed] = useState("");
   const [loading, setLoading] = useState(true);
   
 
@@ -35,20 +35,20 @@ export default function Index() {
       let items : Story[] = []
       const lastViewed = await getLocalStorageItem("lastViewed") as number
       const feedsString = await getLocalStorageItem("feeds") as string
-      let feeds : any
+      let feeds : Feed[]
       
       if (feedsString === undefined) {
         setLoading(false);
         return;
       }
       feeds = JSON.parse(feedsString)
-      if (feeds.urls === undefined || feeds.urls.length == 0) {
+      if (feeds.length == 0) {
         setLoading(false);
         return;
       }
 
-      for (const feedURL of feeds.urls) {
-        const feed = await parser.parseURL(feedURL);
+      for (const feedItem of feeds) {
+        const feed = await parser.parseURL(feedItem.url);
         feed.items.map((item) => {
           let story : Story
           story = item
@@ -63,7 +63,7 @@ export default function Index() {
       setState({ 
         items: items,
         lastViewed: lastViewed,
-        feeds: feeds.urls
+        feeds: feeds
       });
       setLoading(false)
       await setLocalStorageItem("lastViewed", items.at(0)?.date!);
@@ -80,122 +80,35 @@ export default function Index() {
     showToast(ToastStyle.Failure, "Failed loading stories", state.error.message);
   }
 
-  const addFeed = async () => {
-    try {
-      if (newFeed.length === 0) {
-        await showToast(ToastStyle.Failure, "Empty feed URL", "Feed URL cannot be empty");
-        return;
-      }
-
-      const feed = await parser.parseURL(newFeed)
-      
-      let feedsString = await getLocalStorageItem("feeds") as string
-      let feeds = {
-        urls: [] as string[]
-      }
-      if (feedsString !== undefined) {
-        feeds = JSON.parse(feedsString)
-      }
-      if (feeds.urls.includes(newFeed)) {
-        await showToast(ToastStyle.Failure, "Feed already exists", newFeed);
-        return;
-      }
-      feeds.urls.push(newFeed)
-      await setLocalStorageItem("feeds", JSON.stringify(feeds));
-
-      await showToast(ToastStyle.Success, "Subscribed!", newFeed);
-      await clearSearchBar();
-      
-      fetchStories();
-  } catch (error) {
-    await clearSearchBar();
-    showToast(ToastStyle.Failure, "Can't find feed", "No valid feed found on " + newFeed);
-  }
-  };
-
-  const removeFeeds = async () => {
-    let feeds = {
-      urls: [] as string[]
-    }
-    await setLocalStorageItem("feeds", JSON.stringify(feeds));
-
-    await showToast(ToastStyle.Success, "Unsubscribed from all feeds!");
-    await clearSearchBar();
-    setState({});
-  };
-
-  const { push } = useNavigation();
-
-  const fetchAfterFeeds = () => {
-    fetchStories();
-    setState({});
-  }
-
   return (
-    <List
-      isLoading={ loading }
-      onSearchTextChange={(text: string) => setNewFeed(text.trim())}
-      searchBarPlaceholder={"Type feed URL and hit enter to subscribe..."}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Item 
-            title="Subscribe to Feed" 
-            onAction={() => addFeed()}
-            icon={{ source: Icon.Plus, tintColor: Color.Green }}
-          />
-        </ActionPanel>
-      }
-    >
-      { !loading && state.feeds === undefined && (
+    <List isLoading={ loading } >
+      { !loading && ( state.feeds === undefined || state.feeds.length === 0 ) && (
         <List.Item 
           key="empty"
           title="No feeds"
-          subtitle="Type feed URL in the field above and hit enter"
+          subtitle="Press enter to add subscription"
           icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+          actions={
+            <ActionPanel>
+              <PushAction title="Add Subscription" target={<AddFeedForm />} />
+            </ActionPanel>
+          }
         />
       )}
-      { state.feeds !== undefined && state.feeds!.length > 0 && (
-        <List.Section title="Feeds">
-          <List.Item 
-            title="Show All Feeds..."
-            actions={
-              <ActionPanel>
-                <ActionPanel.Item
-                  title="Show All Feeds"
-                  onAction={() => push(<FeedsList callback={fetchAfterFeeds}/>)}
-                  icon={{ source: Icon.List, tintColor: Color.Green }}
-                />
-                <ActionPanel.Item
-                  title="Unsubscribe from All Feeds"
-                  onAction={() => removeFeeds()}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                />
-              </ActionPanel>
-            }
-          />
-        </List.Section> 
-      )}
-      { state.feeds !== undefined && state.feeds!.length > 0 && (
-        <List.Section title="Stories">
-          {state.items?.map((item) => (
-            <StoryListItem key={item.guid} item={item} />
-          ))}
-        </List.Section>
-      )}
+      { state.feeds !== undefined && state.feeds!.length > 0 && state.items?.map((item) => (
+        <StoryListItem key={item.guid} item={item} />
+      ))}
     </List>
   );
 }
 
 function StoryListItem(props: { item: Story }) {
-  const pubAgo = getTimeAgo(props.item) as string;
-
   return (
     <List.Item
       title={props.item.title ?? "No title"}
       icon={ props.item.icon || Icon.Text}
       accessoryIcon={props.item.isNew ? { source: Icon.Dot, tintColor: Color.Green } : undefined}
-      accessoryTitle={pubAgo}
+      accessoryTitle={timeAgo.format(props.item.date!) as string}
       actions={<Actions item={props.item} />}
     />
   );
@@ -218,8 +131,4 @@ function Actions(props: { item: Story }) {
       </ActionPanel.Section>
     </ActionPanel>
   );
-}
-
-function getTimeAgo(item: Story) {
-  return timeAgo.format(Date.parse(item.pubDate!))
 }

@@ -1,11 +1,8 @@
-import { ActionPanel, List, showToast, ToastStyle, Icon, Color, getLocalStorageItem, setLocalStorageItem, useNavigation } from "@raycast/api";
+import { ActionPanel, List, showToast, ToastStyle, Icon, Color, getLocalStorageItem, setLocalStorageItem, PushAction } from "@raycast/api";
 import { useEffect, useState } from "react";
-import Parser from "rss-parser";
+import { AddFeedForm } from "./add-feed"
 
-const parser = new Parser({});
-
-interface Feed {
-  idx: number;
+export interface Feed {
   url: string;
   title?: string;
   icon?: string
@@ -16,42 +13,28 @@ interface State {
   error?: Error;
 }
 
-export default function FeedsList(props: { callback : () => any }) {
-  const { pop } = useNavigation();
-
+export default function FeedsList() {
   const [state, setState] = useState<State>({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  async function fetchFeeds() {
+  async function getFeeds() {
     try {
       setLoading(true)
       const feedsString = await getLocalStorageItem("feeds") as string
-      let feeds : any
-      let feedItems : Feed[] = []
+      let feeds : Feed[]
+      
       if (feedsString === undefined) {
-        setState({ error : new Error("No feeds to fetch") });
-        setLoading(false)
+        setLoading(false);
         return;
       }
       feeds = JSON.parse(feedsString)
-      if (feeds.urls === undefined || feeds.urls.length == 0) {
-        setState({ error : new Error("No feeds to fetch") });
-        setLoading(false)
+      if (feeds.length == 0) {
+        setLoading(false);
         return;
       }
 
-      for (const feedURL of feeds.urls) {
-        const feed = await parser.parseURL(feedURL);
-        let feedItem = ({
-          idx: feeds.urls.indexOf(feedURL),
-          url: feedURL,
-          title: feed.title!,
-          icon: feed.image?.url
-        })
-        feedItems.push(feedItem)
-      }
       setState({ 
-        items: feedItems
+        items: feeds,
       });
       setLoading(false)
     } catch (error) {
@@ -60,7 +43,7 @@ export default function FeedsList(props: { callback : () => any }) {
   }
 
   useEffect(() => {
-    fetchFeeds();
+    getFeeds();
   }, []);
 
   if (state.error) {
@@ -69,34 +52,34 @@ export default function FeedsList(props: { callback : () => any }) {
 
   const removeFeed = async (index: number) => {
     const removedFeed = state.items?.at(index)?.title
-    state.items?.splice(index, 1)
-    let feeds = {
-      urls: [] as string[]
-    }
-    state.items?.map((feed) => {
-      feeds.urls.push(feed.url)
-    })
-    await setLocalStorageItem("feeds", JSON.stringify(feeds));
+    let feedItems = state.items
+    feedItems?.splice(index, 1)
+    await setLocalStorageItem("feeds", JSON.stringify(feedItems));
 
     await showToast(ToastStyle.Success, "Unsubscribed from the feed!", removedFeed);
 
-    fetchFeeds();
+    setState({
+      items: feedItems
+    })
   };
-
-  const back = () => {
-    pop()
-    props.callback()
-  }
 
   return (
     <List
       isLoading={ loading }
-      actions={
-        <ActionPanel>
-          <ActionPanel.Item title="Return to Stories" onAction={back} shortcut={{ modifiers: [], key: "escape" }}/>
-        </ActionPanel>
-      }
     >
+      { !loading && ( state.items === undefined || state.items.length === 0 ) && (
+        <List.Item 
+          key="empty"
+          title="No feeds"
+          subtitle="Press enter to add subscription"
+          icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+          actions={
+            <ActionPanel>
+              <PushAction title="Add Subscription" target={<AddFeedForm />} />
+            </ActionPanel>
+          }
+        />
+      )}
       {state.items?.map((item, index) => (
         <List.Item
           key={item.url}

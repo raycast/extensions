@@ -8,9 +8,23 @@
   "commands": [
     {
       "name": "index",
-      "title": "Read News",
+      "title": "Read Stories",
       "subtitle": "RSS",
       "description": "Get the latest from your favourite sources",
+      "mode": "view"
+    },
+    {
+      "name": "feeds",
+      "title": "View Subscriptions",
+      "subtitle": "RSS",
+      "description": "Get and manage the list of your sources",
+      "mode": "view"
+    },
+    {
+      "name": "add-feed",
+      "title": "Add Subscription",
+      "subtitle": "RSS",
+      "description": "Subscribe to the new sources",
       "mode": "view"
     }
   ],
