@@ -94,13 +94,12 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
   const path = rootPath;
   const prettyPath = tildify(path);
   const subtitle = dirname(prettyPath);
-  const keywords = tags;
   return (
     <List.Item
       title={name}
       subtitle={subtitle}
       icon={{ fileIcon: path }}
-      keywords={keywords}
+      keywords={tags}
       accessoryTitle={tags.join(", ")}
       actions={
         <ActionPanel>

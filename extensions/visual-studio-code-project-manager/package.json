@@ -21,7 +21,7 @@
       "required": false,
       "default": "",
       "title": "Path of the projects.json of the Project Manager",
-      "description": ""
+      "description": "Only used if you have moved it, otherwise leave blank"
     },
     {
       "name": "groupProjectsByTag",
@@ -30,7 +30,7 @@
       "title": "Group projects by tag",
       "default": true,
       "label": "",
-      "description": ""
+      "description": "Groups projects by tag instead of just showing"
     }
   ],
   "dependencies": {
