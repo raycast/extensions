@@ -1,7 +1,7 @@
 {
   "name": "ricescore",
   "title": "RICE Score",
-  "description": "Calculate the RICE Score",
+  "description": "Calculate RICE Score and output value or markdown table",
   "icon": "rice.png",
   "author": "tonka3000",
   "license": "MIT",
