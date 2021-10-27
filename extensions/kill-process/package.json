@@ -39,7 +39,7 @@
       "required": false,
       "title": "",
       "label": "Filtering should search process paths",
-      "description": "Some processes are named differently than the app itself. This flag determines whether the path of the process should be searched for the query, or only the process name."
+      "description": "Some processes are named differently than the app itself. This flag determines whether\nthe path of the process should be searched for the query, or only the process name."
     },
     {
       "name": "shouldPrioritizeAppsWhenFiltering",
@@ -48,6 +48,14 @@
       "title": "",
       "label": "Prioritize apps when filtering",
       "description": "Determines whether apps are listed before other results when filtering."
+    },
+    {
+      "name": "shouldShowPID",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show PID",
+      "description": "Show process PID info."
     }
   ]
 }
