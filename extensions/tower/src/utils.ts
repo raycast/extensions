@@ -1,6 +1,7 @@
 import { preferences, showToast, ToastStyle } from "@raycast/api";
 import fs from "fs";
 import os from "os";
+import path from "path";
 import plist from "plist";
 import Bookmark from "./dtos/bookmark-dto";
 import ImportedTowerBookmarks, { ImportedTowerBookmark } from "./interfaces/imported-tower-bookmark";
@@ -75,4 +76,14 @@ export async function fetchBookmarks(): Promise<Bookmark[]> {
     await showToast(ToastStyle.Failure, "Something whent wrong", "Something whent wrong loading the Tower bookmarks.");
     return Promise.resolve([]);
   }
+}
+
+export function getCurrentBranchName(gitRepoPath: string): string {
+  const gitHeadPath = `${gitRepoPath}/.git/HEAD`;
+
+  return fs.existsSync(gitRepoPath)
+    ? fs.existsSync(gitHeadPath)
+      ? fs.readFileSync(gitHeadPath, "utf-8").trim().split("/").slice(2).join("/")
+      : getCurrentBranchName(path.resolve(gitRepoPath, ".."))
+    : "";
 }

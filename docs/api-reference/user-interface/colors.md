@@ -4,7 +4,7 @@
 
 ### Color
 
-The standard colors. Use these colors for consistency.
+The standard colors. Use this colors for consistency.
 
 The colors automatically adopt to light and dark theme.
 
