@@ -19,6 +19,11 @@ export default function NoteItem({ note }: { note: Note }) {
             target={`bear://x-callback-url/open-note?id=${note.id}&edit=yes`}
             icon={Icon.Sidebar}
           />
+          <OpenAction
+            title="Open in New Bear Window"
+            target={`bear://x-callback-url/open-note?id=${note.id}&new_window=yes&edit=yes`}
+            icon={Icon.Window}
+          />
           <PushAction
             title="Show Note Preview"
             target={<PreviewNote note={note} />}
