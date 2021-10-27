@@ -10,10 +10,10 @@ import {
   ActionPanel,
   SubmitFormAction,
 } from "@raycast/api";
-import { Project, User, Label, Milestone, Branch } from "../gitlabapi";
+import { Project, User, Label, Milestone, Branch, Issue } from "../gitlabapi";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
-import { projectIcon, toFormValues } from "../utils";
+import { projectIcon, stringToSlug, toFormValues } from "../utils";
 import { useCache } from "../cache";
 
 interface MRFormValues {
@@ -44,6 +44,69 @@ async function submit(values: MRFormValues) {
   } catch (error: any) {
     await showToast(ToastStyle.Failure, "Error", error.message);
   }
+}
+
+async function getProjectBranches(projectID: number) {
+  const branches = ((await gitlab.fetch(`projects/${projectID}/repository/branches`, {}, true)) as Branch[]) || [];
+  const project = await gitlab.getProject(projectID);
+  return { branches, project };
+}
+
+export function IssueMRCreateForm({
+  issue,
+  projectID,
+  title,
+}: {
+  issue: Issue;
+  projectID: number;
+  title: string;
+}): JSX.Element {
+  const branchName = `${issue.iid}-${stringToSlug(issue.title)}`;
+  const [branches, setBranches] = useState<Branch[]>();
+  const [project, setProject] = useState<Project>();
+
+  useEffect(() => {
+    projectID && getProjectBranches(projectID).then((data) => (setProject(data?.project), setBranches(data?.branches)));
+  }, [projectID]);
+
+  async function submit(values: { source_branch: string; target_branch: string }) {
+    const { source_branch, target_branch } = values;
+    try {
+      await gitlab.post(`projects/${projectID}/repository/branches?branch=${source_branch}&ref=${target_branch}`);
+      await gitlab.createMR(projectID, {
+        id: projectID,
+        description: `Closes #${issue.iid}`,
+        source_branch: source_branch,
+        target_branch: target_branch,
+        title: title,
+        assignee_id: project?.owner?.id,
+      });
+      showToast(ToastStyle.Success, "Merge Request created", "Merge Request creation successful");
+      popToRoot();
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Cannot create Merge Request", (error instanceof Error && error.message) || "");
+    }
+  }
+
+  return (
+    <Form
+      onSubmit={submit}
+      isLoading={project === undefined && branches === undefined}
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Create Merge Request" onSubmit={submit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="source_branch"
+        title="Source branch"
+        placeholder="Enter source branch"
+        defaultValue={branchName}
+      />
+      <TargetBranchDropdown project={project} info={{ branches: branches || [] }} />
+    </Form>
+  );
 }
 
 export function MRCreateForm(props: { project?: Project | undefined; branch?: string | undefined }) {
@@ -186,7 +249,10 @@ function SourceBranchDropdown(props: {
   }
 }
 
-function TargetBranchDropdown(props: { project?: Project | undefined; info?: ProjectInfoMR | undefined }) {
+function TargetBranchDropdown(props: {
+  project?: Project | undefined;
+  info?: Pick<ProjectInfoMR, "branches"> | undefined;
+}) {
   if (props.project && props.info) {
     const pro = props.project;
     const defaultBranch =
