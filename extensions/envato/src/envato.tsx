@@ -12,28 +12,32 @@ let month = date.getMonth()+1;
 let year = date.getFullYear();
 let fullDate = `${day}, ${month}, ${year}`;
 
+type envatoErrors = {
+	empty?: boolean,
+	reason?: string,
+	description?: string,
+};
 
 export default function Command() {
-	const [state, setState] = useState( { sales: [], errors: [] } );
+	const [state, setState] = useState<{sales: [], errors: envatoErrors}>( { sales: [], errors: [] as envatoErrors } );
 
 	useEffect(() => {
 		async function fetch() {
 			try {
 				let salesInfo = await client.private.getSales();
 				let salesEmpty: any = salesInfo.length === 0 ? {empty: true} : [];
-				console.log(salesInfo.length === 0 ?? "");
 				setState((oldState) => ({
 					...oldState,
 					sales: salesInfo as [],
-					errors: salesEmpty as []
+					errors: salesEmpty as envatoErrors
 				}));
-			 } catch (error) {
+			 } catch (error: any) {
 				 let reason = error.response.reason ?? "Error";
 				 let description = error.response.error ?? "An unknown error has occurred.";
 				 let out: {[key: string]: any} = {reason, description};
 				 setState((oldState) => ({
 					 ...oldState,
-					 errors: out as []
+					 errors: out as envatoErrors
 				 }));
 				 showToast(ToastStyle.Failure, reason, description);
 				 return;
@@ -41,9 +45,8 @@ export default function Command() {
 		}
 		fetch();
 	}, []);
-	
-	if(state.errors.length !== 0 && state.errors.empty !== true) {
-		console.log(state.errors);
+
+	if(state.errors.reason !== undefined && state.errors.empty !== true) {
 		return (
 			<Detail markdown={`# 😢 ${state.errors.reason ?? ""} \n \`\`\`\n${state.errors.description ?? ""}\n\`\`\``}/>
 	)}
@@ -71,10 +74,9 @@ export default function Command() {
 				}
 		  />)
 	}
-	console.log(state.sales);
 
 	return (
-		<List isLoading={state.sales.length === 0 && state.errors.length === 0 }>
+		<List isLoading={state.sales.length === 0 && state.errors.reason == undefined && state.errors.empty !== true }>
 			<List.Section title="Today">
 				{state.sales
 					.map((sale, index) => {
