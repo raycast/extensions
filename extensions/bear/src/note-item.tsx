@@ -14,8 +14,17 @@ export default function NoteItem({ note }: { note: Note }) {
       keywords={[note.id]}
       actions={
         <ActionPanel>
-          <OpenAction title="Open Note in Bear" target={`bear://x-callback-url/open-note?id=${note.id}`} />
-          <PushAction title="Show Note Preview" target={<PreviewNote note={note} />} />
+          <OpenAction
+            title="Open in Bear"
+            target={`bear://x-callback-url/open-note?id=${note.id}`}
+            icon={Icon.Sidebar}
+          />
+          <PushAction
+            title="Show Note Preview"
+            target={<PreviewNote note={note} />}
+            icon={Icon.Text}
+            shortcut={{ modifiers: ["cmd"], key: "p" }}
+          />
           <PushAction
             title="Show Note Links"
             target={<NoteLinks note={note} />}
