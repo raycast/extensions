@@ -9,16 +9,13 @@ import { is, isError } from './util/fp'
 import { DomainStatus, getStatusIcon, SearchResultWithStatus } from './util/types'
 import { SEARCH_SUGGESTIONS, STATUS_DESCRIPTIONS, STATUS_MAPPING } from './util/costants'
 import useLoading from './util/useLoading'
-// import useHistory, { History } from './util/history'
 
 function DomainrSearch() {
 	const loading = useLoading( false )
-	// const { addToHistory, loadHistory } = useHistory()
-	// const [history, setHistory] = useState<History>( [] )
 	const [results, setResults] = useState<ReadonlyArray<SearchResultWithStatus>>( [] )
 	const [query, setQuery] = useState( '' )
 
-	const performSearch = useCallback(flow(
+	const performSearch = useCallback( flow(
 		fullSearch,
 		TE.map( flow(
 			A.filter( O.isSome ),
@@ -36,33 +33,7 @@ function DomainrSearch() {
 			),
 			loading.stop
 		) )
-	), [results, loading])
-
-	// Load History
-	// useEffect( () => {
-	// 	if ( query.length > 3 ) return
-
-	// 	loading.start()
-
-	// 	pipe(
-	// 		loadHistory,
-	// 		TE.map( flow(
-	// 			logAndContinue, // DEBUG
-	// 			setHistory
-	// 		)),
-	// 		TE.mapLeft( err => pipe(
-	// 			err,
-	// 			logAndContinue, // DEBUG
-	// 			isError,
-	// 			is,
-	// 			O.fold(
-	// 				() => showToast( ToastStyle.Failure, 'Error decoding history', 'Invalid data structure.' ),
-	// 				() => showToast( ToastStyle.Failure, 'Error loading history', ( err as Error ).message ),
-	// 			),
-	// 			loading.stop
-	// 		) )
-	// 	)()
-	// }, [query] )
+	), [results, loading] )
 
 	// Perform Search
 	useEffect( () => {
@@ -73,46 +44,12 @@ function DomainrSearch() {
 
 		loading.start()
 
-		performSearch(query)()
-
-		// pipe(
-		// 	query,
-		// 	addToHistory(history),
-		// 	TE.chainIOK(performSearch),
-		// 	TE.mapLeft(flow(
-		// 		logAndContinue, // DEBUG
-		// 		performSearch(query)
-		// 	))
-		// )()
+		performSearch( query )()
 	}, [query] )
 
 
 	return (
 		<List isLoading={loading.status} onSearchTextChange={setQuery} throttle searchBarPlaceholder='Search domains'>
-			{/* {history.length > 0 && query.length === 0 && !loading.status && (
-				<List.Section title='Recents'>
-					{history.map( ( item, index ) => (
-						<List.Item
-							key={index}
-							title={item.domain}
-							accessoryTitle={new Date(item.date).toISOString()}
-							icon={Icon.Globe}
-							actions={
-								<ActionPanel>
-									<ActionPanel.Item
-										title='Check'
-										onAction={() => {
-											clearSearchBar()
-											setQuery(item.domain)
-										}}
-									/>
-								</ActionPanel>
-							}
-						/>
-					))}
-				</List.Section>
-			)} */}
-
 			{results.length === 0 && !loading.status && (
 				<List.Section title='Tips & Tricks'>
 					{SEARCH_SUGGESTIONS.map( item => (
