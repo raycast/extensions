@@ -39,7 +39,7 @@ export default function Command() {
   const score = (reachNum * impactNum * (confidenceNum / 100.0)) / effortNum;
   const roundScore = Math.round(score * 100.0) / 100.0;
   const isValid = !Number.isNaN(roundScore);
-  const scoreText = isValid ? roundScore.toString() : "Invalid input";
+  const scoreText = isValid ? roundScore.toString() : "";
 
   const md = getMarkdown(reach, impact, confidence, effort, scoreText);
 
@@ -80,7 +80,8 @@ export default function Command() {
         placeholder="How many “person-months” will this take?"
         defaultValue={effort}
       />
-      <Form.TextField id="score" title="RICE score" value={scoreText} />
+      <Form.Separator />
+      <Form.TextField id="score" title="RICE score" value={scoreText} placeholder="Result" />
     </Form>
   );
 }
