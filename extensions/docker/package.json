@@ -1,6 +1,7 @@
 {
   "name": "docker",
   "title": "Docker",
+  "version": "1.1.0",
   "description": "Manage Docker with Raycast",
   "icon": "docker-icon.png",
   "author": "priithaamer",
