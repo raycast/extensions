@@ -1,4 +1,4 @@
-import { ActionPanel, getPreferenceValues, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, getPreferenceValues, List, OpenInBrowserAction, showToast, ToastStyle, Detail } from "@raycast/api";
 import { useState, useEffect } from "react";
 import Envato from "envato";
 import dateFormat from "dateformat";
@@ -14,24 +14,39 @@ let fullDate = `${day}, ${month}, ${year}`;
 
 
 export default function Command() {
-	const [state, setState] = useState( { sales: [] } );
+	const [state, setState] = useState( { sales: [], errors: [] } );
 
 	useEffect(() => {
 		async function fetch() {
 			try {
 				let salesInfo = await client.private.getSales();
+				let salesEmpty: any = salesInfo.length === 0 ? {empty: true} : [];
+				console.log(salesInfo.length === 0 ?? "");
 				setState((oldState) => ({
 					...oldState,
-					sales: salesInfo as []
+					sales: salesInfo as [],
+					errors: salesEmpty as []
 				}));
-		
 			 } catch (error) {
-				 showToast(ToastStyle.Failure, `Loading failed`);
+				 let reason = error.response.reason ?? "Error";
+				 let description = error.response.error ?? "An unknown error has occurred.";
+				 let out: {[key: string]: any} = {reason, description};
+				 setState((oldState) => ({
+					 ...oldState,
+					 errors: out as []
+				 }));
+				 showToast(ToastStyle.Failure, reason, description);
 				 return;
 			 }
 		}
 		fetch();
 	}, []);
+	
+	if(state.errors.length !== 0 && state.errors.empty !== true) {
+		console.log(state.errors);
+		return (
+			<Detail markdown={`# 😢 ${state.errors.reason ?? ""} \n \`\`\`\n${state.errors.description ?? ""}\n\`\`\``}/>
+	)}
 	
 	function price(price: "", support: "") {
 		let support_out = "";
@@ -56,14 +71,15 @@ export default function Command() {
 				}
 		  />)
 	}
+	console.log(state.sales);
 
 	return (
-		<List isLoading={state.sales.length === 0}>
+		<List isLoading={state.sales.length === 0 && state.errors.length === 0 }>
 			<List.Section title="Today">
 				{state.sales
 					.map((sale, index) => {
 						let saleDate = String(dateFormat(sale['sold_at'], "dd, mm, yyyy"));
-						if(saleDate == fullDate)
+						if(saleDate == fullDate && state.errors !== [])
 							return (<SaleItem sale={sale} key={index} />)
 					})
 				}
@@ -72,7 +88,7 @@ export default function Command() {
 				{state.sales
 				.map((sale, index) => {
 					let saleDate = String(dateFormat(sale['sold_at'], "dd, mm, yyyy"));
-					if(saleDate != fullDate)
+					if(saleDate != fullDate && state.errors !== [])
 						return (<SaleItem sale={sale} key={index} />)
 				})
 				}

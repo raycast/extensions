@@ -21,7 +21,7 @@
       "type": "textfield",
       "required": true,
       "title": "Envato Token",
-      "description": "Please paste your token"
+      "description": "You need to provide an API token to access the API. The token must be a 32 character long alphanumeric string. See https://build.envato.com/api/#token"
     }
   ],
   "dependencies": {
