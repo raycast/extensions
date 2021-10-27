@@ -29,10 +29,10 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "# general commands": "##################################################",
-    "deduplicate": "npx yarn-deduplicate && yarn",
+    "deduplicate": "npx yarn-deduplicate && npm install",
     "lint": "eslint --fix \"**/*.{js,jsx,ts,tsx}\"",
     "type-check": "tsc --noEmit",
-    "validate": "yarn lint && yarn type-check",
+    "validate": "npm run lint && npm run type-check",
     "#": "###################################################################"
   },
   "dependencies": {
