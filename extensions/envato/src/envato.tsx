@@ -58,7 +58,7 @@ export default function Command() {
 	}
 
 	return (
-		<List isLoading={state.sales.length === 0} navigationTitle="Open Pull Requests">
+		<List isLoading={state.sales.length === 0}>
 			<List.Section title="Today">
 				{state.sales
 					.map((sale, index) => {
