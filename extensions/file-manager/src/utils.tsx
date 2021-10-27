@@ -12,8 +12,7 @@ import {
   getPreferenceValues,
   PushAction,
   useNavigation,
-  Icon,
-  ToastStyle
+  Icon
 } from "@raycast/api";
 import { promisify } from "util";
 import { exec as _exec } from "child_process";
