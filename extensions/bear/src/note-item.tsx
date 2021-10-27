@@ -1,8 +1,7 @@
-import { ActionPanel, Icon, List, OpenAction, PushAction } from "@raycast/api";
+import { List } from "@raycast/api";
 import { formatDistanceToNowStrict } from "date-fns";
 import { Note } from "./bear-db";
-import NoteLinks from "./note-links";
-import PreviewNote from "./preview-note";
+import NoteActions from "./note-actions";
 
 export default function NoteItem({ note }: { note: Note }) {
   return (
@@ -12,33 +11,9 @@ export default function NoteItem({ note }: { note: Note }) {
       subtitle={note.tags.map((t) => `#${t}`).join(" ")}
       icon={{ source: "command-icon.png" }}
       keywords={[note.id]}
-      actions={
-        <ActionPanel>
-          <OpenAction
-            title="Open in Bear"
-            target={`bear://x-callback-url/open-note?id=${note.id}&edit=yes`}
-            icon={Icon.Sidebar}
-          />
-          <OpenAction
-            title="Open in New Bear Window"
-            target={`bear://x-callback-url/open-note?id=${note.id}&new_window=yes&edit=yes`}
-            icon={Icon.Window}
-          />
-          <PushAction
-            title="Show Note Preview"
-            target={<PreviewNote note={note} />}
-            icon={Icon.Text}
-            shortcut={{ modifiers: ["cmd"], key: "p" }}
-          />
-          <PushAction
-            title="Show Note Links"
-            target={<NoteLinks note={note} />}
-            icon={Icon.Link}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
-          />
-        </ActionPanel>
-      }
+      actions={<NoteActions isNotePreview={false} note={ note }/>}
       accessoryTitle={`edited ${formatDistanceToNowStrict(note.modifiedAt, { addSuffix: true })}`}
     />
   );
 }
+
