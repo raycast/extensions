@@ -1,7 +1,6 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle, Icon, Color, getLocalStorageItem, setLocalStorageItem, PushAction } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle, Icon, Color, getLocalStorageItem, setLocalStorageItem, PushAction, clearSearchBar } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Feed } from "./feeds";
-import { AddFeedForm } from "./add-feed"
+import { Feed, FeedsList } from "./feeds";
 import Parser from "rss-parser";
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en.json'
@@ -15,10 +14,11 @@ interface Story extends Parser.Item {
   icon?: string;
   isNew?: boolean;
   date?: number;
+  fromFeed?: string;
 }
 
-interface State {
-  items?: Story[];
+export interface State {
+  stories?: Story[];
   lastViewed?: number;
   error?: Error;
   feeds?: Feed[];
@@ -26,13 +26,14 @@ interface State {
 
 export default function Index() {
   const [state, setState] = useState<State>({});
+  const [newFeed, setNewFeed] = useState("");
   const [loading, setLoading] = useState(true);
   
 
   async function fetchStories() {
     try {
       setLoading(true)
-      let items : Story[] = []
+      let stories : Story[] = []
       const lastViewed = await getLocalStorageItem("lastViewed") as number
       const feedsString = await getLocalStorageItem("feeds") as string
       let feeds : Feed[]
@@ -55,18 +56,19 @@ export default function Index() {
           story.icon = feed.image?.url
           story.date = Date.parse(story.pubDate!)
           story.isNew = ( story.date > lastViewed )
-          items!.push(story)
+          story.fromFeed = feedItem.url
+          stories!.push(story)
         })
       }
       
-      items.sort((a, b) => b.date! - a.date!)
+      stories.sort((a, b) => b.date! - a.date!)
       setState({ 
-        items: items,
+        stories: stories,
         lastViewed: lastViewed,
         feeds: feeds
       });
       setLoading(false)
-      await setLocalStorageItem("lastViewed", items.at(0)?.date!);
+      await setLocalStorageItem("lastViewed", stories.at(0)?.date!);
     } catch (error) {
       setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
     }
@@ -76,28 +78,105 @@ export default function Index() {
     fetchStories();
   }, []);
 
+  const addFeed = async () => {
+    try {
+      showToast(ToastStyle.Animated, "Subscribing...")
+      await clearSearchBar();
+      if (newFeed.length === 0) {
+        await showToast(ToastStyle.Failure, "Empty feed URL", "Feed URL cannot be empty");
+        return;
+      }
+      
+      const feed = await parser.parseURL(newFeed)
+      let feedItem = ({
+        url: newFeed,
+        title: feed.title!,
+        icon: feed.image?.url
+      })      
+
+      let feedItems = state.feeds || []
+      
+      if (feedItems?.some(item => item.url === feedItem.url)) {
+        await showToast(ToastStyle.Failure, "Feed already exists", feedItem.title);
+        return;
+      }
+      feedItems?.push(feedItem)
+      await setLocalStorageItem("feeds", JSON.stringify(feedItems));
+
+
+      let stories = state.stories || []
+      feed.items.map((item) => {
+        let story : Story
+        story = item
+        story.icon = feed.image?.url
+        story.date = Date.parse(story.pubDate!)
+        story.isNew = ( story.date > (state.lastViewed || 0) )
+        story.fromFeed = feedItem.url
+        stories!.push(story)
+      })
+      stories.sort((a, b) => b.date! - a.date!)
+
+      await showToast(ToastStyle.Success, "Subscribed!", feedItem.title);
+
+      setState({
+        stories: stories,
+        feeds: feedItems
+      })
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Can't find feed", "No valid feed found on " + newFeed);
+    }
+  };
+
   if (state.error) {
     showToast(ToastStyle.Failure, "Failed loading stories", state.error.message);
   }
 
   return (
-    <List isLoading={ loading } >
+    <List
+       isLoading={ loading }
+       onSearchTextChange={(text: string) => setNewFeed(text.trim())}
+       searchBarPlaceholder={"Type feed URL and hit enter to subscribe..."}
+       actions={
+         <ActionPanel>
+           <ActionPanel.Item 
+             title="Subscribe to Feed" 
+             onAction={addFeed}
+             icon={{ source: Icon.Plus, tintColor: Color.Green }}
+           />
+         </ActionPanel>
+       }
+     >
       { !loading && ( state.feeds === undefined || state.feeds.length === 0 ) && (
         <List.Item 
           key="empty"
           title="No feeds"
-          subtitle="Press enter to add subscription"
+          subtitle="Type feed URL in the field above and press enter to subscribe"
           icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
-          actions={
-            <ActionPanel>
-              <PushAction title="Add Subscription" target={<AddFeedForm />} />
-            </ActionPanel>
-          }
         />
       )}
-      { state.feeds !== undefined && state.feeds!.length > 0 && state.items?.map((item) => (
-        <StoryListItem key={item.guid} item={item} />
-      ))}
+      { state.feeds !== undefined && state.feeds!.length > 0 && (
+         <List.Section title="Feeds">
+           <List.Item 
+             title="Show All Feeds..."
+             actions={
+               <ActionPanel>
+                 <PushAction
+                   title="Show All Feeds"
+                   target={<FeedsList indexState={state} callback={setState}/>}
+                   icon={{ source: Icon.List, tintColor: Color.Green }}
+                 />
+               </ActionPanel>
+             }
+           />
+         </List.Section> 
+       )}
+      { state.feeds !== undefined && state.feeds!.length > 0 && (
+        <List.Section title="Stories">
+          {state.stories?.map((story) => (
+            <StoryListItem key={story.guid} item={story} />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }
