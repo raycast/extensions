@@ -76,7 +76,6 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 * Use [preferences API](https://developers.raycast.com/api-reference/preferences) to let your user configure your extension or for providing credentials like API tokens
   * When using `required: true`, Raycast will ask a user to set preferences before continuing with an extension. See the example [here](../../extensions/gitlab/package.json#L123).
 * You should not build separate commands for configuring your extension. If you miss some API to achieve the prefs setup you want, please file [GitHub issue](https://github.com/raycast/extensions/issues) with a feature request.
-* If the extension integrates with a service and requires an access token that goes against the Terms of Service of the service, include a warning when asking for the token.
 
 ### Action Panel
 
