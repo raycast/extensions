@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { fullSearch } from './util/api'
 import { is, isError } from './util/fp'
 import { DomainStatus, getStatusIcon, SearchResultWithStatus } from './util/types'
-import { SEARCH_SUGGESTIONS, STATUS_DESCRIPTIONS, STATUS_MAPPING } from './util/costants'
+import { QUERY_MIN_LENGTH, SEARCH_SUGGESTIONS, STATUS_DESCRIPTIONS, STATUS_MAPPING } from './util/costants'
 import useLoading from './util/useLoading'
 
 function DomainrSearch() {
@@ -37,7 +37,7 @@ function DomainrSearch() {
 
 	// Perform Search
 	useEffect( () => {
-		if ( query.length < 3 ) {
+		if ( query.length < QUERY_MIN_LENGTH ) {
 			loading.stop()
 			return
 		}
@@ -50,7 +50,7 @@ function DomainrSearch() {
 
 	return (
 		<List isLoading={loading.status} onSearchTextChange={setQuery} throttle searchBarPlaceholder='Search domains'>
-			{results.length === 0 && !loading.status && (
+			{query.length === 0 && !loading.status && (
 				<List.Section title='Tips & Tricks'>
 					{SEARCH_SUGGESTIONS.map( item => (
 						<List.Item

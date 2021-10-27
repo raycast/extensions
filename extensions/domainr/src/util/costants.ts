@@ -80,3 +80,6 @@ export const SEARCH_SUGGESTIONS: ReadonlyArray<Suggestion> = [
 		subtitle: 'You don’t want to be so precise that there’s no room for your website to grow.'
 	}
 ] as const
+
+
+export const QUERY_MIN_LENGTH: number = 1 as const
