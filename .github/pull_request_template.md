@@ -21,3 +21,4 @@
 - [ ] I read the [extension guidelines](https://developers.raycast.com/basics/prepare-an-extension-for-store)
 - [ ] I read the [documentation about publishing](https://developers.raycast.com/basics/publish-an-extension)
 - [ ] I checked that extension's icon has size of `512x512`
+- [ ] If my extension integrates with another service, I have checked that it complies with the Terms of Service of the other service, or I have included a warning in my extension's README and in the places in my extension where it breaks the Terms of Service.

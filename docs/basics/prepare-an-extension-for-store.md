@@ -13,6 +13,8 @@ Here you will find requirements and guidelines that you'll need to follow in ord
   * Ensure you use `MIT` in `license` field
   * Ensure you are using latest Raycast API version
 * Please use `npm` for installing dependencies and include `package-lock.json` in your pull request. We use `npm` in our CI when building and publishing extensions, so by providing `package-lock.json` we ensure that dependencies on server are exactly the same as you had locally during testing of your extension.
+* If your extension integrates with another service and doesn't comply with the Terms of Service of that service, include a warning in your README. The warning should be similar to:
+  > Warning: This extension is not compliant with the Terms of Service of [service name]. Use at your own risk.
 
 ### Extensions and Commands Naming
 
@@ -74,6 +76,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 * Use [preferences API](https://developers.raycast.com/api-reference/preferences) to let your user configure your extension or for providing credentials like API tokens
   * When using `required: true`, Raycast will ask a user to set preferences before continuing with an extension. See the example [here](../../extensions/gitlab/package.json#L123).
 * You should not build separate commands for configuring your extension. If you miss some API to achieve the prefs setup you want, please file [GitHub issue](https://github.com/raycast/extensions/issues) with a feature request.
+* If the extension integrates with a service and requires an access token that goes against the Terms of Service of the service, include a warning when asking for the token.
 
 ### Action Panel
 
