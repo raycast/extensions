@@ -6,7 +6,7 @@ const Caffeinate = async (pid?: string) => {
     await runAppleScript(`do shell script "pgrep caffeinate"`);
     await showHUD("Your Mac is already caffeinated");
   } catch (_) {
-    runAppleScript(`do shell script "caffeinate -di${pid}"`);
+    runAppleScript(`do shell script "caffeinate -di${pid ? pid : ""}"`);
     await showHUD("Your Mac is caffeinated");
   }
 };

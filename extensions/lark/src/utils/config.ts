@@ -12,3 +12,11 @@ export function getPreference(): Preference {
   preference.recentListCount = Number(preference.recentListCount) || 15;
   return preference;
 }
+
+export const preference = getPreference();
+
+export const TYPE_TLD = preference.type === 'feishu' ? 'feishu.cn' : 'larksuite.com';
+
+export const API_DOMAIN = `https://${preference.subdomain}.${TYPE_TLD}`;
+
+export const INTERNAL_API_DOMAIN = `https://internal-api-space.${TYPE_TLD}`;

@@ -30,6 +30,7 @@ export function useHAStates(): {
 
           subscribeEntities(con, (entities) => {
             console.log("incoming entities changes");
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const haStates = Object.entries(entities).map(([k, v]) => v as State);
             if (!cancel) {
               console.log("set new entities");
@@ -42,6 +43,7 @@ export function useHAStates(): {
           const entColl = entitiesColl(hawsRef.current);
           await entColl.refresh();
         }
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         if (!cancel) {
           const err = e instanceof Error ? e : new Error(e);
