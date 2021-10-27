@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "envato",
-      "title": "envato",
+      "title": "Track Sales",
+      "subtitle": "Envato",
       "description": "Tracking New Sales For Envato Author",
       "mode": "view"
     }
