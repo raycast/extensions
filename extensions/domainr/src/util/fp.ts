@@ -1,6 +1,7 @@
 import { showToast, ToastStyle } from '@raycast/api'
 import * as O from 'fp-ts/Option'
 import * as E from 'fp-ts/Either'
+import { UnauthorizedError } from './api'
 
 export const is = ( condition: boolean ): O.Option<null> => condition
 	? O.some( null )
@@ -8,6 +9,11 @@ export const is = ( condition: boolean ): O.Option<null> => condition
 
 export const isError = (err: unknown): err is Error => {
 	if ( err instanceof Error ) return true
+	return false
+}
+
+export const isUnauthorized = (err: unknown): err is UnauthorizedError => {
+	if ( err instanceof UnauthorizedError && err._tag === 'UnauthorizedError' ) return true
 	return false
 }
 

@@ -1,5 +1,5 @@
 import { getPreferenceValues } from '@raycast/api'
-import axios from 'axios'
+import axios, { Axios, AxiosError } from 'axios'
 import * as A from 'fp-ts/Array'
 import * as E from 'fp-ts/Either'
 import { flow, pipe } from 'fp-ts/lib/function'
@@ -16,6 +16,22 @@ type RaycastPreferences = {
 }
 
 const prefs: RaycastPreferences = getPreferenceValues()
+
+export function toAxiosError<T>(e: unknown): AxiosError<T> {
+	return e as AxiosError<T>
+}
+
+export function isAxiosError(err: unknown): err is AxiosError {
+	return 'isAxiosError' in toAxiosError(err) && toAxiosError(err).isAxiosError
+}
+
+function getStatusCode(e: AxiosError): number | undefined {
+	return e.response?.status
+}
+
+export class UnauthorizedError extends Error {
+	_tag: 'UnauthorizedError' = 'UnauthorizedError'
+}
 
 export const cache = setupCache({
 	maxAge: 1000 * 60 * 15, // 15 min cache
@@ -37,7 +53,14 @@ const api = axios.create({
 	}
 })
 
-export const getDomainStatus: R.Reader<ISearchResult, TE.TaskEither<Error | Errors, O.Option<SearchResultWithStatus>>> = pipe(
+const handleError = (err: unknown) => pipe(
+	toAxiosError<{ message: string }>(err),
+	err => [403, 401].includes(err.response?.status ?? 500)
+		? new UnauthorizedError(err.response?.data?.message ?? 'Unauthorized')
+		: E.toError(err)
+)
+
+export const getDomainStatus: R.Reader<ISearchResult, TE.TaskEither<Error | UnauthorizedError | Errors, O.Option<SearchResultWithStatus>>> = pipe(
 	R.ask<ISearchResult>(),
 	R.map(result => pipe(
 		TE.tryCatch(
@@ -46,7 +69,7 @@ export const getDomainStatus: R.Reader<ISearchResult, TE.TaskEither<Error | Erro
 					domain: result.domain
 				}
 			}),
-			E.toError
+			handleError
 		),
 		TE.chainEitherKW(flow(
 			r => r.data,
@@ -63,14 +86,14 @@ export const getDomainStatus: R.Reader<ISearchResult, TE.TaskEither<Error | Erro
 	))
 )
 
-export const search = (query: string): TE.TaskEither<Errors | Error, ISearchResult[]> => pipe(
+export const search = (query: string): TE.TaskEither<Errors | UnauthorizedError | Error, ISearchResult[]> => pipe(
 	TE.tryCatch(
 		() => api.get<ISearchResponse>('/search', {
 			params: {
 				query
 			}
 		}),
-		E.toError
+		handleError
 	),
 	TE.chainEitherKW(flow(
 		r => r.data,

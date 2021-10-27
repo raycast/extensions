@@ -1,16 +1,18 @@
-import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle } from '@raycast/api'
+import { ActionPanel, Icon, List, OpenInBrowserAction, showToast, ToastStyle } from '@raycast/api'
 import { flow, pipe } from 'fp-ts/lib/function'
 import * as O from 'fp-ts/Option'
 import * as A from 'fp-ts/ReadonlyArray'
 import * as TE from 'fp-ts/TaskEither'
 import { useCallback, useEffect, useState } from 'react'
-import { fullSearch } from './util/api'
-import { is, isError } from './util/fp'
+import { fullSearch, isAxiosError } from './util/api'
+import { is, isError, isUnauthorized } from './util/fp'
 import { DomainStatus, getStatusIcon, SearchResultWithStatus } from './util/types'
 import { QUERY_MIN_LENGTH, SEARCH_SUGGESTIONS, STATUS_DESCRIPTIONS, STATUS_MAPPING } from './util/costants'
 import useLoading from './util/useLoading'
 
 function DomainrSearch() {
+	const [isValidApiKey, setIsValidApiKey] = useState( true )
+
 	const loading = useLoading( false )
 	const [results, setResults] = useState<ReadonlyArray<SearchResultWithStatus>>( [] )
 	const [query, setQuery] = useState( '' )
@@ -25,11 +27,19 @@ function DomainrSearch() {
 		) ),
 		TE.mapLeft( err => pipe(
 			err,
-			isError,
-			is, // returns O.some<null> if the error is a network error
-			O.fold(
-				() => showToast( ToastStyle.Failure, 'Failed to perform search', 'Invalid response body' ),
-				() => showToast( ToastStyle.Failure, 'Failed to perform search', ( err as Error ).message )
+			isUnauthorized,
+			is,
+			O.foldW(
+				() => pipe(
+					err,
+					isError,
+					is, // returns O.some<null> if the error is a network error
+					O.fold(
+						() => showToast( ToastStyle.Failure, 'Failed to perform search', 'Invalid response body' ),
+						() => showToast( ToastStyle.Failure, 'Failed to perform search', ( err as Error ).message )
+					)
+				),
+				() => setIsValidApiKey( false )
 			),
 			loading.stop
 		) )
@@ -50,7 +60,7 @@ function DomainrSearch() {
 
 	return (
 		<List isLoading={loading.status} onSearchTextChange={setQuery} throttle searchBarPlaceholder='Search domains'>
-			{query.length === 0 && !loading.status && (
+			{query.length === 0 && isValidApiKey && !loading.status && (
 				<List.Section title='Tips & Tricks'>
 					{SEARCH_SUGGESTIONS.map( item => (
 						<List.Item
@@ -60,6 +70,14 @@ function DomainrSearch() {
 					) )}
 
 				</List.Section>
+			)}
+
+			{!isValidApiKey && (
+				<List.Item
+					icon={Icon.ExclamationMark}
+					title='Invalid API Key'
+					accessoryTitle='Go to Extensions -> Domainr'
+				/>
 			)}
 
 			{results.map( result => (
