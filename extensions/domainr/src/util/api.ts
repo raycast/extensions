@@ -12,7 +12,7 @@ import { setupCache } from 'axios-cache-adapter'
 
 
 type RaycastPreferences = {
-	rapidApiToken: string
+	rapidApiKey: string
 }
 
 const prefs: RaycastPreferences = getPreferenceValues()
@@ -30,10 +30,10 @@ const api = axios.create({
 	baseURL: 'https://domainr.p.rapidapi.com/v2/',
 	headers: {
 		'x-rapidapi-host': 'domainr.p.rapidapi.com',
-		'x-rapidapi-key': prefs.rapidApiToken
+		'x-rapidapi-key': prefs.rapidApiKey
 	  },
 	params: {
-		'mashape-key': prefs.rapidApiToken,
+		'mashape-key': prefs.rapidApiKey,
 	}
 })
 

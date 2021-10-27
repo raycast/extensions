@@ -1,7 +1,7 @@
 {
   "name": "domainr",
   "title": "Domainr",
-  "description": "Search domains via domainr api",
+  "description": "Search domains availability with Domainr",
   "icon": "icon.png",
   "author": "fedevitaledev",
   "license": "MIT",
@@ -14,11 +14,11 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "rapidApiToken",
+          "name": "rapidApiKey",
           "type": "password",
           "required": true,
-          "title": "RapidApi Token",
-          "description": "Your account token",
+          "title": "RapidApi Key",
+          "description": "Your account apiKey",
           "link": "https://rapidapi.com/domainr/api/domainr"
         }
       ]
