@@ -2,6 +2,7 @@ import {
   ActionPanel,
   ActionPanelItem,
   closeMainWindow,
+  Color,
   KeyboardShortcut,
   List,
   ListItem,
@@ -13,7 +14,9 @@ import {
 } from "@raycast/api";
 import * as open from "open";
 import { Project } from "../gitlabapi";
+import { GitLabIcons } from "../icons";
 import { getVSCodeAppPath } from "../vscode";
+import { ProjectLabelList } from "./project_label";
 
 function CloneURLInVSCodeListItem(props: { url?: string }) {
   const clone = async (url: string) => {
@@ -88,4 +91,15 @@ export function CloneProjectInGitPod(props: { shortcut?: KeyboardShortcut; proje
   } else {
     return null;
   }
+}
+
+export function ShowProjectLabels(props: { project: Project; shortcut?: KeyboardShortcut }) {
+  return (
+    <PushAction
+      title="Labels"
+      target={<ProjectLabelList project={props.project} />}
+      shortcut={props.shortcut}
+      icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
+    />
+  );
 }

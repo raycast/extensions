@@ -50,7 +50,8 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
         author: userFromJson(mr.author),
         project_id: mr.project_id,
         description: mr.description,
-        reference_full: mr.references.full,
+        reference_full: mr.references?.full,
+        labels: mr.labels as Label[]
     }
 }
 
@@ -70,12 +71,13 @@ export function jsonDataToIssue(issue: any): Issue {
         web_url: issue.web_url,
         id: issue.id,
         iid: issue.iid,
-        reference_full: issue.references.full,
+        reference_full: issue.references?.full,
         state: issue.state,
         updated_at: new Date(issue.updated_at),
         author: userFromJson(issue.author),
         project_id: issue.project_id,
-        milestone: dataToMilestone(issue.milestone)
+        milestone: dataToMilestone(issue.milestone),
+        labels: issue.labels as Label[]
     };
 }
 
@@ -111,6 +113,8 @@ export interface Branch {
 
 export interface Epic {
     id: number;
+    iid: number;
+    group_id: number;
     title: string;
     state: string;
     web_url: string;
@@ -133,6 +137,8 @@ export class Label {
     public name: string = "";
     public color: string = "";
     public textColor: string = "";
+    public description: string = "";
+    public subscribed?: boolean | undefined;
 }
 
 export class Milestone {
@@ -152,6 +158,7 @@ export class Issue {
     public updated_at = new Date(2000, 1, 1);
     public project_id = 0;
     public milestone?: Milestone = undefined;
+    public labels: Label[] = [];
 }
 
 export class MergeRequest {
@@ -165,6 +172,18 @@ export class MergeRequest {
     public updated_at = new Date(2000, 1, 1);
     public project_id = 0;
     public reference_full = "";
+    public labels: Label[] = [];
+}
+
+export interface TodoGroup {
+    id: number;
+    name: string;
+    path: string;
+    kind: string;
+    full_path: string;
+    parent_id: number;
+    avatar_url?: string;
+    web_url: string;
 }
 
 export class Todo {
@@ -175,6 +194,7 @@ export class Todo {
     public id: number = 0;
     public action_name = "";
     public project_with_namespace = "";
+    public group?: TodoGroup;
     public author?: User = undefined;
 }
 
@@ -365,6 +385,9 @@ export class GitLab {
 
     async getIssues(params: Record<string, any>, project?: Project): Promise<Issue[]> {
         const projectPrefix = project ? `projects/${project.id}/` : "";
+        if (!params.with_labels_details) {
+            params.with_labels_details = "true";
+        }
         const issueItems: Issue[] = await this.fetch(`${projectPrefix}issues`, params = params)
             .then((issues) => {
                 return issues.map((issue: any, index: number) => jsonDataToIssue(issue))
@@ -373,6 +396,9 @@ export class GitLab {
     }
 
     async getGroupIssues(params: Record<string, any>, groupID: number): Promise<Issue[]> {
+        if (!params.with_labels_details) {
+            params.with_labels_details = "true";
+        }
         const issueItems: Issue[] = await this.fetch(`groups/${groupID}/issues`, params = params)
             .then((issues) => {
                 return issues.map((issue: any, index: number) => jsonDataToIssue(issue))
@@ -404,13 +430,15 @@ export class GitLab {
     }
 
     async getProjectLabels(projectId: Number): Promise<Label[]> {
-        const items: Label[] = await this.fetch(`projects/${projectId}/labels`)
+        const items: Label[] = await this.fetch(`projects/${projectId}/labels`, {}, true)
             .then((labels) => {
                 return labels.map((data: any, index: number) => ({
                     id: data.id,
                     name: data.name,
                     color: data.color,
                     textColor: data.text_color,
+                    description: data.description,
+                    subscribed: data.subscribed || undefined
                 }))
             });
         return items;
@@ -506,6 +534,9 @@ export class GitLab {
     }
 
     async getMergeRequests(params: Record<string, any>, project?: Project): Promise<MergeRequest[]> {
+        if (!params.with_labels_details) {
+            params.with_labels_details = "true";
+        }
         const projectPrefix = project ? `projects/${project.id}/` : "";
         const issueItems: MergeRequest[] = await this.fetch(`${projectPrefix}merge_requests`, params = params)
             .then((issues) => {
@@ -515,6 +546,9 @@ export class GitLab {
     }
 
     async getGroupMergeRequests(params: Record<string, any>, group: Group): Promise<MergeRequest[]> {
+        if (!params.with_labels_details) {
+            params.with_labels_details = "true";
+        }
         const issueItems: MergeRequest[] = await this.fetch(`groups/${group.id}/merge_requests`, params = params)
             .then((issues) => {
                 return issues.map((issue: any, _: number) => jsonDataToMergeRequest(issue))
@@ -532,7 +566,8 @@ export class GitLab {
                     target_type: issue.target_type,
                     target: issue.target,
                     id: issue.id,
-                    project_with_namespace: issue.project.name_with_namespace,
+                    project_with_namespace: issue.project ? issue.project.name_with_namespace : undefined,
+                    group: issue.group ? issue.group as TodoGroup : undefined,
                     author: userFromJson(issue.author)
                 }))
             });
@@ -588,6 +623,9 @@ export class GitLab {
             }
             delete params.scope;
         }
+
+        params.include_ancestor_groups = false;
+        params.include_descendant_groups = false;
 
         const groups = await this.getUserGroups();
         let epics: Epic[] = [];

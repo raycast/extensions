@@ -1,0 +1,37 @@
+{
+  "name": "bear",
+  "title": "Bear Notes",
+  "description": "Control Bear with Raycast",
+  "icon": "command-icon.png",
+  "author": "hmarr",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Notes",
+      "subtitle": "Bear",
+      "description": "Search and open Bear notes",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.1",
+    "date-fns": "^2.25.0",
+    "sql.js": "^1.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/sql.js": "^1.4.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
