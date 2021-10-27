@@ -15,6 +15,7 @@ import { gitlab } from "../common";
 import { Epic, Group, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { ClearLocalCacheAction } from "./cache_actions";
+import { CreateEpicTodoAction } from "./epic_actions";
 
 function getIcon(state: string): Image {
   if (state == "opened") {
@@ -36,6 +37,7 @@ export function EpicListItem(props: { epic: any }) {
       actions={
         <ActionPanel>
           <OpenInBrowserAction url={epic.web_url} />
+          <CreateEpicTodoAction epic={epic} shortcut={{ modifiers: ["cmd"], key: "t" }} />
           <CopyToClipboardAction title="Copy Epic ID" content={epic.id} />
           <ClearLocalCacheAction />
         </ActionPanel>

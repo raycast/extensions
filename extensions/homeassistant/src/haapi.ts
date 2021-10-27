@@ -1,9 +1,10 @@
 import { showToast, ToastStyle } from "@raycast/api";
 import fetch from "node-fetch";
 import urljoin from "url-join";
+import { getErrorMessage } from "./utils";
 
 function paramString(params: { [key: string]: string }): string {
-    let p: string[] = [];
+    const p: string[] = [];
     for (const k in params) {
         const v = encodeURI(params[k]);
         p.push(`${k}=${v}`);
@@ -18,6 +19,7 @@ function paramString(params: { [key: string]: string }): string {
 export class State {
     public entity_id = "";
     public state = "";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public attributes: Record<string, any> = {};
 }
 
@@ -29,6 +31,7 @@ export class HomeAssistant {
         this.url = url;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public async fetch(url: string, params: { [key: string]: string } = {}): Promise<any> {
         const ps = paramString(params);
         const fullUrl = urljoin(this.url, "api", url + ps);
@@ -48,7 +51,8 @@ export class HomeAssistant {
         }
     }
 
-    public async post(url: string, params: { [key: string]: any } = {}) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    public async post(url: string, params: { [key: string]: any } = {}): Promise<null> {
         const fullUrl = this.url + "/api/" + url;
         console.log(`send POST request: ${fullUrl}`);
         const body = JSON.stringify(params);
@@ -72,87 +76,89 @@ export class HomeAssistant {
         return null;
     }
 
-    async callService(domain: string, service: string, params: { [key: string]: any }) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async callService(domain: string, service: string, params: { [key: string]: any }): Promise<void> {
+        const userparams = params;
         try {
-            await this.post(`services/${domain}/${service}`, params = params);
-        } catch (error: any) {
-            showToast(ToastStyle.Failure, "Error", `${error.message}`)
+            await this.post(`services/${domain}/${service}`, params = userparams);
+        } catch (error) {
+            showToast(ToastStyle.Failure, "Error", getErrorMessage(error))
         }
     }
 
-    async openCover(entityID: string) {
+    async openCover(entityID: string): Promise<void> {
         return await this.callService("cover", "open_cover", { entity_id: entityID });
     }
 
-    async closeCover(entityID: string) {
+    async closeCover(entityID: string): Promise<void> {
         return await this.callService("cover", "close_cover", { entity_id: entityID });
     }
 
-    async toggleCover(entityID: string) {
+    async toggleCover(entityID: string): Promise<void> {
         return await this.callService("cover", "toggle", { entity_id: entityID });
     }
 
-    async stopCover(entityID: string) {
+    async stopCover(entityID: string): Promise<void> {
         return await this.callService("cover", "stop_cover", { entity_id: entityID });
     }
 
-    async toggleLight(entityID: string) {
+    async toggleLight(entityID: string): Promise<void> {
         return await this.callService("light", "toggle", { entity_id: entityID });
     }
 
-    async turnOnLight(entityID: string) {
+    async turnOnLight(entityID: string): Promise<void> {
         return await this.callService("light", "turn_on", { entity_id: entityID });
     }
 
-    async turnOffLight(entityID: string) {
+    async turnOffLight(entityID: string): Promise<void> {
         return await this.callService("light", "turn_off", { entity_id: entityID });
     }
 
-    async playMedia(entityID: string) {
+    async playMedia(entityID: string): Promise<void> {
         return await this.callService("media_player", "play_media", { entity_id: entityID });
     }
 
-    async playPauseMedia(entityID: string) {
+    async playPauseMedia(entityID: string): Promise<void> {
         return await this.callService("media_player", "media_play_pause", { entity_id: entityID });
     }
 
-    async nextMedia(entityID: string) {
+    async nextMedia(entityID: string): Promise<void> {
         return await this.callService("media_player", "media_next_track", { entity_id: entityID });
     }
 
-    async previousMedia(entityID: string) {
+    async previousMedia(entityID: string): Promise<void> {
         return await this.callService("media_player", "media_previous_track", { entity_id: entityID });
     }
 
-    async pauseMedia(entityID: string) {
+    async pauseMedia(entityID: string): Promise<void> {
         return await this.callService("media_player", "media_pause", { entity_id: entityID });
     }
 
-    async stopMedia(entityID: string) {
+    async stopMedia(entityID: string): Promise<void> {
         return await this.callService("media_player", "media_stop", { entity_id: entityID });
     }
 
-    async volumeUpMedia(entityID: string) {
+    async volumeUpMedia(entityID: string): Promise<void> {
         return await this.callService("media_player", "volume_up", { entity_id: entityID });
     }
 
-    async volumeDownMedia(entityID: string) {
+    async volumeDownMedia(entityID: string): Promise<void> {
         return await this.callService("media_player", "volume_down", { entity_id: entityID });
     }
 
-    async muteMedia(entityID: string) {
+    async muteMedia(entityID: string): Promise<void> {
         return await this.callService("media_player", "volume_mute", { entity_id: entityID });
     }
 
-    async setClimateTemperature(entityID: string, value: number) {
+    async setClimateTemperature(entityID: string, value: number): Promise<void> {
         return await this.callService("climate", "set_temperature", { entity_id: entityID, temperature: value });
     }
 
-    async setClimateOperation(entityID: string, value: string) {
+    async setClimateOperation(entityID: string, value: string): Promise<void> {
         return await this.callService("climate", "set_hvac_mode", { entity_id: entityID, hvac_mode: value });
     }
 
-    async setClimatePreset(entityID: string, value: string) {
+    async setClimatePreset(entityID: string, value: string): Promise<void> {
         let v: string | null = value;
         if (value === "None") {
             v = null;
