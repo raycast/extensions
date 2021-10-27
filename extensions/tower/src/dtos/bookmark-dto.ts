@@ -1,5 +1,6 @@
 import tildify from "tildify";
-const getCurrentBranchName = require("node-git-current-branch");
+import { getCurrentBranchName } from "../utils";
+
 export default class Bookmark {
   Folder: string;
   Name: string;
