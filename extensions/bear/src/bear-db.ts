@@ -58,6 +58,58 @@ LIMIT
   20
 `;
 
+const SEARCH_BACKLINKS = `
+  SELECT DISTINCT
+  note.ZUNIQUEIDENTIFIER AS id,
+  note.ZTITLE AS title,
+  note.ZTEXT AS text,
+  note.ZMODIFICATIONDATE AS modified_at,
+  group_concat(tag.ZTITLE) AS tags
+FROM
+	ZSFNOTE note
+	LEFT OUTER JOIN Z_7TAGS nTag ON note.Z_PK = nTag.Z_7NOTES
+	LEFT OUTER JOIN ZSFNOTETAG tag ON nTag.Z_14TAGS = tag.Z_PK
+WHERE
+	note.ZUNIQUEIDENTIFIER in(
+		SELECT
+			src.ZUNIQUEIDENTIFIER FROM ZSFNOTE src
+			JOIN Z_7LINKEDNOTES lnk ON lnk.Z_7LINKEDBYNOTES = src.Z_PK
+			JOIN ZSFNOTE trgt ON lnk.Z_7LINKEDNOTES = trgt.Z_PK
+		WHERE
+			trgt.ZUNIQUEIDENTIFIER LIKE :id )
+GROUP BY
+	note.ZUNIQUEIDENTIFIER
+ORDER BY
+	note.ZMODIFICATIONDATE DESC
+LIMIT 400
+`
+
+const SEARCH_NOTE_LINKS = `
+SELECT DISTINCT
+  note.ZUNIQUEIDENTIFIER AS id,
+  note.ZTITLE AS title,
+  note.ZTEXT AS text,
+  note.ZMODIFICATIONDATE AS modified_at,
+  group_concat(tag.ZTITLE) AS tags
+FROM
+	ZSFNOTE note
+	LEFT OUTER JOIN Z_7TAGS nTag ON note.Z_PK = nTag.Z_7NOTES
+	LEFT OUTER JOIN ZSFNOTETAG tag ON nTag.Z_14TAGS = tag.Z_PK
+WHERE
+	note.ZUNIQUEIDENTIFIER in(
+		SELECT
+			trgt.ZUNIQUEIDENTIFIER FROM ZSFNOTE src
+			JOIN Z_7LINKEDNOTES lnk ON lnk.Z_7LINKEDBYNOTES = src.Z_PK
+			JOIN ZSFNOTE trgt ON lnk.Z_7LINKEDNOTES = trgt.Z_PK
+		WHERE
+			src.ZUNIQUEIDENTIFIER LIKE :id )
+GROUP BY
+	note.ZUNIQUEIDENTIFIER
+ORDER BY
+	note.ZMODIFICATIONDATE DESC
+LIMIT 400
+`
+
 export async function loadDatabase(): Promise<BearDb> {
   const SQL = await initSqlJs({ locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm") });
   const db = readFileSync(BEAR_DB_PATH);
@@ -89,6 +141,48 @@ export class BearDb {
         modifiedAt: new Date((row.modified_at as number + BEAR_EPOCH) * 1000),
         tags: ((row.tags) as string | undefined)?.split(',') ?? [],
         encrypted: row.encrypted === 1,
+      });
+    }
+
+    statement.free();
+
+    return results;
+  }
+
+  getBacklinks(noteID: string): Note[] {
+    const statement = this.database.prepare(SEARCH_BACKLINKS);
+    statement.bind({ ':id': noteID });
+
+    const results: Note[] = [];
+    while (statement.step()) {
+      const row = statement.getAsObject();
+      results.push({
+        id: row.id as string,
+        title: row.title as string,
+        text: row.text as string,
+        modifiedAt: new Date((row.modified_at as number + BEAR_EPOCH) * 1000),
+        tags: ((row.tags) as string | undefined)?.split(',') ?? []
+      });
+    }
+
+    statement.free();
+
+    return results;
+  }
+
+  getNoteLinks(noteID: string): Note[] {
+    const statement = this.database.prepare(SEARCH_NOTE_LINKS);
+    statement.bind({ ':id': noteID });
+
+    const results: Note[] = [];
+    while (statement.step()) {
+      const row = statement.getAsObject();
+      results.push({
+        id: row.id as string,
+        title: row.title as string,
+        text: row.text as string,
+        modifiedAt: new Date((row.modified_at as number + BEAR_EPOCH) * 1000),
+        tags: ((row.tags) as string | undefined)?.split(',') ?? []
       });
     }
 

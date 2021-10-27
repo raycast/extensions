@@ -1,9 +1,8 @@
-import { ActionPanel, List, OpenAction, PushAction, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { formatDistanceToNowStrict } from "date-fns";
 import { Note } from "./bear-db";
 import { useBearDb } from "./hooks";
-import PreviewNote from "./preview-note";
+import NoteItem from "./note-item";
 
 export default function SearchNotes() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -22,19 +21,7 @@ export default function SearchNotes() {
   return (
     <List isLoading={notes == undefined} onSearchTextChange={setSearchQuery}>
       {notes?.map((note) => (
-        <List.Item
-          key={note.id}
-          title={note.title}
-          subtitle={note.tags.map((t) => `#${t}`).join(" ")}
-          icon={{ source: "command-icon.png" }}
-          actions={
-            <ActionPanel>
-              <OpenAction title="Open Note in Bear" target={`bear://x-callback-url/open-note?id=${note.id}`} />
-              <PushAction title="Show Note Preview" target={<PreviewNote note={note} />} />
-            </ActionPanel>
-          }
-          accessoryTitle={`modified ${formatDistanceToNowStrict(note.modifiedAt, { addSuffix: true })}`}
-        />
+        <NoteItem note={note}></NoteItem>
       ))}
     </List>
   );
