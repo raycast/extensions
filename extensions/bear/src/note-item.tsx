@@ -16,7 +16,7 @@ export default function NoteItem({ note }: { note: Note }) {
         <ActionPanel>
           <OpenAction
             title="Open in Bear"
-            target={`bear://x-callback-url/open-note?id=${note.id}`}
+            target={`bear://x-callback-url/open-note?id=${note.id}&edit=yes`}
             icon={Icon.Sidebar}
           />
           <PushAction
