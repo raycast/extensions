@@ -3,6 +3,8 @@ import { Note } from "./bear-db";
 import NoteLinks from "./note-links";
 import PreviewNote, { formatBearAttachments } from "./preview-note";
 import { HtmlRenderer, Parser } from "commonmark";
+import GrabUrl from "./grab-url";
+import AddText from "./add-text";
 
 function renderMarkdown(noteText: string): string {
   const reader = new Parser();
@@ -23,12 +25,14 @@ function renderMarkdown(noteText: string): string {
 };
 
 function NotePreviewAction({ note }: { note: Note }) {
-  return (<PushAction
-    title="Show Note Preview"
-    target={<PreviewNote note={note} />}
-    icon={Icon.Text}
-    shortcut={{ modifiers: ["cmd"], key: "p" }}
-  />);
+  return (
+    <PushAction
+      title="Show Note Preview"
+      target={<PreviewNote note={note} />}
+      icon={Icon.Text}
+      shortcut={{ modifiers: ["cmd"], key: "p" }}
+    />
+  );
 }
 
 export default function NoteActions({ isNotePreview, note }: { isNotePreview: boolean, note: Note}) {
@@ -46,7 +50,13 @@ export default function NoteActions({ isNotePreview, note }: { isNotePreview: bo
             icon={Icon.Window}
           />
         </ActionPanel.Section>
-        <ActionPanel.Section title="Move">
+        <ActionPanel.Section title="Edit">
+        <PushAction
+            title="Add Text"
+            icon={Icon.Plus}
+            shortcut={{ modifiers: ["cmd"], key: 't' }}
+            target={<AddText note={note}/>}
+          />
           <OpenAction
             title="Move to Archive"
             target={`bear://x-callback-url/archive?id=${note.id}&show_window=yes`}
@@ -81,6 +91,26 @@ export default function NoteActions({ isNotePreview, note }: { isNotePreview: bo
             content={renderMarkdown(note.text)}
             icon={Icon.Terminal}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          />
+          <CopyToClipboardAction
+            title="Copy Link to Note"
+            content={`bear://x-callback-url/open-note?id=${note.id}`}
+            icon={Icon.Link}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          />
+          <CopyToClipboardAction
+            title="Copy Unique Identifier"
+            content={`note.id`}
+            icon={Icon.QuestionMark}
+            shortcut={{ modifiers: ["cmd", "opt", 'shift'], key: "c" }}
+            />
+        </ActionPanel.Section>
+        <ActionPanel.Section title="New Note">
+          <PushAction
+            title="Web Capture"
+            icon={Icon.Globe}
+            shortcut={{ modifiers: ["cmd", 'shift'], key: "n" }}
+            target={<GrabUrl/>}
           />
         </ActionPanel.Section>
       </ActionPanel>
