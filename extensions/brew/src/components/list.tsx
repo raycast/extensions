@@ -1,11 +1,33 @@
-import {
-  Color,
-  Icon,
-  List,
-  ListSection,
-} from "@raycast/api";
-import { Formula, brewIsInstalled, brewFormatVersion } from "../brew";
-import { FormulaActionPanel } from "./actionPanel";
+import { Color, Icon, List, ListSection } from "@raycast/api";
+import { Cask, Formula } from "../brew";
+import { brewFormatVersion, brewIsInstalled, brewName } from "../brew";
+import { CaskActionPanel, FormulaActionPanel } from "./actionPanels";
+
+export interface FormulaListProps {
+  formulae: Formula[];
+  casks: Cask[];
+  searchBarPlaceholder: string,
+  isLoading: boolean;
+  onSearchTextChange?: (q: string) => void;
+  onAction: () => void;
+}
+
+export function FormulaList(props: FormulaListProps) {
+  return (
+    <List searchBarPlaceholder={props.searchBarPlaceholder} isLoading={props.isLoading}>
+      <ListSection title="Formulae">
+        {props.formulae.map((formula) => (
+          <FormulaListItem key={formula.name} formula={formula} onAction={props.onAction} />
+        ))}
+      </ListSection>
+      <ListSection title="Casks" >
+        {props.casks.map((cask) => (
+          <CaskListItem key={cask.token} cask={cask} onAction={props.onAction} />
+        ))}
+      </ListSection>
+    </List>
+  );
+}
 
 export function FormulaListItem(props: { formula: Formula, onAction: () => void }) {
   const formula = props.formula;
@@ -20,7 +42,7 @@ export function FormulaListItem(props: { formula: Formula, onAction: () => void 
   return (
     <List.Item
       id={formula.name}
-      title={formula.full_name}
+      title={formula.name}
       subtitle={formula.desc}
       accessoryTitle={version}
       icon={ {source: Icon.Checkmark, tintColor: tintColor} }
@@ -29,23 +51,24 @@ export function FormulaListItem(props: { formula: Formula, onAction: () => void 
   );
 }
 
-interface FormulaListProps {
-  formulae: Formula[];
-  searchBarPlaceholder: string,
-  isLoading: boolean;
-  sectionTitle?: string;
-  onSearchTextChange?: (q: string) => void;
-  onAction: () => void;
-}
+export function CaskListItem(props: { cask: Cask, onAction: () => void }) {
+  const cask = props.cask;
+  let version = cask.versions.stable;
+  let tintColor = Color.SecondaryText;
 
-export function FormulaList(props: FormulaListProps) {
+  if (brewIsInstalled(cask)) {
+    version = brewFormatVersion(cask);
+    tintColor = cask.outdated ? Color.Red : Color.Green;
+  }
+
   return (
-    <List searchBarPlaceholder={props.searchBarPlaceholder} isLoading={props.isLoading}>
-      <ListSection title={props.sectionTitle} >
-        {props.formulae.map((formula) => (
-          <FormulaListItem key={formula.name} formula={formula} onAction={props.onAction} />
-        ))}
-      </ListSection>
-    </List>
+    <List.Item
+      id={cask.token}
+      title={brewName(cask)}
+      subtitle={cask.desc}
+      accessoryTitle={version}
+      icon={ {source: Icon.Checkmark, tintColor: tintColor} }
+      actions={<CaskActionPanel cask={cask} showDetails={true} onAction={props.onAction} />}
+    />
   );
 }

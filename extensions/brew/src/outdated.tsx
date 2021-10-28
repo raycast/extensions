@@ -7,33 +7,33 @@ import {
   ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { OutdatedFormula, brewFetchOutdated } from "./brew";
-import { OutdatedActionPanel } from "./components/actionPanel";
+import { OutdatedResults, OutdatedCask, OutdatedFormula, brewFetchOutdated } from "./brew";
+import { OutdatedActionPanel } from "./components/actionPanels";
 
 interface State {
-  outdated: OutdatedFormula[];
+  outdated?: OutdatedResults;
   isLoading: boolean;
 }
 
 export default function Main() {
-  const [state, setState] = useState<State>({outdated: [], isLoading: true});
+  const [state, setState] = useState<State>({isLoading: true});
 
   useEffect(() => {
     if (!state.isLoading) { return; }
-    brewFetchOutdated()
+    brewFetchOutdated(true) // include auto_update casks
     .then(outdated => {
       setState({outdated: outdated, isLoading: false});
     })
     .catch (err => {
       console.log("brewFetchOutdated error:", err);
       showToast(ToastStyle.Failure, "Brew outdated failed");
-      setState({outdated: [], isLoading: false});
+      setState({isLoading: false});
     });
   }, [state]);
 
 
   return (
-    <OutdatedList outdatedFormulae={state.outdated}
+    <OutdatedList outdated={state.outdated}
                   isLoading={state.isLoading}
                   onAction={() => {
                     setState((oldState) => ({...oldState, isLoading: true}));
@@ -42,7 +42,21 @@ export default function Main() {
   );
 }
 
-function OutdatedListItem(props: { outdated: OutdatedFormula, onAction: () => void }) {
+function OutdatedCaskListItem(props: { outdated: OutdatedCask, onAction: () => void }) {
+  const outdated = props.outdated;
+  const version = `${outdated.installed_versions} -> ${outdated.current_version}`
+
+  return (
+    <List.Item id={outdated.name}
+               title={outdated.name}
+               accessoryTitle={version}
+               icon={ {source: Icon.Checkmark, tintColor: Color.Red} }
+               actions={<OutdatedActionPanel outdated={outdated} onAction={props.onAction} />}
+    />
+  );
+}
+
+function OutdatedFormulaeListItem(props: { outdated: OutdatedFormula, onAction: () => void }) {
   const outdated = props.outdated;
   let version = "";
   if (outdated.installed_versions.length > 0) {
@@ -60,13 +74,23 @@ function OutdatedListItem(props: { outdated: OutdatedFormula, onAction: () => vo
   );
 }
 
-function OutdatedList(props: { outdatedFormulae: OutdatedFormula[], isLoading: boolean, onAction: () => void }) {
+function OutdatedList(props: { outdated?: OutdatedResults, isLoading: boolean, onAction: () => void }) {
+  const formulae = props.outdated?.formulae ?? [];
+  const casks = props.outdated?.casks ?? [];
+
   return (
     <List searchBarPlaceholder="Filter formulae by name..." isLoading={props.isLoading}>
-      <ListSection title="Outdated">
+      <ListSection title="Formulae">
         {
-          props.outdatedFormulae.map((outdated) => (
-            <OutdatedListItem key={outdated.name} outdated={outdated} onAction={props.onAction} />
+          formulae.map((formula) => (
+            <OutdatedFormulaeListItem key={formula.name} outdated={formula} onAction={props.onAction} />
+          ))
+        }
+      </ListSection>
+      <ListSection title="Casks">
+        {
+          casks.map((cask) => (
+            <OutdatedCaskListItem key={cask.name} outdated={cask} onAction={props.onAction} />
           ))
         }
       </ListSection>

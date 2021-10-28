@@ -1,5 +1,5 @@
 import { Detail, useNavigation } from "@raycast/api";
-import { FormulaActionPanel } from "./actionPanel";
+import { FormulaActionPanel } from "./actionPanels";
 import { Formula, brewIsInstalled, brewPrefix } from '../brew';
 
 export function FormulaInfo(props: {formula: Formula, onAction: (result: boolean) => void}) {
@@ -20,7 +20,7 @@ export function FormulaInfo(props: {formula: Formula, onAction: (result: boolean
 
 function formatInfo(formula: Formula): string {
   return `
-# ${formula.full_name}
+# ${formula.name}
 ${formula.desc}
 
 [${formula.homepage}](${formula.homepage})
@@ -83,7 +83,7 @@ ${markdown}
 }
 
 function formatConflicts(formula: Formula): string {
-  if (formula.conflicts_with.length == 0) { return ''; }
+  if (!formula.conflicts_with) { return ''; }
 
   return `#### Conflicts With:
 ${formula.conflicts_with.join(', ')}

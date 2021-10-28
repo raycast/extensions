@@ -39,6 +39,7 @@ export default function Main() {
 
   return (
     <FormulaList formulae={state.formulae}
+                 casks={[]}
                  searchBarPlaceholder="Search formulae by name..."
                  isLoading={state.isLoading}
                  onSearchTextChange={(query: string) => {
@@ -56,7 +57,7 @@ export default function Main() {
 async function listInstalled(): Promise<Map<string, Formula>> {
   const installed = await brewFetchInstalled(true);
   const dict = new Map<string, Formula>();
-  for (const formula of installed) {
+  for (const formula of installed.formulae) {
     dict.set(formula.name, formula);
   }
   return dict;
