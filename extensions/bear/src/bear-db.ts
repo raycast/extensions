@@ -9,7 +9,8 @@ export interface Note {
   title: string,
   text: string,
   modifiedAt: Date,
-  tags: string[]
+  tags: string[],
+  encrypted: boolean,
 }
 
 const BEAR_DB_PATH = homedir() + '/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite';
@@ -20,7 +21,8 @@ SELECT
   notes.ZTITLE AS title,
   notes.ZTEXT AS text,
   notes.ZMODIFICATIONDATE AS modified_at,
-  group_concat(tags.ZTITLE) AS tags
+  group_concat(tags.ZTITLE) AS tags,
+  notes.ZENCRYPTED AS encrypted
 FROM
   ZSFNOTE AS notes
 LEFT OUTER JOIN
@@ -85,7 +87,8 @@ export class BearDb {
         title: row.title as string,
         text: row.text as string,
         modifiedAt: new Date((row.modified_at as number + BEAR_EPOCH) * 1000),
-        tags: ((row.tags) as string | undefined)?.split(',') ?? []
+        tags: ((row.tags) as string | undefined)?.split(',') ?? [],
+        encrypted: row.encrypted === 1,
       });
     }
 
