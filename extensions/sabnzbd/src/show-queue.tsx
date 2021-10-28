@@ -6,14 +6,15 @@ import { Client, Queue, QueueSlot } from "sabnzbd-api";
 export default function SlotList() {
   const [state, setState] = useState<{ slots: QueueSlot[] }>({ slots: [] });
 
+  async function fetch() {
+    const slots = await fetchSlots();
+    setState((oldState) => ({
+      ...oldState,
+      slots: slots,
+    }));
+  }
+
   useEffect(() => {
-    async function fetch() {
-      const slots = await fetchSlots();
-      setState((oldState) => ({
-        ...oldState,
-        slots: slots,
-      }));
-    }
     fetch();
   }, []);
 
