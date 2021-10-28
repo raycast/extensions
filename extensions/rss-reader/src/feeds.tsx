@@ -1,55 +1,42 @@
 import { ActionPanel, List, showToast, ToastStyle, Icon, Color, setLocalStorageItem } from "@raycast/api";
 import { useState } from "react";
-import { State as IndexState} from "./index";
+import { State as IndexState } from "./index";
 
 export interface Feed {
   url: string;
   title?: string;
   icon?: string
 }
-  
-interface State {
-  feeds?: Feed[];
-  error?: Error;
-}
 
 export function FeedsList(props: { indexState: IndexState, callback: (indexState: IndexState) => any }) {
-  const [state, setState] = useState<State>({feeds: props.indexState.feeds});
-
-  if (state.error) {
-    showToast(ToastStyle.Failure, "Failed loading feeds", state.error.message);
-  }
+  const [feeds, setFeeds] = useState<Feed[]>(props.indexState.feeds)
 
   const removeFeed = async (index: number) => {
-    const removedFeed = state.feeds?.at(index)
-    let feedItems = state.feeds
-    feedItems?.splice(index, 1)
+    const removedFeed = feeds.at(index) as Feed
+    let feedItems = [...feeds]
+    feedItems.splice(index, 1)
+
     await setLocalStorageItem("feeds", JSON.stringify(feedItems));
+    setFeeds(feedItems)
+    await showToast(ToastStyle.Success, "Unsubscribed from the feed!", removedFeed.title);
 
-    setState({
-      feeds: feedItems
-    })
-
-    await showToast(ToastStyle.Success, "Unsubscribed from the feed!", removedFeed?.title);
-
-    let stories = props.indexState.stories?.filter(story => story.fromFeed != removedFeed?.url)
+    const stories = props.indexState.stories.filter(story => story.fromFeed != removedFeed.url)
     props.callback({
       feeds: feedItems,
-      stories: stories,
-      lastViewed: props.indexState.lastViewed
+      stories: stories
     })
   };
 
   return (
     <List>
-      { ( state.feeds === undefined || state.feeds.length === 0 ) && (
+      { feeds.length === 0 && (
         <List.Item 
           key="empty"
           title="No feeds"
           icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
         />
       )}
-      {state.feeds?.map((item, index) => (
+      {feeds.map((item, index) => (
         <List.Item
           key={item.url}
           title={item.title ?? "No title"}

@@ -12,20 +12,21 @@ const timeAgo = new TimeAgo('en-US')
 
 interface Story extends Parser.Item {
   icon?: string;
-  isNew?: boolean;
-  date?: number;
-  fromFeed?: string;
+  isNew: boolean;
+  date: number;
+  fromFeed: string;
 }
 
 export interface State {
-  stories?: Story[];
-  lastViewed?: number;
-  error?: Error;
-  feeds?: Feed[];
+  feeds: Feed[];
+  stories: Story[];
 }
 
 export default function Index() {
-  const [state, setState] = useState<State>({});
+  const [state, setState] = useState<State>({
+    feeds: [] as Feed[], 
+    stories: [] as Story[]
+  })
   const [newFeed, setNewFeed] = useState("");
   const [loading, setLoading] = useState(true);
   
@@ -33,44 +34,40 @@ export default function Index() {
   async function fetchStories() {
     try {
       setLoading(true)
-      let stories : Story[] = []
-      const lastViewed = await getLocalStorageItem("lastViewed") as number
       const feedsString = await getLocalStorageItem("feeds") as string
-      let feeds : Feed[]
       
       if (feedsString === undefined) {
         setLoading(false);
         return;
       }
-      feeds = JSON.parse(feedsString)
+      const feeds = JSON.parse(feedsString) as Feed[]
       if (feeds.length == 0) {
         setLoading(false);
         return;
       }
 
+      const lastViewed = await getLocalStorageItem("lastViewed") as number
+      let stories : Story[] = []
       for (const feedItem of feeds) {
         const feed = await parser.parseURL(feedItem.url);
-        feed.items.map((item) => {
-          let story : Story
-          story = item
-          story.icon = feed.image?.url
-          story.date = Date.parse(story.pubDate!)
-          story.isNew = ( story.date > lastViewed )
-          story.fromFeed = feedItem.url
-          stories!.push(story)
+        feed.items.forEach((item) => {
+          item.icon = feed.image?.url
+          item.date = Date.parse(item.pubDate!)
+          item.isNew = ( item.date > lastViewed )
+          item.fromFeed = feedItem.url
+          stories.push(item as Story)
         })
-      }
+      } 
+      stories.sort((a, b) => b.date - a.date)
       
-      stories.sort((a, b) => b.date! - a.date!)
-      setState({ 
-        stories: stories,
-        lastViewed: lastViewed,
-        feeds: feeds
-      });
+      setState({
+        feeds: feeds,
+        stories: stories
+      })
       setLoading(false)
-      await setLocalStorageItem("lastViewed", stories.at(0)?.date!);
+      await setLocalStorageItem("lastViewed", stories.at(0)?.date || lastViewed);
     } catch (error) {
-      setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
+      showToast(ToastStyle.Failure, "Failed loading stories", "Something went wrong");
     }
   }
 
@@ -94,42 +91,39 @@ export default function Index() {
         icon: feed.image?.url
       })      
 
-      let feedItems = state.feeds || []
+      let feedItems = [...state.feeds]
       
-      if (feedItems?.some(item => item.url === feedItem.url)) {
+      if (feedItems.some(item => item.url === feedItem.url)) {
         await showToast(ToastStyle.Failure, "Feed already exists", feedItem.title);
         return;
       }
-      feedItems?.push(feedItem)
+      feedItems.push(feedItem)
       await setLocalStorageItem("feeds", JSON.stringify(feedItems));
 
-
-      let stories = state.stories || []
+      const lastViewed = await getLocalStorageItem("lastViewed") as number
+      let storyItems = [...state.stories]
       feed.items.map((item) => {
-        let story : Story
-        story = item
-        story.icon = feed.image?.url
-        story.date = Date.parse(story.pubDate!)
-        story.isNew = ( story.date > (state.lastViewed || 0) )
-        story.fromFeed = feedItem.url
-        stories!.push(story)
+        item.icon = feed.image?.url
+        item.date = Date.parse(item.pubDate!)
+        item.isNew = ( item.date > lastViewed )
+        item.fromFeed = feedItem.url
+        storyItems.push(item as Story)
       })
-      stories.sort((a, b) => b.date! - a.date!)
+      storyItems.sort((a, b) => b.date - a.date)
 
       await showToast(ToastStyle.Success, "Subscribed!", feedItem.title);
+      await setLocalStorageItem("lastViewed", storyItems.at(0)?.date || lastViewed);
 
       setState({
-        stories: stories,
-        feeds: feedItems
+        feeds: feedItems,
+        stories: storyItems
       })
     } catch (error) {
+      console.error(error);
+      
       showToast(ToastStyle.Failure, "Can't find feed", "No valid feed found on " + newFeed);
     }
   };
-
-  if (state.error) {
-    showToast(ToastStyle.Failure, "Failed loading stories", state.error.message);
-  }
 
   return (
     <List
@@ -143,10 +137,16 @@ export default function Index() {
              onAction={addFeed}
              icon={{ source: Icon.Plus, tintColor: Color.Green }}
            />
+           <ActionPanel.Item
+             title="Check for New Stories"
+             onAction={fetchStories}
+             shortcut={{ modifiers: ["cmd"], key: "r" }}
+             icon={{ source: Icon.ArrowClockwise, tintColor: Color.Green }}
+           />
          </ActionPanel>
        }
      >
-      { !loading && ( state.feeds === undefined || state.feeds.length === 0 ) && (
+      { !loading && state.feeds.length === 0 && (
         <List.Item 
           key="empty"
           title="No feeds"
@@ -154,25 +154,31 @@ export default function Index() {
           icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
         />
       )}
-      { state.feeds !== undefined && state.feeds!.length > 0 && (
+      { state.feeds.length > 0 && (
          <List.Section title="Feeds">
            <List.Item 
              title="Show All Feeds..."
              actions={
                <ActionPanel>
-                 <PushAction
-                   title="Show All Feeds"
-                   target={<FeedsList indexState={state} callback={setState}/>}
-                   icon={{ source: Icon.List, tintColor: Color.Green }}
-                 />
+                  <PushAction
+                    title="Show All Feeds"
+                    target={<FeedsList indexState={state} callback={setState}/>}
+                    icon={{ source: Icon.List, tintColor: Color.Green }}
+                  />
+                  <ActionPanel.Item
+                    title="Check for New Stories"
+                    onAction={fetchStories}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    icon={{ source: Icon.ArrowClockwise, tintColor: Color.Green }}
+                  />
                </ActionPanel>
              }
            />
          </List.Section> 
        )}
-      { state.feeds !== undefined && state.feeds!.length > 0 && (
+      { state.feeds.length > 0 && (
         <List.Section title="Stories">
-          {state.stories?.map((story) => (
+          {state.stories.map((story) => (
             <StoryListItem key={story.guid} item={story} />
           ))}
         </List.Section>
@@ -187,7 +193,7 @@ function StoryListItem(props: { item: Story }) {
       title={props.item.title ?? "No title"}
       icon={ props.item.icon || Icon.Text}
       accessoryIcon={props.item.isNew ? { source: Icon.Dot, tintColor: Color.Green } : undefined}
-      accessoryTitle={timeAgo.format(props.item.date!) as string}
+      accessoryTitle={timeAgo.format(props.item.date) as string}
       actions={<Actions item={props.item} />}
     />
   );
