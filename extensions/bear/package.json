@@ -19,6 +19,7 @@
     "@types/commonmark": "^0.27.5",
     "commonmark": "^0.30.0",
     "date-fns": "^2.25.0",
+    "open": "^8.4.0",
     "sql.js": "^1.6.2"
   },
   "devDependencies": {
