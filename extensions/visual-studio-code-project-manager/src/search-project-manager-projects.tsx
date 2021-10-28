@@ -1,14 +1,13 @@
 import {
   ActionPanel,
   CopyToClipboardAction,
+  Detail,
   environment,
   getPreferenceValues,
   List,
   OpenAction,
   OpenWithAction,
   ShowInFinderAction,
-  showToast,
-  ToastStyle,
   TrashAction,
 } from "@raycast/api";
 import { existsSync, readFileSync } from "fs";
@@ -25,11 +24,6 @@ const preferences: Preferences = getPreferenceValues();
 function getProjectEntries(): ProjectEntry[] {
   const storageFile = preferences.projectManagerDataPath || STORAGE;
   if (!existsSync(storageFile)) {
-    showToast(
-      ToastStyle.Failure,
-      "Projects.json file not found",
-      `File 'projects.json' not found in path: ${storageFile}`
-    );
     return [];
   }
   return JSON.parse(readFileSync(storageFile).toString());
@@ -76,6 +70,16 @@ function getProjectsGroupedByTagAsElements(projectEntries: ProjectEntry[]): Reac
 export default function Command() {
   const elements: ReactElement[] = [];
   const projectEntries = getProjectEntries();
+  if (!projectEntries || projectEntries.length === 0) {
+    return (
+      <Detail
+        markdown="To use this extension, the Visual Studio Extension 
+      [Project Manager](https://marketplace.visualstudio.com/items?itemName=alefragnani.project-manager)
+       is required."
+      />
+    );
+  }
+
   const sortedProjects = getSortedProjects(projectEntries);
 
   if (preferences.groupProjectsByTag) {
