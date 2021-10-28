@@ -5,6 +5,7 @@ import PreviewNote, { formatBearAttachments } from "./preview-note";
 import { HtmlRenderer, Parser } from "commonmark";
 import GrabUrl from "./grab-url";
 import AddText from "./add-text";
+import NewNote from "./new-note";
 
 function renderMarkdown(noteText: string): string {
   const reader = new Parser();
@@ -105,9 +106,15 @@ export default function NoteActions({ isNotePreview, note }: { isNotePreview: bo
             shortcut={{ modifiers: ["cmd", "opt", 'shift'], key: "c" }}
             />
         </ActionPanel.Section>
-        <ActionPanel.Section title="New Note">
+        <ActionPanel.Section title="Create">
           <PushAction
-            title="Web Capture"
+            title="New Note"
+            icon={Icon.Document}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            target={<NewNote/>}
+          />
+          <PushAction
+            title="New Web Capture"
             icon={Icon.Globe}
             shortcut={{ modifiers: ["cmd", 'shift'], key: "n" }}
             target={<GrabUrl/>}
