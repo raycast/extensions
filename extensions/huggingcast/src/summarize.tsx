@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import { summarize } from "./huggingface";
 
 interface Preferences {
-  defaultModel: string;
+  models: string;
 }
 
 export default () => {
@@ -46,7 +46,14 @@ export default () => {
       }
     >
       <Form.TextArea id="text" title="Text to summarize" value={text} onChange={(text) => setText(text)} />
-      <Form.TextField id="model" title="Model" defaultValue={preferences.defaultModel} />
+      <Form.Dropdown id="model" title="Model">
+        {preferences.models
+          .split(",")
+          .map((path: string) => path.trim())
+          .map((path: string, index: number) => (
+            <Form.Dropdown.Item key={index} value={path} title={path} />
+          ))}
+      </Form.Dropdown>
     </Form>
   );
 };

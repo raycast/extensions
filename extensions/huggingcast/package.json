@@ -2,24 +2,24 @@
   "name": "huggingcast",
   "title": "Huggingcast",
   "description": "Use Huggingface models for summarization, translation, ...",
-  "icon": "huggingface.png",
+  "icon": "huggingcast.png",
   "author": "ragnor",
   "license": "MIT",
   "commands": [
     {
       "name": "summarize",
       "title": "Summarize",
-      "subtitle": "",
+      "subtitle": "Huggingcast",
       "description": "Summarize a text using Huggingface Inference API",
       "mode": "view",
       "preferences": [
         {
-          "name": "defaultModel",
+          "name": "models",
           "type": "textfield",
-          "default": "facebook/bart-large-cnn",
+          "default": "facebook/bart-large-cnn,IlyaGusev/mbart_ru_sum_gazeta,sshleifer/distilbart-cnn-12-6",
           "required": true,
-          "title": "Default Model",
-          "description": "Default Model for Summarization"
+          "title": "Summarization Models",
+          "description": "Comma-separated list of models you want to use for summarization"
         }
       ]
     }
@@ -30,7 +30,7 @@
       "type": "password",
       "required": true,
       "title": "Token",
-      "description": "Hugginface Inference API Token",
+      "description": "Huggingface Inference API Token",
       "link": "https://huggingface.co/settings/token"
     }
   ],
