@@ -54,7 +54,7 @@ export default function NoteActions({ isNotePreview, note }: { isNotePreview: bo
             shortcut={{ modifiers: ["cmd", "shift"], key:"backspace"}}
           />
           <OpenAction
-            title="Move To Trash"
+            title="Move to Trash"
             target={`bear://x-callback-url/trash?id=${note.id}&show_window=yes`}
             icon={{ source: Icon.Trash, tintColor: Color.Red }}
             shortcut={{ modifiers: ["cmd"], key:"backspace"}}
