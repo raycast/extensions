@@ -1,0 +1,53 @@
+{
+  "name": "linkedin",
+  "title": "LinkedIn",
+  "description": "Search people and company on LinkedIn.",
+  "icon": "logo.png",
+  "author": "HenriChabrand",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search on LinkedIn",
+      "subtitle": "LinkedIn",
+      "description": "Search people and company on LinkedIn.",
+      "mode": "view"
+    }
+  ],
+   "preferences": [
+    {
+      "name": "LINKEDIN_COOKIE",
+      "type": "password",
+      "required": true,
+      "title": "LinkedIn Cookie",
+      "description": "Inspect LinkedIn's network request header to get the 'cookie' in dev console.",
+      "placeholder": "bcookie= -------------"
+    },
+    {
+      "name": "LINKEDIN_CSRF_TOKEN",
+      "type": "password",
+      "required": true,
+      "title": "LinkedIn CSRF Token",
+      "description": "Inspect LinkedIn's network request header to get the 'csrf-token' in dev console.",
+      "placeholder": "ajax: ------------------"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.1",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
