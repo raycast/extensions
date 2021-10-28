@@ -31,13 +31,17 @@ WHERE
   -- When there is a query, filter the body by that query, otherwise
   -- ignore the query
   (
-    lower(notes.ZTEXT) like lower('%' || :query || '%')
+    lower(notes.ZTITLE) like lower('%' || :query || '%')
+    OR lower(notes.ZTEXT) like lower('%' || :query || '%')
     OR :query = ''
   )
   -- Ignore trashed, archived, and empty notes
   AND notes.ZARCHIVED = 0
   AND notes.ZTRASHED = 0
-  AND notes.ZTEXT IS NOT NULL
+  AND (
+    notes.ZTEXT IS NOT NULL
+    OR notes.ZENCRYPTED = 1
+  )
 GROUP BY
   notes.ZUNIQUEIDENTIFIER
 ORDER BY
