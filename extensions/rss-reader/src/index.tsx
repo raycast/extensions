@@ -102,7 +102,7 @@ export default function Index() {
 
       const lastViewed = await getLocalStorageItem("lastViewed") as number
       let storyItems = [...state.stories]
-      feed.items.map((item) => {
+      feed.items.forEach((item) => {
         item.icon = feed.image?.url
         item.date = Date.parse(item.pubDate!)
         item.isNew = ( item.date > lastViewed )
