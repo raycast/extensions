@@ -12,6 +12,13 @@
       "subtitle": "Bear",
       "description": "Search and open Bear notes",
       "mode": "view"
+    },
+    {
+      "name": "new-note",
+      "title": "Create Note",
+      "subtitle": "Bear",
+      "description": "Create a new bear note",
+      "mode": "view"
     }
   ],
   "dependencies": {
