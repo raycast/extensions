@@ -26,6 +26,13 @@
       "subtitle": "SABnzbd",
       "description": "Resume queue globally",
       "mode": "no-view"
+    },
+    {
+      "name": "shutdown",
+      "title": "Shutdown",
+      "subtitle": "SABnzbd",
+      "description": "Shutdown SABnzbd",
+      "mode": "no-view"
     }
   ],
   "preferences": [
