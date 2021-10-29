@@ -13,6 +13,8 @@ Here you will find requirements and guidelines that you'll need to follow in ord
   * Ensure you use `MIT` in `license` field
   * Ensure you are using latest Raycast API version
 * Please use `npm` for installing dependencies and include `package-lock.json` in your pull request. We use `npm` in our CI when building and publishing extensions, so by providing `package-lock.json` we ensure that dependencies on server are exactly the same as you had locally during testing of your extension.
+* Please check the terms of service of third party services that your extension uses. If your extension doesn't comply with the terms, include a warning in your extension's README. The warning should be similar to:
+  > Warning: This extension is not compliant with the Terms of Service of [service name]. Use at your own risk.
 
 ### Extensions and Commands Naming
 

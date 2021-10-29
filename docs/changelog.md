@@ -1,8 +1,26 @@
 # Changelog
 
-## 1.25.1 - 2021-10-20
+## 1.25.2 – 2021-10-28
 
-## 🐞 Bugfixes
+### 💎 Improvements
+
+* Improved ActionPanel updating performance
+
+### 🐞 Bugfixes
+
+* `searchBarPlaceholder` updates when using the list in a navigation stack
+* Wrong action panel actions when popping back in a navigation stack
+* Empty state flickering when updating the `isLoading` property in lists
+* Accessory and subtitle label truncation in lists
+* Icon from assets tinting on dynamic theme changes
+* Dynamic removal of form elements
+* Open actions leading to Node env vars being set for the opened application
+* Some extensions not getting loaded for a particular Node setup
+* Local storage values being lost when extensions are automatically updated
+
+## 1.25.1 – 2021-10-20
+
+### 🐞 Bugfixes
 
 * Fixed configuring `tintColor` for icons in `ActionPanel` and `Form.Dropdown`
 * Fixed displaying submenu icons from local assets
