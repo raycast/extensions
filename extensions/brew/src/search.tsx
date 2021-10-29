@@ -1,49 +1,62 @@
 import { showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Formula, brewSearchFormula, brewFetchInstalled } from "./brew";
+import { Cask, Formula, InstallableResults } from "./brew";
+import { brewSearch, brewFetchInstalled } from "./brew";
 import { FormulaList } from "./components/list";
 
 /// Main
 
+type Installable = Cask | Formula;
+
+interface Installed {
+  formulae: Map<string, Formula>;
+  casks: Map<string, Cask>;
+}
+
 interface State {
-  formulae: Formula[];
   isLoading: boolean;
-  installed?: Map<string, Formula>;
+  results?: InstallableResults;
+  installed?: Installed;
   query?: string;
 }
 
 export default function Main() {
-  const [state, setState] = useState<State>({formulae: [], isLoading: true});
+  const [state, setState] = useState<State>({isLoading: true});
 
   useEffect(() => {
     if (!state.isLoading) { return; }
 
     if (state.installed == undefined) {
-      listInstalled().then((installed: Map<string, Formula>) => {
+      listInstalled().then((installed: Installed) => {
         setState((oldState) => ({ ...oldState, installed: installed}));
       });
       return;
     }
 
-    brewSearchFormula(state.query?.trim())
-      .then(formulae => {
-        updateInstalled(formulae, state.installed);
-        setState((oldState) => ({...oldState, formulae: formulae, isLoading: false}));
+    const query = state.query?.trim() ?? "";
+    brewSearch(query, 200)
+      .then(results => {
+        updateInstalled(results, state.installed);
+        setState((oldState) => ({...oldState, results: results, isLoading: false}));
       })
       .catch (err => {
-        console.log("brewSearchFormula error:", err);
-        setState((oldState) => ({...oldState, formulae: [], isLoading: false}));
+        console.log("brewSearch error:", err);
+        setState((oldState) => ({...oldState, results: undefined, isLoading: false}));
         showToast(ToastStyle.Failure, "Package search error");
       });
   }, [state]);
 
+  const formulae = state.results?.formulae ?? [];
+  const casks = state.results?.casks ?? [];
+
   return (
-    <FormulaList formulae={state.formulae}
-                 casks={[]}
+    <FormulaList formulae={formulae}
+                 casks={casks}
                  searchBarPlaceholder="Search formulae by name..."
                  isLoading={state.isLoading}
                  onSearchTextChange={(query: string) => {
-                   setState((oldState) => ({ ...oldState, query: query}));
+                   // Perhaps query should be another useState??
+                   setState((oldState) => ({ ...oldState, query: query, isLoading: true}));
                  }}
                  onAction={() => {
                    setState((oldState) => ({ ...oldState, installed: undefined, isLoading: true}));
@@ -54,22 +67,47 @@ export default function Main() {
 
 /// Private
 
-async function listInstalled(): Promise<Map<string, Formula>> {
+async function listInstalled(): Promise<Installed> {
   const installed = await brewFetchInstalled(true);
-  const dict = new Map<string, Formula>();
+
+  const formulae = new Map<string, Formula>();
   for (const formula of installed.formulae) {
-    dict.set(formula.name, formula);
+    formulae.set(formula.name, formula);
   }
-  return dict;
+
+  const casks = new Map<string, Cask>();
+  for (const cask of installed.casks) {
+    casks.set(cask.token, cask);
+  }
+
+  return {formulae: formulae, casks: casks};
 }
 
-function updateInstalled(formulae: Formula[], installed?: Map<string, Formula>) {
-  if (installed === undefined) { return; }
+function updateInstalled(results?: InstallableResults, installed?: Installed) {
+  if (!results || !installed) { return; }
 
-  for (const formula of formulae) {
-    const info = installed.get(formula.name);
+  for (const formula of results.formulae) {
+    const info = installed.formulae.get(formula.name);
+    if (!info || !isFormula(info)) { continue; }
+
     formula.installed = info?.installed ?? [];
     formula.outdated = info?.outdated ?? false;
     formula.pinned = info?.pinned ?? false;
   }
+
+  for (const cask of results.casks) {
+    const info = installed.casks.get(cask.token);
+    if (!info || !isCask(info)) { continue; }
+
+    cask.installed = info?.installed;
+    cask.outdated = info?.outdated ?? false;
+  }
+}
+
+function isCask(installable: Installable): installable is Cask {
+  return (installable as Cask).token != undefined;
+}
+
+function isFormula(installable: Installable): installable is Formula {
+  return (installable as Formula).pinned != undefined;
 }

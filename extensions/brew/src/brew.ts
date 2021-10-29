@@ -3,7 +3,6 @@ import { promisify } from "util";
 import { accessSync, constants } from "fs";
 import { stat, readFile, writeFile } from "fs/promises";
 import { join as path_join } from "path";
-import fetch from "node-fetch";
 import { cpus } from "os";
 import * as utils from "./utils";
 
@@ -102,6 +101,7 @@ export function brewPath(suffix: string): string {
 
 const installedCachePath = utils.cachePath('installedv2.json');
 const formulaCachePath = utils.cachePath('formula.json');
+const caskCachePath = utils.cachePath('cask.json');
 
 export async function brewFetchInstalled(useCache: boolean): Promise<InstallableResults> {
   async function installed(): Promise<string> {
@@ -163,59 +163,46 @@ export async function brewFetchOutdated(greedy: boolean): Promise<OutdatedResult
   return JSON.parse((await execp(cmd)).stdout);
 }
 
-let formulaCache: Formula[] = [];
 const formulaURL = "https://formulae.brew.sh/api/formula.json";
+const caskURL = "https://formulae.brew.sh/api/cask.json"
 
-export async function brewFetchFormula(): Promise<Formula[]> {
-  if (formulaCache.length > 0) {
-    return [...formulaCache];
-  }
+const formulaRemote: utils.Remote<Formula> = {url: formulaURL, cachePath: formulaCachePath};
+const caskRemote: utils.Remote<Cask> = {url: caskURL, cachePath: caskCachePath};
 
-  async function readCache(): Promise<Formula[]> {
-    const cacheTime = (await stat(formulaCachePath)).mtimeMs;
-    const response = await fetch(formulaURL, {method: "HEAD"});
-    const lastModified = Date.parse(response.headers.get('last-modified') ?? "");
-
-    if (!isNaN(lastModified) && lastModified < cacheTime) {
-      const cacheBuffer = await readFile(formulaCachePath);
-      formulaCache = JSON.parse(cacheBuffer.toString());
-      return [...formulaCache];
-    } else {
-      throw 'Invalid cache';
-    }
-  }
-
-  async function fetchFormula(): Promise<Formula[]> {
-    try {
-      const response = await fetch("https://formulae.brew.sh/api/formula.json");
-      formulaCache = await response.json();
-      try {
-        await writeFile(formulaCachePath, JSON.stringify(formulaCache));
-      } catch (err) {
-        console.error("Failed to write formula cache:", err)
-      }
-      return [...formulaCache];
-    } catch (e) {
-      console.log("fetch error:", e);
-      return [];
-    }
-  }
-
-  try {
-    return await readCache();
-  } catch {
-    return await fetchFormula();
-  }
+export async function brewFetchFormulae(): Promise<Formula[]> {
+  return await utils.fetchRemote(formulaRemote);
 }
 
-export async function brewSearchFormula(searchText?: string): Promise<Formula[]> {
-  const formulas = await brewFetchFormula();
-  if (!searchText) { return formulas; }
+export async function brewFetchCasks(): Promise<Cask[]> {
+  return await utils.fetchRemote(caskRemote);
+}
 
-  const target = searchText.toLowerCase();
-  return formulas?.filter(formula => {
-    return formula.name.toLowerCase().includes(target);
-  });
+export async function brewSearch(searchText: string, limit?: number): Promise<InstallableResults> {
+  let formulae = await brewFetchFormulae();
+  let casks = await brewFetchCasks();
+
+  if (searchText.length > 0) {
+    const target = searchText.toLowerCase();
+    formulae = formulae?.filter(formula => {
+      return formula.name.toLowerCase().includes(target);
+    });
+    casks = casks?.filter(cask => {
+      return cask.token.toLowerCase().includes(target);
+    });
+  }
+
+  const formulaeLen = formulae.length;
+  const casksLen = casks.length;
+
+  if (limit) {
+    formulae = formulae.slice(0, limit);
+    casks = casks.slice(0, limit);
+  }
+
+  formulae.totalLength = formulaeLen;
+  casks.totalLength = casksLen;
+
+  return {formulae: formulae, casks: casks};
 }
 
 /// Actions
@@ -352,5 +339,5 @@ function brewIdentifier(item: Cask | Nameable): string {
 }
 
 function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {
-  return (maybeCask as Cask).token != undefined ? true : false;
+  return (maybeCask as Cask).token != undefined;
 }

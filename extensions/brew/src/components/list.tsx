@@ -13,17 +13,22 @@ export interface FormulaListProps {
 }
 
 export function FormulaList(props: FormulaListProps) {
+  const formulae = props.formulae;
+  const casks = props.casks;
+
   return (
-    <List searchBarPlaceholder={props.searchBarPlaceholder} isLoading={props.isLoading}>
+    <List searchBarPlaceholder={props.searchBarPlaceholder} onSearchTextChange={props.onSearchTextChange} isLoading={props.isLoading}>
       <ListSection title="Formulae">
-        {props.formulae.map((formula) => (
-          <FormulaListItem key={formula.name} formula={formula} onAction={props.onAction} />
+        {formulae.map((formula) => (
+          <FormulaListItem key={`formula-${formula.name}`} formula={formula} onAction={props.onAction} />
         ))}
+        {formulae.isTruncated() && <MoreListItem />}
       </ListSection>
       <ListSection title="Casks" >
         {props.casks.map((cask) => (
-          <CaskListItem key={cask.token} cask={cask} onAction={props.onAction} />
+          <CaskListItem key={`cask-${cask.token}`} cask={cask} onAction={props.onAction} />
         ))}
+        {casks.isTruncated() && <MoreListItem />}
       </ListSection>
     </List>
   );
@@ -41,7 +46,6 @@ export function FormulaListItem(props: { formula: Formula, onAction: () => void 
 
   return (
     <List.Item
-      id={formula.name}
       title={formula.name}
       subtitle={formula.desc}
       accessoryTitle={version}
@@ -63,12 +67,17 @@ export function CaskListItem(props: { cask: Cask, onAction: () => void }) {
 
   return (
     <List.Item
-      id={cask.token}
       title={brewName(cask)}
       subtitle={cask.desc}
       accessoryTitle={version}
       icon={ {source: Icon.Checkmark, tintColor: tintColor} }
       actions={<CaskActionPanel cask={cask} showDetails={true} onAction={props.onAction} />}
     />
+  );
+}
+
+export function MoreListItem() {
+  return (
+    <List.Item title="" icon={Icon.Dot} />
   );
 }
