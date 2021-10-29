@@ -38,7 +38,7 @@ function getProjectsGroupedByTag(projects: ProjectEntry[]): Map<string, ProjectE
   const groupedProjects = new Map<string, ProjectEntry[]>();
 
   projects.forEach((project: ProjectEntry) => {
-    const tags = project.tags.length > 0 ? project.tags : ["[no tags]"];
+    const tags = project.tags?.length ?? 0 > 0 ? project.tags : ["[no tags]"];
     tags.forEach((tag) => {
       const projects: ProjectEntry[] = [];
       if (groupedProjects.has(tag)) {
