@@ -2,6 +2,14 @@ import { Form, ActionPanel, CopyToClipboardAction } from "@raycast/api";
 import { markdownTable } from "markdown-table";
 import { useState } from "react";
 
+function parseNumberText(text: string | undefined): number {
+  let t = text || "";
+  if (t.includes(",")) {
+    t = t.replace(",", ".");
+  }
+  return parseFloat(t);
+}
+
 function getMarkdown(
   reach: string | undefined,
   impact: string | undefined,
@@ -32,10 +40,10 @@ export default function Command() {
   const [confidence, setConfidence] = useState<string>();
   const [effort, setEffort] = useState<string>();
 
-  const reachNum = parseFloat(reach || "");
-  const impactNum = parseFloat(impact || "");
-  const confidenceNum = parseFloat(confidence || "");
-  const effortNum = parseFloat(effort || "");
+  const reachNum = parseNumberText(reach);
+  const impactNum = parseNumberText(impact);
+  const confidenceNum = parseNumberText(confidence);
+  const effortNum = parseNumberText(effort);
   const score = (reachNum * impactNum * (confidenceNum / 100.0)) / effortNum;
   const roundScore = Math.round(score * 100.0) / 100.0;
   const isValid = !Number.isNaN(roundScore);
