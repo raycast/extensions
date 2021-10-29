@@ -3,7 +3,6 @@ import { api as getApi } from '../api.js';
 import { useEffect, useState } from 'react';
 const Colors = ["Red", "Orange", "Yellow", "Green", "Blue", "Purple"];
 
-type ColorName = 'Blue'|'Green'|'Brown'|'Magenta'|'Orange'|'Purple'|'Red'|'Yellow';
 
 interface Preferences {
   token: string;
