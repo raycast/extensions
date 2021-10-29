@@ -12,6 +12,7 @@ import {
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 
+
 interface LinkedInSearch {
   searchResults?: SearchResult[]
   error?: string
@@ -88,7 +89,7 @@ function SearchResultItem(props: { searchResult: SearchResult }) {
 
     if(matchs && matchs[0]){
       accessoryTitle = matchs[0]
-      searchResult.subtitle = searchResult.subtitle.replaceAll('• '+accessoryTitle+' • ','')
+      searchResult.subtitle = searchResult.subtitle.replace(new RegExp('• '+accessoryTitle+' • ','g'), "")
     }
   } 
    
@@ -100,7 +101,7 @@ function SearchResultItem(props: { searchResult: SearchResult }) {
       title={searchResult.title}
       subtitle={searchResult.subtitle}
       accessoryTitle={accessoryTitle}
-      icon={{ source : (searchResult.img ? searchResult.img : defaultIcon[ressource.type]), mask: (searchResult.img ? ImageMask.RoundedRectangle : null)}}
+      icon={{ source : (searchResult.img ? searchResult.img : defaultIcon[ressource.type]), mask: (searchResult.img ? ImageMask.RoundedRectangle : undefined)}}
       actions={
         <ActionPanel>
           <OpenInBrowserAction title="Open in LinkedIn" url={targetUrl} />
