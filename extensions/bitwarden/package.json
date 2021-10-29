@@ -42,7 +42,7 @@
       "type": "textfield",
       "default": "/usr/local/bin:/opt/homebrew/bin",
       "required": false,
-      "title": "Bitwarden CLI Installation Path",
+      "title": "PATH Environment Variable",
       "description": "Ordered list of directory from where the bitwarden cli will be searched for.",
       "placeholder": "PATH"
     },
