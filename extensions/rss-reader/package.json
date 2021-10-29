@@ -7,10 +7,24 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Read Stories",
+      "name": "feeds",
+      "title": "View Subscriptions",
       "subtitle": "RSS",
-      "description": "Get the latest from your favourite sources",
+      "description": "Manage your favourite sources and read stories",
+      "mode": "view"
+    },
+    {
+      "name": "subscription-form",
+      "title": "Add Subscription",
+      "subtitle": "RSS",
+      "description": "Subscribe to a new sources",
+      "mode": "view"
+    },
+    {
+      "name": "list-all",
+      "title": "Read All Stories",
+      "subtitle": "RSS",
+      "description": "Get the latest from all your favourite sources at once",
       "mode": "view"
     }
   ],
