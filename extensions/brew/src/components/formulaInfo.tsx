@@ -47,14 +47,18 @@ function formatVersions(formula: Formula): string {
   if (brewIsInstalled(formula)) {
     status.push('installed');
   }
+  if (formula.installed.first()?.installed_as_dependency) {
+    status.push('dependency')
+  }
   let markdown = `
 #### Versions:
 Stable: ${versions.stable} ${status ? `(${status.join(', ')})` : ''}
 
-  `;
+`;
   if (versions.head) {
     markdown += versions.head;
   }
+
   return markdown;
 }
 
@@ -83,10 +87,10 @@ ${markdown}
 }
 
 function formatConflicts(formula: Formula): string {
-  if (!formula.conflicts_with) { return ''; }
+  if (formula.conflicts_with?.length == 0) { return ''; }
 
   return `#### Conflicts With:
-${formula.conflicts_with.join(', ')}
+ ${formula.conflicts_with?.join(', ')}
   `;
 }
 
