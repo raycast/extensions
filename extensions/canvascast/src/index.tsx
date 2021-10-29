@@ -1,4 +1,4 @@
-import { Detail, getPreferenceValues, Form, List, OpenInBrowserAction, ActionPanel, Icon, Color } from "@raycast/api";
+import { getPreferenceValues, List, OpenInBrowserAction, ActionPanel, Icon, Color } from "@raycast/api";
 import { api as getApi } from '../api.js';
 import { useEffect, useState } from 'react';
 const Colors = ["Red", "Orange", "Yellow", "Green", "Blue", "Purple"];
