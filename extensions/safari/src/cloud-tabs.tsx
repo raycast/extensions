@@ -1,11 +1,21 @@
-import { List, ActionPanel, environment, CopyToClipboardAction, OpenInBrowserAction, Detail } from '@raycast/api';
+import {
+  List,
+  ActionPanel,
+  environment,
+  CopyToClipboardAction,
+  OpenInBrowserAction,
+  Detail,
+  showToast,
+  ToastStyle,
+  Icon,
+} from '@raycast/api';
 import { useState, useEffect, useCallback } from 'react';
 import os from 'os';
 import path from 'path';
 import { promisify } from 'util';
 import { readFile } from 'fs';
 import _ from 'lodash';
-import initSqlJs, { Database, ParamsObject } from 'sql.js';
+import initSqlJs, { Database } from 'sql.js';
 import execa from 'execa';
 import { getUrlDomain, getFaviconUrl, plural, permissionErrorMarkdown } from './shared';
 
@@ -22,16 +32,26 @@ const getCurrentDeviceName = (): string => {
   }
 };
 
+const currentDeviceName = getCurrentDeviceName();
+
+let loadedDb: Database;
 const loadDb = async (): Promise<Database> => {
+  if (loadedDb) {
+    return loadedDb;
+  }
+
   const fileBuffer = await asyncReadFile(cloudTabsDbPath);
   const SQL = await initSqlJs({
     locateFile: () => path.join(environment.assetsPath, 'sql-wasm.wasm'),
   });
 
-  return new SQL.Database(fileBuffer);
+  const db = new SQL.Database(fileBuffer);
+  loadedDb = db;
+
+  return db;
 };
 
-const executeQuery = async (db: Database, query: string): Promise<ParamsObject[]> => {
+const executeQuery = async (db: Database, query: string): Promise<unknown> => {
   const results = [];
   const stmt = db.prepare(query);
   while (stmt.step()) {
@@ -40,6 +60,22 @@ const executeQuery = async (db: Database, query: string): Promise<ParamsObject[]
 
   stmt.free();
   return results;
+};
+
+const fetchTabs = async (): Promise<Tab[]> => {
+  const db = await loadDb();
+  const tabs = (await executeQuery(
+    db,
+    `SELECT t.tab_uuid as uuid, d.device_uuid, d.device_name, t.title, t.url, t.position
+         FROM cloud_tabs t
+         INNER JOIN cloud_tab_devices d ON t.device_uuid = d.device_uuid`
+  )) as Tab[];
+
+  return tabs;
+};
+
+const closeTab = async (tab: Tab) => {
+  await showToast(ToastStyle.Success, 'Tab Closed', 'It will take a few seconds to take effect.');
 };
 
 interface Tab {
@@ -61,21 +97,14 @@ interface Device {
 
 const formatTitle = (title: string) => _.truncate(title, { length: 75 });
 
+// closeTab
 export default function Command() {
   const [hasPermissionError, setHasPermissionError] = useState(false);
   const [devices, setDevices] = useState<Device[]>();
 
   const fetchDevices = useCallback(async () => {
     try {
-      const db = await loadDb();
-      const currentDeviceName = getCurrentDeviceName();
-      const tabs = (await executeQuery(
-        db,
-        `SELECT t.tab_uuid as uuid, d.device_uuid, d.device_name, t.title, t.url, t.position
-         FROM cloud_tabs t
-         INNER JOIN cloud_tab_devices d ON t.device_uuid = d.device_uuid`
-      )) as unknown as Tab[];
-
+      const tabs = await fetchTabs();
       const devices = _.chain(tabs)
         .groupBy('device_uuid')
         .reduce((devices: Device[], tabs: Tab[], device_uuid: string) => {
@@ -124,6 +153,12 @@ export default function Command() {
                 <ActionPanel>
                   <OpenInBrowserAction url={tab.url} />
                   <CopyToClipboardAction content={tab.url} title="Copy URL" />
+                  <ActionPanel.Item
+                    title="Close Tab"
+                    icon={Icon.XmarkCircle}
+                    shortcut={{ modifiers: ['ctrl'], key: 'x' }}
+                    onAction={() => closeTab(tab)}
+                  />
                 </ActionPanel>
               }
             />
