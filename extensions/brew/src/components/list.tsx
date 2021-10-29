@@ -57,7 +57,7 @@ export function FormulaListItem(props: { formula: Formula, onAction: () => void 
 
 export function CaskListItem(props: { cask: Cask, onAction: () => void }) {
   const cask = props.cask;
-  let version = cask.versions.stable;
+  let version = cask.version;
   let tintColor = Color.SecondaryText;
 
   if (brewIsInstalled(cask)) {
