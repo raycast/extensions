@@ -10,10 +10,7 @@ export default function ListAll() {
   const [loading, setLoading] = useState(false);
   
   async function fetchFeeds() {
-    console.log("fetching feeds");
-    const feedItems = await getFeeds()
-    console.log(feedItems.length);
-    setFeeds(feedItems)
+    setFeeds(await getFeeds())
   } 
 
   async function fetchStories() {
@@ -21,23 +18,16 @@ export default function ListAll() {
       return
     }
     setLoading(true)
-    console.log("fetching stories");
-    const storyItems = await getStories(feeds)
-    console.log(storyItems.length);
-    setStories(storyItems)
+    setStories(await getStories(feeds))
     setLoading(false)
   }
 
   useEffect(() => {
-    if (feeds.length === 0) {
-      fetchFeeds()
-    }
+    fetchFeeds()
   }, []);
 
   useEffect(() => {
-    if (feeds.length > 0) {
-      fetchStories()
-    }
+    fetchStories()
   }, [feeds])
 
   return (
