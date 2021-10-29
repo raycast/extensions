@@ -2,7 +2,7 @@
     "name": "github-for-enterprise",
     "title": "GitHub Enterprise",
     "description": "Visualize and manage your issues and pull requests",
-    "icon": "github.png",
+    "icon": "icon.png",
     "author": "Kinbaum",
     "license": "MIT",
     "commands": [
