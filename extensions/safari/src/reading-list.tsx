@@ -1,4 +1,4 @@
-import { List, ActionPanel, Icon, OpenAction, Detail } from '@raycast/api';
+import { List, ActionPanel, CopyToClipboardAction, OpenInBrowserAction, Detail } from '@raycast/api';
 import { useState, useEffect, useCallback } from 'react';
 import os from 'os';
 import _ from 'lodash';
@@ -102,7 +102,8 @@ export default function Command() {
           accessoryTitle={formatDate(bookmark.dateAdded)}
           actions={
             <ActionPanel>
-              <OpenAction title="Open in Safari" target={bookmark.url} application="Safari" icon={Icon.Globe} />
+              <OpenInBrowserAction url={bookmark.url} />
+              <CopyToClipboardAction content={bookmark.url} title="Copy URL" />
             </ActionPanel>
           }
         />

@@ -1,4 +1,4 @@
-import { List, ActionPanel, Icon, environment, OpenAction, Detail } from '@raycast/api';
+import { List, ActionPanel, environment, CopyToClipboardAction, OpenInBrowserAction, Detail } from '@raycast/api';
 import { useState, useEffect, useCallback } from 'react';
 import os from 'os';
 import path from 'path';
@@ -122,7 +122,8 @@ export default function Command() {
               icon={getFaviconUrl(tab.domain)}
               actions={
                 <ActionPanel>
-                  <OpenAction title="Open in Safari" target={tab.url} application="Safari" icon={Icon.Globe} />
+                  <OpenInBrowserAction url={tab.url} />
+                  <CopyToClipboardAction content={tab.url} title="Copy URL" />
                 </ActionPanel>
               }
             />
