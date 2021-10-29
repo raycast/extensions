@@ -27,7 +27,7 @@
     {
       "name": "index",
       "title": "Open Dashboard",
-      "subtitle": "Your Canvas homepage",
+      "subtitle": "Canvas",
       "description": "View the Canvas dashboard ported to Raycast",
       "mode": "view"
     }
