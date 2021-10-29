@@ -1,8 +1,8 @@
 import { ActionPanel, Detail, Image, ImageMask, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
-import millify from "millify";
+//import millify from "millify";
 import { TweetV1 } from "twitter-api-v2";
 import { Fetcher, getPhotoUrlFromTweet, refreshTweet, useRefresher } from "../twitterapi";
-import { padStart } from "../utils";
+import { compactNumberFormat, padStart } from "../utils";
 import {
   DeleteTweetAction,
   LikeAction,
@@ -47,7 +47,7 @@ export function TweetListItem(props: {
     if (num === undefined) {
       return "0";
     }
-    const text = millifyState ? millify(num) : `${num}`;
+    const text = millifyState ? compactNumberFormat(num) : `${num}`;
     return padStart(text, length);
   };
   const minPadding = 1;
@@ -175,7 +175,7 @@ export function TweetList(props: {
     if (num === undefined) {
       return 0;
     }
-    const text = millifyState ? millify(num) : `${num}`;
+    const text = millifyState ? compactNumberFormat(num) : `${num}`;
     return text.length;
   };
 
