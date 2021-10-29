@@ -4,7 +4,9 @@
   "description": "Search and open tabs and history in Google Chrome.",
   "icon": "google_chrome-icon.png",
   "author": "Codely",
-  "contributors": ["bromanko"],
+  "contributors": [
+    "bromanko"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -19,6 +21,13 @@
       "title": "Search History",
       "subtitle": "Google Chrome",
       "description": "Search browser history.",
+      "mode": "view"
+    },
+    {
+      "name": "google-chrome-new-tab",
+      "title": "New Tab",
+      "subtitle": "Google Chrome",
+      "description": "Open a new Google Chrome tab.",
       "mode": "view"
     }
   ],
