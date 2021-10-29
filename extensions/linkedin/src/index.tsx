@@ -75,11 +75,23 @@ function SearchResultItem(props: { searchResult: SearchResult }) {
   }
 
   const defaultIcon = {
-    member: Icon.Person,
-    company: Icon.Desktop,
-    job: Icon.Bubble,
-    unknown: Icon.QuestionMark
+    member: '👤',
+    company: '🏢',
+    job: '💼',
+    unknown: Icon.MagnifyingGlass
   } as Record<string,string>
+
+  var accessoryTitle;
+  if(searchResult.subtitle){
+
+    var matchs = searchResult.subtitle.match(new RegExp('(?<=• ).+?(?= •)','g'));
+
+    if(matchs && matchs[0]){
+      accessoryTitle = matchs[0]
+      searchResult.subtitle = searchResult.subtitle.replaceAll('• '+accessoryTitle+' • ','')
+    }
+  } 
+   
 
   return (
     <List.Item
@@ -87,7 +99,8 @@ function SearchResultItem(props: { searchResult: SearchResult }) {
       key={searchResult.trackingId}
       title={searchResult.title}
       subtitle={searchResult.subtitle}
-      icon={{ source : (searchResult.img ? searchResult.img : defaultIcon[ressource.type]), mask: ImageMask.RoundedRectangle }}
+      accessoryTitle={accessoryTitle}
+      icon={{ source : (searchResult.img ? searchResult.img : defaultIcon[ressource.type]), mask: (searchResult.img ? ImageMask.RoundedRectangle : null)}}
       actions={
         <ActionPanel>
           <OpenInBrowserAction title="Open in LinkedIn" url={targetUrl} />
