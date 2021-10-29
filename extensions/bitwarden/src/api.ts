@@ -3,10 +3,11 @@ import { VaultStatus } from "./types";
 
 export class Bitwarden {
   private env: Record<string, string>;
-  constructor(clientId: string, clientSecret: string) {
+  constructor(clientId: string, clientSecret: string, PATH: string) {
     this.env = {
       BW_CLIENTSECRET: clientSecret,
       BW_CLIENTID: clientId,
+      PATH: PATH
     };
   }
 

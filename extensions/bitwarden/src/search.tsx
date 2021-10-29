@@ -15,16 +15,14 @@ import treeify from "treeify";
 import { filterNullishPropertiesFromObject, codeBlock, titleCase, faviconUrl } from "./utils";
 import { useBitwarden } from "./hooks";
 import { TroubleshootingGuide, UnlockForm } from "./components";
-import { existsSync } from "fs";
 import { Bitwarden } from "./api";
-import { dirname } from "path";
+import * as which from 'which';
 
-const { cliPath, clientId, clientSecret, fetchFavicons } = getPreferenceValues();
-process.env.PATH = dirname(cliPath);
-const bitwardenApi = new Bitwarden(clientId, clientSecret);
+const { PATH, clientId, clientSecret, fetchFavicons } = getPreferenceValues();
+const bitwardenApi = new Bitwarden(clientId, clientSecret, PATH);
 
 export default function Search(): JSX.Element {
-  if (!existsSync(cliPath)) {
+  if (!which.sync('bw', {nothrow: true, path: PATH})) {
     return <TroubleshootingGuide />;
   }
 
