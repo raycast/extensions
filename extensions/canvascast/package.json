@@ -28,7 +28,7 @@
       "name": "index",
       "title": "Open Dashboard",
       "subtitle": "Canvas",
-      "description": "View the Canvas dashboard ported to Raycast",
+      "description": "View the Canvas dashboard",
       "mode": "view"
     }
   ],
