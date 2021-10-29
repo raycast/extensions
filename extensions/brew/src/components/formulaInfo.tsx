@@ -25,7 +25,7 @@ ${formula.desc}
 
 [${formula.homepage}](${formula.homepage})
 
-#### License:
+#### License
  ${formula.license}
 
 ${formatVersions(formula)}
@@ -51,7 +51,7 @@ function formatVersions(formula: Formula): string {
     status.push('dependency')
   }
   let markdown = `
-#### Versions:
+#### Versions
 Stable: ${versions.stable} ${status ? `(${status.join(', ')})` : ''}
 
 `;
@@ -89,7 +89,7 @@ ${markdown}
 function formatConflicts(formula: Formula): string {
   if (formula.conflicts_with?.length == 0) { return ''; }
 
-  return `#### Conflicts With:
+  return `#### Conflicts With
  ${formula.conflicts_with?.join(', ')}
   `;
 }
@@ -110,7 +110,7 @@ ${formula.caveats}
   }
 
   if (caveats) {
-    return `#### Caveats:
+    return `#### Caveats
 ${caveats}
     `
   } else {

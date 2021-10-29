@@ -30,6 +30,11 @@ export interface Cask extends Installable {
   version: string;
   installed?: string; // version
   auto_updates: boolean;
+  depends_on: CaskDependency;
+}
+
+export interface CaskDependency {
+  macos?: {[key: string]: string[]};
 }
 
 export interface Formula extends Installable, Nameable {

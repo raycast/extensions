@@ -27,6 +27,8 @@ ${cask.desc}
 
 ${formatVersion(cask)}
 
+${formatDependencies(cask)}
+
 ${formatConflicts(cask)}
 
 ${formatCaveats(cask)}
@@ -42,20 +44,34 @@ function formatVersion(cask: Cask): string {
   }
 
   return `
-#### Version:
+#### Version
 
 ${version}
 
-#### Auto Updates:
+#### Auto Updates
 
-${cask.auto_updates}
+${cask.auto_updates ?? false}
   `;
+}
+
+function formatDependencies(cask: Cask): string {
+  if (!cask.depends_on.macos) { return ''; }
+
+  let markdown = '';
+  for (const key in cask.depends_on.macos) {
+    const values = cask.depends_on.macos[key];
+    markdown += `macOS ${key} ${values.join(', ')}`;
+  }
+
+  return `#### Dependencies
+${markdown}
+    `;
 }
 
 function formatConflicts(cask: Cask): string {
   if (!cask.conflicts_with) { return ''; }
 
-  return `#### Conflicts With:
+  return `#### Conflicts With
 ${cask.conflicts_with.join(', ')}
   `;
 }
@@ -70,7 +86,7 @@ ${cask.caveats}
   }
 
   if (caveats) {
-    return `#### Caveats:
+    return `#### Caveats
 ${caveats}
     `
   } else {
