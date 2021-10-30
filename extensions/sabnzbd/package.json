@@ -33,6 +33,13 @@
       "subtitle": "SABnzbd",
       "description": "Shutdown SABnzbd",
       "mode": "no-view"
+    },
+    {
+      "name": "change-complete-action",
+      "title": "Change Complete Action",
+      "subtitle": "SABnzbd",
+      "description": "Set an end-of-queue action",
+      "mode": "view"
     }
   ],
   "preferences": [
