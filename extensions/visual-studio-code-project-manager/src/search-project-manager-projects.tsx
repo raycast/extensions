@@ -104,7 +104,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
       subtitle={subtitle}
       icon={{ fileIcon: path }}
       keywords={tags}
-      accessoryTitle={tags.join(", ")}
+      accessoryTitle={tags?.join(", ")}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
