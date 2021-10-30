@@ -55,8 +55,8 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          {isValid && <CopyToClipboardAction title="Copy RICE score to Clipboard" content={scoreText} />}
-          {isValid && <CopyToClipboardAction title="Copy RICE score markdown to Clipboard" content={md} />}
+          {isValid && <CopyToClipboardAction title="Copy Score" content={scoreText} />}
+          {isValid && <CopyToClipboardAction title="Copy Markdown Table" content={md} />}
         </ActionPanel>
       }
     >
