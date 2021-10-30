@@ -1,4 +1,4 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { showToast, ToastStyle } from "@raycast/api";
 import { TweetV1 } from "twitter-api-v2";
 import { TweetList } from "../components/tweet";
 import { refreshTweets, twitterClient, useRefresher } from "../twitterapi";

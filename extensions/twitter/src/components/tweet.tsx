@@ -1,5 +1,4 @@
 import { ActionPanel, Detail, Image, ImageMask, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
-//import millify from "millify";
 import { TweetV1 } from "twitter-api-v2";
 import { Fetcher, getPhotoUrlFromTweet, refreshTweet, useRefresher } from "../twitterapi";
 import { compactNumberFormat, padStart } from "../utils";
