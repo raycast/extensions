@@ -30,38 +30,37 @@ function Main(): JSX.Element {
     showToast(ToastStyle.Failure, 'Invalid token detected')
     throw new Error('Invalid token length detected')
   }
-  const ignoredTeamIDs = String(preferences.ignoredTeams.value ?? '')
-    .split(',')
-    .map((id) => id.trim())
-    .filter((id) => id !== '')
 
   // Setup useState objects
   const [username, setUsername] = useState('')
   const [deployments, setDeployments] = useState<Deployment[]>()
   const [teams, setTeams] = useState<Team[]>()
   useEffect(() => {
-    const call = async () => setUsername(await fetchUsername())
-    if (username === '') {
-      call()
+    const ignoredTeamIDs = String(preferences.ignoredTeams.value ?? '')
+      .split(',')
+      .map((id) => id.trim())
+      .filter((id) => id !== '')
+    const fetchData = async () => {
+      const [fetchedUsername, fetchedTeams] = await Promise.all([
+        fetchUsername(),
+        fetchTeams(ignoredTeamIDs),
+      ])
+      const fetchedDeployments = await fetchDeployments(
+        fetchedUsername,
+        fetchedTeams
+      )
+      setUsername(fetchedUsername)
+      setTeams(fetchedTeams)
+      setDeployments(fetchedDeployments)
     }
-  })
-  useEffect(() => {
-    const call = async () =>
-      setDeployments(await fetchDeployments(username, teams ?? []))
-    if (!deployments) {
-      call()
-    }
-  })
-  useEffect(() => {
-    const call = async () => setTeams(await fetchTeams(ignoredTeamIDs))
-    if (!teams) {
-      call()
-    }
-  })
+    fetchData()
+  }, [])
 
   // Refresh deployments every 2 seconds
   useInterval(async () => {
-    setDeployments(await fetchDeployments(username, teams ?? []))
+    if (username && teams) {
+      setDeployments(await fetchDeployments(username, teams))
+    }
   }, 2000)
 
   return (

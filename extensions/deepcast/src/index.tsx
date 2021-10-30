@@ -11,7 +11,7 @@ import {
 import got from "got";
 import { useEffect, useState } from "react";
 
-const languages = {
+const source_languages = {
   BG: "Bulgarian",
   ZH: "Chinese",
   CS: "Czech",
@@ -29,6 +29,36 @@ const languages = {
   LV: "Latvian",
   LT: "Lithuanian",
   PL: "Polish",
+  PT: "Portuguese",
+  RO: "Romanian",
+  RU: "Russian",
+  SK: "Slovak",
+  SL: "Slovenian",
+  ES: "Spanish",
+  SV: "Swedish",
+};
+
+const target_languages = {
+  BG: "Bulgarian",
+  ZH: "Chinese",
+  CS: "Czech",
+  DA: "Danish",
+  NL: "Dutch",
+  "EN-GB": "English (UK)",
+  "EN-US": "English (US)",
+  ET: "Estonian",
+  FI: "Finnish",
+  FR: "French",
+  DE: "German",
+  EL: "Greek",
+  HU: "Hungarian",
+  IT: "Italian",
+  JA: "Japanese",
+  LV: "Latvian",
+  LT: "Lithuanian",
+  PL: "Polish",
+  "PT-PT": "Portuguese",
+  "PT-BR": "Portuguese (Brazil)",
   RO: "Romanian",
   RU: "Russian",
   SK: "Slovak",
@@ -99,13 +129,13 @@ const Command = () => {
         <Form.TextArea id="text" placeholder="Enter or paste text here" />
         <Form.Dropdown id="from" defaultValue="" storeValue={true} title="From">
           <Form.Dropdown.Item value="" title="Detect" />
-          {Object.entries(languages).map(([value, title]) => (
+          {Object.entries(source_languages).map(([value, title]) => (
             <Form.Dropdown.Item value={value} title={title} key={value} />
           ))}
         </Form.Dropdown>
         <Form.Separator />
         <Form.Dropdown id="to" defaultValue="EN" storeValue={true} title="To">
-          {Object.entries(languages).map(([value, title]) => (
+          {Object.entries(target_languages).map(([value, title]) => (
             <Form.Dropdown.Item value={value} title={title} key={value} />
           ))}
         </Form.Dropdown>

@@ -121,9 +121,25 @@ function searchProjects(query?: string): {
     let filtered = projectList;
     if (filtered.length > 0 && query && query.length > 0) {
       filtered = fuzzysort
-        .go(query, filtered, { keys: ["name", "displayPath"], allowTypo: false })
+        .go(query, filtered, {
+          keys: ["name", "displayPath"],
+          allowTypo: false,
+          threshold: -1000000, // pick a pretty big negative number
+          scoreFn: (a) => {
+            let scores = [-1000001] as number[]; // less than the threshold by default
+            if(a[0]) {
+              scores = scores.concat(a[0].score)
+            }
+            if(a[1]) {
+              // scores are negative, so make displayPath matches worse than direct name matches
+              scores = scores.concat(a[1].score * 10)
+            }
+            return Math.max(...scores)
+          },
+        })
         .map((result) => result.obj);
     }
+    // but: frecency matches will take precedence if parts of the path are included.
     filtered = projectFrecency.sort({ searchQuery: query || "", results: filtered });
     setProjects(filtered);
   }, [query, projectList]);
@@ -131,6 +147,7 @@ function searchProjects(query?: string): {
 }
 
 function updateFrecency(searchQuery: string | undefined, project: Project) {
+  // the selectedId attribute has to match the projectFrecency config set above
   projectFrecency.save({ searchQuery: searchQuery || "", selectedId: project.fullPath });
 }
 

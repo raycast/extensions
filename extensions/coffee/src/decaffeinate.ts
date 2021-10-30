@@ -1,7 +1,7 @@
 import { showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
-export default async function main() {
+const Decaffeinate = async () => {
   try {
     await runAppleScript(`do shell script "pgrep caffeinate"`);
     await runAppleScript('do shell script "killall caffeinate"');
@@ -9,4 +9,6 @@ export default async function main() {
   } catch (_) {
     await showHUD("Your Mac is already decaffeinated");
   }
-}
+};
+
+export default Decaffeinate;
