@@ -5,7 +5,7 @@ import Parser from "rss-parser";
 
 const parser = new Parser({});
 
-export function AddFeedForm(props?: { callback?: (feeds: Feed[]) => void }) {
+function AddFeedForm(props?: { callback?: (feeds: Feed[]) => void }) {
   const [value, setValue] = useState("");
   const { pop } = useNavigation()
 

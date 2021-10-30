@@ -1,7 +1,7 @@
 import { ActionPanel, List, showToast, ToastStyle, Icon, Color, setLocalStorageItem, getLocalStorageItem, PushAction } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { StoriesList } from "./stories"
 import AddFeedForm from "./subscription-form";
-import { getStories, Story, StoryListItem } from "./stories"
 
 export interface Feed {
   url: string;
@@ -9,7 +9,7 @@ export interface Feed {
   icon: string;
 }
 
-export function FeedsList() {
+function FeedsList() {
   const [feeds, setFeeds] = useState<Feed[]>([])
 
   async function fetchFeeds() {
@@ -62,7 +62,7 @@ export function FeedsList() {
               <ActionPanel.Section title={ item.title }>
                 <PushAction
                   title="Oped Feed"
-                  target={ <FeedStoriesList feedItem={ item } /> }
+                  target={ <StoriesList feeds={ [ item ] } /> }
                   icon={{ source: Icon.TextDocument, tintColor: Color.Green }}
                 />
               </ActionPanel.Section>
@@ -106,29 +106,6 @@ export function FeedsList() {
       ))}
     </List>
   );
-}
-
-function FeedStoriesList(props: { feedItem : Feed }) {
-  const [stories, setStories] = useState<Story[]>([] as Story[])
-  const [loading, setLoading] = useState(false);
-
-  async function fetchStories() {
-    setLoading(true)
-    setStories(await getStories([ props.feedItem ]))
-    setLoading(false)
-  }
-
-  useEffect(() => {
-    fetchStories();
-  }, [])
-
-  return (
-    <List isLoading = { loading } >
-      {stories.map((story) => (
-        <StoryListItem key={ story.guid } item={ story } />
-      ))}
-    </List>
-  )
 }
 
 export async function getFeeds() {

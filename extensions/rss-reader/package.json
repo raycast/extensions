@@ -21,7 +21,7 @@
       "mode": "view"
     },
     {
-      "name": "list-all",
+      "name": "stories",
       "title": "Read All Stories",
       "subtitle": "RSS",
       "description": "Get the latest from all your favourite sources at once",
