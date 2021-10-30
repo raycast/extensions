@@ -8,6 +8,8 @@ import {
   ToastStyle,
   Detail,
   Icon,
+  getPreferenceValues,
+  KeyboardShortcut,
 } from '@raycast/api'
 import { useEffect, useState } from 'react'
 import fetch from 'node-fetch'
@@ -42,6 +44,58 @@ export default function PackageList() {
           })
         : null}
     </List>
+  )
+}
+
+interface Preferences {
+  defaultCopyAction: 'yarn' | 'npm'
+}
+
+const CopyInstallCommandActions = ({ name }: { name: string }) => {
+  const { defaultCopyAction }: Preferences = getPreferenceValues()
+
+  const defaultShortcut: KeyboardShortcut = {
+    key: 'c',
+    modifiers: ['shift', 'cmd'],
+  }
+  const alternateShortcut: KeyboardShortcut = {
+    key: 'c',
+    modifiers: ['opt', 'cmd'],
+  }
+
+  const yarnAction = (
+    <CopyToClipboardAction
+      title={`Copy Yarn Install Command`}
+      content={`yarn add ${name}`}
+      shortcut={
+        defaultCopyAction === 'yarn' ? defaultShortcut : alternateShortcut
+      }
+    />
+  )
+
+  const npmAction = (
+    <CopyToClipboardAction
+      title={`Copy npm Install Command`}
+      content={`npm install ${name}`}
+      shortcut={
+        defaultCopyAction === 'npm' ? defaultShortcut : alternateShortcut
+      }
+    />
+  )
+  return (
+    <>
+      {defaultCopyAction === 'npm' ? (
+        <>
+          {npmAction}
+          {yarnAction}
+        </>
+      ) : (
+        <>
+          {yarnAction}
+          {npmAction}
+        </>
+      )}
+    </>
   )
 }
 
@@ -138,16 +192,7 @@ const PackageListItem = ({
               },
             }}
           />
-
-          <CopyToClipboardAction
-            title={`Copy Yarn Install Command`}
-            content={`yarn install ${pkg.name}`}
-          />
-
-          <CopyToClipboardAction
-            title={`Copy npm Install Command`}
-            content={`npm install ${pkg.name}`}
-          />
+          <CopyInstallCommandActions name={pkg.name} />
         </ActionPanel>
       }
     />
