@@ -7,10 +7,17 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "search-videos",
       "title": "Search Videos",
       "subtitle": "",
-      "description": "Search YouTube videos",
+      "description": "Search YouTube Videos",
+      "mode": "view"
+    },
+    {
+      "name": "search-channel",
+      "title": "Search Channels",
+      "subtitle": "",
+      "description": "Search YouTube Channels",
       "mode": "view"
     }
   ],

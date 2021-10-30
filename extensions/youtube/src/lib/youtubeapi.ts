@@ -12,6 +12,12 @@ function createClient(): youtube_v3.Youtube {
 
 export const youtubeClient = createClient();
 
+export enum SearchType {
+    channel = "channel",
+    video = "video",
+    any = ""
+}
+
 export interface Fetcher {
     updateInline: () => Promise<void>;
     refresh: () => Promise<void>;
