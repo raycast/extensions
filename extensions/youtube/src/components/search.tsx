@@ -17,8 +17,7 @@ export function OpenChannelInBrowser(props: {
   snippet: youtube_v3.Schema$SearchResultSnippet | undefined;
 }): JSX.Element | null {
   const channelId = props.snippet?.channelId;
-  const channelTitle = props.snippet?.channelTitle;
-  if (channelId && channelTitle) {
+  if (channelId) {
     return <OpenInBrowserAction title="Open Channel in Browser" url={`https://youtube.com/channel/${channelId}`} />;
   }
   return null;
