@@ -20,7 +20,7 @@ interface LinkedInSearch {
   searchResults?: SearchResult[]
   error?: string
   isLoading: boolean
-  searchId?: string
+  searchId: string
 }
 
 interface LinkedInProfile {
@@ -42,7 +42,7 @@ type SearchResult = {
 
 var LINKEDIN_COOKIE: string | undefined;
 var LINKEDIN_CSRF_TOKEN:  string | undefined;
-var LINKEDIN_COOKIE_EXPIRED:  string | undefined;
+var LINKEDIN_COOKIE_EXPIRED:  boolean | undefined;
 
 export default function SearchResultList() {
   const [searchText, setSearchText] = useState<string>()
@@ -156,7 +156,7 @@ export function ProfileDetail(props: { searchId: string, searchPos: number, quer
       }
 
       if(profile.contactInfo.websites && profile.contactInfo.websites[0]){
-        profile.contactInfo.websites.forEach(function(website: string){
+        profile.contactInfo.websites.forEach(function(website: any){
           profileMarkdown+='\n 🔗 : ['+website.url+']('+website.url+')';
           if(website.type && website.type['com.linkedin.voyager.identity.profile.StandardWebsite'] && website.type['com.linkedin.voyager.identity.profile.StandardWebsite'].category){
               profileMarkdown+=' ('+website.type['com.linkedin.voyager.identity.profile.StandardWebsite'].category+')';
@@ -165,7 +165,7 @@ export function ProfileDetail(props: { searchId: string, searchPos: number, quer
       }
 
       if(profile.contactInfo.twitterHandles && profile.contactInfo.twitterHandles[0]){
-        profile.contactInfo.twitterHandles.forEach(function(twitterHandle: string){
+        profile.contactInfo.twitterHandles.forEach(function(twitterHandle: any){
           profileMarkdown+='\n 🐦 : [@'+twitterHandle.name+'](https://twitter.com/'+twitterHandle.name+') \n';
         })
       }
