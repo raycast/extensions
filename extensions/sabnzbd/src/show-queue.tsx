@@ -37,14 +37,15 @@ export default function SlotList() {
       onSearchTextChange={onSearchTextChange}
     >
       {state.slots.map((slot) => (
-        <SlotListItem key={slot.nzo_id} slot={slot} />
+        <SlotListItem key={slot.nzo_id} slot={slot} setState={setState} />
       ))}
     </List>
   );
 }
 
-function SlotListItem(props: { slot: QueueSlot }) {
+function SlotListItem(props: { slot: QueueSlot; setState: any }) {
   const slot = props.slot;
+  const setState = props.setState;
 
   let icon: ImageLike;
 
@@ -56,8 +57,8 @@ function SlotListItem(props: { slot: QueueSlot }) {
 
       actions = (
         <ActionPanel>
-          <ActionPanel.Item title={"Resume"} onAction={() => onResume(slot)} />
-          <ActionPanel.Item title={"Delete"} onAction={() => onDelete(slot)} />
+          <ActionPanel.Item title={"Resume"} onAction={() => onResume(slot, setState)} />
+          <ActionPanel.Item title={"Delete"} onAction={() => onDelete(slot, setState)} />
         </ActionPanel>
       );
 
@@ -68,8 +69,8 @@ function SlotListItem(props: { slot: QueueSlot }) {
 
       actions = (
         <ActionPanel>
-          <ActionPanel.Item title={"Pause"} onAction={() => onPause(slot)} />
-          <ActionPanel.Item title={"Delete"} onAction={() => onDelete(slot)} />
+          <ActionPanel.Item title={"Pause"} onAction={() => onPause(slot, setState)} />
+          <ActionPanel.Item title={"Delete"} onAction={() => onDelete(slot, setState)} />
         </ActionPanel>
       );
 
@@ -80,8 +81,8 @@ function SlotListItem(props: { slot: QueueSlot }) {
 
       actions = (
         <ActionPanel>
-          <ActionPanel.Item title={"Resume"} onAction={() => onResume(slot)} />
-          <ActionPanel.Item title={"Delete"} onAction={() => onDelete(slot)} />
+          <ActionPanel.Item title={"Resume"} onAction={() => onResume(slot, setState)} />
+          <ActionPanel.Item title={"Delete"} onAction={() => onDelete(slot, setState)} />
         </ActionPanel>
       );
 
@@ -90,7 +91,7 @@ function SlotListItem(props: { slot: QueueSlot }) {
     default:
       actions = (
         <ActionPanel>
-          <ActionPanel.Item title={"Delete"} onAction={() => onDelete(slot)} />
+          <ActionPanel.Item title={"Delete"} onAction={() => onDelete(slot, setState)} />
         </ActionPanel>
       );
 
@@ -119,13 +120,18 @@ function SlotListItem(props: { slot: QueueSlot }) {
   );
 }
 
-async function onDelete(slot: QueueSlot) {
-  console.log("Delete slot");
-
+async function onDelete(slot: QueueSlot, setState: any) {
   let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
 
   try {
     const results = (await client.jobDelete(slot.nzo_id)) as Results;
+
+    const slots = await fetchSlots();
+    setState((oldState: any) => ({
+      ...oldState,
+      slots: slots,
+    }));
+
     showToast(ToastStyle.Success, "Deleted job");
   } catch (error) {
     console.error(error);
@@ -133,13 +139,18 @@ async function onDelete(slot: QueueSlot) {
   }
 }
 
-async function onPause(slot: QueueSlot) {
-  console.log("Pause slot");
-
+async function onPause(slot: QueueSlot, setState: any) {
   let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
 
   try {
     const results = (await client.jobPause(slot.nzo_id)) as Results;
+
+    const slots = await fetchSlots();
+    setState((oldState: any) => ({
+      ...oldState,
+      slots: slots,
+    }));
+
     showToast(ToastStyle.Success, "Paused job");
   } catch (error) {
     console.error(error);
@@ -147,13 +158,18 @@ async function onPause(slot: QueueSlot) {
   }
 }
 
-async function onResume(slot: QueueSlot) {
-  console.log("Resume slot");
-
+async function onResume(slot: QueueSlot, setState: any) {
   let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
 
   try {
     const results = (await client.jobResume(slot.nzo_id)) as Results;
+
+    const slots = await fetchSlots();
+    setState((oldState: any) => ({
+      ...oldState,
+      slots: slots,
+    }));
+
     showToast(ToastStyle.Success, "Resumed job");
   } catch (error) {
     console.error(error);
