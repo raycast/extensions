@@ -52,7 +52,7 @@ function SlotListItem(props: { slot: QueueSlot }) {
 
   switch (slot.status) {
     case "Paused":
-      icon = Icon.ChevronDown;
+      icon = { source: { light: "pause-light.png", dark: "pause-dark.png" } };
 
       actions = (
         <ActionPanel>
@@ -64,7 +64,7 @@ function SlotListItem(props: { slot: QueueSlot }) {
       break;
 
     case "Downloading":
-      icon = Icon.ChevronUp;
+      icon = { source: { light: "play-light.png", dark: "play-dark.png" } };
 
       actions = (
         <ActionPanel>
@@ -76,7 +76,7 @@ function SlotListItem(props: { slot: QueueSlot }) {
       break;
 
     case "Queued":
-      icon = Icon.Dot;
+      icon = { source: { light: "hourglass-light.png", dark: "hourglass-dark.png" } };
 
       actions = (
         <ActionPanel>
