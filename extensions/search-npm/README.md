@@ -12,7 +12,7 @@ Raycast extension to search for npm packages using [npms.io](https://npms.io)
 
   <p>
     <a href="https://www.raycast.com/mrmartineau/search-npm">
-      <img src="https://img.shields.io/badge/Raycast-store-red.svg"
+      <img src="https://img.shields.io/badge/Raycast-Store-red.svg"
         alt="Find this extension on the Raycast store"
       />
     </a>
@@ -34,23 +34,39 @@ Raycast extension to search for npm packages using [npms.io](https://npms.io)
         alt="Follow @MrMartineau"
       />
     </a>
-    <a href="https://open.vscode.dev/organization/repository">
-      <img
-        src="https://open.vscode.dev/badges/open-in-vscode.svg"
-        alt="Open in Visual Studio Code"
+    <a href="https://github.dev/mrmartineau/raycast-extensions">
+      <img src="https://img.shields.io/badge/Open_in-GitHub.dev-red.svg"
+        alt="Open in GitHub.dev"
       />
     </a>
   </p>
 </div>
 
-## Features
+### Actions for each search result
 
-- search npm packages using [npms.io](https://npms.io)
-- hit <kbd>ENTER</kbd> to view the package's homepage
-- view the package's [bundlephobia.com](https://bundlephobia.com) cost. hit <kbd>⌘</kbd> <kbd>ENTER</kbd>
-- view the package's README in Raycast
-- view the package's Snyk vulnerability report
-- view the package source code on GitHub.dev & CodeSandbox
+#### Links
+
+- open the package's repository (if it is known)
+- open the package's homepage (if it is known)
+- open the package's npm page
+- open a npms.io search results page based on the package name
+
+#### Info
+
+- view the package's README in a Raycast detail view
+- view the package's bundle cost on [bundlephobia.com](https://bundlephobia.com). hit <kbd>cmd + shift + enter</kbd>
+- view the package's [Snyk](https://snyk.io) vulnerability report
+- view the package source code on [GitHub.dev](https://github.dev) & [CodeSandbox](https://codesandbox.io)
+
+#### Copy
+
 - copy yarn/npm install commands to clipboard
+  - copy install command for preferred package manager: <kbd>cmd + shift + c</kbd>
+  - copy install command for alternate package manager: <kbd>cmd< + opt + c</kbd>
+- copy package name to clipboard - <kbd>cmd + c</kbd>
 
-https://user-images.githubusercontent.com/64883/137721894-8860d0f6-73c9-4654-b232-96daae47235b.mp4
+### Preferences
+
+- choose your preferred npm registry. `yarn` or `npm`
+
+https://user-images.githubusercontent.com/64883/139598309-f47e1478-5f4e-44f6-bbea-e33a3b2f988b.mp4
