@@ -1,0 +1,39 @@
+{
+  "name": "have-a-cookie",
+  "title": "Have a Cookie",
+  "description": "Retrieves any cookie from Google Chrome.",
+  "icon": "command-icon.png",
+  "author": "HenriChabrand",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Cookies",
+      "subtitle": "Google Chrome",
+      "description": "Search cookie from Google Chrome.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.2",
+    "int": "^0.2.0",
+    "keychain": "^1.3.0",
+    "request": "^2.88.0",
+    "tldjs": "^1.5.1",
+    "tough-cookie": "^2.3.4"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
