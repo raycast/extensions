@@ -1,5 +1,4 @@
 import { showToast, ToastStyle, List } from "@raycast/api";
-import { useState } from "react";
 import { getErrorMessage } from "../lib/utils";
 import { getPlaylistVideos, useRefresher, Video } from "../lib/youtubeapi";
 import { VideoListItem } from "./video";
