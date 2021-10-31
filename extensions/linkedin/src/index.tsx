@@ -284,12 +284,17 @@ function useLinkedInSearch(query: string | undefined): LinkedInSearch {
 
             setError(undefined)
 
+            if(!LINKEDIN_COOKIE || !LINKEDIN_CSRF_TOKEN){
+              setError('Cookie not set')
+              return
+            }
+
             try {
               const response = await fetch("https://www.linkedin.com/voyager/api/voyagerSearchDashTypeahead?decorationId=com.linkedin.voyager.dash.deco.search.typeahead.GlobalTypeaheadCollection-27&q=globalTypeahead&query="+query, {
                 method: 'get',
                 headers: {
-                  'Cookie': (LINKEDIN_COOKIE ? LINKEDIN_COOKIE : ''),
-                  'csrf-token': (LINKEDIN_CSRF_TOKEN ? LINKEDIN_CSRF_TOKEN : ''),
+                  'Cookie': LINKEDIN_COOKIE,
+                  'csrf-token': LINKEDIN_CSRF_TOKEN,
                   'x-restli-protocol-version': '2.0.0'
                 }
               });
@@ -355,6 +360,11 @@ function useLinkedInProfile(searchId: string, searchPos: number, query: string):
             if (cancel) { return }
 
             setError(undefined)
+
+            if(!LINKEDIN_COOKIE || !LINKEDIN_CSRF_TOKEN){
+              setError('Cookie not set')
+              return
+            }
 
             try {
               const response = await fetch("https://www.linkedin.com/voyager/api/search/dash/clusters?decorationId=com.linkedin.voyager.dash.deco.search.SearchClusterCollection-126&origin=RICH_QUERY_SUGGESTION&q=all&query=(keywords:"+encodeURIComponent(query)+",flagshipSearchIntent:SEARCH_SRP,queryParameters:(position:List("+searchPos+"),resultType:List(ALL),searchId:List("+searchId+")),includeFiltersInResponse:false)&start=0", {
