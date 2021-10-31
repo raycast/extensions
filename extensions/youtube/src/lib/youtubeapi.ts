@@ -84,6 +84,10 @@ export function useRefresher<T>(fn: (updateInline: boolean) => Promise<T>, deps?
     return { data, error, isLoading, fetcher };
 }
 
+export interface ChannelRelatedPlaylists {
+    uploads?: string
+}
+
 export interface VideoStatistics {
     commentCount: string,
     dislikeCount: string,
@@ -114,7 +118,8 @@ export interface Channel {
     description?: string,
     publishedAt: string,
     thumbnails: Thumbnails,
-    statistics?: ChannelStatistics
+    statistics?: ChannelStatistics,
+    relatedPlaylists?: ChannelRelatedPlaylists
 }
 
 export interface Video {
@@ -126,6 +131,36 @@ export interface Video {
     statistics?: VideoStatistics,
     channelId: string,
     channelTitle: string
+}
+
+async function fetchAndInjectVideoStats(videos: Video[]) {
+    const videoIds: string[] = videos.map(v => v.id);
+    if (videoIds) {
+        const statsData = await youtubeClient.videos.list({ id: videoIds, part: ["statistics"], maxResults: videoIds.length });
+        const statsItems = statsData.data.items;
+        if (statsItems) {
+            for (const s of statsItems) {
+                const si = s.statistics;
+                if (si) {
+                    const stats: VideoStatistics = {
+                        commentCount: si.commentCount || "0",
+                        dislikeCount: si.dislikeCount || "0",
+                        favoriteCount: si.favoriteCount || "0",
+                        likeCount: si.likeCount || "0",
+                        viewCount: si.viewCount || "0"
+                    };
+                    if (s.id) {
+                        const el = videos.find(x => x.id === s.id);
+                        if (el) {
+                            el.statistics = stats;
+                        }
+                    }
+                }
+            }
+        } else {
+            throw Error("could not fetch stats for videos");
+        }
+    }
 }
 
 async function search(query: string, type: SearchType, channedId?: string | undefined): Promise<GaxiosResponse<youtube_v3.Schema$SearchListResponse>> {
@@ -142,13 +177,11 @@ async function search(query: string, type: SearchType, channedId?: string | unde
 export async function searchVideos(query: string, channedId?: string | undefined): Promise<Video[]> {
     const data = await search(query, SearchType.video, channedId)
     const items = data?.data.items;
-    const videoIds: string[] = [];
     const result: Video[] = []
     if (items) {
         for (const r of items) {
             const vid = r.id?.videoId;
             if (vid) {
-                videoIds.push(vid);
                 const v: Video = {
                     id: vid,
                     title: r.snippet?.title || "?",
@@ -169,31 +202,7 @@ export async function searchVideos(query: string, channedId?: string | undefined
             }
         }
     }
-    if (videoIds) {
-        // get stats
-        const statsData = await youtubeClient.videos.list({ id: videoIds, part: ["statistics"], maxResults: videoIds.length });
-        const statsItems = statsData.data.items;
-        if (statsItems) {
-            for (const s of statsItems) {
-                const si = s.statistics;
-                if (si) {
-                    const stats: VideoStatistics = {
-                        commentCount: si.commentCount || "0",
-                        dislikeCount: si.dislikeCount || "0",
-                        favoriteCount: si.favoriteCount || "0",
-                        likeCount: si.likeCount || "0",
-                        viewCount: si.viewCount || "0"
-                    };
-                    if (s.id) {
-                        const el = result.find(x => x.id === s.id);
-                        if (el) {
-                            el.statistics = stats;
-                        }
-                    }
-                }
-            }
-        }
-    }
+    await fetchAndInjectVideoStats(result);
     return result;
 }
 
@@ -227,7 +236,7 @@ export async function searchChannels(query: string): Promise<Channel[]> {
     }
     if (channelIds) {
         // get stats
-        const statsData = await youtubeClient.channels.list({ id: channelIds, part: ["statistics"], maxResults: channelIds.length });
+        const statsData = await youtubeClient.channels.list({ id: channelIds, part: ["statistics", "contentDetails"], maxResults: channelIds.length });
         const statsItems = statsData.data.items;
         if (statsItems) {
             for (const s of statsItems) {
@@ -243,6 +252,12 @@ export async function searchChannels(query: string): Promise<Channel[]> {
                         const el = result.find(x => x.id === s.id);
                         if (el) {
                             el.statistics = stats;
+                            const rps = s.contentDetails?.relatedPlaylists;
+                            if (rps) {
+                                el.relatedPlaylists = {
+                                    uploads: rps.uploads
+                                }
+                            }
                         }
                     }
                 }
@@ -255,7 +270,7 @@ export async function searchChannels(query: string): Promise<Channel[]> {
 export async function getChannel(channelId: string): Promise<Channel | undefined> {
     let result: Channel | undefined;
     if (channelId) {
-        const data = await youtubeClient.channels.list({ id: [channelId], part: ["statistics", "snippet"], maxResults: 1 });
+        const data = await youtubeClient.channels.list({ id: [channelId], part: ["statistics", "snippet", "contentDetails"], maxResults: 1 });
         const items = data.data.items;
         if (items && items.length > 0) {
             const item = items[0];
@@ -287,6 +302,50 @@ export async function getChannel(channelId: string): Promise<Channel | undefined
                 videoCount: sd.videoCount || "0",
                 viewCount: sd.viewCount || "0"
             };
+            const rps = item.contentDetails?.relatedPlaylists;
+            if (rps) {
+                result.relatedPlaylists = {
+                    uploads: rps.uploads
+                }
+            }
+        }
+    }
+    return result;
+}
+
+export async function getPlaylistVideos(playlistId: string): Promise<Video[] | undefined> {
+    let result: Video[] | undefined;
+
+    if (playlistId) {
+        const data = await youtubeClient.playlistItems.list({ playlistId: playlistId, part: ["snippet", "contentDetails"], maxResults: 50 });
+        const items = data.data.items;
+        if (items) {
+            result = [];
+            for (const item of items) {
+                const sn = item.snippet;
+                if (!sn) {
+                    throw Error(`Could not get snippet of playlist ${playlistId}`);
+                }
+                const vid = item.contentDetails?.videoId;
+                const v: Video = {
+                    id: vid || "",
+                    title: sn.title || "?",
+                    description: sn.description || undefined,
+                    publishedAt: sn.publishedAt || "?",
+                    channelId: sn.channelId || "",
+                    channelTitle: sn.channelTitle || "?",
+                    thumbnails: {
+                        default: {
+                            url: sn.thumbnails?.default?.url || undefined
+                        },
+                        high: {
+                            url: sn.thumbnails?.high?.url || undefined
+                        }
+                    }
+                };
+                result.push(v);
+            }
+            await fetchAndInjectVideoStats(result);
         }
     }
     return result;

@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, OpenInBrowserAction, PushAction } from "@raycast/api";
+import { ActionPanel, Color, Detail, Icon, List, OpenInBrowserAction, PushAction } from "@raycast/api";
 import { compactNumberFormat } from "../lib/utils";
 import { Video } from "../lib/youtubeapi";
 import { OpenChannelInBrowser } from "./actions";
@@ -15,7 +15,14 @@ function OpenVideoInBrowser(props: { videoId: string | null | undefined }): JSX.
 function ShowChannelAction(props: { channelId: string | undefined }): JSX.Element | null {
   const cid = props.channelId;
   if (cid) {
-    return <PushAction title="Show Channel" target={<ChannelListItemDetailFetched channelId={cid} />} />;
+    return (
+      <PushAction
+        title="Show Channel"
+        target={<ChannelListItemDetailFetched channelId={cid} />}
+        icon={{ source: Icon.Person, tintColor: Color.PrimaryText }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      />
+    );
   }
   return null;
 }
@@ -27,9 +34,9 @@ export function VideoListItemDetail(props: { video: Video }): JSX.Element {
   const title = video.title;
   const thumbnailUrl = video.thumbnails?.high?.url || undefined;
   const thumbnailMd = (thumbnailUrl ? `![thumbnail](${thumbnailUrl})` : "") + "\n\n";
-  const publishedAt = video.publishedAt;
+  const publishedAt = new Date(video.publishedAt);
   const channel = video.channelTitle;
-  const meta: string[] = [`Channel: ${channel}  `, `Published at: ${publishedAt}`];
+  const meta: string[] = [`- Channel: ${channel}  `, `- Published at: ${publishedAt.toLocaleDateString("en-US")}`];
   let md = `# ${title}\n\n${thumbnailMd}${desc}\n\n${meta.join("\n")}`;
   return (
     <Detail
@@ -66,7 +73,11 @@ export function VideoListItem(props: { video: Video }): JSX.Element {
       accessoryTitle={parts.join(" ")}
       actions={
         <ActionPanel>
-          <PushAction title="Show Details" target={<VideoListItemDetail video={video} />} />
+          <PushAction
+            title="Show Details"
+            target={<VideoListItemDetail video={video} />}
+            icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
+          />
           <OpenVideoInBrowser videoId={videoId} />
           <ShowChannelAction channelId={video.channelId} />
         </ActionPanel>

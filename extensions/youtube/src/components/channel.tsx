@@ -1,7 +1,7 @@
-import { ActionPanel, Detail, List, PushAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Color, Detail, Icon, ImageMask, List, PushAction, showToast, ToastStyle } from "@raycast/api";
 import { compactNumberFormat, getErrorMessage } from "../lib/utils";
 import { Channel, getChannel, useRefresher } from "../lib/youtubeapi";
-import { OpenChannelInBrowser, SearchChannelVideosAction } from "./actions";
+import { OpenChannelInBrowser, SearchChannelVideosAction, ShowRecentPlaylistVideosAction } from "./actions";
 
 export function ChannelListItemDetail(props: {
   channel: Channel | undefined;
@@ -14,7 +14,7 @@ export function ChannelListItemDetail(props: {
     channelId = channel.id;
     const desc = channel.description || "<no description>";
     const title = channel.title;
-    const thumbnailUrl = channel.thumbnails?.high?.url || undefined;
+    const thumbnailUrl = channel.thumbnails?.default?.url || undefined;
     const publishedAt = new Date(channel.publishedAt);
     mdParts = [`# Channel: ${title}`];
     if (thumbnailUrl) {
@@ -40,6 +40,10 @@ export function ChannelListItemDetail(props: {
       markdown={md}
       actions={
         <ActionPanel>
+          <ShowRecentPlaylistVideosAction
+            title="Show Recent Channel Videos"
+            playlistId={channel?.relatedPlaylists?.uploads}
+          />
           <SearchChannelVideosAction channelId={channelId} />
           <OpenChannelInBrowser channelId={channelId} />
         </ActionPanel>
@@ -61,12 +65,20 @@ export function ChannelListItem(props: { channel: Channel }): JSX.Element {
     <List.Item
       key={channelId}
       title={channel.title}
-      icon={{ source: thumbnail }}
+      icon={{ source: thumbnail, mask: ImageMask.Circle }}
       accessoryTitle={parts.join(" ")}
       actions={
         <ActionPanel>
-          <PushAction title="Show Details" target={<ChannelListItemDetail channel={channel} />} />
+          <PushAction
+            title="Show Details"
+            target={<ChannelListItemDetail channel={channel} />}
+            icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
+          />
           <SearchChannelVideosAction channelId={channelId} />
+          <ShowRecentPlaylistVideosAction
+            title="Show Recent Channel Videos"
+            playlistId={channel.relatedPlaylists?.uploads}
+          />
           <OpenChannelInBrowser channelId={channelId} />
         </ActionPanel>
       }

@@ -9,14 +9,14 @@
     {
       "name": "search-videos",
       "title": "Search Videos",
-      "subtitle": "",
+      "subtitle": "YouTube",
       "description": "Search YouTube Videos",
       "mode": "view"
     },
     {
       "name": "search-channel",
       "title": "Search Channels",
-      "subtitle": "",
+      "subtitle": "YouTube",
       "description": "Search YouTube Channels",
       "mode": "view"
     }
