@@ -38,7 +38,7 @@ export interface EnvironmentVariable {
   target: string[]
   gitBranch: string
   configurationId: string
-  updatedAt: number
+  createdAt: number
   updatedAt: number
 }
 
@@ -158,7 +158,7 @@ async function rawFetchProjectEnvironmentVariables(
 ): Promise<EnvironmentVariable[]> {
   dayjs.extend(relativeTime)
   try {
-    const environmentVariables: EnvironmentVariables[] = []
+    const environmentVariables: EnvironmentVariable[] = []
     const response = await fetch(
       apiURL + `v8/projects/${projectId}/env`,
       {
@@ -182,7 +182,7 @@ export async function updateEnvironmentVariable(
   envId: string,
   envKey: string,
   envValue: string
-): Promise<EnvironmentVariable[]> {
+): Promise<EnvironmentVariable> {
   const environmentVariable: EnvironmentVariable = await rawUpdateProjectEnvironmentVariable(projectId, envId, envKey, envValue)
   return environmentVariable;
 }
@@ -193,7 +193,7 @@ async function rawUpdateProjectEnvironmentVariable(
   envId: string,
   envKey: string,
   envValue: string
-): Promise<EnvironmentVariable[]> {
+): Promise<EnvironmentVariable> {
   dayjs.extend(relativeTime)
   try {
     const response = await fetch(
