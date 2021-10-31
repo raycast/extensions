@@ -58,8 +58,8 @@ function getProjectsGroupedByTagAsElements(projectEntries: ProjectEntry[]): Reac
   projectsGrouped.forEach((value, key) => {
     elements.push(
       <List.Section key={key} title={key}>
-        {value?.map((project) => (
-          <ProjectListItem key={project.rootPath} {...project} />
+        {value?.map((project, index) => (
+          <ProjectListItem key={project.rootPath + index} {...project} />
         ))}
       </List.Section>
     );
