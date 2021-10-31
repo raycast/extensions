@@ -14,17 +14,17 @@ import {
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 
-import { getCookies } from "./chrome-cookies-secure";
-
+const chrome = require("./chrome-cookies-secure");
 
 interface LinkedInSearch {
   searchResults?: SearchResult[]
   error?: string
   isLoading: boolean
+  searchId?: string
 }
 
 interface LinkedInProfile {
-  profile?: Record<striing, any>
+  profile?: Record<string, any>
   error?: string
   isLoading: boolean
 }
@@ -40,9 +40,9 @@ type SearchResult = {
   img: string;
 };
 
-var LINKEDIN_COOKIE;
-var LINKEDIN_CSRF_TOKEN;
-var LINKEDIN_COOKIE_EXPIRED;
+var LINKEDIN_COOKIE: string | undefined;
+var LINKEDIN_CSRF_TOKEN:  string | undefined;
+var LINKEDIN_COOKIE_EXPIRED:  string | undefined;
 
 export default function SearchResultList() {
   const [searchText, setSearchText] = useState<string>()
@@ -52,7 +52,7 @@ export default function SearchResultList() {
     showToast(ToastStyle.Failure, "An Error Occurred", error.toString())
   }
 
-  getCookies('https://www.linkedin.com/', function(err, cookies) {
+  chrome.getCookies('https://www.linkedin.com/', function(err: string, cookies: Record<string,string>[]) {
 
     if(!err && cookies && cookies[0]){
       LINKEDIN_COOKIE = '';
@@ -122,7 +122,7 @@ export default function SearchResultList() {
 }
 
 
-export function ProfileDetail(props: { searchId: string, searchPos: number, query: string | undefined }) {
+export function ProfileDetail(props: { searchId: string, searchPos: number, query: string }) {
   const searchId = props.searchId;
   const searchPos = props.searchPos;
   const query = props.query;
@@ -156,7 +156,7 @@ export function ProfileDetail(props: { searchId: string, searchPos: number, quer
       }
 
       if(profile.contactInfo.websites && profile.contactInfo.websites[0]){
-        profile.contactInfo.websites.forEach(function(website){
+        profile.contactInfo.websites.forEach(function(website: string){
           profileMarkdown+='\n 🔗 : ['+website.url+']('+website.url+')';
           if(website.type && website.type['com.linkedin.voyager.identity.profile.StandardWebsite'] && website.type['com.linkedin.voyager.identity.profile.StandardWebsite'].category){
               profileMarkdown+=' ('+website.type['com.linkedin.voyager.identity.profile.StandardWebsite'].category+')';
@@ -165,7 +165,7 @@ export function ProfileDetail(props: { searchId: string, searchPos: number, quer
       }
 
       if(profile.contactInfo.twitterHandles && profile.contactInfo.twitterHandles[0]){
-        profile.contactInfo.twitterHandles.forEach(function(twitterHandle){
+        profile.contactInfo.twitterHandles.forEach(function(twitterHandle: string){
           profileMarkdown+='\n 🐦 : [@'+twitterHandle.name+'](https://twitter.com/'+twitterHandle.name+') \n';
         })
       }
