@@ -1,7 +1,7 @@
 import { ActionPanel, PushAction, CopyToClipboardAction, PasteAction, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
 import { useState, useEffect } from "react";
 
-import { getCookiesPromised, getDomainsPromised } from "./util/chrome-cookie-helper";
+const chrome = require("./util/chrome-cookie-helper");
 
 export default function DomainList() {
   const { isLoading, error, domains } = useDomainSearch()
@@ -10,7 +10,7 @@ export default function DomainList() {
     <List 
       isLoading={isLoading} 
       searchBarPlaceholder="Filter by domain">
-      {domains.map((domain, i) => (
+      {domains?.map((domain, i) => (
         <DomainListItem key={"domain-"+i} domain={domain} />
       ))}
     </List>
@@ -23,7 +23,7 @@ export function CookieList(props: { domain_name: string }) {
   const { isLoading, error, cookies } = useCookieSearch(domain_name)
 
   var requestHeaderCookie = '';
-  cookies.forEach(function (cookie){
+  cookies?.forEach(function (cookie){
     requestHeaderCookie+=cookie.name+'='+cookie.value+';'
   })
 
@@ -46,8 +46,8 @@ export function CookieList(props: { domain_name: string }) {
             }
             />
         </List.Section>
-        <List.Section title="Cookies" subtitle={cookies.length.toString()}>
-          {cookies.map((cookie, i) => (
+        <List.Section title="Cookies" subtitle={cookies?.length.toString()}>
+          {cookies?.map((cookie, i) => (
             <CookieListItem key={"cookie-"+i} cookie={cookie} />
           ))}
         </List.Section>
@@ -93,7 +93,7 @@ function CookieListItem(props: { cookie: Cookie }) {
             <CopyToClipboardAction title="Copy Cookie Name" content={cookie.name} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <PasteAction shortcut={{ modifiers: ["cmd"], key: "pà" }} title="Paste Cookie Value" content={cookie.value} />
+            <PasteAction shortcut={{ modifiers: ["cmd"], key: "p" }} title="Paste Cookie Value" content={cookie.value} />
             <PasteAction title="Paste Cookie Name" content={cookie.name} />
           </ActionPanel.Section>               
         </ActionPanel>
@@ -120,7 +120,7 @@ function useCookieSearch(domain_name: string): CookieSearch {
             try {
               
 
-              const {err, cookies} = await getCookiesPromised('https://'+domain_name)
+              const {err, cookies} = await chrome.getCookiesPromised('https://'+domain_name)
               
               if(err){
                 setError(err as string)
@@ -154,7 +154,7 @@ function useCookieSearch(domain_name: string): CookieSearch {
     return { cookies, error, isLoading }
 }
 
-function useDomainSearch(searchText: string | undefined): DomainSearch {
+function useDomainSearch(searchText?: string | undefined): DomainSearch {
     const [domains, setDomains] = useState<Domain[]>([])
     const [error, setError] = useState<string>()
     const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -169,7 +169,7 @@ function useDomainSearch(searchText: string | undefined): DomainSearch {
 
             try {
               
-              const {err, domains} = await getDomainsPromised((searchText ? searchText : ''))
+              const {err, domains} = await chrome.getDomainsPromised((searchText ? searchText : ''))
          
               if(err){
                 setError(err as string)
