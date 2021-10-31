@@ -9,10 +9,19 @@ export function ChannelListItemDetail(props: { channel: Channel }): JSX.Element 
   const desc = channel.description || "<no description>";
   const title = channel.title;
   const thumbnailUrl = channel.thumbnails?.high?.url || undefined;
-  const thumbnailMd = (thumbnailUrl ? `![thumbnail](${thumbnailUrl})` : "") + "\n\n";
-  const publishedAt = channel.publishedAt;
-  const meta: string[] = [`Channel: ${channel.title}  `, `Published at: ${publishedAt}`];
-  let md = `# ${title}\n\n${thumbnailMd}${desc}\n\n${meta.join("\n")}`;
+  const publishedAt = new Date(channel.publishedAt);
+  let mdParts = [`# Channel: ${title}`];
+  if (thumbnailUrl) {
+    mdParts.push(`![thumbnail](${thumbnailUrl})`);
+  }
+  const meta: string[] = [`- Channelname: ${channel.title}  `, `- Published at: ${publishedAt.toLocaleDateString("en-US")}`];
+  mdParts = mdParts.concat([desc, meta.join("\n")]);
+  if (channel.statistics) {
+    const cs = channel.statistics;
+    const stats = [`- Videos: ${cs.videoCount}`, `- Views: ${compactNumberFormat(parseInt(cs.viewCount))}`];
+    mdParts.push(`## Statistics\n\n ${stats.join("\n")}`);
+  }
+  const md = mdParts.join("\n\n");
   return (
     <Detail
       markdown={md}
