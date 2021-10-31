@@ -2,6 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getErrorMessage } from "./utils";
 import { youtube, youtube_v3 } from "@googleapis/youtube";
+import { GaxiosResponse } from "googleapis-common";
 
 function createClient(): youtube_v3.Youtube {
     const pref = getPreferenceValues();
@@ -14,8 +15,7 @@ export const youtubeClient = createClient();
 
 export enum SearchType {
     channel = "channel",
-    video = "video",
-    any = ""
+    video = "video"
 }
 
 export interface Fetcher {
@@ -82,4 +82,171 @@ export function useRefresher<T>(fn: (updateInline: boolean) => Promise<T>, deps?
     }, depsAll);
 
     return { data, error, isLoading, fetcher };
+}
+
+export interface VideoStatistics {
+    commentCount: string,
+    dislikeCount: string,
+    favoriteCount: string,
+    likeCount: string
+    viewCount: string
+}
+
+export interface ChannelStatistics {
+    commentCount: string,
+    subscriberCount: string,
+    videoCount: string,
+    viewCount: string
+}
+
+export interface Thumbnail {
+    url?: string
+}
+
+export interface Thumbnails {
+    default?: Thumbnail,
+    high?: Thumbnail
+}
+
+export interface Channel {
+    id: string,
+    title: string,
+    description?: string,
+    publishedAt: string,
+    thumbnails: Thumbnails,
+    statistics?: ChannelStatistics
+}
+
+export interface Video {
+    id: string,
+    title: string,
+    description?: string,
+    publishedAt: string,
+    thumbnails: Thumbnails,
+    statistics?: VideoStatistics,
+    channelId: string,
+    channelTitle: string
+}
+
+async function search(query: string, type: SearchType): Promise<GaxiosResponse<youtube_v3.Schema$SearchListResponse>> {
+    const data = await youtubeClient.search.list({
+        q: query,
+        part: ["id", "snippet"],
+        type: [type],
+        maxResults: 50,
+    });
+    return data;
+}
+
+export async function searchVideos(query: string): Promise<Video[]> {
+    const data = await search(query, SearchType.video)
+    const items = data?.data.items;
+    const videoIds: string[] = [];
+    const result: Video[] = []
+    if (items) {
+        for (const r of items) {
+            const vid = r.id?.videoId;
+            if (vid) {
+                videoIds.push(vid);
+                const v: Video = {
+                    id: vid,
+                    title: r.snippet?.title || "?",
+                    description: r.snippet?.description || undefined,
+                    publishedAt: r.snippet?.publishedAt || "?",
+                    channelId: r.snippet?.channelId || "",
+                    channelTitle: r.snippet?.channelTitle || "?",
+                    thumbnails: {
+                        default: {
+                            url: r.snippet?.thumbnails?.default?.url || undefined
+                        },
+                        high: {
+                            url: r.snippet?.thumbnails?.high?.url || undefined
+                        }
+                    }
+                };
+                result.push(v);
+            }
+        }
+    }
+    if (videoIds) {
+        // get stats
+        const statsData = await youtubeClient.videos.list({ id: videoIds, part: ["statistics"], maxResults: videoIds.length });
+        const statsItems = statsData.data.items;
+        if (statsItems) {
+            for (const s of statsItems) {
+                const si = s.statistics;
+                if (si) {
+                    const stats: VideoStatistics = {
+                        commentCount: si.commentCount || "0",
+                        dislikeCount: si.dislikeCount || "0",
+                        favoriteCount: si.favoriteCount || "0",
+                        likeCount: si.likeCount || "0",
+                        viewCount: si.viewCount || "0"
+                    };
+                    if (s.id) {
+                        const el = result.find(x => x.id === s.id);
+                        if (el) {
+                            el.statistics = stats;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
+
+export async function searchChannels(query: string): Promise<Channel[]> {
+    const data = await search(query, SearchType.channel)
+    const items = data?.data.items;
+    const channelIds: string[] = [];
+    const result: Channel[] = []
+    if (items) {
+        for (const r of items) {
+            const cid = r.id?.channelId;
+            if (cid) {
+                channelIds.push(cid);
+                const v: Channel = {
+                    id: cid,
+                    title: r.snippet?.channelTitle || "?",
+                    description: r.snippet?.description || undefined,
+                    publishedAt: r.snippet?.publishedAt || "?",
+                    thumbnails: {
+                        default: {
+                            url: r.snippet?.thumbnails?.default?.url || undefined
+                        },
+                        high: {
+                            url: r.snippet?.thumbnails?.high?.url || undefined
+                        }
+                    }
+                };
+                result.push(v);
+            }
+        }
+    }
+    if (channelIds) {
+        // get stats
+        const statsData = await youtubeClient.channels.list({ id: channelIds, part: ["statistics"], maxResults: channelIds.length });
+        const statsItems = statsData.data.items;
+        if (statsItems) {
+            for (const s of statsItems) {
+                const si = s.statistics;
+                if (si) {
+                    const stats: ChannelStatistics = {
+                        commentCount: si.commentCount || "0",
+                        subscriberCount: si.subscriberCount || "0",
+                        videoCount: si.videoCount || "0",
+                        viewCount: si.viewCount || "0"
+                    };
+                    if (s.id) {
+                        const el = result.find(x => x.id === s.id);
+                        if (el) {
+                            el.statistics = stats;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return result;
 }

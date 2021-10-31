@@ -1,6 +1,5 @@
-import VideoSearchList from "./components/search";
-import { SearchType } from "./lib/youtubeapi";
+import { SearchChannelList } from "./components/channel_search";
 
-export default function SearchChannelList(): JSX.Element {
-  return <VideoSearchList type={SearchType.channel} />;
+export default function SearchChannel(): JSX.Element {
+  return <SearchChannelList />;
 }
