@@ -3,6 +3,7 @@ import {
   ActionPanel,
   CopyToClipboardAction,
   Detail,
+  getApplications,
   List,
   OpenWithAction,
   popToRoot,
@@ -211,6 +212,19 @@ const fuseRecent = (search: string, recent: Array<recentEntry>, fused: Fuse<rece
   return fused.search(search).map(({item}) => item)
 };
 
+function OpenJetBrainsToolBox() {
+  return <ActionPanel.Item title="Launch JetBrains Toolbox" onAction={() => {
+    getApplications().then(apps => {
+      const jb = apps.find(app => app.name.match('JetBrains Toolbox'))
+      if (jb) {
+        exec(`open -a "${jb.name}"`, (err) => err && showToast(ToastStyle.Failure, err?.message))
+      } else {
+        showToast(ToastStyle.Failure, 'Unable to find JetBrains Toolbox App')
+      }
+    })
+  }}/>;
+}
+
 function ProjectList() {
   const [{recent, tools, keys}, setRecent] = useState<state>({recent: null, tools: null, keys: []});
   const [search, setSearch] = useState<string>("");
@@ -256,9 +270,17 @@ function ProjectList() {
   if (recent === null || tools === null) {
     return <Detail isLoading/>;
   } else if (tools.length === 0) {
+    const message = recent === null
+      ? 'No JetBrains applications found. Please check that you have [JetBrains Toolbox](https://jb.gg/toolbox-app-faq) and at least one IDE installed.'
+      : 'Please enable JetBrains Toolbox CLI tools in order to launch from Raycast. You can find them under:\n\n`Settings` -> `Tools` -> `Generate shell scripts`'
+    const actions = recent === null
+      ? null
+      : <ActionPanel>
+        <OpenJetBrainsToolBox/>
+      </ActionPanel>
     return (
       <Detail
-        markdown="No JetBrains applications found. Please check that you have [JetBrains Toolbox](https://jb.gg/toolbox-app-faq) and at least one IDE installed."/>
+        markdown={message} actions={actions}/>
     );
   } else if (recent.size === 0) {
     return (
