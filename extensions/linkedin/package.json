@@ -14,27 +14,14 @@
       "mode": "view"
     }
   ],
-   "preferences": [
-    {
-      "name": "LINKEDIN_COOKIE",
-      "type": "password",
-      "required": true,
-      "title": "LinkedIn Cookie",
-      "description": "Inspect LinkedIn's network request header to get the 'cookie' in dev console.",
-      "placeholder": "bcookie= -------------"
-    },
-    {
-      "name": "LINKEDIN_CSRF_TOKEN",
-      "type": "password",
-      "required": true,
-      "title": "LinkedIn CSRF Token",
-      "description": "Inspect LinkedIn's network request header to get the 'csrf-token' in dev console.",
-      "placeholder": "ajax: ------------------"
-    }
-  ],
   "dependencies": {
-    "@raycast/api": "^1.25.1",
-    "node-fetch": "^3.0.0"
+    "@raycast/api": "^1.25.2",
+    "node-fetch": "^3.0.0",
+    "int": "^0.2.0",
+    "keychain": "^1.3.0",
+    "request": "^2.88.0",
+    "tldjs": "^1.5.1",
+    "tough-cookie": "^2.3.4"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
