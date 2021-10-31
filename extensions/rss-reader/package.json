@@ -1,26 +1,31 @@
 {
   "name": "rss-reader",
   "title": "RSS Reader",
-  "description": "Browse last news from your favourite source",
+  "description": "Browse latest news from your favourite sources",
   "icon": "command-icon.png",
   "author": "fuksman",
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Read News",
+      "name": "feeds",
+      "title": "View Subscriptions",
       "subtitle": "RSS",
-      "description": "Get the latest from your favourite source",
+      "description": "Manage your favourite sources and read stories",
       "mode": "view"
-    }
-  ],
-  "preferences": [
+    },
     {
-      "name": "feed",
-      "type": "textfield",
-      "required": true,
-      "title": "RSS Feed",
-      "description": "Paste feed URL"
+      "name": "subscription-form",
+      "title": "Add Subscription",
+      "subtitle": "RSS",
+      "description": "Subscribe to a new sources",
+      "mode": "view"
+    },
+    {
+      "name": "stories",
+      "title": "Read All Stories",
+      "subtitle": "RSS",
+      "description": "Get the latest from all your favourite sources at once",
+      "mode": "view"
     }
   ],
   "dependencies": {
