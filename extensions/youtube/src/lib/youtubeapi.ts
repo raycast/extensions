@@ -250,3 +250,43 @@ export async function searchChannels(query: string): Promise<Channel[]> {
     }
     return result;
 }
+
+export async function getChannel(channelId: string): Promise<Channel | undefined> {
+    let result: Channel | undefined;
+    if (channelId) {
+        const data = await youtubeClient.channels.list({ id: [channelId], part: ["statistics", "snippet"], maxResults: 1 });
+        const items = data.data.items;
+        if (items && items.length > 0) {
+            const item = items[0];
+            const sn = item.snippet;
+            if (!sn) {
+                throw Error(`Could not find channel ${channelId}`);
+            }
+            result = {
+                id: channelId,
+                title: sn.title || "?",
+                description: sn.description || undefined,
+                publishedAt: sn.publishedAt || "?",
+                thumbnails: {
+                    default: {
+                        url: sn.thumbnails?.default?.url || undefined
+                    },
+                    high: {
+                        url: sn.thumbnails?.high?.url || undefined
+                    }
+                }
+            };
+            const sd = item.statistics;
+            if (!sd) {
+                throw Error(`Could not get stats of channel ${channelId}`);
+            }
+            result.statistics = {
+                commentCount: sd.commentCount || "0",
+                subscriberCount: sd.subscriberCount || "0",
+                videoCount: sd.videoCount || "0",
+                viewCount: sd.viewCount || "0"
+            };
+        }
+    }
+    return result;
+}

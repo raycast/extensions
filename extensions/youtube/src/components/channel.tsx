@@ -1,29 +1,43 @@
-import { ActionPanel, Detail, List, OpenInBrowserAction, PushAction } from "@raycast/api";
-import { compactNumberFormat } from "../lib/utils";
-import { Channel } from "../lib/youtubeapi";
+import { ActionPanel, Detail, List, OpenInBrowserAction, PushAction, showToast, ToastStyle } from "@raycast/api";
+import { channel } from "diagnostics_channel";
+import { compactNumberFormat, getErrorMessage } from "../lib/utils";
+import { Channel, getChannel, useRefresher } from "../lib/youtubeapi";
 import { OpenChannelInBrowser } from "./actions";
 
-export function ChannelListItemDetail(props: { channel: Channel }): JSX.Element {
+export function ChannelListItemDetail(props: {
+  channel: Channel | undefined;
+  isLoading?: boolean | undefined;
+}): JSX.Element {
   const channel = props.channel;
-  const channelId = channel.id;
-  const desc = channel.description || "<no description>";
-  const title = channel.title;
-  const thumbnailUrl = channel.thumbnails?.high?.url || undefined;
-  const publishedAt = new Date(channel.publishedAt);
-  let mdParts = [`# Channel: ${title}`];
-  if (thumbnailUrl) {
-    mdParts.push(`![thumbnail](${thumbnailUrl})`);
-  }
-  const meta: string[] = [`- Channelname: ${channel.title}  `, `- Published at: ${publishedAt.toLocaleDateString("en-US")}`];
-  mdParts = mdParts.concat([desc, meta.join("\n")]);
-  if (channel.statistics) {
-    const cs = channel.statistics;
-    const stats = [`- Videos: ${cs.videoCount}`, `- Views: ${compactNumberFormat(parseInt(cs.viewCount))}`];
-    mdParts.push(`## Statistics\n\n ${stats.join("\n")}`);
+  let channelId: string | undefined;
+  let mdParts = [];
+  if (channel) {
+    channelId = channel.id;
+    const desc = channel.description || "<no description>";
+    const title = channel.title;
+    const thumbnailUrl = channel.thumbnails?.high?.url || undefined;
+    const publishedAt = new Date(channel.publishedAt);
+    mdParts = [`# Channel: ${title}`];
+    if (thumbnailUrl) {
+      mdParts.push(`![thumbnail](${thumbnailUrl})`);
+    }
+    const meta: string[] = [
+      `- Channelname: ${channel.title}  `,
+      `- Published at: ${publishedAt.toLocaleDateString("en-US")}`,
+    ];
+    mdParts = mdParts.concat([desc, meta.join("\n")]);
+    if (channel.statistics) {
+      const cs = channel.statistics;
+      const stats = [`- Videos: ${cs.videoCount}`, `- Views: ${compactNumberFormat(parseInt(cs.viewCount))}`];
+      mdParts.push(`## Statistics\n\n ${stats.join("\n")}`);
+    }
+  } else {
+    mdParts = ["Error getting channel info"];
   }
   const md = mdParts.join("\n\n");
   return (
     <Detail
+      isLoading={props.isLoading}
       markdown={md}
       actions={
         <ActionPanel>
@@ -57,4 +71,18 @@ export function ChannelListItem(props: { channel: Channel }): JSX.Element {
       }
     />
   );
+}
+
+export function ChannelListItemDetailFetched(props: { channelId: string }): JSX.Element {
+  const channelId = props.channelId;
+  const { data, error, isLoading } = useRefresher<Channel | undefined>(async () => {
+    if (channelId) {
+      return await getChannel(channelId);
+    }
+    return undefined;
+  }, [channelId]);
+  if (error) {
+    showToast(ToastStyle.Failure, "Error fetching channel info", getErrorMessage(error));
+  }
+  return <ChannelListItemDetail channel={data} isLoading={isLoading} />;
 }

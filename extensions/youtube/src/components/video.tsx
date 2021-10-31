@@ -2,11 +2,20 @@ import { ActionPanel, Detail, List, OpenInBrowserAction, PushAction } from "@ray
 import { compactNumberFormat } from "../lib/utils";
 import { Video } from "../lib/youtubeapi";
 import { OpenChannelInBrowser } from "./actions";
+import { ChannelListItemDetailFetched } from "./channel";
 
 function OpenVideoInBrowser(props: { videoId: string | null | undefined }): JSX.Element | null {
   const videoId = props.videoId;
   if (videoId) {
     return <OpenInBrowserAction title="Open Video in Browser" url={`https://youtube.com/watch?v=${videoId}`} />;
+  }
+  return null;
+}
+
+function ShowChannelAction(props: { channelId: string | undefined }): JSX.Element | null {
+  const cid = props.channelId;
+  if (cid) {
+    return <PushAction title="Show Channel" target={<ChannelListItemDetailFetched channelId={cid} />} />;
   }
   return null;
 }
@@ -28,6 +37,7 @@ export function VideoListItemDetail(props: { video: Video }): JSX.Element {
       actions={
         <ActionPanel>
           <OpenVideoInBrowser videoId={videoId} />
+          <ShowChannelAction channelId={video.channelId} />
           <OpenChannelInBrowser channelId={video.channelId} />
         </ActionPanel>
       }
@@ -58,6 +68,7 @@ export function VideoListItem(props: { video: Video }): JSX.Element {
         <ActionPanel>
           <PushAction title="Show Details" target={<VideoListItemDetail video={video} />} />
           <OpenVideoInBrowser videoId={videoId} />
+          <ShowChannelAction channelId={video.channelId} />
         </ActionPanel>
       }
     />
