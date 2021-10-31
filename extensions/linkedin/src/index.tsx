@@ -383,7 +383,7 @@ function useLinkedInProfile(searchId: string, searchPos: number, query: string):
                   { targetKey : "trackingId", sourceKeys : ["featureUnion","heroEntityCard","trackingId"]},
                   { targetKey : "memberRelationshipUrn", sourceKeys : ["featureUnion","heroEntityCard","primaryActions","0","actionDetails","primaryProfileActionV2","primaryAction","connection","memberRelationshipUrn"]}                
                 ] as any
-              })[0] as Record<striing, any>
+              })[0] as Record<string, any>
             
             setProfile(profileResult);
 
