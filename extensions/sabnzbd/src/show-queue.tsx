@@ -6,20 +6,36 @@ import { Client, Queue, QueueSlot, Results } from "sabnzbd-api";
 export default function SlotList() {
   const [state, setState] = useState<{ slots: QueueSlot[] }>({ slots: [] });
 
-  async function fetch() {
-    const slots = await fetchSlots();
+  useEffect(() => {
+    async function fetch() {
+      const slots = await fetchSlots();
+      setState((oldState) => ({
+        ...oldState,
+        slots: slots,
+      }));
+    }
+
+    fetch();
+  }, []);
+
+  const onSearchTextChange = async (text: string) => {
+    let slots = await fetchSlots();
+    slots = slots.filter((slot) => {
+      return slot.filename.includes(text);
+    });
+
     setState((oldState) => ({
       ...oldState,
       slots: slots,
     }));
-  }
-
-  useEffect(() => {
-    fetch();
-  }, []);
+  };
 
   return (
-    <List isLoading={state.slots.length === 0} searchBarPlaceholder="Filter slots by filename...">
+    <List
+      isLoading={state.slots.length === 0}
+      searchBarPlaceholder="Filter slots by filename..."
+      onSearchTextChange={onSearchTextChange}
+    >
       {state.slots.map((slot) => (
         <SlotListItem key={slot.nzo_id} slot={slot} />
       ))}
