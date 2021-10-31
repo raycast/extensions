@@ -45,7 +45,7 @@ var LINKEDIN_CSRF_TOKEN:  string | undefined;
 var LINKEDIN_COOKIE_EXPIRED:  boolean | undefined;
 
 export default function SearchResultList() {
-  const [searchText, setSearchText] = useState<string>()
+  const [searchText, setSearchText] = useState<string>('')
   const { isLoading, error, searchId, searchResults } = useLinkedInSearch(searchText)
 
   if (error) {
@@ -197,7 +197,7 @@ export function ProfileDetail(props: { searchId: string, searchPos: number, quer
 
 
 
-function SearchResultItem(props: { searchResult: SearchResult, searchId: string, searchPos: number, query: string | undefined}) {
+function SearchResultItem(props: { searchResult: SearchResult, searchId: string, searchPos: number, query: string}) {
   const searchResult = props.searchResult;
   const searchId = props.searchId;
   const searchPos = props.searchPos;
@@ -271,8 +271,8 @@ function SearchResultItem(props: { searchResult: SearchResult, searchId: string,
 
 
 function useLinkedInSearch(query: string | undefined): LinkedInSearch {
-    const [searchResults, setSearchResults] = useState<SearchResult[]>()
-    const [searchId, setSearchId] = useState<string>()
+    const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+    const [searchId, setSearchId] = useState<string>('')
     const [error, setError] = useState<string>()
     const [isLoading, setIsLoading] = useState<boolean>(true)
 
@@ -288,8 +288,8 @@ function useLinkedInSearch(query: string | undefined): LinkedInSearch {
               const response = await fetch("https://www.linkedin.com/voyager/api/voyagerSearchDashTypeahead?decorationId=com.linkedin.voyager.dash.deco.search.typeahead.GlobalTypeaheadCollection-27&q=globalTypeahead&query="+query, {
                 method: 'get',
                 headers: {
-                  'Cookie': LINKEDIN_COOKIE,
-                  'csrf-token': LINKEDIN_CSRF_TOKEN,
+                  'Cookie': (LINKEDIN_COOKIE ? LINKEDIN_COOKIE : ''),
+                  'csrf-token': (LINKEDIN_CSRF_TOKEN ? LINKEDIN_CSRF_TOKEN : ''),
                   'x-restli-protocol-version': '2.0.0'
                 }
               });
@@ -342,7 +342,7 @@ function useLinkedInSearch(query: string | undefined): LinkedInSearch {
 
 
 function useLinkedInProfile(searchId: string, searchPos: number, query: string): LinkedInProfile {
-    const [profile, setProfile] = useState<Record<striing, any>>()
+    const [profile, setProfile] = useState<Record<string, any>>()
     const [error, setError] = useState<string>()
     const [isLoading, setIsLoading] = useState<boolean>(true)
 
