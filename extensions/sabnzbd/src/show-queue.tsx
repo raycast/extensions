@@ -57,8 +57,16 @@ function SlotListItem(props: { slot: QueueSlot; setState: any }) {
 
       actions = (
         <ActionPanel>
-          <ActionPanel.Item title={"Resume"} onAction={() => onResume(slot, setState)} />
-          <ActionPanel.Item title={"Delete"} onAction={() => onDelete(slot, setState)} />
+          <ActionPanel.Item
+            title={"Resume"}
+            onAction={() => onResume(slot, setState)}
+            icon={{ source: { light: "play-light.png", dark: "play-dark.png" } }}
+          />
+          <ActionPanel.Item
+            title={"Delete"}
+            onAction={() => onDelete(slot, setState)}
+            icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
+          />
         </ActionPanel>
       );
 
@@ -69,8 +77,16 @@ function SlotListItem(props: { slot: QueueSlot; setState: any }) {
 
       actions = (
         <ActionPanel>
-          <ActionPanel.Item title={"Pause"} onAction={() => onPause(slot, setState)} />
-          <ActionPanel.Item title={"Delete"} onAction={() => onDelete(slot, setState)} />
+          <ActionPanel.Item
+            title={"Pause"}
+            onAction={() => onPause(slot, setState)}
+            icon={{ source: { light: "pause-light.png", dark: "pause-dark.png" } }}
+          />
+          <ActionPanel.Item
+            title={"Delete"}
+            onAction={() => onDelete(slot, setState)}
+            icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
+          />
         </ActionPanel>
       );
 
@@ -81,8 +97,16 @@ function SlotListItem(props: { slot: QueueSlot; setState: any }) {
 
       actions = (
         <ActionPanel>
-          <ActionPanel.Item title={"Resume"} onAction={() => onResume(slot, setState)} />
-          <ActionPanel.Item title={"Delete"} onAction={() => onDelete(slot, setState)} />
+          <ActionPanel.Item
+            title={"Resume"}
+            onAction={() => onResume(slot, setState)}
+            icon={{ source: { light: "play-light.png", dark: "play-dark.png" } }}
+          />
+          <ActionPanel.Item
+            title={"Delete"}
+            onAction={() => onDelete(slot, setState)}
+            icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
+          />
         </ActionPanel>
       );
 
@@ -91,7 +115,11 @@ function SlotListItem(props: { slot: QueueSlot; setState: any }) {
     default:
       actions = (
         <ActionPanel>
-          <ActionPanel.Item title={"Delete"} onAction={() => onDelete(slot, setState)} />
+          <ActionPanel.Item
+            title={"Delete"}
+            onAction={() => onDelete(slot, setState)}
+            icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
+          />
         </ActionPanel>
       );
 
