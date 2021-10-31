@@ -37,7 +37,7 @@ export function VideoListItemDetail(props: { video: Video }): JSX.Element {
   const publishedAt = new Date(video.publishedAt);
   const channel = video.channelTitle;
   const meta: string[] = [`- Channel: ${channel}  `, `- Published at: ${publishedAt.toLocaleDateString("en-US")}`];
-  let md = `# ${title}\n\n${thumbnailMd}${desc}\n\n${meta.join("\n")}`;
+  const md = `# ${title}\n\n${thumbnailMd}${desc}\n\n${meta.join("\n")}`;
   return (
     <Detail
       markdown={md}
