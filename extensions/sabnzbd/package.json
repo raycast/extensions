@@ -35,6 +35,13 @@
       "mode": "no-view"
     },
     {
+      "name": "restart",
+      "title": "Restart",
+      "subtitle": "SABnzbd",
+      "description": "Restart SABnzbd",
+      "mode": "no-view"
+    },
+    {
       "name": "change-complete-action",
       "title": "Change Complete Action",
       "subtitle": "SABnzbd",
