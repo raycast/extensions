@@ -128,18 +128,19 @@ export interface Video {
     channelTitle: string
 }
 
-async function search(query: string, type: SearchType): Promise<GaxiosResponse<youtube_v3.Schema$SearchListResponse>> {
+async function search(query: string, type: SearchType, channedId?: string | undefined): Promise<GaxiosResponse<youtube_v3.Schema$SearchListResponse>> {
     const data = await youtubeClient.search.list({
         q: query,
         part: ["id", "snippet"],
         type: [type],
         maxResults: 50,
+        channelId: channedId
     });
     return data;
 }
 
-export async function searchVideos(query: string): Promise<Video[]> {
-    const data = await search(query, SearchType.video)
+export async function searchVideos(query: string, channedId?: string | undefined): Promise<Video[]> {
+    const data = await search(query, SearchType.video, channedId)
     const items = data?.data.items;
     const videoIds: string[] = [];
     const result: Video[] = []

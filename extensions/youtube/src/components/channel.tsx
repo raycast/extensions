@@ -1,8 +1,7 @@
-import { ActionPanel, Detail, List, OpenInBrowserAction, PushAction, showToast, ToastStyle } from "@raycast/api";
-import { channel } from "diagnostics_channel";
+import { ActionPanel, Detail, List, PushAction, showToast, ToastStyle } from "@raycast/api";
 import { compactNumberFormat, getErrorMessage } from "../lib/utils";
 import { Channel, getChannel, useRefresher } from "../lib/youtubeapi";
-import { OpenChannelInBrowser } from "./actions";
+import { OpenChannelInBrowser, SearchChannelVideosAction } from "./actions";
 
 export function ChannelListItemDetail(props: {
   channel: Channel | undefined;
@@ -41,6 +40,7 @@ export function ChannelListItemDetail(props: {
       markdown={md}
       actions={
         <ActionPanel>
+          <SearchChannelVideosAction channelId={channelId} />
           <OpenChannelInBrowser channelId={channelId} />
         </ActionPanel>
       }
@@ -66,6 +66,7 @@ export function ChannelListItem(props: { channel: Channel }): JSX.Element {
       actions={
         <ActionPanel>
           <PushAction title="Show Details" target={<ChannelListItemDetail channel={channel} />} />
+          <SearchChannelVideosAction channelId={channelId} />
           <OpenChannelInBrowser channelId={channelId} />
         </ActionPanel>
       }

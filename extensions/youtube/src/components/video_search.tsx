@@ -4,11 +4,11 @@ import { getErrorMessage } from "../lib/utils";
 import { searchVideos, useRefresher, Video } from "../lib/youtubeapi";
 import { VideoListItem } from "./video";
 
-export function SearchVideoList() {
+export function SearchVideoList(props: { channedId?: string | undefined }) {
   const [searchText, setSearchText] = useState<string>();
   const { data, error, isLoading } = useRefresher<Video[] | undefined>(async () => {
     if (searchText) {
-      return await searchVideos(searchText);
+      return await searchVideos(searchText, props.channedId);
     }
     return undefined;
   }, [searchText]);
