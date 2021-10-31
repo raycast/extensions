@@ -7,6 +7,7 @@ import {
   Icon,
   List,
   Form,
+  FormValues,
   OpenInBrowserAction,
   preferences,
   showToast,
@@ -148,8 +149,8 @@ function UpdateEnvironmentVariable(props: { projectId: string, projectName: stri
     const envConf = JSON.parse(values.env_conf)
     const updatedEnvVariable = await updateEnvironmentVariable(projectId, envConf.envId, envConf.envKey, values.env_value)
 
-    if(!updatedEnvVariable || updatedEnvVariable.error){
-      showToast(ToastStyle.Failure, updatedEnvVariable.error.message);
+    if(!updatedEnvVariable || !updatedEnvVariable.key){
+      showToast(ToastStyle.Failure, "Couldn't update variable");
     }else{
       showToast(ToastStyle.Success, updatedEnvVariable.key+" was updated!");
       pop();
@@ -187,8 +188,6 @@ function UpdateEnvironmentVariable(props: { projectId: string, projectName: stri
             const randomID = randomUUID()
             return (
               <Form.Dropdown.Item 
-                key={ev.id + randomID}
-                id={ev.id + randomID}
                 value={JSON.stringify({envId : ev.id, envKey : ev.key})} 
                 title={ev.key} />
             )
