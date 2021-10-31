@@ -44,10 +44,14 @@ export function VideoListItem(props: { video: Video }): JSX.Element {
   }
   const thumbnail = video.thumbnails?.high?.url || "";
 
+  const maxLength = 70;
+  const rawTitle = video.title;
+  const title = rawTitle.slice(0, maxLength) + (rawTitle.length > maxLength ? " ..." : "");
+
   return (
     <List.Item
       key={videoId}
-      title={video.title}
+      title={title}
       icon={{ source: thumbnail }}
       accessoryTitle={parts.join(" ")}
       actions={
