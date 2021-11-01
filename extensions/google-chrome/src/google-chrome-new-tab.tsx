@@ -157,7 +157,7 @@ const NewTabActions = (props: { query: string | undefined }): ReactElement => {
         <ActionPanel title="New Tab">
           <ActionPanel.Item
             onAction={function () { openNewTab(query)}}
-            title={(query ? "Search \""+query+"\"" : "Open empty tab")} />
+            title={(query ? `Search "${query}"` : "Open Empty Tab")} />
         </ActionPanel>
     )
 }
