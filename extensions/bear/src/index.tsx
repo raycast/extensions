@@ -8,6 +8,7 @@ export default function SearchNotes() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [db, error] = useBearDb();
   const [notes, setNotes] = useState<Note[]>();
+  
   useEffect(() => {
     if (db != null) {
       setNotes(db.getNotes(searchQuery));
@@ -19,7 +20,7 @@ export default function SearchNotes() {
   }
 
   return (
-    <List isLoading={notes == undefined} onSearchTextChange={setSearchQuery}>
+    <List isLoading={notes == undefined} onSearchTextChange={setSearchQuery} searchBarPlaceholder="Search note text or id ...">
       {notes?.map((note) => (
         <NoteItem note={note}></NoteItem>
       ))}
