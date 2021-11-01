@@ -80,9 +80,7 @@ async function openNewTab(queryText: string | null | undefined): Promise<boolean
     end tell
   `
 
-  const newTabOpened = await runAppleScript(script);
-
-  return newTabOpened;
+  return await runAppleScript(script);
 }
 
 
