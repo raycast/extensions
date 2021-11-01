@@ -2,14 +2,15 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import { homedir } from 'os';
 import { environment } from '@raycast/api';
-import initSqlJs, { Database } from 'sql.js'
+import initSqlJs, { Database, ParamsObject } from 'sql.js'
 
 export interface Note {
   id: string,
   title: string,
   text: string,
   modifiedAt: Date,
-  tags: string[]
+  tags: string[],
+  formattedTags: string
 }
 
 const BEAR_DB_PATH = homedir() + '/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/database.sqlite';
@@ -111,6 +112,27 @@ export async function loadDatabase(): Promise<BearDb> {
   return new BearDb(new SQL.Database(db));
 }
 
+/**
+ * Get a nicely formatted string of tags from an array of tags
+ *
+ * @param tagStr - A `SqlVallue` containing the string of comma seperated tags
+ * @returns
+ */
+function formatTags(tags: string[]): string {
+  if (tags.length === 0) {
+    return "Not Tagged";
+  }
+  const formattedTags = [];
+  for (const tag of tags) {
+    // Only format tag if tah is not subtag
+    if (tags.filter((t) => t.includes(tag)).length < 2) {
+      // Format tags with spaces like Bear (two hashtags)
+      formattedTags.push(tag.includes(" ") ? `#${tag}#` : `#${tag}`);
+    }
+  }
+  return formattedTags.join(" ");
+}
+
 export class BearDb {
   database: Database;
 
@@ -122,6 +144,18 @@ export class BearDb {
     this.database.close();
   }
 
+  private toNote(row: ParamsObject): Note {
+    const tags = ((row.tags) as string | undefined)?.split(',') ?? [];
+    return {
+      id: row.id as string,
+      title: row.title as string,
+      text: row.text as string,
+      modifiedAt: new Date((row.modified_at as number + BEAR_EPOCH) * 1000),
+      tags: tags,
+      formattedTags: formatTags(tags)
+    }
+  }
+
   getNotes(searchQuery: string): Note[] {
     const statement = this.database.prepare(SEARCH_NOTES_QUERY);
     statement.bind({ ':query': searchQuery });
@@ -129,13 +163,7 @@ export class BearDb {
     const results: Note[] = [];
     while (statement.step()) {
       const row = statement.getAsObject();
-      results.push({
-        id: row.id as string,
-        title: row.title as string,
-        text: row.text as string,
-        modifiedAt: new Date((row.modified_at as number + BEAR_EPOCH) * 1000),
-        tags: ((row.tags) as string | undefined)?.split(',') ?? []
-      });
+      results.push(this.toNote(row));
     }
 
     statement.free();
@@ -150,13 +178,7 @@ export class BearDb {
     const results: Note[] = [];
     while (statement.step()) {
       const row = statement.getAsObject();
-      results.push({
-        id: row.id as string,
-        title: row.title as string,
-        text: row.text as string,
-        modifiedAt: new Date((row.modified_at as number + BEAR_EPOCH) * 1000),
-        tags: ((row.tags) as string | undefined)?.split(',') ?? []
-      });
+      results.push(this.toNote(row));
     }
 
     statement.free();
@@ -171,13 +193,7 @@ export class BearDb {
     const results: Note[] = [];
     while (statement.step()) {
       const row = statement.getAsObject();
-      results.push({
-        id: row.id as string,
-        title: row.title as string,
-        text: row.text as string,
-        modifiedAt: new Date((row.modified_at as number + BEAR_EPOCH) * 1000),
-        tags: ((row.tags) as string | undefined)?.split(',') ?? []
-      });
+      results.push(this.toNote(row));
     }
 
     statement.free();
