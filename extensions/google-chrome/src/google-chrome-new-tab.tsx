@@ -72,7 +72,7 @@ async function openNewTab(queryText: string | null | undefined): Promise<boolean
     tell application "Google Chrome"
       activate
       tell window 1
-          set newTab to make new tab ` + (queryText ? 'with properties {URL:"http://www.google.com/search?q='+queryText+'"}' : '') + ` 
+          set newTab to make new tab ` + (queryText ? 'with properties {URL:"https://www.google.com/search?q='+queryText+'"}' : '') + ` 
       end tell
     end tell
   `
