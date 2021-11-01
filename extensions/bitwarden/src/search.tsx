@@ -16,23 +16,22 @@ import { filterNullishPropertiesFromObject, codeBlock, titleCase, faviconUrl } f
 import { useBitwarden } from "./hooks";
 import { TroubleshootingGuide, UnlockForm } from "./components";
 import { Bitwarden } from "./api";
-import * as which from 'which';
 
-const { PATH, clientId, clientSecret, fetchFavicons } = getPreferenceValues();
-const bitwardenApi = new Bitwarden(clientId, clientSecret, PATH);
+const { cliPath, clientId, clientSecret, fetchFavicons } = getPreferenceValues();
 
 export default function Search(): JSX.Element {
-  if (!which.sync('bw', {nothrow: true, path: PATH})) {
+  try {
+    const bitwardenApi = new Bitwarden(clientId, clientSecret, cliPath);
+    const [state, setSessionToken] = useBitwarden(bitwardenApi);
+
+    if (state.vaultStatus === "locked") {
+      return <UnlockForm setSessionToken={setSessionToken} bitwardenApi={bitwardenApi} />;
+    }
+    return <ItemList bitwardenApi={bitwardenApi} sessionToken={state.sessionToken} vaultStatus={state.vaultStatus} />;
+
+  } catch (error) {
     return <TroubleshootingGuide />;
   }
-
-  const [state, setSessionToken] = useBitwarden(bitwardenApi);
-
-  if (state.vaultStatus === "locked") {
-    return <UnlockForm setSessionToken={setSessionToken} bitwardenApi={bitwardenApi} />;
-  }
-
-  return <ItemList bitwardenApi={bitwardenApi} sessionToken={state.sessionToken} vaultStatus={state.vaultStatus} />;
 }
 
 function ItemList(props: {

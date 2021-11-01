@@ -38,13 +38,12 @@
       "placeholder": "client_secret"
     },
     {
-      "name": "PATH",
+      "name": "cliPath",
       "type": "textfield",
-      "default": "/usr/local/bin:/opt/homebrew/bin",
       "required": false,
-      "title": "PATH Environment Variable",
-      "description": "Ordered list of directory from where the bitwarden cli will be searched for.",
-      "placeholder": "PATH"
+      "title": "Bitwarden CLI Installation Path",
+      "description": "Location of the local Bitwarden CLI installation. Defaults to '/usr/local/bin/bw'.",
+      "placeholder": "CLI Installation Path"
     },
     {
       "name": "fetchFavicons",

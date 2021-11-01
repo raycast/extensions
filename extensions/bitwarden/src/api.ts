@@ -1,13 +1,20 @@
 import execa from "execa";
+import { existsSync } from "fs";
+import which from "which";
 import { VaultStatus } from "./types";
 
 export class Bitwarden {
   private env: Record<string, string>;
-  constructor(clientId: string, clientSecret: string, PATH: string) {
+  private cliPath: string
+  constructor(clientId: string, clientSecret: string, cliPath: string | undefined) {
+    this.cliPath = cliPath ? cliPath : which.sync('bw', {path: "/usr/local/bin:/opt/homebrew/bin"})
+    if (!existsSync(this.cliPath)) {
+      throw Error(`Invalid Cli Path: ${this.cliPath}`)
+    }
     this.env = {
       BW_CLIENTSECRET: clientSecret,
       BW_CLIENTID: clientId,
-      PATH: PATH
+      PATH: "/usr/local/bin:/opt/homebrew/bin"
     };
   }
 
@@ -35,6 +42,6 @@ export class Bitwarden {
   }
 
   private async exec(args: string[]): Promise<execa.ExecaChildProcess> {
-    return await execa("bw", args, { env: this.env });
+    return await execa(this.cliPath, args, { env: this.env });
   }
 }
