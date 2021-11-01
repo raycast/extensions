@@ -10,6 +10,7 @@ export interface Note {
   text: string,
   modifiedAt: Date,
   tags: string[],
+  encrypted: boolean,
   formattedTags: string
 }
 
@@ -21,7 +22,8 @@ SELECT
   notes.ZTITLE AS title,
   notes.ZTEXT AS text,
   notes.ZMODIFICATIONDATE AS modified_at,
-  group_concat(tags.ZTITLE) AS tags
+  group_concat(tags.ZTITLE) AS tags,
+  notes.ZENCRYPTED AS encrypted
 FROM
   ZSFNOTE AS notes
 LEFT OUTER JOIN
@@ -32,14 +34,18 @@ WHERE
   -- When there is a query, filter the body by that query, otherwise
   -- ignore the query
   (
-    lower(notes.ZTEXT) LIKE lower('%' || :query || '%')
+    lower(notes.ZTITLE) LIKE lower('%' || :query || '%')
+    OR lower(notes.ZTEXT) LIKE lower('%' || :query || '%')
     OR :query = ''
     OR lower(notes.ZUNIQUEIDENTIFIER) LIKE lower('%' || :query || '%')
   )
   -- Ignore trashed, archived, and empty notes
   AND notes.ZARCHIVED = 0
   AND notes.ZTRASHED = 0
-  AND notes.ZTEXT IS NOT NULL
+  AND (
+    notes.ZTEXT IS NOT NULL
+    OR notes.ZENCRYPTED = 1
+  )
 GROUP BY
   notes.ZUNIQUEIDENTIFIER
 ORDER BY
@@ -152,7 +158,8 @@ export class BearDb {
       text: row.text as string,
       modifiedAt: new Date((row.modified_at as number + BEAR_EPOCH) * 1000),
       tags: tags,
-      formattedTags: formatTags(tags)
+      formattedTags: formatTags(tags),
+      encrypted: row.encrypted === 1,
     }
   }
 
