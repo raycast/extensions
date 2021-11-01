@@ -5,12 +5,8 @@ import NoteActions from "./note-actions";
 
 const BEAR_LOCAL_FILES_PATH = homedir() + '/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/Local Files';
 
-<<<<<<< HEAD
-export function formatBearAttachments(text: string, forPreview = true): string {
-=======
 export function formatBearAttachments(text: string | null, forPreview = true): string {
   if (text === null) { return "" };
->>>>>>> raycast-main
   let result = text;
   const matches = result.matchAll(/\[(?<type>file|image):(?<path>.+)\]/g);
   for (const match of matches) {
@@ -35,16 +31,11 @@ export function formatBearAttachments(text: string | null, forPreview = true): s
 }
 
 export default function PreviewNote({ note }: { note: Note }) {
-<<<<<<< HEAD
-  return (<Detail
-    markdown={formatBearAttachments(note.text)}
-=======
   const noteContent = note.encrypted ? 
     `# ${note.title}\n\n*This note's content is encrypted*` :
     note.text;
   return (<Detail
     markdown={formatBearAttachments(noteContent)}
->>>>>>> raycast-main
     navigationTitle={note.title}
     actions={<NoteActions isNotePreview={true} note={ note }/>}
   />);
