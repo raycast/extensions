@@ -19,6 +19,13 @@
       "subtitle": "Bear",
       "description": "Create a new bear note",
       "mode": "view"
+    },
+    {
+      "name": "grab-url",
+      "title": "Web Capture",
+      "subtitle": "Bear",
+      "description": "Create a new bear note from a web capture",
+      "mode": "view"
     }
   ],
   "dependencies": {
