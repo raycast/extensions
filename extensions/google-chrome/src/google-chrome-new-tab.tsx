@@ -183,7 +183,7 @@ const HistoryItemActions = (props: { entry: HistoryEntry }): ReactElement => {
     return (
         <ActionPanel title={title}>
           <OpenInBrowserAction
-              title="Open in tab"
+              title="Open in Tab"
               url={url} />
           <CopyToClipboardAction
               title="Copy URL"
