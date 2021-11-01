@@ -3,18 +3,19 @@ import { existsSync } from "fs";
 import which from "which";
 import { VaultStatus } from "./types";
 
+const PATH = "/usr/local/bin:/opt/homebrew/bin"
 export class Bitwarden {
   private env: Record<string, string>;
   private cliPath: string
   constructor(clientId: string, clientSecret: string, cliPath: string | undefined) {
-    this.cliPath = cliPath ? cliPath : which.sync('bw', {path: "/usr/local/bin:/opt/homebrew/bin"})
+    this.cliPath = cliPath ? cliPath : which.sync('bw', {path: PATH})
     if (!existsSync(this.cliPath)) {
       throw Error(`Invalid Cli Path: ${this.cliPath}`)
     }
     this.env = {
       BW_CLIENTSECRET: clientSecret,
       BW_CLIENTID: clientId,
-      PATH: "/usr/local/bin:/opt/homebrew/bin"
+      PATH: PATH
     };
   }
 
