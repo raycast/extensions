@@ -110,7 +110,7 @@ export default function Command(): ReactElement {
     const [state, setState] = useState<State>({});
 
     async function getTabs(query: string | null) {
-      var tabs = await getOpenTabs(useOriginalFavicon);
+      let tabs = await getOpenTabs(useOriginalFavicon);
 
       if(query){
         tabs = tabs.filter(function (tab) {
