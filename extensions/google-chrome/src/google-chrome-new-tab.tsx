@@ -29,9 +29,6 @@ class Tab {
     return this.url.replace(/(^\w+:|^)\/\//, '').replace('www.', '');
   }
 
-  urlDomain(): string {
-    return this.urlWithoutScheme().split('/')[0];
-  }
 
   googleFavicon(): string {
     return faviconUrl(64, this.url)
