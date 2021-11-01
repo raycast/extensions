@@ -23,7 +23,8 @@ function CreateNoteAction() {
         values.openNote === "new" ? "yes" : "no"
       }&show_window=${values.openNote === "main" ? "yes" : "no"}&edit=${
         values.openNote === "no" ? "no" : "yes"
-      }&timestamp=${values.timestamp ? "yes" : "no"}&text=${encodeURIComponent(values.text)}`
+      }&timestamp=${values.timestamp ? "yes" : "no"}&text=${encodeURIComponent(values.text)}`,
+      {background: values.openNote === "no" ? true : false}
     );
     await closeMainWindow();
   }

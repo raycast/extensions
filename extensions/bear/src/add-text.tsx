@@ -1,4 +1,4 @@
-import { ActionPanel, closeMainWindow, Form, Icon, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import { ActionPanel, closeMainWindow, Form, Icon, showToast, SubmitFormAction, ToastStyle} from "@raycast/api";
 import open from "open";
 import { useEffect, useState } from "react";
 import { Note } from "./bear-db";
@@ -55,7 +55,8 @@ export default function AddText({ note }: { note: Note }) {
           values.openNote === "new" ? "yes" : "no"
         }&show_window=${values.openNote === "main" ? "yes" : "no"}&edit=${
           values.openNote === "no" ? "no" : "yes"
-        }&timestamp=${values.timestamp ? "yes" : "no"}&text=${encodeURIComponent(values.text)}`
+        }&timestamp=${values.timestamp ? "yes" : "no"}&text=${encodeURIComponent(values.text)}`,
+        {background: values.openNote === "no" ? true : false}
       );
       await closeMainWindow();
     };
@@ -83,7 +84,7 @@ export default function AddText({ note }: { note: Note }) {
       <Form.Dropdown id="header" title="Append To Header">
         <Form.Dropdown.Item value="none" title="-" />
         {headers.map(({ level, text }) => (
-          <Form.Dropdown.Item value={text} title={`h${level}: ${text}`} />
+          <Form.Dropdown.Item key={text} value={text} title={`h${level}: ${text}`} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown id="openNote" title="Open Note">
