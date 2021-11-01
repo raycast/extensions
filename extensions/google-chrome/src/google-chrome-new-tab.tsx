@@ -129,7 +129,7 @@ export default function Command(): ReactElement {
         <List onSearchTextChange={function (query) { setSearchText(query); getTabs(query);}} isLoading={isLoading} throttle={false}>
             <List.Section title="New Tab" key="new-tab">
               <List.Item
-                title={(!searchText ? "Open empty tab" : "Search \""+searchText+"\"")}
+                title={(!searchText ? "Open Empty Tab" : `Search "${searchText}"`)}
                 icon={{ source: (!searchText ? Icon.Plus : Icon.MagnifyingGlass)}}
                 actions={<NewTabActions query={searchText} />} 
               />
