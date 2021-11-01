@@ -5,7 +5,8 @@ import NoteActions from "./note-actions";
 
 const BEAR_LOCAL_FILES_PATH = homedir() + '/Library/Group Containers/9K33E3U3T4.net.shinyfrog.bear/Application Data/Local Files';
 
-export function formatBearAttachments(text: string, forPreview = true): string {
+export function formatBearAttachments(text: string | null, forPreview = true): string {
+  if (text === null) { return "" };
   let result = text;
   const matches = result.matchAll(/\[(?<type>file|image):(?<path>.+)\]/g);
   for (const match of matches) {
