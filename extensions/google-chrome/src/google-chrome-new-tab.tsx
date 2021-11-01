@@ -223,7 +223,7 @@ function GoogleChromeGoToTab(props: { tab: Tab }) {
     await closeMainWindow();
   }
 
-  return <ActionPanel.Item title="Open tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
+  return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
 
 
