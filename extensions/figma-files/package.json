@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "figma-files-raycast-extension",
   "title": "Figma File Search",
   "description": "Lists Figma files allowing you to search and navigate to them.",

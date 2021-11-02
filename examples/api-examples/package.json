@@ -1,9 +1,11 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "api-examples",
   "title": "API Examples",
   "description": "A collection of examples to explore the Raycast API.",
   "icon": "command-icon.png",
   "license": "MIT",
+  "author": "raycast",
   "commands": [
     {
       "name": "markdown",
@@ -107,9 +109,8 @@
           "name": "addSignature",
           "type": "checkbox",
           "required": false,
-          "title": "",
           "label": "Add signature",
-          "description": "Indicates whether a signature should be added "
+          "description": "Indicates whether a signature should be added"
         },
         {
           "name": "favoriteColor",

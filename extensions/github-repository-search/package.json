@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "github-repository-search",
   "title": "GitHub Repository Search",
   "description": "Search repositories on GitHub and open previously visited ones faster.",

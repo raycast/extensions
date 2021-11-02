@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ricescore",
   "title": "RICE Score",
   "description": "Calculate RICE Score and output value or markdown table",
@@ -9,7 +10,6 @@
     {
       "name": "index",
       "title": "RICE score",
-      "subtitle": "",
       "description": "Calculate the RICE score",
       "mode": "view"
     }
