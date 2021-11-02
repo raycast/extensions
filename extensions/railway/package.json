@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "railway",
   "title": "Railway Project Search",
   "description": "Search and navigate to your Railway projects",
