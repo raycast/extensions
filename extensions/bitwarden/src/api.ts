@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import execa from "execa";
 import { existsSync } from "fs";
 import which from "which";
@@ -7,7 +8,8 @@ const PATH = "/usr/local/bin:/opt/homebrew/bin"
 export class Bitwarden {
   private env: Record<string, string>;
   private cliPath: string
-  constructor(clientId: string, clientSecret: string, cliPath: string | undefined) {
+  constructor() {
+    const { cliPath, clientId, clientSecret } = getPreferenceValues()
     this.cliPath = cliPath ? cliPath : which.sync('bw', {path: PATH})
     if (!existsSync(this.cliPath)) {
       throw Error(`Invalid Cli Path: ${this.cliPath}`)
@@ -35,6 +37,10 @@ export class Bitwarden {
   async unlock(password: string): Promise<string> {
       const {stdout: sessionToken} = await this.exec(["unlock", password, "--raw"])
       return sessionToken
+  }
+
+  async lock(): Promise<void> {
+    await this.exec(["lock"])
   }
 
   async status(sessionToken: string | undefined): Promise<VaultStatus> {

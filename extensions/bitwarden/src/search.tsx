@@ -17,11 +17,11 @@ import { useBitwarden } from "./hooks";
 import { TroubleshootingGuide, UnlockForm } from "./components";
 import { Bitwarden } from "./api";
 
-const { cliPath, clientId, clientSecret, fetchFavicons } = getPreferenceValues();
+const { fetchFavicons } = getPreferenceValues();
 
 export default function Search(): JSX.Element {
   try {
-    const bitwardenApi = new Bitwarden(clientId, clientSecret, cliPath);
+    const bitwardenApi = new Bitwarden();
     const [state, setSessionToken] = useBitwarden(bitwardenApi);
 
     if (state.vaultStatus === "locked") {

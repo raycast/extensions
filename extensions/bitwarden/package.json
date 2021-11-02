@@ -18,6 +18,13 @@
       "subtitle": "Bitwarden",
       "description": "Search all items in the authenticated Bitwarden vault.",
       "mode": "view"
+    },
+    {
+      "name": "lock-vault",
+      "title": "Lock Vault",
+      "subtitle": "Bitwarden",
+      "description": "Lock the vault.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
