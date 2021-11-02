@@ -28,7 +28,6 @@ export default function Search(): JSX.Element {
       return <UnlockForm setSessionToken={setSessionToken} bitwardenApi={bitwardenApi} />;
     }
     return <ItemList bitwardenApi={bitwardenApi} sessionToken={state.sessionToken} vaultStatus={state.vaultStatus} />;
-
   } catch (error) {
     return <TroubleshootingGuide />;
   }
@@ -68,23 +67,43 @@ function ItemList(props: {
     }
   }, [sessionToken]);
 
+  async function refreshItems() {
+    if (sessionToken) {
+      const toast = await showToast(ToastStyle.Animated, "Syncing Items...");
+      await bitwardenApi.sync(sessionToken);
+      await loadItems(sessionToken);
+      await toast.hide();
+    }
+  }
+
+  const favoriteItems = [];
+  const regularItems = [];
+  for (const item of state?.items || []) {
+    item.favorite ? favoriteItems.push(item) : regularItems.push(item);
+  }
+
   return (
     <List isLoading={typeof state === "undefined"}>
-      {state?.items.map((item) => (
+      <List.Section title="Favorites">
+        {favoriteItems.map((item) => (
+          <ItemListItem
+            key={item.id}
+            item={item}
+            folder={item.folderId ? folderMap[item.folderId] : undefined}
+            refreshItems={refreshItems}
+          />
+        ))}
+      </List.Section>
+      <List.Section title="Others">
+      {regularItems.map((item) => (
         <ItemListItem
           key={item.id}
           item={item}
           folder={item.folderId ? folderMap[item.folderId] : undefined}
-          refreshItems={async () => {
-            if (sessionToken) {
-              const toast = await showToast(ToastStyle.Animated, "Syncing Items...");
-              await bitwardenApi.sync(sessionToken);
-              await loadItems(sessionToken);
-              await toast.hide();
-            }
-          }}
+          refreshItems={refreshItems}
         />
       ))}
+      </List.Section>
     </List>
   );
 }
