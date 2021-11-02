@@ -1,9 +1,11 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jetbrains",
   "title": "JetBrains Toolbox Recent Projects",
   "description": "Search and open JetBrains Toolbox projects",
   "icon": "jb.png",
   "author": "gdsmith",
+  "license": "MIT",
   "commands": [
     {
       "name": "recent",
