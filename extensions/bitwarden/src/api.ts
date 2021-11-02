@@ -43,6 +43,6 @@ export class Bitwarden {
   }
 
   private async exec(args: string[]): Promise<execa.ExecaChildProcess> {
-    return await execa(this.cliPath, args, { env: this.env });
+    return execa(this.cliPath, args, { env: this.env });
   }
 }

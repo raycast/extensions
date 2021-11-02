@@ -5,11 +5,11 @@ import { VaultStatus } from "./types";
 
 async function login(api: Bitwarden) {
   try {
-    const toast = await showToast(ToastStyle.Animated, "Login in...", "It may takes some time");
+    const toast = await showToast(ToastStyle.Animated, "Loggin in...", "It may takes some time");
     await api.login();
     toast.hide();
   } catch (error) {
-    showToast(ToastStyle.Failure, "An error occurred during login!", "Please check your crendentials");
+    showToast(ToastStyle.Failure, "An error occurred during login!", "Please check your credentials");
   }
 }
 

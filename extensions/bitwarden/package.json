@@ -34,7 +34,7 @@
       "type": "password",
       "required": true,
       "title": "Client Secret",
-      "description": "The client_secret value seen in the My Account section of a Bitwarden web vault. More info: https://bitwarden.com/help/article/personal-api-key/",
+      "description": "The client_secret value seen in the My Account section of a Bitwarden web vault.\r\nMore info: https://bitwarden.com/help/article/personal-api-key/",
       "placeholder": "client_secret"
     },
     {
