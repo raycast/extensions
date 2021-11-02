@@ -29,7 +29,7 @@ export default function SearchNotes() {
       {notes?.map((note) => (
         <List.Item
           key={note.id}
-          title={note.title === "" ? "Untitled Note" : note.title}
+          title={note.title === "" ? "Untitled Note" : note.encrypted ? "🔒 " + note.title : note.title}
           subtitle={note.formattedTags}
           icon={{ source: "command-icon.png" }}
           keywords={[note.id]}
