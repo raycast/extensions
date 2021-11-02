@@ -13,6 +13,8 @@ function createClient(): youtube_v3.Youtube {
 
 export const youtubeClient = createClient();
 
+const maxPageResults = 50;
+
 export enum SearchType {
     channel = "channel",
     video = "video"
@@ -133,6 +135,21 @@ export interface Video {
     channelTitle: string
 }
 
+function dataToStatistics(statistics?: youtube_v3.Schema$VideoStatistics | undefined): VideoStatistics | undefined {
+    const si = statistics;
+    if (!si) {
+        return undefined;
+    }
+    const result: VideoStatistics = {
+        commentCount: si.commentCount || "0",
+        dislikeCount: si.dislikeCount || "0",
+        favoriteCount: si.favoriteCount || "0",
+        likeCount: si.likeCount || "0",
+        viewCount: si.viewCount || "0"
+    };
+    return result;
+}
+
 async function fetchAndInjectVideoStats(videos: Video[]) {
     const videoIds: string[] = videos.map(v => v.id);
     if (videoIds) {
@@ -142,13 +159,7 @@ async function fetchAndInjectVideoStats(videos: Video[]) {
             for (const s of statsItems) {
                 const si = s.statistics;
                 if (si) {
-                    const stats: VideoStatistics = {
-                        commentCount: si.commentCount || "0",
-                        dislikeCount: si.dislikeCount || "0",
-                        favoriteCount: si.favoriteCount || "0",
-                        likeCount: si.likeCount || "0",
-                        viewCount: si.viewCount || "0"
-                    };
+                    const stats = dataToStatistics(si);
                     if (s.id) {
                         const el = videos.find(x => x.id === s.id);
                         if (el) {
@@ -168,7 +179,7 @@ async function search(query: string, type: SearchType, channedId?: string | unde
         q: query,
         part: ["id", "snippet"],
         type: [type],
-        maxResults: 50,
+        maxResults: maxPageResults,
         channelId: channedId
     });
     return data;
@@ -317,7 +328,7 @@ export async function getPlaylistVideos(playlistId: string): Promise<Video[] | u
     let result: Video[] | undefined;
 
     if (playlistId) {
-        const data = await youtubeClient.playlistItems.list({ playlistId: playlistId, part: ["snippet", "contentDetails"], maxResults: 50 });
+        const data = await youtubeClient.playlistItems.list({ playlistId: playlistId, part: ["snippet", "contentDetails"], maxResults: maxPageResults });
         const items = data.data.items;
         if (items) {
             result = [];
@@ -346,6 +357,39 @@ export async function getPlaylistVideos(playlistId: string): Promise<Video[] | u
                 result.push(v);
             }
             await fetchAndInjectVideoStats(result);
+        }
+    }
+    return result;
+}
+
+export async function getPopularVideos(): Promise<Video[] | undefined> {
+    let result: Video[] | undefined;
+    const data = await youtubeClient.videos.list({ chart: "mostPopular", part: ["snippet", "contentDetails", "statistics"], maxResults: maxPageResults });
+    const items = data.data.items;
+    if (items && items.length > 0) {
+        result = [];
+        for (const item of items) {
+            const sn = item.snippet;
+            if (sn) {
+                const v: Video = {
+                    id: item.id || "",
+                    title: sn.title || "?",
+                    description: sn.description || undefined,
+                    publishedAt: sn.publishedAt || "?",
+                    thumbnails: {
+                        default: {
+                            url: sn.thumbnails?.default?.url || undefined
+                        },
+                        high: {
+                            url: sn.thumbnails?.high?.url || undefined
+                        }
+                    },
+                    channelId: sn.channelId || "",
+                    channelTitle: sn.channelTitle || "?",
+                    statistics: dataToStatistics(item.statistics)
+                };
+                result.push(v);
+            }
         }
     }
     return result;
