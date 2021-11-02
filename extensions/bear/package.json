@@ -12,11 +12,28 @@
       "subtitle": "Bear",
       "description": "Search and open Bear notes",
       "mode": "view"
+    },
+    {
+      "name": "new-note",
+      "title": "Create Note",
+      "subtitle": "Bear",
+      "description": "Create a new bear note",
+      "mode": "view"
+    },
+    {
+      "name": "grab-url",
+      "title": "Web Capture",
+      "subtitle": "Bear",
+      "description": "Create a new bear note from a web capture",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.25.1",
+    "@types/commonmark": "^0.27.5",
+    "commonmark": "^0.30.0",
     "date-fns": "^2.25.0",
+    "open": "^8.4.0",
     "sql.js": "^1.6.2"
   },
   "devDependencies": {
