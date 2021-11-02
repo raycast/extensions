@@ -19,9 +19,9 @@ function CreateNoteAction() {
     open(
       `bear://x-callback-url/create?title=${encodeURIComponent(values.title)}&tags=${encodeURIComponent(
         values.tags
-      )}&open_note=${values.openNote === "main" ? "yes" : "no"}&new_window=${
+      )}&open_note=${values.openNote !== "no" ? "yes" : "no"}&new_window=${
         values.openNote === "new" ? "yes" : "no"
-      }&show_window=${values.openNote === "main" ? "yes" : "no"}&edit=${
+      }&show_window=${values.openNote !== "no" ? "yes" : "no"}&edit=${
         values.openNote === "no" ? "no" : "yes"
       }&timestamp=${values.timestamp ? "yes" : "no"}&text=${encodeURIComponent(values.text)}`,
       {background: values.openNote === "no" ? true : false}

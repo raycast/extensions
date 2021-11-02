@@ -51,9 +51,9 @@ export default function AddText({ note }: { note: Note }) {
           values.header === "none" ? "" : "&header=" + encodeURIComponent(values.header)
         }&mode=${values.mode}&new_line=${values.newLine ? "yes" : "no"}&tags=${encodeURIComponent(
           values.tags
-        )}&open_note=${values.openNote === "no" ? "no" : "yes"}&new_window=${
+        )}&open_note=${values.openNote !== "no" ? "yes" : "no"}&new_window=${
           values.openNote === "new" ? "yes" : "no"
-        }&show_window=${values.openNote === "main" ? "yes" : "no"}&edit=${
+        }&show_window=${values.openNote !== "no" ? "yes" : "no"}&edit=${
           values.openNote === "no" ? "no" : "yes"
         }&timestamp=${values.timestamp ? "yes" : "no"}&text=${encodeURIComponent(values.text)}`,
         {background: values.openNote === "no" ? true : false}
