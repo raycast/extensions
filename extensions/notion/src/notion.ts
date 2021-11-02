@@ -132,7 +132,7 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
         id: property.id as string,
         type: property.type as string,
         name: name as string,
-        options: [] as DatabasePropertieOption
+        options: [] as DatabasePropertieOption[]
       }
 
       switch (property.type) {
