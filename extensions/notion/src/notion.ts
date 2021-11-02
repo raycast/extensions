@@ -26,7 +26,13 @@ export interface DatabasePropertie {
   id: string
   type: string
   name: string
-  options: {id: string, name: string, color: string | undefined}[]
+  options: DatabasePropertieOption[]
+}
+
+export interface DatabasePropertieOption {
+  id: string
+  name: string
+  color: string | undefined
 }
 
 export interface Page {  
@@ -131,7 +137,7 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
 
       switch (property.type) {
         case 'select':
-          databasePropertie.options.push({id:'_select_null_', name: 'No Selection'})
+          databasePropertie.options.push({id:'_select_null_', name: 'No Selection'} as DatabasePropertieOption)
           databasePropertie.options = databasePropertie.options.concat(property.select.options)
           break
         case 'multi_select':
