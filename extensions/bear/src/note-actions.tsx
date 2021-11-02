@@ -88,17 +88,15 @@ export default function NoteActions({ isNotePreview, note }: { isNotePreview: bo
           />
         </ActionPanel.Section>
       )}
-      {note.encrypted ? null : (
-        <ActionPanel.Section title="Show in Raycast">
-          {isNotePreview ? null : <NotePreviewAction note={note} />}
-          <PushAction
-            title="Show Note Links"
-            target={<NoteLinks note={note} />}
-            icon={Icon.Link}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
-          />
-        </ActionPanel.Section>
-      )}
+      <ActionPanel.Section title="Show in Raycast">
+        {isNotePreview ? null : <NotePreviewAction note={note} />}
+        <PushAction
+          title="Show Note Links"
+          target={<NoteLinks note={note} />}
+          icon={Icon.Link}
+          shortcut={{ modifiers: ["cmd"], key: "l" }}
+        />
+      </ActionPanel.Section>
       <ActionPanel.Section title="Copy">
         {note.encrypted ? null : (
           <CopyToClipboardAction
