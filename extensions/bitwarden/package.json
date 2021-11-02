@@ -18,6 +18,13 @@
       "subtitle": "Bitwarden",
       "description": "Search all items in the authenticated Bitwarden vault.",
       "mode": "view"
+    },
+    {
+      "name": "lock-vault",
+      "title": "Lock Vault",
+      "subtitle": "Bitwarden",
+      "description": "Lock the vault.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -34,13 +41,12 @@
       "type": "password",
       "required": true,
       "title": "Client Secret",
-      "description": "The client_secret value seen in the My Account section of a Bitwarden web vault. More info: https://bitwarden.com/help/article/personal-api-key/",
+      "description": "The client_secret value seen in the My Account section of a Bitwarden web vault.\r\nMore info: https://bitwarden.com/help/article/personal-api-key/",
       "placeholder": "client_secret"
     },
     {
       "name": "cliPath",
       "type": "textfield",
-      "default": "/usr/local/bin/bw",
       "required": false,
       "title": "Bitwarden CLI Installation Path",
       "description": "Location of the local Bitwarden CLI installation. Defaults to '/usr/local/bin/bw'.",
@@ -65,6 +71,7 @@
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@types/treeify": "^1.0.0",
+    "@types/which": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
