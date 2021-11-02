@@ -14,9 +14,7 @@ import {
   ToastStyle,
   useNavigation,
 } from '@raycast/api'
-import { randomUUID } from 'crypto'
 import { useEffect, useState } from 'react'
-import useInterval from './use-interval'
 import {
   Database,
   DatabasePropertie,
@@ -94,10 +92,10 @@ export default function CreateDatabaseForm(): JSX.Element {
       isLoading={isLoading} 
       actions={
         <ActionPanel>
-          <ActionPanel.Section title='Environment Variable'>
+          <ActionPanel.Section>
             <SubmitFormAction 
-              title='Update Variable'
-              icon={Icon.Pencil}
+              title='Create Page'
+              icon={Icon.Plus}
               onSubmit={handleSubmit}
                />
             </ActionPanel.Section>
@@ -109,7 +107,6 @@ export default function CreateDatabaseForm(): JSX.Element {
         title={'Database'}
         onChange={setDatabaseId}>
           {databases?.map((d) => {
-            const randomID = randomUUID()
             return (
               <Form.Dropdown.Item
                 key={d.id} 
@@ -121,38 +118,45 @@ export default function CreateDatabaseForm(): JSX.Element {
       </Form.Dropdown>
       <Form.Separator />
       {databaseProperties?.map((dp) => {
-        let FormType = Form.TextField
-        let placeholder = dp.type.replace(/_/g, ' ')
+        const key = 'property::'+dp.type+'::'+dp.id;
+        const id = key;
+        const title = dp.name;
+        const placeholder = dp.type.replace(/_/g, ' ')
+
         switch (dp.type) {
           case 'date':
-            FormType = Form.DatePicker
+            return (<Form.DatePicker key={key} id={id} title={title} placeholder={placeholder} />)
             break
           case 'checkbox':
-            FormType = Form.Checkbox
+            return (<Form.Checkbox key={key} id={id} title={title} label={placeholder} />)
             break
           case 'select':
-            FormType = Form.Dropdown
+           return (<Form.Dropdown key={key} id={id} title={title} placeholder={placeholder}>
+                {dp.options?.map((opt) => {
+                  return (<Form.Dropdown.Item  
+                      key={'option::'+opt.id} 
+                      value={opt.id} 
+                      title={opt.name}
+                      icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : null)}/>)
+                })}
+              </Form.Dropdown>
+            )
             break
           case 'multi_select':
-            FormType = Form.TagPicker
+            return (<Form.TagPicker key={key} id={id} title={title} placeholder={placeholder}>
+                {dp.options?.map((opt) => {
+                  return (<Form.TagPicker.Item  
+                      key={'option::'+opt.id} 
+                      value={opt.id} 
+                      title={opt.name}
+                      icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : null)}/>)
+                })}
+              </Form.TagPicker>
+            )            
             break
+          default:
+            return (<Form.TextField key={key} id={id} title={title} placeholder={placeholder} />)
         }
-        return (
-          <FormType
-            key={'property::'+dp.type+'::'+dp.id}
-            id={'property::'+dp.type+'::'+dp.id}
-            title={dp.name}
-            placeholder={placeholder}
-            label={(dp.type === 'checkbox' ? 'Checkbox' : null)}>
-              {dp.options?.map((opt) => {
-                return (<FormType.Item  
-                    key={'option::'+opt.id} 
-                    value={opt.id} 
-                    title={opt.name}
-                    icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : null)}/>)
-              })}
-          </FormType>
-        )
       })}
     </Form>
   )
@@ -169,7 +173,7 @@ function validateForm(values: FormValues): boolean {
 }
 
 
-function notionColorToTintColor (notionColor: string): string {
+function notionColorToTintColor (notionColor: string): Color {
   return {
     'default': Color.PrimaryText,
     'gray': Color.PrimaryText,
