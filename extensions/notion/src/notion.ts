@@ -26,7 +26,7 @@ export interface DatabasePropertie {
   id: string
   type: string
   name: string
-  options: {id: string, name: string, color: string}[]
+  options: {id: string, name: string, color: string | undefined}[]
 }
 
 export interface Page {  
@@ -42,7 +42,7 @@ export async function fetchDatabases(): Promise<Database[]> {
 }
 
 // Raw function for fetching databases
-async function rawFetchDatabases(): Promise<Deployment[]> {
+async function rawFetchDatabases(): Promise<Database[]> {
   try {
     const response = await fetch(
       apiURL + `v1/search`,
@@ -104,7 +104,7 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
     'select',
     'multi_select'
   ]
-  const databaseProperties = [];
+  const databaseProperties: DatabasePropertie[] = [];
   try {
     const response = await fetch(
       apiURL + `v1/databases/${databaseId}`,
@@ -131,7 +131,7 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
 
       switch (property.type) {
         case 'select':
-          databasePropertie.options = [{id:'_select_null_', name: 'No Selection'}]
+          databasePropertie.options = [{id:'_select_null_', name: 'No Selection'}] as DatabasePropertie[]
           databasePropertie.options = databasePropertie.options.concat(property.select.options)
           break
         case 'multi_select':
@@ -166,13 +166,13 @@ async function rawCreateDatabasePage(values: FormValues): Promise<Page> {
         database_id: values.database
       },
       properties: {}
-    }
+    } as Record<string,any>
 
     delete values.database;
 
     Object.keys(values).forEach(function (formId: string){
-      let type = formId.match(/(?<=property::).*(?=::)/g)[0]
-      let propId = formId.match(new RegExp('(?<=property::'+type+'::).*', 'g'))[0]
+      let type = formId.match(/(?<=property::).*(?=::)/g)![0]
+      let propId = formId.match(new RegExp('(?<=property::'+type+'::).*', 'g'))![0]
       let value = values[formId]
 
       if(value){
@@ -240,7 +240,7 @@ async function rawCreateDatabasePage(values: FormValues): Promise<Page> {
             }
             break
           case 'multi_select':
-            const multi_values = [];
+            const multi_values: Record<string,string>[]= [];
             value.map(function (multi_select_id){
               multi_values.push({id: multi_select_id})
             })
