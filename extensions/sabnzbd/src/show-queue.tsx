@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 import { Client, Queue, QueueSlot, Results } from "sabnzbd-api";
 
 export default function SlotList() {
-  const [state, setState] = useState<{ slots: QueueSlot[] }>({ slots: [] });
+  const [state, setState] = useState<{ slots: QueueSlot[], init: boolean }>({ slots: [], init: false  });
 
   useEffect(() => {
     async function fetch() {
@@ -12,6 +12,7 @@ export default function SlotList() {
       setState((oldState) => ({
         ...oldState,
         slots: slots,
+        init: true
       }));
     }
 
@@ -32,7 +33,7 @@ export default function SlotList() {
 
   return (
     <List
-      isLoading={state.slots.length === 0}
+      isLoading={!state.init}
       searchBarPlaceholder="Filter slots by filename..."
       onSearchTextChange={onSearchTextChange}
     >
