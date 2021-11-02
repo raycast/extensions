@@ -76,7 +76,6 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
 
   return (
     <List.Item
-      key={item.id}
       title={_.startCase(item.id)}
       icon={Icon.Dot}
       keywords={[item.section]}
@@ -132,7 +131,10 @@ export default function FakerList() {
 
   const handlePinnedItemsChange = (nextPinnedItems: Item[]) => {
     setPinnedItems(nextPinnedItems);
-    const nextPinnedItemIds = _.map(nextPinnedItems, ({ section, id }) => ({ section, id }));
+    const nextPinnedItemIds = _.map(nextPinnedItems, ({ section, id }) => ({
+      section,
+      id,
+    }));
     setLocalStorageItem('pinnedItemIds', JSON.stringify(nextPinnedItemIds));
   };
 
@@ -142,7 +144,10 @@ export default function FakerList() {
   };
 
   const unpin = (item: Item) => {
-    const nextPinnedItems = _.reject(pinnedItems, { section: item.section, id: item.id });
+    const nextPinnedItems = _.reject(pinnedItems, {
+      section: item.section,
+      id: item.id,
+    });
     handlePinnedItemsChange(nextPinnedItems);
   };
 
