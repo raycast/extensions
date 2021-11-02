@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gitmoji",
   "title": "Gitmoji Search",
   "description": "Gitmoji is an emoji guide for your commit messages",
@@ -9,7 +10,6 @@
     {
       "name": "gitmoji",
       "title": "gitmoji",
-      "subtitle": "",
       "description": "Search your gitmoji",
       "mode": "view"
     }
