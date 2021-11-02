@@ -1,16 +1,17 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "binance",
   "title": "Binance Portfolio",
-  "description": "Binance Portfolio",
+  "description": "Track your Binance portfolio",
   "icon": "binance-logo.png",
   "author": "grzegorzkrukowski",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Binance Portfolio",
-      "subtitle": "Binance Portfolio",
-      "description": "Binance Portfolio",
+      "title": "My Portfolio",
+      "subtitle": "Binance",
+      "description": "Show your Binance portfolio with current value in USDT for each currency",
       "mode": "view"
     }
   ],
