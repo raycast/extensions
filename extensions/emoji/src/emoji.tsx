@@ -7,7 +7,7 @@ import {
   setLocalStorageItem,
 } from "@raycast/api";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import type { ReactElement, SetStateAction, Dispatch } from "react";
 import { createEmojiList } from "generate-emoji-list";
 
@@ -20,15 +20,22 @@ type Emoji = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStateFromLocalStorage = <T, _ = void>(key: string, initialValue: T): [T, Dispatch<SetStateAction<T>>] => {
   const [state, setState] = useState<T>(initialValue);
+  const didUnmount = useRef<boolean>(false);
 
   useEffect(() => {
     (async () => {
       const cache = await getLocalStorageItem(key);
 
       if (typeof cache === "string") {
-        setState(JSON.parse(cache));
+        if (!didUnmount.current) {
+          setState(JSON.parse(cache));
+        }
       }
     })();
+
+    return () => {
+      didUnmount.current = true;
+    };
   }, []);
 
   const setStateAndLocalStorage = useCallback((updater) => {
@@ -44,11 +51,18 @@ const useStateFromLocalStorage = <T, _ = void>(key: string, initialValue: T): [T
 
 export default function Main(): ReactElement {
   const [list, setList] = useStateFromLocalStorage<Category[]>("emoji-list", []);
+  const didUnmount = useRef<boolean>(false);
 
   useEffect(() => {
     createEmojiList().then((list: Category[]) => {
-      setList(list);
+      if (!didUnmount.current) {
+        setList(list);
+      }
     });
+
+    return () => {
+      didUnmount.current = true;
+    };
   }, []);
 
   const [recentlyUsed, setRecentlyUsed] = useStateFromLocalStorage<Emoji[]>("recently-used", []);
