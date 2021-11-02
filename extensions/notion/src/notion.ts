@@ -131,7 +131,7 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
 
       switch (property.type) {
         case 'select':
-          databasePropertie.options = [{id:'_select_null_', name: 'No Selection'}] as DatabasePropertie[]
+          databasePropertie.options.push({id:'_select_null_', name: 'No Selection'})
           databasePropertie.options = databasePropertie.options.concat(property.select.options)
           break
         case 'multi_select':
@@ -241,7 +241,7 @@ async function rawCreateDatabasePage(values: FormValues): Promise<Page> {
             break
           case 'multi_select':
             const multi_values: Record<string,string>[]= [];
-            value.map(function (multi_select_id){
+            value.map(function (multi_select_id: string){
               multi_values.push({id: multi_select_id})
             })
 
