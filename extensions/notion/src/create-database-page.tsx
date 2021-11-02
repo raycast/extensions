@@ -6,6 +6,7 @@ import {
   Color,
   Icon,
   List,
+  Detail,
   Form,
   FormValues,
   OpenInBrowserAction,
@@ -86,7 +87,9 @@ export default function CreateDatabaseForm(): JSX.Element {
   }, [databaseId])
 
 
-
+  if(databases && !databases[0]){
+    return NoSharedContent()
+  }
   return (
     <Form 
       isLoading={isLoading} 
@@ -125,19 +128,19 @@ export default function CreateDatabaseForm(): JSX.Element {
 
         switch (dp.type) {
           case 'date':
-            return (<Form.DatePicker key={key} id={id} title={title} placeholder={placeholder} />)
+            return (<Form.DatePicker key={key} id={id} title={title} />)
             break
           case 'checkbox':
             return (<Form.Checkbox key={key} id={id} title={title} label={placeholder} />)
             break
           case 'select':
-           return (<Form.Dropdown key={key} id={id} title={title} placeholder={placeholder}>
+           return (<Form.Dropdown key={key} id={id} title={title} >
                 {dp.options?.map((opt) => {
                   return (<Form.Dropdown.Item  
                       key={'option::'+opt.id} 
                       value={opt.id} 
                       title={opt.name}
-                      icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : null)}/>)
+                      icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined)}/>)
                 })}
               </Form.Dropdown>
             )
@@ -149,7 +152,7 @@ export default function CreateDatabaseForm(): JSX.Element {
                       key={'option::'+opt.id} 
                       value={opt.id} 
                       title={opt.name}
-                      icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : null)}/>)
+                      icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined)}/>)
                 })}
               </Form.TagPicker>
             )            
@@ -160,6 +163,11 @@ export default function CreateDatabaseForm(): JSX.Element {
       })}
     </Form>
   )
+}
+
+export function NoSharedContent(): JSX.Element{
+  return (<Detail markdown={`## No Shared Content 
+  \n\n Make sure to **Invite** at least one database with the integration you have created.\n ![NotionShare](https://images.ctfassets.net/lzny33ho1g45/2pIkZOvLY2o2dwfnJIYJxt/d5d9f1318b2e79ad92d8197e4abab655/automate-notion-with-zapier-11-share-options.png)`} />)
 }
 
 function validateForm(values: FormValues): boolean {
@@ -174,7 +182,7 @@ function validateForm(values: FormValues): boolean {
 
 
 function notionColorToTintColor (notionColor: string): Color {
-  return {
+   const colorMapper = {
     'default': Color.PrimaryText,
     'gray': Color.PrimaryText,
     'brown': Color.Brown,
@@ -185,5 +193,7 @@ function notionColorToTintColor (notionColor: string): Color {
     'orange': Color.Orange,
     'purple': Color.Purple,
     'pink': Color.Magenta
-  }[notionColor]
+  } as Record<string,Color>
+
+  return colorMapper[notionColor] 
 }
