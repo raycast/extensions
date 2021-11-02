@@ -1,23 +1,21 @@
 import {
   ActionPanel,
-  ActionPanelItem,
-  getLocalStorageItem,
-  Icon,
+  ActionPanelItem, Icon,
   ImageLike,
   List,
   OpenInBrowserAction,
   PushAction,
-  setLocalStorageItem,
   showToast,
-  ToastStyle,
+  ToastStyle
 } from "@raycast/api";
-import open from "open";
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { Doc, Entry, Index } from "./types";
 import Fuse from "fuse.js";
-import { useVisitedDocs } from "./useVisitedDocs";
 import fetch from "node-fetch";
+import open from "open";
+import { Dispatch, SetStateAction, useMemo, useState } from "react";
+import useSWR from "swr";
 import { URL } from "url";
+import { Doc, Entry } from "./types";
+import { useVisitedDocs } from "./useVisitedDocs";
 
 export const DEVDOCS_BASE_URL = "https://devdocs.io";
 
@@ -30,69 +28,37 @@ export function faviconUrl(size: number, url: string): string {
   }
 }
 
-export async function fetchDocIndex(): Promise<Doc[]> {
-  try {
-    const response = await fetch(`${DEVDOCS_BASE_URL}/docs/docs.json`);
-    const json = await response.json();
-    return json as Doc[];
-  } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Animated, "Could not refresh doc", "Please check your connexion.");
-    return Promise.resolve([]);
-  }
+interface FetchResult<T> {
+  data: T | undefined;
+  isLoading: boolean;
 }
 
-export async function fetchEntries(slug: string): Promise<Entry[]> {
-  try {
-    const response = await fetch(`${DEVDOCS_BASE_URL}/docs/${slug}/index.json`);
-    const json = await response.json();
-    return (json as Index).entries;
-  } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Could not load doc. Please check your connexion.");
-    return Promise.resolve([]);
+function fetcher<T>(path: string) {
+  return fetch(path).then((res) => res.json()) as Promise<T>
+}
+
+export function useFetch<T>(path: string): FetchResult<T> {
+  const { data, error } = useSWR<T, Error>(path, fetcher);
+  if (error) {
+    showToast(ToastStyle.Failure, "An error occurred!", "Please check your connexion.")
   }
+
+  return { data, isLoading: !error && !data };
 }
 
 export default function DocList(): JSX.Element {
-  const [state, setState] = useState<{ docs?: Doc[]; isLoading: boolean }>({ isLoading: true });
-  const { docs: visitedDocs, visitDoc, isLoading } = useVisitedDocs();
-
-  useEffect(() => {
-    let shouldUpdate = true;
-    async function refreshIndex() {
-      await getLocalStorageItem("index").then((content) => {
-        content && shouldUpdate ? setState({ docs: JSON.parse(content as string), isLoading: false }) : null;
-      });
-      await fetchDocIndex().then((docs) => {
-        if (shouldUpdate) {
-          setState({ docs, isLoading: false });
-          setLocalStorageItem("index", JSON.stringify(docs));
-        }
-      });
-      return () => {
-        shouldUpdate = false;
-      };
-    }
-    refreshIndex();
-  }, []);
-
-  useEffect(() => {
-    fetchDocIndex().then((docs) => {
-      setState({ docs: docs, isLoading: false });
-      setLocalStorageItem("index", JSON.stringify(docs));
-    });
-  }, []);
+  const { data, isLoading } = useFetch<Doc[]>(`${DEVDOCS_BASE_URL}/docs/docs.json`);
+  const { docs: visitedDocs, visitDoc } = useVisitedDocs();
 
   return (
-    <List isLoading={state.isLoading || isLoading}>
+    <List isLoading={!data && !data || isLoading}>
       <List.Section title="Last Visited">
         {visitedDocs?.map((doc) => (
           <DocItem key={doc.slug} doc={doc} onVisit={() => visitDoc(doc)} />
         ))}
       </List.Section>
       <List.Section title="All">
-        {state.docs?.map((doc) => (
+        {data?.map((doc) => (
           <DocItem key={doc.slug} doc={doc} onVisit={() => visitDoc(doc)} />
         ))}
       </List.Section>
@@ -100,44 +66,25 @@ export default function DocList(): JSX.Element {
   );
 }
 
-function useFuse<U>(items: U[], options: Fuse.IFuseOptions<U>, limit: number): [U[], Dispatch<SetStateAction<string>>] {
+function useFuse<U>(items: U[] | undefined, options: Fuse.IFuseOptions<U>, limit: number): [U[], Dispatch<SetStateAction<string>>] {
   const [query, setQuery] = useState("");
   const fuse = useMemo(() => {
-    return new Fuse(items, options);
+    return new Fuse(items || [], options);
   }, [items]);
 
-  if (!query) return [items.slice(0, limit), setQuery];
+  if (!query) return [(items || []).slice(0, limit), setQuery];
   const results = fuse.search(query, { limit: limit });
   return [results.map((result) => result.item), setQuery];
 }
 
 function EntryList(props: { doc: Doc; icon: ImageLike }) {
   const { doc, icon } = props;
-  const [entries, setEntries] = useState<Entry[]>([]);
-  const [results, setQuery] = useFuse(entries, { keys: ["name", "type"] }, 500);
-
-  useEffect(() => {
-    let shouldUpdate = true;
-    async function refreshEntries() {
-      await getLocalStorageItem(doc.slug).then((content) => {
-        content && shouldUpdate ? setEntries(JSON.parse(content as string)) : null;
-      });
-      await fetchEntries(doc.slug).then((entries) => {
-        if (shouldUpdate) {
-          setEntries(entries);
-          setLocalStorageItem(doc.slug, JSON.stringify(entries));
-        }
-      });
-    }
-    refreshEntries();
-    return () => {
-      shouldUpdate = false;
-    };
-  }, []);
+  const { data, isLoading } = useFetch<{entries: Entry[]}>(`${DEVDOCS_BASE_URL}/docs/${doc.slug}/index.json`);
+  const [results, setQuery] = useFuse(data?.entries, { keys: ["name", "type"] }, 500);
 
   return (
     <List
-      isLoading={entries.length == 0}
+      isLoading={isLoading}
       onSearchTextChange={(text) => {
         setQuery(text);
       }}

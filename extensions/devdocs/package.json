@@ -1,4 +1,6 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "license": "MIT",
   "name": "devdocs",
   "title": "Devdocs",
   "description": "Search on DevDocs from Raycast",
@@ -15,8 +17,9 @@
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "fuse.js": "^6.4.6",
-    "node-fetch": "^2.6.1",
-    "open": "^8.2.1"
+    "node-fetch": "^3.0.0",
+    "open": "^8.2.1",
+    "swr": "^1.0.1"
   },
   "devDependencies": {
     "@types/node": "^16.4.3",
