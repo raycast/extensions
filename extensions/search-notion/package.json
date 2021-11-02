@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-notion",
   "title": "Notion Page Search",
   "description": "Search Notion pages and open visited ones faster. No admin access required.",
@@ -35,7 +36,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
-    "node-fetch":	"^3.0.0",
+    "node-fetch": "^3.0.0",
     "raycast": "^1.0.8",
     "moment": "^2.29.1"
   },

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "things",
   "title": "Things",
   "version": "1.0.0",

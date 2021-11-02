@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "xkcd",
   "title": "XKCD Comics",
   "description": "Browse the xkcd comics and keep track of the ones you've read.",

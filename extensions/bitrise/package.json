@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bitrise",
   "title": "Bitrise Builds",
   "description": "This extension shows a list of your latest Bitrise builds.\n\nIt requires a Bitrise API key which you can get on https://app.bitrise.io/me/profile#/security.\n\nIcons courtesy of the Bitrise team.",
@@ -19,8 +20,8 @@
       "name": "apiKey",
       "type": "password",
       "required": true,
-      "title":"Bitrise API key",
-      "description":"Get it on https://app.bitrise.io/me/profile#/security"
+      "title": "Bitrise API key",
+      "description": "Get it on https://app.bitrise.io/me/profile#/security"
     }
   ],
   "dependencies": {

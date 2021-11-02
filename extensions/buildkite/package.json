@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "buildkite",
   "title": "Buildkite",
   "description": "Search Buildkite pipelines and builds",

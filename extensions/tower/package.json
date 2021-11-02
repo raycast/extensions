@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tower",
   "title": "Tower Repositories",
   "description": "Navigate and open your repositories in Tower.",
