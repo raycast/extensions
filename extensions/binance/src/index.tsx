@@ -13,14 +13,22 @@ const binance = new Binance().options({
 export interface PortfolioState {
   isLoading: boolean;
   portfolio: Portfolio | null;
-  title: string
 }
+
+interface BinanceError { 
+  statusMessage: string 
+}
+
+function isBinanceError(object: any): object is BinanceError {
+  return 'statusMessage' in object;
+}
+
 
 export default function BalanceList() {
   const { state } = usePortfolio()
 
   return (
-    <List isLoading={state.isLoading} searchBarPlaceholder={state.title}>
+    <List isLoading={state.isLoading} searchBarPlaceholder="Filter currencies">
     {
       state.portfolio?.sort(compareUSDTValue).reverse().map((entry) => (
           <CurrencyItem key={entry.currency} portfolioEntry={entry} />
@@ -54,7 +62,7 @@ function CurrencyItem(props: { portfolioEntry: PortfolioEntry }) {
 }
 
 export function usePortfolio() {
-  const [state, setState] = useState<PortfolioState>({ portfolio: null, isLoading: true, title: "" });
+  const [state, setState] = useState<PortfolioState>({ portfolio: null, isLoading: true });
 
   useEffect(() => {
     fetchPortfolio()
@@ -67,16 +75,8 @@ export function usePortfolio() {
     }));
 
     try {
-      setState((oldState) => ({
-        ...oldState,
-        title: "Loading balance"
-      }));
-      const balance = await binance.balance() as Balance
-      setState((oldState) => ({
-        ...oldState,
-        title: "Loading prices"
-      }));
-      const prices = await binance.prices() as PriceRecord
+      const balance: Balance = await binance.balance()
+      const prices: PriceRecord = await binance.prices()
   
       const portfolio: PortfolioEntry[] = Object.keys(balance).flatMap((currency: Currency) => {
         const available = balance[currency].available
@@ -100,19 +100,22 @@ export function usePortfolio() {
       setState((oldState) => ({
         ...oldState,
         isLoading: false,
-        portfolio: portfolio,
-        title: "Filter currencies"
+        portfolio: portfolio
       }));
-    } catch (error) {
-      const binanceError = error as BinanceError
-      console.error(binanceError)
-      const errorMsg = `Loading failed`
+    } catch (error: any) {
+      let errorMsg
+      if (error instanceof Error) {
+        errorMsg = error.message
+      } else if (isBinanceError(error)) {
+          errorMsg = error.statusMessage
+      } else {
+        errorMsg = error.toString()
+      }
       showToast(ToastStyle.Failure, errorMsg)
       setState((oldState) => ({
         ...oldState,
         isLoading: false,
         portfolio: null,
-        title: errorMsg
       }));
     }
   }
@@ -120,7 +123,6 @@ export function usePortfolio() {
   return { state }
 }
 
-type BinanceError = { statusMessage: string }
 type Currency = string
 type Price = number
 type BalanceInformation = {
