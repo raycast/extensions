@@ -65,7 +65,7 @@ async function getDerivedKey(callback) {
 
 	var keytar,
 	chromePassword;
-     await removeLocalStorageItem("CHROME_PASSWORD");
+	
 	chromePassword = await getLocalStorageItem("CHROME_PASSWORD");
   	if(!chromePassword){
   		if (process.platform === 'darwin') {
