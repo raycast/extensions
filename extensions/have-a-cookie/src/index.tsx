@@ -1,11 +1,21 @@
-import { ActionPanel, PushAction, CopyToClipboardAction, PasteAction, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { 
+  ActionPanel, 
+  PushAction, 
+  CopyToClipboardAction, 
+  Detail, 
+  PasteAction, 
+  List, 
+  OpenInBrowserAction, 
+  showToast, 
+  ToastStyle ,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 
 const chrome = require("./util/chrome-cookie-helper");
 
-export default function DomainList() {
-  const { isLoading, error, domains } = useDomainSearch()
-  
+export default function DomainList() { 
+  const { isLoading, error, domains } = useDomainSearch();
+
   return (
     <List 
       isLoading={isLoading} 
@@ -14,13 +24,15 @@ export default function DomainList() {
         <DomainListItem key={"domain-"+i} domain={domain} />
       ))}
     </List>
-  );
+  );  
 }
 
 
 export function CookieList(props: { domain_name: string }) {
   const domain_name = props.domain_name;
   const { isLoading, error, cookies } = useCookieSearch(domain_name)
+
+  
 
   var requestHeaderCookie = '';
   cookies?.forEach(function (cookie){
