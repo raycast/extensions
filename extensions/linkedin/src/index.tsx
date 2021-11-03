@@ -9,7 +9,11 @@ import {
   ToastStyle, 
   Icon, 
   ImageMask,
-  render
+  render,
+  getLocalStorageItem,
+  setLocalStorageItem,
+  removeLocalStorageItem,
+  popToRoot,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
@@ -29,7 +33,6 @@ interface LinkedInProfile {
   isLoading: boolean
 }
 
-
 type SearchResult = {
   searchId: string;
   trackingId: string;
@@ -42,7 +45,6 @@ type SearchResult = {
 
 var LINKEDIN_COOKIE: string | undefined;
 var LINKEDIN_CSRF_TOKEN:  string | undefined;
-var LINKEDIN_COOKIE_EXPIRED:  boolean | undefined;
 
 export default function SearchResultList() {
   const [searchText, setSearchText] = useState<string>('')
@@ -50,43 +52,8 @@ export default function SearchResultList() {
 
   if (error) {
     showToast(ToastStyle.Failure, "An Error Occurred", error.toString())
+    return HowToGrantKeyChainAccessDetail()
   }
-
-  chrome.getCookies('https://www.linkedin.com/', function(err: string, cookies: Record<string,string>[]) {
-
-    if(!err && cookies && cookies[0]){
-      LINKEDIN_COOKIE = '';
-      cookies.forEach(function (cookie){
-        LINKEDIN_COOKIE+=cookie.name+'='+cookie.value+';'
-        if(cookie.name=== 'JSESSIONID'){
-          LINKEDIN_CSRF_TOKEN = cookie.value.replace(/\"/g, "")
-        } 
-      })
-
-      LINKEDIN_COOKIE_EXPIRED = false;
-    }
-
-  });
-
-  if(LINKEDIN_COOKIE_EXPIRED){
-    render (
-        <Detail 
-          markdown={`## Missing LinkedIn's Cookie 🍪
-          \n We couldn\'t find your LinkedIn cookies or they were expired.
-          \n To resolve this issue, simply open **Google Chrome** and sign into your LinkedIn account.
-          \n ⚠️ *It can take up to a minute once signed in for the extension to work*
-          \n ![Sing Into LinkedIn](https://cdn.henrichabrand.com/raycast/sign-in-banner.png)`}
-          actions={
-            <ActionPanel> 
-              <OpenInBrowserAction title="Sign Into LinkedIn" url="https://www.linkedin.com/login" />
-            </ActionPanel>
-          }
-         />
-      );
-  }
-
- 
-
 
   return (
     <List 
@@ -131,6 +98,7 @@ export function ProfileDetail(props: { searchId: string, searchPos: number, quer
 
   if (error) {
     showToast(ToastStyle.Failure, "An Error Occurred", error.toString())
+    return HowToGrantKeyChainAccessDetail()
   }
 
 
@@ -264,10 +232,58 @@ function SearchResultItem(props: { searchResult: SearchResult, searchId: string,
           <OpenInBrowserAction title="Open in LinkedIn" url={targetUrl} />
           <CopyToClipboardAction title="Copy URL" content={targetUrl} />
         </ActionPanel>
-      }
-    />
+      } />
   );
 }
+
+
+
+
+export function HowToGrantKeyChainAccessDetail() {
+  return (
+    <Detail 
+      navigationTitle='Setup Extension'
+      markdown={`## Temporary Keychain Access
+        \n ![emporary Keychain Access](https://user-images.githubusercontent.com/18643714/140047596-5f1e35cc-c903-40b2-a6f5-c384b7b9620d.png)`}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Item title='Grant Keychain Access' onAction={async function () {
+            const cookieStored = await getLinkedInCookie();
+            if(cookieStored){
+              showToast(ToastStyle.Success, 'Access Granted', 'We retrieved your Chrome Safe Storage.')
+              render(HowToRefreshCookieDetail())                            
+            } else {
+              render(HowToGrantKeyChainAccessDetail()) 
+              showToast(ToastStyle.Failure, 'Access Denied', 'You need to hit "Allow" Chrome Safe Storage access.')
+            }
+          }} />
+        </ActionPanel>
+      } />
+  );
+}
+
+export function HowToRefreshCookieDetail() {
+  return (
+    <Detail 
+      navigationTitle='Setup Extension'
+      markdown={`## Generate LinkedIn Cookie
+        \n ![Sing Into LinkedIn](https://user-images.githubusercontent.com/18643714/140047604-3377657b-7498-4e3a-8621-18e408575343.png)`}
+      actions={
+        <ActionPanel>
+          <OpenInBrowserAction 
+            title="Log Into LinkedIn" 
+            url="https://www.linkedin.com/"
+            onOpen={function () {
+              popToRoot({ clearSearchBar: false });
+            }}/>
+        </ActionPanel>
+      } />
+  );
+}
+
+
+
+
 
 
 function useLinkedInSearch(query: string | undefined): LinkedInSearch {
@@ -280,15 +296,18 @@ function useLinkedInSearch(query: string | undefined): LinkedInSearch {
 
     useEffect(() => {
         async function getSearch() {
-            if (cancel) { return }
+          if (cancel) { return }
 
-            setError(undefined)
+          setError(undefined)
 
-            if(!LINKEDIN_COOKIE || !LINKEDIN_CSRF_TOKEN){
-              setError('Cookie not set')
-              return
-            }
+          LINKEDIN_COOKIE = await getLocalStorageItem("LINKEDIN_COOKIE");
+          LINKEDIN_CSRF_TOKEN = await getLocalStorageItem("LINKEDIN_CSRF_TOKEN");
 
+          if(!LINKEDIN_COOKIE || !LINKEDIN_CSRF_TOKEN){
+            setError("Missing LinkedIn cookie.")
+          }
+
+          if(LINKEDIN_COOKIE && LINKEDIN_CSRF_TOKEN){
             try {
               const response = await fetch("https://www.linkedin.com/voyager/api/voyagerSearchDashTypeahead?decorationId=com.linkedin.voyager.dash.deco.search.typeahead.GlobalTypeaheadCollection-27&q=globalTypeahead&query="+query, {
                 method: 'get',
@@ -318,7 +337,8 @@ function useLinkedInSearch(query: string | undefined): LinkedInSearch {
               setSearchResults(searchResults);
 
             } catch (e) {
-              LINKEDIN_COOKIE_EXPIRED = true;
+              await removeLocalStorageItem("LINKEDIN_COOKIE");
+              await removeLocalStorageItem("LINKEDIN_CSRF_TOKEN");
               if (!cancel) {
                   setError(e as string)
               }
@@ -326,6 +346,7 @@ function useLinkedInSearch(query: string | undefined): LinkedInSearch {
               if (!cancel)
                   setIsLoading(false)
             }
+          }
         }
 
         if(query){
@@ -344,8 +365,6 @@ function useLinkedInSearch(query: string | undefined): LinkedInSearch {
     return { searchResults, searchId, error, isLoading }
 }
 
-
-
 function useLinkedInProfile(searchId: string, searchPos: number, query: string): LinkedInProfile {
     const [profile, setProfile] = useState<Record<string, any>>()
     const [error, setError] = useState<string>()
@@ -353,93 +372,94 @@ function useLinkedInProfile(searchId: string, searchPos: number, query: string):
 
     let cancel = false
 
-
-
     useEffect(() => {
         async function getProfile() {
-            if (cancel) { return }
+          if (cancel) { return }
 
-            setError(undefined)
+          setError(undefined)
 
-            if(!LINKEDIN_COOKIE || !LINKEDIN_CSRF_TOKEN){
-              setError('Cookie not set')
-              return
-            }
+          LINKEDIN_COOKIE = await getLocalStorageItem("LINKEDIN_COOKIE");
+          LINKEDIN_CSRF_TOKEN = await getLocalStorageItem("LINKEDIN_CSRF_TOKEN");
 
-            try {
-              const response = await fetch("https://www.linkedin.com/voyager/api/search/dash/clusters?decorationId=com.linkedin.voyager.dash.deco.search.SearchClusterCollection-126&origin=RICH_QUERY_SUGGESTION&q=all&query=(keywords:"+encodeURIComponent(query)+",flagshipSearchIntent:SEARCH_SRP,queryParameters:(position:List("+searchPos+"),resultType:List(ALL),searchId:List("+searchId+")),includeFiltersInResponse:false)&start=0", {
-                method: 'get',
-                headers: {
-                  'Cookie': LINKEDIN_COOKIE,
-                  'csrf-token': LINKEDIN_CSRF_TOKEN,
-                  'x-restli-protocol-version': '2.0.0'
-                }
-              });
-              const json = await response.json() as Record<string,any>;
+          if(!LINKEDIN_COOKIE || !LINKEDIN_CSRF_TOKEN){
+            setError("Missing LinkedIn cookie.")
+          }
 
-              const profileResult = recordMapper({ 
-                sourceRecords : json.elements as any[],
-                models : [                
-                  { targetKey : "title", sourceKeys : ["featureUnion","heroEntityCard","title","text"]},
-                  { targetKey : "subtitle", sourceKeys : ["featureUnion","heroEntityCard","primarySubtitle","text"]},
-                  { targetKey : "secondarySubtitle", sourceKeys : ["featureUnion","heroEntityCard","secondarySubtitle","text"]},                  
-                  { targetKey : "badgeText", sourceKeys : ["featureUnion","heroEntityCard","badgeText","accessibilityText"]},
-                  { targetKey : "imgRoot", sourceKeys : ["featureUnion","heroEntityCard","image","attributes","0","detailData","profilePicture","profilePicture","displayImageReference","vectorImage","rootUrl"]},
-                  { targetKey : "img200", sourceKeys : ["featureUnion","heroEntityCard","image","attributes","0","detailData","profilePicture","profilePicture","displayImageReference","vectorImage","artifacts","1","fileIdentifyingUrlPathSegment"]},
-                  { targetKey : "logo200", sourceKeys : ["featureUnion","heroEntityCard","image","attributes","0","detailData","companyLogo","logo","vectorImage","artifacts","0","fileIdentifyingUrlPathSegment"]},
-                  { targetKey : "logoRoot", sourceKeys : ["featureUnion","heroEntityCard","image","attributes","0","detailData","companyLogo","logo","vectorImage","rootUrl"]},
-                  { targetKey : "trackingUrn", sourceKeys : ["featureUnion","heroEntityCard","trackingUrn"]},
-                  { targetKey : "navigationUrl", sourceKeys : ["featureUnion","heroEntityCard","navigationUrl"]},
-                  { targetKey : "trackingId", sourceKeys : ["featureUnion","heroEntityCard","trackingId"]},
-                  { targetKey : "memberRelationshipUrn", sourceKeys : ["featureUnion","heroEntityCard","primaryActions","0","actionDetails","primaryProfileActionV2","primaryAction","connection","memberRelationshipUrn"]}                
-                ] as any
-              })[0] as Record<string, any>
-            
-            setProfile(profileResult);
-
-            if(profileResult.trackingUrn && profileResult.trackingUrn.includes('urn:li:member:')){
-              profileResult.handler = profileResult.navigationUrl.match(/(?<=\/in\/).+?(?=\?)/g)[0]
-
-            
-
-             const response2 = await fetch("https://www.linkedin.com/voyager/api/identity/profiles/"+profileResult.handler+"/profileContactInfo", {
-                method: 'get',
-                headers: {
-                  'Cookie': LINKEDIN_COOKIE,
-                  'csrf-token': LINKEDIN_CSRF_TOKEN,
-                  'x-restli-protocol-version': '2.0.0'
-                }
-              });
-              const json2 = await response2.json() as Record<string,any>;
-              
-              profileResult.contactInfo = json2;
-              setProfile(profileResult);
-            }
-
-            
-              
-
-            } catch (e) {
-              LINKEDIN_COOKIE_EXPIRED = true;
-              if (!cancel) {
-                  setError(e as string)
+          try {
+            const response = await fetch("https://www.linkedin.com/voyager/api/search/dash/clusters?decorationId=com.linkedin.voyager.dash.deco.search.SearchClusterCollection-126&origin=RICH_QUERY_SUGGESTION&q=all&query=(keywords:"+encodeURIComponent(query)+",flagshipSearchIntent:SEARCH_SRP,queryParameters:(position:List("+searchPos+"),resultType:List(ALL),searchId:List("+searchId+")),includeFiltersInResponse:false)&start=0", {
+              method: 'get',
+              headers: {
+                'Cookie': LINKEDIN_COOKIE,
+                'csrf-token': LINKEDIN_CSRF_TOKEN,
+                'x-restli-protocol-version': '2.0.0'
               }
-            } finally {
-              if (!cancel)
-                  setIsLoading(false)
+            });
+            const json = await response.json() as Record<string,any>;
+
+            const profileResult = recordMapper({ 
+              sourceRecords : json.elements as any[],
+              models : [                
+                { targetKey : "title", sourceKeys : ["featureUnion","heroEntityCard","title","text"]},
+                { targetKey : "subtitle", sourceKeys : ["featureUnion","heroEntityCard","primarySubtitle","text"]},
+                { targetKey : "secondarySubtitle", sourceKeys : ["featureUnion","heroEntityCard","secondarySubtitle","text"]},                  
+                { targetKey : "badgeText", sourceKeys : ["featureUnion","heroEntityCard","badgeText","accessibilityText"]},
+                { targetKey : "imgRoot", sourceKeys : ["featureUnion","heroEntityCard","image","attributes","0","detailData","profilePicture","profilePicture","displayImageReference","vectorImage","rootUrl"]},
+                { targetKey : "img200", sourceKeys : ["featureUnion","heroEntityCard","image","attributes","0","detailData","profilePicture","profilePicture","displayImageReference","vectorImage","artifacts","1","fileIdentifyingUrlPathSegment"]},
+                { targetKey : "logo200", sourceKeys : ["featureUnion","heroEntityCard","image","attributes","0","detailData","companyLogo","logo","vectorImage","artifacts","0","fileIdentifyingUrlPathSegment"]},
+                { targetKey : "logoRoot", sourceKeys : ["featureUnion","heroEntityCard","image","attributes","0","detailData","companyLogo","logo","vectorImage","rootUrl"]},
+                { targetKey : "trackingUrn", sourceKeys : ["featureUnion","heroEntityCard","trackingUrn"]},
+                { targetKey : "navigationUrl", sourceKeys : ["featureUnion","heroEntityCard","navigationUrl"]},
+                { targetKey : "trackingId", sourceKeys : ["featureUnion","heroEntityCard","trackingId"]},
+                { targetKey : "memberRelationshipUrn", sourceKeys : ["featureUnion","heroEntityCard","primaryActions","0","actionDetails","primaryProfileActionV2","primaryAction","connection","memberRelationshipUrn"]}                
+              ] as any
+            })[0] as Record<string, any>
+          
+          setProfile(profileResult);
+
+          if(profileResult.trackingUrn && profileResult.trackingUrn.includes('urn:li:member:')){
+            profileResult.handler = profileResult.navigationUrl.match(/(?<=\/in\/).+?(?=\?)/g)[0]
+
+          
+
+           const response2 = await fetch("https://www.linkedin.com/voyager/api/identity/profiles/"+profileResult.handler+"/profileContactInfo", {
+              method: 'get',
+              headers: {
+                'Cookie': LINKEDIN_COOKIE,
+                'csrf-token': LINKEDIN_CSRF_TOKEN,
+                'x-restli-protocol-version': '2.0.0'
+              }
+            });
+            const json2 = await response2.json() as Record<string,any>;
+            
+            profileResult.contactInfo = json2;
+            setProfile(profileResult);
+          }
+
+          
+            
+
+          } catch (e) {
+            await removeLocalStorageItem("LINKEDIN_COOKIE");
+            await removeLocalStorageItem("LINKEDIN_CSRF_TOKEN");
+            if (!cancel) {
+                setError(e as string)
             }
-        }
+          } finally {
+            if (!cancel)
+                setIsLoading(false)
+          }
+      }
 
-        if(query){
-          getProfile();
-        } else {
-          setIsLoading(false)
-        }
-        
+      if(query){
+        getProfile();
+      } else {
+        setIsLoading(false)
+      }
+      
 
-        return () => {
-            cancel = true
-        }
+      return () => {
+          cancel = true
+      }
 
     }, [searchId, searchPos, query])
 
@@ -447,6 +467,31 @@ function useLinkedInProfile(searchId: string, searchPos: number, query: string):
 }
 
 
+
+async function getLinkedInCookie(): boolean {
+  try {
+    const cookies: Record<string,string>[] = await chrome.getCookiesPromised('https://www.linkedin.com/')
+    let TEMP_LINKEDIN_COOKIE: string = '';
+    let TEMP_LINKEDIN_CSRF_TOKEN: string = '';
+    if(cookies && cookies[0]){
+      cookies.forEach(function (cookie){
+        TEMP_LINKEDIN_COOKIE+=cookie.name+'='+cookie.value+';'
+        if(cookie.name=== 'JSESSIONID'){
+          TEMP_LINKEDIN_CSRF_TOKEN = cookie.value.replace(/\"/g, '')
+        } 
+      })
+      await setLocalStorageItem("LINKEDIN_COOKIE", TEMP_LINKEDIN_COOKIE)
+      await setLocalStorageItem("LINKEDIN_CSRF_TOKEN", TEMP_LINKEDIN_CSRF_TOKEN)
+      console.log(TEMP_LINKEDIN_CSRF_TOKEN)
+      return true;
+    } else {
+      return false
+    }
+  } catch (error) {
+      return false
+  }
+  
+}
 
 
 function recordMapper (mapper: { sourceRecords : any[], models: [{targetKey : string, sourceKeys : string[]}]}): Record<string, any> {
