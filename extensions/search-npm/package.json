@@ -10,7 +10,7 @@
     {
       "name": "index",
       "title": "Search Packages",
-      "subtitle": "Search for npm package information",
+      "subtitle": "npm",
       "description": "Search for npm package information from npms.io. Also view bundlephobia.com cost, the package's README and Snyk vulnerability info",
       "mode": "view"
     }
