@@ -1,0 +1,69 @@
+{
+	"name": "github-repository-search",
+	"title": "GitHub Pull Requests",
+	"description": "Shows Pull Requests where you’re an assignee, a reviewer, or author.",
+	"icon": "icon.png",
+	"author": "rolandleth",
+	"license": "MIT",
+	"commands": [
+		{
+			"name": "index",
+			"title": "Pull Requests",
+			"subtitle": "GitHub",
+			"description": "Shows Pull Requests where you’re an assignee, a reviewer, or author",
+			"mode": "view"
+		}
+	],
+	"preferences": [
+		{
+			"name": "username",
+			"type": "textfield",
+			"required": true,
+			"title": "Username",
+			"description": "Your GitHub username",
+			"placeholder": "Enter your GitHub username"
+		},
+		{
+			"name": "token",
+			"type": "password",
+			"required": true,
+			"title": "Personal Access Token",
+			"description": "Create a token with repository and organization access"
+		},
+		{
+			"name": "ignoredRepos",
+			"type": "textfield",
+			"required": false,
+			"title": "Ignored repositories",
+			"description": "Comma separated repositories, in the form of\norg/repo or user/repo or repo, e.g raycast/extensions or extensions.\nUseful for ignoring certain repos"
+		},
+		{
+			"name": "ignoredAuthors",
+			"type": "textfield",
+			"required": false,
+			"title": "Ignored PR authors",
+			"description": "Comma separated ids, e.g dependabot. Useful for ignoring PRs by bots"
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^1.25.0",
+		"javascript-time-ago": "^2.3.9",
+		"octokit": "^1.7.0",
+		"use-debounce": "^7.0.0",
+		"node-fetch": "^3.0.0"
+	},
+	"devDependencies": {
+		"@types/node": "~16.10.0",
+		"@types/react": "^17.0.28",
+		"@typescript-eslint/eslint-plugin": "^5.0.0",
+		"@typescript-eslint/parser": "^5.0.0",
+		"eslint": "^7.32.0",
+		"eslint-config-prettier": "^8.3.0",
+		"react-devtools": "^4.19.2",
+		"typescript": "^4.4.3"
+	},
+	"scripts": {
+		"build": "ray build -e dist",
+		"dev": "ray develop"
+	}
+}
