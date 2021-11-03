@@ -18,6 +18,12 @@
  ITERATIONS,
  dbClosed = false;
 
+ import {
+  getLocalStorageItem,
+  setLocalStorageItem,
+  removeLocalStorageItem,
+} from "@raycast/api";
+
  const { exec } = require("child_process");
 
  var	KEYLENGTH = 16,
@@ -55,18 +61,28 @@ function decrypt(key, encryptedData) {
 
 }
 
-function getDerivedKey(callback) {
+async function getDerivedKey(callback) {
 
 	var keytar,
 	chromePassword;
-
-	if (process.platform === 'darwin') {
-
-		var keychain = require('keychain');
-		keychain.getPassword({ account: 'Chrome', service: 'Chrome Safe Storage' }, function(err, chromePassword) {
-			crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
-		});	
-	} 
+     await removeLocalStorageItem("CHROME_PASSWORD");
+	chromePassword = await getLocalStorageItem("CHROME_PASSWORD");
+  	if(!chromePassword){
+  		if (process.platform === 'darwin') {
+			var keychain = require('keychain');
+			keychain.getPassword({ account: 'Chrome', service: 'Chrome Safe Storage' }, async function(err, chromePassword) {
+				if(typeof chromePassword === 'string'){
+				  	await setLocalStorageItem("CHROME_PASSWORD", chromePassword)
+				  	crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
+				} else {
+					callback('Keychain Access Denied')
+				}				
+			});	
+		} 
+  	} else {
+  		crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
+  	}
+	
 
 }
 
@@ -250,8 +266,6 @@ const getCookies = async (uri, format, callback, profile) => {
 
 	}
 
-	//db = new sqlite3.Database(path);
-
 	if (format instanceof Function) {
 		callback = format;
 		format = null;
@@ -263,18 +277,12 @@ const getCookies = async (uri, format, callback, profile) => {
 		return callback(new Error('Could not parse URI, format should be http://www.example.com/path/'));
 	}
 
-	/*if (dbClosed) {
-		db = new sqlite3.Database(path);
-		dbClosed = false;
-	}*/
-
-	getDerivedKey(function (err, derivedKey) {
+	getDerivedKey(async function (err, derivedKey) {
 
 		if (err) {
+			await removeLocalStorageItem("CHROME_PASSWORD");
 			return callback(err);
 		}
-
-		//db.serialize(function () {
 
 		var cookies = [];
 
@@ -292,12 +300,13 @@ const getCookies = async (uri, format, callback, profile) => {
 
 		
 		exec(sqliteQuery, (error, stdout, stderr) => {
+			exec('sqlite3 .exit', (error, stdout, stderr) => {})
 			if (error) {
-				
+				callback(error)
 				return;
 			}
 			if (stderr) {
-				
+				callback(stderr)
 				return;
 			}
 
