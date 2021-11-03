@@ -46,10 +46,14 @@ Raycast extension to display and filter your recent GitHub stars
 
 - open the package's repository
 - view the package's README in a Raycast detail view
+- view the package source code on [GitHub.dev](https://github.dev) & [CodeSandbox](https://codesandbox.io)
+- copy command to clone the repo using either `gh`, git SSH or git HTTPS
 
 ### Preferences
 
 - set your GitHub username
 - set the number of results to display
+
+### Screencast
 
 https://user-images.githubusercontent.com/64883/139749757-0cc71b6a-182b-41ad-8890-df302331eef7.mp4
