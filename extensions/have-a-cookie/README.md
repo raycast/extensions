@@ -1,1 +1,4 @@
-![google-chrome-safe-access-banner](https://user-images.githubusercontent.com/18643714/139648305-2415289e-0d13-4da2-99a1-88cff290e6a8.png)
+# Extension Setup
+
+### Keychain Access
+![how-to-grant-keychain-access](https://user-images.githubusercontent.com/18643714/140070327-1c3fe5f4-eb9f-487e-a8a5-1823fabcc21f.png)
