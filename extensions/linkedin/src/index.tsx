@@ -305,6 +305,7 @@ function useLinkedInSearch(query: string | undefined): LinkedInSearch {
 
           if(!LINKEDIN_COOKIE || !LINKEDIN_CSRF_TOKEN){
             setError("Missing LinkedIn cookie.")
+            return
           }
 
           if(LINKEDIN_COOKIE && LINKEDIN_CSRF_TOKEN){
@@ -383,7 +384,8 @@ function useLinkedInProfile(searchId: string, searchPos: number, query: string):
 
           if(!LINKEDIN_COOKIE || !LINKEDIN_CSRF_TOKEN){
             setError("Missing LinkedIn cookie.")
-          }
+            return
+          } 
 
           try {
             const response = await fetch("https://www.linkedin.com/voyager/api/search/dash/clusters?decorationId=com.linkedin.voyager.dash.deco.search.SearchClusterCollection-126&origin=RICH_QUERY_SUGGESTION&q=all&query=(keywords:"+encodeURIComponent(query)+",flagshipSearchIntent:SEARCH_SRP,queryParameters:(position:List("+searchPos+"),resultType:List(ALL),searchId:List("+searchId+")),includeFiltersInResponse:false)&start=0", {
@@ -468,7 +470,7 @@ function useLinkedInProfile(searchId: string, searchPos: number, query: string):
 
 
 
-async function getLinkedInCookie(): boolean {
+async function getLinkedInCookie(): Promise<boolean> {
   try {
     const cookies: Record<string,string>[] = await chrome.getCookiesPromised('https://www.linkedin.com/')
     let TEMP_LINKEDIN_COOKIE: string = '';
