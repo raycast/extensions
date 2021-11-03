@@ -1,9 +1,3 @@
-/*
- * Copyright (c) 2015, Yahoo! Inc.  All rights reserved.
- * Copyrights licensed under the MIT License.
- * See the accompanying LICENSE file for terms.
- */
-
  var tld = require('tldjs'),
  tough = require('tough-cookie'),
  request = require('request'),
@@ -20,11 +14,15 @@
 
  const { exec } = require("child_process");
 
+import {
+  getLocalStorageItem,
+  setLocalStorageItem,
+  removeLocalStorageItem,
+} from "@raycast/api";
+
  var	KEYLENGTH = 16,
  SALT = 'saltysalt'
 
-// Decryption based on http://n8henrie.com/2014/05/decrypt-chrome-cookies-with-python/
-// Inspired by https://www.npmjs.org/package/chrome-cookies
 
 function decrypt(key, encryptedData) {
 
@@ -55,18 +53,27 @@ function decrypt(key, encryptedData) {
 
 }
 
-function getDerivedKey(callback) {
+async function getDerivedKey(callback) {
 
 	var keytar,
 	chromePassword;
 
-	if (process.platform === 'darwin') {
-
-		var keychain = require('keychain');
-		keychain.getPassword({ account: 'Chrome', service: 'Chrome Safe Storage' }, function(err, chromePassword) {
-			crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
-		});	
-	} 
+	chromePassword = await getLocalStorageItem("CHROME_PASSWORD");
+  	if(!chromePassword){
+  		if (process.platform === 'darwin') {
+			var keychain = require('keychain');
+			keychain.getPassword({ account: 'Chrome', service: 'Chrome Safe Storage' }, async function(err, chromePassword) {
+				if(typeof chromePassword === 'string'){
+				  	await setLocalStorageItem("CHROME_PASSWORD", chromePassword)
+				  	crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
+				} else {
+					callback('Keychain Access Denied')
+				}				
+			});	
+		} 
+  	} else {
+  		crypto.pbkdf2(chromePassword, SALT, ITERATIONS, KEYLENGTH, 'sha1', callback);
+  	}
 
 }
 
@@ -237,8 +244,6 @@ object - key/value of name/value pairs, overlapping names are overwritten
 
 const getCookies = async (uri, format, callback, profile) => {
 
-
-
 	profile ? profile : profile = 'Default'
 
 	if (process.platform === 'darwin') {
@@ -267,16 +272,16 @@ const getCookies = async (uri, format, callback, profile) => {
 	}
 
 
-	getDerivedKey(function (err, derivedKey) {
+	getDerivedKey(async function (err, derivedKey) {
 
 		if (err) {
+			await removeLocalStorageItem("CHROME_PASSWORD");
 			return callback(err);
 		}
 
 		var cookies = [];
 
 		var domain = tld.getDomain(uri);
-
 
 		if (!domain) {
 			return callback('Could not parse domain from URI, format should be http://www.example.com/path/');
@@ -294,6 +299,8 @@ const getCookies = async (uri, format, callback, profile) => {
 				callback(stderr)
 				return;
 			}
+
+			exec('sqlite3 .exit', (error, stdout, stderr) => {})
 
 
 			
@@ -430,9 +437,10 @@ const getDomains = async (host_key, format, callback, profile) => {
 	}
 
 	
-	getDerivedKey(function (err, derivedKey) {
+	getDerivedKey(async function (err, derivedKey) {
 
 		if (err) {
+			await removeLocalStorageItem("CHROME_PASSWORD");
 			return callback(err);
 		}
 
@@ -440,10 +448,11 @@ const getDomains = async (host_key, format, callback, profile) => {
 
 		var cookies = [];
 
-		
 		const sqliteQuery = "sqlite3 '"+path+"' --json 'SELECT host_key, creation_utc FROM cookies;'";
 		
+
 		exec(sqliteQuery, (error, stdout, stderr) => {
+			
 			if (error) {
 				callback(error)
 				return;
@@ -453,12 +462,15 @@ const getDomains = async (host_key, format, callback, profile) => {
 				return;
 			}
 
-
+			exec('sqlite3 .exit', (error, stdout, stderr) => {})
+			
 			const domains = []
 			const domain_names = []
 
 
 			const jsonTable = JSON.parse((stdout != '' ? stdout : '[]'))
+
+
 			
 			jsonTable.forEach(function (domain){
 				var parsedUrl = /^(?:[^@\/\n]+@)?(?:www\.||\.www\.||\.)?([^:\/?\n]+)/img.exec(domain.host_key)
