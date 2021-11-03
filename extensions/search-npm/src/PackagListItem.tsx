@@ -116,7 +116,6 @@ export const PackageListItem = ({
             <CopyToClipboardAction
               title="Copy Package Name"
               content={pkg.name}
-              shortcut={{ modifiers: ['cmd'], key: 'c' }}
             />
           </ActionPanel.Section>
         </ActionPanel>
