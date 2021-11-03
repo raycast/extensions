@@ -117,7 +117,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenAction title="Open in Code" icon="icon.png" target={path} application="Visual Studio Code" />
+            <OpenAction title="Open in Code" icon="command-icon.png" target={path} application="Visual Studio Code" />
             {terminalInstalled && (
               <ActionPanel.Item
                 title="Open in Terminal"
