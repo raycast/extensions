@@ -22,7 +22,9 @@ interface ExtensionPreferences {
 }
 
 export default function PackageList() {
-  const [state, setState] = useState<State>()
+  const [state, setState] = useState<State>({
+    items: [],
+  })
   const [loading, setLoading] = useState<boolean>(true)
   const { githubUsername, resultsCount }: ExtensionPreferences =
     getPreferenceValues()
@@ -40,23 +42,35 @@ export default function PackageList() {
           `https://api.github.com/users/${githubUsername}/starred?per_page=${resultsCount}`
         )
         const json = await response.json()
-        setState({ items: json as Response })
+        if (response.ok) {
+          setState({ items: json as Response })
+          await setLocalStorageItem('github-star-items', JSON.stringify(json))
+        } else {
+          await setLocalStorageItem('github-star-items', '')
+          setState({
+            error: new Error(
+              'This GitHub user does not exist. Check your preferences'
+            ),
+          })
+        }
         setLoading(false)
-        await setLocalStorageItem('github-star-items', JSON.stringify(json))
       } catch (error) {
-        console.error(error)
         showToast(ToastStyle.Failure, 'Could not fetch stars')
-        // setState({ error: error instanceof Error ? error : new Error("Something went wrong") }))
+        setState({
+          error:
+            error instanceof Error ? error : new Error('Something went wrong'),
+        })
       }
     }
 
     if (githubUsername) {
       fetchPackages()
     } else {
-      showToast(
-        ToastStyle.Failure,
-        `Please add your GitHub username to this extension's preferences`
-      )
+      setState({
+        error: new Error(
+          `Please add your GitHub username to this extension's preferences`
+        ),
+      })
     }
   }, [])
 
