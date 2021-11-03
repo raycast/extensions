@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vscode-project-manager",
   "title": "Visual Studio Code - Project Manager",
   "description": "Search and open projects from Visual Studio Code Project Manager",
@@ -27,9 +28,9 @@
       "name": "groupProjectsByTag",
       "type": "checkbox",
       "required": false,
-      "title": "Group projects by tag",
+      "title": "Grouping",
       "default": true,
-      "label": "",
+      "label": "Group projects by tag",
       "description": "Groups projects by tag instead of just showing"
     }
   ],
