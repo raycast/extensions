@@ -42,7 +42,7 @@ export const PackageListItem = ({
           />
           <OpenInBrowserAction
             url={result.html_url.replace('github.com', 'github.dev')}
-            title="View Code in Github.dev"
+            title="View Code in GitHub.dev"
             icon={{
               source: {
                 light: 'github-bright.png',

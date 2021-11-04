@@ -1,6 +1,6 @@
 {
   "name": "search-github-stars",
-  "title": "Stars",
+  "title": "GitHub Stars",
   "description": "Display and filter your recent GitHub stars",
   "subtitle": "GitHub",
   "icon": "icon.png",
