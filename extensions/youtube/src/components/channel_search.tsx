@@ -1,17 +1,18 @@
 import { List, showToast, ToastStyle } from "@raycast/api";
 import { useState } from "react";
-import { getErrorMessage } from "../lib/utils";
+import { getErrorMessage, getUuid } from "../lib/utils";
 import { Channel, searchChannels, useRefresher } from "../lib/youtubeapi";
 import { ChannelListItem } from "./channel";
 import { RecentSearchesList, useRecentSearch } from "./search";
 
 export function SearchChannelList() {
   const [searchText, setSearchText] = useState<string>();
+  const [uuid] = useState<string>(getUuid());
   const {
     data: rc,
     appendRecentSearches,
     clearAllRecentSearches,
-  } = useRecentSearch("recent_channel_searches", setSearchText);
+  } = useRecentSearch("recent_channel_searches", uuid, setSearchText);
   const { data, error, isLoading } = useRefresher<Channel[] | undefined>(async () => {
     if (searchText) {
       return await searchChannels(searchText);
@@ -23,7 +24,7 @@ export function SearchChannelList() {
   }
   if (data) {
     return (
-      <List isLoading={isLoading} onSearchTextChange={setSearchText} throttle={true}>
+      <List isLoading={isLoading} onSearchTextChange={appendRecentSearches} throttle={true}>
         {data?.map((c) => (
           <ChannelListItem key={c.id} channel={c} />
         ))}

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtube",
   "title": "Youtube",
   "description": "Search Videos, Playlists and more",
@@ -19,6 +20,13 @@
       "subtitle": "YouTube",
       "description": "Search YouTube Channels",
       "mode": "view"
+    },
+    {
+      "name": "popular-videos",
+      "title": "Popular Videos",
+      "subtitle": "YouTube",
+      "description": "Show popular YouTube Videos",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -35,12 +43,14 @@
     "@google-cloud/local-auth": "^1.0.1",
     "@googleapis/youtube": "^2.0.0",
     "@raycast/api": "^1.25.2",
+    "javascript-time-ago": "^2.3.10",
     "node-fetch": "^3.0.0",
-    "use-debounce": "^7.0.0"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
+    "@types/uuid": "^8.3.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
