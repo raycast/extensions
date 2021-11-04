@@ -8,4 +8,6 @@ export interface ProjectEntry {
 export interface Preferences {
   projectManagerDataPath: string;
   groupProjectsByTag: boolean;
+  terminalAppPath: string;
+  gitClientAppPath: string;
 }

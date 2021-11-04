@@ -1,5 +1,6 @@
 import {
   ActionPanel,
+  closeMainWindow,
   CopyToClipboardAction,
   Detail,
   environment,
@@ -11,7 +12,9 @@ import {
   TrashAction,
 } from "@raycast/api";
 import { existsSync, readFileSync } from "fs";
+import open from "open";
 import { homedir } from "os";
+import config from "parse-git-config";
 import { dirname } from "path";
 import { ReactElement } from "react";
 import tildify from "tildify";
@@ -20,6 +23,12 @@ import { Preferences, ProjectEntry } from "./types";
 const STORAGE = `${homedir()}/Library/Application Support/Code/User/globalStorage/alefragnani.project-manager/projects.json`;
 
 const preferences: Preferences = getPreferenceValues();
+
+const gitClientPath = preferences.gitClientAppPath || "";
+const gitClientInstalled = existsSync(gitClientPath);
+
+const terminalPath = preferences.terminalAppPath || "";
+const terminalInstalled = existsSync(terminalPath);
 
 function getProjectEntries(): ProjectEntry[] {
   const storageFile = preferences.projectManagerDataPath || STORAGE;
@@ -108,7 +117,31 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenAction title="Open in Code" icon="icon.png" target={path} application="Visual Studio Code" />
+            <OpenAction title="Open in Code" icon="command-icon.png" target={path} application="Visual Studio Code" />
+            {terminalInstalled && (
+              <ActionPanel.Item
+                title="Open in Terminal"
+                key="terminal"
+                onAction={() => {
+                  open(path, { app: { name: terminalPath, arguments: [path] } });
+                  closeMainWindow();
+                }}
+                icon={{ fileIcon: terminalPath }}
+                shortcut={{ modifiers: ["cmd"], key: "t" }}
+              />
+            )}
+            {gitClientInstalled && isGitRepo(path) && (
+              <ActionPanel.Item
+                title="Open in Git client"
+                key="git-client"
+                onAction={() => {
+                  open(path, { app: { name: gitClientPath, arguments: [path] } });
+                  closeMainWindow();
+                }}
+                icon={{ fileIcon: gitClientPath }}
+                shortcut={{ modifiers: ["cmd"], key: "g" }}
+              />
+            )}
             <ShowInFinderAction path={path} />
             <OpenWithAction path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           </ActionPanel.Section>
@@ -143,4 +176,9 @@ function DevelopmentActionSection() {
       <CopyToClipboardAction title="Copy projects.json File Path" content={STORAGE} />
     </ActionPanel.Section>
   ) : null;
+}
+
+function isGitRepo(path: string): boolean {
+  const gitConfig = config.sync({ cwd: path, path: ".git/config", expandKeys: true });
+  return !!gitConfig.core;
 }
