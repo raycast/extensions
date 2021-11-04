@@ -86,21 +86,21 @@ export interface OutdatedResults {
 
 /// Paths
 
-const brewExecutable = (() => {
-  const path = (cpus()[0].model.includes('Apple') ? "/opt/homebrew/bin/brew" : "/usr/local/bin/brew");
-  try {
-    accessSync(path, constants.X_OK);
-    return path
-  } catch {
-    return 'brew' // assume brew is in PATH
-  }
-})();
-
-export const brewPrefix = execSync(`${brewExecutable} --prefix`, {encoding: 'utf8'}).trim();
+export const brewPrefix: string = cpus()[0].model.includes('Apple') ? "/opt/homebrew" : "/usr/local";
 
 export function brewPath(suffix: string): string {
   return path_join(brewPrefix, suffix);
 }
+
+const brewExecutable = (() => {
+  const path = path_join(brewPrefix, 'bin/brew');
+  try {
+    accessSync(path, constants.X_OK);
+    return path;
+  } catch {
+    return 'brew'; // assume brew is in PATH
+  }
+})();
 
 /// Fetching
 
