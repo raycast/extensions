@@ -9,6 +9,7 @@ import Fuse from "fuse.js"
 export const JetBrainsIcon = "jb.png"
 
 export const preferredApp = String(preferences["app"].value || preferences["app"].default)
+export const bin = String(preferences["bin"].value || preferences["bin"].default).replace('~', homedir())
 
 export interface file {
   title: string
