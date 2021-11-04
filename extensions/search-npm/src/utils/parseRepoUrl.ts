@@ -7,7 +7,15 @@ interface ParseRepoUrlResponse {
   type?: 'github' | 'gitlab'
 }
 
-export const parseRepoUrl = (repoUrl: string): ParseRepoUrlResponse => {
+export const parseRepoUrl = (repoUrl?: string): ParseRepoUrlResponse => {
+  if (!repoUrl) {
+    return {
+      owner: null,
+      name: null,
+      type: undefined,
+    }
+  }
+
   const isGithubRepo = repoUrl.includes('github.com')
   const isGitlabRepo = repoUrl.includes('gitlab.com')
   const parsedRepo = isGithubRepo
