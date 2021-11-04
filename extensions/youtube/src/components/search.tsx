@@ -75,14 +75,12 @@ async function appendRecentSearchesStore(key: string, search: RecentSearch) {
     const existing = data.find((o) => o.uuid === search.uuid);
     if (existing) {
       // update existing recent stored search
-      console.log("patch existing");
       existing.text = search.text;
       existing.timestamp = search.timestamp;
       existing.uuid = search.uuid;
       setRecentSearches(key, data);
     } else {
       // add new entry to recent searches
-      console.log("add new entry");
       const freshData = [search].concat(data).slice(0, 20);
       setRecentSearches(key, freshData);
     }
