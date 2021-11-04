@@ -1,15 +1,18 @@
 import {
   ActionPanel,
+  Color,
   getLocalStorageItem,
+  Icon,
   List,
   popToRoot,
   removeLocalStorageItem,
   setLocalStorageItem,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { useDebouncedCallback } from "use-debounce";
+import { formatDateShort } from "../lib/utils";
 
 export interface RecentSearch {
+  uuid: string;
   text: string;
   timestamp: Date;
 }
@@ -41,6 +44,7 @@ export async function getRecentSearches(key: string): Promise<RecentSearch[] | u
             }
             if (text && text.length > 0 && timestamp) {
               result.push({
+                uuid: r.uuid || "",
                 text: text,
                 timestamp: timestamp,
               });
@@ -68,8 +72,18 @@ async function setRecentSearches(key: string, recentSearches: RecentSearch[]) {
 async function appendRecentSearchesStore(key: string, search: RecentSearch) {
   const data = await getRecentSearches(key);
   if (data && data.length > 0) {
-    const freshData = [search].concat(data).slice(0, 20);
-    setRecentSearches(key, freshData);
+    const existing = data.find((o) => o.uuid === search.uuid);
+    if (existing) {
+      // update existing recent stored search
+      existing.text = search.text;
+      existing.timestamp = search.timestamp;
+      existing.uuid = search.uuid;
+      setRecentSearches(key, data);
+    } else {
+      // add new entry to recent searches
+      const freshData = [search].concat(data).slice(0, 20);
+      setRecentSearches(key, freshData);
+    }
   } else {
     setRecentSearches(key, [search]);
   }
@@ -86,7 +100,7 @@ function NoSearchItem(props: { recentQueries: RecentSearch[] | undefined }): JSX
 
 function SearchItem(props: {
   search: RecentSearch;
-  setSearchText: (text: string, noDelay?: boolean | undefined) => void;
+  setSearchText: (text: string) => void;
   clearAll?: () => Promise<void>;
 }): JSX.Element {
   const handleClear = async () => {
@@ -98,11 +112,21 @@ function SearchItem(props: {
   return (
     <List.Item
       title={props.search.text}
-      accessoryTitle={props.search.timestamp.toLocaleString()}
+      accessoryTitle={formatDateShort(props.search.timestamp)}
       actions={
         <ActionPanel>
-          <ActionPanel.Item onAction={() => props.setSearchText(props.search.text, true)} title="Search Again" />
-          {props.clearAll && <ActionPanel.Item title="Clear old searches" onAction={handleClear} />}
+          <ActionPanel.Item
+            title="Search Again"
+            icon={{ source: Icon.Binoculars, tintColor: Color.PrimaryText }}
+            onAction={() => props.setSearchText(props.search.text)}
+          />
+          {props.clearAll && (
+            <ActionPanel.Item
+              title="Clear old Searches"
+              icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+              onAction={handleClear}
+            />
+          )}
         </ActionPanel>
       }
     />
@@ -111,7 +135,7 @@ function SearchItem(props: {
 
 export function RecentSearchesList(props: {
   recentSearches: RecentSearch[] | undefined;
-  setRootSearchText: (text: string, noDelay?: boolean | undefined) => void;
+  setRootSearchText: (text: string) => void;
   isLoading?: boolean | undefined;
   clearAll?: () => Promise<void>;
 }): JSX.Element {
@@ -127,7 +151,7 @@ export function RecentSearchesList(props: {
         <NoSearchItem recentQueries={rq} />
         {rq?.map((q) => (
           <SearchItem
-            key={q.timestamp.toLocaleString() + q.text}
+            key={`${q.timestamp.toLocaleString()} ${q.text} ${q.uuid}`}
             search={q}
             setSearchText={setRootSearchText}
             clearAll={props.clearAll}
@@ -140,30 +164,21 @@ export function RecentSearchesList(props: {
 
 export function useRecentSearch(
   key: string,
+  uuid: string,
   setSearchText?: React.Dispatch<React.SetStateAction<string | undefined>>
 ): {
   data: RecentSearch[] | undefined;
-  appendRecentSearches: (text: string, noDelay?: boolean | undefined) => Promise<void>;
+  appendRecentSearches: (text: string) => Promise<void>;
   clearAllRecentSearches: () => Promise<void>;
 } {
   const [data, setData] = useState<RecentSearch[]>();
+  let cancel = false;
 
-  const dispatchAppend = async (text: string) => {
+  const appendRecentSearches = async (text: string) => {
     if (setSearchText) {
       setSearchText(text);
     }
-    await appendRecentSearchesStore(key, { text: text, timestamp: new Date() });
-  };
-
-  const debounced = useDebouncedCallback(dispatchAppend, 1500, { maxWait: 3000 });
-  let cancel = false;
-
-  const appendRecentSearches = async (text: string, noDelay?: boolean | undefined) => {
-    if (noDelay) {
-      await dispatchAppend(text);
-    } else {
-      debounced(text);
-    }
+    await appendRecentSearchesStore(key, { uuid: uuid, text: text, timestamp: new Date() });
   };
 
   const clearAllRecentSearches = async () => {
@@ -185,8 +200,7 @@ export function useRecentSearch(
 
     return () => {
       cancel = true;
-      debounced.flush();
     };
-  }, [debounced]);
+  }, []);
   return { data, appendRecentSearches, clearAllRecentSearches };
 }

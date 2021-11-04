@@ -1,5 +1,5 @@
 import { ActionPanel, Color, Detail, Icon, List, OpenInBrowserAction, PushAction } from "@raycast/api";
-import { compactNumberFormat } from "../lib/utils";
+import { compactNumberFormat, formatDate } from "../lib/utils";
 import { Video } from "../lib/youtubeapi";
 import { OpenChannelInBrowser } from "./actions";
 import { ChannelListItemDetailFetched } from "./channel";
@@ -34,9 +34,9 @@ export function VideoListItemDetail(props: { video: Video }): JSX.Element {
   const title = video.title;
   const thumbnailUrl = video.thumbnails?.high?.url || undefined;
   const thumbnailMd = (thumbnailUrl ? `![thumbnail](${thumbnailUrl})` : "") + "\n\n";
-  const publishedAt = new Date(video.publishedAt);
+  //const publishedAt = new Date(video.publishedAt);
   const channel = video.channelTitle;
-  const meta: string[] = [`- Channel: ${channel}  `, `- Published at: ${publishedAt.toLocaleDateString("en-US")}`];
+  const meta: string[] = [`- Channel: ${channel}  `, `- Published: ${formatDate(video.publishedAt)}`];
   const md = `# ${title}\n\n${thumbnailMd}${desc}\n\n${meta.join("\n")}`;
   return (
     <Detail
