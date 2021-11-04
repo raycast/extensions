@@ -1,33 +1,37 @@
-import { showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Formula, brewFetchInstalled } from "./brew";
+import { showFailureToast } from "./utils";
+import { InstallableResults, brewFetchInstalled } from "./brew";
 import { FormulaList } from "./components/list";
 
 interface State {
-  formulae: Formula[];
+  results?: InstallableResults;
   isLoading: boolean;
 }
 
 export default function Main() {
-  const [state, setState] = useState<State>({formulae: [], isLoading: true});
+  const [state, setState] = useState<State>({isLoading: true});
 
   useEffect(() => {
     if (!state.isLoading) { return; }
+
     brewFetchInstalled(true)
-      .then(formulae => {
-        setState({formulae: formulae, isLoading: false});
+      .then(results => {
+        setState({results: results, isLoading: false});
       })
       .catch(err => {
         console.log("brewFetchInstalled error:", err);
-        showToast(ToastStyle.Failure, "Brew list failed");
-        setState({formulae: [], isLoading: false});
+        showFailureToast("Brew list failed", err);
+        setState({isLoading: false});
       });
   }, [state]);
 
+  const formulae = state.results?.formulae ?? [];
+  const casks = state.results?.casks ?? [];
+
   return (
-    <FormulaList formulae={state.formulae}
-                 searchBarPlaceholder="Filter formulae by name"
-                 sectionTitle="Installed"
+    <FormulaList formulae={formulae}
+                 casks={casks}
+                 searchBarPlaceholder="Filter results by name"
                  isLoading={state.isLoading}
                  onAction={() => {
                    setState((oldState) => ({ ...oldState, isLoading: true}));

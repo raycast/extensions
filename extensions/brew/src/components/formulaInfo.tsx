@@ -1,5 +1,5 @@
 import { Detail, useNavigation } from "@raycast/api";
-import { FormulaActionPanel } from "./actionPanel";
+import { FormulaActionPanel } from "./actionPanels";
 import { Formula, brewIsInstalled, brewPrefix } from '../brew';
 
 export function FormulaInfo(props: {formula: Formula, onAction: (result: boolean) => void}) {
@@ -20,12 +20,12 @@ export function FormulaInfo(props: {formula: Formula, onAction: (result: boolean
 
 function formatInfo(formula: Formula): string {
   return `
-# ${formula.full_name}
+# ${formula.name}
 ${formula.desc}
 
 [${formula.homepage}](${formula.homepage})
 
-#### License:
+#### License
  ${formula.license}
 
 ${formatVersions(formula)}
@@ -47,14 +47,18 @@ function formatVersions(formula: Formula): string {
   if (brewIsInstalled(formula)) {
     status.push('installed');
   }
+  if (formula.installed.first()?.installed_as_dependency) {
+    status.push('dependency')
+  }
   let markdown = `
-#### Versions:
+#### Versions
 Stable: ${versions.stable} ${status ? `(${status.join(', ')})` : ''}
 
-  `;
+`;
   if (versions.head) {
     markdown += versions.head;
   }
+
   return markdown;
 }
 
@@ -83,10 +87,10 @@ ${markdown}
 }
 
 function formatConflicts(formula: Formula): string {
-  if (formula.conflicts_with.length == 0) { return ''; }
+  if (formula.conflicts_with?.length == 0) { return ''; }
 
-  return `#### Conflicts With:
-${formula.conflicts_with.join(', ')}
+  return `#### Conflicts With
+ ${formula.conflicts_with?.join(', ')}
   `;
 }
 
@@ -106,7 +110,7 @@ ${formula.caveats}
   }
 
   if (caveats) {
-    return `#### Caveats:
+    return `#### Caveats
 ${caveats}
     `
   } else {
