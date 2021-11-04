@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "recent",
-      "title": "Open Recent Projects",
+      "title": "Search Recent Projects",
       "subtitle": "JetBrains Toolbox",
       "description": "Search and open JetBrains Toolbox projects",
       "mode": "view"
@@ -24,6 +24,15 @@
       "description": "Prefer which JetBrains Application (will be sorted to the top of the list)",
       "default": "PhpStorm",
       "placeholder": "PhpStorm"
+    },
+    {
+      "name": "bin",
+      "type": "textfield",
+      "required": false,
+      "title": "tools bin folder",
+      "description": "Where are JetBrains Tools installed (in Toolbox Settings)",
+      "default": "/usr/local/bin",
+      "placeholder": "/usr/local/bin"
     }
   ],
   "keywords": [
@@ -38,12 +47,14 @@
     "@raycast/api": "^1.25.0",
     "fast-glob": "^3.2.7",
     "fuse.js": "^6.4.6",
+    "which": "^2.0.2",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
     "@types/glob": "^7.1.4",
     "@types/node": "^16.4.3",
     "@types/react": "^17.0.15",
+    "@types/which": "^2.0.1",
     "@types/xml2js": "^0.4.9",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
