@@ -1,8 +1,7 @@
 import { getRandomInt } from "./utils";
 
 const foodSymbol = "O";
-const wallSymbol = "#";
-const snakeSymbol = "X";
+const snakeSymbol = "▉";
 const emptySymbol = " ";
 
 function addCoords(c1: Coord, c2: Coord): Coord {
@@ -44,7 +43,7 @@ class Snake {
             this.bodyLength += 1;
             game.increaseFood();
             game.spawnFood();
-        } else if (ev === wallSymbol || ev === undefined || ev === snakeSymbol) {
+        } else if (ev === undefined || ev === snakeSymbol) {
             game.setMessage("Game Over 😝");
             return;
         }
@@ -144,7 +143,21 @@ export class Field {
             for (let x = -1; x <= this.width; x++) {
                 let v: string | undefined = emptySymbol;
                 if (y == -1 || y === this.height || x == -1 || x === this.width) {
-                    v = wallSymbol;
+                    if (x === -1 && y === -1) {
+                        v = "╔";
+                    } else if (x === this.width && y === -1) {
+                        v = "╗";
+                    } else if (x === -1 && y === this.height) {
+                        v = "╚";
+                    } else if (x === this.width && y === this.height) {
+                        v = "╝";
+                    } else if (y === -1 || y === this.height) {
+                        v = "═";
+                    } else if (x == -1 || x === this.width) {
+                        v = "║";
+                    } else {
+                        v = " ";
+                    }
                 } else {
                     v = this.getValue({ x, y });
                     if (!v) {
