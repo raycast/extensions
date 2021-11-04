@@ -15,8 +15,8 @@ export class Bitwarden {
       throw Error(`Invalid Cli Path: ${this.cliPath}`)
     }
     this.env = {
-      BW_CLIENTSECRET: clientSecret,
-      BW_CLIENTID: clientId,
+      BW_CLIENTSECRET: clientSecret.trim(),
+      BW_CLIENTID: clientId.trim(),
       PATH: PATH
     };
   }
