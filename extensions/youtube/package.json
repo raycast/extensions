@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtube",
   "title": "Youtube",
   "description": "Search Videos, Playlists and more",
