@@ -1,5 +1,6 @@
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
+import { v4 as uuidv4 } from "uuid";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -28,4 +29,8 @@ export function formatDateShort(input: Date | string) {
 export function formatDate(input: Date | string) {
     const date = typeof input === "string" ? new Date(input) : input;
     return timeAgo.format(date) as string;
+}
+
+export function getUuid(): string {
+    return uuidv4();
 }

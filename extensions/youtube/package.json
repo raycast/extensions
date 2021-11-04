@@ -44,11 +44,12 @@
     "@raycast/api": "^1.25.2",
     "javascript-time-ago": "^2.3.10",
     "node-fetch": "^3.0.0",
-    "use-debounce": "^7.0.0"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
+    "@types/uuid": "^8.3.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
