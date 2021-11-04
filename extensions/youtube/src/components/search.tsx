@@ -1,6 +1,8 @@
 import {
   ActionPanel,
+  Color,
   getLocalStorageItem,
+  Icon,
   List,
   popToRoot,
   removeLocalStorageItem,
@@ -115,8 +117,18 @@ function SearchItem(props: {
       accessoryTitle={formatDateShort(props.search.timestamp)}
       actions={
         <ActionPanel>
-          <ActionPanel.Item onAction={() => props.setSearchText(props.search.text)} title="Search Again" />
-          {props.clearAll && <ActionPanel.Item title="Clear old searches" onAction={handleClear} />}
+          <ActionPanel.Item
+            title="Search Again"
+            icon={{ source: Icon.Binoculars, tintColor: Color.PrimaryText }}
+            onAction={() => props.setSearchText(props.search.text)}
+          />
+          {props.clearAll && (
+            <ActionPanel.Item
+              title="Clear old Searches"
+              icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+              onAction={handleClear}
+            />
+          )}
         </ActionPanel>
       }
     />
