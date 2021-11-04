@@ -1,5 +1,5 @@
-import { showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { showFailureToast } from "./utils";
 import { InstallableResults, brewFetchInstalled } from "./brew";
 import { FormulaList } from "./components/list";
 
@@ -20,7 +20,7 @@ export default function Main() {
       })
       .catch(err => {
         console.log("brewFetchInstalled error:", err);
-        showToast(ToastStyle.Failure, "Brew list failed");
+        showFailureToast("Brew list failed", err);
         setState({isLoading: false});
       });
   }, [state]);

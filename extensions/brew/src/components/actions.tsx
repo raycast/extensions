@@ -13,6 +13,7 @@ import {
   brewUpgrade,
   brewUpgradeAll,
 } from "../brew";
+import { showFailureToast } from "../utils";
 import { Cask, Formula, OutdatedCask, OutdatedFormula } from "../brew";
 
 export function FormulaInstallAction(props: {formula: Cask | Formula , onAction: (result: boolean) => void}) {
@@ -91,9 +92,9 @@ async function install(formula: Cask | Formula): Promise<boolean> {
     formula.installed = [{version: formula.versions.stable, installed_as_dependency: false, installed_on_request: true}];
     showToast(ToastStyle.Success, `Installed ${brewName(formula)}`);
     return true;
-  } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Install failed");
+  } catch (err) {
+    console.error(err);
+    showFailureToast("Install failed", err);
     return false;
   }
 }
@@ -106,7 +107,7 @@ async function uninstall(formula: Cask | Formula): Promise<boolean> {
     return true;
   } catch (err) {
     console.error(err);
-    showToast(ToastStyle.Failure, "Uninstall failed");
+    showFailureToast("Uninstall failed", err);
     return false;
   }
 }
@@ -119,7 +120,7 @@ async function upgrade(formula: Cask | Formula | OutdatedCask | OutdatedFormula)
     return true;
   } catch (err) {
     console.log(err);
-    showToast(ToastStyle.Failure, 'Upgrade formula failed');
+    showFailureToast('Upgrade formula failed', err);
     return false;
   }
 }
@@ -132,7 +133,7 @@ async function upgradeAll(): Promise<boolean> {
     return true;
   } catch (err) {
     console.log(err);
-    showToast(ToastStyle.Failure, 'Upgrade formula failed');
+    showFailureToast('Upgrade formula failed', err);
     return false;
   }
 }
@@ -147,7 +148,7 @@ async function pin(formula: Formula | OutdatedFormula): Promise<boolean> {
     return true;
   } catch (err) {
     console.error(err);
-    showToast(ToastStyle.Failure, "Pin formula failed");
+    showFailureToast("Pin formula failed", err);
     return false;
   }
 }
@@ -161,7 +162,7 @@ async function unpin(formula: Formula | OutdatedFormula): Promise<boolean> {
     return true;
   } catch (err) {
     console.error(err);
-    showToast(ToastStyle.Failure, "Unpin formula failed");
+    showFailureToast("Unpin formula failed", err);
     return false;
   }
 }

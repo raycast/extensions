@@ -3,10 +3,9 @@ import {
   Icon,
   List,
   ListSection,
-  showToast,
-  ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { showFailureToast } from "./utils";
 import { OutdatedResults, OutdatedCask, OutdatedFormula, brewFetchOutdated } from "./brew";
 import { OutdatedActionPanel } from "./components/actionPanels";
 
@@ -26,7 +25,7 @@ export default function Main() {
     })
     .catch (err => {
       console.log("brewFetchOutdated error:", err);
-      showToast(ToastStyle.Failure, "Brew outdated failed");
+      showFailureToast("Brew outdated failed", err);
       setState({isLoading: false});
     });
   }, [state]);

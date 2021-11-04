@@ -1,5 +1,5 @@
-import { showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { showFailureToast } from "./utils";
 import { Cask, Formula, InstallableResults } from "./brew";
 import { brewSearch, brewFetchInstalled } from "./brew";
 import { FormulaList } from "./components/list";
@@ -27,9 +27,14 @@ export default function Main() {
     if (!state.isLoading) { return; }
 
     if (state.installed == undefined) {
-      listInstalled().then((installed: Installed) => {
-        setState((oldState) => ({ ...oldState, installed: installed}));
-      });
+      listInstalled()
+        .then((installed: Installed) => {
+          setState((oldState) => ({ ...oldState, installed: installed}));
+        })
+        .catch (err => {
+          console.log("listInstalled error:", err);
+          showFailureToast("Brew search failed", err);
+        });
       return;
     }
 
@@ -41,8 +46,8 @@ export default function Main() {
       })
       .catch (err => {
         console.log("brewSearch error:", err);
+        showFailureToast("Brew search failed", err);
         setState((oldState) => ({...oldState, results: undefined, isLoading: false}));
-        showToast(ToastStyle.Failure, "Package search error");
       });
   }, [state]);
 

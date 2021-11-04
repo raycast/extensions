@@ -1,4 +1,4 @@
-import { environment } from "@raycast/api";
+import { environment, showToast, ToastStyle } from "@raycast/api";
 import { join as path_join } from "path";
 import { mkdirSync } from "fs";
 import { stat, readFile, writeFile } from "fs/promises";
@@ -60,6 +60,13 @@ export async function fetchRemote<T>(remote: Remote<T>): Promise<T[]> {
     value = await fetchURL();
   }
   return (value ? [...value] : []);
+}
+
+/// Toast
+
+export function showFailureToast(title: string, error: any) {
+  const msg = error['stderr']?.trim() ?? '';
+  showToast(ToastStyle.Failure, title, msg);
 }
 
 /// Array
