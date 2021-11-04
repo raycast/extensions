@@ -19,6 +19,13 @@
       "subtitle": "YouTube",
       "description": "Search YouTube Channels",
       "mode": "view"
+    },
+    {
+      "name": "popular-videos",
+      "title": "Popular Videos",
+      "subtitle": "YouTube",
+      "description": "Show popular YouTube Videos",
+      "mode": "view"
     }
   ],
   "preferences": [
