@@ -153,7 +153,7 @@ export function RecentSearchesList(props: {
         <NoSearchItem recentQueries={rq} />
         {rq?.map((q) => (
           <SearchItem
-            key={q.timestamp.toLocaleString() + q.text}
+            key={`${q.timestamp.toLocaleString()} ${q.text} ${q.uuid}`}
             search={q}
             setSearchText={setRootSearchText}
             clearAll={props.clearAll}
