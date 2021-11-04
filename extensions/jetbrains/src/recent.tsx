@@ -26,7 +26,6 @@ import {
   getFiles,
   getRecentEntries,
   JetBrainsIcon,
-  listAnd,
   preferredApp,
   recentEntry
 } from "./util";
@@ -248,7 +247,7 @@ export default function ProjectList() {
 
   return (
     <List
-      searchBarPlaceholder={`Search recent ${listAnd(appHistory.map(recent => recent.title))} projects…`}
+      searchBarPlaceholder={`Search recent projects…`}
       onSearchTextChange={(term) => setSearch(term.trim())}
       actions={<ActionPanel children={defaultActions}/>}
     >

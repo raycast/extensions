@@ -54,12 +54,6 @@ export function getFiles(dir: string | string[]): Promise<Array<file>> {
   )))
 }
 
-export function listAnd(entries: IterableIterator<string> | Array<string>): string {
-  const arr = Array.from(entries)
-  const last = arr.pop()
-  return last ? `${arr.join(", ")} and ${last}` : ""
-}
-
 export const createUniqueArray = <T>(s: string, values: Array<T>): Array<T> => {
   if (values.length == 0) {
     return values

@@ -7,7 +7,7 @@
   "commands": [
     {
       "name": "recent",
-      "title": "Open Recent Projects",
+      "title": "Search Recent Projects",
       "subtitle": "JetBrains Toolbox",
       "description": "Search and open JetBrains Toolbox projects",
       "mode": "view"
