@@ -44,7 +44,7 @@ class Snake {
             this.bodyLength += 1;
             game.increaseFood();
             game.spawnFood();
-        } else if (ev === wallSymbol || ev === undefined || ev === snakeSymbol || !game.field.isValidCoord(newPos)) {
+        } else if (ev === wallSymbol || ev === undefined || ev === snakeSymbol) {
             game.setMessage("Game Over 😝");
             return;
         }
@@ -95,14 +95,20 @@ export class Field {
         return (this.width * coord.y) + coord.x;
     }
 
-    getValue(coord: Coord): string {
-        const i = this.coordToIndex(coord);
-        return this.data[i];
+    getValue(coord: Coord): string | undefined {
+        if (this.isValidCoord(coord)) {
+            const i = this.coordToIndex(coord);
+            return this.data[i];
+        } else {
+            return undefined;
+        }
     }
 
     setValue(coord: Coord, value: string) {
-        const i = this.coordToIndex(coord);
-        this.data[i] = value;
+        if (this.isValidCoord(coord)) {
+            const i = this.coordToIndex(coord);
+            this.data[i] = value;
+        }
     }
 
     public isFieldFull(): boolean {
@@ -114,11 +120,29 @@ export class Field {
         return true;
     }
 
+    public getRandomFreeCoord(): Coord | undefined {
+        const freeCoords: Coord[] = [];
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                const coord: Coord = { x, y };
+                const val = this.getValue(coord);
+                if (val === emptySymbol) {
+                    freeCoords.push(coord);
+                }
+            }
+        }
+        if (freeCoords.length > 0) {
+            const index = getRandomInt(0, freeCoords.length);
+            return freeCoords[index];
+        }
+        return undefined;
+    }
+
     public toString(): string {
         let result = "\n";
         for (let y = -1; y <= this.height; y++) {
             for (let x = -1; x <= this.width; x++) {
-                let v = emptySymbol;
+                let v: string | undefined = emptySymbol;
                 if (y == -1 || y === this.height || x == -1 || x === this.width) {
                     v = wallSymbol;
                 } else {
@@ -223,13 +247,9 @@ export class Game {
     }
 
     spawnFood() {
-        while (true) {
-            const coord: Coord = { x: getRandomInt(0, this.field.width), y: getRandomInt(0, this.field.height) };
-            const ev = this.field.getValue(coord);
-            if (ev === emptySymbol) {
-                this.field.setValue(coord, foodSymbol);
-                break;
-            }
+        const coord = this.field.getRandomFreeCoord();
+        if (coord) {
+            this.field.setValue(coord, foodSymbol);
         }
     }
 
