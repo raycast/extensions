@@ -47,7 +47,7 @@ function getProjectsGroupedByTag(projects: ProjectEntry[]): Map<string, ProjectE
   const groupedProjects = new Map<string, ProjectEntry[]>();
 
   projects.forEach((project: ProjectEntry) => {
-    const tags = project.tags.length > 0 ? project.tags : ["[no tags]"];
+    const tags = project.tags?.length > 0 ? project.tags : ["[no tags]"];
     tags.forEach((tag) => {
       const projects: ProjectEntry[] = [];
       if (groupedProjects.has(tag)) {
@@ -67,8 +67,8 @@ function getProjectsGroupedByTagAsElements(projectEntries: ProjectEntry[]): Reac
   projectsGrouped.forEach((value, key) => {
     elements.push(
       <List.Section key={key} title={key}>
-        {value?.map((project) => (
-          <ProjectListItem key={project.rootPath} {...project} />
+        {value?.map((project, index) => (
+          <ProjectListItem key={project.rootPath + index} {...project} />
         ))}
       </List.Section>
     );
@@ -113,7 +113,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
       subtitle={subtitle}
       icon={{ fileIcon: path }}
       keywords={tags}
-      accessoryTitle={tags.join(", ")}
+      accessoryTitle={tags?.join(", ")}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
