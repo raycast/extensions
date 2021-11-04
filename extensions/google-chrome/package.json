@@ -1,10 +1,13 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-chrome",
   "title": "Google Chrome",
   "description": "Search and open tabs and history in Google Chrome.",
   "icon": "google_chrome-icon.png",
   "author": "Codely",
-  "contributors": ["bromanko"],
+  "contributors": [
+    "bromanko"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -25,7 +28,8 @@
   "preferences": [
     {
       "name": "useOriginalFavicon",
-      "title": "Extract the favicon from every open tab",
+      "title": "Fav icon",
+      "label": "Extract the favicon from every open tab",
       "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Google Chrome profile.",
       "required": false,
       "type": "checkbox",
