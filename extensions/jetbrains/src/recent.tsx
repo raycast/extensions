@@ -53,6 +53,9 @@ const getRecent = async (path: string | string[], icon: string) => {
 }
 
 const globFromHistory = (history: History) => {
+  if (history.item.intellij_platform === undefined) {
+    return []
+  }
   const root = dirname(history.item.intellij_platform.default_config_directories['idea.config.path'].replace('$HOME', homedir()));
   return history.item.intellij_platform.config.map(config => `${root}/${config.directory}/options/${config.recent_projects_filename}`)
 }
@@ -66,15 +69,15 @@ const getHistory = async () => {
         .then(json => json.history.pop())
         .then(async (history: History) => {
           const icon = icons.find(icon => icon.title.startsWith(history.item.name))?.path ?? JetBrainsIcon
-          const tool = await which(history.item.intellij_platform.shell_script_name, {path: bin})
-            .catch(() => '');
+          const tool = history.item.intellij_platform?.shell_script_name ?? false;
+          const activation = history.item.activation?.hosts[0] ?? false
           return {
             title: history.item.name,
-            url: `jetbrains://${history.item.activation.hosts[0]}/navigate/reference?project=`,
-            tool,
+            url: activation ? `jetbrains://${activation}/navigate/reference?project=` : false,
+            tool: tool ? await which(tool, {path: bin}).catch(() => false) : false,
             icon,
             xmlFiles: await getRecent(globFromHistory(history), icon)
-          }
+          } as AppHistory
         })
     }))
   })
@@ -93,22 +96,25 @@ const getIcons = async () => {
 };
 
 const loadAppEntries = async (apps: AppHistory[]) => {
-  return await Promise.all(apps.map(async app => {
-    for (const res of app.xmlFiles ?? []) {
-      const entries = await getRecentEntries(res, app);
-      // sort before unique so we get the newest versions
-      app.entries =
-        createUniqueArray<recentEntry>("path", [...(app.entries ?? []), ...entries]).sort(
-          (a, b) => b.opened - a.opened
-        )
-    }
-    return app
-  }))
+  return await Promise.all(apps
+    .map(async app => {
+      for (const res of app.xmlFiles ?? []) {
+        const entries = await getRecentEntries(res, app);
+        // sort before unique so we get the newest versions
+        app.entries =
+          createUniqueArray<recentEntry>("path", [...(app.entries ?? []), ...entries]).sort(
+            (a, b) => b.opened - a.opened
+          )
+      }
+      return app
+    }))
 };
 
 function OpenInJetBrainsAppAction({tool, recent}: { tool: AppHistory; recent: recentEntry | null }) {
   function handleAction() {
-    const cmd = `${tool.tool} "${recent?.path ?? ''}"`
+    const cmd = tool.tool
+      ? `${tool.tool} "${recent?.path ?? ''}"`
+      : `open ${tool.url}${recent?.title ?? ''}`
     execPromise(cmd)
       .then(() => showHUD(`Opening ${recent ? recent.title : tool.title}`)
         .then(() => popToRoot({clearSearchBar: true})
@@ -195,8 +201,7 @@ export default function ProjectList() {
 
   useEffect(() => {
     getHistory()
-      .then(apps =>
-        loadAppEntries(apps)
+      .then(apps => loadAppEntries(apps)
           .then(withEntries => withEntries.sort(sortApps))
           .then(sorted => {
             const options = {
@@ -227,7 +232,7 @@ export default function ProjectList() {
       <OpenInBrowserAction title='Open Toolbox Website' url={tbUrl} icon={JetBrainsIcon}/>
       <OpenInBrowserAction title='Open Toolbox FAQ' url={`${tbUrl}-faq`}/>
     </ActionPanel>}/>
-  } else if (!appHistory.reduce((exists, appHistory) => exists && appHistory.tool.length > 0, true)) {
+  } else if (!appHistory.reduce((exists, appHistory) => (exists || appHistory.tool !== false || appHistory.url !== false), false)) {
     const message = 'Unable to find shell scripts, ensure you have "Generate Shell scripts" checked in *JetBrains Toolbox* under *Settings*\n\nIf you have set a custom path for your shell scripts, that can set that in the settings for this extension'
     return <Detail markdown={message} actions={<ActionPanel>
       <OpenJetBrainsToolBox/>
@@ -251,7 +256,7 @@ export default function ProjectList() {
         <List.Section title={app.title} key={app.title}>
           {fuseRecent(search, app.entries ?? [], app.fused)
             .map((recent: recentEntry) =>
-              recent?.path && app.tool ? (
+              recent?.path ? (
                 <RecentProject key={`${app.title}-${recent.path}`} app={app} recent={recent} tools={appHistory}/>
               ) : null
             )}

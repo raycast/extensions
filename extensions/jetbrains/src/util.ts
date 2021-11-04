@@ -33,8 +33,8 @@ export interface recentEntry {
 
 export interface AppHistory {
   title: string
-  url: string
-  tool: string
+  url: string|false
+  tool: string|false
   icon: string
   xmlFiles: file[]
   entries?: recentEntry[]

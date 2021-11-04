@@ -23,8 +23,8 @@ interface Item {
   package:             Package;
   post_install:        PostInstall;
   uninstall:           Uninstall;
-  activation:          Activation;
-  intellij_platform:   IntellijPlatform;
+  activation?:         Activation;
+  intellij_platform?:  IntellijPlatform;
   description_i18n?:   I18N;
   home_url_i18n?:      I18N;
   product_overview?:   ProductOverview;
