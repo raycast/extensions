@@ -1,5 +1,5 @@
 import { ActionPanel, Color, Detail, Icon, ImageMask, List, PushAction, showToast, ToastStyle } from "@raycast/api";
-import { compactNumberFormat, getErrorMessage } from "../lib/utils";
+import { compactNumberFormat, formatDate, getErrorMessage } from "../lib/utils";
 import { Channel, getChannel, useRefresher } from "../lib/youtubeapi";
 import { OpenChannelInBrowser, SearchChannelVideosAction, ShowRecentPlaylistVideosAction } from "./actions";
 
@@ -15,15 +15,11 @@ export function ChannelListItemDetail(props: {
     const desc = channel.description || "<no description>";
     const title = channel.title;
     const thumbnailUrl = channel.thumbnails?.default?.url || undefined;
-    const publishedAt = new Date(channel.publishedAt);
     mdParts = [`# Channel: ${title}`];
     if (thumbnailUrl) {
       mdParts.push(`![thumbnail](${thumbnailUrl})`);
     }
-    const meta: string[] = [
-      `- Channelname: ${channel.title}  `,
-      `- Published at: ${publishedAt.toLocaleDateString("en-US")}`,
-    ];
+    const meta: string[] = [`- Channelname: ${channel.title}  `, `- Published: ${formatDate(channel.publishedAt)}`];
     mdParts = mdParts.concat([desc, meta.join("\n")]);
     if (channel.statistics) {
       const cs = channel.statistics;

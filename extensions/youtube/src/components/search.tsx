@@ -8,6 +8,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { formatDateShort } from "../lib/utils";
 
 export interface RecentSearch {
   text: string;
@@ -98,7 +99,7 @@ function SearchItem(props: {
   return (
     <List.Item
       title={props.search.text}
-      accessoryTitle={props.search.timestamp.toLocaleString()}
+      accessoryTitle={formatDateShort(props.search.timestamp)}
       actions={
         <ActionPanel>
           <ActionPanel.Item onAction={() => props.setSearchText(props.search.text, true)} title="Search Again" />
