@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "transmission",
   "title": "Transmission",
   "description": "View and manage torrents directly from Raycast.",
@@ -40,7 +41,8 @@
     },
     {
       "name": "ssl",
-      "title": "Use SSL",
+      "title": "SSL",
+      "label": "Use SSL",
       "required": false,
       "description": "Use SSL to connect to the Transmission server",
       "type": "checkbox",
