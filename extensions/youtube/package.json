@@ -1,0 +1,55 @@
+{
+  "name": "youtube",
+  "title": "Youtube",
+  "description": "Search Videos, Playlists and more",
+  "icon": "youtube.png",
+  "author": "tonka3000",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-videos",
+      "title": "Search Videos",
+      "subtitle": "YouTube",
+      "description": "Search YouTube Videos",
+      "mode": "view"
+    },
+    {
+      "name": "search-channel",
+      "title": "Search Channels",
+      "subtitle": "YouTube",
+      "description": "Search YouTube Channels",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apikey",
+      "type": "password",
+      "title": "API Key",
+      "placeholder": "Your YouTube enabled Google API key",
+      "required": true,
+      "description": "YouTube enabled Google API key"
+    }
+  ],
+  "dependencies": {
+    "@google-cloud/local-auth": "^1.0.1",
+    "@googleapis/youtube": "^2.0.0",
+    "@raycast/api": "^1.25.2",
+    "node-fetch": "^3.0.0",
+    "use-debounce": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
