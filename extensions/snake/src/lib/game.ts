@@ -8,6 +8,30 @@ function addCoords(c1: Coord, c2: Coord): Coord {
     return { x: c1.x + c2.x, y: c1.y + c2.y };
 }
 
+function deltaMoveCoordRelative(dir: Move, coord: Coord): Coord {
+    let moveX = 0;
+    let moveY = 0;
+    switch (dir) {
+        case Move.up: {
+            moveY = -1;
+        } break;
+        case Move.down: {
+            moveY = 1;
+        } break;
+        case Move.left: {
+            moveX = -1;
+        } break;
+        case Move.right: {
+            moveX = 1;
+        } break;
+    }
+    return { x: moveX, y: moveY };
+}
+
+function deltaMoveCoordAbsolute(dir: Move, coord: Coord): Coord {
+    return addCoords(deltaMoveCoordRelative(dir, coord), coord);
+}
+
 export interface GameScore {
     food: number;
     speed: number;
@@ -223,29 +247,9 @@ export class Game {
     }
 
     public move(m: Move) {
-        let ok = false;
-        switch (m) {
-            case Move.right: {
-                if (this.snakeDirection !== Move.left) {
-                    ok = true;
-                }
-            } break;
-            case Move.left: {
-                if (this.snakeDirection !== Move.right) {
-                    ok = true;
-                }
-            } break;
-            case Move.up: {
-                if (this.snakeDirection !== Move.down) {
-                    ok = true;
-                }
-            } break;
-            case Move.down: {
-                if (this.snakeDirection !== Move.up) {
-                    ok = true;
-                }
-            } break;
-        }
+        const nextCoord = deltaMoveCoordAbsolute(m, this.snake.head);
+        const v = this.field.getValue(nextCoord);
+        const ok = v && v === snakeSymbol ? false : true;
         if (ok) {
             this.snakeDirection = m;
         }
