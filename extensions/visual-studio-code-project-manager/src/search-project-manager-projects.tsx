@@ -120,8 +120,8 @@ export default function Command() {
     const groupedProjects = getProjectsGroupedByTagAsElements(sortedProjects);
     elements.push(...groupedProjects);
   } else {
-    sortedProjects.forEach((project) => {
-      elements.push(<ProjectListItem key={project.rootPath} {...project} />);
+    sortedProjects.forEach((project, index) => {
+      elements.push(<ProjectListItem key={project.rootPath + index} {...project} />);
     });
   }
 
