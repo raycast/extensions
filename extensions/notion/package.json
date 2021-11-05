@@ -28,7 +28,7 @@
       "name": "notion_workspace_slug",
       "type": "textfield",
       "required": true,
-      "title": "Notion Workspace Domain (slug)",
+      "title": "Notion Workspace Domain",
       "description": "In Notion go to Settings & Members > Settings > Domain",
       "placeholder": "my-workspace-domain-slug",
       "link": "https://www.notion.so/"
