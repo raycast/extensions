@@ -193,7 +193,7 @@ function DevelopmentActionSection() {
     <ActionPanel.Section title="Development">
       <OpenAction
         title="Open projects.json File in Code"
-        icon="icon.png"
+        icon="command-icon.png"
         target={STORAGE}
         application="Visual Studio Code"
       />
