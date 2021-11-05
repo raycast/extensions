@@ -89,7 +89,7 @@ class Snake {
 }
 
 export class Field {
-    width = 100;
+    width = 104;
     height = 18;
     data: string[] = [];
     constructor() {
