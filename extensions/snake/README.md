@@ -43,9 +43,16 @@ Raycast extension to play the classic game Snake 🐍.
   </p>
 </div>
 
-## Features
+## How to Play
 
-- Play Snake
+This game use the normal Raycast shortcuts to control the snake.
+
+You can control the snake via the normal arrow keys.
+But you need to press `CMD` + `SHIFT` because Raycast don't allow shortcuts without modifiers.
+
+You can restart the game via `ENTER`.
+
+Checkout all actions via `CMD` + `K` for all actions.
 
 ## Showcases
 
