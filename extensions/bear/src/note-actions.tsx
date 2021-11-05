@@ -84,7 +84,7 @@ export default function NoteActions({ isNotePreview, note }: { isNotePreview: bo
               showToast(ToastStyle.Success, "Moved note to trash");
             }}
             icon={{ source: Icon.Trash, tintColor: Color.Red }}
-            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
           />
         </ActionPanel.Section>
       )}
