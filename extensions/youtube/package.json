@@ -37,6 +37,25 @@
       "placeholder": "Your YouTube enabled Google API key",
       "required": true,
       "description": "YouTube enabled Google API key"
+    },
+    {
+      "name": "primaryaction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "required": false,
+      "default": "detail",
+      "data": [
+        {
+        "title": "Show Details",
+        "value": "detail"
+        },
+        {
+          "title": "Open in Browser",
+          "value": "browser"
+        }
+      ],
+      "description": "Set the default action"
+
     }
   ],
   "dependencies": {
