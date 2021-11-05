@@ -2,7 +2,6 @@ import {
   ActionPanel,
   CopyToClipboardAction,
   Detail,
-  environment,
   Icon,
   ImageLike,
   KeyboardShortcut,
@@ -48,7 +47,7 @@ export function SnakeGame(): JSX.Element {
     parts.push(`# ${message}`);
   } else if (score) {
     let text = `Foods: ${score.food}, Speed: ${score.speed}`;
-    if (environment.isDevelopment) {
+    if (process.env.NODE_ENV === "development") {
       text += ` (${speedMs ? speedMs : "?"}ms)`;
     }
     parts.push(text);
