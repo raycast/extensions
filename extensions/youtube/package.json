@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtube",
-  "title": "Youtube",
+  "title": "YouTube",
   "description": "Search Videos, Playlists and more",
   "icon": "youtube.png",
   "author": "tonka3000",
