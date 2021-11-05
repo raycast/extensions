@@ -2,11 +2,11 @@ import {
   ActionPanel,
   CopyToClipboardAction,
   Detail,
+  environment,
   Icon,
   ImageLike,
   KeyboardShortcut,
   showToast,
-  Toast,
   ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
@@ -33,12 +33,10 @@ function CursorAction(props: {
 export function SnakeGame(): JSX.Element {
   const [error, setError] = useState<string>();
   const { field, game, score, message, restart } = useGame(setError);
-  useInterval(
-    () => {
-      game.draw();
-    },
-    error || message ? null : game.speedMs
-  );
+  const speedMs = error || message ? null : game.getSpeedMs();
+  useInterval(() => {
+    game.draw();
+  }, speedMs);
 
   const codefence = "```" + field + "```";
   if (error) {
@@ -49,7 +47,11 @@ export function SnakeGame(): JSX.Element {
   if (message) {
     parts.push(`# ${message}`);
   } else if (score) {
-    parts.push(`Foods: ${score.food}, Speed: ${score.speed}`);
+    let text = `Foods: ${score.food}, Speed: ${score.speed}`;
+    if (environment.isDevelopment) {
+      text += ` (${speedMs ? speedMs : "?"}ms)`;
+    }
+    parts.push(text);
   }
   parts.push(codefence);
 
@@ -114,13 +116,10 @@ function useGame(setError: React.Dispatch<React.SetStateAction<string | undefine
   };
 
   useEffect(() => {
-    let cancel = false;
     game.flush();
     game.start();
 
-    return () => {
-      cancel = true;
-    };
+    return () => {};
   }, []);
   return { field, game, score, message, restart };
 }

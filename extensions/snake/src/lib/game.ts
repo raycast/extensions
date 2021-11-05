@@ -183,7 +183,9 @@ export class Game {
     public setScore: React.Dispatch<React.SetStateAction<GameScore | undefined>>;
     private snake: Snake;
     private foodCount = 0;
-    public speedMs = 1000;
+    private speedMs = 1000;
+    private minSpeedMs = 150;
+    private maxSpeedMs = 30;
     public speed = 1;
 
     constructor(setField: React.Dispatch<React.SetStateAction<string>>,
@@ -201,13 +203,21 @@ export class Game {
         this.setField(this.field.toString());
     }
 
+    public getSpeedMs(): number {
+        const sd = this.snakeDirection;
+        if (sd === Move.up || sd === Move.down) {
+            return Math.floor(this.speedMs + (this.speedMs * 0.2))
+        }
+        return this.speedMs;
+    }
+
     public start() {
         this.field.clearField();
         this.setError(undefined);
         this.snake = new Snake({ x: getRandomInt(20, 80), y: getRandomInt(5, 15) });
         this.foodCount = 0;
         this.speed = 1;
-        this.speedMs = 200;
+        this.speedMs = this.minSpeedMs;
         this.setScore({ food: this.foodCount, speed: 1 });
         this.spawnFood();
     }
@@ -243,10 +253,10 @@ export class Game {
 
     public increaseFood() {
         this.foodCount += 1;
-        let newSpeedMs = this.speedMs - 20;
+        let newSpeedMs = this.speedMs - 5;
         let addSpeed = true;
-        if (newSpeedMs < 10) {
-            newSpeedMs = 10;
+        if (newSpeedMs < this.maxSpeedMs) {
+            newSpeedMs = this.maxSpeedMs;
             addSpeed = false;
         }
         this.speedMs = newSpeedMs;
