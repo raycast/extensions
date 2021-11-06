@@ -1,8 +1,27 @@
 import { ActionPanel, Color, CopyToClipboardAction, Icon, List, showToast, ToastStyle } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { SpeedTestHelp } from "./components/help";
-import { isSpeedtestCliInstalled, Result, runSpeedTest } from "./lib/speedtest";
+import { enusreCLI, speedtestCLIDirectory } from "./lib/cli";
+import { Result, runSpeedTest } from "./lib/speedtest";
 import { pingToString, speedToString } from "./lib/utils";
+import * as afs from "fs/promises";
+
+function ClearCacheAction(): JSX.Element {
+  const handle = async () => {
+    try {
+      const d = speedtestCLIDirectory();
+      await afs.rm(d, { recursive: true });
+    } catch (error) {
+      // ignore
+    }
+  };
+  return (
+    <ActionPanel.Item
+      title="Clear CLI Cache"
+      icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
+      onAction={handle}
+    />
+  );
+}
 
 function ISPListItem(props: { name: string | undefined }): JSX.Element {
   const n = props.name;
@@ -11,7 +30,12 @@ function ISPListItem(props: { name: string | undefined }): JSX.Element {
       title="Internet Service Provider"
       icon={{ source: Icon.Globe, tintColor: Color.Green }}
       accessoryTitle={`${n ? n : "?"}`}
-      actions={<ActionPanel>{n && <CopyToClipboardAction content={n} />}</ActionPanel>}
+      actions={
+        <ActionPanel>
+          {n && <CopyToClipboardAction content={n} />}
+          <ClearCacheAction />
+        </ActionPanel>
+      }
     />
   );
 }
@@ -65,9 +89,6 @@ function UploadListItem(props: { upload: number | undefined }): JSX.Element {
 }
 
 export default function SpeedtestList() {
-  if (!isSpeedtestCliInstalled()) {
-    return <SpeedTestHelp />;
-  }
   const { result, error, isLoading } = useSpeedtest();
   if (error) {
     showToast(ToastStyle.Failure, "Speedtest failed", error);
@@ -97,11 +118,9 @@ function useSpeedtest(): { result: Result; error: string | undefined; isLoading:
   const [isLoading, setIsLoading] = useState<boolean>(true);
   let cancel = false;
   useEffect(() => {
-    function runTest() {
+    async function runTest() {
       try {
-        if (!isSpeedtestCliInstalled()) {
-          throw Error("Speedtest CLI is not installed");
-        }
+        await enusreCLI();
         runSpeedTest(
           (r: Result) => {
             if (!cancel) {

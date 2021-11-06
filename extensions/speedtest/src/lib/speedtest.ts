@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { spawn } from "child_process";
+import { speedtestCLIFilepath } from './cli';
 
 export interface Result {
     isp: string | undefined;
@@ -10,13 +11,12 @@ export interface Result {
     ping: number | undefined;
 }
 
-const exePath = "/usr/local/bin/speedtest";
-
 export function isSpeedtestCliInstalled(): boolean {
-    return fs.existsSync(exePath);
+    return fs.existsSync(speedtestCLIFilepath());
 }
 
 export function runSpeedTest(callback: (result: Result) => void, resultCallback: (result: Result) => void, errorCallback: (error: Error) => void) {
+    const exePath = speedtestCLIFilepath();
     const pro = spawn(exePath, ["--format", "json", "--progress", "--accept-license", "--accept-gdpr"]);
     const result: Result = { isp: undefined, location: undefined, serverName: undefined, download: undefined, upload: undefined, ping: undefined };
 

@@ -16,11 +16,16 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.3",
-    "node-fetch": "^3.0.0"
+    "download": "^8.0.0",
+    "sha256-file": "^1.0.0",
+    "tar": "^6.1.11"
   },
   "devDependencies": {
+    "@types/download": "^8.0.1",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
+    "@types/sha256-file": "^1.0.1",
+    "@types/tar": "^6.1.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

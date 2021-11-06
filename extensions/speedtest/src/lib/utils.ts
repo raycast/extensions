@@ -1,3 +1,6 @@
+import fs from "fs";
+import sha256 from "sha256-file";
+
 export function pingToString(ping: number | undefined): string {
     return ping === undefined ? "?" : ping.toFixed(1) + " ms";
 }
@@ -15,4 +18,20 @@ export function speedToString(speed: number | undefined): string {
         bits /= 1000;
     }
     return `${bits.toFixed(places[unit])} ${units[unit]}bps`;
+}
+
+export async function fileExists(file: string): Promise<boolean> {
+    return new Promise(resolve => fs.access(file, fs.constants.F_OK, err => resolve(!err)));
+}
+
+export async function sha256FileHash(filename: string): Promise<string | null> {
+    return new Promise((resolve, reject) => {
+        sha256(filename, (error: Error | null, sum: string | null) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(sum);
+            }
+        });
+    });
 }
