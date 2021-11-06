@@ -132,8 +132,7 @@ export default function CreateDatabaseForm(): JSX.Element {
         key='database'
         id='database'
         title={'Database'}
-        onChange={setDatabaseId}
-        storeValue>
+        onChange={setDatabaseId}>
           {databases?.map((d) => {
             return (
               <Form.Dropdown.Item
