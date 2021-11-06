@@ -132,7 +132,8 @@ export default function CreateDatabaseForm(): JSX.Element {
         key='database'
         id='database'
         title={'Database'}
-        onChange={setDatabaseId}>
+        onChange={setDatabaseId}
+        storeValue>
           {databases?.map((d) => {
             return (
               <Form.Dropdown.Item
@@ -166,7 +167,7 @@ export default function CreateDatabaseForm(): JSX.Element {
                       value={opt.id} 
                       title={opt.name}
                       icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined)}
-                      storeValue/>)
+                      />)
                 })}
               </Form.Dropdown>
             )
