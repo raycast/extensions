@@ -1,9 +1,13 @@
 import { Color, Icon, List, showToast, ToastStyle } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { SpeedTestHelp } from "./components/help";
 import { isSpeedtestCliInstalled, Result, runSpeedTest } from "./lib/speedtest";
 import { pingToString, speedToString } from "./lib/utils";
 
 export default function SpeedtestList() {
+  if (!isSpeedtestCliInstalled()) {
+    return <SpeedTestHelp />;
+  }
   const { result, error, isLoading } = useSpeedtest();
   if (error) {
     showToast(ToastStyle.Failure, "Speedtest failed", error);
