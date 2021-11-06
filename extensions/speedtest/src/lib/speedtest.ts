@@ -17,7 +17,7 @@ export function isSpeedtestCliInstalled(): boolean {
 }
 
 export function runSpeedTest(callback: (result: Result) => void, resultCallback: (result: Result) => void, errorCallback: (error: Error) => void) {
-    const pro = spawn(exePath, ["--format", "json", "--progress"]);
+    const pro = spawn(exePath, ["--format", "json", "--progress", "--accept-license", "--accept-gdpr"]);
     const result: Result = { isp: undefined, location: undefined, serverName: undefined, download: undefined, upload: undefined, ping: undefined };
 
     pro.on('uncaughtException', function (err) {
