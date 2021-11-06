@@ -1,23 +1,31 @@
 import {
   ActionPanel,
-  ActionPanelItem, Icon,
+  ActionPanelItem,
+  environment,
+  Icon,
   ImageLike,
   List,
   OpenInBrowserAction,
+  popToRoot,
   PushAction,
   showToast,
   ToastStyle
 } from "@raycast/api";
+import { existsSync, mkdirSync } from "fs";
+import { readFile, writeFile } from "fs/promises";
 import Fuse from "fuse.js";
 import fetch from "node-fetch";
 import open from "open";
-import { Dispatch, SetStateAction, useMemo, useState } from "react";
-import useSWR from "swr";
+import { resolve } from "path";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { URL } from "url";
 import { Doc, Entry } from "./types";
 import { useVisitedDocs } from "./useVisitedDocs";
 
 export const DEVDOCS_BASE_URL = "https://devdocs.io";
+if (!existsSync(environment.supportPath)) {
+  mkdirSync(environment.supportPath, {recursive: true})
+}
 
 export function faviconUrl(size: number, url: string): string {
   try {
@@ -33,25 +41,40 @@ interface FetchResult<T> {
   isLoading: boolean;
 }
 
-function fetcher<T>(path: string) {
-  return fetch(path).then((res) => res.json()) as Promise<T>
-}
+export function useFetchWithCache<T>(url: string, cacheFilename: string): FetchResult<T> {
+  const cachePath = resolve(environment.supportPath, cacheFilename);
+  const [data, setData] = useState<T>();
 
-export function useFetch<T>(path: string): FetchResult<T> {
-  const { data, error } = useSWR<T, Error>(path, fetcher);
-  if (error) {
-    showToast(ToastStyle.Failure, "An error occurred!", "Please check your connexion.")
-  }
+  useEffect(() => {
+    async function fetchWithCache() {
+      // Load from Cache
+      if (existsSync(cachePath)) {
+        const text = await readFile(cachePath).then((buffer) => buffer.toString());
+        await setData(JSON.parse(text.toString()));
+      }
 
-  return { data, isLoading: !error && !data };
+      // Refresh Cache
+      try {
+        const data = await fetch(url).then((res) => res.json());
+        await setData(data as T);
+        await writeFile(cachePath, JSON.stringify(data));
+      } catch (error) {
+        console.error(error)
+        showToast(ToastStyle.Failure, "Could not refresh cache!", "Please Check your connexion");
+      }
+    }
+    fetchWithCache();
+  }, [url]);
+
+  return { data: data, isLoading: !data };
 }
 
 export default function DocList(): JSX.Element {
-  const { data, isLoading } = useFetch<Doc[]>(`${DEVDOCS_BASE_URL}/docs/docs.json`);
+  const { data, isLoading } = useFetchWithCache<Doc[]>(`${DEVDOCS_BASE_URL}/docs/docs.json`, "index.json");
   const { docs: visitedDocs, visitDoc } = useVisitedDocs();
 
   return (
-    <List isLoading={!data && !data || isLoading}>
+    <List isLoading={(!data && !data) || isLoading}>
       <List.Section title="Last Visited">
         {visitedDocs?.map((doc) => (
           <DocItem key={doc.slug} doc={doc} onVisit={() => visitDoc(doc)} />
@@ -66,7 +89,11 @@ export default function DocList(): JSX.Element {
   );
 }
 
-function useFuse<U>(items: U[] | undefined, options: Fuse.IFuseOptions<U>, limit: number): [U[], Dispatch<SetStateAction<string>>] {
+function useFuse<U>(
+  items: U[] | undefined,
+  options: Fuse.IFuseOptions<U>,
+  limit: number
+): [U[], Dispatch<SetStateAction<string>>] {
   const [query, setQuery] = useState("");
   const fuse = useMemo(() => {
     return new Fuse(items || [], options);
@@ -79,7 +106,10 @@ function useFuse<U>(items: U[] | undefined, options: Fuse.IFuseOptions<U>, limit
 
 function EntryList(props: { doc: Doc; icon: ImageLike }) {
   const { doc, icon } = props;
-  const { data, isLoading } = useFetch<{entries: Entry[]}>(`${DEVDOCS_BASE_URL}/docs/${doc.slug}/index.json`);
+  const { data, isLoading } = useFetchWithCache<{ entries: Entry[] }>(
+    `${DEVDOCS_BASE_URL}/docs/${doc.slug}/index.json`,
+    `${doc.slug}.json`
+  );
   const [results, setQuery] = useFuse(data?.entries, { keys: ["name", "type"] }, 500);
 
   return (
@@ -107,21 +137,24 @@ function EntryItem(props: { entry: Entry; doc: Doc; icon: ImageLike }) {
       keywords={[entry.type].concat(entry.name.split("."))}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`${DEVDOCS_BASE_URL}/${doc.slug}/${entry.path}`} />
-          <OpenInDevdocsAction url={`${DEVDOCS_BASE_URL}/${doc.slug}/${entry.path}`} />
+          <OpenInBrowserAction url={`${DEVDOCS_BASE_URL}/${doc.slug}/${entry.path}`} onOpen={() => popToRoot()} />
+          <OpenInDevdocsAction url={`${DEVDOCS_BASE_URL}/${doc.slug}/${entry.path}`} onOpen={() => popToRoot()} />
         </ActionPanel>
       }
     />
   );
 }
 
-function OpenInDevdocsAction(props: { url: string }) {
+function OpenInDevdocsAction(props: { url: string; onOpen?: () => void }) {
   return (
     <ActionPanelItem
       title="Open in Devdocs"
       icon="devdocs.png"
       onAction={() => {
         open(props.url, { app: { name: "DevDocs" } });
+        if (props.onOpen) {
+          props.onOpen();
+        }
       }}
     />
   );
@@ -150,10 +183,14 @@ function DocItem(props: { doc: Doc; onVisit: () => void }) {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <OpenInBrowserAction url={`${DEVDOCS_BASE_URL}/${slug}`} />
-            <OpenInDevdocsAction url={`${DEVDOCS_BASE_URL}/${slug}`} />
-            {links?.home ? <OpenInBrowserAction title="Open Project Homepage" url={links.home} /> : null}
-            {links?.code ? <OpenInBrowserAction title="Open Code Repository" url={links.code} /> : null}
+            <OpenInBrowserAction url={`${DEVDOCS_BASE_URL}/${slug}`} onOpen={() => popToRoot()} />
+            <OpenInDevdocsAction url={`${DEVDOCS_BASE_URL}/${slug}`} onOpen={() => popToRoot()} />
+            {links?.home ? (
+              <OpenInBrowserAction title="Open Project Homepage" url={links.home} onOpen={() => popToRoot()} />
+            ) : null}
+            {links?.code ? (
+              <OpenInBrowserAction title="Open Code Repository" url={links.code} onOpen={() => popToRoot()} />
+            ) : null}
           </ActionPanel.Section>
         </ActionPanel>
       }
