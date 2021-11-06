@@ -14,6 +14,8 @@ import {
   showToast,
   ToastStyle,
   useNavigation,
+  setLocalStorageItem,
+  getLocalStorageItem,
 } from '@raycast/api'
 import { useEffect, useState } from 'react'
 import {
@@ -64,10 +66,21 @@ export default function CreateDatabaseForm(): JSX.Element {
   // Fetch databases
   useEffect(() => {
     const fetchData = async () => {
+
+      const cachedDatabases = await loadDatabases()
+
+      if (cachedDatabases) {
+        setDatabases(cachedDatabases)
+      }
+
       const fetchedDatabases = await fetchDatabases()
-     
+      
+      
       setDatabases(fetchedDatabases)
       setIsLoading(false)
+
+      await storeDatabases(fetchedDatabases)
+            
      
     }
     fetchData()
@@ -78,9 +91,20 @@ export default function CreateDatabaseForm(): JSX.Element {
     const fetchData = async () => {
       if(databaseId){
         setIsLoading(true)
-        const fetchedDatabaseProperties = await fetchDatabaseProperties(databaseId)     
-        setDatabaseProperties(fetchedDatabaseProperties)
+
+        const cachedDatabaseProperties = await loadDatabaseProperties(databaseId)
+
+        if (cachedDatabaseProperties) {
+          setDatabaseProperties(cachedDatabaseProperties)
+        }
+
+        const fetchedDatabaseProperties = await fetchDatabaseProperties(databaseId)
+      
+        setDatabaseProperties(fetchedDatabaseProperties)          
         setIsLoading(false)
+
+        await storeDatabaseProperties(databaseId, fetchedDatabaseProperties)
+        
       }      
     }
     fetchData()
@@ -108,7 +132,8 @@ export default function CreateDatabaseForm(): JSX.Element {
         key='database'
         id='database'
         title={'Database'}
-        onChange={setDatabaseId}>
+        onChange={setDatabaseId}
+        storeValue>
           {databases?.map((d) => {
             return (
               <Form.Dropdown.Item
@@ -124,7 +149,8 @@ export default function CreateDatabaseForm(): JSX.Element {
         const key = 'property::'+dp.type+'::'+dp.id;
         const id = key;
         const title = dp.name;
-        const placeholder = dp.type.replace(/_/g, ' ')
+        var placeholder = dp.type.replace(/_/g, ' ');
+        placeholder = placeholder.charAt(0).toUpperCase() + placeholder.slice(1);
 
         switch (dp.type) {
           case 'date':
@@ -140,7 +166,8 @@ export default function CreateDatabaseForm(): JSX.Element {
                       key={'option::'+opt.id} 
                       value={opt.id} 
                       title={opt.name}
-                      icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined)}/>)
+                      icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined)}
+                      storeValue/>)
                 })}
               </Form.Dropdown>
             )
@@ -197,3 +224,24 @@ function notionColorToTintColor (notionColor: string): Color {
 
   return colorMapper[notionColor] 
 }
+
+async function storeDatabases(database: Database[]) {
+  const data = JSON.stringify(database)
+  await setLocalStorageItem('DATABASES', data)
+}
+
+async function loadDatabases() {
+  const data: string | undefined = await getLocalStorageItem('DATABASES')
+  return data !== undefined ? JSON.parse(data) : undefined
+}
+
+async function storeDatabaseProperties(databaseId: string, databaseProperties: DatabasePropertie[]) {
+  const data = JSON.stringify(databaseProperties)
+  await setLocalStorageItem('DATABASE_PROPERTIES_'+databaseId, data)
+}
+
+async function loadDatabaseProperties(databaseId: string) {
+  const data: string | undefined = await getLocalStorageItem('DATABASE_PROPERTIES_'+databaseId)
+  return data !== undefined ? JSON.parse(data) : undefined
+}
+
