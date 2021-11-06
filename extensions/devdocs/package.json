@@ -3,14 +3,14 @@
   "license": "MIT",
   "name": "devdocs",
   "title": "Devdocs",
-  "description": "Search on DevDocs from Raycast",
+  "description": "Search through DevDocs documentation sets from Raycast.",
   "icon": "devdocs.png",
   "author": "pomdtr",
   "commands": [
     {
       "name": "index",
-      "title": "Browse Devdocs",
-      "description": "Search on DevDocs from Raycast",
+      "title": "Search Devdocs",
+      "description": "Search through DevDocs documentation sets from Raycast",
       "mode": "view"
     }
   ],
