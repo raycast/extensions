@@ -1,14 +1,15 @@
 {
   "name": "tailwindcss",
-  "title": "Tailwind CSS",
-  "description": "Utilities for Tailwind CSS",
+  "title": "Tailwind CSS Documentation",
+  "description": "Quickly search Tailwind CSS documentation and open it in the browser",
   "icon": "tailwind-icon.png",
   "author": "vimtor",
   "license": "MIT",
   "commands": [
     {
       "name": "search-documentation",
-      "title": "Search Tailwind CSS Documentation",
+      "title": "Search CSS Documentation",
+      "subtitle": "Tailwind",
       "description": "Search Tailwind CSS documentation and open it in the browser",
       "mode": "view"
     }
