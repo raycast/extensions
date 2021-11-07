@@ -9,24 +9,25 @@ import {
 import { randomUUID } from 'crypto'
 import { useState } from 'react'
 import { Crate, getCrates } from './api'
-import { useDebouncedCallback } from 'use-debounce'
 
 render(<Main />)
 
 function Main(): JSX.Element {
   const [crates, setCrates] = useState<Crate[]>([])
   const [loading, setLoading] = useState(false)
-  const debounced = useDebouncedCallback(async (v) => {
+
+  async function search(v: string): Promise<void> {
     setLoading(true)
     setCrates(await getCrates(v))
     setLoading(false)
-  }, 500)
+  }
 
   return (
     <List
       isLoading={loading}
-      onSearchTextChange={(v) => debounced(v)}
+      onSearchTextChange={search}
       searchBarPlaceholder="Search for a crate..."
+      throttle={true}
     >
       {crates.map((c) => {
         const id = c.name + randomUUID()
@@ -43,6 +44,10 @@ function Main(): JSX.Element {
                 <CopyToClipboardAction
                   content={`${c.name} = "${c.version}"`}
                   title="Copy Dependency Line"
+                />
+                <OpenInBrowserAction
+                  url={`https://crates.io/crates/${c.name}`}
+                  title="View on crates.io"
                 />
                 {c.documentationURL ? (
                   <OpenInBrowserAction

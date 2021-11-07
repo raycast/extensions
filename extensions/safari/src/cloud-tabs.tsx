@@ -97,7 +97,6 @@ interface Device {
 
 const formatTitle = (title: string) => _.truncate(title, { length: 75 });
 
-// closeTab
 export default function Command() {
   const [hasPermissionError, setHasPermissionError] = useState(false);
   const [devices, setDevices] = useState<Device[]>();

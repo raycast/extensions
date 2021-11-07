@@ -5,9 +5,10 @@ import { NodeEntity, ObjEntity, UserEntity, NodeType, isNodeEntity } from '../se
 export interface SpaceListItemProps {
   node: NodeEntity | ObjEntity;
   owner: UserEntity;
+  actions?: React.ReactElement;
 }
 
-export const SpaceListItem: React.FC<SpaceListItemProps> = ({ node, owner }) => {
+export const SpaceListItem: React.FC<SpaceListItemProps> = ({ node, owner, actions }) => {
   let id: string;
   let title: string;
   let subtitle: string;
@@ -45,6 +46,7 @@ export const SpaceListItem: React.FC<SpaceListItemProps> = ({ node, owner }) => 
         <ActionPanel>
           <OpenInBrowserAction url={node.url} />
           <CopyToClipboardAction title="Copy URL" content={node.url} />
+          {actions}
         </ActionPanel>
       }
     />
