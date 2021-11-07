@@ -2,10 +2,11 @@ import { List, showToast, ToastStyle, preferences, Icon, ImageLike, ActionPanel 
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { Client, History, HistorySlots, Results } from "sabnzbd-api";
+import moment from "moment";
 
 export default function History() {
-  const [init, setInit] = useState(false);
-  const [historySlots, setHistorySlots] = useState([]);
+  const [init, setInit] = useState<boolean>(false);
+  const [historySlots, setHistorySlots] = useState<HistorySlots[]>([]);
 
   useEffect(() => {
     async function fetch() {
@@ -40,7 +41,19 @@ function HistorySlotListItem(props: { slot: HistorySlots; setHistorySlots: any }
   const slot = props.slot;
   const setHistorySlots = props.setHistorySlots;
 
-  return <List.Item id={slot.nzo_id} key={slot.nzo_id} title={slot.name} />;
+  let icon: ImageLike;
+
+  if (slot.status == "Completed") {
+    icon = { source: { light: "ok-light.png", dark: "ok-dark.png" } };
+  } else {
+    console.log(`Unknown slot status: ${slot.status}`);
+
+    icon = Icon.QuestionMark;
+  }
+
+  const completed = moment.unix(slot.completed).fromNow();
+
+  return <List.Item id={slot.nzo_id} key={slot.nzo_id} title={slot.name} subtitle={completed} icon={icon} />;
 }
 
 async function fetchHistorySlots(): Promise<HistorySlots[]> {
