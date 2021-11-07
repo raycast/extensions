@@ -28,6 +28,13 @@
       "mode": "no-view"
     },
     {
+      "name": "history",
+      "title": "History",
+      "subtitle": "SABnzbd",
+      "description": "Full history output with details about all jobs",
+      "mode": "view"
+    },
+    {
       "name": "shutdown",
       "title": "Shutdown",
       "subtitle": "SABnzbd",
