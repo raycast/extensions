@@ -37,26 +37,26 @@ export function faviconUrl(size: number, url: string): string {
 }
 
 interface FetchResult<T> {
-  data: T | undefined;
+  data?: T;
   isLoading: boolean;
 }
 
 export function useFetchWithCache<T>(url: string, cacheFilename: string): FetchResult<T> {
   const cachePath = resolve(environment.supportPath, cacheFilename);
-  const [data, setData] = useState<T>();
+  const [state, setState] = useState<{data?: T, isLoading: boolean}>({isLoading: true});
 
   useEffect(() => {
     async function fetchWithCache() {
       // Load from Cache
       if (existsSync(cachePath)) {
         const text = await readFile(cachePath).then((buffer) => buffer.toString());
-        await setData(JSON.parse(text.toString()));
+        await setState({data: JSON.parse(text.toString()), isLoading: true});
       }
 
       // Refresh Cache
       try {
         const data = await fetch(url).then((res) => res.json());
-        await setData(data as T);
+        await setState({data: data as T, isLoading: false});
         await writeFile(cachePath, JSON.stringify(data));
       } catch (error) {
         console.error(error)
@@ -66,7 +66,7 @@ export function useFetchWithCache<T>(url: string, cacheFilename: string): FetchR
     fetchWithCache();
   }, [url]);
 
-  return { data: data, isLoading: !data };
+  return state;
 }
 
 export default function DocList(): JSX.Element {
