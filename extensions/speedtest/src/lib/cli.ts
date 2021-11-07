@@ -21,10 +21,9 @@ export function speedtestCLIFilepath(): string {
     return path.join(speedtestCLIDirectory(), "speedtest");
 }
 
-export async function enusreCLI() {
+export async function ensureCLI() {
     const cli = speedtestCLIFilepath();
     if (fs.existsSync(cli)) {
-        console.log("there");
         return cli;
     } else {
         const binaryURL = `https://install.speedtest.net/app/cli/ookla-speedtest-${cliVersion}-${cliFileInfo.pkg}`;
@@ -38,7 +37,6 @@ export async function enusreCLI() {
         try {
             const archive = path.join(tempDir, cliFileInfo.pkg);
             const archiveHash = await sha256FileHash(archive);
-            console.log(archiveHash);
             if (archiveHash === cliFileInfo.sha256) {
                 await afs.mkdir(dir, { recursive: true });
                 await tar.extract({ file: archive, filter: (p) => p === "speedtest", cwd: dir });

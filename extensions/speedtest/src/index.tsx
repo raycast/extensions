@@ -1,6 +1,6 @@
 import { ActionPanel, Color, CopyToClipboardAction, Icon, List, showToast, ToastStyle } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { enusreCLI, speedtestCLIDirectory } from "./lib/cli";
+import { ensureCLI, speedtestCLIDirectory } from "./lib/cli";
 import { Result, runSpeedTest } from "./lib/speedtest";
 import { pingToString, speedToString } from "./lib/utils";
 import * as afs from "fs/promises";
@@ -120,7 +120,7 @@ function useSpeedtest(): { result: Result; error: string | undefined; isLoading:
   useEffect(() => {
     async function runTest() {
       try {
-        await enusreCLI();
+        await ensureCLI();
         runSpeedTest(
           (r: Result) => {
             if (!cancel) {
