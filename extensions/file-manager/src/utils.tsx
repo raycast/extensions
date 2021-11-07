@@ -104,7 +104,7 @@ export function DirectoryItem(props: { fileData: FileDataType }) {
       icon={{ fileIcon: filePath }}
       actions={
         <ActionPanel>
-          <PushAction title="Open Directory" target={<Directory path={filePath} />} />
+          <PushAction title="Open Directory" icon={Icon.ArrowRight} target={<Directory path={filePath} />} />
           <ShowInFinderAction path={filePath} />
           <CopyToClipboardAction title="Copy Directory Path" content={`${filePath}/`} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
           <PushAction title="Create File" icon={Icon.Plus} shortcut={{ modifiers: ["cmd"], key: "n" }} target={<CreateFile path={props.fileData.path} />} />
@@ -156,7 +156,7 @@ export function SymlinkItem(props: { fileData: FileDataType }) {
         subtitle={preferences.showFilePermissions ? props.fileData.permissions : ""}
         actions={
           <ActionPanel>
-            <PushAction title="Open Symlink Directory" target={<Directory path={originalPath} />} />
+            <PushAction title="Open Symlink Directory" icon={Icon.ArrowRight} target={<Directory path={originalPath} />} />
             <OpenWithAction path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
             <CopyToClipboardAction title="Copy Symlink Path" content={filePath} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
             <CopyToClipboardAction title="Copy Original Directory Path" content={filePath} shortcut={{ modifiers: ["cmd", "opt"], key: "c" }} />
@@ -197,7 +197,7 @@ export function createItem(fileData: FileDataType) {
   } else if (fileData.type === "symlink") {
     return (<SymlinkItem fileData={fileData} />);
   } else {
-    showToast(ToastStyle.Failure, "Unsupported file type", `file type: ${fileData.type}`);
+    showToast(ToastStyle.Failure, "Unsupported file type", `File type: ${fileData.type}`);
   }
 }
 
@@ -246,7 +246,7 @@ export function Directory(props: { path: string }) {
     const directories = directoryData.filter(file => file.type === "directory");
     const nonDirectories = directoryData.filter(file => file.type !== "directory");
     return (
-      <List navigationTitle={props.path} searchBarPlaceholder="Search for a file or directory...">
+      <List searchBarPlaceholder={`Search in ${props.path}/`}>
         <List.Section title="Directories">
           {directories.map(data => createItem(data))}
         </List.Section>
@@ -257,7 +257,7 @@ export function Directory(props: { path: string }) {
     );
   } else {
     return (
-      <List navigationTitle={props.path} searchBarPlaceholder="Search for a file or directory...">
+      <List searchBarPlaceholder={`Search in ${props.path}/`}>
         {directoryData.map(data => createItem(data))}
       </List>
     );
