@@ -45,7 +45,7 @@
     {
       "name": "showFilePermissions",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": true,
       "title": "",
       "description": "Show the permissions of files",
