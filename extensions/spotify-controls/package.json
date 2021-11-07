@@ -1,9 +1,11 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spotify-controls",
   "title": "Spotify Controls",
   "description": "Control the Spotify app for macOS with your keyboard.",
   "icon": "icon.png",
   "author": "thomas",
+  "license": "MIT",
   "commands": [
     {
       "name": "play",

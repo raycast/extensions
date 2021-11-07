@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zotero",
   "title": "Search Zotero",
   "description": "Search Zotero Database from Raycast",
@@ -35,7 +36,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
-    "node-fetch":	"^3.0.0",
+    "node-fetch": "^3.0.0",
     "raycast": "^1.0.8",
     "he": "^1.2.0"
   },

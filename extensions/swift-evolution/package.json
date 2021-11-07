@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "swift-evolution",
   "title": "Swift Evolution",
   "description": "Search and see details for the Swift langauge proposals from swift evolution web page https://apple.github.io/swift-evolution/",

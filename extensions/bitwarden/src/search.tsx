@@ -15,26 +15,22 @@ import treeify from "treeify";
 import { filterNullishPropertiesFromObject, codeBlock, titleCase, faviconUrl } from "./utils";
 import { useBitwarden } from "./hooks";
 import { TroubleshootingGuide, UnlockForm } from "./components";
-import { existsSync } from "fs";
 import { Bitwarden } from "./api";
-import { dirname } from "path";
 
-const { cliPath, clientId, clientSecret, fetchFavicons } = getPreferenceValues();
-process.env.PATH = dirname(cliPath);
-const bitwardenApi = new Bitwarden(clientId, clientSecret);
+const { fetchFavicons } = getPreferenceValues();
 
 export default function Search(): JSX.Element {
-  if (!existsSync(cliPath)) {
+  try {
+    const bitwardenApi = new Bitwarden();
+    const [state, setSessionToken] = useBitwarden(bitwardenApi);
+
+    if (state.vaultStatus === "locked") {
+      return <UnlockForm setSessionToken={setSessionToken} bitwardenApi={bitwardenApi} />;
+    }
+    return <ItemList bitwardenApi={bitwardenApi} sessionToken={state.sessionToken} vaultStatus={state.vaultStatus} />;
+  } catch (error) {
     return <TroubleshootingGuide />;
   }
-
-  const [state, setSessionToken] = useBitwarden(bitwardenApi);
-
-  if (state.vaultStatus === "locked") {
-    return <UnlockForm setSessionToken={setSessionToken} bitwardenApi={bitwardenApi} />;
-  }
-
-  return <ItemList bitwardenApi={bitwardenApi} sessionToken={state.sessionToken} vaultStatus={state.vaultStatus} />;
 }
 
 function ItemList(props: {
@@ -71,23 +67,43 @@ function ItemList(props: {
     }
   }, [sessionToken]);
 
+  async function refreshItems() {
+    if (sessionToken) {
+      const toast = await showToast(ToastStyle.Animated, "Syncing Items...");
+      await bitwardenApi.sync(sessionToken);
+      await loadItems(sessionToken);
+      await toast.hide();
+    }
+  }
+
+  const favoriteItems = [];
+  const regularItems = [];
+  for (const item of state?.items || []) {
+    item.favorite ? favoriteItems.push(item) : regularItems.push(item);
+  }
+
   return (
     <List isLoading={typeof state === "undefined"}>
-      {state?.items.map((item) => (
+      <List.Section title="Favorites">
+        {favoriteItems.map((item) => (
+          <ItemListItem
+            key={item.id}
+            item={item}
+            folder={item.folderId ? folderMap[item.folderId] : undefined}
+            refreshItems={refreshItems}
+          />
+        ))}
+      </List.Section>
+      <List.Section title="Others">
+      {regularItems.map((item) => (
         <ItemListItem
           key={item.id}
           item={item}
           folder={item.folderId ? folderMap[item.folderId] : undefined}
-          refreshItems={async () => {
-            if (sessionToken) {
-              const toast = await showToast(ToastStyle.Animated, "Syncing Items...");
-              await bitwardenApi.sync(sessionToken);
-              await loadItems(sessionToken);
-              await toast.hide();
-            }
-          }}
+          refreshItems={refreshItems}
         />
       ))}
+      </List.Section>
     </List>
   );
 }

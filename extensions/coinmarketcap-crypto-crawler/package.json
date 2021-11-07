@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coinmarketcap-crypto-price-crawler",
   "title": "CoinMarketCap Crypto Search",
   "description": "A price crawler to search crypto price from Coinmarketcap.",

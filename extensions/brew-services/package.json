@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brew-services",
   "title": "Manage Services",
   "description": "Manage homebrew services",

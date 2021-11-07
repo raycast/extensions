@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "domainr",
   "title": "Domainr",
   "description": "Search domains availability with Domainr",
