@@ -31,6 +31,7 @@ interface Bookmark {
   URLString: string;
   ReadingList: {
     DateAdded: string;
+    DateLastViewed?: string;
     PreviewText: string;
   };
   imageURL: string;
@@ -42,6 +43,7 @@ interface ReadingListBookmark {
   domain: string;
   title: string;
   dateAdded: string;
+  dateLastViewed?: string;
   description: string;
 }
 
@@ -55,10 +57,30 @@ const extractReadingListBookmarks = (bookmarks: BookmarkPListResult): ReadingLis
       domain: getUrlDomain(res.URLString),
       title: res.ReadingListNonSync.Title || res.URIDictionary.title,
       dateAdded: res.ReadingList.DateAdded,
+      dateLastViewed: res.ReadingList.DateLastViewed,
       description: res.ReadingList.PreviewText || '',
     }))
     .orderBy('dateAdded', 'desc')
     .value();
+
+function ListItem(props: { bookmark: ReadingListBookmark }) {
+  const { bookmark } = props;
+  return (
+    <List.Item
+      title={bookmark.title}
+      subtitle={bookmark.domain}
+      keywords={[bookmark.url, bookmark.domain, bookmark.description]}
+      icon={getFaviconUrl(bookmark.domain)}
+      accessoryTitle={formatDate(bookmark.dateAdded)}
+      actions={
+        <ActionPanel>
+          <OpenInBrowserAction url={bookmark.url} />
+          <CopyToClipboardAction content={bookmark.url} title="Copy URL" />
+        </ActionPanel>
+      }
+    />
+  );
+}
 
 export default function Command() {
   const [hasPermissionError, setHasPermissionError] = useState(false);
@@ -70,7 +92,6 @@ export default function Command() {
       const bookmarks = extractReadingListBookmarks(safariBookmarksPlist);
       setBookmarks(bookmarks);
     } catch (err) {
-      // TODO check error
       if (err instanceof Error && err.message.includes('operation not permitted')) {
         return setHasPermissionError(true);
       }
@@ -87,27 +108,21 @@ export default function Command() {
     return <Detail markdown={permissionErrorMarkdown} />;
   }
 
+  const groupedBookmarks = _.groupBy(bookmarks, ({ dateLastViewed }) => (dateLastViewed ? 'read' : 'unread'));
+
   return (
-    <List
-      isLoading={!bookmarks}
-      navigationTitle={bookmarks && `Reading List (${plural(bookmarks.length, 'bookmark')})`}
-    >
-      {_.map(bookmarks, (bookmark: ReadingListBookmark) => (
-        <List.Item
-          key={bookmark.uuid}
-          title={bookmark.title}
-          subtitle={bookmark.domain}
-          keywords={[bookmark.url, bookmark.domain, bookmark.description]}
-          icon={getFaviconUrl(bookmark.domain)}
-          accessoryTitle={formatDate(bookmark.dateAdded)}
-          actions={
-            <ActionPanel>
-              <OpenInBrowserAction url={bookmark.url} />
-              <CopyToClipboardAction content={bookmark.url} title="Copy URL" />
-            </ActionPanel>
-          }
-        />
-      ))}
+    <List isLoading={!bookmarks}>
+      {_.map(groupedBookmarks, (bookmarks, key) => {
+        if (bookmarks.length > 0) {
+          return (
+            <List.Section key={key} title={_.startCase(key)} subtitle={plural(bookmarks.length, 'bookmark')}>
+              {_.map(bookmarks, (bookmark) => (
+                <ListItem key={bookmark.uuid} bookmark={bookmark} />
+              ))}
+            </List.Section>
+          );
+        }
+      })}
     </List>
   );
 }
