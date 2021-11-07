@@ -43,6 +43,16 @@ function HistorySlotListItem(props: { slot: HistorySlots; setHistorySlots: any }
 
   let icon: ImageLike;
 
+  const actions = (
+    <ActionPanel>
+      <ActionPanel.Item
+        title={"Delete"}
+        onAction={() => onDelete(slot, setHistorySlots)}
+        icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
+      />
+    </ActionPanel>
+  );
+
   if (slot.status == "Completed") {
     icon = { source: { light: "ok-light.png", dark: "ok-dark.png" } };
   } else {
@@ -53,7 +63,33 @@ function HistorySlotListItem(props: { slot: HistorySlots; setHistorySlots: any }
 
   const completed = moment.unix(slot.completed).fromNow();
 
-  return <List.Item id={slot.nzo_id} key={slot.nzo_id} title={slot.name} subtitle={completed} icon={icon} />;
+  return (
+    <List.Item
+      id={slot.nzo_id}
+      key={slot.nzo_id}
+      title={slot.name}
+      subtitle={completed}
+      icon={icon}
+      actions={actions}
+    />
+  );
+}
+
+async function onDelete(slot: HistorySlots, setHistorySlots: any) {
+  let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
+
+  try {
+    const results = (await client.historyDelete(slot.nzo_id)) as Results;
+
+    const slots = await fetchHistorySlots();
+
+    setHistorySlots(slots);
+
+    showToast(ToastStyle.Success, "Deleted history item");
+  } catch (error) {
+    console.error(error);
+    showToast(ToastStyle.Failure, "Could not delete history item");
+  }
 }
 
 async function fetchHistorySlots(): Promise<HistorySlots[]> {
