@@ -29,7 +29,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run Ray CLI
-        uses: raycast/github-actions/ray@v1.0.0
+        uses: raycast/github-actions/ray@v1.1.0
         with:
           access_token: "${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}"
           api_url: "${{ secrets.RAYCAST_CLI_API_URL }}"

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-mdn",
   "title": "Search MDN",
   "description": "Search MDN Web Docs",

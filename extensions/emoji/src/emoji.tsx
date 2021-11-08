@@ -7,7 +7,7 @@ import {
   setLocalStorageItem,
 } from "@raycast/api";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { ReactElement, SetStateAction, Dispatch } from "react";
 import { createEmojiList } from "generate-emoji-list";
 
@@ -20,21 +20,24 @@ type Emoji = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const useStateFromLocalStorage = <T, _ = void>(key: string, initialValue: T): [T, Dispatch<SetStateAction<T>>] => {
   const [state, setState] = useState<T>(initialValue);
-  const didUnmount = useRef<boolean>(false);
 
   useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
     (async () => {
       const cache = await getLocalStorageItem(key);
 
       if (typeof cache === "string") {
-        if (!didUnmount.current) {
+        if (!didUnmount) {
           setState(JSON.parse(cache));
         }
       }
     })();
 
     return () => {
-      didUnmount.current = true;
+      didUnmount = true;
     };
   }, []);
 
@@ -51,17 +54,20 @@ const useStateFromLocalStorage = <T, _ = void>(key: string, initialValue: T): [T
 
 export default function Main(): ReactElement {
   const [list, setList] = useStateFromLocalStorage<Category[]>("emoji-list", []);
-  const didUnmount = useRef<boolean>(false);
 
   useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
     createEmojiList().then((list: Category[]) => {
-      if (!didUnmount.current) {
+      if (!didUnmount) {
         setList(list);
       }
     });
 
     return () => {
-      didUnmount.current = true;
+      didUnmount = true;
     };
   }, []);
 

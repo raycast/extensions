@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-open-project",
   "version": "1.0.0",
   "title": "Quick Open Project",
