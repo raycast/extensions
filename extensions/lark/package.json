@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lark",
   "title": "Lark Documents",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Quickly search documents from Feishu/Lark.",
   "icon": "logo.png",
   "author": "tmk",
