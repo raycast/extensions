@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "1password7",
   "title": "1Password 7",
   "description": "Search, open or edit your 1Password 7 passwords from Raycast",

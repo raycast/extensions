@@ -12,11 +12,13 @@ export type DashResult = {
 };
 
 async function searchDash(query: string, signal: AbortSignal): Promise<DashResult[]> {
+  const dashPath = await getDashAppPath();
+
   return new Promise((resolve, reject) => {
     exec(
       `./dashAlfredWorkflow ${query}`,
       {
-        cwd: `${getDashAppPath()}/Contents/Resources`,
+        cwd: `${dashPath}/Contents/Resources`,
         signal,
       },
       (err, data) => {

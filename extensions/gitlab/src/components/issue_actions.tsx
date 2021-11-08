@@ -4,6 +4,7 @@ import {
   Color,
   CopyToClipboardAction,
   Icon,
+  KeyboardShortcut,
   PushAction,
   showToast,
   ToastStyle,
@@ -76,10 +77,39 @@ function ShowIssueLabelsAction(props: { labels: Label[] }) {
   );
 }
 
+export function CreateIssueTodoAction(props: { issue: Issue; shortcut?: KeyboardShortcut }) {
+  const issue = props.issue;
+  async function handleAction() {
+    try {
+      await gitlab.post(`projects/${issue.project_id}/issues/${issue.iid}/todo`);
+      showToast(ToastStyle.Success, "To do created");
+    } catch (error: any) {
+      showToast(
+        ToastStyle.Failure,
+        "Failed to add as to do",
+        error instanceof Error ? error.message : error.toString()
+      );
+    }
+  }
+  if (issue.state === "opened") {
+    return (
+      <ActionPanel.Item
+        title="Add a to do"
+        shortcut={props.shortcut}
+        icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }}
+        onAction={handleAction}
+      />
+    );
+  } else {
+    return null;
+  }
+}
+
 export function IssueItemActions(props: { issue: Issue }) {
   const issue = props.issue;
   return (
     <React.Fragment>
+      <CreateIssueTodoAction issue={issue} shortcut={{ modifiers: ["cmd"], key: "t" }} />
       <ShowIssueLabelsAction labels={issue.labels} />
       {issue.state == "opened" && <CreateMRAction issue={issue} />}
       {issue.state == "opened" && <CloseIssueAction issue={issue} />}

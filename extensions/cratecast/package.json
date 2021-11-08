@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cratecast",
   "title": "crates.io Search",
   "description": "Explore crates.io",
@@ -16,8 +17,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
-    "node-fetch": "^3.0.0",
-    "use-debounce": "^7.0.0"
+    "node-fetch": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

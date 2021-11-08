@@ -1,9 +1,11 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "producthunt",
   "title": "Product Hunt - Today's Hunts",
   "description": "Get the latest products from the fontpage of Product Hunt.",
   "icon": "icon.png",
   "author": "ragnor",
+  "license": "MIT",
   "commands": [
     {
       "name": "frontpage",

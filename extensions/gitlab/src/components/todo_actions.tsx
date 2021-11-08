@@ -25,8 +25,13 @@ export function CloseTodoAction(props: { todo: Todo }) {
   async function handleAction() {
     try {
       await gitlab.post(`todos/${todo.id}/mark_as_done`);
+      showToast(ToastStyle.Success, "Done", "Todo is now marked as done");
     } catch (error: any) {
-      showToast(ToastStyle.Failure, "Failed to Close to do", error instanceof Error ? error.message : error.toString());
+      showToast(
+        ToastStyle.Failure,
+        "Failed to mark Todo as done",
+        error instanceof Error ? error.message : error.toString()
+      );
     }
   }
   return (
@@ -43,6 +48,7 @@ export function CloseAllTodoAction() {
   async function handleAction() {
     try {
       await gitlab.post(`todos/mark_as_done`);
+      showToast(ToastStyle.Success, "Done", "All Todos are now marked as done");
     } catch (error: any) {
       showToast(
         ToastStyle.Failure,

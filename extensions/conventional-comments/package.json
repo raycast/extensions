@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "conventional-comments",
   "title": "Conventional Comments",
   "description": "Paste conventional comment into your foremost application",
@@ -9,7 +10,6 @@
     {
       "name": "index",
       "title": "Insert Conventional Comment",
-      "subtitle": "",
       "description": "Easily insert conventional comments into the frontmost application.",
       "mode": "view"
     }
