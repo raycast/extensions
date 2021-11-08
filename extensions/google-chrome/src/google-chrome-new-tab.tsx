@@ -2,7 +2,7 @@ import { ActionPanel, popToRoot, closeMainWindow, CopyToClipboardAction, getPref
 import { runAppleScript } from "run-applescript";
 import { HistoryEntry, useChromeHistorySearch } from "./browserHistory"
 import { useEffect, useState, ReactElement} from "react";
-import { faviconUrl } from "./utils"
+import { faviconUrl, urlParser } from "./utils"
 
 class Tab {
   static readonly TAB_CONTENTS_SEPARATOR: string = '~~~';
@@ -29,6 +29,9 @@ class Tab {
     return this.url.replace(/(^\w+:|^)\/\//, '').replace('www.', '');
   }
 
+  urlDomain(): string {
+    return this.urlWithoutScheme().split('/')[0];
+  }
 
   googleFavicon(): string {
     return faviconUrl(64, this.url)
@@ -64,7 +67,7 @@ async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   return openTabs.split("\n").filter(line => line.length !== 0).map(line => Tab.parse(line));
 }
 
-async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
+async function openNewTab(queryText: string | null | undefined, url: string | undefined): Promise<boolean | string> {
   popToRoot();
   closeMainWindow({ clearRootSearch: true });
   
@@ -72,12 +75,14 @@ async function openNewTab(queryText: string | null | undefined): Promise<boolean
     tell application "Google Chrome"
       activate
       tell window 1
-          set newTab to make new tab ` + (queryText ? 'with properties {URL:"https://www.google.com/search?q='+queryText+'"}' : '') + ` 
+          set newTab to make new tab ` + (url ? 'with properties {URL:"'+url+'"}'  : (queryText ? 'with properties {URL:"http://www.google.com/search?q='+queryText+'"}' : ''))+ ` 
       end tell
     end tell
   `
 
-  return await runAppleScript(script);
+  const newTabOpened = await runAppleScript(script);
+
+  return newTabOpened;
 }
 
 
@@ -100,6 +105,7 @@ interface State {
 
 export default function Command(): ReactElement {
     const [searchText, setSearchText] = useState<string>()
+    const [searchUrl, setSearchUrl] = useState<string>()
     const { isLoading, error, entries } = useChromeHistorySearch(searchText)
 
 
@@ -107,7 +113,7 @@ export default function Command(): ReactElement {
     const [state, setState] = useState<State>({});
 
     async function getTabs(query: string | null) {
-      let tabs = await getOpenTabs(useOriginalFavicon);
+      var tabs = await getOpenTabs(useOriginalFavicon);
 
       if(query){
         tabs = tabs.filter(function (tab) {
@@ -125,13 +131,23 @@ export default function Command(): ReactElement {
         showToast(ToastStyle.Failure, "An Error Occurred", error.toString())
     }
 
+  
+
+    if(!searchUrl && searchText){
+      const parsedUrl = urlParser(searchText)
+      if(parsedUrl){
+        setSearchUrl(parsedUrl)
+      }
+    }
+
+
     return (
         <List onSearchTextChange={function (query) { setSearchText(query); getTabs(query);}} isLoading={isLoading} throttle={false}>
             <List.Section title="New Tab" key="new-tab">
               <List.Item
-                title={(!searchText ? "Open Empty Tab" : `Search "${searchText}"`)}
-                icon={{ source: (!searchText ? Icon.Plus : Icon.MagnifyingGlass)}}
-                actions={<NewTabActions query={searchText} />} 
+                title={(searchUrl ? "Open URL" : ( searchText ? "Search \""+searchText+"\"" : "Open empty tab"))}
+                icon={{ source: (searchUrl ? Icon.Link : ( searchText ? Icon.MagnifyingGlass : Icon.Plus))}}
+                actions={<NewTabActions query={searchText} url={searchUrl} />} 
               />
             </List.Section>
             <List.Section title="Open Tabs" key="open-tabs">
@@ -150,14 +166,15 @@ export default function Command(): ReactElement {
 
 
 
-const NewTabActions = (props: { query: string | undefined }): ReactElement => {
+const NewTabActions = (props: { query: string | undefined, url: string | undefined }): ReactElement => {
     const query = props.query
+    const url = props.url
 
     return (
         <ActionPanel title="New Tab">
           <ActionPanel.Item
-            onAction={function () { openNewTab(query)}}
-            title={(query ? `Search "${query}"` : "Open Empty Tab")} />
+            onAction={function () { openNewTab(query, url)}}
+            title={( url ? "Open URL" : (query ? "Search \""+query+"\"" : "Open empty tab"))} />
         </ActionPanel>
     )
 }
@@ -183,7 +200,7 @@ const HistoryItemActions = (props: { entry: HistoryEntry }): ReactElement => {
     return (
         <ActionPanel title={title}>
           <OpenInBrowserAction
-              title="Open in Tab"
+              title="Open in tab"
               url={url} />
           <CopyToClipboardAction
               title="Copy URL"
@@ -223,7 +240,7 @@ function GoogleChromeGoToTab(props: { tab: Tab }) {
     await closeMainWindow();
   }
 
-  return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
+  return <ActionPanel.Item title="Open tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }
 
 
