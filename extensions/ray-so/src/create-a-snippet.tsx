@@ -25,7 +25,7 @@ export default function CreateSnippet() {
   const [code, setCode] = useState<Values>(defaultSnippet);
   const url = `https://ray.so/?colors=${code.color}&background=${code.background}&darkMode=${code.darkMode}&padding=${
     code.padding
-  }&title=${code.title || "Untitled 1"}&code=${code.snippet}&language=${code.language}`;
+  }&title=${code.title || "Untitled 1"}&code=${Buffer.from(code.snippet).toString("base64")}&language=${code.language}`;
 
   return (
     <Form
