@@ -5,11 +5,12 @@ import { GroupSection, SubGroupSection } from "@components"
 import { Group } from "@models";
 
 type Props = {
-  isLoading: boolean;
-  groups: Group[];
+  isLoading: boolean
+  groups: Group[]
+  totalScriptCommands: number
 }
 
-export function MainContent({ isLoading, groups }: Props): JSX.Element {
+export function MainContent({ isLoading, groups, totalScriptCommands }: Props): JSX.Element {
   const sections: JSX.Element[] = []
 
   groups.sort((left: Group, right: Group) => {
@@ -30,9 +31,12 @@ export function MainContent({ isLoading, groups }: Props): JSX.Element {
     }
   }
   
-  return <List 
+  return (
+  <List 
     isLoading={isLoading} 
-    searchBarPlaceholder="Search for your Script Command">
-      {sections}
+    searchBarPlaceholder={`Search for your Script Command among of ${totalScriptCommands}`}
+  >
+    {sections}
   </List>
+  )
 }
