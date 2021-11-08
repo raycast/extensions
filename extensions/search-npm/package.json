@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-npm",
   "title": "Search npm Packages",
   "description": "Search for npm package information from npms.io",

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "safari",
   "title": "Safari Bookmarks",
   "description": "List your Safari Cloud Tabs and Reading List Bookmarks",

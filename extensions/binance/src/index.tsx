@@ -10,27 +10,27 @@ const binance = new Binance().options({
   APISECRET: preferences.binance_api_secret.value as string
 });
 
-export default function BalanceList() {
-  const [state, setState] = useState<{ portfolio: Portfolio }>( { portfolio: [] } );
+export interface PortfolioState {
+  isLoading: boolean;
+  portfolio: Portfolio | null;
+}
 
-  useEffect(() => {
-    async function fetch() {
-      const portfolio = await fetchPortfolio()
-      setState((oldState) => ({
-        ...oldState,
-        portfolio: portfolio
-      }));
-    }
-    fetch();
-  }, []);
+interface BinanceError { 
+  statusMessage: string 
+}
+
+function isBinanceError(object: any): object is BinanceError {
+  return 'statusMessage' in object;
+}
+
+
+export default function BalanceList() {
+  const { state } = usePortfolio()
 
   return (
-    <List isLoading={state.portfolio.length == 0} searchBarPlaceholder="Filter currencies">
+    <List isLoading={state.isLoading} searchBarPlaceholder="Filter currencies">
     {
-      state.portfolio
-      .sort(compareUSDTValue)
-      .reverse()
-      .map((entry) => (
+      state.portfolio?.sort(compareUSDTValue).reverse().map((entry) => (
           <CurrencyItem key={entry.currency} portfolioEntry={entry} />
       ))
     }
@@ -61,40 +61,68 @@ function CurrencyItem(props: { portfolioEntry: PortfolioEntry }) {
   );
 }
 
-async function fetchPortfolio(): Promise<Portfolio> {
-  try {
-    const balance = await binance.balance() as Balance
-    const prices = await binance.prices() as PriceRecord
+export function usePortfolio() {
+  const [state, setState] = useState<PortfolioState>({ portfolio: null, isLoading: true });
 
-    const portfolio: PortfolioEntry[] = Object.keys(balance).flatMap((currency: Currency) => {
-      const available = balance[currency].available
-      const usdPriceFromAPI = prices[currency.concat('USDT')]
-      const tradeToCurrency = !isNaN(usdPriceFromAPI) ? 'USDT' : (currency == 'USDT') ? null : 'BTC'
-      const usdPrice = !isNaN(usdPriceFromAPI) ? usdPriceFromAPI : (currency == 'USDT') ? 1 : 0
-      const usdValue = available * usdPrice
-      let icon = `currency/${currency.toLowerCase()}.png`  
-      if (!fs.existsSync(path.join(environment.assetsPath, icon))) {
-        icon = `currency/generic.png`
+  useEffect(() => {
+    fetchPortfolio()
+  }, []);
+
+  async function fetchPortfolio() {
+    setState((oldState) => ({
+      ...oldState,
+      isLoading: true,
+    }));
+
+    try {
+      const balance: Balance = await binance.balance()
+      const prices: PriceRecord = await binance.prices()
+  
+      const portfolio: PortfolioEntry[] = Object.keys(balance).flatMap((currency: Currency) => {
+        const available = balance[currency].available
+        const usdPriceFromAPI = prices[currency.concat('USDT')]
+        const tradeToCurrency = !isNaN(usdPriceFromAPI) ? 'USDT' : (currency == 'USDT') ? null : 'BTC'
+        const usdPrice = !isNaN(usdPriceFromAPI) ? usdPriceFromAPI : (currency == 'USDT') ? 1 : 0
+        const usdValue = available * usdPrice
+        let icon = `currency/${currency.toLowerCase()}.png`  
+        if (!fs.existsSync(path.join(environment.assetsPath, icon))) {
+          icon = `currency/generic.png`
+        }
+        return { 
+          currency: currency, 
+          available: available,
+          usdPrice: usdPrice,
+          usdValue: usdValue,
+          tradeToCurrency: tradeToCurrency,
+          icon: icon
+        } as PortfolioEntry
+      })
+      setState((oldState) => ({
+        ...oldState,
+        isLoading: false,
+        portfolio: portfolio
+      }));
+    } catch (error: any) {
+      let errorMsg
+      if (error instanceof Error) {
+        errorMsg = error.message
+      } else if (isBinanceError(error)) {
+          errorMsg = error.statusMessage
+      } else {
+        errorMsg = error.toString()
       }
-      return { 
-        currency: currency, 
-        available: available,
-        usdPrice: usdPrice,
-        usdValue: usdValue,
-        tradeToCurrency: tradeToCurrency,
-        icon: icon
-      } as PortfolioEntry
-    })
-    return Promise.resolve(portfolio)
-  } catch (error) {
-    const binanceError = error as BinanceError
-    console.error(binanceError)
-    showToast(ToastStyle.Failure, `Loading failed`)
-    return Promise.resolve([])
+      showToast(ToastStyle.Failure, errorMsg)
+      setState((oldState) => ({
+        ...oldState,
+        isLoading: false,
+        portfolio: null,
+      }));
+    }
   }
+
+  return { state }
 }
 
-type BinanceError = { statusMessage: string }
 type Currency = string
 type Price = number
 type BalanceInformation = {
