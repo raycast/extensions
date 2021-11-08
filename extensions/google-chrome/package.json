@@ -23,6 +23,13 @@
       "subtitle": "Google Chrome",
       "description": "Search browser history.",
       "mode": "view"
+    },
+    {
+      "name": "google-chrome-new-tab",
+      "title": "New Tab",
+      "subtitle": "Google Chrome",
+      "description": "Open a new Google Chrome tab.",
+      "mode": "view"
     }
   ],
   "preferences": [
