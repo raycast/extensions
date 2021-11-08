@@ -13,7 +13,7 @@ export function MainContent({ isLoading, groups }: Props): JSX.Element {
   const sections: JSX.Element[] = []
 
   groups.sort((left: Group, right: Group) => {
-    return (left.name > right.name) ? 1 : -1;
+    return (left.name > right.name) ? 1 : -1
   })
   
   for (const group of groups) {
@@ -21,7 +21,7 @@ export function MainContent({ isLoading, groups }: Props): JSX.Element {
 
     if (group.subGroups != null && group.subGroups?.length > 0) {
       group.subGroups.sort((left: Group, right: Group) => {
-        return (left.name > right.name) ? 1 : -1;
+        return (left.name > right.name) ? 1 : -1
       })
 
       for (const subGroup of group.subGroups) {

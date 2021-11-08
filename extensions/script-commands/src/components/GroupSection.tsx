@@ -9,10 +9,10 @@ type Props = {
 }
 
 export function GroupSection({ group }: Props) {
-  const key = `${group.name}-${group.path}`;
+  const key = `${group.name}-${group.path}`
 
   group.scriptCommands.sort((left: ScriptCommand, right: ScriptCommand) => {
-    return (left.title > right.title) ? 1 : -1;
+    return (left.title > right.title) ? 1 : -1
   })
 
   return (

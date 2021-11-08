@@ -1,8 +1,8 @@
-import { List } from "@raycast/api";
+import { List } from "@raycast/api"
 
-import { iconDarkURL, iconLightURL, languageURL } from "@network";
+import { iconDarkURL, iconLightURL, languageURL } from "@network"
 
-import { Author, ScriptCommand } from "@models";
+import { Author, ScriptCommand } from "@models"
 
 type Props = { 
   scriptCommand: ScriptCommand
@@ -24,7 +24,7 @@ export function ScriptCommandItem({ scriptCommand }: Props) {
       accessoryIcon={languageURL(scriptCommand.language)}
       accessoryTitle={author(scriptCommand.authors) ?? ""}
     />
-  );
+  )
 }
 
 function author(authors: Author[] | null): string | null {
@@ -33,14 +33,14 @@ function author(authors: Author[] | null): string | null {
 
     for (const author of authors) {
       if (content.length > 0) {
-        content += " and ";
+        content += " and "
       }
 
-      content += author.name;
+      content += author.name
     }
 
-    return `by ${content}`;
+    return `by ${content}`
   }
 
-  return null;
+  return null
 }

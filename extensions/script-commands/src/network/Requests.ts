@@ -3,7 +3,7 @@ import fetch from "node-fetch"
 
 import { Main, Group, ScriptCommand } from "@models"
 
-const baseURL = "https://raw.githubusercontent.com/raycast/script-commands/master/commands";
+const baseURL = "https://raw.githubusercontent.com/raycast/script-commands/master/commands"
 
 const Constants = {
   Regex: {
@@ -20,36 +20,36 @@ enum IconStyle {
 
 export async function fetchScriptCommands(): Promise<Main | null> {
   try {
-    const response = await fetch(Constants.extensionsURL);
-    const json = await response.json();
-    const main = json as Main;
+    const response = await fetch(Constants.extensionsURL)
+    const json = await response.json()
+    const main = json as Main
 
     main.groups.sort((a, b) => {
-      const left = a as Group;
-      const right = b as Group;
+      const left = a as Group
+      const right = b as Group
 
       if (left.name > right.name) {
-        return 1;
+        return 1
       }
 
-      return -1;
-    });
+      return -1
+    })
 
     return main
   }
   catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Could not load Script Commands");
+    console.error(error)
+    showToast(ToastStyle.Failure, "Could not load Script Commands")
 
-    return Promise.resolve(null);
+    return Promise.resolve(null)
   }
 }
 
 export const languageURL = (language: string) => `${Constants.languageImageURL}/icon-${language}.png`
 
-export const iconDarkURL = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Dark);
+export const iconDarkURL = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Dark)
 
-export const iconLightURL = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Light);
+export const iconLightURL = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Light)
 
 function iconURL(scriptCommand: ScriptCommand, style: IconStyle): string | null {
   let path = scriptCommand.icon.light

@@ -1,7 +1,7 @@
-import { Group } from "@models";
+import { Group } from "@models"
 
 export interface Main {
-  groups: Group[];
-  totalScriptCommands: number;
-  updatedAt: Date;
+  groups: Group[]
+  totalScriptCommands: number
+  updatedAt: Date
 }

@@ -1,8 +1,8 @@
-import { List } from "@raycast/api";
+import { List } from "@raycast/api"
 
-import { ScriptCommandItem } from "@components";
+import { ScriptCommandItem } from "@components"
 
-import { Group, ScriptCommand } from "@models";
+import { Group, ScriptCommand } from "@models"
 
 type Props = { 
   parentName: string
@@ -10,10 +10,10 @@ type Props = {
 }
 
 export function SubGroupSection({ parentName, subGroup }: Props) {
-  const key = `${subGroup.name}-${subGroup.path}`;
+  const key = `${subGroup.name}-${subGroup.path}`
 
   subGroup.scriptCommands.sort((left: ScriptCommand, right: ScriptCommand) => {
-    return (left.title > right.title) ? 1 : -1;
+    return (left.title > right.title) ? 1 : -1
   })
 
   return (
@@ -22,5 +22,5 @@ export function SubGroupSection({ parentName, subGroup }: Props) {
         <ScriptCommandItem scriptCommand={scriptCommand} />
       ))}
     </List.Section>
-  );
+  )
 }
