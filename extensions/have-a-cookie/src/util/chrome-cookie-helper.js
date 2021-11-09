@@ -1,16 +1,9 @@
- var tld = require('tldjs'),
+ const tld = require('tldjs'),
  tough = require('tough-cookie'),
  request = require('request'),
  int = require('int'),
  url = require('url'),
- crypto = require('crypto'),
- os = require('os'),
- fs = require('fs'),
- dpapi,
- Cookie = tough.Cookie,
- path,
- ITERATIONS,
- dbClosed = false;
+ crypto = require('crypto')
 
  const { exec } = require("child_process");
 
@@ -55,13 +48,13 @@ function decrypt(key, encryptedData) {
 
 async function getDerivedKey(callback) {
 
-	var keytar,
+	var keychain,
 	chromePassword;
-
+	
 	chromePassword = await getLocalStorageItem("CHROME_PASSWORD");
   	if(!chromePassword){
   		if (process.platform === 'darwin') {
-			var keychain = require('keychain');
+			keychain = require('keychain');
 			keychain.getPassword({ account: 'Chrome', service: 'Chrome Safe Storage' }, async function(err, chromePassword) {
 				if(typeof chromePassword === 'string'){
 				  	await setLocalStorageItem("CHROME_PASSWORD", chromePassword)
@@ -246,16 +239,8 @@ const getCookies = async (uri, format, callback, profile) => {
 
 	profile ? profile : profile = 'Default'
 
-	if (process.platform === 'darwin') {
-
-		path = process.env.HOME + `/Library/Application Support/Google/Chrome/${profile}/Cookies`;
-		ITERATIONS = 1003;
-
-	} else {
-
-		return callback('Only Mac, Windows, and Linux are supported.');
-
-	}
+	path = process.env.HOME + `/Library/Application Support/Google/Chrome/${profile}/Cookies`;
+	ITERATIONS = 1003;
 
 	
 
@@ -321,13 +306,13 @@ const getCookies = async (uri, format, callback, profile) => {
 							cookie.value = dpapi.unprotectData(encryptedValue, null, 'CurrentUser').toString('utf-8');
 
 						} else if (encryptedValue[0] == 0x76 && encryptedValue[1] == 0x31 && encryptedValue[2] == 0x30 ){
-							localState = JSON.parse(fs.readFileSync(os.homedir() + '/AppData/Local/Google/Chrome/User Data/Local State'));
-							b64encodedKey = localState.os_crypt.encrypted_key;
-							encryptedKey = new Buffer.from(b64encodedKey,'base64');
-							key = dpapi.unprotectData(encryptedKey.slice(5, encryptedKey.length), null, 'CurrentUser');
-							nonce = encryptedValue.slice(3, 15);
-							tag = encryptedValue.slice(encryptedValue.length - 16, encryptedValue.length);
-							encryptedValue = encryptedValue.slice(15, encryptedValue.length - 16);
+							const localState = JSON.parse(fs.readFileSync(os.homedir() + '/AppData/Local/Google/Chrome/User Data/Local State'));
+							const b64encodedKey = localState.os_crypt.encrypted_key;
+							const encryptedKey = new Buffer.from(b64encodedKey,'base64');
+							const key = dpapi.unprotectData(encryptedKey.slice(5, encryptedKey.length), null, 'CurrentUser');
+							const nonce = encryptedValue.slice(3, 15);
+							const tag = encryptedValue.slice(encryptedValue.length - 16, encryptedValue.length);
+							const encryptedValue = encryptedValue.slice(15, encryptedValue.length - 16);
 							cookie.value = decryptAES256GCM(key, encryptedValue, nonce, tag).toString('utf-8');
 						}
 					} else {
@@ -419,16 +404,8 @@ const getDomains = async (host_key, format, callback, profile) => {
 
 	profile ? profile : profile = 'Default'
 
-	if (process.platform === 'darwin') {
-
-		path = process.env.HOME + `/Library/Application Support/Google/Chrome/${profile}/Cookies`;
-		ITERATIONS = 1003;
-
-	} else {
-
-		return callback('Only Mac, Windows, and Linux are supported.');
-
-	}
+	path = process.env.HOME + `/Library/Application Support/Google/Chrome/${profile}/Cookies`;
+	ITERATIONS = 1003;
 
 
 	if (format instanceof Function) {
