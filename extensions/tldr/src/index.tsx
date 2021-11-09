@@ -1,18 +1,16 @@
-import { ActionPanel, CopyToClipboardAction, Detail, environment, Icon, List, PushAction, showToast, ToastStyle } from "@raycast/api";
-import degit from "degit";
+import { ActionPanel, CopyToClipboardAction, Detail, environment, Icon, List, PushAction } from "@raycast/api";
 import fs, { readdirSync } from "fs";
 import { globby } from "globby";
 import { parse } from "path";
 import { useEffect, useState } from "react";
+import { fetchPages } from "./http";
 
 export default function TLDRList(): JSX.Element {
   const [platforms, setPlatforms] = useState<Platform[]>();
   useEffect(() => {
-    async function fetchPages() {
+    async function loadPages() {
       if (readdirSync(environment.supportPath).length == 0) {
-        const toast = await showToast(ToastStyle.Animated, "Pulling TLDR Pages");
-        await degit("tldr-pages/tldr/pages").clone(environment.supportPath);
-        toast.hide();
+        await fetchPages()
       }
 
       const platformNames = ["osx", "common", "linux", "windows", "sunos", "android"];
@@ -30,7 +28,7 @@ export default function TLDRList(): JSX.Element {
       );
       setPlatforms(platforms);
     }
-    fetchPages();
+    loadPages();
   }, []);
 
   return (
