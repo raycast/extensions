@@ -10,7 +10,7 @@
     {
       "name": "index",
       "title": "Search Documentation",
-      "subtitle": "DevDocs"
+      "subtitle": "DevDocs",
       "description": "Search through DevDocs documentation sets from Raycast",
       "mode": "view"
     }
