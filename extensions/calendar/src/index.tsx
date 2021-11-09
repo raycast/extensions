@@ -4,11 +4,12 @@ import { Calendar } from "calendar";
 import { weekNumber } from 'weeknumber';
 
 const days = [
-  "`#  ` `SUN` `MON` `TUE` `WED` `THU` `FRI` `SAT`",
-  "`#  ` `MON` `TUE` `WED` `THU` `FRI` `SAT` `SUN`"
+  "`SUN` `MON` `TUE` `WED` `THU` `FRI` `SAT`",
+  "`MON` `TUE` `WED` `THU` `FRI` `SAT` `SUN`"
 ]
 
 const weekStart = Number(getPreferenceValues().weekStart)
+const showWeeks = getPreferenceValues().showWeeks
 const currentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
 
 export default function main() {
@@ -23,11 +24,13 @@ export default function main() {
 
       let table = ""
       m.forEach((week) => {
-        const wn = weekNumber(week[0])
-        if (wn < 10) {
-          table += "`#" + wn + " ` "
-        } else {
-          table += "`#" + wn + "` "
+        if (showWeeks) {
+          const wn = weekNumber(week[0])
+          if (wn < 10) {
+            table += "`" + wn + "  `    "
+          } else {
+            table += "`" + wn + " `    "
+          }
         }
 
         week.forEach((day) => {
@@ -45,9 +48,10 @@ export default function main() {
         table += "\n\n"
       })
 
-      const header = date.toLocaleString('en', { month: 'long', year: 'numeric' });
+      const header = date.toLocaleString('en', { month: 'long', year: 'numeric' })
+      const weeksHeader = showWeeks ? "`#  `    " : ""
       setHeader(header)
-      setCalendar("# " + header + "\n***\n" + days[weekStart] + "\n\n" + table)
+      setCalendar("# " + header + "\n***\n" + weeksHeader + days[weekStart] + "\n\n" + table)
     })();
   }, [date]);
 

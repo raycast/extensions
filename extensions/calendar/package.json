@@ -32,6 +32,15 @@
       ],
       "description": "First Day of Week",
       "default": "1"
+    },
+    {
+      "name": "showWeeks",
+      "type": "checkbox",
+      "required": true,
+      "label": "Show week numbers",
+      "title": "Week nubmbers",
+      "description": "Indicated if it is necessary to show week numbers",
+      "default": true
     }
   ],
   "dependencies": {
