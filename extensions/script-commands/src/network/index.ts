@@ -1,6 +1,13 @@
 export { 
+  // Requests
   fetchScriptCommands, 
+  fetchSourceCode,
+  
+  // Helper methods
+  authorAvatarURL,
   iconDarkURL, 
   iconLightURL, 
-  languageURL 
+  languageURL,
+  sourceCodeRawURL,
+  sourceCodeNormalURL
 } from "./Requests"

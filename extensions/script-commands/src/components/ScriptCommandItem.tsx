@@ -37,6 +37,7 @@ export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
 function ViewsActionSection({ scriptCommand }: { scriptCommand: ScriptCommand }): JSX.Element {
   return (
     <ActionPanel.Section>
+      <ViewSourceCodeAction scriptCommand={ scriptCommand } />
       <OpenInBrowserAction 
         title="View Source Code in Browser" 
         url={ sourceCodeNormalURL(scriptCommand) } 
@@ -45,6 +46,23 @@ function ViewsActionSection({ scriptCommand }: { scriptCommand: ScriptCommand })
   )
 }
 
+function ViewSourceCodeAction({ scriptCommand }: { scriptCommand: ScriptCommand }): JSX.Element {
+  const { push } = useNavigation();
+  
+  const action = () => {
+    push(
+      <SourceCodeDetail scriptCommand={scriptCommand } />
+    )
+  }
+  
+  return (
+    <ActionPanel.Item 
+      icon={ Icon.TextDocument } 
+      title="View Source Code" 
+      onAction={ action } 
+    />
+  )
+}
 
 function AuthorsActionPanel({ authors }: { authors: Author[] }): JSX.Element {
   const count = authors.length

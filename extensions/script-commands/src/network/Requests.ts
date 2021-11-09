@@ -44,6 +44,23 @@ export async function fetchScriptCommands(): Promise<Main | null> {
   }
 }
 
+export async function fetchSourceCode(scriptCommand: ScriptCommand): Promise<string> {
+  try {
+    const url = sourceCodeRawURL(scriptCommand)
+    const response = await fetch(url)
+
+    return await response.text()
+  }
+  catch {
+    showToast(
+      ToastStyle.Failure, 
+      `Could not load the source code for ${scriptCommand.title}`
+    )
+
+    return Promise.resolve("")
+  }
+}
+
 export const authorAvatarURL = (author: Author): string => {
   if (author.url != null && author.url.length > 0) {
     const path = new URL(author.url)
