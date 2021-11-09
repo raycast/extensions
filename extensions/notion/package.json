@@ -1,0 +1,55 @@
+{
+  "name": "notion",
+  "title": "Notion Database",
+  "description": "Fastest way to create Notion database item.",
+  "icon": "notion-logo.png",
+  "author": "HenriChabrand",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-database-page",
+      "title": "Create Database Page",
+      "subtitle": "Notion",
+      "description": "Create a database page.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "notion_token",
+      "type": "password",
+      "required": true,
+      "title": "Notion Token",
+      "description": "In Notion go to Settings & Members > Integration > Develop your own > New integration",
+      "placeholder": "secret_1l3892KIWCJHJVikbiyJ7",
+      "link": "https://www.notion.so/my-integrations"
+    },
+    {
+      "name": "notion_workspace_slug",
+      "type": "textfield",
+      "required": true,
+      "title": "Notion Workspace Domain",
+      "description": "In Notion go to Settings & Members > Settings > Domain",
+      "placeholder": "my-workspace-domain-slug",
+      "link": "https://www.notion.so/"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.4.3",
+    "@types/node-fetch": "^2.5.12",
+    "@types/react": "^17.0.15",
+    "@typescript-eslint/eslint-plugin": "^4.28.5",
+    "@typescript-eslint/parser": "^4.28.5",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
