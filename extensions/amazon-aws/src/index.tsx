@@ -44,7 +44,7 @@ export default function DescribeInstances() {
 function InstanceListItem(props: { instance: Instance }) {
   const instance = props.instance;
   let name = instance.Tags.filter((t: { Key: string; Value: string; }) => t.Key === 'Name').pop().Value
-    .replace('-', ' ');
+    .replaceAll('-', ' ');
   const preferences: Preferences = getPreferenceValues();
 
   return (
