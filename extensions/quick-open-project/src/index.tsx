@@ -17,7 +17,7 @@ import Frecency from "frecency";
 import { mkdirSync, statSync, readFileSync, writeFileSync } from "fs";
 import { sync } from "glob";
 import { homedir } from "os";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import open = require("open");
 import fuzzysort = require("fuzzysort");
 import config = require("parse-git-config");
@@ -31,11 +31,7 @@ type Repo = {
   host: string;
   url: string;
 };
-type ProjectList = Project[] | undefined;
-type ProjectState = {
-  projectList: ProjectList | undefined;
-  isLoading: boolean;
-};
+type ProjectList = Project[];
 
 class Project {
   name: string;
@@ -94,12 +90,8 @@ const projectFrecency = new Frecency({
 
 function searchProjects(query?: string): {
   projects: ProjectList;
-  isLoading: boolean;
 } {
-  const [{ projectList, isLoading }, setProjectList] = useState<ProjectState>({ projectList: [], isLoading: true });
-  const [projects, setProjects] = useState<ProjectList>();
-
-  useEffect(() => {
+  const projectList = useMemo(() => {
     const projectPaths = (preferences.paths.value as string).split(",").map((s) => s.trim());
     const projects = projectPaths
       .flatMap((base) => {
@@ -111,13 +103,10 @@ function searchProjects(query?: string): {
       .filter((path) => statSync(path)?.isDirectory())
       .map((path) => new Project(path))
       .sort((a, b) => (a.displayPath.toLowerCase > b.displayPath.toLowerCase ? -1 : 1));
-    setProjectList({ projectList: projects, isLoading: false });
+    return projects;
   }, []);
 
-  useEffect(() => {
-    if (projectList == undefined) {
-      return;
-    }
+  const projects = useMemo(() => {
     let filtered = projectList;
     if (filtered.length > 0 && query && query.length > 0) {
       filtered = fuzzysort
@@ -127,23 +116,23 @@ function searchProjects(query?: string): {
           threshold: -1000000, // pick a pretty big negative number
           scoreFn: (a) => {
             let scores = [-1000001] as number[]; // less than the threshold by default
-            if(a[0]) {
-              scores = scores.concat(a[0].score)
+            if (a[0]) {
+              scores = scores.concat(a[0].score);
             }
-            if(a[1]) {
+            if (a[1]) {
               // scores are negative, so make displayPath matches worse than direct name matches
-              scores = scores.concat(a[1].score * 10)
+              scores = scores.concat(a[1].score * 10);
             }
-            return Math.max(...scores)
+            return Math.max(...scores);
           },
         })
         .map((result) => result.obj);
     }
     // but: frecency matches will take precedence if parts of the path are included.
     filtered = projectFrecency.sort({ searchQuery: query || "", results: filtered });
-    setProjects(filtered);
+    return filtered;
   }, [query, projectList]);
-  return { projects, isLoading };
+  return { projects };
 }
 
 function updateFrecency(searchQuery: string | undefined, project: Project) {
@@ -153,11 +142,11 @@ function updateFrecency(searchQuery: string | undefined, project: Project) {
 
 function Command() {
   const [searchQuery, setSearchQuery] = useState<string>();
-  const { projects, isLoading } = searchProjects(searchQuery);
+  const { projects } = searchProjects(searchQuery);
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchQuery} selectedItemId={(projects && projects[0]) ? projects[0].fullPath : ""}>
-      {projects?.map((project) => (
+    <List onSearchTextChange={setSearchQuery} selectedItemId={projects[0] ? projects[0].fullPath : ""}>
+      {projects.map((project) => (
         <List.Item
           id={project.fullPath}
           key={project.fullPath}
