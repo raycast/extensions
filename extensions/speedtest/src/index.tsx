@@ -135,7 +135,7 @@ function useSpeedtest(): { result: Result; error: string | undefined; isLoading:
           },
           (err: Error) => {
             if (!cancel) {
-              setError(err instanceof Error ? err.message : "unknown error");
+              setError(err.message);
             }
           }
         );

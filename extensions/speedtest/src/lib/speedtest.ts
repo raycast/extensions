@@ -21,7 +21,7 @@ export function runSpeedTest(callback: (result: Result) => void, resultCallback:
     const result: Result = { isp: undefined, location: undefined, serverName: undefined, download: undefined, upload: undefined, ping: undefined };
 
     pro.on('uncaughtException', function (err) {
-        errorCallback(err);
+        errorCallback(err instanceof Error ? err : new Error("unknown error"));
     });
 
     pro.on('error', function (err) {
