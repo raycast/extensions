@@ -8,6 +8,7 @@ import {
   OpenInBrowserAction,
   popToRoot,
   PushAction,
+  showHUD,
   showToast,
   ToastStyle
 } from "@raycast/api";
@@ -24,7 +25,7 @@ import { useVisitedDocs } from "./useVisitedDocs";
 
 export const DEVDOCS_BASE_URL = "https://devdocs.io";
 if (!existsSync(environment.supportPath)) {
-  mkdirSync(environment.supportPath, {recursive: true})
+  mkdirSync(environment.supportPath, { recursive: true });
 }
 
 export function faviconUrl(size: number, url: string): string {
@@ -43,23 +44,23 @@ interface FetchResult<T> {
 
 export function useFetchWithCache<T>(url: string, cacheFilename: string): FetchResult<T> {
   const cachePath = resolve(environment.supportPath, cacheFilename);
-  const [state, setState] = useState<{data?: T, isLoading: boolean}>({isLoading: true});
+  const [state, setState] = useState<{ data?: T; isLoading: boolean }>({ isLoading: true });
 
   useEffect(() => {
     async function fetchWithCache() {
       // Load from Cache
       if (existsSync(cachePath)) {
         const text = await readFile(cachePath).then((buffer) => buffer.toString());
-        await setState({data: JSON.parse(text.toString()), isLoading: true});
+        await setState({ data: JSON.parse(text.toString()), isLoading: true });
       }
 
       // Refresh Cache
       try {
         const data = await fetch(url).then((res) => res.json());
-        await setState({data: data as T, isLoading: false});
+        await setState({ data: data as T, isLoading: false });
         await writeFile(cachePath, JSON.stringify(data));
       } catch (error) {
-        console.error(error)
+        console.error(error);
         showToast(ToastStyle.Failure, "Could not refresh cache!", "Please Check your connexion");
       }
     }
@@ -150,8 +151,13 @@ function OpenInDevdocsAction(props: { url: string; onOpen?: () => void }) {
     <ActionPanelItem
       title="Open in Devdocs"
       icon="devdocs.png"
-      onAction={() => {
-        open(props.url, { app: { name: "DevDocs" } });
+      onAction={async () => {
+        const { exitCode } = await open(props.url, { app: { name: "DevDocs" }, wait: true });
+        if (exitCode !== 0) {
+          await open("https://github.com/dteoh/devdocs-macos");
+          showHUD("Devdocs app is not installed!");
+        }
+
         if (props.onOpen) {
           props.onOpen();
         }
