@@ -3,7 +3,7 @@ import { useStore } from "./common/store";
 import { View } from "./common/View";
 
 export default function MyView() {
-  const store = useStore(["results"], (_, q) => searchResources(q as string));
+  const store = useStore(["results"], (_, q) => searchResources(q as string, ["tf.", "tfa.", "tfio.", "tfds."]));
   const sectionNames = ["Search Results"];
   return (
     <View

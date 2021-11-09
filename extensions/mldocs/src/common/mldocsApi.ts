@@ -1,4 +1,3 @@
-import { getPreferenceValues } from "@raycast/api";
 import { stat, readFile, writeFile } from "fs/promises";
 import Fuse from 'fuse.js';
 import fetch from "node-fetch";
@@ -15,20 +14,6 @@ interface MLDataEntry {
 
 interface GenericData {
   [key: string]: string;
-}
-
-interface Preferences {
-  shouldFilterTensorflow: boolean;
-  shouldFilterTensorflowIO: boolean;
-  shouldFilterTensorflowAddOns: boolean;
-  shouldFilterTensorflowDataset: boolean;
-  shouldFilterPyTorch: boolean;
-  shouldFilterPandas: boolean;
-  shouldFilterStatsmodels: boolean;
-  shouldFilterScikitLearn: boolean;
-  shouldFilterNumpy: boolean;
-  shouldFilterMatplotlib: boolean;
-  shouldFilterSeaborn: boolean;
 }
 
 export type QueryResultItem = {
@@ -67,10 +52,10 @@ const parseResponse = (item: any) : QueryResultItem => {
 const dataCachePath = utils.cachePath('ml.json');
 
 export const searchResources = async (
-  q: string
+  q: string,
+  filters: string[]
 ): Promise<QueryResultItem[]> => {
 
-  const preferences: Preferences = getPreferenceValues();
   async function getData(): Promise<string> {
     const query = `https://raw.githubusercontent.com/lsgrep/mldocs/master/data/ml.json`
 
@@ -120,54 +105,9 @@ export const searchResources = async (
 
 
   let d = Object.keys(ret)
-  .filter((key) => key.includes('.'));
-
-  if (preferences.shouldFilterTensorflow){
-    d = d.filter((key) => !key.includes('tf.'));
-  }
-
-  if (preferences.shouldFilterTensorflowIO){
-    d = d.filter((key) => !key.includes('tfio.'));
-  }
-
-  if (preferences.shouldFilterTensorflowAddOns){
-    d = d.filter((key) => !key.includes('tfa.'));
-  }
-
-  if (preferences.shouldFilterTensorflowDataset){
-    d = d.filter((key) => !key.includes('tfds.'));
-  }
-
-  if (preferences.shouldFilterMatplotlib){
-    d = d.filter((key) => !key.includes('matplotlib.'))
-    .filter((key) => !key.includes('mpl_toolkits.'));
-  }
-
-  if (preferences.shouldFilterNumpy){
-    d = d.filter((key) => !key.includes('numpy.'));
-  }
-
-  if (preferences.shouldFilterPandas){
-    d = d.filter((key) => !key.includes('pandas.'));
-  }
-
-  if (preferences.shouldFilterPyTorch){
-    d = d.filter((key) => !key.includes('torch.'));
-  }
-
-  if (preferences.shouldFilterScikitLearn){
-    d = d.filter((key) => !key.includes('sklearn.'));
-  }
-
-  if (preferences.shouldFilterSeaborn){
-    d = d.filter((key) => !key.includes('seaborn.'));
-  }
-
-  if (preferences.shouldFilterStatsmodels){
-    d = d.filter((key) => !key.includes('statsmodels.'));
-  }
-
-  const list = d.map(key => {
+  .filter((key) => key.includes('.'))
+  .filter((key) => filters.some(val => key.startsWith(val)))
+  .map(key => {
     return { name: key, value: ret[key]};
   });
 
@@ -184,7 +124,7 @@ export const searchResources = async (
       }
     ]
   };
-  const fuse = new Fuse(list, options);
+  const fuse = new Fuse(d, options);
   const query = q.replace('sns.', 'seaborn.')
   .replace('pt.', 'matplotlib.')
   .replace('pd.', 'pandas.')

@@ -1,104 +1,56 @@
 {
   "name": "mldocs",
-  "title": "Machine Learning Library APIs",
-  "description": "Raycast Commands for Searching ML APIs",
+  "title": "Machine Learning APIs",
+  "description": "Raycast Commands for Searching Different ML APIs",
   "icon": "command-icon.png",
   "commands": [
     {
-      "name": "index",
-      "title": "Search Machine Learning Library APIs",
-      "description": "Search Machine Learning Library APIs",
+      "name": "tf",
+      "title": "Search Tensorflow APIs",
+      "description": "Search Tensorflow APIs",
       "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "shouldFilterTensorflow",
-      "type": "checkbox",
-      "required": false,
-      "title": "Filtering",
-      "label": "Tensorflow",
-      "description": "Do not search Tensorflow (tf.*) APIs"
     },
     {
-      "name": "shouldFilterTensorflowIO",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Tensorflow IO",
-      "description": "Do not search Tensorflow IO (tfio.*) APIs"
+      "name": "torch",
+      "title": "Search Pytorch APIs",
+      "description": "Search Pytorch APIs",
+      "mode": "view"
     },
     {
-      "name": "shouldFilterTensorflowAddOns",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Tensorflow Addons",
-      "description": "Do not search Tensorflow IAddons(tfa.*) APIs"
+      "name": "pandas",
+      "title": "Search Pandas APIs",
+      "description": "Search Pandas Library APIs",
+      "mode": "view"
     },
     {
-      "name": "shouldFilterTensorflowDataset",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Tensorflow Dataset",
-      "description": "Do not search Tensorflow Dataset (tfds.*) APIs"
+      "name": "sklearn",
+      "title": "Search Scikit-Learn APIs",
+      "description": "Search Scikit-Learn Library APIs",
+      "mode": "view"
     },
     {
-      "name": "shouldFilterPyTorch",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Pytorch",
-      "description": "Do not search Pytorch (torch.*) APIs"
+      "name": "numpy",
+      "title": "Search Numpy APIs",
+      "description": "Search Numpy Library APIs",
+      "mode": "view"
     },
     {
-      "name": "shouldFilterPandas",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Pandas",
-      "description": "Do not search Pandas (pd.*) APIs"
+      "name": "matplotlib",
+      "title": "Search Matplotlib and Plotly APIs",
+      "description": "Search Matplotlib and Plotly Library APIs",
+      "mode": "view"
     },
     {
-      "name": "shouldFilterStatsmodels",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "StatsModels",
-      "description": "Do not search StatsModels (statsmodels.*) APIs"
+      "name": "seaborn",
+      "title": "Search Seaborn APIs",
+      "description": "Search Seaborn Library APIs",
+      "mode": "view"
     },
     {
-      "name": "shouldFilterScikitLearn",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Scikit-Learn",
-      "description": "Do not search Scikit-Learn (sklearn.*) APIs"
-    },
-    {
-      "name": "shouldFilterNumpy",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Numpy",
-      "description": "Do not search numpy (np.*) APIs"
-    },
-    {
-      "name": "shouldFilterMatplotlib",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Matplotlib",
-      "description": "Do not search matplotlib (matplotlib.*) APIs"
-    },
-    {
-      "name": "shouldFilterSeaborn",
-      "type": "checkbox",
-      "required": false,
-      "title": "",
-      "label": "Seaborn",
-      "description": "Do not search seaborn (sns.*) APIs"
+      "name": "statsmodels",
+      "title": "Search Statsmodels APIs",
+      "description": "Search Statsmodels Library APIs",
+      "mode": "view"
     }
   ],
   "dependencies": {
