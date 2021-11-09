@@ -4,9 +4,6 @@ import {
   CopyToClipboardAction, 
   PasteAction, 
   List, 
-  OpenInBrowserAction, 
-  showToast, 
-  ToastStyle ,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 
