@@ -1,5 +1,6 @@
 import {
   ActionPanel,
+  Color,
   CopyToClipboardAction,
   Detail,
   Icon,
@@ -31,22 +32,34 @@ function CursorAction(props: {
 
 export function SnakeGame(): JSX.Element {
   const [error, setError] = useState<string>();
+  const [pause, setPause] = useState<boolean>(false);
   const { field, game, score, message, restart } = useGame(setError);
   const speedMs = error || message ? null : game.getSpeedMs();
-  useInterval(() => {
-    game.draw();
-  }, speedMs);
+  useInterval(
+    () => {
+      game.draw();
+    },
+    pause ? null : speedMs
+  );
 
   const codefence = "```" + field + "```";
   if (error) {
     showToast(ToastStyle.Failure, "Error", error);
   }
 
+  const scoreText = (): string => {
+    if (score) {
+      return `Foods: ${score.food}, Speed: ${score.speed}`;
+    }
+    return "";
+  };
+
   const parts: string[] = [];
   if (message) {
-    parts.push(`# ${message}`);
+    const st = scoreText();
+    parts.push(`## ${message}` + (st ? "          " + st : ""));
   } else if (score) {
-    let text = `Foods: ${score.food}, Speed: ${score.speed}`;
+    let text = scoreText();
     if (process.env.NODE_ENV === "development") {
       text += ` (${speedMs ? speedMs : "?"}ms)`;
     }
@@ -60,6 +73,13 @@ export function SnakeGame(): JSX.Element {
       markdown={md}
       actions={
         <ActionPanel>
+          {message === undefined && (
+            <ActionPanel.Item
+              title={pause ? "Continue" : "Pause"}
+              icon={{ source: pause ? "play.png" : "pause.png", tintColor: Color.PrimaryText }}
+              onAction={() => setPause(!pause)}
+            />
+          )}
           <ActionPanel.Item title="Restart Game" icon={{ source: Icon.ArrowClockwise }} onAction={() => restart()} />
           <CopyToClipboardAction title="Copy Score to Clipboard" content={score?.food || 0} />
           <CursorAction
