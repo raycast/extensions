@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "commandSearchZotero",
-      "title": "Search Zotero Database",
+      "title": "Search Database",
       "subtitle": "Zotero",
       "description": "Search Zotero",
       "mode": "view"
