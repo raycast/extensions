@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Devdocs",
+      "title": "Search Documentation",
+      "subtitle": "DevDocs"
       "description": "Search through DevDocs documentation sets from Raycast",
       "mode": "view"
     }
