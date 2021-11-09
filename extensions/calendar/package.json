@@ -36,7 +36,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.3",
-    "calendar": "^0.1.1"
+    "calendar": "^0.1.1",
+    "weeknumber": "^1.2.1"
   },
   "devDependencies": {
     "@types/calendar": "^0.1.2",

@@ -1,35 +1,45 @@
 import { ActionPanel, CopyToClipboardAction, Detail, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Calendar } from "calendar";
+import { weekNumber } from 'weeknumber';
 
 const days = [
-  "\`SUN\` \`MON\` \`TUE\` \`WED\` \`THU\` \`FRI\` \`SAT\`",
-  "\`MON\` \`TUE\` \`WED\` \`THU\` \`FRI\` \`SAT\` \`SUN\`"
+  "`#  ` `SUN` `MON` `TUE` `WED` `THU` `FRI` `SAT`",
+  "`#  ` `MON` `TUE` `WED` `THU` `FRI` `SAT` `SUN`"
 ]
 
 const weekStart = Number(getPreferenceValues().weekStart)
+const currentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
 
 export default function main() {
   const [calendar, setCalendar] = useState("")
   const [header, setHeader] = useState("")
-  const [date, setDate] = useState(new Date())
+  const [date, setDate] = useState(currentMonth)
 
   useEffect(() => {
     (async () => {
       const cal = new Calendar(weekStart)
-      const m = cal.monthDays(date.getFullYear(), date.getMonth())
+      const m = cal.monthDates(date.getFullYear(), date.getMonth())
 
       let table = ""
       m.forEach((week) => {
+        const wn = weekNumber(week[0])
+        if (wn < 10) {
+          table += "`#" + wn + " ` "
+        } else {
+          table += "`#" + wn + "` "
+        }
+
         week.forEach((day) => {
-          if (day == 0) {
-            table += "\`   \` "
+          const dayNum = day.getMonth() === date.getMonth() ? day.getDate() : 0;
+          if (dayNum == 0) {
+            table += "`   ` "
           }
-          if (day > 0 && day < 10) {
-            table += "\`  " + day + "\` "
+          if (dayNum > 0 && dayNum < 10) {
+            table += "`  " + dayNum + "` "
           }
-          if (day >= 10) {
-            table += "\` " + day + "\` "
+          if (dayNum >= 10) {
+            table += "` " + dayNum + "` "
           }
         })
         table += "\n\n"
@@ -51,12 +61,21 @@ export default function main() {
     setDate(newDate)
   }
 
+  const setCurrent = () => {
+    setDate(currentMonth)
+  }
+
   return <Detail
     markdown={calendar}
     navigationTitle={header}
     actions={
       <ActionPanel>
         <ActionPanel.Section title={header}>
+          <ActionPanel.Item
+            title="Current Month"
+            // shortcut={{ modifiers: [], key: "arrowUp" }}
+            onAction={() => setCurrent()}
+          />
           <CopyToClipboardAction content={calendar} />
         </ActionPanel.Section>
         <ActionPanel.Section title="Change Month">
