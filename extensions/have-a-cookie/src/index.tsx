@@ -3,7 +3,7 @@ import {
   PushAction, 
   CopyToClipboardAction, 
   PasteAction, 
-  List, 
+  List,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 
