@@ -1,6 +1,6 @@
 # Raycast Search Stackoverflow
 
-This extension brings [stackoverflow](https://stackoverflow.com/) search to raycast!
+This extension brings [stackoverflow](https://stackoverflow.com/) search to Raycast!
 
 
 ## Features

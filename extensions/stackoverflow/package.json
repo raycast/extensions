@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "commandSearchStackOverflow",
-      "title": "Search StackOverflow",
+      "title": "Search Question",
       "subtitle": "StackOverflow",
       "description": "Search StackOverflow",
       "mode": "view"
@@ -19,7 +19,6 @@
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "node-fetch": "^3.0.0",
-    "raycast": "^1.0.8",
     "he": "^1.2.0"
   },
   "devDependencies": {
