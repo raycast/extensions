@@ -1,13 +1,13 @@
 {
   "name": "mldocs",
-  "title": "MLDocs",
-  "description": "Raycast Commands for Searching MLDocs",
+  "title": "Machine Learning Library APIs",
+  "description": "Raycast Commands for Searching ML APIs",
   "icon": "command-icon.png",
   "commands": [
     {
-      "name": "commandSearchMLDocs",
-      "title": "MLDocs",
-      "description": "Search MLDocs",
+      "name": "index",
+      "title": "Search Machine Learning Library APIs",
+      "description": "Search Machine Learning Library APIs",
       "mode": "view"
     }
   ],
@@ -104,7 +104,6 @@
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "node-fetch": "^3.0.0",
-    "raycast": "^1.0.8",
     "nanoid": "^3.1.30",
     "moment": "^2.29.1",
     "he": "^1.2.0",
