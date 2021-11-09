@@ -1,7 +1,7 @@
 import { Author, Icon } from "@models"
 
 export interface ScriptCommand {
-  authors: Author[]
+  authors?: Author[]
   createdAt: Date
   currentDirectoryPath: string
   description: string
@@ -13,7 +13,7 @@ export interface ScriptCommand {
   language: string
   mode: string
   needsConfirmation?: boolean
-  packageName: string
+  packageName?: string
   path: string
   refreshTime: string
   schemaVersion: number
