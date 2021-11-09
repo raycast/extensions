@@ -1,7 +1,8 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "homeassistant",
   "title": "Home Assistant",
-  "version": "1.0.0",
+  "version": "1.2.2",
   "author": "tonka3000",
   "license": "MIT",
   "description": "Home Assistant remote control. Control your house with Raycast 🚀",
@@ -10,71 +11,78 @@
     {
       "name": "index",
       "title": "All Entities",
-      "subtitle" : "Home Assistant",
+      "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant entities",
       "mode": "view"
     },
     {
       "name": "covers",
       "title": "Covers",
-      "subtitle" : "Home Assistant",
+      "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant covers",
       "mode": "view"
     },
     {
       "name": "lights",
       "title": "Lights",
-      "subtitle" : "Home Assistant",
+      "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant lights",
       "mode": "view"
     },
     {
       "name": "persons",
       "title": "Persons",
-      "subtitle" : "Home Assistant",
+      "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant persons",
       "mode": "view"
     },
     {
       "name": "sensors",
       "title": "Sensors",
-      "subtitle" : "Home Assistant",
+      "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant sensors",
       "mode": "view"
     },
     {
       "name": "binarysensors",
       "title": "Binary Sensors",
-      "subtitle" : "Home Assistant",
+      "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant binary sensors",
       "mode": "view"
     },
     {
       "name": "mediaplayers",
       "title": "Mediaplayers",
-      "subtitle" : "Home Assistant",
+      "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant mediaplayers",
       "mode": "view"
     },
     {
       "name": "automations",
       "title": "Automations",
-      "subtitle" : "Home Assistant",
+      "subtitle": "Home Assistant",
       "description": "Home Assistant automations",
       "mode": "view"
     },
     {
       "name": "dashboard",
       "title": "Dashboard",
-      "subtitle" : "Home Assistant",
+      "subtitle": "Home Assistant",
       "description": "Open Home Assistant dashboard",
-      "mode": "view"
+      "mode": "no-view"
     },
     {
       "name": "climate",
       "title": "Climate",
-      "subtitle" : "Home Assistant",
+      "subtitle": "Home Assistant",
       "description": "Get/Set states of Home Assistant climate entities",
+      "mode": "view"
+    },
+    {
+      "name": "attributes",
+      "title": "All Entities with Attributes",
+      "subtitle": "Home Assistant",
+      "description": "Query Home Assistant entity attributes",
       "mode": "view"
     }
   ],
@@ -92,20 +100,33 @@
       "type": "password",
       "required": true,
       "title": "API Token",
-      "description": "Your Home Assistant API token",
-      "placeholder": "Enter your Home Assistant API token"
+      "description": "Your Home Assistant long-lived access token",
+      "placeholder": "Enter your Home Assistant long-lived access token"
+    },
+    {
+      "name": "ignorecerts",
+      "type": "checkbox",
+      "label": "Ignore Certificates",
+      "required": false,
+      "default": false,
+      "title": "Network Settings",
+      "description": "Ignore Certificates",
+      "placeholder": "Ignore Certificates"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.24.5",
+    "@raycast/api": "^1.25.0",
+    "home-assistant-js-websocket": "^5.11.1",
     "node-fetch": "^2.6.1",
-    "url-join": "^4.0.1"
+    "url-join": "^4.0.1",
+    "ws": "^8.2.3"
   },
   "devDependencies": {
     "@types/node": "^16.4.3",
     "@types/node-fetch": "^2.5.12",
     "@types/react": "^17.0.15",
     "@types/url-join": "^4.0.1",
+    "@types/ws": "^8.2.0",
     "@typescript-eslint/eslint-plugin": "^4.28.5",
     "@typescript-eslint/parser": "^4.28.5",
     "eslint": "^7.31.0",

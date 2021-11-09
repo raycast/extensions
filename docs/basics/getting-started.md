@@ -15,14 +15,14 @@ Before you can create your first extension, make sure you have the following pre
 
 ### Activate early access
 
-In order to use the API as well as discover extensions in the store, you need to activate early access to our platform. For this, open Raycast, insert `0xC0FFEE` in the root search and press `↵`. 
+In order to use the API as well as discover extensions in the store, you need to activate early access to our platform. For this, open Raycast, insert `0xC0FFEE` in the root search and press `↵`.
 
 ![Activate early access](../.gitbook/assets/activate-early-access.gif)
 
 This unlocks the following commands:
 
-* **Store: **Search and install all published extensions
-* **Create Extension: **Create new extensions from templates
+* **Store:** Search and install all published extensions
+* **Create Extension:** Create new extensions from templates
 * **Import Extension:** Import extensions from source code
 * **Manage Extensions**: List and edit your published extensions
 

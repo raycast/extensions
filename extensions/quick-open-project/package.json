@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-open-project",
+  "version": "1.0.0",
+  "title": "Quick Open Project",
+  "description": "Find and open projects on your system",
+  "icon": "icon.png",
+  "author": "zerowidth",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Quick Open Project",
+      "description": "Find and open projects on your system, using frecency and fuzzy search. Indexes a given list of paths (CSV), e.g. `~/code,~/work`",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "paths",
+          "type": "textfield",
+          "required": true,
+          "title": "Paths to index",
+          "description": "Comma-separated list of paths to index. Example: '~/work,~/projects'",
+          "default": ""
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "frecency": "^1.3.2",
+    "fuzzysort": "^1.1.4",
+    "glob": "^7.1.7",
+    "open": "^8.2.1",
+    "parse-git-config": "^3.0.0",
+    "parse-github-url": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/frecency": "^1.3.2",
+    "@types/glob": "^7.1.4",
+    "@types/node": "^16.4.3",
+    "@types/parse-git-config": "^3.0.1",
+    "@types/parse-github-url": "^1.0.0",
+    "@types/react": "^17.0.15",
+    "@typescript-eslint/eslint-plugin": "^4.28.5",
+    "@typescript-eslint/parser": "^4.28.5",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist"
+  }
+}

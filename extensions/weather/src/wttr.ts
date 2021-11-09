@@ -117,14 +117,22 @@ function paramString(params: { [key: string]: string }): string {
 
 async function toJsonOrError(response: Response): Promise<any> {
     const s = response.status;
+    const getJson = async (): Promise<any> => {
+        try {
+            return await response.json();
+        }
+        catch (e: any) {
+            throw Error(`Server-side issue at wttr.in (${s} - invalid json). Please try again later`);
+        }
+    };
     console.log(`status code: ${s}`);
     if (s >= 200 && s < 300) {
-        const json = await response.json();
+        const json = await getJson();
         return json;
     } else if (s == 401) {
         throw Error("Unauthorized");
     } else if (s == 403) {
-        const json = await response.json();
+        const json = await getJson();
         let msg = "Forbidden";
         if (json.error && json.error == "insufficient_scope") {
             msg = "Insufficient API token scope";
@@ -134,10 +142,13 @@ async function toJsonOrError(response: Response): Promise<any> {
     } else if (s == 404) {
         throw Error("Not found");
     } else if (s >= 400 && s < 500) {
-        const json = await response.json();
+        const json = await getJson();
         console.log(json);
         const msg = json.message;
         throw Error(msg);
+    } else if (s >= 500 && s < 600) {
+        throw Error(`Server-side issue at wttr.in (${s}). Please try again later`);
+
     } else {
         console.log("unknown error");
         throw Error(`http status ${s}`);
@@ -168,10 +179,20 @@ export class Wttr {
         }
     }
 
-    public async getWeather(city?: string): Promise<Weather> {
+    public async getWeather(city?: string, language?: string | undefined): Promise<Weather> {
         // setting lang: "en" manipulate the e.g. kmph values
-        return await this.fetch(city, { format: "j1" }) as Weather;
+        let params: Record<string, string> = {
+            format: "j1"
+        };
+        if (language && supportedLanguages.includes(language)) {
+            params.lang = language;
+        }
+        return await this.fetch(city, params) as Weather;
     }
 }
+
+export const supportedLanguages: string[] = [
+    "en", "de", "fr"
+];
 
 export const wttr = new Wttr();
