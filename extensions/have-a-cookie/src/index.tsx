@@ -2,7 +2,6 @@ import {
   ActionPanel, 
   PushAction, 
   CopyToClipboardAction, 
-  Detail, 
   PasteAction, 
   List, 
   OpenInBrowserAction, 
