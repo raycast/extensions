@@ -1,6 +1,6 @@
 import { List } from "@raycast/api"
 
-import { GroupSection, SubGroupSection } from "@components"
+import { GroupSection } from "@components"
 
 import { Group } from "@models";
 
@@ -31,9 +31,9 @@ export function MainContent({ isLoading, groups, totalScriptCommands }: Props): 
 
       for (const subGroup of group.subGroups) {
         sections.push(
-          <SubGroupSection 
+          <GroupSection 
             parentName={group.name} 
-            subGroup={subGroup} 
+            group={subGroup} 
           />
         )
       }
