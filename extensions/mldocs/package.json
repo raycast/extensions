@@ -1,0 +1,127 @@
+{
+  "name": "mldocs",
+  "title": "MLDocs",
+  "description": "Raycast Commands for Searching MLDocs",
+  "icon": "command-icon.png",
+  "commands": [
+    {
+      "name": "commandSearchMLDocs",
+      "title": "MLDocs",
+      "description": "Search MLDocs",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "shouldFilterTensorflow",
+      "type": "checkbox",
+      "required": false,
+      "title": "Filtering",
+      "label": "Tensorflow",
+      "description": "Do not search Tensorflow (tf.*) APIs"
+    },
+    {
+      "name": "shouldFilterTensorflowIO",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Tensorflow IO",
+      "description": "Do not search Tensorflow IO (tfio.*) APIs"
+    },
+    {
+      "name": "shouldFilterTensorflowAddOns",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Tensorflow Addons",
+      "description": "Do not search Tensorflow IAddons(tfa.*) APIs"
+    },
+    {
+      "name": "shouldFilterTensorflowDataset",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Tensorflow Dataset",
+      "description": "Do not search Tensorflow Dataset (tfds.*) APIs"
+    },
+    {
+      "name": "shouldFilterPyTorch",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Pytorch",
+      "description": "Do not search Pytorch (torch.*) APIs"
+    },
+    {
+      "name": "shouldFilterPandas",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Pandas",
+      "description": "Do not search Pandas (pd.*) APIs"
+    },
+    {
+      "name": "shouldFilterStatsmodels",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "StatsModels",
+      "description": "Do not search StatsModels (statsmodels.*) APIs"
+    },
+    {
+      "name": "shouldFilterScikitLearn",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Scikit-Learn",
+      "description": "Do not search Scikit-Learn (sklearn.*) APIs"
+    },
+    {
+      "name": "shouldFilterNumpy",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Numpy",
+      "description": "Do not search numpy (np.*) APIs"
+    },
+    {
+      "name": "shouldFilterMatplotlib",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Matplotlib",
+      "description": "Do not search matplotlib (matplotlib.*) APIs"
+    },
+    {
+      "name": "shouldFilterSeaborn",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Seaborn",
+      "description": "Do not search seaborn (sns.*) APIs"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "node-fetch": "^3.0.0",
+    "raycast": "^1.0.8",
+    "nanoid": "^3.1.30",
+    "moment": "^2.29.1",
+    "he": "^1.2.0",
+    "fuse.js":"^6.4.6"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
