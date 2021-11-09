@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "script-commands",
-  "title": "Script Commands Store",
+  "title": "Script Commands",
   "description": "Package of extensions to manage Raycast Script Commands",
   "icon": "command-icon.png",
   "author": "tholanda",

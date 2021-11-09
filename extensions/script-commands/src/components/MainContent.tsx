@@ -18,7 +18,11 @@ export function MainContent({ isLoading, groups, totalScriptCommands }: Props): 
   })
   
   for (const group of groups) {
-    sections.push(<GroupSection group={group} />)
+    sections.push(
+      <GroupSection 
+        group={group} 
+      />
+    )
 
     if (group.subGroups != null && group.subGroups?.length > 0) {
       group.subGroups.sort((left: Group, right: Group) => {
@@ -26,7 +30,12 @@ export function MainContent({ isLoading, groups, totalScriptCommands }: Props): 
       })
 
       for (const subGroup of group.subGroups) {
-        sections.push(<SubGroupSection parentName={group.name} subGroup={subGroup} />)
+        sections.push(
+          <SubGroupSection 
+            parentName={group.name} 
+            subGroup={subGroup} 
+          />
+        )
       }
     }
   }
@@ -34,7 +43,7 @@ export function MainContent({ isLoading, groups, totalScriptCommands }: Props): 
   return (
   <List 
     isLoading={isLoading} 
-    searchBarPlaceholder={`Search for your Script Command among of ${totalScriptCommands}`}
+    searchBarPlaceholder={`Search for your Script Command among of ${totalScriptCommands} items`}
   >
     {sections}
   </List>

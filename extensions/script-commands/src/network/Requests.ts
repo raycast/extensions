@@ -24,15 +24,8 @@ export async function fetchScriptCommands(): Promise<Main | null> {
     const json = await response.json()
     const main = json as Main
 
-    main.groups.sort((a, b) => {
-      const left = a as Group
-      const right = b as Group
-
-      if (left.name > right.name) {
-        return 1
-      }
-
-      return -1
+    main.groups.sort((left: Group, right: Group) => {
+      return (left.name > right.name) ? 1 : -1
     })
 
     return main
@@ -51,7 +44,7 @@ export const iconDarkURL = (scriptCommand: ScriptCommand) => iconURL(scriptComma
 
 export const iconLightURL = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Light)
 
-function iconURL(scriptCommand: ScriptCommand, style: IconStyle): string | null {
+const iconURL = (scriptCommand: ScriptCommand, style: IconStyle): string | null => {
   let path = scriptCommand.icon.light
 
   if (style == IconStyle.Dark) {
