@@ -73,6 +73,7 @@ export default function main() {
         <ActionPanel.Section title={header}>
           <ActionPanel.Item
             title="Current Month"
+            shortcut={{ modifiers: [], key: "c" }}
             onAction={() => setCurrent()}
           />
           <CopyToClipboardAction content={calendar} />
