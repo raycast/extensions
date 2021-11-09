@@ -41,11 +41,11 @@ export function MainContent({ isLoading, groups, totalScriptCommands }: Props): 
   }
   
   return (
-  <List 
-    isLoading={isLoading} 
-    searchBarPlaceholder={`Search for your Script Command among of ${totalScriptCommands} items`}
-  >
-    {sections}
-  </List>
+    <List 
+      isLoading={isLoading} 
+      searchBarPlaceholder={`Search for your Script Command among of ${totalScriptCommands} items`}
+    >
+      {sections}
+    </List>
   )
 }

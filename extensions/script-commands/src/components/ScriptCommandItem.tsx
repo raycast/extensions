@@ -1,11 +1,12 @@
-import { ActionPanel, List, ImageMask } from "@raycast/api"
+import { useNavigation, ActionPanel, Icon, ImageMask, Image, List, OpenInBrowserAction } from "@raycast/api"
 
-import { iconDarkURL, iconLightURL, languageURL } from "@network"
+import { authorAvatarURL, iconDarkURL, iconLightURL, languageURL, sourceCodeNormalURL } from "@network"
 
 import { Author, ScriptCommand } from "@models"
+import { SourceCodeDetail } from "@components"
 
 type Props = { 
-  scriptCommand: ScriptCommand 
+  scriptCommand: ScriptCommand
 }
 
 export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
@@ -20,17 +21,30 @@ export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
           dark: iconDarkURL(scriptCommand) ?? "",
         },
       }}
-      keywords={keywordsFor(scriptCommand)}
+      keywords={keywords(scriptCommand)}
       accessoryIcon={languageURL(scriptCommand.language)}
-      accessoryTitle={authorsDescriptionFor(scriptCommand.authors)}
+      accessoryTitle={authorsDescription(scriptCommand.authors)}
       actions={
-        <ActionPanel title={panelTitleFor(scriptCommand)}>
+        <ActionPanel title={scriptCommand.title}>
+          <ViewsActionSection scriptCommand={scriptCommand} />
           <AuthorsActionPanel authors={scriptCommand.authors ?? []} />
         </ActionPanel>
       }
     />
   )
 }
+
+function ViewsActionSection({ scriptCommand }: { scriptCommand: ScriptCommand }): JSX.Element {
+  return (
+    <ActionPanel.Section>
+      <OpenInBrowserAction 
+        title="View Source Code in Browser" 
+        url={ sourceCodeNormalURL(scriptCommand) } 
+      />
+    </ActionPanel.Section>
+  )
+}
+
 
 function AuthorsActionPanel({ authors }: { authors: Author[] }): JSX.Element {
   const count = authors.length
@@ -47,33 +61,42 @@ function AuthorsActionPanel({ authors }: { authors: Author[] }): JSX.Element {
 }
 
 function AuthorActionItem({ author }: { author: Author }): JSX.Element {
-  const name = author.name ?? "Raycast"
-  
-  return <ActionPanel.Item
-    title={name}
-    icon={{ 
-      source: avatarURL(author), 
-      mask: ImageMask.Circle 
-    }}
-  />
-}
+  let name = author.name ?? "Raycast"
 
-const avatarURL = (author: Author): string => {
   if (author.url != null && author.url.length > 0) {
     const path = new URL(author.url)
 
     if (path.host == "twitter.com") {
-      return `https://unavatar.io/twitter${path.pathname}`
+      name = `${name} (Twitter)`
     }
     else if (path.host == "github.com") {
-      return `${author.url}.png?size=100`
+      name = `${name} (GitHub)`
     }
   }
-
-  return "https://github.com/raycast.png?size=100"
+  
+  if (author.url != null) {
+    return <OpenInBrowserAction
+      title={ name }
+      icon={ avatarImage(author) }
+      url={ author.url }
+    />
+  }
+  else {
+    return <ActionPanel.Item
+      title={ name }
+      icon={ avatarImage(author) }
+    />
+  }
 }
 
-const authorsDescriptionFor = (authors: Author[] | undefined): string => { 
+const avatarImage = (author: Author): Image => {
+  return { 
+    source: authorAvatarURL(author), 
+    mask: ImageMask.Circle 
+  }
+}
+
+const authorsDescription = (authors: Author[] | undefined): string => { 
   if (authors != null && authors?.length > 0) {
     let content = "";
 
@@ -91,17 +114,7 @@ const authorsDescriptionFor = (authors: Author[] | undefined): string => {
   return "by Raycast"
 }
 
-const panelTitleFor = (scriptCommand: ScriptCommand): string => { 
-  let packageName: string = scriptCommand.packageName ?? ""
-  
-  if (packageName.length > 0) {
-    packageName = `[${packageName}]`
-  }
-
-  return `${packageName} ${scriptCommand.title}'s details`
-}
-
-const keywordsFor = (scriptCommand: ScriptCommand): string[] => { 
+const keywords = (scriptCommand: ScriptCommand): string[] => { 
   const keywords: string[] = []
 
   if (scriptCommand.packageName != null) {

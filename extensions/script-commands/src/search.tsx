@@ -19,12 +19,12 @@ export default function ScriptCommandsList() {
 
   useEffect(() => {
     async function fetch() {
-      const main = await fetchScriptCommands()
+      const response = await fetchScriptCommands()
 
       setContent((oldState) => ({
         ...oldState,
-        groups: main?.groups ?? [],
-        totalScriptCommands: main?.totalScriptCommands ?? 0
+        groups: response?.groups ?? [],
+        totalScriptCommands: response?.totalScriptCommands ?? 0
       }))
     }
 
