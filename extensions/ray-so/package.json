@@ -3,7 +3,7 @@
   "name": "ray-so",
   "title": "Ray.so",
   "description": "Create beautiful images of your code",
-  "icon": "command-icon.png",
+  "icon": "icon.png",
   "author": "Garrett",
   "license": "MIT",
   "commands": [
