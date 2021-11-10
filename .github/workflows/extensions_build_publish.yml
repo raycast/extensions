@@ -29,12 +29,18 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run Ray CLI
-        uses: raycast/github-actions/ray@v1.1.0
+        id: ray_cli
+        uses: raycast/github-actions/ray@v1.2.0
         with:
           access_token: "${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}"
           api_url: "${{ secrets.RAYCAST_CLI_API_URL }}"
           command: "${{ inputs.command }}"
           paths: "${{ inputs.paths }}"
+      - name: Post Store URLs
+        uses: raycast/github-actions/git-post-store-urls-to-pr@v1.2.0
+        with:
+          store_urls: ${{ steps.ray_cli.outputs.store_urls }}
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       - name: Notify Failure to Slack
         if: failure() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: edge/simple-slack-notify@master
