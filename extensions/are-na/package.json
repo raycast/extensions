@@ -19,6 +19,13 @@
       "subtitle": "navigate to a channel on are.na",
       "description": "todo",
       "mode": "view"
+    },
+    {
+      "name": "addBlock",
+      "title": "Add to Are.na (link)",
+      "subtitle": "Post a link or image url to are.na",
+      "description": "todo",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -35,7 +42,7 @@
     "@raycast/api": "^1.25.0",
     "are.na": "^0.1.5",
     "node-fetch": "^3.0.0",
-    "react-async": "^10.0.1"
+    "react-query": "^3.32.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
