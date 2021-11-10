@@ -4,16 +4,15 @@ import fetch from "node-fetch";
 import { Client, Queue, QueueSlot, Results } from "sabnzbd-api";
 
 export default function SlotList() {
-  const [state, setState] = useState<{ slots: QueueSlot[], init: boolean }>({ slots: [], init: false  });
+  const [init, setInit] = useState<boolean>(false);
+  const [slots, setSlots] = useState<QueueSlot[]>([]);
 
   useEffect(() => {
     async function fetch() {
       const slots = await fetchSlots();
-      setState((oldState) => ({
-        ...oldState,
-        slots: slots,
-        init: true
-      }));
+
+      setSlots(slots);
+      setInit(true);
     }
 
     fetch();
@@ -25,28 +24,21 @@ export default function SlotList() {
       return slot.filename.includes(text);
     });
 
-    setState((oldState) => ({
-      ...oldState,
-      slots: slots,
-    }));
+    setSlots(slots);
   };
 
   return (
-    <List
-      isLoading={!state.init}
-      searchBarPlaceholder="Filter slots by filename..."
-      onSearchTextChange={onSearchTextChange}
-    >
-      {state.slots.map((slot) => (
-        <SlotListItem key={slot.nzo_id} slot={slot} setState={setState} />
+    <List isLoading={!init} searchBarPlaceholder="Filter slots by filename..." onSearchTextChange={onSearchTextChange}>
+      {slots.map((slot) => (
+        <SlotListItem key={slot.nzo_id} slot={slot} setSlots={setSlots} />
       ))}
     </List>
   );
 }
 
-function SlotListItem(props: { slot: QueueSlot; setState: any }) {
+function SlotListItem(props: { slot: QueueSlot; setSlots: any }) {
   const slot = props.slot;
-  const setState = props.setState;
+  const setSlots = props.setSlots;
 
   let icon: ImageLike;
 
@@ -60,12 +52,12 @@ function SlotListItem(props: { slot: QueueSlot; setState: any }) {
         <ActionPanel>
           <ActionPanel.Item
             title={"Resume"}
-            onAction={() => onResume(slot, setState)}
+            onAction={() => onResume(slot, setSlots)}
             icon={{ source: { light: "play-light.png", dark: "play-dark.png" } }}
           />
           <ActionPanel.Item
             title={"Delete"}
-            onAction={() => onDelete(slot, setState)}
+            onAction={() => onDelete(slot, setSlots)}
             icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
           />
         </ActionPanel>
@@ -80,12 +72,12 @@ function SlotListItem(props: { slot: QueueSlot; setState: any }) {
         <ActionPanel>
           <ActionPanel.Item
             title={"Pause"}
-            onAction={() => onPause(slot, setState)}
+            onAction={() => onPause(slot, setSlots)}
             icon={{ source: { light: "pause-light.png", dark: "pause-dark.png" } }}
           />
           <ActionPanel.Item
             title={"Delete"}
-            onAction={() => onDelete(slot, setState)}
+            onAction={() => onDelete(slot, setSlots)}
             icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
           />
         </ActionPanel>
@@ -100,12 +92,12 @@ function SlotListItem(props: { slot: QueueSlot; setState: any }) {
         <ActionPanel>
           <ActionPanel.Item
             title={"Resume"}
-            onAction={() => onResume(slot, setState)}
+            onAction={() => onResume(slot, setSlots)}
             icon={{ source: { light: "play-light.png", dark: "play-dark.png" } }}
           />
           <ActionPanel.Item
             title={"Delete"}
-            onAction={() => onDelete(slot, setState)}
+            onAction={() => onDelete(slot, setSlots)}
             icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
           />
         </ActionPanel>
@@ -118,7 +110,7 @@ function SlotListItem(props: { slot: QueueSlot; setState: any }) {
         <ActionPanel>
           <ActionPanel.Item
             title={"Delete"}
-            onAction={() => onDelete(slot, setState)}
+            onAction={() => onDelete(slot, setSlots)}
             icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
           />
         </ActionPanel>
@@ -149,17 +141,15 @@ function SlotListItem(props: { slot: QueueSlot; setState: any }) {
   );
 }
 
-async function onDelete(slot: QueueSlot, setState: any) {
+async function onDelete(slot: QueueSlot, setSlots: any) {
   let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
 
   try {
     const results = (await client.jobDelete(slot.nzo_id)) as Results;
 
     const slots = await fetchSlots();
-    setState((oldState: any) => ({
-      ...oldState,
-      slots: slots,
-    }));
+
+    setSlots(slots);
 
     showToast(ToastStyle.Success, "Deleted job");
   } catch (error) {
@@ -168,17 +158,15 @@ async function onDelete(slot: QueueSlot, setState: any) {
   }
 }
 
-async function onPause(slot: QueueSlot, setState: any) {
+async function onPause(slot: QueueSlot, setSlots: any) {
   let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
 
   try {
     const results = (await client.jobPause(slot.nzo_id)) as Results;
 
     const slots = await fetchSlots();
-    setState((oldState: any) => ({
-      ...oldState,
-      slots: slots,
-    }));
+
+    setSlots(slots);
 
     showToast(ToastStyle.Success, "Paused job");
   } catch (error) {
@@ -187,17 +175,15 @@ async function onPause(slot: QueueSlot, setState: any) {
   }
 }
 
-async function onResume(slot: QueueSlot, setState: any) {
+async function onResume(slot: QueueSlot, setSlots: any) {
   let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
 
   try {
     const results = (await client.jobResume(slot.nzo_id)) as Results;
 
     const slots = await fetchSlots();
-    setState((oldState: any) => ({
-      ...oldState,
-      slots: slots,
-    }));
+
+    setSlots(slots);
 
     showToast(ToastStyle.Success, "Resumed job");
   } catch (error) {
