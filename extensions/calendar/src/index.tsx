@@ -72,7 +72,7 @@ export default function main() {
 
   return <Detail
     markdown={calendar}
-    navigationTitle={header}
+    navigationTitle="Calendar"
     actions={
       <ActionPanel>
         <ActionPanel.Section title={header}>
