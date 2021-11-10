@@ -4,7 +4,6 @@ import { ChannelList } from "./components/ChannelList";
 import { useChannels } from "./hooks/useChannels";
 import { useCreateBlock } from "./hooks/useCreateBlock";
 import { useProfile } from "./hooks/useProfile";
-import { prefs } from "./util/preferences";
 
 interface AddBlockFormProps {
   selectedChannel: string;
