@@ -1,11 +1,22 @@
-import { Form, FormValue, ActionPanel, SubmitFormAction, showToast, ToastStyle, pasteText, Icon } from "@raycast/api";
+import {
+  Form,
+  FormValue,
+  ActionPanel,
+  SubmitFormAction,
+  pasteText,
+  Icon,
+  closeMainWindow,
+  OpenInBrowserAction,
+  showHUD,
+} from "@raycast/api";
 
 export default function Command() {
   async function handleSubmit(values: Record<string, FormValue>) {
     const { label, subject, content } = values;
-    showToast(ToastStyle.Success, "Comment pasted to app");
     const body = `**${label}**: ${subject}\n${content}`;
     await pasteText(body);
+    await showHUD("Comment pasted to foremost app");
+    await closeMainWindow();
   }
 
   return (
@@ -13,6 +24,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <SubmitFormAction icon={Icon.Clipboard} title="Paste" onSubmit={handleSubmit} />
+          <OpenInBrowserAction title="Open Reference Website" url="https://conventionalcomments.org/" />
         </ActionPanel>
       }
     >

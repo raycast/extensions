@@ -63,7 +63,12 @@ function ProjectListItem(props: { uri: string }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenAction title="Open in Code" icon="icon.png" target={props.uri} application="Visual Studio Code" />
+            <OpenAction
+              title="Open in Code"
+              icon="action-icon.png"
+              target={props.uri}
+              application="Visual Studio Code"
+            />
             <ShowInFinderAction path={path} />
             <OpenWithAction path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           </ActionPanel.Section>

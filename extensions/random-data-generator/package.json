@@ -1,0 +1,235 @@
+{
+  "name": "random",
+  "title": "Random Data Generator",
+  "description": "Generate random data using Faker library",
+  "icon": "random.png",
+  "author": "loris",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Generate Random Data",
+      "description": "Generate random data using Faker library",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "locale",
+          "type": "dropdown",
+          "required": false,
+          "title": "Locale",
+          "description": "Locale used to generate data",
+          "default": "en",
+          "data": [
+            {
+              "value": "ar",
+              "title": "Arabic"
+            },
+            {
+              "value": "hy",
+              "title": "Armenian"
+            },
+            {
+              "value": "az",
+              "title": "Azerbaijani"
+            },
+            {
+              "value": "zh_CN",
+              "title": "Chinese"
+            },
+            {
+              "value": "zh_TW",
+              "title": "Chinese (Taiwan)"
+            },
+            {
+              "value": "cz",
+              "title": "Czech"
+            },
+            {
+              "value": "nl",
+              "title": "Dutch"
+            },
+            {
+              "value": "nl_BE",
+              "title": "Dutch (Belgium)"
+            },
+            {
+              "value": "en",
+              "title": "English"
+            },
+            {
+              "value": "en_AU_ocker",
+              "title": "English (Australia Ocker)"
+            },
+            {
+              "value": "en_AU",
+              "title": "English (Australia)"
+            },
+            {
+              "value": "en_BORK",
+              "title": "English (Bork)"
+            },
+            {
+              "value": "en_CA",
+              "title": "English (Canada)"
+            },
+            {
+              "value": "en_GB",
+              "title": "English (Great Britain)"
+            },
+            {
+              "value": "en_IND",
+              "title": "English (India)"
+            },
+            {
+              "value": "en_IE",
+              "title": "English (Ireland)"
+            },
+            {
+              "value": "en_ZA",
+              "title": "English (South Africa)"
+            },
+            {
+              "value": "en_US",
+              "title": "English (United States)"
+            },
+            {
+              "value": "fa",
+              "title": "Farsi"
+            },
+            {
+              "value": "fi",
+              "title": "Finnish"
+            },
+            {
+              "value": "fr",
+              "title": "French"
+            },
+            {
+              "value": "fr_CA",
+              "title": "French (Canada)"
+            },
+            {
+              "value": "fr_CH",
+              "title": "French (Switzerland)"
+            },
+            {
+              "value": "ge",
+              "title": "Georgian"
+            },
+            {
+              "value": "de",
+              "title": "German"
+            },
+            {
+              "value": "de_AT",
+              "title": "German (Austria)"
+            },
+            {
+              "value": "de_CH",
+              "title": "German (Switzerland)"
+            },
+            {
+              "value": "hr",
+              "title": "Hrvatski"
+            },
+            {
+              "value": "id_ID",
+              "title": "Indonesia"
+            },
+            {
+              "value": "it",
+              "title": "Italian"
+            },
+            {
+              "value": "ja",
+              "title": "Japanese"
+            },
+            {
+              "value": "ko",
+              "title": "Korean"
+            },
+            {
+              "value": "ne",
+              "title": "Nepalese"
+            },
+            {
+              "value": "nb_NO",
+              "title": "Norwegian"
+            },
+            {
+              "value": "pl",
+              "title": "Polish"
+            },
+            {
+              "value": "pt_BR",
+              "title": "Portuguese (Brazil)"
+            },
+            {
+              "value": "pt_PT",
+              "title": "Portuguese (Portugal)"
+            },
+            {
+              "value": "ro",
+              "title": "Romanian"
+            },
+            {
+              "value": "ru",
+              "title": "Russian"
+            },
+            {
+              "value": "sk",
+              "title": "Slovakian"
+            },
+            {
+              "value": "es",
+              "title": "Spanish"
+            },
+            {
+              "value": "es_MX",
+              "title": "Spanish (Mexico)"
+            },
+            {
+              "value": "sv",
+              "title": "Swedish"
+            },
+            {
+              "value": "tr",
+              "title": "Turkish"
+            },
+            {
+              "value": "uk",
+              "title": "Ukrainian"
+            },
+            {
+              "value": "vi",
+              "title": "Vietnamese"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.1",
+    "faker": "^5.5.3",
+    "is-url": "^1.2.4",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/faker": "^5.5.9",
+    "@types/is-url": "^1.2.30",
+    "@types/lodash": "^4.14.176",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

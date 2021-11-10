@@ -8,7 +8,7 @@
 
 - New extension
 - Bug fix / improvement for my extension
-- Bug fix / improvement for somebody else's extension
+- Bug fix / improvement for somebody else's extension. Extension author: @GH-handle
 - Documentation update
 - Other (Specify)
 
@@ -18,6 +18,6 @@
 
 ## Checklist
 
+- [ ] I read the [extension guidelines](https://developers.raycast.com/basics/prepare-an-extension-for-store)
 - [ ] I read the [documentation about publishing](https://developers.raycast.com/basics/publish-an-extension)
-- [ ] I read the [extension guidelines](https://developers.raycast.com/information/review-process#guidelines)
 - [ ] I checked that extension's icon has size of `512x512`

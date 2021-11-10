@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lobsters",
   "version": "1.0.1",
   "title": "Lobste.rs Homepage",
@@ -11,7 +12,7 @@
       "name": "index",
       "title": "Lobste.rs",
       "subtitle": "Homepage Posts",
-      "description": "Media",
+      "description": "Show the Homepage Posts",
       "mode": "view"
     }
   ],
