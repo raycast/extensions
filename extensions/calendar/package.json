@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "View Calendar",
+      "title": "Calendar",
       "description": "Shows calendar for a month",
       "mode": "view"
     }
