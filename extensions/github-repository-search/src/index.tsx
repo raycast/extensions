@@ -126,6 +126,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
           <ActionPanel.Item
             icon={Icon.List}
             title="Browse Releases"
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
             onAction={() => push(<ReleaseView repository={props.repository} />)}
           />
         )}
@@ -207,6 +208,7 @@ function ReleaseView(props: { repository: Repository }) {
                 {release.description && (
                   <PushAction
                     title="View Release Detail"
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
                     icon={Icon.Eye}
                     target={
                       <Detail
