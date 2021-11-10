@@ -1,0 +1,39 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mdn-quick-lookup",
+  "title": "MDN Quick Lookup",
+  "description": "Look up HTML, CSS and JS documentations instantly. Find and view documentation for all HTML, CSS and Javascript terms and concepts right in Raycast.",
+  "icon": "command-icon.png",
+  "author": "degreat",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "MDN Quick Lookup",
+      "subtitle": "Find documentation for HTML, CSS and Javascript from MDN",
+      "description": "Find and view documentation for all HTML, CSS and Javascript terms and concepts right in Raycast",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.3",
+    "@types/turndown": "^5.0.1",
+    "node-fetch": "^3.0.0",
+    "node-html-parser": "^5.1.0",
+    "turndown": "^7.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
