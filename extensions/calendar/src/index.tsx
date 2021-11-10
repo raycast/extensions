@@ -2,6 +2,7 @@ import { ActionPanel, CopyToClipboardAction, Detail, getPreferenceValues } from 
 import { useState, useEffect } from "react";
 import { Calendar } from "calendar";
 import { weekNumber } from 'weeknumber';
+import { UV_FS_O_FILEMAP } from "constants";
 
 const days = [
   "`SUN` `MON` `TUE` `WED` `THU` `FRI` `SAT`",
@@ -78,6 +79,7 @@ export default function main() {
           <ActionPanel.Item
             title="Current Month"
             shortcut={{ modifiers: [], key: "c" }}
+            icon={{ source: { dark: "up-dark.png", light: "up.png" } }}
             onAction={() => setCurrent()}
           />
           <CopyToClipboardAction content={calendar} />
@@ -86,11 +88,13 @@ export default function main() {
           <ActionPanel.Item
             title="Previous Month"
             shortcut={{ modifiers: [], key: "arrowLeft" }}
+            icon={{ source: { dark: "left-dark.png", light: "left.png" } }}
             onAction={() => changeMonth(-1)}
           />
           <ActionPanel.Item
             title="Next Month"
             shortcut={{ modifiers: [], key: "arrowRight" }}
+            icon={{ source: { dark: "right-dark.png", light: "right.png" } }}
             onAction={() => changeMonth(1)}
           />
         </ActionPanel.Section>
@@ -98,11 +102,13 @@ export default function main() {
           <ActionPanel.Item
             title="Previous Year"
             shortcut={{ modifiers: ["shift"], key: "arrowLeft" }}
+            icon={{ source: { dark: "double-left-dark.png", light: "double-left.png" } }}
             onAction={() => changeYear(-1)}
           />
           <ActionPanel.Item
             title="Next Year"
             shortcut={{ modifiers: ["shift"], key: "arrowRight" }}
+            icon={{ source: { dark: "double-right-dark.png", light: "double-right.png" } }}
             onAction={() => changeYear(1)}
           />
         </ActionPanel.Section>
