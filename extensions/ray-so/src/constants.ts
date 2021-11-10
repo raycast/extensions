@@ -1,10 +1,5 @@
 export const colors = ["candy", "breeze", "midnight", "sunset"];
 
-//   { img: "", color: "candy" },
-//   { img: "", color: "breeze" },
-//   { img: "", color: "midnight" },
-//   { img: "", color: "sunset" },
-// ];
 export const languages = [
   { label: "Auto-Detect", value: "auto" },
   { label: "Bash", value: "bash" },
