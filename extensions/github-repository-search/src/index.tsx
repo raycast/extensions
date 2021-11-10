@@ -199,8 +199,8 @@ function ReleaseView(props: { repository: Repository }) {
         return (
           <List.Item
             key={release.id}
-            title={release.name || ""}
-            subtitle={release.tagName}
+            title={release.tagName}
+            subtitle={release.name || ""}
             accessoryTitle={publishedAtString}
             actions={
               <ActionPanel title={`${props.repository.nameWithOwner}`}>
