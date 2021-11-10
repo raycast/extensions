@@ -31,7 +31,7 @@ export default function CreateSnippet() {
     <Form
       actions={
         <ActionPanel>
-          <OpenInBrowserAction title="Create snippet" url={url} />
+          <OpenInBrowserAction title="Create Snippet"  url={url} />
         </ActionPanel>
       }
     >
