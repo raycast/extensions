@@ -55,11 +55,11 @@ export function useImage(url?: string, defaultIcon?: string): {
     }, { deps: [url], secondsToRefetch: 600 });
 
     useEffect(() => {
-        async function fetchData() {
         // FIXME In the future version, we don't need didUnmount checking
         // https://github.com/facebook/react/pull/22114
         let didUnmount = false;
 
+        async function fetchData() {
             if (didUnmount) {
                 return;
             }
