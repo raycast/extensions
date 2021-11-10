@@ -180,7 +180,15 @@ function DevelopmentActionSection() {
 }
 
 function ReleaseView(props: { repository: Repository }) {
-  const { releases, loading } = useRepositoryReleases(props.repository);
+  const { releases, loading, error } = useRepositoryReleases(props.repository);
+
+  if (error) {
+    showToast(
+      ToastStyle.Failure,
+      "Failed fetching repository releases",
+      error instanceof Error ? error.message : String(error)
+    );
+  }
 
   return (
     <List isLoading={loading}>
