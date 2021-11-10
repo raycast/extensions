@@ -2,12 +2,15 @@ import {
   ActionPanel,
   Color,
   CopyToClipboardAction,
+  Detail,
   environment,
   Icon,
   List,
   OpenInBrowserAction,
+  PushAction,
   showToast,
   ToastStyle,
+  useNavigation,
 } from "@raycast/api";
 import { useState } from "react";
 import { Repository } from "./types";
@@ -15,6 +18,7 @@ import { useDebounce } from "use-debounce";
 import { useRepositories } from "./useRepositories";
 import { clearVisitedRepositories, useVisitedRepositories } from "./useVisitedRepositories";
 import { getAccessoryTitle, getIcon, getSubtitle } from "./utils";
+import { useRepositoryReleases } from "./useRepositoryReleases";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
@@ -70,6 +74,8 @@ function RepositoryListItem(props: { repository: Repository; onVisit: (repositor
 }
 
 function Actions(props: { repository: Repository; onVisit: (repository: Repository) => void }) {
+  const { push } = useNavigation();
+
   return (
     <ActionPanel title={props.repository.nameWithOwner}>
       <ActionPanel.Section>
@@ -114,6 +120,14 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
             url={`${props.repository.url}/projects`}
             shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
             onOpen={() => props.onVisit(props.repository)}
+          />
+        )}
+        {props.repository.releases.totalCount > 0 && (
+          <ActionPanel.Item
+            icon={Icon.List}
+            title="Browse Releases"
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={() => push(<ReleaseView repository={props.repository} />)}
           />
         )}
       </ActionPanel.Section>
@@ -164,4 +178,56 @@ function DevelopmentActionSection() {
       />
     </ActionPanel.Section>
   ) : null;
+}
+
+function ReleaseView(props: { repository: Repository }) {
+  const { releases, loading, error } = useRepositoryReleases(props.repository);
+
+  if (error) {
+    showToast(
+      ToastStyle.Failure,
+      "Failed fetching repository releases",
+      error instanceof Error ? error.message : String(error)
+    );
+  }
+
+  return (
+    <List isLoading={loading}>
+      {releases?.map((release) => {
+        const publishedAt = new Date(release.publishedAt);
+        const publishedAtString = `${publishedAt.toLocaleDateString()} ${publishedAt.toLocaleTimeString()}`;
+
+        return (
+          <List.Item
+            key={release.id}
+            title={release.tagName}
+            subtitle={release.name || ""}
+            accessoryTitle={publishedAtString}
+            actions={
+              <ActionPanel title={`${props.repository.nameWithOwner}`}>
+                {release.description && (
+                  <PushAction
+                    title="View Release Detail"
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    icon={Icon.Eye}
+                    target={
+                      <Detail
+                        markdown={release.description}
+                        actions={
+                          <ActionPanel title={`${props.repository.nameWithOwner}`}>
+                            <OpenInBrowserAction url={release.url} />
+                          </ActionPanel>
+                        }
+                      />
+                    }
+                  />
+                )}
+                <OpenInBrowserAction url={release.url} />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
+    </List>
+  );
 }
