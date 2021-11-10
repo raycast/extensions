@@ -199,6 +199,7 @@ function ReleaseView(props: { repository: Repository }) {
                 {release.description && (
                   <PushAction
                     title="View Release Detail"
+                    icon={Icon.Eye}
                     target={
                       <Detail
                         markdown={release.description}
