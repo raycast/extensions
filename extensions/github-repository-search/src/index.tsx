@@ -122,7 +122,7 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
             onOpen={() => props.onVisit(props.repository)}
           />
         )}
-        {props.repository.releases.totalCount > 0 && (
+        {props.repository.releases?.totalCount > 0 && (
           <ActionPanel.Item
             icon={Icon.List}
             title="Browse Releases"
