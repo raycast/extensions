@@ -1,8 +1,14 @@
-import { List } from "@raycast/api"
+import { 
+  List 
+} from "@raycast/api"
 
-import { GroupSection } from "@components"
+import { 
+  GroupSection 
+} from "@components"
 
-import { Group } from "@models";
+import { 
+  Group 
+} from "@models"
 
 type Props = {
   isLoading: boolean

@@ -1,11 +1,18 @@
-import { List } from "@raycast/api";
+import { 
+  List
+} from "@raycast/api"
 
-import { ScriptCommandItem } from "@components";
+import { 
+  ScriptCommandItem 
+} from "@components"
 
-import { Group, ScriptCommand } from "@models";
+import { 
+  Group, 
+  ScriptCommand 
+} from "@models"
 
 type Props = { 
-  group: Group, 
+  group: Group,
   parentName?: string
 }
 

@@ -1,4 +1,6 @@
-import { ScriptCommand } from "@models"
+import { 
+  ScriptCommand 
+} from "@models"
 
 export interface Group {
   name: string

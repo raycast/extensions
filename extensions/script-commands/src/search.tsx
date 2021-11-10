@@ -1,10 +1,19 @@
-import { useState, useEffect } from "react"
+import { 
+  useState, 
+  useEffect 
+} from "react"
 
-import { fetchScriptCommands } from "@network"
+import { 
+  fetchScriptCommands 
+} from "@network"
 
-import { Group } from "@models"
+import { 
+  Group 
+} from "@models"
 
-import { MainContent } from "@components"
+import { 
+  MainContent 
+} from "@components"
 
 interface Result {
   groups: Group[]

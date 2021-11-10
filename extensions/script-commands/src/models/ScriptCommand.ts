@@ -1,4 +1,7 @@
-import { Author, Icon } from "@models"
+import { 
+  Author, 
+  Icon 
+} from "@models"
 
 export interface ScriptCommand {
   authors?: Author[]

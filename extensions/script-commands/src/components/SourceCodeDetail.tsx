@@ -1,8 +1,23 @@
-import { useState, useEffect } from "react"
-import { ActionPanel, CopyToClipboardAction, Detail, OpenInBrowserAction } from "@raycast/api"
+import { 
+  useState, 
+  useEffect 
+} from "react"
 
-import { ScriptCommand } from "@models";
-import { fetchSourceCode, sourceCodeNormalURL } from "@network";
+import { 
+  ActionPanel, 
+  CopyToClipboardAction, 
+  Detail, 
+  OpenInBrowserAction 
+} from "@raycast/api"
+
+import { 
+  ScriptCommand 
+} from "@models"
+
+import { 
+  fetchSourceCode, 
+  sourceCodeNormalURL 
+} from "@network"
 
 type Props = {
   scriptCommand: ScriptCommand
@@ -57,7 +72,7 @@ const details = (scriptCommand: ScriptCommand, sourceCode: string): string => {
   File: ${scriptCommand.filename}  
   \n\n  
   `
-  content += "```\n"
+  content += "```" + scriptCommand.language + "\n"
   content += sourceCode
   content += "\n```"
 

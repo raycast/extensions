@@ -1,9 +1,29 @@
-import { useNavigation, ActionPanel, Icon, ImageMask, Image, List, OpenInBrowserAction } from "@raycast/api"
+import { 
+  useNavigation, 
+  ActionPanel, 
+  Icon, 
+  ImageMask, 
+  Image, 
+  List, 
+  OpenInBrowserAction 
+} from "@raycast/api"
 
-import { authorAvatarURL, iconDarkURL, iconLightURL, languageURL, sourceCodeNormalURL } from "@network"
+import { 
+  authorAvatarURL, 
+  iconDarkURL, 
+  iconLightURL, 
+  languageURL, 
+  sourceCodeNormalURL 
+} from "@network"
 
-import { Author, ScriptCommand } from "@models"
-import { SourceCodeDetail } from "@components"
+import { 
+  Author, 
+  ScriptCommand 
+} from "@models"
+
+import { 
+  SourceCodeDetail 
+} from "@components"
 
 type Props = { 
   scriptCommand: ScriptCommand
