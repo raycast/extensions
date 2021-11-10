@@ -19,8 +19,10 @@ Creates a new block and adds it to the specified channel.
 
 */
 
-import { useMutation, UseMutationOptions } from "react-query";
+import { useCallback } from "react";
+import { useAsync } from "react-async";
 import { api } from "../util/api";
+import { useToken } from "./useToken";
 
 export type CreateBlockParams =
   | {
@@ -30,16 +32,20 @@ export type CreateBlockParams =
       content: string;
     };
 
-interface UseCreateBlockOptions extends UseMutationOptions<unknown, unknown, CreateBlockParams, unknown> {
+interface UseCreateBlockOptions {
   slug: string;
-  accessToken: string;
 }
-export const useCreateBlock = ({ accessToken, slug, ...options }: UseCreateBlockOptions) => {
+export const useCreateBlock = ({ slug }: UseCreateBlockOptions) => {
   const path = `/channels/${slug}/blocks`;
-  return useMutation({
-    ...options,
-    mutationFn: (variables: CreateBlockParams) => {
-      return api(accessToken)("POST", path, variables);
+  const accessToken = useToken();
+  const deferFn = useCallback(
+    async ([params]) => {
+      await api(accessToken)("POST", path, params);
     },
+    [accessToken, path]
+  );
+
+  return useAsync({
+    deferFn,
   });
 };

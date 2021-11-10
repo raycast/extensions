@@ -1,10 +1,12 @@
+import { useCallback } from "react";
+import { useAsync } from "react-async";
 import { User } from "../types/arena";
 import { api } from "../util/api";
-import { useQuery } from "react-query";
 import { useToken } from "./useToken";
 
 export const useProfile = () => {
   const accessToken = useToken();
-  const url = "/me";
-  return useQuery<User>(url, (): Promise<User> => api(accessToken)("GET", url));
+
+  const promiseFn = useCallback(() => api(accessToken)<User>("GET", "/me"), []);
+  return useAsync<User>(promiseFn);
 };

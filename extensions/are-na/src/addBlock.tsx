@@ -5,15 +5,12 @@ import { useChannels } from "./hooks/useChannels";
 import { useCreateBlock } from "./hooks/useCreateBlock";
 import { useProfile } from "./hooks/useProfile";
 import { prefs } from "./util/preferences";
-import { QueryClientProvider } from "react-query";
-import { queryClient } from "./util/queryClient";
 
 interface AddBlockFormProps {
   selectedChannel: string;
 }
 const AddBlockForm = ({ selectedChannel }: AddBlockFormProps) => {
   const createBlock = useCreateBlock({
-    accessToken: prefs().accesstoken,
     slug: selectedChannel || "",
   });
   const [message, setMessage] = useState("");
@@ -25,7 +22,7 @@ const AddBlockForm = ({ selectedChannel }: AddBlockFormProps) => {
           <SubmitFormAction
             title="Add"
             onSubmit={() => {
-              createBlock.mutate({
+              createBlock.run({
                 source: message,
               });
               setMessage("");
@@ -74,9 +71,5 @@ ${channelError || userError}
 };
 
 export default function Command() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AddBlock />
-    </QueryClientProvider>
-  );
+  return <AddBlock />;
 }

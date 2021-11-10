@@ -42,7 +42,7 @@
     "@raycast/api": "^1.25.0",
     "are.na": "^0.1.5",
     "node-fetch": "^3.0.0",
-    "react-query": "^3.32.1"
+    "react-async": "^10.0.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

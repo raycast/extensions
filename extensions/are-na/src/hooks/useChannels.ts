@@ -1,5 +1,6 @@
+import { useCallback } from "react";
+import { useAsync } from "react-async";
 import { Channels } from "../types/arena";
-import { useQuery } from "react-query";
 import { api } from "../util/api";
 import { useProfile } from "./useProfile";
 import { useToken } from "./useToken";
@@ -12,8 +13,14 @@ export const useChannels = () => {
 
   const { data: profile } = useProfile();
   const userId = profile?.id;
-  const path = userId ? (`/users/${userId}/channels` as const) : (`null` as const);
-  return useQuery<Channels>(path, () => api(accessToken)<Channels>("GET", path), {
-    enabled: !!userId,
+  const promiseFn = useCallback(
+    userId
+      ? async () => api(accessToken)<Channels>("GET", `/users/${userId}/channels`)
+      : async () => Promise.resolve(null),
+    [accessToken, userId]
+  );
+
+  return useAsync<Channels | null>({
+    promiseFn,
   });
 };

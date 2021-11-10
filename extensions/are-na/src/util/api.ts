@@ -14,6 +14,7 @@ export const api =
       method,
       headers: {
         ...headers(accessToken),
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(json),
     });
