@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "calendar",
-  "title": "Calendar",
+  "title": "Quick Calendar",
   "description": "View calendar month-by-month",
   "icon": "command-icon.png",
   "author": "fuksman",

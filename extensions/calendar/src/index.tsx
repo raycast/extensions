@@ -1,12 +1,11 @@
-import { ActionPanel, CopyToClipboardAction, Detail, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, Detail, getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Calendar } from "calendar";
 import { weekNumber } from 'weeknumber';
-import { UV_FS_O_FILEMAP } from "constants";
 
 const days = [
-  "`SUN` `MON` `TUE` `WED` `THU` `FRI` `SAT`",
-  "`MON` `TUE` `WED` `THU` `FRI` `SAT` `SUN`"
+  "` SUN` ` MON` ` TUE` ` WED` ` THU` ` FRI` ` SAT`",
+  "` MON` ` TUE` ` WED` ` THU` ` FRI` ` SAT` ` SUN`"
 ]
 
 const weekStart = Number(getPreferenceValues().weekStart)
@@ -26,31 +25,23 @@ export default function main() {
       let table = ""
       m.forEach((week) => {
         if (showWeeks) {
-          const wn = weekNumber(week[0])
-          if (wn < 10) {
-            table += "`" + wn + "  `    "
-          } else {
-            table += "`" + wn + " `    "
-          }
+          const wn = weekNumber(week[0]).toString()
+          table += "`" + wn + " ".repeat(2 - wn.length) + "`    "
         }
 
         week.forEach((day) => {
-          const dayNum = day.getMonth() === date.getMonth() ? day.getDate() : 0;
-          if (dayNum == 0) {
-            table += "`   ` "
-          }
-          if (dayNum > 0 && dayNum < 10) {
-            table += "`  " + dayNum + "` "
-          }
-          if (dayNum >= 10) {
-            table += "` " + dayNum + "` "
+          const dayString = day.getMonth() === date.getMonth() ? day.getDate().toString() : ""
+          if (day.toDateString() === new Date().toDateString()) {
+            table += "`•" + " ".repeat(3 - dayString.length) + dayString + "` "
+          } else {
+            table += "`" + " ".repeat(4 - dayString.length) + dayString + "` "
           }
         })
         table += "\n\n"
       })
 
       const header = date.toLocaleString('en', { month: 'long', year: 'numeric' })
-      const weeksHeader = showWeeks ? "`#  `    " : ""
+      const weeksHeader = showWeeks ? "`# `    " : ""
       setHeader(header)
       setCalendar("# " + header + "\n***\n" + weeksHeader + days[weekStart] + "\n\n" + table)
     })();
@@ -67,7 +58,11 @@ export default function main() {
   }
 
   const setCurrent = () => {
-    setDate(currentMonth)
+    if (date === currentMonth) {
+      showToast(ToastStyle.Success, "Current month is on screen")
+    } else {
+      setDate(currentMonth)
+    }
   }
 
   return <Detail
