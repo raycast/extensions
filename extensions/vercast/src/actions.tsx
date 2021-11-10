@@ -32,6 +32,15 @@ export function UpdateEnvironmentVariable(props: { projectId: string, projectNam
 
   // Setup useState objects
   const [environmentVariables, setEnvironmentVariables] = useState<EnvironmentVariable[]>()
+  
+  // Submit form validation
+  function validateForm(values: FormValues): boolean {
+    if (!values.env_value) {
+      showToast(ToastStyle.Failure, "Please set new value");
+      return false;
+    }
+    return true;
+  }
 
   // On form submit function
   const { pop } = useNavigation();
@@ -91,10 +100,3 @@ export function UpdateEnvironmentVariable(props: { projectId: string, projectNam
   )
 }
 
-function validateForm(values: FormValues): boolean {
-  if (!values.env_value) {
-    showToast(ToastStyle.Failure, "Please set new value");
-    return false;
-  }
-  return true;
-}
