@@ -23,7 +23,7 @@ function ClearCacheAction(): JSX.Element {
   );
 }
 
-function ISPListItem(props: { name: string | undefined }): JSX.Element {
+function ISPListItem(props: { name: string | undefined; summary: JSX.Element }): JSX.Element {
   const n = props.name;
   return (
     <List.Item
@@ -32,6 +32,7 @@ function ISPListItem(props: { name: string | undefined }): JSX.Element {
       accessoryTitle={`${n ? n : "?"}`}
       actions={
         <ActionPanel>
+          {props.summary}
           {n && <CopyToClipboardAction content={n} />}
           <ClearCacheAction />
         </ActionPanel>
@@ -40,52 +41,84 @@ function ISPListItem(props: { name: string | undefined }): JSX.Element {
   );
 }
 
-function ServerListItem(props: { serverName: string | undefined }): JSX.Element {
+function ServerListItem(props: { serverName: string | undefined; summary: JSX.Element }): JSX.Element {
   const sn = props.serverName;
   return (
     <List.Item
       title="Server"
       icon={{ source: "server.png" }}
       accessoryTitle={`${sn ? sn : "?"}`}
-      actions={<ActionPanel>{sn && <CopyToClipboardAction content={sn} />}</ActionPanel>}
+      actions={
+        <ActionPanel>
+          {props.summary}
+          {sn && <CopyToClipboardAction content={sn} />}
+        </ActionPanel>
+      }
     />
   );
 }
 
-function PingListItem(props: { ping: number | undefined }): JSX.Element {
+function PingListItem(props: { ping: number | undefined; summary: JSX.Element }): JSX.Element {
   const p = props.ping;
   return (
     <List.Item
       title="Ping"
       icon={{ source: Icon.LevelMeter, tintColor: Color.Blue }}
       accessoryTitle={`${pingToString(p)}`}
-      actions={<ActionPanel>{p && <CopyToClipboardAction content={pingToString(p)} />}</ActionPanel>}
+      actions={
+        <ActionPanel>
+          {props.summary}
+          {p && <CopyToClipboardAction content={pingToString(p)} />}
+        </ActionPanel>
+      }
     />
   );
 }
 
-function DownloadListItem(props: { download: number | undefined }): JSX.Element {
+function DownloadListItem(props: { download: number | undefined; summary: JSX.Element }): JSX.Element {
   const d = props.download;
   return (
     <List.Item
       title="Download"
       icon={{ source: "download.png", tintColor: Color.Blue }}
       accessoryTitle={`${speedToString(d)}`}
-      actions={<ActionPanel>{d && <CopyToClipboardAction content={speedToString(d)} />}</ActionPanel>}
+      actions={
+        <ActionPanel>
+          {props.summary}
+          {d && <CopyToClipboardAction content={speedToString(d)} />}
+        </ActionPanel>
+      }
     />
   );
 }
 
-function UploadListItem(props: { upload: number | undefined }): JSX.Element {
+function UploadListItem(props: { upload: number | undefined; summary: JSX.Element }): JSX.Element {
   const u = props.upload;
   return (
     <List.Item
       title="Upload"
       icon={{ source: "download.png", tintColor: "#bf71ff" }}
       accessoryTitle={`${speedToString(u)}`}
-      actions={<ActionPanel>{u && <CopyToClipboardAction content={speedToString(u)} />}</ActionPanel>}
+      actions={
+        <ActionPanel>
+          {props.summary}
+          {u && <CopyToClipboardAction content={speedToString(u)} />}
+        </ActionPanel>
+      }
     />
   );
+}
+
+function CopySummaryAction(props: { result: Result }): JSX.Element {
+  const r = props.result;
+  const parts: string[] = [
+    `ISP: ${r.isp || "?"}`,
+    `Server: ${r.serverName || "?"}`,
+    `Ping: ${pingToString(r.ping)}`,
+    `Download: ${speedToString(r.download)}`,
+    `Upload: ${speedToString(r.upload)}`,
+  ];
+  return <CopyToClipboardAction title="Copy Summary To Clipboard" content={parts.join("; ")} />;
 }
 
 export default function SpeedtestList() {
@@ -94,13 +127,14 @@ export default function SpeedtestList() {
     showToast(ToastStyle.Failure, "Speedtest failed", error);
   }
   const title = isLoading ? progressText : undefined;
+  const summaryAction = <CopySummaryAction result={result} />;
   return (
     <List isLoading={isLoading} searchBarPlaceholder={title}>
-      <ISPListItem name={result.isp} />
-      <ServerListItem serverName={result.serverName} />
-      <PingListItem ping={result.ping} />
-      <DownloadListItem download={result.download} />
-      <UploadListItem upload={result.upload} />
+      <ISPListItem name={result.isp} summary={summaryAction} />
+      <ServerListItem serverName={result.serverName} summary={summaryAction} />
+      <PingListItem ping={result.ping} summary={summaryAction} />
+      <DownloadListItem download={result.download} summary={summaryAction} />
+      <UploadListItem upload={result.upload} summary={summaryAction} />
     </List>
   );
 }
