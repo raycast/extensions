@@ -73,8 +73,8 @@ export default function CreateSnippet() {
         <Form.Dropdown.Item value="false" title="No" />
       </Form.Dropdown>
       <Form.Dropdown id="darkMode" title="Dark Mode" storeValue onChange={(darkMode) => setCode({ ...code, darkMode })}>
-        <Form.Dropdown.Item value="true" title="True" />
-        <Form.Dropdown.Item value="false" title="False" />
+        <Form.Dropdown.Item value="true" title="Yes" />
+        <Form.Dropdown.Item value="false" title="No" />
       </Form.Dropdown>
       <Form.Dropdown id="padding" title="Padding" storeValue onChange={(padding) => setCode({ ...code, padding })}>
         <Form.Dropdown.Item value="16" title="16" />
