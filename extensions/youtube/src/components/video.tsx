@@ -1,6 +1,7 @@
 import {
   ActionPanel,
   Color,
+  CopyToClipboardAction,
   Detail,
   Icon,
   List,
@@ -23,6 +24,16 @@ function videoUrl(videoId: string | null | undefined): string | undefined {
     return `https://youtube.com/watch?v=${videoId}`;
   }
   return undefined;
+}
+
+function CopyVideoUrlAction(props: { videoId: string | null | undefined }): JSX.Element | null {
+  const url = videoUrl(props.videoId);
+  if (url) {
+    return (
+      <CopyToClipboardAction title="Copy Video URL" content={url} shortcut={{ modifiers: ["cmd", "opt"], key: "c" }} />
+    );
+  }
+  return null;
 }
 
 function OpenVideoInBrowser(props: { videoId: string | null | undefined }): JSX.Element | null {
@@ -179,6 +190,7 @@ export function VideoListItem(props: { video: Video }): JSX.Element {
         <ActionPanel>
           {mainActions()}
           <ShowChannelAction channelId={video.channelId} />
+          <CopyVideoUrlAction videoId={videoId} />
           <OpenWithVLCAction videoId={videoId} />
           <OpenWithIINAAction videoId={videoId} />
         </ActionPanel>
