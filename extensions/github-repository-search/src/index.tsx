@@ -199,7 +199,7 @@ function ReleaseView(props: { repository: Repository }) {
         return (
           <List.Item
             key={release.id}
-            title={release.name}
+            title={release.name || ""}
             subtitle={release.tagName}
             accessoryTitle={publishedAtString}
             actions={
