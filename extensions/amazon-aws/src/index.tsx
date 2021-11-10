@@ -1,6 +1,5 @@
-import { getPreferenceValues, ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { getPreferenceValues, ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle, Detail } from "@raycast/api";
 import { useState, useEffect } from "react";
-import fetch from "node-fetch";
 var AWS = require('aws-sdk');
 
 interface Preferences {
@@ -13,24 +12,30 @@ export default function DescribeInstances() {
   var ec2 = new AWS.EC2({apiVersion: '2016-11-15'});
   var params = {DryRun: false};
   
-  const [state, setState] = useState<{ instances: Instance[] }>({ instances: [] });
+  const [state, setState] = useState<{ instances: Instance[], hasError: boolean }>({ instances: [], hasError: false });
 
   useEffect(() => {
     async function fetch() {
       ec2.describeInstances(params, function(err: { stack: any; }, data: any) {
         if (err) {
-          console.log("Error", err.stack);
-          return;
+          setState(oldstate => ({
+            hasError: true,
+            instances: []
+          }));
+        } else {
+          setState((oldState) => ({
+            ...oldState,
+            instances: data.Reservations.map((r: any) => r.Instances).flat(),
+          }));
         }
-
-        setState((oldState) => ({
-          ...oldState,
-          instances: data.Reservations.map((r: any) => r.Instances).flat(),
-        }));
       });
     }
     fetch();
   }, []);
+
+  if (state.hasError) {
+    return (<Detail markdown="We can't find a valid [configuration and credential file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) in your machine." />)
+  }
 
   return (
     <List isLoading={state.instances.length === 0} searchBarPlaceholder="Filter instances by name...">
