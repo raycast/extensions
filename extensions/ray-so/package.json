@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "create-a-snippet",
-      "title": "Create a snippet",
+      "title": "Create Beautiful Images of Code",
       "subtitle": "Generate a beautiful code snippet",
       "description": "Use Ray.so to create beautiful images of your code",
       "mode": "view"
