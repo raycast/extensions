@@ -89,11 +89,11 @@ function UploadListItem(props: { upload: number | undefined }): JSX.Element {
 }
 
 export default function SpeedtestList() {
-  const { result, error, isLoading } = useSpeedtest();
+  const { result, error, isLoading, progressText } = useSpeedtest();
   if (error) {
     showToast(ToastStyle.Failure, "Speedtest failed", error);
   }
-  const title = isLoading ? "Speedtest running" : undefined;
+  const title = isLoading ? progressText : undefined;
   return (
     <List isLoading={isLoading} searchBarPlaceholder={title}>
       <ISPListItem name={result.isp} />
@@ -105,7 +105,12 @@ export default function SpeedtestList() {
   );
 }
 
-function useSpeedtest(): { result: Result; error: string | undefined; isLoading: boolean } {
+function useSpeedtest(): {
+  result: Result;
+  error: string | undefined;
+  isLoading: boolean;
+  progressText: string | undefined;
+} {
   const [result, setResult] = useState<Result>({
     isp: undefined,
     location: undefined,
@@ -116,6 +121,7 @@ function useSpeedtest(): { result: Result; error: string | undefined; isLoading:
   });
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [progressText, setProgressText] = useState<string>();
   let cancel = false;
   useEffect(() => {
     async function runTest() {
@@ -137,6 +143,11 @@ function useSpeedtest(): { result: Result; error: string | undefined; isLoading:
             if (!cancel) {
               setError(err.message);
             }
+          },
+          (progressText: string) => {
+            if (!cancel) {
+              setProgressText(progressText);
+            }
           }
         );
       } catch (err) {
@@ -151,5 +162,5 @@ function useSpeedtest(): { result: Result; error: string | undefined; isLoading:
       cancel = true;
     };
   }, []);
-  return { result, error, isLoading };
+  return { result, error, isLoading, progressText };
 }
