@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "youtube",
-  "title": "Youtube",
+  "title": "YouTube",
   "description": "Search Videos, Playlists and more",
   "icon": "youtube.png",
   "author": "tonka3000",
@@ -37,6 +37,25 @@
       "placeholder": "Your YouTube enabled Google API key",
       "required": true,
       "description": "YouTube enabled Google API key"
+    },
+    {
+      "name": "primaryaction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "required": false,
+      "default": "detail",
+      "data": [
+        {
+        "title": "Show Details",
+        "value": "detail"
+        },
+        {
+          "title": "Open in Browser",
+          "value": "browser"
+        }
+      ],
+      "description": "Set the default action"
+
     }
   ],
   "dependencies": {
