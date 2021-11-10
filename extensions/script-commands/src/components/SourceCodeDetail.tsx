@@ -23,8 +23,17 @@ type Props = {
   scriptCommand: ScriptCommand
 }
 
+type ContentState = { 
+  hasContent: boolean, 
+  sourceCode: string 
+}
+
 export function SourceCodeDetail({ scriptCommand }: Props): JSX.Element {
-  const [content, setContent] = useState<{ hasContent: boolean, sourceCode: string }>({ hasContent: false, sourceCode: "" })
+  const title = `Source code for "${scriptCommand.title }"`
+  const [content, setContent] = useState<ContentState>({ 
+    hasContent: false, 
+    sourceCode: "Loading source code..." 
+  })
 
   useEffect(() => {
     async function fetch() {
@@ -42,10 +51,10 @@ export function SourceCodeDetail({ scriptCommand }: Props): JSX.Element {
 
     fetch()
   }, [])
-  
+
   return (
     <Detail 
-      navigationTitle={ `Source code for "${scriptCommand.title }"` }
+      navigationTitle={ title }
       isLoading={ content.hasContent == false } 
       markdown={ content.sourceCode }
       actions={ 
