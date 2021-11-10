@@ -3,7 +3,7 @@
   "name": "script-commands",
   "title": "Script Commands",
   "description": "Package of extensions to manage Raycast Script Commands",
-  "icon": "command-icon.png",
+  "icon": "extension-icon.png",
   "author": "tholanda",
   "license": "MIT",
   "commands": [
