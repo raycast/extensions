@@ -58,7 +58,7 @@ export default function CreateSnippet() {
           />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown id="langauge" title="Language" storeValue onChange={(language) => setCode({ ...code, language })}>
+      <Form.Dropdown id="language" title="Language" storeValue onChange={(language) => setCode({ ...code, language })}>
         {languages.map((el, idx) => (
           <Form.Dropdown.Item key={idx} value={el.value} title={el.label} />
         ))}
