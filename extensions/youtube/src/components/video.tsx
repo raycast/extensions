@@ -140,6 +140,9 @@ export function VideoListItemDetail(props: { video: Video }): JSX.Element {
           <OpenVideoInBrowser videoId={videoId} />
           <ShowChannelAction channelId={video.channelId} />
           <OpenChannelInBrowser channelId={video.channelId} />
+          <CopyVideoUrlAction videoId={videoId} />
+          <OpenWithVLCAction videoId={videoId} />
+          <OpenWithIINAAction videoId={videoId} />
         </ActionPanel>
       }
     />
