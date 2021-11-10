@@ -35,6 +35,7 @@ export function useRepositoryReleases(repository: Repository) {
     }
 
     setLoading(true);
+    setError(null);
 
     const [owner, name] = repository.nameWithOwner.split("/");
 
