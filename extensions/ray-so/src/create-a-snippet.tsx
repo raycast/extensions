@@ -1,4 +1,4 @@
-import { Form, ActionPanel, OpenInBrowserAction } from "@raycast/api";
+import { Form, ActionPanel, SubmitFormAction } from "@raycast/api";
 import { colors, languages } from "./constants";
 import { useState } from "react";
 import open from "open";
