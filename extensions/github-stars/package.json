@@ -2,14 +2,16 @@
   "name": "search-github-stars",
   "title": "GitHub Stars",
   "description": "Display and filter your recent GitHub stars",
-  "subtitle": "GitHub",
   "icon": "icon.png",
   "author": "mrmartineau",
+  "keywords": [
+    "stars"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Stars",
+      "title": "Starred Repositories",
       "subtitle": "GitHub",
       "description": "Display and filter your recent GitHub stars",
       "mode": "view"
