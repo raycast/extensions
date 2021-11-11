@@ -14,9 +14,11 @@
     "jsx": "react-jsx",
     "baseUrl": "src",
     "paths": {
-      "@models":["Models/index"],
-      "@components":["Components/index"],
-      "@network":["Network/index"]
+      "@models": ["Models/index"],
+      "@components": ["Components/index"],
+      "@managers": ["Managers/index"],
+      "@network": ["Network/API/index"],
+      "@urls": ["Network/URL/index"]
     }
   }
 }
