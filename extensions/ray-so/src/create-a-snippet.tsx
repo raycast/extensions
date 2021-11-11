@@ -1,4 +1,4 @@
-import { Form, ActionPanel, SubmitFormAction } from "@raycast/api";
+import { Form, ActionPanel, SubmitFormAction, closeMainWindow } from "@raycast/api";
 import { colors, languages } from "./constants";
 import { useState } from "react";
 import open from "open";
@@ -28,11 +28,16 @@ export default function CreateSnippet() {
     code.padding
   }&title=${code.title || "Untitled 1"}&code=${Buffer.from(code.snippet).toString("base64")}&language=${code.language}`;
 
+  const handleSubmit = () => {
+    open(url);
+    closeMainWindow();
+  };
+
   return (
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create Snippet" onSubmit={() => open(url)} />
+          <SubmitFormAction title="Create Snippet" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
