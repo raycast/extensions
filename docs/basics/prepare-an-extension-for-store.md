@@ -13,8 +13,9 @@ Here you will find requirements and guidelines that you'll need to follow in ord
   * Ensure you use `MIT` in `license` field
   * Ensure you are using latest Raycast API version
 * Please use `npm` for installing dependencies and include `package-lock.json` in your pull request. We use `npm` in our CI when building and publishing extensions, so by providing `package-lock.json` we ensure that dependencies on server are exactly the same as you had locally during testing of your extension.
-* Please check the terms of service of third party services that your extension uses. If your extension doesn't comply with the terms, include a warning in your extension's README. The warning should be similar to:
-  > Warning: This extension is not compliant with the Terms of Service of [service name]. Use at your own risk.
+*   Please check the terms of service of third party services that your extension uses. If your extension doesn't comply with the terms, include a warning in your extension's README. The warning should be similar to:
+
+    > Warning: This extension is not compliant with the Terms of Service of \[service name]. Use at your own risk.
 
 ### Extensions and Commands Naming
 
@@ -67,6 +68,34 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 * Make sure to remove unused assets and icons
 * 💡 If you feel like designing icons is not up to your alley, ask [community](https://raycast.com/community) for help (#extensions channel)
 
+### Provide README if Additional Configuration Required
+
+* If your extension requires additional setup, such as getting API access token, enabling some preferences in other applications or has non-trivial use cases, please provide README file at the root folder of your extension. When README provided users will see "About This Extension" button on preferences onboarding screen.
+
+![](<../.gitbook/assets/CleanShot 2021-11-11 at 17.31.47@2x.png>)
+
+### Contributing to Existing Extensions vs Creating a New One
+
+* **When you should contribute to existing extension instead of creating a new one**
+  * You want to make a small improvement to an extension that is already published. E.g. extra actions, new preference, UX improvements, etc. Usually it's a non-significant change.
+  * You want to add a simple command that compliments an existing extension without changing extension title or description. E.g. you want to add "Like Current Track" command for Spotify. It wouldn't make sense creating a whole new extension just for this when there is already [Spotify Controls](https://www.raycast.com/thomas/spotify-controls) extension.
+  * **Important:** If your change is significant, it would be sensible to contact the author of the extension before you invest a lot of time into it. We cannot merge significant contributions without the author's sign off.
+* **When you should consider creating a new extension instead of contributing to existing one**
+  * The changes to an existing extension would be significant and might break other people's workflows. Check with the author if you will want to proceed with the collaboration path.
+  * Your extension provides integration with same service but has different configuration. E.g. one extension could be "GitHub Cloud", another – "GitHub Enterprise". One extension could be "Spotify Controls" that just uses apple script to play/pause songs, another extension can provide deeper integration via the API and require access token setup. There is no reason to try to merge everything together, this would only make things more complicated.
+* **Multiple simple extensions vs one large one**
+  * If your extension can act as a standalone and brings something new to the Store, it's acceptable to create a new one instead of adding commands to existing one. E.g. one extension could be "GitHub Repository Search", another one could be "GitHub Issue Search". There is no goal to merge all extensions connecting with one service into one mega extension. However it's also acceptable to merge two extensions under one if authors decide to do so.
+
+### Binary Dependencies and Additional Configuration
+
+* Avoid asking users to perform additional downloads and try to automate as much as possible from the extension, especially if you are targeting non-developers. See [Speedtest](https://github.com/raycast/extensions/pull/302) extension that downloads CLI in the background and later uses it under the hood.
+* Don't bundle heavy binary dependencies in the extension – this would lead to increased extension download size.
+* If you do end up downloading executable binaries in the background, please make sure it's done from a server that you don't have access to. Otherwise we cannot guarantee that you won't replace the binary with malicious code after the review. E.g. downloading `speedtest-cli` from [`install.speedtest.net`](http://install.speedtest.net) is acceptable, but doing this from some custom AWS server would lead to a rejection.
+
+### Keychain Access
+
+* Extensions requesting Keychain Access will be rejected due to security concerns. If you can't work around this limitation, reach out to us on [Slack](https://raycast.com/community) or via `feedback@raycast.com`.
+
 ## UI/UX Guidelines
 
 ### Preferences
@@ -101,6 +130,17 @@ Here you will find requirements and guidelines that you'll need to follow in ord
   * **Known issue:** Sometimes there is nothing you can show when search query is empty and an extension shows "No results" when you open it (often in search commands). We have plans to provide API that would improve that experience. In the meantime you might want to consider introducing some sections that could be helpful in an empty state – e.g. suggestions or recently visited items.
 * **Common mistake** – "flickering empty state view" on start
   * If you try render empty list before real data arrives (e.g. from the network or disk), you might see flickering "No results" view when opening extension. To prevent this make sure to not return empty list of items before you get the data you want to display. In the meantime you can show loading indicator. See [this example](https://developers.raycast.com/information/best-practices#show-loading-indicator).
+
+### Navigation Title
+
+* Don't change `navigationTitle` in the root command, it will be automatically set to the command name. Use `navigationTitle` only in nested screens to provide additional context. See [Slack Status extension](https://github.com/raycast/extensions/blob/020f2232aa5579b5c63b4b3c08d23ad719bce1f8/extensions/slack-status/src/setStatusForm.tsx#L95) as an example of correct usage of `navigationTitle` property.
+* Avoid long titles. If you can't predict how long is gonna be string you're using for the navigation title, consider using something else. E.g. in Jira extension we used issue key instead of the issue title to keep it short.
+* Avoid updating navigation title multiple times on one screen depending on some state. If you find yourself doing it, there is high chance you are misusing it.
+
+### Placeholders in Text Fields
+
+* For better visual experience please add placeholders in text field and text area components. This includes preferences.
+* Don't leave the search bar without a placeholder
 
 ### Localization / Language
 
