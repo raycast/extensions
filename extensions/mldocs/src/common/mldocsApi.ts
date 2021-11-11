@@ -114,15 +114,18 @@ export const searchResources = async (
         });
 
     const options = {
-        includeScore: true,
+        includeScore: false,
+        ignoreLocation: true,
+        threshold: 0.8,
+        minMatchCharLength: 3,
         keys: [
             {
                 name: 'name',
-                weight: 0.8,
+                weight: 0.999,
             },
             {
                 name: 'value.url',
-                weight: 0.2,
+                weight: 0.001,
             },
         ],
     };
