@@ -1,0 +1,51 @@
+{
+  "name": "vault",
+  "title": "Vault",
+  "description": "Manage Secrets in Vault",
+  "icon": "icon.png",
+  "author": "ricoberger",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list",
+      "title": "List Secrets",
+      "subtitle": "Vault",
+      "description": "Show a list of secrets",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.2",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  },
+  "preferences": [
+    {
+      "name": "address",
+      "type": "textfield",
+      "required": true,
+      "title": "Address",
+      "description": "Address of the Vault instance"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Token",
+      "description": "Token to access the Vault instance"
+    }
+  ]
+}
