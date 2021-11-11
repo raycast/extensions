@@ -15,6 +15,17 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "folderPath",
+      "description": "Folder where your Script Commands will be installed",
+      "title": "Folder path",
+      "required": true,
+      "type": "textfield",
+      "default": "~/Documents/Raycast/Script-Commands",
+      "placeholder": "~/"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.25.3",
     "node-fetch": "^3.0.0"
