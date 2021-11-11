@@ -15,9 +15,12 @@ import {
 } from "@models"
 
 import { 
-  fetchSourceCode, 
   sourceCodeNormalURL 
-} from "@network"
+} from "@urls"
+
+import { 
+  DataManager 
+} from "@managers"
 
 type Props = {
   scriptCommand: ScriptCommand
@@ -28,7 +31,9 @@ type ContentState = {
   sourceCode: string 
 }
 
-export function SourceCodeDetail({ scriptCommand }: Props): JSX.Element {
+const dataManager = DataManager.shared()
+
+export function SourceCodeDetail({ scriptCommand}: Props): JSX.Element {
   const title = `Source code for "${scriptCommand.title }"`
   const [content, setContent] = useState<ContentState>({ 
     hasContent: false, 
@@ -37,7 +42,7 @@ export function SourceCodeDetail({ scriptCommand }: Props): JSX.Element {
 
   useEffect(() => {
     async function fetch() {
-      const response = await fetchSourceCode(scriptCommand)
+      const response = await dataManager.fetchSourceCode(scriptCommand)
 
       setContent((oldState) => ({
         ...oldState,
