@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aws",
   "title": "Amazon AWS",
-  "description": "Integrate your AWS account in Raykcast",
+  "description": "Integrate your AWS account in Raycast",
   "icon": "command-icon.png",
   "author": "Falcon",
   "license": "MIT",
