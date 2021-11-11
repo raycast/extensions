@@ -5,5 +5,4 @@ import {
 export interface Main {
   groups: Group[]
   totalScriptCommands: number
-  updatedAt: Date
 }
