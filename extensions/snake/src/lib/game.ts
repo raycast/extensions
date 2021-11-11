@@ -1,3 +1,4 @@
+import { TextSize } from "./text";
 import { getRandomInt } from "./utils";
 
 const foodSymbol = "O";
@@ -94,6 +95,16 @@ export class Field {
     data: string[] = [];
     constructor() {
         this.clearField();
+    }
+
+    setSize(textSize: TextSize) {
+        if (textSize === TextSize.Medium) {
+            this.width = 104;
+            this.height = 18;
+        } else {
+            this.width = 90;
+            this.height = 14;
+        }
     }
 
     clearField() {
@@ -235,10 +246,11 @@ export class Game {
         return this.speedMs;
     }
 
-    public start() {
+    public start(textSize: TextSize) {
+        this.field.setSize(textSize);
         this.field.clearField();
         this.setError(undefined);
-        this.snake = new Snake({ x: getRandomInt(20, 80), y: getRandomInt(5, 15) });
+        this.snake = new Snake({ x: getRandomInt(20, 80), y: getRandomInt(5, this.field.height - 5) });
         this.foodCount = 0;
         this.speed = 1;
         this.speedMs = this.minSpeedMs;

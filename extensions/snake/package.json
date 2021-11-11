@@ -16,6 +16,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.2",
+    "bplist-parser": "^0.3.1",
     "use-interval": "^1.4.0"
   },
   "devDependencies": {
