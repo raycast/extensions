@@ -1,6 +1,7 @@
 import { Form, ActionPanel, OpenInBrowserAction } from "@raycast/api";
 import { colors, languages } from "./constants";
 import { useState } from "react";
+import open from "open";
 
 interface Values {
   title: string;
