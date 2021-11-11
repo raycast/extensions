@@ -1,6 +1,10 @@
-import { ScriptCommand } from "@models"
+import { 
+  ScriptCommand 
+} from "@models"
 
-import { URLConstants } from "@network"
+import { 
+  URLConstants 
+} from "@urls"
 
 enum ContentType {
   Raw,

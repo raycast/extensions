@@ -1,9 +1,11 @@
+import 
+  fetch 
+from "node-fetch"
+
 import { 
   showToast, 
   ToastStyle 
 } from "@raycast/api"
-
-import fetch from "node-fetch"
 
 import { 
   Main, 
@@ -14,9 +16,9 @@ import {
 import { 
   URLConstants,
   sourceCodeRawURL
-} from "@network"
+} from "@urls"
 
-export async function fetchScriptCommands(): Promise<Main | null> {
+export async function fetchScriptCommands(): Promise<Main> {
   const extensionsURL = `${URLConstants.baseRawURL}/extensions.json`
 
   try {
@@ -34,7 +36,10 @@ export async function fetchScriptCommands(): Promise<Main | null> {
     console.error(error)
     showToast(ToastStyle.Failure, "Could not load Script Commands")
 
-    return Promise.resolve(null)
+    return Promise.resolve({
+      groups: [],
+      totalScriptCommands: 0
+    })
   }
 }
 

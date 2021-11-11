@@ -1,4 +1,6 @@
-import { URLConstants } from "@network"
+import { 
+  URLConstants 
+} from "@urls"
 
 export const languageURL = (language: string) => {
   const imagesURL = `${URLConstants.baseRawURL}/images`
