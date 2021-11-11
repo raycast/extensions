@@ -9,7 +9,11 @@ function percentageToString(val: number | undefined): string | undefined {
   if (val === undefined) {
     return undefined;
   }
-  return `${Math.round(val * 100)}%`;
+  const v = Math.round(val * 100);
+  if (v === 100) {
+    return undefined;
+  }
+  return `${v}%`;
 }
 
 function ClearCacheAction(): JSX.Element {
