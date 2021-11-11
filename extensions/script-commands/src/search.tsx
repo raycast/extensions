@@ -4,36 +4,34 @@ import {
 } from "react"
 
 import { 
-  fetchScriptCommands 
-} from "@network"
+  DataManager 
+} from "@managers"
 
 import { 
-  Group 
+  Main 
 } from "@models"
 
 import { 
   MainContent 
 } from "@components"
+import { Detail } from "@raycast/api"
 
-interface Result {
-  groups: Group[]
-  totalScriptCommands: number
-}
+const dataManager = DataManager.shared()
 
 export default function ScriptCommandsList() {
-  const [content, setContent] = useState<Result>({ 
+  const [content, setContent] = useState<Main>({ 
     groups: [],
     totalScriptCommands: 0
   })
 
   useEffect(() => {
     async function fetch() {
-      const response = await fetchScriptCommands()
+      const response = await dataManager.fetchCommands()
 
       setContent((oldState) => ({
         ...oldState,
-        groups: response?.groups ?? [],
-        totalScriptCommands: response?.totalScriptCommands ?? 0
+        groups: response.groups,
+        totalScriptCommands: response.totalScriptCommands
       }))
     }
 
@@ -45,6 +43,6 @@ export default function ScriptCommandsList() {
       isLoading={content.groups.length == 0} 
       groups={content.groups} 
       totalScriptCommands={content.totalScriptCommands}
-  />
+    />
   )
 }
