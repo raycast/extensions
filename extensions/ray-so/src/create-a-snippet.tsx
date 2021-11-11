@@ -28,6 +28,9 @@ export default function CreateSnippet() {
     code.padding
   }&title=${code.title || "Untitled 1"}&code=${Buffer.from(code.snippet).toString("base64")}&language=${code.language}`;
 
+  function handleSubmit() {
+    open(url);
+  }
   return (
     <Form
       actions={
