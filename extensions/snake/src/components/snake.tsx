@@ -12,6 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import useInterval from "use-interval";
 import { Game, GameScore, Move } from "../lib/game";
+import { getUserTextSize, TextSize } from "../lib/text";
 
 function CursorAction(props: {
   game: Game;
@@ -33,11 +34,23 @@ function CursorAction(props: {
 export function SnakeGame(): JSX.Element {
   const [error, setError] = useState<string>();
   const [pause, setPause] = useState<boolean>(false);
-  const { field, game, score, message, restart } = useGame(setError);
+  const [textSize, setTextSize] = useState<TextSize>();
+
+  useEffect(() => {
+    const getSetting = async () => {
+      const ts = await getUserTextSize();
+      setTextSize(ts);
+    };
+    getSetting();
+  }, []);
+  const { field, game, score, message, restart } = useGame(setError, textSize);
   const speedMs = error || message ? null : game.getSpeedMs();
+
   useInterval(
     () => {
-      game.draw();
+      if (textSize !== undefined) {
+        game.draw();
+      }
     },
     pause ? null : speedMs
   );
@@ -67,9 +80,10 @@ export function SnakeGame(): JSX.Element {
   }
   parts.push(codefence);
 
-  const md = parts.join("\n\n");
+  const md = textSize !== undefined ? parts.join("\n\n") : "---";
   return (
     <Detail
+      isLoading={textSize === undefined}
       markdown={md}
       actions={
         <ActionPanel>
@@ -116,7 +130,10 @@ export function SnakeGame(): JSX.Element {
   );
 }
 
-function useGame(setError: React.Dispatch<React.SetStateAction<string | undefined>>): {
+function useGame(
+  setError: React.Dispatch<React.SetStateAction<string | undefined>>,
+  textSize: TextSize | undefined
+): {
   field: string;
   game: Game;
   score: GameScore | undefined;
@@ -129,16 +146,18 @@ function useGame(setError: React.Dispatch<React.SetStateAction<string | undefine
   const [game] = useState<Game>(new Game(setField, setError, setScore, setMessage));
 
   const restart = () => {
-    game.start();
+    game.start(textSize || TextSize.Medium);
     game.flush();
     setMessage(undefined);
   };
 
   useEffect(() => {
-    game.flush();
-    game.start();
-
+    if (textSize !== undefined) {
+      game.flush();
+      game.start(textSize);
+      game.draw();
+    }
     return () => {};
-  }, []);
+  }, [textSize]);
   return { field, game, score, message, restart };
 }
