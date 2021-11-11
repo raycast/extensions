@@ -21,9 +21,16 @@
       "mode": "view"
     },
     {
-      "name": "addBlock",
+      "name": "addLink",
       "title": "Add to Are.na (link)",
       "subtitle": "Post a link or image url to are.na",
+      "description": "todo",
+      "mode": "view"
+    },
+    {
+      "name": "addText",
+      "title": "Add to Are.na (text)",
+      "subtitle": "Post a markdown block to are.na",
       "description": "todo",
       "mode": "view"
     }
