@@ -9,14 +9,14 @@
     {
       "name": "index",
       "title": "Are.na Profile",
-      "subtitle": "display my user",
+      "subtitle": "Display my user",
       "description": "hello world command",
       "mode": "view"
     },
     {
       "name": "channels",
       "title": "Go to a Channel",
-      "subtitle": "navigate to a channel on are.na",
+      "subtitle": "Navigate to a channel on are.na",
       "description": "todo",
       "mode": "view"
     },
