@@ -30,11 +30,3 @@ export async function sha256FileHash(filename: string): Promise<string | null> {
         });
     });
 }
-
-export function captialize(text: string): string {
-    if (text.length > 1) {
-        return text.charAt(0).toUpperCase() + text.slice(1);
-    } else {
-        return text;
-    }
-}

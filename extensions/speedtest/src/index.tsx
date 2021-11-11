@@ -1,9 +1,16 @@
 import { ActionPanel, Color, CopyToClipboardAction, Icon, List, showToast, ToastStyle } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { ensureCLI, speedtestCLIDirectory } from "./lib/cli";
-import { Result, runSpeedTest } from "./lib/speedtest";
+import { Result, ResultProgress, runSpeedTest } from "./lib/speedtest";
 import { pingToString, speedToString } from "./lib/utils";
 import * as afs from "fs/promises";
+
+function percentageToString(val: number | undefined): string | undefined {
+  if (val === undefined) {
+    return undefined;
+  }
+  return `${Math.round(val * 100)}%`;
+}
 
 function ClearCacheAction(): JSX.Element {
   const handle = async () => {
@@ -58,11 +65,16 @@ function ServerListItem(props: { serverName: string | undefined; summary: JSX.El
   );
 }
 
-function PingListItem(props: { ping: number | undefined; summary: JSX.Element }): JSX.Element {
+function PingListItem(props: {
+  ping: number | undefined;
+  progress: number | undefined;
+  summary: JSX.Element;
+}): JSX.Element {
   const p = props.ping;
   return (
     <List.Item
       title="Ping"
+      subtitle={percentageToString(props.progress)}
       icon={{ source: Icon.LevelMeter, tintColor: Color.Blue }}
       accessoryTitle={`${pingToString(p)}`}
       actions={
@@ -75,11 +87,16 @@ function PingListItem(props: { ping: number | undefined; summary: JSX.Element })
   );
 }
 
-function DownloadListItem(props: { download: number | undefined; summary: JSX.Element }): JSX.Element {
+function DownloadListItem(props: {
+  download: number | undefined;
+  progress: number | undefined;
+  summary: JSX.Element;
+}): JSX.Element {
   const d = props.download;
   return (
     <List.Item
       title="Download"
+      subtitle={percentageToString(props.progress)}
       icon={{ source: "download.png", tintColor: Color.Blue }}
       accessoryTitle={`${speedToString(d)}`}
       actions={
@@ -92,11 +109,16 @@ function DownloadListItem(props: { download: number | undefined; summary: JSX.El
   );
 }
 
-function UploadListItem(props: { upload: number | undefined; summary: JSX.Element }): JSX.Element {
+function UploadListItem(props: {
+  upload: number | undefined;
+  progress: number | undefined;
+  summary: JSX.Element;
+}): JSX.Element {
   const u = props.upload;
   return (
     <List.Item
       title="Upload"
+      subtitle={percentageToString(props.progress)}
       icon={{ source: "download.png", tintColor: "#bf71ff" }}
       accessoryTitle={`${speedToString(u)}`}
       actions={
@@ -122,19 +144,19 @@ function CopySummaryAction(props: { result: Result }): JSX.Element {
 }
 
 export default function SpeedtestList() {
-  const { result, error, isLoading, progressText } = useSpeedtest();
+  const { result, error, isLoading, resultProgress } = useSpeedtest();
   if (error) {
     showToast(ToastStyle.Failure, "Speedtest failed", error);
   }
-  const title = isLoading ? progressText : undefined;
+  const title = isLoading ? "Speedtest running" : undefined;
   const summaryAction = <CopySummaryAction result={result} />;
   return (
     <List isLoading={isLoading} searchBarPlaceholder={title}>
       <ISPListItem name={result.isp} summary={summaryAction} />
       <ServerListItem serverName={result.serverName} summary={summaryAction} />
-      <PingListItem ping={result.ping} summary={summaryAction} />
-      <DownloadListItem download={result.download} summary={summaryAction} />
-      <UploadListItem upload={result.upload} summary={summaryAction} />
+      <PingListItem ping={result.ping} progress={resultProgress.ping} summary={summaryAction} />
+      <DownloadListItem download={result.download} progress={resultProgress.download} summary={summaryAction} />
+      <UploadListItem upload={result.upload} progress={resultProgress.upload} summary={summaryAction} />
     </List>
   );
 }
@@ -143,7 +165,7 @@ function useSpeedtest(): {
   result: Result;
   error: string | undefined;
   isLoading: boolean;
-  progressText: string | undefined;
+  resultProgress: ResultProgress;
 } {
   const [result, setResult] = useState<Result>({
     isp: undefined,
@@ -155,7 +177,11 @@ function useSpeedtest(): {
   });
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [progressText, setProgressText] = useState<string>();
+  const [resultProgress, setResultProgress] = useState<ResultProgress>({
+    download: undefined,
+    upload: undefined,
+    ping: undefined,
+  });
   let cancel = false;
   useEffect(() => {
     async function runTest() {
@@ -178,9 +204,9 @@ function useSpeedtest(): {
               setError(err.message);
             }
           },
-          (progressText: string) => {
+          (prog: ResultProgress) => {
             if (!cancel) {
-              setProgressText(progressText);
+              setResultProgress(prog);
             }
           }
         );
@@ -196,5 +222,5 @@ function useSpeedtest(): {
       cancel = true;
     };
   }, []);
-  return { result, error, isLoading, progressText };
+  return { result, error, isLoading, resultProgress };
 }

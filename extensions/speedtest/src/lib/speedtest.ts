@@ -1,7 +1,6 @@
 import fs from 'fs';
 import { spawn } from "child_process";
 import { speedtestCLIFilepath } from './cli';
-import { captialize } from './utils';
 
 export interface Result {
     isp: string | undefined;
@@ -12,22 +11,38 @@ export interface Result {
     ping: number | undefined;
 }
 
+export interface ResultProgress {
+    ping: number | undefined;
+    download: number | undefined;
+    upload: number | undefined;
+}
+
 export function isSpeedtestCliInstalled(): boolean {
     return fs.existsSync(speedtestCLIFilepath());
 }
 
-export function runSpeedTest(callback: (result: Result) => void, resultCallback: (result: Result) => void, errorCallback: (error: Error) => void, progressCallback: (progressText: string) => void) {
+export function runSpeedTest(callback: (result: Result) => void, resultCallback: (result: Result) => void, errorCallback: (error: Error) => void, progressCallback: (resultProgress: ResultProgress) => void) {
     const exePath = speedtestCLIFilepath();
     const pro = spawn(exePath, ["--format", "json", "--progress", "--accept-license", "--accept-gdpr"]);
     const result: Result = { isp: undefined, location: undefined, serverName: undefined, download: undefined, upload: undefined, ping: undefined };
+    const resultProgress: ResultProgress = { download: undefined, upload: undefined, ping: undefined };
 
     const sendProgress = (type: string, val: number | undefined) => {
         if (val) {
-            progressCallback(`${captialize(type)} ${Math.round(val * 100)}%`);
+            switch (type) {
+                case "download": {
+                    resultProgress.download = val;
+                } break;
+                case "upload": {
+                    resultProgress.upload = val;
+                } break;
+                case "ping": {
+                    resultProgress.ping = val;
+                }
+            }
+            progressCallback(resultProgress);
         }
     };
-
-    progressCallback("Speedtest running");
 
     pro.on('uncaughtException', function (err) {
         errorCallback(err instanceof Error ? err : new Error("unknown error"));
@@ -58,7 +73,7 @@ export function runSpeedTest(callback: (result: Result) => void, resultCallback:
                 result.upload = obj.upload.bandwidth as number || undefined;
                 result.ping = obj.ping?.latency;
                 resultCallback(result);
-                progressCallback("");
+                progressCallback({ download: undefined, upload: undefined, ping: undefined });
             }
         }
     });
