@@ -32,7 +32,7 @@ export default function CreateSnippet() {
     <Form
       actions={
         <ActionPanel>
-          <OpenInBrowserAction title="Create Snippet"  url={url} />
+          <SubmitFormAction title="Create Snippet" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
