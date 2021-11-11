@@ -25,8 +25,9 @@ export function MainContent({ isLoading, groups, totalScriptCommands }: Props): 
   
   for (const group of groups) {
     sections.push(
-      <GroupSection 
-        group={group} 
+      <GroupSection
+        key={ group.path } 
+        group={ group } 
       />
     )
 
@@ -36,10 +37,12 @@ export function MainContent({ isLoading, groups, totalScriptCommands }: Props): 
       })
 
       for (const subGroup of group.subGroups) {
+        const keySubGroup = `${group.path}-${subGroup.path}`
         sections.push(
           <GroupSection 
-            parentName={group.name} 
-            group={subGroup} 
+            key={ keySubGroup } 
+            parentName={ group.name } 
+            group={ subGroup } 
           />
         )
       }

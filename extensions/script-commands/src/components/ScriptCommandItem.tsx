@@ -14,7 +14,7 @@ import {
   iconLightURL, 
   languageURL, 
   sourceCodeNormalURL 
-} from "@network"
+} from "@urls"
 
 import { 
   Author, 
@@ -32,7 +32,7 @@ type Props = {
 export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
   return (
     <List.Item
-      key={scriptCommand.identifier}
+      key={ scriptCommand.identifier }
       title={scriptCommand.title}
       subtitle={scriptCommand.packageName}
       icon={{
@@ -90,9 +90,11 @@ function AuthorsActionPanel({ authors }: { authors: Author[] }): JSX.Element {
   const totalDescription = `Author${suffix}`
 
   return (
-    <ActionPanel.Section title={totalDescription}>
+    <ActionPanel.Section title={ totalDescription }>
       {authors.map((author) => (
-        <AuthorActionItem author={author} />
+        <AuthorActionItem 
+        key={ author.url ?? crypto.randomUUID() } 
+        author={ author } />
       ))}
     </ActionPanel.Section>
   )
@@ -120,7 +122,7 @@ function AuthorActionItem({ author }: { author: Author }): JSX.Element {
     />
   }
   else {
-    return <ActionPanel.Item
+    return <ActionPanel.Item 
       title={ name }
       icon={ avatarImage(author) }
     />
