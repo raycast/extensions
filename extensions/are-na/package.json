@@ -8,28 +8,28 @@
   "commands": [
     {
       "name": "index",
-      "title": "Are.na profile",
+      "title": "Are.na Profile",
       "subtitle": "display my user",
       "description": "hello world command",
       "mode": "view"
     },
     {
       "name": "channels",
-      "title": "Go to a channel",
+      "title": "Go to a Channel",
       "subtitle": "navigate to a channel on are.na",
       "description": "todo",
       "mode": "view"
     },
     {
       "name": "addLink",
-      "title": "Add to Are.na (link)",
+      "title": "Add to Are.na (Link)",
       "subtitle": "Post a link or image url to are.na",
       "description": "todo",
       "mode": "view"
     },
     {
       "name": "addText",
-      "title": "Add to Are.na (text)",
+      "title": "Add to Are.na (Text)",
       "subtitle": "Post a markdown block to are.na",
       "description": "todo",
       "mode": "view"
