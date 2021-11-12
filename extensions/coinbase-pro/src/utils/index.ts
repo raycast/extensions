@@ -1,5 +1,5 @@
 import { ToastStyle } from "@raycast/api";
-import { TAccount, TCurrency } from "../types";
+import { TAccount } from "../types";
 
 export const createResolvedToast = (
   toast: any,
