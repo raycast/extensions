@@ -45,12 +45,8 @@ export const getAccounts = async () => {
 };
 
 export const getPrice = async ({ baseCurrency, cryptoSymbol }: { baseCurrency: string; cryptoSymbol: string }) => {
-  try {
-    const response = await fetch(`${COINBASE_API_BASE_URL + ENDPOINTS.PRICES}/${cryptoSymbol}-${baseCurrency}/sell`);
-    const { data } = (await response.json()) as any;
+  const response = await fetch(`${COINBASE_API_BASE_URL + ENDPOINTS.PRICES}/${cryptoSymbol}-${baseCurrency}/sell`);
+  const { data } = (await response.json()) as any;
 
-    return data;
-  } catch (error) {
-    console.log(error);
-  }
+  return data;
 };
