@@ -55,6 +55,8 @@ function HistorySlotListItem(props: { slot: HistorySlots; setHistorySlots: any }
 
   if (slot.status == "Completed") {
     icon = { source: { light: "ok-light.png", dark: "ok-dark.png" } };
+  } else if (slot.status == "Extracting") {
+    icon = { source: { light: "bolt-light.png", dark: "bolt-dark.png" } };
   } else {
     console.log(`Unknown slot status: ${slot.status}`);
 
