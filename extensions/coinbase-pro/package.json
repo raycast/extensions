@@ -2,16 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coinbase-pro",
   "title": "Coinbase Pro",
-  "description": "View your Coinbase Pro portfolio performance",
+  "description": "View your Coinbase Pro portfolio",
   "icon": "coinbase-logo.png",
   "author": "farisaziz12",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Show Portfolio",
-      "subtitle": "Show all your cryptocurrencies and balances",
-      "description": "Shows default portfolio",
+      "title": "View Portfolio",
+      "subtitle": "Coinbase Pro",
+      "description": "View your cryptocurrencies and balances",
       "mode": "view"
     }
   ],
