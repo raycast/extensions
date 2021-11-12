@@ -75,11 +75,13 @@ export function useDetail(issueID: number): {
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  let cancel = false;
-
   useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
     async function fetchData() {
-      if (issueID <= 0 || cancel) {
+      if (issueID <= 0 || didUnmount) {
         return;
       }
 
@@ -92,15 +94,15 @@ export function useDetail(issueID: number): {
           variables: { id: `gid://gitlab/Issue/${issueID}` },
         });
         const desc = data.data.issue.description || "<no description>";
-        if (!cancel) {
+        if (!didUnmount) {
           setDescription(desc);
         }
       } catch (e: any) {
-        if (!cancel) {
+        if (!didUnmount) {
           setError(e.message);
         }
       } finally {
-        if (!cancel) {
+        if (!didUnmount) {
           setIsLoading(false);
         }
       }
@@ -109,7 +111,7 @@ export function useDetail(issueID: number): {
     fetchData();
 
     return () => {
-      cancel = true;
+      didUnmount = true;
     };
   }, [issueID]);
 
@@ -258,11 +260,13 @@ export function useSearch(
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  let cancel = false;
-
   useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
     async function fetchData() {
-      if (query === null || cancel) {
+      if (query === null || didUnmount) {
         return;
       }
 
@@ -282,21 +286,21 @@ export function useSearch(
         injectQueryNamedParameters(requestParams, qd, scope, true);
         if (group) {
           const glIssues = await gitlab.getGroupIssues(requestParams, group.id);
-          if (!cancel) {
+          if (!didUnmount) {
             setIssues(glIssues);
           }
         } else {
           const glIssues = await gitlab.getIssues(requestParams, project);
-          if (!cancel) {
+          if (!didUnmount) {
             setIssues(glIssues);
           }
         }
       } catch (e: any) {
-        if (!cancel) {
+        if (!didUnmount) {
           setError(e.message);
         }
       } finally {
-        if (!cancel) {
+        if (!didUnmount) {
           setIsLoading(false);
         }
       }
@@ -305,7 +309,7 @@ export function useSearch(
     fetchData();
 
     return () => {
-      cancel = true;
+      didUnmount = true;
     };
   }, [query]);
 
