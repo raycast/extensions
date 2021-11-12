@@ -1,3 +1,5 @@
+// Raycast
+
 import { 
   useNavigation, 
   ActionPanel, 
@@ -7,6 +9,8 @@ import {
   List, 
   OpenInBrowserAction 
 } from "@raycast/api"
+
+// Script Commands Store 
 
 import { 
   authorAvatarURL, 
@@ -25,9 +29,23 @@ import {
   SourceCodeDetail 
 } from "@components"
 
+import { 
+  DataManager 
+} from "@managers"
+
+// External
+
+import 
+  * as crypto 
+from "crypto"
+
+// Internal 
+
 type Props = { 
   scriptCommand: ScriptCommand
 }
+
+const dataManager = DataManager.shared()
 
 export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
   return (
@@ -46,10 +64,31 @@ export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
       accessoryTitle={authorsDescription(scriptCommand.authors)}
       actions={
         <ActionPanel title={scriptCommand.title}>
+          <InstallActionSection scriptCommand={scriptCommand} />
           <ViewsActionSection scriptCommand={scriptCommand} />
           <AuthorsActionPanel authors={scriptCommand.authors ?? []} />
         </ActionPanel>
       }
+    />
+  )
+}
+
+function InstallActionSection({ scriptCommand }: { scriptCommand: ScriptCommand }): JSX.Element {
+  return (
+    <ActionPanel.Section>
+      <InstallActionItem scriptCommand={ scriptCommand } />
+    </ActionPanel.Section>
+  )
+}
+
+function InstallActionItem({ scriptCommand }: { scriptCommand: ScriptCommand }): JSX.Element {
+  return (
+    <ActionPanel.Item 
+      icon={ Icon.Download } 
+      title="Install Script Command" 
+      onAction={ 
+        async () => await dataManager.download(scriptCommand) 
+      } 
     />
   )
 }
@@ -60,7 +99,11 @@ function ViewsActionSection({ scriptCommand }: { scriptCommand: ScriptCommand })
       <ViewSourceCodeAction scriptCommand={ scriptCommand } />
       <OpenInBrowserAction 
         title="View Source Code in Browser" 
-        url={ sourceCodeNormalURL(scriptCommand) } 
+        url={ sourceCodeNormalURL(scriptCommand) }
+        shortcut={{ 
+          modifiers: ["cmd"], 
+          key: "o" 
+        }}
       />
     </ActionPanel.Section>
   )
@@ -71,13 +114,19 @@ function ViewSourceCodeAction({ scriptCommand }: { scriptCommand: ScriptCommand 
   
   const action = () => {
     push(
-      <SourceCodeDetail scriptCommand={scriptCommand } />
+      <SourceCodeDetail 
+        scriptCommand={scriptCommand } 
+      />
     )
   }
   
   return (
     <ActionPanel.Item 
       icon={ Icon.TextDocument } 
+      shortcut={{ 
+        modifiers: ["cmd"], 
+        key: "return" 
+      }}
       title="View Source Code" 
       onAction={ action } 
     />
@@ -106,12 +155,10 @@ function AuthorActionItem({ author }: { author: Author }): JSX.Element {
   if (author.url != null && author.url.length > 0) {
     const path = new URL(author.url)
 
-    if (path.host == "twitter.com") {
+    if (path.host == "twitter.com")
       name = `${name} (Twitter)`
-    }
-    else if (path.host == "github.com") {
+    else if (path.host == "github.com")
       name = `${name} (GitHub)`
-    }
   }
   
   if (author.url != null) {
@@ -141,9 +188,8 @@ const authorsDescription = (authors: Author[] | undefined): string => {
     let content = "";
 
     for (const author of authors) {
-      if (content.length > 0) {
+      if (content.length > 0)
         content += " and "
-      }
 
       content += author.name
     }
@@ -164,15 +210,13 @@ const keywords = (scriptCommand: ScriptCommand): string[] => {
   const authors = scriptCommand.authors
   if (authors != null && authors.length > 0) {
     for (const author of authors) {
-      if (author.name != null && author.name.length > 0) {
+      if (author.name != null && author.name.length > 0)
         keywords.push(author.name)
-      }
     }
   }
 
-  if (scriptCommand.language.length > 0) {
+  if (scriptCommand.language.length > 0)
     keywords.push(scriptCommand.language)
-  }
 
   return keywords
 }

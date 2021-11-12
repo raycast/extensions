@@ -17,12 +17,11 @@ type Props = {
 }
 
 export function GroupSection({ group, parentName }: Props) {
-  const key = `${group.name}-${group.path}`
-
   group.scriptCommands.sort((left: ScriptCommand, right: ScriptCommand) => {
     return (left.title > right.title) ? 1 : -1
   })
-
+  
+  const key = `${group.name}-${group.path}`
   const title = parentName ?? group.name
   const subtitle = parentName != null ? group.name : ""
 
