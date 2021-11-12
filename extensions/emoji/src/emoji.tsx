@@ -5,16 +5,19 @@ import {
   List,
   getLocalStorageItem,
   setLocalStorageItem,
+  preferences
 } from "@raycast/api";
 
 import { useState, useEffect, useCallback } from "react";
 import type { ReactElement, SetStateAction, Dispatch } from "react";
 import { createEmojiList } from "generate-emoji-list";
+import { UnicodeVersion } from "generate-emoji-list/dist/createEmojiList";
 
 type Category = { category: string; emojis: Emoji[] };
 type Emoji = {
   emoji: string;
   description: string;
+  shortCode?: string[];
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -60,7 +63,12 @@ export default function Main(): ReactElement {
     // https://github.com/facebook/react/pull/22114
     let didUnmount = false;
 
-    createEmojiList().then((list: Category[]) => {
+    const options = {
+      unicodeVersion: preferences.unicodeVersion.value as UnicodeVersion,
+      features: { shortCodes: Boolean(preferences.shortCodes.value) },
+    };
+
+    createEmojiList(options).then((list: Category[]) => {
       if (!didUnmount) {
         setList(list);
       }
@@ -87,7 +95,9 @@ export default function Main(): ReactElement {
               key={`${category.category}${emoji.description}`}
               id={`${category.category}${emoji.description}`}
               icon={emoji.emoji}
-              title={emoji.description}
+              title={emoji.description.replace(/\b(\w)/g, s => s.toUpperCase())}
+              accessoryTitle={emoji?.shortCode?.join(" / ")}
+              keywords={emoji.shortCode}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
