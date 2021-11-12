@@ -31,7 +31,8 @@ export default function AlertList() {
   );
 }
 
-function AlertListItem(props: { alert: Alert }) {
+export function AlertListItem(props: { alert: Alert, goBackToSavedSearches?: () => Promise<void> }) {
+  const goBackToSavedSearches = props.goBackToSavedSearches;
   const alert = props.alert;
 
   const createdAt = new Date(alert.createdAt);
@@ -55,13 +56,14 @@ function AlertListItem(props: { alert: Alert }) {
           <ActionPanel.Item title="Snooze for 1 Hour" icon={Icon.SpeakerSlash} onAction={() => snoozeAlert(alert.id, 1)} />
           <ActionPanel.Item title="Snooze for 1 Day" icon={Icon.SpeakerSlash} onAction={() => snoozeAlert(alert.id, 24)} />
           <ActionPanel.Item title="Snooze for 1 Week" icon={Icon.SpeakerSlash} onAction={() => snoozeAlert(alert.id, 168)} />
+          {goBackToSavedSearches && <ActionPanel.Item title="Show Saved Searches" icon={Icon.List} onAction={() => goBackToSavedSearches()} />}
         </ActionPanel>
       }
     />
   );
 }
 
-async function fetchAlerts(query: string): Promise<Alert[]> {
+export async function fetchAlerts(query: string): Promise<Alert[]> {
   try {
     const response = await fetch(`${preferences.apiUrl}/v2/alerts?query=${encodeURIComponent(query)}&limit=100&sort=createdAt&order=desc`, {
       headers: {
@@ -180,7 +182,7 @@ async function snoozeAlert(id: string, hours: number): Promise<void> {
   }
 }
 
-type Alert = {
+export type Alert = {
   id: string;
   message: string;
   status: string;

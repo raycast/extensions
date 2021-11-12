@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coffee",
   "title": "Coffee",
   "description": "Prevent the sleep function on your mac",
@@ -18,6 +19,20 @@
       "title": "Decaffeinate",
       "subtitle": "Coffee",
       "description": "Turn off the caffeine",
+      "mode": "no-view"
+    },
+    {
+      "name": "caffeinateWhile",
+      "title": "Caffeinate While",
+      "subtitle": "Coffee",
+      "description": "Prevent your Mac from sleeping while an certain app is running",
+      "mode": "view"
+    },
+    {
+      "name": "caffeinationStatus",
+      "title": "Caffeination Status",
+      "subtitle": "Coffee",
+      "description": "Get the status of the current caffeination",
       "mode": "no-view"
     }
   ],

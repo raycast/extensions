@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "git-repos",
   "title": "Git Repos",
   "description": "Quickly access your local git repositories and open them in your favorite editor or any app",
@@ -57,8 +58,8 @@
       "name": "includeSubmodules",
       "type": "checkbox",
       "required": true,
-      "title": "Include submodules",
-      "label": "",
+      "title": "Scan options",
+      "label": "Include submodules",
       "default": false,
       "description": "Include submodules in scan"
     }

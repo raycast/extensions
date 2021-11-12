@@ -1,5 +1,6 @@
 import {
   ActionPanel,
+  Color,
   CopyToClipboardAction,
   Icon,
   Image,
@@ -65,15 +66,15 @@ export default function Main(): ReactElement {
                       let host = remote.host
                       switch (remote.host) {
                         case "github.com":
-                          icon = { source: { dark: "github-icon-dark.png", light: "github-icon-light.png" } }
+                          icon = { source: "github-icon.png", tintColor: Color.PrimaryText }
                           host = "GitHub"
                           break
                         case "gitlab.com":
-                          icon = { source: { dark: "gitlab-icon-dark.png", light: "gitlab-icon-light.png" } }
+                          icon = { source: "gitlab-icon.png", tintColor: Color.PrimaryText }
                           host = "GitLab"
                           break
                         case "bitbucket.org":
-                          icon = { source: { dark: "bitbucket-icon-dark.png", light: "bitbucket-icon-light.png" } }
+                          icon = { source: "bitbucket-icon.png", tintColor: Color.PrimaryText }
                           host = "Bitbucket"
                           break
 
@@ -87,21 +88,21 @@ export default function Main(): ReactElement {
                               title={`Code`}
                               key={`code ${remote.name}`}
                               url={remote.url}
-                              icon = {{ source: { dark: "github-code-icon-dark.png", light: "github-code-icon-light.png" } }}
+                              icon = {{ source: "github-code-icon.png", tintColor: Color.PrimaryText }}
                               shortcut={{modifiers: ["shift", "cmd"], key: "c"}}
                             />
                             <OpenInBrowserAction
                               title={`Issues`}
                               key={`issues ${remote.name}`}
                               url={`${remote.url}/issues`}
-                              icon = {{ source: { dark: "github-issues-icon-dark.png", light: "github-issues-icon-light.png" } }}
+                              icon = {{ source: "github-issues-icon.png", tintColor: Color.PrimaryText }}
                               shortcut={{modifiers: ["shift", "cmd"], key: "i"}}
                             />
                             <OpenInBrowserAction
                               title={`Pull Requests`}
                               key={`pulls ${remote.name}`}
                               url={`${remote.url}/pulls`}
-                              icon = {{ source: { dark: "github-pulls-icon-dark.png", light: "github-pulls-icon-light.png" } }}
+                              icon = {{ source: "github-pulls-icon.png", tintColor: Color.PrimaryText }}
                               shortcut={{modifiers: ["shift", "cmd"], key: "p"}}
                             />
                           </ActionPanel.Submenu>

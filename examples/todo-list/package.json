@@ -1,14 +1,15 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "todo-list",
   "title": "Todo List",
   "description": "A simple todo list.",
   "icon": "icon.png",
   "author": "thomas",
+  "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Show Todos",
-      "subtitle": "",
       "description": "Show a list of all todos.",
       "mode": "view"
     }
