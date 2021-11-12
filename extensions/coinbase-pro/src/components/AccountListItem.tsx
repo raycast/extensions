@@ -61,11 +61,8 @@ export function AccountListItem({
           </ActionPanel>
         }
         keywords={[cryptoCurrency]}
-        title={
-          priceData
-            ? `Balance: ${priceData.currency} ${round(priceData.amount * available, 2).toLocaleString()}`
-            : `Balance: ${available}`
-        }
+        title={`${available}`}
+        subtitle={priceData ? `${priceData.currency} ${round(priceData.amount * available, 2).toLocaleString()}` : ""}
       />
     </List.Section>
   );
