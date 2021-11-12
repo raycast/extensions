@@ -1,6 +1,8 @@
-import { ActionPanel, Color, Detail, Icon, showToast, ToastStyle, useNavigation } from '@raycast/api';
+import { ActionPanel, Color, Detail, Icon, useNavigation } from '@raycast/api';
 import { DockerState } from './docker';
-import { containerInspectName, formatContainerDetailMarkdown } from './docker/container';
+import { containerName, formatContainerDetailMarkdown } from './docker/container';
+import { formatContainerError } from './docker/error';
+import { withToast } from './ui/toast';
 
 export default function ContainerDetail({ docker, containerId }: { docker: DockerState; containerId: string }) {
   const { isLoading, containerInfo, startContainer, restartContainer, stopContainer, removeContainer } =
@@ -14,34 +16,37 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
       actions={
         <ActionPanel>
           {containerInfo?.State.Running === true && (
-            <>
-              <ActionPanel.Item
-                title="Stop Container"
-                shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
-                onAction={async () => {
-                  await stopContainer(containerInfo);
-                  await showToast(ToastStyle.Success, `Container ${containerInspectName(containerInfo)} stopped`);
-                }}
-              />
-              <ActionPanel.Item
-                title="Restart Container"
-                icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ['opt'], key: 'r' }}
-                onAction={async () => {
-                  await restartContainer(containerInfo);
-                  await showToast(ToastStyle.Success, `Container ${containerInspectName(containerInfo)} restarted`);
-                }}
-              />
-            </>
+            <ActionPanel.Item
+              title="Stop Container"
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'w' }}
+              onAction={withToast({
+                action: () => stopContainer(containerInfo),
+                onSuccess: () => `Container ${containerName(containerInfo)} stopped`,
+                onFailure: (error) => formatContainerError(error, containerInfo),
+              })}
+            />
+          )}
+          {containerInfo?.State.Running === true && (
+            <ActionPanel.Item
+              title="Restart Container"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ['opt'], key: 'r' }}
+              onAction={withToast({
+                action: () => restartContainer(containerInfo),
+                onSuccess: () => `Container ${containerName(containerInfo)} restarted`,
+                onFailure: (error) => formatContainerError(error, containerInfo),
+              })}
+            />
           )}
           {containerInfo?.State.Running === false && (
             <ActionPanel.Item
               title="Start Container"
               shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
-              onAction={async () => {
-                await startContainer(containerInfo);
-                await showToast(ToastStyle.Success, `Container ${containerInspectName(containerInfo)} started`);
-              }}
+              onAction={withToast({
+                action: () => startContainer(containerInfo),
+                onSuccess: () => `Container ${containerName(containerInfo)} started`,
+                onFailure: (error) => formatContainerError(error, containerInfo),
+              })}
             />
           )}
 
@@ -50,11 +55,14 @@ export default function ContainerDetail({ docker, containerId }: { docker: Docke
               title="Remove Container"
               icon={{ source: Icon.Trash, tintColor: Color.Red }}
               shortcut={{ modifiers: ['cmd', 'shift'], key: 'x' }}
-              onAction={async () => {
-                await removeContainer(containerInfo);
-                await showToast(ToastStyle.Success, `Container ${containerInspectName(containerInfo)} removed`);
-                pop();
-              }}
+              onAction={withToast({
+                action: async () => {
+                  await removeContainer(containerInfo);
+                  pop();
+                },
+                onSuccess: () => `Container ${containerName(containerInfo)} removed`,
+                onFailure: (error) => formatContainerError(error, containerInfo),
+              })}
             />
           )}
         </ActionPanel>

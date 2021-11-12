@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vscode-project-manager",
   "title": "Visual Studio Code - Project Manager",
   "description": "Search and open projects from Visual Studio Code Project Manager",
@@ -27,18 +28,37 @@
       "name": "groupProjectsByTag",
       "type": "checkbox",
       "required": false,
-      "title": "Group projects by tag",
+      "title": "Group projects...",
       "default": true,
-      "label": "",
+      "label": "by tag",
       "description": "Groups projects by tag instead of just showing"
+    },
+    {
+      "name": "terminalAppPath",
+      "type": "textfield",
+      "required": false,
+      "default": "/Applications/iTerm.app",
+      "title": "Terminal app path",
+      "description": "Path to the terminal app"
+    },
+    {
+      "name": "gitClientAppPath",
+      "type": "textfield",
+      "required": false,
+      "default": "/Applications/Fork.app",
+      "title": "Git client app path",
+      "description": "Path to the Git client app"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.25.1",
+    "open": "^8.4.0",
+    "parse-git-config": "^3.0.0",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
+    "@types/parse-git-config": "^3.0.1",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

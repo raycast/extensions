@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "slack-status",
   "title": "Slack Status",
   "description": "Quickly change your Slack status",

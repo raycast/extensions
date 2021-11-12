@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clockify",
   "title": "Clockify",
   "description": "Control Clockify time tracking from Raycast",
@@ -11,7 +12,7 @@
       "type": "password",
       "required": true,
       "title": "API Key",
-      "description": "API Key",
+      "description": "Clockify API Key",
       "link": "https://clockify.me/user/settings"
     }
   ],

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "todoist",
   "title": "Todoist",
   "description": "Check your Todoist tasks and quickly create new ones",

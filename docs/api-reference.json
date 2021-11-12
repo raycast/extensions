@@ -6408,7 +6408,7 @@
 						"isOptional": true
 					},
 					"comment": {
-						"shortText": "ID of the submenu.\nMake sure to assign each section a unique ID or a UUID will be auto-generated."
+						"shortText": "ID of the submenu.\nMake sure to assign each submenu a unique ID or a UUID will be auto-generated."
 					},
 					"type": {
 						"type": "intrinsic",

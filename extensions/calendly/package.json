@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "calendly",
   "title": "Calendly Share Meeting Links",
   "description": "Quickly share your Calendly meeting links",
