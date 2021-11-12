@@ -49,8 +49,11 @@ export default function Command() {
                 variables: {
                     repositoryId: id,
                     ...Object.keys(values)
-                        .filter(k => values[k])
-                        .reduce((a, k) => ({ ...a, [k]: values[k] }), {})
+                        .filter(k => Array.isArray(values[k]) ? values[k].length > 0 : values[k])
+                        .reduce((a, k) => ({
+                            ...a,
+                            [k]: values[k]
+                        }), {})
                 }
             });
 
@@ -148,52 +151,56 @@ export default function Command() {
                             }));
                         }}
                         value={template.content} />
-                    <Form.TagPicker
-                        id="assigneeIds"
-                        title="Assignees"
-                        placeholder="Type or choose an assignee">
-                        {repository?.assignableUsers?.nodes.map(({ id, login }) => (
-                            <Form.TagPicker.Item
-                                key={id}
-                                title={login}
-                                value={id} />
-                        ))}
-                    </Form.TagPicker>
-                    <Form.TagPicker
-                        id="labelIds"
-                        title="Labels"
-                        placeholder="Type or choose a label">
-                        {repository?.labels?.nodes.map(({ id, name }) => (
-                            <Form.TagPicker.Item
-                                key={id}
-                                title={name}
-                                value={id} />
-                        ))}
-                    </Form.TagPicker>
-                    <Form.TagPicker
-                        id="projectIds"
-                        title="Projects"
-                        placeholder="Type or choose a project">
-                        {repository?.projects?.nodes.map(({ id, name }) => (
-                            <Form.TagPicker.Item
-                                key={id}
-                                title={name}
-                                value={id} />
-                        ))}
-                    </Form.TagPicker>
-                    <Form.Dropdown
-                        id="milestoneId"
-                        title="Milestone">
-                        <Form.Dropdown.Item
-                            title="None"
-                            value="" />
-                        {repository?.milestones?.nodes.map(({ id, title }) => (
-                            <Form.Dropdown.Item
-                                key={id}
-                                title={title}
-                                value={id} />
-                        ))}
-                    </Form.Dropdown>
+                    {repository?.viewerPermission !== 'READ' && (
+                        <>
+                            <Form.TagPicker
+                                id="assigneeIds"
+                                title="Assignees"
+                                placeholder="Type or choose an assignee">
+                                {repository?.assignableUsers?.nodes.map(({ id, login }) => (
+                                    <Form.TagPicker.Item
+                                        key={id}
+                                        title={login}
+                                        value={id} />
+                                ))}
+                            </Form.TagPicker>
+                            <Form.TagPicker
+                                id="labelIds"
+                                title="Labels"
+                                placeholder="Type or choose a label">
+                                {repository?.labels?.nodes.map(({ id, name }) => (
+                                    <Form.TagPicker.Item
+                                        key={id}
+                                        title={name}
+                                        value={id} />
+                                ))}
+                            </Form.TagPicker>
+                            <Form.TagPicker
+                                id="projectIds"
+                                title="Projects"
+                                placeholder="Type or choose a project">
+                                {repository?.projects?.nodes.map(({ id, name }) => (
+                                    <Form.TagPicker.Item
+                                        key={id}
+                                        title={name}
+                                        value={id} />
+                                ))}
+                            </Form.TagPicker>
+                            <Form.Dropdown
+                                id="milestoneId"
+                                title="Milestone">
+                                <Form.Dropdown.Item
+                                    title="None"
+                                    value="" />
+                                {repository?.milestones?.nodes.map(({ id, title }) => (
+                                    <Form.Dropdown.Item
+                                        key={id}
+                                        title={title}
+                                        value={id} />
+                                ))}
+                            </Form.Dropdown>
+                        </>
+                    )}
                 </>
             )}
         </Form>

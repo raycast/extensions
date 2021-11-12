@@ -103,6 +103,7 @@ export const GET_REPOSITORIES = gql`
                     id
                     name
                     nameWithOwner
+                    viewerPermission
                     owner {
                         login
                         avatarUrl
