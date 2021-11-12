@@ -69,7 +69,7 @@
         }
     ],
     "dependencies": {
-        "@raycast/api": "^1.25.2",
+        "@raycast/api": "^1.25.4",
         "debounce": "^1.2.1",
         "fuse.js": "^6.4.6",
         "graphql": "^15.6.1",
