@@ -31,10 +31,12 @@
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {
+    "@types/download": "^8.0.1",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
+    "download": "^8.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "react-devtools": "^4.21.0",
