@@ -172,7 +172,7 @@ export default function Command() {
                                     placeholder="Type or choose an assignee"
                                     value={assigneeIds}
                                     onChange={setAssigneeIds}>
-                                    {repository?.assignableUsers?.nodes.map(({ id, login }) => (
+                                    {repository.assignableUsers.nodes.map(({ id, login }) => (
                                         <Form.TagPicker.Item
                                             key={id}
                                             title={login}
@@ -187,7 +187,7 @@ export default function Command() {
                                     placeholder="Type or choose a label"
                                     value={labelIds}
                                     onChange={setLabelIds}>
-                                    {repository?.labels?.nodes.map(({ id, name }) => (
+                                    {repository.labels.nodes.map(({ id, name }) => (
                                         <Form.TagPicker.Item
                                             key={id}
                                             title={name}
@@ -202,7 +202,7 @@ export default function Command() {
                                     placeholder="Type or choose a project"
                                     value={projectIds}
                                     onChange={setProjectIds}>
-                                    {repository?.projects?.nodes.map(({ id, name }) => (
+                                    {repository.projects.nodes.map(({ id, name }) => (
                                         <Form.TagPicker.Item
                                             key={id}
                                             title={name}
@@ -219,7 +219,7 @@ export default function Command() {
                                     <Form.Dropdown.Item
                                         title="None"
                                         value="" />
-                                    {repository?.milestones?.nodes.map(({ id, title }) => (
+                                    {repository.milestones.nodes.map(({ id, title }) => (
                                         <Form.Dropdown.Item
                                             key={id}
                                             title={title}
