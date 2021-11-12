@@ -37,7 +37,7 @@
       "type": "password",
       "required": true,
       "title": "Coinbase API Key",
-      "description": "Your Coinbase API Key. You can find once you generate a new API key at https://pro.coinbase.com/profile/api",
+      "description": "Your Coinbase API Key. You can find this once you generate a new API key at https://pro.coinbase.com/profile/api",
       "placeholder": "Enter your Coinbase API Key"
     }
   ],
