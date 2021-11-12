@@ -6,19 +6,19 @@ import {
 export interface ScriptCommand {
   authors?: Author[]
   createdAt: Date
-  currentDirectoryPath: string
-  description: string
+  currentDirectoryPath?: string
+  description?: string
   filename: string
   hasArguments: boolean
-  icon: Icon
+  icon?: Icon
   identifier: string
   isTemplate: boolean
   language: string
-  mode: string
+  mode?: string
   needsConfirmation?: boolean
   packageName?: string
   path: string
-  refreshTime: string
+  refreshTime?: string
   schemaVersion: number
   title: string
   updatedAt: Date
