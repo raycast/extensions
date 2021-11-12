@@ -15,7 +15,7 @@ export function AccountListItem({
   baseCurrency: string;
 }) {
   const { currency: cryptoCurrency, available } = account;
-  const priceData = useFetch(
+  const { data: priceData } = useFetch(
     () => getPrice({ baseCurrency, cryptoSymbol: cryptoCurrency }),
     {
       name: "prices",
