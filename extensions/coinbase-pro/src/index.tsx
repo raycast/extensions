@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { List, ActionPanel } from "@raycast/api";
+import { List, ActionPanel, Detail } from "@raycast/api";
 import { getAccounts } from "./api";
 import { useFetch } from "./hooks";
 import { TAccount } from "./types";
@@ -9,16 +9,18 @@ import { round } from "./utils";
 export default function App() {
   const [balances, setBalances] = useState<{ [key: string]: number }>({});
   const [baseCurrency, setBaseCurrency] = useState<string>("USD");
-  const accounts = useFetch(getAccounts, {
+  const { data: accounts, isLoading } = useFetch(getAccounts, {
     name: "accounts",
     defaultValue: [],
     shouldShowToast: true,
     refreshInterval: 10_000,
   });
 
-  const total = Object.values(balances).reduce((a, b) => a + b, 0);
-  return (
-    <List isLoading={accounts.length === 0} searchBarPlaceholder="Filter accounts by name...">
+  const renderTotalBalance = () => {
+    if (!accounts[0]) return <List.Item title="No Results" />;
+
+    const total = Object.values(balances).reduce((a, b) => a + b, 0);
+    return (
       <List.Section title="Total Balance">
         <List.Item
           actions={
@@ -34,6 +36,12 @@ export default function App() {
           })}`}
         />
       </List.Section>
+    );
+  };
+
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder="Filter accounts by name...">
+      {renderTotalBalance()}
       {accounts.map((account: TAccount) => (
         <AccountListItem baseCurrency={baseCurrency} key={account.id} account={account} setBalances={setBalances} />
       ))}
