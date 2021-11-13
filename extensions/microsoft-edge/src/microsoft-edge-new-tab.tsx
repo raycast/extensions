@@ -15,43 +15,10 @@ import { HistoryEntry, useEdgeHistorySearch } from "./hooks/useHistorySearch";
 import { useEffect, useState, ReactElement } from "react";
 import { faviconUrl } from "./utils";
 import { Tab } from "./lib/Tab";
+import { TabListItem } from "./components/TabListItem";
+import { getOpenTabs } from "./common/getOpenTabs";
 
-async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
-  const faviconFormula = useOriginalFavicon
-    ? `execute of tab _tab_index of window _window_index javascript ¬
-                    "document.querySelector('link[rel~=icon]').href;"`
-    : '""';
-
-  const openTabs = await runAppleScript(`
-      set _output to ""
-      tell application "Microsoft Edge"
-        set _window_index to 1
-        repeat with w in windows
-          set _tab_index to 1
-          repeat with t in tabs of w
-            set _title to get title of t
-            set _url to get URL of t
-            set _favicon to ${faviconFormula}
-            set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _window_index & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "\\n")
-            set _tab_index to _tab_index + 1
-          end repeat
-          set _window_index to _window_index + 1
-          if _window_index > count windows then exit repeat
-        end repeat
-      end tell
-      return _output
-  `);
-
-  return openTabs
-    .split("\n")
-    .filter((line) => line.length !== 0)
-    .map((line) => Tab.parse(line));
-}
-
-async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
-  popToRoot();
-  closeMainWindow({ clearRootSearch: true });
-
+async function openNewTab(queryText: string | null | undefined): Promise<void> {
   const script =
     `
     tell application "Microsoft Edge"
@@ -64,17 +31,9 @@ async function openNewTab(queryText: string | null | undefined): Promise<boolean
     end tell
   `;
 
-  return await runAppleScript(script);
-}
-
-async function setActiveTab(tab: Tab): Promise<void> {
-  await runAppleScript(`
-    tell application "Microsoft Edge"
-      activate
-      set index of window (${tab.windowsIndex} as number) to (${tab.windowsIndex} as number)
-      set active tab index of window (${tab.windowsIndex} as number) to (${tab.tabIndex} as number)
-    end tell
-  `);
+  await runAppleScript(script);
+  await popToRoot({ clearSearchBar: true });
+  return closeMainWindow();
 }
 
 interface State {
@@ -181,33 +140,3 @@ const HistoryItemActions = (props: { entry: HistoryEntry }): ReactElement => {
     </ActionPanel>
   );
 };
-
-function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean }) {
-  return (
-    <List.Item
-      title={props.tab.title}
-      subtitle={props.tab.urlWithoutScheme()}
-      keywords={[props.tab.urlDomain()]}
-      actions={<TabListItemActions tab={props.tab} />}
-      icon={props.useOriginalFavicon ? props.tab.favicon : props.tab.googleFavicon()}
-    />
-  );
-}
-
-function TabListItemActions(props: { tab: Tab }) {
-  return (
-    <ActionPanel title={props.tab.title}>
-      <MicrosoftEdgeGoToTab tab={props.tab} />
-      <CopyToClipboardAction title="Copy URL" content={props.tab.url} />
-    </ActionPanel>
-  );
-}
-
-function MicrosoftEdgeGoToTab(props: { tab: Tab }) {
-  async function handleAction() {
-    await setActiveTab(props.tab);
-    await closeMainWindow();
-  }
-
-  return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
-}
