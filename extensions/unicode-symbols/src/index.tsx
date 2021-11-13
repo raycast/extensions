@@ -57,7 +57,7 @@ export default function Command() {
   const list = !areRecentlyUsedItemsLoaded ? [] : buildList(dataset, recentlyUsedItems, !searchTextRef.current);
 
   return (
-    <List isLoading={!addToRecentlyUsedItems} onSearchTextChange={handleSearchTextChange}>
+    <List isLoading={!addToRecentlyUsedItems || !list.length} onSearchTextChange={handleSearchTextChange}>
       {list.map((section) => (
         <List.Section key={section.sectionTitle} title={section.sectionTitle}>
           {section.items.map((item) => (
