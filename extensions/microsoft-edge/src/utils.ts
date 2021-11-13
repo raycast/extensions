@@ -1,6 +1,22 @@
+import path from "path";
 import { URL } from "url";
 
 export const faviconUrl = (size: number, url: string): string => {
   const domain = new URL(url).hostname;
   return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`;
 };
+
+export const userDataDirectoryPath = () => {
+  if (!process.env.HOME) {
+    throw new Error("$HOME environment variable is not set.");
+  }
+
+  // * NOTE: You can find this under "Profile path" by visiting edge://version in Edge.
+  return path.join(process.env.HOME, "Library", "Application Support", "Microsoft Edge");
+};
+
+export const historyDbPath = (profileName: string) => path.join(userDataDirectoryPath(), profileName, "History");
+
+export const bookmarksFilePath = (profileName: string) => path.join(userDataDirectoryPath(), profileName, "Bookmarks");
+
+export const getProfileName = () => "Default";

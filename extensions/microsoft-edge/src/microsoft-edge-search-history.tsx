@@ -1,6 +1,6 @@
 import { List, ToastStyle, showToast, ActionPanel, OpenInBrowserAction, CopyToClipboardAction } from "@raycast/api";
 import { useState, ReactElement } from "react";
-import { HistoryEntry, useEdgeHistorySearch } from "./browserHistory";
+import { HistoryEntry, useEdgeHistorySearch } from "./hooks/useHistorySearch";
 import { faviconUrl } from "./utils";
 
 type GroupedEntries = Map<string, HistoryEntry[]>;

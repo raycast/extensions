@@ -4,6 +4,7 @@ import util from "util";
 import initSqlJs, { Database } from "sql.js";
 import { useEffect, useRef, useState } from "react";
 import { environment } from "@raycast/api";
+import { getProfileName, historyDbPath } from "../utils";
 
 const fsReadFile = util.promisify(fs.readFile);
 
@@ -19,19 +20,6 @@ export interface EdgeHistorySearch {
   error?: string;
   isLoading: boolean;
 }
-
-const userDataDirectoryPath = () => {
-  if (!process.env.HOME) {
-    throw new Error("$HOME environment variable is not set.");
-  }
-
-  // * NOTE: You can find this under "Profile path" by visiting edge://version in Edge.
-  return path.join(process.env.HOME, "Library", "Application Support", "Microsoft Edge");
-};
-
-const historyDbPath = (profileName: string) => path.join(userDataDirectoryPath(), profileName, "History");
-
-const getProfileName = () => "Default";
 
 const loadDb = async (profileName: string): Promise<Database> => {
   const dbPath = historyDbPath(profileName);

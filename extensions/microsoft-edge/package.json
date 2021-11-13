@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "microsoft-edge",
   "title": "Microsoft Edge",
-  "description": "Search and open tabs and history in Microsoft Edge.",
+  "description": "Search open tabs, bookmarks and history in Microsoft Edge.",
   "icon": "microsoft-edge-icon.png",
   "author": "KartikKumarSahoo",
   "contributors": [
@@ -11,6 +11,13 @@
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "microsoft-edge-search-bookmark",
+      "title": "Search Bookmarks",
+      "subtitle": "Microsoft Edge",
+      "description": "Search Microsoft Edge browser bookmarks.",
+      "mode": "view"
+    },
     {
       "name": "microsoft-edge-go-to-tab",
       "title": "Search Tabs",
