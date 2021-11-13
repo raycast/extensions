@@ -12,37 +12,53 @@ export const useFetch = (fetchFunc: () => any, options: any = {}, deps: any[] = 
   } = options;
   const [state, setState] = useState<any>(defaultValue);
   const [error, setError] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
     (async () => {
       if (!shouldExecute) return;
-      setIsLoading(true);
+
       let toast;
       if (shouldShowToast) {
         toast = await showToast(ToastStyle.Animated, `Fetching ${capitalize(name)}`);
       }
+
       try {
         if (refreshInterval) {
           intervalId = setInterval(async () => {
-            setIsLoading(true);
-            const data = await fetchFunc();
-            if (data) setState(data);
-            setIsLoading(false);
+            let refreshToast;
+            if (shouldShowToast) {
+              refreshToast = await showToast(ToastStyle.Animated, `Refreshing ${capitalize(name)}`);
+            }
+            try {
+              const data = await fetchFunc();
+              if (data) setState(data);
+              if (shouldShowToast) createResolvedToast(refreshToast, `${capitalize(name)} refreshed`).success();
+            } catch (error) {
+              setError("Something went wrong");
+              if (shouldShowToast) createResolvedToast(refreshToast, `Failed to refresh ${name.toLowerCase()}`).error();
+            }
           }, refreshInterval);
         }
 
         const data = await fetchFunc();
         if (data) setState(data);
 
-        if (shouldShowToast) createResolvedToast(toast, `${capitalize(name)} Fetched`).success();
+        if (shouldShowToast) createResolvedToast(toast, `${capitalize(name)} fetched`).success();
         setIsLoading(false);
       } catch (error) {
+        console.log("BIG ERROR HERE");
         setIsLoading(false);
-        const message = (error as string) || "";
-        setError(message);
-        if (shouldShowToast) createResolvedToast(toast, `Failed to fetch ${name.toLowerCase()}`, message).error();
+
+        if (typeof error === "string") {
+          const message = (error as string) || "";
+          setError(error);
+          if (shouldShowToast) createResolvedToast(toast, `Failed to fetch ${name.toLowerCase()}`, message).error();
+        } else {
+          setError("Something went wrong");
+          if (shouldShowToast) createResolvedToast(toast, `Failed to fetch ${name.toLowerCase()}`).error();
+        }
       }
     })();
     return () => clearInterval(intervalId);
