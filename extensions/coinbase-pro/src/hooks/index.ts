@@ -13,6 +13,7 @@ export const useFetch = (fetchFunc: () => any, options: any = {}, deps: any[] = 
   const [state, setState] = useState<any>(defaultValue);
   const [error, setError] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isFirstFetch, setIsFirstFetch] = useState<boolean>(true);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -20,7 +21,7 @@ export const useFetch = (fetchFunc: () => any, options: any = {}, deps: any[] = 
       if (!shouldExecute) return;
 
       let toast;
-      if (shouldShowToast) {
+      if (shouldShowToast && isFirstFetch) {
         toast = await showToast(ToastStyle.Animated, `Fetching ${capitalize(name)}`);
       }
 
@@ -42,10 +43,13 @@ export const useFetch = (fetchFunc: () => any, options: any = {}, deps: any[] = 
           }, refreshInterval);
         }
 
-        const data = await fetchFunc();
-        if (data) setState(data);
+        if (isFirstFetch) {
+          const data = await fetchFunc();
+          if (data) setState(data);
+          if (shouldShowToast) createResolvedToast(toast, `${capitalize(name)} fetched`).success();
+          setIsFirstFetch(false);
+        }
 
-        if (shouldShowToast) createResolvedToast(toast, `${capitalize(name)} fetched`).success();
         setIsLoading(false);
       } catch (error) {
         setIsLoading(false);
@@ -53,10 +57,14 @@ export const useFetch = (fetchFunc: () => any, options: any = {}, deps: any[] = 
         if (typeof error === "string") {
           const message = (error as string) || "";
           setError(error);
-          if (shouldShowToast) createResolvedToast(toast, `Failed to fetch ${name.toLowerCase()}`, message).error();
+          if (shouldShowToast && isFirstFetch) {
+            createResolvedToast(toast, `Failed to fetch ${name.toLowerCase()}`, message).error();
+          }
         } else {
           setError("Something went wrong");
-          if (shouldShowToast) createResolvedToast(toast, `Failed to fetch ${name.toLowerCase()}`).error();
+          if (shouldShowToast && isFirstFetch) {
+            createResolvedToast(toast, `Failed to fetch ${name.toLowerCase()}`).error();
+          }
         }
       }
     })();
