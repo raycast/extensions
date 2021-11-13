@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { List, ActionPanel, OpenInBrowserAction } from "@raycast/api";
+import { List, ActionPanel, OpenInBrowserAction, ImageMask } from "@raycast/api";
 import { useFetch } from "../hooks";
 import { getPrice } from "../api";
 import { TAccount } from "../types";
@@ -46,11 +46,14 @@ export function AccountListItem({
       }
     >
       <List.Item
-        icon={{ source: `https://cryptoicons.org/api/icon/${cryptoCurrency.toLowerCase()}/30` }}
+        icon={{
+          source: `https://cryptoicon-api.vercel.app/api/icon/${cryptoCurrency.toLowerCase()}`,
+          mask: ImageMask.Circle,
+        }}
         actions={
           <ActionPanel>
             <OpenInBrowserAction
-              icon="coinbase-logo.png"
+              icon={{ source: "coinbase-logo.png", mask: ImageMask.Circle }}
               title="Open in Coinbase Pro"
               url={
                 priceData
