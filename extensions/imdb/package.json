@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "imdb",
+  "title": "IMDb Search",
+  "description": "Easily open your favourite film or tv series on IMDb.",
+  "icon": "icon.png",
+  "author": "ryan",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search for a Film or TV Series",
+      "subtitle": "IMDb",
+      "description": "Easily open your favourite film or tv series on IMDb.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "link": "http://www.omdbapi.com/apikey.aspx",
+      "description": "Need help? Check out our README on Github",
+      "placeholder": "Enter your Open Movie Database (OMDb) API token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.4",
+    "fastest-levenshtein": "^1.0.12",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
