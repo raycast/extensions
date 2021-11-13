@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { List, ActionPanel, Detail } from "@raycast/api";
+import { List, ActionPanel, Icon } from "@raycast/api";
 import { getAccounts } from "./api";
 import { useFetch } from "./hooks";
 import { TAccount } from "./types";
@@ -17,7 +17,8 @@ export default function App() {
   });
 
   const renderTotalBalance = () => {
-    if (!accounts[0]) return <List.Item title="No Results" />;
+    if (isLoading) return null;
+    if (!accounts[0]) return <List.Item icon={Icon.XmarkCircle} title="No Results" />;
 
     const total = Object.values(balances).reduce((a, b) => a + b, 0);
     return (

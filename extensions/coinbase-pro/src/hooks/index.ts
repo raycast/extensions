@@ -48,7 +48,6 @@ export const useFetch = (fetchFunc: () => any, options: any = {}, deps: any[] = 
         if (shouldShowToast) createResolvedToast(toast, `${capitalize(name)} fetched`).success();
         setIsLoading(false);
       } catch (error) {
-        console.log("BIG ERROR HERE");
         setIsLoading(false);
 
         if (typeof error === "string") {
