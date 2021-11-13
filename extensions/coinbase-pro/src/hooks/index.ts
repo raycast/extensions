@@ -43,7 +43,7 @@ export const useFetch = (fetchFunc: () => any, options: any = {}, deps: any[] = 
           }, refreshInterval);
         }
 
-        if (isFirstFetch) {
+        if (isFirstFetch || !refreshInterval) {
           const data = await fetchFunc();
           if (data) setState(data);
           if (shouldShowToast) createResolvedToast(toast, `${capitalize(name)} fetched`).success();
@@ -57,12 +57,12 @@ export const useFetch = (fetchFunc: () => any, options: any = {}, deps: any[] = 
         if (typeof error === "string") {
           const message = (error as string) || "";
           setError(error);
-          if (shouldShowToast && isFirstFetch) {
+          if ((shouldShowToast && isFirstFetch) || !refreshInterval) {
             createResolvedToast(toast, `Failed to fetch ${name.toLowerCase()}`, message).error();
           }
         } else {
           setError("Something went wrong");
-          if (shouldShowToast && isFirstFetch) {
+          if ((shouldShowToast && isFirstFetch) || !refreshInterval) {
             createResolvedToast(toast, `Failed to fetch ${name.toLowerCase()}`).error();
           }
         }
