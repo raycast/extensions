@@ -19,7 +19,7 @@ export function AccountListItem({
     () => getPrice({ baseCurrency, cryptoSymbol: cryptoCurrency }),
     {
       name: "prices",
-      shouldShowToast: true,
+      shouldShowToast: false,
     },
     [account, baseCurrency]
   );
