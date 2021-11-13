@@ -6,10 +6,12 @@ import { TAccount } from "../types";
 import { round } from "../utils";
 
 export function AccountListItem({
+  hasBaseCurrencyChanged,
   account,
   setBalances,
   baseCurrency,
 }: {
+  hasBaseCurrencyChanged: boolean;
   account: TAccount;
   setBalances: any;
   baseCurrency: string;
@@ -19,7 +21,7 @@ export function AccountListItem({
     () => getPrice({ baseCurrency, cryptoSymbol: cryptoCurrency }),
     {
       name: "prices",
-      shouldShowToast: false,
+      shouldShowToast: hasBaseCurrencyChanged,
     },
     [account, baseCurrency]
   );
