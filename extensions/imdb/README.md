@@ -3,7 +3,7 @@
   <h1 align="center">IMDb Search</h1>
 </p>
 
-A [Raycast](https://raycast.com/) extenstion that lets you easily open your favourite film or tv series on [IMDb](https://imdb.com/).
+A [Raycast](https://raycast.com/) extenstion that lets you easily open your favorite film or tv series on [IMDb](https://imdb.com/).
 
 This extension is made by [Ryan Voevodin](https://twitter.com/RyanVoevodin) and uses [The Open Movie Database API](https://www.omdbapi.com/) (OMDb) by Brian Fritz.
 
@@ -21,7 +21,7 @@ This extension is made by [Ryan Voevodin](https://twitter.com/RyanVoevodin) and 
 
 ## Troubleshooting
 
-### 🔺 401 [Unauthorised]
+### 🔺 401 [Unauthorized]
 
 The API key you've provided either hasn't been activated or is incorrect.
 
@@ -30,7 +30,7 @@ The API key you've provided either hasn't been activated or is incorrect.
 3. On Raycast open the Preferences pane (Search "Extensions Raycast Preferences").
 4. Select the `Search for a Film or TV Series` command from the list.
 5. Paste in your API key e.g. `ab12c345` into the field provided.
-6. Re-open the IMDb extension and try searching for your favourite film or tv series.
+6. Re-open the IMDb extension and try searching for your favorite film or tv series.
 
 ### Other Issues
 
