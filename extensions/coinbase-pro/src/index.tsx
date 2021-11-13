@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { List, ActionPanel, Icon } from "@raycast/api";
 import { getAccounts } from "./api";
-import { useFetch } from "./hooks";
+import { useFetch, usePreviousState } from "./hooks";
 import { TAccount } from "./types";
 import { AccountListItem } from "./components";
 import { round } from "./utils";
@@ -15,6 +15,7 @@ export default function App() {
     shouldShowToast: true,
     refreshInterval: 10_000,
   });
+  const prevBaseCurrency = usePreviousState(baseCurrency);
 
   const renderTotalBalance = () => {
     if (isLoading) return null;
@@ -44,7 +45,13 @@ export default function App() {
     <List isLoading={isLoading} searchBarPlaceholder="Filter accounts by name...">
       {renderTotalBalance()}
       {accounts.map((account: TAccount) => (
-        <AccountListItem baseCurrency={baseCurrency} key={account.id} account={account} setBalances={setBalances} />
+        <AccountListItem
+          hasBaseCurrencyChanged={prevBaseCurrency && prevBaseCurrency !== baseCurrency}
+          baseCurrency={baseCurrency}
+          key={account.id}
+          account={account}
+          setBalances={setBalances}
+        />
       ))}
     </List>
   );
