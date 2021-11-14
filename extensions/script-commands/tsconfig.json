@@ -14,10 +14,10 @@
     "jsx": "react-jsx",
     "baseUrl": "src",
     "paths": {
-      "@models": ["Models/index"],
       "@commands": ["Commands/index"],
       "@components": ["Components/index"],
       "@managers": ["Managers/index"],
+      "@models": ["Models/index"],
       "@network": ["Network/API/index"],
       "@urls": ["Network/URL/index"]
     }

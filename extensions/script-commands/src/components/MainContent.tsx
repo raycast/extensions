@@ -36,7 +36,7 @@ export function MainContent({ isLoading, groups, totalScriptCommands }: Props): 
         return (left.name > right.name) ? 1 : -1
       })
 
-      for (const subGroup of group.subGroups) {
+      group.subGroups.forEach(subGroup => {
         const keySubGroup = `${group.path}-${subGroup.path}`
         sections.push(
           <GroupSection 
@@ -45,16 +45,16 @@ export function MainContent({ isLoading, groups, totalScriptCommands }: Props): 
             group={ subGroup } 
           />
         )
-      }
+      })
     }
   }
   
   return (
     <List 
-      isLoading={isLoading} 
+      isLoading={ isLoading } 
       searchBarPlaceholder={`Search for your Script Command among of ${totalScriptCommands} items`}
     >
-      {sections}
+      { sections }
     </List>
   )
 }

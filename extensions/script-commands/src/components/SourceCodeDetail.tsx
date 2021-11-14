@@ -37,7 +37,7 @@ export function SourceCodeDetail({ scriptCommand}: Props): JSX.Element {
   const title = `Source code for "${scriptCommand.title }"`
   const [content, setContent] = useState<ContentState>({ 
     hasContent: false, 
-    sourceCode: "" 
+    sourceCode: "Loading source code..."
   })
 
   useEffect(() => {

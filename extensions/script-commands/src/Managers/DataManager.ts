@@ -26,15 +26,30 @@ import path from "path"
 
 import download from "download"
 
-interface SystemInformation {
-  needsSetup: boolean
+interface File {
+  path: string
+  link: string
+}
+
+interface Files {
+  iconLight: File | null
+  iconDark: File | null
+  command: File
 }
 
 interface Command {
   identifier: string
-  information: SystemInformation
+  needsSetup: boolean
+  files: Files
   scriptCommand: ScriptCommand
 }
+
+interface Result<T> {
+  content: T,
+  message: string
+}
+
+type StateResult = Result<State>
 
 export enum State {
   Installed,
@@ -46,7 +61,6 @@ export enum State {
 interface Content {
   [identifier: string]: Command
 }
-
 class ContentManager {
   private content: Content
 
@@ -68,6 +82,10 @@ class ContentManager {
     this.content[command.identifier] = command
   }
 
+  update(command: Command): void {
+    this.content[command.identifier] = command
+  }
+
   delete(identifier: string): void {
     if (this.content && this.content[identifier] != null)
       delete this.content[identifier]
@@ -79,7 +97,8 @@ class ContentManager {
 }
 
 export class DataManager {
-  private commandsFolderPath = this.resolvePath(getPreferenceValues().folderPath)
+  private folderPath = getPreferenceValues().folderPath
+  private commandsFolderPath = this.resolvePath(this.folderPath)
   private databaseFile = path.join(environment.supportPath, "ScriptCommandsStore.json")
   private repositoryCommandsFolderPath = path.join(this.commandsFolderPath, "commands")
   private imagesCommandsFolderPath = path.join(this.commandsFolderPath, "images")
@@ -130,6 +149,20 @@ export class DataManager {
       )  
     })
   }
+  
+  private isCommandDownloaded(identifier: string): boolean {
+    const command = this.contentManager.contentFor(identifier)
+    return command != null
+  }
+
+  private isCommandNeedsSetup(identifier: string): boolean {
+    const command = this.contentManager.contentFor(identifier)
+
+    if (command != null)
+      return command.needsSetup
+
+    return true
+  }
 
   private resolvePath(folder: string): string {
     if (folder.length > 0 && folder.startsWith("~"))
@@ -139,14 +172,33 @@ export class DataManager {
   }
 
   persist(): void {
-    const data = JSON.stringify(this.contentManager.getContent, null, 2)
-    if (data.length > 0)
+    const data = JSON.stringify(this.contentManager.getContent(), null, 2)
+
+    if ((data != null || data != undefined) && data.length > 0)
       fs.writeFileSync(this.databaseFile, data)
   }
 
   clear(): void {
     this.contentManager.clear()
     this.persist()
+  }
+
+  stateFor(scriptCommand: ScriptCommand): State {
+    const downloaded = this.isCommandDownloaded(scriptCommand.identifier)
+    const needSetup = this.isCommandNeedsSetup(scriptCommand.identifier)
+
+    let state: State
+
+    if (downloaded) {
+      if (needSetup)
+        state = State.NeedSetup
+      else
+        state = State.Installed
+    }
+    else
+      state = State.NotInstalled
+
+    return state
   }
 
   async fetchCommands(): Promise<Main> {
@@ -157,22 +209,50 @@ export class DataManager {
     return fetchSourceCode(scriptCommand)
   }
   
-  async download(scriptCommand: ScriptCommand) {
-    try {
-      const commandFullPath = path.join(this.repositoryCommandsFolderPath, scriptCommand.path)
-    
-      await this.downloadIcons(
-        scriptCommand, 
-        commandFullPath
-      )
+  async download(scriptCommand: ScriptCommand): Promise<StateResult> {
+    const commandFullPath = path.join(this.repositoryCommandsFolderPath, scriptCommand.path)
+  
+    const icons = await this.downloadIcons(
+      scriptCommand, 
+      commandFullPath
+    )
 
-      await this.downloadCommand(
-        scriptCommand,
-        commandFullPath
-      )
+    const command = await this.downloadCommand(
+      scriptCommand,
+      commandFullPath
+    )
+
+    if (command == null)
+      return {
+        content: State.Error,
+        message: "Script Command couldn't be downloaded"  
+      }
+
+    const files: Files = {
+      command: command,
+      iconDark: null,
+      iconLight: null
     }
-    catch (error) {
-      console.log(error)
+
+    if (icons.light != null)
+      files.iconLight = icons.light
+
+    if (icons.dark != null)
+      files.iconDark = icons.dark
+    
+    const resource: Command = {
+      identifier: scriptCommand.identifier,
+      needsSetup: scriptCommand.isTemplate,
+      files: files,
+      scriptCommand: scriptCommand
+    }
+
+    this.contentManager.add(resource)
+    this.persist()
+
+    return {
+      content: scriptCommand.isTemplate ? State.NeedSetup : State.Installed,
+      message: ""
     }
   }
 
@@ -193,45 +273,14 @@ export class DataManager {
     ]
   }
 
-  async downloadIcon(
-    url: string, 
-    imageFolderPath: string, 
-    filename: string
-  ) {
-    const imagePath = path.join(imageFolderPath, filename)
-    const linkImagePath = path.join(this.imagesCommandsFolderPath, filename)
-
-    if (fs.existsSync(imagePath) == false) {
-      try {
-        await download(
-          url, 
-          imageFolderPath, 
-          { filename: filename }
-        )
-
-        if (fs.existsSync(this.imagesCommandsFolderPath) == false) {
-          fs.mkdirSync(
-            this.imagesCommandsFolderPath, 
-            {recursive: true}
-          )
-        }
-      }
-      catch (error) {
-        console.log(`Error: ${error}`)
-      }
+  async downloadIcons(scriptCommand: ScriptCommand, commandPath: string): Promise<{ dark: File | null, light: File | null }> {
+    const icons: { dark: File | null, light: File | null } = { 
+      dark: null, 
+      light: null 
     }
-
-    if (fs.existsSync(linkImagePath) == false && fs.existsSync(imagePath)) {
-      await afs.symlink(
-        imagePath, 
-        linkImagePath
-      )
-    }
-  }
-
-  async downloadIcons(scriptCommand: ScriptCommand, commandPath: string) {
+    
     if (scriptCommand.icon == null) 
-      return
+      return icons
 
     let imagePath = ""
     const icon = scriptCommand.icon
@@ -244,7 +293,7 @@ export class DataManager {
       imagePath = darkImagePath
 
     if (imagePath.length == 0)
-      return
+      return icons
 
     const imageFolderPath = path.join(commandPath, imagePath)
       
@@ -252,23 +301,70 @@ export class DataManager {
       afs.mkdir(imageFolderPath, { recursive: true })
 
     if (lightFilename.length > 0) {
-      await this.downloadIcon(
+      const lightIcon = await this.downloadIcon(
         iconLightURL(scriptCommand) ?? "",
         imageFolderPath,
         lightFilename
       )
+
+      if (lightIcon != null)
+        icons.light = lightIcon
     }
 
     if (darkFilename.length > 0) {
-      await this.downloadIcon(
+      const darkIcon = await this.downloadIcon(
         iconDarkURL(scriptCommand) ?? "",
         imageFolderPath,
         darkFilename
       )
+
+      if (darkIcon != null)
+        icons.dark = darkIcon
+    }
+
+    return icons
+  }
+
+  async downloadIcon(
+    url: string, 
+    imageFolderPath: string, 
+    filename: string
+  ): Promise<File | null> {
+    const imagePath = path.join(imageFolderPath, filename)
+    const linkImagePath = path.join(this.imagesCommandsFolderPath, filename)
+
+    if (fs.existsSync(imagePath) == false) {
+      await download(
+        url, 
+        imageFolderPath, 
+        { filename: filename }
+      )
+
+      if (fs.existsSync(this.imagesCommandsFolderPath) == false) {
+        fs.mkdirSync(
+          this.imagesCommandsFolderPath, 
+          {recursive: true}
+        )
+      }      
+    }
+
+    if (fs.existsSync(linkImagePath) == false) {
+      await afs.symlink(
+        imagePath, 
+        linkImagePath
+      )
+    }
+
+    if (fs.existsSync(linkImagePath) == false)
+      return null
+    
+    return {
+      path: imagePath,
+      link: linkImagePath
     }
   }
 
-  async downloadCommand(scriptCommand: ScriptCommand, commandPath: string) {
+  async downloadCommand(scriptCommand: ScriptCommand, commandPath: string): Promise<File | null> {
     const filename = scriptCommand.filename
     const commandFilePath = path.join(commandPath, scriptCommand.filename)
 
@@ -276,24 +372,26 @@ export class DataManager {
     const linkCommandFilePath = path.join(this.commandsFolderPath, linkFilename)
 
     if (fs.existsSync(commandFilePath) == false) {
-      try {
-        await download(
-          sourceCodeRawURL(scriptCommand), 
-          commandPath,
-          { filename: filename }
-        )
-      }
-      catch (error) {
-        console.log(error)
-        return
-      }
+      await download(
+        sourceCodeRawURL(scriptCommand), 
+        commandPath,
+        { filename: filename }
+      )
     }
 
-    if (fs.existsSync(linkCommandFilePath) == false && fs.existsSync(commandFilePath)) {
+    if (fs.existsSync(linkCommandFilePath) == false) {
       await afs.symlink(
         commandFilePath,
         linkCommandFilePath
       )
+    }
+
+    if (fs.existsSync(linkCommandFilePath) == false)
+      return null
+
+    return {
+      path: commandFilePath,
+      link: linkCommandFilePath
     }
   }
 }

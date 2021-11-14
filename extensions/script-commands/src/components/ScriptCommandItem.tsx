@@ -1,13 +1,14 @@
 // Raycast
 
 import { 
-  useNavigation, 
   ActionPanel, 
   Icon, 
   ImageMask, 
   Image, 
   List, 
-  OpenInBrowserAction 
+  OpenInBrowserAction, 
+  Color,
+  PushAction
 } from "@raycast/api"
 
 // Script Commands Store 
@@ -26,11 +27,14 @@ import {
 } from "@models"
 
 import { 
-  SourceCodeDetail 
+  Progress,
+  SourceCodeDetail, 
+  StoreToast 
 } from "@components"
 
 import { 
-  DataManager 
+  DataManager,
+  State
 } from "@managers"
 
 // External
@@ -38,6 +42,10 @@ import {
 import 
   * as crypto 
 from "crypto"
+
+import { 
+  useState
+} from "react"
 
 // Internal 
 
@@ -64,7 +72,7 @@ export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
       accessoryTitle={authorsDescription(scriptCommand.authors)}
       actions={
         <ActionPanel title={scriptCommand.title}>
-          <InstallActionSection scriptCommand={scriptCommand} />
+          <ManagementActionSection scriptCommand={scriptCommand} />
           <ViewsActionSection scriptCommand={scriptCommand} />
           <AuthorsActionPanel authors={scriptCommand.authors ?? []} />
         </ActionPanel>
@@ -73,22 +81,132 @@ export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
   )
 }
 
-function InstallActionSection({ scriptCommand }: { scriptCommand: ScriptCommand }): JSX.Element {
+function ManagementActionSection({ scriptCommand }: { scriptCommand: ScriptCommand }): JSX.Element | null {
+  type Refresh = { refresh: boolean }
+  
+  const elements: JSX.Element[] = [] 
+
+  const state = dataManager.stateFor(scriptCommand)
+  const [, setRefresh] = useState<Refresh>({ refresh: false })
+
+  const uninstallAction = (
+    <UninstallActionItem
+      key={`uninstall-${scriptCommand.identifier}`}
+      scriptCommand={ scriptCommand } 
+      onAction={ 
+        () => {
+          console.log("Uninstall Action called")
+          setRefresh(oldState => ({
+            ...oldState, 
+            refresh: true 
+          }))
+        }
+      }
+    />
+  )
+
+  switch (state) {
+  case State.Installed: 
+    elements.push(uninstallAction)
+    break
+  
+  case State.NotInstalled: 
+    elements.push(
+      <InstallActionItem
+        key={`install-${scriptCommand.identifier}`}
+        scriptCommand={ scriptCommand } 
+        onAction={ 
+          () => {
+            console.log("Install Action called")
+            setRefresh(oldState => ({
+              ...oldState, 
+              refresh: true 
+            }))
+          }
+        }
+      />
+    )
+    break
+  
+  case State.NeedSetup: 
+    elements.push(
+      <SetupActionItem
+        key={`setup-${scriptCommand.identifier}`} 
+        scriptCommand={scriptCommand} 
+        onAction={ 
+          () => {
+            console.log(`[onAction] SetupActionItem`)
+          }
+        }
+      />
+    )
+    elements.push(uninstallAction)
+
+    break
+  
+  case State.Error: 
+    console.log("[ManagementActionSection] Error")
+    return null
+  }
+
   return (
     <ActionPanel.Section>
-      <InstallActionItem scriptCommand={ scriptCommand } />
+      { elements }
     </ActionPanel.Section>
   )
 }
 
-function InstallActionItem({ scriptCommand }: { scriptCommand: ScriptCommand }): JSX.Element {
+function InstallActionItem({ scriptCommand, onAction }: { scriptCommand: ScriptCommand, onAction: () => void }): JSX.Element {  
   return (
     <ActionPanel.Item 
       icon={ Icon.Download } 
       title="Install Script Command" 
       onAction={ 
-        async () => await dataManager.download(scriptCommand) 
+        async () => {
+          await StoreToast(State.NotInstalled, Progress.InProgress, scriptCommand)
+          const result = await dataManager.download(scriptCommand)
+
+          await StoreToast(result.content, Progress.Finished, scriptCommand)
+          onAction()
+        }
       } 
+    />
+  )
+}
+
+function UninstallActionItem({ scriptCommand, onAction }: { scriptCommand: ScriptCommand, onAction: () => void }): JSX.Element {
+  return (
+    <ActionPanel.Item 
+      icon={{ 
+        source: Icon.XmarkCircle, 
+        tintColor: Color.Red 
+      }} 
+      title="Uninstall Script Command" 
+      shortcut={{ 
+        modifiers: ["ctrl"], 
+        key: "x" 
+      }}
+      onAction={ 
+        () => {
+          console.log(`[TODO] Implement Script Command uninstall (${scriptCommand.title})`)
+          onAction()
+        }
+      } 
+    />
+  )
+}
+
+function SetupActionItem({ scriptCommand, onAction }: { scriptCommand: ScriptCommand, onAction: () => void }): JSX.Element {
+  return (
+    <ActionPanel.Item 
+      icon={ Icon.TextDocument } 
+      title="Configure Script Command" 
+      onAction={ 
+        () => {
+          console.log(`[TODO] Implement Script Command setup (${scriptCommand.title})`)
+          onAction()
+        }
+      }
     />
   )
 }
@@ -110,25 +228,19 @@ function ViewsActionSection({ scriptCommand }: { scriptCommand: ScriptCommand })
 }
 
 function ViewSourceCodeAction({ scriptCommand }: { scriptCommand: ScriptCommand }): JSX.Element {
-  const { push } = useNavigation();
-  
-  const action = () => {
-    push(
-      <SourceCodeDetail 
-        scriptCommand={scriptCommand } 
-      />
-    )
-  }
-  
   return (
-    <ActionPanel.Item 
+    <PushAction
       icon={ Icon.TextDocument } 
       shortcut={{ 
         modifiers: ["cmd"], 
         key: "return" 
       }}
       title="View Source Code" 
-      onAction={ action } 
+      target={ 
+        <SourceCodeDetail 
+          scriptCommand={scriptCommand } 
+        />
+      }
     />
   )
 }
@@ -140,10 +252,11 @@ function AuthorsActionPanel({ authors }: { authors: Author[] }): JSX.Element {
 
   return (
     <ActionPanel.Section title={ totalDescription }>
-      {authors.map((author) => (
+      {authors.map(author => (
         <AuthorActionItem 
-        key={ author.url ?? crypto.randomUUID() } 
-        author={ author } />
+          key={ author.url ?? crypto.randomUUID() } 
+          author={ author } 
+        />
       ))}
     </ActionPanel.Section>
   )
@@ -187,12 +300,11 @@ const authorsDescription = (authors: Author[] | undefined): string => {
   if (authors != null && authors?.length > 0) {
     let content = "";
 
-    for (const author of authors) {
+    authors.forEach(author => {
       if (content.length > 0)
-        content += " and "
-
+        content += " and "  
       content += author.name
-    }
+    })
 
     return `by ${content}`
   }
@@ -203,16 +315,15 @@ const authorsDescription = (authors: Author[] | undefined): string => {
 const keywords = (scriptCommand: ScriptCommand): string[] => { 
   const keywords: string[] = []
 
-  if (scriptCommand.packageName != null) {
+  if (scriptCommand.packageName != null)
     keywords.push(scriptCommand.packageName)
-  }
 
   const authors = scriptCommand.authors
   if (authors != null && authors.length > 0) {
-    for (const author of authors) {
+    authors.forEach(author => {
       if (author.name != null && author.name.length > 0)
         keywords.push(author.name)
-    }
+    })
   }
 
   if (scriptCommand.language.length > 0)

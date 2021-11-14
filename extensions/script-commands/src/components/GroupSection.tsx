@@ -27,7 +27,7 @@ export function GroupSection({ group, parentName }: Props) {
 
   return (
     <List.Section key={ key } title={ title } subtitle={ subtitle }>
-      {group.scriptCommands.map((scriptCommand) => (
+      {group.scriptCommands.map(scriptCommand => (
         <ScriptCommandItem 
           key={ scriptCommand.identifier } 
           scriptCommand={scriptCommand} 

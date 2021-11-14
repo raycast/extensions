@@ -1,3 +1,4 @@
 export {
-  DataManager
+  DataManager,
+  State
 } from "./DataManager"
