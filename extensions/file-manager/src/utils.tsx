@@ -12,13 +12,17 @@ import {
   getPreferenceValues,
   PushAction,
   useNavigation,
-  Icon
+  Icon,
+  Detail
 } from "@raycast/api";
-import { promisify } from "util";
-import { exec as _exec } from "child_process";
-const exec = promisify(_exec);
+import { promisify } from "node:util";
+import { exec as _exec } from "node:child_process";
 import filesize from "filesize";
-import * as fs from "fs";
+import { existsSync, writeFileSync, mkdirSync, lstatSync, readdirSync, readlinkSync } from "node:fs";
+import { resolve } from "node:path";
+import { homedir } from "node:os";
+
+const exec = promisify(_exec);
 
 export type FileType = "directory" | "file" | "symlink" | "other";
 
@@ -36,11 +40,18 @@ export type PreferencesType = {
   caseSensitive: boolean;
   showFilePermissions: boolean;
   showFileSize: boolean;
+  startDirectory: string,
 }
 
 export async function runShellScript(command: string) {
   const { stdout, stderr } = await exec(command);
   return { stdout, stderr };
+}
+
+export function getStartDirectory(): string {
+  let { startDirectory } = getPreferenceValues();
+  startDirectory = startDirectory.replace("~", homedir());
+  return resolve(startDirectory);
 }
 
 export function CreateFile(props: { path: string }) {
@@ -51,10 +62,10 @@ export function CreateFile(props: { path: string }) {
         <ActionPanel>
           <SubmitFormAction onSubmit={(values: { fileName: string, fileContents: string }) => {
             const filePath = `${props.path}/${values.fileName}`;
-            if (fs.existsSync(filePath)) {
+            if (existsSync(filePath)) {
               showToast(ToastStyle.Failure, "Error Creating File", "File already exists");
             } else {
-              fs.writeFileSync(filePath, values.fileContents);
+              writeFileSync(filePath, values.fileContents);
               showToast(ToastStyle.Success, "File Created", "File successfully created");
               pop();
             }
@@ -76,10 +87,10 @@ export function CreateDirectory(props: { path: string }) {
         <ActionPanel>
           <SubmitFormAction onSubmit={(values: { directoryName: string }) => {
             const filePath = `${props.path}/${values.directoryName}`;
-            if (fs.existsSync(filePath)) {
+            if (existsSync(filePath)) {
               showToast(ToastStyle.Failure, "Error Creating Directory", "Directory already exists");
             } else {
-              fs.mkdirSync(filePath);
+              mkdirSync(filePath);
               showToast(ToastStyle.Success, "Directory Created", "Directory successfully created");
               pop();
             }
@@ -143,9 +154,9 @@ export function FileItem(props: { fileData: FileDataType }) {
 export function SymlinkItem(props: { fileData: FileDataType }) {
   const preferences: PreferencesType = getPreferenceValues();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
-  const a = fs.readlinkSync(filePath);
+  const a = readlinkSync(filePath);
   const originalPath = a.startsWith("/") ? a : `${props.fileData.path}/${a}`;
-  const originalFileData = fs.lstatSync(originalPath);
+  const originalFileData = lstatSync(originalPath);
   if (originalFileData.isDirectory()) {
     return (
       <List.Item
@@ -203,7 +214,7 @@ export function createItem(fileData: FileDataType) {
 
 export function getDirectoryData(path: string): FileDataType[] {
   const preferences: PreferencesType = getPreferenceValues();
-  let files: string[] = fs.readdirSync(path);
+  let files: string[] = readdirSync(path);
   if (!preferences.showDots) {
     files = files.filter((file) => !file.startsWith("."));
   }
@@ -218,7 +229,7 @@ export function getDirectoryData(path: string): FileDataType[] {
   const data: FileDataType[] = [];
 
   for (const file of files) {
-    const fileData = fs.lstatSync(`${path}/${file}`);
+    const fileData = lstatSync(`${path}/${file}`);
     let fileType: FileType = "other";
     if (fileData.isDirectory()) fileType = "directory";
     if (fileData.isFile()) fileType = "file";
@@ -240,6 +251,9 @@ export function getDirectoryData(path: string): FileDataType[] {
 }
 
 export function Directory(props: { path: string }) {
+  if (!existsSync(props.path)) {
+    return <Detail markdown={`# Error: \n\nThe directory \`${props.path}\` does not exist. `} />;
+  }
   const directoryData = getDirectoryData(props.path);
   const preferences: PreferencesType = getPreferenceValues();
   if (preferences.directoriesFirst) {
@@ -247,7 +261,7 @@ export function Directory(props: { path: string }) {
     const nonDirectories = directoryData.filter(file => file.type !== "directory");
     return (
       <List searchBarPlaceholder={`Search in ${props.path}/`}>
-        <List.Section title="Directories">
+        <List.Section title="Directories" >
           {directories.map(data => createItem(data))}
         </List.Section>
         <List.Section title="Files">
