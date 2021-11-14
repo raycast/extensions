@@ -3,11 +3,12 @@ import {
 } from "@models"
 
 import { 
+  checkIsValidURL,
   URLConstants 
 } from "@urls"
 
-export const Regex = {
-  emoji: /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi,
+const Expression = {
+  emoji: /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi
 }
 
 enum IconStyle {
@@ -15,30 +16,49 @@ enum IconStyle {
   Dark,
 }
 
-export const iconDarkURL = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Dark)
+export enum IconType {
+  Emoji,
+  URL,
+}
 
-export const iconLightURL = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Light)
+export interface IconResult {
+  type: IconType,
+  content: string
+}
 
-const iconURL = (scriptCommand: ScriptCommand, style: IconStyle): string | null => {
+export const iconDarkFor = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Dark)
+
+export const iconLightFor = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Light)
+
+const iconURL = (scriptCommand: ScriptCommand, style: IconStyle): IconResult | null => {
   if (scriptCommand.icon == null)
     return null
-
+  
   let path = scriptCommand.icon.light
-
+  
   if (style == IconStyle.Dark)
     path = scriptCommand.icon.dark
-
+  
   if (path == null || path.length == 0)
     return null
+  
+  const emojiRegex = new RegExp(Expression.emoji)
 
-  if (Regex.emoji.test(path))
-    return path
-
-  if (path != null && path != undefined && path.length > 0) {
-    const url = `${URLConstants.baseRawURL}/${scriptCommand.path}${path}`
-
-    return url
+  if (emojiRegex.test(path))
+    return {
+      type: IconType.Emoji,
+      content: path
+    }
+  else if (checkIsValidURL(path))
+    return {
+      type: IconType.URL,
+      content: path
+    }
+  
+  const url = `${URLConstants.baseRawURL}/${scriptCommand.path}${path}`
+  
+  return {
+    type: IconType.URL,
+    content: url
   }
-
-  return null
 }

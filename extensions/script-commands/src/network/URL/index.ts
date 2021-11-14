@@ -7,9 +7,18 @@ export {
 } from "./AvatarURL"
 
 export {
-  iconDarkURL,
-  iconLightURL
+  iconDarkFor,
+  iconLightFor, 
+  IconType
 } from "./IconURL"
+
+export type { 
+  IconResult
+} from "./IconURL"
+
+export { 
+  checkIsValidURL
+} from "./CheckURL"
 
 export {
   languageURL
