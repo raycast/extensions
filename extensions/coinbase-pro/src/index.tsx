@@ -13,7 +13,6 @@ export default function App() {
     name: "accounts",
     defaultValue: [],
     shouldShowToast: true,
-    refreshInterval: 10_000,
   });
   const prevBaseCurrency = usePreviousState(baseCurrency);
 
