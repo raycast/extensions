@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "copy-gcp-icon",
-      "title": "Copy GCP Icon",
+      "title": "Copy Icon",
       "subtitle": "Google Cloud Platform",
       "description": "Copy Product Icons from Google Cloud Platform",
       "mode": "view"
