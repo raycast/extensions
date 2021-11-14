@@ -36,6 +36,13 @@ interface Command {
   scriptCommand: ScriptCommand
 }
 
+export enum State {
+  Installed,
+  NotInstalled,
+  NeedSetup,
+  Error,
+}
+
 interface Content {
   [identifier: string]: Command
 }
