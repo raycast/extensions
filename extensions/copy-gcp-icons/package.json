@@ -37,12 +37,11 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.3",
-    "extract-zip": "^2.0.1",
-    "node-fetch": "^3.0.0",
-    "run-applescript": "^6.0.0",
-    "tmp-promise": "^3.0.3"
+    "download": "^8.0.0",
+    "run-applescript": "^6.0.0"
   },
   "devDependencies": {
+    "@types/download": "^8.0.1",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
