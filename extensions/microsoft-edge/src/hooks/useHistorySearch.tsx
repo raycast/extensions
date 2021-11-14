@@ -5,6 +5,7 @@ import initSqlJs, { Database } from "sql.js";
 import { useEffect, useRef, useState } from "react";
 import { environment } from "@raycast/api";
 import { getProfileName, historyDbPath } from "../utils";
+import { NullableString } from "../schema/types";
 
 const fsReadFile = util.promisify(fs.readFile);
 
@@ -51,7 +52,7 @@ const whereClauses = (terms: string[]) => {
     .join(" AND ");
 };
 
-const searchHistory = async (db: Database, query: string | undefined): Promise<HistoryEntry[]> => {
+const searchHistory = async (db: Database, query: NullableString): Promise<HistoryEntry[]> => {
   const terms = query ? query.trim().split(" ") : [""];
   const queries = `SELECT
             id, url, title,
@@ -72,7 +73,7 @@ const searchHistory = async (db: Database, query: string | undefined): Promise<H
   }));
 };
 
-export function useEdgeHistorySearch(query: string | undefined): EdgeHistorySearch {
+export function useEdgeHistorySearch(query: NullableString): EdgeHistorySearch {
   const [entries, setEntries] = useState<HistoryEntry[]>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);

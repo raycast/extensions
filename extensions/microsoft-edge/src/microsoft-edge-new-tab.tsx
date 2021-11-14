@@ -13,19 +13,24 @@ import {
 import { runAppleScript } from "run-applescript";
 import { HistoryEntry, useEdgeHistorySearch } from "./hooks/useHistorySearch";
 import { useEffect, useState, ReactElement } from "react";
-import { faviconUrl } from "./utils";
+import { faviconUrl, urlParser } from "./utils";
 import { Tab } from "./lib/Tab";
 import { TabListItem } from "./components/TabListItem";
 import { getOpenTabs } from "./common/getOpenTabs";
+import { NullableString } from "./schema/types";
 
-async function openNewTab(queryText: string | null | undefined): Promise<void> {
+async function openNewTab(queryText: NullableString, url: NullableString): Promise<void> {
   const script =
     `
     tell application "Microsoft Edge"
       activate
       tell window 1
-          set newTab to make new tab ` +
-    (queryText ? 'with properties {URL:"https://www.google.com/search?q=' + queryText + '"}' : "") +
+      set newTab to make new tab ` +
+    (url
+      ? 'with properties {URL:"' + url + '"}'
+      : queryText
+      ? 'with properties {URL:"https://www.google.com/search?q=' + queryText + '"}'
+      : "") +
     ` 
       end tell
     end tell
@@ -61,6 +66,9 @@ export default function Command(): ReactElement {
     setState({ tabs: tabs });
   }
 
+  const url = searchText ? urlParser(searchText) : null;
+  const isUrl = !!url;
+
   useEffect(() => {
     getTabs(null);
   }, []);
@@ -80,9 +88,10 @@ export default function Command(): ReactElement {
     >
       <List.Section title="New Tab" key="new-tab">
         <List.Item
-          title={!searchText ? "Open Empty Tab" : `Search "${searchText}"`}
-          icon={{ source: !searchText ? Icon.Plus : Icon.MagnifyingGlass }}
-          actions={<NewTabActions query={searchText} />}
+          id={searchText}
+          title={isUrl ? "Open URL" : searchText ? 'Search "' + searchText + '"' : "Open empty tab"}
+          icon={{ source: isUrl ? Icon.Link : searchText ? Icon.MagnifyingGlass : Icon.Plus }}
+          actions={<NewTabActions query={searchText} url={url} />}
         />
       </List.Section>
       <List.Section title="Open Tabs" key="open-tabs">
@@ -99,16 +108,17 @@ export default function Command(): ReactElement {
   );
 }
 
-const NewTabActions = (props: { query: string | undefined }): ReactElement => {
+const NewTabActions = (props: { query: NullableString; url: NullableString }): ReactElement => {
   const query = props.query;
+  const url = props.url;
 
   return (
     <ActionPanel title="New Tab">
       <ActionPanel.Item
         onAction={function () {
-          openNewTab(query);
+          openNewTab(query, url);
         }}
-        title={query ? `Search "${query}"` : "Open Empty Tab"}
+        title={url ? "Open URL" : query ? 'Search "' + query + '"' : "Open empty tab"}
       />
     </ActionPanel>
   );

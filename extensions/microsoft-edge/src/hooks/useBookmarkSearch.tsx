@@ -2,6 +2,7 @@ import fs from "fs";
 import util from "util";
 import { useEffect, useRef, useState } from "react";
 import { bookmarksFilePath, getProfileName } from "../utils";
+import { NullableString } from "../schema/types";
 
 const fsReadFile = util.promisify(fs.readFile);
 
@@ -17,7 +18,6 @@ export interface EdgeBookmarkSearch {
   isLoading: boolean;
 }
 
-type Query = string | undefined;
 type BookmarkNodeType = "folder" | "url";
 
 export interface BookmarkDirectory {
@@ -72,7 +72,7 @@ const getBookmarkEntriesFromRawBookmarks = (rawBookmarks: RawBookmarks): Bookmar
   return bookmarks;
 };
 
-const searchBookmarks = async (bookmarks: BookmarkEntry[], query: Query): Promise<BookmarkEntry[]> => {
+const searchBookmarks = async (bookmarks: BookmarkEntry[], query: NullableString): Promise<BookmarkEntry[]> => {
   if (!query) {
     return bookmarks;
   }
@@ -83,7 +83,7 @@ const searchBookmarks = async (bookmarks: BookmarkEntry[], query: Query): Promis
   });
 };
 
-export function useEdgeBookmarkSearch(query: Query): EdgeBookmarkSearch {
+export function useEdgeBookmarkSearch(query: NullableString): EdgeBookmarkSearch {
   const [entries, setEntries] = useState<BookmarkEntry[]>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
