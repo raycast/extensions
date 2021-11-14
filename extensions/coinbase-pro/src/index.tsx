@@ -26,9 +26,9 @@ export default function App() {
         <List.Item
           actions={
             <ActionPanel title="Currencies">
-              <ActionPanel.Item title="View EUR" onAction={() => setBaseCurrency("EUR")} />
-              <ActionPanel.Item title="View GBP" onAction={() => setBaseCurrency("GBP")} />
-              <ActionPanel.Item title="View USD" onAction={() => setBaseCurrency("USD")} />
+              <ActionPanel.Item title="View in EUR" onAction={() => setBaseCurrency("EUR")} />
+              <ActionPanel.Item title="View in GBP" onAction={() => setBaseCurrency("GBP")} />
+              <ActionPanel.Item title="View in USD" onAction={() => setBaseCurrency("USD")} />
             </ActionPanel>
           }
           keywords={accounts.map(({ currency }: { currency: string }) => currency)}
