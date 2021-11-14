@@ -1,22 +1,25 @@
-import { ActionPanel, CopyToClipboardAction, Detail, environment, Icon, List, PushAction } from "@raycast/api";
-import fs, { readdirSync } from "fs";
+import { ActionPanel, CopyToClipboardAction, Detail, Icon, List, PushAction } from "@raycast/api";
+import fs, { existsSync, mkdirSync, readdirSync } from "fs";
 import { globby } from "globby";
 import { parse } from "path";
 import { useEffect, useState } from "react";
-import { fetchPages } from "./http";
+import { CACHE_DIR, refreshPages } from "./tldr";
 
 export default function TLDRList(): JSX.Element {
   const [platforms, setPlatforms] = useState<Platform[]>();
   useEffect(() => {
     async function loadPages() {
-      if (readdirSync(environment.supportPath).length == 0) {
-        await fetchPages()
+      if (!existsSync(CACHE_DIR)) {
+        mkdirSync(CACHE_DIR, {recursive: true})
+      }
+      if (readdirSync(CACHE_DIR).length == 0) {
+        await refreshPages()
       }
 
       const platformNames = ["osx", "common", "linux", "windows", "sunos", "android"];
       const platforms = await Promise.all(
         platformNames.map(async (platformName) => {
-          const filepaths = await globby(`${environment.supportPath}/${platformName}/*`);
+          const filepaths = await globby(`${CACHE_DIR}/${platformName}/*`);
           const pages = await Promise.all(
             filepaths.map((filepath) => parsePage(filepath))
           );
