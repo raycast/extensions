@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ray-so",
   "title": "Ray.so",
-  "description": "Create beautiful images of your code",
+  "description": "Create beautiful images of your code using ray.so",
   "icon": "icon.png",
   "author": "Garrett",
   "license": "MIT",
