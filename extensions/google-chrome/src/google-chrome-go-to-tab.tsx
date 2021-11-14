@@ -125,8 +125,8 @@ function Actions(props: { tab: Tab }) {
 
 function GoogleChromeGoToTab(props: { tab: Tab }) {
   async function handleAction() {
+    closeMainWindow();
     popToRoot();
-    closeMainWindow({ clearRootSearch: true });
     await setActiveTab(props.tab);
   }
 
