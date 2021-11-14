@@ -14,11 +14,10 @@ import {
 import { 
   MainContent 
 } from "@components"
-import { Detail } from "@raycast/api"
 
 const dataManager = DataManager.shared()
 
-export default function ScriptCommandsList() {
+export function ScriptCommandsList() {
   const [content, setContent] = useState<Main>({ 
     groups: [],
     totalScriptCommands: 0
@@ -28,7 +27,7 @@ export default function ScriptCommandsList() {
     async function fetch() {
       const response = await dataManager.fetchCommands()
 
-      setContent((oldState) => ({
+      setContent(oldState => ({
         ...oldState,
         groups: response.groups,
         totalScriptCommands: response.totalScriptCommands

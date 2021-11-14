@@ -15,6 +15,7 @@
     "baseUrl": "src",
     "paths": {
       "@models": ["Models/index"],
+      "@commands": ["Commands/index"],
       "@components": ["Components/index"],
       "@managers": ["Managers/index"],
       "@network": ["Network/API/index"],
