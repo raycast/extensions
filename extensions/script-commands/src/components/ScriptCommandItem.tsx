@@ -8,17 +8,19 @@ import {
   List, 
   OpenInBrowserAction, 
   Color,
-  PushAction
+  PushAction,
+  ImageLike
 } from "@raycast/api"
 
 // Script Commands Store 
 
 import { 
   authorAvatarURL, 
-  iconDarkURL, 
-  iconLightURL, 
+  iconDarkFor, 
+  iconLightFor, 
   languageURL, 
-  sourceCodeNormalURL 
+  sourceCodeNormalURL,
+  checkIsValidURL
 } from "@urls"
 
 import { 
@@ -49,6 +51,10 @@ import {
 
 // Internal 
 
+type Refresh = { 
+  refresh: boolean 
+}
+
 type Props = { 
   scriptCommand: ScriptCommand
 }
@@ -56,34 +62,39 @@ type Props = {
 const dataManager = DataManager.shared()
 
 export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
+  const [, setRefresh] = useState<Refresh>({ refresh: false })
+  
   return (
     <List.Item
       key={ scriptCommand.identifier }
-      title={scriptCommand.title}
-      subtitle={scriptCommand.packageName}
-      icon={{
-        source: {
-          light: iconLightURL(scriptCommand) ?? "",
-          dark: iconDarkURL(scriptCommand) ?? "",
-        },
-      }}
-      keywords={keywords(scriptCommand)}
-      accessoryIcon={languageURL(scriptCommand.language)}
-      accessoryTitle={authorsDescription(scriptCommand.authors)}
+      title={ scriptCommand.title }
+      subtitle={ scriptCommand.packageName }
+      icon={ iconFor(scriptCommand) }
+      keywords={ keywords(scriptCommand) }
+      accessoryIcon={ accessoryIconFor(scriptCommand) }
+      accessoryTitle={ authorsDescription(scriptCommand.authors) }
       actions={
-        <ActionPanel title={scriptCommand.title}>
-          <ManagementActionSection scriptCommand={scriptCommand} />
-          <ViewsActionSection scriptCommand={scriptCommand} />
-          <AuthorsActionPanel authors={scriptCommand.authors ?? []} />
+        <ActionPanel title={ scriptCommand.title }>
+          <ManagementActionSection 
+            scriptCommand={ scriptCommand } 
+            onStateChanged={ 
+              () => {
+                setRefresh(oldState => ({
+                  ...oldState, 
+                  refresh: true 
+                }))
+              }
+            } 
+          />
+          <ViewsActionSection scriptCommand={ scriptCommand } />
+          <AuthorsActionPanel authors={ scriptCommand.authors ?? [] } />
         </ActionPanel>
       }
     />
   )
 }
 
-function ManagementActionSection({ scriptCommand }: { scriptCommand: ScriptCommand }): JSX.Element | null {
-  type Refresh = { refresh: boolean }
-  
+function ManagementActionSection({ scriptCommand, onStateChanged }: { scriptCommand: ScriptCommand, onStateChanged: () => void }): JSX.Element | null {
   const elements: JSX.Element[] = [] 
 
   const state = dataManager.stateFor(scriptCommand)
@@ -91,7 +102,7 @@ function ManagementActionSection({ scriptCommand }: { scriptCommand: ScriptComma
 
   const uninstallAction = (
     <UninstallActionItem
-      key={`uninstall-${scriptCommand.identifier}`}
+      key={`uninstall-${ scriptCommand.identifier }`}
       scriptCommand={ scriptCommand } 
       onAction={ 
         () => {
@@ -113,15 +124,16 @@ function ManagementActionSection({ scriptCommand }: { scriptCommand: ScriptComma
   case State.NotInstalled: 
     elements.push(
       <InstallActionItem
-        key={`install-${scriptCommand.identifier}`}
+        key={`install-${ scriptCommand.identifier }`}
         scriptCommand={ scriptCommand } 
         onAction={ 
           () => {
-            console.log("Install Action called")
             setRefresh(oldState => ({
               ...oldState, 
               refresh: true 
             }))
+
+            onStateChanged()
           }
         }
       />
@@ -131,7 +143,7 @@ function ManagementActionSection({ scriptCommand }: { scriptCommand: ScriptComma
   case State.NeedSetup: 
     elements.push(
       <SetupActionItem
-        key={`setup-${scriptCommand.identifier}`} 
+        key={`setup-${ scriptCommand.identifier }`} 
         scriptCommand={scriptCommand} 
         onAction={ 
           () => {
@@ -216,7 +228,6 @@ function ViewsActionSection({ scriptCommand }: { scriptCommand: ScriptCommand })
     <ActionPanel.Section>
       <ViewSourceCodeAction scriptCommand={ scriptCommand } />
       <OpenInBrowserAction 
-        title="View Source Code in Browser" 
         url={ sourceCodeNormalURL(scriptCommand) }
         shortcut={{ 
           modifiers: ["cmd"], 
@@ -265,7 +276,7 @@ function AuthorsActionPanel({ authors }: { authors: Author[] }): JSX.Element {
 function AuthorActionItem({ author }: { author: Author }): JSX.Element {
   let name = author.name ?? "Raycast"
 
-  if (author.url != null && author.url.length > 0) {
+  if (author.url != null && author.url.length > 0 && checkIsValidURL(author.url)) {
     const path = new URL(author.url)
 
     if (path.host == "twitter.com")
@@ -273,8 +284,8 @@ function AuthorActionItem({ author }: { author: Author }): JSX.Element {
     else if (path.host == "github.com")
       name = `${name} (GitHub)`
   }
-  
-  if (author.url != null) {
+
+  if (author.url != null && author.url.length > 0 && checkIsValidURL(author.url)) {
     return <OpenInBrowserAction
       title={ name }
       icon={ avatarImage(author) }
@@ -328,6 +339,42 @@ const keywords = (scriptCommand: ScriptCommand): string[] => {
 
   if (scriptCommand.language.length > 0)
     keywords.push(scriptCommand.language)
+  
+  if (dataManager.isCommandDownloaded(scriptCommand.identifier))
+    keywords.push("installed")
+
+  if (scriptCommand.isTemplate)
+    keywords.push("setup")
 
   return keywords
+}
+
+const accessoryIconFor = (scriptCommand: ScriptCommand): ImageLike => {
+  let icon: ImageLike
+
+  if (dataManager.isCommandDownloaded(scriptCommand.identifier))
+    icon = { 
+      source: Icon.Checkmark, 
+      tintColor: Color.Green
+    }
+  else 
+    icon = { 
+      source: languageURL(scriptCommand.language) 
+    }
+  
+  return icon
+}
+
+const iconFor = (scriptCommand: ScriptCommand): Image => {
+  const iconDark = iconDarkFor(scriptCommand)
+  const iconLight = iconLightFor(scriptCommand)
+
+  const image: Image = {
+    source: {
+      light: iconLight != null ? iconLight.content : "",
+      dark: iconDark != null ? iconDark.content : ""
+    }
+  }
+
+  return image
 }
