@@ -1,0 +1,33 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "conventional-commit",
+  "title": "Conventional Commit",
+  "description": "Conventional Commit into the foremost application (w/ Gitmoji!)",
+  "icon": "command-icon.png",
+  "author": "jerome",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Conventional Commit",
+      "description": "Insert conventional commits into the frontmost applicatioddn",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.4"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
