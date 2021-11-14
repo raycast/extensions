@@ -1,5 +1,8 @@
 import { 
-  List 
+  ActionPanel,
+  Icon,
+  List, 
+  PushAction
 } from "@raycast/api"
 
 import { 
@@ -10,19 +13,25 @@ import {
   Group 
 } from "@models"
 
+import { 
+  ScriptCommandsList 
+} from "@commands"
+
 type Props = {
+  navigationTitle: string
   isLoading: boolean
   groups: Group[]
   totalScriptCommands: number
+  showSearchListAction: boolean
 }
 
-export function MainContent({ isLoading, groups, totalScriptCommands }: Props): JSX.Element {
+export function MainContent({ navigationTitle, isLoading, groups, totalScriptCommands, showSearchListAction }: Props): JSX.Element {
   const sections: JSX.Element[] = []
 
   groups.sort((left: Group, right: Group) => {
     return (left.name > right.name) ? 1 : -1
   })
-  
+
   for (const group of groups) {
     sections.push(
       <GroupSection
@@ -51,8 +60,19 @@ export function MainContent({ isLoading, groups, totalScriptCommands }: Props): 
   
   return (
     <List 
+      navigationTitle={ navigationTitle }
       isLoading={ isLoading } 
       searchBarPlaceholder={`Search for your Script Command among of ${totalScriptCommands} items`}
+      actions={
+        showSearchListAction && 
+        <ActionPanel>
+          <PushAction 
+            title="Open Search Commands List"
+            icon={ Icon.MagnifyingGlass }
+            target={ <ScriptCommandsList /> } 
+          />
+        </ActionPanel>
+      }
     >
       { sections }
     </List>

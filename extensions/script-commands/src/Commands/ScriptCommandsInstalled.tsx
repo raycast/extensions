@@ -4,12 +4,12 @@ import {
 } from "react"
 
 import { 
-  DataManager 
-} from "@managers"
-
-import { 
   Main 
 } from "@models"
+
+import { 
+  DataManager 
+} from "@managers"
 
 import { 
   MainContent 
@@ -17,7 +17,7 @@ import {
 
 const dataManager = DataManager.shared()
 
-export function ScriptCommandsList() {
+export function ScriptCommandsInstalledList() {
   const [content, setContent] = useState<Main>({ 
     groups: [],
     totalScriptCommands: 0
@@ -25,7 +25,7 @@ export function ScriptCommandsList() {
 
   useEffect(() => {
     async function fetch() {
-      const response = await dataManager.fetchCommands()
+      const response = await dataManager.fetchInstalledCommands()
 
       setContent(oldState => ({
         ...oldState,
@@ -39,11 +39,11 @@ export function ScriptCommandsList() {
 
   return (
     <MainContent 
-      navigationTitle="Search Command"
-      isLoading={content.groups.length == 0} 
-      groups={content.groups} 
-      totalScriptCommands={content.totalScriptCommands}
-      showSearchListAction={ false }
+      navigationTitle="List Commands Installed"
+      isLoading={ content.groups.length == 0 } 
+      groups={ content.groups } 
+      totalScriptCommands={ content.totalScriptCommands }
+      showSearchListAction={ content.totalScriptCommands == 0}
     />
   )
 }
