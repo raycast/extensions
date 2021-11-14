@@ -1,5 +1,6 @@
 import { 
   Main, 
+  Group,
   ScriptCommand 
 } from "@models"
 
@@ -9,8 +10,9 @@ import {
 } from "@network"
 
 import {
-  iconDarkURL,
-  iconLightURL,
+  iconDarkFor,
+  iconLightFor,
+  IconType,
   sourceCodeRawURL
 } from "@urls"
 
@@ -150,12 +152,12 @@ export class DataManager {
     })
   }
   
-  private isCommandDownloaded(identifier: string): boolean {
+  isCommandDownloaded(identifier: string): boolean {
     const command = this.contentManager.contentFor(identifier)
     return command != null
   }
 
-  private isCommandNeedsSetup(identifier: string): boolean {
+  isCommandNeedsSetup(identifier: string): boolean {
     const command = this.contentManager.contentFor(identifier)
 
     if (command != null)
@@ -208,6 +210,35 @@ export class DataManager {
   async fetchSourceCode(scriptCommand: ScriptCommand): Promise<string> {
     return fetchSourceCode(scriptCommand)
   }
+
+  async fetchInstalledCommands(): Promise<Main> {
+    this.loadDatabase()
+
+    const content = this.contentManager.getContent()
+    
+    const main: Main = {
+      groups: [],
+      totalScriptCommands: Object.values(content).length
+    }
+
+    const installedGroup: Group = {
+      name: "Installed Script Commands",
+      path: "installed-script-commands",
+      scriptCommands: []
+    }
+
+    Object.values(content).forEach((command: Command) => {
+      installedGroup.scriptCommands.push(command.scriptCommand)
+    })
+
+    installedGroup.scriptCommands.sort((left: ScriptCommand, right: ScriptCommand) => {
+      return (left.title > right.title) ? 1 : -1
+    })
+
+    main.groups.push(installedGroup)
+
+    return main
+  }
   
   async download(scriptCommand: ScriptCommand): Promise<StateResult> {
     const commandFullPath = path.join(this.repositoryCommandsFolderPath, scriptCommand.path)
@@ -256,7 +287,7 @@ export class DataManager {
     }
   }
 
-  iconPaths(icon?: string): [string, string] {
+  private iconPaths(icon?: string): [string, string] {
     let imagePath = ""
     let filename = ""
 
@@ -273,7 +304,7 @@ export class DataManager {
     ]
   }
 
-  async downloadIcons(scriptCommand: ScriptCommand, commandPath: string): Promise<{ dark: File | null, light: File | null }> {
+  private async downloadIcons(scriptCommand: ScriptCommand, commandPath: string): Promise<{ dark: File | null, light: File | null }> {
     const icons: { dark: File | null, light: File | null } = { 
       dark: null, 
       light: null 
@@ -301,31 +332,39 @@ export class DataManager {
       afs.mkdir(imageFolderPath, { recursive: true })
 
     if (lightFilename.length > 0) {
-      const lightIcon = await this.downloadIcon(
-        iconLightURL(scriptCommand) ?? "",
-        imageFolderPath,
-        lightFilename
-      )
+      const resource = iconLightFor(scriptCommand)
 
-      if (lightIcon != null)
-        icons.light = lightIcon
+      if (resource != null && resource.type == IconType.URL && resource.content.length > 0 ) {
+        const lightIcon = await this.downloadIcon(
+          resource.content,
+          imageFolderPath,
+          lightFilename
+        )
+  
+        if (lightIcon != null)
+          icons.light = lightIcon
+      }
     }
 
     if (darkFilename.length > 0) {
-      const darkIcon = await this.downloadIcon(
-        iconDarkURL(scriptCommand) ?? "",
-        imageFolderPath,
-        darkFilename
-      )
+      const resource = iconDarkFor(scriptCommand)
 
-      if (darkIcon != null)
-        icons.dark = darkIcon
+      if (resource != null && resource.type == IconType.URL && resource.content.length > 0 ) {
+        const darkIcon = await this.downloadIcon(
+          resource.content,
+          imageFolderPath,
+          lightFilename
+        )
+  
+        if (darkIcon != null)
+          icons.light = darkIcon
+      }
     }
 
     return icons
   }
 
-  async downloadIcon(
+  private async downloadIcon(
     url: string, 
     imageFolderPath: string, 
     filename: string
@@ -364,7 +403,7 @@ export class DataManager {
     }
   }
 
-  async downloadCommand(scriptCommand: ScriptCommand, commandPath: string): Promise<File | null> {
+  private async downloadCommand(scriptCommand: ScriptCommand, commandPath: string): Promise<File | null> {
     const filename = scriptCommand.filename
     const commandFilePath = path.join(commandPath, scriptCommand.filename)
 
