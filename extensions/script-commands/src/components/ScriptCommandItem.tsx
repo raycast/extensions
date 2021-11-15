@@ -16,8 +16,8 @@ import {
 
 import { 
   authorAvatarURL, 
-  iconDarkFor, 
-  iconLightFor, 
+  iconDarkURLFor, 
+  iconLightURLFor, 
   languageURL, 
   sourceCodeNormalURL,
   checkIsValidURL
@@ -366,8 +366,8 @@ const accessoryIconFor = (scriptCommand: ScriptCommand): ImageLike => {
 }
 
 const iconFor = (scriptCommand: ScriptCommand): Image => {
-  const iconDark = iconDarkFor(scriptCommand)
-  const iconLight = iconLightFor(scriptCommand)
+  const iconDark = iconDarkURLFor(scriptCommand)
+  const iconLight = iconLightURLFor(scriptCommand)
 
   const image: Image = {
     source: {

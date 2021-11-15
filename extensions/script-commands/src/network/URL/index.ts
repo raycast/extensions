@@ -7,9 +7,10 @@ export {
 } from "./AvatarURL"
 
 export {
-  iconDarkFor,
-  iconLightFor, 
-  IconType
+  iconDarkURLFor,
+  iconLightURLFor, 
+  IconType,
+  IconStyle
 } from "./IconURL"
 
 export type { 

@@ -10,8 +10,10 @@ import {
 } from "@network"
 
 import {
-  iconDarkFor,
-  iconLightFor,
+  iconDarkURLFor,
+  iconLightURLFor,
+  IconResult,
+  IconStyle,
   IconType,
   sourceCodeRawURL
 } from "@urls"

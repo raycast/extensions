@@ -11,7 +11,7 @@ const Expression = {
   emoji: /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi
 }
 
-enum IconStyle {
+export enum IconStyle {
   Light,
   Dark,
 }
@@ -26,9 +26,9 @@ export interface IconResult {
   content: string
 }
 
-export const iconDarkFor = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Dark)
+export const iconDarkURLFor = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Dark)
 
-export const iconLightFor = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Light)
+export const iconLightURLFor = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Light)
 
 const iconURL = (scriptCommand: ScriptCommand, style: IconStyle): IconResult | null => {
   if (scriptCommand.icon == null)
