@@ -108,7 +108,6 @@ export function DirectoryItem(props: { fileData: FileDataType }) {
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
   return (
     <List.Item
-      key={filePath}
       id={filePath}
       title={props.fileData.name}
       subtitle={preferences.showFilePermissions ? props.fileData.permissions : ""}
@@ -160,7 +159,6 @@ export function SymlinkItem(props: { fileData: FileDataType }) {
   if (originalFileData.isDirectory()) {
     return (
       <List.Item
-        key={filePath}
         id={filePath}
         title={props.fileData.name}
         icon={{ fileIcon: filePath }}
@@ -180,7 +178,6 @@ export function SymlinkItem(props: { fileData: FileDataType }) {
   } else {
     return (
       <List.Item
-        key={filePath}
         id={filePath}
         title={props.fileData.name}
         icon={{ fileIcon: filePath }}
@@ -201,12 +198,13 @@ export function SymlinkItem(props: { fileData: FileDataType }) {
 }
 
 export function createItem(fileData: FileDataType) {
+  const filePath = `${fileData.path}/${fileData.name}`;
   if (fileData.type === "directory") {
-    return (<DirectoryItem fileData={fileData} />);
+    return (<DirectoryItem fileData={fileData} key={filePath} />);
   } else if (fileData.type === "file") {
-    return (<FileItem fileData={fileData} />);
+    return (<FileItem fileData={fileData} key={filePath} />);
   } else if (fileData.type === "symlink") {
-    return (<SymlinkItem fileData={fileData} />);
+    return (<SymlinkItem fileData={fileData} key={filePath} />);
   } else {
     showToast(ToastStyle.Failure, "Unsupported file type", `File type: ${fileData.type}`);
   }
