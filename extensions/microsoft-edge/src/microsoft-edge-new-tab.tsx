@@ -1,45 +1,13 @@
-import {
-  ActionPanel,
-  popToRoot,
-  closeMainWindow,
-  CopyToClipboardAction,
-  getPreferenceValues,
-  Icon,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
-import { runAppleScript } from "run-applescript";
-import { HistoryEntry, useEdgeHistorySearch } from "./hooks/useHistorySearch";
+import { ActionPanel, getPreferenceValues, Icon, List, showToast, ToastStyle } from "@raycast/api";
+import { useEdgeHistorySearch } from "./hooks/useHistorySearch";
 import { useEffect, useState, ReactElement } from "react";
-import { faviconUrl, urlParser } from "./utils";
+import { urlParser } from "./utils";
 import { Tab } from "./lib/Tab";
 import { TabListItem } from "./components/TabListItem";
 import { getOpenTabs } from "./common/getOpenTabs";
 import { NullableString } from "./schema/types";
-
-async function openNewTab(queryText: NullableString, url: NullableString): Promise<void> {
-  const script =
-    `
-    tell application "Microsoft Edge"
-      activate
-      tell window 1
-      set newTab to make new tab ` +
-    (url
-      ? 'with properties {URL:"' + url + '"}'
-      : queryText
-      ? 'with properties {URL:"https://www.google.com/search?q=' + queryText + '"}'
-      : "") +
-    ` 
-      end tell
-    end tell
-  `;
-
-  await runAppleScript(script);
-  await popToRoot({ clearSearchBar: true });
-  return closeMainWindow();
-}
+import { UrlListItem } from "./components/UrlListItem";
+import { openNewTab } from "./common/openNewTab";
 
 interface State {
   tabs?: Tab[];
@@ -101,7 +69,7 @@ export default function Command(): ReactElement {
       </List.Section>
       <List.Section title="Recently Closed" key="recently-closed">
         {entries?.map((e) => (
-          <HistoryItem entry={e} key={e.id} />
+          <UrlListItem entry={e} key={e.id} />
         ))}
       </List.Section>
     </List>
@@ -115,38 +83,9 @@ const NewTabActions = (props: { query: NullableString; url: NullableString }): R
   return (
     <ActionPanel title="New Tab">
       <ActionPanel.Item
-        onAction={function () {
-          openNewTab(query, url);
-        }}
+        onAction={() => openNewTab(query, url)}
         title={url ? "Open URL" : query ? 'Search "' + query + '"' : "Open empty tab"}
       />
-    </ActionPanel>
-  );
-};
-
-const HistoryItem = (props: { entry: HistoryEntry }): ReactElement => {
-  const { url, title } = props.entry;
-  const id = props.entry.id.toString();
-  const favicon = faviconUrl(64, url);
-
-  return (
-    <List.Item
-      id={id}
-      title={title}
-      subtitle={url}
-      icon={favicon}
-      actions={<HistoryItemActions entry={props.entry} />}
-    />
-  );
-};
-
-const HistoryItemActions = (props: { entry: HistoryEntry }): ReactElement => {
-  const { title, url } = props.entry;
-
-  return (
-    <ActionPanel title={title}>
-      <OpenInBrowserAction title="Open in Tab" url={url} />
-      <CopyToClipboardAction title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
     </ActionPanel>
   );
 };

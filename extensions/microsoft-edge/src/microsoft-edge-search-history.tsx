@@ -1,7 +1,7 @@
-import { List, ToastStyle, showToast, ActionPanel, OpenInBrowserAction, CopyToClipboardAction } from "@raycast/api";
+import { List, ToastStyle, showToast } from "@raycast/api";
 import { useState, ReactElement } from "react";
+import { UrlListItem } from "./components/UrlListItem";
 import { HistoryEntry, useEdgeHistorySearch } from "./hooks/useHistorySearch";
-import { faviconUrl } from "./utils";
 
 type GroupedEntries = Map<string, HistoryEntry[]>;
 
@@ -21,7 +21,7 @@ export default function Command(): ReactElement {
       {groups?.map((group) => (
         <List.Section title={group} key={group}>
           {groupedEntries?.get(group)?.map((e) => (
-            <HistoryItem entry={e} key={e.id} />
+            <UrlListItem entry={e} key={e.id} />
           ))}
         </List.Section>
       ))}
@@ -45,23 +45,4 @@ const groupTitle = (d: Date): string => {
     month: "long",
     day: "numeric",
   });
-};
-
-const HistoryItem = (props: { entry: HistoryEntry }): ReactElement => {
-  const { url, title } = props.entry;
-  const id = props.entry.id.toString();
-  const favicon = faviconUrl(64, url);
-
-  return <List.Item id={id} title={title} subtitle={url} icon={favicon} actions={<Actions entry={props.entry} />} />;
-};
-
-const Actions = (props: { entry: HistoryEntry }): ReactElement => {
-  const { title, url } = props.entry;
-
-  return (
-    <ActionPanel title={title}>
-      <OpenInBrowserAction title="Open in Browser" url={url} />
-      <CopyToClipboardAction title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
-    </ActionPanel>
-  );
 };
