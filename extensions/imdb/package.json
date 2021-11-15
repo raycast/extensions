@@ -2,16 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "imdb",
   "title": "IMDb Search",
-  "description": "Easily open your favorite film or tv series on IMDb.",
+  "description": "Easily open your favorite film or TV series on IMDb.",
   "icon": "icon.png",
   "author": "ryan",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Search for a Film or TV Series",
+      "title": "Search Film or TV Series",
       "subtitle": "IMDb",
-      "description": "Easily open your favorite film or tv series on IMDb.",
+      "description": "Easily open your favorite film or TV series on IMDb.",
       "mode": "view"
     }
   ],
@@ -21,8 +21,8 @@
       "type": "password",
       "required": true,
       "title": "API Token",
-      "link": "http://www.omdbapi.com/apikey.aspx",
-      "description": "Need help? Check out our README on Github",
+      "link": "https://www.omdbapi.com/apikey.aspx",
+      "description": "Need help? Check the README",
       "placeholder": "Enter your Open Movie Database (OMDb) API token"
     }
   ],

@@ -6,7 +6,6 @@ import type { Title } from "./types";
 
 import { getTitle } from "./api";
 import { ListItem } from "./components/ListItem";
-import { debounce } from "./utils";
 
 export default function SearchResults() {
   const [state, setState] = useState<{ titles: Title[] }>({ titles: [] });
@@ -27,8 +26,9 @@ export default function SearchResults() {
       }
       setLoading(false);
     }
-    // if a user is still typing, delay the search
-    debounce(fetch, 500);
+    if (search.length > 0) {
+      fetch();
+    }
   }, [search]);
 
   const onSearchChange = (newSearchTerm: string) => {
@@ -36,13 +36,14 @@ export default function SearchResults() {
       setLoading(true);
       setSearch(newSearchTerm);
     }
+
     // backspace
-    if (search.length > newSearchTerm.length) {
+    if (newSearchTerm.length < search.length) {
       setState({ titles: [] });
     }
   };
 
-  const filterResults = state.titles.filter((title) => {
+  const filterResults = [...new Set(state.titles)].filter((title) => {
     // if there are many results
     if (state.titles.length > 3) {
       // only include titles with relatively high similarities
@@ -69,6 +70,7 @@ export default function SearchResults() {
       isLoading={loading}
       onSearchTextChange={onSearchChange}
       searchBarPlaceholder="Search IMDb for titles by name..."
+      throttle
     >
       {latestResult ? (
         <List.Section

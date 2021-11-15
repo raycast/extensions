@@ -2,13 +2,12 @@ import fetch from "node-fetch";
 import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
 import type { Preferences, Title } from "../types";
 
-export const getTitle = async (search: string): Promise<Title | null> => {
+export const getTitle = async (title: string): Promise<Title | null> => {
   const preferences: Preferences = getPreferenceValues();
   const apiKey = preferences.token;
 
   try {
-    const response = await fetch(`http://www.omdbapi.com/?t=${search}&apikey=${apiKey}`);
-
+    const response = await fetch(`https://www.omdbapi.com/?t=${title}&apikey=${apiKey}`);
     if (response.status === 200) {
       // valid response
       const json = (await response.json()) as Partial<Title>;
