@@ -74,6 +74,12 @@ function HistorySlotListItem(props: { slot: HistorySlots; setHistorySlots: any }
     icon = { source: { light: "ok-light.png", dark: "ok-dark.png" } };
   } else if (slot.status == "Extracting") {
     icon = { source: { light: "bolt-light.png", dark: "bolt-dark.png" } };
+  } else if (slot.status == "Verifying") {
+    icon = { source: { light: "key-light.png", dark: "key-dark.png" } };
+  } else if (slot.status == "Queued") {
+    icon = { source: { light: "pause-light.png", dark: "pause-dark.png" } };
+  } else if (slot.status == "Repairing") {
+    icon = { source: { light: "tool-light.png", dark: "tool-dark.png" } };
   } else if (slot.status == "Failed") {
     icon = { source: { light: "error-light.png", dark: "error-dark.png" } };
   } else {
