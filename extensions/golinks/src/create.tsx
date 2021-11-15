@@ -1,12 +1,12 @@
 import { ActionPanel, Form, FormValue, SubmitFormAction, popToRoot, showToast, ToastStyle } from '@raycast/api'
-import { createGolink } from './api'
+import { createGoLink } from './api'
 
-export default function CreateGolink() {
+export default function CreateGoLink() {
   return (
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create golink" onSubmit={submit} />
+          <SubmitFormAction title="Create GoLink" onSubmit={submit} />
         </ActionPanel>
       }
     >
@@ -20,9 +20,9 @@ export default function CreateGolink() {
 async function submit(values: Record<string, FormValue>) {
   const body = { ...values }
 
-  showToast(ToastStyle.Animated, 'Creating golink...')
+  showToast(ToastStyle.Animated, 'Creating GoLink...')
 
-  await createGolink(body.name as string, body.url as string, body.description as string)
+  await createGoLink(body.name as string, body.url as string, body.description as string)
 
   popToRoot()
 }

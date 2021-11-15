@@ -2,23 +2,23 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "golinks",
   "title": "GoLinks",
-  "description": "Manage your golinks",
+  "description": "Manage your GoLinks",
   "icon": "command-icon.png",
   "author": "micnncim",
   "license": "MIT",
   "commands": [
     {
       "name": "list",
-      "title": "Search golinks",
+      "title": "Search GoLinks",
       "subtitle": "GoLinks",
-      "description": "Search golinks",
+      "description": "Search your GoLinks",
       "mode": "view"
     },
     {
       "name": "create",
-      "title": "Create golink",
+      "title": "Create GoLink",
       "subtitle": "GoLinks",
-      "description": "Create golink",
+      "description": "Create a new GoLink",
       "mode": "view"
     }
   ],

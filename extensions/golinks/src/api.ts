@@ -2,7 +2,7 @@ import { showToast, ToastStyle, getPreferenceValues } from '@raycast/api'
 import { URLSearchParams } from 'url'
 import useSWR from 'swr'
 import axios, { AxiosError } from 'axios'
-import { Golink } from './types'
+import { GoLink } from './types'
 
 interface Preferences {
   token: string
@@ -32,17 +32,17 @@ export function useFetch<T>(path: string): FetchResult<T> {
   return { data, isLoading: !error && !data, error: new Error(error?.message) }
 }
 
-export async function createGolink(name: string, url: string, description: string): Promise<void> {
+export async function createGoLink(name: string, url: string, description: string): Promise<void> {
   try {
     const params = new URLSearchParams()
     params.append('name', name)
     params.append('url', url)
     params.append('description', description)
 
-    await api.post<Golink>('/golinks', params)
+    await api.post<GoLink>('/golinks', params)
 
-    showToast(ToastStyle.Success, 'golink created')
+    showToast(ToastStyle.Success, 'GoLink created')
   } catch (error) {
-    showToast(ToastStyle.Failure, `Failed to create golink: ${error}`)
+    showToast(ToastStyle.Failure, `Failed to create GoLink: ${error}`)
   }
 }

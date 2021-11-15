@@ -2,7 +2,7 @@
 
 A [Raycast Extension](https://developers.raycast.com) for [GoLinks](https://www.golinks.io).
 
-https://user-images.githubusercontent.com/21333876/141518995-a408d0f3-c4cf-418f-abbc-4cd555fa40c8.mov
+https://user-images.githubusercontent.com/21333876/141827027-ccedcd91-a174-4e2c-acdc-590061f13f6e.mov
 
 ## Getting Started
 
@@ -16,17 +16,17 @@ See the [GoLinks document](https://docs.golinks.io/#19f87188-f2fb-4b75-bf69-83f0
 
 ## Commands
 
-### Search golinks
+### Search GoLinks
 
 ![screenshot-list](./docs/assets/screenshot-list.png)
 
-Lets you search golinks and then open a selected golink.
+Lets you search your GoLinks and then open a selected GoLink.
 
-### Create golink
+### Create GoLink
 
 ![screenshot-create](./docs/assets/screenshot-create.png)
 
-Lets you create a new golink.
+Lets you create a new GoLink.
 
 ## License
 
