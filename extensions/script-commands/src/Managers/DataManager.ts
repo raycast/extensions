@@ -1,7 +1,7 @@
 import { 
   Main, 
   Group,
-  ScriptCommand 
+  ScriptCommand
 } from "@models"
 
 import { 
@@ -36,8 +36,8 @@ interface File {
 }
 
 interface Files {
-  iconLight: File | null
-  iconDark: File | null
+  iconLight: FileNullable
+  iconDark: FileNullable
   command: File
 }
 
@@ -48,12 +48,14 @@ interface Command {
   scriptCommand: ScriptCommand
 }
 
+interface Content {
+  [identifier: string]: Command
+}
+
 interface Result<T> {
   content: T,
   message: string
 }
-
-type StateResult = Result<State>
 
 export enum State {
   Installed,
@@ -62,9 +64,24 @@ export enum State {
   Error,
 }
 
-interface Content {
-  [identifier: string]: Command
+enum IconUsage {
+  LastScriptUsing,
+  BeingUsedByMore,
 }
+
+interface IconPath  {
+  filename: string, 
+  path: string
+}
+
+type StateResult = Result<State>
+
+type IconPathNullable = IconPath | null
+
+type IconResultNullable = IconResult | null
+
+type FileNullable = File | null
+
 class ContentManager {
   private content: Content
 
@@ -289,25 +306,28 @@ export class DataManager {
     }
   }
 
-  private iconPaths(icon?: string): [string, string] {
+  private iconPaths(icon?: string | null): IconPathNullable {
+    if (icon == null || icon == undefined )
+      return null
+
     let imagePath = ""
     let filename = ""
 
-    if (icon != null && icon.length > 0) {
+    if (icon.length > 0) {
       const fullpath = path.parse(icon)
 
       filename = fullpath.base
       imagePath = fullpath.dir
     }
 
-    return [
-      filename,
-      imagePath
-    ]
+    return {
+      filename: filename,
+      path: imagePath
+    }
   }
 
-  private async downloadIcons(scriptCommand: ScriptCommand, commandPath: string): Promise<{ dark: File | null, light: File | null }> {
-    const icons: { dark: File | null, light: File | null } = { 
+  private async downloadIcons(scriptCommand: ScriptCommand, commandPath: string): Promise<{ dark: FileNullable, light: FileNullable }> {
+    const icons: { dark: FileNullable, light: FileNullable } = { 
       dark: null, 
       light: null 
     }
@@ -317,13 +337,14 @@ export class DataManager {
 
     let imagePath = ""
     const icon = scriptCommand.icon
-    const [lightFilename, lightImagePath] = this.iconPaths(icon.light)
-    const [darkFilename, darkImagePath] = this.iconPaths(icon.dark)
-    
-    if (lightImagePath.length > 0)
-      imagePath = lightImagePath
-    else if (darkImagePath.length > 0)
-      imagePath = darkImagePath
+
+    const lightIcon = this.iconPaths(icon.light)
+    const darkIcon = this.iconPaths(icon.dark)
+
+    if (lightIcon != null && lightIcon.path.length > 0)
+      imagePath = lightIcon.path
+    else if (darkIcon != null && darkIcon.path.length > 0)
+      imagePath = darkIcon.path
 
     if (imagePath.length == 0)
       return icons
@@ -333,37 +354,42 @@ export class DataManager {
     if (fs.existsSync(imageFolderPath) == false)
       afs.mkdir(imageFolderPath, { recursive: true })
 
-    if (lightFilename.length > 0) {
-      const resource = iconLightFor(scriptCommand)
-
-      if (resource != null && resource.type == IconType.URL && resource.content.length > 0 ) {
-        const lightIcon = await this.downloadIcon(
-          resource.content,
-          imageFolderPath,
-          lightFilename
-        )
-  
-        if (lightIcon != null)
-          icons.light = lightIcon
-      }
-    }
-
-    if (darkFilename.length > 0) {
-      const resource = iconDarkFor(scriptCommand)
-
-      if (resource != null && resource.type == IconType.URL && resource.content.length > 0 ) {
-        const darkIcon = await this.downloadIcon(
-          resource.content,
-          imageFolderPath,
-          lightFilename
-        )
-  
-        if (darkIcon != null)
-          icons.light = darkIcon
-      }
-    }
+    icons.light = await this.downloadIconFor(scriptCommand, lightIcon, imageFolderPath, IconStyle.Light)
+    icons.dark = await this.downloadIconFor(scriptCommand, darkIcon, imageFolderPath, IconStyle.Dark)
 
     return icons
+  }
+
+  private async downloadIconFor(
+    scriptCommand: ScriptCommand, 
+    iconPath: IconPathNullable, 
+    imageFolderPath: string, 
+    style: IconStyle
+  ): Promise<FileNullable> {
+    if (iconPath == null)
+      return null
+    
+    if (iconPath.filename.length == 0)
+      return null
+
+    let resource: IconResultNullable = null
+
+    if (style == IconStyle.Light)
+      resource = iconLightURLFor(scriptCommand)
+    else
+      resource = iconDarkURLFor(scriptCommand)
+
+    if (resource != null && resource.type == IconType.URL) {
+      const result = await this.downloadIcon(
+        resource.content,
+        imageFolderPath,
+        iconPath.filename
+      )
+
+      return result
+    }
+
+    return null
   }
 
   private async downloadIcon(
@@ -405,11 +431,11 @@ export class DataManager {
     }
   }
 
-  private async downloadCommand(scriptCommand: ScriptCommand, commandPath: string): Promise<File | null> {
+  private async downloadCommand(scriptCommand: ScriptCommand, commandPath: string): Promise<FileNullable> {
     const filename = scriptCommand.filename
     const commandFilePath = path.join(commandPath, scriptCommand.filename)
 
-    const linkFilename = scriptCommand.isTemplate ? `${scriptCommand.identifier}.template` : filename
+    const linkFilename = scriptCommand.isTemplate ? `${scriptCommand.identifier}.template` : scriptCommand.identifier
     const linkCommandFilePath = path.join(this.commandsFolderPath, linkFilename)
 
     if (fs.existsSync(commandFilePath) == false) {
@@ -434,5 +460,102 @@ export class DataManager {
       path: commandFilePath,
       link: linkCommandFilePath
     }
+  }
+
+  async uninstall(scriptCommand: ScriptCommand): Promise<StateResult> {
+    const content = this.contentManager.contentFor(scriptCommand.identifier)
+ 
+    if (content != null) {
+      const files = content.files
+
+      let filesDeleted = 0
+
+      if (this.deleteIcon(files.iconLight, IconStyle.Light))
+        filesDeleted += 0.5
+
+      if (this.deleteIcon(files.iconDark, IconStyle.Dark))
+        filesDeleted += 0.5
+
+      if (this.deleteCommand(files.command))
+        filesDeleted += 1
+  
+      if (filesDeleted >= 1) {
+        this.contentManager.delete(scriptCommand.identifier)
+        this.persist()
+
+        return {
+          content: State.NotInstalled,
+          message: ""
+        }
+      }
+    }
+
+    return {
+      content: State.Error,
+      message: "Something went wrong"
+    }
+  }
+
+  private deleteCommand(file: FileNullable): boolean {
+    if (file == null)
+      return false
+
+    if (file.path.length > 0 && file.link.length > 0) {
+      if (fs.existsSync(file.path) && fs.existsSync(file.link)) {
+        afs.rm(file.link)
+        afs.rm(file.path)
+
+        return true
+      }
+    }
+
+    return false
+  }  
+
+  private deleteIcon(file: FileNullable, style: IconStyle): boolean {
+    if (file == null)
+      return false
+
+    if (file.path.length > 0 && file.link.length > 0) {
+      const linkPath = path.parse(file.link)
+
+      if (this.iconUsage(linkPath.name, style) == IconUsage.LastScriptUsing) {
+        afs.rm(file.link)
+        afs.rm(file.path)
+
+        return true
+      }
+    }
+
+    return false
+  }
+
+  private iconUsage(filename: string, style: IconStyle): IconUsage {
+    let counter = 0
+
+    const content = this.contentManager.getContent()
+
+    Object.values(content).forEach((command: Command) => {
+      const files = command.files
+      
+      let file: FileNullable
+
+      if (style == IconStyle.Light)
+        file = files.iconLight
+      else
+        file = files.iconDark
+
+      if (file != null && file.link.length > 0) {
+        const parsedpath = path.parse(file.link)
+
+        if (parsedpath.name == filename && fs.existsSync(file.link))
+          counter += 1
+      }
+    })
+
+    if (counter >= 2)
+      return IconUsage.BeingUsedByMore
+    else
+      return IconUsage.LastScriptUsing
   }
 }

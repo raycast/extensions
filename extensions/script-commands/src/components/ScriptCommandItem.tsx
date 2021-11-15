@@ -106,11 +106,12 @@ function ManagementActionSection({ scriptCommand, onStateChanged }: { scriptComm
       scriptCommand={ scriptCommand } 
       onAction={ 
         () => {
-          console.log("Uninstall Action called")
           setRefresh(oldState => ({
             ...oldState, 
             refresh: true 
           }))
+
+          onStateChanged()
         }
       }
     />
@@ -199,8 +200,12 @@ function UninstallActionItem({ scriptCommand, onAction }: { scriptCommand: Scrip
         key: "x" 
       }}
       onAction={ 
-        () => {
-          console.log(`[TODO] Implement Script Command uninstall (${scriptCommand.title})`)
+        async () => {
+          await StoreToast(State.Installed, Progress.InProgress, scriptCommand)
+          const result = await dataManager.uninstall(scriptCommand)
+
+          await StoreToast(result.content, Progress.Finished, scriptCommand)
+
           onAction()
         }
       } 
