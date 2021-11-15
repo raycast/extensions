@@ -179,78 +179,7 @@ function Details(props: { slot: QueueSlot; setSlots: any }) {
 
   const markdown = `# ${slot.filename}\n\nStatus: ${slot.status}\n\nPriority: ${slot.priority}\n\nIndex: ${slot.index}\n\nCategory: ${slot.cat}\n\nSize: ${slot.size}\n\nSize left: ${slot.sizeleft}\n\nCompleted percentage: ${slot.percentage}%\n\nTimeleft: ${slot.timeleft}\n\nLabels: ${labels}\n\nScript: ${slot.script}`;
 
-  let actions: any;
-
-  switch (slot.status) {
-    case "Paused":
-      actions = (
-        <ActionPanel>
-          <ActionPanel.Item
-            title={"Resume"}
-            onAction={() => onResume(slot, setSlots)}
-            icon={{ source: { light: "play-light.png", dark: "play-dark.png" } }}
-          />
-          <ActionPanel.Item
-            title={"Delete"}
-            onAction={() => onDelete(slot, setSlots)}
-            icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
-          />
-        </ActionPanel>
-      );
-
-      break;
-
-    case "Downloading":
-      actions = (
-        <ActionPanel>
-          <ActionPanel.Item
-            title={"Pause"}
-            onAction={() => onPause(slot, setSlots)}
-            icon={{ source: { light: "pause-light.png", dark: "pause-dark.png" } }}
-          />
-          <ActionPanel.Item
-            title={"Delete"}
-            onAction={() => onDelete(slot, setSlots)}
-            icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
-          />
-        </ActionPanel>
-      );
-
-      break;
-
-    case "Queued":
-      actions = (
-        <ActionPanel>
-          <ActionPanel.Item
-            title={"Resume"}
-            onAction={() => onResume(slot, setSlots)}
-            icon={{ source: { light: "play-light.png", dark: "play-dark.png" } }}
-          />
-          <ActionPanel.Item
-            title={"Delete"}
-            onAction={() => onDelete(slot, setSlots)}
-            icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
-          />
-        </ActionPanel>
-      );
-
-      break;
-
-    default:
-      actions = (
-        <ActionPanel>
-          <ActionPanel.Item
-            title={"Delete"}
-            onAction={() => onDelete(slot, setSlots)}
-            icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
-          />
-        </ActionPanel>
-      );
-
-      console.log(`Unknown slot status: ${slot.status}`);
-  }
-
-  return <Detail markdown={markdown} actions={actions} navigationTitle={slot.filename} />;
+  return <Detail markdown={markdown} navigationTitle={slot.filename} />;
 }
 
 async function onDelete(slot: QueueSlot, setSlots: any) {

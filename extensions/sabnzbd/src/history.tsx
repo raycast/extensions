@@ -104,17 +104,7 @@ function Details(props: { slot: HistorySlots; setHistorySlots: any }) {
 
   const markdown = `# ${slot.name}\n\nStatus: ${slot.status}\n\nCategory: ${slot.category}\n\nStorage: ${slot.storage}\n\nCompleted: ${completed}`;
 
-  const actions = (
-    <ActionPanel>
-      <ActionPanel.Item
-        title={"Delete"}
-        onAction={() => onDelete(slot, setHistorySlots)}
-        icon={{ source: { light: "bin-light.png", dark: "bin-dark.png" } }}
-      />
-    </ActionPanel>
-  );
-
-  return <Detail markdown={markdown} actions={actions} navigationTitle={slot.name} />;
+  return <Detail markdown={markdown} navigationTitle={slot.name} />;
 }
 
 async function onDelete(slot: HistorySlots, setHistorySlots: any) {
