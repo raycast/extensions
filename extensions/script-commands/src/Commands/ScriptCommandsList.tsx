@@ -15,9 +15,19 @@ import {
   MainContent 
 } from "@components"
 
+import { 
+  ViewState 
+} from "@types"
+
 const dataManager = DataManager.shared()
 
-export function ScriptCommandsList() {
+type Props = {
+  onAction?: () => void
+}
+
+export function ScriptCommandsList({ onAction }: Props): JSX.Element {
+  const [state, setState] = useState<ViewState>({ needsReload: true })
+
   const [content, setContent] = useState<Main>({ 
     groups: [],
     totalScriptCommands: 0
@@ -35,7 +45,7 @@ export function ScriptCommandsList() {
     }
 
     fetch()
-  }, [])
+  }, [state])
 
   return (
     <MainContent 
@@ -44,6 +54,16 @@ export function ScriptCommandsList() {
       isLoading={content.groups.length == 0} 
       groups={content.groups} 
       showSearchListAction={ false }
+      onAction={ 
+        () => {
+          setState(oldState => ({
+            ...oldState, 
+            needsReload: true 
+          }))
+
+          if (onAction != undefined)
+            onAction()          
+      }}
     />
   )
 }

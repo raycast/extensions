@@ -82,7 +82,16 @@ export function MainContent({ navigationTitle, placeholder, isLoading, groups, s
           <PushAction 
             title="Open Search Commands List"
             icon={ Icon.MagnifyingGlass }
-            target={ <ScriptCommandsList /> } 
+            target={ 
+              <ScriptCommandsList 
+                onAction={ 
+                  () =>  {
+                    if (onAction != undefined)
+                      onAction() 
+                  }
+                }
+              /> 
+            } 
           />
         </ActionPanel>
       }

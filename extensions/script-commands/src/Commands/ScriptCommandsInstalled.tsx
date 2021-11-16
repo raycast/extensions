@@ -15,14 +15,14 @@ import {
   MainContent 
 } from "@components"
 
-type State = { 
-  needsReload: boolean 
-}
+import { 
+  ViewState 
+} from "@types"
 
 const dataManager = DataManager.shared()
 
-export function ScriptCommandsInstalledList() {
-  const [state, setState] = useState<State>({ needsReload: true })
+export function ScriptCommandsInstalledList(): JSX.Element  {
+  const [state, setState] = useState<ViewState>({ needsReload: true })
 
   const [content, setContent] = useState<Main>({ 
     groups: [],
@@ -43,10 +43,15 @@ export function ScriptCommandsInstalledList() {
     fetch()
   }, [state])
 
+  let placeholder = "There's no Script Commands installed"
+  
+  if (content.totalScriptCommands > 0)
+    placeholder = `Search between ${content.totalScriptCommands} installed`
+
   return (
     <MainContent 
       navigationTitle="List Commands Installed"
-      placeholder={`Search between ${content.totalScriptCommands} installed`}
+      placeholder={ placeholder }
       isLoading={ content.groups.length == 0 } 
       groups={ content.groups } 
       showSearchListAction={ content.totalScriptCommands == 0}
