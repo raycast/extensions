@@ -64,28 +64,6 @@ function OpenWithIINAAction(props: { videoId: string | null | undefined }): JSX.
   return null;
 }
 
-function OpenWithVLCAction(props: { videoId: string | null | undefined }): JSX.Element | null {
-  const url = videoUrl(props.videoId);
-  if (url) {
-    const appPath = "/Applications/VLC.app";
-    if (fs.existsSync(appPath)) {
-      return (
-        <OpenAction
-          title="Open with VLC"
-          target={url}
-          application="vlc"
-          icon={{ fileIcon: appPath }}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-          onOpen={() => {
-            showHUD("Open VLC");
-          }}
-        />
-      );
-    }
-  }
-  return null;
-}
-
 function ShowVideoDetails(props: { video: Video }): JSX.Element {
   const video = props.video;
   return (
@@ -131,7 +109,6 @@ export function VideoListItemDetail(props: { video: Video }): JSX.Element {
           <ShowChannelAction channelId={video.channelId} />
           <OpenChannelInBrowser channelId={video.channelId} />
           <CopyVideoUrlAction videoId={videoId} />
-          <OpenWithVLCAction videoId={videoId} />
           <OpenWithIINAAction videoId={videoId} />
         </ActionPanel>
       }
@@ -184,7 +161,6 @@ export function VideoListItem(props: { video: Video }): JSX.Element {
           {mainActions()}
           <ShowChannelAction channelId={video.channelId} />
           <CopyVideoUrlAction videoId={videoId} />
-          <OpenWithVLCAction videoId={videoId} />
           <OpenWithIINAAction videoId={videoId} />
         </ActionPanel>
       }
