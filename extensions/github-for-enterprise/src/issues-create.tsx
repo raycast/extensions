@@ -9,6 +9,10 @@ import useSWRImmutable from 'swr/immutable';
 export default function Command() {
     const [repository, setRepository] = useState<Repository | null>(null);
     const [template, setTemplate] = useState({ title: '', content: '' });
+    const [assigneeIds, setAssigneeIds] = useState<string[]>([]);
+    const [labelIds, setLabelIds] = useState<string[]>([]);
+    const [projectIds, setProjectIds] = useState<string[]>([]);
+    const [milestoneId, setMilestoneId] = useState('')
     const { data, error } = useSWRImmutable<GetRepositories>('repos', () => fetcher({ document: GET_REPOSITORIES }));
     const { data: issueTemplates } = useSWRImmutable<GetIssueTemplates>(repository ? repository.nameWithOwner : null, () => fetcher({
         document: GET_ISSUE_TEMPLATES,
@@ -49,8 +53,11 @@ export default function Command() {
                 variables: {
                     repositoryId: id,
                     ...Object.keys(values)
-                        .filter(k => values[k])
-                        .reduce((a, k) => ({ ...a, [k]: values[k] }), {})
+                        .filter(k => Array.isArray(values[k]) ? values[k].length > 0 : values[k])
+                        .reduce((a, k) => ({
+                            ...a,
+                            [k]: values[k]
+                        }), {})
                 }
             });
 
@@ -96,6 +103,11 @@ export default function Command() {
                         title="Repository"
                         onChange={repo => {
                             setRepository(JSON.parse(repo))
+                            setTemplate({ title: '', content: '' });
+                            setAssigneeIds([]);
+                            setLabelIds([]);
+                            setProjectIds([]);
+                            setMilestoneId('')
                         }}>
                         {data?.user.repositories.nodes.map(repo => (
                             <Form.Dropdown.Item
@@ -115,6 +127,9 @@ export default function Command() {
                             onChange={value => {
                                 setTemplate(JSON.parse(value));
                             }}>
+                            <Form.Dropdown.Item
+                                title="None"
+                                value={JSON.stringify({ title: '', content: '' })} />
                             {templates.map(({ name, displayName, title, content }) => (
                                 <Form.Dropdown.Item
                                     key={name}
@@ -148,52 +163,72 @@ export default function Command() {
                             }));
                         }}
                         value={template.content} />
-                    <Form.TagPicker
-                        id="assigneeIds"
-                        title="Assignees"
-                        placeholder="Type or choose an assignee">
-                        {repository?.assignableUsers?.nodes.map(({ id, login }) => (
-                            <Form.TagPicker.Item
-                                key={id}
-                                title={login}
-                                value={id} />
-                        ))}
-                    </Form.TagPicker>
-                    <Form.TagPicker
-                        id="labelIds"
-                        title="Labels"
-                        placeholder="Type or choose a label">
-                        {repository?.labels?.nodes.map(({ id, name }) => (
-                            <Form.TagPicker.Item
-                                key={id}
-                                title={name}
-                                value={id} />
-                        ))}
-                    </Form.TagPicker>
-                    <Form.TagPicker
-                        id="projectIds"
-                        title="Projects"
-                        placeholder="Type or choose a project">
-                        {repository?.projects?.nodes.map(({ id, name }) => (
-                            <Form.TagPicker.Item
-                                key={id}
-                                title={name}
-                                value={id} />
-                        ))}
-                    </Form.TagPicker>
-                    <Form.Dropdown
-                        id="milestoneId"
-                        title="Milestone">
-                        <Form.Dropdown.Item
-                            title="None"
-                            value="" />
-                        {repository?.milestones?.nodes.map(({ id, title }) => (
-                            <Form.Dropdown.Item
-                                key={id}
-                                title={title}
-                                value={id} />
-                        ))}
-                    </Form.Dropdown>
+                    {repository?.viewerPermission !== 'READ' && (
+                        <>
+                            {!!repository?.assignableUsers?.nodes.length && (
+                                <Form.TagPicker
+                                    id="assigneeIds"
+                                    title="Assignees"
+                                    placeholder="Type or choose an assignee"
+                                    value={assigneeIds}
+                                    onChange={setAssigneeIds}>
+                                    {repository.assignableUsers.nodes.map(({ id, login }) => (
+                                        <Form.TagPicker.Item
+                                            key={id}
+                                            title={login}
+                                            value={id} />
+                                    ))}
+                                </Form.TagPicker>
+                            )}
+                            {!!repository?.labels?.nodes.length && (
+                                <Form.TagPicker
+                                    id="labelIds"
+                                    title="Labels"
+                                    placeholder="Type or choose a label"
+                                    value={labelIds}
+                                    onChange={setLabelIds}>
+                                    {repository.labels.nodes.map(({ id, name }) => (
+                                        <Form.TagPicker.Item
+                                            key={id}
+                                            title={name}
+                                            value={id} />
+                                    ))}
+                                </Form.TagPicker>
+                            )}
+                            {!!repository?.projects?.nodes?.length && (
+                                <Form.TagPicker
+                                    id="projectIds"
+                                    title="Projects"
+                                    placeholder="Type or choose a project"
+                                    value={projectIds}
+                                    onChange={setProjectIds}>
+                                    {repository.projects.nodes.map(({ id, name }) => (
+                                        <Form.TagPicker.Item
+                                            key={id}
+                                            title={name}
+                                            value={id} />
+                                    ))}
+                                </Form.TagPicker>
+                            )}
+                            {!!repository?.milestones?.nodes.length && (
+                                <Form.Dropdown
+                                    id="milestoneId"
+                                    title="Milestone"
+                                    value={milestoneId}
+                                    onChange={setMilestoneId}>
+                                    <Form.Dropdown.Item
+                                        title="None"
+                                        value="" />
+                                    {repository.milestones.nodes.map(({ id, title }) => (
+                                        <Form.Dropdown.Item
+                                            key={id}
+                                            title={title}
+                                            value={id} />
+                                    ))}
+                                </Form.Dropdown>
+                            )}
+                        </>
+                    )}
                 </>
             )}
         </Form>
