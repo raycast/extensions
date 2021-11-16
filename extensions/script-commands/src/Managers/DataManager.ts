@@ -14,13 +14,16 @@ import {
 } from "@stores"
 
 import { 
-  Command,
-  Content,
   ScriptCommandManager, 
   Settings, 
+} from "@managers"
+
+import { 
+  Command,
+  Content,
   State,
   StateResult, 
-} from "@managers"
+} from "@types"
 
 import fs from 'fs'
 

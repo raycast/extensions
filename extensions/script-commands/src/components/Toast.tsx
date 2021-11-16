@@ -9,13 +9,9 @@ import {
 } from "@models"
 
 import { 
-  State 
-} from "@managers"
-
-export enum Progress {
-  InProgress,
-  Finished,
-}
+  State,
+  Progress 
+} from "@types"
 
 export async function StoreToast(
     state: State, 

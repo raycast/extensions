@@ -17,7 +17,7 @@ type Props = {
   onAction: () => void
 }
 
-export function GroupSection({ group, parentName, onAction }: Props) {
+export function GroupSection({ group, parentName, onAction }: Props): JSX.Element  {
   group.scriptCommands.sort((left: ScriptCommand, right: ScriptCommand) => {
     return (left.title > right.title) ? 1 : -1
   })

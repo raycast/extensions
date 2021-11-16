@@ -15,6 +15,5 @@ export {
 } from "./SourceCodeDetail"
 
 export { 
-  Progress, 
   StoreToast
 } from "./Toast"

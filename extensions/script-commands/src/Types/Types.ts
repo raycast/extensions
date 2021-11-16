@@ -38,6 +38,11 @@ export interface IconPath  {
   path: string
 }
 
+export enum Progress {
+  InProgress,
+  Finished,
+}
+
 interface Result<T> {
   content: T,
   message: string
@@ -48,6 +53,10 @@ export enum State {
   NotInstalled,
   NeedSetup,
   Error,
+}
+
+export type ViewState = { 
+  needsReload: boolean 
 }
 
 export type StateResult = Result<State>

@@ -30,15 +30,19 @@ import {
 } from "@models"
 
 import { 
-  Progress,
   SourceCodeDetail, 
   StoreToast 
 } from "@components"
 
 import { 
   DataManager,
-  State
 } from "@managers"
+
+import { 
+  Progress,
+  State,
+  ViewState
+} from "@types"
 
 // External
 
@@ -48,10 +52,6 @@ import {
 
 // Internal 
 
-type Refresh = { 
-  refresh: boolean 
-}
-
 type Props = { 
   scriptCommand: ScriptCommand,
   onAction: () => void
@@ -60,7 +60,7 @@ type Props = {
 const dataManager = DataManager.shared()
 
 export function ScriptCommandItem({ scriptCommand, onAction }: Props): JSX.Element {
-  const [, setRefresh] = useState<Refresh>({ refresh: false })
+  const [, setViewState] = useState<ViewState>({ needsReload: true })
   
   return (
     <List.Item
@@ -77,9 +77,9 @@ export function ScriptCommandItem({ scriptCommand, onAction }: Props): JSX.Eleme
             scriptCommand={ scriptCommand } 
             onStateChanged={ 
               () => {
-                setRefresh(oldState => ({
+                setViewState(oldState => ({
                   ...oldState, 
-                  refresh: true 
+                  needsReload: true 
                 }))
 
                 onAction()
@@ -98,7 +98,7 @@ function ManagementActionSection({ scriptCommand, onStateChanged }: { scriptComm
   const elements: JSX.Element[] = [] 
 
   const state = dataManager.stateFor(scriptCommand)
-  const [, setRefresh] = useState<Refresh>({ refresh: false })
+  const [, setViewState] = useState<ViewState>({ needsReload: true })
 
   const uninstallAction = (
     <UninstallActionItem
@@ -106,7 +106,7 @@ function ManagementActionSection({ scriptCommand, onStateChanged }: { scriptComm
       scriptCommand={ scriptCommand } 
       onAction={ 
         () => {
-          setRefresh(oldState => ({
+          setViewState(oldState => ({
             ...oldState, 
             refresh: true 
           }))
@@ -129,7 +129,7 @@ function ManagementActionSection({ scriptCommand, onStateChanged }: { scriptComm
         scriptCommand={ scriptCommand } 
         onAction={ 
           () => {
-            setRefresh(oldState => ({
+            setViewState(oldState => ({
               ...oldState, 
               refresh: true 
             }))

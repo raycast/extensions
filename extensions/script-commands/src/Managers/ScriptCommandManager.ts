@@ -1,15 +1,18 @@
 import { 
-  Command,
+  Settings,
+} from "@managers"
+
+import { 
+  Command, 
   File,
   FileNullable,
   Files,
   IconPathNullable,
   IconResultNullable,
   IconUsage,
-  Settings,
   State,
   StateResult,
-} from "@managers"
+} from "@types"
 
 import { 
   ScriptCommand,
