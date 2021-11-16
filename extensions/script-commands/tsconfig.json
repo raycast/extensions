@@ -19,6 +19,7 @@
       "@managers": ["Managers/index"],
       "@models": ["Models/index"],
       "@network": ["Network/API/index"],
+      "@stores": ["Stores/index"],
       "@urls": ["Network/URL/index"]
     }
   }

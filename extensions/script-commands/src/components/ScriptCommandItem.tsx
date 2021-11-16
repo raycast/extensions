@@ -2,14 +2,15 @@
 
 import { 
   ActionPanel, 
+  Color,
   Icon, 
-  ImageMask, 
   Image, 
+  ImageLike,
+  ImageMask, 
   List, 
   OpenInBrowserAction, 
-  Color,
   PushAction,
-  ImageLike
+  randomId,
 } from "@raycast/api"
 
 // Script Commands Store 
@@ -41,10 +42,6 @@ import {
 
 // External
 
-import 
-  * as crypto 
-from "crypto"
-
 import { 
   useState
 } from "react"
@@ -56,12 +53,13 @@ type Refresh = {
 }
 
 type Props = { 
-  scriptCommand: ScriptCommand
+  scriptCommand: ScriptCommand,
+  onAction: () => void
 }
 
 const dataManager = DataManager.shared()
 
-export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
+export function ScriptCommandItem({ scriptCommand, onAction }: Props): JSX.Element {
   const [, setRefresh] = useState<Refresh>({ refresh: false })
   
   return (
@@ -83,6 +81,8 @@ export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
                   ...oldState, 
                   refresh: true 
                 }))
+
+                onAction()
               }
             } 
           />
@@ -177,7 +177,7 @@ function InstallActionItem({ scriptCommand, onAction }: { scriptCommand: ScriptC
       onAction={ 
         async () => {
           await StoreToast(State.NotInstalled, Progress.InProgress, scriptCommand)
-          const result = await dataManager.download(scriptCommand)
+          const result = await dataManager.installScriptCommand(scriptCommand)
 
           await StoreToast(result.content, Progress.Finished, scriptCommand)
           onAction()
@@ -202,7 +202,7 @@ function UninstallActionItem({ scriptCommand, onAction }: { scriptCommand: Scrip
       onAction={ 
         async () => {
           await StoreToast(State.Installed, Progress.InProgress, scriptCommand)
-          const result = await dataManager.uninstall(scriptCommand)
+          const result = await dataManager.deleteScriptCommand(scriptCommand)
 
           await StoreToast(result.content, Progress.Finished, scriptCommand)
 
@@ -270,7 +270,7 @@ function AuthorsActionPanel({ authors }: { authors: Author[] }): JSX.Element {
     <ActionPanel.Section title={ totalDescription }>
       {authors.map(author => (
         <AuthorActionItem 
-          key={ author.url ?? crypto.randomUUID() } 
+          key={ author.url ?? randomId() } 
           author={ author } 
         />
       ))}
@@ -314,7 +314,7 @@ const avatarImage = (author: Author): Image => {
 
 const authorsDescription = (authors: Author[] | undefined): string => { 
   if (authors != null && authors?.length > 0) {
-    let content = "";
+    let content = ""
 
     authors.forEach(author => {
       if (content.length > 0)

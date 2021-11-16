@@ -15,9 +15,15 @@ import {
   MainContent 
 } from "@components"
 
+type State = { 
+  needsReload: boolean 
+}
+
 const dataManager = DataManager.shared()
 
 export function ScriptCommandsInstalledList() {
+  const [state, setState] = useState<State>({ needsReload: true })
+
   const [content, setContent] = useState<Main>({ 
     groups: [],
     totalScriptCommands: 0
@@ -35,15 +41,23 @@ export function ScriptCommandsInstalledList() {
     }
 
     fetch()
-  }, [])
+  }, [state])
 
   return (
     <MainContent 
       navigationTitle="List Commands Installed"
+      placeholder={`Search between ${content.totalScriptCommands} installed`}
       isLoading={ content.groups.length == 0 } 
       groups={ content.groups } 
       totalScriptCommands={ content.totalScriptCommands }
       showSearchListAction={ content.totalScriptCommands == 0}
+      onAction={ 
+        () => {
+          setState(oldState => ({
+            ...oldState, 
+            needsReload: true 
+          }))
+      }}
     />
   )
 }
