@@ -69,12 +69,12 @@ export default function Command() {
                 <ActionPanel>
                   <ActionPanel.Section>
                     <PasteAction
-                      title="Paste character to Curent Window"
+                      title="Paste Character to Current Window"
                       content={item.value}
                       onPaste={() => addToRecentlyUsedItems(item)}
                     />
                     <CopyToClipboardAction
-                      title="Copy character to Clipboard"
+                      title="Copy Character to Clipboard"
                       content={item.value}
                       onCopy={() => addToRecentlyUsedItems(item)}
                     />

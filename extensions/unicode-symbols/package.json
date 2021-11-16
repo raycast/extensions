@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unicode-symbols",
   "title": "Unicode Symbols Search",
-  "description": "Browse and copy-paste common unicode symbols.",
+  "description": "Browse and copy-paste common Unicode symbols.",
   "icon": "command-icon.png",
   "author": "mmazzarolo",
   "license": "MIT",
@@ -10,7 +10,7 @@
     {
       "name": "index",
       "title": "Search Unicode Symbol",
-      "description": "Browse and copy-paste common unicode symbols.",
+      "description": "Browse and copy-paste common Unicode symbols.",
       "mode": "view"
     }
   ],
