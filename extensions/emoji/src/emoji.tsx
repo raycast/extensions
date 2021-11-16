@@ -92,7 +92,7 @@ export default function Main(): ReactElement {
                 <ActionPanel>
                   <ActionPanel.Section>
                     <PasteAction
-                      title="Paste Emoji to Curent Window"
+                      title="Paste Emoji to Current Window"
                       content={emoji.emoji}
                       onPaste={() => addToRecentlyUsed(emoji)}
                     />
