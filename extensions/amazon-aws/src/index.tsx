@@ -36,7 +36,7 @@ export default function DescribeInstances() {
   }, []);
 
   if (state.hasError) {
-    return (<Detail markdown="We can't find a valid [configuration and credential file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) in your machine." />)
+    return (<Detail markdown="No valid [configuration and credential file] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />)
   }
 
   return (
