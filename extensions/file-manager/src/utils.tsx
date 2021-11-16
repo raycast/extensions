@@ -5,20 +5,17 @@ import {
   ShowInFinderAction,
   OpenWithAction,
   OpenAction,
-  Form,
   showToast,
   ToastStyle,
-  SubmitFormAction,
   getPreferenceValues,
   PushAction,
-  useNavigation,
   Icon,
   Detail
 } from "@raycast/api";
 import { promisify } from "node:util";
 import { exec as _exec } from "node:child_process";
 import filesize from "filesize";
-import { existsSync, writeFileSync, mkdirSync, lstatSync, readdirSync, readlinkSync } from "node:fs";
+import { existsSync,lstatSync, readdirSync, readlinkSync } from "node:fs";
 import { resolve } from "node:path";
 import { homedir } from "node:os";
 
@@ -54,55 +51,6 @@ export function getStartDirectory(): string {
   return resolve(startDirectory);
 }
 
-export function CreateFile(props: { path: string }) {
-  const { pop } = useNavigation();
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <SubmitFormAction onSubmit={(values: { fileName: string, fileContents: string }) => {
-            const filePath = `${props.path}/${values.fileName}`;
-            if (existsSync(filePath)) {
-              showToast(ToastStyle.Failure, "Error Creating File", "File already exists");
-            } else {
-              writeFileSync(filePath, values.fileContents);
-              showToast(ToastStyle.Success, "File Created", "File successfully created");
-              pop();
-            }
-          }} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField title="File Name" placeholder="file.txt" id="fileName" />
-      <Form.TextArea title="File Contents" placeholder="contents" id="fileContents" />
-    </Form>
-  );
-}
-
-export function CreateDirectory(props: { path: string }) {
-  const { pop } = useNavigation();
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <SubmitFormAction onSubmit={(values: { directoryName: string }) => {
-            const filePath = `${props.path}/${values.directoryName}`;
-            if (existsSync(filePath)) {
-              showToast(ToastStyle.Failure, "Error Creating Directory", "Directory already exists");
-            } else {
-              mkdirSync(filePath);
-              showToast(ToastStyle.Success, "Directory Created", "Directory successfully created");
-              pop();
-            }
-          }} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField title="Directory Name" placeholder="folder name" id="directoryName" />
-    </Form>
-  );
-}
-
 export function DirectoryItem(props: { fileData: FileDataType }) {
   const preferences: PreferencesType = getPreferenceValues();
   const filePath = `${props.fileData.path}/${props.fileData.name}`;
@@ -117,8 +65,6 @@ export function DirectoryItem(props: { fileData: FileDataType }) {
           <PushAction title="Open Directory" icon={Icon.ArrowRight} target={<Directory path={filePath} />} />
           <ShowInFinderAction path={filePath} />
           <CopyToClipboardAction title="Copy Directory Path" content={`${filePath}/`} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
-          <PushAction title="Create File" icon={Icon.Plus} shortcut={{ modifiers: ["cmd"], key: "n" }} target={<CreateFile path={props.fileData.path} />} />
-          <PushAction title="Create Directory" icon={Icon.Plus} shortcut={{ modifiers: ["cmd", "shift"], key: "n" }} target={<CreateDirectory path={props.fileData.path} />} />
         </ActionPanel>
       }
     />
@@ -142,8 +88,6 @@ export function FileItem(props: { fileData: FileDataType }) {
           <ShowInFinderAction path={filePath} />
           <OpenWithAction path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           <CopyToClipboardAction title="Copy File Path" content={filePath} shortcut={{ modifiers: ["opt", "shift"], key: "c" }} />
-          <PushAction title="Create File" icon={Icon.Plus} shortcut={{ modifiers: ["cmd"], key: "n" }} target={<CreateFile path={props.fileData.path} />} />
-          <PushAction title="Create Directory" icon={Icon.Plus} shortcut={{ modifiers: ["cmd", "shift"], key: "n" }} target={<CreateDirectory path={props.fileData.path} />} />
         </ActionPanel>
       }
     />
@@ -169,8 +113,6 @@ export function SymlinkItem(props: { fileData: FileDataType }) {
             <OpenWithAction path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
             <CopyToClipboardAction title="Copy Symlink Path" content={filePath} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
             <CopyToClipboardAction title="Copy Original Directory Path" content={filePath} shortcut={{ modifiers: ["cmd", "opt"], key: "c" }} />
-            <PushAction title="Create File" icon={Icon.Plus} shortcut={{ modifiers: ["cmd"], key: "n" }} target={<CreateFile path={props.fileData.path} />} />
-            <PushAction title="Create Directory" icon={Icon.Plus} shortcut={{ modifiers: ["cmd", "shift"], key: "n" }} target={<CreateDirectory path={props.fileData.path} />} />
           </ActionPanel>
         }
       />
@@ -188,8 +130,6 @@ export function SymlinkItem(props: { fileData: FileDataType }) {
             <OpenWithAction path={filePath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
             <CopyToClipboardAction title="Copy Symlink Path" content={filePath} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
             <CopyToClipboardAction title="Copy Original File Path" content={originalPath} shortcut={{ modifiers: ["cmd", "opt"], key: "c" }} />
-            <PushAction title="Create File" icon={Icon.Plus} shortcut={{ modifiers: ["cmd"], key: "n" }} target={<CreateFile path={props.fileData.path} />} />
-            <PushAction title="Create Directory" icon={Icon.Plus} shortcut={{ modifiers: ["cmd", "shift"], key: "n" }} target={<CreateDirectory path={props.fileData.path} />} />
           </ActionPanel>
         }
       />
