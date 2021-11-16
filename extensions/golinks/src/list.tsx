@@ -1,15 +1,32 @@
-import { ActionPanel, CopyToClipboardAction, Icon, List, OpenInBrowserAction } from '@raycast/api'
+import {
+  ActionPanel,
+  CopyToClipboardAction,
+  Icon,
+  List,
+  OpenInBrowserAction,
+  showToast,
+  ToastStyle,
+} from '@raycast/api'
 import { useFetch } from './api'
 import { GoLink } from './types'
 
 export default function ListGoLink() {
   const { data, isLoading, error } = useFetch('/golinks?limit=100')
+
   if (error) {
-    return (
-      <List>
-        <List.Item icon={Icon.ExclamationMark} title="Error occurred" accessoryTitle={error.message} />
-      </List>
-    )
+    showToast(ToastStyle.Failure, `Error occurred: ${error.message}`)
+
+    if (error.response?.status === 401) {
+      return (
+        <List>
+          <List.Item
+            icon={Icon.ExclamationMark}
+            title="The API token is invalid or deactivated"
+            accessoryTitle="Go to Extensions → GoLinks"
+          />
+        </List>
+      )
+    }
   }
 
   const golinks = (data as { results: GoLink[] })?.results || []

@@ -11,7 +11,7 @@ interface Preferences {
 interface FetchResult<T> {
   data: T | undefined
   isLoading: boolean
-  error: Error
+  error?: AxiosError
 }
 
 const preferences: Preferences = getPreferenceValues()
@@ -29,20 +29,14 @@ const fetcher = (path: string) => api.get(path).then((res) => res.data)
 export function useFetch<T>(path: string): FetchResult<T> {
   const { data, error } = useSWR<T, AxiosError>(path, fetcher)
 
-  return { data, isLoading: !error && !data, error: new Error(error?.message) }
+  return { data, isLoading: !error && !data, error: error }
 }
 
-export async function createGoLink(name: string, url: string, description: string): Promise<void> {
-  try {
-    const params = new URLSearchParams()
-    params.append('name', name)
-    params.append('url', url)
-    params.append('description', description)
+export async function createGoLink(name: string, url: string, description: string): Promise<AxiosError | void> {
+  const params = new URLSearchParams()
+  params.append('name', name)
+  params.append('url', url)
+  params.append('description', description)
 
-    await api.post<GoLink>('/golinks', params)
-
-    showToast(ToastStyle.Success, 'GoLink created')
-  } catch (error) {
-    showToast(ToastStyle.Failure, `Failed to create GoLink: ${error}`)
-  }
+  await api.post<GoLink>('/golinks', params)
 }
