@@ -95,7 +95,7 @@ function QueueListItem(props: { queue: string, attributes: QueueAttributes|undef
       actions={
         <ActionPanel>
           <OpenInBrowserAction title="Open in Browser" shortcut={{ modifiers: [], key: "enter" }} url={path} />
-          <CopyToClipboardAction title="Copy path" content={queue} />
+          <CopyToClipboardAction title="Copy Path" content={queue} />
         </ActionPanel>
       }
     />
