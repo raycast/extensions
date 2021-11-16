@@ -11,7 +11,7 @@ AWS.config.update({region: preferences.region});
 var sqs = new AWS.SQS({apiVersion: '2012-11-05'});
 
 export default function ListSQSQueues() {
-  const [state, setState] = useState<{ queues: string[], showingQueues: string[], attributes: QueueAttributes[],  hasError: boolean }>({ queues: [], showingQueues: [], attributes: [], hasError: false });
+  const [state, setState] = useState<{ loaded: boolean, queues: string[], showingQueues: string[], attributes: QueueAttributes[],  hasError: boolean }>({ loaded: false, queues: [], showingQueues: [], attributes: [], hasError: false });
 
   let loadItems = async function(q: string[]) {
     let att: any[] = [];
@@ -33,14 +33,22 @@ export default function ListSQSQueues() {
 
   useEffect(() => {
     async function fetch() {
-      let queues = await sqs.listQueues({}).promise();
-      
-      setState(o => ({
-        ...o, 
-        queues: queues.QueueUrls,
-        showingQueues: queues.QueueUrls,
-      }));
-      loadItems(queues.QueueUrls);
+      await sqs.listQueues({}, function(err: { stack: any; }, data: any) {
+        if (err) {
+          setState(o => ({
+            ...o,
+            hasError: true
+          }));
+        } else {
+          setState(o => ({
+            ...o, 
+            loaded: true,
+            queues: data.QueueUrls,
+            showingQueues: data.QueueUrls,
+          }));
+          loadItems(data.QueueUrls);
+        }
+      });
     }
     fetch();
   }, []);
@@ -50,7 +58,7 @@ export default function ListSQSQueues() {
   }
   
   return (
-    <List isLoading={state.queues.length === 0} searchBarPlaceholder="Filter queues by name..." >
+    <List isLoading={!state.loaded} searchBarPlaceholder="Filter queues by name..." >
       {state.showingQueues.map((i, k) => {
         let attr = state.attributes.find((a: QueueAttributes) => i === a.Name);
           return (

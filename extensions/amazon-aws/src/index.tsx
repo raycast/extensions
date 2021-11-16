@@ -12,7 +12,7 @@ export default function DescribeInstances() {
   var ec2 = new AWS.EC2({apiVersion: '2016-11-15'});
   var params = {DryRun: false};
   
-  const [state, setState] = useState<{ instances: Instance[], hasError: boolean }>({ instances: [], hasError: false });
+  const [state, setState] = useState<{ instances: Instance[], loaded: boolean, hasError: boolean }>({ instances: [], loaded: false, hasError: false });
 
   useEffect(() => {
     async function fetch() {
@@ -20,12 +20,14 @@ export default function DescribeInstances() {
         if (err) {
           setState(oldstate => ({
             hasError: true,
+            loaded: false,
             instances: []
           }));
         } else {
-          setState((oldState) => ({
-            ...oldState,
-            instances: data.Reservations.map((r: any) => r.Instances).flat(),
+          setState(oldstate => ({
+            hasError: false,
+            loaded: true,
+            instances: data.Reservations.map((r: any) => r.Instances).flat()
           }));
         }
       });
@@ -38,7 +40,7 @@ export default function DescribeInstances() {
   }
 
   return (
-    <List isLoading={state.instances.length === 0} searchBarPlaceholder="Filter instances by name...">
+    <List isLoading={!state.loaded} searchBarPlaceholder="Filter instances by name...">
       {state.instances.map((i) => (
         <InstanceListItem key={i.InstanceId} instance={i} />
       ))}
