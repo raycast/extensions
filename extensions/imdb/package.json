@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Film or TV Series",
+      "title": "Search Film and TV Series",
       "subtitle": "IMDb",
       "description": "Easily open your favorite film or TV series on IMDb.",
       "mode": "view"

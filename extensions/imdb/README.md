@@ -28,8 +28,9 @@ The API key you've provided either hasn't been activated or is incorrect.
 
 1. Open the confirmation email from OMDb.
 2. Activate the API key once more.
+   > Note: You may need to change the activation link to `https://`
 3. On Raycast open the Preferences pane (Search "Extensions Raycast Preferences").
-4. Select the `Search Film or TV Series` command from the list.
+4. Select the `Search Film and TV Series` command from the list.
 5. Paste in your API key e.g. `ab12c345` into the field provided.
 6. Re-open the IMDb extension and try searching for your favorite film or tv series.
 
@@ -41,4 +42,4 @@ If any other issues persist, feel free to [contact me](https://twitter.com/RyanV
 
 Special thanks again to Brian Fritz for providing the Open Movie Database API. If you would like to support the OMDb project, you can [become a patreon](https://www.patreon.com/join/omdb).
 
-This site is not endorsed by or affiliated with IMDb or OMDb.
+This extension is not endorsed by or affiliated with IMDb or OMDb.
