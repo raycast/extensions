@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lorem-ipsum",
+  "title": "Lorem Ipsum",
+  "description": "Generate placeholder content",
+  "icon": "paragraph-icon.png",
+  "author": "AntonNiklasson",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "paragraph",
+      "title": "Generate Paragraph",
+      "subtitle": "Lorem Ipsum",
+      "description": "Generate a random paragraph and copy it to the clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "sentence",
+      "title": "Generate Sentence",
+      "subtitle": "Lorem Ipsum",
+      "description": "Generate a random sentence and copy it to the clipboard",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "lorem-ipsum": "^2.0.4",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

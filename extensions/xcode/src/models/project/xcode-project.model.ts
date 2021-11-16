@@ -19,5 +19,5 @@ export interface XcodeProject {
   /**
    * The keywords
    */
-  keywords: string[]
+  keywords: string[];
 }

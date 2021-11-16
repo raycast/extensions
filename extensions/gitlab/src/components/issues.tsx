@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
 import { Group, Issue, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { optimizeMarkdownText, toDateString } from "../utils";
+import { optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
 import { IssueItemActions } from "./issue_actions";
 
 export enum IssueScope {
@@ -43,9 +43,17 @@ export function IssueDetail(props: { issue: Issue }) {
     showToast(ToastStyle.Failure, "Could not get issue details", error);
   }
 
+  const desc = (description ? description : props.issue.description) || "";
+
+  let md = "";
+  if (props.issue) {
+    md = props.issue.labels.map((i) => `\`${i.name}\``).join(" ") + "  \n";
+  }
+  md += "## Description\n" + optimizeMarkdownText(desc);
+
   return (
     <Detail
-      markdown={optimizeMarkdownText(description)}
+      markdown={md}
       isLoading={isLoading}
       navigationTitle={`${props.issue.reference_full}`}
       actions={
@@ -59,19 +67,21 @@ export function IssueDetail(props: { issue: Issue }) {
 }
 
 export function useDetail(issueID: number): {
-  description: string;
+  description?: string;
   error?: string;
   isLoading: boolean;
 } {
-  const [description, setDescription] = useState<string>("");
+  const [description, setDescription] = useState<string>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  let cancel = false;
-
   useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
     async function fetchData() {
-      if (issueID <= 0 || cancel) {
+      if (issueID <= 0 || didUnmount) {
         return;
       }
 
@@ -84,15 +94,15 @@ export function useDetail(issueID: number): {
           variables: { id: `gid://gitlab/Issue/${issueID}` },
         });
         const desc = data.data.issue.description || "<no description>";
-        if (!cancel) {
+        if (!didUnmount) {
           setDescription(desc);
         }
       } catch (e: any) {
-        if (!cancel) {
+        if (!didUnmount) {
           setError(e.message);
         }
       } finally {
-        if (!cancel) {
+        if (!didUnmount) {
           setIsLoading(false);
         }
       }
@@ -101,7 +111,7 @@ export function useDetail(issueID: number): {
     fetchData();
 
     return () => {
-      cancel = true;
+      didUnmount = true;
     };
   }, [issueID]);
 
@@ -188,6 +198,53 @@ export function IssueList({
   );
 }
 
+function getIssueQuery(query: string | undefined) {
+  return tokenizeQueryText(query, ["label", "author", "milestone", "assignee"]);
+}
+
+function injectQueryNamedParameters(
+  requestParams: Record<string, any>,
+  query: Query,
+  scope: IssueScope,
+  isNegative: boolean
+) {
+  const namedParams = isNegative ? query.negativeNamed : query.named;
+  for (const extraParam of Object.keys(namedParams)) {
+    const extraParamVal = namedParams[extraParam];
+    const prefixed = (text: string): string => {
+      return isNegative ? `not[${text}]` : text;
+    };
+    if (extraParamVal) {
+      switch (extraParam) {
+        case "label":
+          {
+            requestParams[prefixed("labels")] = extraParamVal.join(",");
+          }
+          break;
+        case "author":
+          {
+            if (scope === IssueScope.all) {
+              requestParams[prefixed("author_username")] = extraParamVal.join(",");
+            }
+          }
+          break;
+        case "milestone":
+          {
+            requestParams[prefixed("milestone")] = extraParamVal.join(",");
+          }
+          break;
+        case "assignee":
+          {
+            if (scope === IssueScope.all) {
+              requestParams[prefixed("assignee_username")] = extraParamVal.join(",");
+            }
+          }
+          break;
+      }
+    }
+  }
+}
+
 export function useSearch(
   query: string | undefined,
   scope: IssueScope,
@@ -203,11 +260,13 @@ export function useSearch(
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  let cancel = false;
-
   useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
     async function fetchData() {
-      if (query === null || cancel) {
+      if (query === null || didUnmount) {
         return;
       }
 
@@ -215,39 +274,33 @@ export function useSearch(
       setError(undefined);
 
       try {
+        const qd = getIssueQuery(query);
+        query = qd.query;
+        const requestParams: Record<string, any> = {
+          state: state,
+          scope: scope,
+          search: query || "",
+          in: "title",
+        };
+        injectQueryNamedParameters(requestParams, qd, scope, false);
+        injectQueryNamedParameters(requestParams, qd, scope, true);
         if (group) {
-          const glIssues = await gitlab.getGroupIssues(
-            {
-              state: state,
-              scope: scope,
-              search: query || "",
-              in: "title",
-            },
-            group.id
-          );
-          if (!cancel) {
+          const glIssues = await gitlab.getGroupIssues(requestParams, group.id);
+          if (!didUnmount) {
             setIssues(glIssues);
           }
         } else {
-          const glIssues = await gitlab.getIssues(
-            {
-              state: state,
-              scope: scope,
-              search: query || "",
-              in: "title",
-            },
-            project
-          );
-          if (!cancel) {
+          const glIssues = await gitlab.getIssues(requestParams, project);
+          if (!didUnmount) {
             setIssues(glIssues);
           }
         }
       } catch (e: any) {
-        if (!cancel) {
+        if (!didUnmount) {
           setError(e.message);
         }
       } finally {
-        if (!cancel) {
+        if (!didUnmount) {
           setIsLoading(false);
         }
       }
@@ -256,7 +309,7 @@ export function useSearch(
     fetchData();
 
     return () => {
-      cancel = true;
+      didUnmount = true;
     };
   }, [query]);
 

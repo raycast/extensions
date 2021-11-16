@@ -1,4 +1,4 @@
-import { ActionPanel, ActionPanelProps, List, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, ActionPanelProps, Color, Icon, ImageLike, List, showToast, ToastStyle } from "@raycast/api";
 import { XcodeSimulator } from "../../models/simulator/xcode-simulator.model";
 import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
 import { ReactElement } from "react";
@@ -19,10 +19,39 @@ export function xcodeSimulatorListItem(
       title={xcodeSimulator.name}
       subtitle={xcodeSimulator.runtime}
       accessoryTitle={xcodeSimulator.state}
+      accessoryIcon={accessoryIcon(xcodeSimulator)}
       keywords={[xcodeSimulator.name, xcodeSimulator.runtime]}
       actions={actions(xcodeSimulator, xcodeSimulatorService)}
     />
   );
+}
+
+/**
+ * Retrieve accessory icon for XcodeSimulator
+ * @param xcodeSimulator The XcodeSimulator
+ */
+function accessoryIcon(
+  xcodeSimulator: XcodeSimulator
+): ImageLike | undefined {
+  switch (xcodeSimulator.state) {
+    case "Booted":
+      return {
+        source: Icon.Checkmark,
+        tintColor: Color.Green
+      };
+    case "Pending":
+      return {
+        source: Icon.Dot,
+        tintColor: Color.Yellow
+      };
+    case "Shutdown":
+      return {
+        source: Icon.Circle,
+        tintColor: Color.SecondaryText
+      };
+    default:
+      return undefined;
+  }
 }
 
 /**

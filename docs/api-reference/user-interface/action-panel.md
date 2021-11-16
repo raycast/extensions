@@ -183,7 +183,7 @@ export default function Command() {
 | :--- | :--- | :--- | :--- | :--- |
 | children | <code>[ActionPanelChildren](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanelchildren)</code> | No | - | Items of the submenu. |
 | icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | The icon displayed for the submenu. |
-| id | <code>string</code> | No | - | ID of the submenu. Make sure to assign each section a unique ID or a UUID will be auto-generated. |
+| id | <code>string</code> | No | - | ID of the submenu. Make sure to assign each submenu a unique ID or a UUID will be auto-generated. |
 | shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the submenu. |
 | title | <code>string</code> | Yes | - | The title displayed for submenu. |
 

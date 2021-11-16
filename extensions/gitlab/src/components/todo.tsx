@@ -53,11 +53,12 @@ export function TodoList() {
 
 export function TodoListItem(props: { todo: Todo }) {
   const todo = props.todo;
+  const subtitle = todo.group ? todo.group.full_path : todo.project_with_namespace || "";
   return (
     <List.Item
       id={todo.id.toString()}
       title={todo.title}
-      subtitle={todo.project_with_namespace}
+      subtitle={subtitle}
       accessoryTitle={todo.action_name}
       accessoryIcon={userToIcon(todo.author)}
       icon={{ source: GitLabIcons.todo, tintColor: Color.Green }}
@@ -81,11 +82,13 @@ export function useSearch(query: string | undefined): {
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  let cancel = false;
-
   useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
     async function fetchData() {
-      if (query === null || cancel) {
+      if (query === null || didUnmount) {
         return;
       }
 
@@ -95,15 +98,15 @@ export function useSearch(query: string | undefined): {
       try {
         const glTodos = await gitlab.getTodos({ search: query || "" });
 
-        if (!cancel) {
+        if (!didUnmount) {
           setTodos(glTodos);
         }
       } catch (e: any) {
-        if (!cancel) {
+        if (!didUnmount) {
           setError(e.message);
         }
       } finally {
-        if (!cancel) {
+        if (!didUnmount) {
           setIsLoading(false);
         }
       }
@@ -112,7 +115,7 @@ export function useSearch(query: string | undefined): {
     fetchData();
 
     return () => {
-      cancel = true;
+      didUnmount = true;
     };
   }, [query]);
 

@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List, ListItem, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, List, showToast, ToastStyle } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { createHomeAssistantClient } from "../common";
 import { State } from "../haapi";
@@ -6,13 +6,13 @@ import { useHAStates } from "../hooks";
 
 export const ha = createHomeAssistantClient();
 
-export function StatesAttributesList(props: { domain: string }) {
+export function StatesAttributesList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useSearch(searchText, allStates);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Home Assistant states", error);
+    showToast(ToastStyle.Failure, "Cannot search Home Assistant states", error.message);
   }
 
   if (!states) {
@@ -64,9 +64,10 @@ function useSearch(
 
   useEffect(() => {
     if (allStates) {
-      let filteredStates: State[] = [];
+      const filteredStates: State[] = [];
       allStates.forEach((s) => {
-        let attrs: Record<string, any> = {};
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const attrs: Record<string, any> = {};
         for (const [k, v] of Object.entries(s.attributes)) {
           if (lquery) {
             const friendlyName: string = (s.attributes.friendly_name || "").toLocaleLowerCase();
