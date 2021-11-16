@@ -13,7 +13,7 @@ interface Values {
   color: string;
 }
 const defaultSnippet: Values = {
-  title: "Untitled 1",
+  title: "Untitled%201",
   background: "true",
   darkMode: "true",
   padding: "16",
@@ -26,7 +26,9 @@ export default function CreateSnippet() {
   const [code, setCode] = useState<Values>(defaultSnippet);
   const url = `https://ray.so/?colors=${code.color}&background=${code.background}&darkMode=${code.darkMode}&padding=${
     code.padding
-  }&title=${code.title || "Untitled 1"}&code=${Buffer.from(code.snippet).toString("base64")}&language=${code.language}`;
+  }&title=${code.title || "Untitled%201"}&code=${Buffer.from(code.snippet).toString("base64")}&language=${
+    code.language
+  }`;
 
   const handleSubmit = () => {
     open(url);
@@ -45,7 +47,7 @@ export default function CreateSnippet() {
         id="title"
         title="Title"
         placeholder="Untitled 1"
-        onChange={(title) => setCode({ ...code, title })}
+        onChange={(title) => setCode({ ...code, title: title.replace(/ /g, "%20").trim() })}
       />
       <Form.TextArea
         id="code"
