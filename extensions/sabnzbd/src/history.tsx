@@ -1,4 +1,14 @@
-import { List, showToast, ToastStyle, preferences, Icon, ImageLike, ActionPanel } from "@raycast/api";
+import {
+  List,
+  showToast,
+  ToastStyle,
+  preferences,
+  Icon,
+  ImageLike,
+  ActionPanel,
+  Detail,
+  useNavigation,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { Client, History, HistorySlots, Results } from "sabnzbd-api";
@@ -38,6 +48,8 @@ export default function History() {
 }
 
 function HistorySlotListItem(props: { slot: HistorySlots; setHistorySlots: any }) {
+  const { push } = useNavigation();
+
   const slot = props.slot;
   const setHistorySlots = props.setHistorySlots;
 
@@ -45,6 +57,11 @@ function HistorySlotListItem(props: { slot: HistorySlots; setHistorySlots: any }
 
   const actions = (
     <ActionPanel>
+      <ActionPanel.Item
+        title="Details"
+        icon={{ source: { light: "file-light.png", dark: "file-dark.png" } }}
+        onAction={() => push(<Details slot={slot} setHistorySlots={setHistorySlots} />)}
+      />
       <ActionPanel.Item
         title={"Delete"}
         onAction={() => onDelete(slot, setHistorySlots)}
@@ -55,6 +72,16 @@ function HistorySlotListItem(props: { slot: HistorySlots; setHistorySlots: any }
 
   if (slot.status == "Completed") {
     icon = { source: { light: "ok-light.png", dark: "ok-dark.png" } };
+  } else if (slot.status == "Extracting") {
+    icon = { source: { light: "bolt-light.png", dark: "bolt-dark.png" } };
+  } else if (slot.status == "Verifying") {
+    icon = { source: { light: "key-light.png", dark: "key-dark.png" } };
+  } else if (slot.status == "Queued") {
+    icon = { source: { light: "pause-light.png", dark: "pause-dark.png" } };
+  } else if (slot.status == "Repairing") {
+    icon = { source: { light: "tool-light.png", dark: "tool-dark.png" } };
+  } else if (slot.status == "Failed") {
+    icon = { source: { light: "error-light.png", dark: "error-dark.png" } };
   } else {
     console.log(`Unknown slot status: ${slot.status}`);
 
@@ -73,6 +100,17 @@ function HistorySlotListItem(props: { slot: HistorySlots; setHistorySlots: any }
       actions={actions}
     />
   );
+}
+
+function Details(props: { slot: HistorySlots; setHistorySlots: any }) {
+  const slot = props.slot;
+  const setHistorySlots = props.slot;
+
+  const completed = moment.unix(slot.completed).fromNow();
+
+  const markdown = `# ${slot.name}\n\nStatus: ${slot.status}\n\nCategory: ${slot.category}\n\nStorage: ${slot.storage}\n\nCompleted: ${completed}`;
+
+  return <Detail markdown={markdown} navigationTitle={slot.name} />;
 }
 
 async function onDelete(slot: HistorySlots, setHistorySlots: any) {

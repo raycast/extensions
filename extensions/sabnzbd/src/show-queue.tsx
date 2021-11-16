@@ -1,4 +1,14 @@
-import { List, showToast, ToastStyle, preferences, Icon, ImageLike, ActionPanel } from "@raycast/api";
+import {
+  List,
+  showToast,
+  ToastStyle,
+  preferences,
+  Icon,
+  ImageLike,
+  ActionPanel,
+  Detail,
+  useNavigation,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { Client, Queue, QueueSlot, Results } from "sabnzbd-api";
@@ -37,6 +47,8 @@ export default function SlotList() {
 }
 
 function SlotListItem(props: { slot: QueueSlot; setSlots: any }) {
+  const { push } = useNavigation();
+
   const slot = props.slot;
   const setSlots = props.setSlots;
 
@@ -44,12 +56,21 @@ function SlotListItem(props: { slot: QueueSlot; setSlots: any }) {
 
   let actions: any;
 
+  const detailAction = (
+    <ActionPanel.Item
+      title="Details"
+      icon={{ source: { light: "file-light.png", dark: "file-dark.png" } }}
+      onAction={() => push(<Details slot={slot} setSlots={setSlots} />)}
+    />
+  );
+
   switch (slot.status) {
     case "Paused":
       icon = { source: { light: "pause-light.png", dark: "pause-dark.png" } };
 
       actions = (
         <ActionPanel>
+          {detailAction}
           <ActionPanel.Item
             title={"Resume"}
             onAction={() => onResume(slot, setSlots)}
@@ -70,6 +91,7 @@ function SlotListItem(props: { slot: QueueSlot; setSlots: any }) {
 
       actions = (
         <ActionPanel>
+          {detailAction}
           <ActionPanel.Item
             title={"Pause"}
             onAction={() => onPause(slot, setSlots)}
@@ -90,6 +112,7 @@ function SlotListItem(props: { slot: QueueSlot; setSlots: any }) {
 
       actions = (
         <ActionPanel>
+          {detailAction}
           <ActionPanel.Item
             title={"Resume"}
             onAction={() => onResume(slot, setSlots)}
@@ -108,6 +131,7 @@ function SlotListItem(props: { slot: QueueSlot; setSlots: any }) {
     default:
       actions = (
         <ActionPanel>
+          {detailAction}
           <ActionPanel.Item
             title={"Delete"}
             onAction={() => onDelete(slot, setSlots)}
@@ -139,6 +163,23 @@ function SlotListItem(props: { slot: QueueSlot; setSlots: any }) {
       actions={actions}
     />
   );
+}
+
+function Details(props: { slot: QueueSlot; setSlots: any }) {
+  const slot = props.slot;
+  const setSlots = props.slot;
+
+  let labels: String;
+
+  if (slot.labels && slot.labels.length > 0) {
+    labels = slot.labels.join(", ");
+  } else {
+    labels = "None";
+  }
+
+  const markdown = `# ${slot.filename}\n\nStatus: ${slot.status}\n\nPriority: ${slot.priority}\n\nIndex: ${slot.index}\n\nCategory: ${slot.cat}\n\nSize: ${slot.size}\n\nSize left: ${slot.sizeleft}\n\nCompleted percentage: ${slot.percentage}%\n\nTimeleft: ${slot.timeleft}\n\nLabels: ${labels}\n\nScript: ${slot.script}`;
+
+  return <Detail markdown={markdown} navigationTitle={slot.filename} />;
 }
 
 async function onDelete(slot: QueueSlot, setSlots: any) {
