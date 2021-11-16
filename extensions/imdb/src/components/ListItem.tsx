@@ -1,7 +1,7 @@
 import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from "@raycast/api";
-import type { Title } from "../types";
+import type { EnrichedTitle } from "../types";
 
-export const ListItem = (props: { title: Title }) => {
+export const ListItem = (props: { title: EnrichedTitle }) => {
   const title = props.title;
 
   // nicely space each row's plot content

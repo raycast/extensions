@@ -1,28 +1,48 @@
 import fetch from "node-fetch";
 import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
-import type { Preferences, Title } from "../types";
+import type { BasicTitle, EnrichedTitle, SearchAPIResponse, TitleAPIResponse } from "../types";
 
-export const getTitle = async (title: string): Promise<Title | null> => {
-  const preferences: Preferences = getPreferenceValues();
-  const apiKey = preferences.token;
+const preferences: { token: string } = getPreferenceValues();
+const apiKey = preferences.token;
 
+export const getSearchResults = async (search: string): Promise<BasicTitle[] | null> => {
   try {
-    const response = await fetch(`https://www.omdbapi.com/?t=${title}&apikey=${apiKey}`);
-    if (response.status === 200) {
-      // valid response
-      const json = (await response.json()) as Partial<Title>;
+    const response = await fetch(`https://www.omdbapi.com/?s=${search}&apikey=${apiKey}`);
 
-      // filter out incomplete results
-      if (json.Response === "True" && json.Plot !== "N/A" && json.imdbID?.includes("tt")) {
-        return json as Title;
-      } else {
-        return Promise.resolve(null);
+    if (response.status === 200) {
+      const json = (await response.json()) as SearchAPIResponse;
+
+      if (json.Response === "True" && json.Search) {
+        // success
+        return json.Search.filter((title) => title.imdbID?.includes("tt") && title.Type !== "game");
       }
     } else {
       // api returned failure
       showToast(ToastStyle.Failure, `Status: ${response.status} [${response.statusText}]`);
-      return Promise.resolve(null);
     }
+
+    // toast has shown, resolve promise
+    return Promise.resolve(null);
+  } catch (error) {
+    showToast(ToastStyle.Failure, "Could not load results");
+    return Promise.resolve(null);
+  }
+};
+
+export const getEnrichedTitle = async (id: string): Promise<EnrichedTitle | null> => {
+  try {
+    const response = await fetch(`https://www.omdbapi.com/?i=${id}&apikey=${apiKey}`);
+
+    if (response.status === 200) {
+      const json = (await response.json()) as TitleAPIResponse;
+
+      if (json.Response === "True" && json.Plot !== "N/A" && json.Rated !== "N/A") {
+        return json as EnrichedTitle;
+      }
+    } else {
+      showToast(ToastStyle.Failure, `Status: ${response.status} [${response.statusText}]`);
+    }
+    return Promise.resolve(null);
   } catch (error) {
     showToast(ToastStyle.Failure, "Could not load results");
     return Promise.resolve(null);

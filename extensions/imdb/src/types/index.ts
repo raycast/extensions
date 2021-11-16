@@ -1,6 +1,12 @@
-type Film = {
+export type BasicTitle = {
   Title: string; // "Casino Royale"
   Year: string; // "2006"
+  imdbID: string; // "tt0381061"
+  Type: string; //  'movie'
+  Poster: string; // "https://m.media-amazon.com/images/M/MV5BMDI5ZWJhOWItYTlhOC00YWNhLTlkNzctNDU5YTI1M2E1MWZhXkEyXkFqcGdeQXVyNTIzOTk5ODM@._V1_SX300.jpg"
+};
+
+type Film = BasicTitle & {
   Rated: string; // "PG-13"
   Released: string; // "17 Nov 2006"
   Runtime: string; // "144 min"
@@ -12,7 +18,6 @@ type Film = {
   Language: string; // "English, Serbian, German, Italian, French"
   Country: string; // "United Kingdom, Czech Republic, United States, Germany, Bahamas"
   Awards: string; // "27 wins & 44 nominations total"
-  Poster: string; // "https://m.media-amazon.com/images/M/MV5BMDI5ZWJhOWItYTlhOC00YWNhLTlkNzctNDU5YTI1M2E1MWZhXkEyXkFqcGdeQXVyNTIzOTk5ODM@._V1_SX300.jpg"
   Ratings: {
     Source: string; // "Internet Movie Database" | "Rotten Tomatoes" | "Metacritic"
     Value: string; // "8.0/10" | "94%" | "80/100"
@@ -20,21 +25,25 @@ type Film = {
   Metascore: string; // "8.0"
   imdbRating: string; // "8.0"
   imdbVotes: string; // " 616,745"
-  imdbID: string; // "tt0381061"
-  Type: string; // "movie"
   DVD: string; // "13 Mar 2007"
   BoxOffice: string; // "$167,445,960"
   Production: string; // "N/A"
   Website: string; // "N/A"
-  Response: string; // "True"
 };
 
 type TVShow = Film & {
   totalSeasons: string; // "6"
 };
 
-export type Title = Film & TVShow;
+export type EnrichedTitle = Film & TVShow;
 
-export type Preferences = {
-  token: string;
+type APIResponse = {
+  Response: "True" | "False";
+  Error?: string;
 };
+
+export type SearchAPIResponse = {
+  Search?: BasicTitle[];
+} & APIResponse;
+
+export type TitleAPIResponse = Partial<EnrichedTitle> & APIResponse;

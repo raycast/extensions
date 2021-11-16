@@ -1,90 +1,88 @@
-import { distance } from "fastest-levenshtein";
 import { List } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-import type { Title } from "./types";
+import type { BasicTitle, EnrichedTitle } from "./types";
 
-import { getTitle } from "./api";
+import { getEnrichedTitle, getSearchResults } from "./api";
 import { ListItem } from "./components/ListItem";
 
 export default function SearchResults() {
-  const [state, setState] = useState<{ titles: Title[] }>({ titles: [] });
-  const [loading, setLoading] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [titles, setTitles] = useState<EnrichedTitle[]>([]);
 
   useEffect(() => {
     async function fetch() {
-      const result = await getTitle(search);
+      const data: BasicTitle[] | null = await getSearchResults(search);
 
-      if (result !== null) {
-        // only add new results
-        if (!state.titles.map((title) => title.imdbID).includes(result.imdbID)) {
-          setState((previous) => ({
-            titles: [result, ...previous.titles],
-          }));
-        }
+      if (data !== null) {
+        const sortOrder = data.map((result) => result.imdbID);
+
+        data.map(async (title, i) => {
+          const enrichedTitle = await getEnrichedTitle(title.imdbID);
+          if (enrichedTitle !== null) {
+            setTitles((previous) =>
+              !previous.map((t) => t.imdbID).includes(enrichedTitle.imdbID)
+                ? // if the enriched title isn't in the list, add it, and re-sort the list
+                  [...previous, enrichedTitle].sort((a, b) => sortOrder.indexOf(a.imdbID) - sortOrder.indexOf(b.imdbID))
+                : [...previous]
+            );
+          }
+
+          if (i + 1 === data.length) {
+            // all data has been enriched
+            setTimeout(() => setLoading(false), 400);
+          }
+        });
+      } else {
+        // search was successful but returned no results
+        setLoading(false);
       }
-      setLoading(false);
     }
+
     if (search.length > 0) {
+      setLoading(true);
+      setTitles([]);
       fetch();
     }
   }, [search]);
 
-  const onSearchChange = (newSearchTerm: string) => {
-    if (newSearchTerm.length > 0) {
-      setLoading(true);
-      setSearch(newSearchTerm);
-    }
-
+  const onSearchChange = (newSearch: string) => {
     // backspace
-    if (newSearchTerm.length < search.length) {
-      setState({ titles: [] });
+    if (newSearch.length < search.length) {
+      setTitles([]);
     }
+    setSearch(newSearch);
   };
 
-  const filterResults = [...new Set(state.titles)].filter((title) => {
-    // if there are many results
-    if (state.titles.length > 3) {
-      // only include titles with relatively high similarities
-      if (distance(search, title.Title) < 12) return true;
-    } else {
-      return true;
-    }
-  });
-
-  const sortedResults = filterResults.sort((a, b) => {
-    // if direct hit, order first
-    if (a.Title.toLowerCase() === search.toLowerCase()) return -1;
-    // if partial hit, order next
-    if (a.Title.toLowerCase().includes(search.toLowerCase())) return -1;
-    // otherwise order by cloest match
-    return distance(search, a.Title) - distance(search, b.Title);
-  });
-
-  const latestResult = sortedResults.at(0);
-  const restOfResults = sortedResults.slice(1, state.titles.length);
+  const uniqueResults = [...new Set(titles)];
+  const bestMatch = uniqueResults.at(0);
+  const similar = uniqueResults.slice(1, titles.length);
 
   return (
     <List
+      throttle
       isLoading={loading}
       onSearchTextChange={onSearchChange}
       searchBarPlaceholder="Search IMDb for titles by name..."
-      throttle
     >
-      {latestResult ? (
-        <List.Section
-          title="Top Result"
-          subtitle={`${latestResult.Type.charAt(0).toUpperCase() + latestResult.Type.slice(1)}`}
-        >
-          <ListItem title={latestResult} />
-        </List.Section>
+      {!loading ? (
+        <>
+          {bestMatch ? (
+            <List.Section
+              title="Best Match"
+              subtitle={`${bestMatch.Type.charAt(0).toUpperCase() + bestMatch.Type.slice(1)}`}
+            >
+              <ListItem title={bestMatch} />
+            </List.Section>
+          ) : null}
+          <List.Section title="Similar" subtitle={`${titles.length} result(s)`}>
+            {similar.map((title) => (
+              <ListItem title={title} key={title.imdbID} />
+            ))}
+          </List.Section>
+        </>
       ) : null}
-      <List.Section title="Similar" subtitle={`${restOfResults.length} result(s)`}>
-        {restOfResults.map((title) => (
-          <ListItem key={title.imdbID} title={title} />
-        ))}
-      </List.Section>
     </List>
   );
 }
