@@ -49,7 +49,6 @@ export function ScriptCommandsInstalledList() {
       placeholder={`Search between ${content.totalScriptCommands} installed`}
       isLoading={ content.groups.length == 0 } 
       groups={ content.groups } 
-      totalScriptCommands={ content.totalScriptCommands }
       showSearchListAction={ content.totalScriptCommands == 0}
       onAction={ 
         () => {

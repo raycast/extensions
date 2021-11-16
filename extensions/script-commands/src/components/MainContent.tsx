@@ -22,12 +22,11 @@ type Props = {
   placeholder: string
   isLoading: boolean
   groups: Group[]
-  totalScriptCommands: number
   showSearchListAction: boolean,
   onAction?: () => void
 }
 
-export function MainContent({ navigationTitle, placeholder, isLoading, groups, totalScriptCommands, showSearchListAction, onAction }: Props): JSX.Element {
+export function MainContent({ navigationTitle, placeholder, isLoading, groups, showSearchListAction, onAction }: Props): JSX.Element {
   const sections: JSX.Element[] = []
 
   groups.sort((left: Group, right: Group) => {
@@ -76,7 +75,7 @@ export function MainContent({ navigationTitle, placeholder, isLoading, groups, t
     <List 
       navigationTitle={ navigationTitle }
       isLoading={ isLoading } 
-      searchBarPlaceholder={ placeholder } //{`Search for your Script Command among of ${totalScriptCommands} items`}
+      searchBarPlaceholder={ placeholder }
       actions={
         showSearchListAction && 
         <ActionPanel>

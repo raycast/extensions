@@ -40,9 +40,9 @@ export function ScriptCommandsList() {
   return (
     <MainContent 
       navigationTitle="Search Command"
+      placeholder={`Search for your Script Command among of ${content.totalScriptCommands} items`}
       isLoading={content.groups.length == 0} 
       groups={content.groups} 
-      totalScriptCommands={content.totalScriptCommands}
       showSearchListAction={ false }
     />
   )
