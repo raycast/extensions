@@ -39,7 +39,7 @@
     {
       "name": "previous-track",
       "title": "Previous Track",
-      "description": "Skips to the previous track in Music.",
+      "description": "Skip to the previous track in Music.",
       "mode": "no-view"
     }
   ],
