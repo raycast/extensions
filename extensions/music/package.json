@@ -33,7 +33,7 @@
     {
       "name": "next-track",
       "title": "Next Track",
-      "description": "Skips to the next track in Music.",
+      "description": "Skip to the next track in Music.",
       "mode": "no-view"
     },
     {
