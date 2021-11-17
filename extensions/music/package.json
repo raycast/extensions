@@ -21,7 +21,7 @@
     {
       "name": "play",
       "title": "Play",
-      "description": "Plays current track in Music.",
+      "description": "Play current track in Music.",
       "mode": "no-view"
     },
     {
