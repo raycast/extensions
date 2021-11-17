@@ -28,7 +28,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.4",
-    "fastest-levenshtein": "^1.0.12",
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {
