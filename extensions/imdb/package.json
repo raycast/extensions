@@ -22,7 +22,7 @@
       "required": true,
       "title": "API Token",
       "link": "https://www.omdbapi.com/apikey.aspx",
-      "description": "Need help? Check the README",
+      "description": "Register for a free token at https://www.omdbapi.com/",
       "placeholder": "Enter your Open Movie Database (OMDb) API token"
     }
   ],
