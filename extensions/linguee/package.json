@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "linguee",
   "title": "Linguee",
-  "description": "Lookup on Linguee",
+  "description": "Search Linguee translations for English, Chinese, German, Italian, Spanish, French.",
   "icon": "command-icon-linguee.png",
   "author": "geekdada",
   "license": "MIT",
