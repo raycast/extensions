@@ -13,6 +13,13 @@
       "subtitle": "Amazon AWS",
       "description": "List and Filter All your EC2 Instances",
       "mode": "view"
+    },
+    {
+      "name": "queues",
+      "title": "SQS Queues",
+      "subtitle": "Amazon AWS",
+      "description": "List All your SQS Queues",
+      "mode": "view"
     }
   ],
   "preferences": [
