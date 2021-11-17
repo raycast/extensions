@@ -32,7 +32,7 @@ export default function CreateSnippet() {
 
   const handleSubmit = async () => {
     if (!code.snippet) {
-      await showToast(ToastStyle.Failure, "Missing code", "Code cannot be empty");
+      await showToast(ToastStyle.Failure, "Missing Code", "Code cannot be empty");
       return;
     }
     open(url);
