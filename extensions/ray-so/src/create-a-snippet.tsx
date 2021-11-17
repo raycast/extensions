@@ -1,4 +1,4 @@
-import { Form, ActionPanel, SubmitFormAction, closeMainWindow } from "@raycast/api";
+import { Form, ActionPanel, SubmitFormAction, closeMainWindow, showToast, ToastStyle } from "@raycast/api";
 import { colors, languages } from "./constants";
 import { useState } from "react";
 import open from "open";
@@ -30,7 +30,11 @@ export default function CreateSnippet() {
     code.language
   }`;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!code.snippet) {
+      await showToast(ToastStyle.Failure, "Missing Code", "Code cannot be empty");
+      return;
+    }
     open(url);
     closeMainWindow();
   };
