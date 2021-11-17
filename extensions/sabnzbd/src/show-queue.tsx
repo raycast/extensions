@@ -10,7 +10,6 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import fetch from "node-fetch";
 import { Client, Queue, QueueSlot, Results } from "sabnzbd-api";
 
 export default function SlotList() {

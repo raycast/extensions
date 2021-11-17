@@ -10,7 +10,6 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import fetch from "node-fetch";
 import { Client, History, HistorySlots, Results } from "sabnzbd-api";
 import moment from "moment";
 
