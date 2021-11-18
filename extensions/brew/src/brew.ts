@@ -212,6 +212,11 @@ export async function brewSearch(searchText: string, limit?: number): Promise<In
 export async function brewInstall(installable: Cask | Formula): Promise<void> {
   const identifier = brewIdentifier(installable);
   await execp(`${brewExecutable} install ${identifier}`);
+  if (isCask(installable)) {
+    installable.installed = installable.version;
+  } else {
+    installable.installed = [{version: installable.versions.stable, installed_as_dependency: false, installed_on_request: true}];
+  }
 }
 
 export async function brewUninstall(installable: Cask | Formula): Promise<void> {

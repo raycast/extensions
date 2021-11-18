@@ -89,7 +89,6 @@ async function install(formula: Cask | Formula): Promise<boolean> {
   showToast(ToastStyle.Animated, `Installing ${brewName(formula)}`);
   try {
     await brewInstall(formula);
-    formula.installed = [{version: formula.versions.stable, installed_as_dependency: false, installed_on_request: true}];
     showToast(ToastStyle.Success, `Installed ${brewName(formula)}`);
     return true;
   } catch (err) {
