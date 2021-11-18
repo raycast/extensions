@@ -16,7 +16,7 @@
     {
       "name": "decode",
       "title": "Base64 Decode",
-      "description": "overwrite the clipboard contents with a decoded string",
+      "description": "Overwrite the clipboard contents with a decoded string",
       "mode": "no-view"
     }
   ],
