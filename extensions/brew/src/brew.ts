@@ -1,6 +1,5 @@
 import { exec, execSync } from "child_process";
 import { promisify } from "util";
-import { accessSync, constants } from "fs";
 import { stat, readFile, writeFile } from "fs/promises";
 import { join as path_join } from "path";
 import { cpus } from "os";
@@ -86,21 +85,19 @@ export interface OutdatedResults {
 
 /// Paths
 
-export const brewPrefix: string = cpus()[0].model.includes('Apple') ? "/opt/homebrew" : "/usr/local";
+export const brewPrefix: string = (() => {
+  try {
+    return execSync('brew --prefix', {'encoding': 'utf8'}).trim();
+  } catch {
+    return cpus()[0].model.includes('Apple') ? "/opt/homebrew" : "/usr/local";
+  }
+})();
 
 export function brewPath(suffix: string): string {
   return path_join(brewPrefix, suffix);
 }
 
-const brewExecutable = (() => {
-  const path = path_join(brewPrefix, 'bin/brew');
-  try {
-    accessSync(path, constants.X_OK);
-    return path;
-  } catch {
-    return 'brew'; // assume brew is in PATH
-  }
-})();
+const brewExecutable: string = path_join(brewPrefix, 'bin/brew');
 
 /// Fetching
 
