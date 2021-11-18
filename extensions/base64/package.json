@@ -10,7 +10,7 @@
     {
       "name": "encode",
       "title": "Base64 Encode",
-      "description": "overwrite the clipboard contents with an encoded string",
+      "description": "Overwrite the clipboard contents with an encoded string",
       "mode": "no-view"
     },
     {
