@@ -47,7 +47,7 @@ export default function iconList() {
 
   return (
     <List isLoading={state.results.length === 0} searchBarPlaceholder="Search CSS.GG icons...">
-      <List.Section key={randomId()} title="CSS.GG" subtitle="704 Pure CSS & SVG icons">
+      <List.Section key={randomId()} title="CSS.GG" subtitle="704 Pure CSS and SVG icons">
         {state.results.map((result) => (
           <IconListItem
             key={randomId()}
