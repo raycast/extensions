@@ -83,7 +83,6 @@ export async function ejectVolume(volume: Volume): Promise<void> {
 
   try {
     const { stdout, stderr } = await exec(exePath, options)
-    showToast(ToastStyle.Success, 'Successfully Ejected Disk')
   } catch (e: any) {
     console.log(e.message)
     showToast(ToastStyle.Failure, 'Error ejecting volume', e.message)

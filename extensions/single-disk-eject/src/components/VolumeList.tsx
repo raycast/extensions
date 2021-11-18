@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { List } from '@raycast/api'
+import { List, showToast, Toast, ToastStyle } from '@raycast/api'
 
 import { Volume } from '../types'
 import { listVolumes, ejectVolume } from '../utils'
@@ -16,10 +16,14 @@ export default function VolumeList() {
   }
 
   async function eject(volume: Volume): Promise<void> {
-    setIsLoading(true)
-    setVolumes([])
+    const toast = new Toast({ style: ToastStyle.Animated, title: `Ejecting ${volume.name}...` })
+    await toast.show()
 
     await ejectVolume(volume)
+
+    await toast.hide()
+    showToast(ToastStyle.Success, `Successfully Ejected ${volume.name}`)
+
     await fetchVolumes()
   }
 
