@@ -47,8 +47,8 @@ function MicrosoftEdgeGoToTab(props: { tab: Tab }) {
   async function handleAction() {
     try {
       await setActiveTab(props.tab);
-      await popToRoot({ clearSearchBar: true });
-      return await closeMainWindow();
+      await closeMainWindow({ clearRootSearch: true });
+      return await popToRoot();
     } catch (error) {
       showToast(ToastStyle.Failure, DEFAULT_ERROR_TITLE, "Couldn't go to tab");
     }

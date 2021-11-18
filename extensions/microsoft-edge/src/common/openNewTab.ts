@@ -17,14 +17,14 @@ function generateScriptThatOpensUrlInEdge(url: NullableString): string {
   return `
     tell application "Microsoft Edge"
       activate
-      open location "${url}"
+      ${url ? `open location "${url}"` : "tell front window to make new tab"}
     end tell
   `;
 }
 
-export async function openNewTabWithQuery(queryText: NullableString): Promise<void> {
+export async function openNewTabWithQuery(queryText: string): Promise<void> {
   try {
-    const url = "https://www.google.com/search?q=" + queryText;
+    const url = "https://www.google.com/search?q=" + encodeURI(queryText);
     const script = generateScriptThatOpensUrlInEdge(url);
     return await runScriptAndCloseWindow(script);
   } catch (error) {
@@ -32,7 +32,7 @@ export async function openNewTabWithQuery(queryText: NullableString): Promise<vo
   }
 }
 
-export async function openNewTabWithUrl(url: NullableString): Promise<void> {
+export async function openNewTabWithUrl(url: string): Promise<void> {
   try {
     const script = generateScriptThatOpensUrlInEdge(url);
     return await runScriptAndCloseWindow(script);
@@ -43,6 +43,6 @@ export async function openNewTabWithUrl(url: NullableString): Promise<void> {
 
 export async function runScriptAndCloseWindow(script: string): Promise<void> {
   await runAppleScript(script);
-  await popToRoot({ clearSearchBar: true });
-  return await closeMainWindow();
+  await closeMainWindow({ clearRootSearch: true });
+  return await popToRoot();
 }
