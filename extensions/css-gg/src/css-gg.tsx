@@ -235,6 +235,26 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               title={"Download " + nameFormatted + " as .SCSS"}
               url={"https://unpkg.com/css.gg@2.0.0/icons/scss/" + name + ".scss"}
             />
+            <OpenInBrowserAction
+              icon={{
+                source: {
+                  light: apiPathLight + "software-download.png",
+                  dark: apiPathDark + "software-download.png",
+                },
+              }}
+              title={"Download " + nameFormatted + " as White .PNG"}
+              url={ apiPathDark + name + ".png"}
+            />
+            <OpenInBrowserAction
+              icon={{
+                source: {
+                  light: apiPathLight + "software-download.png",
+                  dark: apiPathDark + "software-download.png",
+                },
+              }}
+              title={"Download " + nameFormatted + " as Black .PNG"}
+              url={apiPathLight + name + ".png"}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="Tools">
             <OpenInBrowserAction
@@ -298,6 +318,18 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               }}
               title={"Download as .SCSS"}
               url={"https://css.gg/all.scss"}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="NPM">
+            <CopyToClipboardAction
+                icon={{
+                  source: {
+                    light: apiPathLight + "npm.png",
+                    dark: apiPathDark + "npm.png",
+                  },
+                }}
+                title="npm i css.gg"
+                content="npm i css.gg"
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Links">
