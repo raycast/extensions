@@ -13,13 +13,6 @@
       "subtitle": "Script Command Store",
       "description": "List all and search for Script Commands available in the Raycast Script Commands repository on GitHub",
       "mode": "view"
-    },
-    {
-      "name": "installed",
-      "title": "List Commands Installed",
-      "subtitle": "Script Command Store",
-      "description": "List all Script Commands installed in your computer",
-      "mode": "view"
     }
   ],
   "preferences": [
