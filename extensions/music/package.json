@@ -41,6 +41,12 @@
       "title": "Previous Track",
       "description": "Skips to the previous track in Music.",
       "mode": "no-view"
+    },
+    {
+      "name": "currently-playing",
+      "title": "Currently Playing Track",
+      "description": "Get info about currently playing track.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
