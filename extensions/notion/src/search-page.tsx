@@ -15,12 +15,7 @@ import {
 } from '@raycast/api'
 import { useEffect, useState } from 'react'
 import {
-  Database,
-  DatabasePropertie,
   Page,
-  fetchDatabases,
-  fetchDatabaseProperties,
-  createDatabasePage,
   searchPages,
 } from './notion'
 import moment from 'moment'
