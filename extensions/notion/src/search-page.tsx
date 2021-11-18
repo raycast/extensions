@@ -1,23 +1,16 @@
 import {
-  render,
   ActionPanel,
-  SubmitFormAction,
-  PushAction,
   Color,
   Icon,
   List,
   Detail,
-  Form,
   FormValues,
-  OpenInBrowserAction,
   preferences,
   showToast,
   ToastStyle,
-  useNavigation,
   setLocalStorageItem,
   getLocalStorageItem,
   getApplications,
-  getDefaultApplication,
   closeMainWindow,
 } from '@raycast/api'
 import { useEffect, useState } from 'react'
