@@ -17,9 +17,7 @@ function generateScriptThatOpensUrlInEdge(url: NullableString): string {
   return `
     tell application "Microsoft Edge"
       activate
-      tell window 1
-      set newTab to make new tab ${url ? `with properties {URL:"${url}" }` : ""}
-      end tell
+      open location "${url}"
     end tell
   `;
 }
