@@ -71,7 +71,7 @@ export default function SearchPageList(): JSX.Element {
       if (cachedLastEditedPages) {
         if(searchText){
           setPages(cachedLastEditedPages.filter(function (p: Page){
-            return p.title.toLowerCase().includes(searchText.toLowerCase())
+            return (p.title ? p.title : 'Untitled').toLowerCase().includes(searchText.toLowerCase())
           }))
         } else {
           setPages(cachedLastEditedPages)
@@ -103,7 +103,7 @@ export default function SearchPageList(): JSX.Element {
       if (cachedRecentlyOpenPages) {
         if(searchText){
           setRecentlyOpenPages(cachedRecentlyOpenPages.filter(function (p: Page){
-            return p.title.toLowerCase().includes(searchText.toLowerCase())
+            return (p.title ? p.title : 'Untitled').toLowerCase().includes(searchText.toLowerCase())
           }))
         } else {
           setRecentlyOpenPages(cachedRecentlyOpenPages)
@@ -151,9 +151,7 @@ export default function SearchPageList(): JSX.Element {
                  />
               </ActionPanel.Section>
           </ActionPanel>
-          }
-        >
-        </List.Item>
+          }/>
         ))}
       </List.Section>
       <List.Section key='search-result' title={( searchText ? 'Search Results' : 'Last Edited')}>
@@ -176,9 +174,7 @@ export default function SearchPageList(): JSX.Element {
                  />
               </ActionPanel.Section>
           </ActionPanel>
-          }
-        >
-        </List.Item>
+          }/>
         ))}
       </List.Section>
     </List>
