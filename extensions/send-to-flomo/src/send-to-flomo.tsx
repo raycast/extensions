@@ -7,7 +7,7 @@ import {
   FormValue,
   SubmitFormAction,
   showToast,
-  ToastStyle
+  ToastStyle,
 } from '@raycast/api';
 
 interface Preferences {
@@ -18,7 +18,7 @@ interface Preferences {
 export default function Command() {
   const preferences: Preferences = getPreferenceValues();
   const [text, setText] = useState<string>('');
-  const [tags, setTags] = useState<string>(preferences.defaultTags)
+  const [tags, setTags] = useState<string>(preferences.defaultTags);
 
   async function handleSubmit(values: Record<string, FormValue>) {
     let content = values.memo;
@@ -31,7 +31,7 @@ export default function Command() {
       const response = await axios.post(preferences.api, { content });
 
       if (response.data?.code === 0) {
-        showToast(ToastStyle.Success, 'Success', 'Successfully send MEMO');
+        showToast(ToastStyle.Success, 'Success', 'Successfully sent MEMO');
         setText('');
         setTags(preferences.defaultTags);
       } else {

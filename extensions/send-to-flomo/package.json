@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "send-to-flomo",
   "title": "Send to flomo",
-  "description": "Raycast extension for sending MEMOs to flomo",
+  "description": "Send your MEMOs to flomo",
   "icon": "command-icon.png",
   "author": "ahonn",
   "license": "MIT",
