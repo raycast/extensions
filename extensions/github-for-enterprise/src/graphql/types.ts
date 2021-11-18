@@ -21,6 +21,7 @@ export type Repository = {
     id: string;
     name: string;
     nameWithOwner: string;
+    viewerPermission: string;
     owner: {
         login: string;
         avatarUrl: string;

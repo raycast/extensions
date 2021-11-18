@@ -38,7 +38,7 @@
       "type": "checkbox",
       "required": true,
       "label": "Show week numbers",
-      "title": "Week nubmbers",
+      "title": "Week numbers",
       "description": "Indicated if it is necessary to show week numbers",
       "default": true
     }

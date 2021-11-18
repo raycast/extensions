@@ -1,5 +1,7 @@
 # Amazon AWS
-### Raycast extension to list your EC2 instances.
+### Commands:
+- List your EC2 Instances.
+- List your SQS Queues.
 
 ## Configuration
 This extension uses your `~/.aws/credentials` file to get your access key id and secret.

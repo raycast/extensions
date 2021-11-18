@@ -4,7 +4,9 @@ import execa from "execa";
 import { useEffect, useState } from "react";
 
 async function runShellScript(command: string) {
-  const { stdout } = await execa.command(command);
+  const { stdout } = await execa.command(command, {
+    env: { LC_CTYPE: "UTF-8" }
+  });
   return stdout;
 }
 

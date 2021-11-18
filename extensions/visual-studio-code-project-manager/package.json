@@ -21,8 +21,8 @@
       "type": "textfield",
       "required": false,
       "default": "",
-      "title": "Path of the projects.json of the Project Manager",
-      "description": "Only used if you have moved it, otherwise leave blank"
+      "title": "Path of the 'Projects Location' of the Project Manager",
+      "description": "Only used if you have moved the 'Projects Location', otherwise leave blank"
     },
     {
       "name": "groupProjectsByTag",
