@@ -1,6 +1,18 @@
 # Changelog
 
-## 1.25.2 – 2021-10-28
+## 1.25.4 - 2021-11-11
+
+### 💎 Improvements
+
+* Updating of items and submenus while the action panel is open
+* Supporting all convenience actions with primary shortcut (cmd + enter) on form views
+* Better error handling when the API cannot be loaded after failed app updates
+
+### 🐞 Bugfixes
+
+* Loading indicator in detail views when used in a navigation stack
+
+## 1.25.2 - 2021-10-28
 
 ### 💎 Improvements
 
@@ -18,7 +30,7 @@
 * Some extensions not getting loaded for a particular Node setup
 * Local storage values being lost when extensions are automatically updated
 
-## 1.25.1 – 2021-10-20
+## 1.25.1 - 2021-10-20
 
 ### 🐞 Bugfixes
 

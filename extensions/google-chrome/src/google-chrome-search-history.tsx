@@ -1,4 +1,4 @@
-import { List, ToastStyle, showToast, ActionPanel, OpenInBrowserAction, CopyToClipboardAction } from "@raycast/api";
+import { List, ToastStyle, showToast, popToRoot, ActionPanel, OpenInBrowserAction, CopyToClipboardAction } from "@raycast/api";
 import { useState, ReactElement } from "react"
 import { HistoryEntry, useChromeHistorySearch } from "./browserHistory"
 import { faviconUrl } from "./utils"
@@ -58,6 +58,9 @@ const HistoryItem = (props: { entry: HistoryEntry }): ReactElement => {
             actions={<Actions entry={props.entry} />} />)
 }
 
+const onBrowserOpen = () => {
+    popToRoot({ clearSearchBar: true })
+}
 
 const Actions = (props: { entry: HistoryEntry }): ReactElement => {
     const { title, url } = props.entry
@@ -66,7 +69,8 @@ const Actions = (props: { entry: HistoryEntry }): ReactElement => {
         <ActionPanel title={title}>
             <OpenInBrowserAction
                 title="Open in Browser"
-                url={url} />
+                url={url}
+                onOpen={onBrowserOpen} />
             <CopyToClipboardAction
                 title="Copy URL"
                 content={url}

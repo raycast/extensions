@@ -53,10 +53,10 @@ export default function CryptoList() {
       } else {
         const now = dayjs();
         const { cryptoList: cryptoListFromFile, timestamp } = JSON.parse(data)
-        const fileCachedTimeDiff = now.diff(dayjs(timestamp), 'month')
+        const fileCachedTimeDiff = now.diff(dayjs(timestamp), 'day')
 
-        //Remove cache file if it has been more than 3 month since last time saved.
-        if (fileCachedTimeDiff >= 3) {
+        //Remove cache file if it has been more than 15 days since last time saved.
+        if (fileCachedTimeDiff >= 15) {
           fs.unlink(CRYPTO_LIST_PATH, (err) => {
             if (err) throw err;
             console.log('Crypto list cache has been cleared.');

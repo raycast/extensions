@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "commandSearchZotero",
-      "title": "Search Zotero Database",
+      "title": "Search Database",
       "subtitle": "Zotero",
       "description": "Search Zotero",
       "mode": "view"
@@ -37,7 +37,6 @@
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "node-fetch": "^3.0.0",
-    "raycast": "^1.0.8",
     "he": "^1.2.0"
   },
   "devDependencies": {
