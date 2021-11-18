@@ -1,10 +1,14 @@
-import { showHUD } from "@raycast/api"
-import { runAppleScript } from "run-applescript"
-import { copyTextToClipboard } from "@raycast/api"
+import { showToast, ToastStyle } from "@raycast/api"
+import { contents, update } from "./util/clipboard"
 import { encode } from "js-base64"
 export default async () => {
-  const clipboard = await runAppleScript('the clipboard')
-  const encoded = encode(clipboard)
-  await copyTextToClipboard(encoded)
-  showHUD("Copied to clipboard")
+  try {
+    const clipboard = await contents()
+    const encoded = encode(clipboard)
+    await update(encoded)
+  } catch (e) {
+    if (typeof e === "string") {
+      await showToast(ToastStyle.Failure, "Encode failed", e)
+    } 
+  }
 }

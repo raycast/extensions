@@ -1,10 +1,15 @@
-import { showHUD } from "@raycast/api"
-import { runAppleScript } from "run-applescript"
-import { copyTextToClipboard } from "@raycast/api"
-import { decode } from "js-base64"
+import { showToast, ToastStyle } from "@raycast/api"
+import { contents, update } from "./util/clipboard"
+import { decode, isValid } from "js-base64"
 export default async () => {
-  const clipboard = await runAppleScript('the clipboard')
-  const decoded = decode(clipboard)
-  await copyTextToClipboard(decoded)
-  showHUD("Copied to clipboard")
+  try {
+    const clipboard = await contents()
+    if (!isValid(clipboard)) throw "not a valid base64 string"
+    const decoded = decode(clipboard)
+    await update(decoded)
+  } catch (e) {
+    if (typeof e === "string") {
+      await showToast(ToastStyle.Failure, "Decode failed", e)
+    } 
+  }
 }
