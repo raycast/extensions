@@ -9,7 +9,7 @@ const execp = promisify(exec);
 
 /// Types
 
-interface Nameable {
+export interface Nameable {
   name: string;
 }
 
@@ -222,12 +222,12 @@ export async function brewInstall(installable: Cask | Formula): Promise<void> {
   }
 }
 
-export async function brewUninstall(installable: Cask | Formula): Promise<void> {
+export async function brewUninstall(installable: Cask | Nameable): Promise<void> {
   const identifier = brewIdentifier(installable);
   await execp(`${brewExecutable} rm ${identifier}`);
 }
 
-export async function brewUpgrade(upgradable: Cask | Formula | Outdated): Promise<void> {
+export async function brewUpgrade(upgradable: Cask | Nameable): Promise<void> {
   const identifier = brewIdentifier(upgradable);
   await execp(`${brewExecutable} upgrade ${identifier}`);
 }
@@ -321,9 +321,8 @@ function formulaInstallPath(formula: Formula): string {
 function formulaFormatVersion(formula: Formula): string {
   if (!formula.installed.length) { return ""; }
 
-  let version = "";
   const installed_version = formula.installed[0];
-  version = installed_version.version;
+  let version = installed_version.version;
   let status = "";
   if (installed_version.installed_as_dependency) {
     status += 'D';
