@@ -8,12 +8,12 @@ labels: 'extension, feature request'
 
 <!--
   Please provide a proper link to the extension.
-  Example: `# [Extension](https://github.com/raycast/extensions/tree/main/extensions/api-icon-list)`.
+  Example: `# Extension – [API Icon List](https://github.com/raycast/extensions/tree/main/extensions/api-icon-list)`.
 -->
-# [Extension](https://github.com/raycast/extensions/tree/main/extensions/*)
+# Extension – [Title](https://github.com/raycast/extensions/tree/main/extensions/*)
 <!--
-  Please mention extension's author here. 
-  You can check an author handle by looking at the very first commit with the extension.
+  Please mention the extension's author here. 
+  You can check an author's handle by looking at the very first commit with the extension.
   Example: `Author: @mattisssa`.
 -->
 Author: 
