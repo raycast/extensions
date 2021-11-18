@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "music",
   "title": "Music",
-  "description": "Manage apple music",
+  "description": "Control the Apple Music app with your keyboard.",
   "icon": "icon.png",
   "author": "fedevitaledev",
   "license": "MIT",
@@ -21,7 +21,7 @@
     {
       "name": "play",
       "title": "Play",
-      "description": "Plays current track in Music.",
+      "description": "Play current track in Music.",
       "mode": "no-view"
     },
     {
@@ -33,13 +33,13 @@
     {
       "name": "next-track",
       "title": "Next Track",
-      "description": "Skips to the next track in Music.",
+      "description": "Skip to the next track in Music.",
       "mode": "no-view"
     },
     {
       "name": "previous-track",
       "title": "Previous Track",
-      "description": "Skips to the previous track in Music.",
+      "description": "Skip to the previous track in Music.",
       "mode": "no-view"
     },
     {
