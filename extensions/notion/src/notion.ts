@@ -324,8 +324,8 @@ async function rawSearchPages(query: string | undefined ): Promise<Page[]> {
     return pages
   } catch (err) {
     console.error(err)
-    showToast(ToastStyle.Failure, 'Failed to create page')
-    throw new Error('Failed to create page')
+    showToast(ToastStyle.Failure, 'Failed to load pages')
+    throw new Error('Failed to load pages')
   }
 }
 
@@ -366,16 +366,19 @@ function pageMapper (jsonPage: Record<string, any>): Page {
   if(page.object === 'page'){
     const propertyKeys = Object.keys(page.properties);
 
+
+    page.title = 'Untitled'
+
     propertyKeys.forEach(function (pk){
       if(page.properties[pk].type === 'title'){
-        page.title = page.properties[pk].title[0].plain_text!
+        if(page.properties[pk].title[0] && page.properties[pk].title[0].plain_text){
+          page.title = page.properties[pk].title[0].plain_text
+        }
       }
     })
   } else if(jsonPage.title && jsonPage.title[0] && jsonPage.title[0].plain_text) {
     page.title = jsonPage.title[0].plain_text
-  } else {
-    page.title = 'Untitled'
-  }  
+  } 
   
   return page;
 }
