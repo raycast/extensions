@@ -87,18 +87,21 @@ export function useEdgeHistorySearch(query: NullableString): EdgeHistorySearch {
         return;
       }
 
-      if (!dbRef.current) {
-        const profileName = getProfileName();
-        dbRef.current = await loadDb(profileName);
-      }
-
-      setError(undefined);
       try {
+        if (!dbRef.current) {
+          const profileName = getProfileName();
+          dbRef.current = await loadDb(profileName);
+        }
+
+        setError(undefined);
         const dbEntries = await searchHistory(dbRef.current, query);
         setEntries(dbEntries);
       } catch (e) {
         if (!cancel) {
-          setError(e as string);
+          const errorMessage = (e as Error).message?.includes("no such file or directory")
+            ? "Microsoft Edge not installed"
+            : "Failed to load history";
+          setError(errorMessage);
         }
       } finally {
         if (!cancel) setIsLoading(false);

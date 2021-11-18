@@ -1,5 +1,15 @@
-import { ActionPanel, closeMainWindow, CopyToClipboardAction, Icon, List, popToRoot } from "@raycast/api";
+import {
+  ActionPanel,
+  closeMainWindow,
+  CopyToClipboardAction,
+  Icon,
+  List,
+  popToRoot,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+import { DEFAULT_ERROR_TITLE } from "../common/constants";
 import { Tab } from "../lib/Tab";
 
 export function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean }) {
@@ -35,9 +45,13 @@ function UrlListItemActions(props: { tab: Tab }) {
 
 function MicrosoftEdgeGoToTab(props: { tab: Tab }) {
   async function handleAction() {
-    await setActiveTab(props.tab);
-    await popToRoot({ clearSearchBar: true });
-    await closeMainWindow();
+    try {
+      await setActiveTab(props.tab);
+      await popToRoot({ clearSearchBar: true });
+      return await closeMainWindow();
+    } catch (error) {
+      showToast(ToastStyle.Failure, DEFAULT_ERROR_TITLE, "Couldn't go to tab");
+    }
   }
 
   return <ActionPanel.Item title="Open Tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;

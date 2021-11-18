@@ -1,5 +1,6 @@
 import { List, ToastStyle, showToast } from "@raycast/api";
 import { useState, ReactElement } from "react";
+import { DEFAULT_ERROR_TITLE } from "./common/constants";
 import { UrlListItem } from "./components/UrlListItem";
 import { useEdgeBookmarkSearch } from "./hooks/useBookmarkSearch";
 
@@ -8,7 +9,7 @@ export default function Command(): ReactElement {
   const { isLoading, error, entries } = useEdgeBookmarkSearch(searchText);
 
   if (error) {
-    showToast(ToastStyle.Failure, "An Error Occurred", error.toString());
+    showToast(ToastStyle.Failure, DEFAULT_ERROR_TITLE, error.toString());
   }
 
   return (

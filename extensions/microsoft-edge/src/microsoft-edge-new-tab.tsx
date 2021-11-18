@@ -8,30 +8,37 @@ import { getOpenTabs } from "./common/getOpenTabs";
 import { NullableString } from "./schema/types";
 import { UrlListItem } from "./components/UrlListItem";
 import { openNewTab } from "./common/openNewTab";
+import { DEFAULT_ERROR_TITLE } from "./common/constants";
 
 interface State {
   tabs?: Tab[];
+  error?: boolean;
 }
 
 export default function Command(): ReactElement {
   const [searchText, setSearchText] = useState<string>();
   const { isLoading, error, entries } = useEdgeHistorySearch(searchText);
-
-  const { useOriginalFavicon } = getPreferenceValues<{ useOriginalFavicon: boolean }>();
   const [state, setState] = useState<State>({});
 
-  async function getTabs(query: string | null) {
-    let tabs = await getOpenTabs(useOriginalFavicon);
+  const { useOriginalFavicon } = getPreferenceValues<{ useOriginalFavicon: boolean }>();
 
-    if (query) {
-      tabs = tabs.filter(function (tab) {
-        return (
-          tab.title.toLowerCase().includes(query.toLowerCase()) ||
-          tab.urlWithoutScheme().toLowerCase().includes(query.toLowerCase())
-        );
-      });
+  async function getTabs(query: string | null) {
+    try {
+      let tabs = await getOpenTabs(useOriginalFavicon);
+
+      if (query) {
+        tabs = tabs.filter(function (tab) {
+          return (
+            tab.title.toLowerCase().includes(query.toLowerCase()) ||
+            tab.urlWithoutScheme().toLowerCase().includes(query.toLowerCase())
+          );
+        });
+      }
+      setState({ tabs: tabs });
+    } catch (error) {
+      setState({ tabs: [], error: true });
+      showToast(ToastStyle.Failure, DEFAULT_ERROR_TITLE, "Couldn't get open tabs");
     }
-    setState({ tabs: tabs });
   }
 
   const url = searchText ? urlParser(searchText) : null;
@@ -42,7 +49,7 @@ export default function Command(): ReactElement {
   }, []);
 
   if (error) {
-    showToast(ToastStyle.Failure, "An Error Occurred", error.toString());
+    showToast(ToastStyle.Failure, DEFAULT_ERROR_TITLE, error.toString());
   }
 
   return (
@@ -84,7 +91,8 @@ const NewTabActions = (props: { query: NullableString; url: NullableString }): R
     <ActionPanel title="New Tab">
       <ActionPanel.Item
         onAction={() => openNewTab(query, url)}
-        title={url ? "Open URL" : query ? 'Search "' + query + '"' : "Open empty tab"}
+        icon={{ source: Icon.Link }}
+        title={url ? "Open URL" : query ? 'Search "' + query + '"' : "Open Empty Tab"}
       />
     </ActionPanel>
   );

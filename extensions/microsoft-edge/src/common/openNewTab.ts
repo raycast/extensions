@@ -1,6 +1,7 @@
-import { closeMainWindow, popToRoot } from "@raycast/api";
+import { closeMainWindow, popToRoot, showToast, ToastStyle } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { NullableString } from "../schema/types";
+import { DEFAULT_ERROR_TITLE } from "./constants";
 
 export async function openNewTab(queryText: NullableString, url: NullableString): Promise<void> {
   if (url) {
@@ -24,14 +25,22 @@ function generateScriptThatOpensUrlInEdge(url: NullableString): string {
 }
 
 export async function openNewTabWithQuery(queryText: NullableString): Promise<void> {
-  const url = "https://www.google.com/search?q=" + queryText;
-  const script = generateScriptThatOpensUrlInEdge(url);
-  return await runScriptAndCloseWindow(script);
+  try {
+    const url = "https://www.google.com/search?q=" + queryText;
+    const script = generateScriptThatOpensUrlInEdge(url);
+    return await runScriptAndCloseWindow(script);
+  } catch (error) {
+    showToast(ToastStyle.Failure, DEFAULT_ERROR_TITLE, "Failed to search the query");
+  }
 }
 
 export async function openNewTabWithUrl(url: NullableString): Promise<void> {
-  const script = generateScriptThatOpensUrlInEdge(url);
-  return await runScriptAndCloseWindow(script);
+  try {
+    const script = generateScriptThatOpensUrlInEdge(url);
+    return await runScriptAndCloseWindow(script);
+  } catch (error) {
+    showToast(ToastStyle.Failure, DEFAULT_ERROR_TITLE, "Failed to open the link");
+  }
 }
 
 export async function runScriptAndCloseWindow(script: string): Promise<void> {

@@ -97,18 +97,21 @@ export function useEdgeBookmarkSearch(query: NullableString): EdgeBookmarkSearch
         return;
       }
 
-      if (!bookmarksDataRef.current) {
-        const profileName = getProfileName();
-        bookmarksDataRef.current = await getBookmarksFromEdge(profileName);
-      }
-
-      setError(undefined);
       try {
+        if (!bookmarksDataRef.current) {
+          const profileName = getProfileName();
+          bookmarksDataRef.current = await getBookmarksFromEdge(profileName);
+        }
+
+        setError(undefined);
         const bookmarkEntries = await searchBookmarks(bookmarksDataRef.current, query);
         setEntries(bookmarkEntries);
       } catch (e) {
         if (!cancel) {
-          setError(e as string);
+          const errorMessage = (e as Error).message?.includes("no such file or directory")
+            ? "Microsoft Edge not installed"
+            : "Failed to load bookmarks";
+          setError(errorMessage);
         }
       } finally {
         if (!cancel) setIsLoading(false);

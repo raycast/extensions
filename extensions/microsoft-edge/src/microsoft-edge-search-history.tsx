@@ -1,5 +1,6 @@
 import { List, ToastStyle, showToast } from "@raycast/api";
 import { useState, ReactElement } from "react";
+import { DEFAULT_ERROR_TITLE } from "./common/constants";
 import { UrlListItem } from "./components/UrlListItem";
 import { HistoryEntry, useEdgeHistorySearch } from "./hooks/useHistorySearch";
 
@@ -10,7 +11,7 @@ export default function Command(): ReactElement {
   const { isLoading, error, entries } = useEdgeHistorySearch(searchText);
 
   if (error) {
-    showToast(ToastStyle.Failure, "An Error Occurred", error.toString());
+    showToast(ToastStyle.Failure, DEFAULT_ERROR_TITLE, error.toString());
   }
 
   const groupedEntries = entries ? groupEntries(entries) : undefined;
