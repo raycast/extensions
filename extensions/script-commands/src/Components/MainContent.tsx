@@ -13,20 +13,16 @@ import {
   Group 
 } from "@models"
 
-import { 
-  ScriptCommandsList 
-} from "@commands"
 
 type Props = {
   navigationTitle: string
   placeholder: string
   isLoading: boolean
   groups: Group[]
-  showSearchListAction: boolean,
-  onAction?: () => void
+  showSearchListAction: boolean
 }
 
-export function MainContent({ navigationTitle, placeholder, isLoading, groups, showSearchListAction, onAction }: Props): JSX.Element {
+export function MainContent({ navigationTitle, placeholder, isLoading, groups }: Props): JSX.Element {
   const sections: JSX.Element[] = []
 
   groups.sort((left: Group, right: Group) => {
@@ -38,12 +34,6 @@ export function MainContent({ navigationTitle, placeholder, isLoading, groups, s
       <GroupSection
         key={ group.path } 
         group={ group } 
-        onAction={ 
-          () => {
-            if (onAction != undefined)
-              onAction()
-          } 
-        }
       />
     )
 
@@ -59,12 +49,6 @@ export function MainContent({ navigationTitle, placeholder, isLoading, groups, s
             key={ keySubGroup } 
             parentName={ group.name } 
             group={ subGroup }
-            onAction={ 
-              () => {
-                if (onAction != undefined)
-                  onAction()
-              } 
-            }
           />
         )
       })
@@ -76,25 +60,6 @@ export function MainContent({ navigationTitle, placeholder, isLoading, groups, s
       navigationTitle={ navigationTitle }
       isLoading={ isLoading } 
       searchBarPlaceholder={ placeholder }
-      actions={
-        showSearchListAction && 
-        <ActionPanel>
-          <PushAction 
-            title="Open Search Commands List"
-            icon={ Icon.MagnifyingGlass }
-            target={ 
-              <ScriptCommandsList 
-                onAction={ 
-                  () =>  {
-                    if (onAction != undefined)
-                      onAction() 
-                  }
-                }
-              /> 
-            } 
-          />
-        </ActionPanel>
-      }
     >
       { sections }
     </List>

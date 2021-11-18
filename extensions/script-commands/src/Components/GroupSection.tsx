@@ -13,11 +13,10 @@ import {
 
 type Props = { 
   group: Group,
-  parentName?: string,
-  onAction: () => void
+  parentName?: string
 }
 
-export function GroupSection({ group, parentName, onAction }: Props): JSX.Element  {
+export function GroupSection({ group, parentName }: Props): JSX.Element  {
   group.scriptCommands.sort((left: ScriptCommand, right: ScriptCommand) => {
     return (left.title > right.title) ? 1 : -1
   })
@@ -32,7 +31,6 @@ export function GroupSection({ group, parentName, onAction }: Props): JSX.Elemen
         <ScriptCommandItem 
           key={ scriptCommand.identifier } 
           scriptCommand={ scriptCommand }
-          onAction={ () => onAction() }
         />
       ))}
     </List.Section>

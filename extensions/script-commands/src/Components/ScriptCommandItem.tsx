@@ -53,13 +53,12 @@ import {
 // Internal 
 
 type Props = { 
-  scriptCommand: ScriptCommand,
-  onAction: () => void
+  scriptCommand: ScriptCommand
 }
 
 const dataManager = DataManager.shared()
 
-export function ScriptCommandItem({ scriptCommand, onAction }: Props): JSX.Element {
+export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
   const [, setViewState] = useState<ViewState>({ needsReload: true })
   
   return (
@@ -82,7 +81,6 @@ export function ScriptCommandItem({ scriptCommand, onAction }: Props): JSX.Eleme
                   needsReload: true 
                 }))
 
-                onAction()
               }
             } 
           />
