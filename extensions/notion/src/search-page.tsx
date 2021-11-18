@@ -70,7 +70,7 @@ export default function SearchPageList(): JSX.Element {
 
       if (cachedLastEditedPages) {
         if(searchText){
-          setPages(cachedLastEditedPages.filter(function (p){
+          setPages(cachedLastEditedPages.filter(function (p: Page){
             return p.title.toLowerCase().includes(searchText.toLowerCase())
           }))
         } else {
@@ -82,7 +82,7 @@ export default function SearchPageList(): JSX.Element {
         const searchedPages = await searchPages(searchText)      
         setPages(searchedPages)
       } else {
-        const fetchedLastEditedPages = await searchPages()      
+        const fetchedLastEditedPages = await searchPages(undefined)      
         setPages(fetchedLastEditedPages)
         storeLastEditedPages(fetchedLastEditedPages)
       }
@@ -102,7 +102,7 @@ export default function SearchPageList(): JSX.Element {
 
       if (cachedRecentlyOpenPages) {
         if(searchText){
-          setRecentlyOpenPages(cachedRecentlyOpenPages.filter(function (p){
+          setRecentlyOpenPages(cachedRecentlyOpenPages.filter(function (p: Page){
             return p.title.toLowerCase().includes(searchText.toLowerCase())
           }))
         } else {
@@ -116,7 +116,7 @@ export default function SearchPageList(): JSX.Element {
 
 
   async function handleOnOpenPage(page: Page) {
-    const pageUrl = pageBaseURL+page.id.replaceAll('-','')
+    const pageUrl = pageBaseURL+page.id.replace(/-/g,'')
     closeMainWindow();
     open((isNotionInstalled ?  'notion://' : 'https://')+pageUrl);
     await storeRecentlyOpenPage(page)
@@ -135,13 +135,13 @@ export default function SearchPageList(): JSX.Element {
       {recentlyOpenPages?.map((p) => (
         <List.Item
           key={p.id}
-          title={p.title}
+          title={(p.title ? p.title : 'Untitled')}
           icon={{source: ((p.icon_emoji) ? p.icon_emoji : ( p.icon_file ?  p.icon_file :  ( p.icon_external ?  p.icon_external : Icon.TextDocument)))}}
           accessoryTitle={moment(p.last_edited_time).fromNow()}
-          subtitle={(p.object === 'database' ? 'Database' : null)}
+          subtitle={(p.object === 'database' ? 'Database' : undefined)}
           actions={            
           <ActionPanel>
-            <ActionPanel.Section title={p.title}>
+            <ActionPanel.Section title={(p.title ? p.title : 'Untitled')}>
               <ActionPanel.Item 
                 id={p.id}
                 key={p.id}
@@ -160,13 +160,13 @@ export default function SearchPageList(): JSX.Element {
       {pages?.map((p) => (
         <List.Item
           key={p.id}
-          title={p.title}
+          title={(p.title ? p.title : 'Untitled')}
           icon={{source: ((p.icon_emoji) ? p.icon_emoji : ( p.icon_file ?  p.icon_file :  ( p.icon_external ?  p.icon_external : Icon.TextDocument)))}}
           accessoryTitle={moment(p.last_edited_time).fromNow()}
-          subtitle={(p.object === 'database' ? 'Database' : null)}
+          subtitle={(p.object === 'database' ? 'Database' : undefined)}
           actions={            
           <ActionPanel>
-            <ActionPanel.Section title={p.title}>
+            <ActionPanel.Section title={(p.title ? p.title : 'Untitled')}>
               <ActionPanel.Item 
                 id={p.id}
                 key={p.id}
@@ -234,7 +234,7 @@ async function storeRecentlyOpenPage(page: Page) {
     recentlyOpenPages = [];
   }
 
-  const pageExistInList = recentlyOpenPages.filter(function (recentPage) {
+  const pageExistInList = recentlyOpenPages.filter(function (recentPage: Page) {
     return recentPage.id === page.id
   })
 
@@ -245,7 +245,7 @@ async function storeRecentlyOpenPage(page: Page) {
     recentlyOpenPages.push(page)
   }
   
-  recentlyOpenPages.sort(function (a,b) {
+  recentlyOpenPages.sort(function (a: Page, b: Page) {
     if ( a.last_edited_time > b.last_edited_time ){
       return -1;
     }
