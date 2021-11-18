@@ -132,8 +132,9 @@ export async function brewFetchInstalled(useCache: boolean): Promise<Installable
     const cacheTime = await mtimeMs(installedCachePath);
     // 'var/homebrew/locks' is updated after installed keg_only or linked formula.
     const locksTime = await mtimeMs(brewPath('var/homebrew/locks'));
-    // Because '/var/homebrew/pinned can be removed, we need to also check the parent directory'
-    const homebrewTime = await mtimeMs(brewPath('var/homebrew'));
+    // Casks
+    const caskroomTime = await mtimeMs(brewPath('Caskroom'));
+
     // 'var/homebrew/pinned' is updated after pin/unpin actions (but does not exist if there are no pinned formula).
     let pinnedTime;
     try {
@@ -141,8 +142,10 @@ export async function brewFetchInstalled(useCache: boolean): Promise<Installable
     } catch {
       pinnedTime = 0;
     }
+    // Because '/var/homebrew/pinned can be removed, we need to also check the parent directory'
+    const homebrewTime = await mtimeMs(brewPath('var/homebrew'));
 
-    if (homebrewTime < cacheTime && locksTime < cacheTime && pinnedTime < cacheTime) {
+    if (homebrewTime < cacheTime && caskroomTime < cacheTime && locksTime < cacheTime && pinnedTime < cacheTime) {
       const cacheBuffer = await readFile(installedCachePath);
       return JSON.parse(cacheBuffer.toString());
     } else {
