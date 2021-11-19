@@ -36,10 +36,19 @@ export interface DatabasePropertieOption {
 }
 
 export interface Page {  
-  id: string,
+  object: string
+  id: string
+  parent_page_id: string | null
+  parent_database_id: string | null
+  last_edited_time: number  
   title: string | null
+  icon_emoji: string | null
+  icon_file: string | null
+  icon_external: string | null
+  url: string
+  properties: Record<string, any>
+  _keywords: string[] 
 }
-
 
 // Fetch databases
 export async function fetchDatabases(): Promise<Database[]> {
@@ -69,7 +78,7 @@ async function rawFetchDatabases(): Promise<Database[]> {
     )
     const json = await response.json()
 
-    const databases = recordMapper({ 
+    const databases = recordsMapper({ 
       sourceRecords : json.results as any[],
       models : [
         { targetKey : 'last_edited_time', sourceKeys : ['last_edited_time']},
@@ -269,9 +278,7 @@ async function rawCreateDatabasePage(values: FormValues): Promise<Page> {
     )
     const json = await response.json() as Record<string,any>
 
-    const page = {
-      id: json.id as string
-    } as Page
+    const page = pageMapper(json)
 
     return page
   } catch (err) {
@@ -282,35 +289,137 @@ async function rawCreateDatabasePage(values: FormValues): Promise<Page> {
 }
 
 
+// Search pages
+export async function searchPages(query: string | undefined): Promise<Page[]> {
+  const pages: Page[] = await rawSearchPages(query);
+  return pages;
+}
+
+// Raw function for searching pages
+async function rawSearchPages(query: string | undefined ): Promise<Page[]> {
+  try {
+
+    var requestBody = {
+      sort:{
+        direction:'descending',
+        timestamp:'last_edited_time'
+      }
+    } as Record<string,any>
+
+    if(query){
+      requestBody.query = query;
+    }
+
+    const response = await fetch(
+      apiURL + `v1/search`,
+      {
+        method: 'post',
+        headers: headers,
+        body: JSON.stringify(requestBody)
+      }
+    )
+    const json = await response.json() as Record<string,any>
+    
+    const pages = pageListMapper(json.results as Record<string,any>[])
+
+    return pages
+  } catch (err) {
+    console.error(err)
+    showToast(ToastStyle.Failure, 'Failed to load pages')
+    throw new Error('Failed to load pages')
+  }
+}
 
 
 
-function recordMapper (mapper: { sourceRecords : any[], models: [{targetKey : string, sourceKeys : string[]}]}): Record<string, any> {
+
+function pageListMapper (jsonPageList: Record<string, any>[]): Page[] {
+  const pages: Page[] = [];
+
+  jsonPageList.forEach(function (jsonPage){
+    const page = pageMapper(jsonPage);
+    pages.push(page);
+  })
+
+  return pages
+}
+
+
+function pageMapper (jsonPage: Record<string, any>): Page {
+  var page = recordMapper({ 
+      sourceRecord : jsonPage,
+      models : [
+        { targetKey : 'object', sourceKeys : ['object']},
+        { targetKey : 'id', sourceKeys : ['id']},
+        { targetKey : 'parent_page_id', sourceKeys : ['parent','page_id']},
+        { targetKey : 'parent_database_id', sourceKeys : ['parent','database_id']},
+        { targetKey : 'last_edited_time', sourceKeys : ['last_edited_time']},
+        { targetKey : 'icon_emoji', sourceKeys : ['icon','emoji']},      
+        { targetKey : 'icon_file', sourceKeys : ['icon','file','url']},              
+        { targetKey : 'icon_external', sourceKeys : ['icon','external','url']},   
+        { targetKey : 'url', sourceKeys : ['url']},
+        { targetKey : 'properties', sourceKeys : ['properties']}
+      ] as any
+    }) as Page;
+
+  
+
+  if(page.object === 'page'){
+    const propertyKeys = Object.keys(page.properties);
+
+
+    page.title = 'Untitled'
+
+    propertyKeys.forEach(function (pk){
+      if(page.properties[pk].type === 'title'){
+        if(page.properties[pk].title[0] && page.properties[pk].title[0].plain_text){
+          page.title = page.properties[pk].title[0].plain_text
+        }
+      }
+    })
+  } else if(jsonPage.title && jsonPage.title[0] && jsonPage.title[0].plain_text) {
+    page.title = jsonPage.title[0].plain_text
+  } 
+  
+  return page;
+}
+
+
+function recordsMapper (mapper: { sourceRecords : any[], models: [{targetKey : string, sourceKeys : string[]}]}): Record<string, any>[] {
   const sourceRecords = mapper.sourceRecords;
   const models = mapper.models;
 
   var mappedRecords = [] as any[];
 
   sourceRecords.forEach(function (sourceRecord){
-    var mappedRecord = {} as any;
-    models.forEach(function (model){
-      const sourceKeys = model.sourceKeys;
-      const targetKey = model.targetKey;
-      var tempRecord = JSON.parse(JSON.stringify(sourceRecord));
-      sourceKeys.forEach(function (sourceKey){
-        if(!tempRecord){
-          return
-        }
-        if(sourceKey in tempRecord ){
-          tempRecord = tempRecord[sourceKey];
-        }else{
-          tempRecord = null;
-          return
-        }
-      })
-      mappedRecord[targetKey] = tempRecord;
-    })
-    mappedRecords.push(mappedRecord)
+    mappedRecords.push(recordMapper({sourceRecord, models}))
   })
+
   return mappedRecords;
+}
+
+
+function recordMapper (mapper: { sourceRecord : any, models: [{targetKey : string, sourceKeys : string[]}]}): Record<string, any> {
+  const sourceRecord = mapper.sourceRecord;
+  const models = mapper.models;
+
+  var mappedRecord = {} as any;
+  models.forEach(function (model){
+    const sourceKeys = model.sourceKeys;
+    const targetKey = model.targetKey;
+    var tempRecord = JSON.parse(JSON.stringify(sourceRecord));
+    sourceKeys.forEach(function (sourceKey){
+      if(!tempRecord){
+        return
+      }
+      if(sourceKey in tempRecord ){
+        tempRecord = tempRecord[sourceKey];
+      }else{
+        tempRecord = null;
+        return
+      }
+    })
+    mappedRecord[targetKey] = tempRecord;
+  })
+  return mappedRecord;
 }
