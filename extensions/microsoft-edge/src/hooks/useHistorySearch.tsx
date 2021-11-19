@@ -1,22 +1,13 @@
-import path from "path";
-import fs from "fs";
-import util from "util";
-import initSqlJs, { Database } from "sql.js";
-import { useEffect, useRef, useState } from "react";
-import { environment } from "@raycast/api";
-import { UrlSearchResult, UrlDetail, NullableString } from "../schema/types";
-import { getProfileName, historyDbPath } from "../utils/pathUtils";
-import { termsAsParamNames, termsAsParams } from "../utils/sqlUtils";
+import { Database } from 'sql.js';
+import { getProfileName, historyDbPath } from '../utils/pathUtils';
+import { loadDataToLocalDb, termsAsParamNames, termsAsParams } from '../utils/sqlUtils';
+import { NullableString, UrlDetail, UrlSearchResult } from '../schema/types';
+import { useUrlSearch } from './useUrlSearch';
 
-const fsReadFile = util.promisify(fs.readFile);
-
-const loadHistoryToLocalDb = async (profileName: string): Promise<Database> => {
+const loadHistoryToLocalDb = async (): Promise<Database> => {
+  const profileName = getProfileName();
   const dbPath = historyDbPath(profileName);
-  const fileBuffer = await fsReadFile(dbPath);
-  const SQL = await initSqlJs({
-    locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm"),
-  });
-  return new SQL.Database(fileBuffer);
+  return loadDataToLocalDb(dbPath, "sql-wasm.wasm");
 };
 
 const whereClauses = (terms: string[]) => {
@@ -34,6 +25,7 @@ const searchHistory = async (db: Database, query: NullableString): Promise<UrlDe
           WHERE ${whereClauses(terms)}
           ORDER BY last_visit_time DESC LIMIT 30;`;
   const results = db.exec(queries, termsAsParams(terms));
+
   if (results.length !== 1) {
     return [];
   }
@@ -46,54 +38,6 @@ const searchHistory = async (db: Database, query: NullableString): Promise<UrlDe
   }));
 };
 
-export function useEdgeHistorySearch(query: NullableString): UrlSearchResult {
-  const [entries, setEntries] = useState<UrlDetail[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const dbRef = useRef<Database>();
-
-  let cancel = false;
-
-  useEffect(() => {
-    async function getHistory() {
-      if (cancel) {
-        return;
-      }
-
-      try {
-        if (!dbRef.current) {
-          const profileName = getProfileName();
-          dbRef.current = await loadHistoryToLocalDb(profileName);
-        }
-
-        setError(undefined);
-        const dbEntries = await searchHistory(dbRef.current, query);
-        setEntries(dbEntries);
-      } catch (e) {
-        if (!cancel) {
-          const errorMessage = (e as Error).message?.includes("no such file or directory")
-            ? "Microsoft Edge not installed"
-            : "Failed to load history";
-          setError(errorMessage);
-        }
-      } finally {
-        if (!cancel) setIsLoading(false);
-      }
-    }
-
-    getHistory();
-
-    return () => {
-      cancel = true;
-    };
-  }, [query]);
-
-  // Dispose of the database
-  useEffect(() => {
-    return () => {
-      dbRef.current?.close();
-    };
-  }, []);
-
-  return { entries, error, isLoading };
+export function useHistorySearch(query: NullableString): UrlSearchResult {
+  return useUrlSearch(query, loadHistoryToLocalDb, searchHistory);
 }

@@ -1,14 +1,21 @@
-import { ActionPanel, getPreferenceValues, Icon, List, showToast, ToastStyle } from "@raycast/api";
-import { useEdgeHistorySearch } from "./hooks/useHistorySearch";
-import { useEffect, useState, ReactElement } from "react";
-import { Tab } from "./lib/Tab";
-import { TabListItem } from "./components/TabListItem";
-import { getOpenTabs } from "./common/getOpenTabs";
-import { NullableString } from "./schema/types";
-import { UrlListItem } from "./components/UrlListItem";
-import { openNewTab } from "./common/openNewTab";
-import { DEFAULT_ERROR_TITLE } from "./common/constants";
-import { urlParser } from "./utils/urlUtils";
+import {
+	ActionPanel,
+	getPreferenceValues,
+	Icon,
+	List,
+	showToast,
+	ToastStyle
+	} from '@raycast/api';
+import { DEFAULT_ERROR_TITLE } from './common/constants';
+import { getOpenTabs } from './common/getOpenTabs';
+import { NullableString } from './schema/types';
+import { openNewTab } from './common/openNewTab';
+import { ReactElement, useEffect, useState } from 'react';
+import { Tab } from './lib/Tab';
+import { TabListItem } from './components/TabListItem';
+import { UrlListItem } from './components/UrlListItem';
+import { urlParser } from './utils/urlUtils';
+import { useHistorySearch } from './hooks/useHistorySearch';
 
 interface State {
   tabs?: Tab[];
@@ -17,7 +24,7 @@ interface State {
 
 export default function Command(): ReactElement {
   const [searchText, setSearchText] = useState<string>();
-  const { isLoading, error, entries } = useEdgeHistorySearch(searchText);
+  const { isLoading, error, entries } = useHistorySearch(searchText);
   const [state, setState] = useState<State>({});
 
   const { useOriginalFavicon } = getPreferenceValues<{ useOriginalFavicon: boolean }>();
