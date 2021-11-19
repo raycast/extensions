@@ -33,7 +33,7 @@ const searchCollection = async (db: Database, query: NullableString): Promise<Ur
             id, source, title, date_modified
           FROM items
           WHERE ${whereClauses(terms)}
-          ORDER BY date_modified DESC LIMIT 30;`;
+          ORDER BY date_modified DESC LIMIT 50;`;
   const results = db.exec(queries, termsAsParams(terms));
 
   if (results.length !== 1) {
@@ -52,5 +52,5 @@ const searchCollection = async (db: Database, query: NullableString): Promise<Ur
 };
 
 export function useCollectionSearch(query: NullableString): UrlSearchResult {
-  return useUrlSearch(query, loadCollectionsToLocalDb, searchCollection);
+  return useUrlSearch<Database>(query, loadCollectionsToLocalDb, searchCollection);
 }

@@ -2,15 +2,15 @@ import { Database } from 'sql.js';
 import { NullableString, UrlDetail, UrlSearchResult } from '../schema/types';
 import { useEffect, useRef, useState } from 'react';
 
-export function useUrlSearch(
+export function useUrlSearch<SourceDataType>(
   query: NullableString,
-  loadUrlsToLocalDb: () => Promise<Database>,
-  searchUrls: (db: Database, query: NullableString) => Promise<UrlDetail[]>
+  loadUrlsToLocalDb: () => Promise<SourceDataType>,
+  searchUrls: (db: SourceDataType, query: NullableString) => Promise<UrlDetail[]>
 ): UrlSearchResult {
   const [entries, setEntries] = useState<UrlDetail[]>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const dbRef = useRef<Database>();
+  const dbRef = useRef<SourceDataType>();
 
   let cancel = false;
 
@@ -50,7 +50,9 @@ export function useUrlSearch(
   // Dispose of the database
   useEffect(() => {
     return () => {
-      dbRef.current?.close();
+      if (dbRef.current instanceof Database) {
+        dbRef.current.close();
+      }
     };
   }, []);
 

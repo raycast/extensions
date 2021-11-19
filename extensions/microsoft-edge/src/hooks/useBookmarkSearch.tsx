@@ -1,26 +1,15 @@
-import fs from "fs";
-import util from "util";
-import { useEffect, useRef, useState } from "react";
-import { NullableString } from "../schema/types";
-import { bookmarksFilePath, getProfileName } from "../utils/pathUtils";
+import fs from 'fs';
+import util from 'util';
+import { bookmarksFilePath, getProfileName } from '../utils/pathUtils';
+import { NullableString, UrlDetail, UrlSearchResult } from '../schema/types';
+import { useUrlSearch } from './useUrlSearch';
 
 const fsReadFile = util.promisify(fs.readFile);
-
-export interface BookmarkEntry {
-  id: string;
-  url: string;
-  title: string;
-}
-
-export interface EdgeBookmarkSearch {
-  entries?: BookmarkEntry[];
-  error?: string;
-  isLoading: boolean;
-}
 
 type BookmarkNodeType = "folder" | "url";
 
 export interface BookmarkDirectory {
+  date_added: string;
   children: BookmarkDirectory[];
   type: BookmarkNodeType;
   id: string;
@@ -40,14 +29,15 @@ export interface RawBookmarks {
   [key: string]: unknown;
 }
 
-const getBookmarksFromEdge = async (profileName: string): Promise<BookmarkEntry[]> => {
+const getBookmarksFromEdge = async (): Promise<UrlDetail[]> => {
+  const profileName = getProfileName();
   const filePath = bookmarksFilePath(profileName);
   const fileBuffer = await fsReadFile(filePath, { encoding: "utf-8" });
   return getBookmarkEntriesFromRawBookmarks(JSON.parse(fileBuffer));
 };
 
-function getBookmarkEntriesFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): BookmarkEntry[] {
-  const bookmarks: BookmarkEntry[] = [];
+function getBookmarkEntriesFromBookmarkDirectory(bookmarkDirectory: BookmarkDirectory): UrlDetail[] {
+  const bookmarks: UrlDetail[] = [];
   if (bookmarkDirectory.type === "folder") {
     bookmarkDirectory.children.forEach((child) => {
       bookmarks.push(...getBookmarkEntriesFromBookmarkDirectory(child));
@@ -57,13 +47,14 @@ function getBookmarkEntriesFromBookmarkDirectory(bookmarkDirectory: BookmarkDire
       id: bookmarkDirectory.id,
       url: bookmarkDirectory.url,
       title: bookmarkDirectory.name,
+      lastVisited: new Date(bookmarkDirectory.date_added),
     });
   }
   return bookmarks;
 }
 
-const getBookmarkEntriesFromRawBookmarks = (rawBookmarks: RawBookmarks): BookmarkEntry[] => {
-  const bookmarks: BookmarkEntry[] = [];
+const getBookmarkEntriesFromRawBookmarks = (rawBookmarks: RawBookmarks): UrlDetail[] => {
+  const bookmarks: UrlDetail[] = [];
   Object.keys(rawBookmarks.roots).forEach((rootKey) => {
     const rootLevelBookmarkFolders = rawBookmarks.roots[rootKey];
     const bookmarkEntries = getBookmarkEntriesFromBookmarkDirectory(rootLevelBookmarkFolders);
@@ -72,7 +63,7 @@ const getBookmarkEntriesFromRawBookmarks = (rawBookmarks: RawBookmarks): Bookmar
   return bookmarks;
 };
 
-const searchBookmarks = async (bookmarks: BookmarkEntry[], query: NullableString): Promise<BookmarkEntry[]> => {
+const searchBookmarks = async (bookmarks: UrlDetail[], query: NullableString): Promise<UrlDetail[]> => {
   if (!query) {
     return bookmarks;
   }
@@ -83,47 +74,6 @@ const searchBookmarks = async (bookmarks: BookmarkEntry[], query: NullableString
   });
 };
 
-export function useEdgeBookmarkSearch(query: NullableString): EdgeBookmarkSearch {
-  const [entries, setEntries] = useState<BookmarkEntry[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const bookmarksDataRef = useRef<BookmarkEntry[]>();
-
-  let cancel = false;
-
-  useEffect(() => {
-    async function getHistory() {
-      if (cancel) {
-        return;
-      }
-
-      try {
-        if (!bookmarksDataRef.current) {
-          const profileName = getProfileName();
-          bookmarksDataRef.current = await getBookmarksFromEdge(profileName);
-        }
-
-        setError(undefined);
-        const bookmarkEntries = await searchBookmarks(bookmarksDataRef.current, query);
-        setEntries(bookmarkEntries);
-      } catch (e) {
-        if (!cancel) {
-          const errorMessage = (e as Error).message?.includes("no such file or directory")
-            ? "Microsoft Edge not installed"
-            : "Failed to load bookmarks";
-          setError(errorMessage);
-        }
-      } finally {
-        if (!cancel) setIsLoading(false);
-      }
-    }
-
-    getHistory();
-
-    return () => {
-      cancel = true;
-    };
-  }, [query]);
-
-  return { entries, error, isLoading };
+export function useEdgeBookmarkSearch(query: NullableString): UrlSearchResult {
+  return useUrlSearch<UrlDetail[]>(query, getBookmarksFromEdge, searchBookmarks);
 }

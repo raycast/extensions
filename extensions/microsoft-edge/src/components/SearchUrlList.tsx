@@ -1,12 +1,12 @@
-import { DEFAULT_ERROR_TITLE } from './common/constants';
+import { DEFAULT_ERROR_TITLE } from '../common/constants';
 import { List, showToast, ToastStyle } from '@raycast/api';
+import { NullableString, UrlSearchResult } from '../schema/types';
 import { ReactElement, useState } from 'react';
-import { UrlListItem } from './components/UrlListItem';
-import { useEdgeBookmarkSearch } from './hooks/useBookmarkSearch';
+import { UrlListItem } from './UrlListItem';
 
-export default function Command(): ReactElement {
+export function SearchUrlList(useUrlSearchHook: (query: NullableString) => UrlSearchResult): ReactElement {
   const [searchText, setSearchText] = useState<string>();
-  const { isLoading, error, entries } = useEdgeBookmarkSearch(searchText);
+  const { isLoading, error, entries } = useUrlSearchHook(searchText);
 
   if (error) {
     showToast(ToastStyle.Failure, DEFAULT_ERROR_TITLE, error.toString());
