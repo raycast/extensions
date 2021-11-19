@@ -165,7 +165,7 @@ async function storeRecentlyOpenedPage(page: Page) {
   const cachedRecentlyOpenPages = await loadRecentlyOpenedPages()
   const updatedRecentlyOpenPages = (cachedRecentlyOpenPages ? cachedRecentlyOpenPages : [])
 
-  const cachedPageIndex = updatedRecentlyOpenPages.findIndex(cp => cp.id === page.id);
+  const cachedPageIndex = updatedRecentlyOpenPages.findIndex(cp: Page => cp.id === page.id);
 
   if(cachedPageIndex > -1){
     updatedRecentlyOpenPages[cachedPageIndex].last_edited_time = Date.now();
