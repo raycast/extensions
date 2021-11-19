@@ -137,7 +137,8 @@ export default function Command(): ReactElement {
         const parsedUrl = urlParser(searchText)
         setSearchUrl(parsedUrl)       
       } else {
-        setSearchUrl(null)      }
+        setSearchUrl(undefined)
+      }
     }, [searchText]);
   
 
