@@ -93,19 +93,26 @@ function updateInstalled(results?: InstallableResults, installed?: Installed) {
 
   for (const formula of results.formulae) {
     const info = installed.formulae.get(formula.name);
-    if (!info || !isFormula(info)) { continue; }
-
-    formula.installed = info?.installed ?? [];
-    formula.outdated = info?.outdated ?? false;
-    formula.pinned = info?.pinned ?? false;
+    if (info && isFormula(info)) {
+      formula.installed = info.installed;
+      formula.outdated = info.outdated;
+      formula.pinned = info.pinned;
+    } else {
+      formula.installed = [];
+      formula.outdated = false;
+      formula.pinned = false;
+    }
   }
 
   for (const cask of results.casks) {
     const info = installed.casks.get(cask.token);
-    if (!info || !isCask(info)) { continue; }
-
-    cask.installed = info?.installed;
-    cask.outdated = info?.outdated ?? false;
+    if (info && isCask(info)) {
+      cask.installed = info.installed;
+      cask.outdated = info.outdated;
+    } else {
+      cask.installed = undefined;
+      cask.outdated = false;
+    }
   }
 }
 
