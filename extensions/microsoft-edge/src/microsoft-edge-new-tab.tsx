@@ -1,11 +1,11 @@
 import {
-	ActionPanel,
-	getPreferenceValues,
-	Icon,
-	List,
-	showToast,
-	ToastStyle
-	} from '@raycast/api';
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  List,
+  showToast,
+  ToastStyle
+  } from '@raycast/api';
 import { DEFAULT_ERROR_TITLE } from './common/constants';
 import { getOpenTabs } from './common/getOpenTabs';
 import { NullableString } from './schema/types';
@@ -19,7 +19,6 @@ import { useHistorySearch } from './hooks/useHistorySearch';
 
 interface State {
   tabs?: Tab[];
-  error?: boolean;
 }
 
 export default function Command(): ReactElement {
@@ -43,7 +42,7 @@ export default function Command(): ReactElement {
       }
       setState({ tabs: tabs });
     } catch (error) {
-      setState({ tabs: [], error: true });
+      setState({ tabs: [] });
       showToast(ToastStyle.Failure, DEFAULT_ERROR_TITLE, "Couldn't get open tabs");
     }
   }

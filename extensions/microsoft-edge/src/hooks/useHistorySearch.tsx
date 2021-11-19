@@ -39,5 +39,5 @@ const searchHistory = async (db: Database, query: NullableString): Promise<UrlDe
 };
 
 export function useHistorySearch(query: NullableString): UrlSearchResult {
-  return useUrlSearch<Database>(query, loadHistoryToLocalDb, searchHistory);
+  return useUrlSearch<Database>(query, loadHistoryToLocalDb, searchHistory, "history");
 }

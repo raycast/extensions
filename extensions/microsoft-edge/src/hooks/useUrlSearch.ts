@@ -1,3 +1,4 @@
+import { checkIfBrowserIsInstalled } from '../utils/appleScriptUtils';
 import { Database } from 'sql.js';
 import { NullableString, UrlDetail, UrlSearchResult } from '../schema/types';
 import { useEffect, useRef, useState } from 'react';
@@ -5,7 +6,8 @@ import { useEffect, useRef, useState } from 'react';
 export function useUrlSearch<SourceDataType>(
   query: NullableString,
   loadUrlsToLocalDb: () => Promise<SourceDataType>,
-  searchUrls: (db: SourceDataType, query: NullableString) => Promise<UrlDetail[]>
+  searchUrls: (db: SourceDataType, query: NullableString) => Promise<UrlDetail[]>,
+  resourceName?: string
 ): UrlSearchResult {
   const [entries, setEntries] = useState<UrlDetail[]>();
   const [error, setError] = useState<string>();
@@ -30,9 +32,10 @@ export function useUrlSearch<SourceDataType>(
         setEntries(urlItemEntries);
       } catch (e) {
         if (!cancel) {
-          const errorMessage = (e as Error).message?.includes("no such file or directory")
+          const isEdgeInstalled = await checkIfBrowserIsInstalled();
+          const errorMessage = !isEdgeInstalled
             ? "Microsoft Edge not installed"
-            : "Failed to load urls";
+            : `Failed to show ${resourceName || "urls"}`;
           setError(errorMessage);
         }
       } finally {

@@ -1,14 +1,23 @@
-import { Detail, getPreferenceValues, List, showToast, ToastStyle } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { Tab } from "./lib/Tab";
-import { TabListItem } from "./components/TabListItem";
-import { getOpenTabs } from "./common/getOpenTabs";
-import { DEFAULT_ERROR_TITLE, DownloadMSEdgeMDText } from "./common/constants";
+import { checkIfBrowserIsInstalled } from './utils/appleScriptUtils';
+import { DEFAULT_ERROR_TITLE, DownloadMSEdgeMDText } from './common/constants';
+import {
+  Detail,
+  getPreferenceValues,
+  List,
+  showToast,
+  ToastStyle
+  } from '@raycast/api';
+import { getOpenTabs } from './common/getOpenTabs';
+import { Tab } from './lib/Tab';
+import { TabListItem } from './components/TabListItem';
+import { useEffect, useState } from 'react';
 
 interface State {
   tabs?: Tab[];
   error?: boolean;
 }
+
+let isEdgeInstalled = true;
 
 export default function Command() {
   const { useOriginalFavicon } = getPreferenceValues<{ useOriginalFavicon: boolean }>();
@@ -19,13 +28,15 @@ export default function Command() {
     async function getTabs() {
       try {
         const tabs = await getOpenTabs(useOriginalFavicon);
-        setState({ tabs });
+        setState({ tabs, error: false });
       } catch (error) {
-        setState({ error: true, tabs: [] });
-        const errorMessage = (error as Error).message.includes("execution error")
-          ? "Microsoft Edge not installed"
-          : "Tabs not found";
-        showToast(ToastStyle.Failure, DEFAULT_ERROR_TITLE, errorMessage);
+        isEdgeInstalled = await checkIfBrowserIsInstalled();
+        setState({ tabs: [], error: !isEdgeInstalled });
+        showToast(
+          ToastStyle.Failure,
+          DEFAULT_ERROR_TITLE,
+          isEdgeInstalled ? "Failed to show open tabs" : "Microsoft Edge is not installed"
+        );
       }
     }
 

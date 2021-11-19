@@ -52,5 +52,5 @@ const searchCollection = async (db: Database, query: NullableString): Promise<Ur
 };
 
 export function useCollectionSearch(query: NullableString): UrlSearchResult {
-  return useUrlSearch<Database>(query, loadCollectionsToLocalDb, searchCollection);
+  return useUrlSearch<Database>(query, loadCollectionsToLocalDb, searchCollection, "collections");
 }

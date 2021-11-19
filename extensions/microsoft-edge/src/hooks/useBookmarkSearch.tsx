@@ -75,5 +75,5 @@ const searchBookmarks = async (bookmarks: UrlDetail[], query: NullableString): P
 };
 
 export function useEdgeBookmarkSearch(query: NullableString): UrlSearchResult {
-  return useUrlSearch<UrlDetail[]>(query, getBookmarksFromEdge, searchBookmarks);
+  return useUrlSearch<UrlDetail[]>(query, getBookmarksFromEdge, searchBookmarks, "bookmarks");
 }
