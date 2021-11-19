@@ -30,15 +30,6 @@
       "description": "In Notion go to Settings & Members > Integration > Develop your own > New integration",
       "placeholder": "secret_1l3892KIWCJHJVikbiyJ7",
       "link": "https://www.notion.so/my-integrations"
-    },
-    {
-      "name": "notion_workspace_slug",
-      "type": "textfield",
-      "required": true,
-      "title": "Notion Workspace Domain",
-      "description": "In Notion go to Settings & Members > Settings > Domain",
-      "placeholder": "my-workspace-domain-slug",
-      "link": "https://www.notion.so/"
     }
   ],
   "dependencies": {

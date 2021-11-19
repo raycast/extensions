@@ -47,7 +47,6 @@ export interface Page {
   icon_external: string | null
   url: string
   properties: Record<string, any>
-  _keywords: string[] 
 }
 
 // Fetch databases
@@ -319,7 +318,7 @@ async function rawSearchPages(query: string | undefined ): Promise<Page[]> {
       }
     )
     const json = await response.json() as Record<string,any>
-    
+
     const pages = pageListMapper(json.results as Record<string,any>[])
 
     return pages

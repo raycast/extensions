@@ -12,6 +12,8 @@ import {
   getLocalStorageItem,
   getApplications,
   closeMainWindow,
+  CopyToClipboardAction,
+  PasteAction,
 } from '@raycast/api'
 import { useEffect, useState } from 'react'
 import {
@@ -26,12 +28,10 @@ import open from 'open'
 export default function SearchPageList(): JSX.Element {
   // Get preference values
   const notion_token = String(preferences.notion_token.value)
-  const notion_workspace_slug = String(preferences.notion_workspace_slug.value)
   if (notion_token.length !== 50) {
     showToast(ToastStyle.Failure, 'Invalid token detected')
     throw new Error('Invalid token length detected')
   }
-  const pageBaseURL = 'notion.so/'+notion_workspace_slug+'/'
 
   // Setup useState objects
   const [pages, setPages] = useState<Page[]>()
@@ -49,8 +49,7 @@ export default function SearchPageList(): JSX.Element {
         setIsNotionInstalled(installedApplications.some(function(app) {
           return app.bundleId === 'notion.id';
         })) 
-      }
-     
+      }     
     }
     checkAppInstalled()
   }, [])
@@ -98,9 +97,8 @@ export default function SearchPageList(): JSX.Element {
 
 
   async function handleOnOpenPage(page: Page) {
-    const pageUrl = pageBaseURL+page.id.replace(/-/g,'')
     closeMainWindow();
-    open((isNotionInstalled ?  'notion://' : 'https://')+pageUrl);
+    open((isNotionInstalled ?  page.url.replace('https','notion') : page.url))
     storeRecentlyOpenedPage(page)
 
   }
@@ -150,13 +148,21 @@ function PageListItem(props: { p: Page, isNotionInstalled: boolean | undefined, 
     actions={            
     <ActionPanel>
       <ActionPanel.Section title={(p.title ? p.title : 'Untitled')}>
-        <ActionPanel.Item 
-          id={p.id}
-          key={p.id}
+        <ActionPanel.Item
           title='Open Page'
           icon={{source:(isNotionInstalled ? 'notion-logo.png' : Icon.Globe)}}
           onAction={function () { handleOnOpenPage(p)}}/>
-        </ActionPanel.Section>
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <CopyToClipboardAction
+          title='Copy Page URL'
+          content={p.url}
+          shortcut={{ modifiers: ["cmd","shift"], key: "c" }}/>
+        <PasteAction
+          title='Past Page URL'
+          content={p.url}
+          shortcut={{ modifiers: ["cmd","shift"], key: "v" }}/>
+      </ActionPanel.Section>
     </ActionPanel>
     }/>)
 }
