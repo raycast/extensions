@@ -3,7 +3,7 @@
   <h1 align="center">Kinopoisk</h1>
 </p>
 
-A [Raycast](https://raycast.com/) extenstion that lets you easily open your favorite film or tv series on [Kinopoisk](http://kinopoisk.ru).
+A [Raycast](https://raycast.com/) extenstion that lets you easily open your favorite film or tv series on [Kinopoisk](https://kinopoisk.ru).
 
 This extension uses [The Kinopoisk Api Unofficial](https://kinopoiskapiunofficial.tech)
 
