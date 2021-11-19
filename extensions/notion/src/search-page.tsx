@@ -97,9 +97,9 @@ export default function SearchPageList(): JSX.Element {
 
 
   async function handleOnOpenPage(page: Page) {
-    closeMainWindow();
     open((isNotionInstalled ?  page.url.replace('https','notion') : page.url))
-    storeRecentlyOpenedPage(page)
+    await storeRecentlyOpenedPage(page)
+    closeMainWindow();
 
   }
 
