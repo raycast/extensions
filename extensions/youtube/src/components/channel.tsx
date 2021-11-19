@@ -1,6 +1,7 @@
 import { ActionPanel, Color, Detail, Icon, ImageMask, List, PushAction, showToast, ToastStyle } from "@raycast/api";
+import React from "react";
 import { compactNumberFormat, formatDate, getErrorMessage } from "../lib/utils";
-import { Channel, getChannel, useRefresher } from "../lib/youtubeapi";
+import { Channel, getChannel, getPrimaryActionPreference, PrimaryAction, useRefresher } from "../lib/youtubeapi";
 import { OpenChannelInBrowser, SearchChannelVideosAction, ShowRecentPlaylistVideosAction } from "./actions";
 
 export function ChannelListItemDetail(props: {
@@ -57,6 +58,33 @@ export function ChannelListItem(props: { channel: Channel }): JSX.Element {
   }
   const thumbnail = channel.thumbnails?.high?.url || "";
 
+  const mainActions = (): JSX.Element => {
+    const showDetail = (
+      <PushAction
+        title="Show Details"
+        target={<ChannelListItemDetail channel={channel} />}
+        icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
+      />
+    );
+    const openBrowser = <OpenChannelInBrowser channelId={channelId} />;
+
+    if (getPrimaryActionPreference() === PrimaryAction.Browser) {
+      return (
+        <React.Fragment>
+          {openBrowser}
+          {showDetail}
+        </React.Fragment>
+      );
+    } else {
+      return (
+        <React.Fragment>
+          {showDetail}
+          {openBrowser}
+        </React.Fragment>
+      );
+    }
+  };
+
   return (
     <List.Item
       key={channelId}
@@ -65,17 +93,12 @@ export function ChannelListItem(props: { channel: Channel }): JSX.Element {
       accessoryTitle={parts.join(" ")}
       actions={
         <ActionPanel>
-          <PushAction
-            title="Show Details"
-            target={<ChannelListItemDetail channel={channel} />}
-            icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
-          />
+          {mainActions()}
           <SearchChannelVideosAction channelId={channelId} />
           <ShowRecentPlaylistVideosAction
             title="Show Recent Channel Videos"
             playlistId={channel.relatedPlaylists?.uploads}
           />
-          <OpenChannelInBrowser channelId={channelId} />
         </ActionPanel>
       }
     />

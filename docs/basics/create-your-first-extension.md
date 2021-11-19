@@ -8,7 +8,7 @@ description: Learn how to build your first extension and use it in Raycast.
 
 Open the Create Extension command, name your extension "Hello World" and select the Markdown template. Pick a parent folder in the Location field and press `⌘` `↵` to continue.
 
-![Create a new extensio](../.gitbook/assets/basics-create-extension.png)
+![Create a new extension](../.gitbook/assets/basics-create-extension.png)
 
 Next, you'll need to follow the on-screen instructions to build the extension.
 

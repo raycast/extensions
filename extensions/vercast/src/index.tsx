@@ -1,13 +1,18 @@
 import {
   render,
   ActionPanel,
+  SubmitFormAction,
+  PushAction,
   Color,
   Icon,
   List,
+  Form,
+  FormValues,
   OpenInBrowserAction,
   preferences,
   showToast,
   ToastStyle,
+  useNavigation,
 } from '@raycast/api'
 import { randomUUID } from 'crypto'
 import { useEffect, useState } from 'react'
@@ -20,6 +25,10 @@ import {
   fetchUsername,
   Team,
 } from './vercel'
+
+import {
+  UpdateEnvironmentVariable,
+} from './actions'
 
 render(<Main />)
 
@@ -61,7 +70,7 @@ function Main(): JSX.Element {
     if (username && teams) {
       setDeployments(await fetchDeployments(username, teams))
     }
-  }, 2000)
+  }, 8000)
 
   return (
     <List isLoading={!deployments}>
@@ -93,7 +102,20 @@ function Main(): JSX.Element {
             icon={{ tintColor: iconTintColor, source: iconSource }}
             actions={
               <ActionPanel>
-                <OpenInBrowserAction url={d.url} />
+                <ActionPanel.Section title={(d.owner === username ? '' : `${d.owner}/`) + d.project}>
+                  <OpenInBrowserAction url={d.url} />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Project Settings">
+                  <PushAction 
+                    icon={Icon.Gear}
+                    title="Environment Variable"                     
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    target={<UpdateEnvironmentVariable
+                      projectId={d.project}
+                      projectName={(d.owner === username ? '' : `${d.owner}/`) + d.project}
+                    />} 
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
