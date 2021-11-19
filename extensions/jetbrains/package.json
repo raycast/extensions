@@ -38,10 +38,19 @@
       "name": "fallback",
       "type": "checkbox",
       "required": false,
-      "title": "fallback to use protocol urls",
-      "description": "Try to use the jetbrain://app-name protocol url to open projects if tools are not installed",
+      "title": "Use protocol urls if missing shell scripts",
+      "description": "Try to use the jetbrain://app-name protocol url to open projects if tools are not installed (not recommended)",
       "default": false,
       "label": "Enabled"
+    },
+    {
+      "name": "historic",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use historic project files",
+      "description": "Add projects from previous app installs",
+      "default": false,
+      "label": "Use all"
     }
   ],
   "keywords": [

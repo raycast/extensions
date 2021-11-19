@@ -23,7 +23,7 @@ import {
   bin,
   createUniqueArray,
   getFiles,
-  getRecentEntries,
+  getRecentEntries, historicProjects,
   JetBrainsIcon,
   preferredApp,
   recentEntry, useUrl
@@ -39,13 +39,11 @@ const HISTORY_GLOB = "Library/Application Support/JetBrains/Toolbox/apps/**/.his
 const getRecent = async (path: string | string[], icon: string) => {
   return getFiles(path).then((apps) => {
     return apps
-      .map((file) => {
-        return {
+      .map((file) => ({
           ...file,
           title: file.title,
           icon: icon,
-        };
-      })
+        }))
       .sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
   });
 }
@@ -96,7 +94,8 @@ const getIcons = async () => {
 const loadAppEntries = async (apps: AppHistory[]) => {
   return await Promise.all(apps
     .map(async app => {
-      for (const res of app.xmlFiles ?? []) {
+      const xmlFiles = app.xmlFiles ?? []
+      for (const res of historicProjects ? xmlFiles : xmlFiles.slice(0,1)) {
         const entries = await getRecentEntries(res, app);
         // sort before unique so we get the newest versions
         app.entries =
