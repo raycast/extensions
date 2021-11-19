@@ -27,7 +27,7 @@ import {
   getRecentEntries,
   JetBrainsIcon,
   preferredApp,
-  recentEntry
+  recentEntry, useUrl
 } from "./util";
 import History from "./.history.json";
 import {promisify} from "util";
@@ -72,7 +72,7 @@ const getHistory = async () => {
           const activation = history.item.activation?.hosts[0] ?? false
           return {
             title: history.item.name,
-            url: activation ? `jetbrains://${activation}/navigate/reference?project=` : false,
+            url: useUrl && activation ? `jetbrains://${activation}/navigate/reference?project=` : false,
             tool: tool ? await which(tool, {path: bin}).catch(() => false) : false,
             icon,
             xmlFiles: await getRecent(globFromHistory(history), icon)
@@ -114,11 +114,9 @@ function OpenInJetBrainsAppAction({tool, recent}: { tool: AppHistory; recent: re
     const cmd = tool.tool
       ? `${tool.tool} "${recent?.path ?? ''}"`
       : `open ${tool.url}${recent?.title ?? ''}`
-    execPromise(cmd)
-      .then(() => showHUD(`Opening ${recent ? recent.title : tool.title}`)
-        .then(() => popToRoot({clearSearchBar: true})
-        )
-      )
+    showHUD(`Opening ${recent ? recent.title : tool.title}`)
+      .then(() => execPromise(cmd))
+      .then(() => popToRoot())
       .catch((error) => showToast(ToastStyle.Failure, "Failed", error.message)
         .then(() => console.error({error}))
       )
@@ -226,14 +224,24 @@ export default function ProjectList() {
     return <Detail isLoading/>;
   } else if (appHistory.length === 0) {
     const tbUrl = 'https://jb.gg/toolbox-app';
-    const message = `No JetBrains applications found. Please check that you have [JetBrains Toolbox](${tbUrl}) and at least one IDE installed.`
-    return <Detail markdown={message} actions={<ActionPanel>
+    const message = [
+      '# Unable to find any JetBrains Toolbox apps',
+      `Please check that you have installed [JetBrains Toolbox](${tbUrl}) and added at least one IDE.`
+    ]
+    return <Detail markdown={message.join('\n\n')} actions={<ActionPanel>
       <OpenInBrowserAction title='Open Toolbox Website' url={tbUrl} icon={JetBrainsIcon}/>
       <OpenInBrowserAction title='Open Toolbox FAQ' url={`${tbUrl}-faq`}/>
     </ActionPanel>}/>
   } else if (!appHistory.reduce((exists, appHistory) => (exists || appHistory.tool !== false || appHistory.url !== false), false)) {
-    const message = 'Unable to find shell scripts, ensure you have "Generate Shell scripts" checked in *JetBrains Toolbox* under *Settings*\n\nIf you have set a custom path for your shell scripts, that can set that in the settings for this extension'
-    return <Detail markdown={message} actions={<ActionPanel>
+    const message = [
+      '# There was a problem finding the JetBrains shell scripts',
+      'We were unable to find shell scripts, ensure you have the **Generate Shell scripts** option checked in *JetBrains Toolbox* under *Settings*.',
+      `If you have set a custom path for your shell scripts, that can set that in the settings for this extension, this is currently set to \`${bin}\`.`,
+      useUrl
+        ? 'Additionally, we were unable to find a protocol url link to fallback on, please ensure you are using the latest version of JetBrains Toolbox and any apps you are using.'
+        : 'You can also enable the extension preference to fallback to protocol url, though that is a less reliable method of opening projects.',
+    ];
+    return <Detail markdown={message.join('\n\n')} actions={<ActionPanel>
       <OpenJetBrainsToolBox/>
     </ActionPanel>}/>
   }

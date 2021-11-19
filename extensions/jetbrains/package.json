@@ -29,10 +29,19 @@
       "name": "bin",
       "type": "textfield",
       "required": false,
-      "title": "tools bin folder",
-      "description": "Where are JetBrains Tools installed (in Toolbox Settings)",
+      "title": "Shell scripts location",
+      "description": "Where are JetBrains Tools 'shell scripts' are installed (in Toolbox → Settings → Tools)",
       "default": "/usr/local/bin",
       "placeholder": "/usr/local/bin"
+    },
+    {
+      "name": "fallback",
+      "type": "checkbox",
+      "required": false,
+      "title": "fallback to use protocol urls",
+      "description": "Try to use the jetbrain://app-name protocol url to open projects if tools are not installed",
+      "default": false,
+      "label": "Enabled"
     }
   ],
   "keywords": [
