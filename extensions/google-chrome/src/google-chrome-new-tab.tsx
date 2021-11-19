@@ -131,14 +131,17 @@ export default function Command(): ReactElement {
         showToast(ToastStyle.Failure, "An Error Occurred", error.toString())
     }
 
+
+    useEffect(() => { 
+      if(searchText){
+        const parsedUrl = urlParser(searchText)
+        setSearchUrl(parsedUrl)       
+      } else {
+        setSearchUrl(null)      }
+    }, [searchText]);
   
 
-    if(!searchUrl && searchText){
-      const parsedUrl = urlParser(searchText)
-      if(parsedUrl){
-        setSearchUrl(parsedUrl)
-      }
-    }
+    
 
 
     return (
