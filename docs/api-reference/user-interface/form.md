@@ -503,7 +503,13 @@ export default function Command() {
   }
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form
+       actions={
+         <ActionPanel>
+           <SubmitFormAction title="Submit" onSubmit={handleSubmit} />
+         </ActionPanel>
+       }
+    >
       <Form.TextField id="todo" title="Todo" />
       <Form.DatePicker id="due" title="Due Date" />
     </Form>

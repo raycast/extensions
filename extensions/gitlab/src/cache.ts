@@ -119,9 +119,6 @@ export function useCache<T>(
     const [error, setError] = useState<string>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    let cancel = false;
-    let refetch = false;
-
     const search = async (alldata: T) => {
         if (options.onFilter) {
             return await options.onFilter(alldata);
@@ -130,8 +127,14 @@ export function useCache<T>(
     };
 
     useEffect(() => {
+        let refetch = false;
+
+        // FIXME In the future version, we don't need didUnmount checking
+        // https://github.com/facebook/react/pull/22114
+        let didUnmount = false;
+
         async function fetchData() {
-            if (cancel) {
+            if (didUnmount) {
                 return;
             }
 
@@ -143,7 +146,7 @@ export function useCache<T>(
                 const cacheData = await getLargeCacheObjectData(key);
                 if (cacheData && cacheData.ageInSeconds < secondsToInvalid) {
                     console.log("cache data found");
-                    if (!cancel) {
+                    if (!didUnmount) {
                         console.log("set cache data");
                         setData(await search(cacheData.data));
                         console.log(`${cacheData.ageInSeconds}  vs  ${secondsToRefetch}`);
@@ -156,16 +159,16 @@ export function useCache<T>(
                                 setLargeCacheObject(key, value);
                                 value = await search(value);
                                 refetch = false;
-                                if (!cancel) {
+                                if (!didUnmount) {
                                     setData(value);
                                     setIsLoading(false);
                                 }
                             }).catch((e) => {
-                                if (!cancel) {
+                                if (!didUnmount) {
                                     setError(e);
                                 }
                             }).finally(() => {
-                                if (!cancel) {
+                                if (!didUnmount) {
                                     setIsLoading(false);
                                     refetch = false;
                                 }
@@ -176,16 +179,16 @@ export function useCache<T>(
                     console.log("no cache data, start fetch");
                     const data = await getData();
                     setLargeCacheObject(key, data);
-                    if (!cancel) {
+                    if (!didUnmount) {
                         setData(await search(data));
                     }
                 }
             } catch (e: any) {
-                if (!cancel) {
+                if (!didUnmount) {
                     setError(e.message);
                 }
             } finally {
-                if (!cancel && !refetch) {
+                if (!didUnmount && !refetch) {
                     setIsLoading(false);
                 }
             }
@@ -194,7 +197,7 @@ export function useCache<T>(
         fetchData();
 
         return () => {
-            cancel = true;
+            didUnmount = true;
         };
     }, options.deps);
 

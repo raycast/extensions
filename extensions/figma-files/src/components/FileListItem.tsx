@@ -1,49 +1,24 @@
-import { useEffect, useState } from "react"
-import {
-  ActionPanel,
-  List,
-  OpenInBrowserAction,
-  CopyToClipboardAction,
-  OpenAction,
-  Application,
-  getApplications,
-} from "@raycast/api"
-import TimeAgo from "javascript-time-ago"
-import en from "javascript-time-ago/locale/en.json"
+import { ActionPanel, List, CopyToClipboardAction } from "@raycast/api";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en.json";
 
-import type { File } from "../types"
-import DevelopmentActionSection from "./DevelopmentActionSection"
+import type { File } from "../types";
+import DevelopmentActionSection from "./DevelopmentActionSection";
+import { OpenProjectFileAction } from "./OpenProjectFileAction";
+import { OpenPageSubmenuAction } from "./OpenPageSubmenuAction";
 
-TimeAgo.addDefaultLocale(en)
-const timeAgo = new TimeAgo("en-US")
+TimeAgo.addDefaultLocale(en);
+const timeAgo = new TimeAgo("en-US");
 
-export default function FileListItem(props: { file: File; extraKey?: string; onVisit: (file: File) => void }) {
-  const { file, extraKey, onVisit } = props
+export default function FileListItem(props: {
+  file: File;
+  extraKey?: string;
+  onVisit: (file: File) => void;
+}) {
+  const { file, extraKey, onVisit } = props;
 
-  const OpenProjectFileAction = (props: { file: File }) => {
-    const [desktopApp, setDesktopApp] = useState<Application>()
-
-    useEffect(() => {
-      getApplications()
-        .then((apps) => apps.find((a) => a.bundleId === "com.figma.Desktop"))
-        .then(setDesktopApp)
-    }, [])
-
-    return desktopApp ? (
-      <OpenAction
-        icon="command-icon.png"
-        title="Open in Figma"
-        target={`figma://file/${props.file.key}`}
-        application={desktopApp}
-        onOpen={() => onVisit(props.file)}
-      />
-    ) : (
-      <OpenInBrowserAction url={`https://figma.com/file/${props.file.key}`} onOpen={() => onVisit(props.file)} />
-    )
-  }
-
-  const accessoryTitle = String(timeAgo.format(new Date(file.last_modified)))
-  const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key
+  const accessoryTitle = String(timeAgo.format(new Date(file.last_modified)));
+  const fileIdentifier = extraKey ? `${file.key}-${extraKey}` : file.key;
   return (
     <List.Item
       id={fileIdentifier}
@@ -53,12 +28,17 @@ export default function FileListItem(props: { file: File; extraKey?: string; onV
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenProjectFileAction file={props.file} />
-            <CopyToClipboardAction content={`https://figma.com/file/${file.key}`} />
+            <OpenProjectFileAction file={props.file} onVisit={onVisit} />
+            <CopyToClipboardAction
+              content={`https://figma.com/file/${file.key}`}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <OpenPageSubmenuAction file={props.file} onVisit={onVisit} />
           </ActionPanel.Section>
           <DevelopmentActionSection />
         </ActionPanel>
       }
     />
-  )
+  );
 }

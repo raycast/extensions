@@ -109,6 +109,7 @@
           "name": "addSignature",
           "type": "checkbox",
           "required": false,
+          "title": "",
           "label": "Add signature",
           "description": "Indicates whether a signature should be added"
         },

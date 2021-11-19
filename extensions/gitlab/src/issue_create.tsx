@@ -153,11 +153,13 @@ export function useProject(query?: string): {
   const [errorProjectInfo, setError] = useState<string>();
   const [isLoadingProjectInfo, setIsLoading] = useState<boolean>(false);
 
-  let cancel = false;
-
   useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
     async function fetchData() {
-      if (query === null || cancel) {
+      if (query === null || didUnmount) {
         return;
       }
 
@@ -172,18 +174,18 @@ export function useProject(query?: string): {
           const labels = await gitlab.getProjectLabels(proid);
           const milestones = await gitlab.getProjectMilestones(proid);
 
-          if (!cancel) {
+          if (!didUnmount) {
             setProjectInfo({ ...projectinfo, members: members, labels: labels, milestones: milestones });
           }
         } else {
           console.log("no project selected");
         }
       } catch (e: any) {
-        if (!cancel) {
+        if (!didUnmount) {
           setError(e.toString());
         }
       } finally {
-        if (!cancel) {
+        if (!didUnmount) {
           setIsLoading(false);
         }
       }
@@ -192,7 +194,7 @@ export function useProject(query?: string): {
     fetchData();
 
     return () => {
-      cancel = true;
+      didUnmount = true;
     };
   }, [query]);
 

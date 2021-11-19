@@ -3,6 +3,7 @@
   "name": "tableplus",
   "title": "TablePlus",
   "description": "Search and open database connections in TablePlus",
+  "version": "1.2.0",
   "icon": "icon.png",
   "author": "pernielsentikaer",
   "license": "MIT",
@@ -15,11 +16,22 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "path",
+      "type": "textfield",
+      "required": false,
+      "title": "TablePlus data directory",
+      "placeholder": "Leave blank for default location",
+      "description": "If you installed TablePlus with SetApp or moved the data directory\r\n(must be full-paths or tidle-prefixed ones)"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.25.1",
     "plist": "^3.0.4"
   },
   "devDependencies": {
+    "@types/expand-tilde": "^2.0.0",
     "@types/node": "~16.10.0",
     "@types/plist": "^3.0.2",
     "@types/react": "^17.0.28",
@@ -27,7 +39,8 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "expand-tilde": "^2.0.2",
+    "react-devtools": "^4.21.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
