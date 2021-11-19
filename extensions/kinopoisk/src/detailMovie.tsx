@@ -20,7 +20,7 @@ ${movie.description ?? ""}
       markdown={markdownString}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`https://www.kinopoisk.ru/film/${movie.filmId}/`} />
+          <OpenInBrowserAction url={`https://www.kinopoisk.ru/film/${movie.filmId}/`} icon="kinopoisk.png" />
         </ActionPanel>
       }
     />
