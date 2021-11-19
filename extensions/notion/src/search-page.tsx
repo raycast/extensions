@@ -159,7 +159,7 @@ function PageListItem(props: { p: Page, isNotionInstalled: boolean | undefined, 
           content={p.url}
           shortcut={{ modifiers: ["cmd","shift"], key: "c" }}/>
         <PasteAction
-          title='Past Page URL'
+          title='Paste Page URL'
           content={p.url}
           shortcut={{ modifiers: ["cmd","shift"], key: "v" }}/>
       </ActionPanel.Section>
