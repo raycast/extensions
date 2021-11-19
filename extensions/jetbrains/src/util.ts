@@ -4,7 +4,6 @@ import fg from "fast-glob"
 import {basename, dirname} from "path"
 import {parseStringPromise} from "xml2js"
 import {homedir} from "os"
-import Fuse from "fuse.js"
 
 export const JetBrainsIcon = "jb.png"
 
@@ -39,7 +38,6 @@ export interface AppHistory {
   icon: string
   xmlFiles: file[]
   entries?: recentEntry[]
-  fused?: Fuse<recentEntry>
 }
 
 

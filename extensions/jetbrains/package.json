@@ -55,7 +55,6 @@
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "fast-glob": "^3.2.7",
-    "fuse.js": "^6.4.6",
     "which": "^2.0.2",
     "xml2js": "^0.4.23"
   },

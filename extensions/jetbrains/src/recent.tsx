@@ -13,7 +13,6 @@ import {
   showToast,
   ToastStyle,
 } from "@raycast/api";
-import Fuse from "fuse.js";
 import {readFile} from "fs/promises";
 import {homedir} from "os";
 import {dirname, resolve} from "path";
@@ -159,17 +158,6 @@ function RecentProject({app, recent, tools}: { app: AppHistory; recent: recentEn
   );
 }
 
-const fuseRecent = (search: string, recent: Array<recentEntry>, fused: Fuse<recentEntry> | undefined): recentEntry[] => {
-  if (search === '') {
-    return recent;
-  }
-  if (fused === undefined) {
-    return recent;
-  }
-
-  return fused.search(search).map(({item}) => item)
-};
-
 function OpenJetBrainsToolBox() {
   return <ActionPanel.Item icon={JetBrainsIcon} title="Launch JetBrains Toolbox" onAction={() => {
     getApplications().then(apps => {
@@ -177,7 +165,7 @@ function OpenJetBrainsToolBox() {
       if (jb) {
         exec(`open -a "${jb.name}"`, (err) => err && showToast(ToastStyle.Failure, err?.message))
       } else {
-        showToast(ToastStyle.Failure, 'Unable to find JetBrains Toolbox App')
+        showToast(ToastStyle.Failure, 'Unable to find JetBrains Toolbox App').catch((err) => console.error(err))
       }
     })
   }}/>;
@@ -194,27 +182,15 @@ interface state {
 
 export default function ProjectList() {
   const [{loading, appHistory}, setAppHistory] = useState<state>({loading: true, appHistory: []});
-  const [search, setSearch] = useState<string>("");
 
   useEffect(() => {
     getHistory()
       .then(apps => loadAppEntries(apps)
           .then(withEntries => withEntries.sort(sortApps))
           .then(sorted => {
-            const options = {
-              isCaseSensitive: false,
-              findAllMatches: true,
-              shouldSort: true,
-              ignoreLocation: true,
-              // keys to search
-              keys: ['path', 'title', 'parts', 'app']
-            };
             setAppHistory({
               loading: false,
-              appHistory: sorted.map(app => ({
-                ...app,
-                fused: new Fuse<recentEntry>(app?.entries ?? [], options)
-              }))
+              appHistory: sorted,
             })
           })
       )
@@ -256,13 +232,11 @@ export default function ProjectList() {
   return (
     <List
       searchBarPlaceholder={`Search recent projects…`}
-      onSearchTextChange={(term) => setSearch(term.trim())}
       actions={<ActionPanel children={defaultActions}/>}
     >
       {appHistory.map((app) => (
         <List.Section title={app.title} key={app.title}>
-          {fuseRecent(search, app.entries ?? [], app.fused)
-            .map((recent: recentEntry) =>
+          {(app.entries ?? []).map((recent: recentEntry) =>
               recent?.path ? (
                 <RecentProject key={`${app.title}-${recent.path}`} app={app} recent={recent} tools={appHistory}/>
               ) : null
