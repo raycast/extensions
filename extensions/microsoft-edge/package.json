@@ -33,6 +33,13 @@
       "mode": "view"
     },
     {
+      "name": "microsoft-edge-search-collection",
+      "title": "Search Collections",
+      "subtitle": "Microsoft Edge",
+      "description": "Search Microsoft Edge browser collections.",
+      "mode": "view"
+    },
+    {
       "name": "microsoft-edge-new-tab",
       "title": "New Tab",
       "subtitle": "Microsoft Edge",

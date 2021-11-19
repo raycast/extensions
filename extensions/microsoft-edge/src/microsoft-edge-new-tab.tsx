@@ -1,7 +1,6 @@
 import { ActionPanel, getPreferenceValues, Icon, List, showToast, ToastStyle } from "@raycast/api";
 import { useEdgeHistorySearch } from "./hooks/useHistorySearch";
 import { useEffect, useState, ReactElement } from "react";
-import { urlParser } from "./utils";
 import { Tab } from "./lib/Tab";
 import { TabListItem } from "./components/TabListItem";
 import { getOpenTabs } from "./common/getOpenTabs";
@@ -9,6 +8,7 @@ import { NullableString } from "./schema/types";
 import { UrlListItem } from "./components/UrlListItem";
 import { openNewTab } from "./common/openNewTab";
 import { DEFAULT_ERROR_TITLE } from "./common/constants";
+import { urlParser } from "./utils/urlUtils";
 
 interface State {
   tabs?: Tab[];

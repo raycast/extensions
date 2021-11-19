@@ -1,10 +1,4 @@
 import path from "path";
-import { URL } from "url";
-
-export const faviconUrl = (size: number, url: string): string => {
-  const domain = new URL(url).hostname;
-  return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`;
-};
 
 export const userDataDirectoryPath = () => {
   if (!process.env.HOME) {
@@ -17,18 +11,9 @@ export const userDataDirectoryPath = () => {
 
 export const historyDbPath = (profileName: string) => path.join(userDataDirectoryPath(), profileName, "History");
 
+export const collectionsDbPath = (profileName: string) =>
+  path.join(userDataDirectoryPath(), profileName, "Collections", "collectionsSQLite");
+
 export const bookmarksFilePath = (profileName: string) => path.join(userDataDirectoryPath(), profileName, "Bookmarks");
 
 export const getProfileName = () => "Default";
-
-export const urlParser = (text: string): string | null => {
-  const matchUrl = text.match(
-    /https?:\/\/(www\.)?([-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b)([-a-zA-Z0-9()@:%_+.~#?&/=]*)/g
-  );
-
-  if (matchUrl) {
-    return matchUrl[0];
-  } else {
-    return null;
-  }
-};

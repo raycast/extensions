@@ -2,14 +2,14 @@ import { List, ToastStyle, showToast } from "@raycast/api";
 import { useState, ReactElement } from "react";
 import { DEFAULT_ERROR_TITLE } from "./common/constants";
 import { UrlListItem } from "./components/UrlListItem";
-import { useEdgeHistorySearch } from "./hooks/useHistorySearch";
+import { useCollectionSearch } from "./hooks/useCollectionSearch";
 import { UrlDetail } from "./schema/types";
 
 type GroupedEntries = Map<string, UrlDetail[]>;
 
 export default function Command(): ReactElement {
   const [searchText, setSearchText] = useState<string>();
-  const { isLoading, error, entries } = useEdgeHistorySearch(searchText);
+  const { isLoading, error, entries } = useCollectionSearch(searchText);
 
   if (error) {
     showToast(ToastStyle.Failure, DEFAULT_ERROR_TITLE, error.toString());

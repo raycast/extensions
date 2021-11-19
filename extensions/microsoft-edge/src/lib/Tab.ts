@@ -1,4 +1,4 @@
-import { faviconUrl } from "../utils";
+import { faviconUrl } from "../utils/urlUtils";
 
 export class Tab {
   static readonly TAB_CONTENTS_SEPARATOR: string = "~~~";

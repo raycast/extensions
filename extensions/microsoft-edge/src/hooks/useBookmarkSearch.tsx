@@ -1,8 +1,8 @@
 import fs from "fs";
 import util from "util";
 import { useEffect, useRef, useState } from "react";
-import { bookmarksFilePath, getProfileName } from "../utils";
 import { NullableString } from "../schema/types";
+import { bookmarksFilePath, getProfileName } from "../utils/pathUtils";
 
 const fsReadFile = util.promisify(fs.readFile);
 

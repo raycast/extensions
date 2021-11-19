@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { ReactElement } from "react";
-import { faviconUrl } from "../utils";
+import { faviconUrl } from "../utils/urlUtils";
 import { UrlActions } from "./UrlAction";
 
 export interface UrlResourceEntry {

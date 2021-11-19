@@ -1,52 +1,66 @@
 import path from "path";
 import fs from "fs";
-import util from "util";
+import util, { TextDecoder } from "util";
 import initSqlJs, { Database } from "sql.js";
 import { useEffect, useRef, useState } from "react";
 import { environment } from "@raycast/api";
 import { UrlSearchResult, UrlDetail, NullableString } from "../schema/types";
-import { getProfileName, historyDbPath } from "../utils/pathUtils";
+import { collectionsDbPath, getProfileName } from "../utils/pathUtils";
 import { termsAsParamNames, termsAsParams } from "../utils/sqlUtils";
 
 const fsReadFile = util.promisify(fs.readFile);
 
-const loadHistoryToLocalDb = async (profileName: string): Promise<Database> => {
-  const dbPath = historyDbPath(profileName);
+interface ItemSource {
+  url: string;
+  websiteName: string;
+}
+
+const loadCollectionsToLocalDb = async (profileName: string): Promise<Database> => {
+  const dbPath = collectionsDbPath(profileName);
   const fileBuffer = await fsReadFile(dbPath);
   const SQL = await initSqlJs({
-    locateFile: () => path.join(environment.assetsPath, "sql-wasm.wasm"),
+    locateFile: () => path.join(environment.assetsPath, "sql-collections.wasm"),
   });
   return new SQL.Database(fileBuffer);
 };
 
 const whereClauses = (terms: string[]) => {
   return termsAsParamNames(terms)
-    .map((t) => `urls.title LIKE ${t}`)
+    .map((t) => `items.title LIKE ${t}`)
+    .concat("type = 'website'")
     .join(" AND ");
 };
 
-const searchHistory = async (db: Database, query: NullableString): Promise<UrlDetail[]> => {
+export function decodeUint8ArrayBlob(blob: Uint8Array): unknown {
+  const result = new TextDecoder().decode(blob);
+  return result;
+}
+
+const searchCollection = async (db: Database, query: NullableString): Promise<UrlDetail[]> => {
   const terms = query ? query.trim().split(" ") : [""];
   const queries = `SELECT
-            id, url, title,
-            datetime(last_visit_time / 1000000 + (strftime('%s', '1601-01-01')), 'unixepoch', 'localtime')
-          FROM urls
+            id, source, title, date_modified
+          FROM items
           WHERE ${whereClauses(terms)}
-          ORDER BY last_visit_time DESC LIMIT 30;`;
+          ORDER BY date_modified DESC LIMIT 30;`;
   const results = db.exec(queries, termsAsParams(terms));
+
   if (results.length !== 1) {
     return [];
   }
 
-  return results[0].values.map((v) => ({
-    id: v[0]?.toString() as string,
-    url: v[1] as string,
-    title: v[2] as string,
-    lastVisited: new Date(v[3] as string),
-  }));
+  return results[0].values.map((v) => {
+    const source = decodeUint8ArrayBlob(v[1] as Uint8Array) as string;
+    return {
+      id: v[0] as string,
+      url: (JSON.parse(source) as ItemSource).url as string,
+      title: v[2] as string,
+      lastVisited: new Date(v[3] as number),
+    };
+  });
 };
 
-export function useEdgeHistorySearch(query: NullableString): UrlSearchResult {
+export function useCollectionSearch(query: NullableString): UrlSearchResult {
   const [entries, setEntries] = useState<UrlDetail[]>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -55,7 +69,7 @@ export function useEdgeHistorySearch(query: NullableString): UrlSearchResult {
   let cancel = false;
 
   useEffect(() => {
-    async function getHistory() {
+    async function getCollectionItems() {
       if (cancel) {
         return;
       }
@@ -63,17 +77,19 @@ export function useEdgeHistorySearch(query: NullableString): UrlSearchResult {
       try {
         if (!dbRef.current) {
           const profileName = getProfileName();
-          dbRef.current = await loadHistoryToLocalDb(profileName);
+          dbRef.current = await loadCollectionsToLocalDb(profileName);
         }
 
         setError(undefined);
-        const dbEntries = await searchHistory(dbRef.current, query);
-        setEntries(dbEntries);
+        const resultEntries = await searchCollection(dbRef.current, query);
+        // console.log("\n\nresultEntries", resultEntries);
+        setEntries(resultEntries);
       } catch (e) {
         if (!cancel) {
+          // console.log("HELLO\n", e.message, e.name, e.stack);
           const errorMessage = (e as Error).message?.includes("no such file or directory")
             ? "Microsoft Edge not installed"
-            : "Failed to load history";
+            : "Failed to load Collections";
           setError(errorMessage);
         }
       } finally {
@@ -81,7 +97,7 @@ export function useEdgeHistorySearch(query: NullableString): UrlSearchResult {
       }
     }
 
-    getHistory();
+    getCollectionItems();
 
     return () => {
       cancel = true;
