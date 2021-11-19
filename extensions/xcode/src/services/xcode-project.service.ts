@@ -84,7 +84,7 @@ export class XcodeProjectService {
    * Decode XcodeProject from Xcode Project Path
    * @param xcodeProjectPath The Xcode Project Path
    */
-  private static decodeXcodeProject(
+  static decodeXcodeProject(
     xcodeProjectPath: string
   ): XcodeProject | undefined {
     // Initialize the last path component

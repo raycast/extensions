@@ -43,6 +43,13 @@
       "mode": "view"
     },
     {
+      "name": "add-swift-package.command",
+      "title": "Add Swift Package",
+      "subtitle": "Xcode",
+      "description": "Add a Swift Package from an URL to an opened Xcode project",
+      "mode": "view"
+    },
+    {
       "name": "create-swift-package.command",
       "title": "Create Swift Package",
       "subtitle": "Xcode",
