@@ -1,10 +1,12 @@
 import {
   ActionPanel,
+  closeMainWindow,
   CopyToClipboardAction,
   Detail,
   environment,
   Icon,
   List,
+  popToRoot,
   PushAction,
   showToast,
   ToastStyle
@@ -109,7 +111,13 @@ function CommandList(props: { page: Page }) {
             key={item.command}
             actions={
               <ActionPanel>
-                <CopyToClipboardAction content={item.command} />
+                <CopyToClipboardAction
+                  content={item.command}
+                  onCopy={async () => {
+                    await closeMainWindow();
+                    await popToRoot();
+                  }}
+                />
               </ActionPanel>
             }
           />
