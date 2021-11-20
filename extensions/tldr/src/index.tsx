@@ -1,4 +1,14 @@
-import { ActionPanel, CopyToClipboardAction, Detail, environment, Icon, List, PushAction, showToast, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  CopyToClipboardAction,
+  Detail,
+  environment,
+  Icon,
+  List,
+  PushAction,
+  showToast,
+  ToastStyle
+} from "@raycast/api";
 import degit from "degit";
 import fs, { readdirSync } from "fs";
 import { rm } from "fs/promises";
@@ -6,18 +16,17 @@ import { globby } from "globby";
 import { parse, resolve } from "path";
 import { useEffect, useState } from "react";
 
-const  CACHE_DIR = resolve(environment.supportPath, "pages")
+const CACHE_DIR = resolve(environment.supportPath, "pages");
 
 async function refreshPages() {
-  await rm(resolve(CACHE_DIR), {recursive: true, force: true})
+  await rm(resolve(CACHE_DIR), { recursive: true, force: true });
   await showToast(ToastStyle.Animated, "Fetching TLDR Pages...");
   try {
     await degit("tldr-pages/tldr/pages").clone(CACHE_DIR);
-    await showToast(ToastStyle.Success, "TLDR pages fetched!")
+    await showToast(ToastStyle.Success, "TLDR pages fetched!");
   } catch (error) {
-    await showToast(ToastStyle.Failure, "Download Failed!", "Please check your internet connexion.")
+    await showToast(ToastStyle.Failure, "Download Failed!", "Please check your internet connexion.");
   }
-
 }
 
 async function readPages() {
@@ -25,24 +34,22 @@ async function readPages() {
   return await Promise.all(
     platformNames.map(async (platformName) => {
       const filepaths = await globby(`${CACHE_DIR}/${platformName}/*`);
-      const pages = await Promise.all(
-        filepaths.map((filepath) => parsePage(filepath))
-      );
+      const pages = await Promise.all(filepaths.map((filepath) => parsePage(filepath)));
       return {
         name: platformName,
         pages: pages,
       };
     })
   );
-
 }
 
 export default function TLDRList(): JSX.Element {
   const [platforms, setPlatforms] = useState<Platform[]>();
+  const [query, setQuery] = useState("");
   useEffect(() => {
     async function loadPages() {
       if (readdirSync(CACHE_DIR).length == 0) {
-        await refreshPages()
+        await refreshPages();
       }
 
       setPlatforms(await readPages());
@@ -51,27 +58,40 @@ export default function TLDRList(): JSX.Element {
   }, []);
 
   return (
-    <List searchBarPlaceholder="Input command" throttle={true} isLoading={!platforms}>
+    <List
+      searchBarPlaceholder="Input command"
+      onSearchTextChange={(query) => {
+        setQuery(query);
+      }}
+      isLoading={!platforms}
+    >
       {platforms?.map((platform) => (
         <List.Section title={platform.name} key={platform.name}>
-          {platform.pages.map((page) => (
-            <List.Item
-              title={page.title}
-              key={page.filename}
-              subtitle={page.subtitle}
-              accessoryTitle={page.filename}
-              actions={
-                <ActionPanel>
-                  <PushAction title="Show Commands" icon={Icon.ArrowRight} target={<CommandList page={page} />} />
-                  <PushAction title="Show Detail" icon={Icon.Text} target={<Detail markdown={page.markdown} />} />
-                  <ActionPanel.Item title="Refresh Pages" icon={Icon.ArrowClockwise} onAction={async () => {
-                    await refreshPages()
-                    setPlatforms(await readPages())
-                  }}/>
-                </ActionPanel>
-              }
-            />
-          ))}
+          {platform.pages
+            .filter((page) => page.title.startsWith(query))
+            .sort((a, b) => a.title.localeCompare(b.title))
+            .map((page) => (
+              <List.Item
+                title={page.title}
+                key={page.filename}
+                subtitle={page.subtitle}
+                accessoryTitle={page.filename}
+                actions={
+                  <ActionPanel>
+                    <PushAction title="Show Commands" icon={Icon.ArrowRight} target={<CommandList page={page} />} />
+                    <PushAction title="Show Detail" icon={Icon.Text} target={<Detail markdown={page.markdown} />} />
+                    <ActionPanel.Item
+                      title="Refresh Pages"
+                      icon={Icon.ArrowClockwise}
+                      onAction={async () => {
+                        await refreshPages();
+                        setPlatforms(await readPages());
+                      }}
+                    />
+                  </ActionPanel>
+                }
+              />
+            ))}
         </List.Section>
       ))}
     </List>
@@ -113,20 +133,17 @@ interface Page {
 }
 
 async function parsePage(path: string): Promise<Page> {
-  const markdown = await fs.promises.readFile(path).then(buffer => buffer.toString())
+  const markdown = await fs.promises.readFile(path).then((buffer) => buffer.toString());
 
-  const subtitle = []
-  const commands = []
-  const descriptions = []
+  const subtitle = [];
+  const commands = [];
+  const descriptions = [];
   const lines = markdown.split("\n");
 
   for (const line of lines) {
-    if (line.startsWith(">"))
-      subtitle.push(line.slice(2))
-    else if (line.startsWith("`"))
-      commands.push(line.slice(1, -1))
-    else if (line.startsWith("-"))
-      descriptions.push(line.slice(2))
+    if (line.startsWith(">")) subtitle.push(line.slice(2));
+    else if (line.startsWith("`")) commands.push(line.slice(1, -1));
+    else if (line.startsWith("-")) descriptions.push(line.slice(2));
   }
 
   return {
