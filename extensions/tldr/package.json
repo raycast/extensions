@@ -4,21 +4,21 @@
   "title": "tldr",
   "author": "pomdtr",
   "license":"MIT",
-  "description": "Search tldr Pages",
+  "description": "Search tldr Pages - Command Cheatsheet",
   "icon": "tldr.png",
   "commands": [
     {
       "name": "index",
-      "title": "Search TLDR Pages",
+      "title": "Search Pages",
       "subtitle": "tldr",
       "description": "Search Commands Cheatsheets.",
       "mode": "view"
     },
     {
       "name": "refresh-pages",
-      "title": "Refresh TLDR Pages",
+      "title": "Refresh Pages",
       "subtitle": "tldr",
-      "description": "Refresh TLDR Pages",
+      "description": "Refresh Command Cheatsheets",
       "mode": "no-view"
     }
   ],
