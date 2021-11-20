@@ -1,11 +1,11 @@
 import {
   ActionPanel,
+  getPreferenceValues,
   ImageMask,
   List,
   OpenInBrowserAction,
   showToast,
   ToastStyle,
-  getPreferenceValues,
 } from "@raycast/api";
 import axios from "axios";
 import { decode } from "html-entities";
@@ -49,8 +49,16 @@ function TrendListItem(props: { data: TrendItem }) {
       }}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction title="Open Article in Browser" url={trendItem.articleUrl} />
-          <OpenInBrowserAction title="Open Trend in Browser" url={trendItem.trendUrl} />
+          <OpenInBrowserAction
+            title="Open Article in Browser"
+            url={trendItem.articleUrl}
+            icon={{ source: trendItem.imageUrl, mask: ImageMask.RoundedRectangle }}
+          />
+          <OpenInBrowserAction
+            title="Open Trend in Browser"
+            url={trendItem.trendUrl}
+            icon={{ source: `Icon.png`, mask: ImageMask.RoundedRectangle }}
+          />
         </ActionPanel>
       }
     />
@@ -62,7 +70,7 @@ async function fetchTrends(): Promise<TrendItem[]> {
     const preferences = getPreferenceValues();
 
     const res = await axios.get(
-      `https://trends.google.com/trends/api/realtimetrends?hl=${preferences.lang}&tz=-540&cat=all&fi=0&fs=0&geo=${preferences.country_realtime}&ri=300&rs=20&sort=0`
+      `https://trends.google.com/trends/api/realtimetrends?hl=${preferences.lang}&tz=-540&cat=all&fi=0&fs=0&geo=${preferences.country}&ri=300&rs=20&sort=0`
     );
     const trendData: Realtime = JSON.parse(res.data.replace(")]}'", ""));
 

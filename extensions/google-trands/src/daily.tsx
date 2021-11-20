@@ -39,15 +39,14 @@ export default function DailyList() {
 
 function TrendListItem(props: { data: TrendItem }) {
   const trendItem = props.data;
-  const article = decode(trendItem.article);
-  const keyword = article.split(" ");
+
   return (
     <List.Item
       id={trendItem.id + ""}
       title={trendItem.name}
-      keywords={keyword}
+      keywords={trendItem.keyword}
       subtitle={trendItem.formattedTraffic}
-      accessoryTitle={article}
+      accessoryTitle={trendItem.article}
       icon={{ source: `${trendItem.idx}.png`, mask: ImageMask.RoundedRectangle }}
       accessoryIcon={{
         source: trendItem.imageUrl,
@@ -55,8 +54,16 @@ function TrendListItem(props: { data: TrendItem }) {
       }}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction title="Open Article in Browser" url={trendItem.articleUrl} />
-          <OpenInBrowserAction title="Open Trend in Browser" url={trendItem.trendUrl} />
+          <OpenInBrowserAction
+            title="Open Article in Browser"
+            url={trendItem.articleUrl}
+            icon={{ source: trendItem.imageUrl, mask: ImageMask.RoundedRectangle }}
+          />
+          <OpenInBrowserAction
+            title="Open Trend in Browser"
+            url={trendItem.trendUrl}
+            icon={{ source: `Icon.png`, mask: ImageMask.RoundedRectangle }}
+          />
         </ActionPanel>
       }
     />
@@ -68,7 +75,7 @@ async function fetchTrends(): Promise<Trend[]> {
     const preferences = getPreferenceValues();
 
     const res = await axios.get(
-      `https://trends.google.com/trends/api/dailytrends?hl=${preferences.lang}&tz=-540&geo=${preferences.country_daily}`
+      `https://trends.google.com/trends/api/dailytrends?hl=${preferences.lang}&tz=-540&geo=${preferences.country}`
     );
     const trendData: Daily = JSON.parse(res.data.replace(")]}',", ""));
 
@@ -81,16 +88,19 @@ async function fetchTrends(): Promise<Trend[]> {
         items: [],
       };
       result.push(newItem);
+
       day.trendingSearches.forEach((item, index) => {
+        const article = decode(item.articles[0].title);
         newItem.items.push({
           id: lastIndex++,
           idx: index < 9 ? String(++index) : "etc",
           name: item.title.query,
           formattedTraffic: item.formattedTraffic,
-          article: item.articles[0].title,
+          article: article,
           articleUrl: item.articles[0].url,
           imageUrl: item.image.imageUrl ?? "",
           trendUrl: "https://trends.google.com" + item.title.exploreLink,
+          keyword: article.split(" "),
         });
       });
     });

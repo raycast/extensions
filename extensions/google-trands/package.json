@@ -12,41 +12,355 @@
       "title": "Show Daily",
       "subtitle": "Google Trends",
       "description": "Google Trends Daily List",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "country",
+          "type": "dropdown",
+          "required": true,
+          "title": "Daily Trends Country",
+          "description": "Select Daily Trends Country",
+          "default": "US",
+          "data": [
+            {
+              "title": "🇦🇷 Argentina",
+              "value": "AR"
+            },
+            {
+              "title": "🇦🇹 Austria",
+              "value": "AT"
+            },
+            {
+              "title": "🇦🇺 Australia",
+              "value": "AU"
+            },
+            {
+              "title": "🇧🇪 Belgium",
+              "value": "BE"
+            },
+            {
+              "title": "🇧🇷 Brazil",
+              "value": "BR"
+            },
+            {
+              "title": "🇨🇦 Canada",
+              "value": "CA"
+            },
+            {
+              "title": "🇨🇱 Chile",
+              "value": "CL"
+            },
+            {
+              "title": "🇨🇴 Colombia",
+              "value": "CO"
+            },
+            {
+              "title": "🇨🇿 Czech",
+              "value": "CZ"
+            },
+            {
+              "title": "🇩🇪 Germany",
+              "value": "DE"
+            },
+            {
+              "title": "🇩🇰 Denmark",
+              "value": "DK"
+            },
+            {
+              "title": "🇪🇬 Egypt",
+              "value": "EG"
+            },
+            {
+              "title": "🇫🇮 Finland",
+              "value": "FI"
+            },
+            {
+              "title": "🇫🇷 France",
+              "value": "FR"
+            },
+            {
+              "title": "🇬🇧 England",
+              "value": "GB"
+            },
+            {
+              "title": "🇬🇷 Greece",
+              "value": "GR"
+            },
+            {
+              "title": "🇭🇰 Hong Kong",
+              "value": "HK"
+            },
+            {
+              "title": "🇭🇺 Hungary",
+              "value": "HU"
+            },
+            {
+              "title": "🇮🇪 Ireland",
+              "value": "IE"
+            },
+            {
+              "title": "🇮🇳 India",
+              "value": "IN"
+            },
+            {
+              "title": "🇮🇹 Italy",
+              "value": "IT"
+            },
+            {
+              "title": "🇮🇩 Indonesia",
+              "value": "ID"
+            },
+            {
+              "title": "🇮🇱 Israel",
+              "value": "IL"
+            },
+            {
+              "title": "🇯🇵 Japan",
+              "value": "JP"
+            },
+            {
+              "title": "🇰🇪 Kenya",
+              "value": "KE"
+            },
+            {
+              "title": "🇰🇷 Korea",
+              "value": "KR"
+            },
+            {
+              "title": "🇲🇽 Mexico",
+              "value": "MX"
+            },
+            {
+              "title": "🇲🇾 Malaysia",
+              "value": "MY"
+            },
+            {
+              "title": "🇳🇬 Nigeria",
+              "value": "NG"
+            },
+            {
+              "title": "🇳🇱 Netherlands",
+              "value": "NL"
+            },
+            {
+              "title": "🇳🇴 Norway",
+              "value": "NO"
+            },
+            {
+              "title": "🇳🇿 New Zealand",
+              "value": "NZ"
+            },
+            {
+              "title": "🇵🇭 Philippines",
+              "value": "PH"
+            },
+            {
+              "title": "🇵🇱 Poland",
+              "value": "PL"
+            },
+            {
+              "title": "🇵🇹 Portugal",
+              "value": "PT"
+            },
+            {
+              "title": "🇷🇴 Romania",
+              "value": "RO"
+            },
+            {
+              "title": "🇷🇺 Russia",
+              "value": "RU"
+            },
+            {
+              "title": "🇸🇦 Saudi Arabia",
+              "value": "SA"
+            },
+            {
+              "title": "🇸🇬 Singapore",
+              "value": "SG"
+            },
+            {
+              "title": "🇸🇪 Sweden",
+              "value": "SE"
+            },
+            {
+              "title": "🇹🇭 Thailand",
+              "value": "TH"
+            },
+            {
+              "title": "🇹🇼 Taiwan",
+              "value": "TW"
+            },
+            {
+              "title": "🇨🇭 Swiss",
+              "value": "CH"
+            },
+            {
+              "title": "🇹🇷 Turkey",
+              "value": "TR"
+            },
+            {
+              "title": "🇺🇦 Ukraine",
+              "value": "UA"
+            },
+            {
+              "title": "🇺🇸 United States",
+              "value": "US"
+            },
+            {
+              "title": "🇻🇳 Vietnam",
+              "value": "VN"
+            },
+            {
+              "title": "🇿🇦 South Africa",
+              "value": "ZA"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "realtime",
       "title": "Show Realtime",
       "subtitle": "Google Trends",
       "description": "Google Trends Realtime List",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "country",
+          "type": "dropdown",
+          "required": true,
+          "title": "RealTime Trends Country",
+          "description": "Select RealTime Trends Country",
+          "default": "US",
+          "data": [
+            {
+              "title": "🇦🇷 Argentina",
+              "value": "AR"
+            },
+            {
+              "title": "🇦🇹 Austria",
+              "value": "AT"
+            },
+            {
+              "title": "🇦🇺 Australia",
+              "value": "AU"
+            },
+            {
+              "title": "🇧🇪 Belgium",
+              "value": "BE"
+            },
+            {
+              "title": "🇧🇷 Brazil",
+              "value": "BR"
+            },
+            {
+              "title": "🇨🇦 Canada",
+              "value": "CA"
+            },
+            {
+              "title": "🇨🇱 Chile",
+              "value": "CL"
+            },
+            {
+              "title": "🇨🇴 Colombia",
+              "value": "CO"
+            },
+            {
+              "title": "🇩🇪 Germany",
+              "value": "DE"
+            },
+            {
+              "title": "🇫🇷 France",
+              "value": "FR"
+            },
+            {
+              "title": "🇬🇧 England",
+              "value": "GB"
+            },
+            {
+              "title": "🇮🇪 Ireland",
+              "value": "IE"
+            },
+            {
+              "title": "🇮🇳 India",
+              "value": "IN"
+            },
+            {
+              "title": "🇮🇹 Italy",
+              "value": "IT"
+            },
+            {
+              "title": "🇯🇵 Japan",
+              "value": "JP"
+            },
+            {
+              "title": "🇲🇽 Mexico",
+              "value": "MX"
+            },
+            {
+              "title": "🇲🇾 Malaysia",
+              "value": "MY"
+            },
+            {
+              "title": "🇳🇱 Netherlands",
+              "value": "NL"
+            },
+            {
+              "title": "🇳🇴 Norway",
+              "value": "NO"
+            },
+            {
+              "title": "🇳🇿 New Zealand",
+              "value": "NZ"
+            },
+            {
+              "title": "🇵🇭 Philippines",
+              "value": "PH"
+            },
+            {
+              "title": "🇵🇱 Poland",
+              "value": "PL"
+            },
+            {
+              "title": "🇵🇹 Portugal",
+              "value": "PT"
+            },
+            {
+              "title": "🇷🇺 Russia",
+              "value": "RU"
+            },
+            {
+              "title": "🇸🇪 Sweden",
+              "value": "SE"
+            },
+            {
+              "title": "🇨🇭 Swiss",
+              "value": "CH"
+            },
+            {
+              "title": "🇹🇷 Turkey",
+              "value": "TR"
+            },
+            {
+              "title": "🇺🇸 United States",
+              "value": "US"
+            },
+            {
+              "title": "🇻🇳 Vietnam",
+              "value": "VN"
+            }
+          ]
+        }
+      ]
     }
   ],
-  "dependencies": {
-    "@raycast/api": "^1.25.6",
-    "axios": "^0.24.0",
-    "html-entities": "^2.3.2"
-  },
-  "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
-  },
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop"
-  },
   "preferences": [
     {
       "name": "lang",
       "type": "dropdown",
       "required": true,
       "title": "Your Language",
+      "description": "Select Language",
       "default": "en",
       "data": [
         {
@@ -481,336 +795,26 @@
           "title": "Zulu",
           "value": "zu"
         }
-      ],
-      "description": "Select Language"
-    },
-    {
-      "name": "country_daily",
-      "type": "dropdown",
-      "required": true,
-      "default": "US",
-      "data": [
-        {
-          "title": "🇦🇷 Argentina",
-          "value": "AR"
-        },
-        {
-          "title": "🇦🇹 Austria",
-          "value": "AT"
-        },
-        {
-          "title": "🇦🇺 Australia",
-          "value": "AU"
-        },
-        {
-          "title": "🇧🇪 Belgium",
-          "value": "BE"
-        },
-        {
-          "title": "🇧🇷 Brazil",
-          "value": "BR"
-        },
-        {
-          "title": "🇨🇦 Canada",
-          "value": "CA"
-        },
-        {
-          "title": "🇨🇱 Chile",
-          "value": "CL"
-        },
-        {
-          "title": "🇨🇴 Colombia",
-          "value": "CO"
-        },
-        {
-          "title": "🇨🇿 Czech",
-          "value": "CZ"
-        },
-        {
-          "title": "🇩🇪 Germany",
-          "value": "DE"
-        },
-        {
-          "title": "🇩🇰 Denmark",
-          "value": "DK"
-        },
-        {
-          "title": "🇪🇬 Egypt",
-          "value": "EG"
-        },
-        {
-          "title": "🇫🇮 Finland",
-          "value": "FI"
-        },
-        {
-          "title": "🇫🇷 France",
-          "value": "FR"
-        },
-        {
-          "title": "🇬🇧 England",
-          "value": "GB"
-        },
-        {
-          "title": "🇬🇷 Greece",
-          "value": "GR"
-        },
-        {
-          "title": "🇭🇰 Hong Kong",
-          "value": "HK"
-        },
-        {
-          "title": "🇭🇺 Hungary",
-          "value": "HU"
-        },
-        {
-          "title": "🇮🇪 Ireland",
-          "value": "IE"
-        },
-        {
-          "title": "🇮🇳 India",
-          "value": "IN"
-        },
-        {
-          "title": "🇮🇹 Italy",
-          "value": "IT"
-        },
-        {
-          "title": "🇮🇩 Indonesia",
-          "value": "ID"
-        },
-        {
-          "title": "🇮🇱 Israel",
-          "value": "IL"
-        },
-        {
-          "title": "🇯🇵 Japan",
-          "value": "JP"
-        },
-        {
-          "title": "🇰🇪 Kenya",
-          "value": "KE"
-        },
-        {
-          "title": "🇰🇷 Korea",
-          "value": "KR"
-        },
-        {
-          "title": "🇲🇽 Mexico",
-          "value": "MX"
-        },
-        {
-          "title": "🇲🇾 Malaysia",
-          "value": "MY"
-        },
-        {
-          "title": "🇳🇬 Nigeria",
-          "value": "NG"
-        },
-        {
-          "title": "🇳🇱 Netherlands",
-          "value": "NL"
-        },
-        {
-          "title": "🇳🇴 Norway",
-          "value": "NO"
-        },
-        {
-          "title": "🇳🇿 New Zealand",
-          "value": "NZ"
-        },
-        {
-          "title": "🇵🇭 Philippines",
-          "value": "PH"
-        },
-        {
-          "title": "🇵🇱 Poland",
-          "value": "PL"
-        },
-        {
-          "title": "🇵🇹 Portugal",
-          "value": "PT"
-        },
-        {
-          "title": "🇷🇴 Romania",
-          "value": "RO"
-        },
-        {
-          "title": "🇷🇺 Russia",
-          "value": "RU"
-        },
-        {
-          "title": "🇸🇦 Saudi Arabia",
-          "value": "SA"
-        },
-        {
-          "title": "🇸🇬 Singapore",
-          "value": "SG"
-        },
-        {
-          "title": "🇸🇪 Sweden",
-          "value": "SE"
-        },
-        {
-          "title": "🇹🇭 Thailand",
-          "value": "TH"
-        },
-        {
-          "title": "🇹🇼 Taiwan",
-          "value": "TW"
-        },
-        {
-          "title": "🇨🇭 Swiss",
-          "value": "CH"
-        },
-        {
-          "title": "🇹🇷 Turkey",
-          "value": "TR"
-        },
-        {
-          "title": "🇺🇦 Ukraine",
-          "value": "UA"
-        },
-        {
-          "title": "🇺🇸 United States",
-          "value": "US"
-        },
-        {
-          "title": "🇻🇳 Vietnam",
-          "value": "VN"
-        },
-        {
-          "title": "🇿🇦 South Africa",
-          "value": "ZA"
-        }
-      ],
-      "title": "Select Daily Trends Country",
-      "description": "Select Daily Trends Country"
-    },
-    {
-      "name": "country_realtime",
-      "type": "dropdown",
-      "required": true,
-      "default": "US",
-      "data": [
-        {
-          "title": "🇦🇷 Argentina",
-          "value": "AR"
-        },
-        {
-          "title": "🇦🇹 Austria",
-          "value": "AT"
-        },
-        {
-          "title": "🇦🇺 Australia",
-          "value": "AU"
-        },
-        {
-          "title": "🇧🇪 Belgium",
-          "value": "BE"
-        },
-        {
-          "title": "🇧🇷 Brazil",
-          "value": "BR"
-        },
-        {
-          "title": "🇨🇦 Canada",
-          "value": "CA"
-        },
-        {
-          "title": "🇨🇱 Chile",
-          "value": "CL"
-        },
-        {
-          "title": "🇨🇴 Colombia",
-          "value": "CO"
-        },
-        {
-          "title": "🇩🇪 Germany",
-          "value": "DE"
-        },
-        {
-          "title": "🇫🇷 France",
-          "value": "FR"
-        },
-        {
-          "title": "🇬🇧 England",
-          "value": "GB"
-        },
-        {
-          "title": "🇮🇪 Ireland",
-          "value": "IE"
-        },
-        {
-          "title": "🇮🇳 India",
-          "value": "IN"
-        },
-        {
-          "title": "🇮🇹 Italy",
-          "value": "IT"
-        },
-        {
-          "title": "🇯🇵 Japan",
-          "value": "JP"
-        },
-        {
-          "title": "🇲🇽 Mexico",
-          "value": "MX"
-        },
-        {
-          "title": "🇲🇾 Malaysia",
-          "value": "MY"
-        },
-        {
-          "title": "🇳🇱 Netherlands",
-          "value": "NL"
-        },
-        {
-          "title": "🇳🇴 Norway",
-          "value": "NO"
-        },
-        {
-          "title": "🇳🇿 New Zealand",
-          "value": "NZ"
-        },
-        {
-          "title": "🇵🇭 Philippines",
-          "value": "PH"
-        },
-        {
-          "title": "🇵🇱 Poland",
-          "value": "PL"
-        },
-        {
-          "title": "🇵🇹 Portugal",
-          "value": "PT"
-        },
-        {
-          "title": "🇷🇺 Russia",
-          "value": "RU"
-        },
-        {
-          "title": "🇸🇪 Sweden",
-          "value": "SE"
-        },
-        {
-          "title": "🇨🇭 Swiss",
-          "value": "CH"
-        },
-        {
-          "title": "🇹🇷 Turkey",
-          "value": "TR"
-        },
-        {
-          "title": "🇺🇸 United States",
-          "value": "US"
-        },
-        {
-          "title": "🇻🇳 Vietnam",
-          "value": "VN"
-        }
-      ],
-      "title": "Select RealTime Trends Country",
-      "description": "Select RealTime Trends Country"
+      ]
     }
-  ]
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.6",
+    "axios": "^0.24.0",
+    "html-entities": "^2.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
 }
