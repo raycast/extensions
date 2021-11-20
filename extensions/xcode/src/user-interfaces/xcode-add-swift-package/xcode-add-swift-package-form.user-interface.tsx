@@ -2,6 +2,7 @@ import {ActionPanel, closeMainWindow, Icon, List, Navigation, showHUD, showToast
 import {XcodeSwiftPackageService} from "../../services/xcode-swift-package.service";
 import {XcodeProject} from "../../models/project/xcode-project.model";
 import {XcodeAddSwiftPackageSelectXcodeProject} from "./xcode-add-swift-package-select-xcode-project.user-interface";
+import {execAsync} from "../../shared/exec-async";
 
 /**
  * Xcode add Swift Package Form
@@ -101,12 +102,11 @@ async function addSwiftPackage(
   xcodeSwiftPackageService: XcodeSwiftPackageService,
   navigation: Navigation
 ) {
-  // Show loading Toast
-  const loadingToast = await showToast(
-    ToastStyle.Animated,
-    "Adding Swift Package please wait"
-  )
   try {
+    // Launch Xcode if needed
+    // To ensure that Xcode is already running
+    // before closing the main Raycast window
+    await launchXcodeIfNeeded();
     // Close main Raycast window to prevent
     // that the main focus is on the Raycast window
     await closeMainWindow();
@@ -126,8 +126,44 @@ async function addSwiftPackage(
     showHUD(
       "⚠️ An error occurred while trying to add the Swift Package"
     );
+  }
+}
+
+/**
+ * Launch Xcode if needed
+ */
+async function launchXcodeIfNeeded() {
+  // Declare isXcodeRunning bool value
+  let isXcodeRunning: boolean
+  try {
+    // prep Xcode process status
+    isXcodeRunning = (
+      await execAsync("pgrep Xcode")
+    ).stdout.trim().length !== 0
+  } catch {
+    // On error Xcode is not running
+    isXcodeRunning = false;
+  }
+  // Check if Xcode is running
+  if (isXcodeRunning) {
+    // Otherwise return out of function
+    return;
+  }
+  // Show loading Toast
+  const loadingToast = await showToast(
+    ToastStyle.Animated,
+    "Launching Xcode"
+  );
+  try {
+    // Launch Xcode and sleep 2 seconds
+    // to ensure the process is running
+    await execAsync(
+      "open -b com.apple.dt.xcode -j && sleep 2"
+    )
+  } catch {
+    // Ignore error
   } finally {
     // Hide loading Toast
-    await loadingToast.hide();
+    loadingToast.hide();
   }
 }
