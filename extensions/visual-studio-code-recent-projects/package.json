@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "visual-studio-code",
   "title": "Visual Studio Code Recent Projects",
   "description": "Search and open recent projects from Visual Studio Code.",

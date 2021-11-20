@@ -140,7 +140,7 @@ export default function Command() {
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | accessoryIcon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | A optional icon displayed as accessory for the list item. See [ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike) for the supported formats and types. |
-| accessoryTitle | <code>string</code> | No | - | An additional icon displayed for the item. See [ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike) for the supported formats and types. |
+| accessoryTitle | <code>string</code> | No | - | An additional title displayed for the item. |
 | actions | <code>null</code> or <code>[ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel)</code> | No | - | An [ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel) that will be updated for the selected list item. |
 | icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | A optional icon displayed for the list item. See [ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike) for the supported formats and types. |
 | id | <code>string</code> | No | - | ID of the item. Make sure to assign each item a unique ID or a UUID will be auto generated. |

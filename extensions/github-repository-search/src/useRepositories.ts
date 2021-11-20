@@ -26,6 +26,9 @@ query SearchRepositories($searchText: String!) {
         hasIssuesEnabled
         hasWikiEnabled
         hasProjectsEnabled
+        releases {
+          totalCount
+        }
       }
     }
   }

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "weather",
   "title": "Weather",
   "version": "0.3.0",
@@ -14,27 +15,33 @@
       "mode": "view"
     }
   ],
-  "preferences" : [
+  "preferences": [
     {
-      "name" : "unitsystem",
-      "type" : "dropdown",
-      "title" : "Unit System",
-      "required" : false,
-      "default" : "metric",
-      "description" : "Unit System",
-      "data" : [
-        { "title" : "Metric System", "value" : "metric" },
-        { "title" : "Imperial Units", "value" : "imperial" }
+      "name": "unitsystem",
+      "type": "dropdown",
+      "title": "Unit System",
+      "required": false,
+      "default": "metric",
+      "description": "Unit System",
+      "data": [
+        {
+          "title": "Metric System",
+          "value": "metric"
+        },
+        {
+          "title": "Imperial Units",
+          "value": "imperial"
+        }
       ]
     },
     {
-      "name" : "defaultquery",
-      "type" : "textfield",
-      "title" : "Default query",
-      "placeholder" : "Empty or location (e.g. London)",
-      "required" : false,
-      "default" : "",
-      "description" : "Default query when search bar is empty. Same content as in the search bar."
+      "name": "defaultquery",
+      "type": "textfield",
+      "title": "Default query",
+      "placeholder": "Empty or location (e.g. London)",
+      "required": false,
+      "default": "",
+      "description": "Default query when search bar is empty. Same content as in the search bar."
     }
   ],
   "dependencies": {

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-npm",
   "title": "Search npm Packages",
   "description": "Search for npm package information from npms.io",
@@ -34,6 +35,29 @@
       "required": false,
       "default": "npm",
       "value": "npm"
+    },
+    {
+      "name": "defaultOpenAction",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Open Repository",
+          "value": "openRepository"
+        },
+        {
+          "title": "Open Homepage",
+          "value": "openHomepage"
+        },
+        {
+          "title": "npm Package Page",
+          "value": "npmPackagePage"
+        }
+      ],
+      "title": "Default Open Action",
+      "description": "How to open the selected package when Enter is pressed",
+      "required": false,
+      "default": "openRepository",
+      "value": "openRepository"
     }
   ],
   "dependencies": {

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "sketch",
   "title": "Sketch",
   "description": "Frictionless Workspace Browsing",
