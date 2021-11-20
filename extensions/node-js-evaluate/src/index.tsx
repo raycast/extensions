@@ -1,4 +1,4 @@
-import {List, ActionPanel, CopyToClipboardAction} from "@raycast/api";
+import {List, ActionPanel, Detail, CopyToClipboardAction, PushAction, preferences} from "@raycast/api";
 import {useEffect, useState} from "react";
 
 interface State {
@@ -9,15 +9,20 @@ interface State {
     isLoading: boolean
 }
 
+const fastEvaluation = preferences?.fastEvaluation?.value ?? false;
+
 export default function Command() {
     const [state, setState] = useState<State>({isLoading: false});
     useEffect(() => {
         if (!state.isLoading) return;
         try {
-            const result = eval(state.query?.trim() ?? "");
+            let result;
+            if (fastEvaluation) {
+                result = eval(state.query?.trim() ?? "");
+            }
             setState({
                 result: JSON.stringify(result),
-                type: typeof result,
+                type: type(result),
                 isLoading: false,
                 ...{query: state.query}
             });
@@ -25,12 +30,15 @@ export default function Command() {
             setState({
                 error: error instanceof Error ? error : (new Error("Unknown Error")),
                 isLoading: false,
-                ...{query: state.query}});
+                ...{query: state.query}
+            });
         }
     }, [state]);
 
-    return (
-        <List
+    return fastEvaluation ? <FastEval/> : <SlowEval/>;
+
+    function FastEval() {
+        return <List
             searchBarPlaceholder="Type some Javascript to Evaluate"
             isLoading={state.isLoading || (!state.result && !state.error)}
             onSearchTextChange={(query: string) => {
@@ -47,7 +55,30 @@ export default function Command() {
                 />
             }
         </List>
-    );
+    }
+
+    function SlowEval() {
+        return <List
+            searchBarPlaceholder="Type some Javascript to Evaluate and press return"
+            isLoading={false}
+            onSearchTextChange={(query: string) => {
+                setState((oldState) => ({...oldState, query: query, isLoading: false}));
+            }}
+        >
+            {(state?.query?.length ?? 0) === 0 ? null :
+                <List.Item
+                    title={`Evaluate: ${state?.query}`}
+                    accessoryTitle="⏎  to evaluate"
+                    actions={
+                        <ActionPanel title="Evaluation result">
+                            <PushAction title="Show Evaluation" icon="command-icon.png"
+                                        target={<EvalResult state={state}/>}/>
+                        </ActionPanel>}
+                    icon="command-icon.png"
+                />
+            }
+        </List>;
+    }
 
     function Actions(props: { state: State }) {
         return (
@@ -60,5 +91,37 @@ export default function Command() {
                 </ActionPanel.Section>
             </ActionPanel>
         );
+    }
+
+    function EvalResult(props: { state: State }): JSX.Element {
+        const {state} = props;
+        let result;
+        let error;
+        try {
+            result = eval(state.query?.trim() ?? "");
+        } catch (err) {
+            if (err instanceof Error) {
+                error = err.message;
+            } else if (typeof err === "string") {
+                error = err
+            }
+        }
+
+        return <Detail markdown={
+            `### Code:
+\`\`\`
+${state.query}
+\`\`\`
+
+${error ? "Evaluation Error:" : `Evaluation result (\`${type(result)}\`):`}
+
+\`\`\`
+${error ?? JSON.stringify(result, null, 2)}
+\`\`\`
+            `} actions={<Actions state={state}/>}/>;
+    }
+
+    function type(object: { __proto__: { constructor: { name: string; }; }; }) {
+        return object.__proto__.constructor.name;
     }
 }
