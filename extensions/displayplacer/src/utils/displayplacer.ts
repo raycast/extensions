@@ -1,7 +1,7 @@
 import { execSync } from "child_process";
 
 export function listScreenInfo() {
-  const stout = execSync("displayplacer list");
+  const stout = execSync("zsh -l -c 'displayplacer list'");
   const result = stout
     .toString()
     .split("\n")
@@ -88,5 +88,5 @@ export function listScreenInfo() {
 
 export function switchSettings(favorite: Favorite) {
   if (!favorite.command) return;
-  execSync(favorite.command);
+  execSync(`zsh -l -c '${favorite.command}'`);
 }

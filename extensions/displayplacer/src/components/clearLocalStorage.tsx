@@ -8,7 +8,7 @@ export default function ClearLocalStorage({
   const { pop } = useNavigation();
   return (
     <Detail
-      navigationTitle="Clear Saved Configurations"
+      navigationTitle="Clear All Display Presets"
       actions={
         <ActionPanel>
           <ActionPanelItem

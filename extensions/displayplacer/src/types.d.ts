@@ -26,6 +26,7 @@ type DisplayPlacerList = {
 };
 
 type Favorite = {
+  id: string;
   name: string;
   subtitle: string;
   command?: string;
