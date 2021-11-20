@@ -1,218 +1,133 @@
-import {
-  ActionPanel,
-  closeMainWindow,
-  Form,
-  Navigation,
-  showToast,
-  SubmitFormAction,
-  Toast,
-  ToastStyle
-} from "@raycast/api";
+import {ActionPanel, closeMainWindow, Icon, List, Navigation, showHUD, showToast, ToastStyle} from "@raycast/api";
 import {XcodeSwiftPackageService} from "../../services/xcode-swift-package.service";
-import {xcodeProjectList} from "../xcode-projects/xcode-project-list.user-interface";
 import {XcodeProject} from "../../models/project/xcode-project.model";
-import {XcodeAddSwiftPackageXcodeNotRunningError} from "../../models/swift-package/xcode-add-swift-package-xcode-not-running-error.model";
+import {XcodeAddSwiftPackageSelectXcodeProject} from "./xcode-add-swift-package-select-xcode-project.user-interface";
 
 /**
  * Xcode add Swift Package Form
+ * @param swiftPackageUrl The Swift Package Url
+ * @param setSwiftPackageUrl The set Swift Package Url function
  * @param xcodeSwiftPackageService The XcodeSwiftPackageService
  * @param navigation The Navigation
- * @param availableXcodeProjects The optional available XcodeProjects
- * @param swiftPackageUrl The Swift Package Url
- * @param setSwiftPackageUrl An arrow function to set the Swift Package Url
  */
 export function xcodeAddSwiftPackageForm(
-  xcodeSwiftPackageService: XcodeSwiftPackageService,
-  navigation: Navigation,
-  availableXcodeProjects: XcodeProject[] | undefined,
   swiftPackageUrl: string,
-  setSwiftPackageUrl: (url: string) => void
+  setSwiftPackageUrl: (url: string) => void,
+  xcodeSwiftPackageService: XcodeSwiftPackageService,
+  navigation: Navigation
 ): JSX.Element {
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <SubmitFormAction
-            title={"Add Swift Package"}
-            onSubmit={
-              formValues => {
+    <List
+      searchBarPlaceholder={"Enter Swift Package URL"}
+      onSearchTextChange={setSwiftPackageUrl}>
+      <List.Section
+        title={"Swift Package"}>
+        <List.Item
+          id={"add-swift-package"}
+          icon={Icon.Plus}
+          title={"Add Swift Package"}
+          subtitle={swiftPackageUrl}
+          actions={
+            <ActionPanel>
+              <AddSwiftPackageAction
+                swiftPackageUrl={swiftPackageUrl}
+                xcodeSwiftPackageService={xcodeSwiftPackageService}
+                navigation={navigation}
+              />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
+    </List>
+  );
+}
+
+/**
+ * Add Swift Package Action
+ * @param props The properties
+ */
+function AddSwiftPackageAction(
+  props: {
+    swiftPackageUrl: string,
+    xcodeSwiftPackageService: XcodeSwiftPackageService,
+    navigation: Navigation
+  }
+): JSX.Element {
+  return <ActionPanel.Item
+    title={"Add Swift Package"}
+    onAction={
+      () => {
+        // Check if Swift Package Url is valid
+        if (props.xcodeSwiftPackageService.isSwiftPackageUrlValid(props.swiftPackageUrl)) {
+          // Initialize select XcodeProject component
+          const selectXcodeProjectComponent = <XcodeAddSwiftPackageSelectXcodeProject
+            onSelect={
+              (xcodeProject) => {
+                // Pop back
+                props.navigation.pop()
+                // Add Swift Package to selected XcodeProject
                 addSwiftPackage(
-                  formValues.swiftPackageUrl,
-                  xcodeSwiftPackageService,
-                  navigation,
-                  availableXcodeProjects
+                  props.swiftPackageUrl,
+                  xcodeProject,
+                  props.xcodeSwiftPackageService,
+                  props.navigation
                 )
               }
             }
-          />
-        </ActionPanel>
+          />;
+          // Push select XcodeProject component
+          props.navigation.push(selectXcodeProjectComponent);
+        } else {
+          // Otherwise show failure Toast
+          showToast(
+            ToastStyle.Failure, 'Please enter a valid url to a Swift Package'
+          );
+        }
       }
-    >
-      <Form.TextField
-        id="swiftPackageUrl"
-        title={"Swift Package URL"}
-        placeholder={"https://github.com/User/Repo"}
-        value={swiftPackageUrl}
-        onChange={setSwiftPackageUrl}
-      />
-    </Form>
-  );
+    }
+  />;
 }
 
 /**
  * Add Swift Package
  * @param swiftPackageUrl The Swift Package Url
+ * @param xcodeProject The XcodeProject where the Swift Package should be added
  * @param xcodeSwiftPackageService The XcodeSwiftPackageService
  * @param navigation The Navigation
- * @param availableXcodeProjects The optional available XcodeProjects
- * @param selectedXcodeProject The optional selected XcodeProject. Default value `undefined`
- * @param loadingToast The optional loading Toast. Default value `undefined`
  */
 async function addSwiftPackage(
   swiftPackageUrl: string,
+  xcodeProject: XcodeProject,
   xcodeSwiftPackageService: XcodeSwiftPackageService,
-  navigation: Navigation,
-  availableXcodeProjects: XcodeProject[] | undefined,
-  selectedXcodeProject: XcodeProject | undefined = undefined,
-  loadingToast: Toast | undefined = undefined
+  navigation: Navigation
 ) {
-  // Check if Swift Package Url is unavailable
-  if (!swiftPackageUrl) {
-    // Return out of function and show failure Toast
-    return showToast(
-      ToastStyle.Failure, 'Please enter a url to a Swift Package'
-    );
-  }
-  // Declare AddSwiftPackageResult which is either:
-  // An Array of XcodeProjects to choose from
-  // or an void type representing the state where the Swift Package was successfully added
-  let addSwiftPackageResult: XcodeProject[] | void;
+  // Show loading Toast
+  const loadingToast = await showToast(
+    ToastStyle.Animated,
+    "Adding Swift Package please wait"
+  )
   try {
-    // Add Swift Package with URL and optional selected XcodeProject
-    addSwiftPackageResult = await xcodeSwiftPackageService.addSwiftPackage(
-      swiftPackageUrl,
-      selectedXcodeProject
-    );
+    // Close main Raycast window to prevent
+    // that the main focus is on the Raycast window
+    await closeMainWindow();
+    // Add Swift Package from Url to XcodeProject
+    await xcodeSwiftPackageService
+      .addSwiftPackage(
+        swiftPackageUrl,
+        xcodeProject
+      );
+    // Pop back
+    navigation.pop();
   } catch (error) {
-    // Check if Xcode is not running
-    if (error instanceof XcodeAddSwiftPackageXcodeNotRunningError) {
-      // Push XcodeProject Selection List if needed
-      return pushXcodeProjectSelectionListIfNeeded(
-        navigation,
-        [],
-        availableXcodeProjects ?? [],
-        async (selectedXcodeProject) => {
-          // Show loading Toast
-          const loadingToast = await showToast(
-            ToastStyle.Animated,
-            'Launching Xcode. Please wait...'
-          );
-          // Re-Invoke addSwiftPackage with selected XcodeProject
-          addSwiftPackage(
-            swiftPackageUrl,
-            xcodeSwiftPackageService,
-            navigation,
-            availableXcodeProjects,
-            selectedXcodeProject,
-            loadingToast
-          );
-        }
-      )
-    } else {
-      // Log Error
-      console.error(error);
-      // Check if a loading Toast is available
-      if (loadingToast) {
-        // Hide loading Toast
-        loadingToast.hide();
-      }
-      // Show failure Toast
-      return showToast(
-        ToastStyle.Failure,
-        'An error occurred while trying to add Swift Package'
-      )
-    }
-  }
-  // Check if AddSwiftPackageResult is an Array
-  if (Array.isArray(addSwiftPackageResult)) {
-    // Push XcodeProject Selection List if needed
-    return pushXcodeProjectSelectionListIfNeeded(
-      navigation,
-      addSwiftPackageResult as XcodeProject[],
-      availableXcodeProjects ?? [],
-      (selectedXcodeProject) => {
-        // Re-Invoke addSwiftPackage with selected XcodeProject
-        addSwiftPackage(
-          swiftPackageUrl,
-          xcodeSwiftPackageService,
-          navigation,
-          availableXcodeProjects,
-          selectedXcodeProject
-        );
-      }
+    // Log Error
+    console.error(error);
+    // Show a failure HUD as main Raycast window
+    // has already been closed
+    showHUD(
+      "⚠️ An error occurred while trying to add the Swift Package"
     );
-  }
-  // Check if a loading Toast is available
-  if (loadingToast) {
+  } finally {
     // Hide loading Toast
-    loadingToast.hide();
+    await loadingToast.hide();
   }
-  // Pop back
-  navigation.pop();
-  // Close Main Window
-  closeMainWindow();
-}
-
-/**
- * Push XcodeProjects Selection List if needed
- * @param navigation The Navigation
- * @param openedXcodeProjects The opened XcodeProjects
- * @param availableXcodeProjects The available XcodeProjects
- * @param onSelect The arrow function which will be invoked when a XcodeProject has been selected by the user
- */
-function pushXcodeProjectSelectionListIfNeeded(
-  navigation: Navigation,
-  openedXcodeProjects: XcodeProject[],
-  availableXcodeProjects: XcodeProject[],
-  onSelect: (xcodeProject: XcodeProject) => void
-) {
-  // Check if no XcodeProjects are available
-  if (openedXcodeProjects.concat(availableXcodeProjects).length === 0) {
-    // Return out of function and show failure Toast
-    return showToast(
-      ToastStyle.Failure,
-      'No Xcode Projects were found'
-    );
-  }
-  // Initialize XcodeProjects by concatenating opened and available XcodeProjects
-  const xcodeProjects = openedXcodeProjects
-    .concat(
-      availableXcodeProjects
-        // Filter out opened XcodeProjects from available XcodeProjects to avoid duplicates
-        .filter(xcodeProject => {
-          return !openedXcodeProjects
-            .map(openedXcodeProject => openedXcodeProject.filePath)
-            .includes(xcodeProject.filePath);
-        })
-    );
-  // Push XcodeProject List
-  navigation.push(
-    xcodeProjectList(
-      xcodeProjects,
-      "Select the Xcode Project where the Swift Package should be added",
-      (xcodeProject) => {
-        return <ActionPanel.Item
-          title={"Add Swift Package"}
-          onAction={
-            () => {
-              // Pop back
-              navigation.pop()
-              // Invoke onSelect with XcodeProject
-              onSelect(xcodeProject);
-            }
-          }
-        />
-      }
-    )
-  );
 }
