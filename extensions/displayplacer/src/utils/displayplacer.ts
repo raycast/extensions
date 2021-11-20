@@ -1,31 +1,5 @@
 import { execSync } from "child_process";
 
-type DisplayPlacerResolution = {
-  mode?: number;
-  res?: string;
-  colorDepth?: string;
-  hz?: string;
-  scaling?: string;
-  current?: boolean;
-};
-type DisplayPlacerScreen = {
-  persistentId: string;
-  resolutions: DisplayPlacerResolution[];
-  contextualId?: string;
-  type?: string;
-  resolution?: string;
-  hertz?: string;
-  colorDepth?: string;
-  scaling?: string;
-  origin?: string;
-  rotation?: string;
-  mainDisplay?: boolean;
-};
-type DisplayPlacerList = {
-  currentId?: string;
-  screens: DisplayPlacerScreen[];
-};
-
 export function listScreenInfo() {
   const stout = execSync("displayplacer list");
   const result = stout
@@ -101,11 +75,18 @@ export function listScreenInfo() {
             hz: value.match(/hz:(\d+)/)?.[1],
           });
         }
+        if (line.startsWith("displayplacer ")) {
+          data.currentCommand = line;
+        }
         return data;
       },
-      { screens: [] }
+      { screens: [], currentCommand: null }
     );
 
-  console.log(result);
   return result;
+}
+
+export function switchSettings(favorite: Favorite) {
+  if (!favorite.command) return;
+  execSync(favorite.command);
 }
