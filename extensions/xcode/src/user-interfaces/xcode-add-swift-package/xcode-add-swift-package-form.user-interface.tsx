@@ -1,92 +1,72 @@
 import {ActionPanel, closeMainWindow, Icon, List, Navigation, showHUD, showToast, ToastStyle} from "@raycast/api";
 import {XcodeSwiftPackageService} from "../../services/xcode-swift-package.service";
+import {XcodeSwiftPackageMetadata} from "../../models/swift-package/xcode-swift-package-metadata.model";
+import {swiftPackageMetadataSection} from "./xcode-add-swift-package-metadata-section.user-interface";
+import {AddSwiftPackageAction} from "./xcode-add-swift-package-action.user-interface";
 import {XcodeProject} from "../../models/project/xcode-project.model";
-import {XcodeAddSwiftPackageSelectXcodeProject} from "./xcode-add-swift-package-select-xcode-project.user-interface";
-import {execAsync} from "../../shared/exec-async";
+import {XcodeService} from "../../services/xcode.service";
 
 /**
  * Xcode add Swift Package Form
  * @param swiftPackageUrl The Swift Package Url
  * @param setSwiftPackageUrl The set Swift Package Url function
+ * @param swiftPackageMetadata The optional Swift Package Metadata
  * @param xcodeSwiftPackageService The XcodeSwiftPackageService
+ * @param xcodeService The XcodeService
  * @param navigation The Navigation
  */
 export function xcodeAddSwiftPackageForm(
   swiftPackageUrl: string,
   setSwiftPackageUrl: (url: string) => void,
+  swiftPackageMetadata: XcodeSwiftPackageMetadata | undefined,
   xcodeSwiftPackageService: XcodeSwiftPackageService,
+  xcodeService: XcodeService,
   navigation: Navigation
 ): JSX.Element {
   return (
     <List
-      searchBarPlaceholder={"Enter Swift Package URL"}
+      searchBarPlaceholder="Enter Swift Package URL"
       onSearchTextChange={setSwiftPackageUrl}>
       <List.Section
-        title={"Swift Package"}>
+        title="Swift Package">
         <List.Item
-          id={"add-swift-package"}
+          id="add-swift-package"
           icon={Icon.Plus}
-          title={"Add Swift Package"}
-          subtitle={swiftPackageUrl}
+          title="Add Swift Package"
+          subtitle={
+            xcodeSwiftPackageService.isSwiftPackageUrlValid(swiftPackageUrl)
+              ? swiftPackageUrl
+              : undefined
+          }
           actions={
             <ActionPanel>
               <AddSwiftPackageAction
                 swiftPackageUrl={swiftPackageUrl}
                 xcodeSwiftPackageService={xcodeSwiftPackageService}
                 navigation={navigation}
+                onSelect={
+                  (xcodeProject) => {
+                    addSwiftPackage(
+                      swiftPackageUrl,
+                      xcodeProject,
+                      xcodeSwiftPackageService,
+                      xcodeService,
+                      navigation
+                    )
+                  }
+                }
               />
             </ActionPanel>
           }
         />
       </List.Section>
+      {
+        swiftPackageMetadata
+          ? swiftPackageMetadataSection(swiftPackageMetadata)
+          : undefined
+      }
     </List>
   );
-}
-
-/**
- * Add Swift Package Action
- * @param props The properties
- */
-function AddSwiftPackageAction(
-  props: {
-    swiftPackageUrl: string,
-    xcodeSwiftPackageService: XcodeSwiftPackageService,
-    navigation: Navigation
-  }
-): JSX.Element {
-  return <ActionPanel.Item
-    title={"Add Swift Package"}
-    onAction={
-      () => {
-        // Check if Swift Package Url is valid
-        if (props.xcodeSwiftPackageService.isSwiftPackageUrlValid(props.swiftPackageUrl)) {
-          // Initialize select XcodeProject component
-          const selectXcodeProjectComponent = <XcodeAddSwiftPackageSelectXcodeProject
-            onSelect={
-              (xcodeProject) => {
-                // Pop back
-                props.navigation.pop()
-                // Add Swift Package to selected XcodeProject
-                addSwiftPackage(
-                  props.swiftPackageUrl,
-                  xcodeProject,
-                  props.xcodeSwiftPackageService,
-                  props.navigation
-                )
-              }
-            }
-          />;
-          // Push select XcodeProject component
-          props.navigation.push(selectXcodeProjectComponent);
-        } else {
-          // Otherwise show failure Toast
-          showToast(
-            ToastStyle.Failure, 'Please enter a valid url to a Swift Package'
-          );
-        }
-      }
-    }
-  />;
 }
 
 /**
@@ -94,19 +74,21 @@ function AddSwiftPackageAction(
  * @param swiftPackageUrl The Swift Package Url
  * @param xcodeProject The XcodeProject where the Swift Package should be added
  * @param xcodeSwiftPackageService The XcodeSwiftPackageService
+ * @param xcodeService The XcodeService
  * @param navigation The Navigation
  */
 async function addSwiftPackage(
   swiftPackageUrl: string,
   xcodeProject: XcodeProject,
   xcodeSwiftPackageService: XcodeSwiftPackageService,
+  xcodeService: XcodeService,
   navigation: Navigation
 ) {
   try {
     // Launch Xcode if needed
     // To ensure that Xcode is already running
     // before closing the main Raycast window
-    await launchXcodeIfNeeded();
+    await launchXcodeIfNeeded(xcodeService);
     // Close main Raycast window to prevent
     // that the main focus is on the Raycast window
     await closeMainWindow();
@@ -131,22 +113,14 @@ async function addSwiftPackage(
 
 /**
  * Launch Xcode if needed
+ * @param xcodeService The XcodeService
  */
-async function launchXcodeIfNeeded() {
-  // Declare isXcodeRunning bool value
-  let isXcodeRunning: boolean
-  try {
-    // prep Xcode process status
-    isXcodeRunning = (
-      await execAsync("pgrep Xcode")
-    ).stdout.trim().length !== 0
-  } catch {
-    // On error Xcode is not running
-    isXcodeRunning = false;
-  }
+async function launchXcodeIfNeeded(
+  xcodeService: XcodeService
+) {
   // Check if Xcode is running
-  if (isXcodeRunning) {
-    // Otherwise return out of function
+  if (await xcodeService.isXcodeRunning()) {
+    // Return out of function
     return;
   }
   // Show loading Toast
@@ -155,11 +129,8 @@ async function launchXcodeIfNeeded() {
     "Launching Xcode"
   );
   try {
-    // Launch Xcode and sleep 2 seconds
-    // to ensure the process is running
-    await execAsync(
-      "open -b com.apple.dt.xcode -j && sleep 2"
-    )
+    // Launch Xcode
+    await xcodeService.launchXcode();
   } catch {
     // Ignore error
   } finally {

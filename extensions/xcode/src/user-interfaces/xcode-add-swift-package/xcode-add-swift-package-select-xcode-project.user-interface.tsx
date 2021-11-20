@@ -56,7 +56,7 @@ export function XcodeAddSwiftPackageSelectXcodeProject(
   // Initialize select Action provider
   const selectActionProvider = (xcodeProject: XcodeProject) => {
     return <ActionPanel.Item
-      title={"Add Swift Package"}
+      title="Add Swift Package"
       onAction={
         () => {
           // Check if XcodeProject is a Swift Playground
@@ -77,11 +77,11 @@ export function XcodeAddSwiftPackageSelectXcodeProject(
   // Return XcodeProject List
   return (
     <List
-      navigationTitle={"Select Xcode Project"}
+      navigationTitle="Select Xcode Project"
       isLoading={!xcodeProjects}
       searchBarPlaceholder="Select the Xcode Project where the Swift Package should be added">
       <List.Section
-        title={"Opened Projects"}>
+        title="Opened Projects">
         {
           openedXcodeProjects
             ?.map(xcodeProject => {

@@ -4,6 +4,9 @@ import {XcodeSwiftPackageCreationParameters} from "../models/swift-package/xcode
 import {joinPathComponents} from "../shared/join-path-components";
 import {XcodeProject} from "../models/project/xcode-project.model";
 import {runAppleScript} from "../shared/run-apple-script";
+import {XcodeSwiftPackageMetadata} from "../models/swift-package/xcode-swift-package-metadata.model";
+import {URL} from "url";
+import fetch from "node-fetch";
 
 /**
  * XcodeSwiftPackageService
@@ -64,6 +67,38 @@ export class XcodeSwiftPackageService {
   ): boolean {
     // Swift Package Url must start with "http" or "git"
     return url.startsWith("http") || url.startsWith("git");
+  }
+
+  /**
+   * Retrieve Swift Package Metadata for Swift Package Url, if available
+   * @param swiftPackageUrl The Swift Package Url
+   */
+  async getSwiftPackageMetadata(
+    swiftPackageUrl: string
+  ): Promise<XcodeSwiftPackageMetadata | null> {
+    // Initialize URL
+    const url = new URL(swiftPackageUrl);
+    // Check if host is GitHub
+    if (url.host === "github.com") {
+      // Fetch GitHub Repository details
+      const gitHubAPIResponse = await fetch(
+        joinPathComponents(
+          "https://api.github.com/repos",
+          url.pathname
+        )
+      );
+      // Retrieve GitHub Repository from response
+      const gitHubRepository = await gitHubAPIResponse.json() as any;
+      // Return Metadata
+      return {
+        name: gitHubRepository.name,
+        description: gitHubRepository.description,
+        starsCount: gitHubRepository.stargazers_count,
+        license: gitHubRepository.license?.name
+      }
+    }
+    // Otherwise return null
+    return null;
   }
 
   /**
