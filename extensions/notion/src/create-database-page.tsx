@@ -32,7 +32,6 @@ import {
 export default function CreateDatabaseForm(): JSX.Element {
   // Get preference values
   const notion_token = String(preferences.notion_token.value)
-  const notion_workspace_slug = String(preferences.notion_workspace_slug.value)
   if (notion_token.length !== 50) {
     showToast(ToastStyle.Failure, 'Invalid token detected')
     throw new Error('Invalid token length detected')
