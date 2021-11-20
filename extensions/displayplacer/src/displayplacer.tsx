@@ -174,7 +174,7 @@ export default function DisplayPlacer() {
     );
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Filter Presets">
       {isLoading || (
         <>
           <List.Section title="Presets">

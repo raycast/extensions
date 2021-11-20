@@ -1,51 +1,51 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "displayplacer",
-  "title": "displayplacer",
+  "title": "Display Placer",
   "description": "Manage favorite display configurations",
-  "icon": "command-icon.png",
+  "icon": "displayplacer.png",
   "author": "eluce2",
   "license": "MIT",
   "commands": [
     {
       "name": "displayplacer",
       "title": "Switch Display Preset",
-      "subtitle": "displayplacer",
+      "subtitle": "Display Placer",
       "description": "Set display presets and quickly switch between them.",
       "mode": "view"
     },
     {
       "name": "preset1",
       "title": "Load Display Preset #1",
-      "subtitle": "displayplacer",
+      "subtitle": "Display Placer",
       "description": "Quickly Load Display Preset #1",
       "mode": "no-view"
     },
     {
       "name": "preset2",
       "title": "Load Display Preset #2",
-      "subtitle": "displayplacer",
+      "subtitle": "Display Placer",
       "description": "Quickly Load Display Preset #2",
       "mode": "no-view"
     },
     {
       "name": "preset3",
       "title": "Load Display Preset #3",
-      "subtitle": "displayplacer",
+      "subtitle": "Display Placer",
       "description": "Quickly Load Display Preset #3",
       "mode": "no-view"
     },
     {
       "name": "preset4",
       "title": "Load Display Preset #4",
-      "subtitle": "displayplacer",
+      "subtitle": "Display Placer",
       "description": "Quickly Load Display Preset #4",
       "mode": "no-view"
     },
     {
       "name": "preset5",
       "title": "Load Display Preset #5",
-      "subtitle": "displayplacer",
+      "subtitle": "Display Placer",
       "description": "Quickly Load Display Preset #5",
       "mode": "no-view"
     }
