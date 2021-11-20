@@ -1,35 +1,51 @@
-import { ActionPanel, CopyToClipboardAction, Detail, Icon, List, PushAction } from "@raycast/api";
-import fs, { existsSync, mkdirSync, readdirSync } from "fs";
+import { ActionPanel, CopyToClipboardAction, Detail, environment, Icon, List, PushAction, showToast, ToastStyle } from "@raycast/api";
+import degit from "degit";
+import fs, { readdirSync } from "fs";
+import { rm } from "fs/promises";
 import { globby } from "globby";
-import { parse } from "path";
+import { parse, resolve } from "path";
 import { useEffect, useState } from "react";
-import { CACHE_DIR, refreshPages } from "./tldr";
+
+const  CACHE_DIR = resolve(environment.supportPath, "pages")
+
+async function refreshPages() {
+  await rm(resolve(CACHE_DIR), {recursive: true, force: true})
+  await showToast(ToastStyle.Animated, "Fetching TLDR Pages...");
+  try {
+    await degit("tldr-pages/tldr/pages").clone(CACHE_DIR);
+    await showToast(ToastStyle.Success, "TLDR pages fetched!")
+  } catch (error) {
+    await showToast(ToastStyle.Failure, "Download Failed!", "Please check your internet connexion.")
+  }
+
+}
+
+async function readPages() {
+  const platformNames = ["osx", "common", "linux", "windows", "sunos", "android"];
+  return await Promise.all(
+    platformNames.map(async (platformName) => {
+      const filepaths = await globby(`${CACHE_DIR}/${platformName}/*`);
+      const pages = await Promise.all(
+        filepaths.map((filepath) => parsePage(filepath))
+      );
+      return {
+        name: platformName,
+        pages: pages,
+      };
+    })
+  );
+
+}
 
 export default function TLDRList(): JSX.Element {
   const [platforms, setPlatforms] = useState<Platform[]>();
   useEffect(() => {
     async function loadPages() {
-      if (!existsSync(CACHE_DIR)) {
-        mkdirSync(CACHE_DIR, {recursive: true})
-      }
       if (readdirSync(CACHE_DIR).length == 0) {
         await refreshPages()
       }
 
-      const platformNames = ["osx", "common", "linux", "windows", "sunos", "android"];
-      const platforms = await Promise.all(
-        platformNames.map(async (platformName) => {
-          const filepaths = await globby(`${CACHE_DIR}/${platformName}/*`);
-          const pages = await Promise.all(
-            filepaths.map((filepath) => parsePage(filepath))
-          );
-          return {
-            name: platformName,
-            pages: pages,
-          };
-        })
-      );
-      setPlatforms(platforms);
+      setPlatforms(await readPages());
     }
     loadPages();
   }, []);
@@ -47,7 +63,11 @@ export default function TLDRList(): JSX.Element {
               actions={
                 <ActionPanel>
                   <PushAction title="Show Commands" icon={Icon.ArrowRight} target={<CommandList page={page} />} />
-                  <PushAction title="Show Markdown" icon={Icon.Text} target={<Detail markdown={page.markdown} />} />
+                  <PushAction title="Show Detail" icon={Icon.Text} target={<Detail markdown={page.markdown} />} />
+                  <ActionPanel.Item title="Refresh Pages" icon={Icon.ArrowClockwise} onAction={async () => {
+                    await refreshPages()
+                    setPlatforms(await readPages())
+                  }}/>
                 </ActionPanel>
               }
             />

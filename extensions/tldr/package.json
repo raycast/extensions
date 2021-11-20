@@ -13,13 +13,6 @@
       "subtitle": "tldr",
       "description": "Search Commands Cheatsheets.",
       "mode": "view"
-    },
-    {
-      "name": "refresh-pages",
-      "title": "Refresh Pages",
-      "subtitle": "tldr",
-      "description": "Refresh Command Cheatsheets",
-      "mode": "no-view"
     }
   ],
   "dependencies": {
