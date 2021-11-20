@@ -11,8 +11,8 @@ const kit_path = resolve(homedir(), ".kit");
 export default function listScripts(): JSX.Element {
   const [scripts, setScripts] = useState<Script[]>();
   useEffect(() => {
-    const db_path = resolve(kit_path.replace("~", homedir()), "db", "scripts.json");
-    readFile(db_path)
+    const script_db_path = resolve(kit_path, "db", "scripts.json");
+    readFile(script_db_path)
       .then((buffer) => buffer.toString())
       .then(JSON.parse)
       .then((json) => setScripts(json.scripts));
