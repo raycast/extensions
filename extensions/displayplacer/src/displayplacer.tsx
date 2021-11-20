@@ -1,9 +1,7 @@
 import {
   ActionPanel,
   ActionPanelItem,
-  clearLocalStorage,
   closeMainWindow,
-  Detail,
   Form,
   FormCheckbox,
   FormTextField,

@@ -9,10 +9,45 @@
   "commands": [
     {
       "name": "displayplacer",
-      "title": "displayplacer",
-      "subtitle": "",
-      "description": "",
+      "title": "Switch Display Preset",
+      "subtitle": "displayplacer",
+      "description": "Set display presets and quickly switch between them.",
       "mode": "view"
+    },
+    {
+      "name": "preset1",
+      "title": "Load Display Preset #1",
+      "subtitle": "displayplacer",
+      "description": "Quickly Load Display Preset #1",
+      "mode": "no-view"
+    },
+    {
+      "name": "preset2",
+      "title": "Load Display Preset #2",
+      "subtitle": "displayplacer",
+      "description": "Quickly Load Display Preset #2",
+      "mode": "no-view"
+    },
+    {
+      "name": "preset3",
+      "title": "Load Display Preset #3",
+      "subtitle": "displayplacer",
+      "description": "Quickly Load Display Preset #3",
+      "mode": "no-view"
+    },
+    {
+      "name": "preset4",
+      "title": "Load Display Preset #4",
+      "subtitle": "displayplacer",
+      "description": "Quickly Load Display Preset #4",
+      "mode": "no-view"
+    },
+    {
+      "name": "preset5",
+      "title": "Load Display Preset #5",
+      "subtitle": "displayplacer",
+      "description": "Quickly Load Display Preset #5",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
