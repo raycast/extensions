@@ -1,10 +1,14 @@
-import { ActionPanel, closeMainWindow, Icon, List, popToRoot } from "@raycast/api";
+import { ActionPanel, closeMainWindow, Icon, List, popToRoot, showToast, ToastStyle } from "@raycast/api";
 import { spawn } from "child_process";
+import { execa } from "execa";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import { resolve } from "path";
 import { useEffect, useState } from "react";
+import util from "util";
 import { Script } from "./script";
+
+const promisifiedSpawn = util.promisify(spawn)
 
 const kit_path = resolve(homedir(), ".kit");
 
@@ -88,9 +92,13 @@ function RunScriptAction(props: { scriptPath: string; icon?: Icon, title?: strin
       icon={props.icon || Icon.Terminal}
       onAction={async () => {
         const kar_path = resolve(kit_path, "kar");
-        await spawn(kar_path, [props.scriptPath, ...(props.args || [])]);
-        await closeMainWindow();
-        await popToRoot();
+        try {
+          await execa(kar_path, [props.scriptPath, ...(props.args || [])]);
+          await closeMainWindow();
+          await popToRoot();
+        } catch (error) {
+          showToast(ToastStyle.Failure, "Could not connect to Kit", "Please check that Kit is running")
+        }
       }}
     />
   );
