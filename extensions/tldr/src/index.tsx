@@ -56,9 +56,9 @@ export default function TLDRList(): JSX.Element {
         <List.Section title={platform.name} key={platform.name}>
           {platform.pages.map((page) => (
             <List.Item
-              title={page.name}
+              title={page.title}
               key={page.filename}
-              subtitle={page.description}
+              subtitle={page.subtitle}
               accessoryTitle={page.filename}
               actions={
                 <ActionPanel>
@@ -81,7 +81,7 @@ export default function TLDRList(): JSX.Element {
 function CommandList(props: { page: Page }) {
   const page = props.page;
   return (
-    <List navigationTitle={page.name}>
+    <List navigationTitle={page.title}>
       {page.items?.map((item) => (
         <List.Section key={item.description} title={item.description}>
           <List.Item
@@ -105,25 +105,34 @@ interface Platform {
 }
 
 interface Page {
-  name: string;
+  title: string;
   filename: string;
-  description: string;
+  subtitle: string;
   markdown: string;
   items: { description: string; command: string }[];
 }
 
 async function parsePage(path: string): Promise<Page> {
   const markdown = await fs.promises.readFile(path).then(buffer => buffer.toString())
+
+  const subtitle = []
+  const commands = []
+  const descriptions = []
   const lines = markdown.split("\n");
-  const name = lines[0].slice(2);
-  const description = lines.filter((line) => line.startsWith(">")).map((line) => line.slice(2))[0];
-  const commands = lines.filter((line) => line.startsWith("`")).map((line) => line.slice(1, -1));
-  const descriptions = lines.filter((line) => line.startsWith("-")).map((line) => line.slice(2));
+
+  for (const line of lines) {
+    if (line.startsWith(">"))
+      subtitle.push(line.slice(2))
+    else if (line.startsWith("`"))
+      commands.push(line.slice(1, -1))
+    else if (line.startsWith("-"))
+      descriptions.push(line.slice(2))
+  }
 
   return {
-    name: name,
+    title: lines[0].slice(2),
     filename: parse(path).name,
-    description: description,
+    subtitle: subtitle[0],
     markdown: markdown,
     items: zip(commands, descriptions).map(([command, description]) => ({
       command: command as string,
