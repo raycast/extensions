@@ -104,7 +104,7 @@ function PasswordList({ onePasswordMetaItems }: { onePasswordMetaItems: OnePassw
   return (
     <List searchBarPlaceholder="Filter items by name..." isLoading={onePasswordMetaItems === undefined}>
       {sortedCategories?.map(onePasswordMetaItemsCategory => (
-          <PasswordListCategory onePasswordMetaItemsCategory={onePasswordMetaItemsCategory}/>
+          <PasswordListCategory onePasswordMetaItemsCategory={onePasswordMetaItemsCategory} key={onePasswordMetaItemsCategory.categoryUUID}/>
       ))}
     </List>
   );
@@ -152,7 +152,6 @@ function PasswordListItem(props: { onePasswordMetaItem: OnePasswordMetaItem }) {
 
   return (
     <List.Item
-      id={onePasswordMetaItem.uuid}
       title={onePasswordMetaItem.itemTitle}
       subtitle={onePasswordMetaItem.categorySingularName}
       icon={getIconForCategory(onePasswordMetaItem.categoryUUID)}
