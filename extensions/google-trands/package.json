@@ -3,7 +3,7 @@
   "name": "google-trends",
   "title": "Google Trends",
   "description": "Daily and real-time surge trends in Google trends",
-  "icon": "gtrends.ico",
+  "icon": "icon.png",
   "author": "Kang",
   "license": "MIT",
   "commands": [
