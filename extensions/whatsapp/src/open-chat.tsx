@@ -71,7 +71,7 @@ function ChatListItem({ chat, onPinAction }: ChatListItemProps) {
           />
           <ActionPanel.Item
             title={chat.pinned ? "Unpin Chat" : "Pin Chat"}
-            shortcut={{ modifiers: ["cmd"], key: "p" }}
+            shortcut={{ modifiers: ["opt"], key: "p" }}
             icon={Icon.Pin}
             onAction={() => onPinAction(chat)}
           />
