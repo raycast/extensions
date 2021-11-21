@@ -84,7 +84,7 @@ export class XcodeSwiftPackageService {
       const gitHubAPIResponse = await fetch(
         joinPathComponents(
           "https://api.github.com/repos",
-          url.pathname
+          url.pathname.replace(".git", "")
         )
       );
       // Retrieve GitHub Repository from response
