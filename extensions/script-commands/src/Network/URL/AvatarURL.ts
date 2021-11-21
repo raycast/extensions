@@ -1,22 +1,27 @@
 import { 
-  Author 
-} from "@models"
-
-import { 
   checkIsValidURL 
 } from "@urls"
 
+export const avatarURL = (url: string | null): string => {
+  const defaultSize = 100
+  const defaultURL = "https://github.com/raycast.png"
 
-export const authorAvatarURL = (author: Author): string => {
-  if (author.url != null && author.url.length > 0 && checkIsValidURL(author.url)) {
-    const path = new URL(author.url)
+  if (url != null && url.length > 0 && checkIsValidURL(url)) {
+    const path = new URL(url)
 
     if (path.host == "twitter.com")
       return `https://unavatar.io/twitter${path.pathname}`
 
     else if (path.host == "github.com")
-      return `${author.url}.png?size=100`
+      return `${url}.png?size=${defaultSize}`
+    
+    else {
+      const currentURL = `https://unavatar.io/${path.host}?fallback=${defaultURL}`
+      //console.log(`Current value: ${currentURL}`)
+
+      return currentURL
+    }
   }
 
-  return "https://github.com/raycast.png?size=100"
+  return `${defaultURL}?size=${defaultSize}`
 }

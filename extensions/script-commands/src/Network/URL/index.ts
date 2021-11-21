@@ -3,7 +3,7 @@ export {
 } from "./URLConstants"
 
 export {
-  authorAvatarURL
+  avatarURL
 } from "./AvatarURL"
 
 export {
