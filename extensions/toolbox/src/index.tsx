@@ -196,7 +196,6 @@ async function runScript(config: { content: string; isWindowClose: boolean }): P
     } else {
       showToast(ToastStyle.Success, "Success", result);
     }
-    showToast(ToastStyle.Success, "Success", result);
     return true;
   } catch (error) {
     if (error instanceof Error) {
