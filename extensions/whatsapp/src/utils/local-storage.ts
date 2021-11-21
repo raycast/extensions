@@ -1,18 +1,21 @@
-import { WhatsAppContact } from "./types";
+import { WhatsAppChat } from "./types";
 import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
 
-export async function getStoredWhatsAppContacts(): Promise<Array<WhatsAppContact>> {
-  return JSON.parse(await getLocalStorageItem("contacts") || "[]");
+const whatsAppStorageKey = "whatsapp-chats";
+const pinnedPhonesStorageKey = "whatsapp-pinned-phones";
+
+export async function getStoredWhatsAppChats(): Promise<Array<WhatsAppChat>> {
+  return JSON.parse(await getLocalStorageItem(whatsAppStorageKey) || "[]");
 }
 
-export async function saveStoredWhatsAppContacts(contacts: Array<WhatsAppContact>): Promise<void> {
-  await setLocalStorageItem("contacts", JSON.stringify(contacts));
+export async function saveStoredWhatsAppChats(contacts: Array<WhatsAppChat>): Promise<void> {
+  await setLocalStorageItem(whatsAppStorageKey, JSON.stringify(contacts));
 }
 
 export async function getStoredPinnedPhones(): Promise<Array<string>> {
-  return JSON.parse(await getLocalStorageItem("pinnedContactPhones") || "[]");
+  return JSON.parse(await getLocalStorageItem(pinnedPhonesStorageKey) || "[]");
 }
 
 export async function saveStoredPinnedPhones(phones: Array<string>): Promise<void> {
-  await setLocalStorageItem("pinnedContactPhones", JSON.stringify(phones));
+  await setLocalStorageItem(pinnedPhonesStorageKey, JSON.stringify(phones));
 }

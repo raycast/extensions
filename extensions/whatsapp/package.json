@@ -8,7 +8,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "open-contact-chat",
+      "name": "open-chat",
       "title": "Open Chat",
       "subtitle": "WhatsApp",
       "description": "Open Apple contact chat in WhatsApp",

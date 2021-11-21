@@ -3,7 +3,7 @@ export type AppleContact = {
     phones: Array<string>;
 };
 
-export type WhatsAppContact = {
+export type WhatsAppChat = {
     name: string;
     phone: string;
     pinned: boolean;

@@ -1,9 +1,10 @@
-import { AppleContact, WhatsAppContact } from "./types";
-import { runJxa } from "run-jxa";
-import { phone as parsePhone } from "phone";
-import { getStoredPinnedPhones } from "./local-storage";
+import {AppleContact, WhatsAppChat} from "./types";
+import {runJxa} from "run-jxa";
+import {phone as parsePhone} from "phone";
+import {getStoredPinnedPhones} from "./local-storage";
+import {showToast, ToastStyle} from "@raycast/api";
 
-export async function getWhatsAppContacts(): Promise<Array<WhatsAppContact>> {
+export async function getWhatsappChats(): Promise<Array<WhatsAppChat>> {
   try {
     const pinnedPhones = await getStoredPinnedPhones();
 
@@ -44,6 +45,7 @@ export async function getWhatsAppContacts(): Promise<Array<WhatsAppContact>> {
       .sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
     console.error(error);
+    showToast(ToastStyle.Failure, "Failed to refresh chats")
     return [];
   }
 }
