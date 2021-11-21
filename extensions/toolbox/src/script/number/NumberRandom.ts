@@ -1,6 +1,6 @@
 import { Script } from "../type";
 
-export const NumberRandom: Script = {
+export const numberRandom: Script = {
   info: { title: "Random Number", desc: "Random Number in range", type: "input", example: "1,100" },
   run(input) {
     try {

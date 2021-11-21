@@ -7,7 +7,7 @@ import { Script } from "../type";
   },
 }; */
 
-export const Trim: Script = {
+export const trim: Script = {
   info: {
     title: "Trim",
     desc: "Trims leading and trailing whitespace",

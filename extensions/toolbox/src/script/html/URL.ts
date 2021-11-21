@@ -1,6 +1,6 @@
 import { Script } from "../type";
 
-export const URLEncode: Script = {
+export const urlEncode: Script = {
   info: {
     title: "URL Encode",
     desc: "Encodes URL entities in your text",
@@ -12,7 +12,7 @@ export const URLEncode: Script = {
   },
 };
 
-export const URLDecode: Script = {
+export const urlDecode: Script = {
   info: {
     title: "URL Decode",
     desc: "Decodes URL entities in your text",

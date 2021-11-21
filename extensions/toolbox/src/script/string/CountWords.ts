@@ -1,7 +1,6 @@
 import { Script } from "../type";
-import * as _ from "lodash";
 
-export const CountWords: Script = {
+export const countWords: Script = {
   info: {
     title: "Count Words",
     desc: "Get the word count of your text",

@@ -1,2 +1,2 @@
-export * from "./DateToTimestamp";
-export * from "./DateToUTC";
+export * from "./dateToTimestamp";
+export * from "./dateToUTC";
