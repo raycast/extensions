@@ -95,12 +95,12 @@ export class DataManager {
     this.persist()
   }
   
-  isCommandDownloaded(identifier: string): boolean {
+  private isCommandDownloaded(identifier: string): boolean {
     const command = this.contentManager.contentFor(identifier)
     return command != null
   }
 
-  isCommandNeedsSetup(identifier: string): boolean {
+  private isCommandNeedsSetup(identifier: string): boolean {
     const command = this.contentManager.contentFor(identifier)
 
     if (command != null)
@@ -121,7 +121,7 @@ export class DataManager {
       else
         state = State.Installed
     }
-    else
+    else 
       state = State.NotInstalled
 
     return state
@@ -181,5 +181,4 @@ export class DataManager {
 
     return result
   }
-
 }
