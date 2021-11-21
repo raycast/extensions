@@ -1,0 +1,39 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "license": "MIT",
+  "name": "devdocs",
+  "title": "Devdocs",
+  "description": "Search through DevDocs documentation sets from Raycast.",
+  "icon": "devdocs.png",
+  "author": "pomdtr",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Documentation",
+      "subtitle": "DevDocs",
+      "description": "Search through DevDocs documentation sets from Raycast",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "fuse.js": "^6.4.6",
+    "node-fetch": "^3.0.0",
+    "open": "^8.2.1",
+    "swr": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^16.4.3",
+    "@types/node-fetch": "^2.5.12",
+    "@types/react": "^17.0.15",
+    "@typescript-eslint/eslint-plugin": "^4.28.5",
+    "@typescript-eslint/parser": "^4.28.5",
+    "eslint": "^7.31.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.3.5"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist"
+  }
+}

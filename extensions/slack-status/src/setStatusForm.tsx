@@ -76,18 +76,23 @@ function StatusForm(props: {
   preset?: SlackStatusPreset;
 }) {
   let submitActionTitle = "";
+  let navigationTitle = "";
   switch (props.mode) {
     case StatusFormMode.SetCustomStatus:
       submitActionTitle = "Set Status";
+      navigationTitle = "Set Custom Status";
       break;
     case StatusFormMode.EditPreset:
       submitActionTitle = "Update Preset";
+      navigationTitle = "Edit Preset";
       break;
     case StatusFormMode.CreatePreset:
       submitActionTitle = "Create Preset";
+      navigationTitle = "Create Preset";
   }
   return (
     <Form
+      navigationTitle={navigationTitle}
       actions={
         <ActionPanel>
           <SubmitFormAction title={submitActionTitle} onSubmit={props.onSubmit} />
@@ -118,6 +123,7 @@ function StatusForm(props: {
         storeValue={props.preset ? false : true}
       >
         <Form.Dropdown.Item key={"0m"} title="Don't clear" value="0" />
+        <Form.Dropdown.Item key={"15m"} title="15 minutes" value="15" />
         <Form.Dropdown.Item key={"30m"} title="30 minutes" value="30" />
         <Form.Dropdown.Item key={"45m"} title="45 minutes" value="45" />
         <Form.Dropdown.Item key={"60m"} title="1 hour" value="60" />

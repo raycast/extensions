@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pinboard",
   "title": "Pinboard",
   "description": "Post new bookmarks to Pinboard and search through your Pinboard bookmarks.\nTip: Assign a global shortcut to the \"Add Bookmark\" command, select a URL, and then run the command ✨",

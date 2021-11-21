@@ -30,6 +30,19 @@ export interface Team {
   id: string
 }
 
+export interface EnvironmentVariable {
+  type: string
+  id: string
+  key: string
+  value: string
+  target: string[]
+  gitBranch: string
+  configurationId: string
+  createdAt: number
+  updatedAt: number
+}
+
+
 // Fetch the username that belongs to the token given.
 // Use for filtering deployments by user and providing links later on
 export async function fetchUsername(): Promise<string> {
@@ -128,5 +141,76 @@ async function rawFetchDeployments(
     console.error(err)
     showToast(ToastStyle.Failure, 'Failed to fetch deployments')
     throw new Error('Failed to fetch deployments')
+  }
+}
+
+// Fetch project environment variable
+export async function fetchEnvironmentVariables(
+  projectId: string
+): Promise<EnvironmentVariable[]> {
+  const environmentVariables: EnvironmentVariable[] = [...(await rawFetchProjectEnvironmentVariables(projectId))]
+  return environmentVariables.sort((a, b) => b.updatedAt - a.updatedAt)
+}
+
+// Raw function for fetching project environment variable
+async function rawFetchProjectEnvironmentVariables(
+  projectId: string
+): Promise<EnvironmentVariable[]> {
+  dayjs.extend(relativeTime)
+  try {
+    const environmentVariables: EnvironmentVariable[] = []
+    const response = await fetch(
+      apiURL + `v8/projects/${projectId}/env`,
+      {
+        method: 'get',
+        headers: headers,
+      }
+    )
+    const json = await response.json()    
+
+    return json.envs;
+  } catch (err) {
+    console.error(err)
+    showToast(ToastStyle.Failure, 'Failed to fetch environment variable')
+    throw new Error('Failed to fetch environment variable')
+  }
+}
+
+// Update project environment variable
+export async function updateEnvironmentVariable(
+  projectId: string,
+  envId: string,
+  envKey: string,
+  envValue: string
+): Promise<EnvironmentVariable> {
+  const environmentVariable: EnvironmentVariable = await rawUpdateProjectEnvironmentVariable(projectId, envId, envKey, envValue)
+  return environmentVariable;
+}
+
+// Raw function for updating project environment variable
+async function rawUpdateProjectEnvironmentVariable(
+  projectId: string,
+  envId: string,
+  envKey: string,
+  envValue: string
+): Promise<EnvironmentVariable> {
+  dayjs.extend(relativeTime)
+  try {
+    const response = await fetch(
+      apiURL + `v8/projects/${projectId}/env/${envId}`,
+      {
+        method: 'patch',
+        headers: headers,
+        body: JSON.stringify({
+          value: envValue
+        })
+      }
+    )
+    const environmentVariable = await response.json() as EnvironmentVariable;   
+    return environmentVariable;
+  } catch (err) {
+    console.error(err)
+    showToast(ToastStyle.Failure, 'Failed to fetch environment variable')
+    throw new Error('Failed to fetch environment variable')
   }
 }

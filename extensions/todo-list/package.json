@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "todo-list",
   "title": "Todo List",
   "description": "Manage your todo list quickly by adding items and marking items as completed.",
@@ -9,7 +10,6 @@
     {
       "name": "index",
       "title": "Manage Todo List",
-      "subtitle": "",
       "description": "Create and delete items, mark them as completed and pin important tasks.",
       "mode": "view"
     }

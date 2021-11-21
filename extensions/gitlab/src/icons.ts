@@ -54,18 +54,20 @@ export function useImage(url?: string, defaultIcon?: string): {
         return await gitlab.downloadFile(url, { localFilepath: imgFilepath });
     }, { deps: [url], secondsToRefetch: 600 });
 
-    let cancel = false;
-
     useEffect(() => {
+        // FIXME In the future version, we don't need didUnmount checking
+        // https://github.com/facebook/react/pull/22114
+        let didUnmount = false;
+
         async function fetchData() {
-            if (cancel) {
+            if (didUnmount) {
                 return;
             }
 
             setIsLoading(true);
             setError(undefined);
 
-            if (!cancel) {
+            if (!didUnmount) {
                 if (!data) {
                     setLocalFilepath(defaultIcon);
                 } else {
@@ -76,11 +78,11 @@ export function useImage(url?: string, defaultIcon?: string): {
             try {
 
             } catch (e: any) {
-                if (!cancel) {
+                if (!didUnmount) {
                     setError(e.message);
                 }
             } finally {
-                if (!cancel) {
+                if (!didUnmount) {
                     setIsLoading(false);
                 }
             }
@@ -89,7 +91,7 @@ export function useImage(url?: string, defaultIcon?: string): {
         fetchData();
 
         return () => {
-            cancel = true;
+            didUnmount = true;
         };
     }, [data]);
 

@@ -1,9 +1,11 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hacker-news",
   "title": "Hacker News",
   "description": "Read the latest stories of Hacker News.",
   "icon": "icon.png",
   "author": "thomas",
+  "license": "MIT",
   "commands": [
     {
       "name": "frontpage",

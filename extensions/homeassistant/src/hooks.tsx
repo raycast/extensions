@@ -13,11 +13,13 @@ export function useHAStates(): {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const hawsRef = useRef<Connection>();
 
-  let cancel = false;
-
   useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
     async function fetchData() {
-      if (cancel) {
+      if (didUnmount) {
         return;
       }
 
@@ -30,8 +32,9 @@ export function useHAStates(): {
 
           subscribeEntities(con, (entities) => {
             console.log("incoming entities changes");
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const haStates = Object.entries(entities).map(([k, v]) => v as State);
-            if (!cancel) {
+            if (!didUnmount) {
               console.log("set new entities");
               setStates(haStates);
             }
@@ -42,8 +45,9 @@ export function useHAStates(): {
           const entColl = entitiesColl(hawsRef.current);
           await entColl.refresh();
         }
+        //eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
-        if (!cancel) {
+        if (!didUnmount) {
           const err = e instanceof Error ? e : new Error(e);
           setError(err);
         }
@@ -53,7 +57,7 @@ export function useHAStates(): {
     fetchData();
 
     return () => {
-      cancel = true;
+      didUnmount = true;
     };
   }, []);
 

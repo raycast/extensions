@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "switchhosts",
   "title": "SwitchHosts",
   "description": "An extension for hosts management & switching",
