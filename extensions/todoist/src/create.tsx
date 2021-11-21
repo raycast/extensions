@@ -1,31 +1,41 @@
-import { ActionPanel, Form, FormValue, render, SubmitFormAction } from "@raycast/api";
-import { Project } from "./types";
+import { ActionPanel, Form, FormValue, render, SubmitFormAction, useNavigation } from "@raycast/api";
+import { Project as TProject } from "./types";
 import { createTask, useFetch } from "./api";
 import { priorities } from "./constants";
 import { getAPIDate } from "./utils";
+import Project from "./components/Project";
 
 function Create() {
-  const { data } = useFetch<Project[]>("/projects");
+  const { push } = useNavigation();
+  const { data } = useFetch<TProject[]>("/projects");
 
   const projects = data || [];
 
   async function submit(values: Record<string, FormValue>) {
-    const body = { ...values };
+    try {
+      const body = { ...values };
 
-    if (values.due_date) {
-      const date = new Date(values.due_date as string);
-      body.due_date = getAPIDate(date);
+      if (values.due_date) {
+        const date = new Date(values.due_date as string);
+        body.due_date = getAPIDate(date);
+      }
+
+      if (values.priority) {
+        body.priority = parseInt(values.priority as string);
+      }
+
+      if (values.project_id) {
+        body.project_id = parseInt(values.project_id as string);
+      }
+
+      await createTask(body);
+
+      if (values.project_id) {
+        push(<Project projectId={parseInt(values.project_id as string)} />);
+      }
+    } catch (error) {
+      console.error(error);
     }
-
-    if (values.priority) {
-      body.priority = parseInt(values.priority as string);
-    }
-
-    if (values.project_id) {
-      body.project_id = parseInt(values.project_id as string);
-    }
-
-    await createTask(body);
   }
 
   return (

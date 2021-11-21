@@ -20,7 +20,7 @@ function Projects() {
           {...(project.favorite ? { accessoryIcon: Icon.Star } : {})}
           actions={
             <ActionPanel>
-              <PushAction icon={Icon.TextDocument} title="Show Details" target={<Project project={project} />} />
+              <PushAction icon={Icon.TextDocument} title="Show Details" target={<Project projectId={project.id} />} />
               <OpenInBrowserAction url={project.url} />
             </ActionPanel>
           }
