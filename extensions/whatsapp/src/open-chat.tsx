@@ -1,6 +1,6 @@
-import { ActionPanel, Icon, List, OpenInBrowserAction } from "@raycast/api";
-import { useWhatsappChats } from "./utils/use-whatsapp-chats";
-import { WhatsAppChat } from "./utils/types";
+import {ActionPanel, Icon, List, OpenInBrowserAction, showToast, ToastStyle} from "@raycast/api";
+import {useWhatsappChats} from "./utils/use-whatsapp-chats";
+import {WhatsAppChat} from "./utils/types";
 
 export default function ChatList() {
   const [chats, setChats] = useWhatsappChats();
@@ -8,7 +8,7 @@ export default function ChatList() {
   const pinnedChats = chats.filter(chat => chat.pinned);
   const unpinnedChats = chats.filter(chat => !chat.pinned);
 
-  const handlePin = (chat: WhatsAppChat) => {
+  const handlePin = async (chat: WhatsAppChat) => {
     const newChats = chats.map(c => {
       if (c.phone === chat.phone) {
         return { ...c, pinned: !c.pinned };
@@ -16,6 +16,7 @@ export default function ChatList() {
       return c;
     });
     setChats(newChats);
+    await showToast(ToastStyle.Success, `${!chat.pinned ? "Pinned" : "Unpinned"} chat with ${chat.name} `)
   };
 
   return (
@@ -71,7 +72,7 @@ function ChatListItem({ chat, onPinAction }: ChatListItemProps) {
           />
           <ActionPanel.Item
             title={chat.pinned ? "Unpin Chat" : "Pin Chat"}
-            shortcut={{ modifiers: ["opt"], key: "p" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
             icon={Icon.Pin}
             onAction={() => onPinAction(chat)}
           />
