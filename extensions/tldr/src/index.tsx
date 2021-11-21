@@ -50,7 +50,7 @@ export default function TLDRList(): JSX.Element {
   const [query, setQuery] = useState("");
   useEffect(() => {
     async function loadPages() {
-      if (readdirSync(CACHE_DIR).length == 0) {
+      if (!existsSync(CACHE_DIR)) {
         await refreshPages();
       }
 
