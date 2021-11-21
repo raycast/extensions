@@ -10,38 +10,54 @@ export const axiosInstance = axios.create({
 });
 
 export async function createTask(body: TaskPayload): Promise<void> {
+  const toast = await showToast(ToastStyle.Animated, "Creating task");
   try {
     await axiosInstance.post(`/tasks`, body);
-    showToast(ToastStyle.Success, "Task created");
-  } catch {
-    showToast(ToastStyle.Failure, "Could not create task");
+    toast.style = ToastStyle.Success;
+    toast.title = "Created task";
+  } catch (error) {
+    toast.style = ToastStyle.Failure;
+    toast.title = "Failed creating task";
+    toast.message = error instanceof Error ? error.message : undefined;
   }
 }
 
 export async function completeTask(id: number): Promise<void> {
+  const toast = await showToast(ToastStyle.Animated, "Completing task");
   try {
     await axiosInstance.post(`/tasks/${id}/close`);
-    showToast(ToastStyle.Success, "Task completed");
-  } catch {
-    showToast(ToastStyle.Failure, "Could not complete task");
+    toast.style = ToastStyle.Success;
+    toast.title = "Task achieved. Well done! 🙌";
+  } catch (error) {
+    toast.style = ToastStyle.Failure;
+    toast.title = "Failed completing task";
+    toast.message = error instanceof Error ? error.message : undefined;
   }
 }
 
 export async function updateTask(id: number, body: TaskPayload): Promise<void> {
+  const toast = await showToast(ToastStyle.Animated, "Updating task");
   try {
     await axiosInstance.post(`tasks/${id}`, body);
-    showToast(ToastStyle.Success, "Task updated");
-  } catch {
-    showToast(ToastStyle.Failure, "Could not update task");
+    toast.style = ToastStyle.Success;
+    toast.title = "Task updated";
+  } catch (error) {
+    toast.style = ToastStyle.Failure;
+    toast.title = "Failed updating task";
+    toast.message = error instanceof Error ? error.message : undefined;
   }
 }
 
 export async function deleteTask(id: number): Promise<void> {
+  const toast = await showToast(ToastStyle.Animated, "Deleting task");
   try {
     await axiosInstance.delete(`/tasks/${id}`);
-    showToast(ToastStyle.Success, "Task deleted");
-  } catch {
-    showToast(ToastStyle.Failure, "Could not delete task");
+    toast.style = ToastStyle.Success;
+    toast.title = "Task deleted";
+  } catch (error) {
+    toast.style = ToastStyle.Failure;
+    toast.title = "Failed deleting task";
+    toast.message = error instanceof Error ? error.message : undefined;
   }
 }
 
