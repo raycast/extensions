@@ -13,7 +13,7 @@ export const dateToTimestamp: Script = {
       if (isFinite(parsedDate)) {
         return String(parsedDate / 1000);
       } else {
-        throw Error("No Date");
+        throw Error("It's not a date format.");
       }
     } catch (error) {
       if (error instanceof Error) {

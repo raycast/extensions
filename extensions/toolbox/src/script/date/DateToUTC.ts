@@ -13,7 +13,7 @@ export const dateToUTC: Script = {
       if (isFinite(parsedDate)) {
         return new Date(parsedDate).toUTCString();
       } else {
-        throw Error("No Date");
+        throw Error("It's not a date format.");
       }
     } catch (error) {
       if (error instanceof Error) {

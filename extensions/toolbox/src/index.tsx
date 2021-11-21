@@ -70,8 +70,12 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
     if (config.useClipboard) {
       const content = await isClipboardContent();
       if (content) {
-        runScript({ content: content, isWindowClose: config.isWindowClose });
-        selectScript = null;
+        const result = await runScript({ content: content, isWindowClose: config.isWindowClose });
+        if (!result) {
+          push(<InputView info={info} />);
+        } else {
+          selectScript = null;
+        }
       } else {
         push(<InputView info={info} />);
       }
@@ -140,11 +144,13 @@ function InputView(props: { info: Info }) {
           <ActionPanel.Item
             title={"Run Script"}
             icon={Icon.Text}
-            onAction={() => {
+            onAction={async () => {
               if (content.length > 0) {
-                runScript({ content: content, isWindowClose: true });
-                selectScript = null;
-                pop();
+                const result = await runScript({ content: content, isWindowClose: true });
+                if (result) {
+                  selectScript = null;
+                  pop();
+                }
               } else {
                 showToast(ToastStyle.Failure, "Failure", "Please type it in.");
               }
@@ -154,9 +160,9 @@ function InputView(props: { info: Info }) {
             title={"Run Script - Window Keep"}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
             icon={Icon.Window}
-            onAction={() => {
+            onAction={async () => {
               if (content.length > 0) {
-                runScript({ content: content, isWindowClose: false });
+                await runScript({ content: content, isWindowClose: false });
               } else {
                 showToast(ToastStyle.Failure, "Failure", "Please type it in.");
               }
@@ -178,7 +184,7 @@ async function isClipboardContent() {
   return content;
 }
 
-async function runScript(config: { content: string; isWindowClose: boolean }) {
+async function runScript(config: { content: string; isWindowClose: boolean }): Promise<boolean> {
   try {
     const result = selectScript?.(config.content);
     if (typeof result !== "string") {
@@ -191,11 +197,13 @@ async function runScript(config: { content: string; isWindowClose: boolean }) {
       showToast(ToastStyle.Success, "Success", result);
     }
     showToast(ToastStyle.Success, "Success", result);
+    return true;
   } catch (error) {
     if (error instanceof Error) {
       showToast(ToastStyle.Failure, "Failure", error.message);
     } else {
       showToast(ToastStyle.Failure, "Failure");
     }
+    return false;
   }
 }
