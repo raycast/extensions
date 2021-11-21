@@ -11,18 +11,15 @@ import {
 } from "@providers"
 
 export function ScriptCommandsList(): JSX.Element {
-  const { main } = useScriptCommands()  
-
-  console.log(`Called List: ${main.groups.length} - TSC: ${main.totalScriptCommands}`)
-
+  const { props } = useScriptCommands()  
+  
   return (
     <ApplicationProvider>
       <MainContent 
-        navigationTitle="Search Command"
-        placeholder={`Search for your Script Command among of ${main.totalScriptCommands} items`}
-        isLoading={main.groups.length == 0} 
-        groups={main.groups} 
-        showSearchListAction={ false }
+        navigationTitle={ props.title }
+        placeholder={ props.placeholder}
+        isLoading={ props.isLoading } 
+        groups={ props.groups} 
       />
     </ApplicationProvider>
   )
