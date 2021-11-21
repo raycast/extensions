@@ -1,0 +1,21 @@
+export interface Category {
+  title: string;
+  icon?: string;
+  items: Script[];
+}
+
+export interface Info {
+  title: string;
+  desc: string;
+  keywords?: string[];
+  icon?: string;
+}
+
+export type Run = {
+  (input: string): string | Error;
+};
+
+export interface Script {
+  info: Info;
+  run: Run;
+}
