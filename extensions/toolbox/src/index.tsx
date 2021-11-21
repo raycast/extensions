@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import React, { useEffect, useMemo, useState } from "react";
 import * as scripts from "./script";
-import { Category, Run, Script } from "./script/type";
+import { Category, Info, Run, Script } from "./script/type";
 import { readClipboard } from "./script/util";
 
 let selectScript: Run | null = null;
@@ -73,10 +73,10 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
         runScript({ content: content, isWindowClose: config.isWindowClose });
         selectScript = null;
       } else {
-        push(<InputView title={item.info.title} />);
+        push(<InputView info={info} />);
       }
     } else {
-      push(<InputView title={item.info.title} />);
+      push(<InputView info={info} />);
     }
   }
 
@@ -88,36 +88,42 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
       icon="list-icon.png"
       actions={
         <ActionPanel>
-          <ActionPanel.Item
-            title={"Run Script Clipboard"}
-            icon={Icon.Clipboard}
-            onAction={async () => {
-              action({ useClipboard: true, isWindowClose: true });
-            }}
-          />
-          <ActionPanel.Item
-            title={"Run Script Input"}
-            icon={Icon.Text}
-            onAction={async () => {
-              action({ useClipboard: false, isWindowClose: false });
-            }}
-          />
-          <ActionPanel.Item
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
-            title={"Run Script - Window Keep"}
-            icon={Icon.Window}
-            onAction={async () => {
-              action({ useClipboard: true, isWindowClose: false });
-            }}
-          />
+          {(info.type === "all" || info.type === "clipboard") && (
+            <ActionPanel.Item
+              title={"Run Script Clipboard"}
+              icon={Icon.Clipboard}
+              onAction={async () => {
+                action({ useClipboard: true, isWindowClose: true });
+              }}
+            />
+          )}
+          {(info.type === "all" || info.type === "input") && (
+            <ActionPanel.Item
+              title={"Run Script Input"}
+              icon={Icon.Text}
+              onAction={async () => {
+                action({ useClipboard: false, isWindowClose: false });
+              }}
+            />
+          )}
+          {(info.type === "all" || info.type === "clipboard") && (
+            <ActionPanel.Item
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              title={"Run Script - Window Keep"}
+              icon={Icon.Window}
+              onAction={async () => {
+                action({ useClipboard: true, isWindowClose: false });
+              }}
+            />
+          )}
         </ActionPanel>
       }
     />
   );
 });
 
-function InputView(props: { title: string }) {
-  const title = props.title;
+function InputView(props: { info: Info }) {
+  const info = props.info;
   const { pop } = useNavigation();
   const [content, setContent] = useState<string>("");
   useEffect(() => {
@@ -128,7 +134,7 @@ function InputView(props: { title: string }) {
 
   return (
     <Form
-      navigationTitle={"Toolbox - " + title}
+      navigationTitle={"Toolbox - " + info.title}
       actions={
         <ActionPanel>
           <ActionPanel.Item
@@ -139,6 +145,8 @@ function InputView(props: { title: string }) {
                 runScript({ content: content, isWindowClose: true });
                 selectScript = null;
                 pop();
+              } else {
+                showToast(ToastStyle.Failure, "Failure", "Please type it in.");
               }
             }}
           />
@@ -149,13 +157,15 @@ function InputView(props: { title: string }) {
             onAction={() => {
               if (content.length > 0) {
                 runScript({ content: content, isWindowClose: false });
+              } else {
+                showToast(ToastStyle.Failure, "Failure", "Please type it in.");
               }
             }}
           />
         </ActionPanel>
       }
     >
-      <Form.TextArea id="content" title="Data" value={content} onChange={setContent} />
+      <Form.TextArea id="content" title="Data" placeholder={info.example} value={content} onChange={setContent} />
     </Form>
   );
 }

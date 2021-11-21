@@ -7,7 +7,9 @@ export interface Category {
 export interface Info {
   title: string;
   desc: string;
+  type: "all" | "clipboard" | "input";
   keywords?: string[];
+  example?: string;
   icon?: string;
 }
 

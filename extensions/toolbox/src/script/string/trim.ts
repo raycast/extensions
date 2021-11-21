@@ -10,8 +10,10 @@ import { Script } from "../type";
 export const Trim: Script = {
   info: {
     title: "Trim",
-    desc: "Trims leading and trailing whitespace.",
-    keywords: ["trim", "whitespace", "empty", "space"],
+    desc: "Trims leading and trailing whitespace",
+    type: "all",
+    keywords: ["whitespace", "empty", "space"],
+    example: "    ray cat     ",
   },
   run(input) {
     return input.trim();

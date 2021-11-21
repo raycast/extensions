@@ -1,2 +1,4 @@
-export * from "./base64";
-export * from "./trim";
+export * from "./Base64";
+export * from "./CountWords";
+export * from "./CamelCase";
+export * from "./Trim";
