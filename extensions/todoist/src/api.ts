@@ -12,6 +12,10 @@ export const axiosInstance = axios.create({
 export async function createTask(body: TaskPayload): Promise<void> {
   const toast = await showToast(ToastStyle.Animated, "Creating task");
   try {
+    if (!body.content) {
+      throw new Error("Title is required");
+    }
+
     await axiosInstance.post(`/tasks`, body);
     toast.style = ToastStyle.Success;
     toast.title = "Created task";
@@ -19,6 +23,8 @@ export async function createTask(body: TaskPayload): Promise<void> {
     toast.style = ToastStyle.Failure;
     toast.title = "Failed creating task";
     toast.message = error instanceof Error ? error.message : undefined;
+
+    throw error;
   }
 }
 

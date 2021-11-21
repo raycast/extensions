@@ -31,10 +31,10 @@ function Create() {
       await createTask(body);
 
       if (values.project_id) {
-        push(<Project projectId={parseInt(values.project_id as string)} />);
+        push(<Project projectId={body.project_id as number} />);
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
+      // fail silently
     }
   }
 
