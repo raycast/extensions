@@ -2,15 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "toolbox",
   "title": "Toolbox",
-  "description": "Toolbox",
-  "icon": "command-icon.png",
+  "description": "Collection of scripts that process data",
+  "icon": "icon.png",
   "author": "Kang",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Toolbox",
-      "description": "Template to show a list received from a networking response",
+      "description": "Collection of scripts that process data",
       "mode": "view"
     }
   ],
@@ -18,8 +18,7 @@
     "@raycast/api": "^1.25.6",
     "@types/lodash": "^4.14.177",
     "execa": "^6.0.0",
-    "lodash": "^4.17.21",
-    "node-fetch": "^3.0.0"
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

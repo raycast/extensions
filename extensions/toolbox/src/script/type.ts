@@ -1,6 +1,5 @@
 export interface Category {
   title: string;
-  icon?: string;
   items: Script[];
 }
 

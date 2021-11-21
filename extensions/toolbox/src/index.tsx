@@ -85,7 +85,7 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
       title={info.title}
       subtitle={info.desc}
       keywords={keyword}
-      icon="list-icon.png"
+      icon={info.icon}
       actions={
         <ActionPanel>
           {(info.type === "all" || info.type === "clipboard") && (
