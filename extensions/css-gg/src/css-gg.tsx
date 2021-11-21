@@ -114,7 +114,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
               }}
             />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Copy as inline">
+          <ActionPanel.Section title="Copy as Inline">
             <CopyToClipboardAction
               title="CSS"
               icon={{

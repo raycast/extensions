@@ -8,9 +8,9 @@
   "commands": [
     {
       "name": "css-gg",
-      "title": "CSS.GG",
-      "subtitle": "700+ CSS & SVG Icons ",
-      "description": "Open-source CSS, SVG and Figma UI Icons Available in SVG Sprite, styled-components, NPM & API",
+      "title": "Search Icons",
+      "subtitle": "css.gg",
+      "description": "Search in Open-source CSS, SVG and Figma UI Icons",
       "mode": "view"
     }
   ],
