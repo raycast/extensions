@@ -12,7 +12,7 @@ import {
   ToastStyle
 } from "@raycast/api";
 import degit from "degit";
-import fs, { readdirSync } from "fs";
+import fs, { existsSync } from "fs";
 import { rm } from "fs/promises";
 import { globby } from "globby";
 import { parse, resolve } from "path";
@@ -61,7 +61,7 @@ export default function TLDRList(): JSX.Element {
 
   return (
     <List
-      searchBarPlaceholder="Input command"
+      searchBarPlaceholder="Search for command..."
       onSearchTextChange={(query) => {
         setQuery(query);
       }}
