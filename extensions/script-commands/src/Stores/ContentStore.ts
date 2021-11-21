@@ -1,7 +1,7 @@
 import { 
   Content,
   Command,
-} from "@managers"
+} from "@types"
 
 export class ContentStore {
   private content: Content

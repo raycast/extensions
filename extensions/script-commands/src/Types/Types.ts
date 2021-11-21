@@ -59,7 +59,11 @@ export type ViewState = {
   needsReload: boolean 
 }
 
+export type SourceCode = string
+
 export type StateResult = Result<State>
+
+export type SourceCodeResult = Result<SourceCode>
 
 export type IconPathNullable = IconPath | null
 

@@ -1,5 +1,5 @@
 export { 
-  useDataManager,
+  ApplicationContext,
   ApplicationProvider,
-  ApplicationContext
-} from "./DataManagerProvider"
+} from "./ApplicationProvider"
+

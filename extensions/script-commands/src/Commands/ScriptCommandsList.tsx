@@ -2,10 +2,13 @@ import {
   MainContent 
 } from "@components"
 
+import { 
+  useScriptCommands
+} from "@hooks"
+
 import {
    ApplicationProvider
- } from "@providers"
-import { useScriptCommands } from "Providers/DataManagerProvider"
+} from "@providers"
 
 export function ScriptCommandsList(): JSX.Element {
   const { main } = useScriptCommands()  

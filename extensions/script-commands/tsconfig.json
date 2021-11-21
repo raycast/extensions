@@ -17,6 +17,7 @@
       "@commands": ["Commands/index"],
       "@components": ["Components/index"],
       "@managers": ["Managers/index"],
+      "@hooks": ["Hooks/index"],
       "@models": ["Models/index"],
       "@network": ["Network/API/index"],
       "@providers": ["Providers/index"],
