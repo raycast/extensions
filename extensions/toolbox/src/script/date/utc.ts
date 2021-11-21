@@ -3,7 +3,7 @@ import { Script } from "../type";
 export const toUtc: Script = {
   info: {
     title: "Date to UTC",
-    desc: "Converts dates and timestamps to UTC dates",
+    desc: "Convert dates and timestamps to UTC dates",
     type: "all",
     example: "2001-05-22 11:22:00",
   },

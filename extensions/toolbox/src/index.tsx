@@ -113,7 +113,7 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
           {(info.type === "all" || info.type === "clipboard") && (
             <ActionPanel.Item
               shortcut={{ modifiers: ["cmd"], key: "s" }}
-              title={"Run Script - Window Keep"}
+              title={"Run Script - Keep Window"}
               icon={Icon.Window}
               onAction={async () => {
                 action({ useClipboard: true, isWindowClose: false });
@@ -157,7 +157,7 @@ function InputView(props: { info: Info }) {
             }}
           />
           <ActionPanel.Item
-            title={"Run Script - Window Keep"}
+            title={"Run Script - Keep Window"}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
             icon={Icon.Window}
             onAction={async () => {

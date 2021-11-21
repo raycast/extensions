@@ -3,7 +3,7 @@ import { Script } from "../type";
 export const urlEncode: Script = {
   info: {
     title: "URL Encode",
-    desc: "Encodes URL entities in your text",
+    desc: "Encode URL entities in your text",
     type: "all",
     example: "https://www.raycast.com",
   },
@@ -15,7 +15,7 @@ export const urlEncode: Script = {
 export const urlDecode: Script = {
   info: {
     title: "URL Decode",
-    desc: "Decodes URL entities in your text",
+    desc: "Decode URL entities in your text",
     type: "all",
     example: "https%3A%2F%2Fwww.raycast.com",
   },

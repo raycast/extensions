@@ -3,7 +3,7 @@ import { Script } from "../type";
 export const toTimestamp: Script = {
   info: {
     title: "Date to Timestamp",
-    desc: "Converts dates to Unix timestamp",
+    desc: "Convert dates to Unix timestamps",
     type: "all",
     example: "2001-05-22 11:22:00",
   },
