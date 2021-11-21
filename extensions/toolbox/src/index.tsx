@@ -87,7 +87,7 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
   return (
     <List.Item
       title={info.title}
-      subtitle={info.desc}
+      accessoryTitle={info.desc}
       keywords={keyword}
       icon={info.icon}
       actions={
