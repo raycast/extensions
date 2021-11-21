@@ -1,14 +1,22 @@
 export { 
-  ScriptCommandItem 
-} from "./ScriptCommandItem"
+  AuthorsActionPanel
+} from "./AuthorsActionPanel"
+
+export { 
+  GroupSection 
+} from "./GroupSection"
+
+export { 
+  ManagementActionSection 
+} from "./ManagementActionSection"
 
 export { 
   MainContent 
 } from "./MainContent"
 
 export { 
-  GroupSection 
-} from "./GroupSection"
+  ScriptCommandItem 
+} from "./ScriptCommandItem"
 
 export { 
   SourceCodeDetail 
@@ -17,3 +25,7 @@ export {
 export { 
   StoreToast
 } from "./Toast"
+
+export { 
+  ViewsActionSection
+} from "./ViewsActionSection"

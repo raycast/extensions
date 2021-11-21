@@ -30,7 +30,7 @@ export async function StoreToast(
         style = ToastStyle.Animated
       }
       else {
-        title = "Script Command installed!"
+        title = "Script Command uninstalled!"
         style = ToastStyle.Success
       }
     }
@@ -43,7 +43,7 @@ export async function StoreToast(
         style = ToastStyle.Animated
       }
       else {
-        title = "Script Command uninstalled!"
+        title = "Script Command installed!"
         style = ToastStyle.Success
       }
     }
@@ -56,6 +56,7 @@ export async function StoreToast(
       style = ToastStyle.Success
     }
     break
+
   case (State.Error): 
     {
       title = "Error 😔"
@@ -65,5 +66,5 @@ export async function StoreToast(
     break
   }
 
-  return showToast(style, title, message )
+  return showToast(style, title, message)
 }

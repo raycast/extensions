@@ -1,8 +1,5 @@
 import { 
-  ActionPanel,
-  Icon,
   List, 
-  PushAction
 } from "@raycast/api"
 
 import { 
@@ -13,13 +10,11 @@ import {
   Group 
 } from "@models"
 
-
 type Props = {
   navigationTitle: string
   placeholder: string
   isLoading: boolean
   groups: Group[]
-  showSearchListAction: boolean
 }
 
 export function MainContent({ navigationTitle, placeholder, isLoading, groups }: Props): JSX.Element {
