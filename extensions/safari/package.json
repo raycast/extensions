@@ -1,16 +1,16 @@
 {
   "name": "safari",
   "title": "Safari Bookmarks",
-  "description": "List your Safari Cloud Tabs and Reading List Bookmarks",
+  "description": "List your Safari iCloud Tabs and Reading List Bookmarks",
   "icon": "safari-icon.png",
   "author": "loris",
   "license": "MIT",
   "commands": [
     {
       "name": "cloud-tabs",
-      "title": "Search Cloud Tabs",
+      "title": "Search iCloud Tabs",
       "subtitle": "Safari",
-      "description": "List, filter and open your Safari Cloud Tabs",
+      "description": "List, filter and open your Safari iCloud Tabs",
       "mode": "view"
     },
     {
