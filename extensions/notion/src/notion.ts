@@ -359,7 +359,7 @@ export async function fetchExtensionReadMe(): Promise<string> {
     return text
   } catch (err) {
     showToast(ToastStyle.Failure, 'Failed to load Extension README')
-    throw new Error(err)
+    throw new Error('Failed to load Extension README')
   }
 }
 
