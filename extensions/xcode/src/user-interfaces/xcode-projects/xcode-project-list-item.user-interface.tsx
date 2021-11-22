@@ -38,10 +38,14 @@ function defaultActions(
 ): ActionPanelChildren {
   return [
     <OpenAction
+      key="open-with-xcode"
       title="Open with Xcode"
-      target={xcodeProject.filePath} />,
+      target={xcodeProject.filePath}
+    />,
     <ShowInFinderAction
-      path={xcodeProject.filePath} />
+      key="show-in-finder"
+      path={xcodeProject.filePath}
+    />
   ]
 }
 
