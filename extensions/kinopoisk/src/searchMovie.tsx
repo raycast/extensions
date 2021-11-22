@@ -11,7 +11,6 @@ export default function ArticleList() {
   if (result.error) {
     showToast(ToastStyle.Failure, "Cannot find movie", result.error);
   }
-  console.log(result);
   return (
     <List
       isLoading={result.isLoading}
