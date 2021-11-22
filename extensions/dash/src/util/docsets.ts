@@ -14,7 +14,7 @@ export type Docset = {
 };
 
 export function useDocsets(searchText: string): [Docset[], boolean] {
-  const [isLoading, setLoading] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState<boolean>(true);
   const [docsets, setDocsets] = useState<Docset[]>([]);
   const [filteredDocsets, setFilteredDocsets] = useState<Docset[]>([]);
 
