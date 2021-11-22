@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ActionPanel, Form, Icon, render, useNavigation } from "@raycast/api";
-import { Project as TProject } from "./types";
+import { Project as TProject, Label } from "./types";
 import { createTask, useFetch } from "./api";
 import { priorities } from "./constants";
 import { getAPIDate } from "./utils";
@@ -12,19 +12,21 @@ interface FormattedPayload {
   due_date?: string;
   priority?: number;
   project_id?: number;
+  label_ids?: number[];
 }
 
 function Create() {
   const { push } = useNavigation();
-  const { data } = useFetch<TProject[]>("/projects");
+  const { data: projects, isLoading: isLoadingProjects } = useFetch<TProject[]>("/projects");
+  const { data: labels, isLoading: isLoadingLabels } = useFetch<Label[]>("/labels");
+  const isLoading = isLoadingLabels || isLoadingProjects;
 
   const [content, setContent] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState<Date | undefined>();
   const [priority, setPriority] = useState<string>();
   const [projectId, setProjectId] = useState<string>();
-
-  const projects = data || [];
+  const [labelIds, setLabelIds] = useState<string[]>();
 
   function clear() {
     setContent("");
@@ -34,6 +36,10 @@ function Create() {
 
     if (projects) {
       setProjectId(String(projects[0].id));
+    }
+
+    if (labelIds) {
+      setLabelIds([]);
     }
   }
 
@@ -54,11 +60,15 @@ function Create() {
       }
 
       if (priority) {
-        body.priority = parseInt(priority as string);
+        body.priority = parseInt(priority);
       }
 
       if (projectId) {
-        body.project_id = parseInt(projectId as string);
+        body.project_id = parseInt(projectId);
+      }
+
+      if (labelIds && labelIds.length > 0) {
+        body.label_ids = labelIds.map((id) => parseInt(id));
       }
 
       await createTask(body);
@@ -70,6 +80,7 @@ function Create() {
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <ActionPanel.Item title="Create task" onAction={submit} icon={Icon.Plus} />
@@ -105,6 +116,14 @@ function Create() {
             <Form.Dropdown.Item value={String(id)} title={name} key={id} />
           ))}
         </Form.Dropdown>
+      ) : null}
+
+      {labels ? (
+        <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds}>
+          {labels.map(({ id, name }) => (
+            <Form.TagPicker.Item value={String(id)} title={name} key={id} />
+          ))}
+        </Form.TagPicker>
       ) : null}
     </Form>
   );

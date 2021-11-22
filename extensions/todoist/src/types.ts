@@ -24,6 +24,11 @@ export interface Section {
   project_id: number;
 }
 
+export interface Label {
+  id: number;
+  name: string;
+}
+
 export interface DueDate {
   recurring: boolean;
   string: string;
