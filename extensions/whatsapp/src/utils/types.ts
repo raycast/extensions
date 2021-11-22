@@ -1,10 +1,11 @@
 export type AppleContact = {
-    name: string;
-    phones: Array<string>;
+  name: string;
+  phones: Array<string>;
 };
 
 export type WhatsAppChat = {
-    name: string;
-    phone: string;
-    pinned: boolean;
+  id: string;
+  name: string;
+  phone: string;
+  pinned: boolean;
 };

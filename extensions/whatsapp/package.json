@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "whatsapp",
-  "title": "Open WhatsApp Chat",
-  "description": "Open Apple contacts in WhatsApp",
+  "title": "WhatsApp",
+  "description": "Open WhatsApp chats",
   "icon": "whatsapp.png",
   "author": "vimtor",
   "license": "MIT",
@@ -11,8 +11,22 @@
       "name": "open-chat",
       "title": "Open Chat",
       "subtitle": "WhatsApp",
-      "description": "Open Apple contact chat in WhatsApp",
+      "description": "Opens saved WhatsApp chats",
       "mode": "view"
+    },
+    {
+      "name": "create-chat",
+      "title": "Create Chat",
+      "subtitle": "WhatsApp",
+      "description": "Creates WhatsApp chat in the extension",
+      "mode": "view"
+    },
+    {
+      "name": "import-contacts",
+      "title": "Import Contacts",
+      "subtitle": "WhatsApp",
+      "description": "Imports Apple contacts as WhatsApp chats",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

@@ -1,14 +1,8 @@
-import {AppleContact, WhatsAppChat} from "./types";
-import {runJxa} from "run-jxa";
-import {phone as parsePhone} from "phone";
-import {getStoredPinnedPhones} from "./local-storage";
-import {showToast, ToastStyle} from "@raycast/api";
+import { AppleContact } from "./types";
+import { runJxa } from "run-jxa";
 
-export async function getWhatsappChats(): Promise<Array<WhatsAppChat>> {
-  try {
-    const pinnedPhones = await getStoredPinnedPhones();
-
-    const contacts: Array<AppleContact> | null = await runJxa(`
+export async function getAppleContacts(): Promise<Array<AppleContact>> {
+  const contacts: Array<AppleContact> | null = await runJxa(`
             const contacts = Application('Contacts');
             return contacts.people().map(person => {
                 return {
@@ -18,34 +12,9 @@ export async function getWhatsappChats(): Promise<Array<WhatsAppChat>> {
             });
         `);
 
-    if (!contacts) {
-      return [];
-    }
-
-    return contacts
-      .filter(contact => contact.phones.length > 0)
-      .flatMap(contact => {
-        return contact.phones.map(phone => {
-          return {
-            name: contact.name,
-            phoneInformation: parsePhone(phone)
-          };
-        });
-      })
-      .filter(contact => contact.phoneInformation.isValid)
-      .map(contact => {
-        const phone = contact.phoneInformation.phoneNumber as string;
-        return {
-          phone,
-          name: contact.name,
-          pinned: pinnedPhones.includes(phone)
-        };
-      })
-      .filter((contact, index, self) => self.findIndex(c => c.phone === contact.phone) === index)
-      .sort((a, b) => a.name.localeCompare(b.name));
-  } catch (error) {
-    console.error(error);
-    showToast(ToastStyle.Failure, "Failed to refresh chats")
-    return [];
+  if (!contacts) {
+    throw new Error("No contacts found");
   }
+
+  return contacts;
 }
