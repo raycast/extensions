@@ -13,7 +13,7 @@ export async function getAppleContacts(): Promise<Array<AppleContact>> {
         `);
 
   if (!contacts) {
-    throw new Error("No contacts found");
+    throw new Error("Contact retrieval through JXA failed");
   }
 
   return contacts;

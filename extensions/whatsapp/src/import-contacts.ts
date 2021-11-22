@@ -1,5 +1,5 @@
 import { randomId, Toast, ToastStyle } from "@raycast/api";
-import { getAppleContacts } from "./utils/get-whatsapp-chats";
+import { getAppleContacts } from "./utils/get-apple-contacts";
 import { phone as parsePhone } from "phone";
 import { getStoredWhatsAppChats, saveStoredWhatsAppChats } from "./utils/local-storage";
 
