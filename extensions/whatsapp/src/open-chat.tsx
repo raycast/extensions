@@ -1,6 +1,15 @@
-import { ActionPanel, Color, Icon, List, OpenInBrowserAction, popToRoot, PushAction } from "@raycast/api";
+import {
+  ActionPanel,
+  Color,
+  CopyToClipboardAction,
+  Icon,
+  List,
+  OpenInBrowserAction,
+  popToRoot,
+  PushAction
+} from "@raycast/api";
 import { useWhatsAppChats } from "./utils/use-whatsapp-chats";
-import { isPhoneChat, WhatsAppChat } from "./utils/types";
+import { isGroupChat, isPhoneChat, WhatsAppChat } from "./utils/types";
 import WhatsAppPhoneChatForm from "./create-chat";
 import { useState } from "react";
 import WhatsAppGroupChatForm from "./create-group";
@@ -101,7 +110,7 @@ function getChatItemProps(chat: WhatsAppChat) {
       accessoryTitle,
       appUrl: `whatsapp://send?phone=${phone}&text=`,
       webUrl: `https://web.whatsapp.com/send?phone=${phone}&text=`,
-      icon: '👤',
+      icon: "👤",
       form: <WhatsAppPhoneChatForm defaultValue={chat} />
     };
   } else {
@@ -129,36 +138,48 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
       accessoryTitle={accessoryTitle}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction
-            title="Open in WhatsApp"
-            icon="whatsapp-outline.png"
-            url={appUrl}
-            onOpen={() => onOpenChat(chat)}
-          />
-          {webUrl ? (
+          <ActionPanel.Section>
             <OpenInBrowserAction
-              title="Open in Web"
-              icon={Icon.Globe}
-              url={webUrl}
+              title="Open in WhatsApp"
+              icon="whatsapp-outline.png"
+              url={appUrl}
               onOpen={() => onOpenChat(chat)}
             />
-          ) : null}
-          <ActionPanel.Item
-            title={chat.pinned ? "Unpin Chat" : "Pin Chat"}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-            icon={Icon.Pin}
-            onAction={() => onPinAction(chat)}
-          />
-          <PushAction
-            title="Edit Chat"
-            icon={Icon.Pencil}
-            target={form}
-          />
-          <ActionPanel.Item
-            title="Delete Chat"
-            icon={{ source: Icon.Trash, tintColor: Color.Red }}
-            onAction={() => onDeleteChat(chat)}
-          />
+            {webUrl ? (
+              <OpenInBrowserAction
+                title="Open in Web"
+                icon={Icon.Globe}
+                url={webUrl}
+                onOpen={() => onOpenChat(chat)}
+              />
+            ) : null}
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ActionPanel.Item
+              title={chat.pinned ? "Unpin Chat" : "Pin Chat"}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+              icon={Icon.Pin}
+              onAction={() => onPinAction(chat)}
+            />
+            <PushAction
+              title="Edit Chat"
+              icon={Icon.Pencil}
+              target={form}
+            />
+            <ActionPanel.Item
+              title="Delete Chat"
+              icon={{ source: Icon.Trash, tintColor: Color.Red }}
+              onAction={() => onDeleteChat(chat)}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <CopyToClipboardAction content={chat.name} title="Copy Name" />
+            {isGroupChat(chat) ? (
+              <CopyToClipboardAction content={`https://chat.whatsapp.com/${chat.groupCode}`} title="Copy Invite Link" />
+            ) : (
+              <CopyToClipboardAction content={chat.phone} title="Copy Phone Number" />
+            )}
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
