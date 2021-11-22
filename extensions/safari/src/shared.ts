@@ -1,5 +1,15 @@
 import { URL } from 'url';
 
+export const getTabUrl = (url: string) => {
+  const parsedUrl = new URL(url);
+
+  // Extract URL from suspended tabs (Tab Suspender for Safari)
+  if (parsedUrl.protocol === 'safari-extension:' && parsedUrl.searchParams.has('url')) {
+    return parsedUrl.searchParams.get('url') || url;
+  }
+
+  return url;
+};
 export const getUrlDomain = (url: string) => new URL(url).hostname.replace(/^www\./, '');
 export const getFaviconUrl = (domain: string) => `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(domain)}`;
 
