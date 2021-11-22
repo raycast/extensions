@@ -22,7 +22,22 @@ export function useSearch(query: string): SearchResult {
             },
           }
         )
-          .then((res) => res.json())
+          .then((res) => {
+            if (res.ok) {
+              return res.json();
+            }
+            const status = res.status as number;
+            switch (status) {
+              case 401:
+                showToast(ToastStyle.Failure, "Could not load movies", "Invalid token!");
+                break;
+              case 429:
+                showToast(ToastStyle.Failure, "Could not load movies", "Too many requests, wait a little");
+                break;
+              default:
+                break;
+            }
+          })
           .catch((error) => {
             console.error(error);
             showToast(ToastStyle.Failure, "Could not load movies", error);
