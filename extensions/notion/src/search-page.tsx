@@ -26,13 +26,7 @@ import open from 'open'
 
 
 export default function SearchPageList(): JSX.Element {
-  // Get preference values
-  const notion_token = String(preferences.notion_token.value)
-  if (notion_token.length !== 50) {
-    showToast(ToastStyle.Failure, 'Invalid token detected')
-    throw new Error('Invalid token length detected')
-  }
-
+  
   // Setup useState objects
   const [pages, setPages] = useState<Page[]>()
   const [recentlyOpenPages, setRecentlyOpenPages] = useState<Page[]>()
