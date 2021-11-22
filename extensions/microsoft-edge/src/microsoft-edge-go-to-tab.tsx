@@ -1,13 +1,13 @@
 import { checkIfBrowserIsInstalled } from './utils/appleScriptUtils';
-import { DEFAULT_ERROR_TITLE, DownloadMSEdgeMDText } from './common/constants';
+import { DEFAULT_ERROR_TITLE, EDGE_NOT_INSTALLED_MESSAGE } from './common/constants';
+import { getOpenTabs } from './common/getOpenTabs';
 import {
-  Detail,
   getPreferenceValues,
   List,
   showToast,
   ToastStyle
   } from '@raycast/api';
-import { getOpenTabs } from './common/getOpenTabs';
+import { NotInstalled } from './components/NotInstalled';
 import { Tab } from './lib/Tab';
 import { TabListItem } from './components/TabListItem';
 import { useEffect, useState } from 'react';
@@ -35,7 +35,7 @@ export default function Command() {
         showToast(
           ToastStyle.Failure,
           DEFAULT_ERROR_TITLE,
-          isEdgeInstalled ? "Failed to show open tabs" : "Microsoft Edge is not installed"
+          isEdgeInstalled ? "Failed to show open tabs" : EDGE_NOT_INSTALLED_MESSAGE
         );
       }
     }
@@ -44,7 +44,7 @@ export default function Command() {
   }, []);
 
   if (state.error) {
-    return <Detail navigationTitle="Download Microsoft Edge" markdown={DownloadMSEdgeMDText} />;
+    return <NotInstalled />;
   }
 
   return (

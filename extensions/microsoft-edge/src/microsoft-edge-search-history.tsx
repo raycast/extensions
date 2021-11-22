@@ -1,5 +1,6 @@
-import { DEFAULT_ERROR_TITLE } from './common/constants';
+import { DEFAULT_ERROR_TITLE, EDGE_NOT_INSTALLED_MESSAGE } from './common/constants';
 import { List, showToast, ToastStyle } from '@raycast/api';
+import { NotInstalled } from './components/NotInstalled';
 import { ReactElement, useState } from 'react';
 import { UrlDetail } from './schema/types';
 import { UrlListItem } from './components/UrlListItem';
@@ -12,6 +13,9 @@ export default function Command(): ReactElement {
   const { isLoading, error, entries } = useHistorySearch(searchText);
 
   if (error) {
+    if (error === EDGE_NOT_INSTALLED_MESSAGE) {
+      return <NotInstalled />;
+    }
     showToast(ToastStyle.Failure, DEFAULT_ERROR_TITLE, error.toString());
   }
 

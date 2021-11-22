@@ -1,7 +1,12 @@
-import { closeMainWindow, popToRoot, showToast, ToastStyle } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
-import { NullableString } from "../schema/types";
-import { DEFAULT_ERROR_TITLE } from "./constants";
+import {
+  closeMainWindow,
+  popToRoot,
+  showToast,
+  ToastStyle
+  } from '@raycast/api';
+import { DEFAULT_ERROR_TITLE } from './constants';
+import { NullableString } from '../schema/types';
+import { runAppleScript } from 'run-applescript';
 
 export async function openNewTab(queryText: NullableString, url: NullableString): Promise<void> {
   if (url) {

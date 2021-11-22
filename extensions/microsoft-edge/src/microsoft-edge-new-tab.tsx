@@ -6,8 +6,9 @@ import {
   showToast,
   ToastStyle
   } from '@raycast/api';
-import { DEFAULT_ERROR_TITLE } from './common/constants';
+import { DEFAULT_ERROR_TITLE, EDGE_NOT_INSTALLED_MESSAGE } from './common/constants';
 import { getOpenTabs } from './common/getOpenTabs';
+import { NotInstalled } from './components/NotInstalled';
 import { NullableString } from './schema/types';
 import { openNewTab } from './common/openNewTab';
 import { ReactElement, useEffect, useState } from 'react';
@@ -55,6 +56,9 @@ export default function Command(): ReactElement {
   }, []);
 
   if (error) {
+    if (error === EDGE_NOT_INSTALLED_MESSAGE) {
+      return <NotInstalled />;
+    }
     showToast(ToastStyle.Failure, DEFAULT_ERROR_TITLE, error.toString());
   }
 

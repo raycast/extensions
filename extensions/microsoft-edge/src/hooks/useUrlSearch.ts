@@ -1,5 +1,6 @@
 import { checkIfBrowserIsInstalled } from '../utils/appleScriptUtils';
 import { Database } from 'sql.js';
+import { EDGE_NOT_INSTALLED_MESSAGE } from '../common/constants';
 import { NullableString, UrlDetail, UrlSearchResult } from '../schema/types';
 import { useEffect, useRef, useState } from 'react';
 
@@ -34,7 +35,7 @@ export function useUrlSearch<SourceDataType>(
         if (!cancel) {
           const isEdgeInstalled = await checkIfBrowserIsInstalled();
           const errorMessage = !isEdgeInstalled
-            ? "Microsoft Edge not installed"
+            ? EDGE_NOT_INSTALLED_MESSAGE
             : `Failed to show ${resourceName || "urls"}`;
           setError(errorMessage);
         }

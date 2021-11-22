@@ -1,3 +1,6 @@
+import { DEFAULT_ERROR_TITLE } from '../common/constants';
+import { runAppleScript } from 'run-applescript';
+import { Tab } from '../lib/Tab';
 import {
   ActionPanel,
   closeMainWindow,
@@ -8,9 +11,6 @@ import {
   showToast,
   ToastStyle,
 } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
-import { DEFAULT_ERROR_TITLE } from "../common/constants";
-import { Tab } from "../lib/Tab";
 
 export function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean }) {
   return (
