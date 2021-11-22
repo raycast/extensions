@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import React, { useEffect, useMemo, useState } from "react";
 import * as scripts from "./script";
-import { Category, Info, Run, Script } from "./script/type";
+import { Category, Info, Result, Run, RunType, Script } from "./script/type";
 import { readClipboard } from "./script/util";
 
 let selectScript: Run | null = null;
@@ -65,22 +65,40 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
     [info.keywords]
   );
 
-  async function action(config: { useClipboard: boolean; isWindowClose: boolean }) {
+  function moveWindow(runType: RunType) {
+    if (runType === "clipboard") {
+      if (item.info.type === "form") {
+        push(<InputFormView info={info} />);
+      } else {
+        push(<InputDirectView info={info} />);
+      }
+    } else if (runType === "direct") {
+      push(<InputDirectView info={info} />);
+    } else if (runType === "form") {
+      push(<InputFormView info={info} />);
+    }
+  }
+
+  async function action(runType: RunType) {
     selectScript = item.run;
-    if (config.useClipboard) {
-      const content = await isClipboardContent();
-      if (content) {
-        const result = await runScript({ content: content, isWindowClose: config.isWindowClose });
-        if (!result) {
-          push(<InputView info={info} />);
-        } else {
+    if (runType === "clipboard") {
+      const query = await isClipboardContent();
+      if (query) {
+        const scriptResult = await runScript(query);
+
+        if (scriptResult.isSuccess) {
+          await copyTextToClipboard(scriptResult.result);
+          await showHUD("Copy Result");
           selectScript = null;
+        } else {
+          showToast(ToastStyle.Failure, scriptResult.result);
+          moveWindow(runType);
         }
       } else {
-        push(<InputView info={info} />);
+        moveWindow(runType);
       }
     } else {
-      push(<InputView info={info} />);
+      moveWindow(runType);
     }
   }
 
@@ -95,28 +113,29 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
           {(info.type === "all" || info.type === "clipboard") && (
             <ActionPanel.Item
               title={"Run Script Clipboard"}
-              icon={Icon.Clipboard}
+              icon={Icon.ArrowRight}
               onAction={async () => {
-                action({ useClipboard: true, isWindowClose: true });
+                action("clipboard");
               }}
             />
           )}
-          {(info.type === "all" || info.type === "input") && (
+          {(info.type === "all" || info.type === "noclipboard" || info.type === "direct") && (
             <ActionPanel.Item
-              title={"Run Script Input"}
-              icon={Icon.Text}
+              title={"Run Script Direct"}
+              icon={Icon.Pencil}
               onAction={async () => {
-                action({ useClipboard: false, isWindowClose: false });
+                action("direct");
               }}
             />
           )}
-          {(info.type === "all" || info.type === "clipboard") && (
+          {(info.type === "all" || info.type === "noclipboard" || info.type === "form") && (
             <ActionPanel.Item
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
-              title={"Run Script - Keep Window"}
-              icon={Icon.Window}
+              title={"Run Script Form"}
+              icon={Icon.Document}
+              //modifiers: ["cmd", "shift"], key: "enter" is shortcut Not working
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
               onAction={async () => {
-                action({ useClipboard: true, isWindowClose: false });
+                action("form");
               }}
             />
           )}
@@ -126,52 +145,124 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
   );
 });
 
-function InputView(props: { info: Info }) {
-  const info = props.info;
-  const { pop } = useNavigation();
-  const [content, setContent] = useState<string>("");
+const useScriptHook = () => {
+  const [content, setContent] = useState<Result>({
+    query: "",
+    result: "",
+    isLoading: false,
+    isError: false,
+  });
+
   useEffect(() => {
-    return () => {
-      selectScript = null;
-    };
-  }, []);
+    if (content.isLoading) return;
+    async function startScript() {
+      if (content.query.length > 0) {
+        try {
+          const result = selectScript?.(content.query);
+          if (typeof result !== "string") {
+            throw result;
+          }
+          setContent({
+            ...content,
+            result: result,
+            isLoading: false,
+            isError: false,
+          });
+        } catch (error) {
+          setContent({
+            ...content,
+            result: error instanceof Error ? error.message : "Failure",
+            isLoading: false,
+            isError: true,
+          });
+        }
+      } else {
+        setContent({
+          ...content,
+          result: "",
+          isLoading: false,
+          isError: false,
+        });
+      }
+    }
+    startScript();
+  }, [content.query]);
+
+  return { content, setContent };
+};
+
+function ResultActionView(props: { content: Result; info: Info }) {
+  const content = props.content;
+  const info = props.info;
+  return (
+    !content.isError &&
+    content.result.length > 0 && (
+      <ActionPanel title={info.title}>
+        <ActionPanel.Section>
+          <ActionPanel.Item
+            title="Copy Result to Clipboard"
+            icon={Icon.Clipboard}
+            onAction={async () => {
+              await copyTextToClipboard(content.result);
+              await showHUD("Copy Result");
+            }}
+          />
+
+          <ActionPanel.Item
+            title="Copy Query to Clipboard"
+            icon={Icon.Clipboard}
+            onAction={async () => {
+              await copyTextToClipboard(content.query);
+              await showHUD("Copy Query");
+            }}
+          />
+        </ActionPanel.Section>
+      </ActionPanel>
+    )
+  );
+}
+
+function InputDirectView(props: { info: Info }) {
+  const info = props.info;
+  const { content, setContent } = useScriptHook();
 
   return (
-    <Form
+    <List
       navigationTitle={"Toolbox - " + info.title}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Item
-            title={"Run Script"}
-            icon={Icon.Text}
-            onAction={async () => {
-              if (content.length > 0) {
-                const result = await runScript({ content: content, isWindowClose: true });
-                if (result) {
-                  selectScript = null;
-                  pop();
-                }
-              } else {
-                showToast(ToastStyle.Failure, "Failure", "Please type it in.");
-              }
-            }}
-          />
-          <ActionPanel.Item
-            title={"Run Script - Keep Window"}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
-            icon={Icon.Window}
-            onAction={async () => {
-              if (content.length > 0) {
-                await runScript({ content: content, isWindowClose: false });
-              } else {
-                showToast(ToastStyle.Failure, "Failure", "Please type it in.");
-              }
-            }}
-          />
-        </ActionPanel>
-      }
+      isLoading={content.isLoading}
+      searchBarPlaceholder={info.example}
+      onSearchTextChange={(query: string) => {
+        setContent({
+          ...content,
+          query: query,
+        });
+      }}
     >
-      <Form.TextArea id="content" title="Data" placeholder={info.example} value={content} onChange={setContent} />
+      <List.Item title={content.result} actions={ResultActionView({ content, info })} />
+    </List>
+  );
+}
+
+function InputFormView(props: { info: Info }) {
+  const info = props.info;
+
+  const { content, setContent } = useScriptHook();
+
+  return (
+    <Form navigationTitle={"Toolbox - " + info.title} actions={ResultActionView({ content, info })}>
+      <Form.TextArea
+        id="query"
+        title="Query"
+        placeholder={info.example}
+        value={content.query}
+        onChange={(query: string) =>
+          setContent({
+            ...content,
+            query: query,
+          })
+        }
+      />
+      <Form.TextArea id="result" title="Result" value={content.result} />
     </Form>
   );
 }
@@ -184,25 +275,25 @@ async function isClipboardContent() {
   return content;
 }
 
-async function runScript(config: { content: string; isWindowClose: boolean }): Promise<boolean> {
+async function runScript(query: string): Promise<{ result: string; isSuccess: boolean }> {
+  const state = {
+    result: "",
+    isSuccess: false,
+  };
   try {
-    const result = selectScript?.(config.content);
+    const result = selectScript?.(query);
     if (typeof result !== "string") {
       throw result;
     }
-    copyTextToClipboard(result);
-    if (config.isWindowClose) {
-      await showHUD(result);
-    } else {
-      showToast(ToastStyle.Success, "Success", result);
-    }
-    return true;
+    state.result = result;
+    state.isSuccess = true;
+    return state;
   } catch (error) {
     if (error instanceof Error) {
-      showToast(ToastStyle.Failure, "Failure", error.message);
+      state.result = error.message;
     } else {
-      showToast(ToastStyle.Failure, "Failure");
+      state.result = "Failure";
     }
-    return false;
+    return state;
   }
 }
