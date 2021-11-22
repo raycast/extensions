@@ -1,4 +1,4 @@
-import { ActionPanel, ActionPanelItem, Detail, useNavigation } from "@raycast/api";
+import { ActionPanel, ActionPanelItem, Detail, Icon, useNavigation } from "@raycast/api";
 
 export default function Help({
   onExit = () => {

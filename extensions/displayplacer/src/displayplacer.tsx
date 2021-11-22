@@ -82,6 +82,7 @@ export default function DisplayPlacer() {
           <ActionPanel>
             <SubmitFormAction
               title="New Preset"
+              icon={Icon.Plus}
               onSubmit={async (values: { name: string; subtitle: string }) => {
                 const command = await getCommandForCurrentSettings();
                 if (!command) return;
@@ -242,6 +243,7 @@ export default function DisplayPlacer() {
                   <ActionPanelItem
                     title="New Display Preset"
                     onAction={newPreset}
+                    icon={Icon.Plus}
                     shortcut={{ key: "n", modifiers: ["cmd"] }}
                   />
                   <PushAction title="Clear All Presets" target={<ClearLocalStorage onExit={() => init()} />} />
@@ -254,7 +256,7 @@ export default function DisplayPlacer() {
               icon={Icon.QuestionMark}
               actions={
                 <ActionPanel>
-                  <PushAction title="Open Readme" target={<Help />} />
+                  <PushAction icon={Icon.QuestionMark} title="Open Readme" target={<Help />} />
                 </ActionPanel>
               }
             />
