@@ -27,7 +27,6 @@ import {
   createDatabasePage,
   fetchExtensionReadMe,
 } from './notion'
-import open from 'open'
 
 
 export default function CreateDatabaseForm(): JSX.Element {
@@ -51,7 +50,6 @@ export default function CreateDatabaseForm(): JSX.Element {
     if(!page){
       showToast(ToastStyle.Failure, 'Couldn\'t create database page');
     }else{
-      open(page.url.replace('https','notion'))
       showToast(ToastStyle.Success, 'Page created!');
       pop();
     }
@@ -203,16 +201,6 @@ export default function CreateDatabaseForm(): JSX.Element {
       })}
     </Form>
   )
-}
-
-export function NoSharedContent(): JSX.Element{
-
-  // Setup useState objects
- 
-
-  
-
-  render ()
 }
 
 function validateForm(values: FormValues): boolean {
