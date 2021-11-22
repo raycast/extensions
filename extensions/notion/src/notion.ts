@@ -77,6 +77,11 @@ async function rawFetchDatabases(): Promise<Database[]> {
     )
     const json = await response.json()
 
+    if(json.object === 'error'){
+      showToast(ToastStyle.Failure, json.message)
+      return []
+    }
+
     const databases = recordsMapper({ 
       sourceRecords : json.results as any[],
       models : [
@@ -128,6 +133,12 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
       }
     )
     const json = await response.json()
+
+    if(json.object === 'error'){
+      showToast(ToastStyle.Failure, json.message)
+      return []
+    }
+
     const properties = json.properties as Record<string,any>
     const propertyNames = Object.keys(properties).reverse() as string[]
 
@@ -319,13 +330,36 @@ async function rawSearchPages(query: string | undefined ): Promise<Page[]> {
     )
     const json = await response.json() as Record<string,any>
 
+    if(json.object === 'error'){
+      showToast(ToastStyle.Failure, json.message)
+      return []
+    }
+
     const pages = pageListMapper(json.results as Record<string,any>[])
 
     return pages
   } catch (err) {
-    console.error(err)
     showToast(ToastStyle.Failure, 'Failed to load pages')
     throw new Error('Failed to load pages')
+  }
+}
+
+// Fetch Extension README
+export async function fetchExtensionReadMe(): Promise<string> {
+  try {
+    var pjson = require('./package.json');
+    const response = await fetch(
+      `https://raw.githubusercontent.com/raycast/extensions/main/extensions/${pjson.name}/README.md`,
+      {
+        method: 'get'
+      }
+    )
+    const text = await response.text() as string
+    
+    return text
+  } catch (err) {
+    showToast(ToastStyle.Failure, 'Failed to load Extension README')
+    throw new Error(err)
   }
 }
 
