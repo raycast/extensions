@@ -12,7 +12,7 @@ export function swiftPackageMetadataSection(
   if (swiftPackageMetadata.name) {
     listItems.push(
       <List.Item
-        id="name"
+        key="name"
         title={swiftPackageMetadata.name}
         subtitle={swiftPackageMetadata.description}
       />
@@ -21,7 +21,8 @@ export function swiftPackageMetadataSection(
   if (swiftPackageMetadata.starsCount) {
     listItems.push(
       <List.Item
-        id="stars" icon={Icon.Star}
+        key="stars"
+        icon={Icon.Star}
         title="Stars"
         subtitle={swiftPackageMetadata.starsCount?.toString()}
       />
@@ -30,7 +31,8 @@ export function swiftPackageMetadataSection(
   if (swiftPackageMetadata.license) {
     listItems.push(
       <List.Item
-        id="license" icon={Icon.TextDocument}
+        key="license"
+        icon={Icon.TextDocument}
         title="License"
         subtitle={swiftPackageMetadata.license}
       />
@@ -38,6 +40,7 @@ export function swiftPackageMetadataSection(
   }
   return (
     <List.Section
+      key="information"
       title="Information">
       {listItems}
     </List.Section>

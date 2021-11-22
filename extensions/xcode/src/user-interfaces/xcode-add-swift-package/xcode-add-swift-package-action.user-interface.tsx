@@ -16,6 +16,7 @@ export function AddSwiftPackageAction(
   }
 ): JSX.Element {
   return <ActionPanel.Item
+    key="add-swift-package-action"
     title="Add Swift Package"
     onAction={
       () => {

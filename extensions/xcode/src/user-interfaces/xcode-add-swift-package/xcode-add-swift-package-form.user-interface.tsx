@@ -28,6 +28,7 @@ export function xcodeAddSwiftPackageForm(
       searchBarPlaceholder="Enter Swift Package URL"
       onSearchTextChange={setSwiftPackageUrl}>
       <List.Section
+        key="swift-package"
         title="Swift Package">
         <List.Item
           id="add-swift-package"
