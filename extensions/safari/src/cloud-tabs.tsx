@@ -10,7 +10,7 @@ import {
   Icon,
   closeMainWindow,
 } from '@raycast/api';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import osascript from 'osascript-tag';
 import os from 'os';
 import path from 'path';
@@ -122,9 +122,13 @@ const activateLocalTab = async (tab: Tab) =>
     safari.activate();
 `);
 
-const closeLocalTab = async (tab: Tab) => {
-  await showToast(ToastStyle.Success, 'Tab Closed', 'It will take a few seconds to take effect.');
-};
+const closeLocalTab = async (tab: Tab) =>
+  executeJxa(`
+    const safari = Application("Safari");
+    const window = safari.windows.byId(${tab.window_id});
+    const tab = window.tabs[${tab.index - 1}];
+    tab.close();
+`);
 
 interface Tab {
   uuid: string;
@@ -144,6 +148,41 @@ interface Device {
 }
 
 const formatTitle = (title: string) => _.truncate(title, { length: 75 });
+
+const OpenTabAction = (props: { tab: Tab }) => {
+  const { tab } = props;
+  return tab.is_local ? (
+    <ActionPanel.Item
+      title="Open in Browser"
+      icon={Icon.Globe}
+      onAction={async () => {
+        await activateLocalTab(tab);
+        await closeMainWindow({ clearRootSearch: true });
+      }}
+    />
+  ) : (
+    <OpenInBrowserAction url={tab.url} />
+  );
+};
+
+const CopyTabUrlAction = (props: { tab: Tab }) => <CopyToClipboardAction content={props.tab.url} title="Copy URL" />;
+
+const CloseTabAction = (props: { tab: Tab; refreshTabs: () => void }) => {
+  const { tab, refreshTabs } = props;
+  return tab.is_local ? (
+    <ActionPanel.Item
+      title="Close Tab"
+      icon={Icon.XmarkCircle}
+      shortcut={{ modifiers: ['ctrl'], key: 'x' }}
+      onAction={async () => {
+        await closeLocalTab(tab);
+        refreshTabs();
+      }}
+    />
+  ) : (
+    <Fragment />
+  );
+};
 
 export default function Command() {
   const [hasPermissionError, setHasPermissionError] = useState(false);
@@ -204,26 +243,9 @@ export default function Command() {
                 icon={getFaviconUrl(domain)}
                 actions={
                   <ActionPanel>
-                    {tab.is_local && (
-                      <ActionPanel.Item
-                        title="Open in Browser"
-                        icon={Icon.Globe}
-                        onAction={async () => {
-                          await activateLocalTab(tab);
-                          await closeMainWindow({ clearRootSearch: true });
-                        }}
-                      />
-                    )}
-                    {!tab.is_local && <OpenInBrowserAction url={tab.url} />}
-                    <CopyToClipboardAction content={url} title="Copy URL" />
-                    {tab.is_local && (
-                      <ActionPanel.Item
-                        title="Close Tab"
-                        icon={Icon.XmarkCircle}
-                        shortcut={{ modifiers: ['ctrl'], key: 'x' }}
-                        onAction={() => closeLocalTab(tab)}
-                      />
-                    )}
+                    <OpenTabAction tab={tab} />
+                    <CopyTabUrlAction tab={tab} />
+                    <CloseTabAction tab={tab} refreshTabs={fetchDevices} />
                   </ActionPanel>
                 }
               />
