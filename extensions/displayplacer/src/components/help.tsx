@@ -1,4 +1,4 @@
-import { ActionPanel, ActionPanelItem, clearLocalStorage, Detail, useNavigation } from "@raycast/api";
+import { ActionPanel, ActionPanelItem, Detail, useNavigation } from "@raycast/api";
 
 export default function Help({
   onExit = () => {
@@ -27,7 +27,7 @@ export default function Help({
   2. Open this extension and select the "New Display Preset" option, or press ⌘+N
   3. Give your preset a name and optional subtitle, then save.
   4. To switch between your presets, select them within the exetnsion, or set a hotkey for the preset number in Raycast preferences.
-  The ⭐ icon indicates that your display settings match the indicated preset. The preset numbers are displayed on the right of each preset.
+  The blue dot 🔵 icon indicates that your display settings match the indicated preset. The preset numbers are displayed on the right of each preset.
 
   NOTE: On rare occasions, the screen ID of your displays may change. You can re-save your presets by selecting them and choosing to *Edit Display Preset* from the actions menu.
 

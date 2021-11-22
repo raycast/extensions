@@ -2,6 +2,7 @@ import {
   ActionPanel,
   ActionPanelItem,
   closeMainWindow,
+  Color,
   Form,
   FormCheckbox,
   FormTextField,
@@ -119,6 +120,7 @@ export default function DisplayPlacer() {
           <ActionPanel>
             <SubmitFormAction
               title="Save Changes"
+              icon={Icon.Document}
               onSubmit={async (values: { name: string; subtitle: string; overwrite: boolean }) => {
                 const command = await getCommandForCurrentSettings();
                 if (!command) return;
@@ -185,7 +187,7 @@ export default function DisplayPlacer() {
                   key={i}
                   subtitle={fav.subtitle}
                   accessoryTitle={`# ${(i + 1).toString()}`}
-                  icon={currentCommand === fav.command ? Icon.Star : ""}
+                  icon={currentCommand === fav.command ? { source: Icon.Dot, tintColor: Color.Blue } : ""}
                   actions={
                     <ActionPanel>
                       <ActionPanelItem
