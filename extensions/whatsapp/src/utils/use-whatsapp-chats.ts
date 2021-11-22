@@ -3,7 +3,7 @@ import { WhatsAppChat } from "./types";
 import { getStoredWhatsAppChats, saveStoredWhatsAppChats } from "./local-storage";
 
 export function useWhatsAppChats() {
-  const [chats, setChats] = useState<Array<WhatsAppChat>>([]);
+  const [chats, setChats] = useState<Array<WhatsAppChat>>();
 
   useEffect(() => {
     getStoredWhatsAppChats().then(chats => {
@@ -11,10 +11,13 @@ export function useWhatsAppChats() {
     });
   }, []);
 
-  useEffect(() => {
-    saveStoredWhatsAppChats(chats);
-  }, [chats]);
-
-  return [chats, setChats] as const;
+  return {
+    chats: chats || [],
+    isLoading: chats === undefined,
+    updateChats: async (chats: Array<WhatsAppChat>) => {
+      setChats(chats);
+      await saveStoredWhatsAppChats(chats);
+    }
+  };
 }
 

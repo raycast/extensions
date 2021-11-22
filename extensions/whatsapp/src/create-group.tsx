@@ -1,46 +1,38 @@
 import { ActionPanel, Form, popToRoot, randomId, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
-import { isPhoneChat, PhoneChat, WhatsAppChat } from "./utils/types";
+import { GroupChat, isGroupChat } from "./utils/types";
 import { useWhatsAppChats } from "./utils/use-whatsapp-chats";
-import { phone as parsePhone } from "phone";
 
-interface WhatsAppPhoneChatFormProps {
-  defaultValue?: PhoneChat;
+interface WhatsAppGroupChatFormProps {
+  defaultValue?: GroupChat;
 }
 
-interface FormValues extends Omit<PhoneChat, "id" | "pinned"> {
+interface FormValues extends Omit<GroupChat, "id" | "pinned"> {
   pinned: 0 | 1;
 }
 
-export default function WhatsAppPhoneChatForm({ defaultValue }: WhatsAppPhoneChatFormProps) {
+export default function WhatsAppGroupChatForm({ defaultValue }: WhatsAppGroupChatFormProps) {
   const { chats, updateChats } = useWhatsAppChats();
   const isCreation = !defaultValue;
 
   async function handleSubmit(formValues: FormValues) {
-    const phoneInformation = parsePhone(formValues.phone);
-
-    if (!phoneInformation.isValid) {
-      await showToast(ToastStyle.Failure, "Invalid phone format");
-      return;
-    }
-
-    const savedChat: WhatsAppChat = {
+    const savedChat: GroupChat = {
       id: isCreation ? randomId() : defaultValue.id,
       name: formValues.name,
       pinned: !!formValues.pinned,
-      phone: phoneInformation.phoneNumber
+      groupCode: formValues.groupCode
     };
 
-    const isNewPhoneNumber = isCreation || savedChat.phone !== defaultValue.phone;
-    const doesPhoneNumberAlreadyExist = chats.filter(isPhoneChat).some(chat => chat.phone === phoneInformation.phoneNumber);
+    const isNewGroupCode = isCreation || savedChat.groupCode !== defaultValue.groupCode;
+    const doesPhoneNumberAlreadyExist = chats.filter(isGroupChat).some(chat => chat.groupCode === savedChat.groupCode);
 
-    if (isNewPhoneNumber && doesPhoneNumberAlreadyExist) {
+    if (isNewGroupCode && doesPhoneNumberAlreadyExist) {
       await showToast(ToastStyle.Failure, "Chat already exists");
       return;
     }
 
     if (isCreation) {
       await updateChats([...chats, savedChat]);
-      await showToast(ToastStyle.Success, `Created new chat`, savedChat.name);
+      await showToast(ToastStyle.Success, `Created new group`, savedChat.name);
     } else {
       const newChats = chats.map(chat => {
         if (chat.id === savedChat.id) {
@@ -49,7 +41,7 @@ export default function WhatsAppPhoneChatForm({ defaultValue }: WhatsAppPhoneCha
         return chat;
       });
       await updateChats(newChats);
-      await showToast(ToastStyle.Success, `Updated existing chat`, savedChat.name);
+      await showToast(ToastStyle.Success, `Updated existing group`, savedChat.name);
     }
 
     await popToRoot({ clearSearchBar: true });
@@ -59,21 +51,21 @@ export default function WhatsAppPhoneChatForm({ defaultValue }: WhatsAppPhoneCha
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Save Chat" onSubmit={handleSubmit} />
+          <SubmitFormAction title="Save Group" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="name"
         title="Name"
-        placeholder="John Doe"
+        placeholder="Raycasters"
         defaultValue={defaultValue?.name}
       />
       <Form.TextField
-        id="phone"
-        title="Phone"
-        placeholder="+1 (817) 569-8900"
-        defaultValue={defaultValue?.phone}
+        id="groupCode"
+        title="Group Code"
+        placeholder="LkXPP0Lij10I3OYynP3MXb"
+        defaultValue={defaultValue?.groupCode}
       />
       <Form.Checkbox
         id="pinned"

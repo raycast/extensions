@@ -2,6 +2,7 @@ import { randomId, Toast, ToastStyle } from "@raycast/api";
 import { getAppleContacts } from "./utils/get-apple-contacts";
 import { phone as parsePhone } from "phone";
 import { getStoredWhatsAppChats, saveStoredWhatsAppChats } from "./utils/local-storage";
+import { isPhoneChat } from "./utils/types";
 
 export default async () => {
   const toast = new Toast({ style: ToastStyle.Animated, title: "Importing Apple contacts" });
@@ -31,7 +32,7 @@ export default async () => {
         };
       })
       .filter((chat, index, chats) => chats.findIndex(c => c.phone === chat.phone) === index)
-      .filter(chat => !storedChats.find(storedChat => storedChat.phone === chat.phone));
+      .filter(chat => !storedChats.filter(isPhoneChat).find(storedChat => storedChat.phone === chat.phone));
 
     await saveStoredWhatsAppChats(whatsAppChats);
     toast.style = ToastStyle.Success;
