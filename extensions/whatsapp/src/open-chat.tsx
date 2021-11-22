@@ -110,7 +110,7 @@ function getChatItemProps(chat: WhatsAppChat) {
       accessoryTitle,
       appUrl: `whatsapp://send?phone=${phone}&text=`,
       webUrl: `https://web.whatsapp.com/send?phone=${phone}&text=`,
-      icon: "👤",
+      icon: Icon.Person,
       form: <WhatsAppPhoneChatForm defaultValue={chat} />
     };
   } else {
@@ -120,7 +120,7 @@ function getChatItemProps(chat: WhatsAppChat) {
       accessoryTitle,
       appUrl: `whatsapp://chat?code=${chat.groupCode}`,
       webUrl: null,
-      icon: "👥",
+      icon: Icon.Circle,
       form: <WhatsAppGroupChatForm defaultValue={chat} />
     };
   }
