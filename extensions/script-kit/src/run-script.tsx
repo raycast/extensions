@@ -1,14 +1,10 @@
 import { ActionPanel, closeMainWindow, Icon, List, popToRoot, showToast, ToastStyle } from "@raycast/api";
-import { spawn } from "child_process";
 import { execa } from "execa";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import { resolve } from "path";
 import { useEffect, useState } from "react";
-import util from "util";
 import { Script } from "./script";
-
-const promisifiedSpawn = util.promisify(spawn)
 
 const kit_path = resolve(homedir(), ".kit");
 
@@ -23,7 +19,7 @@ export default function listScripts(): JSX.Element {
   }, []);
 
   return (
-    <List>
+    <List isLoading={typeof scripts=='undefined'}>
       {scripts
         ?.filter((script) => !script.exclude)
         .map((script) => (
