@@ -88,5 +88,18 @@ export function listScreenInfo() {
 
 export function switchSettings(favorite: Favorite) {
   if (!favorite.command) return;
-  execSync(`zsh -l -c '${favorite.command}'`);
+  try {
+    execSync(`zsh -l -c '${favorite.command}'`);
+  } catch (e: any) {
+    let error = true;
+    const lines = e.toString().split("\n");
+    lines.forEach((line: string) => {
+      console.log(line);
+      if (line.search(/skipping changes for that screen/)) {
+        error = false;
+      }
+    });
+
+    if (error) throw new Error("Unknown");
+  }
 }

@@ -200,20 +200,20 @@ export default function DisplayPlacer() {
                             title: "Switching Display Settings...",
                           });
                           await toast.show();
-                          let error = false;
                           try {
                             switchSettings(fav);
+                            await init();
+                            await closeMainWindow();
+                            await toast.hide();
                           } catch (e) {
+                            await init();
+                            await toast.hide();
                             showToast(
                               ToastStyle.Failure,
                               "Error",
                               "An unknown error occured while switching to this preset"
                             );
-                            error = true;
                           }
-                          await init();
-                          if (!error) await closeMainWindow();
-                          await toast.hide();
                         }}
                       />
                       <ActionPanelItem
