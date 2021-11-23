@@ -107,7 +107,7 @@ function getChatItemProps(chat: WhatsAppChat) {
   } else {
     return {
       title: chat.name,
-      subtitle: chat.groupCode,
+      subtitle: 'Group',
       accessoryTitle,
       appUrl: `whatsapp://chat?code=${chat.groupCode}`,
       webUrl: null,
