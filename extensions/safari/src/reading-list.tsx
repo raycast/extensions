@@ -4,7 +4,7 @@ import os from 'os';
 import _ from 'lodash';
 import plist from 'simple-plist';
 import { promisify } from 'util';
-import { getUrlDomain, getFaviconUrl, plural, formatDate, permissionErrorMarkdown } from './shared';
+import { getUrlDomain, getFaviconUrl, plural, formatDate, permissionErrorMarkdown, filterListItem } from './shared';
 
 const readPlist = promisify(plist.readFile);
 
@@ -69,7 +69,6 @@ function ListItem(props: { bookmark: ReadingListBookmark }) {
     <List.Item
       title={bookmark.title}
       subtitle={bookmark.domain}
-      keywords={[bookmark.url, bookmark.domain, bookmark.description]}
       icon={getFaviconUrl(bookmark.domain)}
       accessoryTitle={formatDate(bookmark.dateAdded)}
       actions={
@@ -85,6 +84,7 @@ function ListItem(props: { bookmark: ReadingListBookmark }) {
 export default function Command() {
   const [hasPermissionError, setHasPermissionError] = useState(false);
   const [bookmarks, setBookmarks] = useState<ReadingListBookmark[]>();
+  const [searchText, setSearchText] = useState<string>('');
 
   const fetchItems = useCallback(async () => {
     try {
@@ -111,12 +111,12 @@ export default function Command() {
   const groupedBookmarks = _.groupBy(bookmarks, ({ dateLastViewed }) => (dateLastViewed ? 'read' : 'unread'));
 
   return (
-    <List isLoading={!bookmarks}>
+    <List isLoading={!bookmarks} onSearchTextChange={setSearchText}>
       {_.map(groupedBookmarks, (bookmarks, key) => {
         if (bookmarks.length > 0) {
           return (
             <List.Section key={key} title={_.startCase(key)} subtitle={plural(bookmarks.length, 'bookmark')}>
-              {_.map(bookmarks, (bookmark) => (
+              {bookmarks.filter(filterListItem(searchText, ['title', 'url', 'description'])).map((bookmark) => (
                 <ListItem key={bookmark.uuid} bookmark={bookmark} />
               ))}
             </List.Section>

@@ -19,7 +19,7 @@ import { readFile } from 'fs';
 import _ from 'lodash';
 import initSqlJs, { Database } from 'sql.js';
 import execa from 'execa';
-import { getTabUrl, getUrlDomain, getFaviconUrl, plural, permissionErrorMarkdown } from './shared';
+import { getTabUrl, getUrlDomain, getFaviconUrl, plural, permissionErrorMarkdown, filterListItem } from './shared';
 
 const asyncReadFile = promisify(readFile);
 
@@ -87,10 +87,11 @@ const fetchLocalTabs = (): Promise<Tab[]> =>
     safari.windows().map(window => {
       return window.tabs().map(tab => {
         tabs.push({
-          window_id: window.id(),
-          index: tab.index(),
+          uuid: window.id() + '-' + tab.index(),
           title: tab.name(),
           url: tab.url(),
+          window_id: window.id(),
+          index: tab.index(),
           is_local: true
         });
       })
@@ -134,10 +135,10 @@ interface Tab {
   uuid: string;
   title: string;
   url: string;
-  device_uuid: string;
-  device_name: string;
-  window_id: number;
-  index: number;
+  device_uuid?: string;
+  device_name?: string;
+  window_id?: number;
+  index?: number;
   is_local?: boolean;
 }
 
@@ -187,6 +188,7 @@ const CloseTabAction = (props: { tab: Tab; refreshTabs: () => void }) => {
 export default function Command() {
   const [hasPermissionError, setHasPermissionError] = useState(false);
   const [devices, setDevices] = useState<Device[]>();
+  const [searchText, setSearchText] = useState<string>('');
 
   const fetchDevices = useCallback(async () => {
     try {
@@ -228,10 +230,10 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={!devices}>
+    <List isLoading={!devices} onSearchTextChange={setSearchText}>
       {_.map(devices, (device: Device) => (
         <List.Section key={device.uuid} title={device.name} subtitle={plural(device.tabs.length, 'tab')}>
-          {_.map(device.tabs, (tab: Tab) => {
+          {device.tabs.filter(filterListItem(searchText, ['title', 'url'])).map((tab: Tab) => {
             const url = getTabUrl(tab.url);
             const domain = getUrlDomain(url);
             return (
@@ -239,7 +241,6 @@ export default function Command() {
                 key={tab.uuid}
                 title={formatTitle(tab.title)}
                 accessoryTitle={domain}
-                keywords={[url, domain]}
                 icon={getFaviconUrl(domain)}
                 actions={
                   <ActionPanel>

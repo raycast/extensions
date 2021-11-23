@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { URL } from 'url';
 
 export const getTabUrl = (url: string) => {
@@ -21,6 +22,15 @@ export const formatDate = (date: string) =>
   });
 
 export const plural = (count: number, string: string) => `${count} ${string}${count > 1 ? 's' : ''}`;
+
+const normalizeText = (text: string) =>
+  text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+export const filterListItem = (searchText: string, keys: string[]) => (tab: Tab) =>
+  _.some(keys, (key) => normalizeText(_.get(tab, key)).includes(normalizeText(searchText)));
 
 // @TODO: This screen should be handled by Raycast itself (https://github.com/raycast/extensions/issues/101)
 export const permissionErrorMarkdown = `## Raycast needs full disk access in order to display your Safari bookmarks.
