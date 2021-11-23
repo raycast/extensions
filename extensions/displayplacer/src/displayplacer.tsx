@@ -13,6 +13,7 @@ import {
   PushAction,
   randomId,
   setLocalStorageItem,
+  showHUD,
   showToast,
   SubmitFormAction,
   Toast,
@@ -203,8 +204,8 @@ export default function DisplayPlacer() {
                           try {
                             switchSettings(fav);
                             await init();
-                            await closeMainWindow();
                             await toast.hide();
+                            await showHUD("Display Preset Loaded");
                           } catch (e) {
                             await init();
                             await toast.hide();
