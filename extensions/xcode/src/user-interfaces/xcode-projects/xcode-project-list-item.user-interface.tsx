@@ -1,14 +1,16 @@
 import { XcodeProject } from "../../models/project/xcode-project.model";
-import { ActionPanel, List, OpenAction, ShowInFinderAction } from "@raycast/api";
+import {ActionPanel, ActionPanelChildren, List, OpenAction, ShowInFinderAction} from "@raycast/api";
 import { XcodeProjectType } from "../../models/project/xcode-project-type.model";
 import tildify from "tildify";
 
 /**
  * Xcode Project List Item
  * @param xcodeProject The XcodeProject
+ * @param customActionsProvider TThe optional custom XcodeProject actions provider. Default value `null`
  */
 export function xcodeProjectListItem(
-  xcodeProject: XcodeProject
+  xcodeProject: XcodeProject,
+  customActionsProvider: ((xcodeProject: XcodeProject) => ActionPanelChildren) | null = null
 ): JSX.Element {
   return (
     <List.Item
@@ -20,14 +22,31 @@ export function xcodeProjectListItem(
       icon={{ source: imageAssetSource(xcodeProject.type) }}
       actions={
         <ActionPanel>
-          <OpenAction
-            title="Open with Xcode"
-            target={xcodeProject.filePath} />
-          <ShowInFinderAction path={xcodeProject.filePath} />
+          { customActionsProvider ? customActionsProvider(xcodeProject) : defaultActions(xcodeProject) }
         </ActionPanel>
       }
     />
   );
+}
+
+/**
+ * Default Actions for a given XcodeProject
+ * @param xcodeProject The XcodeProject
+ */
+function defaultActions(
+  xcodeProject: XcodeProject
+): ActionPanelChildren {
+  return [
+    <OpenAction
+      key="open-with-xcode"
+      title="Open with Xcode"
+      target={xcodeProject.filePath}
+    />,
+    <ShowInFinderAction
+      key="show-in-finder"
+      path={xcodeProject.filePath}
+    />
+  ]
 }
 
 /**
