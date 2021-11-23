@@ -131,6 +131,13 @@ const closeLocalTab = async (tab: LocalTab) =>
     tab.close();
 `);
 
+const openLocalTabWithSearch = async (searchText: string) =>
+  executeJxa(`
+      const safari = Application("Safari");
+      safari.searchTheWeb({ for: "${searchText}" });
+      safari.activate();
+  `);
+
 interface Tab {
   uuid: string;
   title: string;
@@ -237,29 +244,51 @@ export default function Command() {
 
   return (
     <List isLoading={!devices} onSearchTextChange={setSearchText}>
-      {_.map(devices, (device: Device) => (
-        <List.Section key={device.uuid} title={device.name} subtitle={plural(device.tabs.length, 'tab')}>
-          {(device.tabs as Tab[]).filter(filterListItem(searchText, ['title', 'url'])).map((tab: Tab) => {
-            const url = getTabUrl(tab.url);
-            const domain = getUrlDomain(url);
-            return (
+      {_.map(devices, (device: Device) => {
+        const tabs = (device.tabs as Tab[]).filter(filterListItem(searchText, ['title', 'url']));
+        return (
+          <List.Section key={device.uuid} title={device.name} subtitle={plural(tabs.length, 'tab')}>
+            {tabs.map((tab: Tab) => {
+              const url = getTabUrl(tab.url);
+              const domain = getUrlDomain(url);
+              return (
+                <List.Item
+                  key={tab.uuid}
+                  title={formatTitle(tab.title)}
+                  accessoryTitle={domain}
+                  icon={getFaviconUrl(domain)}
+                  actions={
+                    <ActionPanel>
+                      <OpenTabAction tab={tab} />
+                      <CopyTabUrlAction tab={tab} />
+                      <CloseTabAction tab={tab} refreshTabs={fetchDevices} />
+                    </ActionPanel>
+                  }
+                />
+              );
+            })}
+            {searchText !== '' && device.uuid === 'local' && (
               <List.Item
-                key={tab.uuid}
-                title={formatTitle(tab.title)}
-                accessoryTitle={domain}
-                icon={getFaviconUrl(domain)}
+                key="fallback-search"
+                title={`Search for "${searchText}"`}
+                icon={Icon.MagnifyingGlass}
                 actions={
                   <ActionPanel>
-                    <OpenTabAction tab={tab} />
-                    <CopyTabUrlAction tab={tab} />
-                    <CloseTabAction tab={tab} refreshTabs={fetchDevices} />
+                    <ActionPanel.Item
+                      title="Search in Browser"
+                      icon={Icon.Globe}
+                      onAction={async () => {
+                        await openLocalTabWithSearch(searchText);
+                        await closeMainWindow({ clearRootSearch: true });
+                      }}
+                    />
                   </ActionPanel>
                 }
               />
-            );
-          })}
-        </List.Section>
-      ))}
+            )}
+          </List.Section>
+        );
+      })}
     </List>
   );
 }
