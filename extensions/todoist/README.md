@@ -30,12 +30,9 @@ For each task, you can:
 - Delete the task
 - Filter the tasks by name, priority or by project name
 
-## Pro tips
+## Future improvements
 
-Assign global hotkeys to commands so that you can quickly access them. For example:
-
-- `⌥` + `T` to see the "Today" view
-- `⌥` + `U` to see the "Upcoming" view
+- Better support tasks set at a certain time
 
 ## Limitation
 
