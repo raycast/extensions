@@ -4,7 +4,7 @@ import os from 'os';
 import _ from 'lodash';
 import plist from 'simple-plist';
 import { promisify } from 'util';
-import { getUrlDomain, getFaviconUrl, plural, formatDate, permissionErrorMarkdown, filterListItem } from './shared';
+import { getUrlDomain, getFaviconUrl, plural, formatDate, permissionErrorMarkdown, search } from './shared';
 
 const readPlist = promisify(plist.readFile);
 
@@ -113,7 +113,12 @@ export default function Command() {
   return (
     <List isLoading={!bookmarks} onSearchTextChange={setSearchText}>
       {_.map(groupedBookmarks, (bookmarks, key) => {
-        const filteredBookmarks = bookmarks.filter(filterListItem(searchText, ['title', 'url', 'description']));
+        const filteredBookmarks = search(
+          bookmarks,
+          ['title', 'url', 'description'],
+          searchText
+        ) as ReadingListBookmark[];
+
         return (
           <List.Section key={key} title={_.startCase(key)} subtitle={plural(filteredBookmarks.length, 'bookmark')}>
             {filteredBookmarks.map((bookmark) => (

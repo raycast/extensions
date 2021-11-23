@@ -47,8 +47,10 @@ const normalizeText = (text: string) =>
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
-export const filterListItem = (searchText: string, keys: string[]) => (item: any[]) =>
-  _.some(keys, (key) => normalizeText(_.get(item, key)).includes(normalizeText(searchText)));
+export const search = (collection: object[], keys: string[], searchText: string) =>
+  _.filter(collection, (item) =>
+    _.some(keys, (key) => normalizeText(_.get(item, key)).includes(normalizeText(searchText)))
+  );
 
 // @TODO: This screen should be handled by Raycast itself (https://github.com/raycast/extensions/issues/101)
 export const permissionErrorMarkdown = `## Raycast needs full disk access in order to display your Safari bookmarks.

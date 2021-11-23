@@ -16,15 +16,7 @@ import { readFile } from 'fs';
 import _ from 'lodash';
 import initSqlJs, { Database } from 'sql.js';
 import execa from 'execa';
-import {
-  executeJxa,
-  getTabUrl,
-  getUrlDomain,
-  getFaviconUrl,
-  plural,
-  permissionErrorMarkdown,
-  filterListItem,
-} from './shared';
+import { executeJxa, getTabUrl, getUrlDomain, getFaviconUrl, plural, permissionErrorMarkdown, search } from './shared';
 
 const asyncReadFile = promisify(readFile);
 
@@ -234,7 +226,7 @@ export default function Command() {
   return (
     <List isLoading={!devices} onSearchTextChange={setSearchText}>
       {_.map(devices, (device: Device) => {
-        const tabs = (device.tabs as Tab[]).filter(filterListItem(searchText, ['title', 'url']));
+        const tabs = search(device.tabs, ['title', 'url'], searchText) as Tab[];
         return (
           <List.Section key={device.uuid} title={device.name} subtitle={plural(tabs.length, 'tab')}>
             {tabs.map((tab: Tab) => {
