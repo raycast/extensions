@@ -29,10 +29,28 @@
       "name": "bin",
       "type": "textfield",
       "required": false,
-      "title": "tools bin folder",
-      "description": "Where are JetBrains Tools installed (in Toolbox Settings)",
+      "title": "Shell scripts location",
+      "description": "Where are JetBrains Tools 'shell scripts' are installed (in Toolbox → Settings → Tools)",
       "default": "/usr/local/bin",
       "placeholder": "/usr/local/bin"
+    },
+    {
+      "name": "fallback",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use protocol urls if missing shell scripts",
+      "description": "Try to use the jetbrain://app-name protocol url to open projects if tools are not installed (not recommended)",
+      "default": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "historic",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use historic project files",
+      "description": "Add projects from previous app installs",
+      "default": false,
+      "label": "Use all"
     }
   ],
   "keywords": [
@@ -46,7 +64,6 @@
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "fast-glob": "^3.2.7",
-    "fuse.js": "^6.4.6",
     "which": "^2.0.2",
     "xml2js": "^0.4.23"
   },

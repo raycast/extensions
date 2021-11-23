@@ -74,6 +74,7 @@ function actions(
   return (
     <ActionPanel>
       <ActionPanel.Item
+        key={"boot-or-shutdown"}
         title={isShutdown ? "Boot" : "Shutdown"}
         onAction={
           async () => {

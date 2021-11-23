@@ -75,8 +75,8 @@ export default function NoteActions({ isNotePreview, note }: { isNotePreview: bo
               showToast(ToastStyle.Success, "Moved note to archive");
             }}
             icon={{ source: Icon.List, tintColor: Color.Orange }}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
-            />
+            shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+          />
           <ActionPanel.Item
             title="Move to Trash"
             onAction={() => {
@@ -84,7 +84,7 @@ export default function NoteActions({ isNotePreview, note }: { isNotePreview: bo
               showToast(ToastStyle.Success, "Moved note to trash");
             }}
             icon={{ source: Icon.Trash, tintColor: Color.Red }}
-            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
           />
         </ActionPanel.Section>
       )}

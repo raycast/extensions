@@ -23,11 +23,19 @@
       "subtitle": "Google Chrome",
       "description": "Search browser history.",
       "mode": "view"
+    },
+    {
+      "name": "google-chrome-new-tab",
+      "title": "New Tab",
+      "subtitle": "Google Chrome",
+      "description": "Open a new Google Chrome tab.",
+      "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "useOriginalFavicon",
+      "title": "Search Open Tabs",
       "title": "Fav icon",
       "label": "Extract the favicon from every open tab",
       "description": "Before enable this, you should enable 'View > Developer > Allow JavaScript from Apple Events' in every Google Chrome profile.",

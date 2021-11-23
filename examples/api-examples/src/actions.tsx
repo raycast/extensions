@@ -12,7 +12,8 @@ import {
   ToastStyle,
 } from "@raycast/api";
 import open from "open";
-import { downloadsDir } from "./utils";
+import { homedir } from "os";
+import { resolve } from "path";
 
 const description = `
 # Actions
@@ -40,6 +41,8 @@ Assign keyboard shortcuts to actions to make it quicker for users to perform the
 first two actions get the primary (\`↵\`) and secondary shortcut (\`⌘ + ↵\`).
 `;
 
+const downloadsDir = resolve(homedir(), "Downloads");
+
 export default function Command() {
   return (
     <Detail
@@ -49,9 +52,9 @@ export default function Command() {
           <ActionPanel.Section title="Built-in actions">
             <CopyToClipboardAction content="Text copied to the clipboard" />
             <OpenInBrowserAction url="https://raycast.com" />
-            <ShowInFinderAction title="Open Downloads" path={downloadsDir()} />
+            <ShowInFinderAction title="Open Downloads" path={downloadsDir} />
             <PasteAction content="Text pasted to the frontmost application" />
-            <OpenWithAction path={downloadsDir()} />
+            <OpenWithAction path={downloadsDir} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Custom actions">
             <ActionPanel.Item

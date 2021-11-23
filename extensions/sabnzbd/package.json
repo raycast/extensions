@@ -28,6 +28,13 @@
       "mode": "no-view"
     },
     {
+      "name": "history",
+      "title": "History",
+      "subtitle": "SABnzbd",
+      "description": "Full history output with details about all jobs",
+      "mode": "view"
+    },
+    {
       "name": "shutdown",
       "title": "Shutdown",
       "subtitle": "SABnzbd",
@@ -69,7 +76,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.1",
-    "node-fetch": "^3.0.0",
+    "moment": "^2.29.1",
     "sabnzbd-api": "^1.3.2"
   },
   "devDependencies": {

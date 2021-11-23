@@ -11,16 +11,16 @@ import {
   ShowInFinderAction,
   TrashAction,
 } from "@raycast/api";
-import { existsSync, readFileSync } from "fs";
+import { existsSync, lstatSync, readFileSync } from "fs";
 import open from "open";
 import { homedir } from "os";
 import config from "parse-git-config";
 import { dirname } from "path";
 import { ReactElement } from "react";
 import tildify from "tildify";
-import { Preferences, ProjectEntry } from "./types";
+import { GitCachedProjectEntry, Preferences, ProjectEntry } from "./types";
 
-const STORAGE = `${homedir()}/Library/Application Support/Code/User/globalStorage/alefragnani.project-manager/projects.json`;
+const STORAGE = `${homedir()}/Library/Application Support/Code/User/globalStorage/alefragnani.project-manager`;
 
 const preferences: Preferences = getPreferenceValues();
 
@@ -31,11 +31,36 @@ const terminalPath = preferences.terminalAppPath || "";
 const terminalInstalled = existsSync(terminalPath);
 
 function getProjectEntries(): ProjectEntry[] {
-  const storageFile = preferences.projectManagerDataPath || STORAGE;
-  if (!existsSync(storageFile)) {
-    return [];
+  const storagePath = getPreferencesPath() || STORAGE;
+  const savedProjectsFile = `${storagePath}/projects.json`;
+  const cachedGitProjectsFile = `${storagePath}/projects_cache_git.json`;
+
+  const projectEntries: ProjectEntry[] = [];
+  if (existsSync(savedProjectsFile)) {
+    const savedProjects: ProjectEntry[] = JSON.parse(readFileSync(savedProjectsFile).toString());
+    projectEntries.push(...savedProjects);
   }
-  return JSON.parse(readFileSync(storageFile).toString());
+
+  if (existsSync(cachedGitProjectsFile)) {
+    const cachedEntries: GitCachedProjectEntry[] = JSON.parse(readFileSync(cachedGitProjectsFile).toString());
+    cachedEntries.forEach(({ name, fullPath }) => {
+      projectEntries.push({ name, rootPath: fullPath, tags: [], enabled: true });
+    });
+  }
+  return projectEntries;
+}
+
+function getPreferencesPath(): string | undefined {
+  const path = preferences.projectManagerDataPath;
+  if (path && existsSync(path)) {
+    const stat = lstatSync(path);
+    if (stat.isDirectory()) {
+      return path;
+    }
+    if (stat.isFile()) {
+      return dirname(path);
+    }
+  }
 }
 
 function getSortedProjects(projects: ProjectEntry[]): ProjectEntry[] {
@@ -95,8 +120,8 @@ export default function Command() {
     const groupedProjects = getProjectsGroupedByTagAsElements(sortedProjects);
     elements.push(...groupedProjects);
   } else {
-    sortedProjects.forEach((project) => {
-      elements.push(<ProjectListItem key={project.rootPath} {...project} />);
+    sortedProjects.forEach((project, index) => {
+      elements.push(<ProjectListItem key={project.rootPath + index} {...project} />);
     });
   }
 
@@ -168,7 +193,7 @@ function DevelopmentActionSection() {
     <ActionPanel.Section title="Development">
       <OpenAction
         title="Open projects.json File in Code"
-        icon="icon.png"
+        icon="command-icon.png"
         target={STORAGE}
         application="Visual Studio Code"
       />

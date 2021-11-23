@@ -4,12 +4,13 @@ import fg from "fast-glob"
 import {basename, dirname} from "path"
 import {parseStringPromise} from "xml2js"
 import {homedir} from "os"
-import Fuse from "fuse.js"
 
 export const JetBrainsIcon = "jb.png"
 
 export const preferredApp = String(preferences["app"].value || preferences["app"].default)
 export const bin = String(preferences["bin"].value || preferences["bin"].default).replace('~', homedir())
+export const useUrl = Boolean(preferences["fallback"].value || preferences["fallback"].default)
+export const historicProjects = Boolean(preferences["historic"].value || preferences["historic"].default)
 
 export interface file {
   title: string
@@ -38,7 +39,6 @@ export interface AppHistory {
   icon: string
   xmlFiles: file[]
   entries?: recentEntry[]
-  fused?: Fuse<recentEntry>
 }
 
 
