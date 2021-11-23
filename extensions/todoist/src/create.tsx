@@ -110,7 +110,7 @@ function Create() {
         ))}
       </Form.Dropdown>
 
-      {projects ? (
+      {projects && projects.length > 0 ? (
         <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId}>
           {projects.map(({ id, name }) => (
             <Form.Dropdown.Item value={String(id)} title={name} key={id} />
@@ -118,7 +118,7 @@ function Create() {
         </Form.Dropdown>
       ) : null}
 
-      {labels ? (
+      {labels && labels.length > 0 ? (
         <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds}>
           {labels.map(({ id, name }) => (
             <Form.TagPicker.Item value={String(id)} title={name} key={id} />
