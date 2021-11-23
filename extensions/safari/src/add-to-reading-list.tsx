@@ -1,5 +1,6 @@
 import { ActionPanel, SubmitFormAction, Form, showToast, ToastStyle } from '@raycast/api';
 import { useState } from 'react';
+import { URL } from 'url';
 import { executeJxa } from './shared';
 
 const addToReadingList = async (url: string) =>
