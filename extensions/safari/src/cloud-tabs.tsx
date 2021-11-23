@@ -80,7 +80,7 @@ const executeJxa = async (script: string) => {
   }
 };
 
-const fetchLocalTabs = (): Promise<Tab[]> =>
+const fetchLocalTabs = (): Promise<LocalTab[]> =>
   executeJxa(`
     const safari = Application("Safari");
     const tabs = [];
@@ -100,7 +100,7 @@ const fetchLocalTabs = (): Promise<Tab[]> =>
     return tabs;
 `);
 
-const fetchRemoteTabs = async (): Promise<Tab[]> => {
+const fetchRemoteTabs = async (): Promise<RemoteTab[]> => {
   const db = await loadDb();
   const tabs = (await executeQuery(
     db,
@@ -108,22 +108,22 @@ const fetchRemoteTabs = async (): Promise<Tab[]> => {
          FROM cloud_tabs t
          INNER JOIN cloud_tab_devices d ON t.device_uuid = d.device_uuid
          WHERE device_name != "${currentDeviceName}"`
-  )) as Tab[];
+  )) as RemoteTab[];
 
   return tabs;
 };
 
-const activateLocalTab = async (tab: Tab) =>
+const activateLocalTab = async (tab: LocalTab) =>
   executeJxa(`
-    const safari = Application("Safari");
-    const window = safari.windows.byId(${tab.window_id});
-    const tab = window.tabs[${tab.index - 1}];
-    window.index = 1;
-    window.currentTab = tab;
-    safari.activate();
-`);
+      const safari = Application("Safari");
+      const window = safari.windows.byId(${tab.window_id});
+      const tab = window.tabs[${tab.index - 1}];
+      window.index = 1;
+      window.currentTab = tab;
+      safari.activate();
+  `);
 
-const closeLocalTab = async (tab: Tab) =>
+const closeLocalTab = async (tab: LocalTab) =>
   executeJxa(`
     const safari = Application("Safari");
     const window = safari.windows.byId(${tab.window_id});
@@ -135,17 +135,23 @@ interface Tab {
   uuid: string;
   title: string;
   url: string;
-  device_uuid?: string;
-  device_name?: string;
-  window_id?: number;
-  index?: number;
-  is_local?: boolean;
+  is_local: boolean;
+}
+
+interface RemoteTab extends Tab {
+  device_uuid: string;
+  device_name: string;
+}
+
+interface LocalTab extends Tab {
+  window_id: number;
+  index: number;
 }
 
 interface Device {
   uuid: string;
   name: string;
-  tabs: Tab[];
+  tabs: LocalTab[] | RemoteTab[];
 }
 
 const formatTitle = (title: string) => _.truncate(title, { length: 75 });
@@ -157,7 +163,7 @@ const OpenTabAction = (props: { tab: Tab }) => {
       title="Open in Browser"
       icon={Icon.Globe}
       onAction={async () => {
-        await activateLocalTab(tab);
+        await activateLocalTab(tab as LocalTab);
         await closeMainWindow({ clearRootSearch: true });
       }}
     />
@@ -176,7 +182,7 @@ const CloseTabAction = (props: { tab: Tab; refreshTabs: () => void }) => {
       icon={Icon.XmarkCircle}
       shortcut={{ modifiers: ['ctrl'], key: 'x' }}
       onAction={async () => {
-        await closeLocalTab(tab);
+        await closeLocalTab(tab as LocalTab);
         refreshTabs();
       }}
     />
@@ -201,7 +207,7 @@ export default function Command() {
 
       const removeDevices = _.transform(
         _.groupBy(remoteTabs, 'device_uuid'),
-        (devices: Device[], tabs: Tab[], device_uuid: string) => {
+        (devices: Device[], tabs: RemoteTab[], device_uuid: string) => {
           devices.push({
             uuid: device_uuid,
             name: tabs[0].device_name,
@@ -233,7 +239,7 @@ export default function Command() {
     <List isLoading={!devices} onSearchTextChange={setSearchText}>
       {_.map(devices, (device: Device) => (
         <List.Section key={device.uuid} title={device.name} subtitle={plural(device.tabs.length, 'tab')}>
-          {device.tabs.filter(filterListItem(searchText, ['title', 'url'])).map((tab: Tab) => {
+          {(device.tabs as Tab[]).filter(filterListItem(searchText, ['title', 'url'])).map((tab: Tab) => {
             const url = getTabUrl(tab.url);
             const domain = getUrlDomain(url);
             return (
