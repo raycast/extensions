@@ -16,6 +16,8 @@ import { readClipboard } from "./script/util";
 
 let selectScript: Run | null = null;
 
+let isClipboardScriptRunning = false;
+
 export default function ToolboxList() {
   const [categorys, setCategorys] = useState<Category[]>();
 
@@ -80,23 +82,29 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
   }
 
   async function action(runType: RunType) {
+    if (isClipboardScriptRunning) return;
     selectScript = item.run;
+
     if (runType === "clipboard") {
+      isClipboardScriptRunning = true;
+      const toast = await showToast(ToastStyle.Animated, info.title);
+      toast.show();
       const query = await isClipboardContent();
       if (query) {
         const scriptResult = await runScript(query);
-
         if (scriptResult.isSuccess) {
           await copyTextToClipboard(scriptResult.result);
           await showHUD("Copy Result");
           selectScript = null;
         } else {
-          showToast(ToastStyle.Failure, scriptResult.result);
+          await showToast(ToastStyle.Failure, scriptResult.result);
           moveWindow(runType);
         }
       } else {
         moveWindow(runType);
       }
+      toast.hide();
+      isClipboardScriptRunning = false;
     } else {
       moveWindow(runType);
     }
@@ -150,43 +158,48 @@ const useScriptHook = () => {
     query: "",
     result: "",
     isLoading: false,
+    isWaiting: false,
     isError: false,
   });
+  const [isLivw, setIsLive] = useState(true);
+  useEffect(() => {
+    return () => {
+      selectScript = null;
+      setIsLive(false);
+    };
+  }, []);
+
+  async function startScript() {
+    if (content.query.length > 0) {
+      isLivw && setContent((prev) => ({ ...prev, isLoading: true }));
+
+      const scriptResult = await runScript(content.query);
+      isLivw &&
+        setContent((prev) => ({
+          ...prev,
+          result: scriptResult.result,
+          isLoading: false,
+          isError: !scriptResult.isSuccess,
+        }));
+    } else {
+      isLivw && setContent((prev) => ({ ...prev, result: "", isError: false }));
+    }
+  }
 
   useEffect(() => {
-    if (content.isLoading) return;
-    async function startScript() {
-      if (content.query.length > 0) {
-        try {
-          const result = selectScript?.(content.query);
-          if (typeof result !== "string") {
-            throw result;
-          }
-          setContent({
-            ...content,
-            result: result,
-            isLoading: false,
-            isError: false,
-          });
-        } catch (error) {
-          setContent({
-            ...content,
-            result: error instanceof Error ? error.message : "Failure",
-            isLoading: false,
-            isError: true,
-          });
-        }
-      } else {
-        setContent({
-          ...content,
-          result: "",
-          isLoading: false,
-          isError: false,
-        });
-      }
+    if (content.isLoading) {
+      setContent({ ...content, isWaiting: true });
+      return;
     }
     startScript();
   }, [content.query]);
+
+  useEffect(() => {
+    if (!content.isLoading && content.isWaiting) {
+      setContent({ ...content, isWaiting: false });
+      startScript();
+    }
+  }, [content.isLoading, content.isWaiting]);
 
   return { content, setContent };
 };
@@ -232,10 +245,7 @@ function InputDirectView(props: { info: Info }) {
       isLoading={content.isLoading}
       searchBarPlaceholder={info.example}
       onSearchTextChange={(query: string) => {
-        setContent({
-          ...content,
-          query: query,
-        });
+        setContent({ ...content, query: query });
       }}
     >
       <List.Item title={content.result} actions={ResultActionView({ content, info })} />
@@ -245,11 +255,14 @@ function InputDirectView(props: { info: Info }) {
 
 function InputFormView(props: { info: Info }) {
   const info = props.info;
-
   const { content, setContent } = useScriptHook();
 
   return (
-    <Form navigationTitle={"Toolbox - " + info.title} actions={ResultActionView({ content, info })}>
+    <Form
+      navigationTitle={"Toolbox - " + info.title}
+      actions={ResultActionView({ content, info })}
+      isLoading={content.isLoading}
+    >
       <Form.TextArea
         id="query"
         title="Query"

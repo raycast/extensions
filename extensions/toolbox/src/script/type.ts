@@ -13,6 +13,7 @@ export interface Result {
   query: string;
   result: string;
   isLoading: boolean;
+  isWaiting: boolean;
   isError: boolean;
 }
 
