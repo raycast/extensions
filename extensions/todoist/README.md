@@ -32,9 +32,12 @@ For each task, you can:
 
 ## Future improvements
 
-- Better support tasks set at a certain time
+- Support tasks set at a certain time
+- Support sections in task creation
+- Sub-projects and sub-tasks are not supported because Raycast only has simple lists and mixing them with sections would make the list less readable.
 
 ## Limitation
 
 - Tasks in the "Today" and "Upcoming" views are not ordered the same as in your Todoist app because of a limitation from the [Todoist REST API](https://developer.todoist.com/rest/v1/#overview). The [Sync API](https://developer.todoist.com/sync/v8/) supports it but is not adapted for a Raycast extension.
 - You can't move a task to another project because of a limitation from the Todoist REST API.
+- Filters are not supported because of a limitation from the Todoist REST API.
