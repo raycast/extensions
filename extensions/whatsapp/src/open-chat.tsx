@@ -101,6 +101,7 @@ function getChatItemProps(chat: WhatsAppChat) {
       appUrl: `whatsapp://send?phone=${phone}&text=`,
       webUrl: `https://web.whatsapp.com/send?phone=${phone}&text=`,
       icon: Icon.Person,
+      keywords: [chat.phone, phone],
       form: <WhatsAppPhoneChatForm defaultValue={chat} />
     };
   } else {
@@ -111,13 +112,14 @@ function getChatItemProps(chat: WhatsAppChat) {
       appUrl: `whatsapp://chat?code=${chat.groupCode}`,
       webUrl: null,
       icon: Icon.Circle,
+      keywords: [chat.groupCode, 'group'],
       form: <WhatsAppGroupChatForm defaultValue={chat} />
     };
   }
 }
 
 function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListItemProps) {
-  const { title, accessoryTitle, icon, subtitle, appUrl, webUrl, form } = getChatItemProps(chat);
+  const { title, accessoryTitle, icon, keywords, subtitle, appUrl, webUrl, form } = getChatItemProps(chat);
 
   return (
     <List.Item
@@ -126,6 +128,7 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
       subtitle={subtitle}
       icon={icon}
       accessoryTitle={accessoryTitle}
+      keywords={keywords}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
