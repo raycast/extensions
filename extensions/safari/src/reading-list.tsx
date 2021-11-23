@@ -113,15 +113,14 @@ export default function Command() {
   return (
     <List isLoading={!bookmarks} onSearchTextChange={setSearchText}>
       {_.map(groupedBookmarks, (bookmarks, key) => {
-        if (bookmarks.length > 0) {
-          return (
-            <List.Section key={key} title={_.startCase(key)} subtitle={plural(bookmarks.length, 'bookmark')}>
-              {bookmarks.filter(filterListItem(searchText, ['title', 'url', 'description'])).map((bookmark) => (
-                <ListItem key={bookmark.uuid} bookmark={bookmark} />
-              ))}
-            </List.Section>
-          );
-        }
+        const filteredBookmarks = bookmarks.filter(filterListItem(searchText, ['title', 'url', 'description']));
+        return (
+          <List.Section key={key} title={_.startCase(key)} subtitle={plural(filteredBookmarks.length, 'bookmark')}>
+            {filteredBookmarks.map((bookmark) => (
+              <ListItem key={bookmark.uuid} bookmark={bookmark} />
+            ))}
+          </List.Section>
+        );
       })}
     </List>
   );

@@ -1,23 +1,30 @@
 {
   "name": "safari",
-  "title": "Safari Bookmarks",
-  "description": "List your Safari iCloud Tabs and Reading List Bookmarks",
+  "title": "Safari",
+  "description": "Manage your Safari Tabs (Local and iCloud) and Reading List",
   "icon": "safari-icon.png",
   "author": "loris",
   "license": "MIT",
   "commands": [
     {
       "name": "cloud-tabs",
-      "title": "Search iCloud Tabs",
+      "title": "Show Tabs",
       "subtitle": "Safari",
-      "description": "List, filter and open your Safari iCloud Tabs",
+      "description": "List, filter and open your Safari Tabs (Local and iCloud)",
       "mode": "view"
     },
     {
       "name": "reading-list",
-      "title": "Search Reading List",
+      "title": "Show Reading List",
       "subtitle": "Safari",
-      "description": "List, filter and open your Safari Reading List Bookmarks",
+      "description": "List, filter and open your Safari Reading List",
+      "mode": "view"
+    },
+    {
+      "name": "add-to-reading-list",
+      "title": "Add to Reading List",
+      "subtitle": "Safari",
+      "description": "Add URL to Safari Reading List",
       "mode": "view"
     }
   ],

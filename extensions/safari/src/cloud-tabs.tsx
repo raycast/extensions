@@ -5,13 +5,10 @@ import {
   CopyToClipboardAction,
   OpenInBrowserAction,
   Detail,
-  showToast,
-  ToastStyle,
   Icon,
   closeMainWindow,
 } from '@raycast/api';
 import { useState, useEffect, useCallback, Fragment } from 'react';
-import osascript from 'osascript-tag';
 import os from 'os';
 import path from 'path';
 import { promisify } from 'util';
@@ -19,7 +16,15 @@ import { readFile } from 'fs';
 import _ from 'lodash';
 import initSqlJs, { Database } from 'sql.js';
 import execa from 'execa';
-import { getTabUrl, getUrlDomain, getFaviconUrl, plural, permissionErrorMarkdown, filterListItem } from './shared';
+import {
+  executeJxa,
+  getTabUrl,
+  getUrlDomain,
+  getFaviconUrl,
+  plural,
+  permissionErrorMarkdown,
+  filterListItem,
+} from './shared';
 
 const asyncReadFile = promisify(readFile);
 
@@ -62,22 +67,6 @@ const executeQuery = async (db: Database, query: string): Promise<unknown> => {
 
   stmt.free();
   return results;
-};
-
-const executeJxa = async (script: string) => {
-  try {
-    const result = await osascript.jxa({ parse: true })`${script}`;
-    return result;
-  } catch (err: unknown) {
-    if (typeof err === 'string') {
-      const message = err.replace('execution error: Error: ', '');
-      if (message.match(/Application can't be found/)) {
-        showToast(ToastStyle.Failure, 'Application not found', 'Things must be running');
-      } else {
-        showToast(ToastStyle.Failure, 'Something went wrong', message);
-      }
-    }
-  }
 };
 
 const fetchLocalTabs = (): Promise<LocalTab[]> =>

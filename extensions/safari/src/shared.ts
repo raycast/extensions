@@ -1,5 +1,23 @@
 import _ from 'lodash';
 import { URL } from 'url';
+import osascript from 'osascript-tag';
+import { showToast, ToastStyle } from '@raycast/api';
+
+export const executeJxa = async (script: string) => {
+  try {
+    const result = await osascript.jxa({ parse: true })`${script}`;
+    return result;
+  } catch (err: unknown) {
+    if (typeof err === 'string') {
+      const message = err.replace('execution error: Error: ', '');
+      if (message.match(/Application can't be found/)) {
+        showToast(ToastStyle.Failure, 'Application not found', 'Things must be running');
+      } else {
+        showToast(ToastStyle.Failure, 'Something went wrong', message);
+      }
+    }
+  }
+};
 
 export const getTabUrl = (url: string) => {
   const parsedUrl = new URL(url);
@@ -29,8 +47,8 @@ const normalizeText = (text: string) =>
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
-export const filterListItem = (searchText: string, keys: string[]) => (tab: Tab) =>
-  _.some(keys, (key) => normalizeText(_.get(tab, key)).includes(normalizeText(searchText)));
+export const filterListItem = (searchText: string, keys: string[]) => (item: any[]) =>
+  _.some(keys, (key) => normalizeText(_.get(item, key)).includes(normalizeText(searchText)));
 
 // @TODO: This screen should be handled by Raycast itself (https://github.com/raycast/extensions/issues/101)
 export const permissionErrorMarkdown = `## Raycast needs full disk access in order to display your Safari bookmarks.
