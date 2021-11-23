@@ -161,7 +161,7 @@ const useScriptHook = () => {
     isWaiting: false,
     isError: false,
   });
-  const [isLivw, setIsLive] = useState(true);
+  const [isLive, setIsLive] = useState(true);
   useEffect(() => {
     return () => {
       selectScript = null;
@@ -171,10 +171,10 @@ const useScriptHook = () => {
 
   async function startScript() {
     if (content.query.length > 0) {
-      isLivw && setContent((prev) => ({ ...prev, isLoading: true }));
+      isLive && setContent((prev) => ({ ...prev, isLoading: true }));
 
       const scriptResult = await runScript(content.query);
-      isLivw &&
+      isLive &&
         setContent((prev) => ({
           ...prev,
           result: scriptResult.result,
@@ -182,7 +182,7 @@ const useScriptHook = () => {
           isError: !scriptResult.isSuccess,
         }));
     } else {
-      isLivw && setContent((prev) => ({ ...prev, result: "", isError: false }));
+      isLive && setContent((prev) => ({ ...prev, result: "", isError: false }));
     }
   }
 
