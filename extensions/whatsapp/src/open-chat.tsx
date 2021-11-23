@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  Color,
-  CopyToClipboardAction,
-  Icon,
-  List,
-  OpenInBrowserAction,
-  popToRoot,
-  PushAction
-} from "@raycast/api";
+import { ActionPanel, Color, CopyToClipboardAction, Icon, List, OpenInBrowserAction, PushAction } from "@raycast/api";
 import { useWhatsAppChats } from "./utils/use-whatsapp-chats";
 import { isGroupChat, isPhoneChat, WhatsAppChat } from "./utils/types";
 import WhatsAppPhoneChatForm from "./create-chat";
@@ -46,7 +37,6 @@ export default function ChatList() {
       return c;
     });
     await updateChats(newChats);
-    await popToRoot({ clearSearchBar: true });
   }
 
   return (
