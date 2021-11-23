@@ -21,8 +21,6 @@ enum ListName {
   Anytime = 'Anytime',
   Upcoming = 'Upcoming',
   Someday = 'Someday',
-  Logbook = 'Logbook',
-  Trash = 'Trash',
 }
 
 enum TodoStatus {
@@ -67,10 +65,18 @@ const executeJxa = async (script: string) => {
   }
 };
 
+const listNameToListIdMapping = {
+  Inbox: 'TMInboxListSource',
+  Today: 'TMTodayListSource',
+  Anytime: 'TMNextListSource',
+  Upcoming: 'TMCalendarListSource',
+  Someday: 'TMSomedayListSource',
+};
+
 const getListTodos = (listName: ListName) =>
   executeJxa(`
   const things = Application('Things');
-  const todos = things.lists.byName('${listName}').toDos();
+  const todos = things.lists.byId('${listNameToListIdMapping[listName]}').toDos();
   return todos.map(todo => ({
     id: todo.id(),
     name: todo.name(),
