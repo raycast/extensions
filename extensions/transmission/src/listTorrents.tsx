@@ -66,17 +66,17 @@ const statusToLabel = (status: TorrentStatus, percentDone: number) => {
   }
 };
 
-const statusIconSource = (status: TorrentStatus, percentDone: number, metadataPercentComplete: number): string => {
-  switch (status) {
+const statusIconSource = (torrent: Torrent): string => {
+  switch (torrent.status) {
     case TorrentStatus.Stopped:
-      return percentDone === 1 ? Icon.Checkmark : "status-stopped.png";
+      return torrent.percentDone === 1 ? Icon.Checkmark : "status-stopped.png";
     case TorrentStatus.QueuedToCheckFiles:
     case TorrentStatus.CheckingFiles:
     case TorrentStatus.QueuedToDownload:
       return Icon.Dot;
     case TorrentStatus.Downloading: {
-      if (metadataPercentComplete < 1) return "status-loading.png";
-      switch (Math.round(percentDone * 10)) {
+      if (torrent.metadataPercentComplete < 1) return "status-loading.png";
+      switch (Math.round(torrent.percentDone * 10)) {
         case 0:
           return "status-progress-0.png";
         case 1:
@@ -127,10 +127,10 @@ const formatStatus = (torrent: Torrent): string => {
     : statusToLabel(torrent.status, torrent.percentDone);
 };
 
-const statusIconColor = (status: TorrentStatus): string => {
-  switch (status) {
+const statusIconColor = (torrent: Torrent): string => {
+  switch (torrent.status) {
     case TorrentStatus.Downloading:
-      return Color.Green;
+      return torrent.metadataPercentComplete < 1 ? Color.Red : Color.Green;
     default:
       return Color.SecondaryText;
   }
@@ -311,8 +311,8 @@ function TorrentListItem({
       key={torrent.id}
       title={truncate(torrent.name, 60)}
       icon={{
-        source: statusIconSource(torrent.status, torrent.percentDone, torrent.metadataPercentComplete),
-        tintColor: statusIconColor(torrent.status),
+        source: statusIconSource(torrent),
+        tintColor: statusIconColor(torrent),
       }}
       accessoryTitle={[`↓ ${rateDownload}`, " - ", `↑ ${rateUpload}`, " - ", percentDone].join(" ")}
       actions={
