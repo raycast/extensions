@@ -11,6 +11,7 @@ import {
   ImageLike,
   ImageMask,
 } from "@raycast/api";
+import { Response } from "./client/interfaces";
 
 export default function SpotifyList() {
   const [searchText, setSearchText] = useState<string>();
@@ -67,12 +68,6 @@ function TrackListItem(props: { track: SpotifyApi.TrackObjectFull }) {
       }
     />
   );
-}
-
-interface Response<T> {
-  result?: T;
-  error?: string;
-  isLoading: boolean;
 }
 
 function useTrackSearch(query: string | undefined): Response<SpotifyApi.TrackSearchResponse> {

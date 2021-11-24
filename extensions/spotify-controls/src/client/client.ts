@@ -1,6 +1,7 @@
 import { getLocalStorageItem, preferences, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
 import SpotifyWebApi from "spotify-web-api-node";
 import { Response } from "./interfaces";
+import { AuthResponseCredentials } from "./spoti";
 
 const debugMode = false;
 
@@ -55,8 +56,8 @@ async function authenticate(): Promise<void> {
   }
 }
 
-async function getToken(): Promise<Response<SpotifyApi.AuthResponseCredentials>> {
-  const result: Response<SpotifyApi.AuthResponseCredentials> = await spotifyApi
+async function getToken(): Promise<Response<AuthResponseCredentials>> {
+  const result: Response<AuthResponseCredentials> = await spotifyApi
     .clientCredentialsGrant()
     .then((response: { body: any }) => {
       return {
