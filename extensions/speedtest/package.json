@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "speedtest",
   "title": "Speedtest",
-  "description": "Speedtest via speetest.net",
+  "description": "Speedtest via speedtest.net",
   "icon": "speedtest.png",
   "author": "tonka3000",
   "license": "MIT",
