@@ -1,7 +1,7 @@
 {
   "name": "ticktick",
   "title": "TickTick",
-  "description": "",
+  "description": "Check and search tasks in TickTick via Raycast",
   "icon": "tick-logo.png",
   "author": "Appest",
   "license": "MIT",
