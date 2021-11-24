@@ -148,7 +148,7 @@ function TodoListSection(props: { todos: Todo[] }) {
 
   const listSectionProps = id ? { key: id, title: name } : {};
   return (
-    <List.Section {...listSectionProps}>
+    <List.Section {...listSectionProps} subtitle={plural(todos.length, 'todo')}>
       {_.map(todos, (todo: Todo) => (
         <TodoListItem key={todo.id} todo={todo} />
       ))}
@@ -169,6 +169,8 @@ const setCachedListTodos = async (listName: ListName, todos: Todo[]): Promise<vo
   const value = JSON.stringify(todos);
   return setLocalStorageItem(key, value);
 };
+
+const plural = (count: number, string: string) => `${count} ${string}${count > 1 ? 's' : ''}`;
 
 const normalizeText = (text: string) =>
   text
