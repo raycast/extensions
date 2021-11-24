@@ -1,12 +1,11 @@
 <p align="center">
-   <img src="assets/icon,png" height="128">
+   <img src="assets/icon.png" height="128">
    <h1 align="center">Spotify</h1>
  </p>
 
  A [Raycast](https://raycast.com/) extension that lets you easily control [Spotify](https://spotify.com).
 
-
- ![Example of Spotify Extension on Raycast](https://cln.sh/mSexAr/download)
+ ![Example of Spotify Extension on Raycast](https://user-images.githubusercontent.com/15333662/143316115-25b21129-3eb8-4c4e-a47a-23c8cdd396a4.mp4)
 
 ### Configure `Client ID` and `Secret`
 
@@ -19,6 +18,6 @@ To create a new client id and secret, do the following:
 4. Copy **Client ID** and **Client Secret** into the extension preferences
 ![](https://cln.sh/8rCev4/download)
 ---
-#### Has we forgotten something? Let us know, [create an issue](https://github.com/raycast/extensions/issues/new/choose)!
+#### Has we forgotten something? Let us know and [create an issue](https://github.com/raycast/extensions/issues/new/choose)!
 \
-   ![Travolta](https://media.giphy.com/media/g01ZnwAUvutuK8GIQn/giphy.gif)
+![Travolta](https://media.giphy.com/media/g01ZnwAUvutuK8GIQn/giphy.gif)
