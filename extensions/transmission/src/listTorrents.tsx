@@ -30,6 +30,7 @@ type Torrent = {
   comment: string;
   eta: number;
   percentDone: number;
+  metadataPercentComplete: number;
   status: TorrentStatus;
   rateDownload: number;
   rateUpload: number;
@@ -65,7 +66,7 @@ const statusToLabel = (status: TorrentStatus, percentDone: number) => {
   }
 };
 
-const statusIconSource = (status: TorrentStatus, percentDone: number): string => {
+const statusIconSource = (status: TorrentStatus, percentDone: number, metadataPercentComplete: number): string => {
   switch (status) {
     case TorrentStatus.Stopped:
       return percentDone === 1 ? Icon.Checkmark : "status-stopped.png";
@@ -73,7 +74,8 @@ const statusIconSource = (status: TorrentStatus, percentDone: number): string =>
     case TorrentStatus.CheckingFiles:
     case TorrentStatus.QueuedToDownload:
       return Icon.Dot;
-    case TorrentStatus.Downloading:
+    case TorrentStatus.Downloading: {
+      if (metadataPercentComplete < 1) return "status-loading.png";
       switch (Math.round(percentDone * 10)) {
         case 0:
           return "status-progress-0.png";
@@ -99,7 +101,7 @@ const statusIconSource = (status: TorrentStatus, percentDone: number): string =>
         default:
           return "status-progress-10.png";
       }
-      break;
+    }
     case TorrentStatus.QueuedToSeed:
     case TorrentStatus.Seeding:
       return Icon.ChevronUp;
@@ -296,19 +298,26 @@ function TorrentListItem({
   const totalRateDownload = sessionStats != null ? `${prettyBytes(sessionStats.downloadSpeed)}/s` : "N/A";
   const totalRateUpload = sessionStats != null ? `${prettyBytes(sessionStats.uploadSpeed)}/s` : "N/A";
 
+  const selectedTorrentTitle = [
+    `ETA: ${formatStatus(torrent)}`,
+    torrent.metadataPercentComplete < 1 ? `${torrent.metadataPercentComplete * 100}% metadata` : null,
+  ]
+    .filter(Boolean)
+    .join(" - ");
+
   return (
     <List.Item
       id={String(torrent.id)}
       key={torrent.id}
       title={truncate(torrent.name, 60)}
       icon={{
-        source: statusIconSource(torrent.status, torrent.percentDone),
+        source: statusIconSource(torrent.status, torrent.percentDone, torrent.metadataPercentComplete),
         tintColor: statusIconColor(torrent.status),
       }}
       accessoryTitle={[`↓ ${rateDownload}`, " - ", `↑ ${rateUpload}`, " - ", percentDone].join(" ")}
       actions={
         <ActionPanel>
-          <ActionPanel.Section title={`Selected Torrent (ETA: ${formatStatus(torrent)})`}>
+          <ActionPanel.Section title={`Selected Torrent (${selectedTorrentTitle})`}>
             <ActionPanel.Item
               title={torrent.status === TorrentStatus.Stopped ? "Start Torrent" : "Stop Torrent"}
               onAction={() => (torrent.status === TorrentStatus.Stopped ? onStart(torrent) : onStop(torrent))}
