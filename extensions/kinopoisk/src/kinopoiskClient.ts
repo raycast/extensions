@@ -10,7 +10,6 @@ export function useSearch(query: string): SearchResult {
 
   useEffect(() => {
     async function fetchData() {
-      setState((oldState) => ({ ...oldState, isLoading: true }));
       try {
         const response = (await fetch(
           `https://kinopoiskapiunofficial.tech/api/v2.1/films/search-by-keyword?keyword=${query}&page=1`,
