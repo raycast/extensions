@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import {
   List,
   Icon,
@@ -12,8 +13,6 @@ import {
 import { useEffect, useState } from 'react';
 import osascript from 'osascript-tag';
 import dayjs from 'dayjs';
-import groupBy from 'lodash.groupby';
-import map from 'lodash.map';
 
 enum ListName {
   Inbox = 'Inbox',
@@ -32,7 +31,7 @@ interface Todo {
   id: string;
   name: string;
   status: TodoStatus;
-  tags: string[];
+  tags: string;
   project: TodoGroup;
   area: TodoGroup;
   dueDate: string;
@@ -82,7 +81,7 @@ const getListTodos = (listName: ListName) =>
     name: todo.name(),
     status: todo.status(),
     notes: todo.notes(),
-    tags: todo.tagNames().split(', '),
+    tags: todo.tagNames(),
     dueDate: todo.dueDate() && todo.dueDate().toISOString(),
     project: todo.project() && {
       id: todo.project().id(),
@@ -121,12 +120,12 @@ const formatDueDate = (dueDate: string) => {
 
 function TodoListItem(props: { todo: Todo }) {
   const { todo } = props;
-  const { id, name, status, dueDate, notes, tags = [], project, area } = todo;
+  const { id, name, status, dueDate, tags } = todo;
   return (
     <List.Item
       key={id}
       title={name}
-      subtitle={notes}
+      subtitle={tags}
       icon={status === 'completed' ? Icon.Checkmark : Icon.Circle}
       accessoryTitle={dueDate && `⚑  ${formatDueDate(dueDate)}`}
       actions={
@@ -139,7 +138,6 @@ function TodoListItem(props: { todo: Todo }) {
           </ActionPanel.Section>
         </ActionPanel>
       }
-      keywords={[...tags, project?.name, area?.name]}
     />
   );
 }
@@ -151,7 +149,7 @@ function TodoListSection(props: { todos: Todo[] }) {
   const listSectionProps = id ? { key: id, title: name } : {};
   return (
     <List.Section {...listSectionProps}>
-      {map(todos, (todo: Todo) => (
+      {_.map(todos, (todo: Todo) => (
         <TodoListItem key={todo.id} todo={todo} />
       ))}
     </List.Section>
@@ -172,9 +170,16 @@ const setCachedListTodos = async (listName: ListName, todos: Todo[]): Promise<vo
   return setLocalStorageItem(key, value);
 };
 
+const normalizeText = (text: string) =>
+  text
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
 export default function ShowList(props: { listName: ListName }) {
   const [isLoading, setIsLoading] = useState(true);
-  const [todos, setTodos] = useState<Todo[]>();
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [searchText, setSearchText] = useState<string>('');
   const { listName } = props;
 
   useEffect(() => {
@@ -194,11 +199,23 @@ export default function ShowList(props: { listName: ListName }) {
     fetchTodos();
   }, []);
 
-  const groupedTodos = groupBy(todos, getTodoGroupId);
+  const normalizedSearchText = normalizeText(searchText);
+  const searchKeys = ['name', 'notes', 'tags', 'project.name', 'area.name'];
+  const filteredTodos = _.filter(todos, (todo) =>
+    _.some(searchKeys, (key) => {
+      const value = _.get(todo, key, '');
+      return normalizeText(value).includes(normalizedSearchText);
+    })
+  );
+  const groupedTodos = _.groupBy(filteredTodos, getTodoGroupId);
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter by name, tags, project or area…">
-      {map(groupedTodos, (todos: Todo[], groupId: string) => (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter by name, notes, tags, project or area…"
+      onSearchTextChange={setSearchText}
+    >
+      {_.map(groupedTodos, (todos: Todo[], groupId: string) => (
         <TodoListSection key={groupId} todos={todos} />
       ))}
     </List>

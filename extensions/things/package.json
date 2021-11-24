@@ -47,8 +47,7 @@
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "dayjs": "^1.10.7",
-    "lodash.groupby": "^4.6.0",
-    "lodash.map": "^4.6.0",
+    "lodash": "^4.17.21",
     "osascript-tag": "^0.1.2"
   },
   "devDependencies": {
