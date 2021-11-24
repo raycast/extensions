@@ -8,6 +8,31 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "searchTracks",
+      "title": "Search Tracks",
+      "subtitle": "Spotify",
+      "description": "Search & Play tracks in Spotify",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "clientId",
+          "type": "password",
+          "required": true,
+          "title": "Personal Client ID",
+          "description": "Your clientId value from Spotify",
+          "placeholder": "Enter your clientId"
+        },
+        {
+          "name": "secret",
+          "type": "password",
+          "required": true,
+          "title": "Client id's secret",
+          "description": "Your secret value from Spotify",
+          "placeholder": "Enter your secret"
+        }
+      ]
+    },
+    {
       "name": "play",
       "title": "Play",
       "subtitle": "Spotify",
@@ -64,12 +89,16 @@
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
+    "@types/spotify-web-api-node": "^5.0.4",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "js-base64": "^3.6.1",
+    "open": "^8.2.1",
     "prettier": "2.4.1",
+    "spotify-web-api-node": "^5.0.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

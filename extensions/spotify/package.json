@@ -1,0 +1,50 @@
+{
+  "name": "spotify",
+  "title": "Spotify",
+  "description": "Useful commands for Spotify",
+  "icon": "spotify-logo.png",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Tracks",
+      "description": "Search & Play tracks in Spotify",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "type": "password",
+      "required": true,
+      "title": "Personal Client ID",
+      "description": "Your clientId value from Spotify",
+      "placeholder": "Enter your clientId"
+    },
+    {
+      "name": "secret",
+      "type": "password",
+      "required": true,
+      "title": "Client id's secret",
+      "description": "Your secret value from Spotify",
+      "placeholder": "Enter your secret"
+    }
+  ],
+  "engines": {
+    "raycast": ">=1.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^15.12.4",
+    "@types/react": "^17.0.9",
+    "@typescript-eslint/eslint-plugin": "^4.12.0",
+    "@typescript-eslint/parser": "^4.12.0",
+    "eslint": "^7.29.0",
+    "eslint-config-prettier": "^7.1.0",
+    "typescript": "^4.3.4"
+  },
+  "dependencies": {
+    "@raycast/api": "file:/Applications/Raycast Internal.app/Contents/Resources/RaycastCommands_RaycastCommands.bundle/Contents/Resources/api",
+    "js-base64": "^3.6.1",
+    "open": "^8.2.1",
+    "spotify-web-api-node": "^5.0.2"
+  }
+}
