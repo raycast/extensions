@@ -3,7 +3,7 @@
   "title": "TickTick",
   "description": "Check and search tasks in TickTick via Raycast",
   "icon": "tick-logo.png",
-  "author": "Appest",
+  "author": "appest",
   "license": "MIT",
   "commands": [
     {
