@@ -16,8 +16,9 @@ To create a new client id and secret, do the following:
 2. Accept the latest [Developer Terms of Service](https://developer.spotify.com/terms/) to complete your account setup.
 3. Create a new Spotify app at [Applications](https://developer.spotify.com/dashboard/applications)
 4. Copy **Client ID** and **Client Secret** into the extension preferences
+
 ![](https://cln.sh/8rCev4/download)
+
 ---
+
 #### Has we forgotten something? Let us know and [create an issue](https://github.com/raycast/extensions/issues/new/choose)!
-\
-![Travolta](https://media.giphy.com/media/g01ZnwAUvutuK8GIQn/giphy.gif)
