@@ -25,18 +25,11 @@ import {
   fetchDatabases,
   fetchDatabaseProperties,
   createDatabasePage,
+  fetchExtensionReadMe,
 } from './notion'
 
 
-
 export default function CreateDatabaseForm(): JSX.Element {
-  // Get preference values
-  const notion_token = String(preferences.notion_token.value)
-  const notion_workspace_slug = String(preferences.notion_workspace_slug.value)
-  if (notion_token.length !== 50) {
-    showToast(ToastStyle.Failure, 'Invalid token detected')
-    throw new Error('Invalid token length detected')
-  }
 
   // On form submit function
   const { pop } = useNavigation();
@@ -60,6 +53,7 @@ export default function CreateDatabaseForm(): JSX.Element {
   const [databases, setDatabases] = useState<Database[]>()
   const [databaseProperties, setDatabaseProperties] = useState<DatabasePropertie[]>()  
   const [databaseId, setDatabaseId] = useState<string>()
+  const [markdown, setMarkdown] = useState<string>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   
@@ -80,7 +74,6 @@ export default function CreateDatabaseForm(): JSX.Element {
       setIsLoading(false)
 
       await storeDatabases(fetchedDatabases)
-            
      
     }
     fetchData()
@@ -111,9 +104,21 @@ export default function CreateDatabaseForm(): JSX.Element {
   }, [databaseId])
 
 
-  if(databases && !databases[0]){
-    return NoSharedContent()
+  // Fetch Notion Extension README
+  useEffect(() => {
+    const fetchREADME = async () => {
+      if(!markdown){
+         const fetchedREADME = await fetchExtensionReadMe()
+        setMarkdown(fetchedREADME)
+      }     
+    }
+    fetchREADME()
+  }, [])
+
+  if(databases && !databases[0] && markdown){
+     return (<Detail markdown={markdown}/>)
   }
+  
   return (
     <Form 
       isLoading={isLoading} 
@@ -190,11 +195,6 @@ export default function CreateDatabaseForm(): JSX.Element {
       })}
     </Form>
   )
-}
-
-export function NoSharedContent(): JSX.Element{
-  return (<Detail markdown={`## No Shared Content 
-  \n\n Make sure to **Invite** at least one database with the integration you have created.\n ![NotionShare](https://images.ctfassets.net/lzny33ho1g45/2pIkZOvLY2o2dwfnJIYJxt/d5d9f1318b2e79ad92d8197e4abab655/automate-notion-with-zapier-11-share-options.png)`} />)
 }
 
 function validateForm(values: FormValues): boolean {
