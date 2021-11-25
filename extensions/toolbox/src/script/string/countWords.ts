@@ -8,6 +8,10 @@ export const countWords: Script = {
     example: "ray cast",
   },
   run(input) {
-    return String(input.trim().match(/\S+/g)?.length);
+    if (input.trim().match(/\S+/g)) {
+      return String(input.trim().match(/\S+/g)?.length);
+    } else {
+      throw Error("No Word");
+    }
   },
 };
