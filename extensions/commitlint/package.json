@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "commitlint",
   "title": "CommitLint",
-  "description": "Generate commitlint message",
+  "description": "Generate commitlint message. Based on commitlint.io tool.",
   "icon": "commitlint-icon.png",
   "author": "lardissone",
   "license": "MIT",
