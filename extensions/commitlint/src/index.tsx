@@ -1,7 +1,7 @@
 import { Form, copyTextToClipboard, ActionPanel, SubmitFormAction, showToast, ToastStyle } from "@raycast/api";
 
 interface CommitType {
-  [key: string]: string
+  [key: string]: string;
 }
 
 interface CommitValues {
@@ -27,19 +27,13 @@ const commitTypes: CommitType = {
 
 export default function Command() {
   async function handleSubmit(values: CommitValues) {
-    const {
-      type,
-      scope,
-      subject,
-      body,
-      footer
-    } = values;
+    const { type, scope, subject, body, footer } = values;
 
     let commitMessage = `${type}`;
     if (scope) {
       commitMessage += `(${scope})`;
     }
-    commitMessage += ': ';
+    commitMessage += ": ";
     if (subject) {
       commitMessage += subject;
     }
@@ -50,8 +44,6 @@ export default function Command() {
       commitMessage += `\n\n${footer}`;
     }
 
-    console.log(commitMessage);
-    // TODO: add validation with commitlint
     await copyTextToClipboard(commitMessage);
     showToast(ToastStyle.Success, "Copied to clipboard!", commitMessage);
   }
@@ -75,7 +67,4 @@ export default function Command() {
       <Form.TextField id="footer" title="Footer" placeholder="breaking changes and ref. issues (optional)" />
     </Form>
   );
-}
-function el(el: any) {
-  throw new Error("Function not implemented.");
 }
