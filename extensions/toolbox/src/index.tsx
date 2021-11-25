@@ -9,6 +9,7 @@ import {
   ToastStyle,
   useNavigation,
 } from "@raycast/api";
+import _ from "lodash";
 import React, { useEffect, useMemo, useState } from "react";
 import * as scripts from "./script";
 import { Category, Info, Result, Run, RunType, Script } from "./script/type";
@@ -90,21 +91,26 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
       const toast = await showToast(ToastStyle.Animated, info.title);
       toast.show();
       const query = await isClipboardContent();
+
+      let scriptResult = { result: "", isSuccess: false };
       if (query) {
-        const scriptResult = await runScript(query);
+        scriptResult = await runScript(query);
         if (scriptResult.isSuccess) {
           await copyTextToClipboard(scriptResult.result);
+        }
+      }
+      _.delay(async () => {
+        isClipboardScriptRunning = false;
+        toast.hide();
+        if (scriptResult.isSuccess) {
           await showHUD("Copy Result");
-          selectScript = null;
         } else {
-          await showToast(ToastStyle.Failure, scriptResult.result);
+          if (scriptResult.result) {
+            await showToast(ToastStyle.Failure, scriptResult.result);
+          }
           moveWindow(runType);
         }
-      } else {
-        moveWindow(runType);
-      }
-      toast.hide();
-      isClipboardScriptRunning = false;
+      }, 300);
     } else {
       moveWindow(runType);
     }
@@ -188,7 +194,7 @@ const useScriptHook = () => {
 
   useEffect(() => {
     if (content.isLoading) {
-      setContent({ ...content, isWaiting: true });
+      setContent((prev) => ({ ...prev, isWaiting: true }));
       return;
     }
     startScript();
@@ -196,7 +202,7 @@ const useScriptHook = () => {
 
   useEffect(() => {
     if (!content.isLoading && content.isWaiting) {
-      setContent({ ...content, isWaiting: false });
+      setContent((prev) => ({ ...prev, isWaiting: false }));
       startScript();
     }
   }, [content.isLoading, content.isWaiting]);
@@ -243,12 +249,18 @@ function InputDirectView(props: { info: Info }) {
     <List
       navigationTitle={"Toolbox - " + info.title}
       isLoading={content.isLoading}
-      searchBarPlaceholder={info.example}
+      searchBarPlaceholder={"Enter your query here"}
       onSearchTextChange={(query: string) => {
         setContent({ ...content, query: query });
       }}
     >
-      <List.Item title={content.result} actions={ResultActionView({ content, info })} />
+      <List.Item
+        title={content.result}
+        actions={ResultActionView({ content, info })}
+        subtitle={content.query.length <= 0 ? "Result" : ""}
+        accessoryTitle={content.query.length <= 0 ? "Waiting for query" : content.isError ? "Error" : "Success"}
+      />
+      <List.Item title="" subtitle={"Example"} accessoryTitle={info.example} />
     </List>
   );
 }
