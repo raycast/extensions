@@ -11,6 +11,9 @@ export function useSearch(query: string): SearchResult {
   useEffect(() => {
     async function fetchData() {
       try {
+        if (query.length > 0) {
+          setState((oldState) => ({ ...oldState, isLoading: true }));
+        }
         const response = (await fetch(
           `https://kinopoiskapiunofficial.tech/api/v2.1/films/search-by-keyword?keyword=${query}&page=1`,
           {
