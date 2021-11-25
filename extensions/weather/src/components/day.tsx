@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { getIcon, getWindDirectionIcon } from "../icons";
-import { getWindUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
+import { getWindUnit, getTemperatureUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
 import { Hourly, WeatherData } from "../wttr";
 
 function getTime(time: string): string {
@@ -37,7 +37,7 @@ export function DayList(props: { day: WeatherData; title: string }) {
     if (data[key]) {
       val = data[key] || "?";
     }
-    return `${val} ${getWindUnit()}`;
+    return `${val} ${getTemperatureUnit()}`;
   };
 
   return (

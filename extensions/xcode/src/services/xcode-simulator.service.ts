@@ -1,5 +1,5 @@
 import { XcodeSimulator } from "../models/simulator/xcode-simulator.model";
-import { execAsync, ExecAsyncOutput } from "../shared/exec-async";
+import { execAsync } from "../shared/exec-async";
 import { BehaviorSubject, Observable } from "rxjs";
 import { showToast, ToastStyle } from "@raycast/api";
 
@@ -18,7 +18,7 @@ export class XcodeSimulatorService {
    */
   get xcodeSimulators(): Observable<XcodeSimulator[] | undefined> {
     // Refresh XcodeSimulators
-    this.refreshXcodeSimulators();
+    this.refreshXcodeSimulators().then();
     // Return Subject as Observable
     return this.xcodeSimulatorsSubject.asObservable();
   }
@@ -79,7 +79,7 @@ export class XcodeSimulatorService {
       `xcrun simctl boot ${xcodeSimulator.udid}`
     );
     // Refresh XcodeSimulators
-    this.refreshXcodeSimulators();
+    this.refreshXcodeSimulators().then();
   }
 
   /**
@@ -96,7 +96,7 @@ export class XcodeSimulatorService {
       `xcrun simctl shutdown ${xcodeSimulator.udid}`
     );
     // Refresh XcodeSimulators
-    this.refreshXcodeSimulators();
+    this.refreshXcodeSimulators().then();
   }
 
   /**

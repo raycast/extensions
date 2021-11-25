@@ -1,10 +1,10 @@
 import { XcodeSimulatorApplication } from "../models/simulator/xcode-simulator-application.model";
 import { XcodeSimulatorService } from "./xcode-simulator.service";
-import * as fs from "fs";
-import * as Path from "path";
 import { execAsync } from "../shared/exec-async";
 import { XcodeSimulator } from "../models/simulator/xcode-simulator.model";
 import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
+import { readDirectoryAsync } from "../shared/fs-async";
+import { joinPathComponents } from "../shared/join-path-components";
 
 /**
  * XcodeSimulatorApplicationService
@@ -63,7 +63,7 @@ export class XcodeSimulatorApplicationService {
     // Flat map 2D Array to 1D
     const applications = ([] as XcodeSimulatorApplication[]).concat(...allApplications);
     // Cache Applications
-    this.cacheXcodeSimulatorApplication(applications);
+    this.cacheXcodeSimulatorApplication(applications).then();
     // Return Applications
     return applications;
   }
@@ -75,6 +75,16 @@ export class XcodeSimulatorApplicationService {
   private async findXcodeSimulatorApplications(
     simulator: XcodeSimulator
   ): Promise<XcodeSimulatorApplication[]> {
+    // The container application directory path
+    const containerApplicationDirectoryPath = joinPathComponents(
+      simulator.dataPath,
+      "Containers/Bundle/Application"
+    );
+    /// The container sandbox directory path
+    const containerSandboxDirectoryPath = joinPathComponents(
+      simulator.dataPath,
+      "Containers/Data/Application"
+    );
     // Declare Application Directory Paths
     let applicationDirectoryPaths: string[];
     // Declare SandBox Directory Paths
@@ -82,14 +92,28 @@ export class XcodeSimulatorApplicationService {
     // Declare SandBox Directory Bundle identifiers
     let sandBoxDirectoryBundleIds: string[];
     try {
-      // Read child directories paths
-      applicationDirectoryPaths = await readChildDirectoryPathsAsync(
-        Path.join(simulator.dataPath, "Containers/Bundle/Application")
-      );
+      // Read application child directories paths
+      applicationDirectoryPaths = await readDirectoryAsync(
+        containerApplicationDirectoryPath,
+        {
+          withFileTypes: true
+        }
+      ).then(entries => {
+        return entries
+          .filter(entry => entry.isDirectory())
+          .map(entry => joinPathComponents(containerApplicationDirectoryPath, entry.name));
+      });
       // Read SandBox child directory paths
-      sandBoxDirectoryPaths = await readChildDirectoryPathsAsync(
-        Path.join(simulator.dataPath, "Containers/Data/Application")
-      );
+      sandBoxDirectoryPaths = await readDirectoryAsync(
+        containerSandboxDirectoryPath,
+        {
+          withFileTypes: true
+        }
+      ).then(entries => {
+        return entries
+          .filter(entry => entry.isDirectory())
+          .map(entry => joinPathComponents(containerSandboxDirectoryPath, entry.name));
+      });
       // Read SandBox Bundle identifiers for each SandBox directory path
       sandBoxDirectoryBundleIds = (
         await execAsync(
@@ -98,7 +122,7 @@ export class XcodeSimulatorApplicationService {
               return [
                 "defaults",
                 "read",
-                Path.join(
+                joinPathComponents(
                   sandBoxDirectoryPath,
                   ".com.apple.mobile_container_manager.metadata.plist"
                 ),
@@ -161,7 +185,7 @@ export class XcodeSimulatorApplicationService {
     let applicationFileName: string;
     try {
       // Retrieve file names in application directory
-      const fileNames = await readDirectoryFileNamesAsync(applicationDirectoryPath);
+      const fileNames = await readDirectoryAsync(applicationDirectoryPath);
       // Initialize matching application file name where file name ends with '.app'
       const matchingApplicationFileName = fileNames.find(fileName => fileName.endsWith(".app"));
       // Check if matching application file name is unavailable
@@ -176,7 +200,7 @@ export class XcodeSimulatorApplicationService {
       return undefined;
     }
     // Declare Info.plist JSON
-    let infoPlistJSON: any
+    let infoPlistJSON: any;
     try {
       // Try to parse Info.plist JSON
       // using 'plutil' to convert the Info.plist XML to JSON format
@@ -187,7 +211,7 @@ export class XcodeSimulatorApplicationService {
               "plutil",
               "-convert",
               "json",
-              Path.join(
+              joinPathComponents(
                 applicationDirectoryPath,
                 applicationFileName
                   // Escape whitespaces
@@ -245,8 +269,8 @@ export class XcodeSimulatorApplicationService {
     if (primaryAppIconName) {
       try {
         // Read file names in application
-        const applicationFileNames = await readDirectoryFileNamesAsync(
-          Path.join(applicationDirectoryPath, applicationFileName)
+        const applicationFileNames = await readDirectoryAsync(
+          joinPathComponents(applicationDirectoryPath, applicationFileName)
         );
         // Find matching application file name that starts with the primary app icon name
         const matchingApplicationFileName = applicationFileNames
@@ -254,7 +278,7 @@ export class XcodeSimulatorApplicationService {
         // Check if a matching application file name is available
         if (matchingApplicationFileName) {
           // Initialize app icon path
-          appIconPath = Path.join(
+          appIconPath = joinPathComponents(
             applicationDirectoryPath,
             applicationFileName,
             matchingApplicationFileName
@@ -275,58 +299,9 @@ export class XcodeSimulatorApplicationService {
       simulator: simulator,
       bundlePath: applicationDirectoryPath,
       sandBoxPath: sandBoxDirectoryPath,
-      sandBoxDocumentsPath: Path.join(sandBoxDirectoryPath, "Documents"),
-      sandBoxCachesPath: Path.join(sandBoxDirectoryPath, "Library", "Caches")
+      sandBoxDocumentsPath: joinPathComponents(sandBoxDirectoryPath, "Documents"),
+      sandBoxCachesPath: joinPathComponents(sandBoxDirectoryPath, "Library", "Caches")
     };
   }
 
-}
-
-/**
- * Read file names in directory
- * @param path The Path
- */
-async function readDirectoryFileNamesAsync(
-  path: string
-): Promise<string[]> {
-  return new Promise((resolve, reject) => {
-    fs.readdir(
-      path,
-      (error, entries) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(entries);
-        }
-      }
-    );
-  });
-}
-
-/**
- * Read child directory paths from a given path
- * @param path The path to read child directory paths from
- */
-async function readChildDirectoryPathsAsync(
-  path: string
-): Promise<string[]> {
-  return new Promise((resolve, reject) => {
-    fs.readdir(
-      path,
-      {
-        withFileTypes: true
-      },
-      (error, entries) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(
-            entries
-              .filter(entry => entry.isDirectory())
-              .map(entry => Path.join(path, entry.name))
-          );
-        }
-      }
-    );
-  });
 }

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gitlab",
   "title": "GitLab",
   "version": "1.1.0",
@@ -10,112 +11,112 @@
     {
       "name": "issue_my",
       "title": "My Open Issues",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "My GitLab Issues",
       "mode": "view"
     },
     {
       "name": "issue_search",
       "title": "Search Issues",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "Search GitLab Issues",
       "mode": "view"
     },
     {
       "name": "issue_create",
       "title": "Create Issue",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "Create GitLab Issue",
       "mode": "view"
     },
     {
       "name": "mr_my",
       "title": "My Merge Requests",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "You GitLab Merge Requests",
       "mode": "view"
     },
     {
       "name": "mr_search",
       "title": "Search Merge Requests",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "Search Merge Requests",
       "mode": "view"
     },
     {
       "name": "mr_create",
       "title": "Create Merge Request",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "Create GitLab Merge Request",
       "mode": "view"
     },
     {
       "name": "user_search",
       "title": "Search User",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "Search GitLab user",
       "mode": "view"
     },
     {
       "name": "todos",
       "title": "My Todos",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "My GitLab Todos",
       "mode": "view"
     },
     {
       "name": "reviews",
       "title": "My Reviews",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "My GitLab Reviews",
       "mode": "view"
     },
     {
       "name": "project_search",
       "title": "Search Project",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "Search GitLab Project",
       "mode": "view"
     },
     {
       "name": "project_starred",
       "title": "My Starred Projects",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "Starred GitLab Projects",
       "mode": "view"
     },
     {
       "name": "project_my",
       "title": "My Projects",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "My GitLab Projects",
       "mode": "view"
     },
     {
       "name": "group_my",
       "title": "My Groups",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "GitLab Groups",
       "mode": "view"
     },
     {
       "name": "epics",
       "title": "Epics",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "GitLab Epics",
       "mode": "view"
     },
     {
       "name": "epic_search",
       "title": "Search Epics",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "Search GitLab Epics",
       "mode": "view"
     },
     {
       "name": "event_my",
       "title": "My Recent Activities",
-      "subtitle" : "GitLab",
+      "subtitle": "GitLab",
       "description": "Recent GitLab Activities",
       "mode": "view"
     }

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-mdn",
+  "title": "Search MDN",
+  "description": "Search MDN Web Docs",
+  "icon": "icon.png",
+  "author": "krzysztofzuraw",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Web Docs",
+      "subtitle": "MDN",
+      "description": "Search MDN Web Docs",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "axios": "^0.23.0",
+    "url-join": "4.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/url-join": "4.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "tsc": "tsc --project . --noEmit",
+    "lint": "eslint --fix --quiet --ext .ts,.tsx,.es,.jsx src/"
+  }
+}

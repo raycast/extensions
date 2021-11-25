@@ -8,7 +8,7 @@
 
 - New extension
 - Bug fix / improvement for my extension
-- Bug fix / improvement for somebody else's extension
+- Bug fix / improvement for somebody else's extension. Extension author: @GH-handle
 - Documentation update
 - Other (Specify)
 

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "party-parrot",
   "title": "Party Parrot",
   "description": "Celebrating the good times with some dancing party parrot in Raycast.",

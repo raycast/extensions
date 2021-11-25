@@ -15,5 +15,5 @@ export interface XcodeSwiftPackageCreationParameters {
   /**
    * The XcodeSwiftPackageType
    */
-  type: XcodeSwiftPackageType
+  type: XcodeSwiftPackageType;
 }

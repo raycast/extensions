@@ -1,13 +1,18 @@
 import {
   render,
   ActionPanel,
+  SubmitFormAction,
+  PushAction,
   Color,
   Icon,
   List,
+  Form,
+  FormValues,
   OpenInBrowserAction,
   preferences,
   showToast,
   ToastStyle,
+  useNavigation,
 } from '@raycast/api'
 import { randomUUID } from 'crypto'
 import { useEffect, useState } from 'react'
@@ -21,6 +26,10 @@ import {
   Team,
 } from './vercel'
 
+import {
+  UpdateEnvironmentVariable,
+} from './actions'
+
 render(<Main />)
 
 function Main(): JSX.Element {
@@ -30,39 +39,38 @@ function Main(): JSX.Element {
     showToast(ToastStyle.Failure, 'Invalid token detected')
     throw new Error('Invalid token length detected')
   }
-  const ignoredTeamIDs = String(preferences.ignoredTeams.value ?? '')
-    .split(',')
-    .map((id) => id.trim())
-    .filter((id) => id !== '')
 
   // Setup useState objects
   const [username, setUsername] = useState('')
   const [deployments, setDeployments] = useState<Deployment[]>()
   const [teams, setTeams] = useState<Team[]>()
   useEffect(() => {
-    const call = async () => setUsername(await fetchUsername())
-    if (username === '') {
-      call()
+    const ignoredTeamIDs = String(preferences.ignoredTeams.value ?? '')
+      .split(',')
+      .map((id) => id.trim())
+      .filter((id) => id !== '')
+    const fetchData = async () => {
+      const [fetchedUsername, fetchedTeams] = await Promise.all([
+        fetchUsername(),
+        fetchTeams(ignoredTeamIDs),
+      ])
+      const fetchedDeployments = await fetchDeployments(
+        fetchedUsername,
+        fetchedTeams
+      )
+      setUsername(fetchedUsername)
+      setTeams(fetchedTeams)
+      setDeployments(fetchedDeployments)
     }
-  })
-  useEffect(() => {
-    const call = async () =>
-      setDeployments(await fetchDeployments(username, teams ?? []))
-    if (!deployments) {
-      call()
-    }
-  })
-  useEffect(() => {
-    const call = async () => setTeams(await fetchTeams(ignoredTeamIDs))
-    if (!teams) {
-      call()
-    }
-  })
+    fetchData()
+  }, [])
 
   // Refresh deployments every 2 seconds
   useInterval(async () => {
-    setDeployments(await fetchDeployments(username, teams ?? []))
-  }, 2000)
+    if (username && teams) {
+      setDeployments(await fetchDeployments(username, teams))
+    }
+  }, 8000)
 
   return (
     <List isLoading={!deployments}>
@@ -94,7 +102,20 @@ function Main(): JSX.Element {
             icon={{ tintColor: iconTintColor, source: iconSource }}
             actions={
               <ActionPanel>
-                <OpenInBrowserAction url={d.url} />
+                <ActionPanel.Section title={(d.owner === username ? '' : `${d.owner}/`) + d.project}>
+                  <OpenInBrowserAction url={d.url} />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Project Settings">
+                  <PushAction 
+                    icon={Icon.Gear}
+                    title="Environment Variable"                     
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    target={<UpdateEnvironmentVariable
+                      projectId={d.project}
+                      projectName={(d.owner === username ? '' : `${d.owner}/`) + d.project}
+                    />} 
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "emoji",
   "title": "Emoji Search",
   "description": "Finds emojis and inserts or copies them.",
@@ -9,9 +10,36 @@
     {
       "name": "emoji",
       "title": "Search Emoji",
-      "subtitle": "",
       "description": "Finds emojis and inserts or copies them.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "unicodeVersion",
+      "type": "dropdown",
+      "required": false,
+      "title": "Unicode Version",
+      "description": "Unicode version to use (default: 13.1)",
+      "default": "13.1",
+      "data": [
+        { "title": "4.0", "value": "4.0"},
+        { "title": "5.0", "value": "5.0"},
+        { "title": "11.0", "value": "11.0"},
+        { "title": "12.0", "value": "12.0"},
+        { "title": "12.1", "value": "12.1"},
+        { "title": "13.0", "value": "13.0"},
+        { "title": "13.1", "value": "13.1"}
+      ]
+    },
+    {
+      "name": "shortCodes",
+      "type": "checkbox",
+      "required": false,
+      "title": "Shortcodes",
+      "label": "Add Shortcodes",
+      "default": false,
+      "description": "Add short codes to the emojis (e.g. zap for ⚡️) using GitHub Emoji API."
     }
   ],
   "dependencies": {

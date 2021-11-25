@@ -2,6 +2,8 @@ import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
 import { XcodeProject } from "../models/project/xcode-project.model";
 import { XcodeProjectType } from "../models/project/xcode-project-type.model";
 import { execAsync } from "../shared/exec-async";
+import { runAppleScript } from "../shared/run-apple-script";
+import { joinPathComponents } from "../shared/join-path-components";
 
 /**
  * XcodeProjectService
@@ -36,7 +38,7 @@ export class XcodeProjectService {
    */
   private cacheXcodeProjects(
     xcodeProjects: XcodeProject[]
-  ):  Promise<void> {
+  ): Promise<void> {
     // Store XcodeProjects JSON in LocalStorage
     return setLocalStorageItem(
       this.xcodeProjectsJSONLocalStorageKey,
@@ -53,12 +55,12 @@ export class XcodeProjectService {
       "kMDItemDisplayName == *.xcodeproj",
       "kMDItemDisplayName == *.xcworkspace",
       "kMDItemDisplayName == Package.swift",
-      "kMDItemDisplayName == *.playground",
-    ]
+      "kMDItemDisplayName == *.playground"
+    ];
     // Execute command
     const output = await execAsync(
       `mdfind '${spotlightSearchParameters.join(" || ")}'`
-    )
+    );
     // Initialize XcodeProjects
     const xcodeProjects = output
       .stdout
@@ -75,9 +77,60 @@ export class XcodeProjectService {
       // Filter out null values
       .filter(xcodeProject => !!xcodeProject) as XcodeProject[];
     // Cache XcodeProjects
-    this.cacheXcodeProjects(xcodeProjects);
+    this.cacheXcodeProjects(xcodeProjects).then();
     // Return XcodeProjects
     return xcodeProjects;
+  }
+
+  /**
+   * Retrieve the currently opened XcodeProjects
+   */
+  async openedXcodeProjects(): Promise<XcodeProject[]> {
+    // Declare opened XcodeProject paths
+    let openedXcodeProjectPaths: string;
+    try {
+      // Run AppleScript to retrieve the opened XcodeProject paths
+      openedXcodeProjectPaths = await runAppleScript(
+        [
+          'tell application "Xcode"',
+            'return path of workspace documents',
+          'end tell'
+        ]
+      );
+    } catch {
+      // Catch error and return an empty error
+      // usually the error indicates that either
+      // Xcode is not installed or not running
+      return [];
+    }
+    // Check if opened XcodeProject paths are empty
+    if (!openedXcodeProjectPaths.trim()) {
+      // Return an empty array
+      return [];
+    }
+    // Decode opened XcodeProject paths
+    return openedXcodeProjectPaths
+      // Split by semicolon
+      .split(",")
+      // Trim each path
+      .map(path => path.trim())
+      .map(path => {
+        // Check if path does not contain a file extension
+        if (!path.split("/").at(-1)?.includes(".")) {
+          // As no file extension is available in the path
+          // the opened XcodeProject path is a Swift Package Project
+          // which has been opened by clicking the "Package.swift" file.
+          // Therefore the path will be appended with the "Package.swift" file
+          return joinPathComponents(path, "Package.swift");
+        } else {
+          // Otherwise return unmodified path
+          return path;
+        }
+      })
+      // Decode each Xcode Project Path
+      .map(xcodeProjectPath => XcodeProjectService.decodeXcodeProject(xcodeProjectPath))
+      // Filter out null values
+      .filter(xcodeProject => !!xcodeProject) as XcodeProject[]
   }
 
   /**
@@ -92,7 +145,7 @@ export class XcodeProjectService {
     // Initialize the file extension
     const fileExtension = lastPathComponent.split(".").at(-1);
     // Declare name
-    let name: string
+    let name: string;
     // Switch on file extension
     switch (fileExtension) {
       case XcodeProjectType.project:
