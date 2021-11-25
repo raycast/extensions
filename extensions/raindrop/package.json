@@ -21,13 +21,6 @@
       "subtitle": "Raindrop.io",
       "description": "Search bookmarks using operators",
       "mode": "view"
-    },
-    {
-      "name": "add_bookmark",
-      "title": "Add Bookmark",
-      "subtitle": "Raindrop.io",
-      "description": "Add a bookmark to the Unsorted collection",
-      "mode": "view"
     }
   ],
   "preferences": [
