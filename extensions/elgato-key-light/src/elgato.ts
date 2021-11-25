@@ -1,5 +1,6 @@
 import axios from "axios";
 import Bonjour, { RemoteService } from "bonjour";
+import { waitUntil } from "./utils";
 
 export async function toggleKeyLight(service: RemoteService) {
   const url = `http://${service.host}:${service.port}/elgato/lights`;
@@ -19,23 +20,15 @@ async function setKeyLight(url: string, state: boolean) {
   return state;
 }
 
-const TIMEOUT = 3_000;
-
 export async function findKeyLight() {
   const bonjour = Bonjour();
 
-  const timeout = new Promise<never>((_, reject) => {
-    setTimeout(async () => {
-      reject(new Error("Couldn't find key lights on network"));
-    }, TIMEOUT);
-  });
-
   const find = new Promise<RemoteService>((resolve) => {
-    bonjour.findOne({ type: "elg" }, async (service) => {
+    bonjour.findOne({ type: "elg" }, (service) => {
       resolve(service);
       bonjour.destroy();
     });
   });
 
-  return Promise.race([find, timeout]);
+  return waitUntil(find, { timeoutMessage: "Cannot find any Key Lights in the network" });
 }

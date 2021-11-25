@@ -6,7 +6,7 @@ export default async () => {
   try {
     const keyLight = await findKeyLight();
     const isOn = await toggleKeyLight(keyLight);
-    await showHUD(isOn ? "Key light turned on" : "Key light turned off");
+    await showHUD(isOn ? "Key Light turned on" : "Key Light turned off");
   } catch (error) {
     await showFailureToast(error);
   }
