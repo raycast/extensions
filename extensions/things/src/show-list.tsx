@@ -24,6 +24,7 @@ enum ListName {
 enum TodoStatus {
   open = 'open',
   completed = 'completed',
+  canceled = 'canceled',
 }
 
 interface Todo {
@@ -108,6 +109,12 @@ const setTodoProperty = (todoId: string, key: string, value: string) =>
   things.toDos.byId('${todoId}').${key} = '${value}';
 `);
 
+const deleteTodo = (todoId: string) =>
+  executeJxa(`
+  const things = Application('Things');
+  things.delete(things.toDos.byId('${todoId}'));
+`);
+
 const getTodoGroupId = (todo: Todo) => todo.project?.id || todo.area?.id;
 const getTodoGroup = (todo: Todo) => todo.project || todo.area;
 
@@ -126,6 +133,12 @@ const formatDueDate = (dueDate: string) => {
   }
 };
 
+const statusIcons = {
+  open: Icon.Circle,
+  completed: Icon.Checkmark,
+  canceled: Icon.XmarkCircle,
+};
+
 function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: ListName }) {
   const { todo, refreshTodos, listName } = props;
   const { id, name, status, dueDate, project, tags } = todo;
@@ -141,16 +154,16 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
       key={id}
       title={name}
       subtitle={tags}
-      icon={status === 'completed' ? Icon.Checkmark : Icon.Circle}
+      icon={statusIcons[status]}
       accessoryTitle={dueDate && `⚑  ${formatDueDate(dueDate)}`}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={`Todo: ${name}`}>
             <OpenInBrowserAction title="Open in Things" icon={Icon.ArrowRight} url={`things:///show?id=${id}`} />
-            {status === 'open' && (
+            {status !== 'completed' && (
               <ActionPanel.Item
                 title="Mark as Completed"
-                icon={Icon.Checkmark}
+                icon={statusIcons.completed}
                 onAction={async () => {
                   await setTodoProperty(id, 'status', 'completed');
                   refreshTodos();
@@ -159,6 +172,24 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
                 }}
               />
             )}
+            {status !== 'canceled' && (
+              <ActionPanel.Item
+                title="Mark as Canceled"
+                icon={statusIcons.canceled}
+                onAction={async () => {
+                  await setTodoProperty(id, 'status', 'canceled');
+                  refreshTodos();
+                }}
+              />
+            )}
+            <ActionPanel.Item
+              title="Delete"
+              icon={Icon.Trash}
+              onAction={async () => {
+                await deleteTodo(id);
+                refreshTodos();
+              }}
+            />
           </ActionPanel.Section>
           {project && (
             <ActionPanel.Section title={`Project: ${project.name}`}>
