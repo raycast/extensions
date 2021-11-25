@@ -5,7 +5,6 @@ import { TaskPayload } from "./types";
 
 export const axiosInstance = axios.create({
   baseURL: "https://api.todoist.com/rest/v1",
-  timeout: 1000,
   headers: { Authorization: `Bearer ${preferences.token.value}` },
 });
 
