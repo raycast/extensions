@@ -8,9 +8,8 @@ import {
   showToast,
   getLocalStorageItem,
   setLocalStorageItem,
-  environment,
 } from '@raycast/api';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import osascript from 'osascript-tag';
 import dayjs from 'dayjs';
 
@@ -46,6 +45,8 @@ interface Todo {
 interface TodoGroup {
   id: string;
   name: string;
+  tags: string;
+  area?: TodoGroup;
 }
 
 const executeJxa = async (script: string) => {
@@ -86,11 +87,18 @@ const getListTodos = (listName: ListName) =>
     project: todo.project() && {
       id: todo.project().id(),
       name: todo.project().name(),
+      tags: todo.project().tagNames(),
+      area: todo.project().area() && {
+        id: todo.project().area().id(),
+        name: todo.project().area().name(),
+        tags: todo.project().area().tagNames(),
+      },
     },
     area: todo.area() && {
       id: todo.area().id(),
       name: todo.area().name(),
-    }
+      tags: todo.area().tagNames(),
+    },
   }));
 `);
 
@@ -118,9 +126,16 @@ const formatDueDate = (dueDate: string) => {
   }
 };
 
-function TodoListItem(props: { todo: Todo }) {
-  const { todo } = props;
-  const { id, name, status, dueDate, tags } = todo;
+function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: ListName }) {
+  const { todo, refreshTodos, listName } = props;
+  const { id, name, status, dueDate, project, tags } = todo;
+  const area = todo.area || todo.project?.area;
+  // const tags = _([todo.tags, todo.project?.tags, todo.area?.tags, todo.project?.area?.tags])
+  //   .flatMap((string = '') => string.split(', '))
+  //   .compact()
+  //   .uniq()
+  //   .join(', ');
+
   return (
     <List.Item
       key={id}
@@ -130,11 +145,54 @@ function TodoListItem(props: { todo: Todo }) {
       accessoryTitle={dueDate && `⚑  ${formatDueDate(dueDate)}`}
       actions={
         <ActionPanel>
-          <ActionPanel.Section title={name}>
-            <OpenInBrowserAction title="Open in Things" url={`things:///show?id=${id}`} />
-            {environment.isDevelopment && status === 'open' && (
-              <ActionPanel.Item title="Mark as Completed" onAction={() => setTodoProperty(id, 'status', 'completed')} />
+          <ActionPanel.Section title={`Todo: ${name}`}>
+            <OpenInBrowserAction title="Open in Things" icon={Icon.ArrowRight} url={`things:///show?id=${id}`} />
+            {status === 'open' && (
+              <ActionPanel.Item
+                title="Mark as Completed"
+                icon={Icon.Checkmark}
+                onAction={async () => {
+                  await setTodoProperty(id, 'status', 'completed');
+                  refreshTodos();
+                  // Force additional refresh once todo has been removed from list by Things
+                  setTimeout(refreshTodos, 2000);
+                }}
+              />
             )}
+          </ActionPanel.Section>
+          {project && (
+            <ActionPanel.Section title={`Project: ${project.name}`}>
+              <OpenInBrowserAction
+                title="Open in Things"
+                icon={Icon.ArrowRight}
+                shortcut={{ modifiers: ['cmd'], key: 'o' }}
+                url={`things:///show?id=${project.id}`}
+              />
+            </ActionPanel.Section>
+          )}
+          {area && (
+            <ActionPanel.Section title={`Area: ${area.name}`}>
+              <OpenInBrowserAction
+                title="Open in Things"
+                icon={Icon.ArrowRight}
+                shortcut={{ modifiers: ['opt'], key: 'o' }}
+                url={`things:///show?id=${area.id.replace('THMAreaParentSource/', '')}`}
+              />
+            </ActionPanel.Section>
+          )}
+          <ActionPanel.Section title={`List: ${listName}`}>
+            <OpenInBrowserAction
+              title="Open in Things"
+              icon={Icon.ArrowRight}
+              shortcut={{ modifiers: ['ctrl'], key: 'o' }}
+              url={`things:///show?id=${listName.toLowerCase()}`}
+            />
+            <ActionPanel.Item
+              title="Refresh"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ['cmd'], key: 'r' }}
+              onAction={refreshTodos}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -142,15 +200,15 @@ function TodoListItem(props: { todo: Todo }) {
   );
 }
 
-function TodoListSection(props: { todos: Todo[] }) {
-  const { todos } = props;
+function TodoListSection(props: { todos: Todo[]; refreshTodos: () => void; listName: ListName }) {
+  const { todos, refreshTodos, listName } = props;
   const { id, name } = getTodoGroup(todos[0]) || {};
 
   const listSectionProps = id ? { key: id, title: name } : {};
   return (
     <List.Section {...listSectionProps} subtitle={plural(todos.length, 'todo')}>
       {_.map(todos, (todo: Todo) => (
-        <TodoListItem key={todo.id} todo={todo} />
+        <TodoListItem key={todo.id} todo={todo} refreshTodos={refreshTodos} listName={listName} />
       ))}
     </List.Section>
   );
@@ -178,31 +236,51 @@ const normalizeText = (text: string) =>
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
+const searchKeys = [
+  'name',
+  'notes',
+  'tags',
+  'project.name',
+  'project.tags',
+  'area.name',
+  'area.tags',
+  'project.area.name',
+  'project.area.tags',
+];
+
 export default function ShowList(props: { listName: ListName }) {
   const [isLoading, setIsLoading] = useState(true);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [searchText, setSearchText] = useState<string>('');
   const { listName } = props;
 
-  useEffect(() => {
-    const fetchTodos = async () => {
+  const fetchTodos = useCallback(async (refreshing = false) => {
+    const useCache = !refreshing;
+    if (refreshing) {
+      setIsLoading(true);
+    }
+
+    if (useCache) {
       const cachedResults = await getCachedListTodos(ListName[listName]);
       if (cachedResults) {
         setTodos(cachedResults);
       }
+    }
 
-      const results = await getListTodos(ListName[listName]);
-      setTodos(results);
-      setIsLoading(false);
+    const results = await getListTodos(ListName[listName]);
+    setTodos(results);
+    setIsLoading(false);
 
+    if (useCache) {
       setCachedListTodos(ListName[listName], results);
-    };
-
-    fetchTodos();
+    }
   }, []);
 
+  useEffect(() => {
+    fetchTodos();
+  }, [fetchTodos]);
+
   const normalizedSearchText = normalizeText(searchText);
-  const searchKeys = ['name', 'notes', 'tags', 'project.name', 'area.name'];
   const filteredTodos = _.filter(todos, (todo) =>
     _.some(searchKeys, (key) => {
       const value = _.get(todo, key, '');
@@ -218,7 +296,7 @@ export default function ShowList(props: { listName: ListName }) {
       onSearchTextChange={setSearchText}
     >
       {_.map(groupedTodos, (todos: Todo[], groupId: string) => (
-        <TodoListSection key={groupId} todos={todos} />
+        <TodoListSection key={groupId} todos={todos} refreshTodos={() => fetchTodos(true)} listName={listName} />
       ))}
     </List>
   );
