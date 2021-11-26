@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionPanel, Form, Icon, render, useNavigation } from "@raycast/api";
+import { ActionPanel, Form, Icon, render, showToast, ToastStyle, useNavigation } from "@raycast/api";
 import { Project as TProject, Label } from "./types";
 import { createTask, useFetch } from "./api";
 import { priorities } from "./constants";
@@ -52,30 +52,31 @@ function Create() {
   }
 
   async function submit() {
-    try {
-      const body: FormattedPayload = { content, description };
+    const body: FormattedPayload = { content, description };
 
-      if (dueDate) {
-        body.due_date = getAPIDate(dueDate);
-      }
-
-      if (priority) {
-        body.priority = parseInt(priority);
-      }
-
-      if (projectId) {
-        body.project_id = parseInt(projectId);
-      }
-
-      if (labelIds && labelIds.length > 0) {
-        body.label_ids = labelIds.map((id) => parseInt(id));
-      }
-
-      await createTask(body);
-      clear();
-    } catch {
-      // fail silently
+    if (!body.content) {
+      await showToast(ToastStyle.Failure, "The title is required");
+      return;
     }
+
+    if (dueDate) {
+      body.due_date = getAPIDate(dueDate);
+    }
+
+    if (priority) {
+      body.priority = parseInt(priority);
+    }
+
+    if (projectId) {
+      body.project_id = parseInt(projectId);
+    }
+
+    if (labelIds && labelIds.length > 0) {
+      body.label_ids = labelIds.map((id) => parseInt(id));
+    }
+
+    await createTask(body);
+    clear();
   }
 
   return (

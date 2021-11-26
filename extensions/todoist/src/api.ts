@@ -1,4 +1,4 @@
-import { preferences, showToast, ToastStyle } from "@raycast/api";
+import { preferences, showToast, ToastStyle, Toast } from "@raycast/api";
 import axios, { AxiosError } from "axios";
 import useSWR from "swr";
 import { TaskPayload } from "./types";
@@ -8,62 +8,70 @@ export const axiosInstance = axios.create({
   headers: { Authorization: `Bearer ${preferences.token.value}` },
 });
 
+interface HandleSuccessParams {
+  toast: Toast;
+  title: string;
+}
+
+export function handleSuccess({ toast, title }: HandleSuccessParams) {
+  toast.style = ToastStyle.Success;
+  toast.title = title;
+}
+
+interface HandleErrorParams {
+  error: AxiosError;
+  toast: Toast;
+  title: string;
+  message: string;
+}
+
+export function handleError({ error, toast, title, message }: HandleErrorParams) {
+  toast.style = ToastStyle.Failure;
+
+  if (error.response?.status === 401) {
+    toast.title = "Unauthorized";
+    toast.message = "Please check your Todoist token";
+    return;
+  }
+
+  toast.title = title;
+  toast.message = message;
+}
+
 export async function createTask(body: TaskPayload): Promise<void> {
   const toast = await showToast(ToastStyle.Animated, "Creating task");
-  try {
-    if (!body.content) {
-      throw new Error("Title is required");
-    }
 
-    await axiosInstance.post(`/tasks`, body);
-    toast.style = ToastStyle.Success;
-    toast.title = "Created task";
-  } catch (error) {
-    toast.style = ToastStyle.Failure;
-    toast.title = "Failed creating task";
-    toast.message = error instanceof Error ? error.message : undefined;
-
-    throw error;
-  }
+  return axiosInstance
+    .post("/tasks", body)
+    .then(() => handleSuccess({ toast, title: "Task created" }))
+    .catch((error) => handleError({ error, toast, title: "Failed to create task", message: error.message }));
 }
 
 export async function completeTask(id: number): Promise<void> {
   const toast = await showToast(ToastStyle.Animated, "Completing task");
-  try {
-    await axiosInstance.post(`/tasks/${id}/close`);
-    toast.style = ToastStyle.Success;
-    toast.title = "Task achieved. Well done! 🙌";
-  } catch (error) {
-    toast.style = ToastStyle.Failure;
-    toast.title = "Failed completing task";
-    toast.message = error instanceof Error ? error.message : undefined;
-  }
+
+  return axiosInstance
+    .post(`/tasks/${id}/close`)
+    .then(() => handleSuccess({ toast, title: "Task achieved. Well done! 🙌" }))
+    .catch((error) => handleError({ error, toast, title: "Failed to complete task", message: error.message }));
 }
 
 export async function updateTask(id: number, body: TaskPayload): Promise<void> {
   const toast = await showToast(ToastStyle.Animated, "Updating task");
-  try {
-    await axiosInstance.post(`tasks/${id}`, body);
-    toast.style = ToastStyle.Success;
-    toast.title = "Task updated";
-  } catch (error) {
-    toast.style = ToastStyle.Failure;
-    toast.title = "Failed updating task";
-    toast.message = error instanceof Error ? error.message : undefined;
-  }
+
+  return axiosInstance
+    .post(`tasks/${id}`, body)
+    .then(() => handleSuccess({ toast, title: "Task updated" }))
+    .catch((error) => handleError({ error, toast, title: "Failed to update task", message: error.message }));
 }
 
 export async function deleteTask(id: number): Promise<void> {
   const toast = await showToast(ToastStyle.Animated, "Deleting task");
-  try {
-    await axiosInstance.delete(`/tasks/${id}`);
-    toast.style = ToastStyle.Success;
-    toast.title = "Task deleted";
-  } catch (error) {
-    toast.style = ToastStyle.Failure;
-    toast.title = "Failed deleting task";
-    toast.message = error instanceof Error ? error.message : undefined;
-  }
+
+  return axiosInstance
+    .delete(`tasks/${id}`)
+    .then(() => handleSuccess({ toast, title: "Task deleted" }))
+    .catch((error) => handleError({ error, toast, title: "Failed to delete task", message: error.message }));
 }
 
 interface FetchResult<T> {
