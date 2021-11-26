@@ -1,0 +1,18 @@
+# Productboard
+
+![screenshot](./assets/preview.png)
+
+## Setup
+
+Currently, this extension can add new notes to Produtboard.
+
+You'll also need a Public API Access token. To create access token, go to Integrations. Scroll down to PUBLIC API and create a new one to use with Raycast. You will need to have admin rights to be able to do it.
+
+Then, paste access token into the Raycast preferences for this extension.
+
+## Additional preferences
+
+Adding metadata to your note can make the note triaging in the Productboard easier. You can set default presets for them.
+
+- Default tags – adds a default set of tags in add note dialog. Can be overriden.
+- Default Said by – adds a default email to _Said by_ field in add note dialog. Can be overriden.
