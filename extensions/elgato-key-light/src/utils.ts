@@ -17,6 +17,10 @@ export async function showFailureToast<T>(
     : undefined;
 
   await showToast(ToastStyle.Failure, title, message);
+
+  if (process.env.NODE_ENV === "development") {
+    console.error(resolvedError);
+  }
 }
 
 export async function waitUntil<T>(
