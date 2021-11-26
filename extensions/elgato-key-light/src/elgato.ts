@@ -23,7 +23,7 @@ export class KeyLight {
 
   private service: RemoteService;
 
-  constructor(service: RemoteService) {
+  private constructor(service: RemoteService) {
     this.service = service;
   }
 
@@ -36,8 +36,6 @@ export class KeyLight {
 
   async increaseBrightness() {
     const keyLight = await this.getKeyLight(this.service);
-    console.log(keyLight);
-
     const newBrightness = Math.min(keyLight.brightness + 5, 100);
     await this.updateKeyLight(this.service, { brightness: newBrightness });
     return newBrightness;
