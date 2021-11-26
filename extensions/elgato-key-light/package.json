@@ -27,6 +27,20 @@
       "subtitle": "Elgato",
       "description": "Decrease brightness of Key Light by 5%",
       "mode": "no-view"
+    },
+    {
+      "name": "increaseTemperature",
+      "title": "Increase Color Temperature",
+      "subtitle": "Elgato",
+      "description": "Increase color temperature of Key Light by 5%",
+      "mode": "no-view"
+    },
+    {
+      "name": "decreaseTemperature",
+      "title": "Decrease Color Temperature",
+      "subtitle": "Elgato",
+      "description": "Decrease color temperature of Key Light by 5%",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

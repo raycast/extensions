@@ -12,6 +12,6 @@ export default async () => {
     const formattedBrightness = brightness.toLocaleString("en", { maximumFractionDigits: 0 });
     await showHUD(`Decreased brightness to ${formattedBrightness}%`);
   } catch (error) {
-    await showFailureToast(error, "Failed increasing brightness");
+    await showFailureToast(error, "Failed decreasing brightness");
   }
 };
