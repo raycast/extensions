@@ -10,7 +10,7 @@
     {
       "name": "generate",
       "title": "Generate UUID",
-      "description": "Copy to clipboard a randomly generated UUID",
+      "description": "Copy a generated UUID to the clipboard",
       "mode": "no-view"
     }
   ],
