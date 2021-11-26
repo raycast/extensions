@@ -1,4 +1,4 @@
-import { Form, copyTextToClipboard, ActionPanel, SubmitFormAction, showToast, ToastStyle } from "@raycast/api";
+import { Form, copyTextToClipboard, closeMainWindow, ActionPanel, SubmitFormAction, showHUD } from "@raycast/api";
 
 interface CommitType {
   [key: string]: string;
@@ -45,14 +45,15 @@ export default function Command() {
     }
 
     await copyTextToClipboard(commitMessage);
-    showToast(ToastStyle.Success, "Copied to clipboard!", commitMessage);
+    closeMainWindow();
+    showHUD("Copied to Clipboard");
   }
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Copy to clipboard" onSubmit={handleSubmit} />
+          <SubmitFormAction title="Copy to Clipboard" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
