@@ -4,5 +4,5 @@ import { v4 as uuidv4 } from "uuid";
 export default async () => {
     let uuid = uuidv4();
     await copyTextToClipboard(uuid);
-    await showHUD(`Copied new UUID: ${uuid}`);
+    await showHUD(`✅ Copied new UUID: ${uuid}`);
 }
