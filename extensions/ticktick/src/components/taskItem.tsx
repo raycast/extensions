@@ -2,6 +2,7 @@ import { ActionPanel, Color, Icon, List, OpenAction } from "@raycast/api";
 import { useCallback, useMemo } from "react";
 import { getProjectNameById } from "../service/project";
 import { Task } from "../service/task";
+import { addSpaceBetweenEmojiAndText } from "../utils/text";
 
 const TaskItem: React.FC<{
   id: Task["id"];
@@ -49,7 +50,7 @@ const TaskItem: React.FC<{
           </ActionPanel.Section>
         </ActionPanel>
       }
-      accessoryTitle={projectName}
+      accessoryTitle={addSpaceBetweenEmojiAndText(projectName)}
     />
   );
 };
