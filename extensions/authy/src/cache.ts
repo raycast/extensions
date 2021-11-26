@@ -5,7 +5,7 @@ export const APPS_KEY = "apps"
 export const REQUEST_ID = "requestId"
 export const DEVICE_ID = "deviceId"
 export const SECRET_SEED = "secretSeed"
-export const AUTHY_APPS = "authyApps"
+export const AUTHY_ID = "authyId"
 
 export async function checkIfCached(key: string): Promise<boolean> {
     return await getLocalStorageItem(key) != undefined;

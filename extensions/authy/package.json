@@ -10,7 +10,7 @@
     {
       "name": "search-otp",
       "title": "Search OTP",
-      "description": "Search OTP for synced Authy Apps and 3rd party apps",
+      "description": "Search OTP for synced Authy Apps and 3rd party services",
       "mode": "view"
     }
   ],
@@ -36,10 +36,11 @@
     "@raycast/api": "^1.25.6",
     "hi-base32": "^0.5.1",
     "node-fetch": "^3.1.0",
-    "totp-generator": "^0.0.12"
+    "node-forge": "^0.10.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
+    "@types/node-forge": "^0.10.10",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",

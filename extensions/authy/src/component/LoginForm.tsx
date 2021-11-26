@@ -9,6 +9,7 @@ import {
 import {
     ActionPanel,
     Detail,
+    environment,
     getPreferenceValues,
     Icon,
     render,
@@ -18,7 +19,8 @@ import {
 } from "@raycast/api";
 import {
     addToCache,
-    AUTHY_APPS,
+    APPS_KEY,
+    AUTHY_ID,
     checkIfCached,
     DEVICE_ID,
     getFromCache,
@@ -29,6 +31,15 @@ import {
 } from "../cache";
 import Authy from "../search-otp";
 import {genTOTP} from "../util/utils";
+
+const message = `
+## Approval request has been sent
+To continue approve request at any other device and press ⏎ to continue.
+
+![approve](file://${environment.assetsPath}/approve.png)
+
+Or press ⌘ + ⏎ to start this process from scratch 
+`
 
 async function requestLoginIfNeeded() {
     const toast = await showToast(ToastStyle.Animated, "Authy", "Waiting for Approval");
@@ -76,19 +87,23 @@ async function checkForApproval(setLogin: (step: boolean) => void) {
         }
         const deviceId: number = await getFromCache(DEVICE_ID);
         const secretSeed: string = await getFromCache(SECRET_SEED);
-        console.log(deviceId, secretSeed);
         // get authy apps
         const authyApp = await getAuthyApps(authyId, deviceId, genTOTP(secretSeed));
-        await addToCache(AUTHY_APPS, authyApp)
+        await addToCache(APPS_KEY, authyApp)
         // get 3rd party services
         const services = await getServices(authyId, deviceId, genTOTP(secretSeed));
         await addToCache(SERVICES_KEY, services);
+        await addToCache(AUTHY_ID, authyId);
         setLogin(true);
+        await toast.hide()
+        await showToast(ToastStyle.Success, "Authy", "Success Login")
         return Promise.resolve();
     } catch (error) {
         if (error instanceof Error) {
+            await removeFromCache(REQUEST_ID)
             await toast.hide()
             await showToast(ToastStyle.Failure, "Authy", error.message)
+            render(<Authy/>)
         } else {
             throw error;
         }
@@ -111,7 +126,7 @@ export default function LoginForm(props: { setLogin: (step: boolean) => void }) 
     });
 
     return (
-        <Detail markdown={`**Hello** _World_!`} actions={
+        <Detail markdown={`${message}`} actions={
             <ActionPanel>
                 <SubmitFormAction icon={Icon.Clipboard} title="Agree" onSubmit={() => checkForApproval(props.setLogin)}/>
                 <ActionPanel.Item icon={Icon.ExclamationMark} title={"Start From Scratch"} onAction={resetRegistration}/>

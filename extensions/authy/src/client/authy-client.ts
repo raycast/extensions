@@ -35,19 +35,14 @@ export async function checkRequestStatus(authyId: number, requestId: string): Pr
     formData.set("api_key", API_KEY);
     formData.set("signature", SIGNATURE);
     formData.set("locale", "en-GB")
-    console.log(`${baseUrl}/users/${authyId}/devices/registration/${requestId}/status?` + formData)
-    // return Promise.reject();
     const resp = await fetch(`${baseUrl}/users/${authyId}/devices/registration/${requestId}/status?` + formData, {
         method: "GET"
     });
     if (resp.ok) {
-        const registrationStatus = await resp.json() as RegistrationStatus
-        console.log(registrationStatus);
-        return registrationStatus;
+        return await resp.json() as RegistrationStatus;
     } else {
         const apiError = await resp.json() as ApiError;
-        console.log(apiError)
-        throw new Error((await resp.json() as ApiError).message)
+        throw new Error(apiError.message)
     }
 }
 
@@ -63,9 +58,7 @@ export async function completeRegistration(authyId: number, pin: string): Promis
         body: formData
     });
     if (resp.ok) {
-        const device = await resp.json() as Device
-        console.log(device);
-        return device;
+        return await resp.json() as Device;
     } else {
         throw new Error((await resp.json() as ApiError).message)
     }
@@ -80,14 +73,12 @@ export async function getAuthyApps(authyId: number, deviceId: number, otps: numb
     formData.set("otp1", `${otps[0]}`);
     formData.set("otp2", `${otps[1]}`);
     formData.set("otp3", `${otps[2]}`);
-    const resp = await fetch(`${baseUrl}/users/${authyId}/devices/${deviceId}/apps/sync/`, {
+    const resp = await fetch(`${baseUrl}/users/${authyId}/devices/${deviceId}/apps/sync`, {
         method: "POST",
         body: formData
     });
     if (resp.ok) {
-        const authyApp = await resp.json() as AuthyApp
-        console.log(authyApp);
-        return authyApp;
+        return await resp.json() as AuthyApp;
     } else {
         throw new Error((await resp.json() as ApiError).message)
     }
@@ -102,12 +93,9 @@ export async function getServices(authyId: number, deviceId: number, otps: numbe
     formData.set("otp1", `${otps[0]}`);
     formData.set("otp2", `${otps[1]}`);
     formData.set("otp3", `${otps[2]}`);
-    console.log(`${baseUrl}/users/${authyId}/authenticator_tokens?` + formData)
     const resp = await fetch(`${baseUrl}/users/${authyId}/authenticator_tokens?` + formData);
     if (resp.ok) {
-        const services = await resp.json() as Services
-        console.log(services);
-        return services;
+        return await resp.json() as Services;
     } else {
         throw new Error((await resp.json() as ApiError).message)
     }
