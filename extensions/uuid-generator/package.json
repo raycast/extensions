@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "generate",
-      "title": "Generate UUID to clipboard",
+      "title": "Generate UUID",
       "description": "Copy to clipboard a randomly generated UUID",
       "mode": "no-view"
     }
