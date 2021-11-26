@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Commitlint",
+      "title": "Create Commitlint Message",
       "description": "Generate commitlint message",
       "mode": "view"
     }
