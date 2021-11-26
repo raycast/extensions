@@ -9,36 +9,36 @@
   "commands": [
     {
       "name": "toggle",
-      "title": "Toggle Key Lights",
-      "subtitle": "Elgato",
-      "description": "Toggles all connected Key Lights",
+      "title": "Toggle On/Off",
+      "subtitle": "Elgato Key Light",
+      "description": "Toggles all connected Key Lights on or off",
       "mode": "no-view"
     },
     {
       "name": "increaseBrightness",
       "title": "Increase Brightness",
-      "subtitle": "Elgato",
+      "subtitle": "Elgato Key Light",
       "description": "Increase brightness of Key Light by 5%",
       "mode": "no-view"
     },
     {
       "name": "decreaseBrightness",
       "title": "Decrease Brightness",
-      "subtitle": "Elgato",
+      "subtitle": "Elgato Key Light",
       "description": "Decrease brightness of Key Light by 5%",
       "mode": "no-view"
     },
     {
       "name": "increaseTemperature",
       "title": "Increase Color Temperature",
-      "subtitle": "Elgato",
+      "subtitle": "Elgato Key Light",
       "description": "Increase color temperature of Key Light by 5%",
       "mode": "no-view"
     },
     {
       "name": "decreaseTemperature",
       "title": "Decrease Color Temperature",
-      "subtitle": "Elgato",
+      "subtitle": "Elgato Key Light",
       "description": "Decrease color temperature of Key Light by 5%",
       "mode": "no-view"
     }
