@@ -1,23 +1,29 @@
+import moment from "moment";
+
 export const convertMacTime2JSTime = (time: number) => {
   return time * 1000;
 };
 
 export const getSectionNameByDate = (date: Date) => {
-  const today = new Date();
-  const yesterday = getYesterdayDate();
-  const dateYYYYMMDD = YYYYMMDD(date);
-  if (YYYYMMDD(today) === dateYYYYMMDD) {
-    return "Today";
-  } else if (YYYYMMDD(yesterday) === dateYYYYMMDD) {
+  const sectionDateMM = moment(date);
+  if (moment().subtract(1, "days").isSame(date, "day")) {
     return "Overdue";
   }
+
+  if (moment().isSame(date, "day")) {
+    return "Today";
+  }
+
+  if (
+    moment().add(1, "days").isSame(date, "day") ||
+    moment().add(2, "days").isSame(date, "day") ||
+    moment().add(3, "days").isSame(date, "day") ||
+    moment().add(4, "days").isSame(date, "day") ||
+    moment().add(5, "days").isSame(date, "day") ||
+    moment().add(6, "days").isSame(date, "day")
+  ) {
+    return sectionDateMM.format("ddd, MMM Do");
+  }
+
   return "";
-};
-
-function getYesterdayDate() {
-  return new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
-}
-
-const YYYYMMDD = (date: Date) => {
-  return `${date.getFullYear()}${date.getMonth()}${date.getDate()}`;
 };

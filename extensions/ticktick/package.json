@@ -12,10 +12,18 @@
       "subtitle": "TickTick",
       "description": "Show today tasks.",
       "mode": "view"
+    },
+    {
+      "name": "next7Days",
+      "title": "Next 7 Days Tasks",
+      "subtitle": "TickTick",
+      "description": "Show next 7 days tasks.",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.25.2",
+    "moment": "^2.29.1",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {

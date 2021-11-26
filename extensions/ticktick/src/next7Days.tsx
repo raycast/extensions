@@ -1,24 +1,24 @@
 import { List } from "@raycast/api";
 import React, { useEffect, useMemo, useState } from "react";
-import { getToday } from "./service/osScript";
+import { getNext7Days } from "./service/osScript";
 import { Section } from "./service/task";
 import useStartApp from "./hooks/useStartApp";
-import TaskItem from "./components/taskItem";
 import useSearchTasks from "./hooks/useSearchTasks";
+import TaskItem from "./components/taskItem";
 
-const TickTickToday: React.FC<{}> = () => {
+const TickTickNext7Days: React.FC<{}> = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [todaySections, setTodaySections] = useState<Section[] | null>(null);
+  const [sections, setSections] = useState<Section[] | null>(null);
   const { isInitCompleted } = useStartApp();
 
   useEffect(() => {
-    const getTodayTasks = async () => {
-      const today = await getToday();
-      setTodaySections(today);
+    const getTasks = async () => {
+      const tasks = await getNext7Days();
+      setSections(tasks);
     };
 
     if (isInitCompleted) {
-      getTodayTasks();
+      getTasks();
     }
   }, [isInitCompleted]);
 
@@ -32,8 +32,8 @@ const TickTickToday: React.FC<{}> = () => {
     if (searchQuery) {
       return searchTasks == null;
     }
-    return todaySections == null;
-  }, [isInitCompleted, searchQuery, searchTasks, todaySections]);
+    return sections == null;
+  }, [isInitCompleted, searchQuery, searchTasks, sections]);
 
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchQuery} searchBarPlaceholder="Search all tasks...">
@@ -48,7 +48,7 @@ const TickTickToday: React.FC<{}> = () => {
               priority={task.priority}
             />
           ))
-        : todaySections?.map((section) => {
+        : sections?.map((section) => {
             return (
               <List.Section key={section.id} title={`${section.name}`} subtitle={`${section.children.length}`}>
                 {section.children.map((task) => (
@@ -57,7 +57,7 @@ const TickTickToday: React.FC<{}> = () => {
                     actionType="smartProject"
                     id={task.id}
                     title={task.title}
-                    projectId="today"
+                    projectId="week"
                     priority={task.priority}
                   />
                 ))}
@@ -68,4 +68,4 @@ const TickTickToday: React.FC<{}> = () => {
   );
 };
 
-export default TickTickToday;
+export default TickTickNext7Days;

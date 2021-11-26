@@ -86,6 +86,42 @@ export const getToday = async () => {
   }
 };
 
+export const getNext7Days = async () => {
+  const installed = await checkAppInstalled();
+  if (!installed) return [];
+  try {
+    const result = (await runAppleScript(`
+    set result to ""
+    tell application "TickTick"
+	    set result to (next7days tasks)
+    end tell
+    return result
+  `)) as string;
+    if (result === "missing value") {
+      return [];
+    }
+    const parsedResult = JSON.parse(result);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return parsedResult.map((section: any) => {
+      if (section.id === "note") {
+        return {
+          id: "note",
+          name: "Note",
+          children: section.tasks.map(taskObject2Task),
+        };
+      }
+      return {
+        id: `date-${section.date}`,
+        name: getSectionNameByDate(new Date(convertMacTime2JSTime(section.date))),
+        children: section.tasks.map(taskObject2Task),
+      };
+    });
+  } catch (e) {
+    errorHandler(e);
+    return [];
+  }
+};
+
 export const getSearchByKeyword = async (keyword: string) => {
   const installed = await checkAppInstalled();
   if (!installed) return [];
