@@ -11,7 +11,7 @@
       "name": "generate",
       "title": "Generate UUID to clipboard",
       "description": "Copy to clipboard a randomly generated UUID",
-      "mode": "view"
+      "mode": "no-view"
     }
   ],
   "dependencies": {

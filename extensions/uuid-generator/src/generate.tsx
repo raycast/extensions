@@ -1,7 +1,8 @@
-import { closeMainWindow, copyTextToClipboard } from "@raycast/api";
+import { copyTextToClipboard, showHUD } from "@raycast/api";
 import { v4 as uuidv4 } from "uuid";
 
 export default async () => {
-    await closeMainWindow();
-    await copyTextToClipboard(uuidv4());
+    let uuid = uuidv4();
+    await copyTextToClipboard(uuid);
+    await showHUD(`Copied new UUID: ${uuid}`);
 }
