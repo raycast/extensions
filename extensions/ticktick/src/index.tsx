@@ -54,10 +54,10 @@ const TickTickToday: React.FC<{}> = () => {
                 {section.children.map((task) => (
                   <TaskItem
                     key={task.id}
-                    actionType="smartProject"
+                    actionType="today"
                     id={task.id}
                     title={task.title}
-                    projectId="today"
+                    projectId={task.projectId}
                     priority={task.priority}
                   />
                 ))}

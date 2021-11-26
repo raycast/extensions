@@ -8,7 +8,7 @@ const TaskItem: React.FC<{
   title: Task["title"];
   priority: Task["priority"];
   projectId: Task["projectId"];
-  actionType: "smartProject" | "project";
+  actionType: "today" | "week" | "project";
 }> = (props) => {
   const { id, title, priority, projectId, actionType } = props;
 
@@ -32,10 +32,10 @@ const TaskItem: React.FC<{
   }, []);
 
   const target = useMemo(() => {
-    if (actionType === "smartProject") {
-      return `ticktick://widget.view.task.in.smartproject/${projectId}/${id}`;
+    if (actionType === "project") {
+      return `ticktick://widget.view.task.in.project/${projectId}/${id}`;
     }
-    return `ticktick://widget.view.task.in.project/${projectId}/${id}`;
+    return `ticktick://widget.view.task.in.smartproject/${actionType}/${id}`;
   }, [actionType, id, projectId]);
 
   return (
