@@ -8,10 +8,24 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "toggle",
       "title": "Toggle Key Lights",
       "subtitle": "Elgato",
-      "description": "Toggles all connected lights",
+      "description": "Toggles all connected Key Lights",
+      "mode": "no-view"
+    },
+    {
+      "name": "increaseBrightness",
+      "title": "Increase Brightness",
+      "subtitle": "Elgato",
+      "description": "Increase brightness of Key Light by 5%",
+      "mode": "no-view"
+    },
+    {
+      "name": "decreaseBrightness",
+      "title": "Decrease Brightness",
+      "subtitle": "Elgato",
+      "description": "Decrease brightness of Key Light by 5%",
       "mode": "no-view"
     }
   ],
