@@ -11,21 +11,21 @@
       "name": "open-chat",
       "title": "Open Chat",
       "subtitle": "WhatsApp",
-      "description": "Opens saved WhatsApp chats",
+      "description": "Open quickly added WhatsApp chats",
       "mode": "view"
     },
     {
-      "name": "create-chat",
-      "title": "Create Chat",
+      "name": "add-chat",
+      "title": "Add Chat",
       "subtitle": "WhatsApp",
-      "description": "Creates WhatsApp chat in the extension",
+      "description": "Add WhatsApp chats to open them later",
       "mode": "view"
     },
     {
-      "name": "create-group",
-      "title": "Create Group",
+      "name": "add-existing-group",
+      "title": "Add Existing Group",
       "subtitle": "WhatsApp",
-      "description": "Creates WhatsApp group in the extension",
+      "description": "Add existing WhatsApp groups to open them later",
       "mode": "view"
     },
     {

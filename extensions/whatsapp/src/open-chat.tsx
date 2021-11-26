@@ -1,9 +1,9 @@
 import { ActionPanel, Color, CopyToClipboardAction, Icon, List, OpenInBrowserAction, PushAction } from "@raycast/api";
 import { useWhatsAppChats } from "./utils/use-whatsapp-chats";
 import { isGroupChat, isPhoneChat, WhatsAppChat } from "./utils/types";
-import WhatsAppPhoneChatForm from "./create-chat";
+import WhatsAppPhoneChatForm from "./add-chat";
 import { useState } from "react";
-import WhatsAppGroupChatForm from "./create-group";
+import WhatsAppGroupChatForm from "./add-existing-group";
 import formatTimeDistance from "fromnow";
 
 export default function ChatList() {
@@ -107,12 +107,12 @@ function getChatItemProps(chat: WhatsAppChat) {
   } else {
     return {
       title: chat.name,
-      subtitle: 'Group',
+      subtitle: "Group",
       accessoryTitle,
       appUrl: `whatsapp://chat?code=${chat.groupCode}`,
       webUrl: null,
       icon: Icon.Circle,
-      keywords: [chat.groupCode, 'group'],
+      keywords: [chat.groupCode, "group"],
       form: <WhatsAppGroupChatForm defaultValue={chat} />
     };
   }
