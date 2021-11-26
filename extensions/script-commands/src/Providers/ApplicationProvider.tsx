@@ -34,8 +34,7 @@ export const ApplicationProvider = ({children}: Props) => {
   return (
     <ApplicationContext.Provider 
       value={{state}}
-    >
-      { children }
-    </ApplicationContext.Provider>
+      children={ children }
+    />
   )
 }

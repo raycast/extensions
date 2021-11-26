@@ -13,5 +13,4 @@ export type {
   IconPathNullable,
   IconResultNullable,
   StateResult,
-  ViewState,
 } from "./Types"

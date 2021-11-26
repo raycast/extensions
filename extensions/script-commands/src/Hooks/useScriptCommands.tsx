@@ -63,11 +63,17 @@ export const useScriptCommands: UseScriptCommands = () => {
     fetch()
   }, [state])
 
+  const isLoading = state.main.groups.length == 0
+  let placeholder = "Loading Script Commands..."
+
+  if (isLoading == false)
+    placeholder = `Search for your Script Command among of ${state.main.totalScriptCommands} items`
+
   return {
     props: {
       title: "Search Command",
-      placeholder: `Search for your Script Command among of ${state.main.totalScriptCommands} items`,
-      isLoading: state.main.groups.length == 0,
+      placeholder: placeholder,
+      isLoading: isLoading,
       groups: state.main.groups
     },
     reloadData

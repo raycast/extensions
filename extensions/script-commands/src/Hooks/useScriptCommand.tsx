@@ -10,7 +10,6 @@ import {
 } from "@raycast/api"
 
 import { 
-  useRef,
   useState 
 } from "react"
 

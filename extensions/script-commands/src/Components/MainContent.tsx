@@ -10,14 +10,27 @@ import {
   Group 
 } from "@models"
 
-type Props = {
-  navigationTitle: string
-  placeholder: string
-  isLoading: boolean
-  groups: Group[]
-}
+import { 
+  useScriptCommands 
+} from "@hooks"
 
-export function MainContent({ navigationTitle, placeholder, isLoading, groups }: Props): JSX.Element {
+export function MainContent(): JSX.Element {
+  const { props } = useScriptCommands()  
+  const sections = flattenGroups(props.groups)
+  
+  return (
+    <List 
+      navigationTitle={ props.title }
+      isLoading={ props.isLoading } 
+      searchBarPlaceholder={ props.placeholder }
+      children={ sections }
+    />
+  )
+}
+  
+type FlattenGroups = (groups: Group[]) => JSX.Element[]
+  
+const flattenGroups: FlattenGroups = (groups) => {
   const sections: JSX.Element[] = []
 
   groups.sort((left: Group, right: Group) => {
@@ -49,14 +62,6 @@ export function MainContent({ navigationTitle, placeholder, isLoading, groups }:
       })
     }
   }
-  
-  return (
-    <List 
-      navigationTitle={ navigationTitle }
-      isLoading={ isLoading } 
-      searchBarPlaceholder={ placeholder }
-    >
-      { sections }
-    </List>
-  )
+
+  return sections
 }
