@@ -6,6 +6,7 @@ import {
   Icon,
   ImageLike,
   List,
+  OpenInBrowserAction,
   popToRoot,
   PushAction,
   showToast,
@@ -144,6 +145,38 @@ export function StateListItem(props: { state: State }): JSX.Element {
   );
 }
 
+function CopyStateValueAction(props: { state: State }): JSX.Element {
+  return (
+    <CopyToClipboardAction
+      title="Copy State Value"
+      content={props.state.state}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+    />
+  );
+}
+
+function CopyEntityIDAction(props: { state: State }): JSX.Element {
+  return (
+    <CopyToClipboardAction
+      title="Copy Entity ID"
+      content={props.state.entity_id}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+    />
+  );
+}
+
+function OpenEntityHistoryAction(props: { state: State }): JSX.Element {
+  const historyUrl = ha.urlJoin(`history?entity_id=${props.state.entity_id}`);
+  return (
+    <OpenInBrowserAction
+      title="Open History in Browser"
+      icon={{ source: Icon.Text, tintColor: Color.PrimaryText }}
+      url={historyUrl}
+      shortcut={{ modifiers: ["cmd"], key: "h" }}
+    />
+  );
+}
+
 export function StateActionPanel(props: { state: State }): JSX.Element {
   const state = props.state;
   const domain = props.state.entity_id.split(".")[0];
@@ -176,8 +209,10 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             onAction={async () => await ha.stopCover(props.state.entity_id)}
             icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
           />
-          <ShowAttributesAction state={props.state} />
-          <CopyToClipboardAction title="Copy value" content={props.state.state} />
+          <ShowAttributesAction state={state} />
+          <CopyEntityIDAction state={state} />
+          <CopyStateValueAction state={state} />
+          <OpenEntityHistoryAction state={state} />
         </ActionPanel>
       );
     }
@@ -202,7 +237,9 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             icon={{ source: "power-btn.png", tintColor: Color.Red }}
           />
           <ShowAttributesAction state={props.state} />
-          <CopyToClipboardAction title="Copy value" content={props.state.state} />
+          <CopyEntityIDAction state={state} />
+          <CopyStateValueAction state={state} />
+          <OpenEntityHistoryAction state={state} />
         </ActionPanel>
       );
     }
@@ -261,8 +298,9 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             icon={{ source: Icon.SpeakerSlash, tintColor: Color.PrimaryText }}
           />
           <ShowAttributesAction state={props.state} />
-          <CopyToClipboardAction title="Copy ID" content={entityID} />
-          <CopyToClipboardAction title="Copy State Value" content={props.state.state} />
+          <CopyEntityIDAction state={state} />
+          <CopyStateValueAction state={state} />
+          <OpenEntityHistoryAction state={state} />
         </ActionPanel>
       );
     }
@@ -365,8 +403,9 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             />
           )}
           <ShowAttributesAction state={props.state} />
-          <CopyToClipboardAction title="Copy ID" content={entityID} />
-          <CopyToClipboardAction title="Copy State Value" content={state.state} />
+          <CopyEntityIDAction state={state} />
+          <CopyStateValueAction state={state} />
+          <OpenEntityHistoryAction state={state} />
         </ActionPanel>
       );
     }
@@ -374,6 +413,9 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
       return (
         <ActionPanel>
           <ShowAttributesAction state={props.state} />
+          <CopyEntityIDAction state={state} />
+          <CopyStateValueAction state={state} />
+          <OpenEntityHistoryAction state={state} />
         </ActionPanel>
       );
     }

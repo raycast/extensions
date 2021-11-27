@@ -33,6 +33,13 @@ export class HomeAssistant {
         this.url = url;
     }
 
+    public urlJoin(text: string) {
+        if (this.url.endsWith("/")) {
+            return this.url + text;
+        }
+        return `${this.url}/${text}`;
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public async fetch(url: string, params: { [key: string]: string } = {}): Promise<any> {
         const ps = paramString(params);
