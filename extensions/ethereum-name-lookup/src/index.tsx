@@ -6,6 +6,9 @@ import cheerio from "cheerio";
 export default function Command() {
   const { state, search } = useSearch();
 
+  const showEnsResult = state.result?.found && state.result.ens;
+  const showAddressResult = state.result?.found && state.result.address;
+
   return (
     <List
       isLoading={state.isLoading}
@@ -13,22 +16,36 @@ export default function Command() {
       searchBarPlaceholder="Search by Ethereum name or address..."
       throttle
     >
-      {state.result?.found && state.result.address && (
+      {showAddressResult && (
         <List.Section title={`Overview of ${state.searchText}`}>
-          {<AddressListItems searchResult={state.result} searchText={state.searchText} />}
+          {<AddressListItems searchResult={state.result!} searchText={state.searchText} />}
         </List.Section>
       )}
 
-      {/* <List.Section title="Results">
-        {state.results.map((searchResult) => (
-          <SearchListItem key={searchResult.id} searchResult={searchResult} />
-        ))}
-      </List.Section> */}
-
-      {state.result?.found && state.result?.transactions && (
+      {showAddressResult && state.result?.transactions && (
         <List.Section title="Transactions">
           {state.result.transactions.map((transaction) => (
             <TransactionListItem key={transaction.id} transaction={transaction} />
+          ))}
+        </List.Section>
+      )}
+
+      {showEnsResult && (
+        <List.Section title="ENS Overview">{<EnsListItems searchResult={state.result!} />}</List.Section>
+      )}
+
+      {showEnsResult && state.result?.ownedEns && (
+        <List.Section title="Owned Ethereum Names">
+          {state.result.ownedEns.map((data) => (
+            <EnsItem key={data.ens} ens={data.ens} expiration={data.expiration} />
+          ))}
+        </List.Section>
+      )}
+
+      {showEnsResult && state.result?.forwardedEns && (
+        <List.Section title="Forward Resolved Names">
+          {state.result.forwardedEns.map((data) => (
+            <EnsItem key={data} ens={data} />
           ))}
         </List.Section>
       )}
@@ -36,31 +53,26 @@ export default function Command() {
   );
 }
 
-/*
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
+function EnsItem({ ens, expiration }: { ens: string; expiration?: string }) {
+  return <List.Item title={ens} accessoryTitle={expiration} actions={<ENSActions ens={ens} />} />;
+}
+
+function EnsListItems({ searchResult }: { searchResult: SearchResult }) {
   return (
-    <List.Item
-      title={searchResult.}
-      subtitle={searchResult.description}
-      accessoryTitle={searchResult.username}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <OpenInBrowserAction title="Open in Browser" url={searchResult.url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <CopyToClipboardAction
-              title="Copy Install Command"
-              content={`npm install ${searchResult.name}`}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
+    <>
+      <List.Item
+        title="Reverse Record"
+        accessoryTitle={searchResult.ens}
+        actions={<ENSActions ens={searchResult.ens!} />}
+      />
+      <List.Item
+        title="Registrant"
+        accessoryTitle={searchResult.registrant}
+        actions={<AddressActions address={searchResult.registrant!} />}
+      />
+    </>
   );
 }
-*/
 
 function AddressActions({ address }: { address: string }) {
   return (
@@ -75,23 +87,20 @@ function AddressActions({ address }: { address: string }) {
   );
 }
 
+function ENSActions({ ens }: { ens: string }) {
+  return (
+    <ActionPanel>
+      <ActionPanel.Section>
+        <OpenInBrowserAction title="View on Etherscan" url={`https://etherscan.io/enslookup-search?search=${ens}`} />
+      </ActionPanel.Section>
+    </ActionPanel>
+  );
+}
+
 function AddressListItems({ searchResult, searchText }: { searchResult: SearchResult; searchText: string }) {
   return (
     <>
-      <List.Item
-        title="Ethereum Name"
-        accessoryTitle={searchText}
-        actions={
-          <ActionPanel>
-            <ActionPanel.Section>
-              <OpenInBrowserAction
-                title="View on Etherscan"
-                url={`https://etherscan.io/enslookup-search?search=${searchText}`}
-              />
-            </ActionPanel.Section>
-          </ActionPanel>
-        }
-      />
+      <List.Item title="Ethereum Name" accessoryTitle={searchText} actions={<ENSActions ens={searchText} />} />
       <List.Item
         title="Address"
         accessoryTitle={searchResult.address!}
@@ -198,10 +207,46 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
     const ens = addressResult.find(".card-body .row").first().find("a").text();
     const registrant = addressResult.find(".card-body .row").last().find("a").text();
 
+    const ownedEnsTable = addressResult.find("#ownedEthNamesTable");
+    let ownedEns: OwnedEthereumName[] = [];
+
+    const forwardsTable = addressResult.find("#resolvedAddressTable");
+    let forwardedEns: string[] = [];
+
+    if (ownedEnsTable.length > 0) {
+      ownedEns = ownedEnsTable
+        .find("tbody tr")
+        .map((i, el) => {
+          const $el = $(el);
+          const ens = $($el.find("td").get(0)).text();
+          const expiration = $($el.find("td").get(1)).find("span").text();
+
+          return {
+            ens,
+            expiration,
+          };
+        })
+        .get();
+    }
+
+    if (forwardsTable.length > 0) {
+      forwardedEns = forwardsTable
+        .find("tbody tr")
+        .map((i, el) => {
+          const $el = $(el);
+          const name = $($el.find("td").get(0)).text();
+
+          return name;
+        })
+        .get();
+    }
+
     return {
       found: true,
       ens,
       registrant,
+      ownedEns,
+      forwardedEns,
     };
   }
 
@@ -260,6 +305,11 @@ interface Transaction {
   action: string;
 }
 
+interface OwnedEthereumName {
+  ens: string;
+  expiration: string;
+}
+
 interface SearchResult {
   found: boolean;
   ens?: string;
@@ -272,4 +322,8 @@ interface SearchResult {
   expiration?: string;
 
   transactions?: Transaction[];
+
+  ownedEns?: OwnedEthereumName[];
+
+  forwardedEns?: string[];
 }
