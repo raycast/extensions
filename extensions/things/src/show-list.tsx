@@ -1,25 +1,8 @@
 import _ from 'lodash';
-import {
-  List,
-  Icon,
-  ToastStyle,
-  ActionPanel,
-  OpenInBrowserAction,
-  showToast,
-  getLocalStorageItem,
-  setLocalStorageItem,
-} from '@raycast/api';
+import { List, Icon, ActionPanel, OpenInBrowserAction, getLocalStorageItem, setLocalStorageItem } from '@raycast/api';
 import { useCallback, useEffect, useState } from 'react';
-import osascript from 'osascript-tag';
 import dayjs from 'dayjs';
-
-enum ListName {
-  Inbox = 'Inbox',
-  Today = 'Today',
-  Anytime = 'Anytime',
-  Upcoming = 'Upcoming',
-  Someday = 'Someday',
-}
+import { ListName, executeJxa } from './shared';
 
 enum TodoStatus {
   open = 'open',
@@ -49,22 +32,6 @@ interface TodoGroup {
   tags: string;
   area?: TodoGroup;
 }
-
-const executeJxa = async (script: string) => {
-  try {
-    const result = await osascript.jxa({ parse: true })`${script}`;
-    return result;
-  } catch (err: unknown) {
-    if (typeof err === 'string') {
-      const message = err.replace('execution error: Error: ', '');
-      if (message.match(/Application can't be found/)) {
-        showToast(ToastStyle.Failure, 'Application not found', 'Things must be running');
-      } else {
-        showToast(ToastStyle.Failure, 'Something went wrong', message);
-      }
-    }
-  }
-};
 
 const listNameToListIdMapping = {
   Inbox: 'TMInboxListSource',

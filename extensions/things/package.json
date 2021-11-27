@@ -12,35 +12,42 @@
       "name": "show-today-list",
       "title": "Show Today List",
       "subtitle": "Things",
-      "description": "List your Today To-Dos",
+      "description": "Search and manage your Today To-Dos",
       "mode": "view"
     },
     {
       "name": "show-inbox-list",
       "title": "Show Inbox List",
       "subtitle": "Things",
-      "description": "List your Inbox To-Dos",
+      "description": "Search and manage your Inbox To-Dos",
       "mode": "view"
     },
     {
       "name": "show-anytime-list",
       "title": "Show Anytime List",
       "subtitle": "Things",
-      "description": "List your Anytime To-Dos",
+      "description": "Search and manage your Anytime To-Dos",
       "mode": "view"
     },
     {
       "name": "show-upcoming-list",
       "title": "Show Upcoming List",
       "subtitle": "Things",
-      "description": "List your Upcoming To-Dos",
+      "description": "Search and manage your Upcoming To-Dos",
       "mode": "view"
     },
     {
       "name": "show-someday-list",
       "title": "Show Someday List",
       "subtitle": "Things",
-      "description": "List your Someday To-Dos",
+      "description": "Search and manage your Someday To-Dos",
+      "mode": "view"
+    },
+    {
+      "name": "add-new-todo",
+      "title": "Add New To-Do",
+      "subtitle": "Things",
+      "description": "Create To-Dos in any list",
       "mode": "view"
     }
   ],
