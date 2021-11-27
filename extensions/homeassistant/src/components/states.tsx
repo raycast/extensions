@@ -175,6 +175,12 @@ export function StateListItem(props: { state: State }): JSX.Element {
           return `${Math.round(percent)}%`;
         }
       }
+    } else if (state.entity_id.startsWith("sensor")) {
+      const unit = (state.attributes.unit_of_measurement as string) || undefined;
+      const sl = state.state?.toLocaleLowerCase();
+      if (unit && sl && sl !== "unknown" && sl !== "unavailable") {
+        return `${state.state} ${unit}`;
+      }
     }
     return state.state;
   };
