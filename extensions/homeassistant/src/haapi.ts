@@ -86,7 +86,7 @@ export class HomeAssistant {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async callService(domain: string, service: string, params: { [key: string]: any }): Promise<void> {
+    public async callService(domain: string, service: string, params: { [key: string]: any }): Promise<void> {
         const userparams = params;
         try {
             await this.post(`services/${domain}/${service}`, params = userparams);

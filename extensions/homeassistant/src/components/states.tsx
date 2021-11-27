@@ -228,6 +228,31 @@ function OpenEntityHistoryAction(props: { state: State }): JSX.Element {
   );
 }
 
+function BrightnessControlAction(props: { state: State }): JSX.Element | null {
+  const state = props.state;
+  const modes = state.attributes.supported_color_modes;
+
+  const handle = async (bvalue: number) => {
+    await ha.callService("light", "turn_on", { entity_id: state.entity_id, brightness_pct: `${bvalue}` });
+  };
+
+  if (modes && Array.isArray(modes) && modes.includes("brightness")) {
+    const brightnessValues = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0];
+    return (
+      <ActionPanel.Submenu
+        title="Brightness"
+        icon={{ source: "lightbulb.png", tintColor: Color.PrimaryText }}
+        shortcut={{ modifiers: ["cmd"], key: "b" }}
+      >
+        {brightnessValues.map((value) => (
+          <ActionPanel.Item title={`${value} %`} onAction={() => handle(value)} />
+        ))}
+      </ActionPanel.Submenu>
+    );
+  }
+  return null;
+}
+
 export function StateActionPanel(props: { state: State }): JSX.Element {
   const state = props.state;
   const domain = props.state.entity_id.split(".")[0];
@@ -287,6 +312,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             onAction={async () => await ha.turnOffLight(props.state.entity_id)}
             icon={{ source: "power-btn.png", tintColor: Color.Red }}
           />
+          <BrightnessControlAction state={state} />
           <ShowAttributesAction state={props.state} />
           <CopyEntityIDAction state={state} />
           <CopyStateValueAction state={state} />
