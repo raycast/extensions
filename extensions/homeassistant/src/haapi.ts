@@ -21,6 +21,8 @@ export class State {
     public state = "";
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public attributes: Record<string, any> = {};
+    public last_updated = "";
+    public last_changed = "";
 }
 
 export class HomeAssistant {

@@ -95,7 +95,7 @@ function getIcon(state: State): ImageLike | undefined {
 export function StatesList(props: { domain: string }): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
-  const { states } = useSearch(searchText, props.domain, allStates);
+  const { states } = useStateSearch(searchText, props.domain, undefined, allStates);
 
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search Home Assistant states.", error.message);
@@ -105,6 +105,17 @@ export function StatesList(props: { domain: string }): JSX.Element {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
+  return (
+    <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
+      {states?.map((state) => (
+        <StateListItem key={state.entity_id} state={state} />
+      ))}
+    </List>
+  );
+}
+
+export function StateListItem(props: { state: State }): JSX.Element {
+  const state = props.state;
   const extraTitle = (state: State): string => {
     try {
       const e = state.entity_id;
@@ -121,20 +132,15 @@ export function StatesList(props: { domain: string }): JSX.Element {
     }
     return "";
   };
-
   return (
-    <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
-      {states?.map((state) => (
-        <List.Item
-          key={state.entity_id}
-          title={state.attributes.friendly_name || state.entity_id}
-          subtitle={state.entity_id}
-          accessoryTitle={extraTitle(state) + state.state}
-          actions={<StateActionPanel state={state} />}
-          icon={getIcon(state)}
-        />
-      ))}
-    </List>
+    <List.Item
+      key={state.entity_id}
+      title={state.attributes.friendly_name || state.entity_id}
+      subtitle={state.entity_id}
+      accessoryTitle={extraTitle(state) + state.state}
+      actions={<StateActionPanel state={state} />}
+      icon={getIcon(state)}
+    />
   );
 }
 
@@ -374,9 +380,10 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
   }
 }
 
-function useSearch(
+export function useStateSearch(
   query: string | undefined,
   domain: string,
+  device_class?: string,
   allStates?: State[]
 ): {
   states?: State[];
@@ -388,6 +395,9 @@ function useSearch(
       let haStates: State[] = allStates;
       if (domain) {
         haStates = haStates.filter((s) => s.entity_id.startsWith(domain));
+      }
+      if (device_class) {
+        haStates = haStates.filter((s) => s.attributes.device_class === device_class);
       }
       if (query) {
         haStates = haStates.filter(

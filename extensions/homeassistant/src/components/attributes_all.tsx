@@ -80,7 +80,13 @@ function useSearch(
           }
         }
         if (Object.keys(attrs).length > 0) {
-          const ns: State = { entity_id: s.entity_id, state: s.state, attributes: attrs };
+          const ns: State = {
+            entity_id: s.entity_id,
+            state: s.state,
+            attributes: attrs,
+            last_changed: s.last_changed,
+            last_updated: s.last_updated,
+          };
           filteredStates.push(ns);
         }
       });
