@@ -79,7 +79,7 @@ function getIcon(state: State): ImageLike | undefined {
   } else if (e.startsWith("person")) {
     return { source: "person.png", tintColor: PrimaryIconColor };
   } else if (e.startsWith("cover")) {
-    const source = coverStateIconSource[`${state.state}`] || "cover-opened.png";
+    const source = coverStateIconSource[`${state.state}`] || coverStateIconSource.open;
     return { source: source, tintColor: PrimaryIconColor };
   } else if (e.startsWith("automation")) {
     return { source: "automation.png", tintColor: PrimaryIconColor };
