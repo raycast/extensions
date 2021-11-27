@@ -165,12 +165,25 @@ export function StateListItem(props: { state: State }): JSX.Element {
     }
     return "";
   };
+  const stateValue = (state: State): string | undefined => {
+    if (state.entity_id.startsWith("light") && state.state === "on") {
+      const b = state.attributes.brightness || undefined;
+      if (b !== undefined) {
+        const bv = parseInt(b);
+        if (!isNaN(bv)) {
+          const percent = (bv / 255) * 100;
+          return `${Math.round(percent)}%`;
+        }
+      }
+    }
+    return state.state;
+  };
   return (
     <List.Item
       key={state.entity_id}
       title={state.attributes.friendly_name || state.entity_id}
       subtitle={state.entity_id}
-      accessoryTitle={extraTitle(state) + state.state}
+      accessoryTitle={extraTitle(state) + stateValue(state)}
       actions={<StateActionPanel state={state} />}
       icon={getIcon(state)}
     />
