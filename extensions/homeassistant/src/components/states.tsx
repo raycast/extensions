@@ -59,9 +59,41 @@ const deviceClassIconSource: Record<string, string> = {
   humidity: "humidity.png",
 };
 
+const batterLevelIcons: string[] = [
+  "battery-00.png",
+  "battery-10.png",
+  "battery-20.png",
+  "battery-30.png",
+  "battery-40.png",
+  "battery-50.png",
+  "battery-60.png",
+  "battery-70.png",
+  "battery-80.png",
+  "battery-90.png",
+  "battery-100.png",
+];
+
 function getDeviceClassIcon(state: State): ImageLike | undefined {
   if (state.attributes.device_class) {
     const dc = state.attributes.device_class;
+    if (dc === "battery") {
+      const v = parseFloat(state.state);
+      let src = "battery-100.png";
+      if (!isNaN(v)) {
+        const level = Math.floor(v / 10);
+        const levelIcon = batterLevelIcons[level];
+        if (levelIcon) {
+          src = levelIcon;
+        }
+      }
+      let tintColor = PrimaryIconColor;
+      if (v <= 20) {
+        tintColor = Color.Red;
+      } else if (v <= 30) {
+        tintColor = Color.Yellow;
+      }
+      return { source: src, tintColor: tintColor };
+    }
     const src = deviceClassIconSource[dc] || "entity.png";
     return { source: src, tintColor: PrimaryIconColor };
   } else {
