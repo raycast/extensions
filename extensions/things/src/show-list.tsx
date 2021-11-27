@@ -1,8 +1,19 @@
 import _ from 'lodash';
-import { List, Icon, ActionPanel, OpenInBrowserAction, getLocalStorageItem, setLocalStorageItem } from '@raycast/api';
-import { useCallback, useEffect, useState } from 'react';
+import {
+  List,
+  Icon,
+  ActionPanel,
+  OpenInBrowserAction,
+  getLocalStorageItem,
+  setLocalStorageItem,
+  PushAction,
+  showToast,
+  ToastStyle,
+} from '@raycast/api';
+import { useCallback, useEffect, useState, Fragment } from 'react';
 import dayjs from 'dayjs';
 import { ListName, executeJxa } from './shared';
+import AddNewTodo from './add-new-todo';
 
 enum TodoStatus {
   open = 'open',
@@ -133,6 +144,7 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
                 icon={statusIcons.completed}
                 onAction={async () => {
                   await setTodoProperty(id, 'status', 'completed');
+                  await showToast(ToastStyle.Success, 'Marked as Completed');
                   refreshTodos();
                   // Force additional refresh once todo has been removed from list by Things
                   setTimeout(refreshTodos, 2000);
@@ -145,6 +157,7 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
                 icon={statusIcons.canceled}
                 onAction={async () => {
                   await setTodoProperty(id, 'status', 'canceled');
+                  await showToast(ToastStyle.Success, 'Marked as Canceled');
                   refreshTodos();
                 }}
               />
@@ -154,6 +167,7 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
               icon={Icon.Trash}
               onAction={async () => {
                 await deleteTodo(id);
+                await showToast(ToastStyle.Success, 'Deleted');
                 refreshTodos();
               }}
             />
@@ -296,6 +310,40 @@ export default function ShowList(props: { listName: ListName }) {
       {_.map(groupedTodos, (todos: Todo[], groupId: string) => (
         <TodoListSection key={groupId} todos={todos} refreshTodos={() => fetchTodos(true)} listName={listName} />
       ))}
+      <List.Section title={`Use "${searchText}" with…`}>
+        {searchText !== '' && (
+          <Fragment>
+            <List.Item
+              key="fallback-add-new-todo"
+              title="Add New To-Do"
+              icon={Icon.Plus}
+              actions={
+                <ActionPanel>
+                  <PushAction
+                    icon={Icon.Plus}
+                    title="Add New To-Do"
+                    target={<AddNewTodo title={searchText} listName={listName} />}
+                  />
+                </ActionPanel>
+              }
+            />
+            <List.Item
+              key="fallback-search-in-things"
+              title="Search in Things"
+              icon={Icon.MagnifyingGlass}
+              actions={
+                <ActionPanel>
+                  <OpenInBrowserAction
+                    title="Search in Things"
+                    icon={Icon.MagnifyingGlass}
+                    url={`things:///search?query=${searchText}`}
+                  />
+                </ActionPanel>
+              }
+            />
+          </Fragment>
+        )}
+      </List.Section>
     </List>
   );
 }

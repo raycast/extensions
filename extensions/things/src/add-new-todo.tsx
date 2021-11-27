@@ -64,10 +64,11 @@ const getTargetListName = (list: FormValues['list']): ListName => {
   }
 };
 
-export default function AddNewTodo() {
+export default function AddNewTodo(props: { title: string; listName: string }) {
+  const { title, listName = 'Inbox' } = props;
   // const [projects, setProjects] = useState();
   const [tags, setTags] = useState([]);
-  const [list, setList] = useState('inbox');
+  const [list, setList] = useState(listName.toLowerCase());
 
   const { push } = useNavigation();
 
@@ -89,7 +90,7 @@ export default function AddNewTodo() {
     const url = `open -g things:///json?data=${encodeURIComponent(JSON.stringify(json))}`;
     await asyncExec(url);
 
-    showToast(ToastStyle.Success, 'New Todo Added');
+    showToast(ToastStyle.Success, 'Added New To-Do');
     const listName = getTargetListName(values.list);
     push(<ShowList listName={listName} />);
   }
@@ -102,7 +103,7 @@ export default function AddNewTodo() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" />
+      <Form.TextField id="title" title="Title" defaultValue={title} />
       <Form.TextArea id="notes" title="Notes" />
       {/*<Form.Dropdown id="project" title="Project">
         {projects.map(({ id, name }) => (
