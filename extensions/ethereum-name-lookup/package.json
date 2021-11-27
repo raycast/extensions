@@ -1,0 +1,38 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ethereum-name-lookup",
+  "title": "Ethereum Name Lookup",
+  "description": "Lookup domain through ENS, or input address to get Ethereum name",
+  "icon": "command-icon.png",
+  "author": "Yukai",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Lookup ENS",
+      "subtitle": "Ethereum Name Lookup",
+      "description": "Template for showing typeahead search with network results.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.7",
+    "cheerio": "^1.0.0-rc.10",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/cheerio": "^0.22.30",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
