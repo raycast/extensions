@@ -1,17 +1,17 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "ethereum-name-lookup",
-  "title": "Ethereum Name Lookup",
-  "description": "Lookup domain through ENS, or input address to get Ethereum name",
+  "name": "ens-name-lookup",
+  "title": "ENS Name Lookup",
+  "description": "Lookup ENS name or address",
   "icon": "command-icon.png",
   "author": "Yukai",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Lookup ENS",
-      "subtitle": "Ethereum Name Lookup",
-      "description": "Template for showing typeahead search with network results.",
+      "title": "Lookup ENS or address",
+      "subtitle": "ENS Name Lookup",
+      "description": "Lookup ENS Name from Etherscan.",
       "mode": "view"
     }
   ],
