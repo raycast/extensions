@@ -3,11 +3,15 @@ import TaskList from "./components/TaskList";
 import { Task } from "./types";
 import { useFetch } from "./api";
 import { compareAsc } from "date-fns";
-import { displayDueDate, partitionTasksWithOverdue } from "./utils";
+import { displayDueDate, partitionTasksWithOverdue, showApiToastError } from "./utils";
 
 function Upcoming(): JSX.Element {
   const path = "/tasks?filter=view all";
-  const { data, isLoading } = useFetch<Task[]>(path);
+  const { data, isLoading, error } = useFetch<Task[]>(path);
+
+  if (error) {
+    showApiToastError({ error, title: "Failed to get tasks", message: error.message });
+  }
 
   const tasks = data?.filter((task) => task.due?.date) || [];
 

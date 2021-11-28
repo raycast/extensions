@@ -1,6 +1,8 @@
-import { Task } from "./types";
+import { showToast, ToastStyle } from "@raycast/api";
+import { AxiosError } from "axios";
 import { addDays, format, formatISO, isToday, isThisYear, isTomorrow, isBefore } from "date-fns";
 import { partition } from "lodash";
+import { Task } from "./types";
 
 export function isRecurring(task: Task): boolean {
   return task.due?.recurring || false;
@@ -46,4 +48,21 @@ export function isBeforeToday(date: Date) {
 
 export function partitionTasksWithOverdue(tasks: Task[]) {
   return partition(tasks, (task: Task) => task.due?.date && isBeforeToday(new Date(task.due.date)));
+}
+
+export async function showApiToastError({
+  error,
+  title,
+  message,
+}: {
+  error: AxiosError;
+  title: string;
+  message: string;
+}) {
+  if (error.response?.status === 401 || error.response?.status === 403) {
+    await showToast(ToastStyle.Failure, "Unauthorized", "Please check your Todoist token");
+    return;
+  }
+
+  await showToast(ToastStyle.Failure, title, message);
 }
