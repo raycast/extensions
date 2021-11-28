@@ -1,37 +1,16 @@
-import {
-  ActionPanel,
-  Color,
-  ColorLike,
-  CopyToClipboardAction,
-  Icon,
-  ImageLike,
-  List,
-  popToRoot,
-  PushAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, Color, ColorLike, Icon, ImageLike, List, popToRoot, showToast, ToastStyle } from "@raycast/api";
 import { State } from "../haapi";
 import { useState, useEffect } from "react";
 import { ha, shouldDisplayEntityID } from "../common";
-import { EntityAttributesList } from "./attributes";
 import { useHAStates } from "../hooks";
-import { OpenEntityHistoryAction, OpenEntityLogbookAction } from "./entity";
-
-export function ShowAttributesAction(props: { state: State }): JSX.Element | null {
-  if (props.state.attributes) {
-    return (
-      <PushAction
-        title="Show Attributes"
-        target={<EntityAttributesList state={props.state} />}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-        icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
-      />
-    );
-  } else {
-    return null;
-  }
-}
+import {
+  CopyEntityIDAction,
+  CopyStateValueAction,
+  OpenEntityHistoryAction,
+  OpenEntityLogbookAction,
+  ShowAttributesAction,
+} from "./entity";
+import { SelectVolumeAction, SelectSourceAction } from "./mediaplayer";
 
 const PrimaryIconColor = Color.Blue;
 
@@ -232,26 +211,6 @@ export function StateListItem(props: { state: State }): JSX.Element {
   );
 }
 
-function CopyStateValueAction(props: { state: State }): JSX.Element {
-  return (
-    <CopyToClipboardAction
-      title="Copy State Value"
-      content={props.state.state}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-    />
-  );
-}
-
-function CopyEntityIDAction(props: { state: State }): JSX.Element {
-  return (
-    <CopyToClipboardAction
-      title="Copy Entity ID"
-      content={props.state.entity_id}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-    />
-  );
-}
-
 function BrightnessControlAction(props: { state: State }): JSX.Element | null {
   const state = props.state;
   const modes = state.attributes.supported_color_modes;
@@ -270,65 +229,6 @@ function BrightnessControlAction(props: { state: State }): JSX.Element | null {
       >
         {brightnessValues.map((value) => (
           <ActionPanel.Item key={`${value}`} title={`${value} %`} onAction={() => handle(value)} />
-        ))}
-      </ActionPanel.Submenu>
-    );
-  }
-  return null;
-}
-
-function SelectSourceAction(props: { state: State }): JSX.Element | null {
-  const state = props.state;
-  let sl = state.attributes.source_list as string[] | undefined;
-  const handle = async (source: string) => {
-    if (source) {
-      await ha.selectSourceMedia(state.entity_id, source);
-    }
-  };
-
-  const actualSource = state.attributes.source;
-  const title = actualSource ? `Select Source (${actualSource})` : "Select Source";
-
-  if (sl && Array.isArray(sl)) {
-    if (actualSource) {
-      sl = sl?.filter((s) => s !== actualSource);
-    }
-    return (
-      <ActionPanel.Submenu
-        title={title}
-        icon={{ source: Icon.TextDocument, tintColor: Color.PrimaryText }}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-      >
-        {sl.map((s) => (
-          <ActionPanel.Item key={`${s}`} title={`${s}`} onAction={() => handle(`${s}`)} />
-        ))}
-      </ActionPanel.Submenu>
-    );
-  }
-  return null;
-}
-
-function SelectVolumeAction(props: { state: State }): JSX.Element | null {
-  const state = props.state;
-  const handle = async (volumeLevel: number) => {
-    await ha.setVolumeLevelMedia(state.entity_id, volumeLevel);
-  };
-  const av = state.attributes.volume_level;
-
-  const sl = Array(100)
-    .fill(undefined)
-    .map((_, index) => index + 1);
-  const title = av ? `Select Volume (${Math.round(av * 100)}%)` : "Select Volume";
-
-  if (sl && Array.isArray(sl)) {
-    return (
-      <ActionPanel.Submenu
-        title={title}
-        icon={{ source: Icon.Circle, tintColor: Color.PrimaryText }}
-        shortcut={{ modifiers: ["cmd", "opt"], key: "v" }}
-      >
-        {sl.map((s) => (
-          <ActionPanel.Item key={`${s}`} title={`${s}%`} onAction={() => handle(s / 100)} />
         ))}
       </ActionPanel.Submenu>
     );
