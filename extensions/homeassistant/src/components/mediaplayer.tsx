@@ -75,11 +75,7 @@ export function CopyTrackToClipboard(props: { state: State }): JSX.Element | nul
   const song = getMediaPlayerTitleAndArtist(state);
   if (song) {
     return (
-      <CopyToClipboardAction
-        title="Copy Track to Clipboard"
-        content={song}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-      />
+      <CopyToClipboardAction title="Copy Track" content={song} shortcut={{ modifiers: ["cmd", "shift"], key: "t" }} />
     );
   }
   return null;
