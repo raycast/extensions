@@ -409,6 +409,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           />
           <ActionPanel.Item
             title="Mute"
+            shortcut={{ modifiers: ["cmd"], key: "m" }}
             onAction={async () => await ha.muteMedia(entityID)}
             icon={{ source: Icon.SpeakerSlash, tintColor: Color.PrimaryText }}
           />
