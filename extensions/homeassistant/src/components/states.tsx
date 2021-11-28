@@ -97,6 +97,10 @@ function getIcon(state: State): ImageLike | undefined {
     return { source: "climate.png", tintColor: PrimaryIconColor };
   } else if (e.startsWith("media_player")) {
     return { source: "mediaplayer.png", tintColor: PrimaryIconColor };
+  } else if (e === "sun.sun") {
+    const sl = state.state.toLocaleLowerCase();
+    const source = sl === "below_horizon" ? "weather-night.png" : "white-balance-sunny.png";
+    return { source: source, tintColor: PrimaryIconColor };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
