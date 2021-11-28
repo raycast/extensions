@@ -283,7 +283,34 @@ function BrightnessControlAction(props: { state: State }): JSX.Element | null {
         shortcut={{ modifiers: ["cmd"], key: "b" }}
       >
         {brightnessValues.map((value) => (
-          <ActionPanel.Item title={`${value} %`} onAction={() => handle(value)} />
+          <ActionPanel.Item key={`${value}`} title={`${value} %`} onAction={() => handle(value)} />
+        ))}
+      </ActionPanel.Submenu>
+    );
+  }
+  return null;
+}
+
+function SelectSourceAction(props: { state: State }): JSX.Element | null {
+  const state = props.state;
+  let sl = state.attributes.source_list as string[] | undefined;
+  const handle = async (source: string) => {
+    if (source) {
+      await ha.selectSourceMedia(state.entity_id, source);
+    }
+  };
+
+  const actualSource = state.attributes.source;
+  const title = actualSource ? `Select Source (${actualSource})` : "Select Source";
+
+  if (sl && Array.isArray(sl)) {
+    if (actualSource) {
+      sl = sl?.filter((s) => s !== actualSource);
+    }
+    return (
+      <ActionPanel.Submenu title={title} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
+        {sl.map((s) => (
+          <ActionPanel.Item key={`${s}`} title={`${s}`} onAction={() => handle(`${s}`)} />
         ))}
       </ActionPanel.Submenu>
     );
@@ -413,7 +440,8 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             onAction={async () => await ha.muteMedia(entityID)}
             icon={{ source: Icon.SpeakerSlash, tintColor: Color.PrimaryText }}
           />
-          <ShowAttributesAction state={props.state} />
+          <SelectSourceAction state={state} />
+          <ShowAttributesAction state={state} />
           <CopyEntityIDAction state={state} />
           <CopyStateValueAction state={state} />
           <OpenEntityHistoryAction state={state} />

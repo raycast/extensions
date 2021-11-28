@@ -156,6 +156,10 @@ export class HomeAssistant {
         return await this.callService("media_player", "volume_mute", { entity_id: entityID });
     }
 
+    async selectSourceMedia(entityID: string, source: string): Promise<void> {
+        return await this.callService("media_player", "select_source", { entity_id: entityID, source: source });
+    }
+
     async setClimateTemperature(entityID: string, value: number): Promise<void> {
         return await this.callService("climate", "set_temperature", { entity_id: entityID, temperature: value });
     }
