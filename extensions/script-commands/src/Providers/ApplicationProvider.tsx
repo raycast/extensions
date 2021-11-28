@@ -1,39 +1,54 @@
 import { 
   createContext,
-  ReactNode,
   useState,
+  ReactNode
 } from "react"
 
 import { 
   DataManager 
 } from "@managers"
 
-type State = {
+import { 
+  Filter 
+} from "@types"
+
+type ProviderState = {
   dataManager: DataManager
+  filter: Filter
 }
 
 type ContextType = {
-  state: State
+  state: ProviderState
+  setFilter: (filter: Filter) => void
 }
 
-const initialState: State = {
-  dataManager: DataManager.shared()
+const initialState: ProviderState = {
+  dataManager: DataManager.shared(),
+  filter: null,
 }
 
 export const ApplicationContext = createContext<ContextType>({
-  state: initialState
+  state: initialState,
+  setFilter: () => { return }
 })
 
 type Props = {
   children: ReactNode
 }
 
-export const ApplicationProvider = ({children}: Props) => {
-  const [state, ] = useState<State>(initialState)
-  
+export const ApplicationProvider = ({ children }: Props) => {
+  const [state, ] = useState<ProviderState>(initialState)
+  const [filter, setFilter] = useState<Filter>(null)
+
   return (
     <ApplicationContext.Provider 
-      value={{state}}
+      value={{ 
+        state: {
+          dataManager: state.dataManager,
+          filter,
+        },
+        setFilter 
+      }}
       children={ children }
     />
   )

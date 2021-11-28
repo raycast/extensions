@@ -5,13 +5,14 @@ import {
 
 import { 
   AuthorsActionPanel,
+  FiltersActionPanel,
   ManagementActionSection,
   StoreToast,
   ViewsActionSection
 } from "@components"
 
 import {
-  useScriptCommand 
+  useScriptCommand,
 } from "@hooks"
 
 import { 
@@ -19,14 +20,19 @@ import {
 } from "@models"
 
 import { 
-  Progress, State
+  Progress, 
+  State,
 } from "@types"
+import { useContext } from "react"
+
+import { ApplicationContext } from "@providers"
 
 type Props = { 
   scriptCommand: ScriptCommand
 }
 
 export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
+  const { setFilter } = useContext(ApplicationContext)
   const { props, install, uninstall, setup } = useScriptCommand(scriptCommand)
 
   const handleInstall = async () => {
@@ -73,6 +79,7 @@ export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
           <AuthorsActionPanel 
             authors={ scriptCommand.authors ?? [] } 
           />
+          <FiltersActionPanel onFilter={ setFilter } />
         </ActionPanel>
       }
     />

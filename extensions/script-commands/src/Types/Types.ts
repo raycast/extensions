@@ -55,6 +55,8 @@ export enum State {
   Error,
 }
 
+export type Filter = State | string | null
+
 export type StateResult = Result<State>
 
 export type IconPathNullable = IconPath | null

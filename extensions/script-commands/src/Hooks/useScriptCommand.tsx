@@ -177,10 +177,6 @@ const keywordsFor: KeywordsIconFor = (scriptCommand, state) => {
     authors.forEach(author => {
       const name = author.name
 
-      // FIXME: This is a workaround. Since Raycast version 1.25.6 when fuzzy search was
-      // introduced, it only find keywords if the user types the full string of the keyword. 
-      // Example: if the keyword is: 'thiago holanda', it won't find if we just type 'thiago'.
-      // Split the name into multiple strings solve that problem.
       if (name != undefined && name != "") {
         name.split(" ").forEach(
           value => keywords.push(value)

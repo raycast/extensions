@@ -42,8 +42,8 @@ function ViewSourceCodeAction({ scriptCommand }: ViewSourceCodeActionProps): JSX
     <PushAction
       icon={ Icon.TextDocument } 
       shortcut={{ 
-        modifiers: ["cmd"], 
-        key: "return" 
+        modifiers: ["cmd", "shift"], 
+        key: "s" 
       }}
       title="View Source Code" 
       target={ 

@@ -10,6 +10,7 @@ export type {
   File,
   FileNullable,
   Files,
+  Filter,
   IconPathNullable,
   IconResultNullable,
   StateResult,
