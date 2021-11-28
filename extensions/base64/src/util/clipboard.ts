@@ -7,7 +7,7 @@ const isEmpty = (string: string) => {
 
 export const contents = async () => {
   const clipboard = await runAppleScript('the clipboard')
-  if (isEmpty(clipboard)) throw "clipboard is empty"
+  if (isEmpty(clipboard)) throw "Clipboard is empty"
   else return clipboard
 }
 
