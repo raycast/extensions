@@ -181,6 +181,12 @@ export function StateListItem(props: { state: State }): JSX.Element {
       if (unit && sl && sl !== "unknown" && sl !== "unavailable") {
         return `${state.state} ${unit}`;
       }
+    } else if (state.entity_id.startsWith("media_player")) {
+      const v = state.attributes.volume_level as number;
+      if (v && typeof v === "number" && !Number.isNaN(v)) {
+        const vr = Math.round(v * 100.);
+        return `🔉 ${vr}% | ${state.state}`;
+      }
     }
     return state.state;
   };
