@@ -359,61 +359,77 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
     case "cover": {
       return (
         <ActionPanel>
-          <ActionPanel.Item
-            title="Toggle"
-            onAction={async () => await ha.toggleCover(props.state.entity_id)}
-            icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
-          />
-          <ActionPanel.Item
-            title="Open"
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
-            onAction={async () => await ha.openCover(props.state.entity_id)}
-            icon={{ source: Icon.ChevronUp, tintColor: Color.PrimaryText }}
-          />
-          <ActionPanel.Item
-            title="Close"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            onAction={async () => await ha.closeCover(props.state.entity_id)}
-            icon={{ source: Icon.ChevronDown, tintColor: Color.PrimaryText }}
-          />
-          <ActionPanel.Item
-            title="Stop"
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
-            onAction={async () => await ha.stopCover(props.state.entity_id)}
-            icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
-          />
-          <ShowAttributesAction state={state} />
-          <CopyEntityIDAction state={state} />
-          <CopyStateValueAction state={state} />
-          <OpenEntityHistoryAction state={state} />
+          <ActionPanel.Section title="Controls">
+            <ActionPanel.Item
+              title="Toggle"
+              onAction={async () => await ha.toggleCover(props.state.entity_id)}
+              icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
+            />
+            <ActionPanel.Item
+              title="Open"
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={async () => await ha.openCover(props.state.entity_id)}
+              icon={{ source: Icon.ChevronUp, tintColor: Color.PrimaryText }}
+            />
+            <ActionPanel.Item
+              title="Close"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              onAction={async () => await ha.closeCover(props.state.entity_id)}
+              icon={{ source: Icon.ChevronDown, tintColor: Color.PrimaryText }}
+            />
+            <ActionPanel.Item
+              title="Stop"
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              onAction={async () => await ha.stopCover(props.state.entity_id)}
+              icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attribtues">
+            <ShowAttributesAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+          </ActionPanel.Section>
         </ActionPanel>
       );
     }
     case "light": {
       return (
         <ActionPanel>
-          <ActionPanel.Item
-            title="Toggle"
-            onAction={async () => await ha.toggleLight(props.state.entity_id)}
-            icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
-          />
-          <ActionPanel.Item
-            title="Turn On"
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
-            onAction={async () => await ha.turnOnLight(props.state.entity_id)}
-            icon={{ source: "power-btn.png", tintColor: Color.Green }}
-          />
-          <ActionPanel.Item
-            title="Turn Off"
-            shortcut={{ modifiers: ["cmd"], key: "f" }}
-            onAction={async () => await ha.turnOffLight(props.state.entity_id)}
-            icon={{ source: "power-btn.png", tintColor: Color.Red }}
-          />
-          <BrightnessControlAction state={state} />
-          <ShowAttributesAction state={props.state} />
-          <CopyEntityIDAction state={state} />
-          <CopyStateValueAction state={state} />
-          <OpenEntityHistoryAction state={state} />
+          <ActionPanel.Section title="Controls">
+            <ActionPanel.Item
+              title="Toggle"
+              onAction={async () => await ha.toggleLight(props.state.entity_id)}
+              icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
+            />
+            <ActionPanel.Item
+              title="Turn On"
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={async () => await ha.turnOnLight(props.state.entity_id)}
+              icon={{ source: "power-btn.png", tintColor: Color.Green }}
+            />
+            <ActionPanel.Item
+              title="Turn Off"
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              onAction={async () => await ha.turnOffLight(props.state.entity_id)}
+              icon={{ source: "power-btn.png", tintColor: Color.Red }}
+            />
+            <BrightnessControlAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+          </ActionPanel.Section>
         </ActionPanel>
       );
     }
@@ -509,98 +525,112 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
 
       return (
         <ActionPanel>
-          {changeTempAllowed && (
-            <ActionPanel.Submenu
-              title={`Temperature (${currentTemp || "?"})`}
-              shortcut={{ modifiers: ["cmd"], key: "t" }}
-              icon={{ source: "temperature.png", tintColor: Color.PrimaryText }}
-            >
-              {temps.map((t) => (
-                <ActionPanel.Item
-                  key={t.toString()}
-                  title={t.toString()}
-                  onAction={async () => {
-                    await ha.setClimateTemperature(entityID, t);
-                    setCurrentTemp(t);
-                  }}
-                />
-              ))}
-            </ActionPanel.Submenu>
-          )}
-          {state.attributes.hvac_modes && (
-            <ActionPanel.Submenu
-              title={`Operation (${state.state})`}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
-              icon={{ source: Icon.Gear, tintColor: Color.PrimaryText }}
-            >
-              {state.attributes.hvac_modes?.map((o: string) => (
-                <ActionPanel.Item
-                  key={o}
-                  title={o}
-                  onAction={async () => {
-                    await ha.setClimateOperation(entityID, o);
-                    popToRoot();
-                  }}
-                />
-              ))}
-            </ActionPanel.Submenu>
-          )}
+          <ActionPanel.Section title="Controls">
+            {changeTempAllowed && (
+              <ActionPanel.Submenu
+                title={`Temperature (${currentTemp || "?"})`}
+                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                icon={{ source: "temperature.png", tintColor: Color.PrimaryText }}
+              >
+                {temps.map((t) => (
+                  <ActionPanel.Item
+                    key={t.toString()}
+                    title={t.toString()}
+                    onAction={async () => {
+                      await ha.setClimateTemperature(entityID, t);
+                      setCurrentTemp(t);
+                    }}
+                  />
+                ))}
+              </ActionPanel.Submenu>
+            )}
+            {state.attributes.hvac_modes && (
+              <ActionPanel.Submenu
+                title={`Operation (${state.state})`}
+                shortcut={{ modifiers: ["cmd"], key: "o" }}
+                icon={{ source: Icon.Gear, tintColor: Color.PrimaryText }}
+              >
+                {state.attributes.hvac_modes?.map((o: string) => (
+                  <ActionPanel.Item
+                    key={o}
+                    title={o}
+                    onAction={async () => {
+                      await ha.setClimateOperation(entityID, o);
+                      popToRoot();
+                    }}
+                  />
+                ))}
+              </ActionPanel.Submenu>
+            )}
 
-          {preset_modes && (
-            <ActionPanel.Submenu
-              title={`Preset (${currentPresetMode})`}
-              shortcut={{ modifiers: ["cmd"], key: "p" }}
-              icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
-            >
-              {preset_modes?.map((o: string) => (
-                <ActionPanel.Item
-                  key={o}
-                  title={o}
-                  onAction={async () => {
-                    await ha.setClimatePreset(entityID, o);
-                    popToRoot();
-                  }}
-                />
-              ))}
-            </ActionPanel.Submenu>
-          )}
+            {preset_modes && (
+              <ActionPanel.Submenu
+                title={`Preset (${currentPresetMode})`}
+                shortcut={{ modifiers: ["cmd"], key: "p" }}
+                icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
+              >
+                {preset_modes?.map((o: string) => (
+                  <ActionPanel.Item
+                    key={o}
+                    title={o}
+                    onAction={async () => {
+                      await ha.setClimatePreset(entityID, o);
+                      popToRoot();
+                    }}
+                  />
+                ))}
+              </ActionPanel.Submenu>
+            )}
 
-          {upperTemp && changeTempAllowed && (
-            <ActionPanel.Item
-              title={`Increase Temp. 0.5`}
-              shortcut={{ modifiers: ["cmd"], key: "+" }}
-              onAction={async () => {
-                await ha.setClimateTemperature(entityID, upperTemp);
-                setCurrentTemp(upperTemp);
-              }}
-              icon={{ source: "plus.png", tintColor: Color.PrimaryText }}
-            />
-          )}
-          {lowerTemp && changeTempAllowed && (
-            <ActionPanel.Item
-              title={`Decrease Temp. 0.5`}
-              shortcut={{ modifiers: ["cmd"], key: "-" }}
-              onAction={async () => {
-                await ha.setClimateTemperature(entityID, lowerTemp);
-                setCurrentTemp(lowerTemp);
-              }}
-              icon={{ source: "minus.png", tintColor: Color.PrimaryText }}
-            />
-          )}
-          <ShowAttributesAction state={props.state} />
-          <CopyEntityIDAction state={state} />
-          <CopyStateValueAction state={state} />
-          <OpenEntityHistoryAction state={state} />
+            {upperTemp && changeTempAllowed && (
+              <ActionPanel.Item
+                title={`Increase Temp. 0.5`}
+                shortcut={{ modifiers: ["cmd"], key: "+" }}
+                onAction={async () => {
+                  await ha.setClimateTemperature(entityID, upperTemp);
+                  setCurrentTemp(upperTemp);
+                }}
+                icon={{ source: "plus.png", tintColor: Color.PrimaryText }}
+              />
+            )}
+            {lowerTemp && changeTempAllowed && (
+              <ActionPanel.Item
+                title={`Decrease Temp. 0.5`}
+                shortcut={{ modifiers: ["cmd"], key: "-" }}
+                onAction={async () => {
+                  await ha.setClimateTemperature(entityID, lowerTemp);
+                  setCurrentTemp(lowerTemp);
+                }}
+                icon={{ source: "minus.png", tintColor: Color.PrimaryText }}
+              />
+            )}
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+          </ActionPanel.Section>
         </ActionPanel>
       );
     }
     default: {
       return (
         <ActionPanel>
-          <ShowAttributesAction state={props.state} />
-          <CopyEntityIDAction state={state} />
-          <CopyStateValueAction state={state} />
-          <OpenEntityHistoryAction state={state} />
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+          </ActionPanel.Section>
         </ActionPanel>
       );
     }
