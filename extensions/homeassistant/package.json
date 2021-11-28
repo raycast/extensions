@@ -119,6 +119,15 @@
       "title": "Network Settings",
       "description": "Ignore Certificates",
       "placeholder": "Ignore Certificates"
+    },
+    {
+      "name": "showEntityId",
+      "type": "checkbox",
+      "label": "Show Entity IDs",
+      "required": false,
+      "default": false,
+      "title": "Style",
+      "description": "Show Entity IDs as subtitle"
     }
   ],
   "dependencies": {

@@ -34,10 +34,7 @@ export class HomeAssistant {
     }
 
     public urlJoin(text: string) {
-        if (this.url.endsWith("/")) {
-            return this.url + text;
-        }
-        return `${this.url}/${text}`;
+        return urljoin(this.url, text);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

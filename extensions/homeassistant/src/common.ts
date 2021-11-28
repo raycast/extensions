@@ -28,3 +28,8 @@ export async function getHAWSConnection(): Promise<Connection> {
         return con;
     }
 }
+
+export function shouldDisplayEntityID(): boolean {
+    const result = preferences.instance?.value as boolean || false;
+    return result;
+}

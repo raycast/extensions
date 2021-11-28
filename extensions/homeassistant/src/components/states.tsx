@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { State } from "../haapi";
 import { useState, useEffect } from "react";
-import { createHomeAssistantClient } from "../common";
+import { createHomeAssistantClient, shouldDisplayEntityID } from "../common";
 import { EntityAttributesList } from "./attributes";
 import { useHAStates } from "../hooks";
 
@@ -184,14 +184,45 @@ export function StateListItem(props: { state: State }): JSX.Element {
     }
     return state.state;
   };
+
+  let icon: ImageLike | undefined;
+  const subtitle = (state: State): string | undefined => {
+    let extra: string | undefined;
+    if (state.entity_id.startsWith("media_player")) {
+      const title = state.attributes.media_title;
+      const artist = state.attributes.media_artist;
+      const parts = [];
+      if (title && artist) {
+        parts.push(`${artist} - ${title}`);
+      }
+      const channel = state.attributes.media_channel;
+      if (channel) {
+        parts.push(channel);
+      }
+      extra = parts.join(" | ");
+
+      const ep = state.attributes.entity_picture;
+      if (ep) {
+        icon = ha.urlJoin(ep);
+      }
+    }
+    if (shouldDisplayEntityID()) {
+      return extra;
+    }
+    if (extra) {
+      return `${state.entity_id} | ${extra}`;
+    }
+    return state.entity_id;
+  };
+
   return (
     <List.Item
       key={state.entity_id}
       title={state.attributes.friendly_name || state.entity_id}
-      subtitle={state.entity_id}
+      subtitle={subtitle(state)}
       accessoryTitle={extraTitle(state) + stateValue(state)}
       actions={<StateActionPanel state={state} />}
-      icon={getIcon(state)}
+      icon={icon || getIcon(state)}
     />
   );
 }
