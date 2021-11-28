@@ -11,6 +11,7 @@ import {
   ShowAttributesAction,
 } from "./entity";
 import { SelectVolumeAction, SelectSourceAction } from "./mediaplayer";
+import { BrightnessControlAction } from "./light";
 
 const PrimaryIconColor = Color.Blue;
 
@@ -213,31 +214,6 @@ export function StateListItem(props: { state: State }): JSX.Element {
       icon={icon || getIcon(state)}
     />
   );
-}
-
-function BrightnessControlAction(props: { state: State }): JSX.Element | null {
-  const state = props.state;
-  const modes = state.attributes.supported_color_modes;
-
-  const handle = async (bvalue: number) => {
-    await ha.callService("light", "turn_on", { entity_id: state.entity_id, brightness_pct: `${bvalue}` });
-  };
-
-  if (modes && Array.isArray(modes) && modes.includes("brightness")) {
-    const brightnessValues = [100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0];
-    return (
-      <ActionPanel.Submenu
-        title="Brightness"
-        icon={{ source: "lightbulb.png", tintColor: Color.PrimaryText }}
-        shortcut={{ modifiers: ["cmd"], key: "b" }}
-      >
-        {brightnessValues.map((value) => (
-          <ActionPanel.Item key={`${value}`} title={`${value} %`} onAction={() => handle(value)} />
-        ))}
-      </ActionPanel.Submenu>
-    );
-  }
-  return null;
 }
 
 export function StateActionPanel(props: { state: State }): JSX.Element {
