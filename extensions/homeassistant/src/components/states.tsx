@@ -6,7 +6,6 @@ import {
   Icon,
   ImageLike,
   List,
-  OpenInBrowserAction,
   popToRoot,
   PushAction,
   showToast,
@@ -14,11 +13,10 @@ import {
 } from "@raycast/api";
 import { State } from "../haapi";
 import { useState, useEffect } from "react";
-import { createHomeAssistantClient, shouldDisplayEntityID } from "../common";
+import { ha, shouldDisplayEntityID } from "../common";
 import { EntityAttributesList } from "./attributes";
 import { useHAStates } from "../hooks";
-
-export const ha = createHomeAssistantClient();
+import { OpenEntityHistoryAction, OpenEntityLogbookAction } from "./entity";
 
 export function ShowAttributesAction(props: { state: State }): JSX.Element | null {
   if (props.state.attributes) {
@@ -254,18 +252,6 @@ function CopyEntityIDAction(props: { state: State }): JSX.Element {
   );
 }
 
-function OpenEntityHistoryAction(props: { state: State }): JSX.Element {
-  const historyUrl = ha.urlJoin(`history?entity_id=${props.state.entity_id}`);
-  return (
-    <OpenInBrowserAction
-      title="Open History in Browser"
-      icon={{ source: Icon.Text, tintColor: Color.PrimaryText }}
-      url={historyUrl}
-      shortcut={{ modifiers: ["cmd"], key: "h" }}
-    />
-  );
-}
-
 function BrightnessControlAction(props: { state: State }): JSX.Element | null {
   const state = props.state;
   const modes = state.attributes.supported_color_modes;
@@ -393,6 +379,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section title="History">
             <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
           </ActionPanel.Section>
         </ActionPanel>
       );
@@ -429,6 +416,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section title="History">
             <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
           </ActionPanel.Section>
         </ActionPanel>
       );
@@ -501,6 +489,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section title="History">
             <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
           </ActionPanel.Section>
         </ActionPanel>
       );
@@ -630,6 +619,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section title="History">
             <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
           </ActionPanel.Section>
         </ActionPanel>
       );

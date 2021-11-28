@@ -33,7 +33,7 @@ export class HomeAssistant {
         this.url = url;
     }
 
-    public urlJoin(text: string) {
+    public urlJoin(text: string): string {
         return urljoin(this.url, text);
     }
 

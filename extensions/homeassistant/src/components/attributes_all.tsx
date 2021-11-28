@@ -1,10 +1,7 @@
 import { ActionPanel, CopyToClipboardAction, List, showToast, ToastStyle } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { createHomeAssistantClient } from "../common";
 import { State } from "../haapi";
 import { useHAStates } from "../hooks";
-
-export const ha = createHomeAssistantClient();
 
 export function StatesAttributesList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
