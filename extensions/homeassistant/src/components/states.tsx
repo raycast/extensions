@@ -105,7 +105,8 @@ function getIcon(state: State): ImageLike | undefined {
   const e = state.entity_id;
   const attr = state.attributes;
   if (e.startsWith("light")) {
-    const color = lightColor[state.state.toLocaleLowerCase()] || PrimaryIconColor;
+    const sl = state.state.toLocaleLowerCase();
+    const color = sl === "unavailable" ? "#bdbdbd" : lightColor[sl] || PrimaryIconColor;
     const source = attr.icon && attr.icon === "mdi:lightbulb-group" ? "lightbulb-group.png" : "lightbulb.png";
     return { source: source, tintColor: color };
   } else if (e.startsWith("person")) {
@@ -184,7 +185,7 @@ export function StateListItem(props: { state: State }): JSX.Element {
     } else if (state.entity_id.startsWith("media_player")) {
       const v = state.attributes.volume_level as number;
       if (v && typeof v === "number" && !Number.isNaN(v)) {
-        const vr = Math.round(v * 100.);
+        const vr = Math.round(v * 100);
         return `🔉 ${vr}% | ${state.state}`;
       }
     }
