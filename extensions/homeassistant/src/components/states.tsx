@@ -10,7 +10,12 @@ import {
   OpenEntityLogbookAction,
   ShowAttributesAction,
 } from "./entity";
-import { SelectVolumeAction, SelectSourceAction } from "./mediaplayer";
+import {
+  SelectVolumeAction,
+  SelectSourceAction,
+  getMediaPlayerTitleAndArtist,
+  CopyTrackToClipboard,
+} from "./mediaplayer";
 import { BrightnessControlAction } from "./light";
 
 const PrimaryIconColor = Color.Blue;
@@ -178,11 +183,10 @@ export function StateListItem(props: { state: State }): JSX.Element {
   const subtitle = (state: State): string | undefined => {
     let extra: string | undefined;
     if (state.entity_id.startsWith("media_player")) {
-      const title = state.attributes.media_title;
-      const artist = state.attributes.media_artist;
       const parts = [];
-      if (title && artist) {
-        parts.push(`${artist} - ${title}`);
+      const song = getMediaPlayerTitleAndArtist(state);
+      if (song) {
+        parts.push(song);
       }
       const channel = state.attributes.media_channel;
       if (channel) {
@@ -366,6 +370,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           <ActionPanel.Section title="Values">
             <CopyEntityIDAction state={state} />
             <CopyStateValueAction state={state} />
+            <CopyTrackToClipboard state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="History">
             <OpenEntityHistoryAction state={state} />

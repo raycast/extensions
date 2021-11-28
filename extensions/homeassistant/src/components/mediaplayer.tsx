@@ -1,6 +1,15 @@
-import { ActionPanel, Icon, Color } from "@raycast/api";
+import { ActionPanel, Icon, Color, CopyToClipboardAction } from "@raycast/api";
 import { ha } from "../common";
 import { State } from "../haapi";
+
+export function getMediaPlayerTitleAndArtist(state: State): string | undefined {
+  const title = state.attributes.media_title;
+  const artist = state.attributes.media_artist;
+  if (title && artist) {
+    return `${artist} - ${title}`;
+  }
+  return undefined;
+}
 
 export function SelectSourceAction(props: { state: State }): JSX.Element | null {
   const state = props.state;
@@ -56,6 +65,21 @@ export function SelectVolumeAction(props: { state: State }): JSX.Element | null 
           <ActionPanel.Item key={`${s}`} title={`${s}%`} onAction={() => handle(s / 100)} />
         ))}
       </ActionPanel.Submenu>
+    );
+  }
+  return null;
+}
+
+export function CopyTrackToClipboard(props: { state: State }): JSX.Element | null {
+  const state = props.state;
+  const song = getMediaPlayerTitleAndArtist(state);
+  if (song) {
+    return (
+      <CopyToClipboardAction
+        title="Copy Track to Clipboard"
+        content={song}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+      />
     );
   }
   return null;
