@@ -156,6 +156,10 @@ export class HomeAssistant {
         return await this.callService("media_player", "volume_mute", { entity_id: entityID });
     }
 
+    async setVolumeLevelMedia(entityID: string, volumeLevel: number): Promise<void> {
+        return await this.callService("media_player", "volume_set", { entity_id: entityID, volume_level: volumeLevel });
+    }
+
     async selectSourceMedia(entityID: string, source: string): Promise<void> {
         return await this.callService("media_player", "select_source", { entity_id: entityID, source: source });
     }
