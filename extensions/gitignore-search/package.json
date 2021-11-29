@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "GitIgnore Search",
+      "title": "Search GitIgnore",
+      "subtitle": "GitHub",
       "description": "Search through a list of .gitignore files for popular languages",
       "mode": "view"
     }
