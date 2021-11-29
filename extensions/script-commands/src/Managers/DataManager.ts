@@ -5,6 +5,7 @@ import {
 } from "@models"
 
 import { 
+  fetchReadme,
   fetchScriptCommands,
   fetchSourceCode
 } from "@network"
@@ -135,6 +136,10 @@ export class DataManager {
     return fetchSourceCode(scriptCommand)
   }
 
+  async fetchReadme(path: string): Promise<string> {
+    return fetchReadme(path)
+  }
+
   async fetchInstalledCommands(): Promise<Main> {
     this.loadDatabase()
 
@@ -142,7 +147,8 @@ export class DataManager {
     
     const main: Main = {
       groups: [],
-      totalScriptCommands: Object.values(content).length
+      totalScriptCommands: Object.values(content).length,
+      languages: []
     }
 
     const installedGroup: Group = {

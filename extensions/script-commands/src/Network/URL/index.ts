@@ -25,6 +25,11 @@ export {
   languageURL
 } from "./LanguageURL"
 
+export { 
+  readmeNormalURL,
+  readmeRawURL
+} from "./ReadmeURL"
+
 export {
   sourceCodeNormalURL,
   sourceCodeRawURL

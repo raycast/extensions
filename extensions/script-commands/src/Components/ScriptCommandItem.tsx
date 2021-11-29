@@ -7,6 +7,7 @@ import {
   AuthorsActionPanel,
   FiltersActionPanel,
   ManagementActionSection,
+  ReadmeActionSection,
   StoreToast,
   ViewsActionSection
 } from "@components"
@@ -16,6 +17,7 @@ import {
 } from "@hooks"
 
 import { 
+  Group,
   ScriptCommand 
 } from "@models"
 
@@ -23,15 +25,21 @@ import {
   Progress, 
   State,
 } from "@types"
-import { useContext } from "react"
 
-import { ApplicationContext } from "@providers"
+import { 
+  useContext 
+} from "react"
+
+import { 
+  ApplicationContext 
+} from "@providers"
 
 type Props = { 
   scriptCommand: ScriptCommand
+  group: Group
 }
 
-export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
+export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element {
   const { setFilter } = useContext(ApplicationContext)
   const { props, install, uninstall, setup } = useScriptCommand(scriptCommand)
 
@@ -79,6 +87,9 @@ export function ScriptCommandItem({ scriptCommand }: Props): JSX.Element {
           <AuthorsActionPanel 
             authors={ scriptCommand.authors ?? [] } 
           />
+          { group.readme != undefined && group.readme.length > 0 &&
+            <ReadmeActionSection group={ group } /> 
+          }
           <FiltersActionPanel onFilter={ setFilter } />
         </ActionPanel>
       }

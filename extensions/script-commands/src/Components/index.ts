@@ -18,6 +18,14 @@ export {
   ManagementActionSection 
 } from "./ManagementActionSection"
 
+export {
+  ReadmeActionSection
+} from "./ReadmeActionSection"
+
+export { 
+  ReadmeDetail
+} from "./ReadmeDetail"
+
 export { 
   SourceCodeDetail 
 } from "./SourceCodeDetail"
