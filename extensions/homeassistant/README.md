@@ -79,6 +79,14 @@ Now you should be able to manage your Home Assistant instance with Raycast 🚀.
 
 ![covers-moving](https://user-images.githubusercontent.com/3163807/138560057-ce35f611-d55f-47c0-8f50-2e0bd3265520.png)
 
+### Media Player
+
+![media-player](https://user-images.githubusercontent.com/3163807/143785481-a01f1574-87e8-4546-aadd-7537317ec12d.png)
+
+### Batteries
+
+![batteries](https://user-images.githubusercontent.com/3163807/143785334-150f10ab-b679-4a85-a476-cd90ed1c9f76.png)
+
 ### All Entities
 
 ![all-entities](https://user-images.githubusercontent.com/3163807/138604892-a25acae0-61af-495e-835a-d62b213ae7f3.png)
