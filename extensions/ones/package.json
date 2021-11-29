@@ -1,0 +1,150 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ones",
+  "title": "ONES",
+  "description": "Raycast Extensions for [ones.ai](https://ones.ai).",
+  "icon": "command-icon.png",
+  "author": "K8sCat",
+  "license": "MIT",
+  "keywords": [
+    "ones",
+    "ones.ai",
+    "raycast",
+    "extension",
+    "search",
+    "manhour",
+    "task",
+    "project",
+    "wiki"
+  ],
+  "commands": [
+    {
+      "name": "search-project-task",
+      "title": "Search Task",
+      "subtitle": "ONES Project",
+      "description": "Search task in ONES Project, open task in browser, record manhour in task",
+      "mode": "view"
+    },
+    {
+      "name": "search-project-project",
+      "title": "Search Project",
+      "subtitle": "ONES Project",
+      "description": "Search project in ONES Project, open project in browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-project-resource",
+      "title": "Search Resource",
+      "subtitle": "ONES Project",
+      "description": "Search resource in ONES Project, open resource in browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-project-sprint",
+      "title": "Search Sprint",
+      "subtitle": "ONES Project",
+      "description": "Search sprint in ONES Project, open sprint in browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-wiki-space",
+      "title": "Search Space",
+      "subtitle": "ONES Wiki",
+      "description": "Search space in ONES Wiki, open space in browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-wiki-page",
+      "title": "Search Page",
+      "subtitle": "ONES Wiki",
+      "description": "Search page in ONES Wiki, open page in browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-wiki-resource",
+      "title": "Search Resource",
+      "subtitle": "ONES Wiki",
+      "description": "Search resource in ONES Wiki, open resource in browser",
+      "mode": "view"
+    },
+    {
+      "name": "manage-manhour",
+      "title": "Manage Manhour",
+      "subtitle": "ONES Project",
+      "description": "query manhour, record manhour, modify manhour and delete manhour in ONES Project",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseAPI",
+      "type": "textfield",
+      "required": true,
+      "title": "Base URL",
+      "description": "Base URL for ONES API",
+      "default": "https://ones.ai/project/api"
+    },
+    {
+      "name": "teamUUID",
+      "type": "textfield",
+      "required": true,
+      "title": "Team UUID",
+      "description": "Team UUID for ONES API"
+    },
+    {
+      "name": "userUUID",
+      "type": "textfield",
+      "required": true,
+      "title": "User UUID",
+      "description": "User UUID for ONES API"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Token",
+      "description": "Token for ONES API"
+    },
+    {
+      "name": "manhourUser",
+      "type": "textfield",
+      "required": false,
+      "title": "Manhour Owner",
+      "description": "Manhour owner name or uuid, set to ONES API - UserUUID while empty"
+    },
+    {
+      "name": "manhourDays",
+      "type": "textfield",
+      "required": false,
+      "title": "Manhour Days",
+      "description": "Query Manhours in n days, default set to 7",
+      "value": "7"
+    },
+    {
+      "name": "manhourTaskUUID",
+      "type": "textfield",
+      "required": false,
+      "title": "Manhour Task",
+      "description": "UUID of the task where manhour record"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.6",
+    "axios": "^0.24.0",
+    "moment": "^2.29.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
