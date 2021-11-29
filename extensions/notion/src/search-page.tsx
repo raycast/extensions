@@ -91,14 +91,20 @@ export default function SearchPageList(): JSX.Element {
       {recentlyOpenPages?.map((p) => (
          <PageListItem 
           key={`recently-open-page-${p.id}`}
-          page={p}/>
+          page={p}
+          databaseView={undefined}
+          databaseProperties={undefined}
+          saveDatabaseView={undefined}/>
         ))}
       </List.Section>
       <List.Section key='search-result' title='Search'>
       {pages?.map((p) => (
         <PageListItem 
           key={`search-result-page-${p.id}`}
-          page={p}/>
+          page={p}
+          databaseView={undefined}
+          databaseProperties={undefined}
+          saveDatabaseView={undefined}/>
         ))}
       </List.Section>
     </List>
@@ -230,7 +236,7 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
   ) 
 }
 
-function PageListItem(props: { page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined, saveDatabaseView: SetStateAction<DatabaseView | undefined> }): JSX.Element {
+function PageListItem(props: { page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined, saveDatabaseView: string }): JSX.Element {
   const page = props.page
   const pageProperties = page.properties
 
@@ -367,12 +373,14 @@ function PageListItem(props: { page: Page, databaseView: DatabaseView | undefine
                 icon={((databaseView && databaseView.properties && databaseView.properties[dp.id]) ? Icon.Eye  : {source: Icon.EyeSlash, tintColor: Color.SecondaryText} )}  
                 key={page.id+'-view-property-'+dp.id}
                 onAction={function () {
-                  if(databaseView.properties[dp.id]){
-                    delete databaseView.properties[dp.id]
-                  } else {
-                    databaseView.properties[dp.id] = {}
-                  }                             
-                  saveDatabaseView(databaseView)
+                  if(databaseView && databaseView.properties){
+                    if(databaseView.properties[dp.id]){
+                      delete databaseView.properties[dp.id]
+                    } else {
+                      databaseView.properties[dp.id] = {}
+                    }                             
+                    saveDatabaseView(databaseView)
+                  }                  
                 }}
                 title={(dp.name ? dp.name : 'Untitled')}/>
             ))}

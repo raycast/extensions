@@ -169,7 +169,7 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
 
 
 // Create database page
-export async function queryDatabase(databaseId: string, query: { title: string | undefined } | undefined): Promise<Page> {
+export async function queryDatabase(databaseId: string, query: { title: string | undefined } | undefined): Promise<Page[]> {
   const pages: Page[] = await rawQueryDatabase(databaseId, query);
   return pages;
 }
@@ -397,7 +397,9 @@ export async function fetchPageContent(pageId: string): Promise<PageContent> {
 
   const fetchedPageContent = await rawFetchPageContent(pageId) as (Record<string,any> | null)
 
-  var pageContent;
+  var pageContent: PageContent = {
+    blocks:[]
+  }
 
   if(fetchedPageContent && fetchedPageContent.blocks){
     pageContent = fetchedPageContent
