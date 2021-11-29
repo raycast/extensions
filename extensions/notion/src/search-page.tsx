@@ -196,7 +196,7 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
         setDatabasePages(cachedDatabasePages)
       }
 
-      const fetchedDatabasePages = await queryDatabase(databaseId)
+      const fetchedDatabasePages = await queryDatabase(databaseId, undefined)
       if(fetchedDatabasePages && fetchedDatabasePages[0]){
         setDatabasePages(fetchedDatabasePages) 
         setIsLoading(false)
@@ -236,7 +236,7 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
   ) 
 }
 
-function PageListItem(props: { page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined, saveDatabaseView: string }): JSX.Element {
+function PageListItem(props: { page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined, saveDatabaseView: (newDatabaseView: DatabaseView) => void | undefined}): JSX.Element {
   const page = props.page
   const pageProperties = page.properties
 

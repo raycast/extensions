@@ -398,11 +398,12 @@ export async function fetchPageContent(pageId: string): Promise<PageContent> {
   const fetchedPageContent = await rawFetchPageContent(pageId) as (Record<string,any> | null)
 
   var pageContent: PageContent = {
-    blocks:[]
+    blocks:[],
+    markdown: ''
   }
 
   if(fetchedPageContent && fetchedPageContent.blocks){
-    pageContent = fetchedPageContent
+    pageContent = fetchedPageContent as PageContent;
     pageContent.markdown = ''
     
     const pageBlocks = pageContent.blocks;
@@ -415,7 +416,7 @@ export async function fetchPageContent(pageId: string): Promise<PageContent> {
 
 
             try {
-              block[block.type].text.forEach(function(text: string){
+              block[block.type].text.forEach(function(text: Record<string,any>){
                 if(text.plain_text){
                   tempText+=notionTextToMarkdown(text)
                 }
