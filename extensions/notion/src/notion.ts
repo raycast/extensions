@@ -49,6 +49,11 @@ export interface Page {
   properties: Record<string, any>
 }
 
+export interface PageContent {  
+  markdown: string | undefined
+  blocks: Record<string,any>[]
+}
+
 // Fetch databases
 export async function fetchDatabases(): Promise<Database[]> {
   const databases: Database[] = await rawFetchDatabases();
@@ -111,18 +116,7 @@ export async function fetchDatabaseProperties(databaseId: string): Promise<Datab
 
 // Raw function for fetching databases
 async function rawDatabaseProperties(databaseId: string): Promise<DatabasePropertie[]> {
-  const supportedPropTypes = [
-    'title',
-    'rich_text',
-    'number',
-    'url',
-    'email',
-    'phone_number',
-    'date',
-    'checkbox',
-    'select',
-    'multi_select'
-  ]
+  
   const databaseProperties: DatabasePropertie[] = [];
   try {
     const response = await fetch(
@@ -144,8 +138,6 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
 
     propertyNames.forEach(function (name: string){
       let property = properties[name] as Record<string,any>
-      if(!supportedPropTypes.includes(property.type))
-        return
 
       let databasePropertie = {
         id: property.id as string,
@@ -172,6 +164,61 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
     console.error(err)
     showToast(ToastStyle.Failure, 'Failed to fetch database properties')
     throw new Error('Failed to fetch database properties')
+  }
+}
+
+
+// Create database page
+export async function queryDatabase(databaseId: string, query: { title: string | undefined } | undefined): Promise<Page> {
+  const pages: Page[] = await rawQueryDatabase(databaseId, query);
+  return pages;
+}
+
+// Raw function to query databases
+async function rawQueryDatabase(databaseId: string, query: { title: string | undefined } | undefined): Promise<Page[]> {
+  try {
+
+    var requestBody = {
+      page_size: 100,
+      sorts:[{
+        direction:'descending',
+        timestamp:'last_edited_time'
+      }]
+    } as Record<string,any>
+
+    if(query && query.title){
+      requestBody.filter = {
+        and: [{
+          property: 'title',
+          title: {
+            contains: query.title
+          }
+        }]
+      }
+    }
+
+    const response = await fetch(
+      apiURL + `v1/databases/${databaseId}/query`,
+      {
+        method: 'post',
+        headers: headers,
+        body: JSON.stringify(requestBody)
+      }
+    )
+    const json = await response.json()
+
+    if(json.object === 'error'){
+      showToast(ToastStyle.Failure, json.message)
+      return []
+    }
+
+    const pages = pageListMapper(json.results as Record<string,any>[])
+
+    return pages
+  } catch (err) {
+    console.error(err)
+    showToast(ToastStyle.Failure, 'Failed to query databases')
+    throw new Error('Failed to query databases')
   }
 }
 
@@ -344,6 +391,83 @@ async function rawSearchPages(query: string | undefined ): Promise<Page[]> {
   }
 }
 
+
+// Fetch page content
+export async function fetchPageContent(pageId: string): Promise<PageContent> {
+  var pageContent: PageContent = await rawFetchPageContent(pageId);
+  pageContent.markdown = ''
+  
+  const pageBlocks = pageContent.blocks;
+  pageBlocks.forEach(function(block){
+    try {
+      if(block.type !== 'image'){
+        var tempText = '';
+
+        if(block[block.type].text[0]){
+
+
+          try {
+            block[block.type].text.forEach(function(text){
+              if(text.plain_text){
+                tempText+=notionTextToMarkdown(text)
+              }
+            });
+
+          }catch(e){
+
+          }
+
+        }else {
+          if(block[block.type].text.plain_text){
+            tempText+=notionTextToMarkdown(block[block.type].text)
+          }
+        }
+
+      pageContent.markdown+=notionBlockToMarkdown(tempText,block.type)+'\n'
+
+      }else{
+        pageContent.markdown+='![image]('+block.image.file.url+')'+'\n'
+      }
+    }catch(e){
+
+    }
+
+  })
+
+  if(!pageBlocks[0]) {
+    pageContent.markdown += '*Page is empty*'
+  }
+  return pageContent;
+}
+
+// Raw function for fetching page content
+async function rawFetchPageContent(pageId: string): Promise<PageContent> {
+  
+  try {
+    const response = await fetch(
+      apiURL + `v1/blocks/${pageId}/children`,
+      {
+        method: 'get',
+        headers: headers
+      }
+    )
+    const json = await response.json()
+
+    if(json.object === 'error'){
+      showToast(ToastStyle.Failure, json.message)
+      return []
+    }
+
+    const blocks = json.results as Record<string,any>[]
+
+    return { blocks } as PageContent
+  } catch (err) {
+    console.error(err)
+    showToast(ToastStyle.Failure, 'Failed to fetch page content')
+    throw new Error('Failed to fetch page content')
+  }
+}
+
 // Fetch Extension README
 export async function fetchExtensionReadMe(): Promise<string> {
   try {
@@ -391,29 +515,37 @@ function pageMapper (jsonPage: Record<string, any>): Page {
         { targetKey : 'icon_file', sourceKeys : ['icon','file','url']},              
         { targetKey : 'icon_external', sourceKeys : ['icon','external','url']},   
         { targetKey : 'url', sourceKeys : ['url']},
-        { targetKey : 'properties', sourceKeys : ['properties']}
       ] as any
     }) as Page;
 
-  
 
   if(page.object === 'page'){
-    const propertyKeys = Object.keys(page.properties);
-
-
+    const pageProperties = jsonPage.properties
+    const propertyKeys = Object.keys(pageProperties);
     page.title = 'Untitled'
+    page.properties = {}
 
     propertyKeys.forEach(function (pk){
-      if(page.properties[pk].type === 'title'){
-        if(page.properties[pk].title[0] && page.properties[pk].title[0].plain_text){
-          page.title = page.properties[pk].title[0].plain_text
+      const pageProperty = pageProperties[pk];
+
+      // Save page title
+      if(pageProperty.type === 'title'){
+        if(pageProperty.title[0] && pageProperty.title[0].plain_text){
+          page.title = pageProperty.title[0].plain_text
         }
       }
+
+      // Save page property
+      propertyKeys.forEach(function (name){
+        const property = pageProperties[name]
+        property.name = name
+        page.properties[property.id] = property
+      })
     })
+
   } else if(jsonPage.title && jsonPage.title[0] && jsonPage.title[0].plain_text) {
     page.title = jsonPage.title[0].plain_text
   } 
-  
   return page;
 }
 
@@ -455,4 +587,50 @@ function recordMapper (mapper: { sourceRecord : any, models: [{targetKey : strin
     mappedRecord[targetKey] = tempRecord;
   })
   return mappedRecord;
+}
+
+
+function notionBlockToMarkdown(text, type){
+  switch(type) { 
+    case ('heading_1'): { 
+      return '# '+text
+    }
+    case ('heading_2'): { 
+      return '## '+text
+    }
+    case ('heading_3'): { 
+      return '### '+text
+    }
+    case ('bulleted_list_item'): { 
+      return '- '+text
+    }
+    case ('numbered_list_item'): { 
+      return '1. '+text
+    } 
+
+    default: { 
+      return text
+    } 
+  }
+}
+
+function notionTextToMarkdown (text){
+  var plainText = text.plain_text;
+  if(text.annotations.bold){
+    plainText = '**'+plainText+'**'
+  }else if(text.annotations.italic){
+    plainText = '*'+plainText+'*'
+  }else if(text.annotations.code){
+    plainText = '`'+plainText+'`'
+  }
+
+  if(text.href){
+    if(text.href.startsWith('/')){
+      plainText = '['+plainText+']('+getPageUrl(text.href.replace('/',''))+')'
+    }else{
+      plainText = '['+plainText+']('+text.href+')'
+    }
+  }
+
+  return plainText
 }
