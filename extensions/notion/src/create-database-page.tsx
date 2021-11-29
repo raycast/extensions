@@ -253,7 +253,7 @@ async function loadDatabases() {
   return data !== undefined ? JSON.parse(data) : undefined
 }
 
-async function storeDatabaseProperties(databaseId: string, databaseProperties: DatabasePropertie[]) {
+async function storeDatabaseProperties(databaseId: string, databaseProperties: DatabaseProperty[]) {
   const data = JSON.stringify(databaseProperties)
   await setLocalStorageItem('DATABASE_PROPERTIES_'+databaseId, data)
 }

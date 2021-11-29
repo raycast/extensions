@@ -26,10 +26,10 @@ export interface DatabaseProperty {
   id: string
   type: string
   name: string
-  options: databasePropertyOption[]
+  options: DatabasePropertyOption[]
 }
 
-export interface databasePropertyOption {
+export interface DatabasePropertyOption {
   id: string
   name: string
   color: string | undefined
@@ -148,7 +148,7 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
 
       switch (property.type) {
         case 'select':
-          databaseProperty.options.push({id:'_select_null_', name: 'No Selection'} as databasePropertyOption)
+          databaseProperty.options.push({id:'_select_null_', name: 'No Selection'} as DatabasePropertyOption)
           databaseProperty.options = databaseProperty.options.concat(property.select.options)
           break
         case 'multi_select':
@@ -394,49 +394,57 @@ async function rawSearchPages(query: string | undefined ): Promise<Page[]> {
 
 // Fetch page content
 export async function fetchPageContent(pageId: string): Promise<PageContent> {
-  var pageContent: PageContent = await rawFetchPageContent(pageId);
-  pageContent.markdown = ''
-  
-  const pageBlocks = pageContent.blocks;
-  pageBlocks.forEach(function(block){
-    try {
-      if(block.type !== 'image'){
-        var tempText = '';
 
-        if(block[block.type].text[0]){
+  const fetchedPageContent = await rawFetchPageContent(pageId) as (Record<string,any> | null)
+
+  var pageContent;
+
+  if(fetchedPageContent && fetchedPageContent.blocks){
+    pageContent = fetchedPageContent
+    pageContent.markdown = ''
+    
+    const pageBlocks = pageContent.blocks;
+    pageBlocks.forEach(function(block: Record<string,any>){
+      try {
+        if(block.type !== 'image'){
+          var tempText = '';
+
+          if(block[block.type].text[0]){
 
 
-          try {
-            block[block.type].text.forEach(function(text: string){
-              if(text.plain_text){
-                tempText+=notionTextToMarkdown(text)
-              }
-            });
+            try {
+              block[block.type].text.forEach(function(text: string){
+                if(text.plain_text){
+                  tempText+=notionTextToMarkdown(text)
+                }
+              });
 
-          }catch(e){
+            }catch(e){
 
+            }
+
+          }else {
+            if(block[block.type].text.plain_text){
+              tempText+=notionTextToMarkdown(block[block.type].text)
+            }
           }
 
-        }else {
-          if(block[block.type].text.plain_text){
-            tempText+=notionTextToMarkdown(block[block.type].text)
-          }
+        pageContent.markdown+=notionBlockToMarkdown(tempText,block.type)+'\n'
+
+        }else{
+          pageContent.markdown+='![image]('+block.image.file.url+')'+'\n'
         }
+      }catch(e){
 
-      pageContent.markdown+=notionBlockToMarkdown(tempText,block.type)+'\n'
-
-      }else{
-        pageContent.markdown+='![image]('+block.image.file.url+')'+'\n'
       }
-    }catch(e){
 
+    })
+
+    if(!pageBlocks[0]) {
+      pageContent.markdown += '*Page is empty*'
     }
-
-  })
-
-  if(!pageBlocks[0]) {
-    pageContent.markdown += '*Page is empty*'
   }
+  
   return pageContent;
 }
 
@@ -625,7 +633,7 @@ function notionTextToMarkdown (text: Record<string,any>): string {
 
   if(text.href){
     if(text.href.startsWith('/')){
-      plainText = '['+plainText+']('+getPageUrl(text.href.replace('/',''))+')'
+      plainText = '['+plainText+'](https://notion.so'+text.href)+')'
     }else{
       plainText = '['+plainText+']('+text.href+')'
     }

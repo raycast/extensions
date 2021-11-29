@@ -120,8 +120,8 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
   const [databasePages, setDatabasePages] = useState<Page[]>()  
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [actionPanelItems, setActionPanelItems] = useState<Element[]>([])
-  const [databaseView, setDatabaseView] = useState<DatabaseView[]>()
-  const [databaseProperties, setDatabaseProperties] = useState<[]>()
+  const [databaseView, setDatabaseView] = useState<DatabaseView>()
+  const [databaseProperties, setDatabaseProperties] = useState<DatabaseProperty[]>()
 
 
   // Currently supported properties
@@ -181,7 +181,7 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
   // Fetch last 100 edited database pages
   useEffect(() => {
     const getDatabasePages = async () => {
-      console.log('REFRECH DB View',databaseView)
+
       setIsLoading(true)
 
       const cachedDatabasePages = await loadDatabasePages(databaseId)
@@ -230,7 +230,7 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
   ) 
 }
 
-function PageListItem(props: { page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined}): JSX.Element {
+function PageListItem(props: { page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined, saveDatabaseView: SetStateAction<DatabaseView | undefined> }): JSX.Element {
   const page = props.page
   const pageProperties = page.properties
 
@@ -388,7 +388,7 @@ function PageDetail(props: { page: Page }): JSX.Element {
   const page = props.page 
   const pageName = (page.icon_emoji ? page.icon_emoji+' ': '')+(page.title ? page.title : 'Untitled')
 
-  const [pageContent, setPageContent] = useState<pageContent>()
+  const [pageContent, setPageContent] = useState<PageContent>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
 
@@ -487,7 +487,7 @@ async function loadDatabasePages(databaseId: string) {
   return data !== undefined ? JSON.parse(data) : undefined
 }
 
-async function storeDatabaseProperties(databaseId: string, databaseProperties: DatabasePropertie[]) {
+async function storeDatabaseProperties(databaseId: string, databaseProperties: DatabaseProperty[]) {
   const data = JSON.stringify(databaseProperties)
   await setLocalStorageItem('PROPERTIES_DATABASE_'+databaseId, data)
 }
