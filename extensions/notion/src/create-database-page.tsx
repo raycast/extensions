@@ -20,7 +20,7 @@ import {
 import { useEffect, useState } from 'react'
 import {
   Database,
-  DatabasePropertie,
+  DatabaseProperty,
   Page,
   fetchDatabases,
   fetchDatabaseProperties,
@@ -51,7 +51,7 @@ export default function CreateDatabaseForm(): JSX.Element {
 
   // Setup useState objects
   const [databases, setDatabases] = useState<Database[]>()
-  const [databaseProperties, setDatabaseProperties] = useState<DatabasePropertie[]>()  
+  const [databaseProperties, setDatabaseProperties] = useState<DatabaseProperty[]>()  
   const [databaseId, setDatabaseId] = useState<string>()
   const [markdown, setMarkdown] = useState<string>()
   const [isLoading, setIsLoading] = useState<boolean>(true)

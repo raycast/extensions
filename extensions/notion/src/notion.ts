@@ -22,14 +22,14 @@ export interface Database {
   icon_external: string | null
 }
 
-export interface DatabasePropertie {  
+export interface DatabaseProperty {  
   id: string
   type: string
   name: string
-  options: DatabasePropertieOption[]
+  options: databasePropertyOption[]
 }
 
-export interface DatabasePropertieOption {
+export interface databasePropertyOption {
   id: string
   name: string
   color: string | undefined
@@ -109,15 +109,15 @@ async function rawFetchDatabases(): Promise<Database[]> {
 
 
 // Fetch database properties
-export async function fetchDatabaseProperties(databaseId: string): Promise<DatabasePropertie[]> {
-  const databaseProperties: DatabasePropertie[] = await rawDatabaseProperties(databaseId);
+export async function fetchDatabaseProperties(databaseId: string): Promise<DatabaseProperty[]> {
+  const databaseProperties: DatabaseProperty[] = await rawDatabaseProperties(databaseId);
   return databaseProperties;
 }
 
 // Raw function for fetching databases
-async function rawDatabaseProperties(databaseId: string): Promise<DatabasePropertie[]> {
+async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProperty[]> {
   
-  const databaseProperties: DatabasePropertie[] = [];
+  const databaseProperties: DatabaseProperty[] = [];
   try {
     const response = await fetch(
       apiURL + `v1/databases/${databaseId}`,
@@ -139,24 +139,24 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
     propertyNames.forEach(function (name: string){
       let property = properties[name] as Record<string,any>
 
-      let databasePropertie = {
+      let databaseProperty = {
         id: property.id as string,
         type: property.type as string,
         name: name as string,
-        options: [] as DatabasePropertieOption[]
+        options: [] as DatabasePropertyOption[]
       }
 
       switch (property.type) {
         case 'select':
-          databasePropertie.options.push({id:'_select_null_', name: 'No Selection'} as DatabasePropertieOption)
-          databasePropertie.options = databasePropertie.options.concat(property.select.options)
+          databaseProperty.options.push({id:'_select_null_', name: 'No Selection'} as databasePropertyOption)
+          databaseProperty.options = databaseProperty.options.concat(property.select.options)
           break
         case 'multi_select':
-          databasePropertie.options = property.multi_select.options
+          databaseProperty.options = property.multi_select.options
           break
       }
 
-      databaseProperties.push(databasePropertie)
+      databaseProperties.push(databaseProperty)
     })
 
     return databaseProperties
@@ -407,7 +407,7 @@ export async function fetchPageContent(pageId: string): Promise<PageContent> {
 
 
           try {
-            block[block.type].text.forEach(function(text){
+            block[block.type].text.forEach(function(text: string){
               if(text.plain_text){
                 tempText+=notionTextToMarkdown(text)
               }
@@ -441,7 +441,7 @@ export async function fetchPageContent(pageId: string): Promise<PageContent> {
 }
 
 // Raw function for fetching page content
-async function rawFetchPageContent(pageId: string): Promise<PageContent> {
+async function rawFetchPageContent(pageId: string): Promise<PageContent | null> {
   
   try {
     const response = await fetch(
@@ -455,7 +455,7 @@ async function rawFetchPageContent(pageId: string): Promise<PageContent> {
 
     if(json.object === 'error'){
       showToast(ToastStyle.Failure, json.message)
-      return []
+      return null
     }
 
     const blocks = json.results as Record<string,any>[]
@@ -500,7 +500,6 @@ function pageListMapper (jsonPageList: Record<string, any>[]): Page[] {
 
   return pages
 }
-
 
 function pageMapper (jsonPage: Record<string, any>): Page {
   var page = recordMapper({ 
@@ -590,7 +589,7 @@ function recordMapper (mapper: { sourceRecord : any, models: [{targetKey : strin
 }
 
 
-function notionBlockToMarkdown(text, type){
+function notionBlockToMarkdown(text: string, type: string): string {
   switch(type) { 
     case ('heading_1'): { 
       return '# '+text
@@ -614,13 +613,13 @@ function notionBlockToMarkdown(text, type){
   }
 }
 
-function notionTextToMarkdown (text){
+function notionTextToMarkdown (text: Record<string,any>): string {
   var plainText = text.plain_text;
-  if(text.annotations.bold){
+  if(text.annotations.bold as boolean){
     plainText = '**'+plainText+'**'
-  }else if(text.annotations.italic){
+  }else if(text.annotations.italic as boolean){
     plainText = '*'+plainText+'*'
-  }else if(text.annotations.code){
+  }else if(text.annotations.code as boolean){
     plainText = '`'+plainText+'`'
   }
 

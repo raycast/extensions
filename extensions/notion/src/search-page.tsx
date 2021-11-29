@@ -19,6 +19,8 @@ import {
 import { useEffect, useState } from 'react'
 import {
   Page,
+  DatabaseProperty,
+  PageContent,
   searchPages,
   queryDatabase,
   fetchDatabaseProperties,
@@ -28,7 +30,7 @@ import moment from 'moment'
 import open from 'open'
 
 interface DatabaseView {
-  properties: Record
+  properties: Record<string,any>
 }
 
 export default function SearchPageList(): JSX.Element {
@@ -149,7 +151,7 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
       const fetchedDatabaseProperties = await fetchDatabaseProperties(databaseId)
 
       if(fetchedDatabaseProperties){
-        const supportedDatabaseProperties = fetchedDatabaseProperties.filter(function (property){
+        const supportedDatabaseProperties = fetchedDatabaseProperties.filter(function (property: DatabaseProperty){
           return supportedPropTypes.includes(property.type)
         })
         setDatabaseProperties(supportedDatabaseProperties)
@@ -201,7 +203,7 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
 
 
   // Handle save new database view
-  function saveDatabaseView(newDatabaseView) {
+  function saveDatabaseView(newDatabaseView: DatabaseView): void {
     console.log('newDatabaseView',newDatabaseView)
     setDatabaseView(newDatabaseView)
     storeDatabaseView(databaseId,newDatabaseView)
@@ -228,7 +230,7 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
   ) 
 }
 
-function PageListItem(props: { page: Page, databaseView, databaseProperties}): JSX.Element {
+function PageListItem(props: { page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined}): JSX.Element {
   const page = props.page
   const pageProperties = page.properties
 
@@ -252,14 +254,14 @@ function PageListItem(props: { page: Page, databaseView, databaseProperties}): J
 
   // Set database view properties
   var accessoryTitle = moment(page.last_edited_time).fromNow()
-  var keywords = []
+  var keywords: string[] = []
   if(databaseView && databaseView.properties){
 
     const visiblePropertiesIds = Object.keys(databaseView.properties)
     if(visiblePropertiesIds[0]){
       var accessoryTitle = ''
-      const accessoryTitles = []
-      visiblePropertiesIds.forEach(function (propId) {
+      const accessoryTitles: string[] = []
+      visiblePropertiesIds.forEach(function (propId: string) {
 
         const property = databaseView.properties[propId]
 
@@ -306,10 +308,10 @@ function PageListItem(props: { page: Page, databaseView, databaseProperties}): J
                 propAccessoryTitle = propertyValue.name
                 break
               case 'multi_select':   
-                const names = []
-                propertyValue.forEach(function (slection){
-                  keywords.push(slection.name)
-                  names.push(slection.name)
+                const names:string[] = []
+                propertyValue.forEach(function (selection: Record<string,any>){
+                  keywords.push(selection.name as string)
+                  names.push(selection.name as string)
                 })
                 propAccessoryTitle = names.join(', ')
                 break
@@ -360,7 +362,7 @@ function PageListItem(props: { page: Page, databaseView, databaseProperties}): J
       {(databaseProperties ? 
         <ActionPanel.Section title='View options'>
           <ActionPanel.Submenu icon={Icon.Gear} title='Properties...'>
-            {databaseProperties?.map((dp) => (
+            {databaseProperties?.map((dp: DatabaseProperty) => (
               <ActionPanel.Item
                 icon={((databaseView && databaseView.properties && databaseView.properties[dp.id]) ? Icon.Eye  : {source: Icon.EyeSlash, tintColor: Color.SecondaryText} )}  
                 key={page.id+'-view-property-'+dp.id}
