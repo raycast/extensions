@@ -1,13 +1,22 @@
-import { List, ActionPanel, Icon, environment, OpenAction, Detail } from '@raycast/api';
-import { useState, useEffect, useCallback } from 'react';
+import {
+  List,
+  ActionPanel,
+  environment,
+  CopyToClipboardAction,
+  OpenInBrowserAction,
+  Detail,
+  Icon,
+  closeMainWindow,
+} from '@raycast/api';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import os from 'os';
 import path from 'path';
 import { promisify } from 'util';
 import { readFile } from 'fs';
 import _ from 'lodash';
-import initSqlJs, { Database, ParamsObject } from 'sql.js';
+import initSqlJs, { Database } from 'sql.js';
 import execa from 'execa';
-import { getUrlDomain, getFaviconUrl, plural, permissionErrorMarkdown } from './shared';
+import { executeJxa, getTabUrl, getUrlDomain, getFaviconUrl, plural, permissionErrorMarkdown, search } from './shared';
 
 const asyncReadFile = promisify(readFile);
 
@@ -22,16 +31,26 @@ const getCurrentDeviceName = (): string => {
   }
 };
 
+const currentDeviceName = getCurrentDeviceName();
+
+let loadedDb: Database;
 const loadDb = async (): Promise<Database> => {
+  if (loadedDb) {
+    return loadedDb;
+  }
+
   const fileBuffer = await asyncReadFile(cloudTabsDbPath);
   const SQL = await initSqlJs({
     locateFile: () => path.join(environment.assetsPath, 'sql-wasm.wasm'),
   });
 
-  return new SQL.Database(fileBuffer);
+  const db = new SQL.Database(fileBuffer);
+  loadedDb = db;
+
+  return db;
 };
 
-const executeQuery = async (db: Database, query: string): Promise<ParamsObject[]> => {
+const executeQuery = async (db: Database, query: string): Promise<unknown> => {
   const results = [];
   const stmt = db.prepare(query);
   while (stmt.step()) {
@@ -42,56 +61,151 @@ const executeQuery = async (db: Database, query: string): Promise<ParamsObject[]
   return results;
 };
 
+const fetchLocalTabs = (): Promise<LocalTab[]> =>
+  executeJxa(`
+    const safari = Application("Safari");
+    const tabs = [];
+    safari.windows().map(window => {
+      return window.tabs().map(tab => {
+        tabs.push({
+          uuid: window.id() + '-' + tab.index(),
+          title: tab.name(),
+          url: tab.url(),
+          window_id: window.id(),
+          index: tab.index(),
+          is_local: true
+        });
+      })
+    });
+
+    return tabs;
+`);
+
+const fetchRemoteTabs = async (): Promise<RemoteTab[]> => {
+  const db = await loadDb();
+  const tabs = (await executeQuery(
+    db,
+    `SELECT t.tab_uuid as uuid, d.device_uuid, d.device_name, t.title, t.url
+         FROM cloud_tabs t
+         INNER JOIN cloud_tab_devices d ON t.device_uuid = d.device_uuid
+         WHERE device_name != "${currentDeviceName}"`
+  )) as RemoteTab[];
+
+  return tabs;
+};
+
+const activateLocalTab = async (tab: LocalTab) =>
+  executeJxa(`
+      const safari = Application("Safari");
+      const window = safari.windows.byId(${tab.window_id});
+      const tab = window.tabs[${tab.index - 1}];
+      window.index = 1;
+      window.currentTab = tab;
+      safari.activate();
+  `);
+
+const closeLocalTab = async (tab: LocalTab) =>
+  executeJxa(`
+    const safari = Application("Safari");
+    const window = safari.windows.byId(${tab.window_id});
+    const tab = window.tabs[${tab.index - 1}];
+    tab.close();
+`);
+
+const openLocalTabWithSearch = async (searchText: string) =>
+  executeJxa(`
+      const safari = Application("Safari");
+      safari.searchTheWeb({ for: "${searchText}" });
+      safari.activate();
+  `);
+
 interface Tab {
   uuid: string;
   title: string;
   url: string;
-  domain: string;
-  position: string; // @TODO handle value to sort tabs
+  is_local: boolean;
+}
+
+interface RemoteTab extends Tab {
   device_uuid: string;
   device_name: string;
+}
+
+interface LocalTab extends Tab {
+  window_id: number;
+  index: number;
 }
 
 interface Device {
   uuid: string;
   name: string;
-  is_current: boolean;
-  tabs: Tab[];
+  tabs: LocalTab[] | RemoteTab[];
 }
 
 const formatTitle = (title: string) => _.truncate(title, { length: 75 });
 
+const OpenTabAction = (props: { tab: Tab }) => {
+  const { tab } = props;
+  return tab.is_local ? (
+    <ActionPanel.Item
+      title="Open in Browser"
+      icon={Icon.Globe}
+      onAction={async () => {
+        await activateLocalTab(tab as LocalTab);
+        await closeMainWindow({ clearRootSearch: true });
+      }}
+    />
+  ) : (
+    <OpenInBrowserAction url={tab.url} />
+  );
+};
+
+const CopyTabUrlAction = (props: { tab: Tab }) => <CopyToClipboardAction content={props.tab.url} title="Copy URL" />;
+
+const CloseTabAction = (props: { tab: Tab; refreshTabs: () => void }) => {
+  const { tab, refreshTabs } = props;
+  return tab.is_local ? (
+    <ActionPanel.Item
+      title="Close Tab"
+      icon={Icon.XmarkCircle}
+      shortcut={{ modifiers: ['ctrl'], key: 'x' }}
+      onAction={async () => {
+        await closeLocalTab(tab as LocalTab);
+        refreshTabs();
+      }}
+    />
+  ) : (
+    <Fragment />
+  );
+};
+
 export default function Command() {
   const [hasPermissionError, setHasPermissionError] = useState(false);
   const [devices, setDevices] = useState<Device[]>();
+  const [searchText, setSearchText] = useState<string>('');
 
   const fetchDevices = useCallback(async () => {
     try {
-      const db = await loadDb();
-      const currentDeviceName = getCurrentDeviceName();
-      const tabs = (await executeQuery(
-        db,
-        `SELECT t.tab_uuid as uuid, d.device_uuid, d.device_name, t.title, t.url, t.position
-         FROM cloud_tabs t
-         INNER JOIN cloud_tab_devices d ON t.device_uuid = d.device_uuid`
-      )) as unknown as Tab[];
+      const [localTabs, remoteTabs] = await Promise.all([fetchLocalTabs(), fetchRemoteTabs()]);
+      const localDevice = {
+        uuid: 'local',
+        name: `${currentDeviceName} ★`,
+        tabs: localTabs,
+      };
 
-      const devices = _.chain(tabs)
-        .groupBy('device_uuid')
-        .reduce((devices: Device[], tabs: Tab[], device_uuid: string) => {
+      const removeDevices = _.transform(
+        _.groupBy(remoteTabs, 'device_uuid'),
+        (devices: Device[], tabs: RemoteTab[], device_uuid: string) => {
           devices.push({
             uuid: device_uuid,
             name: tabs[0].device_name,
-            is_current: currentDeviceName === tabs[0].device_name,
-            tabs: _.map(tabs, (tab) => ({ ...tab, domain: getUrlDomain(tab.url) })),
+            tabs,
           });
+        },
+        []
+      );
 
-          return devices;
-        }, [])
-        .orderBy('is_current', 'desc')
-        .value();
-
-      setDevices(devices);
+      setDevices([localDevice, ...removeDevices]);
     } catch (err) {
       if (err instanceof Error && err.message.includes('operation not permitted')) {
         return setHasPermissionError(true);
@@ -110,25 +224,52 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={!devices}>
-      {_.map(devices, (device: Device) => (
-        <List.Section key={device.uuid} title={device.name} subtitle={plural(device.tabs.length, 'tab')}>
-          {_.map(device.tabs, (tab: Tab) => (
-            <List.Item
-              key={tab.uuid}
-              title={formatTitle(tab.title)}
-              accessoryTitle={tab.domain}
-              keywords={[tab.url, tab.domain]}
-              icon={getFaviconUrl(tab.domain)}
-              actions={
-                <ActionPanel>
-                  <OpenAction title="Open in Safari" target={tab.url} application="Safari" icon={Icon.Globe} />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      ))}
+    <List isLoading={!devices} onSearchTextChange={setSearchText}>
+      {_.map(devices, (device: Device) => {
+        const tabs = search(device.tabs, ['title', 'url'], searchText) as Tab[];
+        return (
+          <List.Section key={device.uuid} title={device.name} subtitle={plural(tabs.length, 'tab')}>
+            {tabs.map((tab: Tab) => {
+              const url = getTabUrl(tab.url);
+              const domain = getUrlDomain(url);
+              return (
+                <List.Item
+                  key={tab.uuid}
+                  title={formatTitle(tab.title)}
+                  accessoryTitle={domain}
+                  icon={getFaviconUrl(domain)}
+                  actions={
+                    <ActionPanel>
+                      <OpenTabAction tab={tab} />
+                      <CopyTabUrlAction tab={tab} />
+                      <CloseTabAction tab={tab} refreshTabs={fetchDevices} />
+                    </ActionPanel>
+                  }
+                />
+              );
+            })}
+            {searchText !== '' && device.uuid === 'local' && (
+              <List.Item
+                key="fallback-search"
+                title={`Search for "${searchText}"`}
+                icon={Icon.MagnifyingGlass}
+                actions={
+                  <ActionPanel>
+                    <ActionPanel.Item
+                      title="Search in Browser"
+                      icon={Icon.Globe}
+                      onAction={async () => {
+                        await openLocalTabWithSearch(searchText);
+                        await closeMainWindow({ clearRootSearch: true });
+                      }}
+                    />
+                  </ActionPanel>
+                }
+              />
+            )}
+          </List.Section>
+        );
+      })}
     </List>
   );
 }

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "base64",
+  "title": "Base64",
+  "description": "Quickly encode or decode base64 from the clipboard",
+  "icon": "command-icon.png",
+  "author": "DanielSinclair",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "encode",
+      "title": "Base64 Encode",
+      "description": "Overwrite the clipboard contents with an encoded string",
+      "mode": "no-view"
+    },
+    {
+      "name": "decode",
+      "title": "Base64 Decode",
+      "description": "Overwrite the clipboard contents with a decoded string",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.25.5",
+    "js-base64": "3.7.2",
+    "run-applescript": "6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "16.11.7",
+    "@types/react": "17.0.34",
+    "@typescript-eslint/eslint-plugin": "5.3.1",
+    "@typescript-eslint/parser": "5.3.1",
+    "eslint": "8.2.0",
+    "eslint-config-prettier": "8.3.0",
+    "react-devtools": "4.21.0",
+    "typescript": "4.4.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

@@ -35,7 +35,9 @@ function sections(
     .sort(([lhs], [rhs]) => lhs.localeCompare(rhs))
     .map(([runtime, xcodeSimulators]) => {
       return (
-        <List.Section title={runtime}>
+        <List.Section
+          key={runtime}
+          title={runtime}>
           {
             xcodeSimulators
               .map((xcodeSimulator) => {

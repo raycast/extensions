@@ -1,7 +1,7 @@
 {
   "name": "notion",
-  "title": "Notion Database",
-  "description": "Fastest way to create Notion database item.",
+  "title": "Notion",
+  "description": "Fastest way to search and create Notion page.",
   "icon": "notion-logo.png",
   "author": "HenriChabrand",
   "license": "MIT",
@@ -11,6 +11,13 @@
       "title": "Create Database Page",
       "subtitle": "Notion",
       "description": "Create a database page.",
+      "mode": "view"
+    },
+    {
+      "name": "search-page",
+      "title": "Search Page",
+      "subtitle": "Notion",
+      "description": "Search database and page.",
       "mode": "view"
     }
   ],
@@ -23,20 +30,13 @@
       "description": "In Notion go to Settings & Members > Integration > Develop your own > New integration",
       "placeholder": "secret_1l3892KIWCJHJVikbiyJ7",
       "link": "https://www.notion.so/my-integrations"
-    },
-    {
-      "name": "notion_workspace_slug",
-      "type": "textfield",
-      "required": true,
-      "title": "Notion Workspace Domain",
-      "description": "In Notion go to Settings & Members > Settings > Domain",
-      "placeholder": "my-workspace-domain-slug",
-      "link": "https://www.notion.so/"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "moment": "^2.29.1",
+    "open": "^8.4.0"
   },
   "devDependencies": {
     "@types/node": "^16.4.3",
