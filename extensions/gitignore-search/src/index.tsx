@@ -70,7 +70,7 @@ function GitIgnoreListItem(props: { gitignore: GitIgnore }) {
               content={fs.readFileSync(`${environment.assetsPath}/gitignore/${gitignore.path}`, "utf8")}
             />
           )}
-          <OpenInBrowserAction url={gitignore.download_url} />
+          <OpenInBrowserAction url={gitignore.html_url} />
         </ActionPanel>
       }
     />
@@ -93,6 +93,6 @@ type GitIgnore = {
   sha: string;
   name: string;
   path: string;
-  download_url: string;
+  html_url: string;
   type: string;
 };
