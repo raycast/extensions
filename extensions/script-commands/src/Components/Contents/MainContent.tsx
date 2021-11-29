@@ -59,6 +59,7 @@ const flattenGroups: FlattenGroups = (groups) => {
 
       group.subGroups.forEach(subGroup => {
         const keySubGroup = `${group.path}-${subGroup.path}`
+
         sections.push(
           <GroupSection 
             key={ keySubGroup } 

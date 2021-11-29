@@ -1,43 +1,43 @@
 export { 
   AuthorsActionPanel
-} from "./AuthorsActionPanel"
+} from "./ActionPanels/AuthorsActionPanel"
 
 export { 
   FiltersActionPanel 
-} from "./FiltersActionSection"
+} from "./ActionPanels/FiltersActionPanel"
 
 export { 
   GroupSection 
-} from "./GroupSection"
+} from "./Sections/GroupSection"
 
 export { 
   MainContent 
-} from "./MainContent"
+} from "./Contents/MainContent"
 
 export { 
-  ManagementActionSection 
-} from "./ManagementActionSection"
+  ManagementActionPanel 
+} from "./ActionPanels/ManagementActionPanel"
 
 export {
-  ReadmeActionSection
-} from "./ReadmeActionSection"
+  ReadmeActionPanel
+} from "./ActionPanels/ReadmeActionPanel"
 
 export { 
   ReadmeDetail
-} from "./ReadmeDetail"
+} from "./Details/ReadmeDetail"
 
 export { 
   SourceCodeDetail 
-} from "./SourceCodeDetail"
+} from "./Details/SourceCodeDetail"
 
 export { 
   ScriptCommandItem
-} from "./ScriptCommandItem"
+} from "./ListItems/ScriptCommandItem"
 
 export { 
   StoreToast
-} from "./Toast"
+} from "./Common/Toast"
 
 export { 
-  ViewsActionSection
-} from "./ViewsActionSection"
+  ViewsActionPanel
+} from "./ActionPanels/ViewsActionPanel"

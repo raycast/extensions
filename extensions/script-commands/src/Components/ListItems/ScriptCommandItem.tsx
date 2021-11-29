@@ -6,10 +6,10 @@ import {
 import { 
   AuthorsActionPanel,
   FiltersActionPanel,
-  ManagementActionSection,
-  ReadmeActionSection,
+  ManagementActionPanel,
+  ReadmeActionPanel,
   StoreToast,
-  ViewsActionSection
+  ViewsActionPanel,
 } from "@components"
 
 import {
@@ -18,7 +18,7 @@ import {
 
 import { 
   Group,
-  ScriptCommand 
+  ScriptCommand,
 } from "@models"
 
 import { 
@@ -27,11 +27,11 @@ import {
 } from "@types"
 
 import { 
-  useContext 
+  useContext,
 } from "react"
 
 import { 
-  ApplicationContext 
+  ApplicationContext,
 } from "@providers"
 
 type Props = { 
@@ -74,13 +74,13 @@ export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element 
       accessoryTitle={ props.accessoryTitle }
       actions={
         <ActionPanel title={ props.title }>
-          <ManagementActionSection 
+          <ManagementActionPanel 
             state={ props.state }
             onInstall={ handleInstall } 
             onUninstall={ handleUninstall }
             onSetup={ handleSetup }
           />
-          <ViewsActionSection 
+          <ViewsActionPanel 
             url={ props.sourceCodeURL } 
             scriptCommand={ scriptCommand } 
           />
@@ -88,7 +88,7 @@ export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element 
             authors={ scriptCommand.authors ?? [] } 
           />
           { group.readme != undefined && group.readme.length > 0 &&
-            <ReadmeActionSection group={ group } /> 
+            <ReadmeActionPanel group={ group } /> 
           }
           <FiltersActionPanel onFilter={ setFilter } />
         </ActionPanel>

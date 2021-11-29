@@ -1,5 +1,5 @@
 import { 
-  ReadmeDetail
+  ReadmeDetail,
 } from "@components"
 
 import { 
@@ -10,16 +10,18 @@ import {
   ActionPanel, 
   Icon, 
   OpenInBrowserAction, 
-  PushAction 
+  PushAction,
 } from "@raycast/api"
 
-import { readmeNormalURL } from "@urls"
+import { 
+  readmeNormalURL,
+} from "@urls"
 
-type ReadmeActionSectionProps = {
+type ReadmeActionPanelProps = {
   group: Group
 }
 
-export function ReadmeActionSection({ group }: ReadmeActionSectionProps): JSX.Element {
+export function ReadmeActionPanel({ group }: ReadmeActionPanelProps): JSX.Element {
   let normalURL: string | undefined = undefined
   const readme = group.readme
 

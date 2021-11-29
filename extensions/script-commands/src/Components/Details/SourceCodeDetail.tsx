@@ -18,16 +18,16 @@ type Props = {
 }
 
 export function SourceCodeDetail({ scriptCommand}: Props): JSX.Element {
-  const { props } = useSourceCode(scriptCommand)
+  const { title, isLoading, sourceCode, sourceCodeURL } = useSourceCode(scriptCommand)
 
   return (
     <Detail 
-      navigationTitle={ props.title }
-      isLoading={ props.isLoading } 
-      markdown={  props.sourceCode }
+      navigationTitle={ title }
+      isLoading={ isLoading } 
+      markdown={ sourceCode }
       actions={ 
-        <ActionPanel title={ props.title }>
-          <ActionsSection url={ props.sourceCodeURL } />
+        <ActionPanel title={ title }>
+          <ActionsSection url={ sourceCodeURL } />
         </ActionPanel>
       }
     />

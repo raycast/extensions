@@ -1,14 +1,14 @@
 import { 
-  Author
-} from "@models"
-
-import { 
   ActionPanel, 
   Image, 
   ImageMask, 
   OpenInBrowserAction, 
   randomId 
 } from "@raycast/api"
+
+import { 
+  Author
+} from "@models"
 
 import { 
   avatarURL,

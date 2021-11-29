@@ -8,14 +8,14 @@ import {
   State 
 } from "@types"
 
-type ManagementActionSectionProps = {
+type ManagementActionPanelProps = {
   state: State
   onInstall: () => void,
   onUninstall: () => void,
   onSetup: () => void,
 }
 
-export function ManagementActionSection({ state, onInstall, onUninstall, onSetup }: ManagementActionSectionProps): JSX.Element | null {
+export function ManagementActionPanel({ state, onInstall, onUninstall, onSetup }: ManagementActionPanelProps): JSX.Element | null {
   const elements: JSX.Element[] = [] 
 
   const uninstallAction = (

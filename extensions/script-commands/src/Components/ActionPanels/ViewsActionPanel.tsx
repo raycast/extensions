@@ -1,24 +1,24 @@
 import { 
-  SourceCodeDetail 
-} from "@components"
-
-import { 
-  ScriptCommand 
-} from "@models"
-
-import { 
   ActionPanel, 
   Icon, 
   OpenInBrowserAction, 
-  PushAction 
+  PushAction,
 } from "@raycast/api"
 
-type ViewsActionSectionProps = {
+import { 
+  SourceCodeDetail,
+} from "@components"
+
+import { 
+  ScriptCommand,
+} from "@models"
+
+type ViewsActionPanelProps = {
   url: string,
   scriptCommand: ScriptCommand
 }
 
-export function ViewsActionSection({ url, scriptCommand }: ViewsActionSectionProps): JSX.Element {
+export function ViewsActionPanel({ url, scriptCommand }: ViewsActionPanelProps): JSX.Element {
   return (
     <ActionPanel.Section>
       <ViewSourceCodeAction scriptCommand={ scriptCommand } />
