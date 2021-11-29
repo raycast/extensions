@@ -633,7 +633,7 @@ function notionTextToMarkdown (text: Record<string,any>): string {
 
   if(text.href){
     if(text.href.startsWith('/')){
-      plainText = '['+plainText+'](https://notion.so'+text.href)+')'
+      plainText = '['+plainText+'](https://notion.so'+text.href+')'
     }else{
       plainText = '['+plainText+']('+text.href+')'
     }
