@@ -16,7 +16,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.6",
-    "node-fetch": "^3.0.0"
+    "cross-fetch": "^3.1.4"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -26,10 +26,13 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "react-devtools": "^4.19.2",
+    "ts-node": "^10.4.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "postinstall": "npm run generate-dataset",
+    "generate-dataset": "ts-node ./scripts/generate-dataset.ts"
   }
 }
