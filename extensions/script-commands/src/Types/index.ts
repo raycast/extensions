@@ -1,4 +1,5 @@
 export {
+  ContentType,
   IconUsage,
   Progress,
   State,

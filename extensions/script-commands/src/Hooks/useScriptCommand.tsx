@@ -10,22 +10,22 @@ import {
 } from "@raycast/api"
 
 import { 
-  useState 
+  useState,
 } from "react"
 
 import { 
-  useDataManager
+  useDataManager,
 } from "@hooks"
 
 import { 
-  State
+  State,
 } from "@types"
 
 import { 
   iconDarkURLFor, 
   iconLightURLFor, 
   languageURL, 
-  sourceCodeNormalURL
+  sourceCodeNormalURL,
 } from "@urls"
 
 type ScriptCommandState = {
@@ -57,7 +57,6 @@ type UseScriptCommand = (initialScriptCommand: ScriptCommand) => UseScriptComman
 export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
   const { dataManager } = useDataManager()
 
-  // const stateForCommand = dataManager.stateFor(initialScriptCommand)
   const [state, setState] = useState<ScriptCommandState>({
     commandState: dataManager.stateFor(initialScriptCommand), 
     scriptCommand: initialScriptCommand
@@ -120,7 +119,7 @@ const accessoryIconFor: AccessoryIconFor = (state, language) => {
   else if (state == State.NeedSetup)
     icon = { 
       source: Icon.Gear, 
-      tintColor: Color.Green
+      tintColor: Color.Orange
     }
 
   else

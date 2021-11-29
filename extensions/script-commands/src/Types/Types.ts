@@ -17,6 +17,11 @@ export interface Content {
   [identifier: string]: Command
 }
 
+export enum ContentType {
+  Raw,
+  Normal,
+}
+
 export interface File {
   path: string
   link: string
