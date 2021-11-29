@@ -94,7 +94,7 @@ export default function SearchPageList(): JSX.Element {
           page={p}
           databaseView={undefined}
           databaseProperties={undefined}
-          saveDatabaseView={undefined}/>
+          saveDatabaseView={null}/>
         ))}
       </List.Section>
       <List.Section key='search-result' title='Search'>
@@ -104,7 +104,7 @@ export default function SearchPageList(): JSX.Element {
           page={p}
           databaseView={undefined}
           databaseProperties={undefined}
-          saveDatabaseView={undefined}/>
+          saveDatabaseView={null}/>
         ))}
       </List.Section>
     </List>
@@ -236,7 +236,7 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
   ) 
 }
 
-function PageListItem(props: { page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined, saveDatabaseView: ((newDatabaseView: DatabaseView) => void | undefined)}): JSX.Element {
+function PageListItem(props: { page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined, saveDatabaseView: ((newDatabaseView: DatabaseView) => void | null)}): JSX.Element {
   const page = props.page
   const pageProperties = page.properties
 
