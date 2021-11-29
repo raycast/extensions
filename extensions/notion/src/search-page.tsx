@@ -236,7 +236,7 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
   ) 
 }
 
-function PageListItem(props: { page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined, saveDatabaseView: (newDatabaseView: DatabaseView) => void | undefined}): JSX.Element {
+function PageListItem(props: { page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined, saveDatabaseView: ((newDatabaseView: DatabaseView) => void | undefined)}): JSX.Element {
   const page = props.page
   const pageProperties = page.properties
 
