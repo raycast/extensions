@@ -2,7 +2,12 @@ import {
   Group 
 } from "@models"
 
+import { 
+  Language 
+} from "./Language"
+
 export interface Main {
   groups: Group[]
-  totalScriptCommands: number
+  totalScriptCommands: number,
+  languages: Language[]
 }

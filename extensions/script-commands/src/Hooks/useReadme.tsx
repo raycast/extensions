@@ -39,7 +39,6 @@ export const useReadme: UseReadme = (initialGroup) => {
     group: initialGroup
   })
 
-
   let readmeURL = ""
   const readmePath = state.group.readme
   

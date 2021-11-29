@@ -10,6 +10,10 @@ export type {
   Icon 
 } from "./Icon"
 
+export type {
+  Language
+} from "./Language"
+
 export type { 
   Main 
 } from "./Main"

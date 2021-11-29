@@ -1,17 +1,18 @@
 import { 
-  Main, 
   Group,
-  ScriptCommand
+  Language,
+  Main, 
+  ScriptCommand,
 } from "@models"
 
 import { 
   fetchReadme,
   fetchScriptCommands,
-  fetchSourceCode
+  fetchSourceCode,
 } from "@network"
 
 import { 
-  ContentStore 
+  ContentStore,
 } from "@stores"
 
 import { 
@@ -34,6 +35,7 @@ export class DataManager {
   private contentManager: ContentStore
   private scriptCommandManager: ScriptCommandManager
   private settings = new Settings()
+  private languages: Language[] = []
 
   static shared(): DataManager { 
     return this.instance
@@ -114,22 +116,23 @@ export class DataManager {
     const downloaded = this.isCommandDownloaded(scriptCommand.identifier)
     const needSetup = this.isCommandNeedsSetup(scriptCommand.identifier)
 
-    let state: State
+    let state: State = State.NotInstalled
 
-    if (downloaded) {
-      if (needSetup)
-        state = State.NeedSetup
-      else
-        state = State.Installed
-    }
-    else 
-      state = State.NotInstalled
+    if (downloaded)
+      state = (needSetup) ? State.NeedSetup : State.Installed
 
     return state
   }
 
+  fetchLanguages(): Language[] {
+    return this.languages
+  }
+
   async fetchCommands(): Promise<Main> {
-    return fetchScriptCommands()
+    const main = await fetchScriptCommands()
+    this.languages = main.languages
+
+    return main
   }
 
   async fetchSourceCode(scriptCommand: ScriptCommand): Promise<string> {

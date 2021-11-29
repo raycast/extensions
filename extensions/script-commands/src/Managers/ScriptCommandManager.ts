@@ -344,7 +344,7 @@ export class ScriptCommandManager {
 
     if (counter >= 2)
       return IconUsage.BeingUsedByMore
-    else
-      return IconUsage.LastScriptUsing
+
+    return IconUsage.LastScriptUsing
   }
 }

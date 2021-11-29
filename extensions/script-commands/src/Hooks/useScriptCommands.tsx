@@ -36,7 +36,8 @@ export const useScriptCommands: UseScriptCommands = () => {
     shouldReload: true, 
     main: { 
       groups: [],
-      totalScriptCommands: 0
+      totalScriptCommands: 0,
+      languages: []
     }
   })
 
