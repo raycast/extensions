@@ -6,10 +6,9 @@ import {
   URLConstants 
 } from "@urls"
 
-enum ContentType {
-  Raw,
-  Normal,
-}
+import { 
+  ContentType 
+} from "@types"
 
 export const sourceCodeRawURL = (scriptCommand: ScriptCommand) => sourceCodeURL(scriptCommand, ContentType.Raw)
 
@@ -20,4 +19,3 @@ const sourceCodeURL = (scriptCommand: ScriptCommand, type: ContentType): string 
 
   return `${base}/${scriptCommand.path}${scriptCommand.filename}`
 }
-

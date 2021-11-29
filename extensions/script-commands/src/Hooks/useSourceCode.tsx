@@ -1,53 +1,41 @@
 import { 
-  useDataManager 
+  useDataManager,
 } from "@hooks"
 
 import { 
-  ScriptCommand 
+  ScriptCommand,
 } from "@models"
-import { sourceCodeNormalURL } from "@urls"
+
+import { 
+  sourceCodeNormalURL,
+} from "@urls"
 
 import { 
   useEffect,
-  useState 
+  useState,
 } from "react"
 
 type SourceCodeState = {
-  content: string,
-  shouldReload: boolean,
+  content: string
   scriptCommand: ScriptCommand
 }
 
 type UseSourceCodeProps = {
-  title: string,
-  language: string,
-  isLoading: boolean,
-  sourceCodeURL: string,
+  title: string
+  isLoading: boolean
+  sourceCodeURL: string
   sourceCode: string
 }
 
-type UseSourceCodeState = {
-  props: UseSourceCodeProps,
-  reloadData: () => void
-}
-
-type UseSourceCode = (initialScriptCommand: ScriptCommand) => UseSourceCodeState
+type UseSourceCode = (initialScriptCommand: ScriptCommand) => UseSourceCodeProps
 
 export const useSourceCode: UseSourceCode = (initialScriptCommand) => {
   const { dataManager } = useDataManager()
 
   const [state, setState] = useState<SourceCodeState>({
     content: "",
-    shouldReload: true,
     scriptCommand: initialScriptCommand
   })
-
-  const reloadData = () => {
-    setState((oldState) => ({
-      ...oldState, 
-      shouldReload: true
-    }))
-  }
 
   useEffect(() => {
     const fetch = async () => {
@@ -58,26 +46,19 @@ export const useSourceCode: UseSourceCode = (initialScriptCommand) => {
         content: result
       }))
     }
-    
-    if (state.shouldReload == false)
-      return
 
     fetch()
   }, [state])
   
   return {
-    props: {
-      title: state.scriptCommand.title,
-      language: state.scriptCommand.language,
-      isLoading: state.content.length == 0,
-      sourceCodeURL: sourceCodeNormalURL(state.scriptCommand),
-      sourceCode: details(
-        state.scriptCommand.language, 
-        state.scriptCommand.filename,
-        state.content
-      )
-    },
-    reloadData
+    title: state.scriptCommand.title,
+    isLoading: state.content.length == 0,
+    sourceCodeURL: sourceCodeNormalURL(state.scriptCommand),
+    sourceCode: details(
+      state.scriptCommand.language, 
+      state.scriptCommand.filename,
+      state.content
+    )
   }
 }
 
