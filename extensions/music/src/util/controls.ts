@@ -25,6 +25,8 @@ export const getPlayerState = pipe(
 	tell("Music", "player state"),
 	TE.map(state => state  as PlayerState)
 )
+export const love = tell("Music", "set loved of current track to true")
+export const dislike = tell("Music", "set disliked of current track to true")
 
 export interface TrackInfo {
 	name: string;
