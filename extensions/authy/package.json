@@ -10,6 +10,7 @@
     {
       "name": "search-otp",
       "title": "Search OTP",
+      "subtitle": "Authy",
       "description": "Search OTP for synced Authy Apps and 3rd party services",
       "mode": "view"
     }
