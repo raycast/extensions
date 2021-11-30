@@ -9,7 +9,6 @@ import {
   ToastStyle,
   useNavigation,
 } from "@raycast/api";
-import _ from "lodash";
 import React, { useEffect, useMemo, useState } from "react";
 import * as scripts from "./script";
 import { Category, Info, Result, Run, RunType, Script } from "./script/type";
@@ -119,15 +118,6 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
       icon={info.icon}
       actions={
         <ActionPanel>
-          {(info.type === "all" || info.type === "clipboard") && (
-            <ActionPanel.Item
-              title={"Run Script to Clipboard"}
-              icon={Icon.ArrowRight}
-              onAction={async () => {
-                action("clipboard");
-              }}
-            />
-          )}
           {(info.type === "all" || info.type === "noclipboard" || info.type === "direct") && (
             <ActionPanel.Item
               title={"Run Script"}
@@ -141,10 +131,18 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
             <ActionPanel.Item
               title={"Run Script Form"}
               icon={Icon.Document}
-              //modifiers: ["cmd", "shift"], key: "enter" is shortcut Not working
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
               onAction={async () => {
                 action("form");
+              }}
+            />
+          )}
+          {(info.type === "all" || info.type === "clipboard") && (
+            <ActionPanel.Item
+              title={"Run Script to Clipboard"}
+              icon={Icon.ArrowRight}
+              shortcut={{ modifiers: ["ctrl"], key: "v" }}
+              onAction={async () => {
+                action("clipboard");
               }}
             />
           )}
