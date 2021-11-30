@@ -10,12 +10,16 @@ import { runAppleScript } from "run-applescript";
  *
  * @param appleScript - The AppleScript to run
  * @param shouldPop - Indicates whether to reset the navigation stack
- * @throws An error when the AppleScript fails to run
  * @returns A promise that is resolved when the AppleScript finished running
  */
 export async function runAppleScriptSilently(appleScript: string, shouldPop: boolean) {
   await closeMainWindow();
-  await runAppleScript(appleScript);
+  try {
+    await runAppleScript(appleScript);
+  } catch {
+    // HazeOver was not installed correctly.
+    // Avoid "dead" screen by disregarding error.
+  }
   if (shouldPop) {
     await popToRoot();
   }
