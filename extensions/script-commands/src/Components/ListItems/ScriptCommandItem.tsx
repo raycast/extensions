@@ -17,7 +17,7 @@ import {
 } from "@hooks"
 
 import { 
-  Group,
+  CompactGroup,
   ScriptCommand,
 } from "@models"
 
@@ -36,7 +36,7 @@ import {
 
 type Props = { 
   scriptCommand: ScriptCommand
-  group: Group
+  group: CompactGroup
 }
 
 export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element {

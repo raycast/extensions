@@ -3,7 +3,8 @@ export type {
 } from "./Author"
 
 export type { 
-  Group 
+  Group,
+  CompactGroup 
 } from "./Group"
 
 export type { 
@@ -15,7 +16,8 @@ export type {
 } from "./Language"
 
 export type { 
-  Main 
+  MainGroup,
+  MainCompactGroup 
 } from "./Main"
 
 export type { 

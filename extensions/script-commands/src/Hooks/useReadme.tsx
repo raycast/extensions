@@ -3,7 +3,7 @@ import {
 } from "@hooks"
 
 import { 
-  Group,
+  CompactGroup,
 } from "@models"
 
 import { 
@@ -17,7 +17,7 @@ import {
 
 type ReadmeState = {
   content: string,
-  group: Group
+  group: CompactGroup
 }
 
 type UseReadmeProps = {
@@ -29,7 +29,7 @@ type UseReadmeProps = {
 
 import path from "path"
 
-type UseReadme = (initialGroup: Group) => UseReadmeProps
+type UseReadme = (initialGroup: CompactGroup) => UseReadmeProps
 
 export const useReadme: UseReadme = (initialGroup) => {
   const { dataManager } = useDataManager()
@@ -62,7 +62,7 @@ export const useReadme: UseReadme = (initialGroup) => {
   
   
   const filename = (readmePath != undefined && readmePath != "") ? path.parse(readmePath).base : "README"
-  const title = `${state.group.name}'s ${filename}`
+  const title = `${state.group.title}'s ${filename}`
 
   return {
     title: title,

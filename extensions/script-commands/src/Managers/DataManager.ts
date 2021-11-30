@@ -1,7 +1,6 @@
 import { 
-  Group,
   Language,
-  Main, 
+  MainCompactGroup, 
   ScriptCommand,
 } from "@models"
 
@@ -21,7 +20,6 @@ import {
 } from "@managers"
 
 import { 
-  Command,
   Content,
   State,
   StateResult, 
@@ -128,11 +126,11 @@ export class DataManager {
     return this.languages
   }
 
-  async fetchCommands(): Promise<Main> {
-    const main = await fetchScriptCommands()
-    this.languages = main.languages
+  async fetchCommands(): Promise<MainCompactGroup> {
+    const response = await fetchScriptCommands()
+    this.languages = response.languages
 
-    return main
+    return response
   }
 
   async fetchSourceCode(scriptCommand: ScriptCommand): Promise<string> {

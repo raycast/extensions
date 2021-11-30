@@ -8,9 +8,11 @@ import {
 } from "@raycast/api"
 
 import { 
-  Main, 
+  MainGroup, 
   Group, 
-  ScriptCommand 
+  ScriptCommand, 
+  MainCompactGroup,
+  CompactGroup
 } from "@models"
 
 import { 
@@ -21,16 +23,40 @@ import {
 
 import path from "path"
 
-export async function fetchScriptCommands(): Promise<Main> {
+export async function fetchScriptCommands(): Promise<MainCompactGroup> {
   const extensionsURL = `${URLConstants.baseRawURL}/extensions.json`
 
   try {
     const response = await fetch(extensionsURL)
     const json = await response.json()
-    const main = json as Main
+    const object = json as MainGroup
 
-    main.groups.sort((left: Group, right: Group) => {
+    const main: MainCompactGroup = {
+      groups: [],
+      totalScriptCommands: object.totalScriptCommands,
+      languages: object.languages
+    }
+
+    object.groups.sort((left: Group, right: Group) => {
       return (left.name > right.name) ? 1 : -1
+    })
+
+    object.groups.forEach(group => {
+      main.groups.push(
+        flattenGroups(group)
+      )
+  
+      if (group.subGroups != undefined && group.subGroups.length > 0) {
+        group.subGroups.sort((left: Group, right: Group) => {
+          return (left.name > right.name) ? 1 : -1
+        })
+  
+        group.subGroups.forEach(subGroup => {
+          main.groups.push(
+            flattenGroups(subGroup, group.name)
+          )
+        })
+      }
     })
 
     return main
@@ -45,6 +71,38 @@ export async function fetchScriptCommands(): Promise<Main> {
       languages: []
     })
   }
+}
+
+type FlattenGroups = (group: Group, parentGroupName?: string) => CompactGroup
+
+const flattenGroups: FlattenGroups = (group, parentGroupName = undefined) => {
+  if (group.scriptCommands.length > 0) {
+    group.scriptCommands.sort((left: ScriptCommand, right: ScriptCommand) => {
+      return (left.title > right.title) ? 1 : -1
+    })
+  }
+
+  let identifier: string = group.path
+  let title: string = group.name
+  let subtitle: string | undefined = undefined
+
+  if (parentGroupName != undefined && parentGroupName.length > 0) {
+    const key = parentGroupName.replace(" ", "-").toLowerCase()
+
+    identifier = `${key}-${group.path}`
+    title = parentGroupName
+    subtitle = group.name
+  }
+
+  const compactGroup: CompactGroup = {
+    identifier: identifier,
+    title: title,
+    subtitle: subtitle,
+    readme: group.readme,
+    scriptCommands: group.scriptCommands,
+  }
+
+  return compactGroup
 }
 
 export async function fetchSourceCode(scriptCommand: ScriptCommand): Promise<string> {
@@ -87,7 +145,7 @@ type MarkdownNormalized = (markdown: string, readmePath: string) => string
 
 const markdownNormalized: MarkdownNormalized = (markdown, readmePath) => {
   const groupPath = path.parse(readmePath).dir
-  const expression = /!\[[A-Za-z0-9\-.]+\]\(([A-Za-z0-9\-.\\/_]+)\)/gm
+  const expression = /!\[[A-Za-z0-9\-._]+\]\(([A-Za-z0-9\-.\\/_]+)\)/gm
 
   const content = markdown.replace(expression, (_match, path: string) => {
     if (path.length > 0 && (path.startsWith("http") == false || path.startsWith("https") == false))

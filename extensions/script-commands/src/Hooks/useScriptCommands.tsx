@@ -8,20 +8,20 @@ import {
 } from "@hooks"
 
 import { 
-  Group,
-  Main,
+  CompactGroup, 
+  MainCompactGroup,
 } from "@models"
 
 type UseScriptCommandsState = {
   shouldReload: boolean,
-  main: Main
+  main: MainCompactGroup
 }
 
 type UserScriptCommandsProps = {
   title: string,
   placeholder: string,
   isLoading: boolean,
-  groups: Group[]
+  groups: CompactGroup[]
 }
 
 type UseScriptCommands = () => {

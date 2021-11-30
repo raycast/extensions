@@ -6,7 +6,7 @@ import {
 } from "@raycast/api"
 
 import { 
-  Group,
+  CompactGroup,
 } from "@models"
 
 import { 
@@ -14,7 +14,7 @@ import {
 } from "@hooks"
 
 type Props = {
-  group: Group
+  group: CompactGroup
 }
 
 export function ReadmeDetail({ group }: Props): JSX.Element {

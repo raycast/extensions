@@ -9,3 +9,11 @@ export interface Group {
   scriptCommands: ScriptCommand[]
   subGroups?: Group[]
 }
+
+export interface CompactGroup {
+  identifier: string
+  title: string
+  subtitle?: string
+  readme?: string
+  scriptCommands: ScriptCommand[]
+}

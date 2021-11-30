@@ -7,29 +7,19 @@ import {
 } from "@components"
 
 import { 
-  Group, 
-  ScriptCommand 
+  CompactGroup,
 } from "@models"
 
 type Props = { 
-  group: Group,
-  parentName?: string
+  group: CompactGroup
 }
 
-export function GroupSection({ group, parentName }: Props): JSX.Element  {
-  group.scriptCommands.sort((left: ScriptCommand, right: ScriptCommand) => {
-    return (left.title > right.title) ? 1 : -1
-  })
-  
-  const key = `${group.name}-${group.path}`
-  const title = parentName ?? group.name
-  const subtitle = parentName != null ? group.name : ""
-
+export function GroupSection({ group }: Props): JSX.Element  {
   return (
     <List.Section 
-      key={ key } 
-      title={ title } 
-      subtitle={ subtitle }
+      key={ group.identifier } 
+      title={ group.title } 
+      subtitle={ group.subtitle }
       children={
         group.scriptCommands.map(scriptCommand => (
           <ScriptCommandItem 

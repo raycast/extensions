@@ -3,7 +3,7 @@ import {
 } from "@components"
 
 import { 
-  Group,
+  CompactGroup,
 } from "@models"
 
 import { 
@@ -18,7 +18,7 @@ import {
 } from "@urls"
 
 type ReadmeActionPanelProps = {
-  group: Group
+  group: CompactGroup
 }
 
 export function ReadmeActionPanel({ group }: ReadmeActionPanelProps): JSX.Element {
@@ -46,7 +46,7 @@ export function ReadmeActionPanel({ group }: ReadmeActionPanelProps): JSX.Elemen
 }
 
 type ViewReadmeActionProps = {
-  group: Group
+  group: CompactGroup
 }
 
 function ViewReadmeAction({ group }: ViewReadmeActionProps): JSX.Element {
