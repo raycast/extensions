@@ -140,36 +140,6 @@ export class DataManager {
   async fetchReadme(path: string): Promise<string> {
     return fetchReadme(path)
   }
-
-  async fetchInstalledCommands(): Promise<Main> {
-    this.loadDatabase()
-
-    const content = this.contentManager.getContent()
-    
-    const main: Main = {
-      groups: [],
-      totalScriptCommands: Object.values(content).length,
-      languages: []
-    }
-
-    const installedGroup: Group = {
-      name: "Installed Script Commands",
-      path: "installed-script-commands",
-      scriptCommands: []
-    }
-
-    Object.values(content).forEach((command: Command) => {
-      installedGroup.scriptCommands.push(command.scriptCommand)
-    })
-
-    installedGroup.scriptCommands.sort((left: ScriptCommand, right: ScriptCommand) => {
-      return (left.title > right.title) ? 1 : -1
-    })
-
-    main.groups.push(installedGroup)
-
-    return main
-  }
   
   async installScriptCommand(scriptCommand: ScriptCommand): Promise<StateResult> {
     const result = await this.scriptCommandManager.install(scriptCommand)
