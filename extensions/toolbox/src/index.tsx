@@ -232,7 +232,7 @@ function ResultActionView(props: { content: Result; info: Info }) {
             icon={Icon.Clipboard}
             onAction={async () => {
               await copyTextToClipboard(content.query);
-              await showHUD("Copy Query");
+              await showHUD("✅ Query Copied to Clipboard");
             }}
           />
         </ActionPanel.Section>
