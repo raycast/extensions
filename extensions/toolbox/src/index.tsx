@@ -223,7 +223,7 @@ function ResultActionView(props: { content: Result; info: Info }) {
             icon={Icon.Clipboard}
             onAction={async () => {
               await copyTextToClipboard(content.result);
-              await showHUD("Copy Result");
+              await showHUD("✅ Result Copied to Clipboard");
             }}
           />
 
