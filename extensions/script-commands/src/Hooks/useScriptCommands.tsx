@@ -12,6 +12,10 @@ import {
   MainCompactGroup,
 } from "@models"
 
+import { 
+  Filter 
+} from "@types"
+
 type UseScriptCommandsState = {
   shouldReload: boolean,
   main: MainCompactGroup
@@ -22,15 +26,17 @@ type UserScriptCommandsProps = {
   placeholder: string,
   isLoading: boolean,
   groups: CompactGroup[]
+  filter: Filter
 }
 
 type UseScriptCommands = () => {
   props: UserScriptCommandsProps
   reloadData: () => void
+  setFilter: (filter: Filter) => void
 }
 
 export const useScriptCommands: UseScriptCommands = () => {
-  const { dataManager } = useDataManager()
+  const { dataManager, filter, setFilter } = useDataManager()
   
   const [state, setState] = useState<UseScriptCommandsState>({
     shouldReload: true, 
@@ -75,8 +81,10 @@ export const useScriptCommands: UseScriptCommands = () => {
       title: "Search Command",
       placeholder: placeholder,
       isLoading: isLoading,
-      groups: state.main.groups
+      groups: state.main.groups,
+      filter: filter
     },
-    reloadData
+    reloadData,
+    setFilter
   }
 }

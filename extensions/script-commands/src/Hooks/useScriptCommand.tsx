@@ -18,6 +18,7 @@ import {
 } from "@hooks"
 
 import { 
+  Filter,
   State,
 } from "@types"
 
@@ -50,12 +51,13 @@ type UseScriptCommandState = {
   install: () => void
   uninstall: () => void
   setup: () => void
+  setFilter: (filter: Filter) => void
 }
 
 type UseScriptCommand = (initialScriptCommand: ScriptCommand) => UseScriptCommandState
 
 export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
-  const { dataManager } = useDataManager()
+  const { dataManager, setFilter } = useDataManager()
 
   const [state, setState] = useState<ScriptCommandState>({
     commandState: dataManager.stateFor(initialScriptCommand), 
@@ -98,7 +100,8 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
     },
     install,
     uninstall,
-    setup
+    setup,
+    setFilter
   }
 }
 

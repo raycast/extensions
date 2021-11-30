@@ -10,14 +10,22 @@ import {
   ApplicationContext 
 } from "@providers"
 
+import { 
+  Filter 
+} from "@types"
+
 type UseDataManager = () => {
   dataManager: DataManager
+  filter: Filter
+  setFilter: (filter: Filter) => void
 }
 
 export const useDataManager: UseDataManager = () => {
-  const { state } = useContext(ApplicationContext)
+  const { state, setFilter } = useContext(ApplicationContext)
   
   return {
-    dataManager: state.dataManager
+    dataManager: state.dataManager,
+    filter: state.filter,
+    setFilter
   }
 }

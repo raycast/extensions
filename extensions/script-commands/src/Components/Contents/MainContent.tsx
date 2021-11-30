@@ -10,15 +10,8 @@ import {
   useScriptCommands 
 } from "@hooks"
 
-import { useContext } from "react"
-
-import { ApplicationContext } from "@providers"
-
 export function MainContent(): JSX.Element {
-  const { state } = useContext(ApplicationContext)
   const { props } = useScriptCommands()  
-  
-  console.log(`[MainContent] Filter:`, state.filter)
 
   return (
     <List 
