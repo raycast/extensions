@@ -1,4 +1,4 @@
-import { ActionPanel, Form, SubmitFormAction, showToast, ToastStyle, useNavigation } from '@raycast/api';
+import { ActionPanel, Form, showToast, ToastStyle, Icon, useNavigation } from '@raycast/api';
 import _ from 'lodash';
 import { exec } from 'child_process';
 import { useEffect, useState } from 'react';
@@ -10,13 +10,12 @@ const asyncExec = promisify(exec);
 
 interface FormValues {
   title: string;
-  notes?: string;
-  tags?: string;
-  list?: string;
-  when?: string;
-  date?: string;
-  'checklist-items'?: string;
-  deadline?: string;
+  notes: string;
+  tags: string[];
+  list: string | undefined;
+  when: Date | undefined;
+  'checklist-items': string;
+  deadline: Date | undefined;
 }
 
 const getTags = () =>
@@ -64,12 +63,20 @@ const getTargetListName = (list: FormValues['list']): ListName => {
   }
 };
 
-export default function AddNewTodo(props: { title: string; listName: string }) {
-  const { title, listName = 'Inbox' } = props;
+export default function AddNewTodo(props: { title?: string; listName?: string }) {
+  const defaultValues: FormValues = {
+    title: props.title || '',
+    notes: '',
+    tags: [],
+    list: props.listName?.toLowerCase(),
+    when: undefined,
+    'checklist-items': '',
+    deadline: undefined,
+  };
+
+  const [values, setValues] = useState<FormValues>(defaultValues);
   // const [projects, setProjects] = useState();
   const [tags, setTags] = useState([]);
-  const [list, setList] = useState(listName.toLowerCase());
-
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -80,7 +87,11 @@ export default function AddNewTodo(props: { title: string; listName: string }) {
     fetchTags();
   }, []);
 
-  async function submit(values: FormValues) {
+  const setValue = (key: string) => (value: string | string[] | Date) => {
+    setValues({ ...values, [key]: value });
+  };
+
+  const addNewTodo = async () => {
     if (!values.title) {
       showToast(ToastStyle.Failure, 'Title is required');
       return;
@@ -91,27 +102,37 @@ export default function AddNewTodo(props: { title: string; listName: string }) {
     await asyncExec(url);
 
     showToast(ToastStyle.Success, 'Added New To-Do');
+    setValues({ ...defaultValues, title: '' });
+  };
+
+  const addNewTodoAndGoToList = async () => {
+    await addNewTodo();
     const listName = getTargetListName(values.list);
     push(<ShowList listName={listName} />);
-  }
+  };
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Add New To-Do" onSubmit={submit} />
+          <ActionPanel.Item title="Add New To-Do" onAction={addNewTodo} icon={Icon.Plus} />
+          <ActionPanel.Item
+            title="Add New To-Do and Go To List"
+            onAction={addNewTodoAndGoToList}
+            icon={Icon.ArrowRight}
+          />
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" defaultValue={title} />
-      <Form.TextArea id="notes" title="Notes" />
-      {/*<Form.Dropdown id="project" title="Project">
+      <Form.TextField id="title" title="Title" value={values.title} onChange={setValue('title')} />
+      <Form.TextArea id="notes" title="Notes" value={values.notes} onChange={setValue('notes')} />
+      {/*<Form.Dropdown id="project" title="Project" value={values.project} onChange={setValue('project')}>
         {projects.map(({ id, name }) => (
           <Form.Dropdown.Item value={id} title={name} key={id} />
         ))}
       </Form.Dropdown>*/}
       <Form.Separator />
-      <Form.Dropdown id="list" title="List" onChange={setList} value={list}>
+      <Form.Dropdown id="list" title="List" value={values.list} onChange={setValue('list')}>
         <Form.Dropdown.Item value="inbox" title="Inbox" />
         <Form.Dropdown.Item value="today" title="Today" />
         <Form.Dropdown.Item value="evening" title="This Evening" />
@@ -120,14 +141,22 @@ export default function AddNewTodo(props: { title: string; listName: string }) {
         <Form.Dropdown.Item value="anytime" title="Anytime" />
         <Form.Dropdown.Item value="someday" title="Someday" />
       </Form.Dropdown>
-      {list === 'upcoming' && <Form.DatePicker id="when" title="When" />}
-      <Form.TagPicker id="tags" title="Tags">
+      {values.list === 'upcoming' && (
+        <Form.DatePicker id="when" title="When" value={values.when} onChange={setValue('when')} />
+      )}
+      <Form.TagPicker id="tags" title="Tags" value={values.tags} onChange={setValue('tags')}>
         {tags.map((tag) => (
           <Form.TagPicker.Item value={tag} title={tag} key={tag} />
         ))}
       </Form.TagPicker>
-      <Form.TextArea id="checklist-items" title="Checklist Items" placeholder="separated by new lines" />
-      <Form.DatePicker id="deadline" title="Deadline" />
+      <Form.TextArea
+        id="checklist-items"
+        title="Checklist Items"
+        placeholder="separated by new lines"
+        value={values['checklist-items']}
+        onChange={setValue('checklist-items')}
+      />
+      <Form.DatePicker id="deadline" title="Deadline" value={values.deadline} onChange={setValue('deadline')} />
     </Form>
   );
 }

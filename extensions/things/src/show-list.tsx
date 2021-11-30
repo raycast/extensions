@@ -165,6 +165,7 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
             <ActionPanel.Item
               title="Delete"
               icon={Icon.Trash}
+              shortcut={{ modifiers: ['ctrl'], key: 'x' }}
               onAction={async () => {
                 await deleteTodo(id);
                 await showToast(ToastStyle.Success, 'Deleted');
@@ -198,6 +199,12 @@ function TodoListItem(props: { todo: Todo; refreshTodos: () => void; listName: L
               icon={Icon.ArrowRight}
               shortcut={{ modifiers: ['ctrl'], key: 'o' }}
               url={`things:///show?id=${listName.toLowerCase()}`}
+            />
+            <PushAction
+              title="Add New To-Do"
+              icon={Icon.Plus}
+              shortcut={{ modifiers: ['cmd'], key: 'n' }}
+              target={<AddNewTodo listName={listName} />}
             />
             <ActionPanel.Item
               title="Refresh"
