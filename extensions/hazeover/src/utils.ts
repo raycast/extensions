@@ -1,5 +1,5 @@
 // Credit to Raycast's spotify-controls extension for this file.
-import { closeMainWindow, popToRoot } from "@raycast/api";
+import { closeMainWindow, popToRoot, showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 /**
@@ -7,6 +7,7 @@ import { runAppleScript } from "run-applescript";
  *
  * @remarks
  * The main window is closed before running the AppleScript to keep the UI snappy.
+ * A HUD is displayed if the AppleScript returns an error.
  *
  * @param appleScript - The AppleScript to run
  * @param shouldPop - Indicates whether to reset the navigation stack
@@ -19,6 +20,7 @@ export async function runAppleScriptSilently(appleScript: string, shouldPop: boo
   } catch {
     // HazeOver was not installed correctly.
     // Avoid "dead" screen by disregarding error.
+    await showHUD("Oh no! Something went wrong. Check your HazeOver installation.");
   }
   if (shouldPop) {
     await popToRoot();
