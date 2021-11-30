@@ -240,7 +240,7 @@ function InputDirectView(props: { info: Info }) {
 
   return (
     <List
-      navigationTitle={"Toolbox - " + info.title}
+      navigationTitle={"ToolBox - " + info.title}
       isLoading={content.isLoading}
       searchBarPlaceholder={"Enter your query here"}
       onSearchTextChange={(query: string) => {
@@ -264,7 +264,7 @@ function InputFormView(props: { info: Info }) {
 
   return (
     <Form
-      navigationTitle={"Toolbox - " + info.title}
+      navigationTitle={"ToolBox - " + info.title}
       actions={ResultActionView({ content, info })}
       isLoading={content.isLoading}
     >
