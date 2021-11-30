@@ -1,15 +1,15 @@
 import TaskList from "./TaskList";
-import { Project as TProject, Section, Task, ViewMode } from "../types";
+import { Section, Task, ViewMode } from "../types";
 import { useFetch } from "../api";
 
 interface ProjectProps {
-  project: TProject;
+  projectId: number;
 }
 
-function Project({ project }: ProjectProps): JSX.Element {
-  const path = `/tasks?project_id=${project.id}`;
+function Project({ projectId }: ProjectProps): JSX.Element {
+  const path = `/tasks?project_id=${projectId}`;
   const { data: tasks, isLoading: isLoadingTasks } = useFetch<Task[]>(path);
-  const { data: allSections, isLoading: isLoadingSections } = useFetch<Section[]>(`/sections?project_id=${project.id}`);
+  const { data: allSections, isLoading: isLoadingSections } = useFetch<Section[]>(`/sections?project_id=${projectId}`);
 
   const sections = [
     {
