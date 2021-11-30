@@ -129,7 +129,7 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
           )}
           {(info.type === "all" || info.type === "noclipboard" || info.type === "form") && (
             <ActionPanel.Item
-              title={"Run Script Form"}
+              title={"Run Script to Form"}
               icon={Icon.Document}
               onAction={async () => {
                 action("form");
