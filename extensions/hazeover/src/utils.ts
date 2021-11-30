@@ -9,6 +9,7 @@ import { runAppleScript } from "run-applescript";
  * The main window is closed before running the AppleScript to keep the UI snappy.
  *
  * @param appleScript - The AppleScript to run
+ * @param shouldPop - Indicates whether to reset the navigation stack
  * @throws An error when the AppleScript fails to run
  * @returns A promise that is resolved when the AppleScript finished running
  */

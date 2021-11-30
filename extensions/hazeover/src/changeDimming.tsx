@@ -27,6 +27,7 @@ async function decrementIntensity(intensity: number) {
   await runAppleScriptSilently(script, true);
 }
 
+// Possible values to set the intensity to.
 const intensities: number[] = [0, 10, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 100];
 
 export default function Command() {
