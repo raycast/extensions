@@ -13,7 +13,6 @@ import {
   showToast,
   ToastStyle,
 } from "@raycast/api";
-import Fuse from "fuse.js";
 import {readFile} from "fs/promises";
 import {homedir} from "os";
 import {dirname, resolve} from "path";
@@ -24,10 +23,10 @@ import {
   bin,
   createUniqueArray,
   getFiles,
-  getRecentEntries,
+  getRecentEntries, historicProjects,
   JetBrainsIcon,
   preferredApp,
-  recentEntry
+  recentEntry, useUrl
 } from "./util";
 import History from "./.history.json";
 import {promisify} from "util";
@@ -40,13 +39,11 @@ const HISTORY_GLOB = "Library/Application Support/JetBrains/Toolbox/apps/**/.his
 const getRecent = async (path: string | string[], icon: string) => {
   return getFiles(path).then((apps) => {
     return apps
-      .map((file) => {
-        return {
+      .map((file) => ({
           ...file,
           title: file.title,
           icon: icon,
-        };
-      })
+        }))
       .sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
   });
 }
@@ -72,7 +69,7 @@ const getHistory = async () => {
           const activation = history.item.activation?.hosts[0] ?? false
           return {
             title: history.item.name,
-            url: activation ? `jetbrains://${activation}/navigate/reference?project=` : false,
+            url: useUrl && activation ? `jetbrains://${activation}/navigate/reference?project=` : false,
             tool: tool ? await which(tool, {path: bin}).catch(() => false) : false,
             icon,
             xmlFiles: await getRecent(globFromHistory(history), icon)
@@ -97,7 +94,8 @@ const getIcons = async () => {
 const loadAppEntries = async (apps: AppHistory[]) => {
   return await Promise.all(apps
     .map(async app => {
-      for (const res of app.xmlFiles ?? []) {
+      const xmlFiles = app.xmlFiles ?? []
+      for (const res of historicProjects ? xmlFiles : xmlFiles.slice(0,1)) {
         const entries = await getRecentEntries(res, app);
         // sort before unique so we get the newest versions
         app.entries =
@@ -114,11 +112,9 @@ function OpenInJetBrainsAppAction({tool, recent}: { tool: AppHistory; recent: re
     const cmd = tool.tool
       ? `${tool.tool} "${recent?.path ?? ''}"`
       : `open ${tool.url}${recent?.title ?? ''}`
-    execPromise(cmd)
-      .then(() => showHUD(`Opening ${recent ? recent.title : tool.title}`)
-        .then(() => popToRoot({clearSearchBar: true})
-        )
-      )
+    showHUD(`Opening ${recent ? recent.title : tool.title}`)
+      .then(() => execPromise(cmd))
+      .then(() => popToRoot())
       .catch((error) => showToast(ToastStyle.Failure, "Failed", error.message)
         .then(() => console.error({error}))
       )
@@ -161,17 +157,6 @@ function RecentProject({app, recent, tools}: { app: AppHistory; recent: recentEn
   );
 }
 
-const fuseRecent = (search: string, recent: Array<recentEntry>, fused: Fuse<recentEntry> | undefined): recentEntry[] => {
-  if (search === '') {
-    return recent;
-  }
-  if (fused === undefined) {
-    return recent;
-  }
-
-  return fused.search(search).map(({item}) => item)
-};
-
 function OpenJetBrainsToolBox() {
   return <ActionPanel.Item icon={JetBrainsIcon} title="Launch JetBrains Toolbox" onAction={() => {
     getApplications().then(apps => {
@@ -179,7 +164,7 @@ function OpenJetBrainsToolBox() {
       if (jb) {
         exec(`open -a "${jb.name}"`, (err) => err && showToast(ToastStyle.Failure, err?.message))
       } else {
-        showToast(ToastStyle.Failure, 'Unable to find JetBrains Toolbox App')
+        showToast(ToastStyle.Failure, 'Unable to find JetBrains Toolbox App').catch((err) => console.error(err))
       }
     })
   }}/>;
@@ -196,27 +181,15 @@ interface state {
 
 export default function ProjectList() {
   const [{loading, appHistory}, setAppHistory] = useState<state>({loading: true, appHistory: []});
-  const [search, setSearch] = useState<string>("");
 
   useEffect(() => {
     getHistory()
       .then(apps => loadAppEntries(apps)
           .then(withEntries => withEntries.sort(sortApps))
           .then(sorted => {
-            const options = {
-              isCaseSensitive: false,
-              findAllMatches: true,
-              shouldSort: true,
-              ignoreLocation: true,
-              // keys to search
-              keys: ['path', 'title', 'parts', 'app']
-            };
             setAppHistory({
               loading: false,
-              appHistory: sorted.map(app => ({
-                ...app,
-                fused: new Fuse<recentEntry>(app?.entries ?? [], options)
-              }))
+              appHistory: sorted,
             })
           })
       )
@@ -226,14 +199,24 @@ export default function ProjectList() {
     return <Detail isLoading/>;
   } else if (appHistory.length === 0) {
     const tbUrl = 'https://jb.gg/toolbox-app';
-    const message = `No JetBrains applications found. Please check that you have [JetBrains Toolbox](${tbUrl}) and at least one IDE installed.`
-    return <Detail markdown={message} actions={<ActionPanel>
+    const message = [
+      '# Unable to find any JetBrains Toolbox apps',
+      `Please check that you have installed [JetBrains Toolbox](${tbUrl}) and added at least one IDE.`
+    ]
+    return <Detail markdown={message.join('\n\n')} actions={<ActionPanel>
       <OpenInBrowserAction title='Open Toolbox Website' url={tbUrl} icon={JetBrainsIcon}/>
       <OpenInBrowserAction title='Open Toolbox FAQ' url={`${tbUrl}-faq`}/>
     </ActionPanel>}/>
   } else if (!appHistory.reduce((exists, appHistory) => (exists || appHistory.tool !== false || appHistory.url !== false), false)) {
-    const message = 'Unable to find shell scripts, ensure you have "Generate Shell scripts" checked in *JetBrains Toolbox* under *Settings*\n\nIf you have set a custom path for your shell scripts, that can set that in the settings for this extension'
-    return <Detail markdown={message} actions={<ActionPanel>
+    const message = [
+      '# There was a problem finding the JetBrains shell scripts',
+      'We were unable to find shell scripts, ensure you have the **Generate Shell scripts** option checked in *JetBrains Toolbox* under *Settings*.',
+      `If you have set a custom path for your shell scripts, that can set that in the settings for this extension, this is currently set to \`${bin}\`.`,
+      useUrl
+        ? 'Additionally, we were unable to find a protocol url link to fallback on, please ensure you are using the latest version of JetBrains Toolbox and any apps you are using.'
+        : 'You can also enable the extension preference to fallback to protocol url, though that is a less reliable method of opening projects.',
+    ];
+    return <Detail markdown={message.join('\n\n')} actions={<ActionPanel>
       <OpenJetBrainsToolBox/>
     </ActionPanel>}/>
   }
@@ -248,13 +231,11 @@ export default function ProjectList() {
   return (
     <List
       searchBarPlaceholder={`Search recent projects…`}
-      onSearchTextChange={(term) => setSearch(term.trim())}
       actions={<ActionPanel children={defaultActions}/>}
     >
       {appHistory.map((app) => (
         <List.Section title={app.title} key={app.title}>
-          {fuseRecent(search, app.entries ?? [], app.fused)
-            .map((recent: recentEntry) =>
+          {(app.entries ?? []).map((recent: recentEntry) =>
               recent?.path ? (
                 <RecentProject key={`${app.title}-${recent.path}`} app={app} recent={recent} tools={appHistory}/>
               ) : null

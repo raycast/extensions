@@ -5,7 +5,7 @@ import { resolve } from "path";
 
 export default function Command() {
   const downloadsDir = resolve(homedir(), "Downloads");
-  const contents = readdirSync(downloadsDir);
+  const contents = readdirSync(resolve(homedir(), "Downloads"));
   const items = contents
     .map((file) => {
       const stat = lstatSync(resolve(downloadsDir, file));
