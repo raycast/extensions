@@ -103,7 +103,7 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
         isClipboardScriptRunning = false;
         toast.hide();
         if (scriptResult.isSuccess) {
-          await showHUD("Copy Result");
+          await showHUD("✅ Result Copied to Clipboard");
         } else {
           if (scriptResult.result) {
             await showToast(ToastStyle.Failure, scriptResult.result);
