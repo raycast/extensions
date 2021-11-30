@@ -139,17 +139,21 @@ function TransactionListItem({ transaction }: { transaction: Transaction }) {
 }
 
 function useSearch() {
-  const [state, setState] = useState<SearchState>({ searchText: "", result: null, isLoading: true });
+  const [state, setState] = useState<SearchState>({ searchText: "", result: null, isLoading: false });
   const cancelRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    search("");
     return () => {
       cancelRef.current?.abort();
     };
   }, []);
 
   async function search(searchText: string) {
+    if (!searchText) {
+      setState({ searchText, result: null, isLoading: false });
+      return;
+    }
+
     cancelRef.current?.abort();
     cancelRef.current = new AbortController();
     try {
