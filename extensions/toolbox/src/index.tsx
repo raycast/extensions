@@ -88,8 +88,6 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
 
     if (runType === "clipboard") {
       isClipboardScriptRunning = true;
-      const toast = await showToast(ToastStyle.Animated, info.title);
-      toast.show();
       const query = await isClipboardContent();
 
       let scriptResult = { result: "", isSuccess: false };
@@ -99,18 +97,15 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
           await copyTextToClipboard(scriptResult.result);
         }
       }
-      _.delay(async () => {
-        isClipboardScriptRunning = false;
-        toast.hide();
-        if (scriptResult.isSuccess) {
-          await showHUD("✅ Result Copied to Clipboard");
-        } else {
-          if (scriptResult.result) {
-            await showToast(ToastStyle.Failure, scriptResult.result);
-          }
-          moveWindow(runType);
+      isClipboardScriptRunning = false;
+      if (scriptResult.isSuccess) {
+        await showHUD("✅ Result Copied to Clipboard");
+      } else {
+        if (scriptResult.result) {
+          await showToast(ToastStyle.Failure, scriptResult.result);
         }
-      }, 300);
+        moveWindow(runType);
+      }
     } else {
       moveWindow(runType);
     }
