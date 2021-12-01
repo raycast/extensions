@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Lookup ENS or address",
+      "title": "Lookup ENS or Address",
       "subtitle": "ENS Name Lookup",
       "description": "Lookup ENS Name from Etherscan.",
       "mode": "view"
