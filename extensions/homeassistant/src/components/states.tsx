@@ -16,7 +16,8 @@ import {
   getMediaPlayerTitleAndArtist,
   CopyTrackToClipboard,
 } from "./mediaplayer";
-import { BrightnessControlAction } from "./light";
+import { BrightnessControlAction, ColorTempControlAction } from "./light";
+import { RGBtoColorLike } from "../color";
 
 const PrimaryIconColor = Color.Blue;
 
@@ -84,13 +85,33 @@ function getDeviceClassIcon(state: State): ImageLike | undefined {
   }
 }
 
+function getColorLikeFromState(state: State): ColorLike | undefined {
+  const rgb = state.attributes.rgb_color;
+  if (rgb && Array.isArray(rgb) && rgb.length === 3) {
+    return RGBtoColorLike({ r: rgb[0], g: rgb[1], b: rgb[2] });
+  }
+  return undefined;
+}
+
+function getLightIconSource(state: State): string {
+  const attr = state.attributes;
+  return attr.icon && attr.icon === "mdi:lightbulb-group" ? "lightbulb-group.png" : "lightbulb.png";
+}
+
+function getLightTintColor(state: State): ColorLike {
+  const sl = state.state.toLocaleLowerCase();
+  if (sl === "unavailable") {
+    return "#bdbdbd";
+  }
+  return lightColor[sl] || PrimaryIconColor;
+}
+
 function getIcon(state: State): ImageLike | undefined {
   const e = state.entity_id;
   const attr = state.attributes;
   if (e.startsWith("light")) {
-    const sl = state.state.toLocaleLowerCase();
-    const color = sl === "unavailable" ? "#bdbdbd" : lightColor[sl] || PrimaryIconColor;
-    const source = attr.icon && attr.icon === "mdi:lightbulb-group" ? "lightbulb-group.png" : "lightbulb.png";
+    const color = getLightTintColor(state);
+    const source = getLightIconSource(state);
     return { source: source, tintColor: color };
   } else if (e.startsWith("person")) {
     return { source: "person.png", tintColor: PrimaryIconColor };
@@ -111,6 +132,18 @@ function getIcon(state: State): ImageLike | undefined {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
   }
+}
+
+function getAccessoryIcon(state: State): ImageLike | undefined {
+  const e = state.entity_id;
+  if (e.startsWith("light")) {
+    const source = getLightIconSource(state);
+    const color = getColorLikeFromState(state);
+    if (color) {
+      return { source: source, tintColor: color };
+    }
+  }
+  return undefined;
 }
 
 export function StatesList(props: { domain: string }): JSX.Element {
@@ -214,6 +247,7 @@ export function StateListItem(props: { state: State }): JSX.Element {
       title={state.attributes.friendly_name || state.entity_id}
       subtitle={subtitle(state)}
       accessoryTitle={extraTitle(state) + stateValue(state)}
+      accessoryIcon={getAccessoryIcon(state)}
       actions={<StateActionPanel state={state} />}
       icon={icon || getIcon(state)}
     />
@@ -290,6 +324,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               icon={{ source: "power-btn.png", tintColor: Color.Red }}
             />
             <BrightnessControlAction state={state} />
+            <ColorTempControlAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
