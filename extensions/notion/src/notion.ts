@@ -432,7 +432,7 @@ export async function fetchPageContent(pageId: string): Promise<PageContent> {
             }
           }
 
-        pageContent.markdown+=notionBlockToMarkdown(tempText,block.type)+'\n'
+        pageContent.markdown+=notionBlockToMarkdown(tempText, block)+'\n'
 
         }else{
           pageContent.markdown+='![image]('+block.image.file.url+')'+'\n'
@@ -600,8 +600,9 @@ function recordMapper (mapper: { sourceRecord : any, models: [{targetKey : strin
 }
 
 
-function notionBlockToMarkdown(text: string, type: string): string {
-  switch(type) { 
+function notionBlockToMarkdown(text: string, block: Record<string,any>): string {
+  const blockValue: Record<string,any> = block[block.type as string]
+  switch(block.type as string) { 
     case ('heading_1'): { 
       return '# '+text
     }
@@ -616,6 +617,9 @@ function notionBlockToMarkdown(text: string, type: string): string {
     }
     case ('numbered_list_item'): { 
       return '1. '+text
+    } 
+    case ('to_do'): { 
+      return '\n '+(blockValue.checked ? '☑ ': '☐ ')+text
     } 
 
     default: { 
