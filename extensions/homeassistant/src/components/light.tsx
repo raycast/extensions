@@ -18,7 +18,9 @@ export function BrightnessControlAction(props: { state: State }): JSX.Element | 
     await ha.callService("light", "turn_on", { entity_id: state.entity_id, brightness_pct: `${bvalue}` });
   };
 
-  if (modes && Array.isArray(modes) && modes.includes("brightness")) {
+  if (modes && Array.isArray(modes) && (modes.includes("brightness") || modes.includes("color_temp"))) {
+    // we assume that brightness support exists when color_temp is present.
+    // This is required to support which does not provide brightness support mode
     const brightnessValues = getBrightnessValues();
     return (
       <ActionPanel.Submenu
