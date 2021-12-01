@@ -1,4 +1,4 @@
-import { ActionPanel, Color } from "@raycast/api";
+import { ActionPanel, Color, Icon, KeyboardShortcut } from "@raycast/api";
 import { KtoColorLike, miredToK } from "../color";
 import { ha } from "../common";
 import { State } from "../haapi";
@@ -15,6 +15,16 @@ function getBrightnessValues(): number[] {
   return result;
 }
 
+function hasBrightnessSupport(state: State): boolean {
+  const modes = state.attributes.supported_color_modes;
+  if (modes && Array.isArray(modes) && (modes.includes("brightness") || modes.includes("color_temp"))) {
+    // we assume that brightness support exists when color_temp is present.
+    // This is required to support which does not provide brightness support mode
+    return true;
+  }
+  return false;
+}
+
 export function BrightnessControlAction(props: { state: State }): JSX.Element | null {
   const state = props.state;
   const modes = state.attributes.supported_color_modes;
@@ -23,9 +33,7 @@ export function BrightnessControlAction(props: { state: State }): JSX.Element | 
     await ha.callService("light", "turn_on", { entity_id: state.entity_id, brightness_pct: `${bvalue}` });
   };
 
-  if (modes && Array.isArray(modes) && (modes.includes("brightness") || modes.includes("color_temp"))) {
-    // we assume that brightness support exists when color_temp is present.
-    // This is required to support which does not provide brightness support mode
+  if (hasBrightnessSupport(state)) {
     const brightnessValues = getBrightnessValues();
     return (
       <ActionPanel.Submenu
@@ -40,6 +48,47 @@ export function BrightnessControlAction(props: { state: State }): JSX.Element | 
     );
   }
   return null;
+}
+
+function BrightnessAddAction(props: {
+  state: State;
+  add: number;
+  shortcut?: KeyboardShortcut | undefined;
+}): JSX.Element | null {
+  const state = props.state;
+
+  const handle = async (bvalue: number) => {
+    await ha.callService("light", "turn_on", { entity_id: state.entity_id, brightness_pct: `${bvalue}` });
+  };
+
+  if (hasBrightnessSupport(state)) {
+    const brightness = state.attributes.brightness as number | undefined;
+    if (!brightness) {
+      return null;
+    }
+    const brightnessPct = Math.round((brightness / 255) * 100);
+    const brightnessPctUp = brightnessPct + props.add;
+    if (brightnessPctUp > 100 || brightnessPctUp < 0) {
+      return null;
+    }
+    return (
+      <ActionPanel.Item
+        title={`Brightness ${props.add < 0 ? "Down" : "Up"}`}
+        icon={{ source: props.add < 0 ? Icon.ChevronDown : Icon.ChevronUp, tintColor: Color.PrimaryText }}
+        shortcut={props.shortcut}
+        onAction={() => handle(brightnessPctUp)}
+      />
+    );
+  }
+  return null;
+}
+
+export function BrightnessUpAction(props: { state: State }): JSX.Element | null {
+  return <BrightnessAddAction state={props.state} add={1} shortcut={{ modifiers: ["cmd"], key: "+" }} />;
+}
+
+export function BrightnessDownAction(props: { state: State }): JSX.Element | null {
+  return <BrightnessAddAction state={props.state} add={-1} shortcut={{ modifiers: ["cmd"], key: "-" }} />;
 }
 
 export function ColorTempControlAction(props: { state: State }): JSX.Element | null {

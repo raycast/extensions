@@ -16,7 +16,7 @@ import {
   getMediaPlayerTitleAndArtist,
   CopyTrackToClipboard,
 } from "./mediaplayer";
-import { BrightnessControlAction, ColorTempControlAction } from "./light";
+import { BrightnessControlAction, BrightnessDownAction, BrightnessUpAction, ColorTempControlAction } from "./light";
 import { RGBtoColorLike } from "../color";
 
 const PrimaryIconColor = Color.Blue;
@@ -323,8 +323,12 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               onAction={async () => await ha.turnOffLight(props.state.entity_id)}
               icon={{ source: "power-btn.png", tintColor: Color.Red }}
             />
-            <BrightnessControlAction state={state} />
             <ColorTempControlAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Brightness">
+            <BrightnessControlAction state={state} />
+            <BrightnessUpAction state={state} />
+            <BrightnessDownAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
