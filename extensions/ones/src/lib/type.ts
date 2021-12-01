@@ -81,3 +81,29 @@ export interface Manhour {
   description: string;
   type: ManhourType;
 }
+
+export interface LoginUser {
+  uuid: string;
+  email: string;
+  name: string;
+  avatar: string;
+  token: string;
+}
+
+export interface LoginTeam {
+  uuid: string;
+  name: string;
+  owner: string;
+  logo: string;
+}
+
+export interface LoginOrg {
+  uuid: string;
+  name: string;
+}
+
+export interface LoginResult {
+  user: LoginUser;
+  teams: LoginTeam[];
+  org: LoginOrg;
+}

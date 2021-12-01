@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ones",
   "title": "ONES",
-  "description": "Raycast Extensions for [ones.ai](https://ones.ai).",
-  "icon": "command-icon.png",
+  "description": "Raycast Extensions for ones.ai",
+  "icon": "command-icon-black.png",
   "author": "k8scat",
   "license": "MIT",
   "keywords": [
@@ -71,39 +71,39 @@
       "name": "manage-manhour",
       "title": "Manage Manhour",
       "subtitle": "ONES Project",
-      "description": "query manhour, record manhour, modify manhour and delete manhour in ONES Project",
+      "description": "Query manhour, record manhour, modify manhour and delete manhour in ONES Project",
       "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "baseAPI",
+      "name": "url",
       "type": "textfield",
       "required": true,
-      "title": "Base URL",
-      "description": "Base URL for ONES API",
-      "default": "https://ones.ai/project/api"
+      "title": "URL",
+      "description": "URL for ONES",
+      "default": "https://ones.ai"
+    },
+    {
+      "name": "email",
+      "type": "textfield",
+      "required": true,
+      "title": "Email",
+      "description": "Email for ONES"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "title": "Password",
+      "description": "Password for ONES"
     },
     {
       "name": "teamUUID",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "Team UUID",
-      "description": "Team UUID for ONES API"
-    },
-    {
-      "name": "userUUID",
-      "type": "textfield",
-      "required": true,
-      "title": "User UUID",
-      "description": "User UUID for ONES API"
-    },
-    {
-      "name": "token",
-      "type": "password",
-      "required": true,
-      "title": "Token",
-      "description": "Token for ONES API"
+      "description": "Team UUID for ONES"
     },
     {
       "name": "manhourUser",
@@ -118,7 +118,7 @@
       "required": false,
       "title": "Manhour Days",
       "description": "Query Manhours in n days, default set to 7",
-      "value": "7"
+      "default": "7"
     },
     {
       "name": "manhourTaskUUID",
@@ -126,6 +126,24 @@
       "required": false,
       "title": "Manhour Task",
       "description": "UUID of the task where manhour record"
+    },
+    {
+      "name": "manhourMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Manhour Mode",
+      "description": "Manhour mode for ONES",
+      "default": "simple",
+      "data": [
+        {
+          "value": "detailed",
+          "title": "Detailed"
+        },
+        {
+          "value": "simple",
+          "title": "Simple"
+        }
+      ]
     }
   ],
   "dependencies": {

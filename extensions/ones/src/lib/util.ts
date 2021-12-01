@@ -1,4 +1,4 @@
-import client from "./http";
+import client from "./client";
 import moment from "moment";
 
 export function convertTaskURL(taskUUID: string): string {

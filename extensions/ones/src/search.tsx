@@ -1,10 +1,19 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, PushAction } from "@raycast/api";
-import { mapProjects, mapSpaces, mapTasks, mapUsers, search, SearchType } from "./lib/api";
+import {
+  ActionPanel,
+  CopyToClipboardAction,
+  List,
+  OpenInBrowserAction,
+  PushAction,
+  showToast,
+  SubmitFormAction,
+  ToastStyle
+} from "@raycast/api";
+import { deleteTask, mapProjects, mapSpaces, mapTasks, mapUsers, search, SearchType } from "./lib/api";
 import { Project, SearchItem, SearchResult, Space, Task, User } from "./lib/type";
 import { useEffect, useState } from "react";
-import { Product } from "./lib/http";
+import { Product } from "./lib/client";
 import { convertPageURL, convertProjectURL, convertResourceURL, convertSpaceURL, convertTaskURL } from "./lib/util";
-import { AddOrUpdateManhour } from "./manage-manhour";
+import { AddOrUpdateManhour, ManageManhour } from "./manhour";
 
 interface Props {
   product: Product;
@@ -41,59 +50,63 @@ export function Search(props: Props) {
       return;
     }
     setLoading(true);
-    const result = await search(props.product, text, props.searchType);
-    const userUUIDs: string[] = [];
-    const taskUUIDs: string[] = [];
-    const spaceUUIDs: string[] = [];
-    const projectUUIDs: string[] = [];
-    result.datas.project = result.datas.project?.map((project) => {
-      project.url = convertProjectURL(project.fields.uuid);
-      userUUIDs.push(project.fields.owner);
-      return project;
-    });
-    result.datas.task = result.datas.task?.map((task) => {
-      task.url = convertTaskURL(task.fields.uuid);
-      userUUIDs.push(task.fields.assign);
-      taskUUIDs.push(task.fields.uuid);
-      projectUUIDs.push(task.fields.project_uuid);
-      return task;
-    });
-    result.datas.space = result.datas.space?.map((space) => {
-      space.url = convertSpaceURL(space.fields.uuid);
-      return space;
-    });
-    result.datas.page = result.datas.page?.map((page) => {
-      page.url = convertPageURL(page.fields.page_uuid);
-      userUUIDs.push(page.fields.owner_uuid);
-      spaceUUIDs.push(page.fields.space_uuid);
-      return page;
-    });
-    result.datas.resource = result.datas.resource?.map((resource: SearchItem) => {
-      userUUIDs.push(resource.fields.owner_uuid);
-      projectUUIDs.push(resource.fields.project_uuid);
-      resource.url = convertResourceURL(resource.fields.uuid);
-      return resource;
-    });
+    try {
+      const result: SearchResult = await search(props.product, text, props.searchType);
+      const userUUIDs: string[] = [];
+      const taskUUIDs: string[] = [];
+      const spaceUUIDs: string[] = [];
+      const projectUUIDs: string[] = [];
+      result.datas.project = result.datas.project?.map((project) => {
+        project.url = convertProjectURL(project.fields.uuid);
+        userUUIDs.push(project.fields.owner);
+        return project;
+      });
+      result.datas.task = result.datas.task?.map((task) => {
+        task.url = convertTaskURL(task.fields.uuid);
+        userUUIDs.push(task.fields.assign);
+        taskUUIDs.push(task.fields.uuid);
+        projectUUIDs.push(task.fields.project_uuid);
+        return task;
+      });
+      result.datas.space = result.datas.space?.map((space) => {
+        space.url = convertSpaceURL(space.fields.uuid);
+        return space;
+      });
+      result.datas.page = result.datas.page?.map((page) => {
+        page.url = convertPageURL(page.fields.page_uuid);
+        userUUIDs.push(page.fields.owner_uuid);
+        spaceUUIDs.push(page.fields.space_uuid);
+        return page;
+      });
+      result.datas.resource = result.datas.resource?.map((resource: SearchItem) => {
+        userUUIDs.push(resource.fields.owner_uuid);
+        projectUUIDs.push(resource.fields.project_uuid);
+        resource.url = convertResourceURL(resource.fields.uuid);
+        return resource;
+      });
 
-    if (userUUIDs.length > 0) {
-      const users = await mapUsers(userUUIDs);
-      setUsers(users);
+      if (userUUIDs.length > 0) {
+        const users = await mapUsers(userUUIDs);
+        setUsers(users);
+      }
+      if (taskUUIDs.length > 0) {
+        const tasks = await mapTasks(taskUUIDs);
+        setTasks(tasks);
+      }
+      if (spaceUUIDs.length > 0) {
+        const spaces = await mapSpaces(spaceUUIDs);
+        setSpaces(spaces);
+      }
+      if (projectUUIDs.length > 0) {
+        const projects = await mapProjects(projectUUIDs);
+        setProjects(projects);
+      }
+      setSearchResult(result);
+    } catch (err) {
+      showToast(ToastStyle.Failure, "Search failed", (err as Error).message);
+    } finally {
+      setLoading(false);
     }
-    if (taskUUIDs.length > 0) {
-      const tasks = await mapTasks(taskUUIDs);
-      setTasks(tasks);
-    }
-    if (spaceUUIDs.length > 0) {
-      const spaces = await mapSpaces(spaceUUIDs);
-      setSpaces(spaces);
-    }
-    if (projectUUIDs.length > 0) {
-      const projects = await mapProjects(projectUUIDs);
-      setProjects(projects);
-    }
-
-    setSearchResult(result);
-    setLoading(false);
   };
 
   return (
@@ -131,8 +144,18 @@ export function Search(props: Props) {
               actions={
                 <ActionPanel>
                   <OpenInBrowserAction url={item.url ? item.url : ""} />
-                  <PushAction title="Record manhour"
+                  <PushAction icon="⌛️" title="Add Manhour"
                               target={<AddOrUpdateManhour manhourTask={tasks[item.fields.uuid]} />} />
+                  <PushAction icon="🗓" title="Manage Manhour"
+                              target={<ManageManhour taskUUID={item.fields.uuid} />} />
+                  <SubmitFormAction title="Delete Task" icon="⚠️" onSubmit={async () => {
+                    try {
+                      await deleteTask(item.fields.uuid);
+                      showToast(ToastStyle.Success, "Delete task successfully");
+                    } catch (err) {
+                      showToast(ToastStyle.Failure, "Delete task failed", (err as Error).message);
+                    }
+                  }} />
                   <CopyToClipboardAction title="Copy URL" content={item.url ? item.url : ""} />
                 </ActionPanel>
               }
@@ -162,7 +185,7 @@ export function Search(props: Props) {
               key={index}
               title={item.fields.title}
               subtitle={spaces[item.fields.space_uuid] ? spaces[item.fields.space_uuid].name : ""}
-              accessoryTitle={item.fields.summary}
+              accessoryTitle={users[item.fields.owner_uuid] ? users[item.fields.owner_uuid].name : ""}
               accessoryIcon={users[item.fields.owner_uuid] ? users[item.fields.owner_uuid].avatar : ""}
               actions={
                 <ActionPanel>

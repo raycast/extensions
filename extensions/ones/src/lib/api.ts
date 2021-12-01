@@ -1,7 +1,8 @@
-import client, { Product } from "./http";
-import { GraphqlData, Manhour, Project, SearchResult, Space, Sprint, Task, User } from "./type";
-import { showToast, ToastStyle } from "@raycast/api";
+import client, { Product } from "./client";
+import { GraphqlData, LoginResult, Manhour, Project, SearchResult, Space, Sprint, Task, User } from "./type";
+import { clearLocalStorage, preferences, showToast, ToastStyle } from "@raycast/api";
 import moment from "moment";
+import axios from "axios";
 
 export enum SearchType {
   PROJECT = "project",
@@ -16,17 +17,16 @@ export enum ManhourType {
   ESTIMATED = "estimated",
 }
 
-export enum ManhourMode {
-  DETAILED = "detailed",
-  SIMPLE = "simple",
-}
-
 export enum ManhourFormat {
   SUM = "sum",
   AVG = "avg",
 }
 
 export const MANHOUR_BASE = 100000;
+
+export function manhourMode(): string {
+  return (preferences.manhourMode.value ? preferences.manhourMode.value : preferences.manhourMode.default) as string;
+}
 
 export async function mapTasks(uuids: string[]): Promise<{ [key: string]: Task }> {
   const query = `
@@ -54,8 +54,7 @@ export async function mapTasks(uuids: string[]): Promise<{ [key: string]: Task }
     });
     return Promise.resolve(tasks);
   } catch (err) {
-    showToast(ToastStyle.Failure, "map tasks failed", (err as Error).message);
-    return Promise.reject(err);
+    return Promise.reject(new Error(`map tasks failed: ${(err as Error).message}`));
   }
 }
 
@@ -98,8 +97,7 @@ export async function searchSprints(key: string): Promise<Sprint[]> {
     const resp = await client.post(Product.PROJECT, "items/graphql", data);
     return Promise.resolve(resp.data.sprints as Sprint[]);
   } catch (err) {
-    showToast(ToastStyle.Failure, "search sprints failed", (err as Error).message);
-    return Promise.reject(err);
+    return Promise.reject(`search sprints failed: ${(err as Error).message}`);
   }
 }
 
@@ -125,8 +123,7 @@ export async function mapUsers(uuids: string[]): Promise<{ [key: string]: User }
     });
     return Promise.resolve(users);
   } catch (err) {
-    showToast(ToastStyle.Failure, "map users failed", (err as Error).message);
-    return Promise.reject(err);
+    return Promise.reject(new Error(`map users failed: ${(err as Error).message}`));
   }
 }
 
@@ -151,8 +148,7 @@ export async function mapSpaces(uuids: string[]): Promise<{ [key: string]: Space
     });
     return Promise.resolve(spaces);
   } catch (err) {
-    showToast(ToastStyle.Failure, "map spaces failed", (err as Error).message);
-    return Promise.reject(err);
+    return Promise.reject(new Error(`map spaces failed: ${(err as Error).message}`));
   }
 }
 
@@ -177,8 +173,7 @@ export async function mapProjects(uuids: string[]): Promise<{ [key: string]: Pro
     });
     return Promise.resolve(projects);
   } catch (err) {
-    showToast(ToastStyle.Failure, "map projects failed", (err as Error).message);
-    return Promise.reject(err);
+    return Promise.reject(new Error(`map projects failed: ${(err as Error).message}`));
   }
 }
 
@@ -194,23 +189,32 @@ export async function search(product: Product, q: string, types: SearchType[], s
     showToast(ToastStyle.Success, `Took ${resp.took_time}ms`);
     return Promise.resolve(resp as SearchResult);
   } catch (err) {
-    showToast(ToastStyle.Failure, "search failed", (err as Error).message);
-    return Promise.reject(err);
+    return Promise.reject(new Error(`search failed: ${(err as Error).message}`));
   }
 }
 
-export async function listManhours(userUUID: string, startDate: string, endDate?: string): Promise<Manhour[]> {
-  endDate = endDate ? endDate : moment().format("YYYY-MM-DD");
+interface ListManhoursParams {
+  userUUID: string;
+  startDate: string;
+  endDate?: string;
+  taskUUID?: string;
+}
+
+export async function listManhours(params: ListManhoursParams): Promise<Manhour[]> {
+  params.endDate = params.endDate ? params.endDate : moment().format("YYYY-MM-DD");
+  const queryTask = params.taskUUID ? `uuid_equal: "${params.taskUUID}"` : "";
   const query = `
   {
     manhours (
       filter: {
-        owner_equal: "${userUUID}"
+        owner_equal: "${params.userUUID}"
         startTime_range: {
-            gte: "${startDate}"
-            lte: "${endDate}"
+            gte: "${params.startDate}"
+            lte: "${params.endDate}"
         }
-        type_equal: "recorded"
+        task: {
+          ${queryTask}
+        }
       }
     ) {
       uuid
@@ -237,12 +241,11 @@ export async function listManhours(userUUID: string, startDate: string, endDate?
     const resp = await client.post(Product.PROJECT, "items/graphql", data);
     return Promise.resolve(resp.data.manhours);
   } catch (err) {
-    showToast(ToastStyle.Failure, "list manhours failed", (err as Error).message);
-    return Promise.reject(err);
+    return Promise.reject(new Error(`list manhours failed: ${(err as Error).message}`));
   }
 }
 
-export async function getUserByName(name: string): Promise<User> {
+export async function listUsersByName(name: string): Promise<User[]> {
   const query = `
   {
     users (
@@ -258,14 +261,9 @@ export async function getUserByName(name: string): Promise<User> {
   const data: GraphqlData = { query };
   try {
     const resp = await client.post(Product.PROJECT, "items/graphql", data);
-    if (resp.data.users.length === 0) {
-      showToast(ToastStyle.Failure, "user not found");
-      return Promise.reject(new Error("user not found"));
-    }
-    return Promise.resolve(resp.data.users[0]);
+    return Promise.resolve(resp.data.users);
   } catch (err) {
-    showToast(ToastStyle.Failure, "get user failed", (err as Error).message);
-    return Promise.reject(err);
+    return Promise.reject(new Error(`list users by name failed: ${(err as Error).message}`));
   }
 }
 
@@ -290,7 +288,7 @@ export async function addManhour(manhour: Manhour): Promise<void> {
     type: manhour.type,
     owner: manhour.owner.uuid,
     hours_format: ManhourFormat.SUM,
-    mode: ManhourMode.DETAILED,
+    mode: manhourMode(),
     start_time: manhour.startTime,
     hours: manhour.hours,
     description: manhour.description
@@ -298,10 +296,8 @@ export async function addManhour(manhour: Manhour): Promise<void> {
   const data: GraphqlData = { query, variables };
   try {
     await client.post(Product.PROJECT, "items/graphql", data);
-    return Promise.resolve();
   } catch (err) {
-    showToast(ToastStyle.Failure, "add manhour failed", (err as Error).message);
-    return Promise.reject(err);
+    return Promise.reject(new Error(`add manhour failed: ${(err as Error).message}`));
   }
 }
 
@@ -322,7 +318,7 @@ export async function updateManhour(manhour: Manhour): Promise<void> {
     }
   }`;
   const variables = {
-    mode: ManhourMode.DETAILED,
+    mode: manhourMode(),
     owner: manhour.owner.uuid,
     task: manhour.task.uuid,
     type: manhour.type,
@@ -334,10 +330,8 @@ export async function updateManhour(manhour: Manhour): Promise<void> {
   const data: GraphqlData = { query, variables };
   try {
     await client.post(Product.PROJECT, "items/graphql", data);
-    return Promise.resolve();
   } catch (err) {
-    showToast(ToastStyle.Failure, "update manhour failed", (err as Error).message);
-    return Promise.reject(err);
+    return Promise.reject(new Error(`update manhour failed: ${(err as Error).message}`));
   }
 }
 
@@ -353,14 +347,35 @@ export async function deleteManhour(uuid: string): Promise<void> {
   }`;
   const variables = {
     key: `manhour-${uuid}`,
-    mode: ManhourMode.DETAILED
+    mode: manhourMode()
   };
   const data: GraphqlData = { query, variables };
   try {
     await client.post(Product.PROJECT, "items/graphql", data);
     return Promise.resolve();
   } catch (err) {
-    showToast(ToastStyle.Failure, "delete manhour failed", (err as Error).message);
-    return Promise.reject(err);
+    return Promise.reject(new Error(`delete manhour failed: ${(err as Error).message}`));
+  }
+}
+
+export async function login(data: { email: string; password: string; }): Promise<LoginResult> {
+  try {
+    const resp = await axios.post(`${preferences.url.value}/project/api/project/auth/login`, data, {
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+    return Promise.resolve(resp.data as LoginResult);
+  } catch (err) {
+    await clearLocalStorage();
+    return Promise.reject(new Error(`login failed: ${(err as Error).message}`));
+  }
+}
+
+export async function deleteTask(uuid: string): Promise<void> {
+  try {
+    await client.post(Product.PROJECT, `task/${uuid}/delete`);
+  } catch (err) {
+    return Promise.reject(new Error(`delete task failed: ${(err as Error).message}`));
   }
 }
