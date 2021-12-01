@@ -1,0 +1,62 @@
+{
+  "name": "harvest",
+  "title": "harvest",
+  "description": "Access Harvest Time Entries and Weekly Reports",
+  "icon": "command-icon.png",
+  "author": "eluce2",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "New Time Entry",
+      "subtitle": "",
+      "description": "Start a new Timer",
+      "mode": "view"
+    },
+    {
+      "name": "stopTimer",
+      "title": "Stop Timer",
+      "subtitle": "",
+      "description": "Stop your running timer",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "title": "Personal Access Token",
+      "description": "Harvest Token",
+      "required": true,
+      "link": "https://id.getharvest.com/developers",
+      "type": "password"
+    },
+    {
+      "name": "accountID",
+      "title": "Harvest Account ID",
+      "required": true,
+      "description": "Harvest Accoutn ID",
+      "link": "https://id.getharvest.com/developers",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "axios": "^0.23.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.1"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.175",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
