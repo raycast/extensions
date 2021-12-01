@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "flow",
-  "title": "Flow",
+  "title": "Flow Timer",
   "description": "Control Flow application timer",
   "icon": "flow.png",
   "author": "vimtor",
