@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ciweimao",
+  "title": "Ciweimao Reader",
+  "description": "Use full features of www.ciweimao.com via their mobile api.",
+  "icon": "command-icon.png",
+  "author": "zsakvo",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "List Books",
+      "subtitle": "All Books",
+      "description": "Show all books on the current bookshelf",
+      "mode": "view"
+    },
+    {
+      "name": "shelf",
+      "title": "List Shelves",
+      "subtitle": "All Shelves",
+      "description": "Show all shelves of the current account",
+      "mode": "view"
+    },
+    {
+      "name": "chapter",
+      "title": "Continue Reading",
+      "subtitle": "Read Last",
+      "description": "Continue read the last book you read",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Novel",
+      "subtitle": "Search Something",
+      "description": "Search something by book-name or author",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "account",
+      "type": "textfield",
+      "title": "Account",
+      "required": true,
+      "default": "",
+      "description": "Ciweimao account name"
+    },
+    {
+      "name": "login_token",
+      "type": "password",
+      "title": "login_token",
+      "required": true,
+      "default": "",
+      "description": "Ciweimao login token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.7",
+    "@types/crypto-js": "^4.0.2",
+    "axios": "^0.24.0",
+    "crypto-js": "^4.1.1",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.21.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
