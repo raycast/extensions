@@ -15,8 +15,9 @@
     },
     {
       "name": "sr",
-      "title": "SimpRead Unreader",
-      "description": "List of SimpRead Unreader",
+      "title": "Browse Posts",
+      "subtitle": "SimpRead",
+      "description": "Browse SimpRead Posts",
       "mode": "view"
     }
   ],
