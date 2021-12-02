@@ -1,22 +1,29 @@
 {
   "name": "harvest",
   "title": "harvest",
-  "description": "Access Harvest Time Entries and Weekly Reports",
+  "description": "Access Harvest Time Entries",
   "icon": "command-icon.png",
   "author": "eluce2",
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "new",
       "title": "New Time Entry",
-      "subtitle": "",
+      "subtitle": "Harvest",
+      "description": "Start a new Timer",
+      "mode": "view"
+    },
+    {
+      "name": "listTimeEntries",
+      "title": "Today's Timesheet",
+      "subtitle": "Harvest",
       "description": "Start a new Timer",
       "mode": "view"
     },
     {
       "name": "stopTimer",
       "title": "Stop Timer",
-      "subtitle": "",
+      "subtitle": "Harvest",
       "description": "Stop your running timer",
       "mode": "no-view"
     }
@@ -42,6 +49,7 @@
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "axios": "^0.23.0",
+    "dayjs": "^1.10.7",
     "lodash": "^4.17.21",
     "moment": "^2.29.1"
   },

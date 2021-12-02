@@ -5,10 +5,12 @@ import {
   HarvestTimeEntriesResponse,
   HarvestTimeEntryCreatedResponse,
   HarvestTimeEntryResponse,
+  HarvestTimeEntry,
 } from "./responseTypes";
 import { getLocalStorageItem, getPreferenceValues, setLocalStorageItem } from "@raycast/api";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
+import dayjs from "dayjs";
 
 interface Preferences {
   token: string;
@@ -63,18 +65,47 @@ export async function getMyProjectAssignments() {
   return resp.data.project_assignments;
 }
 
+export async function getMyTimeEntries({ from = new Date(), to = new Date() }: { from: Date; to: Date }) {
+  let time_entries: HarvestTimeEntry[] = [];
+  let page = 1;
+  while (true) {
+    const resp = await harvestAPI<HarvestTimeEntriesResponse>({
+      url: "/time_entries",
+      params: {
+        from: dayjs(from).startOf("day").format(),
+        to: dayjs(to).endOf("day").format(),
+        page,
+      },
+    });
+    time_entries = time_entries.concat(resp.data.time_entries);
+    if (resp.data.total_pages >= resp.data.page) break;
+    page += 1;
+  }
+  return time_entries;
+}
+
 export async function newTimeEntry(param: NewTimeEntryDuration | NewTimeEntryStartEnd) {
   const resp = await harvestAPI<HarvestTimeEntryCreatedResponse>({ method: "POST", url: "/time_entries", data: param });
   return resp.data;
 }
 
-export async function stopTimer() {
-  const resp = await harvestAPI<HarvestTimeEntriesResponse>({ url: "/time_entries", params: { is_running: true } });
-  if (resp.data.time_entries.length === 0) {
-    return true;
+export async function stopTimer(entry?: HarvestTimeEntry) {
+  if (!entry) {
+    const resp = await harvestAPI<HarvestTimeEntriesResponse>({ url: "/time_entries", params: { is_running: true } });
+    if (resp.data.time_entries.length === 0) {
+      return true;
+    }
+    entry = resp.data.time_entries[0];
   }
   await harvestAPI<HarvestTimeEntryResponse>({
-    url: `/time_entries/${resp.data.time_entries[0].id}/stop`,
+    url: `/time_entries/${entry.id}/stop`,
+    method: "PATCH",
+  });
+  return true;
+}
+export async function restartTimer(entry: HarvestTimeEntry) {
+  await harvestAPI<HarvestTimeEntryResponse>({
+    url: `/time_entries/${entry.id}/restart`,
     method: "PATCH",
   });
   return true;
