@@ -236,7 +236,7 @@ function TodoListSection(props: { todos: Todo[]; refreshTodos: () => void; listN
 
 const getListTodosCacheKey = (listName: ListName): string => `list:${listName}:todos`;
 
-const getCachedListTodos = async (listName: ListName): Promise<Todo[]> => {
+const getCachedListTodos = async (listName: ListName): Promise<Todo[] | undefined> => {
   const key = getListTodosCacheKey(listName);
   const value = (await getLocalStorageItem(key)) as string;
   if (value) {
