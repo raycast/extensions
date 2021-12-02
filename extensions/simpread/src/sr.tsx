@@ -101,7 +101,7 @@ export default function Command() {
     useEffect(() => {
         async function fetchUnrdist() {
             try {
-                const favicon = 'https://simpread-1254315611.cos.ap-shanghai.myqcloud.com/mobile/apple-icon-180x180.png',
+                const favicon = 'favicon@default.png',
                     path    = await getLocalStorageItem( 'simpread_config_path' ),
                     config  = readFileSync( !path ? preferences.path : path + '', 'utf8' ),
                     unrdist = JSON.parse( config ).unrdist,
@@ -151,5 +151,5 @@ export default function Command() {
         showToast( ToastStyle.Failure, '获取失败，请确认是否存在 simpread_config.json' );
     }
 
-return <List>{ state.items }</List>;
+    return <List isLoading={ state.items === undefined}>{ state.items }</List>;
 }
