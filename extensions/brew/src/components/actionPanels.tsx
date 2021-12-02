@@ -117,6 +117,9 @@ export function OutdatedActionPanel(props: {outdated: OutdatedCask | OutdatedFor
         <Actions.FormulaUpgradeAllAction onAction={props.onAction} />
         {isPinable(outdated) && <Actions.FormulaPinAction formula={outdated} onAction={props.onAction} />}
       </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Actions.FormulaUninstallAction formula={outdated} onAction={props.onAction} />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }

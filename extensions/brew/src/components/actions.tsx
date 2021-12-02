@@ -14,7 +14,7 @@ import {
   brewUpgradeAll,
 } from "../brew";
 import { showFailureToast } from "../utils";
-import { Cask, Formula, OutdatedCask, OutdatedFormula } from "../brew";
+import { Cask, Formula, OutdatedFormula, Nameable } from "../brew";
 
 export function FormulaInstallAction(props: {formula: Cask | Formula , onAction: (result: boolean) => void}) {
   // TD: Support installing other versions?
@@ -30,7 +30,7 @@ export function FormulaInstallAction(props: {formula: Cask | Formula , onAction:
   );
 }
 
-export function FormulaUninstallAction(props: {formula: Cask | Formula, onAction: (result: boolean) => void}) {
+export function FormulaUninstallAction(props: {formula: Cask | Nameable, onAction: (result: boolean) => void}) {
   return (
     <ActionPanelItem title="Uninstall"
                      icon={Icon.Trash}
@@ -44,7 +44,7 @@ export function FormulaUninstallAction(props: {formula: Cask | Formula, onAction
 }
 
 
-export function FormulaUpgradeAction(props: {formula: Cask | Formula | OutdatedCask | OutdatedFormula, onAction: (result: boolean) => void}) {
+export function FormulaUpgradeAction(props: {formula: Cask | Nameable, onAction: (result: boolean) => void}) {
   return (
     <ActionPanelItem title="Upgrade"
                      icon={Icon.Hammer}
@@ -89,7 +89,6 @@ async function install(formula: Cask | Formula): Promise<boolean> {
   showToast(ToastStyle.Animated, `Installing ${brewName(formula)}`);
   try {
     await brewInstall(formula);
-    formula.installed = [{version: formula.versions.stable, installed_as_dependency: false, installed_on_request: true}];
     showToast(ToastStyle.Success, `Installed ${brewName(formula)}`);
     return true;
   } catch (err) {
@@ -99,7 +98,7 @@ async function install(formula: Cask | Formula): Promise<boolean> {
   }
 }
 
-async function uninstall(formula: Cask | Formula): Promise<boolean> {
+async function uninstall(formula: Cask | Nameable): Promise<boolean> {
   showToast(ToastStyle.Animated, `Uninstalling ${brewName(formula)}`);
   try {
     await brewUninstall(formula);
@@ -112,7 +111,7 @@ async function uninstall(formula: Cask | Formula): Promise<boolean> {
   }
 }
 
-async function upgrade(formula: Cask | Formula | OutdatedCask | OutdatedFormula): Promise<boolean> {
+async function upgrade(formula: Cask | Nameable): Promise<boolean> {
   showToast(ToastStyle.Animated, `Upgrading ${brewName(formula)}`);
   try {
     await brewUpgrade(formula);

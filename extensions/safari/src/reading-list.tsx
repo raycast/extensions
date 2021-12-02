@@ -1,10 +1,10 @@
-import { List, ActionPanel, Icon, OpenAction, Detail } from '@raycast/api';
+import { List, ActionPanel, CopyToClipboardAction, OpenInBrowserAction, Detail } from '@raycast/api';
 import { useState, useEffect, useCallback } from 'react';
 import os from 'os';
 import _ from 'lodash';
 import plist from 'simple-plist';
 import { promisify } from 'util';
-import { getUrlDomain, getFaviconUrl, plural, formatDate, permissionErrorMarkdown } from './shared';
+import { getUrlDomain, getFaviconUrl, plural, formatDate, permissionErrorMarkdown, search } from './shared';
 
 const readPlist = promisify(plist.readFile);
 
@@ -31,6 +31,7 @@ interface Bookmark {
   URLString: string;
   ReadingList: {
     DateAdded: string;
+    DateLastViewed?: string;
     PreviewText: string;
   };
   imageURL: string;
@@ -42,6 +43,7 @@ interface ReadingListBookmark {
   domain: string;
   title: string;
   dateAdded: string;
+  dateLastViewed?: string;
   description: string;
 }
 
@@ -55,14 +57,34 @@ const extractReadingListBookmarks = (bookmarks: BookmarkPListResult): ReadingLis
       domain: getUrlDomain(res.URLString),
       title: res.ReadingListNonSync.Title || res.URIDictionary.title,
       dateAdded: res.ReadingList.DateAdded,
+      dateLastViewed: res.ReadingList.DateLastViewed,
       description: res.ReadingList.PreviewText || '',
     }))
     .orderBy('dateAdded', 'desc')
     .value();
 
+function ListItem(props: { bookmark: ReadingListBookmark }) {
+  const { bookmark } = props;
+  return (
+    <List.Item
+      title={bookmark.title}
+      subtitle={bookmark.domain}
+      icon={getFaviconUrl(bookmark.domain)}
+      accessoryTitle={formatDate(bookmark.dateAdded)}
+      actions={
+        <ActionPanel>
+          <OpenInBrowserAction url={bookmark.url} />
+          <CopyToClipboardAction content={bookmark.url} title="Copy URL" />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 export default function Command() {
   const [hasPermissionError, setHasPermissionError] = useState(false);
   const [bookmarks, setBookmarks] = useState<ReadingListBookmark[]>();
+  const [searchText, setSearchText] = useState<string>('');
 
   const fetchItems = useCallback(async () => {
     try {
@@ -70,7 +92,6 @@ export default function Command() {
       const bookmarks = extractReadingListBookmarks(safariBookmarksPlist);
       setBookmarks(bookmarks);
     } catch (err) {
-      // TODO check error
       if (err instanceof Error && err.message.includes('operation not permitted')) {
         return setHasPermissionError(true);
       }
@@ -87,26 +108,25 @@ export default function Command() {
     return <Detail markdown={permissionErrorMarkdown} />;
   }
 
+  const groupedBookmarks = _.groupBy(bookmarks, ({ dateLastViewed }) => (dateLastViewed ? 'read' : 'unread'));
+
   return (
-    <List
-      isLoading={!bookmarks}
-      navigationTitle={bookmarks && `Reading List (${plural(bookmarks.length, 'bookmark')})`}
-    >
-      {_.map(bookmarks, (bookmark: ReadingListBookmark) => (
-        <List.Item
-          key={bookmark.uuid}
-          title={bookmark.title}
-          subtitle={bookmark.domain}
-          keywords={[bookmark.url, bookmark.domain, bookmark.description]}
-          icon={getFaviconUrl(bookmark.domain)}
-          accessoryTitle={formatDate(bookmark.dateAdded)}
-          actions={
-            <ActionPanel>
-              <OpenAction title="Open in Safari" target={bookmark.url} application="Safari" icon={Icon.Globe} />
-            </ActionPanel>
-          }
-        />
-      ))}
+    <List isLoading={!bookmarks} onSearchTextChange={setSearchText}>
+      {_.map(groupedBookmarks, (bookmarks, key) => {
+        const filteredBookmarks = search(
+          bookmarks,
+          ['title', 'url', 'description'],
+          searchText
+        ) as ReadingListBookmark[];
+
+        return (
+          <List.Section key={key} title={_.startCase(key)} subtitle={plural(filteredBookmarks.length, 'bookmark')}>
+            {filteredBookmarks.map((bookmark) => (
+              <ListItem key={bookmark.uuid} bookmark={bookmark} />
+            ))}
+          </List.Section>
+        );
+      })}
     </List>
   );
 }

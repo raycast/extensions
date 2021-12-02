@@ -1,4 +1,4 @@
-import { ActionPanel, closeMainWindow, CopyToClipboardAction, getPreferenceValues, Icon, List } from "@raycast/api";
+import { ActionPanel, closeMainWindow, popToRoot, CopyToClipboardAction, getPreferenceValues, Icon, List } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { useEffect, useState } from "react";
 import { faviconUrl } from "./utils"
@@ -125,8 +125,9 @@ function Actions(props: { tab: Tab }) {
 
 function GoogleChromeGoToTab(props: { tab: Tab }) {
   async function handleAction() {
+    closeMainWindow();
+    popToRoot();
     await setActiveTab(props.tab);
-    await closeMainWindow();
   }
 
   return <ActionPanel.Item title="Open tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;

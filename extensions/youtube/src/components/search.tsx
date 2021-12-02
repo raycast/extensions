@@ -70,15 +70,15 @@ async function setRecentSearches(key: string, recentSearches: RecentSearch[]) {
 }
 
 async function appendRecentSearchesStore(key: string, search: RecentSearch) {
+  if (search.text === "") {
+    return;
+  }
   const data = await getRecentSearches(key);
   if (data && data.length > 0) {
-    const existing = data.find((o) => o.uuid === search.uuid);
-    if (existing) {
+    if (data[0].uuid === search.uuid) {
       // update existing recent stored search
-      existing.text = search.text;
-      existing.timestamp = search.timestamp;
-      existing.uuid = search.uuid;
-      setRecentSearches(key, data);
+      const freshData = [search].concat(data.slice(1) || []);
+      setRecentSearches(key, freshData);
     } else {
       // add new entry to recent searches
       const freshData = [search].concat(data).slice(0, 20);
