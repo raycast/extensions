@@ -1,7 +1,9 @@
 import wiki from "wikijs";
 import useSWR from "swr";
 
-const wikipedia = wiki();
+const wikipedia = wiki({
+  apiUrl: "https://en.wikipedia.org/w/api.php",
+});
 
 export async function getRandomArticle() {
   const [title] = await wikipedia.random(1);
@@ -19,6 +21,7 @@ async function findArticlesByTitle(search: string) {
 async function getArticleByTitle(title: string) {
   const page = await wikipedia.page(title);
   return {
+    title: title,
     url: page.url(),
     summary: await page.summary()
   };
