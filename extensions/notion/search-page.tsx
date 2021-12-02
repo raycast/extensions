@@ -396,6 +396,8 @@ function PageDetail(props: { page: Page }): JSX.Element {
   const page = props.page 
   const pageName = (page.icon_emoji ? page.icon_emoji+' ': '')+(page.title ? page.title : 'Untitled')
 
+  storeRecentlyOpenedPage(page)
+
   const [pageContent, setPageContent] = useState<PageContent>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
 

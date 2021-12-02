@@ -619,7 +619,7 @@ function notionBlockToMarkdown(text: string, block: Record<string,any>): string 
       return '1. '+text
     } 
     case ('to_do'): { 
-      return '\n '+(blockValue.checked ? '☑ ': '☐ ')+text
+      return '\n'+(blockValue.checked ? '☑ ': '☐ ')+text
     } 
 
     default: { 
