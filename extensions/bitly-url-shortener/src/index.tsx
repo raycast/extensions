@@ -8,6 +8,9 @@ export default async function () {
     const clipboard = await runAppleScript("the clipboard");
     if (clipboard.length === 0) throw new Error("Clipboard is empty");
 
+    //validate url or error out early.
+    new URL(clipboard);
+
     const response = await fetch("https://api-ssl.bitly.com/v4/shorten", {
       headers: new Headers({
         Authorization: `Bearer ${accessToken}`,
