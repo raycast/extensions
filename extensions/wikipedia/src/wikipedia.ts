@@ -18,12 +18,10 @@ async function findArticlesByTitle(search: string) {
 
 async function getArticleByTitle(title: string) {
   const page = await wikipedia.page(title);
-  const [url, summary, image] = await Promise.all([
-    page.url(),
-    page.summary(),
-    page.mainImage()
-  ]);
-  return { url, summary, image };
+  return {
+    url: page.url(),
+    summary: await page.summary()
+  };
 }
 
 export function useWikipediaArticles(search: string) {

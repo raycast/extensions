@@ -8,7 +8,7 @@ export function ArticleSummary({ title }: { title: string }) {
     <Detail
       isLoading={isValidating}
       navigationTitle={title}
-      markdown={article ? `# ${title}\n${article.summary}${article.image ? `\n\n![](${article.image})` : ""}` : null}
+      markdown={article ? `# ${title}\n${article.summary}` : null}
       actions={
         article ? (
           <ActionPanel>
