@@ -51,7 +51,6 @@ export function ManagementActionPanel({ state, onInstall, onUninstall, onSetup }
     break
   
   case State.Error: 
-    console.log("[ManagementActionSection] Error")
     return null
   }
 

@@ -62,7 +62,6 @@ export async function fetchScriptCommands(): Promise<MainCompactGroup> {
     return main
   }
   catch (error) {
-    console.error(error)
     showToast(ToastStyle.Failure, "Could not load Script Commands")
 
     return Promise.resolve({

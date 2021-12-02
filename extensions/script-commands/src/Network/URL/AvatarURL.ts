@@ -15,12 +15,8 @@ export const avatarURL = (url: string | null): string => {
     else if (path.host == "github.com")
       return `${url}.png?size=${defaultSize}`
     
-    else {
-      const currentURL = `https://unavatar.io/${path.host}?fallback=${defaultURL}`
-      //console.log(`Current value: ${currentURL}`)
-
-      return currentURL
-    }
+    else
+      return `https://unavatar.io/${path.host}?fallback=${defaultURL}`
   }
 
   return `${defaultURL}?size=${defaultSize}`
