@@ -535,7 +535,7 @@ export function useStateSearch(
         haStates = haStates.filter(
           (e) =>
             e.entity_id.toLowerCase().includes(query.toLowerCase()) ||
-            (e.attributes.friendly_name.toLowerCase() || "").includes(query.toLowerCase())
+            (e.attributes.friendly_name || "").toLowerCase().includes(query.toLowerCase())
         );
       }
       haStates = haStates.slice(0, 100);
