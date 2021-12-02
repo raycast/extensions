@@ -62,7 +62,7 @@ export const searchResources = async (
     filters: string[]
 ): Promise<QueryResultItem[]> => {
     async function getData(): Promise<string> {
-        const query = `https://raw.githubusercontent.com/lsgrep/mldocs/master/data/ml.json`;
+        const query = `https://raw.githubusercontent.com/sadanand-singh/mldocs-data/main/data/ml.json`;
 
         const response = await fetch(query);
         if (response.status !== 200) {
