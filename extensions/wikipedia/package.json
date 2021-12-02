@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wikipedia",
+  "title": "Wikipedia",
+  "description": "Search Wikipedia articles and view them",
+  "icon": "wikipedia.png",
+  "author": "vimtor",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-articles",
+      "title": "Search Articles",
+      "subtitle": "Wikipedia",
+      "description": "Search Wikipedia articles by title",
+      "mode": "view"
+    },
+    {
+      "name": "random-article",
+      "title": "Random Article",
+      "subtitle": "Wikipedia",
+      "description": "Open a random Wikipedia article",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.7",
+    "wikijs": "^6.3.2",
+    "swr": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
