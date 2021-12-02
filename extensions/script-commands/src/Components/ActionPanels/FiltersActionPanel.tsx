@@ -5,6 +5,7 @@ import {
 } from "@raycast/api"
 
 import { 
+  useFilter,
   useLanguages 
 } from "@hooks"
 
@@ -22,14 +23,29 @@ import {
 } from "@urls"
 
 type FiltersActionPanelProps = {
+  filter: Filter
   onFilter: (filter: Filter) => void
 }
 
-export function FiltersActionPanel({ onFilter }: FiltersActionPanelProps): JSX.Element {
+export function FiltersActionPanel({ filter, onFilter }: FiltersActionPanelProps): JSX.Element {
   const { languages } = useLanguages()
 
   return (
     <ActionPanel title="Filter by">
+      { filter != null &&
+        <ActionPanel.Item 
+          title="Clear filter"
+          icon={{ 
+            source: Icon.XmarkCircle, 
+            tintColor: Color.Red
+          }}
+          shortcut={{ 
+            modifiers: ["cmd", "shift"], 
+            key: "c" 
+          }}
+          onAction={ () => onFilter(null) }
+        />
+      }
       <ActionPanel.Submenu 
         title="Type" 
         icon={{ source: Icon.Terminal }}
@@ -62,13 +78,15 @@ export function FiltersActionPanel({ onFilter }: FiltersActionPanelProps): JSX.E
           modifiers: ["cmd"], 
           key: "l" 
         }}
-        children={languages.map(language => (
-          <LanguageActionItem 
-            key={ language.name }
-            language={ language }
-            onFilter={ onFilter }
-          />
-        ))}
+        children={ 
+          languages.map(language => (
+            <LanguageActionItem 
+              key={ language.name }
+              language={ language }
+              onFilter={ onFilter }
+            />
+          ))
+        }
       />
     </ActionPanel>
   )

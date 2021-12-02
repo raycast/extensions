@@ -13,6 +13,7 @@ import {
 } from "@components"
 
 import {
+  useFilter,
   useScriptCommand,
 } from "@hooks"
 
@@ -26,22 +27,13 @@ import {
   State,
 } from "@types"
 
-import { 
-  useContext,
-} from "react"
-
-import { 
-  ApplicationContext,
-} from "@providers"
-
 type Props = { 
   scriptCommand: ScriptCommand
   group: CompactGroup
 }
 
 export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element {
-  const { setFilter } = useContext(ApplicationContext)
-  const { props, install, uninstall, setup } = useScriptCommand(scriptCommand)
+  const { props, install, uninstall, setup, setFilter } = useScriptCommand(scriptCommand)
 
   const handleInstall = async () => {
     await StoreToast(props.state, Progress.InProgress, scriptCommand)
@@ -90,7 +82,10 @@ export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element 
           { group.readme != undefined && group.readme.length > 0 &&
             <ReadmeActionPanel group={ group } /> 
           }
-          <FiltersActionPanel onFilter={ setFilter } />
+          <FiltersActionPanel 
+            filter={ props.filter } 
+            onFilter={ setFilter } 
+          />
         </ActionPanel>
       }
     />

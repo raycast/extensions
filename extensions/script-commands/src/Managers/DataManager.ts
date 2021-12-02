@@ -1,4 +1,5 @@
 import { 
+  CompactGroup,
   Language,
   MainCompactGroup, 
   ScriptCommand,
@@ -21,6 +22,7 @@ import {
 
 import { 
   Content,
+  Filter,
   State,
   StateResult, 
 } from "@types"
@@ -33,7 +35,7 @@ export class DataManager {
   private contentManager: ContentStore
   private scriptCommandManager: ScriptCommandManager
   private settings = new Settings()
-  private languages: Language[] = []
+  private mainContent: MainCompactGroup
 
   static shared(): DataManager { 
     return this.instance
@@ -46,6 +48,12 @@ export class DataManager {
       this.contentManager,
       this.settings
     )
+
+    this.mainContent = {
+      groups: [],
+      languages: [],
+      totalScriptCommands: 0
+    }
 
     this.setupFolders()
     this.loadDatabase()
@@ -123,14 +131,80 @@ export class DataManager {
   }
 
   fetchLanguages(): Language[] {
-    return this.languages
+    return this.mainContent.languages
   }
 
-  async fetchCommands(): Promise<MainCompactGroup> {
-    const response = await fetchScriptCommands()
-    this.languages = response.languages
+  async fetchCommands(filter: Filter = null): Promise<MainCompactGroup> {
+    if (filter != null)
+      return this.filterCommands(filter)
 
-    return response
+    if (this.mainContent.groups.length > 0)
+      return this.mainContent
+
+    this.mainContent = await fetchScriptCommands()
+
+    return this.mainContent
+  }
+
+  private filterCommands(filter: Filter): MainCompactGroup {
+    let data = {... this.mainContent }
+    data.totalScriptCommands = 0
+
+    if (filter == null)
+      return data
+
+    if (typeof(filter) === "string") {
+      const groups: CompactGroup[] = []
+
+      data.groups.forEach(group => {
+        const groupCopy = {... group}
+        groupCopy.scriptCommands = []
+
+        group.scriptCommands.forEach(scriptCommand => { 
+          if (scriptCommand.language == filter) {
+            groupCopy.scriptCommands.push(scriptCommand)
+          }
+        })
+
+        if (groupCopy.scriptCommands.length > 0) {
+          groupCopy.scriptCommands.sort((left: ScriptCommand, right: ScriptCommand) => {
+            return (left.title > right.title) ? 1 : -1
+          })
+
+          data.totalScriptCommands += groupCopy.scriptCommands.length
+          groups.push(groupCopy)
+        }
+      })
+
+      groups.sort((left: CompactGroup, right: CompactGroup) => {
+        return (left.title > right.title) ? 1 : -1
+      })
+
+      data.groups = groups
+    }
+    else {
+      const content = this.contentManager.getContent()
+
+      const group: CompactGroup = {
+        identifier: "installed-script-commands",
+        title: "Installed",
+        subtitle: "Script Commands",
+        scriptCommands: []
+      }
+      
+      Object.values(content).forEach(item => {
+        if ((filter == State.NeedSetup && item.needsSetup == true) || filter == State.Installed)
+          group.scriptCommands.push(item.scriptCommand)
+      })
+
+      data = {
+        groups: [group],
+        totalScriptCommands: group.scriptCommands.length,
+        languages: []
+      }
+    }
+
+    return data
   }
 
   async fetchSourceCode(scriptCommand: ScriptCommand): Promise<string> {

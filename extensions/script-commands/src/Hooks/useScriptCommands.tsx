@@ -13,11 +13,11 @@ import {
 } from "@models"
 
 import { 
-  Filter 
+  Filter, 
+  State 
 } from "@types"
 
 type UseScriptCommandsState = {
-  shouldReload: boolean,
   main: MainCompactGroup
 }
 
@@ -31,7 +31,6 @@ type UserScriptCommandsProps = {
 
 type UseScriptCommands = () => {
   props: UserScriptCommandsProps
-  reloadData: () => void
   setFilter: (filter: Filter) => void
 }
 
@@ -39,7 +38,6 @@ export const useScriptCommands: UseScriptCommands = () => {
   const { dataManager, filter, setFilter } = useDataManager()
   
   const [state, setState] = useState<UseScriptCommandsState>({
-    shouldReload: true, 
     main: { 
       groups: [],
       totalScriptCommands: 0,
@@ -47,34 +45,28 @@ export const useScriptCommands: UseScriptCommands = () => {
     }
   })
 
-  const reloadData = () => {
-    setState((oldState) => ({
-      ...oldState, 
-      shouldReload: true
-    }))
-  }
-
   useEffect(() => {    
     async function fetch() {
-      const response = await dataManager.fetchCommands()
+      const response = await dataManager.fetchCommands(filter)
       
       setState({
-        shouldReload: false, 
         main: response
       })
     }
-
-    if (state.shouldReload == false)
-      return
-
+    
     fetch()
-  }, [state])
+  }, [filter])
 
   const isLoading = state.main.groups.length == 0
   let placeholder = "Loading Script Commands..."
 
-  if (isLoading == false)
-    placeholder = `Search for your Script Command among of ${state.main.totalScriptCommands} items`
+  if (isLoading == false) {
+    if (filter != null) {
+      placeholder = `Filter applied: ${filterDescription(filter)} (${state.main.totalScriptCommands})`
+    }
+    else
+      placeholder = `Search for your Script Command among of ${state.main.totalScriptCommands} items`
+  }
 
   return {
     props: {
@@ -84,7 +76,26 @@ export const useScriptCommands: UseScriptCommands = () => {
       groups: state.main.groups,
       filter: filter
     },
-    reloadData,
     setFilter
   }
+}
+
+type FilterDescription = (filter: Filter) => string | null
+
+const filterDescription: FilterDescription = (filter) => {
+  if (filter == null)
+    return null
+  
+  if (typeof(filter) == "string")
+    return filter
+
+  switch (filter) {
+    case State.Installed:
+      return "Installed"
+
+    case State.NeedSetup:
+      return "Need Setup"
+  }
+
+  return null
 }

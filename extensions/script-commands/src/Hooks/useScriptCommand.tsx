@@ -41,9 +41,10 @@ interface UseScriptCommandProps {
   icon: ImageLike
   keywords: string[]
   accessoryIcon: ImageLike
-  accessoryTitle: string,
+  accessoryTitle: string
   sourceCodeURL: string
-  state: State,
+  filter: Filter
+  state: State
 }
 
 type UseScriptCommandState = {
@@ -57,7 +58,7 @@ type UseScriptCommandState = {
 type UseScriptCommand = (initialScriptCommand: ScriptCommand) => UseScriptCommandState
 
 export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
-  const { dataManager, setFilter } = useDataManager()
+  const { dataManager, filter, setFilter } = useDataManager()
 
   const [state, setState] = useState<ScriptCommandState>({
     commandState: dataManager.stateFor(initialScriptCommand), 
@@ -96,6 +97,7 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
       accessoryIcon: accessoryIconFor(state.commandState, state.scriptCommand.language),
       accessoryTitle: accessoryTitleFor(state.scriptCommand),
       sourceCodeURL: sourceCodeNormalURL(state.scriptCommand),
+      filter: filter,
       state: state.commandState
     },
     install,
