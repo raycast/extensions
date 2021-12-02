@@ -23,7 +23,7 @@ import {
   ColorTempControlAction,
   getLightRGBFromState,
 } from "./light";
-import { changeRGBBrightness, RGBtoColorLike } from "../color";
+import { changeRGBBrightness, RGBtoString } from "../color";
 
 const PrimaryIconColor = Color.Blue;
 
@@ -103,7 +103,7 @@ function getLightTintColor(state: State): ColorLike {
   }
   const rgb = getLightRGBFromState(state);
   if (rgb) {
-    return RGBtoColorLike(changeRGBBrightness(rgb, 56.6));
+    return { light: RGBtoString(changeRGBBrightness(rgb, 56.6)), dark: RGBtoString(rgb) };
   }
   return lightColor[sl] || PrimaryIconColor;
 }
