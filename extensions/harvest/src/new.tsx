@@ -1,11 +1,28 @@
-import { Form, FormValue, ActionPanel, SubmitFormAction, showToast, ToastStyle, Toast, showHUD } from "@raycast/api";
+import {
+  Form,
+  FormValue,
+  ActionPanel,
+  SubmitFormAction,
+  showToast,
+  ToastStyle,
+  Toast,
+  showHUD,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCompany, getMyProjectAssignments, newTimeEntry } from "./services/harvest";
 import { HarvestCompany, HarvestProjectAssignment, HarvestTaskAssignment } from "./services/responseTypes";
 import _ from "lodash";
 import moment from "moment";
 
-export default function Command() {
+export default function Command({
+  onSave = () => {
+    return null;
+  },
+}: {
+  onSave: () => void;
+}) {
+  const { pop } = useNavigation();
   const [company, setCompany] = useState<HarvestCompany | undefined>(undefined);
   const [projects, setProjects] = useState<HarvestProjectAssignment[] | undefined>(undefined);
   const [tasks, setTasks] = useState<HarvestTaskAssignment[] | undefined>(undefined);
@@ -25,14 +42,18 @@ export default function Command() {
       project_id: parseInt(values.project_id.toString()),
       task_id: parseInt(values.task_id.toString()),
       spent_date: values.spent_date === null ? moment().format("YYYY-MM-DD") : values.spent_date.toString(),
-    }).catch((error) => {
+    }).catch(async (error) => {
       console.error(error.response.data);
       toast.hide();
-      showToast(ToastStyle.Failure, "API Error", "Could not save time entry");
-      return;
+      await showToast(ToastStyle.Failure, "Error", error.response.data.message);
     });
-    toast.hide();
-    await showHUD(timeEntry?.is_running ? "Timer Started" : "Time Entry Created");
+
+    if (timeEntry) {
+      toast.hide();
+      await showHUD(timeEntry.is_running ? "Timer Started" : "Time Entry Created");
+      pop();
+      onSave();
+    }
   }
 
   function setTaskAssignments(project_id: string) {

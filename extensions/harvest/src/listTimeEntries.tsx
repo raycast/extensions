@@ -1,4 +1,4 @@
-import { ActionPanel, ActionPanelItem, Color, Icon, List, ListItem, PushAction } from "@raycast/api";
+import { ActionPanel, ActionPanelItem, Color, Icon, List, ListItem, PushAction, Toast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getMyTimeEntries, restartTimer, stopTimer } from "./services/harvest";
 import { HarvestTimeEntry } from "./services/responseTypes";
@@ -18,29 +18,12 @@ export default function Command() {
     init();
   }, []);
 
-  function ToggleTimerAction({ entry }: { entry: HarvestTimeEntry }) {
-    return (
-      <ActionPanelItem
-        title={entry.is_running ? "Stop Timer" : "Start Timer"}
-        icon={Icon.Clock}
-        onAction={() => {
-          if (entry.is_running) {
-            stopTimer(entry);
-          } else {
-            restartTimer(entry);
-          }
-          init();
-        }}
-      />
-    );
-  }
-
   return (
     <List
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <NewEntryAction />
+          <NewEntryAction onSave={init} />
         </ActionPanel>
       }
     >
@@ -58,9 +41,9 @@ export default function Command() {
             icon={entry.is_running ? { tintColor: Color.Orange, source: Icon.Clock } : undefined}
             actions={
               <ActionPanel>
-                <ToggleTimerAction entry={entry} />
-                <EditEntryAction />
-                <NewEntryAction />
+                <ToggleTimerAction entry={entry} onComplete={init} />
+                <EditEntryAction onSave={init} />
+                <NewEntryAction onSave={init} />
               </ActionPanel>
             }
           />
@@ -70,18 +53,55 @@ export default function Command() {
   );
 }
 
-function NewEntryAction() {
-  return (
-    <PushAction target={<New />} title="New Time Entry" shortcut={{ key: "n", modifiers: ["cmd"] }} icon={Icon.Plus} />
-  );
-}
-function EditEntryAction() {
+function NewEntryAction({
+  onSave = () => {
+    return null;
+  },
+}: {
+  onSave: () => void;
+}) {
   return (
     <PushAction
-      target={<New />}
+      target={<New onSave={onSave} />}
+      title="New Time Entry"
+      shortcut={{ key: "n", modifiers: ["cmd"] }}
+      icon={Icon.Plus}
+    />
+  );
+}
+function EditEntryAction({
+  onSave = () => {
+    return null;
+  },
+}: {
+  onSave: () => void;
+}) {
+  return (
+    <PushAction
+      target={<New onSave={onSave} />}
       title="Edit Time Entry"
       shortcut={{ key: "e", modifiers: ["cmd"] }}
       icon={Icon.Pencil}
+    />
+  );
+}
+
+function ToggleTimerAction({ entry, onComplete }: { entry: HarvestTimeEntry; onComplete: () => void }) {
+  return (
+    <ActionPanelItem
+      title={entry.is_running ? "Stop Timer" : "Start Timer"}
+      icon={Icon.Clock}
+      onAction={async () => {
+        const toast = new Toast({ style: ToastStyle.Animated, title: "Loading..." });
+        await toast.show();
+        if (entry.is_running) {
+          await stopTimer(entry);
+        } else {
+          await restartTimer(entry);
+        }
+        onComplete();
+        await toast.hide();
+      }}
     />
   );
 }
