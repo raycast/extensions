@@ -28,6 +28,7 @@ import {
 import { changeRGBBrightness, RGBtoString } from "../color";
 
 const PrimaryIconColor = Color.Blue;
+const UnavailableColor = "#bdbdbd";
 
 const lightColor: Record<string, ColorLike> = {
   on: Color.Yellow,
@@ -85,6 +86,10 @@ function getDeviceClassIcon(state: State): ImageLike | undefined {
         tintColor = Color.Yellow;
       }
       return { source: src, tintColor: tintColor };
+    } else if (dc === "motion") {
+      const source = state.state === "on" ? "run.png" : "walk.png";
+      const color = state.state === "unavailable" ? UnavailableColor : PrimaryIconColor;
+      return { source: source, tintColor: color };
     }
     const src = deviceClassIconSource[dc] || "entity.png";
     return { source: src, tintColor: PrimaryIconColor };
@@ -101,7 +106,7 @@ function getLightIconSource(state: State): string {
 function getLightTintColor(state: State): ColorLike {
   const sl = state.state.toLocaleLowerCase();
   if (sl === "unavailable") {
-    return "#bdbdbd";
+    return UnavailableColor;
   }
   const rgb = getLightRGBFromState(state);
   if (rgb) {
