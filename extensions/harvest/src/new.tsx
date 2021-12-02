@@ -26,6 +26,8 @@ export default function Command({
   const [company, setCompany] = useState<HarvestCompany | undefined>(undefined);
   const [projects, setProjects] = useState<HarvestProjectAssignment[] | undefined>(undefined);
   const [tasks, setTasks] = useState<HarvestTaskAssignment[] | undefined>(undefined);
+  const [taskId, setTaskId] = useState<string | undefined>(undefined);
+
   async function handleSubmit(values: Record<string, FormValue>) {
     if (values.project_id === null) {
       return showToast(ToastStyle.Failure, "No Project Selected");
@@ -62,8 +64,10 @@ export default function Command({
     });
     if (typeof project === "object") {
       setTasks(project.task_assignments);
+      setTaskId(project.task_assignments[0].id.toString());
     } else {
       setTasks(undefined);
+      setTaskId(undefined);
     }
   }
 
@@ -105,7 +109,7 @@ export default function Command({
           );
         })}
       </Form.Dropdown>
-      <Form.Dropdown id="task_id" title="Task" storeValue={true}>
+      <Form.Dropdown id="task_id" title="Task" storeValue={true} value={taskId}>
         {tasks?.map((task) => {
           return <Form.DropdownItem value={task.task.id.toString()} title={task.task.name} key={task.id} />;
         })}
