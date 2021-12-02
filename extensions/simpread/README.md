@@ -1,7 +1,7 @@
 <div align="center">
   <img
     src="https://simpread-1254315611.cos.ap-shanghai.myqcloud.com/mobile/apple-icon-180x180.png"
-    width="50"
+    width="100"
   />
 
   <h1>
@@ -59,13 +59,11 @@ Raycast extension for search and open [SimpRead Unreader](https://simpread.pro/p
 
 1. <kbd>sr</kbd> Search Unreader
 
-2. <kbd>src</kbd> Setting SimpRead config path
+2. Show Unreader Annoating Details
 
-3. Show Unreader Annoating Details
+3. Open local file
 
-4. Open local file
-
-5. Open origin url
+4. Open origin url
 
 ## Showcases
 
@@ -87,7 +85,7 @@ Raycast extension for search and open [SimpRead Unreader](https://simpread.pro/p
 
 ### Setting Simpread config Path
 
-![2021-11-29_13-41-56](https://user-images.githubusercontent.com/81074/143815347-6442438a-41c2-4c84-9dbb-d46a000d2cde.png)
+![image](https://user-images.githubusercontent.com/81074/144406599-2188d65e-cc65-48b0-a529-21aed868e5e0.png)
 
 ## Video
 

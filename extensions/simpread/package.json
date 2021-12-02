@@ -8,12 +8,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "src",
-      "title": "SimpRead Config Setting",
-      "description": "Set local simpread_config.json path",
-      "mode": "view"
-    },
-    {
       "name": "sr",
       "title": "Browse Posts",
       "subtitle": "SimpRead",
