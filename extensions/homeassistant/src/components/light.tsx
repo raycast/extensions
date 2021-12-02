@@ -2,8 +2,9 @@ import { ActionPanel, Color, Icon, KeyboardShortcut } from "@raycast/api";
 import { KtoColorLike, miredToK, RGB } from "../color";
 import { ha } from "../common";
 import { State } from "../haapi";
+import { ensureMinMax } from "../utils";
 
-function round50(value: number): number {
+function ceilRound50(value: number): number {
   return Math.ceil(value / 50) * 50;
 }
 
@@ -102,6 +103,17 @@ export function BrightnessDownAction(props: { state: State }): JSX.Element | nul
   return <BrightnessAddAction state={props.state} add={-1} shortcut={{ modifiers: ["cmd"], key: "-" }} />;
 }
 
+function getLightMinMaxK(state: State): [min: number | undefined, max: number | undefined] {
+  const min_mireds = state.attributes.min_mireds as number | undefined;
+  const max_mireds = state.attributes.max_mireds as number | undefined;
+  if (min_mireds && max_mireds && max_mireds > min_mireds) {
+    const maxK = Math.round(miredToK(min_mireds));
+    const minK = Math.round(miredToK(max_mireds));
+    return ensureMinMax(minK, maxK);
+  }
+  return [undefined, undefined];
+}
+
 export function ColorTempControlAction(props: { state: State }): JSX.Element | null {
   const state = props.state;
   const modes = state.attributes.supported_color_modes;
@@ -110,31 +122,20 @@ export function ColorTempControlAction(props: { state: State }): JSX.Element | n
     await ha.callService("light", "turn_on", { entity_id: state.entity_id, kelvin: `${K}` });
   };
 
-  const ensureMinMax = (v1: number, v2: number): [min: number, max: number] => {
-    if (v1 < v2) {
-      return [v1, v2];
-    }
-    return [v2, v1];
-  };
-
   const getKTempValues = (): number[] | undefined => {
-    const min_mireds = state.attributes.min_mireds as number | undefined;
-    const max_mireds = state.attributes.max_mireds as number | undefined;
-    if (min_mireds && max_mireds && max_mireds > min_mireds) {
+    const [minK, maxK] = getLightMinMaxK(state);
+    if (minK && maxK) {
       const result: number[] = [];
-      const maxK = Math.round(miredToK(min_mireds));
-      const minK = Math.round(miredToK(max_mireds));
-      const [min, max] = ensureMinMax(minK, maxK);
-      const minK50 = round50(min);
-      if (minK50 > min) {
-        result.push(min);
+      const minK50 = ceilRound50(minK);
+      if (minK50 > minK) {
+        result.push(minK);
       }
-      const maxK50 = round50(max);
+      const maxK50 = ceilRound50(maxK);
       for (let i = minK50; i <= maxK50; i = i + 50) {
         result.push(i);
       }
-      if (maxK < max) {
-        result.push(max);
+      if (maxK < maxK) {
+        result.push(maxK);
       }
       return result;
     }
@@ -164,4 +165,64 @@ export function ColorTempControlAction(props: { state: State }): JSX.Element | n
     );
   }
   return null;
+}
+
+function ColorTempControlAddAction(props: {
+  state: State;
+  add: number;
+  shortcut?: KeyboardShortcut | undefined;
+}): JSX.Element | null {
+  const state = props.state;
+  const modes = state.attributes.supported_color_modes;
+  const add = props.add;
+
+  const handle = async (K: number) => {
+    await ha.callService("light", "turn_on", { entity_id: state.entity_id, kelvin: `${K}` });
+  };
+
+  if (modes && Array.isArray(modes) && modes.includes("color_temp")) {
+    const mired = state.attributes.color_temp as number | undefined;
+    if (mired === undefined) {
+      return null;
+    }
+    const [minK, maxK] = getLightMinMaxK(state);
+    if (minK === undefined || maxK === undefined) {
+      return null;
+    }
+    const k = Math.round(miredToK(mired));
+    let nextK = k + add;
+    if (nextK === k) {
+      nextK = k + add;
+    }
+    if (nextK === maxK || nextK === minK) {
+      return null;
+    } else if (nextK > maxK) {
+      nextK = maxK;
+    } else if (nextK < minK) {
+      nextK = minK;
+    }
+
+    return (
+      <ActionPanel.Item
+        key={`${nextK}`}
+        title={`Color Temperature ${add < 0 ? "Down" : "Up"}`}
+        icon={{ source: "lightbulb.png", tintColor: Color.PrimaryText }}
+        shortcut={props.shortcut}
+        onAction={() => handle(nextK)}
+      />
+    );
+  }
+  return null;
+}
+
+export function ColorTempControlUpAction(props: { state: State }): JSX.Element | null {
+  return (
+    <ColorTempControlAddAction state={props.state} add={50} shortcut={{ modifiers: ["cmd", "shift"], key: "+" }} />
+  );
+}
+
+export function ColorTempControlDownAction(props: { state: State }): JSX.Element | null {
+  return (
+    <ColorTempControlAddAction state={props.state} add={-50} shortcut={{ modifiers: ["cmd", "shift"], key: "-" }} />
+  );
 }

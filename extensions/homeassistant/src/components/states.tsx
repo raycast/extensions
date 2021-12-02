@@ -21,6 +21,8 @@ import {
   BrightnessDownAction,
   BrightnessUpAction,
   ColorTempControlAction,
+  ColorTempControlDownAction,
+  ColorTempControlUpAction,
   getLightRGBFromState,
 } from "./light";
 import { changeRGBBrightness, RGBtoString } from "../color";
@@ -311,12 +313,16 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               onAction={async () => await ha.turnOffLight(props.state.entity_id)}
               icon={{ source: "power-btn.png", tintColor: Color.Red }}
             />
-            <ColorTempControlAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Brightness">
             <BrightnessControlAction state={state} />
             <BrightnessUpAction state={state} />
             <BrightnessDownAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Color Temperature">
+            <ColorTempControlAction state={state} />
+            <ColorTempControlUpAction state={state} />
+            <ColorTempControlDownAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
