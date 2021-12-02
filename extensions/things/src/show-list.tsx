@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import {
   List,
+  Detail,
   Icon,
   ActionPanel,
   OpenInBrowserAction,
@@ -12,7 +13,7 @@ import {
 } from '@raycast/api';
 import { useCallback, useEffect, useState, Fragment } from 'react';
 import dayjs from 'dayjs';
-import { ListName, executeJxa } from './shared';
+import { ListName, executeJxa, thingsNotRunningError } from './shared';
 import AddNewTodo from './add-new-todo';
 
 enum TodoStatus {
@@ -238,13 +239,17 @@ const getListTodosCacheKey = (listName: ListName): string => `list:${listName}:t
 const getCachedListTodos = async (listName: ListName): Promise<Todo[]> => {
   const key = getListTodosCacheKey(listName);
   const value = (await getLocalStorageItem(key)) as string;
-  return value && JSON.parse(value);
+  if (value) {
+    return JSON.parse(value);
+  }
 };
 
 const setCachedListTodos = async (listName: ListName, todos: Todo[]): Promise<void> => {
   const key = getListTodosCacheKey(listName);
   const value = JSON.stringify(todos);
-  return setLocalStorageItem(key, value);
+  if (value) {
+    return setLocalStorageItem(key, value);
+  }
 };
 
 const plural = (count: number, string: string) => `${count} ${string}${count > 1 ? 's' : ''}`;
@@ -271,6 +276,7 @@ export default function ShowList(props: { listName: ListName }) {
   const [isLoading, setIsLoading] = useState(true);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [searchText, setSearchText] = useState<string>('');
+  const [thingsNotRunning, setThingsNotRunning] = useState(false);
   const { listName } = props;
 
   const fetchTodos = useCallback(async (refreshing = false) => {
@@ -287,8 +293,12 @@ export default function ShowList(props: { listName: ListName }) {
     }
 
     const results = await getListTodos(ListName[listName]);
-    setTodos(results);
     setIsLoading(false);
+    if (!results) {
+      return setThingsNotRunning(true);
+    }
+
+    setTodos(results);
 
     if (useCache) {
       setCachedListTodos(ListName[listName], results);
@@ -298,6 +308,10 @@ export default function ShowList(props: { listName: ListName }) {
   useEffect(() => {
     fetchTodos();
   }, [fetchTodos]);
+
+  if (thingsNotRunning) {
+    return <Detail markdown={thingsNotRunningError} />;
+  }
 
   const normalizedSearchText = normalizeText(searchText);
   const filteredTodos = _.filter(todos, (todo) =>

@@ -17,6 +17,12 @@ export const executeJxa = async (script: string) => {
   }
 };
 
+export const thingsNotRunningError = `
+  ## Things Not Running
+
+  Please make sure Things is installed and running before using this extension.
+`;
+
 export enum ListName {
   Inbox = 'Inbox',
   Today = 'Today',

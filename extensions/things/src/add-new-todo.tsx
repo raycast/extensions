@@ -1,9 +1,9 @@
-import { ActionPanel, Form, showToast, ToastStyle, Icon, useNavigation } from '@raycast/api';
+import { ActionPanel, Form, Detail, showToast, ToastStyle, Icon, useNavigation } from '@raycast/api';
 import _ from 'lodash';
 import { exec } from 'child_process';
 import { useEffect, useState } from 'react';
 import { promisify } from 'util';
-import { ListName, executeJxa } from './shared';
+import { ListName, executeJxa, thingsNotRunningError } from './shared';
 import ShowList from './show-list';
 
 const asyncExec = promisify(exec);
@@ -77,11 +77,17 @@ export default function AddNewTodo(props: { title?: string; listName?: string })
   const [values, setValues] = useState<FormValues>(defaultValues);
   // const [projects, setProjects] = useState();
   const [tags, setTags] = useState([]);
+  const [thingsNotRunning, setThingsNotRunning] = useState(false);
   const { push } = useNavigation();
 
   useEffect(() => {
     const fetchTags = async () => {
-      setTags(await getTags());
+      const results = await getTags();
+      if (!results) {
+        return setThingsNotRunning(true);
+      }
+
+      setTags(results);
     };
 
     fetchTags();
@@ -110,6 +116,10 @@ export default function AddNewTodo(props: { title?: string; listName?: string })
     const listName = getTargetListName(values.list);
     push(<ShowList listName={listName} />);
   };
+
+  if (thingsNotRunning) {
+    return <Detail markdown={thingsNotRunningError} />;
+  }
 
   return (
     <Form
@@ -145,7 +155,7 @@ export default function AddNewTodo(props: { title?: string; listName?: string })
         <Form.DatePicker id="when" title="When" value={values.when} onChange={setValue('when')} />
       )}
       <Form.TagPicker id="tags" title="Tags" value={values.tags} onChange={setValue('tags')}>
-        {tags.map((tag) => (
+        {_.map(tags, (tag) => (
           <Form.TagPicker.Item value={tag} title={tag} key={tag} />
         ))}
       </Form.TagPicker>
