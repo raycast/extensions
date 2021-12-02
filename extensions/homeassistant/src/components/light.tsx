@@ -1,5 +1,5 @@
 import { ActionPanel, Color, Icon, KeyboardShortcut } from "@raycast/api";
-import { KtoColorLike, miredToK } from "../color";
+import { KtoColorLike, miredToK, RGB } from "../color";
 import { ha } from "../common";
 import { State } from "../haapi";
 
@@ -25,9 +25,20 @@ function hasBrightnessSupport(state: State): boolean {
   return false;
 }
 
+export function getLightRGBFromState(state: State): RGB | undefined {
+  const rgb = state.attributes.rgb_color;
+  if (rgb && Array.isArray(rgb) && rgb.length === 3) {
+    return {
+      r: rgb[0],
+      g: rgb[1],
+      b: rgb[2],
+    };
+  }
+  return undefined;
+}
+
 export function BrightnessControlAction(props: { state: State }): JSX.Element | null {
   const state = props.state;
-  const modes = state.attributes.supported_color_modes;
 
   const handle = async (bvalue: number) => {
     await ha.callService("light", "turn_on", { entity_id: state.entity_id, brightness_pct: `${bvalue}` });

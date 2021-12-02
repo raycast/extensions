@@ -1,9 +1,9 @@
 import { ColorLike } from "@raycast/api";
 
 export class RGB {
-    r: number = 0
-    g: number = 0
-    b: number = 0
+    r = 0
+    g = 0
+    b = 0
 }
 
 export function miredToK(mired: number): number {
@@ -14,7 +14,7 @@ export function KToRGB(temp: number): RGB {
     // Original implementation by Tanner Helland http://www.tannerhelland.com/4435/convert-temperature-rgb-algorithm-code/
     const result: RGB = { r: 0, g: 0, b: 0 };
     temp = temp / 100
-    var red, blue, green
+    let red = 0, blue = 0, green = 0;
 
     if (temp <= 66) {
         red = 255
@@ -77,5 +77,18 @@ export function KtoColorLike(K: number): ColorLike {
 };
 
 export function RGBtoColorLike(rgb: RGB): ColorLike {
+    return RGBtoString(rgb);
+};
+
+export function RGBtoString(rgb: RGB): string {
     return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
 };
+
+export function changeRGBBrightness(rgb: RGB, percentage: number): RGB {
+    const factor = percentage / 100;
+    return {
+        r: Math.min(255, Math.round(rgb.r * factor)),
+        g: Math.min(255, Math.round(rgb.g * factor)),
+        b: Math.min(255, Math.round(rgb.b * factor)),
+    };
+}
