@@ -46,18 +46,25 @@ export const useReadme: UseReadme = (initialGroup) => {
     readmeURL = readmeNormalURL(readmePath)
   
   useEffect(() => {
+    let abort = false
+
     const fetch = async (path: string) => {
       const result = await dataManager.fetchReadme(path)
-      
-      setState((oldState) => ({
-        ...oldState, 
-        content: result
-      }))
+
+      if (abort == false) {
+        setState((oldState) => ({
+          ...oldState, 
+          content: result
+        }))
+      }
     }
     
     if (readmePath != undefined && readmePath != "")
       fetch(readmePath)
     
+    return () => {
+      abort = true
+    }
   }, [state])
   
   

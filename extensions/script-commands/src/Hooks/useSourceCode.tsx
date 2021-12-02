@@ -30,6 +30,7 @@ type UseSourceCodeProps = {
 type UseSourceCode = (initialScriptCommand: ScriptCommand) => UseSourceCodeProps
 
 export const useSourceCode: UseSourceCode = (initialScriptCommand) => {
+  
   const { dataManager } = useDataManager()
 
   const [state, setState] = useState<SourceCodeState>({
@@ -38,16 +39,24 @@ export const useSourceCode: UseSourceCode = (initialScriptCommand) => {
   })
 
   useEffect(() => {
+    let abort = false
+
     const fetch = async () => {
       const result = await dataManager.fetchSourceCode(state.scriptCommand)
   
-      setState((oldState) => ({
-        ...oldState, 
-        content: result
-      }))
+      if (abort == false) {
+        setState((oldState) => ({
+          ...oldState, 
+          content: result
+        }))
+      }
     }
 
     fetch()
+
+    return () => {
+      abort = true
+    }
   }, [state])
   
   return {
