@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { getMyTimeEntries, restartTimer, stopTimer } from "./services/harvest";
 import { HarvestTimeEntry } from "./services/responseTypes";
 import New from "./new";
+import Delete from "./delete";
 
 export default function Command() {
   const [items, setItems] = useState<HarvestTimeEntry[]>([]);
@@ -35,14 +36,15 @@ export default function Command() {
             title={entry.project.name}
             accessoryTitle={`${entry.client.name}${entry.client.name && entry.task.name ? " | " : ""}${
               entry.task.name
-            }`}
+            } | ${entry.hours}`}
             subtitle={entry.notes}
             keywords={entry.notes.split(" ")}
             icon={entry.is_running ? { tintColor: Color.Orange, source: Icon.Clock } : undefined}
             actions={
               <ActionPanel>
                 <ToggleTimerAction entry={entry} onComplete={init} />
-                <EditEntryAction onSave={init} />
+                <EditEntryAction onSave={init} entry={entry} />
+                <DeleteEntryAction onComplete={init} entry={entry} />
                 <NewEntryAction onSave={init} />
               </ActionPanel>
             }
@@ -69,12 +71,15 @@ function NewEntryAction({
     />
   );
 }
+
 function EditEntryAction({
   onSave = async () => {
     return;
   },
+  entry,
 }: {
   onSave: () => Promise<void>;
+  entry: HarvestTimeEntry;
 }) {
   return (
     <PushAction
@@ -82,6 +87,25 @@ function EditEntryAction({
       title="Edit Time Entry"
       shortcut={{ key: "e", modifiers: ["cmd"] }}
       icon={Icon.Pencil}
+    />
+  );
+}
+
+function DeleteEntryAction({
+  onComplete = async () => {
+    return;
+  },
+  entry,
+}: {
+  onComplete: () => Promise<void>;
+  entry: HarvestTimeEntry;
+}) {
+  return (
+    <PushAction
+      target={<Delete onComplete={onComplete} entry={entry} />}
+      title="Delete Time Entry"
+      shortcut={{ key: "delete", modifiers: ["cmd"] }}
+      icon={Icon.Trash}
     />
   );
 }

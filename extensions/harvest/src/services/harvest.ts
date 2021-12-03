@@ -103,10 +103,19 @@ export async function stopTimer(entry?: HarvestTimeEntry) {
   });
   return true;
 }
+
 export async function restartTimer(entry: HarvestTimeEntry) {
   await harvestAPI<HarvestTimeEntryResponse>({
     url: `/time_entries/${entry.id}/restart`,
     method: "PATCH",
+  });
+  return true;
+}
+
+export async function deleteTimeEntry(entry: HarvestTimeEntry) {
+  await harvestAPI<HarvestTimeEntryResponse>({
+    url: `/time_entries/${entry.id}`,
+    method: "DELETE",
   });
   return true;
 }
