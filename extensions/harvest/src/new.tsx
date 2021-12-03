@@ -16,11 +16,11 @@ import _ from "lodash";
 import moment from "moment";
 
 export default function Command({
-  onSave = () => {
-    return null;
+  onSave = async () => {
+    return;
   },
 }: {
-  onSave: () => void;
+  onSave: () => Promise<void>;
 }) {
   const { pop } = useNavigation();
   const [company, setCompany] = useState<HarvestCompany | undefined>(undefined);
@@ -52,9 +52,9 @@ export default function Command({
 
     if (timeEntry) {
       toast.hide();
+      await onSave();
       await showHUD(timeEntry.is_running ? "Timer Started" : "Time Entry Created");
       pop();
-      onSave();
     }
   }
 

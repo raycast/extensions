@@ -54,11 +54,11 @@ export default function Command() {
 }
 
 function NewEntryAction({
-  onSave = () => {
-    return null;
+  onSave = async () => {
+    return;
   },
 }: {
-  onSave: () => void;
+  onSave: () => Promise<void>;
 }) {
   return (
     <PushAction
@@ -70,11 +70,11 @@ function NewEntryAction({
   );
 }
 function EditEntryAction({
-  onSave = () => {
-    return null;
+  onSave = async () => {
+    return;
   },
 }: {
-  onSave: () => void;
+  onSave: () => Promise<void>;
 }) {
   return (
     <PushAction
@@ -86,7 +86,7 @@ function EditEntryAction({
   );
 }
 
-function ToggleTimerAction({ entry, onComplete }: { entry: HarvestTimeEntry; onComplete: () => void }) {
+function ToggleTimerAction({ entry, onComplete }: { entry: HarvestTimeEntry; onComplete: () => Promise<void> }) {
   return (
     <ActionPanelItem
       title={entry.is_running ? "Stop Timer" : "Start Timer"}
@@ -99,7 +99,7 @@ function ToggleTimerAction({ entry, onComplete }: { entry: HarvestTimeEntry; onC
         } else {
           await restartTimer(entry);
         }
-        onComplete();
+        await onComplete();
         await toast.hide();
       }}
     />
