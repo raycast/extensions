@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "authy",
+  "title": "Authy",
+  "description": "Raycast Authy integration",
+  "icon": "command-icon.png",
+  "author": "guga4ka",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-otp",
+      "title": "Search Token",
+      "subtitle": "Authy",
+      "subtitle": "Authy",
+      "description": "Search OTP for synced Authy Apps and 3rd party services",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "required": true,
+      "name": "authyId",
+      "title": "Authy Id",
+      "type": "textfield",
+      "description": "Your Authy Id",
+      "placeholder": "Enter your Authy Id"
+    },
+    {
+      "required": true,
+      "name": "authyPassword",
+      "title": "Authy Backup Password",
+      "type": "password",
+      "description": "Your Authy Backup Password",
+      "placeholder": "Enter your Authy backup password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.6",
+    "hi-base32": "^0.5.1",
+    "node-fetch": "^3.1.0",
+    "node-forge": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/node-forge": "^0.10.10",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
