@@ -241,9 +241,9 @@ function PageListItem(props: { page: Page, databaseView: DatabaseView | undefine
 
   const databaseProperties = props.databaseProperties
   const databaseView = props.databaseView
-  var databaseViewCopy;
+  var databaseViewCopy: any;
   if(databaseView && databaseView.properties){
-    databaseViewCopy = JSON.parse(JSON.stringify(databaseView))
+    databaseViewCopy = JSON.parse(JSON.stringify(databaseView)) as DatabaseView
   }
   const saveDatabaseView = props.saveDatabaseView
 
