@@ -7,6 +7,7 @@ import {
   Form,
   FormValue,
   getLocalStorageItem,
+  getPreferenceValues,
   Icon,
   List,
   PushAction,
@@ -22,7 +23,6 @@ import { useEffect, useState } from "react";
 import { decode } from "hi-base32";
 
 import { Algorithm, Digits, generateTOTP, Options } from "./util/totp";
-import { URL } from "url";
 
 const DEFAULT_OPTIONS: Options = {
   digits: 6,
@@ -31,23 +31,26 @@ const DEFAULT_OPTIONS: Options = {
 };
 
 export default function AppsView() {
-  const [apps, setApps] = useState<
-    {
-      name: string;
-      key: string;
-      code: string;
-    }[]
-  >([]);
+  const [apps, setApps] = useState<{
+    name: string;
+    key: string;
+    code: string;
+  }[]>([]);
 
   useEffect(() => {
     allLocalStorageItems().then((_apps) => {
+      const apps = Object.keys(_apps);
+      const { sort } = getPreferenceValues<{ sort: boolean }>();
+      if (sort) {
+        apps.sort((a, b) => a.localeCompare(b));
+      }
       setApps(
-        Object.keys(_apps).map((name) => {
+        apps.map((name) => {
           const token: { secret: string, options: Options } = parse(_apps[name]);
           return {
             name,
             key: _apps[name].toString(),
-            code: generateTOTP(token.secret, token.options).toString().padStart(6, "0")
+            code: generateTOTP(token.secret, token.options).toString().padStart(token.options.digits, "0")
           };
         })
       );
@@ -63,12 +66,6 @@ export default function AppsView() {
             title="Add App"
             target={<AddForm />}
             shortcut={{ modifiers: ["cmd"], key: "enter" }}
-          />
-          <PushAction
-            icon={Icon.Plus}
-            title="Add App"
-            target={<AddFromUriForm />}
-            shortcut={{ modifiers: ["cmd"], key: "u" }}
           />
         </ActionPanel>
       }
@@ -88,12 +85,6 @@ export default function AppsView() {
                   target={<AddForm />}
                   shortcut={{ modifiers: ["cmd"], key: "enter" }}
                 />
-                <PushAction
-                  icon={Icon.Plus}
-                  title="Add App"
-                  target={<AddFromUriForm />}
-                  shortcut={{ modifiers: ["cmd"], key: "u" }}
-                />
               </ActionPanelSection>
               <ActionPanelSection>
                 <ActionPanelItem
@@ -103,13 +94,18 @@ export default function AppsView() {
                     await removeLocalStorageItem(a.name);
 
                     allLocalStorageItems().then((_apps) => {
+                      const apps = Object.keys(_apps);
+                      const { sort } = getPreferenceValues<{ sort: boolean }>();
+                      if (sort) {
+                        apps.sort((a, b) => a.localeCompare(b));
+                      }
                       setApps(
-                        Object.keys(_apps).map((name) => {
+                        apps.map((name) => {
                           const token = parse(_apps[name]);
                           return {
                             name,
                             key: _apps[name].toString(),
-                            code: generateTOTP(token.secret, token.options).toString().padStart(6, "0")
+                            code: generateTOTP(token.secret, token.options).toString().padStart(token.options.digits, "0")
                           };
                         })
                       );
@@ -133,9 +129,8 @@ function AddForm() {
   const { push } = useNavigation();
 
   const onSubmit = async (e: Record<string, FormValue>) => {
-    const values = e as { name?: string; secret?: string, digits: Digits, period: number, algorithm: Algorithm };
 
-    const options: Options = { digits: values.digits, period: values.period, algorithm: values.algorithm };
+    const values = e as { name?: string; secret?: string, digits: Digits, period: number, algorithm: Algorithm };
 
     if (!values.name || !values.secret) {
       showToast(ToastStyle.Failure, "Please provide both fields");
@@ -155,6 +150,18 @@ function AddForm() {
       showToast(ToastStyle.Failure, "Invalid 2FA secret");
       return;
     }
+
+    if (isNaN(values.period)) {
+      showToast(ToastStyle.Failure, "Period should be a number");
+      return;
+    }
+
+    if (+values.period <= 0) {
+      showToast(ToastStyle.Failure, "Period should be positive number");
+      return;
+    }
+
+    const options: Options = { digits: values.digits, period: values.period, algorithm: values.algorithm };
 
     await setLocalStorageItem(values.name, JSON.stringify({ secret: values.secret, options: options }));
 
@@ -183,80 +190,6 @@ function AddForm() {
         <Form.Dropdown.Item title="SHA256" value="SHA256" />
         <Form.Dropdown.Item title="SHA512" value="SHA512" />
       </Form.Dropdown>
-    </Form>
-  );
-}
-
-function AddFromUriForm() {
-  const { push } = useNavigation();
-
-  const onSubmit = async (e: Record<string, FormValue>) => {
-    const values = e as { uri?: string };
-
-    if (!values.uri) {
-      await showToast(ToastStyle.Failure, "Please provide URI");
-      return;
-    }
-
-    try {
-      const uri = new URL(values.uri);
-      if (uri.protocol != "otpauth:") {
-        await showToast(ToastStyle.Failure, `Unsupported protocol ${uri.protocol}`);
-        return;
-      }
-
-      if (uri.host != "totp") {
-        await showToast(ToastStyle.Failure, `Only TOTP tokens supports`);
-        return;
-      }
-      const params = uri.searchParams;
-      const issuer = params.get("issuer");
-      let secret = params.get("secret");
-      const digits = params.get("digits");
-      const period = params.get("period");
-      const algorithm = params.get("algorithm");
-      if (!issuer || !secret) {
-        await showToast(ToastStyle.Failure, "Issuer and Secret are required parameters");
-        return;
-      }
-      if (await getLocalStorageItem(issuer)) {
-        await showToast(ToastStyle.Failure, "This app name is already taken");
-        return;
-      }
-
-      secret = secret.replace(/[-\s]/g, "").toUpperCase();
-
-      try {
-        decode.asBytes(secret);
-      } catch {
-        await showToast(ToastStyle.Failure, "Invalid 2FA secret");
-        return;
-      }
-
-      await setLocalStorageItem(issuer, JSON.stringify({
-        secret: secret, options: {
-          digits: digits ? digits : DEFAULT_OPTIONS.digits,
-          period: period ? period : DEFAULT_OPTIONS.period,
-          algorithm: algorithm ? algorithm : DEFAULT_OPTIONS.algorithm
-        }
-      }));
-
-    } catch (e) {
-      await showToast(ToastStyle.Failure, "Error while parsing URI");
-    }
-
-    push(<AppsView />);
-  };
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <SubmitFormAction title="Submit" onSubmit={onSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="uri" title="URI" placeholder="URI to add token" />
     </Form>
   );
 }

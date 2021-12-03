@@ -37,8 +37,6 @@ function truncate(input: Buffer, digits: number): number {
 
 export function generateTOTP(key: string, options: Options): number {
 
-  console.log(options)
-
   const time = Math.floor(new Date().getTime() / 1000 / options.period);
 
   const decodedKey = decode.asBytes(key.toUpperCase());
