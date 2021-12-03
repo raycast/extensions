@@ -1,6 +1,7 @@
 import { 
   ActionPanel, 
-  List, 
+  List,
+  showHUD, 
 } from "@raycast/api"
 
 import { 
@@ -13,7 +14,6 @@ import {
 } from "@components"
 
 import {
-  useFilter,
   useScriptCommand,
 } from "@hooks"
 
@@ -33,7 +33,7 @@ type Props = {
 }
 
 export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element {
-  const { props, install, uninstall, setup, setFilter } = useScriptCommand(scriptCommand)
+  const { props, install, uninstall, confirmSetup, setFilter } = useScriptCommand(scriptCommand)
 
   const handleInstall = async () => {
     await StoreToast(props.state, Progress.InProgress, scriptCommand)
@@ -52,7 +52,12 @@ export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element 
   }
 
   const handleSetup = () => {
-    setup()
+    // TODO: Implement showHUD presenting a message saying the contentin the HUD
+    showHUD(`Opening ${props.title}'s file to be configured...`)
+  }
+
+  const handleConfirmSetup = () => {
+    confirmSetup()
   }
 
   return (
@@ -68,9 +73,11 @@ export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element 
         <ActionPanel title={ props.title }>
           <ManagementActionPanel 
             state={ props.state }
+            commandPath={ props.path }
             onInstall={ handleInstall } 
             onUninstall={ handleUninstall }
             onSetup={ handleSetup }
+            onConfirmSetup={ handleConfirmSetup }
           />
           <ViewsActionPanel 
             url={ props.sourceCodeURL } 

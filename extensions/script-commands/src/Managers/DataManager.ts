@@ -21,7 +21,9 @@ import {
 } from "@managers"
 
 import { 
+  Command,
   Content,
+  FileNullable,
   Filter,
   State,
   StateResult, 
@@ -104,6 +106,10 @@ export class DataManager {
     this.persist()
   }
   
+  private hashFromFile(path: string): string {
+    return this.scriptCommandManager.hashFromFile(path)
+  }
+
   private isCommandDownloaded(identifier: string): boolean {
     const command = this.contentManager.contentFor(identifier)
     return command != null
@@ -118,16 +124,60 @@ export class DataManager {
     return true
   }
 
+  private isCommandChanged(identifier: string): boolean {
+    const command = this.contentManager.contentFor(identifier)
+
+    if (command == null)
+      return false
+
+    const commandPath = command.files.command.path
+    const commandHash = command.sha
+    const currentFileHash = this.hashFromFile(commandPath)
+
+    return commandHash != currentFileHash
+  }
+
+  commandFileFor(identifier: string): FileNullable {
+    const command = this.contentManager.contentFor(identifier)
+
+    if (command == null)
+      return null
+
+    return command.files.command
+  }
+
   stateFor(scriptCommand: ScriptCommand): State {
     const downloaded = this.isCommandDownloaded(scriptCommand.identifier)
     const needSetup = this.isCommandNeedsSetup(scriptCommand.identifier)
+    const changedContent = this.isCommandChanged(scriptCommand.identifier)
 
     let state: State = State.NotInstalled
 
-    if (downloaded)
-      state = (needSetup) ? State.NeedSetup : State.Installed
+    if (downloaded) {
+      state =  State.Installed
+
+      if (changedContent)
+        state = State.ChangesDetected
+      else if (needSetup) 
+        state = State.NeedSetup
+    }
 
     return state
+  }
+
+  private stateDescription(state: State): string {
+    switch (state) {
+    case State.Error:
+      return "Error"
+    case State.Installed:
+      return "Installed"
+    case State.NeedSetup:
+      return "Need Setup"
+    case State.NotInstalled:
+      return "Not Installed"
+    case State.ChangesDetected:
+      return "Changed Detected"
+    }
   }
 
   fetchLanguages(): Language[] {
@@ -231,5 +281,19 @@ export class DataManager {
       this.persist()
 
     return result
+  }
+
+  async confirmScriptCommandSetup(scriptCommand: ScriptCommand): Promise<StateResult> {
+    // TODO: Implement the logic to rename the symbolic link
+    // and return the new state (Installed), which will make the cell be 
+    // re-rendered changing the icon for a proper green checkmark
+
+    // TODO: Investigate why the check for the file content isn't being well observed
+    // to reflect in the cell, really after the content change
+
+    return {
+      content: State.Installed,
+      message: ""
+    }
   }
 }

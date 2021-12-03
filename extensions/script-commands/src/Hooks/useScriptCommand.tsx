@@ -45,13 +45,14 @@ interface UseScriptCommandProps {
   sourceCodeURL: string
   filter: Filter
   state: State
+  path?: string
 }
 
 type UseScriptCommandState = {
   props: UseScriptCommandProps
   install: () => void
   uninstall: () => void
-  setup: () => void
+  confirmSetup: () => void
   setFilter: (filter: Filter) => void
 }
 
@@ -82,11 +83,18 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
       commandState: result.content
     }))
   }
-  
-  const setup = async () => {
-    console.log("TODO: Implement setup")
+
+  const confirmSetup = async () => {
+    const result = await dataManager.confirmScriptCommandSetup(state.scriptCommand)
+
+    setState((oldState) => ({
+      ...oldState, 
+      commandState: result.content
+    }))
   }
   
+  const path = dataManager.commandFileFor(state.scriptCommand.identifier)
+
   return {
     props: {
       identifier: state.scriptCommand.identifier,
@@ -98,11 +106,12 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
       accessoryTitle: accessoryTitleFor(state.scriptCommand),
       sourceCodeURL: sourceCodeNormalURL(state.scriptCommand),
       filter: filter,
-      state: state.commandState
+      state: state.commandState,
+      path: path?.path
     },
     install,
     uninstall,
-    setup,
+    confirmSetup,
     setFilter
   }
 }
@@ -127,6 +136,12 @@ const accessoryIconFor: AccessoryIconFor = (state, language) => {
       tintColor: Color.Orange
     }
 
+  else if (state == State.ChangesDetected)
+    icon = { 
+      source: Icon.Checkmark, 
+      tintColor: Color.Orange
+    }
+    
   else
     icon = { 
       source: languageURL(language) 
@@ -195,7 +210,7 @@ const keywordsFor: KeywordsIconFor = (scriptCommand, state) => {
   if (state == State.Installed)
     keywords.push("installed")
 
-  else if (state == State.NeedSetup) {
+  else if (state == State.NeedSetup || state == State.ChangesDetected) {
     keywords.push("installed")
     keywords.push("setup")
   }

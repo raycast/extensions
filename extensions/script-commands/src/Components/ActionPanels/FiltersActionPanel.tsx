@@ -5,7 +5,6 @@ import {
 } from "@raycast/api"
 
 import { 
-  useFilter,
   useLanguages 
 } from "@hooks"
 

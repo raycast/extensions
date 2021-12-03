@@ -1,21 +1,24 @@
 import { 
   ActionPanel, 
   Color, 
-  Icon 
+  Icon,
+  OpenAction,
 } from "@raycast/api"
 
 import { 
-  State 
+  State,
 } from "@types"
 
 type ManagementActionPanelProps = {
   state: State
-  onInstall: () => void,
-  onUninstall: () => void,
-  onSetup: () => void,
+  commandPath?: string
+  onInstall: () => void
+  onUninstall: () => void
+  onSetup: () => void
+  onConfirmSetup: () => void
 }
 
-export function ManagementActionPanel({ state, onInstall, onUninstall, onSetup }: ManagementActionPanelProps): JSX.Element | null {
+export function ManagementActionPanel({ state, commandPath, onInstall, onUninstall, onSetup, onConfirmSetup }: ManagementActionPanelProps): JSX.Element | null {
   const elements: JSX.Element[] = [] 
 
   const uninstallAction = (
@@ -33,31 +36,43 @@ export function ManagementActionPanel({ state, onInstall, onUninstall, onSetup }
   case State.NotInstalled: 
     elements.push(
       <InstallActionItem 
-        key={`install`} 
+        key="install"
         onInstall={ onInstall} 
       />
     )
     break
   
   case State.NeedSetup: 
+    if (commandPath) {
+      elements.push(
+        <SetupActionItem 
+          key="setup" 
+          path={ commandPath }
+          onSetup={ onSetup } 
+        />
+      )
+    }
+
+    elements.push(uninstallAction)
+
+    break
+  
+  case State.ChangesDetected: 
     elements.push(
-      <SetupActionItem 
-        key="setup" 
-        onSetup={ onSetup } 
+      <ConfirmChangeActionItem 
+        key="confirm-setup" 
+        onConfirmSetup={ onConfirmSetup } 
       />
     )
     elements.push(uninstallAction)
 
     break
-  
-  case State.Error: 
-    return null
   }
 
   return (
-    <ActionPanel.Section>
-      { elements }
-    </ActionPanel.Section>
+    <ActionPanel.Section 
+      children={ elements } 
+    />
   )
 }
 
@@ -97,34 +112,31 @@ function UninstallActionItem({ onUninstall }: UninstallActionItemProps): JSX.Ele
 }
 
 type SetupActionItemProps = {
+  path: string
   onSetup: () => void
 }
 
-function SetupActionItem({ onSetup }: SetupActionItemProps): JSX.Element {
-  // TODO: Things to implement in the Setup
-  /*
-  Coisas para fazer aqui:
-  - antes de salvar o arquivo do Script Command em disco, pegar o SHA do conteúdo e salvar a hash numa propriedade no Command
-    - todas as vezes que passar por esse arquivo, devo checar com algum hook se houve modificação naquele arquivo, 
-    - caso o SHA seja diferente daquele que salvei ao persistir o Script Command, vou oferecer uma finalização do setup.
-    - Criação de Hash: https://gist.github.com/GuillermoPena/9233069
+function SetupActionItem({ path, onSetup }: SetupActionItemProps): JSX.Element {
+  return (
+    <OpenAction 
+      icon={ Icon.Pencil } 
+      title="Configure Script Command" 
+      target={ path }
+      onOpen={ onSetup }
+    />
+  )
+}
 
-  - Para editar o arquivo, tenho que chegar se existem alguns programas no sistema. Tais como:
-    - VSCode        - <OpenAction title="Open in VSCode" icon={{fileIcon: "/Applications/Visual Studio Code.app"}} target={repo.fullPath} application="Visual Studio Code" />
-    - Sublime Text  - <OpenAction title="Open in Sublime Text" icon={{fileIcon: "/Applications/Sublime Text.app"}} target={repo.fullPath} application="Sublime Text" />
-    - Xcode         - <OpenAction title="Open in Xcode" icon={{fileIcon: "/Applications/Xcode.app"}} target={repo.fullPath} application="Xcode" />
-    - CodeRunner    - <OpenAction title="Open in CodeRunner" icon={{fileIcon: "/Applications/CodeRunner.app"}} target={repo.fullPath} application="CodeRunner" />
+type ConfirmChangeActionItemProps = {
+  onConfirmSetup: () => void
+}
 
-  - Ao determinar que foi modificado o arquivo original baixado, devo mostrar como Action principal "Finish Setup" ao invés de "Setup Script Command".
-    - Nesse momento, devo renomear o link simbólico removendo o .template do nome
-    - Uma idéia é adicionar um novo case no State: "ChangesDetected" pra informar uma mudança de estado no Script Command internamente ao invés de ficar checando na view
-
-  */
+function ConfirmChangeActionItem({ onConfirmSetup }: ConfirmChangeActionItemProps): JSX.Element {
   return (
     <ActionPanel.Item 
       icon={ Icon.TextDocument } 
-      title="Configure Script Command" 
-      onAction={ onSetup }
+      title="Confirm Changes on Script Command" 
+      onAction={ onConfirmSetup }
     />
   )
 }

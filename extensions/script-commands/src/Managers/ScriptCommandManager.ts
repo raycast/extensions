@@ -36,7 +36,15 @@ import download from "download"
 
 import afs from "fs/promises"
 
-import fs from 'fs'
+import { 
+  existsSync, 
+  mkdirSync, 
+  readFileSync 
+} from 'fs'
+
+import { 
+  createHash 
+} from "crypto"
 
 export class ScriptCommandManager {
   private contentStore: ContentStore
@@ -48,6 +56,18 @@ export class ScriptCommandManager {
   ) {
     this.contentStore = contentStore
     this.settings = settings
+  }
+
+  hashFromFile(path: string): string {
+    if (existsSync(path) == false)
+      return ""
+
+    const hash = createHash("sha256")
+    const buffer = readFileSync(path)
+
+    hash.update(buffer)
+
+    return hash.digest("hex")
   }
 
   async install(scriptCommand: ScriptCommand): Promise<StateResult> {
@@ -81,9 +101,12 @@ export class ScriptCommandManager {
     if (icons.dark != null)
       files.iconDark = icons.dark
     
+    const hash = this.hashFromFile(command.path)
+    
     const resource: Command = {
       identifier: scriptCommand.identifier,
       needsSetup: scriptCommand.isTemplate,
+      sha: hash,
       files: files,
       scriptCommand: scriptCommand
     }
@@ -174,7 +197,7 @@ export class ScriptCommandManager {
 
     const imageFolderPath = path.join(commandPath, imagePath)
       
-    if (fs.existsSync(imageFolderPath) == false)
+    if (existsSync(imageFolderPath) == false)
       afs.mkdir(imageFolderPath, { recursive: true })
 
     icons.light = await this.downloadIconFor(scriptCommand, lightIcon, imageFolderPath, IconStyle.Light)
@@ -223,29 +246,29 @@ export class ScriptCommandManager {
     const imagePath = path.join(imageFolderPath, filename)
     const linkImagePath = path.join(this.settings.imagesCommandsFolderPath, filename)
 
-    if (fs.existsSync(imagePath) == false) {
+    if (existsSync(imagePath) == false) {
       await download(
         url, 
         imageFolderPath, 
         { filename: filename }
       )
 
-      if (fs.existsSync(this.settings.imagesCommandsFolderPath) == false) {
-        fs.mkdirSync(
+      if (existsSync(this.settings.imagesCommandsFolderPath) == false) {
+        mkdirSync(
           this.settings.imagesCommandsFolderPath, 
           {recursive: true}
         )
       }      
     }
 
-    if (fs.existsSync(linkImagePath) == false) {
+    if (existsSync(linkImagePath) == false) {
       await afs.symlink(
         imagePath, 
         linkImagePath
       )
     }
 
-    if (fs.existsSync(linkImagePath) == false)
+    if (existsSync(linkImagePath) == false)
       return null
     
     return {
@@ -261,7 +284,7 @@ export class ScriptCommandManager {
     const linkFilename = scriptCommand.isTemplate ? `${scriptCommand.identifier}.template` : scriptCommand.identifier
     const linkCommandFilePath = path.join(this.settings.commandsFolderPath, linkFilename)
 
-    if (fs.existsSync(commandFilePath) == false) {
+    if (existsSync(commandFilePath) == false) {
       await download(
         sourceCodeRawURL(scriptCommand), 
         commandPath,
@@ -269,14 +292,14 @@ export class ScriptCommandManager {
       )
     }
 
-    if (fs.existsSync(linkCommandFilePath) == false) {
+    if (existsSync(linkCommandFilePath) == false) {
       await afs.symlink(
         commandFilePath,
         linkCommandFilePath
       )
     }
 
-    if (fs.existsSync(linkCommandFilePath) == false)
+    if (existsSync(linkCommandFilePath) == false)
       return null
 
     return {
@@ -290,7 +313,7 @@ export class ScriptCommandManager {
       return false
 
     if (file.path.length > 0 && file.link.length > 0) {
-      if (fs.existsSync(file.path) && fs.existsSync(file.link)) {
+      if (existsSync(file.path) && existsSync(file.link)) {
         afs.rm(file.link)
         afs.rm(file.path)
 
@@ -337,7 +360,7 @@ export class ScriptCommandManager {
       if (file != null && file.link.length > 0) {
         const parsedpath = path.parse(file.link)
 
-        if (parsedpath.name == filename && fs.existsSync(file.link))
+        if (parsedpath.name == filename && existsSync(file.link))
           counter += 1
       }
     })

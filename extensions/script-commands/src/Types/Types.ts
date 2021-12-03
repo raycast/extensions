@@ -9,6 +9,7 @@ import {
 export interface Command {
   identifier: string
   needsSetup: boolean
+  sha: string,
   files: Files
   scriptCommand: ScriptCommand
 }
@@ -57,6 +58,7 @@ export enum State {
   Installed,
   NotInstalled,
   NeedSetup,
+  ChangesDetected,
   Error,
 }
 

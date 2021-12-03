@@ -18,9 +18,10 @@ export async function StoreToast(
     progress: Progress, 
     scriptCommand: ScriptCommand 
   ): Promise<Toast> {
-  let title: string
+
+  let title = ""
   let message: string = scriptCommand.title
-  let style: ToastStyle
+  let style = ToastStyle.Animated
 
   switch (state) {
   case (State.Installed): 
@@ -53,6 +54,14 @@ export async function StoreToast(
     {
       title = "Extra setup needed!"
       message = "You need to edit the Script Command before use"
+      style = ToastStyle.Success
+    }
+    break
+
+  case (State.ChangesDetected): 
+    {
+      title = "Changes Detected!"
+      message = "Looks like you've made changes on this Script Command which is a template.\nPress Return to confirm and activate it."
       style = ToastStyle.Success
     }
     break
