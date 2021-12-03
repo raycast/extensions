@@ -16,7 +16,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.6",
+    "@raycast/api": "^1.26.1",
     "@types/lodash": "^4.14.177",
     "execa": "^6.0.0",
     "lodash": "^4.17.21"
