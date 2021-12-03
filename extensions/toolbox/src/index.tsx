@@ -9,10 +9,10 @@ import {
   ToastStyle,
   useNavigation,
 } from "@raycast/api";
+import { execa } from "execa";
 import React, { useEffect, useMemo, useState } from "react";
 import * as scripts from "./script";
 import { Category, Info, Result, Run, RunType, Script } from "./script/type";
-import { readClipboard } from "./script/util";
 
 let selectScript: Run | null = null;
 
@@ -289,11 +289,11 @@ function InputFormView(props: { info: Info }) {
 }
 
 async function isClipboardContent() {
-  const content = await readClipboard();
-  if (content.length === 0) {
+  const { stdout } = await execa("pbpaste");
+  if (stdout.length === 0) {
     return false;
   }
-  return content;
+  return stdout;
 }
 
 async function runScript(query: string): Promise<{ result: string; isSuccess: boolean }> {
