@@ -1,4 +1,5 @@
 import { Script } from "../type";
+import vkbeautify from "vkbeautify";
 
 export const foramtJson: Script = {
   info: {
@@ -10,7 +11,7 @@ export const foramtJson: Script = {
   },
   run(input) {
     try {
-      return JSON.stringify(JSON.parse(input), null, 2);
+      return vkbeautify.json(input, 2);
     } catch (error) {
       throw Error("Invalid JSON");
     }
