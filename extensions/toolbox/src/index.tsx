@@ -69,13 +69,13 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
 
   function moveWindow(runType: RunType) {
     if (runType === "clipboard") {
-      if (item.info.type === "form") {
-        push(<InputFormView info={info} />);
+      if (item.info.type.includes("list")) {
+        push(<InputListView info={info} />);
       } else {
-        push(<InputDirectView info={info} />);
+        push(<InputFormView info={info} />);
       }
-    } else if (runType === "direct") {
-      push(<InputDirectView info={info} />);
+    } else if (runType === "list") {
+      push(<InputListView info={info} />);
     } else if (runType === "form") {
       push(<InputFormView info={info} />);
     }
@@ -118,34 +118,37 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
       icon={info.icon}
       actions={
         <ActionPanel>
-          {(info.type === "all" || info.type === "noclipboard" || info.type === "direct") && (
-            <ActionPanel.Item
-              title={"Run Script"}
-              icon={Icon.Pencil}
-              onAction={async () => {
-                action("direct");
-              }}
-            />
-          )}
-          {(info.type === "all" || info.type === "noclipboard" || info.type === "form") && (
-            <ActionPanel.Item
-              title={"Run Script to Form"}
-              icon={Icon.Document}
-              onAction={async () => {
-                action("form");
-              }}
-            />
-          )}
-          {(info.type === "all" || info.type === "clipboard") && (
-            <ActionPanel.Item
-              title={"Run Script to Clipboard"}
-              icon={Icon.ArrowRight}
-              shortcut={{ modifiers: ["ctrl"], key: "v" }}
-              onAction={async () => {
-                action("clipboard");
-              }}
-            />
-          )}
+          {info.type.map((type) => {
+            return type === "list" ? (
+              <ActionPanel.Item
+                key={type}
+                title={"Run Script"}
+                icon={Icon.Pencil}
+                onAction={async () => {
+                  action("list");
+                }}
+              />
+            ) : type === "form" ? (
+              <ActionPanel.Item
+                key={type}
+                title={"Run Script to Form"}
+                icon={Icon.Document}
+                onAction={async () => {
+                  action("form");
+                }}
+              />
+            ) : (
+              <ActionPanel.Item
+                key={type}
+                title={"Run Script to Clipboard"}
+                icon={Icon.ArrowRight}
+                shortcut={{ modifiers: ["ctrl"], key: "v" }}
+                onAction={async () => {
+                  action("clipboard");
+                }}
+              />
+            );
+          })}
         </ActionPanel>
       }
     />
@@ -234,7 +237,7 @@ function ResultActionView(props: { content: Result; info: Info }) {
   );
 }
 
-function InputDirectView(props: { info: Info }) {
+function InputListView(props: { info: Info }) {
   const info = props.info;
   const { content, setContent } = useScriptHook();
 

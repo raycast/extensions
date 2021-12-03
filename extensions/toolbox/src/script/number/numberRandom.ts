@@ -1,7 +1,12 @@
 import { Script } from "../type";
 
 export const numberRandom: Script = {
-  info: { title: "Random Number", desc: "Random Number in range", type: "noclipboard", example: "1,100" },
+  info: {
+    title: "Random Number",
+    desc: "Random Number in range",
+    type: ["list", "form"],
+    example: "1,100",
+  },
   run(input) {
     try {
       const minMax = input.split(",").map(Number);

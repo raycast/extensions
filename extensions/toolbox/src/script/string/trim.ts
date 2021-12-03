@@ -11,7 +11,7 @@ export const trim: Script = {
   info: {
     title: "Trim",
     desc: "Trims leading and trailing whitespace",
-    type: "all",
+    type: ["list", "form", "clipboard"],
     keywords: ["whitespace", "empty", "space"],
     example: "    ray cat     ",
   },
