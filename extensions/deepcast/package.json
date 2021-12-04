@@ -23,6 +23,14 @@
       "title": "API key",
       "description": "Your DeepL API key",
       "placeholder": "Enter your free DeepL API key"
+    },
+    {
+      "name": "pro",
+      "type": "checkbox",
+      "required": true,
+      "default": false,
+      "title": "Pro plan",
+      "description": "Check if you have API PRO"
     }
   ],
   "dependencies": {

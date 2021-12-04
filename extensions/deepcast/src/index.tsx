@@ -77,10 +77,12 @@ interface Values {
 
 interface Preferences {
   key: string;
+  pro: boolean;
 }
 
 const Command = () => {
   const [key, setKey] = useState("");
+  const [pro, setPro] = useState(false);
   const [loading, setLoading] = useState(false);
   const [translation, setTranslation] = useState("");
 
@@ -88,6 +90,7 @@ const Command = () => {
     (async () => {
       const preferences: Preferences = getPreferenceValues();
       setKey(preferences.key);
+      setPro(preferences.pro);
     })();
   }, []);
 
@@ -96,9 +99,9 @@ const Command = () => {
       try {
         setLoading(true);
         const response = await got(
-          `https://api-free.deepl.com/v2/translate?auth_key=${key}&text=${values.text}&target_lang=${values.to}${
-            values.from ? `&source_lang=${values.from}` : ""
-          }`
+          `https://api${pro ? "" : "-free"}.deepl.com/v2/translate?auth_key=${key}&text=${values.text}&target_lang=${
+            values.to
+          }${values.from ? `&source_lang=${values.from}` : ""}`
         );
         const translation = JSON.parse(response.body).translations[0].text;
         setLoading(false);
