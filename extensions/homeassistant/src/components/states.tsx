@@ -26,6 +26,12 @@ import {
   getLightRGBFromState,
 } from "./light";
 import { changeRGBBrightness, RGBtoString } from "../color";
+import {
+  AutomationTriggerAction,
+  AutomationTurnOffAction,
+  AutomationTurnOnAction,
+  TriggerAutomationAction,
+} from "./automation";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -571,6 +577,28 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section title="History">
             <OpenEntityHistoryAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "automation": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <AutomationTurnOnAction state={state} />
+            <AutomationTurnOffAction state={state} />
+            <AutomationTriggerAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
           </ActionPanel.Section>
         </ActionPanel>
       );
