@@ -10,62 +10,7 @@ import {
 } from "@raycast/api";
 import got from "got";
 import { useEffect, useState } from "react";
-
-const source_languages = {
-  BG: "Bulgarian",
-  ZH: "Chinese",
-  CS: "Czech",
-  DA: "Danish",
-  NL: "Dutch",
-  EN: "English",
-  ET: "Estonian",
-  FI: "Finnish",
-  FR: "French",
-  DE: "German",
-  EL: "Greek",
-  HU: "Hungarian",
-  IT: "Italian",
-  JA: "Japanese",
-  LV: "Latvian",
-  LT: "Lithuanian",
-  PL: "Polish",
-  PT: "Portuguese",
-  RO: "Romanian",
-  RU: "Russian",
-  SK: "Slovak",
-  SL: "Slovenian",
-  ES: "Spanish",
-  SV: "Swedish",
-};
-
-const target_languages = {
-  BG: "Bulgarian",
-  ZH: "Chinese",
-  CS: "Czech",
-  DA: "Danish",
-  NL: "Dutch",
-  "EN-GB": "English (UK)",
-  "EN-US": "English (US)",
-  ET: "Estonian",
-  FI: "Finnish",
-  FR: "French",
-  DE: "German",
-  EL: "Greek",
-  HU: "Hungarian",
-  IT: "Italian",
-  JA: "Japanese",
-  LV: "Latvian",
-  LT: "Lithuanian",
-  PL: "Polish",
-  "PT-PT": "Portuguese",
-  "PT-BR": "Portuguese (Brazil)",
-  RO: "Romanian",
-  RU: "Russian",
-  SK: "Slovak",
-  SL: "Slovenian",
-  ES: "Spanish",
-  SV: "Swedish",
-};
+import { source_languages, target_languages } from "./languages";
 
 interface Values {
   key?: string;
