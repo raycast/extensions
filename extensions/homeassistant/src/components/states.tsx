@@ -26,12 +26,7 @@ import {
   getLightRGBFromState,
 } from "./light";
 import { changeRGBBrightness, RGBtoString } from "../color";
-import {
-  AutomationTriggerAction,
-  AutomationTurnOffAction,
-  AutomationTurnOnAction,
-  TriggerAutomationAction,
-} from "./automation";
+import { AutomationTriggerAction, AutomationTurnOffAction, AutomationTurnOnAction } from "./automation";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -94,7 +89,8 @@ function getDeviceClassIcon(state: State): ImageLike | undefined {
       return { source: src, tintColor: tintColor };
     } else if (dc === "motion") {
       const source = state.state === "on" ? "run.png" : "walk.png";
-      const color = state.state === "unavailable" ? UnavailableColor : PrimaryIconColor;
+      const color =
+        state.state === "unavailable" ? UnavailableColor : state.state === "on" ? Color.Yellow : PrimaryIconColor;
       return { source: source, tintColor: color };
     } else if (dc === "temperature") {
       return { source: "temperature.png", tintColor: PrimaryIconColor };
@@ -160,10 +156,10 @@ function getIcon(state: State): ImageLike | undefined {
   }
 }
 
-export function StatesList(props: { domain: string }): JSX.Element {
+export function StatesList(props: { domain: string; deviceClass?: string | undefined }): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
-  const { states } = useStateSearch(searchText, props.domain, undefined, allStates);
+  const { states } = useStateSearch(searchText, props.domain, props.deviceClass, allStates);
 
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search Home Assistant states.", error.message);
