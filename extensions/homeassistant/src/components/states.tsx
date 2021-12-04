@@ -252,6 +252,15 @@ export function StateListItem(props: { state: State }): JSX.Element {
               return "Unplugged";
             }
           }
+        } else if (dc === "update") {
+          switch (state.state) {
+            case "on": {
+              return "Update Available";
+            }
+            case "off": {
+              return "Up To Date";
+            }
+          }
         }
       }
       return state.state;
