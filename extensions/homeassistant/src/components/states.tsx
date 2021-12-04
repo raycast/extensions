@@ -90,6 +90,12 @@ function getDeviceClassIcon(state: State): ImageLike | undefined {
       const source = state.state === "on" ? "run.png" : "walk.png";
       const color = state.state === "unavailable" ? UnavailableColor : PrimaryIconColor;
       return { source: source, tintColor: color };
+    } else if (dc === "temperature") {
+      return { source: "temperature.png", tintColor: PrimaryIconColor };
+    } else if (dc === "plug") {
+      const source = state.state === "on" ? "power-plug.png" : "power-plug-off.png";
+      const color = state.state === "unavailable" ? UnavailableColor : PrimaryIconColor;
+      return { source: source, tintColor: color };
     }
     const src = deviceClassIconSource[dc] || "entity.png";
     return { source: src, tintColor: PrimaryIconColor };
@@ -136,6 +142,12 @@ function getIcon(state: State): ImageLike | undefined {
     const sl = state.state.toLocaleLowerCase();
     const source = sl === "below_horizon" ? "weather-night.png" : "white-balance-sunny.png";
     return { source: source, tintColor: PrimaryIconColor };
+  } else if (e.startsWith("input_number")) {
+    return { source: "ray-vertex.png", tintColor: PrimaryIconColor };
+  } else if (e === "binary_sensor.rpi_power_status") {
+    return { source: "raspberry-pi.png", tintColor: PrimaryIconColor };
+  } else if (e.startsWith("water_heater")) {
+    return { source: "temperature.png", tintColor: PrimaryIconColor };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
@@ -204,6 +216,39 @@ export function StateListItem(props: { state: State }): JSX.Element {
         const vr = Math.round(v * 100);
         return `🔉 ${vr}% | ${state.state}`;
       }
+    } else if (state.entity_id.startsWith("binary_sensor")) {
+      const dc = state.attributes.device_class;
+      if (dc) {
+        if (dc === "problem") {
+          switch (state.state) {
+            case "on": {
+              return "Detected";
+            }
+            case "off": {
+              return "OK";
+            }
+          }
+        } else if (dc === "motion") {
+          switch (state.state) {
+            case "on": {
+              return "Detected";
+            }
+            case "off": {
+              return "Normal";
+            }
+          }
+        } else if (dc === "plug") {
+          switch (state.state) {
+            case "on": {
+              return "Plugged";
+            }
+            case "off": {
+              return "Unplugged";
+            }
+          }
+        }
+      }
+      return state.state;
     }
     return state.state;
   };
