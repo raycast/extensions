@@ -11,7 +11,12 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCompany, getMyProjectAssignments, newTimeEntry } from "./services/harvest";
-import { HarvestCompany, HarvestProjectAssignment, HarvestTaskAssignment } from "./services/responseTypes";
+import {
+  HarvestCompany,
+  HarvestProjectAssignment,
+  HarvestTaskAssignment,
+  HarvestTimeEntry,
+} from "./services/responseTypes";
 import _ from "lodash";
 import moment from "moment";
 
@@ -19,14 +24,30 @@ export default function Command({
   onSave = async () => {
     return;
   },
+  entry,
 }: {
   onSave: () => Promise<void>;
+  entry?: HarvestTimeEntry;
 }) {
   const { pop } = useNavigation();
-  const [company, setCompany] = useState<HarvestCompany | undefined>(undefined);
-  const [projects, setProjects] = useState<HarvestProjectAssignment[] | undefined>(undefined);
-  const [tasks, setTasks] = useState<HarvestTaskAssignment[] | undefined>(undefined);
-  const [taskId, setTaskId] = useState<string | undefined>(undefined);
+  const [company, setCompany] = useState<HarvestCompany | undefined>();
+  const [projects, setProjects] = useState<HarvestProjectAssignment[] | undefined>();
+  const [tasks, setTasks] = useState<HarvestTaskAssignment[] | undefined>();
+  const [taskId, setTaskId] = useState<string | undefined>();
+
+  async function init() {
+    const company = await getCompany().catch((error) => {
+      showToast(ToastStyle.Failure, "API Error", "Could not get your company's settings");
+      console.error("getCompany", error.response);
+    });
+    setCompany(company);
+
+    const projects = await getMyProjectAssignments().catch((error) => {
+      showToast(ToastStyle.Failure, "API Error", "Could not get your projects");
+      console.error("getProjects", error.response);
+    });
+    setProjects(projects);
+  }
 
   async function handleSubmit(values: Record<string, FormValue>) {
     if (values.project_id === null) {
@@ -72,22 +93,7 @@ export default function Command({
   }
 
   useEffect(() => {
-    getCompany()
-      .then((company) => {
-        setCompany(company);
-      })
-      .catch((error) => {
-        showToast(ToastStyle.Failure, "API Error", "Could not get your company's settings");
-        console.error("projects", error.response);
-      });
-    getMyProjectAssignments()
-      .then((projects) => {
-        setProjects(projects);
-      })
-      .catch((error) => {
-        showToast(ToastStyle.Failure, "API Error", "Could not get your projects");
-        console.error("projects", error.response);
-      });
+    init();
   }, []);
 
   return (
@@ -114,7 +120,9 @@ export default function Command({
           return <Form.DropdownItem value={task.task.id.toString()} title={task.task.name} key={task.id} />;
         })}
       </Form.Dropdown>
+
       <Form.Separator />
+
       <Form.TextArea id="notes" title="Notes" />
       {company?.wants_timestamp_timers && (
         <>

@@ -21,6 +21,7 @@ export default function Command() {
 
   return (
     <List
+      searchBarPlaceholder="Filter Time Entries"
       isLoading={isLoading}
       actions={
         <ActionPanel>
@@ -42,7 +43,7 @@ export default function Command() {
             icon={entry.is_running ? { tintColor: Color.Orange, source: Icon.Clock } : undefined}
             actions={
               <ActionPanel>
-                <ToggleTimerAction entry={entry} onComplete={init} />
+                <ToggleTimerAction onComplete={init} entry={entry} />
                 <EditEntryAction onSave={init} entry={entry} />
                 <DeleteEntryAction onComplete={init} entry={entry} />
                 <NewEntryAction onSave={init} />
@@ -83,7 +84,7 @@ function EditEntryAction({
 }) {
   return (
     <PushAction
-      target={<New onSave={onSave} />}
+      target={<New onSave={onSave} entry={entry} />}
       title="Edit Time Entry"
       shortcut={{ key: "e", modifiers: ["cmd"] }}
       icon={Icon.Pencil}

@@ -2,12 +2,13 @@
   "name": "harvest",
   "title": "harvest",
   "description": "Access Harvest Time Entries",
-  "icon": "command-icon.png",
+  "icon": "harvest-logo-icon.png",
   "author": "eluce2",
   "license": "MIT",
   "commands": [
     {
       "name": "new",
+      "icon": "add.png",
       "title": "New Time Entry",
       "subtitle": "Harvest",
       "description": "Start a new Timer",
@@ -15,6 +16,7 @@
     },
     {
       "name": "listTimeEntries",
+      "icon": "timer.png",
       "title": "Today's Timesheet",
       "subtitle": "Harvest",
       "description": "Start a new Timer",
@@ -22,6 +24,7 @@
     },
     {
       "name": "stopTimer",
+      "icon": "stop.png",
       "title": "Stop Timer",
       "subtitle": "Harvest",
       "description": "Stop your running timer",
