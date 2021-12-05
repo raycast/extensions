@@ -30,8 +30,8 @@
       "label": "Check if you have DeepL API Pro",
       "required": true,
       "default": false,
-      "title": "Pro plan",
-      "description": "Check if you have API PRO"
+      "title": "DeepL API Pro",
+      "description": "Check if you have DeepL API Pro"
     }
   ],
   "dependencies": {
