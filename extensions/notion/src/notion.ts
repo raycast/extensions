@@ -687,8 +687,9 @@ function notionTextToMarkdown (text: Record<string,any>): string {
 }
 
 
-export function notionColorToTintColor (notionColor: string): Color {
-   const colorMapper = {
+export function notionColorToTintColor (notionColor: string | undefined): Color {
+
+  const colorMapper = {
     'default': Color.PrimaryText,
     'gray': Color.PrimaryText,
     'brown': Color.Brown,
@@ -701,5 +702,8 @@ export function notionColorToTintColor (notionColor: string): Color {
     'pink': Color.Magenta
   } as Record<string,Color>
 
+  if(notionColor === undefined){
+    return colorMapper['default']
+  }
   return colorMapper[notionColor] 
 }
