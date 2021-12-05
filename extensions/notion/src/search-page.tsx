@@ -125,10 +125,8 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
   // Setup useState objects
   const [databasePages, setDatabasePages] = useState<Page[]>()  
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [actionPanelItems, setActionPanelItems] = useState<Element[]>([])
   const [databaseView, setDatabaseView] = useState<DatabaseView>()
   const [databaseProperties, setDatabaseProperties] = useState<DatabaseProperty[]>()
-
 
   // Currently supported properties
   const supportedPropTypes = [
@@ -198,6 +196,7 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
 
       const fetchedDatabasePages = await queryDatabase(databaseId, undefined)
       if(fetchedDatabasePages && fetchedDatabasePages[0]){
+
         setDatabasePages(fetchedDatabasePages) 
         setIsLoading(false)
         storeDatabasePages(databaseId, fetchedDatabasePages)         
@@ -214,7 +213,7 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
     setDatabaseView(newDatabaseView)
     storeDatabaseView(databaseId,newDatabaseView)
   }
-  
+
   return (
     <List 
       isLoading={isLoading} 
@@ -242,7 +241,13 @@ function PageListItem(props: { page: Page, databaseView: DatabaseView | undefine
 
   const databaseProperties = props.databaseProperties
   const databaseView = props.databaseView
+  var databaseViewCopy: any;
+  if(databaseView && databaseView.properties){
+    databaseViewCopy = JSON.parse(JSON.stringify(databaseView)) as DatabaseView
+  }
   const saveDatabaseView = props.saveDatabaseView
+
+
   
   const isDatabase = page.object === 'database'
   const parentIsDatabase = (page.parent_database_id ? true : false)
@@ -290,7 +295,7 @@ function PageListItem(props: { page: Page, databaseView: DatabaseView | undefine
                 propAccessoryTitle = (propertyValue[0] ? propertyValue[0].plain_text : 'Untitled')
                 break
               case 'number':
-                propAccessoryTitle = propertyValue.toString()
+                propAccessoryTitle = propertyValue?.toString()
                 break
               case 'rich_text':
                 propAccessoryTitle = (propertyValue[0] ? propertyValue[0].plain_text : null)
@@ -373,13 +378,13 @@ function PageListItem(props: { page: Page, databaseView: DatabaseView | undefine
                 icon={((databaseView && databaseView.properties && databaseView.properties[dp.id]) ? Icon.Eye  : {source: Icon.EyeSlash, tintColor: Color.SecondaryText} )}  
                 key={page.id+'-view-property-'+dp.id}
                 onAction={function () {
-                  if(databaseView && databaseView.properties){
-                    if(databaseView.properties[dp.id]){
-                      delete databaseView.properties[dp.id]
+                  if(databaseViewCopy && databaseViewCopy.properties){
+                    if(databaseViewCopy.properties[dp.id]){
+                      delete databaseViewCopy.properties[dp.id]
                     } else {
-                      databaseView.properties[dp.id] = {}
+                      databaseViewCopy.properties[dp.id] = {}
                     }                             
-                    saveDatabaseView(databaseView)
+                    saveDatabaseView(databaseViewCopy)
                   }                  
                 }}
                 title={(dp.name ? dp.name : 'Untitled')}/>
@@ -395,6 +400,8 @@ function PageDetail(props: { page: Page }): JSX.Element {
   
   const page = props.page 
   const pageName = (page.icon_emoji ? page.icon_emoji+' ': '')+(page.title ? page.title : 'Untitled')
+
+  storeRecentlyOpenedPage(page)
 
   const [pageContent, setPageContent] = useState<PageContent>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
