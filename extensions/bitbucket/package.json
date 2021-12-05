@@ -6,19 +6,11 @@
   "icon": "bitbucket-logo.png",
   "author": "Francois",
   "license": "MIT",
-  "commands": [
-    {
+  "commands": [{
       "name": "searchRepositories",
       "title": "Search Repositories",
       "subtitle": "Bitbucket",
       "description": "Showing bitbucket results on repositories search",
-      "mode": "view"
-    },
-    {
-      "name": "dashboard",
-      "title": "Dashboard",
-      "subtitle": "Bitbucket",
-      "description": "Showing some useful informations at a glance",
       "mode": "view"
     },
     {
@@ -29,8 +21,7 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
+  "preferences": [{
       "name": "workspace",
       "type": "textfield",
       "title": "Workspace",

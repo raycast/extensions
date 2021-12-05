@@ -37,17 +37,20 @@ Raycast extension to search repositories, check pipelines status, open recent Pu
   </p>
 </div>
 
+![showcase](./assets/showcase.gif)
+
+
 ## Features
 
 - Quick access to your repositories
 - Search your recent pipelines and see their status
-- Open your recent pull requests
+- See your recent open pull requests
 
 ## Getting started
 
 - Go to to your Bitbucket Cloud profile, [under App Passwords](https://bitbucket.org/account/settings/app-passwords/)
 - Click on `Create App Password`
-- Give your App password a name e.g. `Raycast`, and select all the read options (_to be improved_)
+- Give your App password a name e.g. `Raycast`, and select all the read options you need (Account, projects, repositories, Pull Requests, Pipelines)
 - Store in a secure location the given App Password
 - Start a bitbucket command and fill the required fields:
     - Workspace: You can see your workspaces [here](https://bitbucket.org/account/workspaces/), and use the slug. You can find it in the URL of your workspace: `https://bitbucket.org/{organization}/`
@@ -56,21 +59,21 @@ Raycast extension to search repositories, check pipelines status, open recent Pu
 
 Now you should be able to run Bitbucket commands with Raycast 🚀.
 
-## Showcases
-
-### List Repositories
-
-![search-repossitories](./assets/showcase_search_repositories.png)
-
 ## Roadmap
 
-- Use the bitbucket NPM package instead of hardcoding the API
-- Dashboard with a recap
-- Find commit name
+- [x] Use the Bitbucket Client NPM package instead of hardcoding the API
+- [x] Show commit name in pipelines title
+- [x] Addd pagination navigation to pipelines
+- [ ] Dashboard with overview of differents queries (PRs, pipelines, etc)
+- [ ] Extend pipelines capabilities to see logs & rerun a failed/stopped one
+- [ ] Test performances with high number of repositories (only tested with 38 until now). And if bad performances, check:
+  - [ ] Add pagination navigation to repositories
+  - [ ] Load all repos in background and keep a cache of all of them (as repositories are quite static resources)
+  - [ ] Only keep the field needed, to reduce JSON answer size
 
 __________
 
-
 _Extension built & tested for Bitbucket Cloud_
 
-Api resource: https://developer.atlassian.com/cloud/bitbucket/rest/intro/
+Bitbucket API resource: https://developer.atlassian.com/cloud/bitbucket/rest/intro/
+Bitbucket Client API resource: https://bitbucketjs.netlify.app/

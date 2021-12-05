@@ -6,7 +6,7 @@ import {
 } from "@raycast/api";
 import { PipelinesList } from "./pipelinesList";
 
-export function ShowPipelinesActions(props: { repo: any }) {
+export function ShowPipelinesActions(props: { repo: any }): JSX.Element {
   return (
     <PushAction
       title="Show pipelines"
@@ -17,7 +17,7 @@ export function ShowPipelinesActions(props: { repo: any }) {
   );
 };
 
-export function GoesToNextPipelinePage({ setPageNumber, pageNumber }: { setPageNumber: any, pageNumber: number }) {
+export function GoesToNextPipelinePage({ setPageNumber, pageNumber }: { setPageNumber: any, pageNumber: number }): JSX.Element {
   return (
     <ActionPanel.Item
       title="Goes to next page"
@@ -27,7 +27,7 @@ export function GoesToNextPipelinePage({ setPageNumber, pageNumber }: { setPageN
   );
 };
 
-export function GoesToPreviousPipelinePage({ setPageNumber, pageNumber }: { setPageNumber: any, pageNumber: number }) {
+export function GoesToPreviousPipelinePage({ setPageNumber, pageNumber }: { setPageNumber: any, pageNumber: number }): JSX.Element {
   return (
     <ActionPanel.Item
       title="Goes to previous page"
