@@ -1,5 +1,5 @@
-import { runAppleScriptSilently } from "./utils";
+import { runAppleScriptSilentlyNoView } from "./utils";
 
 export default async () => {
-  await runAppleScriptSilently('tell application "HazeOver" to set multiFocus to not multiFocus', false);
+  await runAppleScriptSilentlyNoView('tell application "HazeOver" to set multiFocus to not multiFocus');
 };

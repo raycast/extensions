@@ -1,5 +1,5 @@
 import { ActionPanel, Color, Icon, List } from "@raycast/api";
-import { runAppleScriptSilently } from "./utils";
+import { runAppleScriptSilentlyView, runAppleScriptSilentlyNoView } from "./utils";
 
 async function incrementIntensity(intensity: number) {
   const script = `
@@ -11,7 +11,7 @@ async function incrementIntensity(intensity: number) {
       end if
     end tell
   `;
-  await runAppleScriptSilently(script, true);
+  await runAppleScriptSilentlyView(script);
 }
 
 async function decrementIntensity(intensity: number) {
@@ -24,7 +24,7 @@ async function decrementIntensity(intensity: number) {
       end if
     end tell
   `;
-  await runAppleScriptSilently(script, true);
+  await runAppleScriptSilentlyView(script);
 }
 
 // Possible values to set the intensity to.
@@ -44,7 +44,7 @@ export default function Command() {
                 <ActionPanel.Item
                   key={i.toString()}
                   title={i.toString()}
-                  onAction={() => runAppleScriptSilently(`tell application "HazeOver" to set intensity to ${i}`, true)}
+                  onAction={() => runAppleScriptSilentlyNoView(`tell application "HazeOver" to set intensity to ${i}`)}
                 />
               ))}
             </ActionPanel.Submenu>
