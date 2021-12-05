@@ -97,7 +97,8 @@ export default function SearchPageList(): JSX.Element {
           page={p}
           databaseView={undefined}
           databaseProperties={undefined}
-          saveDatabaseView={undefined}/>
+          saveDatabaseView={undefined}
+          setRefreshView={undefined}/>
         ))}
       </List.Section>
       <List.Section key='search-result' title='Search'>
@@ -107,7 +108,8 @@ export default function SearchPageList(): JSX.Element {
           page={p}
           databaseView={undefined}
           databaseProperties={undefined}
-          saveDatabaseView={undefined}/>
+          saveDatabaseView={undefined}
+          setRefreshView={undefined}/>
         ))}
       </List.Section>
     </List>
@@ -402,8 +404,8 @@ function PageListItem(props: { page: Page, databaseView: DatabaseView | undefine
                     icon={'icon/'+dp.type+'.png'}>
                     {dp?.options?.map(function (opt) {
                       return (<ActionPanel.Item 
-                        icon={(opt.id !== '_select_null_' ? {source: (pageProperties[dp.id][dp.type]?.id === opt.id ? Icon.Checkmark : Icon.Circle), tintColor: notionColorToTintColor(opt.color)} : null )} 
-                        title={opt.name} content={opt.name} 
+                        icon={(opt.id !== '_select_null_' ? {source: (pageProperties[dp.id][dp.type]?.id === opt.id ? Icon.Checkmark : Icon.Circle), tintColor: notionColorToTintColor(opt.color)} : undefined )} 
+                        title={opt.name}
                         onAction={async function () {
                           if(opt.id !== '_select_null_'){
                             patchedProperty[dp.id][dp.type] = { id : opt.id }
@@ -437,7 +439,7 @@ function PageListItem(props: { page: Page, databaseView: DatabaseView | undefine
                         onAction={async function () {
                           patchedProperty[dp.id][dp.type] = (pageProperties[dp.id][dp.type] ? pageProperties[dp.id][dp.type] : [])
                           if(ids.includes(opt.id)){
-                            patchedProperty[dp.id][dp.type] = patchedProperty[dp.id][dp.type].filter(function (o){
+                            patchedProperty[dp.id][dp.type] = patchedProperty[dp.id][dp.type].filter(function (o: DatabasePropertyOption){
                               return o.id !== opt.id
                             })
                           } else {
