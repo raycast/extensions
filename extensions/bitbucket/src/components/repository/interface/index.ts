@@ -14,3 +14,15 @@ export interface Patch {
   timee?: number;
   timeEnd?: number;
 }
+
+export interface Pipeline {
+  uuid: string;
+  name: string;
+  buildNumber: string;
+  state: string;
+  avatarCreatorUrl: string;
+  triggerName: string;
+  commitMessage: string;
+  target: any,
+  createdOn: string
+}

@@ -1,27 +1,20 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
   List,
   OpenInBrowserAction,
   showToast,
   ToastStyle,
-  randomId,
-  PushAction,
-  Detail,
   ImageMask,
-  FormTextField,
-  Icon,
-  ListItem,
   Color
 } from "@raycast/api";
 import {
-  ShowPipelinesActions
+  ShowPipelinesActions,
 } from "./actions";
 import { useState, useEffect, useRef } from "react";
 
-import { repositoryGetQuery } from "./queries";
+import { getRepositories } from "../../queries";
 import { Repository } from "./interface";
-import { Json } from "../../helpers/types"
+import { icon } from "../../helpers/icon"
 
 interface State {
   repositories?: Repository[];
@@ -34,7 +27,19 @@ export function SearchRepositories(): JSX.Element {
   useEffect(() => {
     async function fetchRepositories() {
       try {
-        const repositories = await getRepositories();
+        const { data } = await getRepositories()
+
+        const repositories = data.values
+          .map((repo: any) => ({
+            name: repo.name as string,
+            uuid: repo.uuid as string,
+            slug: repo.slug as string,
+            fullName: repo.full_name as string,
+            avatarUrl: repo.links.avatar.href as string,
+            description: repo.description as string || '',
+            url: `https://bitbucket.org/${repo.full_name}`
+          }));
+
         setState({ repositories: repositories });
       } catch (error) {
         setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
@@ -59,16 +64,11 @@ export function SearchRepositories(): JSX.Element {
   );
 }
 
-// TODO seet number of repos in preferences
 function SearchListItem({ repo }: { repo: Repository }): JSX.Element {
-  // console.log(repo.avatarUrl)
   return (
     <List.Item
       title={repo.name}
       subtitle={repo.description}
-      // subtitle={searchResult.tags.join(" - ")}
-      // accessoryTitle={searchResult.isStarred ? "⭐" : ""}
-      // accessoryTitle={repo.name}
       icon={{ source: repo.avatarUrl, mask: ImageMask.RoundedRectangle }}
       actions={
         <ActionPanel>
@@ -76,17 +76,17 @@ function SearchListItem({ repo }: { repo: Repository }): JSX.Element {
             <OpenInBrowserAction
               title="Open Repository in Browser"
               url={repo.url}
-              icon={{ source: "icon-code.png", tintColor: Color.PrimaryText }}
+              icon={{ source: icon.code, tintColor: Color.PrimaryText }}
             />
             <OpenInBrowserAction
               title="Open Pipelines in Browser"
               url={repo.url + '/addon/pipelines/home'}
-              icon={{ source: "icon-pipelines.png", tintColor: Color.PrimaryText }}
+              icon={{ source: icon.pipeline.self, tintColor: Color.PrimaryText }}
             />
             <OpenInBrowserAction
               title="Open PRs in Browser"
               url={repo.url + '/pull-requests'}
-              icon={{ source: "icon-pr.png", tintColor: Color.PrimaryText }}
+              icon={{ source: icon.pr, tintColor: Color.PrimaryText }}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
           </ActionPanel.Section>
@@ -94,33 +94,7 @@ function SearchListItem({ repo }: { repo: Repository }): JSX.Element {
             <ShowPipelinesActions repo={repo} />
           </ActionPanel.Section>
         </ActionPanel>
-
       }
     />
   );
-}
-
-async function getRepositories(): Promise<Repository[]> {
-  const response = await repositoryGetQuery()
-
-  if (!response.ok) {
-    return Promise.reject(response.statusText);
-  }
-
-  const repos = (await response.json()).values as Json[];
-
-  return repos
-    .map((repo: any) => {
-      // if (repo.name == "Advertising") console.log(repo)
-
-      return {
-        name: repo.name as string,
-        uuid: repo.uuid as string,
-        slug: repo.slug as string,
-        fullName: repo.full_name as string,
-        avatarUrl: repo.links.avatar.href as string,
-        description: repo.description as string || '',
-        url: `https://bitbucket.org/${repo.full_name}`
-      };
-    });
 }

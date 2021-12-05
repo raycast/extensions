@@ -6,7 +6,8 @@
   "icon": "bitbucket-logo.png",
   "author": "Francois",
   "license": "MIT",
-  "commands": [{
+  "commands": [
+    {
       "name": "searchRepositories",
       "title": "Search Repositories",
       "subtitle": "Bitbucket",
@@ -28,7 +29,8 @@
       "mode": "view"
     }
   ],
-  "preferences": [{
+  "preferences": [
+    {
       "name": "workspace",
       "type": "textfield",
       "title": "Workspace",
@@ -58,6 +60,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.26.1",
+    "bitbucket": "^2.7.0",
     "dot-object": "^2.1.4",
     "node-fetch": "^3.0.0"
   },

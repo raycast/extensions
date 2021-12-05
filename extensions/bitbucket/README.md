@@ -66,6 +66,7 @@ Now you should be able to run Bitbucket commands with Raycast 🚀.
 
 - Use the bitbucket NPM package instead of hardcoding the API
 - Dashboard with a recap
+- Find commit name
 
 __________
 
