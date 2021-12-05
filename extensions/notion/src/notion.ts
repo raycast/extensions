@@ -3,8 +3,6 @@ import {
   FormValues,
   showToast, 
   ToastStyle,  
-  setLocalStorageItem,
-  getLocalStorageItem,
   Color,
 } from '@raycast/api'
 import fetch, { Headers } from 'node-fetch'
@@ -173,7 +171,7 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
 
 // Create database page
 export async function queryDatabase(databaseId: string, query: { title: string | undefined } | undefined): Promise<Page[]> {
-  const pages: Page[] = await rawQueryDatabase(databaseId, query, [], undefined);
+  const pages: Page[] = await rawQueryDatabase(databaseId, query);
   return pages;
 }
 
