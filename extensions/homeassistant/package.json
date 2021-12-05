@@ -91,6 +91,13 @@
       "subtitle": "Home Assistant",
       "description": "Query Batteries",
       "mode": "view"
+    },
+    {
+      "name": "motions",
+      "title": "Motions",
+      "subtitle": "Home Assistant",
+      "description": "Query Motion Sensors",
+      "mode": "view"
     }
   ],
   "preferences": [

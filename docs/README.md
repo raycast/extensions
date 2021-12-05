@@ -13,10 +13,6 @@ The Raycast Platform consists of two parts:
 * **API:** This allows developers to build rich extensions with React, Node.js and TypeScript. The docs explain how to use the API to build top-notch experiences.
 * **Store:** This lets developers share their extensions with all Raycast users. You'll learn how to [publish your extension](basics/publish-an-extension.md).
 
-{% hint style="info" %}
-The Raycast platform is currently in public beta. We've stabilised it during a private alpha with our community. We'll continue to work together to nail the developer experience. Join us in our [Slack workspace](https://raycast.com/community).
-{% endhint %}
-
 ## Key features
 
 Here are a few points that make our ecosystem special:
