@@ -27,6 +27,7 @@
     {
       "name": "pro",
       "type": "checkbox",
+      "label": "Check if you have DeepL API Pro",
       "required": true,
       "default": false,
       "title": "Pro plan",
