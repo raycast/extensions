@@ -1,8 +1,3 @@
-export type AppleContact = {
-  name: string;
-  phones: Array<string>;
-};
-
 export interface Chat {
   id: string;
   name: string;

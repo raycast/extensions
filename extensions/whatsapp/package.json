@@ -27,20 +27,12 @@
       "subtitle": "WhatsApp",
       "description": "Add existing WhatsApp groups to open them later",
       "mode": "view"
-    },
-    {
-      "name": "import-contacts",
-      "title": "Import Contacts",
-      "subtitle": "WhatsApp",
-      "description": "Imports Apple contacts as WhatsApp chats",
-      "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.25.6",
     "fromnow": "^3.0.1",
-    "phone": "^3.1.10",
-    "run-jxa": "^3.0.0"
+    "phone": "^3.1.10"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
