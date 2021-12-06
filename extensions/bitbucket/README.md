@@ -76,4 +76,5 @@ __________
 _Extension built & tested for Bitbucket Cloud_
 
 Bitbucket API resource: https://developer.atlassian.com/cloud/bitbucket/rest/intro/
+
 Bitbucket Client API resource: https://bitbucketjs.netlify.app/
