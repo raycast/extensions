@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 import { useEffect, useState } from "react";
 
 export default function WorkflowList() {
-  const [state, setState] = useState<{ workflows: Workflow[] }>({ workflows: [] });
+  const [state, setState] = useState<{ workflows: Workflow[], loading: boolean }>({ workflows: [], loading: true });
 
   useEffect(() => {
     async function fetch() {
@@ -12,13 +12,14 @@ export default function WorkflowList() {
       setState((oldState) => ({
         ...oldState,
         workflows: workflows,
+        loading: false
       }));
     }
     fetch();
   }, []);
 
   return (
-    <List isLoading={state.workflows.length === 0} searchBarPlaceholder="Filter workflows by project name...">
+    <List isLoading={state.loading} searchBarPlaceholder="Filter workflows by project name...">
       {state.workflows.map((workflow) => (
         <WorkflowListItem key={workflow.id} workflow={workflow} />
       ))}
@@ -94,7 +95,6 @@ async function fetchJobs(workflow: Workflow): Promise<Job[]> {
     const json = await response.json();
     return (json as Record<string, unknown>).items as Job[];
   } catch (error) {
-    console.error(error);
     showToast(ToastStyle.Failure, `Could not load jobs due to ${error}`);
     return Promise.resolve([]);
   }
@@ -124,7 +124,6 @@ async function fetchWorkflows(pipelines: Pipeline[]): Promise<Workflow[]> {
     const values = await Promise.all(workflowsPromises);
     return values.flat();
   } catch (error) {
-    console.error(error);
     showToast(ToastStyle.Failure, `Could not load workflows due to ${error}`);
     return [];
   }
@@ -146,7 +145,6 @@ async function fetchPipelines(): Promise<Pipeline[]> {
     const json = await response.json();
     return (json as Record<string, unknown>).items as Pipeline[];
   } catch (error) {
-    console.error(error);
     showToast(ToastStyle.Failure, `Could not load pipelines due to ${error}`);
     return Promise.resolve([]);
   }

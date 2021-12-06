@@ -11,7 +11,7 @@ Extension for quickly visualize Circle CI Workflows status.
 
 ## How to get Organization Slug
 
-1. Open a Terminal.app.
+1. Open a Terminal.
 2. Run the following curl command with your previously retrieved API Token.
 
 ```bash
