@@ -9,7 +9,7 @@
 
 ### Configure `Client ID` and `Secret`
 
-Please provide **Client ID** and **Secret** in the extension preferences (Preferences -> Extensions -> Search Tracks).\\
+Please provide **Client ID** and **Secret** in the extension preferences (Preferences -> Extensions -> Search Tracks).\
 To create a new client id and secret, do the following:
 
 1. Go to the [Dashboard](https://developer.spotify.com/dashboard) page at the Spotify Developer website and, if necessary, log in.
