@@ -115,8 +115,12 @@ function useSearch() {
         return;
       }
 
+      setState((oldState) => ({
+        ...oldState,
+        results: [],
+        isLoading: false,
+      }));
       console.error("search error", error);
-
       showToast(ToastStyle.Failure, "Could not perform search", String(error));
     }
   }
