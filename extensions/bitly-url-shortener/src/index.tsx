@@ -28,7 +28,7 @@ export default async function () {
     }
 
     await copyTextToClipboard(link);
-    await showHUD("Copied shorten url to clipboard");
+    await showHUD("Copied shortened URL to clipboard");
   } catch (error: any) {
     await showHUD(error.toString());
   }
