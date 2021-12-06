@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-maps-search",
   "title": "Google Maps Search",
-  "description": "Quickly get Google Maps directions like navigating to or from your home.",
+  "description": "Quickly open Google Maps directions, for example from your current location to your home.",
   "icon": "google-maps-icon.png",
   "author": "ratoru",
   "license": "MIT",
