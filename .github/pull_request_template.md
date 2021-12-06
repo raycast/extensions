@@ -20,4 +20,3 @@
 
 - [ ] I read the [extension guidelines](https://developers.raycast.com/basics/prepare-an-extension-for-store)
 - [ ] I read the [documentation about publishing](https://developers.raycast.com/basics/publish-an-extension)
-- [ ] I checked that extension's icon has size of `512x512`

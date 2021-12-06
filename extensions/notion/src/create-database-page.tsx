@@ -20,7 +20,7 @@ import {
 import { useEffect, useState } from 'react'
 import {
   Database,
-  DatabasePropertie,
+  DatabaseProperty,
   Page,
   fetchDatabases,
   fetchDatabaseProperties,
@@ -51,11 +51,25 @@ export default function CreateDatabaseForm(): JSX.Element {
 
   // Setup useState objects
   const [databases, setDatabases] = useState<Database[]>()
-  const [databaseProperties, setDatabaseProperties] = useState<DatabasePropertie[]>()  
+  const [databaseProperties, setDatabaseProperties] = useState<DatabaseProperty[]>()  
   const [databaseId, setDatabaseId] = useState<string>()
   const [markdown, setMarkdown] = useState<string>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
+
+  // Currently supported properties
+  const supportedPropTypes = [
+    'title',
+    'rich_text',
+    'number',
+    'url',
+    'email',
+    'phone_number',
+    'date',
+    'checkbox',
+    'select',
+    'multi_select'
+  ]
   
   // Fetch databases
   useEffect(() => {
@@ -82,7 +96,8 @@ export default function CreateDatabaseForm(): JSX.Element {
   // Fetch selected database property
   useEffect(() => {
     const fetchData = async () => {
-      if(databaseId){
+      if(databaseId){        
+
         setIsLoading(true)
 
         const cachedDatabaseProperties = await loadDatabaseProperties(databaseId)
@@ -92,12 +107,15 @@ export default function CreateDatabaseForm(): JSX.Element {
         }
 
         const fetchedDatabaseProperties = await fetchDatabaseProperties(databaseId)
-      
-        setDatabaseProperties(fetchedDatabaseProperties)          
-        setIsLoading(false)
-
-        await storeDatabaseProperties(databaseId, fetchedDatabaseProperties)
+        if(fetchedDatabaseProperties){
+          const supportedDatabaseProperties = fetchedDatabaseProperties.filter(function (property){
+            return supportedPropTypes.includes(property.type)
+          })
+          setDatabaseProperties(supportedDatabaseProperties)   
+          await storeDatabaseProperties(databaseId, supportedDatabaseProperties)
+        }
         
+        setIsLoading(false)
       }      
     }
     fetchData()
@@ -235,7 +253,7 @@ async function loadDatabases() {
   return data !== undefined ? JSON.parse(data) : undefined
 }
 
-async function storeDatabaseProperties(databaseId: string, databaseProperties: DatabasePropertie[]) {
+async function storeDatabaseProperties(databaseId: string, databaseProperties: DatabaseProperty[]) {
   const data = JSON.stringify(databaseProperties)
   await setLocalStorageItem('DATABASE_PROPERTIES_'+databaseId, data)
 }
