@@ -208,9 +208,9 @@ function getWorkflowActions(workflow: Workflow) {
   if (!workflow.repository.target_repository_url) {
     return (
       <ActionPanel>
-        <PushAction title="Workflow's jobs list" target={<JobList workflow={workflow} />} />
-        <OpenInBrowserAction title="Open workflow" url={workflowUrl} />
-        <CopyToClipboardAction title="Copy workflow URL" content={workflowUrl} />
+        <PushAction title="Workflow Job List" target={<JobList workflow={workflow} />} />
+        <OpenInBrowserAction title="Open Workflow" url={workflowUrl} />
+        <CopyToClipboardAction title="Copy Workflow URL" content={workflowUrl} />
       </ActionPanel>
     )
   } else {
