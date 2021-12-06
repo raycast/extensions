@@ -1,8 +1,4 @@
 export {
-  URLConstants
-} from "./URLConstants"
-
-export {
   avatarURL
 } from "./AvatarURL"
 
