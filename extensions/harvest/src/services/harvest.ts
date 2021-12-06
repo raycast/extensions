@@ -6,11 +6,15 @@ import {
   HarvestTimeEntryCreatedResponse,
   HarvestTimeEntryResponse,
   HarvestTimeEntry,
+  HarvestCompany,
+  HarvestClient,
+  HarvestProjectAssignment,
 } from "./responseTypes";
 import { getLocalStorageItem, getPreferenceValues, setLocalStorageItem } from "@raycast/api";
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
 import dayjs from "dayjs";
+import useSWR from "swr";
 
 interface Preferences {
   token: string;
@@ -33,37 +37,61 @@ async function harvestAPI<T = AxiosResponse>({ method = "GET", ...props }: Axios
   return resp;
 }
 
-export async function getCompany() {
-  const key = "company";
-  const cache = await getLocalStorageItem(key);
-  if (cache !== undefined) return JSON.parse(cache.toString());
-
-  const resp = await harvestAPI<HarvestCompanyResponse>({ url: "/company" });
-  await setLocalStorageItem(key, JSON.stringify(resp.data));
-  return resp.data;
-}
-
-export async function getClients() {
-  const key = "clients";
-  const cache = await getLocalStorageItem(key);
-  if (cache !== undefined) return JSON.parse(cache.toString());
-
-  const resp = await harvestAPI<HarvestClientsResponse>({ url: "/clients", params: { is_active: true } });
-  await setLocalStorageItem(key, JSON.stringify(resp.data.clients));
-  return resp.data.clients;
-}
-
-export async function getMyProjectAssignments() {
-  const key = "project-assignments";
-  const cache = await getLocalStorageItem(key);
-  if (cache !== undefined) return JSON.parse(cache.toString());
-
-  const resp = await harvestAPI<HarvestProjectAssignmentsResponse>({
-    url: "/users/me/project_assignments",
+export function useCompany() {
+  const { data, error } = useSWR<HarvestCompany>("company", async () => {
+    const resp = await harvestAPI<HarvestCompanyResponse>({ url: "/company" });
+    return resp.data;
   });
-  await setLocalStorageItem(key, JSON.stringify(resp.data.project_assignments));
-  return resp.data.project_assignments;
+  return { data, error, isLoading: !data && !error };
 }
+
+export function useActiveClients() {
+  const { data, error } = useSWR<HarvestClient[]>("clients", async () => {
+    const resp = await harvestAPI<HarvestClientsResponse>({ url: "/clients", params: { is_active: true } });
+    return resp.data.clients;
+  });
+  return { data, error, isLoading: !data && !error };
+}
+
+export function useMyProjects() {
+  const { data, error } = useSWR<HarvestProjectAssignment[]>("project-assignments", async () => {
+    const resp = await harvestAPI<HarvestProjectAssignmentsResponse>({ url: "/users/me/project_assignments" });
+    return resp.data.project_assignments;
+  });
+  return { data, error, isLoading: !data && !error };
+}
+
+// export async function getCompany() {
+//   const key = "company";
+//   const cache = await getLocalStorageItem(key);
+//   if (cache !== undefined) return JSON.parse(cache.toString());
+
+//   const resp = await harvestAPI<HarvestCompanyResponse>({ url: "/company" });
+//   await setLocalStorageItem(key, JSON.stringify(resp.data));
+//   return resp.data;
+// }
+
+// export async function getClients() {
+//   const key = "clients";
+//   const cache = await getLocalStorageItem(key);
+//   if (cache !== undefined) return JSON.parse(cache.toString());
+
+//   const resp = await harvestAPI<HarvestClientsResponse>({ url: "/clients", params: { is_active: true } });
+//   await setLocalStorageItem(key, JSON.stringify(resp.data.clients));
+//   return resp.data.clients;
+// }
+
+// export async function getMyProjectAssignments() {
+//   const key = "project-assignments";
+//   const cache = await getLocalStorageItem(key);
+//   if (cache !== undefined) return JSON.parse(cache.toString());
+
+//   const resp = await harvestAPI<HarvestProjectAssignmentsResponse>({
+//     url: "/users/me/project_assignments",
+//   });
+//   await setLocalStorageItem(key, JSON.stringify(resp.data.project_assignments));
+//   return resp.data.project_assignments;
+// }
 
 export async function getMyTimeEntries({ from = new Date(), to = new Date() }: { from: Date; to: Date }) {
   let time_entries: HarvestTimeEntry[] = [];
@@ -118,4 +146,20 @@ export async function deleteTimeEntry(entry: HarvestTimeEntry) {
     method: "DELETE",
   });
   return true;
+}
+
+interface FetchResult<T> {
+  data: T | undefined;
+  isLoading: boolean;
+  error: AxiosError | undefined;
+}
+
+const fetcher = (path: string) => api.get(path).then((res) => res.data);
+
+export function useFetch<T>(path: string): FetchResult<T> {
+  const { data, error } = useSWR<T, AxiosError>(path, fetcher);
+
+  const isLoading = !error && !data;
+
+  return { data, isLoading, error: isLoading ? undefined : error };
 }

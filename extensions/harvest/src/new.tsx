@@ -9,45 +9,22 @@ import {
   showHUD,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { getCompany, getMyProjectAssignments, newTimeEntry } from "./services/harvest";
-import {
-  HarvestCompany,
-  HarvestProjectAssignment,
-  HarvestTaskAssignment,
-  HarvestTimeEntry,
-} from "./services/responseTypes";
+import { useState } from "react";
+import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
+import { HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseTypes";
 import _ from "lodash";
-import moment from "moment";
+import dayjs from "dayjs";
 
-export default function Command({
-  onSave = async () => {
-    return;
-  },
-  entry,
-}: {
-  onSave: () => Promise<void>;
-  entry?: HarvestTimeEntry;
-}) {
+export default function Command({ onSave, entry }: { onSave: () => Promise<void>; entry?: HarvestTimeEntry }) {
   const { pop } = useNavigation();
-  const [company, setCompany] = useState<HarvestCompany | undefined>();
-  const [projects, setProjects] = useState<HarvestProjectAssignment[] | undefined>();
-  const [tasks, setTasks] = useState<HarvestTaskAssignment[] | undefined>();
-  const [taskId, setTaskId] = useState<string | undefined>();
-
-  async function init() {
-    const company = await getCompany().catch((error) => {
-      showToast(ToastStyle.Failure, "API Error", "Could not get your company's settings");
-      console.error("getCompany", error.response);
-    });
-    setCompany(company);
-
-    const projects = await getMyProjectAssignments().catch((error) => {
-      showToast(ToastStyle.Failure, "API Error", "Could not get your projects");
-      console.error("getProjects", error.response);
-    });
-    setProjects(projects);
-  }
+  const { data: company } = useCompany();
+  const { data: projects } = useMyProjects();
+  const [projectId, setProjectId] = useState(entry?.project.id.toString() ?? "");
+  const [tasks, setTasks] = useState<HarvestTaskAssignment[]>([]);
+  const [taskId, setTaskId] = useState(entry?.task.id.toString());
+  const [notes, setNotes] = useState(entry?.notes);
+  const [hours, setHours] = useState(entry?.hours.toString());
+  const [spentDate, setSpentDate] = useState(dayjs(entry?.spent_date).startOf("date").add(dayjs().utcOffset(), "m"));
 
   async function handleSubmit(values: Record<string, FormValue>) {
     if (values.project_id === null) {
@@ -64,7 +41,7 @@ export default function Command({
       ...data,
       project_id: parseInt(values.project_id.toString()),
       task_id: parseInt(values.task_id.toString()),
-      spent_date: values.spent_date === null ? moment().format("YYYY-MM-DD") : values.spent_date.toString(),
+      spent_date: values.spent_date === null ? dayjs().format("YYYY-MM-DD") : values.spent_date.toString(),
     }).catch(async (error) => {
       console.error(error.response.data);
       toast.hide();
@@ -79,32 +56,41 @@ export default function Command({
     }
   }
 
-  function setTaskAssignments(project_id: string) {
+  function setTaskAssignments() {
     const project = _.find(projects, (o) => {
-      return o.project.id === parseInt(project_id);
+      return o.project.id === parseInt(projectId);
     });
     if (typeof project === "object") {
       setTasks(project.task_assignments);
       setTaskId(project.task_assignments[0].id.toString());
     } else {
-      setTasks(undefined);
+      setTasks([]);
       setTaskId(undefined);
     }
   }
 
-  useEffect(() => {
-    init();
-  }, []);
+  console.log(dayjs().utcOffset());
+
+  console.log({ spentDate });
 
   return (
     <Form
+      navigationTitle={entry ? "Edit Time Entry" : "New Time Entry"}
       actions={
         <ActionPanel>
           <SubmitFormAction onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="project_id" title="Project" storeValue={true} onChange={setTaskAssignments}>
+      <Form.Dropdown
+        id="project_id"
+        title="Project"
+        value={entry?.project.id.toString() ?? ""}
+        onChange={(newValue) => {
+          setProjectId(newValue);
+          setTaskAssignments();
+        }}
+      >
         {projects?.map((project) => {
           return (
             <Form.DropdownItem
@@ -115,7 +101,7 @@ export default function Command({
           );
         })}
       </Form.Dropdown>
-      <Form.Dropdown id="task_id" title="Task" storeValue={true} value={taskId}>
+      <Form.Dropdown id="task_id" title="Task" value={taskId}>
         {tasks?.map((task) => {
           return <Form.DropdownItem value={task.task.id.toString()} title={task.task.name} key={task.id} />;
         })}
@@ -123,7 +109,7 @@ export default function Command({
 
       <Form.Separator />
 
-      <Form.TextArea id="notes" title="Notes" />
+      <Form.TextArea id="notes" title="Notes" value={notes} onChange={setNotes} />
       {company?.wants_timestamp_timers && (
         <>
           <Form.TextField id="started_time" title="Start Time" placeholder="Leave blank to default to now." />
@@ -131,9 +117,23 @@ export default function Command({
         </>
       )}
       {!company?.wants_timestamp_timers && (
-        <Form.TextField id="hours" title="Duration" placeholder="Leave blank to start a new timer" />
+        <Form.TextField
+          id="hours"
+          title="Duration"
+          placeholder="Leave blank to start a new timer"
+          value={hours}
+          onChange={setHours}
+        />
       )}
-      <Form.DatePicker id="spent_date" title="Date" />
+      <Form.DatePicker
+        id="spent_date"
+        title="Date"
+        value={spentDate}
+        onChange={(newValue) => {
+          console.log(newValue);
+          setSpentDate(newValue);
+        }}
+      />
     </Form>
   );
 }
