@@ -79,15 +79,20 @@ function SearchListItem({ repo }: { repo: Repository }): JSX.Element {
               icon={{ source: icon.code, tintColor: Color.PrimaryText }}
             />
             <OpenInBrowserAction
-              title="Open Pipelines in Browser"
-              url={repo.url + '/addon/pipelines/home'}
-              icon={{ source: icon.pipeline.self, tintColor: Color.PrimaryText }}
+              title="Open Branches in Browser"
+              url={repo.url + '/branches'}
+              icon={{ source: icon.branch, tintColor: Color.PrimaryText }}
             />
             <OpenInBrowserAction
-              title="Open PRs in Browser"
+              title="Open Pull Requests in Browser"
               url={repo.url + '/pull-requests'}
               icon={{ source: icon.pr, tintColor: Color.PrimaryText }}
               shortcut={{ modifiers: ["cmd"], key: "." }}
+            />
+            <OpenInBrowserAction
+              title="Open Pipelines in Browser"
+              url={repo.url + '/addon/pipelines/home'}
+              icon={{ source: icon.pipeline.self, tintColor: Color.PrimaryText }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Details">
