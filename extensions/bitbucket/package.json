@@ -14,8 +14,8 @@
       "mode": "view"
     },
     {
-      "name": "searchOpenPullRequests",
-      "title": "Search Open Pull Requests",
+      "name": "searchMyOpenPullRequests",
+      "title": "Search My Open Pull Requests",
       "subtitle": "Bitbucket",
       "description": "Showing open pull requests for the current user",
       "mode": "view"
