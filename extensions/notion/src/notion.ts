@@ -2,7 +2,8 @@ import {
   preferences, 
   FormValues,
   showToast, 
-  ToastStyle 
+  ToastStyle,  
+  Color,
 } from '@raycast/api'
 import fetch, { Headers } from 'node-fetch'
 
@@ -197,6 +198,8 @@ async function rawQueryDatabase(databaseId: string, query: { title: string | und
       }
     }
 
+
+
     const response = await fetch(
       apiURL + `v1/databases/${databaseId}/query`,
       {
@@ -212,9 +215,10 @@ async function rawQueryDatabase(databaseId: string, query: { title: string | und
       return []
     }
 
-    const pages = pageListMapper(json.results as Record<string,any>[])
+    const fetchedPages = pageListMapper(json.results as Record<string,any>[])
 
-    return pages
+    return fetchedPages   
+    
   } catch (err) {
     console.error(err)
     showToast(ToastStyle.Failure, 'Failed to query databases')
@@ -345,6 +349,39 @@ async function rawCreateDatabasePage(values: FormValues): Promise<Page> {
   }
 }
 
+
+// Patch page
+export async function patchPage(pageId: string, properties: Record<string,any>): Promise<Page> {
+  const page: Page = await rawPatchPage(pageId, properties);
+  return page;
+}
+// Raw function for updating page
+async function rawPatchPage(pageId: string, properties: Record<string,any>): Promise<Page> {
+  try {
+
+    const requestBody = {
+      properties: properties
+    }
+
+    const response = await fetch(
+      apiURL + `v1/pages/${pageId}`,
+      {
+        method: 'patch',
+        headers: headers,
+        body: JSON.stringify(requestBody)
+      }
+    )
+    const json = await response.json() as Record<string,any>
+
+    const page = pageMapper(json)
+
+    return page
+  } catch (err) {
+    console.error(err)
+    showToast(ToastStyle.Failure, 'Failed to update page')
+    throw new Error('Failed to update page')
+  }
+}
 
 // Search pages
 export async function searchPages(query: string | undefined): Promise<Page[]> {
@@ -647,4 +684,26 @@ function notionTextToMarkdown (text: Record<string,any>): string {
   }
 
   return plainText
+}
+
+
+export function notionColorToTintColor (notionColor: string | undefined): Color {
+
+  const colorMapper = {
+    'default': Color.PrimaryText,
+    'gray': Color.PrimaryText,
+    'brown': Color.Brown,
+    'red': Color.Red,
+    'blue': Color.Blue,
+    'green': Color.Green,
+    'yellow': Color.Yellow,
+    'orange': Color.Orange,
+    'purple': Color.Purple,
+    'pink': Color.Magenta
+  } as Record<string,Color>
+
+  if(notionColor === undefined){
+    return colorMapper['default']
+  }
+  return colorMapper[notionColor] 
 }
