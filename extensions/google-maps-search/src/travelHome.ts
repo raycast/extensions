@@ -6,5 +6,5 @@ export default async () => {
   const preferences: Preferences = getPreferenceValues();
   const dirURL = makeDirectionsURL("", preferences.homeAddress, preferences.preferredMode);
   await closeMainWindow();
-  exec(`usr/bin/open -u "${dirURL}"`);
+  exec(`/usr/bin/open -u "${dirURL}"`);
 };
