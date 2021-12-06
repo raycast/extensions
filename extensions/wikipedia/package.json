@@ -8,24 +8,32 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-articles",
-      "title": "Search Articles",
+      "name": "search-page",
+      "title": "Search Page",
       "subtitle": "Wikipedia",
-      "description": "Search Wikipedia articles by title",
+      "description": "Search Wikipedia pages by title",
       "mode": "view"
     },
     {
-      "name": "random-article",
-      "title": "Random Article",
+      "name": "random-page",
+      "title": "Random Page",
       "subtitle": "Wikipedia",
-      "description": "Open a random Wikipedia article",
+      "description": "Open a random Wikipedia page",
+      "mode": "view"
+    },
+    {
+      "name": "featured-page",
+      "title": "Featured Page",
+      "subtitle": "Wikipedia",
+      "description": "Open today's featured Wikipedia page",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.25.7",
-    "wikijs": "^6.3.2",
-    "swr": "^1.0.1"
+    "swr": "^1.0.1",
+    "got": "^11.8.3",
+    "striptags": "^3.2.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

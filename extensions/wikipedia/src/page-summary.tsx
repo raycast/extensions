@@ -1,19 +1,19 @@
-import { useWikipediaArticle } from "./wikipedia";
+import { useWikipediaPageExtract } from "./wikipedia";
 import { ActionPanel, CopyToClipboardAction, Detail, OpenInBrowserAction } from "@raycast/api";
 
-function getArticleMarkdown(article?: { summary: string, title: string }) {
-  if (!article) {
+function getPageMarkdown(title: string, extract?: string) {
+  if (!extract) {
     return null;
   }
-  if (!article.summary) {
-    return `# ${article.title}\n*No summary found for this article*`;
+  if (!extract) {
+    return `# ${title}\n*No extract found for this page*`;
   }
-  return `# ${article.title}\n${article.summary}`;
+  return `# ${title}\n${extract}`;
 }
 
-export function ArticleSummary({ title }: { title: string }) {
-  const { data: article, isValidating } = useWikipediaArticle(title);
-  const markdown = getArticleMarkdown(article);
+export function PageSummary({ title }: { title: string }) {
+  const { data: extract, isValidating } = useWikipediaPageExtract(title);
+  const markdown = getPageMarkdown(title, extract);
 
   return (
     <Detail
@@ -21,21 +21,21 @@ export function ArticleSummary({ title }: { title: string }) {
       navigationTitle={title}
       markdown={markdown}
       actions={
-        article ? (
+        extract ? (
           <ActionPanel>
             <ActionPanel.Section>
-              <OpenInBrowserAction url={article.url} />
+              <OpenInBrowserAction url={`https://wikipedia.org/wiki/${title}`} />
             </ActionPanel.Section>
             <ActionPanel.Section>
               <CopyToClipboardAction
                 title="Copy URL"
                 shortcut={{ modifiers: ["cmd"], key: "." }}
-                content={article.url}
+                content={`https://wikipedia.org/wiki/${title}`}
               />
               <CopyToClipboardAction
-                title="Copy Summary"
+                title="Copy Extract"
                 shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-                content={article.summary}
+                content={extract}
               />
             </ActionPanel.Section>
           </ActionPanel>
