@@ -1,18 +1,43 @@
-import { ActionPanel, ActionPanelItem, Color, Icon, List, ListItem, PushAction, Toast, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  ActionPanelItem,
+  ActionPanelSection,
+  Application,
+  Color,
+  getApplications,
+  Icon,
+  List,
+  ListItem,
+  PushAction,
+  showToast,
+  Toast,
+  ToastStyle,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getMyTimeEntries, restartTimer, stopTimer } from "./services/harvest";
 import { HarvestTimeEntry } from "./services/responseTypes";
 import New from "./new";
 import Delete from "./delete";
+import { execSync } from "child_process";
 
 export default function Command() {
   const [items, setItems] = useState<HarvestTimeEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [harvestInstallPath, setHarvestInstallPath] = useState<Application>();
 
   async function init() {
     const timeEntries = await getMyTimeEntries({ from: new Date(), to: new Date() });
     setItems(timeEntries);
     setIsLoading(false);
+
+    const installedApps = await getApplications();
+    const filteredApps = installedApps.filter((app) => {
+      return app.bundleId?.includes("com.getharvest.harvestxapp");
+    });
+    if (filteredApps.length) {
+      // harvest app is installed, allow the "Open Harvest" action
+      setHarvestInstallPath(filteredApps[0]);
+    }
   }
 
   useEffect(() => {
@@ -26,6 +51,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <NewEntryAction onSave={init} />
+          {harvestInstallPath && <OpenHarvestAppAction app={harvestInstallPath} />}
         </ActionPanel>
       }
     >
@@ -43,10 +69,15 @@ export default function Command() {
             icon={entry.is_running ? { tintColor: Color.Orange, source: Icon.Clock } : undefined}
             actions={
               <ActionPanel>
-                <ToggleTimerAction onComplete={init} entry={entry} />
-                <EditEntryAction onSave={init} entry={entry} />
-                <DeleteEntryAction onComplete={init} entry={entry} />
-                <NewEntryAction onSave={init} />
+                <ActionPanelSection title={`${entry.project.name} | ${entry.client.name}`}>
+                  <ToggleTimerAction onComplete={init} entry={entry} />
+                  <EditEntryAction onSave={init} entry={entry} />
+                  <DeleteEntryAction onComplete={init} entry={entry} />
+                </ActionPanelSection>
+                <ActionPanelSection title="Harvest">
+                  <NewEntryAction onSave={init} />
+                  {harvestInstallPath && <OpenHarvestAppAction app={harvestInstallPath} />}
+                </ActionPanelSection>
               </ActionPanel>
             }
           />
@@ -127,6 +158,23 @@ function ToggleTimerAction({ entry, onComplete }: { entry: HarvestTimeEntry; onC
         await onComplete();
         await toast.hide();
       }}
+    />
+  );
+}
+
+function OpenHarvestAppAction({ app }: { app: Application }) {
+  return (
+    <ActionPanelItem
+      onAction={() => {
+        try {
+          execSync(`open ${app.path}`);
+        } catch {
+          showToast(ToastStyle.Failure, "Could not Open Harvest App");
+        }
+      }}
+      title="Open Harvest App"
+      shortcut={{ key: "o", modifiers: ["cmd"] }}
+      icon={{ source: "./harvest-logo-icon.png" }}
     />
   );
 }

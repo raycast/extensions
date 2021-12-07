@@ -10,7 +10,7 @@ import {
   HarvestClient,
   HarvestProjectAssignment,
 } from "./responseTypes";
-import { getLocalStorageItem, getPreferenceValues, setLocalStorageItem } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
 import dayjs from "dayjs";
@@ -60,38 +60,6 @@ export function useMyProjects() {
   });
   return { data, error, isLoading: !data && !error };
 }
-
-// export async function getCompany() {
-//   const key = "company";
-//   const cache = await getLocalStorageItem(key);
-//   if (cache !== undefined) return JSON.parse(cache.toString());
-
-//   const resp = await harvestAPI<HarvestCompanyResponse>({ url: "/company" });
-//   await setLocalStorageItem(key, JSON.stringify(resp.data));
-//   return resp.data;
-// }
-
-// export async function getClients() {
-//   const key = "clients";
-//   const cache = await getLocalStorageItem(key);
-//   if (cache !== undefined) return JSON.parse(cache.toString());
-
-//   const resp = await harvestAPI<HarvestClientsResponse>({ url: "/clients", params: { is_active: true } });
-//   await setLocalStorageItem(key, JSON.stringify(resp.data.clients));
-//   return resp.data.clients;
-// }
-
-// export async function getMyProjectAssignments() {
-//   const key = "project-assignments";
-//   const cache = await getLocalStorageItem(key);
-//   if (cache !== undefined) return JSON.parse(cache.toString());
-
-//   const resp = await harvestAPI<HarvestProjectAssignmentsResponse>({
-//     url: "/users/me/project_assignments",
-//   });
-//   await setLocalStorageItem(key, JSON.stringify(resp.data.project_assignments));
-//   return resp.data.project_assignments;
-// }
 
 export async function getMyTimeEntries({ from = new Date(), to = new Date() }: { from: Date; to: Date }) {
   let time_entries: HarvestTimeEntry[] = [];

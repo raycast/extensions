@@ -8,8 +8,9 @@ import {
   Toast,
   showHUD,
   useNavigation,
+  getApplications,
 } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
 import { HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseTypes";
 import _ from "lodash";
@@ -19,12 +20,26 @@ export default function Command({ onSave, entry }: { onSave: () => Promise<void>
   const { pop } = useNavigation();
   const { data: company } = useCompany();
   const { data: projects } = useMyProjects();
-  const [projectId, setProjectId] = useState(entry?.project.id.toString() ?? "");
+  const [projectId, setProjectId] = useState<string>();
   const [tasks, setTasks] = useState<HarvestTaskAssignment[]>([]);
-  const [taskId, setTaskId] = useState(entry?.task.id.toString());
-  const [notes, setNotes] = useState(entry?.notes);
-  const [hours, setHours] = useState(entry?.hours.toString());
-  const [spentDate, setSpentDate] = useState(dayjs(entry?.spent_date).startOf("date").add(dayjs().utcOffset(), "m"));
+  const [taskId, setTaskId] = useState<string>();
+  const [notes, setNotes] = useState<string>();
+  const [hours, setHours] = useState<string>();
+  const [spentDate, setSpentDate] = useState<Date>();
+
+  useEffect(() => {
+    if (!entry) return;
+
+    setProjectId(entry.project.id.toString());
+    setTaskId(entry.task.id.toString());
+    setNotes(entry.notes);
+    setHours(entry.hours.toString());
+    setTaskAssignments();
+
+    // const myDate = dayjs(entry.spent_date);
+    console.log("new date", new Date(entry.spent_date ?? ""));
+    // setSpentDate(new Date(entry.spent_date));
+  }, [entry]);
 
   async function handleSubmit(values: Record<string, FormValue>) {
     if (values.project_id === null) {
@@ -56,7 +71,9 @@ export default function Command({ onSave, entry }: { onSave: () => Promise<void>
     }
   }
 
-  function setTaskAssignments() {
+  function setTaskAssignments(projectId?: string) {
+    if (!projectId) return;
+
     const project = _.find(projects, (o) => {
       return o.project.id === parseInt(projectId);
     });
@@ -69,9 +86,7 @@ export default function Command({ onSave, entry }: { onSave: () => Promise<void>
     }
   }
 
-  console.log(dayjs().utcOffset());
-
-  console.log({ spentDate });
+  // console.log({ spentDate });
 
   return (
     <Form
@@ -88,7 +103,7 @@ export default function Command({ onSave, entry }: { onSave: () => Promise<void>
         value={entry?.project.id.toString() ?? ""}
         onChange={(newValue) => {
           setProjectId(newValue);
-          setTaskAssignments();
+          setTaskAssignments(newValue);
         }}
       >
         {projects?.map((project) => {
@@ -125,15 +140,7 @@ export default function Command({ onSave, entry }: { onSave: () => Promise<void>
           onChange={setHours}
         />
       )}
-      <Form.DatePicker
-        id="spent_date"
-        title="Date"
-        value={spentDate}
-        onChange={(newValue) => {
-          console.log(newValue);
-          setSpentDate(newValue);
-        }}
-      />
+      <Form.DatePicker id="spent_date" title="Date" value={spentDate} onChange={setSpentDate} />
     </Form>
   );
 }
