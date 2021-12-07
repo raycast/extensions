@@ -1,16 +1,8 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
   List,
-  OpenInBrowserAction,
   showToast,
   ToastStyle,
-  randomId,
-  PushAction,
-  Detail,
-  FormTextField,
-  Icon,
-  ListItem
 } from "@raycast/api";
 import {
   DeleteAnnotationAction,
@@ -139,7 +131,7 @@ async function performSearchOnAnnotations(searchText: string, signal: AbortSigna
   }
 
   type Json = Record<string, unknown>;
-  
+
   const annotations = (await response.json()) as Json[];
 
   return annotations
@@ -153,5 +145,5 @@ async function performSearchOnAnnotations(searchText: string, signal: AbortSigna
         alertName: annotation.alertName as string,
         newState: annotation.newState as string,
       };
-  });
+    });
 }

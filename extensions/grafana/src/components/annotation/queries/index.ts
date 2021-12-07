@@ -1,4 +1,4 @@
-import fetch, { AbortError } from "node-fetch";
+import fetch from "node-fetch";
 import { preferences } from "../../../helpers/preferences";
 import { Annotation, Patch } from './../interface'
 

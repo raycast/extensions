@@ -1,28 +1,14 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
-  List,
-  OpenInBrowserAction,
   showToast,
   ToastStyle,
-  randomId,
-  PushAction,
-  Detail,
-  FormTextField,
-  Icon,
-  ListItem,
-  FormTextArea,
   Form,
   SubmitFormAction,
   popToRoot
 } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
-import fetch, { AbortError } from "node-fetch";
 import { getErrorMessage } from "../../utils";
 
-import { preferences } from "../../helpers/preferences";
-import { annotationDeleteQuery, annotationPatchQuery } from "./queries";
-import { Annotation } from './interface'
+import { annotationPatchQuery } from "./queries";
 
 interface Values {
   text: string;
@@ -55,7 +41,7 @@ async function handleSubmit(values: Values, annotationId: number) {
   }
 }
 
-export function PatchAnnotationForm(props: {annotation: any}) {
+export function PatchAnnotationForm(props: { annotation: any }) {
   return (
     <Form
       actions={
@@ -66,7 +52,7 @@ export function PatchAnnotationForm(props: {annotation: any}) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="text" title="Text" defaultValue={props.annotation.text}/>
+      <Form.TextField id="text" title="Text" defaultValue={props.annotation.text} />
     </Form>
   );
 }

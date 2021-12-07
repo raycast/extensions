@@ -1,21 +1,12 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
-  List,
-  OpenInBrowserAction,
   showToast,
   ToastStyle,
-  randomId,
   PushAction,
-  Detail,
   Color,
-  FormTextField,
   Icon,
-  ListItem,
   popToRoot
 } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
-import fetch, { AbortError } from "node-fetch";
 import { getErrorMessage } from "../../utils";
 import { annotationDeleteQuery, annotationPatchQuery } from "./queries";
 import { PatchAnnotationForm } from "./patchAnnotationForm";
