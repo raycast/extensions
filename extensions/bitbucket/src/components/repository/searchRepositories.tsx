@@ -10,58 +10,68 @@ import {
 import {
   ShowPipelinesActions,
 } from "./actions";
-import { useState, useEffect, useRef } from "react";
 
-import { getRepositories } from "../../queries";
+import {getRepositories, useRepositories} from "../../queries";
 import { Repository } from "./interface";
 import { icon } from "../../helpers/icon"
+import { cacheConfig } from "../../helpers/cache";
+import useSWR, {mutate, SWRConfig} from "swr";
 
-interface State {
-  repositories?: Repository[];
-  error?: Error;
+const REPOSITORIES_CACHE_KEY = "repositories4";
+
+export function SearchRepositories() {
+    return (
+        <SWRConfig value={cacheConfig}>
+            <SearchList />
+        </SWRConfig>
+    );
 }
 
-export function SearchRepositories(): JSX.Element {
-  const [state, setState] = useState<State>({});
+function SearchList(): JSX.Element {
+    const { data, error, isValidating } = useRepositories();
 
-  useEffect(() => {
-    async function fetchRepositories() {
-      try {
-        const { data } = await getRepositories()
-
-        const repositories = data.values
-          .map((repo: any) => ({
-            name: repo.name as string,
-            uuid: repo.uuid as string,
-            slug: repo.slug as string,
-            fullName: repo.full_name as string,
-            avatarUrl: repo.links.avatar.href as string,
-            description: repo.description as string || '',
-            url: `https://bitbucket.org/${repo.full_name}`
-          }));
-
-        setState({ repositories: repositories });
-      } catch (error) {
-        setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
-      }
+    if (error) {
+        showToast(ToastStyle.Failure, "Failed loading repositories", error.message);
     }
 
-    fetchRepositories();
-  }, []);
+    if (!isValidating) {
+        setTimeout(() => {
+            // mutate(REPOSITORIES_CACHE_KEY, getRepositories)
+        }, 1000)
+    }
 
-  if (state.error) {
-    showToast(ToastStyle.Failure, "Failed loading repositories", state.error.message);
-  }
+    return (
+        <List isLoading={isValidating} searchBarPlaceholder="Search by name..." actions={SearchListActions()}>
+            <List.Section title="Repositories" subtitle={data?.length.toString()}>
+                {data?.map(toRepository).map((repo: any) => (
+                    <SearchListItem key={repo.uuid} repo={repo} />
+                ))}
+            </List.Section>
+        </List>
+    );
+}
 
-  return (
-    <List isLoading={!state.repositories && !state.error} searchBarPlaceholder="Search by name...">
-      <List.Section title="Repositories" subtitle={state.repositories?.length + ""}>
-        {state.repositories?.map((repo) => (
-          <SearchListItem key={repo.uuid} repo={repo} />
-        ))}
-      </List.Section>
-    </List>
-  );
+function SearchListActions(): JSX.Element {
+    return (
+        <ActionPanel title="Search Repositories2">
+            <ActionPanel.Item
+                title="Reload repositories"
+                onAction={() => mutate(REPOSITORIES_CACHE_KEY)}
+            />
+        </ActionPanel>
+    )
+}
+
+function toRepository(repo: any): Repository {
+    return {
+        name: repo.name as string,
+        uuid: repo.uuid as string,
+        slug: repo.slug as string,
+        fullName: repo.full_name as string,
+        avatarUrl: repo.links.avatar.href as string,
+        description: repo.description as string || '',
+        url: `https://bitbucket.org/${repo.full_name}`
+    }
 }
 
 function SearchListItem({ repo }: { repo: Repository }): JSX.Element {

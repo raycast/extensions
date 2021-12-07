@@ -1,5 +1,9 @@
-import { Bitbucket } from 'bitbucket'
+import useSWR from "swr";
+
+import {Bitbucket, Schema} from 'bitbucket'
 import { preferences } from "../helpers/preferences";
+import {Response} from "node-fetch";
+import {AsyncResponse} from "bitbucket/lib/bitbucket";
 
 const clientOptions = {
   baseUrl: 'https://api.bitbucket.org/2.0',
@@ -16,12 +20,21 @@ const defaults = {
 
 const bitbucket = new Bitbucket(clientOptions)
 
-export async function getRepositories(): Promise<any> {
-  return await bitbucket.repositories.list({
+export async function getRepositories(key: string, page = 0, repositories = []): Promise<any> {
+  console.log('FETCH THEM, page: ' + page)
+  const { data } = await bitbucket.repositories.list({
     ...defaults,
     pagelen: 50,
     sort: '-updated_on',
-  })
+  });
+
+  repositories = repositories.concat(data.values as []);
+
+  return { repositories: repositories, done: false };
+}
+
+export function useRepositories() {
+  return useSWR("repositories10", getRepositories)
 }
 
 export async function pipelinesGetQuery(repoSlug: string, pageNumber: number): Promise<any> {
