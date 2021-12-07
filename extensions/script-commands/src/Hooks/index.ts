@@ -3,10 +3,6 @@ export {
 } from "./useDataManager"
 
 export {
-  useFilter
-} from "./useFilter"
-
-export {
   useLanguages
 } from "./useLanguages"
 
