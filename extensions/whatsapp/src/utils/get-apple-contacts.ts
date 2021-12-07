@@ -6,17 +6,16 @@ import path from "path";
 import { randomId } from "@raycast/api";
 
 export async function getAppleContacts(): Promise<Array<AppleContact>> {
-  const fileName = randomId();
+  const filePath = path.join(os.tmpdir(), `${randomId()}.vcf`);
 
   await runAppleScript(`
     tell application "Contacts"
       set the clipboard to (vcard of people) as text
-      do shell script "LANG=en_US.UTF-8 pbpaste >~/Desktop/${fileName}.vcf"
+      do shell script "LANG=en_US.UTF-8 pbpaste > ${filePath}"
       set the clipboard to ""
     end tell`
   );
 
-  const filePath = path.join(os.homedir(), "Desktop", `${fileName}.vcf`);
   const buffer = await fs.readFile(filePath);
 
   const contacts = buffer.toString()
