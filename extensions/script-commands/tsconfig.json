@@ -15,6 +15,7 @@
     "baseUrl": "src",
     "paths": {
       "@commands": ["Commands/index"],
+      "@constants": ["Constants/index"],
       "@components": ["Components/index"],
       "@managers": ["Managers/index"],
       "@hooks": ["Hooks/index"],
