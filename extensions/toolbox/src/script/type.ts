@@ -20,7 +20,7 @@ export interface Result {
 export interface Info {
   title: string;
   desc: string;
-  type: RunType[];
+  type: [RunType, ...RunType[]];
   keywords?: string[];
   example?: string;
   icon?: string;
