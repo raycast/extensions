@@ -18,12 +18,12 @@
   "preferences": [
     {
       "name": "folderPath",
-      "description": "Folder where your Script Commands will be installed",
+      "description": "Folder where your Script Commands will be installed. In case the folder doesn't exist, we will create it for you.",
       "title": "Folder path",
       "required": true,
       "type": "textfield",
       "default": "~/raycast/script-commands",
-      "placeholder": "~/"
+      "placeholder": "~/folder (default: ~/raycast/script-commands)"
     }
   ],
   "dependencies": {
