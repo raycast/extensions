@@ -64,7 +64,14 @@ interface HarvestTimeEntry {
   project: ID_Name;
   task: ID_Name;
   task_assignment: TaskAssignment;
-  external_reference: object;
+  external_reference?: {
+    id: string;
+    group_id: string;
+    account_id: string;
+    permalink: string;
+    service: string;
+    service_icon_url: string;
+  };
   invoice: object;
   hours: number;
   hours_without_timer: number;

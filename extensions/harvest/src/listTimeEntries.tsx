@@ -64,8 +64,9 @@ export default function Command() {
             accessoryTitle={`${entry.client.name}${entry.client.name && entry.task.name ? " | " : ""}${
               entry.task.name
             } | ${entry.hours}`}
+            accessoryIcon={entry.external_reference ? { source: entry.external_reference.service_icon_url } : undefined}
             subtitle={entry.notes}
-            keywords={entry.notes.split(" ")}
+            keywords={entry.notes?.split(" ")}
             icon={entry.is_running ? { tintColor: Color.Orange, source: Icon.Clock } : undefined}
             actions={
               <ActionPanel>
