@@ -2,7 +2,7 @@ import { Script } from "../type";
 
 export const hexToRgb: Script = {
   info: {
-    title: "Hex To Rgb",
+    title: "Hex to Rgb",
     desc: "Convert color in hexadecimal to RGB",
     type: ["list", "form", "clipboard"],
     example: "#51cf75",
@@ -20,7 +20,7 @@ export const hexToRgb: Script = {
 
 export const rgbToHex: Script = {
   info: {
-    title: "Rgb To Hex",
+    title: "Rgb to Hex",
     desc: "Convert color in RGB to hexadecimal",
     type: ["list", "form", "clipboard"],
     example: "81,207,117",
