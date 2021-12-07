@@ -21,6 +21,8 @@ export class State {
     public state = "";
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public attributes: Record<string, any> = {};
+    public last_updated = "";
+    public last_changed = "";
 }
 
 export class HomeAssistant {
@@ -29,6 +31,10 @@ export class HomeAssistant {
     constructor(url: string, token: string) {
         this.token = token;
         this.url = url;
+    }
+
+    public urlJoin(text: string): string {
+        return urljoin(this.url, text);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,7 +83,7 @@ export class HomeAssistant {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async callService(domain: string, service: string, params: { [key: string]: any }): Promise<void> {
+    public async callService(domain: string, service: string, params: { [key: string]: any }): Promise<void> {
         const userparams = params;
         try {
             await this.post(`services/${domain}/${service}`, params = userparams);
@@ -148,6 +154,14 @@ export class HomeAssistant {
 
     async muteMedia(entityID: string): Promise<void> {
         return await this.callService("media_player", "volume_mute", { entity_id: entityID });
+    }
+
+    async setVolumeLevelMedia(entityID: string, volumeLevel: number): Promise<void> {
+        return await this.callService("media_player", "volume_set", { entity_id: entityID, volume_level: volumeLevel });
+    }
+
+    async selectSourceMedia(entityID: string, source: string): Promise<void> {
+        return await this.callService("media_player", "select_source", { entity_id: entityID, source: source });
     }
 
     async setClimateTemperature(entityID: string, value: number): Promise<void> {

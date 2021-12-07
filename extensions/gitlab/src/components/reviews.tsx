@@ -76,6 +76,7 @@ export function useSearch(query: string | undefined): {
           reviewer_id: user.id,
           search: query || "",
           in: "title",
+          scope: "all",
         });
 
         if (!didUnmount) {

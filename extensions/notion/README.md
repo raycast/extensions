@@ -21,16 +21,6 @@ Now go into your workspace, find a database you want to use with Raycast and `Sh
 
 <img width="1680" alt="Screenshot 2021-11-06 at 09 54 13" src="https://user-images.githubusercontent.com/18643714/140604616-23b7e76f-2023-41fa-a60f-e24a6cd5ed24.png">
 
-  
-
-### Copy Notion Workspace Domain
-
-Finally, retrieve from your navigator URL the domain slug of your workspace and ave it in Raycast extension's preference under `Notion Workspace Domain`.
-
-The domain slug can be found in any page of your workspace and respect this pattern `https://www.notion.so/{domain-slug}/ba3e7890ojaj7884675a580d8e` 
-
-<img width="1680" alt="Screenshot 2021-11-06 at 09 54 25" src="https://user-images.githubusercontent.com/18643714/140604622-53f67cd4-1828-44b0-88fe-3dc90dd01ccc.png">
-
 
 You're all set 🙌
 Go back to Raycast to start using the extension.

@@ -80,7 +80,6 @@ export default function TaskListItem({ task, mode }: TaskListItemProps): JSX.Ele
                 key={name}
                 id={name}
                 title={name}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                 onAction={() => updateTask(task, { due_date: getAPIDate(addDays(new Date(), amount)) })}
               />
             ))}

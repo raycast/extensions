@@ -20,6 +20,13 @@
       "subtitle": "Amazon AWS",
       "description": "List All your SQS Queues",
       "mode": "view"
+    },
+    {
+      "name": "codepipelines",
+      "title": "CodePipelines",
+      "subtitle": "Amazon AWS",
+      "description": "List All your CodePipelines",
+      "mode": "view"
     }
   ],
   "preferences": [
