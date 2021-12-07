@@ -22,7 +22,7 @@
       "title": "Folder path",
       "required": true,
       "type": "textfield",
-      "default": "~/Documents/Raycast/Script-Commands",
+      "default": "~/raycast/script-commands",
       "placeholder": "~/"
     }
   ],
