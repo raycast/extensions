@@ -15,16 +15,22 @@ import {
   CopyToClipboardAction,
   PasteAction,
   PushAction,
+  ImageMask,
 } from '@raycast/api'
 import { useEffect, useState } from 'react'
 import {
   Page,
   DatabaseProperty,
+  DatabasePropertyOption,
   PageContent,
+  User,
   searchPages,
   queryDatabase,
   fetchDatabaseProperties,
   fetchPageContent,
+  notionColorToTintColor,
+  patchPage,
+  fetchUsers,
 } from './notion'
 import moment from 'moment'
 import open from 'open'
@@ -94,7 +100,8 @@ export default function SearchPageList(): JSX.Element {
           page={p}
           databaseView={undefined}
           databaseProperties={undefined}
-          saveDatabaseView={undefined}/>
+          saveDatabaseView={undefined}
+          setRefreshView={undefined}/>
         ))}
       </List.Section>
       <List.Section key='search-result' title='Search'>
@@ -104,7 +111,8 @@ export default function SearchPageList(): JSX.Element {
           page={p}
           databaseView={undefined}
           databaseProperties={undefined}
-          saveDatabaseView={undefined}/>
+          saveDatabaseView={undefined}
+          setRefreshView={undefined}/>
         ))}
       </List.Section>
     </List>
@@ -127,6 +135,11 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [databaseView, setDatabaseView] = useState<DatabaseView>()
   const [databaseProperties, setDatabaseProperties] = useState<DatabaseProperty[]>()
+  const [refreshView, setRefreshView] = useState<number>()  
+
+
+  const [users, setUsers] = useState<User[]>()  
+  const [relationsPages, setRelationsPages] = useState<Record<string,Page[]>>({})
 
   // Currently supported properties
   const supportedPropTypes = [
@@ -139,7 +152,9 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
     'checkbox',
     'select',
     'multi_select',
-    'formula'
+    'formula',
+    'people',
+    'relation'
   ]
 
   // Load database properties
@@ -150,6 +165,17 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
       const cachedDatabaseProperties = await loadDatabaseProperties(databaseId)
       if(cachedDatabaseProperties){
         setDatabaseProperties(cachedDatabaseProperties)
+        
+        // Load users
+        hasPeopleProperty = cachedDatabaseProperties.some(function(cdp) {
+          return cdp.type === 'people';
+        })
+        if(hasPeopleProperty){
+          const cachedUsers = await loadUsers()
+          if(cachedUsers){
+            setUsers(cachedUsers)
+          }            
+        }
       }
 
       const fetchedDatabaseProperties = await fetchDatabaseProperties(databaseId)
@@ -159,6 +185,32 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
           return supportedPropTypes.includes(property.type)
         })
         setDatabaseProperties(supportedDatabaseProperties)
+
+        // Fetch relation pages
+        supportedDatabaseProperties.forEach(async function (cdp){
+          if(cdp.type === 'relation' && cdp.relation_id){
+            const fetchedRelationPages = await queryDatabase(cdp.relation_id, undefined)
+            if(fetchedRelationPages && fetchedRelationPages[0]){
+              var copyRelationsPages = JSON.parse(JSON.stringify(relationsPages))
+              copyRelationsPages[cdp.relation_id] = fetchedRelationPages
+              setRelationsPages(copyRelationsPages)
+              storeDatabasePages(cdp.relation_id, fetchedRelationPages)         
+            }
+          }
+        })
+
+        // Fetch users
+        hasPeopleProperty = supportedDatabaseProperties.some(function(sdp) {
+          return sdp.type === 'people';
+        })
+        if(hasPeopleProperty){
+          const fetchedUsers = await fetchUsers()
+          if(fetchedUsers){
+            setUsers(fetchedUsers)
+            storeUsers(fetchedUsers)
+          }
+        }
+
         storeDatabaseProperties(databaseId,supportedDatabaseProperties)
       }
     }
@@ -204,13 +256,13 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
       
     }
     getDatabasePages()
-  }, [])
+  }, [refreshView])
 
 
   // Handle save new database view
   function saveDatabaseView(newDatabaseView: DatabaseView): void {
-    console.log('newDatabaseView',newDatabaseView)
     setDatabaseView(newDatabaseView)
+    showToast(ToastStyle.Success, 'View Updated')  
     storeDatabaseView(databaseId,newDatabaseView)
   }
 
@@ -228,14 +280,17 @@ export function DatabasePagesList(props: {databasePage: Page}): JSX.Element {
           page={p}
           databaseView={databaseView}
           databaseProperties={databaseProperties}
-          saveDatabaseView={saveDatabaseView}/>
+          saveDatabaseView={saveDatabaseView}
+          setRefreshView={setRefreshView}
+          users={users}
+          relationsPages={relationsPages}/>
         ))}
       </List.Section>
     </List>
   ) 
 }
 
-function PageListItem(props: { page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined, saveDatabaseView: any }): JSX.Element {
+function PageListItem(props: { page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined, saveDatabaseView: any, setRefreshView: any, users: User[], relationsPages: Record<string,Page[]>}): JSX.Element {
   const page = props.page
   const pageProperties = page.properties
 
@@ -246,18 +301,24 @@ function PageListItem(props: { page: Page, databaseView: DatabaseView | undefine
     databaseViewCopy = JSON.parse(JSON.stringify(databaseView)) as DatabaseView
   }
   const saveDatabaseView = props.saveDatabaseView
+  const setRefreshView = props.setRefreshView
 
-
+  const users = props.users
+  const relationsPages = props.relationsPages
   
   const isDatabase = page.object === 'database'
   const parentIsDatabase = (page.parent_database_id ? true : false)
   
 
   async function handleOnOpenPage(page: Page) {
-    const installedApplications = await getApplications();
-    const isNotionInstalled = installedApplications.some(function(app) {
-      return app.bundleId === 'notion.id';
-    })
+    const openIn = preferences.open_in?.value;
+    var isNotionInstalled;
+    if(!openIn || openIn === 'app'){
+      const installedApplications = await getApplications();
+      isNotionInstalled = installedApplications.some(function(app) {
+        return app.bundleId === 'notion.id';
+      })
+    }
     open((isNotionInstalled ?  page.url.replace('https','notion') : page.url))
     await storeRecentlyOpenedPage(page)
     closeMainWindow();
@@ -281,7 +342,7 @@ function PageListItem(props: { page: Page, databaseView: DatabaseView | undefine
           var type = property.type
           var propertyValue = property[type]
           
-          if(propertyValue){
+          if(propertyValue !== undefined){
 
             var propAccessoryTitle = ''
 
@@ -310,13 +371,13 @@ function PageListItem(props: { page: Page, databaseView: DatabaseView | undefine
                 propAccessoryTitle = (propertyValue[0] ? propertyValue[0].plain_text : null)
                 break
               case 'date':
-                propAccessoryTitle = moment(propertyValue.start).fromNow()
+                propAccessoryTitle = moment(propertyValue?.start).fromNow()
                 break
               case 'checkbox':
                 propAccessoryTitle = (propertyValue ? '☑' : '☐')
                 break
               case 'select':
-                propAccessoryTitle = propertyValue.name
+                propAccessoryTitle = propertyValue?.name
                 break
               case 'multi_select':   
                 const names:string[] = []
@@ -325,6 +386,14 @@ function PageListItem(props: { page: Page, databaseView: DatabaseView | undefine
                   names.push(selection.name as string)
                 })
                 propAccessoryTitle = names.join(', ')
+                break
+              case 'people':   
+                const user_names:string[] = []
+                propertyValue.forEach(function (user: User){
+                  keywords.push(user.name as string)
+                  user_names.push(user.name as string)
+                })
+                propAccessoryTitle = user_names.join(', ')
                 break
               case 'string':
                 propAccessoryTitle = propertyValue
@@ -345,6 +414,10 @@ function PageListItem(props: { page: Page, databaseView: DatabaseView | undefine
     }
   }
 
+  const quickEditProperties = databaseProperties?.filter(function(property){
+    return ['checkbox','select','multi_select','people','relation'].includes(property.type)
+  })
+
   return (<List.Item
     keywords={keywords}
     title={(page.title ? page.title : 'Untitled')}
@@ -354,18 +427,216 @@ function PageListItem(props: { page: Page, databaseView: DatabaseView | undefine
     actions={            
     <ActionPanel>
       <ActionPanel.Section title={(page.title ? page.title : 'Untitled')}>
-      {(page.object === 'database' ? <PushAction title='Navigate to Database' icon={Icon.ArrowRight} target={<DatabasePagesList databasePage={page} />}/> :  <PushAction title='Preview page' icon={Icon.ArrowRight} target={<PageDetail page={page} />}/>)}
+      {(page.object === 'database' ? <PushAction title='Navigate to Database' icon={Icon.ArrowRight} target={<DatabasePagesList databasePage={page} />}/> :  <PushAction title='Preview Page' icon={Icon.ArrowRight} target={<PageDetail page={page} />}/>)}
         <ActionPanel.Item
           title='Open in Notion'
           icon={'notion-logo.png'}
-          onAction={function () { handleOnOpenPage(page) }}/>
+          onAction={function () { handleOnOpenPage(page) }}/>         
+         </ActionPanel.Section>      
+      <ActionPanel.Section>
+      {(databaseProperties ? 
+        <ActionPanel.Submenu 
+          title='Edit Property'
+          icon={'icon/edit_page_property.png'}
+          shortcut={{ modifiers: ["cmd","shift"], key: "p" }}>
+          {quickEditProperties?.map(function (dp: DatabaseProperty) {
+
+            var patchedProperty: Record<string,any> = {}
+            patchedProperty[dp.id] = {}
+
+            switch (dp.type) {    
+              case 'checkbox':
+                return (<ActionPanel.Item 
+                  icon={'icon/'+dp.type+'_'+pageProperties[dp.id]?.checkbox+'.png'} 
+                  title={dp.name} 
+                  onAction={async function () {                    
+                    patchedProperty[dp.id][dp.type] = !pageProperties[dp.id]?.checkbox   
+                    showToast(ToastStyle.Animated, 'Updating Property')
+                    const updatedPage = await  patchPage(page.id,patchedProperty)
+                    if(updatedPage && updatedPage.id){
+                      showToast(ToastStyle.Success, 'Property Updated')  
+                      setRefreshView(Date.now())
+                    }                        
+                  }}/>)
+                break
+              case 'select': 
+                return (                  
+                  <ActionPanel.Submenu 
+                    title={dp.name}
+                    icon={'icon/'+dp.type+'.png'}>
+                    {dp?.options?.map(function (opt) {
+                      return (<ActionPanel.Item 
+                        icon={(opt.id !== '_select_null_' ? {source: (pageProperties[dp.id][dp.type]?.id === opt.id ? Icon.Checkmark : Icon.Circle), tintColor: notionColorToTintColor(opt.color)} : undefined )} 
+                        title={opt.name}
+                        onAction={async function () {
+                          if(opt.id !== '_select_null_'){
+                            patchedProperty[dp.id][dp.type] = { id : opt.id }
+                          } else {
+                            patchedProperty[dp.id][dp.type] = null
+                          }
+                          showToast(ToastStyle.Animated, 'Updating Property')
+                          const updatedPage = await  patchPage(page.id,patchedProperty)
+                          if(updatedPage && updatedPage.id){
+                            showToast(ToastStyle.Success, 'Property Updated')  
+                            setRefreshView(Date.now())
+                          }                        
+                        }}/>)
+                    })}
+                 </ActionPanel.Submenu>
+                )
+                break
+              case 'multi_select':   
+                const ids:string[] = []
+                pageProperties[dp.id][dp.type]?.forEach(function (selection: Record<string,any>){
+                  ids.push(selection.id as string)
+                })
+                return (
+                  <ActionPanel.Submenu 
+                    title={dp.name}
+                    icon={'icon/'+dp.type+'.png'}>
+                    {dp?.options?.map(function (opt: DatabasePropertyOption) {
+                      return (<ActionPanel.Item 
+                        icon={{source: (ids.includes(opt.id) ? Icon.Checkmark : Icon.Circle), tintColor: notionColorToTintColor(opt.color)}} 
+                        title={opt.name}
+                        onAction={async function () {
+                          patchedProperty[dp.id][dp.type] = (pageProperties[dp.id][dp.type] ? pageProperties[dp.id][dp.type] : [])
+                          if(ids.includes(opt.id)){
+                            patchedProperty[dp.id][dp.type] = patchedProperty[dp.id][dp.type].filter(function (o: DatabasePropertyOption){
+                              return o.id !== opt.id
+                            })
+                          } else {
+                            patchedProperty[dp.id][dp.type].push({id: opt.id})
+                          }
+                          showToast(ToastStyle.Animated, 'Updating Property')
+                          const updatedPage = await  patchPage(page.id,patchedProperty)
+                          if(updatedPage && updatedPage.id){
+                            showToast(ToastStyle.Success, 'Property Updated')  
+                            setRefreshView(Date.now())
+                          }                        
+                        }}/>)
+                    })}
+                 </ActionPanel.Submenu>
+                )
+                break
+              case 'people':   
+                const user_ids:string[] = []
+                pageProperties[dp.id][dp.type]?.forEach(function (user: Record<string,any>){
+                  user_ids.push(user.id as string)
+                })
+                return (
+                  <ActionPanel.Submenu 
+                    title={dp.name}
+                    icon={'icon/'+dp.type+'.png'}>
+                    <ActionPanel.Section>
+                      {pageProperties[dp.id][dp.type]?.map(function (user: User) {
+                        return (<ActionPanel.Item 
+                          icon={{source:user.avatar_url, mask: ImageMask.Circle}} 
+                          title={user.name+'  ✓'}
+                          onAction={async function () {
+                            patchedProperty[dp.id][dp.type] = (pageProperties[dp.id][dp.type] ? pageProperties[dp.id][dp.type] : [])
+                            if(user_ids.includes(user.id)){
+                              patchedProperty[dp.id][dp.type] = patchedProperty[dp.id][dp.type].filter(function (o: DatabasePropertyOption){
+                                return o.id !== user.id
+                              })
+                            }
+                            showToast(ToastStyle.Animated, 'Updating Property')
+                            const updatedPage = await  patchPage(page.id,patchedProperty)
+                            if(updatedPage && updatedPage.id){
+                              showToast(ToastStyle.Success, 'Property Updated')  
+                              setRefreshView(Date.now())
+                            }                      
+                          }}/>)
+                      })}
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                    {users?.map(function (user: User) {
+                      if(!user_ids.includes(user.id)){
+                        return (<ActionPanel.Item 
+                        icon={{source:user.avatar_url, mask: ImageMask.Circle}} 
+                        title={user.name}
+                        onAction={async function () {
+                          patchedProperty[dp.id][dp.type] = (pageProperties[dp.id][dp.type] ? pageProperties[dp.id][dp.type] : [])
+                          patchedProperty[dp.id][dp.type].push({id: user.id})
+                          showToast(ToastStyle.Animated, 'Updating Property')
+                          const updatedPage = await  patchPage(page.id,patchedProperty)
+                          if(updatedPage && updatedPage.id){
+                            showToast(ToastStyle.Success, 'Property Updated')  
+                            setRefreshView(Date.now())
+                          }                      
+                        }}/>)
+                      }                      
+                    })}
+                  </ActionPanel.Section>
+                 </ActionPanel.Submenu>
+                )
+                break
+              case 'relation':   
+                const relation_id = dp.relation_id
+                console.log(relationsPages[relation_id])
+                const relation_ids:string[] = []
+                pageProperties[dp.id][dp.type]?.forEach(function (relationPage: Record<string,any>){
+                  relation_ids.push(relationPage.id as string)
+                })
+                return (
+                  <ActionPanel.Submenu 
+                    title={dp.name}
+                    icon={'icon/'+dp.type+'.png'}>
+                    <ActionPanel.Section>
+                      {relationsPages[relation_id]?.map(function (rp: Page) {
+                        if(relation_ids.includes(rp.id)){
+                          return (<ActionPanel.Item 
+                          icon={{source: ((rp.icon_emoji) ? rp.icon_emoji : ( rp.icon_file ?  rp.icon_file :  ( rp.icon_external ?  rp.icon_external : Icon.TextDocument)))}} 
+                          title={rp.title+'  ✓'}
+                          onAction={async function () {
+                            patchedProperty[dp.id][dp.type] = (pageProperties[dp.id][dp.type] ? pageProperties[dp.id][dp.type] : [])
+                            patchedProperty[dp.id][dp.type] = patchedProperty[dp.id][dp.type].filter(function (o: DatabasePropertyOption){
+                              return o.id !== rp.id
+                            })
+                            showToast(ToastStyle.Animated, 'Updating Property')
+                            const updatedPage = await  patchPage(page.id,patchedProperty)
+                            if(updatedPage && updatedPage.id){
+                              showToast(ToastStyle.Success, 'Property Updated')  
+                              setRefreshView(Date.now())
+                            }                         
+                          }}/>)
+                        }                      
+                      })}
+                    </ActionPanel.Section>
+                    <ActionPanel.Section>
+                    {relationsPages[relation_id]?.map(function (rp: Page) {
+                      if(!relation_ids.includes(rp.id)){
+                        return (<ActionPanel.Item 
+                        icon={{source: ((rp.icon_emoji) ? rp.icon_emoji : ( rp.icon_file ?  rp.icon_file :  ( rp.icon_external ?  rp.icon_external : Icon.TextDocument)))}} 
+                        title={rp.title}
+                        onAction={async function () {
+                          patchedProperty[dp.id][dp.type] = (pageProperties[dp.id][dp.type] ? pageProperties[dp.id][dp.type] : [])
+                          patchedProperty[dp.id][dp.type].push({id: rp.id})
+                          showToast(ToastStyle.Animated, 'Updating Property')
+                          const updatedPage = await  patchPage(page.id,patchedProperty)
+                          if(updatedPage && updatedPage.id){
+                            showToast(ToastStyle.Success, 'Property Updated')  
+                            setRefreshView(Date.now())
+                          }                  
+                        }}/>)
+                      }                      
+                    })}
+                  </ActionPanel.Section>
+                 </ActionPanel.Submenu>
+                )
+                break
+            }              
+          })}
+        </ActionPanel.Submenu>
+      : null )}
       </ActionPanel.Section>      
       <ActionPanel.Section>
         <CopyToClipboardAction
+          key='copy-page-url'
           title='Copy Page URL'
           content={page.url}
           shortcut={{ modifiers: ["cmd","shift"], key: "c" }}/>
         <PasteAction
+          key='paste-page-url'
           title='Paste Page URL'
           content={page.url}
           shortcut={{ modifiers: ["cmd","shift"], key: "v" }}/>
@@ -375,7 +646,7 @@ function PageListItem(props: { page: Page, databaseView: DatabaseView | undefine
           <ActionPanel.Submenu icon={Icon.Gear} title='Properties...'>
             {databaseProperties?.map((dp: DatabaseProperty) => (
               <ActionPanel.Item
-                icon={((databaseView && databaseView.properties && databaseView.properties[dp.id]) ? Icon.Eye  : {source: Icon.EyeSlash, tintColor: Color.SecondaryText} )}  
+                icon={((databaseView && databaseView.properties && databaseView.properties[dp.id]) ? './icon/shown.png'  : {source: './icon/hidden.png', tintColor: Color.SecondaryText} )}  
                 key={page.id+'-view-property-'+dp.id}
                 onAction={function () {
                   if(databaseViewCopy && databaseViewCopy.properties){
@@ -425,10 +696,14 @@ function PageDetail(props: { page: Page }): JSX.Element {
   }, [])
 
   async function handleOnOpenPage(page: Page) {
-    const installedApplications = await getApplications();
-    const isNotionInstalled = installedApplications.some(function(app) {
-      return app.bundleId === 'notion.id';
-    })
+    const openIn = preferences.open_in?.value;
+    var isNotionInstalled;
+    if(!openIn || openIn === 'app'){
+      const installedApplications = await getApplications();
+      isNotionInstalled = installedApplications.some(function(app) {
+        return app.bundleId === 'notion.id';
+      })
+    }    
     open((isNotionInstalled ?  page.url.replace('https','notion') : page.url))
     await storeRecentlyOpenedPage(page)
     closeMainWindow();
@@ -519,5 +794,15 @@ async function storeDatabaseView(databaseId: string, databaseView: DatabaseView)
 
 async function loadDatabaseView(databaseId: string) {
   const data: string | undefined = await getLocalStorageItem('VIEW_DATABASE_'+databaseId)
+  return data !== undefined ? JSON.parse(data) : undefined
+}
+
+async function storeUsers(users: User[]) {
+  const data = JSON.stringify(users)
+  await setLocalStorageItem('USERS', data)
+}
+
+async function loadUsers() {
+  const data: string | undefined = await getLocalStorageItem('USERS')
   return data !== undefined ? JSON.parse(data) : undefined
 }

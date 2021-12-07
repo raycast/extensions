@@ -24,8 +24,11 @@ import {
   Page,
   fetchDatabases,
   fetchDatabaseProperties,
+  queryDatabase,
   createDatabasePage,
   fetchExtensionReadMe,
+  notionColorToTintColor,
+  fetchUsers,
 } from './notion'
 
 
@@ -54,6 +57,8 @@ export default function CreateDatabaseForm(): JSX.Element {
   const [databaseProperties, setDatabaseProperties] = useState<DatabaseProperty[]>()  
   const [databaseId, setDatabaseId] = useState<string>()
   const [markdown, setMarkdown] = useState<string>()
+  const [relationsPages, setRelationsPages] = useState<Record<string,Page[]>>({})
+  const [users, setUsers] = useState<User[]>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
 
@@ -68,7 +73,9 @@ export default function CreateDatabaseForm(): JSX.Element {
     'date',
     'checkbox',
     'select',
-    'multi_select'
+    'multi_select',
+    'relation',
+    'people'
   ]
   
   // Fetch databases
@@ -104,6 +111,29 @@ export default function CreateDatabaseForm(): JSX.Element {
 
         if (cachedDatabaseProperties) {
           setDatabaseProperties(cachedDatabaseProperties)
+
+          // Load realtion page
+          cachedDatabaseProperties.forEach(async function (cdp){
+            if(cdp.type === 'relation' && cdp.relation_id && !relationsPages[cdp.relation_id]){
+              const cachedRelationPages = await loadDatabasePages(databaseId)
+              if(cachedRelationPages){
+                var copyRelationsPages = JSON.parse(JSON.stringify(relationsPages))
+                copyRelationsPages[cdp.relation_id] = cachedRelationPages
+                setRelationsPages(copyRelationsPages)
+              }
+            }
+          })
+
+          // Load users
+          hasPeopleProperty = cachedDatabaseProperties.some(function(cdp) {
+            return cdp.type === 'people';
+          })
+          if(hasPeopleProperty){
+            const cachedUsers = await loadUsers()
+            if(cachedUsers){
+              setUsers(cachedUsers)
+            }            
+          }
         }
 
         const fetchedDatabaseProperties = await fetchDatabaseProperties(databaseId)
@@ -111,7 +141,33 @@ export default function CreateDatabaseForm(): JSX.Element {
           const supportedDatabaseProperties = fetchedDatabaseProperties.filter(function (property){
             return supportedPropTypes.includes(property.type)
           })
-          setDatabaseProperties(supportedDatabaseProperties)   
+          setDatabaseProperties(supportedDatabaseProperties)
+
+          // Fetch relation pages
+          supportedDatabaseProperties.forEach(async function (cdp){
+            if(cdp.type === 'relation' && cdp.relation_id){
+              const fetchedRelationPages = await queryDatabase(cdp.relation_id, undefined)
+              if(fetchedRelationPages && fetchedRelationPages[0]){
+                var copyRelationsPages = JSON.parse(JSON.stringify(relationsPages))
+                copyRelationsPages[cdp.relation_id] = fetchedRelationPages
+                setRelationsPages(copyRelationsPages)
+                storeDatabasePages(cdp.relation_id, fetchedRelationPages)         
+              }
+            }
+          })
+
+          // Fetch users
+          hasPeopleProperty = cachedDatabaseProperties.some(function(cdp) {
+            return cdp.type === 'people';
+          })
+          if(hasPeopleProperty){
+            const fetchedUsers = await fetchUsers()
+            if(fetchedUsers){
+              setUsers(fetchedUsers)
+              await storeUsers(fetchedUsers)
+            }
+          }
+
           await storeDatabaseProperties(databaseId, supportedDatabaseProperties)
         }
         
@@ -121,7 +177,7 @@ export default function CreateDatabaseForm(): JSX.Element {
     fetchData()
   }, [databaseId])
 
-
+  
   // Fetch Notion Extension README
   useEffect(() => {
     const fetchREADME = async () => {
@@ -146,8 +202,7 @@ export default function CreateDatabaseForm(): JSX.Element {
             <SubmitFormAction 
               title='Create Page'
               icon={Icon.Plus}
-              onSubmit={handleSubmit}
-               />
+              onSubmit={handleSubmit}/>
             </ActionPanel.Section>
         </ActionPanel>
       }>
@@ -186,11 +241,10 @@ export default function CreateDatabaseForm(): JSX.Element {
            return (<Form.Dropdown key={key} id={id} title={title} >
                 {dp.options?.map((opt) => {
                   return (<Form.Dropdown.Item  
-                      key={'option::'+opt.id} 
-                      value={opt.id} 
-                      title={opt.name}
-                      icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined)}
-                      />)
+                    key={'option::'+opt.id} 
+                    value={opt.id} 
+                    title={opt.name}
+                    icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined)}/>)
                 })}
               </Form.Dropdown>
             )
@@ -199,10 +253,34 @@ export default function CreateDatabaseForm(): JSX.Element {
             return (<Form.TagPicker key={key} id={id} title={title} placeholder={placeholder}>
                 {dp.options?.map((opt) => {
                   return (<Form.TagPicker.Item  
-                      key={'option::'+opt.id} 
-                      value={opt.id} 
-                      title={opt.name}
-                      icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined)}/>)
+                    key={'option::'+opt.id} 
+                    value={opt.id} 
+                    title={opt.name}
+                    icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined)}/>)
+                })}
+              </Form.TagPicker>
+            )            
+            break
+          case 'relation':
+            return (<Form.TagPicker key={key} id={id} title={title} placeholder={placeholder}>
+                {relationsPages[dp.relation_id]?.map((rp) => {
+                  return (<Form.TagPicker.Item  
+                      key={'relation::'+rp.id} 
+                      value={rp.id} 
+                      title={rp.title}
+                      icon={{source: ((rp.icon_emoji) ? rp.icon_emoji : ( rp.icon_file ?  rp.icon_file :  ( rp.icon_external ?  rp.icon_external : Icon.TextDocument)))}}/>)
+                })}
+              </Form.TagPicker>
+            )            
+            break
+          case 'people':
+            return (<Form.TagPicker key={key} id={id} title={title} placeholder={placeholder}>
+                {users?.map((u) => {
+                  return (<Form.TagPicker.Item  
+                      key={'people::'+u.id} 
+                      value={u.id} 
+                      title={u.name}
+                      icon={{source: u.avatar_url, mask: ImageMask.Circle}}/>)
                 })}
               </Form.TagPicker>
             )            
@@ -225,24 +303,6 @@ function validateForm(values: FormValues): boolean {
   return true;
 }
 
-
-function notionColorToTintColor (notionColor: string): Color {
-   const colorMapper = {
-    'default': Color.PrimaryText,
-    'gray': Color.PrimaryText,
-    'brown': Color.Brown,
-    'red': Color.Red,
-    'blue': Color.Blue,
-    'green': Color.Green,
-    'yellow': Color.Yellow,
-    'orange': Color.Orange,
-    'purple': Color.Purple,
-    'pink': Color.Magenta
-  } as Record<string,Color>
-
-  return colorMapper[notionColor] 
-}
-
 async function storeDatabases(database: Database[]) {
   const data = JSON.stringify(database)
   await setLocalStorageItem('DATABASES', data)
@@ -263,3 +323,22 @@ async function loadDatabaseProperties(databaseId: string) {
   return data !== undefined ? JSON.parse(data) : undefined
 }
 
+async function storeDatabasePages(databaseId: string, pages: Page[]) {
+  const data = JSON.stringify(pages)
+  await setLocalStorageItem('PAGES_DATABASE_'+databaseId, data)
+}
+
+async function loadDatabasePages(databaseId: string) {
+  const data: string | undefined = await getLocalStorageItem('PAGES_DATABASE_'+databaseId)
+  return data !== undefined ? JSON.parse(data) : undefined
+}
+
+async function storeUsers(users: User[]) {
+  const data = JSON.stringify(users)
+  await setLocalStorageItem('USERS', data)
+}
+
+async function loadUsers() {
+  const data: string | undefined = await getLocalStorageItem('USERS')
+  return data !== undefined ? JSON.parse(data) : undefined
+}

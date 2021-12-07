@@ -2,7 +2,8 @@ import {
   preferences, 
   FormValues,
   showToast, 
-  ToastStyle 
+  ToastStyle,  
+  Color,
 } from '@raycast/api'
 import fetch, { Headers } from 'node-fetch'
 
@@ -12,6 +13,14 @@ const headers = new Headers({
   'Content-Type': 'application/json;charset=UTF-8',
 })
 const apiURL = 'https://api.notion.com/'
+
+export interface User {
+  id: string
+  type: string  
+  name: string | null
+  avatar_url: string | null
+}
+
 
 export interface Database {
   id: string
@@ -27,6 +36,7 @@ export interface DatabaseProperty {
   type: string
   name: string
   options: DatabasePropertyOption[]
+  relation_id: string | undefined
 }
 
 export interface DatabasePropertyOption {
@@ -107,7 +117,6 @@ async function rawFetchDatabases(): Promise<Database[]> {
   }
 }
 
-
 // Fetch database properties
 export async function fetchDatabaseProperties(databaseId: string): Promise<DatabaseProperty[]> {
   const databaseProperties: DatabaseProperty[] = await rawDatabaseProperties(databaseId);
@@ -154,6 +163,9 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
         case 'multi_select':
           databaseProperty.options = property.multi_select.options
           break
+        case 'relation':
+          databaseProperty.relation_id = property.relation.database_id
+          break
       }
 
       databaseProperties.push(databaseProperty)
@@ -197,6 +209,8 @@ async function rawQueryDatabase(databaseId: string, query: { title: string | und
       }
     }
 
+
+
     const response = await fetch(
       apiURL + `v1/databases/${databaseId}/query`,
       {
@@ -212,9 +226,10 @@ async function rawQueryDatabase(databaseId: string, query: { title: string | und
       return []
     }
 
-    const pages = pageListMapper(json.results as Record<string,any>[])
+    const fetchedPages = pageListMapper(json.results as Record<string,any>[])
 
-    return pages
+    return fetchedPages   
+    
   } catch (err) {
     console.error(err)
     showToast(ToastStyle.Failure, 'Failed to query databases')
@@ -321,6 +336,24 @@ async function rawCreateDatabasePage(values: FormValues): Promise<Page> {
               multi_select: multi_values
             }
             break
+          case 'relation':
+            const relation_values: Record<string,string>[]= [];
+            value.map(function (relation_page_id: string){
+              relation_values.push({id: relation_page_id})
+            })
+            requestBody.properties[propId] = {
+              relation: relation_values
+            }
+            break
+          case 'people':
+            const people_values: Record<string,string>[]= [];
+            value.map(function (user_id: string){
+              people_values.push({id: user_id})
+            })
+            requestBody.properties[propId] = {
+              people: people_values
+            }
+            break
         }
       }
       
@@ -345,6 +378,39 @@ async function rawCreateDatabasePage(values: FormValues): Promise<Page> {
   }
 }
 
+
+// Patch page
+export async function patchPage(pageId: string, properties: Record<string,any>): Promise<Page> {
+  const page: Page = await rawPatchPage(pageId, properties);
+  return page;
+}
+// Raw function for updating page
+async function rawPatchPage(pageId: string, properties: Record<string,any>): Promise<Page> {
+  try {
+
+    const requestBody = {
+      properties: properties
+    }
+
+    const response = await fetch(
+      apiURL + `v1/pages/${pageId}`,
+      {
+        method: 'patch',
+        headers: headers,
+        body: JSON.stringify(requestBody)
+      }
+    )
+    const json = await response.json() as Record<string,any>
+
+    const page = pageMapper(json)
+
+    return page
+  } catch (err) {
+    console.error(err)
+    showToast(ToastStyle.Failure, 'Failed to update page')
+    throw new Error('Failed to update page')
+  }
+}
 
 // Search pages
 export async function searchPages(query: string | undefined): Promise<Page[]> {
@@ -478,6 +544,52 @@ async function rawFetchPageContent(pageId: string): Promise<PageContent | null> 
     throw new Error('Failed to fetch page content')
   }
 }
+
+// Fetch users
+export async function fetchUsers(): Promise<User[]> {
+  const users: User[] = await rawListUsers();
+  return users;
+}
+
+// Raw function for fetching users
+async function rawListUsers(): Promise<User[]> {
+  
+  try {
+    const response = await fetch(
+      apiURL + `v1/users`,
+      {
+        method: 'get',
+        headers: headers
+      }
+    )
+    const json = await response.json()
+
+    if(json.object === 'error'){
+      showToast(ToastStyle.Failure, json.message)
+      return []
+    }
+
+    const users = recordsMapper({ 
+      sourceRecords : json.results as any[],
+      models : [
+        { targetKey : 'id', sourceKeys : ['id']},
+        { targetKey : 'name', sourceKeys : ['name']},
+        { targetKey : 'type', sourceKeys : ['type']},
+        { targetKey : 'avatar_url', sourceKeys : ['avatar_url']}          
+      ] as any
+    }) as User[];
+    
+
+    return users.filter(function (user){
+      return user.type === 'person'
+    })
+  } catch (err) {
+    console.error(err)
+    showToast(ToastStyle.Failure, 'Failed to fetch users')
+    throw new Error('Failed to fetch users')
+  }
+}
+
 
 // Fetch Extension README
 export async function fetchExtensionReadMe(): Promise<string> {
@@ -648,3 +760,26 @@ function notionTextToMarkdown (text: Record<string,any>): string {
 
   return plainText
 }
+
+
+export function notionColorToTintColor (notionColor: string | undefined): Color {
+
+  const colorMapper = {
+    'default': Color.PrimaryText,
+    'gray': Color.PrimaryText,
+    'brown': Color.Brown,
+    'red': Color.Red,
+    'blue': Color.Blue,
+    'green': Color.Green,
+    'yellow': Color.Yellow,
+    'orange': Color.Orange,
+    'purple': Color.Purple,
+    'pink': Color.Magenta
+  } as Record<string,Color>
+
+  if(notionColor === undefined){
+    return colorMapper['default']
+  }
+  return colorMapper[notionColor] 
+}
+
