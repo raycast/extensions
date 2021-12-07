@@ -1,3 +1,8 @@
+export type AppleContact = {
+  name: string;
+  phone: string;
+};
+
 export interface Chat {
   id: string;
   name: string;
@@ -14,6 +19,10 @@ export interface GroupChat extends Chat {
 }
 
 export type WhatsAppChat = PhoneChat | GroupChat;
+
+export function isAppleContact(contact: { name?: string, phone?: string }): contact is AppleContact {
+  return contact.name !== undefined && contact.phone !== undefined;
+}
 
 export function isGroupChat(chat: WhatsAppChat): chat is GroupChat {
   return (chat as GroupChat).groupCode !== undefined;
