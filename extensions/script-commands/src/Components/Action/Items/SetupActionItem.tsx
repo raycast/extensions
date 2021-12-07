@@ -1,5 +1,5 @@
 import { 
-  OpenAction 
+  OpenWithAction
 } from "@raycast/api"
 
 import { 
@@ -13,10 +13,10 @@ type Props = {
 
 export function SetupActionItem({ path, onSetup }: Props): JSX.Element {
   return (
-    <OpenAction 
+    <OpenWithAction 
       icon={ IconConstants.Setup } 
-      title="Configure Script Command" 
-      target={ path }
+      title="Configure Script Command with" 
+      path={ path }
       onOpen={ onSetup }
     />
   )
