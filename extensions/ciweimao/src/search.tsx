@@ -33,13 +33,13 @@ export default function Command() {
 
   async function add(bid: string, sid: string) {
     const res = await favor(bid, sid);
-    if (res) showToast(ToastStyle.Success, "成功", "书籍添加成功");
+    if (res) showToast(ToastStyle.Success, "Success", "Added Successfully");
   }
 
   return (
     <List
       isLoading={state.isLoading}
-      searchBarPlaceholder="搜索书名或作者……"
+      searchBarPlaceholder="Search books via title or author……"
       throttle={true}
       onSearchTextChange={setKey}
     >
@@ -52,15 +52,15 @@ export default function Command() {
             <ActionPanel>
               <PushAction
                 icon={{ source: "../assets/open.png" }}
-                title="打开书籍"
+                title="Read Book"
                 target={<Chapter book_id={item.book_id} />}
               />
               <PushAction
                 icon={{ source: "../assets/catalog.png" }}
-                title="查看目录"
+                title="View Catalog"
                 target={<Catalog book_id={item.book_id} />}
               />
-              <ActionPanel.Submenu title="加入书架" icon={{ source: "../assets/add.png" }}>
+              <ActionPanel.Submenu title="Add To Bookshelf" icon={{ source: "../assets/add.png" }}>
                 {state.shelves!.map((shelf: any) => (
                   <ActionPanel.Item
                     key={shelf.shelf_id}

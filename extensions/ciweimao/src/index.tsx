@@ -34,7 +34,7 @@ export default function Command(props: { shelf_id?: string }) {
     fetchData();
   }, []);
   if (state.error) {
-    showToast(ToastStyle.Failure, "出错了", state.error.message);
+    showToast(ToastStyle.Failure, "Error", state.error.message);
   }
   async function delBook(bid: string) {
     await deleteShelfBook(bid, state.current!);
@@ -55,12 +55,12 @@ export default function Command(props: { shelf_id?: string }) {
             <ActionPanel>
               <PushAction
                 icon={{ source: "../assets/open.png" }}
-                title="打开书籍"
+                title="Read Book"
                 target={<Chapter book_id={item.book_info.book_id} cid={item.last_read_chapter_id} />}
               />
               <PushAction
                 icon={{ source: "../assets/catalog.png" }}
-                title="查看目录"
+                title="View Catalog"
                 target={<Catalog book_id={item.book_info.book_id} />}
               />
               {/* <PushAction
@@ -70,7 +70,7 @@ export default function Command(props: { shelf_id?: string }) {
               /> */}
               <ActionPanel.Item
                 icon={{ source: "../assets/delete.png" }}
-                title="删除书籍"
+                title="Delete Book"
                 onAction={() => delBook(item.book_info.book_id)}
               />
             </ActionPanel>

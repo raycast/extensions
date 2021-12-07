@@ -26,7 +26,7 @@ ajax.interceptors.response.use((response: AxiosResponse) => {
   if (!res.data) {
     showToast(
       res.code != 100000 ? ToastStyle.Failure : ToastStyle.Success,
-      res.code != 100000 ? "请求失败" : "请求完成",
+      res.code != 100000 ? "Failed" : "Success",
       res.tip
     );
   }

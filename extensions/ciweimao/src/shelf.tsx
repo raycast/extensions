@@ -22,11 +22,11 @@ export default function Command() {
     fetchData();
   }, []);
   if (state.error) {
-    showToast(ToastStyle.Failure, "出错了", state.error.message);
+    showToast(ToastStyle.Failure, "Error", state.error.message);
   }
   async function setDefault(sid: string) {
     await setLocalStorageItem("sid", sid);
-    showToast(ToastStyle.Success, "操作成功", "默认书架设置完毕");
+    showToast(ToastStyle.Success, "Success", "It's now the default.");
   }
   return (
     <List isLoading={!state.shelves && !state.error}>
@@ -39,12 +39,12 @@ export default function Command() {
             <ActionPanel>
               <PushAction
                 icon={{ source: "../assets/shelf.png" }}
-                title="打开书架"
+                title="Open Bookshelf"
                 target={<Shelf shelf_id={item.shelf_id} />}
               />
               <ActionPanel.Item
                 icon={{ source: "../assets/default.png" }}
-                title="设为默认"
+                title="Set Default"
                 onAction={() => setDefault(item.shelf_id)}
               />
             </ActionPanel>

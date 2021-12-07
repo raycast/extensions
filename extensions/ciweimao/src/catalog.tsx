@@ -46,7 +46,7 @@ export function Catalog(props: { book_id: string; current?: number }) {
               />
               <ActionPanel.Item
                 icon={{ source: "../assets/refresh.png" }}
-                title="更新目录"
+                title="Update Catalog"
                 onAction={() => refresh()}
               />
             </ActionPanel>

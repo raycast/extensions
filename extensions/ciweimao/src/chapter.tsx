@@ -125,20 +125,20 @@ export default function Command(props: { book_id: string; current?: number; cid?
           <ActionPanel>
             {!state.auth ? (
               <ActionPanel.Item
-                title={`购买(需 ${state.hlb} 币)`}
+                title={`Buy(Need ${state.hlb} Coins)`}
                 onAction={() => buyCpt()}
                 icon={{ source: "../assets/buy.png" }}
               />
             ) : null}
-            <ActionPanel.Item title="下一章" onAction={() => nextCpt()} icon={{ source: "../assets/right.png" }} />
-            <ActionPanel.Item title="上一章" onAction={() => prevCpt()} icon={{ source: "../assets/left.png" }} />
-            <ActionPanel.Item title="刷新" onAction={() => prevCpt()} icon={{ source: "../assets/refresh.png" }} />
+            <ActionPanel.Item title="Next Chapter" onAction={() => nextCpt()} icon={{ source: "../assets/right.png" }} />
+            <ActionPanel.Item title="Previous Chapter" onAction={() => prevCpt()} icon={{ source: "../assets/left.png" }} />
+            <ActionPanel.Item title="Refresh" onAction={() => prevCpt()} icon={{ source: "../assets/refresh.png" }} />
             <PushAction
               icon={{ source: "../assets/catalog.png" }}
-              title="目录"
+              title="Catalog"
               target={<Catalog book_id={props.book_id} />}
             />
-            <ActionPanel.Item title="朗读" onAction={() => speakCpt()} icon={{ source: "../assets/voice.png" }} />
+            <ActionPanel.Item title="TTS(WIP)" onAction={() => speakCpt()} icon={{ source: "../assets/voice.png" }} />
           </ActionPanel>
         )
       }
