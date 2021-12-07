@@ -1,23 +1,26 @@
 import { 
+  ActionPanel,
   List, 
 } from "@raycast/api"
 
 import { 
-  GroupSection 
+  ClearFilterActionItem,
+  GroupSection,
 } from "@components"
 
 import { 
-  useScriptCommands 
+  useScriptCommands,
 } from "@hooks"
 
 export function MainContent(): JSX.Element {
-  const { props } = useScriptCommands()  
+  const { props, setFilter, setSelection } = useScriptCommands()  
 
   return (
     <List 
       navigationTitle={ props.title }
       isLoading={ props.isLoading } 
       searchBarPlaceholder={ props.placeholder }
+      onSelectionChange={ setSelection }
       children={
         props.groups.map(group => (
           <GroupSection 
@@ -25,6 +28,15 @@ export function MainContent(): JSX.Element {
             group={ group }
           />
         ))
+      }
+      actions={
+        <ActionPanel title="Filter by">
+        { props.filter != null && props.totalScriptCommands == 0 &&
+          <ClearFilterActionItem 
+            onFilter={ setFilter }
+          />
+        }
+        </ActionPanel>
       }
     />
   )

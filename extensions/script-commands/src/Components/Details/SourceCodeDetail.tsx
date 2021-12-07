@@ -2,7 +2,7 @@ import {
   ActionPanel, 
   CopyToClipboardAction, 
   Detail, 
-  OpenInBrowserAction 
+  OpenInBrowserAction,
 } from "@raycast/api"
 
 import { 

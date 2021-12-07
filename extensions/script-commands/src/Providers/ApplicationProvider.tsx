@@ -12,6 +12,14 @@ import {
   Filter 
 } from "@types"
 
+import { 
+  Toast 
+} from "@raycast/api"
+
+import { 
+  FilterToast 
+} from "@components"
+
 type ProviderState = {
   dataManager: DataManager
   filter: Filter
@@ -37,8 +45,19 @@ type Props = {
 }
 
 export const ApplicationProvider = ({ children }: Props) => {
+  let toast: Toast | null
   const [state, ] = useState<ProviderState>(initialState)
-  const [filter, setFilter] = useState<Filter>(null)
+  const [filter, setCustomFilter] = useState<Filter>(null)
+
+  const setFilter = async (filter: Filter) => {
+    setCustomFilter(filter)
+
+    if (filter != null) {
+      toast = await FilterToast(filter)      
+    }
+    else if (toast != null)
+      toast.hide()
+  }
 
   return (
     <ApplicationContext.Provider 

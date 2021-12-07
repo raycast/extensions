@@ -14,8 +14,17 @@ import {
 
 import { 
   Filter, 
+  Progress, 
   State 
 } from "@types"
+
+import { 
+  StoreToast 
+} from "@components"
+
+import { 
+  Toast 
+} from "@raycast/api"
 
 type UseScriptCommandsState = {
   main: MainCompactGroup
@@ -26,15 +35,19 @@ type UserScriptCommandsProps = {
   placeholder: string,
   isLoading: boolean,
   groups: CompactGroup[]
+  totalScriptCommands: number
   filter: Filter
 }
 
 type UseScriptCommands = () => {
   props: UserScriptCommandsProps
   setFilter: (filter: Filter) => void
+  setSelection:(identifier?: string) => void
 }
 
 export const useScriptCommands: UseScriptCommands = () => {
+  let toast: Toast | null
+
   const { dataManager, filter, setFilter } = useDataManager()
   
   const [state, setState] = useState<UseScriptCommandsState>({
@@ -44,6 +57,19 @@ export const useScriptCommands: UseScriptCommands = () => {
       languages: []
     }
   })
+
+  const setSelection = async (identifier?: string) => {
+    if (identifier == undefined)
+      return
+
+    const commandState = dataManager.stateFor(identifier)
+
+    if (commandState == State.ChangesDetected || commandState == State.NeedSetup) {
+      toast = await StoreToast(commandState, Progress.Finished)
+    }
+    else if (toast != null) 
+      toast.hide()
+  }
 
   useEffect(() => {    
     async function fetch() {
@@ -74,9 +100,11 @@ export const useScriptCommands: UseScriptCommands = () => {
       placeholder: placeholder,
       isLoading: isLoading,
       groups: state.main.groups,
+      totalScriptCommands: state.main.totalScriptCommands,
       filter: filter
     },
-    setFilter
+    setFilter,
+    setSelection
   }
 }
 

@@ -1,7 +1,7 @@
 import { 
   ActionPanel, 
   List,
-  showHUD, 
+  showHUD,
 } from "@raycast/api"
 
 import { 
@@ -36,32 +36,28 @@ export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element 
   const { props, install, uninstall, confirmSetup, setFilter } = useScriptCommand(scriptCommand)
 
   const handleInstall = async () => {
-    await StoreToast(props.state, Progress.InProgress, scriptCommand)
+    await StoreToast(props.state, Progress.InProgress, scriptCommand.title)
 
     install()
 
-    await StoreToast(props.state, Progress.Finished, scriptCommand)
+    await StoreToast(props.state, Progress.Finished, scriptCommand.title)
   }
   
   const handleUninstall = async () => {
-    await StoreToast(State.Installed, Progress.InProgress, scriptCommand)
+    await StoreToast(State.Installed, Progress.InProgress, scriptCommand.title)
 
     uninstall()
 
-    await StoreToast(State.Installed, Progress.Finished, scriptCommand)
+    await StoreToast(State.Installed, Progress.Finished, scriptCommand.title)
   }
 
   const handleSetup = () => {
-    // TODO: Implement showHUD presenting a message saying the contentin the HUD
     showHUD(`Opening ${props.title}'s file to be configured...`)
-  }
-
-  const handleConfirmSetup = () => {
-    confirmSetup()
   }
 
   return (
     <List.Item
+      id={ props.identifier }
       key={ props.identifier }
       title={ props.title }
       subtitle={ props.subtitle }
