@@ -17,3 +17,19 @@ export const foramtXml: Script = {
     }
   },
 };
+
+export const minifyXml: Script = {
+  info: {
+    title: "Minify XML/HTML",
+    desc: "Cleans and minifies XML/HTML documents",
+    type: ["form", "clipboard"],
+    example: '<?xml version="1.0" encoding="UTF-8"><a><b>bbb</b><f>fff</f></a>',
+  },
+  run(input) {
+    try {
+      return vkbeautify.xmlmin(input);
+    } catch (error) {
+      throw Error("Invalid XML/HTML");
+    }
+  },
+};

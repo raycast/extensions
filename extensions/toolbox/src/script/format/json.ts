@@ -17,3 +17,19 @@ export const foramtJson: Script = {
     }
   },
 };
+
+export const minifyJson: Script = {
+  info: {
+    title: "Minify JSON",
+    desc: "Cleans and minifies JSON documents",
+    type: ["form", "clipboard"],
+    example: '{"photos": {"total": 10000,"total_pages": 910}}',
+  },
+  run(input) {
+    try {
+      return vkbeautify.jsonmin(input);
+    } catch (error) {
+      throw Error("Invalid JSON");
+    }
+  },
+};

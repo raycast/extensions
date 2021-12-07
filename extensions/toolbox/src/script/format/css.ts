@@ -17,3 +17,19 @@ export const foramtCss: Script = {
     }
   },
 };
+
+export const minifyCss: Script = {
+  info: {
+    title: "Minify CSS",
+    desc: "Cleans and minifies CSS stylesheets",
+    type: ["form", "clipboard"],
+    example: ".headbg{margin:0 8px /*display:none*/ }",
+  },
+  run(input) {
+    try {
+      return vkbeautify.cssmin(input);
+    } catch (error) {
+      throw Error("Invalid CSS");
+    }
+  },
+};
