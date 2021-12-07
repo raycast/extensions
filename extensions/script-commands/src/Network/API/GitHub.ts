@@ -40,9 +40,10 @@ export async function fetchScriptCommands(): Promise<MainCompactGroup> {
       languages: object.languages
     }
 
-    object.groups.sort((left: Group, right: Group) => {
-      return (left.name > right.name) ? 1 : -1
-    })
+    object.groups.sort(
+      (left: Group, right: Group) => 
+      (left.name > right.name) ? 1 : -1
+    )
 
     object.groups.forEach(group => {
       main.groups.push(
@@ -50,9 +51,10 @@ export async function fetchScriptCommands(): Promise<MainCompactGroup> {
       )
   
       if (group.subGroups != undefined && group.subGroups.length > 0) {
-        group.subGroups.sort((left: Group, right: Group) => {
-          return (left.name > right.name) ? 1 : -1
-        })
+        group.subGroups.sort(
+          (left: Group, right: Group) => 
+          (left.name > right.name) ? 1 : -1
+        )
   
         group.subGroups.forEach(subGroup => {
           main.groups.push(
@@ -79,9 +81,10 @@ type FlattenGroups = (group: Group, parentGroupName?: string) => CompactGroup
 
 const flattenGroups: FlattenGroups = (group, parentGroupName = undefined) => {
   if (group.scriptCommands.length > 0) {
-    group.scriptCommands.sort((left: ScriptCommand, right: ScriptCommand) => {
-      return (left.title > right.title) ? 1 : -1
-    })
+    group.scriptCommands.sort(
+      (left: ScriptCommand, right: ScriptCommand) => 
+      (left.title > right.title) ? 1 : -1
+    )
   }
 
   let identifier: string = group.path
