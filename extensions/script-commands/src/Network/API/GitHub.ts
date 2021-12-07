@@ -16,10 +16,13 @@ import {
 } from "@models"
 
 import { 
-  URLConstants,
   sourceCodeRawURL,
   readmeRawURL
 } from "@urls"
+
+import { 
+  URLConstants 
+} from "@constants"
 
 import path from "path"
 

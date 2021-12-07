@@ -1,6 +1,6 @@
 import { 
   URLConstants 
-} from "@urls"
+} from "@constants"
 
 export const languageURL = (language: string) => {
   const imagesURL = `${URLConstants.baseRawURL}/images`

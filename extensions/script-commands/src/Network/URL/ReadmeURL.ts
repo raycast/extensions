@@ -1,6 +1,6 @@
 import { 
   URLConstants 
-} from "@urls"
+} from "@constants"
 
 import { 
   ContentType 

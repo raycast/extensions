@@ -29,6 +29,10 @@ import {
   sourceCodeNormalURL,
 } from "@urls"
 
+import { 
+  IconConstants 
+} from "@constants"
+
 type ScriptCommandState = {
   commandState: State,
   scriptCommand: ScriptCommand
@@ -125,22 +129,13 @@ const accessoryIconFor: AccessoryIconFor = (state, language) => {
   let icon: ImageLike
 
   if (state == State.Installed)
-    icon = { 
-      source: Icon.Checkmark, 
-      tintColor: Color.Green
-    }
+    icon = IconConstants.Installed
 
   else if (state == State.NeedSetup)
-    icon = { 
-      source: Icon.Gear, 
-      tintColor: Color.Orange
-    }
+    icon = IconConstants.NeedSetup
 
   else if (state == State.ChangesDetected)
-    icon = { 
-      source: Icon.Checkmark, 
-      tintColor: Color.Orange
-    }
+    icon = IconConstants.ChangesDetected
     
   else
     icon = { 
