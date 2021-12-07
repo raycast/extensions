@@ -1,38 +1,24 @@
 import { 
   ActionPanel, 
-  Image, 
+  Image,
   ImageMask, 
   OpenInBrowserAction, 
-  randomId 
 } from "@raycast/api"
 
 import { 
-  Author
+  Author 
 } from "@models"
 
 import { 
-  avatarURL,
+  avatarURL, 
   checkIsValidURL 
 } from "@urls"
 
-export function AuthorsActionPanel({ authors }: { authors: Author[] }): JSX.Element {
-  const count = authors.length
-  const suffix = count > 1 ? "s" : ""
-  const totalDescription = `Author${suffix}`
-
-  return (
-    <ActionPanel.Section title={ totalDescription }>
-      {authors.map(author => (
-        <AuthorActionItem 
-          key={ author.url ?? randomId() } 
-          author={ author } 
-        />
-      ))}
-    </ActionPanel.Section>
-  )
+type Props = {
+  author: Author
 }
 
-function AuthorActionItem({ author }: { author: Author }): JSX.Element {
+export function AuthorActionItem({ author }: Props): JSX.Element {
   let name = author.name ?? "Raycast"
   let url = author.url
 
