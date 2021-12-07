@@ -17,15 +17,20 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.26.1",
+    "esrever": "^0.2.0",
     "execa": "^6.0.0",
+    "js-base64": "^3.7.2",
+    "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "vkbeautify": "^0.99.3"
   },
   "devDependencies": {
+    "@types/esrever": "^0.2.0",
+    "@types/js-yaml": "^4.0.5",
     "@types/lodash": "^4.14.177",
-    "@types/vkbeautify": "^0.99.2",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
+    "@types/vkbeautify": "^0.99.2",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
