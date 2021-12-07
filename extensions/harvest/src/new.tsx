@@ -8,7 +8,6 @@ import {
   Toast,
   showHUD,
   useNavigation,
-  getApplications,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
@@ -16,7 +15,15 @@ import { HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseType
 import _ from "lodash";
 import dayjs from "dayjs";
 
-export default function Command({ onSave, entry }: { onSave: () => Promise<void>; entry?: HarvestTimeEntry }) {
+export default function Command({
+  onSave = async () => {
+    return;
+  },
+  entry,
+}: {
+  onSave: () => Promise<void>;
+  entry?: HarvestTimeEntry;
+}) {
   const { pop } = useNavigation();
   const { data: company } = useCompany();
   const { data: projects } = useMyProjects();
@@ -59,7 +66,6 @@ export default function Command({ onSave, entry }: { onSave: () => Promise<void>
       spent_date: values.spent_date === null ? dayjs().format("YYYY-MM-DD") : values.spent_date.toString(),
     }).catch(async (error) => {
       console.error(error.response.data);
-      toast.hide();
       await showToast(ToastStyle.Failure, "Error", error.response.data.message);
     });
 
@@ -86,8 +92,6 @@ export default function Command({ onSave, entry }: { onSave: () => Promise<void>
     }
   }
 
-  // console.log({ spentDate });
-
   return (
     <Form
       navigationTitle={entry ? "Edit Time Entry" : "New Time Entry"}
@@ -100,7 +104,7 @@ export default function Command({ onSave, entry }: { onSave: () => Promise<void>
       <Form.Dropdown
         id="project_id"
         title="Project"
-        value={entry?.project.id.toString() ?? ""}
+        value={projectId}
         onChange={(newValue) => {
           setProjectId(newValue);
           setTaskAssignments(newValue);
