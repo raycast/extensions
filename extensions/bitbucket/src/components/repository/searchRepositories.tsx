@@ -11,13 +11,14 @@ import {
   ShowPipelinesActions,
 } from "./actions";
 
-import {getRepositories, useRepositories} from "../../queries";
+import { getRepositories } from "../../queries";
 import { Repository } from "./interface";
 import { icon } from "../../helpers/icon"
 import { cacheConfig } from "../../helpers/cache";
-import useSWR, {mutate, SWRConfig} from "swr";
+import useSWR, { mutate, SWRConfig } from "swr";
+import {useEffect} from "react";
 
-const REPOSITORIES_CACHE_KEY = "repositories4";
+const REPOSITORIES_CACHE_KEY = "repositories";
 
 export function SearchRepositories() {
     return (
@@ -28,20 +29,18 @@ export function SearchRepositories() {
 }
 
 function SearchList(): JSX.Element {
-    const { data, error, isValidating } = useRepositories();
+    const { data, error, isValidating } = useSWR(REPOSITORIES_CACHE_KEY, getRepositories);
 
     if (error) {
         showToast(ToastStyle.Failure, "Failed loading repositories", error.message);
     }
 
-    if (!isValidating) {
-        setTimeout(() => {
-            // mutate(REPOSITORIES_CACHE_KEY, getRepositories)
-        }, 1000)
-    }
+    useEffect(() => {
+        mutate(REPOSITORIES_CACHE_KEY, getRepositories)
+    }, []);
 
     return (
-        <List isLoading={isValidating} searchBarPlaceholder="Search by name..." actions={SearchListActions()}>
+        <List isLoading={isValidating} searchBarPlaceholder="Search by name...">
             <List.Section title="Repositories" subtitle={data?.length.toString()}>
                 {data?.map(toRepository).map((repo: any) => (
                     <SearchListItem key={repo.uuid} repo={repo} />
@@ -49,17 +48,6 @@ function SearchList(): JSX.Element {
             </List.Section>
         </List>
     );
-}
-
-function SearchListActions(): JSX.Element {
-    return (
-        <ActionPanel title="Search Repositories2">
-            <ActionPanel.Item
-                title="Reload repositories"
-                onAction={() => mutate(REPOSITORIES_CACHE_KEY)}
-            />
-        </ActionPanel>
-    )
 }
 
 function toRepository(repo: any): Repository {

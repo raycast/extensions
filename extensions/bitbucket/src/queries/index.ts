@@ -20,21 +20,22 @@ const defaults = {
 
 const bitbucket = new Bitbucket(clientOptions)
 
-export async function getRepositories(key: string, page = 0, repositories = []): Promise<any> {
-  console.log('FETCH THEM, page: ' + page)
+export async function getRepositories(key: string, page = 1, repositories = []): Promise<any> {
   const { data } = await bitbucket.repositories.list({
     ...defaults,
-    pagelen: 50,
+    pagelen: 100,
     sort: '-updated_on',
+    page: page.toString(),
+    fields: 'values.name,values.uuid,values.slug,values.full_name,values.links.avatar.href,values.description,next'
   });
 
   repositories = repositories.concat(data.values as []);
 
-  return { repositories: repositories, done: false };
-}
+  if (data.next) {
+    return getRepositories(key, page + 1, repositories)
+  }
 
-export function useRepositories() {
-  return useSWR("repositories10", getRepositories)
+  return repositories;
 }
 
 export async function pipelinesGetQuery(repoSlug: string, pageNumber: number): Promise<any> {
