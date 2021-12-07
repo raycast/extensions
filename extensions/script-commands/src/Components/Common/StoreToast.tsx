@@ -5,22 +5,17 @@ import {
 } from "@raycast/api"
 
 import { 
-  ScriptCommand 
-} from "@models"
-
-import { 
   State,
-  Progress 
+  Progress,
 } from "@types"
 
 export async function StoreToast(
     state: State, 
     progress: Progress, 
-    scriptCommand: ScriptCommand 
+    message = ""
   ): Promise<Toast> {
 
   let title = ""
-  let message: string = scriptCommand.title
   let style = ToastStyle.Animated
 
   switch (state) {
@@ -53,7 +48,7 @@ export async function StoreToast(
   case (State.NeedSetup): 
     {
       title = "Extra setup needed!"
-      message = "You need to edit the Script Command before use"
+      message = "You must edit the Script Command before it gets available to be used"
       style = ToastStyle.Success
     }
     break
@@ -61,7 +56,7 @@ export async function StoreToast(
   case (State.ChangesDetected): 
     {
       title = "Changes Detected!"
-      message = "Looks like you've made changes on this Script Command which is a template.\nPress Return to confirm and activate it."
+      message = "Press Return to confirm your change and activate the Script Command."
       style = ToastStyle.Success
     }
     break
