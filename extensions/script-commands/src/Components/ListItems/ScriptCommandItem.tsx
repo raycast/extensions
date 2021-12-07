@@ -73,7 +73,7 @@ export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element 
             onInstall={ handleInstall } 
             onUninstall={ handleUninstall }
             onSetup={ handleSetup }
-            onConfirmSetup={ handleConfirmSetup }
+            onConfirmSetup={ confirmSetup }
           />
           <ViewsActionPanel 
             url={ props.sourceCodeURL } 

@@ -21,7 +21,6 @@ import {
 } from "@managers"
 
 import { 
-  Command,
   Content,
   FileNullable,
   Filter,
@@ -29,7 +28,15 @@ import {
   StateResult, 
 } from "@types"
 
-import fs from 'fs'
+import { 
+  constants,
+  accessSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+  watch,
+} from 'fs'
 
 export class DataManager {
   private static instance = new DataManager()
@@ -63,10 +70,10 @@ export class DataManager {
   
   private loadDatabase(): void {
     try {
-      fs.accessSync(this.settings.databaseFile, fs.constants.R_OK)
+      accessSync(this.settings.databaseFile, constants.R_OK)
 
-      if (fs.existsSync(this.settings.databaseFile)) {
-        const data = fs.readFileSync(this.settings.databaseFile).toString()
+      if (existsSync(this.settings.databaseFile)) {
+        const data = readFileSync(this.settings.databaseFile).toString()
         
         if (data.length > 0) {
           const content: Content = JSON.parse(data)
@@ -87,7 +94,7 @@ export class DataManager {
     ]
 
     paths.forEach((path) => {
-      fs.mkdirSync(
+      mkdirSync(
         path, 
         { recursive: true }
       )  
@@ -98,7 +105,7 @@ export class DataManager {
     const data = JSON.stringify(this.contentManager.getContent(), null, 2)
 
     if ((data != null || data != undefined) && data.length > 0)
-      fs.writeFileSync(this.settings.databaseFile, data)
+      writeFileSync(this.settings.databaseFile, data)
   }
 
   clear(): void {
@@ -137,6 +144,25 @@ export class DataManager {
     return commandHash != currentFileHash
   }
 
+  monitorChangesFor(identifier: string, callback: (state: State) => void): void {
+    const file = this.commandFileFor(identifier)
+    const state = this.stateFor(identifier)
+    
+    if (file && state == State.NeedSetup) {
+      watch(file.path, (event, ) => {        
+        if (this.isCommandChanged(identifier) == false) {
+          callback(State.NeedSetup)
+          return
+        }
+
+        if (event == 'change')
+          callback(
+            this.stateFor(identifier)
+          )
+      })
+    }
+  }
+
   commandFileFor(identifier: string): FileNullable {
     const command = this.contentManager.contentFor(identifier)
 
@@ -146,10 +172,10 @@ export class DataManager {
     return command.files.command
   }
 
-  stateFor(scriptCommand: ScriptCommand): State {
-    const downloaded = this.isCommandDownloaded(scriptCommand.identifier)
-    const needSetup = this.isCommandNeedsSetup(scriptCommand.identifier)
-    const changedContent = this.isCommandChanged(scriptCommand.identifier)
+  stateFor(identifier: string): State {
+    const downloaded = this.isCommandDownloaded(identifier)
+    const needSetup = this.isCommandNeedsSetup(identifier)
+    const changedContent = this.isCommandChanged(identifier)
 
     let state: State = State.NotInstalled
 
@@ -163,21 +189,6 @@ export class DataManager {
     }
 
     return state
-  }
-
-  private stateDescription(state: State): string {
-    switch (state) {
-    case State.Error:
-      return "Error"
-    case State.Installed:
-      return "Installed"
-    case State.NeedSetup:
-      return "Need Setup"
-    case State.NotInstalled:
-      return "Not Installed"
-    case State.ChangesDetected:
-      return "Changed Detected"
-    }
   }
 
   fetchLanguages(): Language[] {
@@ -217,18 +228,20 @@ export class DataManager {
         })
 
         if (groupCopy.scriptCommands.length > 0) {
-          groupCopy.scriptCommands.sort((left: ScriptCommand, right: ScriptCommand) => {
-            return (left.title > right.title) ? 1 : -1
-          })
+          groupCopy.scriptCommands.sort(
+            (left: ScriptCommand, right: ScriptCommand) => 
+            (left.title > right.title) ? 1 : -1
+          )
 
           data.totalScriptCommands += groupCopy.scriptCommands.length
           groups.push(groupCopy)
         }
       })
 
-      groups.sort((left: CompactGroup, right: CompactGroup) => {
-        return (left.title > right.title) ? 1 : -1
-      })
+      groups.sort(
+        (left: CompactGroup, right: CompactGroup) => 
+        (left.title > right.title) ? 1 : -1
+      )
 
       data.groups = groups
     }
@@ -246,6 +259,15 @@ export class DataManager {
         if ((filter == State.NeedSetup && item.needsSetup == true) || filter == State.Installed)
           group.scriptCommands.push(item.scriptCommand)
       })
+
+      group.scriptCommands.sort(
+        (left: ScriptCommand, right: ScriptCommand) => {
+          if (left.packageName && right.packageName)
+            return (left.packageName > right.packageName) ? 1 : -1
+
+          return 0
+        }
+      )
 
       data = {
         groups: [group],
@@ -283,17 +305,12 @@ export class DataManager {
     return result
   }
 
-  async confirmScriptCommandSetup(scriptCommand: ScriptCommand): Promise<StateResult> {
-    // TODO: Implement the logic to rename the symbolic link
-    // and return the new state (Installed), which will make the cell be 
-    // re-rendered changing the icon for a proper green checkmark
+  async confirmScriptCommandSetupFor(scriptCommand: ScriptCommand): Promise<StateResult> {
+    const result = this.scriptCommandManager.finishSetup(scriptCommand)
 
-    // TODO: Investigate why the check for the file content isn't being well observed
-    // to reflect in the cell, really after the content change
+    if (result.content == State.Installed)
+      this.persist()
 
-    return {
-      content: State.Installed,
-      message: ""
-    }
+    return result
   }
 }

@@ -4,12 +4,11 @@ import {
 
 import { 
   Image,
-  ImageLike, 
-  Color, 
-  Icon,
+  ImageLike,
 } from "@raycast/api"
 
 import { 
+  useEffect,
   useState,
 } from "react"
 
@@ -66,10 +65,29 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
   const { dataManager, filter, setFilter } = useDataManager()
 
   const [state, setState] = useState<ScriptCommandState>({
-    commandState: dataManager.stateFor(initialScriptCommand), 
+    commandState: dataManager.stateFor(initialScriptCommand.identifier), 
     scriptCommand: initialScriptCommand
   })
+  
+  useEffect(() => {
+    let abort = false
+    const identifier = state.scriptCommand.identifier
 
+    dataManager.monitorChangesFor(identifier, state => {
+      if (state == State.ChangesDetected && abort == false) {
+        setState((oldState) => ({
+          ...oldState, 
+          commandState: state
+        }))
+
+      }
+    })
+
+    return () => {
+      abort = true
+    }
+  }, [state])
+  
   const install = async () => {
     const result = await dataManager.installScriptCommand(state.scriptCommand)
 
@@ -89,15 +107,15 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
   }
 
   const confirmSetup = async () => {
-    const result = await dataManager.confirmScriptCommandSetup(state.scriptCommand)
+    const result = await dataManager.confirmScriptCommandSetupFor(state.scriptCommand)
 
     setState((oldState) => ({
       ...oldState, 
       commandState: result.content
     }))
   }
-  
-  const path = dataManager.commandFileFor(state.scriptCommand.identifier)
+
+  const file = dataManager.commandFileFor(state.scriptCommand.identifier)
 
   return {
     props: {
@@ -111,7 +129,7 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
       sourceCodeURL: sourceCodeNormalURL(state.scriptCommand),
       filter: filter,
       state: state.commandState,
-      path: path?.path
+      path: file?.path
     },
     install,
     uninstall,

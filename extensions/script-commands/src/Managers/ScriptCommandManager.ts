@@ -39,7 +39,8 @@ import afs from "fs/promises"
 import { 
   existsSync, 
   mkdirSync, 
-  readFileSync 
+  readFileSync,
+  renameSync
 } from 'fs'
 
 import { 
@@ -149,6 +150,41 @@ export class ScriptCommandManager {
     return {
       content: State.Error,
       message: "Something went wrong"
+    }
+  }
+
+  finishSetup(scriptCommand: ScriptCommand): StateResult {
+    const content = this.contentStore.contentFor(scriptCommand.identifier)
+ 
+    if (content != null) {
+      const files = content.files
+      const command = files.command
+
+      if (existsSync(command.link)) {
+        const link = path.parse(command.link)
+        const linkPath = path.join(link.dir, link.name)
+
+        renameSync(command.link, linkPath)
+
+        command.link = linkPath
+        files.command = command
+
+        content.files = files
+        content.needsSetup = false
+        content.sha = this.hashFromFile(command.path)
+        
+        this.contentStore.update(content)
+  
+        return {
+          content: State.Installed,
+          message: ""
+        }
+      }
+    }
+
+    return {
+      content: State.Error,
+      message: "Something went wrong to confirm the setup for the Script Command"
     }
   }
 
