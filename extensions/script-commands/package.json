@@ -19,11 +19,19 @@
     {
       "name": "folderPath",
       "description": "Folder where your Script Commands will be installed. In case the folder doesn't exist, we will create it for you.",
-      "title": "Folder path",
+      "title": "Folder Path",
       "required": true,
       "type": "textfield",
       "default": "~/raycast/script-commands",
-      "placeholder": "~/folder (default: ~/raycast/script-commands)"
+      "placeholder": "~/raycast/script-commands"
+    },
+    {
+      "name": "addedFolderToRaycast",
+      "type": "checkbox",
+      "required": true,
+      "label": "I will add the folder above to Raycast Preferences",
+      "default": false,
+      "description": "I understood that I need to add the folder defined in the Folder Path to Raycast Preferences > Script Commands > Add Directories."
     }
   ],
   "dependencies": {
