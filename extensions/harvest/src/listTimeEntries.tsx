@@ -71,7 +71,8 @@ export default function Command() {
               <ActionPanel>
                 <ActionPanelSection title={`${entry.project.name} | ${entry.client.name}`}>
                   <ToggleTimerAction onComplete={init} entry={entry} />
-                  <EditEntryAction onSave={init} entry={entry} />
+                  {/* Disabling Edit Action for now so we can ship something a useable extension faster */}
+                  {/* <EditEntryAction onSave={init} entry={entry} /> */}
                   <DeleteEntryAction onComplete={init} entry={entry} />
                 </ActionPanelSection>
                 <ActionPanelSection title="Harvest">
@@ -150,13 +151,17 @@ function ToggleTimerAction({ entry, onComplete }: { entry: HarvestTimeEntry; onC
       onAction={async () => {
         const toast = new Toast({ style: ToastStyle.Animated, title: "Loading..." });
         await toast.show();
-        if (entry.is_running) {
-          await stopTimer(entry);
-        } else {
-          await restartTimer(entry);
+        try {
+          if (entry.is_running) {
+            await stopTimer(entry);
+          } else {
+            await restartTimer(entry);
+          }
+          await toast.hide();
+        } catch {
+          await showToast(ToastStyle.Failure, "Error", `Could not ${entry.is_running ? "stop" : "start"} your timer`);
         }
         await onComplete();
-        await toast.hide();
       }}
     />
   );
