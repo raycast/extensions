@@ -7,19 +7,15 @@ import {
   ImageMask,
   Color
 } from "@raycast/api";
-import {
-  ShowPipelinesActions
-} from "./actions";
+import { useEffect } from "react";
+import useSWR, { mutate, SWRConfig } from "swr";
+import { Schema } from "bitbucket";
 
 import { getRepositories } from "../../queries";
 import { Repository } from "./interface";
 import { icon } from "../../helpers/icon";
-import { cacheConfig } from "../../helpers/cache";
-import useSWR, { mutate, SWRConfig } from "swr";
-import { useEffect } from "react";
-import { Schema } from "bitbucket";
-
-const REPOSITORIES_CACHE_KEY = "repositories";
+import { cacheConfig, REPOSITORIES_CACHE_KEY } from "../../helpers/cache";
+import { ShowPipelinesActions } from "./actions";
 
 export function SearchRepositories() {
   return (

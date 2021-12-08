@@ -36,3 +36,5 @@ export const cacheConfig = {
     revalidateOnFocus: false,
     revalidateOnReconnect: false
 };
+
+export const REPOSITORIES_CACHE_KEY = "repositories";
