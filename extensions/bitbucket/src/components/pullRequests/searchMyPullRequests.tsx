@@ -17,7 +17,7 @@ interface State {
   error?: Error;
 }
 
-export function SearchPullRequests(): JSX.Element {
+export function SearchMyPullRequests(): JSX.Element {
   const [state, setState] = useState<State>({});
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export function SearchPullRequests(): JSX.Element {
               <ActionPanel>
                 <ActionPanel.Section>
                   <OpenInBrowserAction
-                    title="Open PR in Browser"
+                    title="Open Pull Request in Browser"
                     url={`https://bitbucket.org/${pr.repo.fullName}/pull-requests/${pr.id}`}
                   />
                 </ActionPanel.Section>

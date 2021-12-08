@@ -19,8 +19,9 @@ const bitbucket = new Bitbucket(clientOptions)
 export async function getRepositories(): Promise<any> {
   return await bitbucket.repositories.list({
     ...defaults,
-    pagelen: 50,
+    pagelen: 100,
     sort: '-updated_on',
+    fields: "values.name,values.uuid,values.slug,values.full_name,values.links.avatar.href,values.description"
   })
 }
 
