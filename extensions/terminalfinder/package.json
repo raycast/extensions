@@ -10,24 +10,28 @@
     {
       "name": "ft",
       "title": "Finder → Terminal",
+      "subtitle": "Open Path",
       "description": "Open current Finder directory in Terminal",
       "mode": "no-view"
     },
     {
       "name": "tf",
       "title": "Terminal → Finder",
+      "subtitle": "Open Path",
       "description": "Open current Terminal directory in Finder",
       "mode": "no-view"
     },
     {
       "name": "fi",
       "title": "Finder → iTerm",
+      "subtitle": "Open Path",
       "description": "Open current Finder directory in iTerm",
       "mode": "no-view"
     },
     {
       "name": "if",
       "title": "iTerm → Finder",
+      "subtitle": "Open Path",
       "description": "Open current iTerm directory in Finder",
       "mode": "no-view"
     }
