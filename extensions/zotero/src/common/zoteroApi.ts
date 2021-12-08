@@ -62,7 +62,7 @@ const parseResponse = (item) => {
     raw_link: `${item.links.alternate.href}`,
     link: `${item.data.url}`,
     url: `zotero://select/items/0_${item.key}`,
-    accessoryTitle: `${name} ${date.getFullYear()}`,
+    accessoryTitle: `${name} ${!isNaN(date.getFullYear()) ? date.getFullYear():''}`,
     icon: `paper.png`,
   }
 };

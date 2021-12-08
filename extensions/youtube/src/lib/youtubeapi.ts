@@ -13,6 +13,21 @@ function createClient(): youtube_v3.Youtube {
 
 export const youtubeClient = createClient();
 
+export enum PrimaryAction {
+    Detail = "detail",
+    Browser = "browser"
+}
+
+export function getPrimaryActionPreference(): PrimaryAction {
+    const pref = getPreferenceValues();
+    const val = (pref.primaryaction as string) || undefined;
+    if (val !== PrimaryAction.Detail && val !== PrimaryAction.Browser) {
+        return PrimaryAction.Detail;
+    }
+    const result: PrimaryAction = val;
+    return result;
+}
+
 const maxPageResults = 50;
 
 export enum SearchType {

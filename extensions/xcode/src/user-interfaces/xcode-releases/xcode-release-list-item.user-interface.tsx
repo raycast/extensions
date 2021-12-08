@@ -148,14 +148,22 @@ function actions(
   if (xcodeRelease.downloadLink) {
     // Push OpenAction to download the Xcode Release from the Apple Developer portal
     elements.push(
-      <OpenAction title="Download" target={xcodeRelease.downloadLink} />
+      <OpenAction
+        key="download"
+        title="Download"
+        target={xcodeRelease.downloadLink}
+      />
     );
   }
   // Check if a release notes link is available
   if (xcodeRelease.releaseNotesLink) {
     // Push OpenAction to view the Xcode Release notes
     elements.push(
-      <OpenAction title="View Release Notes" target={xcodeRelease.releaseNotesLink} />
+      <OpenAction
+        key="view-release-notes"
+        title="View Release Notes"
+        target={xcodeRelease.releaseNotesLink}
+      />
     );
   }
   // Check if elements are empty
