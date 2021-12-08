@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "script-commands",
-  "title": "Script Commands Store",
-  "description": "Package of extensions to manage Raycast Script Commands",
+  "title": "Script Commands Store - Find out your next Script Command",
+  "description": "Your new way manage Script Commands without deal with GitHub again.",
   "icon": "extension-icon.png",
   "author": "tholanda",
   "license": "MIT",
@@ -29,9 +29,9 @@
       "name": "addedFolderToRaycast",
       "type": "checkbox",
       "required": true,
-      "label": "I will add the folder above to Raycast Preferences",
+      "label": "I will add manually the Folder Path to Raycast Preferences",
       "default": false,
-      "description": "I understood that I need to add the folder defined in the Folder Path to Raycast Preferences > Script Commands > Add Directories."
+      "description": "I understood that I need to add the folder defined in the Folder Path to Raycast Preferences > Extensions > Scripts > Script Commands > Add Directories."
     }
   ],
   "dependencies": {
