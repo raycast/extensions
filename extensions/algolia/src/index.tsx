@@ -1,4 +1,4 @@
-import { getPreferenceValues, List, ActionPanel, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, getPreferenceValues, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import algoliasearch from "algoliasearch/lite";
 
@@ -19,10 +19,17 @@ export default function main() {
   const search = async (query = "") => {
     setIsLoading(true);
 
-    return await algoliaIndex.search(query).then((res) => {
-      setIsLoading(false);
-      return res.hits;
-    });
+    return await algoliaIndex
+      .search(query)
+      .then((res) => {
+        setIsLoading(false);
+        return res.hits;
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        showToast(ToastStyle.Failure, "Algolia Error", err.message);
+        return [];
+      });
   };
 
   useEffect(() => {
