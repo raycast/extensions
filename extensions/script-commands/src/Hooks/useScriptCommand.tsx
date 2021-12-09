@@ -169,7 +169,7 @@ const accessoryIconFor: AccessoryIconFor = (state, language) => {
 type AccessoryTitleFor = (scriptCommand: ScriptCommand) => string
 
 const accessoryTitleFor: AccessoryTitleFor = (scriptCommand) => { 
-  const defaultAuthor = "by Raycast"
+  const defaultAuthor = "Raycast"
   
   if (scriptCommand.authors == null || scriptCommand.authors == undefined)
     return defaultAuthor
@@ -187,7 +187,7 @@ const accessoryTitleFor: AccessoryTitleFor = (scriptCommand) => {
     content += author.name
   })
 
-  return `by ${content}`
+  return content
 }
 
 // ###########################################################################
