@@ -22,13 +22,15 @@ export async function getRepositories(key: string, page = 1, repositories = []):
     pagelen: 100,
     sort: "-updated_on",
     page: page.toString(),
-    fields: ["values.name",
+    fields: [
+      "values.name",
       "values.uuid",
       "values.slug",
       "values.full_name",
       "values.links.avatar.href",
       "values.description",
-      "next"].join(",")
+      "next"
+    ].join(",")
   });
 
   repositories = repositories.concat(data.values as []);
@@ -49,14 +51,15 @@ export async function pipelinesGetQuery(repoSlug: string, pageNumber: number): P
     sort: "-created_on",
     // https://developer.atlassian.com/cloud/bitbucket/rest/intro/#fields-parameter-syntax
     // "+": Pulling in additional fields not normally returned by an endpoint, while still getting all the default fields
-    fields: `
-      +values.target.commit.message,
-      +values.target.selector.type+values.target.selector.pattern+values.target.commit.summary.html,
-      +values.target.*,
-      +values.*,
-      +page,
-      +size,
-    `.replace(/(\r\n|\n|\r| )/gm, "")
+    fields: [
+      "+values.target.commit.message",
+      "values.uuid",
+      "+values.target.selector.type+values.target.selector.pattern+values.target.commit.summary.html",
+      "+values.target.*",
+      "+values.*",
+      "+page",
+      "+size"
+    ].join(",")
   });
 }
 
@@ -75,12 +78,13 @@ export async function getMyOpenPullRequests(): Promise<any> {
     pagelen: 20,
     sort: "-created_on",
     selected_user: preferences.accountName
-    // fields: `values.uuid,
-    //   values.build_number,
-    //   values.state,
-    //   values.creator.links.avatar.href,
-    //   values.trigger.name,
-    //   values.target.commit
-    // `.replace(/(\r\n|\n|\r| )/gm, "")
+    // fields: [
+    //   "values.uuid",
+    //   "values.build_number",
+    //   "values.state",
+    //   "values.creator.links.avatar.href",
+    //   "values.trigger.name",
+    //   "values.target.commit",
+    // ].join(",")
   });
 }
