@@ -1,0 +1,35 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "iterm2",
+  "title": "iTerm2",
+  "description": "iTerm2 Controls.",
+  "icon": "command-icon.png",
+  "author": "NickChubb",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "New iTerm2 Window",
+      "description": "Opens a new iTerm2 window",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.2",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
