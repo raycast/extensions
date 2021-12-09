@@ -14,7 +14,7 @@ export async function FilterToast(filter: Filter): Promise<Toast | null> {
     return null
 
   let title = "Filter activated: "
-  const message = `To clear filter, press Command + Shift + C`
+  const message = `To clear the filter, press Command + Shift + C`
   const style = ToastStyle.Success
 
   if (typeof filter == "string")

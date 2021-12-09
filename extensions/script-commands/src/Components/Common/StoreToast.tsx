@@ -48,7 +48,7 @@ export async function StoreToast(
   case (State.NeedSetup): 
     {
       title = "Extra setup needed!"
-      message = "You must edit the Script Command before it gets available to be used"
+      message = "You must edit the Script Command before you can use it"
       style = ToastStyle.Success
     }
     break

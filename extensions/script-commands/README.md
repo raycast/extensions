@@ -4,11 +4,11 @@
   </br></br>
 </div>
 
-The Script Commands Store extension was built to help users to manage their Script Commands without need to download one by one the source code, assets and stuff related.
+The Script Commands Store extension was built to help users to manage their Script Commands without the need to download one by one the source code, assets and stuff related.
 
 ### Getting started
 
-At the first opened, you will have to:
+On the first open, you will have to:
 - Define a folder to store the Script Commands
 - Setup the path you defined for the Script Commands in Raycast Preferences window.
 
@@ -17,14 +17,14 @@ At the first opened, you will have to:
 <details>
  <summary>Instructions</summary>
 
-  At the first time you open Script Commands Store, you will need to define the folder which will be used to storage the Script Commands downloaded.
+  At the first time you open Script Commands Store, you will need to define the folder which will be used to store the Script Commands downloaded.
 
   This is the setup screen. We strongly suggest you define a new folder for it.  
   Example: `~/raycast/script-commands`
 
   ![](assets/readme/setup/first-screen.png)
 
-  After finish the first step, the Script Commands Store will be loaded for you, however, this doesn't mean it is fully configured for you, yet.
+  After finishing the first step, the Script Commands Store will be loaded for you, however, this doesn't mean it is fully configured for you, yet.
 
   In the next step, we will need to inform Raycast which folder it needs to watch. Let's take as example the suggestion above.
 
@@ -36,11 +36,11 @@ At the first opened, you will have to:
 
   ![](assets/readme/setup/preferences-extensions.png)
 
-  After add the directory, the right panel should be similar to this
+  After adding the directory, the right panel should be similar to this
 
   ![](assets/readme/setup/setup-directory-added.png)
 
-  Voilà, we are read to install the first Script Command using our Store!
+  Voilà, we are ready to install the first Script Command using our Store!
 
   💡 Tip: Watch the screencast to see the extension in action.
 
@@ -110,9 +110,9 @@ https://cln.sh/weZwo2
 
 ### Iconography
 
-- ![](assets/readme/icons/gear-orange.png) Need to be edited by the user before it gets ready to be used. i.e: add token, set a username, etc...
+- ![](assets/readme/icons/gear-orange.png) Need to be edited by the user before it is ready to be used. i.e: add token, set a username, etc...
 - ![](assets/readme/icons/checkmark-orange.png) Script Command was changed and the Store detected. A user's confirmation is required to activate the Script Command to be used.
-- ![](assets/readme/icons/checkmark-green.png) Indicates the Script Command is installed. In case of need extra setup, this will indicate the user made the change, confirmed, and now it is ready to use.
+- ![](assets/readme/icons/checkmark-green.png) Indicates the Script Command is installed. In case it needs extra setup, this will indicate the user made the change, confirmed, and now it is ready to use.
 - If you are not seeing any of the icons above, this indicates the Script Command is not installed and you are seeing the programming language used to write it.  
   Example: ![](assets/readme/icons/language.png)
 

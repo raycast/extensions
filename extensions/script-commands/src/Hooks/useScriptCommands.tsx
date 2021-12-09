@@ -91,7 +91,7 @@ export const useScriptCommands: UseScriptCommands = () => {
       placeholder = `Filter applied: ${filterDescription(filter)} (${state.main.totalScriptCommands})`
     }
     else
-      placeholder = `Search for your Script Command among of ${state.main.totalScriptCommands} items`
+      placeholder = `Search by name, category, or author among of ${state.main.totalScriptCommands} items`
   }
 
   return {
