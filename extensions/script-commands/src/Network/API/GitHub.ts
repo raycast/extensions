@@ -95,8 +95,8 @@ const flattenGroups: FlattenGroups = (group, parentGroupName = undefined) => {
     const key = parentGroupName.replace(" ", "-").toLowerCase()
 
     identifier = `${key}-${group.path}`
-    title = parentGroupName
-    subtitle = group.name
+    title = group.name
+    subtitle = parentGroupName
   }
 
   const compactGroup: CompactGroup = {
