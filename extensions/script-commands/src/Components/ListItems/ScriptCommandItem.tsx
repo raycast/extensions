@@ -33,7 +33,7 @@ type Props = {
 }
 
 export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element {
-  const { props, install, uninstall, confirmSetup, setFilter } = useScriptCommand(scriptCommand)
+  const { props, install, uninstall, confirmSetup, editSourceCode, setFilter } = useScriptCommand(scriptCommand)
 
   const handleInstall = async () => {
     await StoreToast(props.state, Progress.InProgress, scriptCommand.title)
@@ -55,6 +55,11 @@ export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element 
     showHUD(`Opening ${props.title}'s file to be configured...`)
   }
 
+  const handleEditLocal = () => {
+    editSourceCode()
+    showHUD(`Opening ${props.title}'s local source code to be edited...`)
+  }
+
   return (
     <List.Item
       id={ props.identifier }
@@ -74,6 +79,7 @@ export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element 
             onUninstall={ handleUninstall }
             onSetup={ handleSetup }
             onConfirmSetup={ confirmSetup }
+            onEditLocal={ handleEditLocal }
           />
           <ViewsActionPanel 
             url={ props.sourceCodeURL } 

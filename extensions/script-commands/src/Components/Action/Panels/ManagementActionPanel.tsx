@@ -8,6 +8,7 @@ import {
 
 import {
   ConfirmChangeActionItem,
+  EditLocalSourceCodeActionItem,
   InstallActionItem,
   SetupActionItem,
   UninstallActionItem,
@@ -20,6 +21,7 @@ type Props = {
   onUninstall: () => void
   onSetup: () => void
   onConfirmSetup: () => void
+  onEditLocal: () => void
 }
 
 export function ManagementActionPanel({ 
@@ -28,7 +30,8 @@ export function ManagementActionPanel({
   onInstall, 
   onUninstall, 
   onSetup, 
-  onConfirmSetup 
+  onConfirmSetup,
+  onEditLocal 
 }: Props): JSX.Element | null {
   const elements: JSX.Element[] = [] 
 
@@ -40,8 +43,19 @@ export function ManagementActionPanel({
   )
 
   switch (state) {
-  case State.Installed: 
-    elements.push(uninstallAction)
+    case State.Installed: {
+      if (commandPath) {
+        elements.push(
+          <EditLocalSourceCodeActionItem 
+            key="edit-source-code" 
+            path={ commandPath }
+            onSetup={ onEditLocal } 
+          />
+        )
+      }
+
+      elements.push(uninstallAction)
+    }
     break
   
   case State.NotInstalled: 

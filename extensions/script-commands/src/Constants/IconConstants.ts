@@ -8,6 +8,7 @@ interface Constants {
   ChangesDetected: ImageLike
   ClearFilter: ImageLike
   ConfirmChange: ImageLike
+  LocalSourceCode: ImageLike
   Install: ImageLike
   Installed: ImageLike
   Languages: ImageLike
@@ -29,6 +30,7 @@ export const IconConstants: Constants = {
     tintColor: Color.Red
   },
   ConfirmChange: Icon.TextDocument,
+  LocalSourceCode: Icon.Pencil,
   Install: Icon.Download,
   Installed: {
     source: Icon.Checkmark,

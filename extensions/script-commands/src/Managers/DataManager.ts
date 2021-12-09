@@ -149,16 +149,31 @@ export class DataManager {
     const state = this.stateFor(identifier)
     
     if (file && state == State.NeedSetup) {
-      watch(file.path, (event, ) => {        
+      watch(file.path, (event, ) => {
         if (this.isCommandChanged(identifier) == false) {
           callback(State.NeedSetup)
           return
         }
 
-        if (event == 'change')
+        if (event == 'change') {
           callback(
             this.stateFor(identifier)
           )
+        }
+      })
+    }
+  }
+
+  updateHashOnChangeFor(identifier: string): void {
+    const file = this.commandFileFor(identifier)
+    const state = this.stateFor(identifier)
+    
+    if (file && state == State.Installed) {
+      watch(file.path, (event) => {
+        if (event == 'change') {
+          this.scriptCommandManager.updateHashFor(identifier)
+          this.persist()
+        }
       })
     }
   }
@@ -180,9 +195,9 @@ export class DataManager {
     let state: State = State.NotInstalled
 
     if (downloaded) {
-      state =  State.Installed
+      state = State.Installed
 
-      if (changedContent)
+      if (changedContent && needSetup)
         state = State.ChangesDetected
       else if (needSetup) 
         state = State.NeedSetup
@@ -308,8 +323,9 @@ export class DataManager {
   async confirmScriptCommandSetupFor(scriptCommand: ScriptCommand): Promise<StateResult> {
     const result = this.scriptCommandManager.finishSetup(scriptCommand)
 
-    if (result.content == State.Installed)
+    if (result.content == State.Installed) {
       this.persist()
+    }
 
     return result
   }

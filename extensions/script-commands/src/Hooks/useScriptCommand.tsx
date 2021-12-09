@@ -56,6 +56,7 @@ type UseScriptCommandState = {
   install: () => void
   uninstall: () => void
   confirmSetup: () => void
+  editSourceCode: () => void
   setFilter: (filter: Filter) => void
 }
 
@@ -71,17 +72,19 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
   
   useEffect(() => {
     let abort = false
-    const identifier = state.scriptCommand.identifier
+    
+    if (state.commandState == State.NeedSetup) {
+      const identifier = state.scriptCommand.identifier
 
-    dataManager.monitorChangesFor(identifier, state => {
-      if (state == State.ChangesDetected && abort == false) {
-        setState((oldState) => ({
-          ...oldState, 
-          commandState: state
-        }))
-
-      }
-    })
+      dataManager.monitorChangesFor(identifier, state => {
+        if (state == State.ChangesDetected && abort == false) {
+          setState((oldState) => ({
+            ...oldState, 
+            commandState: state
+          }))
+        }
+      })
+    }
 
     return () => {
       abort = true
@@ -110,9 +113,13 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
     const result = await dataManager.confirmScriptCommandSetupFor(state.scriptCommand)
 
     setState((oldState) => ({
-      ...oldState, 
+      ...oldState,
       commandState: result.content
     }))
+  }
+
+  const editSourceCode = () => {
+    dataManager.updateHashOnChangeFor(state.scriptCommand.identifier)
   }
 
   const file = dataManager.commandFileFor(state.scriptCommand.identifier)
@@ -134,6 +141,7 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
     install,
     uninstall,
     confirmSetup,
+    editSourceCode,
     setFilter
   }
 }

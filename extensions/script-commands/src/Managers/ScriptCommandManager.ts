@@ -188,6 +188,23 @@ export class ScriptCommandManager {
     }
   }
 
+  updateHashFor(identifier: string) {
+    const content = this.contentStore.contentFor(identifier)
+
+    if (content == null)
+      return
+
+    const files = content.files
+    const command = files.command
+
+    if (existsSync(command.path)) {
+      const newHash = this.hashFromFile(command.path)
+      content.sha = newHash
+      
+      this.contentStore.update(content)
+    }
+  }
+
   private iconPaths(icon?: string | null): IconPathNullable {
     if (icon == null || icon == undefined )
       return null
