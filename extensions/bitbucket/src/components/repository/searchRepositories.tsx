@@ -7,61 +7,56 @@ import {
   ImageMask,
   Color
 } from "@raycast/api";
-import {
-  ShowPipelinesActions,
-} from "./actions";
-import { useState, useEffect, useRef } from "react";
+import { useEffect } from "react";
+import useSWR, { mutate, SWRConfig } from "swr";
+import { Schema } from "bitbucket";
 
 import { getRepositories } from "../../queries";
 import { Repository } from "./interface";
-import { icon } from "../../helpers/icon"
+import { icon } from "../../helpers/icon";
+import { cacheConfig, REPOSITORIES_CACHE_KEY } from "../../helpers/cache";
+import { ShowPipelinesActions } from "./actions";
 
-interface State {
-  repositories?: Repository[];
-  error?: Error;
+export function SearchRepositories() {
+  return (
+    <SWRConfig value={cacheConfig}>
+      <SearchList />
+    </SWRConfig>
+  );
 }
 
-export function SearchRepositories(): JSX.Element {
-  const [state, setState] = useState<State>({});
+function SearchList(): JSX.Element {
+  const { data, error, isValidating } = useSWR(REPOSITORIES_CACHE_KEY, getRepositories);
 
-  useEffect(() => {
-    async function fetchRepositories() {
-      try {
-        const { data } = await getRepositories()
-
-        const repositories = data.values
-          .map((repo: any) => ({
-            name: repo.name as string,
-            uuid: repo.uuid as string,
-            slug: repo.slug as string,
-            fullName: repo.full_name as string,
-            avatarUrl: repo.links.avatar.href as string,
-            description: repo.description as string || '',
-            url: `https://bitbucket.org/${repo.full_name}`
-          }));
-
-        setState({ repositories: repositories });
-      } catch (error) {
-        setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
-      }
-    }
-
-    fetchRepositories();
-  }, []);
-
-  if (state.error) {
-    showToast(ToastStyle.Failure, "Failed loading repositories", state.error.message);
+  if (error) {
+    showToast(ToastStyle.Failure, "Failed loading repositories", error.message);
   }
 
+  useEffect(() => {
+    mutate(REPOSITORIES_CACHE_KEY, getRepositories);
+  }, []);
+
   return (
-    <List isLoading={!state.repositories && !state.error} searchBarPlaceholder="Search by name...">
-      <List.Section title="Repositories" subtitle={state.repositories?.length + ""}>
-        {state.repositories?.map((repo) => (
+    <List isLoading={isValidating} searchBarPlaceholder="Search by name...">
+      <List.Section title="Repositories" subtitle={data?.length.toString()}>
+        {data?.map(toRepository).map((repo: Repository) => (
           <SearchListItem key={repo.uuid} repo={repo} />
         ))}
       </List.Section>
     </List>
   );
+}
+
+function toRepository(repo: Schema.Repository): Repository {
+  return {
+    name: repo.name as string,
+    uuid: repo.uuid as string,
+    slug: repo.slug as string,
+    fullName: repo.full_name as string,
+    avatarUrl: repo.links?.avatar?.href as string,
+    description: repo.description as string || "",
+    url: `https://bitbucket.org/${repo.full_name}`
+  };
 }
 
 function SearchListItem({ repo }: { repo: Repository }): JSX.Element {
@@ -80,18 +75,18 @@ function SearchListItem({ repo }: { repo: Repository }): JSX.Element {
             />
             <OpenInBrowserAction
               title="Open Branches in Browser"
-              url={repo.url + '/branches'}
+              url={repo.url + "/branches"}
               icon={{ source: icon.branch, tintColor: Color.PrimaryText }}
             />
             <OpenInBrowserAction
               title="Open Pull Requests in Browser"
-              url={repo.url + '/pull-requests'}
+              url={repo.url + "/pull-requests"}
               icon={{ source: icon.pr, tintColor: Color.PrimaryText }}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
             <OpenInBrowserAction
               title="Open Pipelines in Browser"
-              url={repo.url + '/addon/pipelines/home'}
+              url={repo.url + "/addon/pipelines/home"}
               icon={{ source: icon.pipeline.self, tintColor: Color.PrimaryText }}
             />
           </ActionPanel.Section>

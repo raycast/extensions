@@ -1,28 +1,43 @@
-import { Bitbucket } from 'bitbucket'
+import { Bitbucket, Schema } from "bitbucket";
 import { preferences } from "../helpers/preferences";
 
 const clientOptions = {
-  baseUrl: 'https://api.bitbucket.org/2.0',
+  baseUrl: "https://api.bitbucket.org/2.0",
   auth: {
     username: preferences.accountName,
-    password: preferences.appPassword,
+    password: preferences.appPassword
   },
   notice: false
-}
+};
 
 const defaults = {
-  workspace: preferences.workspace,
-}
+  workspace: preferences.workspace
+};
 
-const bitbucket = new Bitbucket(clientOptions)
+const bitbucket = new Bitbucket(clientOptions);
 
-export async function getRepositories(): Promise<any> {
-  return await bitbucket.repositories.list({
+export async function getRepositories(key: string, page = 1, repositories = []): Promise<Schema.Repository[]> {
+  const { data } = await bitbucket.repositories.list({
     ...defaults,
     pagelen: 100,
-    sort: '-updated_on',
-    fields: "values.name,values.uuid,values.slug,values.full_name,values.links.avatar.href,values.description"
-  })
+    sort: "-updated_on",
+    page: page.toString(),
+    fields: ["values.name",
+      "values.uuid",
+      "values.slug",
+      "values.full_name",
+      "values.links.avatar.href",
+      "values.description",
+      "next"].join(",")
+  });
+
+  repositories = repositories.concat(data.values as []);
+
+  if (data.next) {
+    return getRepositories(key, page + 1, repositories);
+  }
+
+  return repositories;
 }
 
 export async function pipelinesGetQuery(repoSlug: string, pageNumber: number): Promise<any> {
@@ -30,8 +45,8 @@ export async function pipelinesGetQuery(repoSlug: string, pageNumber: number): P
     ...defaults,
     repo_slug: repoSlug,
     pagelen: 15,
-    page: pageNumber + '',
-    sort: '-created_on',
+    page: pageNumber + "",
+    sort: "-created_on",
     // https://developer.atlassian.com/cloud/bitbucket/rest/intro/#fields-parameter-syntax
     // "+": Pulling in additional fields not normally returned by an endpoint, while still getting all the default fields
     fields: `
@@ -42,24 +57,24 @@ export async function pipelinesGetQuery(repoSlug: string, pageNumber: number): P
       +page,
       +size,
     `.replace(/(\r\n|\n|\r| )/gm, "")
-  })
+  });
 }
 
 export async function getCommitNames(repoSlug: string): Promise<any> {
   return await bitbucket.pipelines.list({
     ...defaults,
     pagelen: 20,
-    sort: '-created_on',
+    sort: "-created_on",
     repo_slug: repoSlug
-  })
+  });
 }
 
 export async function getMyOpenPullRequests(): Promise<any> {
   return await bitbucket.pullrequests.listPullrequestsForUser({
     ...defaults,
     pagelen: 20,
-    sort: '-created_on',
-    selected_user: preferences.accountName,
+    sort: "-created_on",
+    selected_user: preferences.accountName
     // fields: `values.uuid,
     //   values.build_number,
     //   values.state,
@@ -67,6 +82,5 @@ export async function getMyOpenPullRequests(): Promise<any> {
     //   values.trigger.name,
     //   values.target.commit
     // `.replace(/(\r\n|\n|\r| )/gm, "")
-  })
+  });
 }
-
