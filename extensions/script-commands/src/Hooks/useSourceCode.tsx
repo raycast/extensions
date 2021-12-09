@@ -75,8 +75,8 @@ type Details = (language: string, file: string, sourceCode: string) => string
 
 const details: Details = (language, filename, sourceCode) => {
   let content = `
-  Language: ${language}  
-  File: ${filename}  
+  Language: **${language}**  
+  File: **${filename}**  
   \n\n  
   `
   content += "```" + language + "\n"
