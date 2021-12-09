@@ -36,6 +36,7 @@ import {
   readFileSync,
   writeFileSync,
   watch,
+  FSWatcher,
 } from 'fs'
 
 export class DataManager {
@@ -122,7 +123,7 @@ export class DataManager {
     return command != null
   }
 
-  private isCommandNeedsSetup(identifier: string): boolean {
+  private commandNeedsSetup(identifier: string): boolean {
     const command = this.contentManager.contentFor(identifier)
 
     if (command != null)
@@ -144,12 +145,12 @@ export class DataManager {
     return commandHash != currentFileHash
   }
 
-  monitorChangesFor(identifier: string, callback: (state: State) => void): void {
+  monitorChangesFor(identifier: string, callback: (state: State) => void): FSWatcher | null {
     const file = this.commandFileFor(identifier)
     const state = this.stateFor(identifier)
     
     if (file && state == State.NeedSetup) {
-      watch(file.path, (event, ) => {
+      return watch(file.path, (event, ) => {
         if (this.isCommandChanged(identifier) == false) {
           callback(State.NeedSetup)
           return
@@ -162,20 +163,26 @@ export class DataManager {
         }
       })
     }
+
+    return null
   }
 
-  updateHashOnChangeFor(identifier: string): void {
+  updateHashOnChangeFor(identifier: string, onChange: () => void): FSWatcher | null {
     const file = this.commandFileFor(identifier)
     const state = this.stateFor(identifier)
     
     if (file && state == State.Installed) {
-      watch(file.path, (event) => {
-        if (event == 'change') {
+      return watch(file.path, (event) => {
+        if (event == 'change' && this.isCommandChanged(identifier)) {
           this.scriptCommandManager.updateHashFor(identifier)
           this.persist()
+
+          onChange()
         }
       })
     }
+
+    return null
   }
 
   commandFileFor(identifier: string): FileNullable {
@@ -189,7 +196,7 @@ export class DataManager {
 
   stateFor(identifier: string): State {
     const downloaded = this.isCommandDownloaded(identifier)
-    const needSetup = this.isCommandNeedsSetup(identifier)
+    const needSetup = this.commandNeedsSetup(identifier)
     const changedContent = this.isCommandChanged(identifier)
 
     let state: State = State.NotInstalled

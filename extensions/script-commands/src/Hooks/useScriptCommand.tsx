@@ -31,6 +31,7 @@ import {
 import { 
   IconConstants 
 } from "@constants"
+import { FSWatcher } from "fs"
 
 type ScriptCommandState = {
   commandState: State,
@@ -76,12 +77,14 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
     if (state.commandState == State.NeedSetup) {
       const identifier = state.scriptCommand.identifier
 
-      dataManager.monitorChangesFor(identifier, state => {
+      const monitor = dataManager.monitorChangesFor(identifier, state => {
         if (state == State.ChangesDetected && abort == false) {
           setState((oldState) => ({
             ...oldState, 
             commandState: state
           }))
+
+          monitor?.close()
         }
       })
     }
@@ -119,7 +122,9 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
   }
 
   const editSourceCode = () => {
-    dataManager.updateHashOnChangeFor(state.scriptCommand.identifier)
+    const monitor = dataManager.updateHashOnChangeFor(state.scriptCommand.identifier, () => {
+      monitor?.close()
+    })
   }
 
   const file = dataManager.commandFileFor(state.scriptCommand.identifier)
