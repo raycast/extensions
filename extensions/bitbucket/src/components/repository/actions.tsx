@@ -1,9 +1,4 @@
-import {
-  ActionPanel,
-  PushAction,
-  Color,
-  Icon,
-} from "@raycast/api";
+import { ActionPanel, PushAction, Color, Icon } from "@raycast/api";
 import { PipelinesList } from "./pipelinesList";
 
 export function ShowPipelinesActions(props: { repo: any }): JSX.Element {
@@ -15,9 +10,15 @@ export function ShowPipelinesActions(props: { repo: any }): JSX.Element {
       shortcut={{ modifiers: ["cmd"], key: "p" }}
     />
   );
-};
+}
 
-export function GoesToNextPipelinePage({ setPageNumber, pageNumber }: { setPageNumber: any, pageNumber: number }): JSX.Element {
+export function GoesToNextPipelinePage({
+  setPageNumber,
+  pageNumber,
+}: {
+  setPageNumber: any;
+  pageNumber: number;
+}): JSX.Element {
   return (
     <ActionPanel.Item
       title="Goes to next page"
@@ -25,9 +26,15 @@ export function GoesToNextPipelinePage({ setPageNumber, pageNumber }: { setPageN
       onAction={() => setPageNumber(pageNumber + 1)}
     />
   );
-};
+}
 
-export function GoesToPreviousPipelinePage({ setPageNumber, pageNumber }: { setPageNumber: any, pageNumber: number }): JSX.Element {
+export function GoesToPreviousPipelinePage({
+  setPageNumber,
+  pageNumber,
+}: {
+  setPageNumber: any;
+  pageNumber: number;
+}): JSX.Element {
   return (
     <ActionPanel.Item
       title="Goes to previous page"
@@ -35,4 +42,4 @@ export function GoesToPreviousPipelinePage({ setPageNumber, pageNumber }: { setP
       onAction={() => setPageNumber(pageNumber - 1)}
     />
   );
-};
+}

@@ -1,12 +1,4 @@
-import {
-  ActionPanel,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-  ImageMask,
-  Color
-} from "@raycast/api";
+import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle, ImageMask, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 import { getMyOpenPullRequests } from "./../../queries";
@@ -23,7 +15,7 @@ export function SearchMyPullRequests(): JSX.Element {
   useEffect(() => {
     async function fetchPRs() {
       try {
-        const { data } = await getMyOpenPullRequests()
+        const { data } = await getMyOpenPullRequests();
 
         const prs = data.values.map((pr: any) => ({
           id: pr.id as number,
@@ -35,8 +27,8 @@ export function SearchMyPullRequests(): JSX.Element {
           commentCount: pr.comment_count as number,
           author: {
             url: pr.author.links.avatar.href as string,
-            nickname: pr.author.nickname as string
-          }
+            nickname: pr.author.nickname as string,
+          },
         }));
         setState({ pullRequests: prs });
       } catch (error) {
@@ -61,7 +53,7 @@ export function SearchMyPullRequests(): JSX.Element {
             subtitle={pr.repo?.fullName}
             accessoryTitle={`${pr.commentCount} 💬  ·  Created by ${pr.author.nickname}`}
             accessoryIcon={{ source: pr.author.url, mask: ImageMask.Circle }}
-            icon={{ source: 'icon-pr.png', tintColor: Color.PrimaryText }}
+            icon={{ source: "icon-pr.png", tintColor: Color.PrimaryText }}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>

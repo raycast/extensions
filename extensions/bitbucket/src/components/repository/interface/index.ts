@@ -23,6 +23,6 @@ export interface Pipeline {
   avatarCreatorUrl: string;
   triggerName: string;
   commitMessage: string;
-  target: any,
-  createdOn: string
+  target: any;
+  createdOn: string;
 }

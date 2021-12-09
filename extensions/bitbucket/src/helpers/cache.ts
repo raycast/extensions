@@ -13,28 +13,28 @@ const cache = localStorage.getItem(SWR_CACHE_KEY);
 const cacheProvider = new Map(cache ? JSON.parse(cache) : []);
 
 const persistCacheMiddleware: Middleware = (useSWRNext) => {
-    return (key, fetcher, config) => {
-        const swr = useSWRNext(key, fetcher, config);
+  return (key, fetcher, config) => {
+    const swr = useSWRNext(key, fetcher, config);
 
-        useEffect(() => {
-            try {
-                const value = JSON.stringify(Array.from(cacheProvider.entries()));
-                localStorage.setItem(SWR_CACHE_KEY, value);
-            } catch (error) {
-                console.error("Failed persisting cache", error);
-            }
-        }, [swr.data]);
+    useEffect(() => {
+      try {
+        const value = JSON.stringify(Array.from(cacheProvider.entries()));
+        localStorage.setItem(SWR_CACHE_KEY, value);
+      } catch (error) {
+        console.error("Failed persisting cache", error);
+      }
+    }, [swr.data]);
 
-        return swr;
-    };
+    return swr;
+  };
 };
 
 export const cacheConfig = {
-    provider: () => cacheProvider,
-    use: [persistCacheMiddleware],
-    revalidateIfStale: false,
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false
+  provider: () => cacheProvider,
+  use: [persistCacheMiddleware],
+  revalidateIfStale: false,
+  revalidateOnFocus: false,
+  revalidateOnReconnect: false,
 };
 
 export const REPOSITORIES_CACHE_KEY = "repositories";

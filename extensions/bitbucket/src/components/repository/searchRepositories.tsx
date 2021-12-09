@@ -1,12 +1,4 @@
-import {
-  ActionPanel,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-  ImageMask,
-  Color
-} from "@raycast/api";
+import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle, ImageMask, Color } from "@raycast/api";
 import { useEffect } from "react";
 import useSWR, { mutate, SWRConfig } from "swr";
 import { Schema } from "bitbucket";
@@ -54,8 +46,8 @@ function toRepository(repo: Schema.Repository): Repository {
     slug: repo.slug as string,
     fullName: repo.full_name as string,
     avatarUrl: repo.links?.avatar?.href as string,
-    description: repo.description as string || "",
-    url: `https://bitbucket.org/${repo.full_name}`
+    description: (repo.description as string) || "",
+    url: `https://bitbucket.org/${repo.full_name}`,
   };
 }
 

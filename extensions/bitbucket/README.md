@@ -39,7 +39,6 @@ Raycast extension to search repositories, check pipelines status, open recent Pu
 
 ![showcase](./assets/showcase.gif)
 
-
 ## Features
 
 - Quick access to your repositories
@@ -53,9 +52,9 @@ Raycast extension to search repositories, check pipelines status, open recent Pu
 - Give your App password a name e.g. `Raycast`, and select all the read options you need (Account, projects, repositories, Pull Requests, Pipelines)
 - Store in a secure location the given App Password
 - Start a bitbucket command and fill the required fields:
-    - Workspace: You can see your workspaces [here](https://bitbucket.org/account/workspaces/), and use the slug. You can find it in the URL of your workspace: `https://bitbucket.org/{organization}/`
-    - Account Name: You can find it [here](https://bitbucket.org/account/settings/) under `Bitbucket profile settings > Username`
-    - App Password
+  - Workspace: You can see your workspaces [here](https://bitbucket.org/account/workspaces/), and use the slug. You can find it in the URL of your workspace: `https://bitbucket.org/{organization}/`
+  - Account Name: You can find it [here](https://bitbucket.org/account/settings/) under `Bitbucket profile settings > Username`
+  - App Password
 
 Now you should be able to run Bitbucket commands with Raycast 🚀.
 
@@ -71,7 +70,7 @@ Now you should be able to run Bitbucket commands with Raycast 🚀.
   - [ ] Load all repos in background and keep a cache of all of them (as repositories are quite static resources)
   - [ ] Only keep the field needed, to reduce JSON answer size
 
-__________
+---
 
 _Extension built & tested for Bitbucket Cloud_
 

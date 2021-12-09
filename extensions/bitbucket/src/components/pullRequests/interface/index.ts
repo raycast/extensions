@@ -4,10 +4,10 @@ export interface PullRequest {
   repo: {
     name: string;
     fullName: string;
-  },
+  };
   commentCount: number;
   author: {
     url: string;
     nickname: string;
-  }
+  };
 }

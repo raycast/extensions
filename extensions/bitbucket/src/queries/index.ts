@@ -5,13 +5,13 @@ const clientOptions = {
   baseUrl: "https://api.bitbucket.org/2.0",
   auth: {
     username: preferences.accountName,
-    password: preferences.appPassword
+    password: preferences.appPassword,
   },
-  notice: false
+  notice: false,
 };
 
 const defaults = {
-  workspace: preferences.workspace
+  workspace: preferences.workspace,
 };
 
 const bitbucket = new Bitbucket(clientOptions);
@@ -29,8 +29,8 @@ export async function getRepositories(key: string, page = 1, repositories = []):
       "values.full_name",
       "values.links.avatar.href",
       "values.description",
-      "next"
-    ].join(",")
+      "next",
+    ].join(","),
   });
 
   repositories = repositories.concat(data.values as []);
@@ -58,8 +58,8 @@ export async function pipelinesGetQuery(repoSlug: string, pageNumber: number): P
       "+values.target.*",
       "+values.*",
       "+page",
-      "+size"
-    ].join(",")
+      "+size",
+    ].join(","),
   });
 }
 
@@ -68,7 +68,7 @@ export async function getCommitNames(repoSlug: string): Promise<any> {
     ...defaults,
     pagelen: 20,
     sort: "-created_on",
-    repo_slug: repoSlug
+    repo_slug: repoSlug,
   });
 }
 
@@ -77,7 +77,7 @@ export async function getMyOpenPullRequests(): Promise<any> {
     ...defaults,
     pagelen: 20,
     sort: "-created_on",
-    selected_user: preferences.accountName
+    selected_user: preferences.accountName,
     // fields: [
     //   "values.uuid",
     //   "values.build_number",
