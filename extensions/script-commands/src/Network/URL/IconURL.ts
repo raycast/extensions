@@ -34,29 +34,34 @@ export const iconDarkURLFor = (scriptCommand: ScriptCommand) => iconURL(scriptCo
 export const iconLightURLFor = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Light)
 
 const iconURL = (scriptCommand: ScriptCommand, style: IconStyle): IconResult | null => {
-  if (scriptCommand.icon == null)
+  if (!scriptCommand.icon) {
     return null
-  
+  }
+
   let path = scriptCommand.icon.light
   
-  if (style == IconStyle.Dark)
+  if (style === IconStyle.Dark) {
     path = scriptCommand.icon.dark
-  
-  if (path == null || path.length == 0)
+  }
+
+  if (!path || path.length == 0) {
     return null
+  }
   
   const emojiRegex = new RegExp(Expression.emoji)
 
-  if (emojiRegex.test(path))
+  if (emojiRegex.test(path)) {
     return {
       type: IconType.Emoji,
       content: path
     }
-  else if (checkIsValidURL(path))
+  }
+  else if (checkIsValidURL(path)) {
     return {
       type: IconType.URL,
       content: path
     }
+  }
   
   const url = `${URLConstants.baseRawURL}/${scriptCommand.path}${path}`
   

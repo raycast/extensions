@@ -6,17 +6,18 @@ export const avatarURL = (url: string | null): string => {
   const defaultSize = 100
   const defaultURL = "https://github.com/raycast.png"
 
-  if (url != null && url.length > 0 && checkIsValidURL(url)) {
+  if (url && url.length > 0 && checkIsValidURL(url)) {
     const path = new URL(url)
 
-    if (path.host == "twitter.com")
+    if (path.host === "twitter.com") {
       return `https://unavatar.io/twitter${path.pathname}`
-
-    else if (path.host == "github.com")
+    }
+    else if (path.host === "github.com") {
       return `${url}.png?size=${defaultSize}`
-    
-    else
+    }
+    else {
       return `https://unavatar.io/${path.host}?fallback=${defaultURL}`
+    }
   }
 
   return `${defaultURL}?size=${defaultSize}`

@@ -27,9 +27,10 @@ export class Settings {
   }
 
   private resolvePath(folder: string): string {
-    if (folder.length > 0 && folder.startsWith("~"))
+    if (folder.length > 0 && folder.startsWith("~")) {
       return path.join(homedir(), folder.slice(1))
-  
+    }
+    
     return folder
   }
 }

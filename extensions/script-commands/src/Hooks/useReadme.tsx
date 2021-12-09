@@ -42,8 +42,9 @@ export const useReadme: UseReadme = (initialGroup) => {
   let readmeURL = ""
   const readmePath = state.group.readme
   
-  if (readmePath != undefined && readmePath != "")
+  if (readmePath) {
     readmeURL = readmeNormalURL(readmePath)
+  }
   
   useEffect(() => {
     let abort = false
@@ -59,8 +60,9 @@ export const useReadme: UseReadme = (initialGroup) => {
       }
     }
     
-    if (readmePath != undefined && readmePath != "")
+    if (readmePath) {
       fetch(readmePath)
+    }
     
     return () => {
       abort = true
@@ -68,7 +70,7 @@ export const useReadme: UseReadme = (initialGroup) => {
   }, [state])
   
   
-  const filename = (readmePath != undefined && readmePath != "") ? path.parse(readmePath).base : "README"
+  const filename = readmePath ? path.parse(readmePath).base : "README"
   const title = `${state.group.title}'s ${filename}`
 
   return {

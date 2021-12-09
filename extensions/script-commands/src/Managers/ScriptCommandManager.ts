@@ -60,8 +60,9 @@ export class ScriptCommandManager {
   }
 
   hashFromFile(path: string): string {
-    if (existsSync(path) == false)
+    if (!existsSync(path)) {
       return ""
+    }
 
     const hash = createHash("sha256")
     const buffer = readFileSync(path)
@@ -84,11 +85,12 @@ export class ScriptCommandManager {
       commandFullPath
     )
 
-    if (command == null)
+    if (!command) {
       return {
         content: State.Error,
         message: "Script Command couldn't be downloaded"  
       }
+    }
 
     const files: Files = {
       command: command,
@@ -96,11 +98,13 @@ export class ScriptCommandManager {
       iconLight: null
     }
 
-    if (icons.light != null)
+    if (icons.light) {
       files.iconLight = icons.light
+    }
 
-    if (icons.dark != null)
+    if (icons.dark) {
       files.iconDark = icons.dark
+    }
     
     const hash = this.hashFromFile(command.path)
     
@@ -123,19 +127,22 @@ export class ScriptCommandManager {
   async delete(scriptCommand: ScriptCommand): Promise<StateResult> {
     const content = this.contentStore.contentFor(scriptCommand.identifier)
  
-    if (content != null) {
+    if (content) {
       const files = content.files
 
       let filesDeleted = 0
 
-      if (this.deleteIcon(files.iconLight, IconStyle.Light))
+      if (this.deleteIcon(files.iconLight, IconStyle.Light)) {
         filesDeleted += 0.5
+      }
 
-      if (this.deleteIcon(files.iconDark, IconStyle.Dark))
+      if (this.deleteIcon(files.iconDark, IconStyle.Dark)) {
         filesDeleted += 0.5
+      }
 
-      if (this.deleteCommand(files.command))
+      if (this.deleteCommand(files.command)) {
         filesDeleted += 1
+      }
   
       if (filesDeleted >= 1) {
         this.contentStore.delete(scriptCommand.identifier)
@@ -156,7 +163,7 @@ export class ScriptCommandManager {
   finishSetup(scriptCommand: ScriptCommand): StateResult {
     const content = this.contentStore.contentFor(scriptCommand.identifier)
  
-    if (content != null) {
+    if (content) {
       const files = content.files
       const command = files.command
 
@@ -191,8 +198,9 @@ export class ScriptCommandManager {
   updateHashFor(identifier: string) {
     const content = this.contentStore.contentFor(identifier)
 
-    if (content == null)
+    if (!content) {
       return
+    }
 
     const files = content.files
     const command = files.command
@@ -206,8 +214,9 @@ export class ScriptCommandManager {
   }
 
   private iconPaths(icon?: string | null): IconPathNullable {
-    if (icon == null || icon == undefined )
+    if (!icon) {
       return null
+    }
 
     let imagePath = ""
     let filename = ""
@@ -231,8 +240,9 @@ export class ScriptCommandManager {
       light: null 
     }
     
-    if (scriptCommand.icon == null) 
+    if (!scriptCommand.icon) {
       return icons
+    }
 
     let imagePath = ""
     const icon = scriptCommand.icon
@@ -240,18 +250,22 @@ export class ScriptCommandManager {
     const lightIcon = this.iconPaths(icon.light)
     const darkIcon = this.iconPaths(icon.dark)
 
-    if (lightIcon != null && lightIcon.path.length > 0)
+    if (lightIcon && lightIcon.path.length > 0) {
       imagePath = lightIcon.path
-    else if (darkIcon != null && darkIcon.path.length > 0)
+    }
+    else if (darkIcon && darkIcon.path.length > 0) {
       imagePath = darkIcon.path
+    }
 
-    if (imagePath.length == 0)
+    if (imagePath.length == 0) {
       return icons
+    }
 
     const imageFolderPath = path.join(commandPath, imagePath)
       
-    if (existsSync(imageFolderPath) == false)
+    if (!existsSync(imageFolderPath)) {
       afs.mkdir(imageFolderPath, { recursive: true })
+    }
 
     icons.light = await this.downloadIconFor(scriptCommand, lightIcon, imageFolderPath, IconStyle.Light)
     icons.dark = await this.downloadIconFor(scriptCommand, darkIcon, imageFolderPath, IconStyle.Dark)
@@ -265,20 +279,18 @@ export class ScriptCommandManager {
     imageFolderPath: string, 
     style: IconStyle
   ): Promise<FileNullable> {
-    if (iconPath == null)
+    if (!iconPath) {
       return null
+    }
     
-    if (iconPath.filename.length == 0)
+    if (iconPath.filename.length == 0) {
       return null
+    }
 
     let resource: IconResultNullable = null
+    resource = style == IconStyle.Light ? iconLightURLFor(scriptCommand) : iconDarkURLFor(scriptCommand)
 
-    if (style == IconStyle.Light)
-      resource = iconLightURLFor(scriptCommand)
-    else
-      resource = iconDarkURLFor(scriptCommand)
-
-    if (resource != null && resource.type == IconType.URL) {
+    if (resource && resource.type == IconType.URL) {
       const result = await this.downloadIcon(
         resource.content,
         imageFolderPath,
@@ -299,14 +311,14 @@ export class ScriptCommandManager {
     const imagePath = path.join(imageFolderPath, filename)
     const linkImagePath = path.join(this.settings.imagesCommandsFolderPath, filename)
 
-    if (existsSync(imagePath) == false) {
+    if (!existsSync(imagePath)) {
       await download(
         url, 
         imageFolderPath, 
         { filename: filename }
       )
 
-      if (existsSync(this.settings.imagesCommandsFolderPath) == false) {
+      if (!existsSync(this.settings.imagesCommandsFolderPath)) {
         mkdirSync(
           this.settings.imagesCommandsFolderPath, 
           {recursive: true}
@@ -314,14 +326,14 @@ export class ScriptCommandManager {
       }      
     }
 
-    if (existsSync(linkImagePath) == false) {
+    if (!existsSync(linkImagePath)) {
       await afs.symlink(
         imagePath, 
         linkImagePath
       )
     }
 
-    if (existsSync(linkImagePath) == false)
+    if (!existsSync(linkImagePath))
       return null
     
     return {
@@ -337,7 +349,7 @@ export class ScriptCommandManager {
     const linkFilename = scriptCommand.isTemplate ? `${scriptCommand.identifier}.template` : scriptCommand.identifier
     const linkCommandFilePath = path.join(this.settings.commandsFolderPath, linkFilename)
 
-    if (existsSync(commandFilePath) == false) {
+    if (!existsSync(commandFilePath)) {
       await download(
         sourceCodeRawURL(scriptCommand), 
         commandPath,
@@ -345,15 +357,16 @@ export class ScriptCommandManager {
       )
     }
 
-    if (existsSync(linkCommandFilePath) == false) {
+    if (!existsSync(linkCommandFilePath)) {
       await afs.symlink(
         commandFilePath,
         linkCommandFilePath
       )
     }
 
-    if (existsSync(linkCommandFilePath) == false)
+    if (!existsSync(linkCommandFilePath)) {
       return null
+    }
 
     return {
       path: commandFilePath,
@@ -362,10 +375,7 @@ export class ScriptCommandManager {
   }
 
   private deleteCommand(file: FileNullable): boolean {
-    if (file == null)
-      return false
-
-    if (file.path.length > 0 && file.link.length > 0) {
+    if (file && file.path.length > 0 && file.link.length > 0) {
       if (existsSync(file.path) && existsSync(file.link)) {
         afs.rm(file.link)
         afs.rm(file.path)
@@ -378,10 +388,7 @@ export class ScriptCommandManager {
   }  
 
   private deleteIcon(file: FileNullable, style: IconStyle): boolean {
-    if (file == null)
-      return false
-
-    if (file.path.length > 0 && file.link.length > 0) {
+    if (file && file.path.length > 0 && file.link.length > 0) {
       const linkPath = path.parse(file.link)
 
       if (this.iconUsage(linkPath.name, style) == IconUsage.LastScriptUsing) {
@@ -403,23 +410,20 @@ export class ScriptCommandManager {
     Object.values(content).forEach((command: Command) => {
       const files = command.files
       
-      let file: FileNullable
+      const file = style == IconStyle.Light ? files.iconLight : files.iconDark
 
-      if (style == IconStyle.Light)
-        file = files.iconLight
-      else
-        file = files.iconDark
-
-      if (file != null && file.link.length > 0) {
+      if (file && file.link.length > 0) {
         const parsedpath = path.parse(file.link)
 
-        if (parsedpath.name == filename && existsSync(file.link))
+        if (parsedpath.name == filename && existsSync(file.link)) {
           counter += 1
+        }
       }
     })
 
-    if (counter >= 2)
+    if (counter >= 2) {
       return IconUsage.BeingUsedByMore
+    }
 
     return IconUsage.LastScriptUsing
   }

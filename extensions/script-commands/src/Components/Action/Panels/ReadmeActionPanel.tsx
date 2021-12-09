@@ -27,14 +27,15 @@ export function ReadmeActionPanel({ group }: Props): JSX.Element {
   let normalURL: string | undefined = undefined
   const readme = group.readme
 
-  if (readme != undefined && readme.length > 0)
+  if (readme && readme.length > 0) {
     normalURL = readmeNormalURL(readme)
+  }
 
   return (
     <ActionPanel.Section title="Package Information">
       <ViewReadmeActionItem group={ group } />
       { 
-        normalURL != undefined && 
+        normalURL && 
           <OpenInBrowserAction 
             url={ normalURL }
             shortcut={ ShortcutConstants.ViewReadmeInBrowser }

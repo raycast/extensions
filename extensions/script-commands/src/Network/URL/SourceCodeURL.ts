@@ -15,7 +15,7 @@ export const sourceCodeRawURL = (scriptCommand: ScriptCommand) => sourceCodeURL(
 export const sourceCodeNormalURL = (scriptCommand: ScriptCommand) => sourceCodeURL(scriptCommand, ContentType.Normal)
 
 const sourceCodeURL = (scriptCommand: ScriptCommand, type: ContentType): string => {
-  const base = type == ContentType.Raw ? URLConstants.baseRawURL : URLConstants.baseURL
+  const base = type === ContentType.Raw ? URLConstants.baseRawURL : URLConstants.baseURL
 
   return `${base}/${scriptCommand.path}${scriptCommand.filename}`
 }

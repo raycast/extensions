@@ -55,8 +55,9 @@ export const ApplicationProvider = ({ children }: Props) => {
     if (filter != null) {
       toast = await FilterToast(filter)      
     }
-    else if (toast != null)
+    else if (toast) {
       toast.hide()
+    }
   }
 
   return (

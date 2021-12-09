@@ -21,7 +21,7 @@ export async function StoreToast(
   switch (state) {
   case (State.Installed): 
     {  
-      if (progress == Progress.InProgress) {
+      if (progress === Progress.InProgress) {
         title = "Uninstalling Script Command..."
         style = ToastStyle.Animated
       }
@@ -34,7 +34,7 @@ export async function StoreToast(
     
     case (State.NotInstalled): 
     {
-      if (progress == Progress.InProgress) {
+      if (progress === Progress.InProgress) {
         title = "Installing Script Command..."
         style = ToastStyle.Animated
       }

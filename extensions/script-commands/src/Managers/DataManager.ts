@@ -105,8 +105,9 @@ export class DataManager {
   persist(): void {
     const data = JSON.stringify(this.contentManager.getContent(), null, 2)
 
-    if ((data != null || data != undefined) && data.length > 0)
+    if (data && data.length > 0) {
       writeFileSync(this.settings.databaseFile, data)
+    }
   }
 
   clear(): void {
@@ -126,8 +127,9 @@ export class DataManager {
   private commandNeedsSetup(identifier: string): boolean {
     const command = this.contentManager.contentFor(identifier)
 
-    if (command != null)
+    if (command) {
       return command.needsSetup
+    }
 
     return true
   }
@@ -135,8 +137,9 @@ export class DataManager {
   private isCommandChanged(identifier: string): boolean {
     const command = this.contentManager.contentFor(identifier)
 
-    if (command == null)
+    if (!command) {
       return false
+    }
 
     const commandPath = command.files.command.path
     const commandHash = command.sha
@@ -149,9 +152,9 @@ export class DataManager {
     const file = this.commandFileFor(identifier)
     const state = this.stateFor(identifier)
     
-    if (file && state == State.NeedSetup) {
+    if (file && state === State.NeedSetup) {
       return watch(file.path, (event, ) => {
-        if (this.isCommandChanged(identifier) == false) {
+        if (!this.isCommandChanged(identifier)) {
           callback(State.NeedSetup)
           return
         }
@@ -173,7 +176,7 @@ export class DataManager {
     
     if (file && state == State.Installed) {
       return watch(file.path, (event) => {
-        if (event == 'change' && this.isCommandChanged(identifier)) {
+        if (event === 'change' && this.isCommandChanged(identifier)) {
           this.scriptCommandManager.updateHashFor(identifier)
           this.persist()
 
@@ -188,8 +191,9 @@ export class DataManager {
   commandFileFor(identifier: string): FileNullable {
     const command = this.contentManager.contentFor(identifier)
 
-    if (command == null)
+    if (!command) {
       return null
+    }
 
     return command.files.command
   }
@@ -204,10 +208,12 @@ export class DataManager {
     if (downloaded) {
       state = State.Installed
 
-      if (changedContent && needSetup)
+      if (changedContent && needSetup) {
         state = State.ChangesDetected
-      else if (needSetup) 
+      }
+      else if (needSetup) {
         state = State.NeedSetup
+      }
     }
 
     return state
@@ -218,11 +224,13 @@ export class DataManager {
   }
 
   async fetchCommands(filter: Filter = null): Promise<MainCompactGroup> {
-    if (filter != null)
+    if (filter != null) {
       return this.filterCommands(filter)
+    }
 
-    if (this.mainContent.groups.length > 0)
+    if (this.mainContent.groups.length > 0) {
       return this.mainContent
+    }
 
     this.mainContent = await fetchScriptCommands()
 
@@ -233,8 +241,9 @@ export class DataManager {
     let data = {... this.mainContent }
     data.totalScriptCommands = 0
 
-    if (filter == null)
+    if (filter == null) {
       return data
+    }
 
     if (typeof(filter) === "string") {
       const groups: CompactGroup[] = []
@@ -278,14 +287,16 @@ export class DataManager {
       }
       
       Object.values(content).forEach(item => {
-        if ((filter == State.NeedSetup && item.needsSetup == true) || filter == State.Installed)
+        if ((filter === State.NeedSetup && item.needsSetup === true) || filter === State.Installed) {
           group.scriptCommands.push(item.scriptCommand)
+        }
       })
 
       group.scriptCommands.sort(
         (left: ScriptCommand, right: ScriptCommand) => {
-          if (left.packageName && right.packageName)
+          if (left.packageName && right.packageName) {
             return (left.packageName > right.packageName) ? 1 : -1
+          }
 
           return 0
         }
@@ -312,8 +323,9 @@ export class DataManager {
   async installScriptCommand(scriptCommand: ScriptCommand): Promise<StateResult> {
     const result = await this.scriptCommandManager.install(scriptCommand)
 
-    if (result.content == State.Installed || result.content == State.NeedSetup)
+    if (result.content === State.Installed || result.content === State.NeedSetup) {
       this.persist()
+    }
 
     return result
   }
@@ -321,8 +333,9 @@ export class DataManager {
   async deleteScriptCommand(scriptCommand: ScriptCommand): Promise<StateResult> {
     const result = await this.scriptCommandManager.delete(scriptCommand)
 
-    if (result.content == State.NotInstalled)
+    if (result.content === State.NotInstalled) {
       this.persist()
+    }
 
     return result
   }
@@ -330,7 +343,7 @@ export class DataManager {
   async confirmScriptCommandSetupFor(scriptCommand: ScriptCommand): Promise<StateResult> {
     const result = this.scriptCommandManager.finishSetup(scriptCommand)
 
-    if (result.content == State.Installed) {
+    if (result.content === State.Installed) {
       this.persist()
     }
 

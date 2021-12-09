@@ -59,16 +59,18 @@ export const useScriptCommands: UseScriptCommands = () => {
   })
 
   const setSelection = async (identifier?: string) => {
-    if (identifier == undefined)
+    if (!identifier) {
       return
+    }
 
     const commandState = dataManager.stateFor(identifier)
 
-    if (commandState == State.ChangesDetected || commandState == State.NeedSetup) {
+    if (commandState === State.ChangesDetected || commandState === State.NeedSetup) {
       toast = await StoreToast(commandState, Progress.Finished)
     }
-    else if (toast != null) 
+    else if (toast) {
       toast.hide()
+    }
   }
 
   useEffect(() => {    
@@ -83,15 +85,16 @@ export const useScriptCommands: UseScriptCommands = () => {
     fetch()
   }, [filter])
 
-  const isLoading = state.main.groups.length == 0
+  const isLoading = state.main.groups.length === 0
   let placeholder = "Loading Script Commands..."
 
-  if (isLoading == false) {
-    if (filter != null) {
+  if (!isLoading) {
+    if (filter) {
       placeholder = `Filter applied: ${filterDescription(filter)} (${state.main.totalScriptCommands})`
     }
-    else
+    else {
       placeholder = `Search by name, category, or author in ${state.main.totalScriptCommands} items`
+    }
   }
 
   return {
@@ -111,11 +114,13 @@ export const useScriptCommands: UseScriptCommands = () => {
 type FilterDescription = (filter: Filter) => string | null
 
 const filterDescription: FilterDescription = (filter) => {
-  if (filter == null)
+  if (filter == null) {
     return null
+  }
   
-  if (typeof(filter) == "string")
+  if (typeof(filter) == "string") { 
     return filter
+  }
 
   switch (filter) {
     case State.Installed:

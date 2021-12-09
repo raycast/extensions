@@ -31,7 +31,6 @@ import {
 import { 
   IconConstants 
 } from "@constants"
-import { FSWatcher } from "fs"
 
 type ScriptCommandState = {
   commandState: State,
@@ -74,11 +73,11 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
   useEffect(() => {
     let abort = false
     
-    if (state.commandState == State.NeedSetup) {
+    if (state.commandState === State.NeedSetup) {
       const identifier = state.scriptCommand.identifier
 
       const monitor = dataManager.monitorChangesFor(identifier, state => {
-        if (state == State.ChangesDetected && abort == false) {
+        if (state === State.ChangesDetected && abort == false) {
           setState((oldState) => ({
             ...oldState, 
             commandState: state
@@ -159,19 +158,20 @@ type AccessoryIconFor = (state: State, language: string) => ImageLike
 const accessoryIconFor: AccessoryIconFor = (state, language) => {
   let icon: ImageLike
 
-  if (state == State.Installed)
+  if (state === State.Installed) {
     icon = IconConstants.Installed
-
-  else if (state == State.NeedSetup)
+  }
+  else if (state === State.NeedSetup) {
     icon = IconConstants.NeedSetup
-
-  else if (state == State.ChangesDetected)
+  }
+  else if (state === State.ChangesDetected) {
     icon = IconConstants.ChangesDetected
-    
-  else
+  }
+  else {
     icon = { 
       source: languageURL(language) 
     }
+  }
 
   return icon
 }
@@ -184,19 +184,23 @@ type AccessoryTitleFor = (scriptCommand: ScriptCommand) => string
 const accessoryTitleFor: AccessoryTitleFor = (scriptCommand) => { 
   const defaultAuthor = "Raycast"
   
-  if (scriptCommand.authors == null || scriptCommand.authors == undefined)
+  if (!scriptCommand.authors) {
     return defaultAuthor
+  }
 
   const authors = scriptCommand.authors
 
-  if (authors.length == 0)
+  if (authors.length == 0) {
     return defaultAuthor
+  }
 
   let content = ""
 
   authors.forEach(author => {
-    if (content.length > 0)
+    if (content.length > 0) {
       content += " and "  
+    }
+
     content += author.name
   })
 
@@ -213,16 +217,17 @@ const keywordsFor: KeywordsIconFor = (scriptCommand, state) => {
 
   const packageName = scriptCommand.packageName
 
-  if (packageName != undefined && packageName != "")
+  if (packageName) {
     keywords.push(packageName)
+  }
 
   const authors = scriptCommand.authors
 
-  if (authors != undefined && authors.length > 0) {
+  if (authors && authors.length > 0) {
     authors.forEach(author => {
       const name = author.name
 
-      if (name != undefined && name != "") {
+      if (name) {
         name.split(" ").forEach(
           value => keywords.push(value)
         )
@@ -230,19 +235,21 @@ const keywordsFor: KeywordsIconFor = (scriptCommand, state) => {
     })
   }
 
-  if (scriptCommand.language != "")
+  if (scriptCommand.language) {
     keywords.push(scriptCommand.language)
+  }
 
-  if (state == State.Installed)
+  if (state === State.Installed) {
     keywords.push("installed")
-
-  else if (state == State.NeedSetup || state == State.ChangesDetected) {
+  }
+  else if (state === State.NeedSetup || state === State.ChangesDetected) {
     keywords.push("installed")
     keywords.push("setup")
   }
 
-  if (scriptCommand.isTemplate)
+  if (scriptCommand.isTemplate) {
     keywords.push("template")
+  }
 
   return keywords
 }

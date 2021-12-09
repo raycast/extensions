@@ -29,8 +29,9 @@ export class ContentStore {
   }
 
   delete(identifier: string): void {
-    if (this.content && this.content[identifier] != null)
+    if (this.content && this.content[identifier]) {
       delete this.content[identifier]
+    }
   }
 
   clear(): void {

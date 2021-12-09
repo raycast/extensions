@@ -11,7 +11,7 @@ export const readmeNormalURL = (path: string) => readmeURL(path, ContentType.Nor
 export const readmeRawURL = (path: string) => readmeURL(path, ContentType.Raw)
 
 const readmeURL = (path: string, type: ContentType): string => {
-  const base = type == ContentType.Raw ? URLConstants.baseRawURL : URLConstants.baseURL
+  const base = type === ContentType.Raw ? URLConstants.baseRawURL : URLConstants.baseURL
 
   return `${base}/${path}`
 }

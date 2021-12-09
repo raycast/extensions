@@ -61,7 +61,7 @@ export const useSourceCode: UseSourceCode = (initialScriptCommand) => {
   
   return {
     title: state.scriptCommand.title,
-    isLoading: state.content.length == 0,
+    isLoading: state.content.length === 0,
     sourceCodeURL: sourceCodeNormalURL(state.scriptCommand),
     sourceCode: details(
       state.scriptCommand.language, 

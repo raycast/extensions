@@ -153,7 +153,7 @@ const markdownNormalized: MarkdownNormalized = (markdown, readmePath) => {
   const expression = /!\[[A-Za-z0-9\-._]+\]\(([A-Za-z0-9\-.\\/_]+)\)/gm
 
   let content = markdown.replace(expression, (_match, path: string) => {
-    if (path.length > 0 && (path.startsWith("http") == false || path.startsWith("https") == false))
+    if (path.length > 0 && (!path.startsWith("http") || !path.startsWith("https")))
         return `![](${URLConstants.baseRawURL}/${groupPath}/${path})`
 
     return path
