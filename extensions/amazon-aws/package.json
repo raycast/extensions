@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "aws",
   "title": "Amazon AWS",
-  "description": "Integrate your AWS account in Raycast",
+  "description": "Integrate your AWS account in Raycast, by Falcon and Hodglim",
   "icon": "command-icon.png",
   "author": "Falcon",
   "license": "MIT",
@@ -10,22 +10,29 @@
     {
       "name": "index",
       "title": "EC2 Instances",
-      "subtitle": "Amazon AWS",
+      "subtitle": "List and Filter All your EC2 Instances",
       "description": "List and Filter All your EC2 Instances",
       "mode": "view"
     },
     {
       "name": "queues",
       "title": "SQS Queues",
-      "subtitle": "Amazon AWS",
+      "subtitle": "List All your SQS Queues",
       "description": "List All your SQS Queues",
       "mode": "view"
     },
     {
       "name": "codepipelines",
       "title": "CodePipelines",
-      "subtitle": "Amazon AWS",
+      "subtitle": "List All your CodePipelines",
       "description": "List All your CodePipelines",
+      "mode": "view"
+    },
+    {
+      "name": "console",
+      "title": "Console",
+      "subtitle": "Launch AWS console links",
+      "description": "Launch AWS console links",
       "mode": "view"
     }
   ],
