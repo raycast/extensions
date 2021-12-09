@@ -10,28 +10,28 @@
     {
       "name": "index",
       "title": "EC2 Instances",
-      "subtitle": "List and Filter All your EC2 Instances",
+      "subtitle": "Amazon AWS",
       "description": "List and Filter All your EC2 Instances",
       "mode": "view"
     },
     {
       "name": "queues",
       "title": "SQS Queues",
-      "subtitle": "List All your SQS Queues",
+      "subtitle": "Amazon AWS",
       "description": "List All your SQS Queues",
       "mode": "view"
     },
     {
       "name": "codepipelines",
       "title": "CodePipelines",
-      "subtitle": "List All your CodePipelines",
+      "subtitle": "Amazon AWS",
       "description": "List All your CodePipelines",
       "mode": "view"
     },
     {
       "name": "console",
       "title": "Console",
-      "subtitle": "Launch AWS console links",
+      "subtitle": "Amazon AWS",
       "description": "Launch AWS console links",
       "mode": "view"
     }
