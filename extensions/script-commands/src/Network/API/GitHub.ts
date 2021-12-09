@@ -152,12 +152,16 @@ const markdownNormalized: MarkdownNormalized = (markdown, readmePath) => {
   const groupPath = path.parse(readmePath).dir
   const expression = /!\[[A-Za-z0-9\-._]+\]\(([A-Za-z0-9\-.\\/_]+)\)/gm
 
-  const content = markdown.replace(expression, (_match, path: string) => {
+  let content = markdown.replace(expression, (_match, path: string) => {
     if (path.length > 0 && (path.startsWith("http") == false || path.startsWith("https") == false))
         return `![](${URLConstants.baseRawURL}/${groupPath}/${path})`
 
     return path
   })
+
+  // Workaround to give some padding at the bottom of the content.
+  // This is needed to avoid the Action Panels button shadowing the content
+  content += "\n\n&nbsp;"
 
   return content
 }
