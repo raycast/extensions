@@ -1,5 +1,6 @@
 import {
   copyTextToClipboard,
+  popToRoot,
   showHUD,
   showToast,
   ActionPanel,
@@ -54,6 +55,7 @@ function FormatAction() {
     const output = JSON.stringify(json, null, space);
     copyTextToClipboard(output);
     showHUD('Copied to clipboard');
+    popToRoot();
   }
 
   return <SubmitFormAction icon={Icon.Checkmark} title="Format" onSubmit={handleSubmit} />;
