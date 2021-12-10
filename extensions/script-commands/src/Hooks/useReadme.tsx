@@ -12,6 +12,7 @@ import {
 
 import { 
   useEffect,
+  useRef,
   useState 
 } from "react"
 
@@ -32,6 +33,7 @@ import path from "path"
 type UseReadme = (initialGroup: CompactGroup) => UseReadmeProps
 
 export const useReadme: UseReadme = (initialGroup) => {
+  const abort = useRef<AbortController | null>(null)
   const { dataManager } = useDataManager()
   
   const [state, setState] = useState<ReadmeState>({
@@ -47,12 +49,13 @@ export const useReadme: UseReadme = (initialGroup) => {
   }
   
   useEffect(() => {
-    let abort = false
-
     const fetch = async (path: string) => {
-      const result = await dataManager.fetchReadme(path)
+      abort.current?.abort()
+      abort.current = new AbortController()
 
-      if (abort == false) {
+      const result = await dataManager.fetchReadme(path, abort.current.signal)
+
+      if (!abort.current.signal.aborted) {
         setState((oldState) => ({
           ...oldState, 
           content: result
@@ -65,7 +68,7 @@ export const useReadme: UseReadme = (initialGroup) => {
     }
     
     return () => {
-      abort = true
+      abort.current?.abort()
     }
   }, [state])
   

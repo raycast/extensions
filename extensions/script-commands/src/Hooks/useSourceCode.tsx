@@ -1,4 +1,10 @@
 import { 
+  useEffect,
+  useRef,
+  useState,
+} from "react"
+
+import { 
   useDataManager,
 } from "@hooks"
 
@@ -9,11 +15,6 @@ import {
 import { 
   sourceCodeNormalURL,
 } from "@urls"
-
-import { 
-  useEffect,
-  useState,
-} from "react"
 
 type SourceCodeState = {
   content: string
@@ -30,7 +31,7 @@ type UseSourceCodeProps = {
 type UseSourceCode = (initialScriptCommand: ScriptCommand) => UseSourceCodeProps
 
 export const useSourceCode: UseSourceCode = (initialScriptCommand) => {
-  
+  const abort = useRef<AbortController | null>(null)
   const { dataManager } = useDataManager()
 
   const [state, setState] = useState<SourceCodeState>({
@@ -39,12 +40,13 @@ export const useSourceCode: UseSourceCode = (initialScriptCommand) => {
   })
 
   useEffect(() => {
-    let abort = false
-
     const fetch = async () => {
-      const result = await dataManager.fetchSourceCode(state.scriptCommand)
-  
-      if (abort == false) {
+      abort.current?.abort()
+      abort.current = new AbortController()
+
+      const result = await dataManager.fetchSourceCode(state.scriptCommand, abort.current.signal)
+
+      if (!abort.current.signal.aborted) {
         setState((oldState) => ({
           ...oldState, 
           content: result
@@ -55,7 +57,7 @@ export const useSourceCode: UseSourceCode = (initialScriptCommand) => {
     fetch()
 
     return () => {
-      abort = true
+      abort.current?.abort()
     }
   }, [state])
   

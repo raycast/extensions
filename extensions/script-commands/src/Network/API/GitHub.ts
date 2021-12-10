@@ -110,37 +110,40 @@ const flattenGroups: FlattenGroups = (group, parentGroupName = undefined) => {
   return compactGroup
 }
 
-export async function fetchSourceCode(scriptCommand: ScriptCommand): Promise<string> {
+export async function fetchSourceCode(scriptCommand: ScriptCommand, signal: AbortSignal): Promise<string> {
   try {
     const url = sourceCodeRawURL(scriptCommand)
-    const response = await fetch(url)
+    const response = await fetch(url, { signal })
 
     return await response.text()
   }
   catch {
-    showToast(
-      ToastStyle.Failure, 
-      `Could not load the source code for ${scriptCommand.title}`
-    )
-
+    if (!signal.aborted) {
+      showToast(
+        ToastStyle.Failure, 
+        `Could not load the source code for ${scriptCommand.title}`
+      )
+    }
     return Promise.resolve("")
   }
 }
 
-export async function fetchReadme(path: string): Promise<string> {
+export async function fetchReadme(path: string, signal: AbortSignal): Promise<string> {
   try {
     const url = readmeRawURL(path)
-    const response = await fetch(url)
+    const response = await fetch(url, { signal })
     const content = await response.text()
     const markdown = markdownNormalized(content, path)
 
     return markdown
   }
   catch {
-    showToast(
-      ToastStyle.Failure, 
-      `Could not load the README for path ${path}`
-    )
+    if (!signal.aborted) {
+      showToast(
+        ToastStyle.Failure, 
+        `Could not load the README for path ${path}`
+      )
+    }
 
     return Promise.resolve("")
   }

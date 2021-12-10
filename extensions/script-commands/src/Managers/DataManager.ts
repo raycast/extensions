@@ -312,12 +312,12 @@ export class DataManager {
     return data
   }
 
-  async fetchSourceCode(scriptCommand: ScriptCommand): Promise<string> {
-    return fetchSourceCode(scriptCommand)
+  async fetchSourceCode(scriptCommand: ScriptCommand, signal: AbortSignal): Promise<string> {
+    return fetchSourceCode(scriptCommand, signal)
   }
 
-  async fetchReadme(path: string): Promise<string> {
-    return fetchReadme(path)
+  async fetchReadme(path: string, signal: AbortSignal): Promise<string> {
+    return fetchReadme(path, signal)
   }
   
   async installScriptCommand(scriptCommand: ScriptCommand): Promise<StateResult> {

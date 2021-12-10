@@ -1,6 +1,8 @@
 import { 
-  ScriptCommand,
-} from "@models"
+  useEffect,
+  useRef,
+  useState,
+} from "react"
 
 import { 
   Image,
@@ -8,9 +10,8 @@ import {
 } from "@raycast/api"
 
 import { 
-  useEffect,
-  useState,
-} from "react"
+  ScriptCommand,
+} from "@models"
 
 import { 
   useDataManager,
@@ -63,6 +64,7 @@ type UseScriptCommandState = {
 type UseScriptCommand = (initialScriptCommand: ScriptCommand) => UseScriptCommandState
 
 export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
+  const abort = useRef<AbortController | null>(null)
   const { dataManager, filter, setFilter } = useDataManager()
 
   const [state, setState] = useState<ScriptCommandState>({
@@ -71,13 +73,14 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
   })
   
   useEffect(() => {
-    let abort = false
+    abort.current?.abort()
+    abort.current = new AbortController()
     
     if (state.commandState === State.NeedSetup) {
       const identifier = state.scriptCommand.identifier
 
       const monitor = dataManager.monitorChangesFor(identifier, state => {
-        if (state === State.ChangesDetected && abort == false) {
+        if (state === State.ChangesDetected && !abort.current?.signal.aborted) {
           setState((oldState) => ({
             ...oldState, 
             commandState: state
@@ -89,7 +92,7 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
     }
 
     return () => {
-      abort = true
+      abort.current?.abort()
     }
   }, [state])
   
