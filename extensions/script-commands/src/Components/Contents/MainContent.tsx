@@ -17,7 +17,6 @@ export function MainContent(): JSX.Element {
 
   return (
     <List 
-      navigationTitle={ props.title }
       isLoading={ props.isLoading } 
       searchBarPlaceholder={ props.placeholder }
       onSelectionChange={ setSelection }

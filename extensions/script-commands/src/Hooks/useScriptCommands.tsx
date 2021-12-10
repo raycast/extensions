@@ -31,7 +31,6 @@ type UseScriptCommandsState = {
 }
 
 type UserScriptCommandsProps = {
-  title: string,
   placeholder: string,
   isLoading: boolean,
   groups: CompactGroup[]
@@ -99,7 +98,6 @@ export const useScriptCommands: UseScriptCommands = () => {
 
   return {
     props: {
-      title: "Search Command",
       placeholder: placeholder,
       isLoading: isLoading,
       groups: state.main.groups,
