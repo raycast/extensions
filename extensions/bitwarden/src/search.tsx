@@ -8,6 +8,8 @@ import {
   Detail,
   CopyToClipboardAction,
   getPreferenceValues,
+  copyTextToClipboard,
+  closeMainWindow,
 } from "@raycast/api";
 import { Item, Folder, VaultStatus } from "./types";
 import { useEffect, useState } from "react";
@@ -61,6 +63,10 @@ function ItemList(props: {
     }
   }
 
+  function loadTotp(sessionToken: string) {
+    return (id: string) => bitwardenApi.getTotp(id, sessionToken)
+  }
+
   useEffect(() => {
     if (vaultStatus === "unlocked" && sessionToken) {
       loadItems(sessionToken);
@@ -91,6 +97,7 @@ function ItemList(props: {
             item={item}
             folder={item.folderId ? folderMap[item.folderId] : undefined}
             refreshItems={refreshItems}
+            getTotp={sessionToken ? loadTotp(sessionToken) : undefined}
           />
         ))}
       </List.Section>
@@ -101,6 +108,7 @@ function ItemList(props: {
           item={item}
           folder={item.folderId ? folderMap[item.folderId] : undefined}
           refreshItems={refreshItems}
+          getTotp={sessionToken ? loadTotp(sessionToken) : undefined}
         />
       ))}
       </List.Section>
@@ -119,8 +127,8 @@ function getIcon(item: Item) {
   }[item.type];
 }
 
-function ItemListItem(props: { item: Item; folder: Folder | undefined; refreshItems?: () => void }) {
-  const { item, folder, refreshItems } = props;
+function ItemListItem(props: { item: Item; folder: Folder | undefined; refreshItems?: () => void, getTotp?: (id: string) => Promise<string> }) {
+  const { item, folder, refreshItems, getTotp } = props;
   const { name, notes, identity, login, secureNote, fields, passwordHistory, card } = item;
   const accessoryIcons = [];
 
@@ -145,6 +153,16 @@ function ItemListItem(props: { item: Item; folder: Folder | undefined; refreshIt
 
   const tree = treeify.asTree(cleanItem, true, false);
 
+  async function copyTotp(id: string) {
+      if (getTotp) {
+        const totp = await getTotp(id);
+        copyTextToClipboard(totp);
+        closeMainWindow({ clearRootSearch: true });
+      } else {
+        showToast(ToastStyle.Failure, "Failed to fetch TOTP.");
+      }
+  }
+
   return (
     <List.Item
       id={item.id}
@@ -156,6 +174,7 @@ function ItemListItem(props: { item: Item; folder: Folder | undefined; refreshIt
       actions={
         <ActionPanel>
           {item.login?.password ? <CopyToClipboardAction title="Copy Password" content={item.login.password} /> : null}
+          {item.login?.totp ? <ActionPanel.Item title="Copy TOTP" icon={Icon.Clipboard} onAction={() => copyTotp(item.id)} /> : null}
           {item.notes ? (
             <PushAction
               title="Show Secure Note"
