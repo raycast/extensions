@@ -12,7 +12,7 @@ import {
   Toast,
   ToastStyle,
 } from "@raycast/api";
-import execa from "execa";
+import { execaCommand } from "execa";
 import { existsSync } from "fs";
 import { cpus } from "os";
 
@@ -25,7 +25,7 @@ const brewPath: string = (preferences.brewPath && preferences.brewPath.length > 
   : ((cpus()[0].model == "Apple M1") ? "/opt/homebrew/bin/brew" : "/usr/local/bin/brew");
 
 export async function runShellScript(command: string) {
-  const { stdout, stderr } = await execa.command(command);
+  const { stdout, stderr } = await execaCommand(command);
   return { stdout, stderr };
 }
 
@@ -55,11 +55,14 @@ export async function getServices(): Promise<serviceType[]> {
       showToast(ToastStyle.Failure, "Error Parsing Service Data", "Service data could not be parsed.");
       return [];
     }
+    let status = split[1];
+    if(status === "none") status = "stopped";
+    if (split.length !== 4 && split[1] === "started") status = "running";
     data.push({
       name: split[0],
-      status: split[1],
-      user: split[2] ?? "",
-      path: split[3] ?? ""
+      status: status,
+      user: split.length === 4 ? split[2] : "",
+      path: split.at(-1) ?? ""
     });
   }
   return data;
@@ -115,7 +118,7 @@ export async function restartService(service: string) {
   const data = await getServices();
   for (const d of data) {
     if (d.name === service) {
-      if (d.status === "started") {
+      if (d.status === "started" || d.status === "running") {
         toast.style = ToastStyle.Success;
         toast.title = "Restarted Service";
         toast.message = `Restarted ${service}`;
@@ -136,7 +139,7 @@ export async function runService(service: string) {
   const data = await getServices();
   for (const d of data) {
     if (d.name === service) {
-      if (d.status === "started") {
+      if (d.status === "running") {
         toast.style = ToastStyle.Success;
         toast.title = "Ran Service";
         toast.message = `Ran ${service}`;
@@ -150,13 +153,13 @@ export async function runService(service: string) {
 }
 
 export function createIcon(status: string): ImageLike {
-  if (status === "started") return { source: Icon.Checkmark, tintColor: Color.Green }
+  if (status === "started" || status === "running") return { source: Icon.Checkmark, tintColor: Color.Green }
   else if (status === "stopped") return { source: Icon.XmarkCircle, tintColor: Color.Red }
   else return { source: Icon.ExclamationMark, tintColor: Color.Yellow }
 }
 
 export function BrewActions(props: { data: serviceType }) {
-  if (props.data.status === "started") {
+  if (props.data.status === "started" || props.data.status === "running") {
     return (
       <ActionPanel >
         <ActionPanel.Section title="Manage Service">

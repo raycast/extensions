@@ -21,9 +21,10 @@ function truncate(input: Buffer, digits: number): number {
   return (p.readUInt32BE() & 0x7fffffff) % Math.pow(10, digits);
 }
 
-export function generateTOTP(key: string, options: Options): number {
+export function generateTOTP(key: string, options: Options): string {
   let time = options.timestamp || new Date().getTime();
   time = Math.floor(time / 1000 / options.period);
   const decodedKey = decode.asBytes(key.toUpperCase());
-  return truncate(hash(Buffer.from(decodedKey), BigInt(time)), options.digits);
+  const token = truncate(hash(Buffer.from(decodedKey), BigInt(time)), options.digits);
+  return token.toString().padStart(options.digits, "0");
 }
