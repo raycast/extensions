@@ -14,7 +14,7 @@ import { homedir } from "os";
 import { basename, dirname } from "path";
 import { fileURLToPath, URL } from "url";
 import { ReactNode } from "react";
-import { EntryLike, isFileEntry, isFolderEntry, isWorkspaceEntry } from "./types";
+import { EntryLike, isFileEntry, isFolderEntry, isRemoteEntry, isWorkspaceEntry } from "./types";
 
 const STORAGE = `${homedir()}/Library/Application Support/Code/storage.json`;
 
@@ -30,7 +30,7 @@ export default function Command() {
 
   const recentEntries = getRecentEntries();
   recentEntries.forEach((entry) => {
-    if (isFolderEntry(entry) && existsSync(new URL(entry.folderUri))) {
+    if (isFolderEntry(entry) && (isRemoteEntry(entry) || existsSync(new URL(entry.folderUri)))) {
       folders.push(<ProjectListItem key={entry.folderUri} uri={entry.folderUri} />);
     } else if (isFileEntry(entry) && existsSync(new URL(entry.fileUri))) {
       files.push(<ProjectListItem key={entry.fileUri} uri={entry.fileUri} />);
