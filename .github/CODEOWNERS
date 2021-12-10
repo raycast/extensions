@@ -63,6 +63,7 @@
 /extensions/huggingcast                              @ragnor
 /extensions/imdb                                     @ryan
 /extensions/jetbrains                                @gdsmith
+/extensions/json-format                              @destiner
 /extensions/kill-process                             @rolandleth
 /extensions/kinopoisk                                @mattisssa
 /extensions/lark                                     @tmk
