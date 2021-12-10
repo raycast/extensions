@@ -64,8 +64,8 @@ export default function AppsView() {
           />
           <PushAction
             icon={Icon.Link}
-            title="Add By URL"
-            target={<AddByUrl />}
+            title="Add App By URL"
+            target={<AddAppByUrlForm />}
             shortcut={{ modifiers: ["cmd"], key: "u" }} />
         </ActionPanel>
       }
@@ -87,8 +87,8 @@ export default function AppsView() {
                 />
                 <PushAction
                   icon={Icon.Link}
-                  title="Add By URL"
-                  target={<AddByUrl />}
+                  title="Add App By URL"
+                  target={<AddAppByUrlForm />}
                   shortcut={{ modifiers: ["cmd"], key: "u" }} />
               </ActionPanelSection>
               <ActionPanelSection>
@@ -196,7 +196,7 @@ function AddForm() {
   );
 }
 
-function AddByUrl() {
+function AddAppByUrlForm() {
   const { push } = useNavigation();
 
   const onSubmit = async (e: Record<string, FormValue>) => {
