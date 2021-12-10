@@ -1,5 +1,6 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
 import { KeyLight } from "./elgato";
+import { showFailureHUD } from "./utils";
 
 export default async () => {
   try {
@@ -8,7 +9,6 @@ export default async () => {
     const isOn = await keyLight.toggle();
     await showHUD(isOn ? "Key Light turned on" : "Key Light turned off");
   } catch (error) {
-    await showHUD("❌ Failed toggling Key Light");
-    console.error("Failed toggling Key Light", error);
+    await showFailureHUD("Failed toggling Key Light");
   }
 };

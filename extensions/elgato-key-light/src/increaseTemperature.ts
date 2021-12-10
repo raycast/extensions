@@ -1,5 +1,6 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
 import { KeyLight } from "./elgato";
+import { showFailureHUD } from "./utils";
 
 export default async () => {
   try {
@@ -8,7 +9,6 @@ export default async () => {
     await keyLight.increaseTemperature();
     await showHUD(`Increased color temperature`);
   } catch (error) {
-    await showHUD("❌ Failed increasing color temperature");
-    console.error("Failed increasing color temperature", error);
+    await showFailureHUD("Failed increasing color temperature");
   }
 };
