@@ -19,6 +19,7 @@
 /extensions/calendly                                 @eluce2
 /extensions/change-case                              @es183923
 /extensions/change-scroll-direction                  @gregoralbrecht
+/extensions/circle-ci                                @qeude
 /extensions/clockify                                 @isma
 /extensions/coffee                                   @mooxl
 /extensions/coinbase-pro                             @farisaziz12
@@ -54,6 +55,7 @@
 /extensions/google-maps-search                       @ratoru
 /extensions/google-translate                         @ospfranco
 /extensions/google-trends                            @kang
+/extensions/grafana                                  @francois
 /extensions/hacker-news                              @thomas
 /extensions/hazeover                                 @ratoru
 /extensions/homeassistant                            @tonka3000
@@ -87,6 +89,7 @@
 /extensions/rss-reader                               @fuksman
 /extensions/sabnzbd                                  @jns
 /extensions/safari                                   @loris
+/extensions/script-commands                          @tholanda
 /extensions/script-kit                               @pomdtr
 /extensions/search-mdn                               @krzysztofzuraw
 /extensions/search-notion                            @reckoning-dev
@@ -104,6 +107,7 @@
 /extensions/switchhosts                              @tiancheng92
 /extensions/tableplus                                @pernielsentikaer
 /extensions/tailwindcss                              @vimtor
+/extensions/terminalfinder                           @yedongze
 /extensions/things                                   @loris
 /extensions/ticktick                                 @appest
 /extensions/tldr                                     @pomdtr
