@@ -1,5 +1,5 @@
 import { getRandomPageTitle, getTodayFeaturedPageTitle } from "./wikipedia";
-import { PageSummary } from "./page-summary";
+import { PageDetail } from "./page-detail";
 import { useEffect, useState } from "react";
 
 export default function FeaturedPage() {
@@ -9,5 +9,5 @@ export default function FeaturedPage() {
     getTodayFeaturedPageTitle().then(setTitle);
   }, []);
 
-  return <PageSummary title={title} />;
+  return <PageDetail title={title} />;
 }

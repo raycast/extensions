@@ -1,5 +1,5 @@
 import { getRandomPageTitle } from "./wikipedia";
-import { PageSummary } from "./page-summary";
+import { PageDetail } from "./page-detail";
 import { useEffect, useState } from "react";
 
 export default function RandomPage() {
@@ -9,5 +9,5 @@ export default function RandomPage() {
     getRandomPageTitle().then(setTitle);
   }, []);
 
-  return <PageSummary title={title} />;
+  return <PageDetail title={title} />;
 }

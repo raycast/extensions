@@ -1,7 +1,8 @@
 import useSWR from "swr";
 import got from "got";
+import markdownWikipediaPage from "./markdown";
 
-interface WikipediaPageResponse {
+interface WikipediaPageExtractResponse {
   title: string;
   extract: string;
 }
@@ -20,13 +21,21 @@ interface WikipediaSearchResponse {
   };
 }
 
+interface WikipediaPageContentResponse {
+  parse: {
+    text: {
+      "*": string;
+    };
+  };
+}
+
 const client = got.extend({
   prefixUrl: "https://en.wikipedia.org/",
-  responseType: "json",
+  responseType: "json"
 });
 
 export async function getRandomPageTitle() {
-  const response = await client.get("api/rest_v1/page/random/summary").json<WikipediaPageResponse>();
+  const response = await client.get("api/rest_v1/page/random/summary").json<WikipediaPageExtractResponse>();
   return response.title;
 }
 
@@ -56,8 +65,23 @@ async function findPagesByTitle(search: string) {
 }
 
 async function getPageExtract(title: string) {
-  const response = await client.get(`api/rest_v1/page/summary/${title}`).json<WikipediaPageResponse>();
+  const response = await client.get(`api/rest_v1/page/summary/${title}`).json<WikipediaPageExtractResponse>();
   return response.extract;
+}
+
+async function getPageContent(title: string) {
+  const response = await client.get(`w/api.php`, {
+    searchParams: {
+      action: "parse",
+      disabletoc: true,
+      disableeditsection: true,
+      format: "json",
+      mobileformat: true,
+      page: title,
+      disablestylededuplication: true
+    }
+  }).json<WikipediaPageContentResponse>();
+  return markdownWikipediaPage(response.parse.text["*"]);
 }
 
 export function useWikipediaSearch(search: string) {
@@ -68,6 +92,15 @@ export function useWikipediaPageSummary(title?: string) {
   return useSWR(title ? ["page/summary", title] : null, () => {
     if (title) {
       return getPageExtract(title);
+    }
+  });
+}
+
+export function useWikipediaPageContent(title?: string) {
+  return useSWR(title ? ["page/content", title] : null, () => {
+    if (title) {
+      console.log(title);
+      return getPageContent(title);
     }
   });
 }

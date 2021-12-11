@@ -1,7 +1,7 @@
 import { ActionPanel, CopyToClipboardAction, Icon, List, OpenInBrowserAction, PushAction } from "@raycast/api";
 import { useState } from "react";
 import { useWikipediaPageSummary, useWikipediaSearch } from "./wikipedia";
-import { PageSummary } from "./page-summary";
+import { PageDetail } from "./page-detail";
 
 export default function SearchPage() {
   const [search, setSearch] = useState("");
@@ -34,7 +34,7 @@ function PageItem({ title }: { title: string }) {
             <PushAction
               icon={Icon.Sidebar}
               title="Show Summary"
-              target={<PageSummary title={title} />}
+              target={<PageDetail title={title} />}
             />
             <OpenInBrowserAction url={`https://wikipedia.org/wiki/${title}`} />
           </ActionPanel.Section>

@@ -1,27 +1,17 @@
-import { useWikipediaPageSummary } from "./wikipedia";
+import { useWikipediaPageContent, useWikipediaPageSummary } from "./wikipedia";
 import { ActionPanel, CopyToClipboardAction, Detail, OpenInBrowserAction } from "@raycast/api";
 
-function getPageMarkdown(title: string, extract?: string) {
-  if (!extract) {
-    return null;
-  }
-  if (!extract) {
-    return `# ${title}\n*No extract found for this page*`;
-  }
-  return `# ${title}\n${extract}`;
-}
-
-export function PageSummary({ title }: { title: string }) {
-  const { data: extract, isValidating } = useWikipediaPageSummary(title);
-  const markdown = getPageMarkdown(title, extract);
+export function PageDetail({ title }: { title: string }) {
+  const { data: content, isValidating } = useWikipediaPageContent(title);
+  const { data: summary } = useWikipediaPageSummary(title);
 
   return (
     <Detail
       isLoading={isValidating}
       navigationTitle={title}
-      markdown={markdown}
+      markdown={content}
       actions={
-        extract ? (
+        summary ? (
           <ActionPanel>
             <ActionPanel.Section>
               <OpenInBrowserAction url={`https://wikipedia.org/wiki/${title}`} />
@@ -35,7 +25,7 @@ export function PageSummary({ title }: { title: string }) {
               <CopyToClipboardAction
                 title="Copy Summary"
                 shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-                content={extract}
+                content={summary}
               />
             </ActionPanel.Section>
           </ActionPanel>
