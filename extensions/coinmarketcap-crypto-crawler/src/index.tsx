@@ -37,17 +37,22 @@ function CoinListItem({
 }: CoinListItemProps) {
   const coinPrice = coinPriceStore[slug];
 
+  let accessoryTitle;
+  if (coinPrice) {
+    const symbol = coinPrice.isUp ? "+" : "-";
+    accessoryTitle = `${coinPrice.currencyPrice}, ${symbol}${coinPrice.priceDiff}`;
+  }
+
   return (
     <List.Item
       id={`${slug}_${symbol}`}
-      key={`${name}`}
       title={name}
-      subtitle={coinPrice?.currencyPrice}
       icon={{
         source: Icon.Star,
         tintColor: isFavorite ? Color.Yellow : Color.PrimaryText,
       }}
-      accessoryTitle={coinPrice?.priceDiff}
+      subtitle={`$${symbol.toUpperCase()}`}
+      accessoryTitle={accessoryTitle}
       actions={
         <ActionPanel>
           <OpenInBrowserAction url={`${BASE_URL}${slug}`} />
@@ -154,7 +159,7 @@ export default function SearchCryptoList() {
         <List.Section title="Favorite Coins">
           {favoriteCoins.map(({ name, symbol, slug }) => (
             <CoinListItem
-              key={name}
+              key={`FAV_${name}`}
               name={name}
               slug={slug}
               symbol={symbol}
@@ -172,7 +177,7 @@ export default function SearchCryptoList() {
         <List.Section title="Search result">
           {displayedSearchResult.map(({ name, symbol, slug }) => (
             <CoinListItem
-              key={name}
+              key={slug}
               name={name}
               slug={slug}
               symbol={symbol}

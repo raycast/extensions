@@ -1,5 +1,5 @@
 import { environment } from "@raycast/api";
-import { CryptoCurrency, CryptoList } from "../types";
+import { CryptoCurrency } from "../types";
 import fse from "fs-extra";
 import fs from "fs";
 import { fetchAllCrypto } from "../api";
@@ -9,7 +9,7 @@ fse.ensureFileSync(CRYPTO_LIST_PATH);
 
 type FileCoinListData = {
   timestamp: string;
-  cryptoList: CryptoList[];
+  cryptoList: CryptoCurrency[];
 };
 
 export function writeListInToFile(data: FileCoinListData, callback: fs.NoParamCallback) {

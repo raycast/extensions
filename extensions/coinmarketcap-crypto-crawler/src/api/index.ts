@@ -21,7 +21,7 @@ export const fetchAllCrypto = ({ limit, start }: FetchParameters) =>
 
 export const BASE_URL = "https://coinmarketcap.com/currencies/";
   
-export async function fetchPrice(slug: string): Promise<PriceData> {
+export async function fetchPrice(slug: string): Promise<PriceData | null> {
   return fetch(`${BASE_URL}${slug}/`)
     .then((r) => r.text())
     .then((html) => {
@@ -31,15 +31,15 @@ export async function fetchPrice(slug: string): Promise<PriceData> {
 
       // get price diff element className
       const priceDirectionClassName = $html(".priceValue + span > span[class^=icon-Caret]").attr("class");
-      const priceDirection = priceDirectionClassName && priceDirectionClassName.split("-").includes("up") ? "+" : "-";
-      const priceDiffValue = priceValue.next("span").text();
+      const isUp = !!(priceDirectionClassName && priceDirectionClassName.split("-").includes("up"));
+      const priceDiff = priceValue.next("span").text();
 
-      const priceDiffText = `${priceDirection} ${priceDiffValue}`;
+      const currencyPrice = priceValue.text();
 
-      const priceValueText = priceValue.text();
+      if (!currencyPrice) {
+        return null;
+      }
 
-      if (!priceValueText) return { currencyPrice: "", priceDiff: "" };
-
-      return { currencyPrice: priceValueText, priceDiff: priceDiffText };
+      return { currencyPrice, priceDiff, isUp };
     });
 }
