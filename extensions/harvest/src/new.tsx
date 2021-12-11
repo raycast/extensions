@@ -58,6 +58,8 @@ export default function Command({
     const toast = new Toast({ style: ToastStyle.Animated, title: "Loading..." });
     await toast.show();
 
+    setTimeFormat(hours);
+
     const data = _.omitBy(values, _.isEmpty);
     const timeEntry = await newTimeEntry({
       ...data,
@@ -90,6 +92,39 @@ export default function Command({
       setTasks([]);
       setTaskId(undefined);
     }
+  }
+
+  function setTimeFormat(value?: string) {
+    // This function can be called direclty from the onBlur event to better match the Harvest app behavior when it exists
+    if (!value) return;
+
+    if (company?.time_format === "decimal") {
+      if (value.includes(":")) {
+        const parsed = value.split(":");
+        const hour = parseInt(parsed[0]);
+        const minute = parseInt(parsed[1]);
+        if (!isNaN(hour)) {
+          if (!isNaN(minute)) {
+            value = parseFloat(`${hour}.${minute / 60}`)
+              .toFixed(2)
+              .toString();
+          } else {
+            value = hour.toString();
+          }
+        }
+      }
+    }
+    if (company?.time_format === "hours_minutes") {
+      if (!value.includes(":")) {
+        const parsed = parseFloat(value);
+        if (!isNaN(parsed)) {
+          const hour = Math.floor(parsed);
+          const minute = parseInt(((parsed - hour) * 60).toFixed(0));
+          value = `${hour}:${minute < 10 ? "0" : ""}${minute}`;
+        }
+      }
+    }
+    return setHours(value);
   }
 
   return (

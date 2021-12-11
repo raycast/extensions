@@ -11,7 +11,7 @@ import {
   HarvestProjectAssignment,
 } from "./responseTypes";
 import { getPreferenceValues } from "@raycast/api";
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
 import dayjs from "dayjs";
 import useSWR from "swr";
@@ -114,20 +114,4 @@ export async function deleteTimeEntry(entry: HarvestTimeEntry) {
     method: "DELETE",
   });
   return true;
-}
-
-interface FetchResult<T> {
-  data: T | undefined;
-  isLoading: boolean;
-  error: AxiosError | undefined;
-}
-
-const fetcher = (path: string) => api.get(path).then((res) => res.data);
-
-export function useFetch<T>(path: string): FetchResult<T> {
-  const { data, error } = useSWR<T, AxiosError>(path, fetcher);
-
-  const isLoading = !error && !data;
-
-  return { data, isLoading, error: isLoading ? undefined : error };
 }
