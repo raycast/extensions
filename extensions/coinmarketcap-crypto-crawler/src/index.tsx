@@ -79,6 +79,7 @@ export default function CryptoList() {
 
     setSearchResult(transformedFuzzyResult);
   };
+
   const onSelectChange = (id?: string) => {
     if (!id) return;
 
