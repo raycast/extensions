@@ -22,16 +22,18 @@
       "description": "Specify which folders to exclude (comma seperated)"
     }, {
       "name": "removeYAML",
+      "label": "Hide content",
       "type": "checkbox",
-      "title": "Remove YAML",
+      "title": "Hide YAML",
       "required": false,
-      "description": "Remove YAML frontmatter for copying and viewing notes"
+      "description": "Hide YAML frontmatter for copying and viewing notes"
     }, {
       "name": "removeLinks",
+      "label": "Hide content",
       "type": "checkbox",
-      "title": "Remove Links",
+      "title": "Hide Links",
       "required": false,
-      "description": "Remove links for copying and viewing notes"
+      "description": "Hide links for copying and viewing notes"
     }
   ],
   "commands": [
