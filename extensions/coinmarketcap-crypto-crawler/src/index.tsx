@@ -174,7 +174,7 @@ export default function SearchCryptoList() {
       )}
 
       {displayedSearchResult.length === 0 ? null : (
-        <List.Section title="Search result">
+        <List.Section title="Search results">
           {displayedSearchResult.map(({ name, symbol, slug }) => (
             <CoinListItem
               key={slug}
