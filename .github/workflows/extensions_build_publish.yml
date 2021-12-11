@@ -10,6 +10,9 @@ on:
         description: 'Ray CLI command to run (build | publish)'
         default: 'build'
         required: true
+      cli_version:
+        description: 'CLI Version (optional, default: "1.0.0")'
+        required: false
   pull_request:
     paths:
       - "extensions/**"
@@ -30,14 +33,15 @@ jobs:
           fetch-depth: 0
       - name: Run Ray CLI
         id: ray_cli
-        uses: raycast/github-actions/ray@v1.3.0
+        uses: raycast/github-actions/ray@v1.4.0
         with:
           access_token: "${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}"
           api_url: "${{ secrets.RAYCAST_CLI_API_URL }}"
-          command: "${{ inputs.command }}"
-          paths: "${{ inputs.paths }}"
+          command: "${{ github.event.inputs.command }}"
+          paths: "${{ github.event.inputs.paths }}"
+          cli_version: "${{ github.event.inputs.cli_version || '1.0.0' }}"
       - name: Post Store URLs
-        uses: raycast/github-actions/git-post-store-urls-to-pr@v1.3.0
+        uses: raycast/github-actions/git-post-store-urls-to-pr@v1.4.0
         with:
           store_urls: ${{ steps.ray_cli.outputs.store_urls }}
           github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
