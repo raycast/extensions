@@ -24,3 +24,8 @@ export type SearchResult = {
   currencyPrice?: string;
   priceDiff?: string;
 };
+
+export type PriceData = {
+  currencyPrice: string;
+  priceDiff: string;
+}

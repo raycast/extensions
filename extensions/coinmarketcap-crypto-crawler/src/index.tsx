@@ -1,14 +1,14 @@
 import { ActionPanel, Icon, List, OpenInBrowserAction } from "@raycast/api";
 import { useState, useEffect } from "react";
-import $ from "cheerio";
-import fetch from "node-fetch";
 import fuzzysort from "fuzzysort";
 import fs from "fs";
 import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 import { getListFromFile, CRYPTO_LIST_PATH, refreshExistingCache } from "./utils";
-import relativeTime from "dayjs/plugin/relativeTime";
+import useFavoriteCoins from "./utils/useFavoriteCoins";
 import { CryptoList, SearchResult } from "./types";
+import useCoinPriceStore from "./utils/useCoinPriceStore";
 
 dayjs.extend(relativeTime);
 
@@ -18,6 +18,12 @@ export default function SearchCryptoList() {
   const [isLoading, setIsLoading] = useState(false);
   const [cryptoList, setCryptoList] = useState<CryptoList[]>([]);
   const [searchResult, setSearchResult] = useState<SearchResult[]>([]);
+
+  const [selectedSlug, setSelectedSlug] = useState<string>("");
+
+  const coinPriceStore = useCoinPriceStore(selectedSlug);
+
+  const { favoriteCoins, addFavoriteCoin, removeFavoriteCoin, loading: favoriteLoading } = useFavoriteCoins();
 
   useEffect(() => {
     getListFromFile((err, data) => {
@@ -57,48 +63,23 @@ export default function SearchCryptoList() {
     });
   }, []);
 
-  const onSelectCrypto = async (searchText: string) => {
-    setIsLoading(true);
-    const priceInfo = await fetchPrice(searchText);
-
-    // prevent react to batch setting the loading status.
-    setTimeout(() => setIsLoading(false), 0);
-
-    return priceInfo;
-  };
-
   const onSearchChange = (search: string) => {
     setIsLoading(true);
 
     const fuzzyResult = fuzzysort.go(search, cryptoList, { keys: ["symbol", "name"] });
     const transformedFuzzyResult = fuzzyResult.map((result) => ({ obj: result.obj }));
 
-    if (!transformedFuzzyResult.length) {
-      setIsLoading(false);
-    }
-
     setSearchResult(transformedFuzzyResult);
+
+    setIsLoading(false);
   };
 
   const onSelectChange = (id?: string) => {
     if (!id) return;
 
     const [slug] = id.split("_");
-    const targetCryptoIndex = searchResult.findIndex(({ obj }) => obj.slug === slug);
-    const targetCrypto = searchResult.find(({ obj }) => obj.slug === slug);
 
-    if (targetCrypto && !!targetCrypto.currencyPrice) return;
-
-    onSelectCrypto(slug).then(({ currencyPrice = "", priceDiff = "" }) => {
-      setSearchResult((prev) => {
-        const temp = [...prev];
-
-        if (!targetCrypto) return prev;
-
-        temp.splice(targetCryptoIndex, 1, { ...targetCrypto, currencyPrice, priceDiff });
-        return temp;
-      });
-    });
+    setSelectedSlug(slug);
   };
 
   return (
@@ -109,20 +90,20 @@ export default function SearchCryptoList() {
       onSearchTextChange={onSearchChange}
       onSelectionChange={onSelectChange}
     >
-      {searchResult.length === 0
-        ? null
-        : searchResult.map((result, index: number) => {
-            const { currencyPrice = "", priceDiff = "" } = result;
+      {searchResult.length === 0 ? null : (
+        <List.Section title="Search result">
+          {searchResult.map((result, index: number) => {
             const { name, slug, symbol } = result.obj;
+            const coinPrice = coinPriceStore[slug];
 
             return (
               <List.Item
                 id={`${slug}_${symbol}_${index}`}
                 key={`${name}_${index}`}
                 title={name}
-                subtitle={currencyPrice}
+                subtitle={coinPrice?.currencyPrice}
                 icon={Icon.Star}
-                accessoryTitle={priceDiff}
+                accessoryTitle={coinPrice?.priceDiff}
                 actions={
                   <ActionPanel>
                     <OpenInBrowserAction url={`${BASE_URL}${slug}`} />
@@ -131,28 +112,8 @@ export default function SearchCryptoList() {
               />
             );
           })}
+        </List.Section>
+      )}
     </List>
   );
-}
-
-async function fetchPrice(slug: string) {
-  return fetch(`${BASE_URL}${slug}/`)
-    .then((r) => r.text())
-    .then((html) => {
-      const $html = $.load(html);
-
-      const priceValue = $html(".priceValue");
-
-      // get price diff element className
-      const priceDirectionClassName = $html(".priceValue + span > span[class^=icon-Caret]").attr("class");
-      const priceDirection = priceDirectionClassName && priceDirectionClassName.split("-").includes("up") ? "+" : "-";
-      const priceDiffValue = priceValue.next("span").text();
-
-      const priceDiffText = `${priceDirection} ${priceDiffValue}`;
-
-      const priceValueText = priceValue.text();
-      if (!priceValueText) return { priceValueText: "", priceDiffText: "", coinName: "" };
-
-      return { currencyPrice: priceValueText, priceDiff: priceDiffText, slug };
-    });
 }
