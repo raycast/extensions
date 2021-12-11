@@ -1,4 +1,13 @@
-import { ActionPanel, ActionPanelItem, Color, Icon, List, OpenInBrowserAction, useNavigation } from "@raycast/api";
+import {
+  ActionPanel,
+  ActionPanelItem,
+  Color,
+  CopyToClipboardAction,
+  Icon,
+  List,
+  OpenInBrowserAction,
+  useNavigation,
+} from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import fuzzysort from "fuzzysort";
 import fs from "fs";
@@ -123,10 +132,28 @@ function CurrencyConverter({ coinPrice, name, symbol }: CurrencyConverterProps) 
   return (
     <List onSearchTextChange={(text) => setInputText(text)}>
       <List.Section title={`Convert ${name} with USD`}>
-        {usdPrice && <List.Item title={`${inputNumber} ${symbol.toUpperCase()}`} accessoryTitle={`${usdPrice} USD`} />}
+        {usdPrice && (
+          <List.Item
+            title={`${inputNumber} ${symbol.toUpperCase()}`}
+            accessoryTitle={`${usdPrice} USD`}
+            actions={
+              <ActionPanel>
+                <CopyToClipboardAction content={usdPrice.toString()} />
+              </ActionPanel>
+            }
+          />
+        )}
 
         {currencyPrice && (
-          <List.Item title={`${inputNumber} USD`} accessoryTitle={`${currencyPrice} ${symbol.toUpperCase()}`} />
+          <List.Item
+            title={`${inputNumber} USD`}
+            accessoryTitle={`${currencyPrice} ${symbol.toUpperCase()}`}
+            actions={
+              <ActionPanel>
+                <CopyToClipboardAction content={currencyPrice.toString()} />
+              </ActionPanel>
+            }
+          />
         )}
       </List.Section>
     </List>
