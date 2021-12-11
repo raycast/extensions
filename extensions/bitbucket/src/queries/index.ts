@@ -1,5 +1,6 @@
 import { Bitbucket, Schema } from "bitbucket";
 import { preferences } from "../helpers/preferences";
+import { showToast, ToastStyle } from "@raycast/api";
 
 const clientOptions = {
   baseUrl: "https://api.bitbucket.org/2.0",
@@ -17,29 +18,35 @@ const defaults = {
 const bitbucket = new Bitbucket(clientOptions);
 
 export async function getRepositories(key: string, page = 1, repositories = []): Promise<Schema.Repository[]> {
-  const { data } = await bitbucket.repositories.list({
-    ...defaults,
-    pagelen: 100,
-    sort: "-updated_on",
-    page: page.toString(),
-    fields: [
-      "values.name",
-      "values.uuid",
-      "values.slug",
-      "values.full_name",
-      "values.links.avatar.href",
-      "values.description",
-      "next",
-    ].join(","),
-  });
+  try {
+    const { data } = await bitbucket.repositories.list({
+      ...defaults,
+      pagelen: 100,
+      sort: "-updated_on",
+      page: page.toString(),
+      fields: [
+        "values.name",
+        "values.uuid",
+        "values.slug",
+        "values.full_name",
+        "values.links.avatar.href",
+        "values.description",
+        "next",
+      ].join(","),
+    });
 
-  repositories = repositories.concat(data.values as []);
+    repositories = repositories.concat(data.values as []);
 
-  if (data.next) {
-    return getRepositories(key, page + 1, repositories);
+    if (data.next) {
+      return getRepositories(key, page + 1, repositories);
+    }
+
+    return repositories;
+  } catch (error) {
+    showToast(ToastStyle.Failure, "Failed fetching repositories", error instanceof Error ? error.message :  'Could not fetch repositories');
+    return []
   }
 
-  return repositories;
 }
 
 export async function pipelinesGetQuery(repoSlug: string, pageNumber: number): Promise<any> {
