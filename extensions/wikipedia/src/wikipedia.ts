@@ -64,8 +64,8 @@ export function useWikipediaSearch(search: string) {
   return useSWR(["pages", search], () => findPagesByTitle(search));
 }
 
-export function useWikipediaPageExtract(title?: string) {
-  return useSWR(title ? ["page/extract", title] : null, () => {
+export function useWikipediaPageSummary(title?: string) {
+  return useSWR(title ? ["page/summary", title] : null, () => {
     if (title) {
       return getPageExtract(title);
     }

@@ -1,4 +1,4 @@
-import { useWikipediaPageExtract } from "./wikipedia";
+import { useWikipediaPageSummary } from "./wikipedia";
 import { ActionPanel, CopyToClipboardAction, Detail, OpenInBrowserAction } from "@raycast/api";
 
 function getPageMarkdown(title: string, extract?: string) {
@@ -12,7 +12,7 @@ function getPageMarkdown(title: string, extract?: string) {
 }
 
 export function PageSummary({ title }: { title: string }) {
-  const { data: extract, isValidating } = useWikipediaPageExtract(title);
+  const { data: extract, isValidating } = useWikipediaPageSummary(title);
   const markdown = getPageMarkdown(title, extract);
 
   return (
@@ -33,7 +33,7 @@ export function PageSummary({ title }: { title: string }) {
                 content={`https://wikipedia.org/wiki/${title}`}
               />
               <CopyToClipboardAction
-                title="Copy Extract"
+                title="Copy Summary"
                 shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                 content={extract}
               />

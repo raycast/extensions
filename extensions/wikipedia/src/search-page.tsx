@@ -1,6 +1,6 @@
 import { ActionPanel, CopyToClipboardAction, Icon, List, OpenInBrowserAction, PushAction } from "@raycast/api";
 import { useState } from "react";
-import { useWikipediaPageExtract, useWikipediaSearch } from "./wikipedia";
+import { useWikipediaPageSummary, useWikipediaSearch } from "./wikipedia";
 import { PageSummary } from "./page-summary";
 
 export default function SearchPage() {
@@ -20,7 +20,7 @@ export default function SearchPage() {
 }
 
 function PageItem({ title }: { title: string }) {
-  const { data: extract } = useWikipediaPageExtract(title);
+  const { data: extract } = useWikipediaPageSummary(title);
   return (
     <List.Item
       icon={Icon.TextDocument}
@@ -46,7 +46,7 @@ function PageItem({ title }: { title: string }) {
             />
             {extract ? (
               <CopyToClipboardAction
-                title="Copy Extract"
+                title="Copy Summary"
                 shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
                 content={extract}
               />
