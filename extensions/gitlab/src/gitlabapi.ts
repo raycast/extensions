@@ -223,6 +223,20 @@ export class User {
     public web_url = "";
 }
 
+export interface Status {
+    emoji: string;
+    message: string;
+    clear_status_after?: string | undefined;
+    clear_status_at?: Date | undefined;
+}
+
+export function isValidStatus(status: Status): boolean {
+    if (status.message || status.emoji) {
+        return true;
+    }
+    return false;
+}
+
 async function toJsonOrError(response: Response): Promise<any> {
     const s = response.status;
     console.log(`status code: ${s}`);
@@ -640,6 +654,41 @@ export class GitLab {
             }
         }
         return epics;
+    }
+
+    async getUserStatus(): Promise<Status> {
+        const status: Status = await this.fetch("user/status")
+            .then((data) => {
+                return {
+                    message: data.message,
+                    emoji: data.emoji,
+                    clear_status_at: data.clear_status_at ? new Date(data.clear_status_at as string) : undefined
+                }
+            });
+        return status;
+    }
+
+    async setUserStatus(status: Status): Promise<void> {
+        const params: Record<string, string> = {
+            emoji: status.emoji,
+            message: status.message
+        }
+        if (status.clear_status_after && status.clear_status_after.length > 0) {
+            params.clear_status_after = status.clear_status_after;
+        }
+        await this.put("user/status", params);
+    }
+
+    async clearUserStatus(): Promise<void> {
+        const status: Status = {
+            emoji: "",
+            message: "",
+            clear_status_after: ""
+        }
+        await this.put("user/status", {
+            emoji: status.emoji,
+            message: status.message
+        });
     }
 }
 
