@@ -14,7 +14,7 @@ dayjs.extend(relativeTime);
 
 const BASE_URL = "https://coinmarketcap.com/currencies/";
 
-export default function CryptoList() {
+export default function SearchCryptoList() {
   const [isLoading, setIsLoading] = useState(false);
   const [cryptoList, setCryptoList] = useState<CryptoList[]>([]);
   const [searchResult, setSearchResult] = useState<SearchResult[]>([]);
