@@ -1,5 +1,5 @@
-import { ActionPanel, Icon, List, OpenInBrowserAction } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { ActionPanel, ActionPanelItem, Color, Icon, List, OpenInBrowserAction } from "@raycast/api";
+import { useState, useEffect, useMemo } from "react";
 import fuzzysort from "fuzzysort";
 import fs from "fs";
 import dayjs from "dayjs";
@@ -7,23 +7,83 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 import { getListFromFile, CRYPTO_LIST_PATH, refreshExistingCache } from "./utils";
 import useFavoriteCoins from "./utils/useFavoriteCoins";
-import { CryptoList, SearchResult } from "./types";
+import { CryptoCurrency, PriceData } from "./types";
 import useCoinPriceStore from "./utils/useCoinPriceStore";
 
 dayjs.extend(relativeTime);
 
 const BASE_URL = "https://coinmarketcap.com/currencies/";
 
+type CoinListItemProps = {
+  name: string;
+  slug: string;
+  symbol: string;
+  coinPriceStore: { [key: string]: PriceData };
+  addFavoriteCoin: (coin: CryptoCurrency) => void;
+  removeFavoriteCoin: (coin: CryptoCurrency) => void;
+  refreshCoinPrice: () => void;
+  isFavorite: boolean;
+};
+
+function CoinListItem({
+  name,
+  slug,
+  symbol,
+  coinPriceStore,
+  addFavoriteCoin,
+  refreshCoinPrice,
+  isFavorite,
+  removeFavoriteCoin,
+}: CoinListItemProps) {
+  const coinPrice = coinPriceStore[slug];
+
+  return (
+    <List.Item
+      id={`${slug}_${symbol}`}
+      key={`${name}`}
+      title={name}
+      subtitle={coinPrice?.currencyPrice}
+      icon={{
+        source: Icon.Star,
+        tintColor: isFavorite ? Color.Yellow : Color.PrimaryText,
+      }}
+      accessoryTitle={coinPrice?.priceDiff}
+      actions={
+        <ActionPanel>
+          <OpenInBrowserAction url={`${BASE_URL}${slug}`} />
+          <ActionPanelItem
+            title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            icon={Icon.Star}
+            onAction={() => {
+              if (isFavorite) {
+                removeFavoriteCoin({ name, slug, symbol });
+              } else {
+                addFavoriteCoin({ name, slug, symbol });
+              }
+            }}
+          />
+          <ActionPanelItem title="Refresh Price" onAction={() => refreshCoinPrice()} icon={Icon.ArrowClockwise} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
 export default function SearchCryptoList() {
   const [isLoading, setIsLoading] = useState(false);
-  const [cryptoList, setCryptoList] = useState<CryptoList[]>([]);
-  const [searchResult, setSearchResult] = useState<SearchResult[]>([]);
+  const [cryptoList, setCryptoList] = useState<CryptoCurrency[]>([]);
+  const [searchResult, setSearchResult] = useState<CryptoCurrency[]>([]);
 
   const [selectedSlug, setSelectedSlug] = useState<string>("");
 
-  const coinPriceStore = useCoinPriceStore(selectedSlug);
+  const { store: coinPriceStore, refresh: refreshCoinPrice } = useCoinPriceStore(selectedSlug);
 
   const { favoriteCoins, addFavoriteCoin, removeFavoriteCoin, loading: favoriteLoading } = useFavoriteCoins();
+
+  const favoriteCoinSlugs = useMemo(() => favoriteCoins.map(({ slug }) => slug), [favoriteCoins]);
+  const displayedSearchResult = useMemo<CryptoCurrency[]>(() => {
+    return searchResult.filter(({ slug }) => !favoriteCoinSlugs.includes(slug));
+  }, [favoriteCoins, searchResult]);
 
   useEffect(() => {
     getListFromFile((err, data) => {
@@ -67,7 +127,7 @@ export default function SearchCryptoList() {
     setIsLoading(true);
 
     const fuzzyResult = fuzzysort.go(search, cryptoList, { keys: ["symbol", "name"] });
-    const transformedFuzzyResult = fuzzyResult.map((result) => ({ obj: result.obj }));
+    const transformedFuzzyResult = fuzzyResult.map((result) => result.obj);
 
     setSearchResult(transformedFuzzyResult);
 
@@ -90,28 +150,39 @@ export default function SearchCryptoList() {
       onSearchTextChange={onSearchChange}
       onSelectionChange={onSelectChange}
     >
-      {searchResult.length === 0 ? null : (
-        <List.Section title="Search result">
-          {searchResult.map((result, index: number) => {
-            const { name, slug, symbol } = result.obj;
-            const coinPrice = coinPriceStore[slug];
+      {!favoriteLoading && favoriteCoins.length > 0 && (
+        <List.Section title="Favorite Coins">
+          {favoriteCoins.map(({ name, symbol, slug }) => (
+            <CoinListItem
+              key={name}
+              name={name}
+              slug={slug}
+              symbol={symbol}
+              coinPriceStore={coinPriceStore}
+              addFavoriteCoin={addFavoriteCoin}
+              removeFavoriteCoin={removeFavoriteCoin}
+              isFavorite
+              refreshCoinPrice={refreshCoinPrice}
+            />
+          ))}
+        </List.Section>
+      )}
 
-            return (
-              <List.Item
-                id={`${slug}_${symbol}_${index}`}
-                key={`${name}_${index}`}
-                title={name}
-                subtitle={coinPrice?.currencyPrice}
-                icon={Icon.Star}
-                accessoryTitle={coinPrice?.priceDiff}
-                actions={
-                  <ActionPanel>
-                    <OpenInBrowserAction url={`${BASE_URL}${slug}`} />
-                  </ActionPanel>
-                }
-              />
-            );
-          })}
+      {displayedSearchResult.length === 0 ? null : (
+        <List.Section title="Search result">
+          {displayedSearchResult.map(({ name, symbol, slug }) => (
+            <CoinListItem
+              key={name}
+              name={name}
+              slug={slug}
+              symbol={symbol}
+              coinPriceStore={coinPriceStore}
+              addFavoriteCoin={addFavoriteCoin}
+              removeFavoriteCoin={removeFavoriteCoin}
+              isFavorite={false}
+              refreshCoinPrice={refreshCoinPrice}
+            />
+          ))}
         </List.Section>
       )}
     </List>

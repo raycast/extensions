@@ -15,5 +15,13 @@ export default function useCoinPriceStore(slug: string) {
     }
   }, [slug]);
 
-  return priceStore;
+  const refresh = () => {
+    if (slug) {
+      fetchPrice(slug).then((data) => {
+        setPriceStore((prev: PriceStore) => ({ ...prev, [slug]: data } as PriceStore));
+      });
+    }
+  };
+
+  return { store: priceStore, refresh };
 }

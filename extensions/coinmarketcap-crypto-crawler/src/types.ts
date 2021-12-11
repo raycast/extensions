@@ -13,18 +13,6 @@ export type CryptoCurrency = {
   symbol: string;
 };
 
-export type CryptoList = {
-  name: string;
-  slug: string;
-  symbol: string;
-};
-
-export type SearchResult = {
-  obj: CryptoList;
-  currencyPrice?: string;
-  priceDiff?: string;
-};
-
 export type PriceData = {
   currencyPrice: string;
   priceDiff: string;
