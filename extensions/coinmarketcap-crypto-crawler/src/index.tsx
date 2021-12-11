@@ -122,11 +122,13 @@ function CurrencyConverter({ coinPrice, name, symbol }: CurrencyConverterProps) 
 
   return (
     <List onSearchTextChange={(text) => setInputText(text)}>
-      {usdPrice && <List.Item title={`${inputNumber} ${symbol.toUpperCase()}`} accessoryTitle={`${usdPrice} USD`} />}
+      <List.Section title={`Convert ${name} with USD`}>
+        {usdPrice && <List.Item title={`${inputNumber} ${symbol.toUpperCase()}`} accessoryTitle={`${usdPrice} USD`} />}
 
-      {currencyPrice && (
-        <List.Item title={`${inputNumber} USD`} accessoryTitle={`${currencyPrice} ${symbol.toUpperCase()}`} />
-      )}
+        {currencyPrice && (
+          <List.Item title={`${inputNumber} USD`} accessoryTitle={`${currencyPrice} ${symbol.toUpperCase()}`} />
+        )}
+      </List.Section>
     </List>
   );
 }
