@@ -1,4 +1,4 @@
-import { ActionPanel, ActionPanelItem, Color, Icon, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, ActionPanelItem, Color, Icon, List, OpenInBrowserAction, useNavigation } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
 import fuzzysort from "fuzzysort";
 import fs from "fs";
@@ -36,12 +36,19 @@ function CoinListItem({
   removeFavoriteCoin,
 }: CoinListItemProps) {
   const coinPrice = coinPriceStore[slug];
+  const { push } = useNavigation();
 
   let accessoryTitle;
   if (coinPrice) {
     const symbol = coinPrice.isUp ? "+" : "-";
     accessoryTitle = `${coinPrice.currencyPrice}, ${symbol}${coinPrice.priceDiff}`;
   }
+
+  const price = useMemo(() => {
+    if (coinPrice?.currencyPrice) {
+      return parseFloat(coinPrice.currencyPrice.replace(/[$,]/g, ""));
+    }
+  }, [coinPrice]);
 
   return (
     <List.Item
@@ -56,6 +63,17 @@ function CoinListItem({
       actions={
         <ActionPanel>
           <OpenInBrowserAction url={`${BASE_URL}${slug}`} />
+
+          {!!price && (
+            <ActionPanelItem
+              title="Convert Currency"
+              icon={Icon.QuestionMark}
+              onAction={() => {
+                push(<CurrencyConverter coinPrice={price} symbol={symbol} name={name} />);
+              }}
+            />
+          )}
+
           <ActionPanelItem
             title={isFavorite ? "Remove from favorites" : "Add to favorites"}
             icon={Icon.Star}
@@ -71,6 +89,45 @@ function CoinListItem({
         </ActionPanel>
       }
     />
+  );
+}
+
+type CurrencyConverterProps = {
+  coinPrice: number;
+  name: string;
+  symbol: string;
+};
+
+function CurrencyConverter({ coinPrice, name, symbol }: CurrencyConverterProps) {
+  const [inputText, setInputText] = useState("");
+  const inputNumber = useMemo(() => {
+    if (inputText !== "") {
+      return parseFloat(inputText.replace(/[$,]/g, ""));
+    } else {
+      return 1;
+    }
+  }, [inputText]);
+
+  const usdPrice = useMemo(() => {
+    if (inputNumber) {
+      return inputNumber * coinPrice;
+    }
+  }, [inputNumber, coinPrice]);
+
+  const currencyPrice = useMemo(() => {
+    if (inputNumber && inputNumber > 0) {
+      return inputNumber / coinPrice;
+    }
+  }, [inputNumber, coinPrice]);
+
+  return (
+    <List onSearchTextChange={(text) => setInputText(text)}>
+      {usdPrice && <List.Item title={`${inputNumber} ${symbol.toUpperCase()}`} accessoryTitle={`${usdPrice} USD`} />}
+
+      {currencyPrice && (
+        <List.Item title={`${inputNumber} USD`} accessoryTitle={`${currencyPrice} ${symbol.toUpperCase()}`} />
+      )}
+    </List>
   );
 }
 
