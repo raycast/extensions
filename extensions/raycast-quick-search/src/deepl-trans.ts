@@ -1,13 +1,17 @@
 import { showHUD } from "@raycast/api";
 import { DeeplOpner } from "./utils/opener";
-import { readtext } from "./utils/readtxt"
+import { isNotEmpty, readtext } from "./utils/readtxt";
 
 export default async () => {
   try {
-    const text = await readtext()
-    await DeeplOpner(text)
-    showHUD("🎉 Open deepl search")
+    const text = await readtext();
+    if (isNotEmpty(text)) {
+      await DeeplOpner(text);
+      showHUD("🎉 Open deepl search");
+    } else {
+      showHUD("👀 Can not found target text");
+    }
   } catch (error) {
-    showHUD("💩 Sorry, Can not open deepl for now!")
+    showHUD("💩 Sorry, Can not open deepl for now!");
   }
-}
+};
