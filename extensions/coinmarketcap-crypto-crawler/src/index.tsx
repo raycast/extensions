@@ -84,8 +84,9 @@ function CoinListItem({
           )}
 
           <ActionPanelItem
-            title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
             icon={Icon.Star}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
             onAction={() => {
               if (isFavorite) {
                 removeFavoriteCoin({ name, slug, symbol });
