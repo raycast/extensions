@@ -154,7 +154,6 @@
     "fuse.js": "^6.4.6",
     "graphql": "^15.5.1",
     "javascript-time-ago": "^2.3.10",
-    "node-emoji": "^1.11.0",
     "node-fetch": "^2.6.1",
     "open": "^8.2.1"
   },

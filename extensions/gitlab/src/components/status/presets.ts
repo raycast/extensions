@@ -75,7 +75,7 @@ export function usePresets(): {
 export function predefinedPresets(): Status[] {
     return [
         {
-            emoji: "spiral_calendar_pad",
+            emoji: "calendar",
             message: "In a Meeting",
             clear_status_after: "30_minutes",
         },

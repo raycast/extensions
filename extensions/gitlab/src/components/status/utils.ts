@@ -1,4 +1,4 @@
-import emoji from "node-emoji";
+import emojis from "./emojis.json";
 
 export const clearDurations: Record<string, string> = {
     "": "Don't clear",
@@ -50,31 +50,19 @@ export function getClearDurationDate(key: string | undefined | null): Date | und
     return d;
 }
 
-export function transformToNodeEmoji(text: string): string {
-    switch (text) {
-        case "robot": {
-            return "robot_face";
-        }
-    }
-    return text;
-}
-
-export function transformToGitLabEmoji(text: string): string {
-    switch (text) {
-        case "robot_face": {
-            return "robot";
-        }
-    }
-    return text;
-}
-
 export function emojiSymbol(text: string | undefined): string {
     if (!text) {
         return "";
     }
-    text = transformToNodeEmoji(text);
-    if (!emoji.hasEmoji(`:${text}:`)) {
+    const es = emojis as Record<string, string>;
+    const val = es[text];
+    if (val === undefined) {
         return "";
     }
-    return emoji.get(text);
+    return val;
+}
+
+export function getAllEmojiSymbolAliases(): string[] {
+    const es = emojis as Record<string, string>;
+    return Object.keys(es).map(e => e);
 }

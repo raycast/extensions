@@ -1,9 +1,14 @@
 import { FormValues, Form, ActionPanel, SubmitFormAction, useNavigation, showToast, ToastStyle } from "@raycast/api";
 import { isValidStatus, Status } from "../../gitlabapi";
-import { clearDurations, clearDurationText, getClearDurationDate, transformToGitLabEmoji } from "./utils";
+import {
+  clearDurations,
+  clearDurationText,
+  emojiSymbol,
+  getAllEmojiSymbolAliases,
+  getClearDurationDate,
+} from "./utils";
 import { gitlab } from "../../common";
 import { getErrorMessage } from "../../utils";
-import emoji from "node-emoji";
 
 export function StatusForm(props: {
   submitTitle: string;
@@ -40,17 +45,12 @@ function StatusDurationDropDown(props: { id: string; defaultValue: string | unde
 }
 
 function StatusEmojiDropDown(props: { id: string; title: string; defaultValue?: string | undefined }): JSX.Element {
-  const em = emoji.emoji as any;
+  const em = getAllEmojiSymbolAliases();
   return (
     <Form.Dropdown id={props.id} title={props.title} defaultValue={props.defaultValue}>
       <Form.DropdownItem key="-" title="-" value="" />
-      {Object.keys(emoji.emoji).map((k) => (
-        <Form.DropdownItem
-          key={k}
-          title={`:${transformToGitLabEmoji(k)}:`}
-          value={transformToGitLabEmoji(k)}
-          icon={em[k]}
-        />
+      {getAllEmojiSymbolAliases().map((k) => (
+        <Form.DropdownItem key={k} title={`:${k}:`} value={k} icon={emojiSymbol(k)} />
       ))}
     </Form.Dropdown>
   );
