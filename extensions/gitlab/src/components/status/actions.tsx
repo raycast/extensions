@@ -87,7 +87,7 @@ export function StatusPresetCreateAction(props: {
               const np = presets || [];
               np.push(newStatus);
               await storePresets(np);
-              props.setPresets(presets);
+              props.setPresets(np);
               pop();
             }}
           />
