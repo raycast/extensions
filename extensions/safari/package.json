@@ -12,7 +12,27 @@
       "title": "Show Tabs",
       "subtitle": "Safari",
       "description": "List, filter and open your Safari Tabs (Local and iCloud)",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "safariAppIdentifier",
+          "type": "dropdown",
+          "required": false,
+          "title": "Local Safari Browser",
+          "description": "Switch between Safari or Safari Technology Preview",
+          "default": "Safari",
+          "data": [
+            {
+              "value": "Safari",
+              "title": "Safari"
+            },
+            {
+              "value": "Safari Technology Preview",
+              "title": "Safari Technology Preview"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "reading-list",
