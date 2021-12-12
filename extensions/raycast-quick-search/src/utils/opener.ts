@@ -17,7 +17,7 @@ export const GithubSearchOpner = async (text: string) => {
 }
 
 export const GithubRepoOpner = async (text: string) => {
-  await openInBrowser(`https://github.com/${encodeURIComponent(text)}"`)
+  await openInBrowser(`https://github.com/${text}"`)
 }
 
 export const DeeplOpner = async (text: string) => {
