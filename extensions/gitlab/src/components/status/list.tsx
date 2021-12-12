@@ -13,6 +13,7 @@ import {
   StatusPresetEditAction,
   StatusPresetFactoryResetAction,
   StatusPresetSetAction,
+  StatusPresetSetWithDurationAction,
   StatusSetCustomAction,
 } from "./actions";
 
@@ -135,6 +136,7 @@ export function StatusPresetListItem(props: {
         <ActionPanel>
           <ActionPanel.Section>
             <StatusPresetSetAction status={s} setCurrentStatus={props.setCurrentStatus} />
+            <StatusPresetSetWithDurationAction status={s} setCurrentStatus={props.setCurrentStatus} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <StatusPresetEditAction status={s} presets={presets} index={props.index} setPresets={props.setPresets} />

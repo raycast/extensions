@@ -4,7 +4,7 @@ import { Status } from "../../gitlabapi";
 import { getErrorMessage } from "../../utils";
 import { StatusFormPresetCreate, StatusFormPresetEdit, StatusFormSet } from "./form";
 import { wipePresets, predefinedPresets, storePresets } from "./presets";
-import { getClearDurationDate } from "./utils";
+import { clearDurations, clearDurationText, getClearDurationDate } from "./utils";
 
 export function StatusSetCustomAction(props: {
   setCurrentStatus: React.Dispatch<React.SetStateAction<Status | undefined>>;
@@ -116,6 +116,30 @@ export function StatusPresetSetAction(props: {
       icon={{ source: Icon.Pencil, tintColor: Color.PrimaryText }}
       onAction={handle}
     />
+  );
+}
+
+export function StatusPresetSetWithDurationAction(props: {
+  status: Status;
+  setCurrentStatus: React.Dispatch<React.SetStateAction<Status | undefined>>;
+}): JSX.Element {
+  const handle = async (durationKey: string) => {
+    try {
+      const newStatus = { ...props.status, clear_status_after: durationKey };
+      await gitlab.setUserStatus(newStatus);
+      newStatus.clear_status_at = getClearDurationDate(newStatus.clear_status_after);
+      props.setCurrentStatus(newStatus);
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Could not set Status", getErrorMessage(error));
+    }
+  };
+
+  return (
+    <ActionPanel.Submenu title="Set Status with Duration" icon={{ source: Icon.Clock, tintColor: Color.PrimaryText }}>
+      {Object.keys(clearDurations).map((k) => (
+        <ActionPanel.Item key={k + "_"} title={clearDurationText(k)} onAction={() => handle(k)} />
+      ))}
+    </ActionPanel.Submenu>
   );
 }
 
