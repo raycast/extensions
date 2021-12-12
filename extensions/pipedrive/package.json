@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Pipdrive Deals",
+      "title": "Search Deals",
+      "subtitle": "Pipdrive",
       "description": "Search Pipedrive deals.",
       "mode": "view"
     }
