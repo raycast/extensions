@@ -19,20 +19,34 @@ export const executeJxa = async (script: string) => {
   }
 };
 
-export const getTabUrl = (url: string) => {
-  if (url) {
-    const parsedUrl = new URL(url);
-
-    // Extract URL from suspended tabs (Tab Suspender for Safari)
-    if (parsedUrl.protocol === 'safari-extension:' && parsedUrl.searchParams.has('url')) {
-      return parsedUrl.searchParams.get('url') || url;
-    }
-
-    return url;
+const parseUrl = (url: string) => {
+  try {
+    return new URL(url);
+  } catch (err) {
+    return null;
   }
 };
-export const getUrlDomain = (url: string) => url && new URL(url).hostname.replace(/^www\./, '');
-export const getFaviconUrl = (domain: string) => `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(domain)}`;
+export const getTabUrl = (url: string) => {
+  const parsedUrl = parseUrl(url);
+
+  // Extract URL from suspended tabs (Tab Suspender for Safari)
+  if (parsedUrl && parsedUrl.protocol === 'safari-extension:' && parsedUrl.searchParams.has('url')) {
+    return parsedUrl.searchParams.get('url') || url;
+  }
+
+  return url;
+};
+export const getUrlDomain = (url: string) => {
+  const parsedUrl = parseUrl(url);
+  if (parsedUrl && parsedUrl.hostname) {
+    return parsedUrl.hostname.replace(/^www\./, '');
+  }
+};
+export const getFaviconUrl = (domain: string | undefined) => {
+  if (domain) {
+    return `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(domain)}`;
+  }
+};
 
 export const formatDate = (date: string) =>
   new Date(date).toLocaleDateString(undefined, {

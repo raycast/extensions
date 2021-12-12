@@ -70,7 +70,7 @@ const fetchLocalTabs = (): Promise<LocalTab[]> =>
         tabs.push({
           uuid: window.id() + '-' + tab.index(),
           title: tab.name(),
-          url: tab.url(),
+          url: tab.url() || '',
           window_id: window.id(),
           index: tab.index(),
           is_local: true

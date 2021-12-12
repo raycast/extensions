@@ -40,7 +40,7 @@ interface Bookmark {
 interface ReadingListBookmark {
   uuid: string;
   url: string;
-  domain: string;
+  domain?: string;
   title: string;
   dateAdded: string;
   dateLastViewed?: string;
