@@ -82,16 +82,21 @@ const fetchLocalTabs = (): Promise<LocalTab[]> =>
 `);
 
 const fetchRemoteTabs = async (): Promise<RemoteTab[]> => {
-  const db = await loadDb();
-  const tabs = (await executeQuery(
-    db,
-    `SELECT t.tab_uuid as uuid, d.device_uuid, d.device_name, t.title, t.url
+  try {
+    const db = await loadDb();
+    const tabs = (await executeQuery(
+      db,
+      `SELECT t.tab_uuid as uuid, d.device_uuid, d.device_name, t.title, t.url
          FROM cloud_tabs t
          INNER JOIN cloud_tab_devices d ON t.device_uuid = d.device_uuid
          WHERE device_name != "${currentDeviceName}"`
-  )) as RemoteTab[];
+    )) as RemoteTab[];
 
-  return tabs;
+    return tabs;
+  } catch (err) {
+    console.log(err);
+    return [];
+  }
 };
 
 const activateLocalTab = async (tab: LocalTab) =>
