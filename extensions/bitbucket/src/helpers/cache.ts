@@ -32,9 +32,7 @@ const persistCacheMiddleware: Middleware = (useSWRNext) => {
 export const cacheConfig = {
   provider: () => cacheProvider,
   use: [persistCacheMiddleware],
-  revalidateIfStale: false,
-  revalidateOnFocus: false,
-  revalidateOnReconnect: false,
+  revalidateIfStale: true,
 };
 
 export const REPOSITORIES_CACHE_KEY = "repositories";
