@@ -1,6 +1,5 @@
-import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle, ImageMask, Color } from "@raycast/api";
-import { useEffect } from "react";
-import useSWR, { mutate, SWRConfig } from "swr";
+import { ActionPanel, Color, ImageMask, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import useSWR, { SWRConfig } from "swr";
 import { Schema } from "bitbucket";
 
 import { getRepositories } from "../../queries";
@@ -8,6 +7,10 @@ import { Repository } from "./interface";
 import { icon } from "../../helpers/icon";
 import { cacheConfig, REPOSITORIES_CACHE_KEY } from "../../helpers/cache";
 import { ShowPipelinesActions } from "./actions";
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+global.window.requestAnimationFrame = setTimeout;
 
 export function SearchRepositories() {
   return (
@@ -23,10 +26,6 @@ function SearchList(): JSX.Element {
   if (error) {
     showToast(ToastStyle.Failure, "Failed loading repositories", error.message);
   }
-
-  useEffect(() => {
-    mutate(REPOSITORIES_CACHE_KEY, getRepositories);
-  }, []);
 
   return (
     <List isLoading={isValidating} searchBarPlaceholder="Search by name...">
