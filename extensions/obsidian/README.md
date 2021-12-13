@@ -22,4 +22,4 @@ You can specify whether you want the YAML frontmatter and wikilinks removed for 
 
 
 ## Contributions and Credits
-Thank you (macedotavares)[https://forum.obsidian.md/t/big-sur-icon/8121?u=marcjulian] for letting me use your amazing Obsidian (Big Sur) icon.
+Thank you [macedotavares](https://forum.obsidian.md/t/big-sur-icon/8121?u=marcjulian) for letting me use your amazing Obsidian (Big Sur) icon.
