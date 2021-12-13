@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { List, ToastStyle, getPreferenceValues, showToast } from "@raycast/api"
+import { Detail, List, ToastStyle, getPreferenceValues, showToast } from "@raycast/api"
 import api from "./api"
 
 import CapabilitiesActions from "./CapabilitiesActions"
@@ -19,6 +19,7 @@ export default function Command() {
   const [port] = useState(preferences.port)
 
   const [isLoading, setIsLoading] = useState(true)
+  const [isError, setIsError] = useState(false)
 
   const [currentOutboundMode, setCurrentOutboundMode] = useState("")
   const [currentProfile, setCurrentProfile] = useState("")
@@ -77,23 +78,26 @@ export default function Command() {
       setAllPolicyGroups(allPolicyGroups.data)
       setAllSelectOptions(allSelectOptions)
       setAllProfiles(allProfiles.data.profiles)
-
-      setIsLoading(false)
     } catch (err) {
-      console.error("[ERROR] First loading...")
-      console.error(err)
+      setIsError(true)
 
       await showToast(
         ToastStyle.Failure,
         "Failed",
         "Please check your Surge version, X-Key, port and HTTP API function availability"
       )
+    } finally {
+      setIsLoading(false)
     }
   }
 
   useEffect(() => fetchData(), [])
 
-  if (!isLoading) {
+  if (isLoading) {
+    return <List isLoading />
+  } else if (isError) {
+    return <Detail markdown="No results" />
+  } else {
     return (
       <List>
         <OutboundModeActions xKey={xKey} port={port} currentOutboundMode={currentOutboundMode} />
@@ -131,6 +135,4 @@ export default function Command() {
       </List>
     )
   }
-
-  return <List isLoading />
 }
