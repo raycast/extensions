@@ -19,3 +19,7 @@ It is also possible to exclude folders, files and paths so they don't show up in
 You can specify whether you want the YAML frontmatter and wikilinks removed for copying and viewing the notes content.
 
 <img width="783" alt="Obsidian Raycast Preferences" src="https://user-images.githubusercontent.com/67844154/138552922-a29cd8b2-c776-40cb-94f0-9b75556f1cfa.png">
+
+
+## Contributions and Credits
+Thank you (macedotavares)[https://forum.obsidian.md/t/big-sur-icon/8121?u=marcjulian] for letting me use your amazing Obsidian (Big Sur) icon.
