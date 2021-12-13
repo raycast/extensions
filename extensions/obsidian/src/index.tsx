@@ -144,7 +144,7 @@ function NoteForm(props: {note: Note}){
 
 export default function Command() {
 
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [notes, setNotes] = useState<Note[]>();
 
   useEffect(() => {
     async function fetch() {
@@ -166,7 +166,7 @@ export default function Command() {
 
   return (
     <List isLoading={notes === undefined}>
-      {notes.map((note) => (
+      {notes?.map((note) => (
         <List.Item title={note.title} key={note.key} actions={
           <ActionPanel>
 
