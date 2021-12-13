@@ -45,11 +45,8 @@ const getFilesHelp = function(dirPath: string, exFolders: Array<string>, arrayOf
   return arrayOfFiles;
 }
 
-function getFiles(){
-  const pref: Preferences = getPreferenceValues();
-  let vaultPath = pref.vaultPath;
+function getFiles(vaultPath: string){
   let exFolders = prefExcludedFolders();
-
   const files = getFilesHelp(vaultPath.toString(), exFolders, []);
   return files;
 }
@@ -151,10 +148,18 @@ export default function Command() {
 
   useEffect(() => {
     async function fetch() {
+      const pref: Preferences = getPreferenceValues();
+      let vaultPath = pref.vaultPath;
 
-      let files = getFiles();
-      let json = noteJSON(files);
-      setNotes(JSON.parse(json));
+      try {
+        await fs.promises.access(vaultPath + "/.");
+        let files = getFiles(vaultPath);
+        let json = noteJSON(files);
+        setNotes(JSON.parse(json));
+      } catch (error) {
+        showToast(ToastStyle.Failure, "The path set in preferences does not exist.")
+      }
+
     }
     fetch();
   }, []);
