@@ -15,6 +15,30 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "copy",
+      "description": "Select whether the state of the toolbox extension after copying",
+      "type": "dropdown",
+      "required": false,
+      "title": "Action after copy",
+      "default": "none",
+      "data": [
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Copy and back",
+          "value": "back"
+        },
+        {
+          "title": "Copy and end",
+          "value": "end"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.26.2",
     "esrever": "^0.2.0",

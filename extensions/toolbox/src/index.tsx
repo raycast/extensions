@@ -2,8 +2,10 @@ import {
   ActionPanel,
   copyTextToClipboard,
   Form,
+  getPreferenceValues,
   Icon,
   List,
+  popToRoot,
   showHUD,
   showToast,
   ToastStyle,
@@ -17,6 +19,8 @@ import { Category, Info, Result, Run, RunType, Script } from "./script/type";
 let selectScript: Run | null = null;
 
 let isClipboardScriptRunning = false;
+
+const preferences = getPreferenceValues();
 
 export default function ToolboxList() {
   const [categorys, setCategorys] = useState<Category[]>();
@@ -50,7 +54,7 @@ export default function ToolboxList() {
 }
 
 const ListItem = React.memo(function ListItem(props: { item: Script }) {
-  const { push } = useNavigation();
+  const { pop, push } = useNavigation();
 
   const item = props.item;
   const info = item.info;
@@ -94,6 +98,7 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
         scriptResult = await runScript(query);
         if (scriptResult.isSuccess) {
           await copyTextToClipboard(scriptResult.result);
+          copyAction(pop);
         }
       }
       isClipboardScriptRunning = false;
@@ -207,6 +212,7 @@ const useScriptHook = () => {
 };
 
 function ResultActionView(props: { content: Result; info: Info }) {
+  const { pop } = useNavigation();
   const content = props.content;
   const info = props.info;
   return (
@@ -220,6 +226,7 @@ function ResultActionView(props: { content: Result; info: Info }) {
             onAction={async () => {
               await copyTextToClipboard(content.result);
               await showHUD("✅ Result Copied to Clipboard");
+              copyAction(pop);
             }}
           />
 
@@ -229,6 +236,7 @@ function ResultActionView(props: { content: Result; info: Info }) {
             onAction={async () => {
               await copyTextToClipboard(content.query);
               await showHUD("✅ Query Copied to Clipboard");
+              copyAction(pop);
             }}
           />
         </ActionPanel.Section>
@@ -318,3 +326,16 @@ async function runScript(query: string): Promise<{ result: string; isSuccess: bo
     return state;
   }
 }
+
+const copyAction = async (pop: () => void) => {
+  switch (preferences.copy) {
+    case "back":
+      pop();
+      break;
+    case "end":
+      await popToRoot({ clearSearchBar: true });
+      break;
+    default:
+      break;
+  }
+};
