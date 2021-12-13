@@ -14,10 +14,6 @@ export function isFolderEntry(entry: EntryLike): entry is FolderEntry {
   return (entry as FolderEntry).folderUri !== undefined;
 }
 
-export function isRemoteEntry(entry: FolderEntry): boolean {
-  return entry.folderUri.startsWith("vscode-remote://");
-}
-
 export interface WorkspaceEntry {
   workspace: {
     configPath: string;
