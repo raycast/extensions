@@ -2,17 +2,13 @@ import { Icon, Detail, ActionPanel, OpenInBrowserAction } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useRubyGemsGemDetail } from "../rubygems/useRubyGemsGemDetail";
 import type { GemSearchResult, GemDetailResponse, Dependency } from "../rubygems/types";
-import { mapGemLinks } from '../utils';
+import { titleize, mapGemLinks } from '../utils';
 
 interface Props { gem: GemSearchResult }
 
 export const GemInfo = ({ gem }: Props): JSX.Element => {
   const [gemDetails, setGemInfo] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
-
-  const titleize = (term: string) => {
-    return term.split('_').map(title => title.charAt(0).toUpperCase() + title.slice(1)).join(' ')
-  }
 
   const mapInfoValues = (gemDetails: GemDetailResponse) => {
     return Object.keys(gemDetails)
