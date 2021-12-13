@@ -1,6 +1,5 @@
-import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle, ImageMask, Color, getLocalStorageItem } from "@raycast/api";
-import { useEffect } from "react";
-import useSWR, { mutate, SWRConfig } from "swr";
+import { ActionPanel, Color, ImageMask, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import useSWR, { SWRConfig } from "swr";
 import { Schema } from "bitbucket";
 
 import { getRepositories } from "../../queries";

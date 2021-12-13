@@ -1,6 +1,5 @@
 import { Bitbucket, Schema } from "bitbucket";
 import { preferences } from "../helpers/preferences";
-import { showToast, ToastStyle } from "@raycast/api";
 
 const clientOptions = {
   baseUrl: "https://api.bitbucket.org/2.0",
