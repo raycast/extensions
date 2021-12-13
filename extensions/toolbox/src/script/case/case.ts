@@ -51,7 +51,7 @@ export const kebabCase: Script = {
 
 export const upCase: Script = {
   info: {
-    title: "Up Case",
+    title: "Upper Case",
     desc: "Convert your text to Upper Case",
     type: ["list", "form", "clipboard"],
     keywords: ["capital"],
@@ -64,7 +64,7 @@ export const upCase: Script = {
 
 export const downCase: Script = {
   info: {
-    title: "Down Case",
+    title: "Lower Case",
     desc: "Convert your text to Lower Case",
     type: ["list", "form", "clipboard"],
     keywords: ["lower"],
