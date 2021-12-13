@@ -16,12 +16,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.1",
+    "@raycast/api": "^1.26.2",
     "esrever": "^0.2.0",
     "execa": "^6.0.0",
     "js-base64": "^3.7.2",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
+    "sql-formatter": "^4.0.2",
     "vkbeautify": "^0.99.3"
   },
   "devDependencies": {
