@@ -10,8 +10,9 @@ import api from "./api"
  */
 export default function SetAsSystemProxy({ xKey, port, isSystemProxyEnabled }) {
   const iconCheckMark = { source: Icon.Checkmark, tintColor: Color.Green }
+  const iconExclamationMark = { source: Icon.ExclamationMark, tintColor: Color.Yellow }
   const iconTransparent = { source: "Transparent.png" }
-  const iconListItem = isSystemProxyEnabled ? iconCheckMark : iconTransparent
+  const iconListItem = isSystemProxyEnabled ? iconCheckMark : iconExclamationMark
 
   /**
    * Change System Proxy status.

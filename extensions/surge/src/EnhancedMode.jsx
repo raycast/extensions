@@ -10,8 +10,9 @@ import api from "./api"
  */
 export default function EnhancedMode({ xKey, port, isEnhancedModeEnabled }) {
   const iconCheckMark = { source: Icon.Checkmark, tintColor: Color.Green }
+  const iconExclamationMark = { source: Icon.ExclamationMark, tintColor: Color.Yellow }
   const iconTransparent = { source: "Transparent.png" }
-  const iconListItem = isEnhancedModeEnabled ? iconCheckMark : iconTransparent
+  const iconListItem = isEnhancedModeEnabled ? iconCheckMark : iconExclamationMark
 
   /**
    * Change Enhanced Mode.
