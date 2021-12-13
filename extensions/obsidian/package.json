@@ -39,7 +39,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search in Obsidian",
+      "title": "Search Note",
+      "subtitle": "Obsidian",
       "description": "Search, open, copy and paste any note in Obsidian",
       "mode": "view" 
     }
