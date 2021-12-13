@@ -1,6 +1,6 @@
 <p align="center">
   <img src="images/store-logo.png" height="128">
-  <h1 align="center">Raycast Extensions (Beta)</h1>
+  <h1 align="center">Raycast Extensions</h1>
 </p>
 
 <p align="center">
@@ -15,9 +15,6 @@
 [Raycast](https://raycast.com/) lets you control your tools with a few keystrokes. This repository contains all extensions that are available in the [Raycast Store](https://raycast.com/store). It also includes documentation and examples of how to extend Raycast using React.
 
 ![Header](images/header.png)
-
-## Welcome to Beta
-After months of internal and alpha testing, we are finally opening up Raycast API for public beta. During the beta period we want to further iron out the API and developer experience before we fully incorporate the Store into the app for all Raycast users. Please check out our [documentation](https://developers.raycast.com) on how to participate in beta testing and get started with building extensions.
 
 ## Getting Started
 
