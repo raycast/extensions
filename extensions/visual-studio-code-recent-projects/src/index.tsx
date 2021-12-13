@@ -14,7 +14,7 @@ import { homedir } from "os";
 import { basename, dirname } from "path";
 import { fileURLToPath, URL } from "url";
 import { ReactNode } from "react";
-import { EntryLike, isFileEntry, isFolderEntry, isWorkspaceEntry } from "./types";
+import { EntryLike, isFileEntry, isFolderEntry, isRemoteEntry, isWorkspaceEntry } from "./types";
 
 const STORAGE = `${homedir()}/Library/Application Support/Code/storage.json`;
 
@@ -27,10 +27,13 @@ export default function Command() {
   const folders = new Array<ReactNode>();
   const files = new Array<ReactNode>();
   const workspaces = new Array<ReactNode>();
+  const remoteEntries = new Array<ReactNode>();
 
   const recentEntries = getRecentEntries();
   recentEntries.forEach((entry) => {
-    if (isFolderEntry(entry) && existsSync(new URL(entry.folderUri))) {
+    if (isRemoteEntry(entry)) {
+      remoteEntries.push(<ProjectListItem key={entry.folderUri} uri={entry.folderUri} />);
+    } else if (isFolderEntry(entry) && existsSync(new URL(entry.folderUri))) {
       folders.push(<ProjectListItem key={entry.folderUri} uri={entry.folderUri} />);
     } else if (isFileEntry(entry) && existsSync(new URL(entry.fileUri))) {
       files.push(<ProjectListItem key={entry.fileUri} uri={entry.fileUri} />);
@@ -43,6 +46,7 @@ export default function Command() {
     <List searchBarPlaceholder="Search recent projects...">
       <List.Section title="Workspaces">{workspaces}</List.Section>
       <List.Section title="Folders">{folders}</List.Section>
+      <List.Section title="Remote">{remoteEntries}</List.Section>
       <List.Section title="Files">{files}</List.Section>
     </List>
   );
