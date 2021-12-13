@@ -18,6 +18,7 @@ export const GemOptions = ({ gem }: Props): JSX.Element => {
             <ActionPanel>
               <PushAction
                 title="Show Details"
+                icon={Icon.TextDocument}
                 target={
                   <GemInfo key={gem.sha} gem={gem} />
                 }

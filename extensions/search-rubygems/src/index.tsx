@@ -1,4 +1,4 @@
-import { ActionPanel, List, PushAction, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, List, PushAction, OpenInBrowserAction, Icon } from "@raycast/api";
 import { useState } from "react";
 import { useRubyGemsSearch } from "./rubygems/useRubyGemsSearch";
 import { GemOptions } from "./components/GemOptions";
@@ -36,6 +36,7 @@ export default function SearchRubyGems() {
               <ActionPanel>
                 <PushAction
                   title="Show Options"
+                  icon={Icon.List}
                   target={
                     <GemOptions key={gem.sha} gem={gem} />
                   }
