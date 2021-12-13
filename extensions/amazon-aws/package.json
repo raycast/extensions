@@ -5,6 +5,9 @@
   "description": "Integrate your AWS account in Raycast",
   "icon": "command-icon.png",
   "author": "Falcon",
+  "contributors": [
+    "Hodglim"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -26,6 +29,13 @@
       "title": "CodePipelines",
       "subtitle": "Amazon AWS",
       "description": "List All your CodePipelines",
+      "mode": "view"
+    },
+    {
+      "name": "console",
+      "title": "Console",
+      "subtitle": "Amazon AWS",
+      "description": "Launch AWS console links",
       "mode": "view"
     }
   ],
