@@ -27,13 +27,10 @@ export default function Command() {
   const folders = new Array<ReactNode>();
   const files = new Array<ReactNode>();
   const workspaces = new Array<ReactNode>();
-  const remoteEntries = new Array<ReactNode>();
 
   const recentEntries = getRecentEntries();
   recentEntries.forEach((entry) => {
-    if (isRemoteEntry(entry)) {
-      remoteEntries.push(<ProjectListItem key={entry.folderUri} uri={entry.folderUri} />);
-    } else if (isFolderEntry(entry) && existsSync(new URL(entry.folderUri))) {
+    if (isFolderEntry(entry) && (isRemoteEntry(entry) || existsSync(new URL(entry.folderUri)))) {
       folders.push(<ProjectListItem key={entry.folderUri} uri={entry.folderUri} />);
     } else if (isFileEntry(entry) && existsSync(new URL(entry.fileUri))) {
       files.push(<ProjectListItem key={entry.fileUri} uri={entry.fileUri} />);
@@ -46,7 +43,6 @@ export default function Command() {
     <List searchBarPlaceholder="Search recent projects...">
       <List.Section title="Workspaces">{workspaces}</List.Section>
       <List.Section title="Folders">{folders}</List.Section>
-      <List.Section title="Remote">{remoteEntries}</List.Section>
       <List.Section title="Files">{files}</List.Section>
     </List>
   );
