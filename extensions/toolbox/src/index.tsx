@@ -332,7 +332,7 @@ const copyAction = async (pop: () => void) => {
     case "back":
       pop();
       break;
-    case "end":
+    case "exit":
       await popToRoot({ clearSearchBar: true });
       break;
     default:
