@@ -2,7 +2,7 @@ import { encode } from "hi-base32";
 import forge from "node-forge";
 import { generateTOTP } from "./totp";
 
-export function genTOTP(seed: string) {
+export function genTOTP(seed: string): string[] {
   const secret = encode(Buffer.from(seed, "hex"));
   const timestamp = new Date();
   return [

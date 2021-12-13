@@ -62,7 +62,7 @@ export async function completeRegistration(authyId: number, pin: string): Promis
   }
 }
 
-export async function getAuthyApps(authyId: number, deviceId: number, otps: number[]): Promise<AuthyApp> {
+export async function getAuthyApps(authyId: number, deviceId: number, otps: string[]): Promise<AuthyApp> {
   const formData = new URLSearchParams();
   formData.set("api_key", API_KEY);
   formData.set("signature", SIGNATURE);
@@ -82,7 +82,7 @@ export async function getAuthyApps(authyId: number, deviceId: number, otps: numb
   }
 }
 
-export async function getServices(authyId: number, deviceId: number, otps: number[]): Promise<Services> {
+export async function getServices(authyId: number, deviceId: number, otps: string[]): Promise<Services> {
   const formData = new URLSearchParams();
   formData.set("api_key", API_KEY);
   formData.set("signature", SIGNATURE);

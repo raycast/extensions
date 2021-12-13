@@ -16,9 +16,20 @@ import {
   getMediaPlayerTitleAndArtist,
   CopyTrackToClipboard,
 } from "./mediaplayer";
-import { BrightnessControlAction } from "./light";
+import {
+  BrightnessControlAction,
+  BrightnessDownAction,
+  BrightnessUpAction,
+  ColorTempControlAction,
+  ColorTempControlDownAction,
+  ColorTempControlUpAction,
+  getLightRGBFromState,
+} from "./light";
+import { changeRGBBrightness, RGBtoString } from "../color";
+import { AutomationTriggerAction, AutomationTurnOffAction, AutomationTurnOnAction } from "./automation";
 
 const PrimaryIconColor = Color.Blue;
+const UnavailableColor = "#bdbdbd";
 
 const lightColor: Record<string, ColorLike> = {
   on: Color.Yellow,
@@ -76,6 +87,17 @@ function getDeviceClassIcon(state: State): ImageLike | undefined {
         tintColor = Color.Yellow;
       }
       return { source: src, tintColor: tintColor };
+    } else if (dc === "motion") {
+      const source = state.state === "on" ? "run.png" : "walk.png";
+      const color =
+        state.state === "unavailable" ? UnavailableColor : state.state === "on" ? Color.Yellow : PrimaryIconColor;
+      return { source: source, tintColor: color };
+    } else if (dc === "temperature") {
+      return { source: "temperature.png", tintColor: PrimaryIconColor };
+    } else if (dc === "plug") {
+      const source = state.state === "on" ? "power-plug.png" : "power-plug-off.png";
+      const color = state.state === "unavailable" ? UnavailableColor : PrimaryIconColor;
+      return { source: source, tintColor: color };
     }
     const src = deviceClassIconSource[dc] || "entity.png";
     return { source: src, tintColor: PrimaryIconColor };
@@ -84,13 +106,28 @@ function getDeviceClassIcon(state: State): ImageLike | undefined {
   }
 }
 
+function getLightIconSource(state: State): string {
+  const attr = state.attributes;
+  return attr.icon && attr.icon === "mdi:lightbulb-group" ? "lightbulb-group.png" : "lightbulb.png";
+}
+
+function getLightTintColor(state: State): ColorLike {
+  const sl = state.state.toLocaleLowerCase();
+  if (sl === "unavailable") {
+    return UnavailableColor;
+  }
+  const rgb = getLightRGBFromState(state);
+  if (rgb) {
+    return { light: RGBtoString(changeRGBBrightness(rgb, 56.6)), dark: RGBtoString(rgb) };
+  }
+  return lightColor[sl] || PrimaryIconColor;
+}
+
 function getIcon(state: State): ImageLike | undefined {
   const e = state.entity_id;
-  const attr = state.attributes;
   if (e.startsWith("light")) {
-    const sl = state.state.toLocaleLowerCase();
-    const color = sl === "unavailable" ? "#bdbdbd" : lightColor[sl] || PrimaryIconColor;
-    const source = attr.icon && attr.icon === "mdi:lightbulb-group" ? "lightbulb-group.png" : "lightbulb.png";
+    const color = getLightTintColor(state);
+    const source = getLightIconSource(state);
     return { source: source, tintColor: color };
   } else if (e.startsWith("person")) {
     return { source: "person.png", tintColor: PrimaryIconColor };
@@ -107,16 +144,22 @@ function getIcon(state: State): ImageLike | undefined {
     const sl = state.state.toLocaleLowerCase();
     const source = sl === "below_horizon" ? "weather-night.png" : "white-balance-sunny.png";
     return { source: source, tintColor: PrimaryIconColor };
+  } else if (e.startsWith("input_number")) {
+    return { source: "ray-vertex.png", tintColor: PrimaryIconColor };
+  } else if (e === "binary_sensor.rpi_power_status") {
+    return { source: "raspberry-pi.png", tintColor: PrimaryIconColor };
+  } else if (e.startsWith("water_heater")) {
+    return { source: "temperature.png", tintColor: PrimaryIconColor };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
   }
 }
 
-export function StatesList(props: { domain: string }): JSX.Element {
+export function StatesList(props: { domain: string; deviceClass?: string | undefined }): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
-  const { states } = useStateSearch(searchText, props.domain, undefined, allStates);
+  const { states } = useStateSearch(searchText, props.domain, props.deviceClass, allStates);
 
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search Home Assistant states.", error.message);
@@ -175,6 +218,48 @@ export function StateListItem(props: { state: State }): JSX.Element {
         const vr = Math.round(v * 100);
         return `🔉 ${vr}% | ${state.state}`;
       }
+    } else if (state.entity_id.startsWith("binary_sensor")) {
+      const dc = state.attributes.device_class;
+      if (dc) {
+        if (dc === "problem") {
+          switch (state.state) {
+            case "on": {
+              return "Detected";
+            }
+            case "off": {
+              return "OK";
+            }
+          }
+        } else if (dc === "motion") {
+          switch (state.state) {
+            case "on": {
+              return "Detected";
+            }
+            case "off": {
+              return "Normal";
+            }
+          }
+        } else if (dc === "plug") {
+          switch (state.state) {
+            case "on": {
+              return "Plugged";
+            }
+            case "off": {
+              return "Unplugged";
+            }
+          }
+        } else if (dc === "update") {
+          switch (state.state) {
+            case "on": {
+              return "Update Available";
+            }
+            case "off": {
+              return "Up To Date";
+            }
+          }
+        }
+      }
+      return state.state;
     }
     return state.state;
   };
@@ -289,7 +374,16 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               onAction={async () => await ha.turnOffLight(props.state.entity_id)}
               icon={{ source: "power-btn.png", tintColor: Color.Red }}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Brightness">
             <BrightnessControlAction state={state} />
+            <BrightnessUpAction state={state} />
+            <BrightnessDownAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Color Temperature">
+            <ColorTempControlAction state={state} />
+            <ColorTempControlUpAction state={state} />
+            <ColorTempControlDownAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
@@ -488,6 +582,28 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           </ActionPanel.Section>
           <ActionPanel.Section title="History">
             <OpenEntityHistoryAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "automation": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <AutomationTurnOnAction state={state} />
+            <AutomationTurnOffAction state={state} />
+            <AutomationTriggerAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
           </ActionPanel.Section>
         </ActionPanel>
       );

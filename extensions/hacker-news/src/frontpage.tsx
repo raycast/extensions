@@ -15,7 +15,7 @@ export default function Command() {
   useEffect(() => {
     async function fetchStories() {
       try {
-        const feed = await parser.parseURL("https://hnrss.org/frontpage?description=0&count=25");
+        const feed = await parser.parseURL("https://hnrss.org/frontpage?count=25");
         setState({ items: feed.items });
       } catch (error) {
         setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
