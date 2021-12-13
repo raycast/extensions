@@ -1,4 +1,5 @@
 import { Script } from "../type";
+import { format } from "sql-formatter";
 import vkbeautify from "vkbeautify";
 
 export const foramtSql: Script = {
@@ -7,11 +8,13 @@ export const foramtSql: Script = {
     desc: "Format SQL queries",
     type: ["form", "clipboard"],
     keywords: ["queries", "prettify"],
-    example: "SELECT ca.proj_id AS proj_id, FROM rotations r WHERE r.proj_id = proj_id GROUP BY r.proj_id) r_count",
+    example: "SELECT test, test, test FROM xxx WHERE xxx = 1 ORDER BY xxx LIMIT 1, 1",
   },
   run(input) {
     try {
-      return vkbeautify.sql(input);
+      return format(input, {
+        uppercase: true,
+      });
     } catch (error) {
       throw Error("Invalid SQL");
     }
@@ -23,7 +26,7 @@ export const minifySql: Script = {
     title: "Minify SQL",
     desc: "Cleans and minifies SQL queries",
     type: ["form", "clipboard"],
-    example: "SELECT ca.proj_id AS proj_id, FROM rotations r WHERE r.proj_id = proj_id GROUP BY r.proj_id) r_count",
+    example: "SELECT test, test, test \nFROM xxx \nWHERE xxx = 1 \nORDER BY xxx \nLIMIT 1, 1",
   },
   run(input) {
     try {
