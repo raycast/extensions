@@ -35,17 +35,17 @@ export default function SearchRubyGems() {
             actions={
               <ActionPanel>
                 <PushAction
-                  title="Show Details"
+                  title="Show Options"
                   target={
                     <GemOptions key={gem.sha} gem={gem} />
                   }
                 />
                 <OpenInBrowserAction
-                  title="Open source code"
+                  title="Open Source Code"
                   url={gem.source_code_uri}
                 />
                 <OpenInBrowserAction
-                  title="Open homepage"
+                  title="Open Homepage"
                   url={gem.homepage_uri}
                 />
               </ActionPanel>

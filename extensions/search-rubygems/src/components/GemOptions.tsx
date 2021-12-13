@@ -17,7 +17,7 @@ export const GemOptions = ({ gem }: Props): JSX.Element => {
           actions={
             <ActionPanel>
               <PushAction
-                title="Show details"
+                title="Show Details"
                 target={
                   <GemInfo key={gem.sha} gem={gem} />
                 }
@@ -28,7 +28,7 @@ export const GemOptions = ({ gem }: Props): JSX.Element => {
         <List.Item
           key="copy-bundler-string"
           icon={Icon.Clipboard}
-          title="Copy gem string"
+          title="Copy Gem String"
           accessoryTitle={`gem '${gem.name}', '${gem.version}'`}
           actions={
             <ActionPanel>
