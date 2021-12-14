@@ -11,6 +11,11 @@ export default function Command({
   entry: HarvestTimeEntry;
   onComplete: () => Promise<void>;
 }) {
+  // This fix is to prevent `TypeError: window.requestAnimationFrame is not a function` error from SWR
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  global.window.requestAnimationFrame = setTimeout;
+
   const { pop } = useNavigation();
 
   const message = `# 🚨 Are you sure? 🚨
