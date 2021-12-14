@@ -181,19 +181,9 @@ export default function Command({
         <Form.TextField
           id="hours"
           title="Duration"
-          placeholder="Leave blank to start a new timer"
+          placeholder="Enter numbers, or blank to start a new timer"
           value={hours}
-          onChange={(value) => {
-            console.log(value);
-            if (company?.time_format === "decimal") {
-              value = value.replace(/[^\d.]/g, "");
-            }
-            if (company?.time_format === "hours_minutes") {
-              value = value.replace(/[^\d:]/g, "");
-            }
-            console.log(value);
-            setHours(value);
-          }}
+          onChange={setHours}
         />
       )}
       <Form.DatePicker id="spent_date" title="Date" value={spentDate} onChange={setSpentDate} />
