@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
 import { HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseTypes";
-import _ from "lodash";
+import _, { isDate } from "lodash";
 import dayjs from "dayjs";
 
 export default function Command({
@@ -65,12 +65,14 @@ export default function Command({
 
     setTimeFormat(hours);
 
+    const spentDate = _.isDate(values.spent_date) ? values.spent_date : new Date();
+
     const data = _.omitBy(values, _.isEmpty);
     const timeEntry = await newTimeEntry({
       ...data,
       project_id: parseInt(values.project_id.toString()),
       task_id: parseInt(values.task_id.toString()),
-      spent_date: values.spent_date === null ? dayjs().format("YYYY-MM-DD") : values.spent_date.toString(),
+      spent_date: dayjs(spentDate).format("YYYY-MM-DD"),
     }).catch(async (error) => {
       console.error(error.response.data);
       await showToast(ToastStyle.Failure, "Error", error.response.data.message);
