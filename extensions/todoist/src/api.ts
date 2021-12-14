@@ -1,12 +1,14 @@
-import { preferences, showToast, ToastStyle } from "@raycast/api";
+import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
 import axios, { AxiosError } from "axios";
 import useSWR from "swr";
 import { TaskPayload } from "./types";
 import { showApiToastError } from "./utils";
 
+const preferences = getPreferenceValues();
+
 export const axiosInstance = axios.create({
   baseURL: "https://api.todoist.com/rest/v1",
-  headers: { Authorization: `Bearer ${preferences.token.value}` },
+  headers: { Authorization: `Bearer ${preferences.token}` },
 });
 
 export async function createTask(body: TaskPayload) {

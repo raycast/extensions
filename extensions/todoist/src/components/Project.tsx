@@ -8,8 +8,10 @@ interface ProjectProps {
 
 function Project({ projectId }: ProjectProps): JSX.Element {
   const path = `/tasks?project_id=${projectId}`;
-  const { data: tasks, isLoading: isLoadingTasks } = useFetch<Task[]>(path);
+  const { data: rawTasks, isLoading: isLoadingTasks } = useFetch<Task[]>(path);
   const { data: allSections, isLoading: isLoadingSections } = useFetch<Section[]>(`/sections?project_id=${projectId}`);
+
+  const tasks = rawTasks?.filter((task) => !task.parent_id);
 
   const sections = [
     {

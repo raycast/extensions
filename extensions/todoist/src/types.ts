@@ -44,6 +44,7 @@ export interface Task {
   priority: number;
   section_id: number;
   project_id: number;
+  parent_id?: number;
   order: number;
 }
 
