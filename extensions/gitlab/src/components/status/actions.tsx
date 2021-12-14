@@ -84,8 +84,7 @@ export function StatusPresetCreateAction(props: {
             presets={presets}
             setPresets={props.setPresets}
             onFinish={async (newStatus: Status) => {
-              const np = presets || [];
-              np.push(newStatus);
+              const np = presets === undefined ? [] : [...presets, newStatus];
               await storePresets(np);
               props.setPresets(np);
               pop();
@@ -154,7 +153,7 @@ export function StatusPresetEditAction(props: {
   const setStatus = async (newStatus: Status) => {
     try {
       if (index >= 0 && index < presets.length) {
-        const np = presets;
+        const np = [...presets];
         np[index] = newStatus;
         await storePresets(np);
         props.setPresets(np);
