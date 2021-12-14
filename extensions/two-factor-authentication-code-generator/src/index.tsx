@@ -214,18 +214,24 @@ function AddAppByUrlForm() {
         return;
       }
       if (parse.host != "totp") {
-        showToast(ToastStyle.Failure, "Supported type " + parse.host + " only TOTP supported");
+        showToast(ToastStyle.Failure, "Unsupported type " + parse.host + " only TOTP supported");
         return;
       }
+
+      if (!parse.pathname) {
+        showToast(ToastStyle.Failure, "Label is missing");
+        return;
+      }
+
+      const name = decodeURIComponent(parse.pathname.slice(1));
       const searchParams = parse.searchParams;
       const secret = searchParams.get("secret");
-      const issuer = searchParams.get("issuer");
       const algorithm = searchParams.get("algorithm") ? searchParams.get("algorithm") : DEFAULT_OPTIONS.algorithm;
       const maybePeriod = searchParams.get("period");
       const period = maybePeriod ? parseInt(maybePeriod) : DEFAULT_OPTIONS.period;
       const digits = searchParams.get("digits") ? searchParams.get("digits") : DEFAULT_OPTIONS.digits;
 
-      if (!secret || !issuer) {
+      if (!secret) {
         showToast(ToastStyle.Failure, "Secret is mandatory");
         return;
       }
@@ -259,19 +265,17 @@ function AddAppByUrlForm() {
 
       const options: Options = { digits: digits, period: period, algorithm: algorithm };
 
-      await setLocalStorageItem(issuer, JSON.stringify({ secret: secret, options: options }));
+      await setLocalStorageItem(name, JSON.stringify({ secret: secret, options: options }));
 
       push(<AppsView />);
     } catch (e) {
       showToast(ToastStyle.Failure, "Unable to parse URL");
       return;
     }
-    // push(<AppsView />);
+    push(<AppsView />);
   };
 
   return (
-    // <Detail
-    //   markdown={"This extension could parse otpauth URL for more details [see this doc](https://github.com/google/google-authenticator/wiki/Key-Uri-Format)"} />
     <Form
       actions={
         <ActionPanel>
