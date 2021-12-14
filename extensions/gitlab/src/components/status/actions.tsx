@@ -3,7 +3,7 @@ import { gitlab } from "../../common";
 import { Status } from "../../gitlabapi";
 import { getErrorMessage } from "../../utils";
 import { StatusFormPresetCreate, StatusFormPresetEdit, StatusFormSet } from "./form";
-import { wipePresets, predefinedPresets, storePresets } from "./presets";
+import { wipePresets, predefinedPresets } from "./presets";
 import { clearDurations, clearDurationText, getClearDurationDate } from "./utils";
 
 export function StatusSetCustomAction(props: {
@@ -85,7 +85,6 @@ export function StatusPresetCreateAction(props: {
             setPresets={props.setPresets}
             onFinish={async (newStatus: Status) => {
               const np = presets === undefined ? [] : [...presets, newStatus];
-              await storePresets(np);
               props.setPresets(np);
               pop();
             }}
@@ -155,7 +154,6 @@ export function StatusPresetEditAction(props: {
       if (index >= 0 && index < presets.length) {
         const np = [...presets];
         np[index] = newStatus;
-        await storePresets(np);
         props.setPresets(np);
         pop();
       } else {
@@ -196,7 +194,6 @@ export function StatusPresetDeleteAction(props: {
     try {
       if (index >= 0 && index < presets.length) {
         const np = presets.filter((_, i) => i != index);
-        await storePresets(np);
         props.setPresets(np);
       } else {
         throw Error("Preset index out of bounds");

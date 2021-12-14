@@ -9,11 +9,11 @@ export async function wipePresets() {
     await removeLocalStorageItem(presetsStoreKey);
 }
 
-export async function storePresets(presets: Status[]) {
+async function storePresets(presets: Status[]) {
     await setLocalStorageItem(presetsStoreKey, JSON.stringify(presets));
 }
 
-export async function restorePresets(): Promise<Status[] | undefined> {
+async function restorePresets(): Promise<Status[] | undefined> {
     const content = await getLocalStorageItem(presetsStoreKey);
     if (content !== undefined) {
         const data = JSON.parse(content.toString());
@@ -56,7 +56,9 @@ export function usePresets(): {
             try {
                 const presets = await restorePresets();
                 if (!didUnmount) {
-                    setPresets(presets || predefinedPresets());
+                    const data = presets || predefinedPresets();
+                    await storePresets(data)
+                    setPresets(data);
                 }
             } catch (error) {
                 setError(getErrorMessage(error));
