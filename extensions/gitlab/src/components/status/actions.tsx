@@ -211,3 +211,60 @@ export function StatusPresetDeleteAction(props: {
     />
   );
 }
+
+export function StatusPresetMoveUpAction(props: {
+  presets: Status[];
+  index: number;
+  setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
+  setSelectedId: React.Dispatch<React.SetStateAction<string | undefined>>;
+}): JSX.Element | null {
+  const index = props.index;
+  if (index - 1 < 0) {
+    return null;
+  }
+  const handle = () => {
+    const np = [...props.presets];
+    const temp = np[index - 1];
+    np[index - 1] = np[index];
+    np[index] = temp;
+    props.setPresets(np);
+    props.setSelectedId(`preset_${index - 1}`);
+  };
+  return (
+    <ActionPanel.Item
+      title="Move Up"
+      onAction={handle}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+      icon={{ source: Icon.ChevronUp, tintColor: Color.PrimaryText }}
+    />
+  );
+}
+
+export function StatusPresetMoveDownAction(props: {
+  presets: Status[];
+  index: number;
+  setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
+  setSelectedId: React.Dispatch<React.SetStateAction<string | undefined>>;
+}): JSX.Element | null {
+  const index = props.index;
+  const upperIndex = index + 1;
+  if (upperIndex >= props.presets.length) {
+    return null;
+  }
+  const handle = () => {
+    const np = [...props.presets];
+    const temp = np[upperIndex];
+    np[upperIndex] = np[index];
+    np[index] = temp;
+    props.setPresets(np);
+    props.setSelectedId(`preset_${upperIndex}`);
+  };
+  return (
+    <ActionPanel.Item
+      title="Move Down"
+      onAction={handle}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+      icon={{ source: Icon.ChevronDown, tintColor: Color.PrimaryText }}
+    />
+  );
+}

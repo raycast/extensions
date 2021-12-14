@@ -12,6 +12,8 @@ import {
   StatusPresetDeleteAction,
   StatusPresetEditAction,
   StatusPresetFactoryResetAction,
+  StatusPresetMoveDownAction,
+  StatusPresetMoveUpAction,
   StatusPresetSetAction,
   StatusPresetSetWithDurationAction,
   StatusSetCustomAction,
@@ -38,9 +40,10 @@ export default function StatusList(): JSX.Element {
   }, [data]);
 
   const { presets, setPresets } = usePresets();
+  const [selectedId, setSelectedId] = useState<string>();
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} selectedItemId={selectedId}>
       <List.Section title="Current Status">
         <StatusCurrentListItem
           status={currentStatus}
@@ -58,6 +61,7 @@ export default function StatusList(): JSX.Element {
             setPresets={setPresets}
             index={i}
             setCurrentStatus={setCurrentStatus}
+            setSelectedId={setSelectedId}
           />
         ))}
       </List.Section>
@@ -124,11 +128,13 @@ export function StatusPresetListItem(props: {
   index: number;
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
   setCurrentStatus: React.Dispatch<React.SetStateAction<Status | undefined>>;
+  setSelectedId: React.Dispatch<React.SetStateAction<string | undefined>>;
 }): JSX.Element {
   const s = props.status;
   const presets = props.presets || [];
   return (
     <ListItem
+      id={`preset_${props.index}`}
       title={s.message}
       icon={emojiSymbol(s.emoji)}
       subtitle={clearDurationText(s.clear_status_after)}
@@ -145,6 +151,20 @@ export function StatusPresetListItem(props: {
           <ActionPanel.Section>
             <StatusPresetCreateAction presets={presets} setPresets={props.setPresets} />
             <StatusSetCustomAction setCurrentStatus={props.setCurrentStatus} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <StatusPresetMoveUpAction
+              presets={presets}
+              setPresets={props.setPresets}
+              index={props.index}
+              setSelectedId={props.setSelectedId}
+            />
+            <StatusPresetMoveDownAction
+              presets={presets}
+              setPresets={props.setPresets}
+              index={props.index}
+              setSelectedId={props.setSelectedId}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <StatusPresetFactoryResetAction setPresets={props.setPresets} />
