@@ -1,0 +1,66 @@
+{
+  "name": "obsidian",
+  "title": "Obsidian",
+  "description": "Search, open, view, copy, paste and edit any note in Obsidian",
+  "icon": "command-icon.png",
+  "author": "marcjulian",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "type": "textfield",
+      "placeholder": "path/to/vault",
+      "title": "Path to Vault",
+      "required": true,
+      "description": "Specify the path to your own vault"
+    },{
+      "name": "excludedFolders",
+      "type": "textfield",
+      "placeholder": "folder1, folder2, ...",
+      "title": "Exclude following folders",
+      "required": false,
+      "description": "Specify which folders to exclude (comma seperated)"
+    }, {
+      "name": "removeYAML",
+      "label": "Hide content",
+      "type": "checkbox",
+      "title": "Hide YAML",
+      "required": false,
+      "description": "Hide YAML frontmatter for copying and viewing notes"
+    }, {
+      "name": "removeLinks",
+      "label": "Hide content",
+      "type": "checkbox",
+      "title": "Hide Links",
+      "required": false,
+      "description": "Hide links for copying and viewing notes"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Note",
+      "subtitle": "Obsidian",
+      "description": "Search, open, copy and paste any note in Obsidian",
+      "mode": "view" 
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
+
