@@ -8,6 +8,9 @@ The command allows for quick access to all of your notes and features several ac
 - `opt + c` will copy the selected notes content to your clipboard
 - `opt + v` will paste the notes content to the app you used before raycast
 
+## Demo
+https://user-images.githubusercontent.com/67844154/145954580-2a1cde55-a597-4298-8c6c-9cdc8d297a55.mov
+
 ## Search
 <img width="793" alt="Obsidian Raycast Search" src="https://user-images.githubusercontent.com/67844154/138552923-35bfbfdf-a46a-4d23-ab7a-c17d90323f58.png">
 
