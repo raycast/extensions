@@ -54,3 +54,28 @@ export type Profile = {
     pictureURL: string;
   };
 };
+
+type GoogleChromeBookmark = GoogleChromeBookmarkFolder | GoogleChromeBookmarkURL;
+
+export interface GoogleChromeBookmarkURL extends GoogleChromeBookmarkBase {
+  type: "url";
+  url: string;
+}
+
+export interface GoogleChromeBookmarkFolder extends GoogleChromeBookmarkBase {
+  type: "folder";
+  children: [GoogleChromeBookmark];
+}
+
+interface GoogleChromeBookmarkBase {
+  name: string;
+  date_added: number;
+}
+
+export type GoogleChromeBookmarkFile = {
+  roots: {
+    bookmark_bar: GoogleChromeBookmarkFolder;
+    other: GoogleChromeBookmarkFolder;
+    synced: GoogleChromeBookmarkFolder;
+  };
+};

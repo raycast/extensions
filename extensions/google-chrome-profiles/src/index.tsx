@@ -1,15 +1,25 @@
 import {
   ActionPanel,
+  CopyToClipboardAction,
   Icon,
   ImageMask,
   List,
+  PushAction,
   showToast,
   ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { homedir } from "os";
-import { GoogleChromeInfoCache, GoogleChromeLocalState, Profile } from "./util/types";
+import {
+  GoogleChromeBookmarkFile,
+  GoogleChromeBookmarkFolder,
+  GoogleChromeBookmarkURL,
+  GoogleChromeInfoCache,
+  GoogleChromeLocalState,
+  Profile,
+} from "./util/types";
+import { URL } from "url";
 
 export default function Command() {
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
@@ -43,6 +53,12 @@ export default function Command() {
                   title="Open in Google Chrome"
                   icon={Icon.Globe}
                   onAction={onActionOpenInGoogleChrome(profile.directory, "new-tab")}
+                />
+                <PushAction
+                  title="Show Bookmarks"
+                  icon={Icon.Link}
+                  target={<ListBookmarks profile={profile} />}
+                  shortcut={{ modifiers: ["cmd", "opt"], key: "b" }}
                 />
               </ActionPanel>
             }
@@ -78,6 +94,16 @@ const extractProfileFromInfoCache =
 
 const sortAlphabetically = (a: Profile, b: Profile) => a.name.localeCompare(b.name);
 
+const extractBookmarksUrlRecursively = (folder: GoogleChromeBookmarkFolder): GoogleChromeBookmarkURL[] =>
+  folder.children.flatMap((e) => {
+    switch (e.type) {
+      case "url":
+        return [e];
+      case "folder":
+        return extractBookmarksUrlRecursively(e);
+    }
+  });
+
 const onActionOpenInGoogleChrome = (profileDirectory: string, link: string) => async () => {
   const script = `
     set theAppPath to quoted form of "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
@@ -91,3 +117,68 @@ const onActionOpenInGoogleChrome = (profileDirectory: string, link: string) => a
     await showToast(ToastStyle.Failure, (error as Error).message);
   }
 };
+
+//-------------
+// Components
+//-------------
+
+function ListBookmarks(props: { profile: Profile }) {
+  const [bookmarkFile, setBookmarkFile] = useState<GoogleChromeBookmarkFile>();
+  const [error, setError] = useState<Error>();
+
+  useEffect(() => {
+    async function listBookmarks() {
+      try {
+        const dir = props.profile.directory;
+        const script = `read POSIX file "${homedir()}/Library/Application Support/Google/Chrome/${dir}/Bookmarks" as «class utf8»`;
+        const bookmarkFileText = await runAppleScript(script);
+        setBookmarkFile(JSON.parse(bookmarkFileText));
+      } catch (error) {
+        setError(error as Error);
+      }
+    }
+
+    listBookmarks();
+  }, []);
+
+  if (error) {
+    showToast(ToastStyle.Failure, error.message);
+  }
+
+  const bookmarks = Object.values((bookmarkFile ?? { roots: {} }).roots)
+    .flatMap(extractBookmarksUrlRecursively)
+    .map((b) => {
+      const url = new URL(b.url);
+      const urlToDisplay = b.url.replace(/(^\w+:|^)\/\//, "");
+      return {
+        url: b.url,
+        title: b.name ? b.name : urlToDisplay,
+        subtitle: b.name ? urlToDisplay : undefined,
+        iconURL: `${url.origin}/favicon.ico`,
+      };
+    });
+
+  return (
+    <List isLoading={!bookmarkFile && !error} searchBarPlaceholder="Search Bookmark">
+      {bookmarks &&
+        bookmarks.map((b, index) => (
+          <List.Item
+            key={index}
+            title={b.title}
+            subtitle={b.subtitle}
+            icon={{ source: b.iconURL }}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Item
+                  title="Open in Google Chrome"
+                  icon={Icon.Globe}
+                  onAction={onActionOpenInGoogleChrome(props.profile.directory, b.url)}
+                />
+                <CopyToClipboardAction title="Copy URL" content={b.url} />
+              </ActionPanel>
+            }
+          />
+        ))}
+    </List>
+  );
+}
