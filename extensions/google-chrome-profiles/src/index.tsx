@@ -23,22 +23,31 @@ import { URL } from "url";
 
 export default function Command() {
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
+  const [error, setError] = useState<Error>();
 
   useEffect(() => {
     async function listProfiles() {
-      const script = `read POSIX file "${homedir()}/Library/Application Support/Google/Chrome/Local State" as «class utf8»`;
-      const localStateFileText = await runAppleScript(script);
-      setLocalState(JSON.parse(localStateFileText));
+      try {
+        const script = `read POSIX file "${homedir()}/Library/Application Support/Google/Chrome/Local State" as «class utf8»`;
+        const localStateFileText = await runAppleScript(script);
+        setLocalState(JSON.parse(localStateFileText));
+      } catch (error) {
+        setError(Error("No profile found\nIs Google Chrome installed?"));
+      }
     }
 
     listProfiles();
   }, []);
 
+  if (error) {
+    showToast(ToastStyle.Failure, error.message);
+  }
+
   const infoCache = localState?.profile.info_cache;
   const profiles = infoCache && Object.keys(infoCache).map(extractProfileFromInfoCache(infoCache));
 
   return (
-    <List isLoading={!profiles} searchBarPlaceholder="Search Profile">
+    <List isLoading={!profiles && !error} searchBarPlaceholder="Search Profile">
       {profiles &&
         profiles.sort(sortAlphabetically).map((profile, index) => (
           <List.Item
@@ -114,7 +123,7 @@ const onActionOpenInGoogleChrome = (profileDirectory: string, link: string) => a
   try {
     await runAppleScript(script);
   } catch (error) {
-    await showToast(ToastStyle.Failure, (error as Error).message);
+    await showToast(ToastStyle.Failure, "Could not found\nGoogle Chrome.app in Applications folder");
   }
 };
 
@@ -134,7 +143,7 @@ function ListBookmarks(props: { profile: Profile }) {
         const bookmarkFileText = await runAppleScript(script);
         setBookmarkFile(JSON.parse(bookmarkFileText));
       } catch (error) {
-        setError(error as Error);
+        setError(Error("No bookmark found"));
       }
     }
 
