@@ -10,7 +10,6 @@
     {
       "name": "index",
       "title": "Show IP Address",
-      "subtitle": "Internet",
       "description": "My IP information",
       "keywords": [
         "internet"
