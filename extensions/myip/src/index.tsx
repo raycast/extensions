@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, Icon, List, PushAction } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, Icon, List, PushAction, useNavigation } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import LookUp from "./lookup";
@@ -9,6 +9,7 @@ export type LoadingStatus = "loading" | "success" | "failure";
 export default function Command() {
   const [status, setStatus] = useState<LoadingStatus>("loading");
   const [ip, setIp] = useState("");
+  const { pop } = useNavigation();
 
   useEffect(() => {
     async function getIp() {
@@ -33,7 +34,12 @@ export default function Command() {
         actions={
           status === "success" && (
             <ActionPanel>
-              <CopyToClipboardAction content={ip} />
+              <CopyToClipboardAction
+                content={ip}
+                onCopy={() => {
+                  pop();
+                }}
+              />
             </ActionPanel>
           )
         }

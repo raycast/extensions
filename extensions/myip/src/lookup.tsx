@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, Detail, OpenInBrowserAction, useNavigation } from "@raycast/api";
 import axios from "axios";
 import * as cheerio from "cheerio";
 import { useEffect, useState } from "react";
@@ -9,6 +9,7 @@ let isLive = true;
 export default function LookUp() {
   const [status, setStatus] = useState<LoadingStatus>("loading");
   const [data, setData] = useState("");
+  const { pop } = useNavigation();
 
   useEffect(() => {
     async function getIp() {
@@ -31,9 +32,9 @@ export default function LookUp() {
             case 2:
               $("tr", item).each(function (index, item) {
                 temp += `## ${$("td", item).first().text().trim().replace(":", "")}
-  `;
+`;
                 temp += `${$("td", item).last().text().trim()}
-  `;
+`;
               });
               break;
             default:
@@ -65,7 +66,12 @@ export default function LookUp() {
       markdown={data}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={"https://ipaddress.my"} />
+          <OpenInBrowserAction
+            url={"https://ipaddress.my"}
+            onOpen={() => {
+              pop();
+            }}
+          />
         </ActionPanel>
       }
     />
