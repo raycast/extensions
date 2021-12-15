@@ -1,15 +1,13 @@
-import { closeMainWindow, showHUD } from "@raycast/api";
+import { closeMainWindow } from "@raycast/api";
 import { KeyLight } from "./elgato";
-import { showFailureHUD } from "./utils";
+import { run } from "./utils";
 
-export default async () => {
-  try {
-    await closeMainWindow();
-    const keyLight = await KeyLight.discover();
-    const brightness = await keyLight.increaseBrightness();
-    const formattedBrightness = brightness.toLocaleString("en", { maximumFractionDigits: 0 });
-    await showHUD(`Increased brightness to ${formattedBrightness}%`);
-  } catch (error) {
-    await showFailureHUD("Failed increasing brightness");
-  }
+const command = async () => {
+  await closeMainWindow({ clearRootSearch: true });
+  const keyLight = await KeyLight.discover();
+  const brightness = await keyLight.increaseBrightness();
+  const formattedBrightness = brightness.toLocaleString("en", { maximumFractionDigits: 0 });
+  return `Increased brightness to ${formattedBrightness}%`;
 };
+
+export default run(command);
