@@ -156,6 +156,7 @@ function ListBookmarks(props: { profile: Profile }) {
 
   const bookmarks = Object.values((bookmarkFile ?? { roots: {} }).roots)
     .flatMap(extractBookmarksUrlRecursively)
+    .filter((e) => !e.url.startsWith("chrome://"))
     .map((b) => {
       const url = new URL(b.url);
       const urlToDisplay = b.url.replace(/(^\w+:|^)\/\//, "");
