@@ -10,7 +10,7 @@
     {
       "name": "list",
       "title": "Search Script Command",
-      "subtitle": "Script Command Store",
+      "subtitle": "Script Commands Store",
       "description": "List all and search for Script Commands available in the Raycast Script Commands repository on GitHub",
       "mode": "view"
     }

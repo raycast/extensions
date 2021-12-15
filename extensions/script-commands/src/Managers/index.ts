@@ -7,5 +7,5 @@ export {
 } from "./ScriptCommandManager"
 
 export {
-  DataManager,
+  DataManager
 } from "./DataManager"

@@ -10,6 +10,7 @@ import {
 } from "@raycast/api"
 
 import { 
+  CompactGroup,
   ScriptCommand,
 } from "@models"
 
@@ -19,6 +20,8 @@ import {
 
 import { 
   Filter,
+  Process,
+  Progress,
   State,
 } from "@types"
 
@@ -59,6 +62,7 @@ type UseScriptCommandState = {
   confirmSetup: () => void
   editSourceCode: () => void
   setFilter: (filter: Filter) => void
+  installPackage: (group: CompactGroup, callback: (process: Process) => void) => Promise<Progress>
 }
 
 type UseScriptCommand = (initialScriptCommand: ScriptCommand) => UseScriptCommandState
@@ -129,6 +133,21 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
     })
   }
 
+  const installPackage = async (group: CompactGroup, callback: (process: Process) => void) => {
+    const result = await dataManager.installPackage(group, progress => {
+      callback(progress)
+
+      if (state.scriptCommand.identifier == progress.identifier) {
+        setState((oldState) => ({
+          ...oldState, 
+          commandState: progress.state
+        })) 
+      }
+    })
+
+    return result
+  }
+
   const file = dataManager.commandFileFor(state.scriptCommand.identifier)
 
   return {
@@ -149,7 +168,8 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
     uninstall,
     confirmSetup,
     editSourceCode,
-    setFilter
+    setFilter,
+    installPackage
   }
 }
 

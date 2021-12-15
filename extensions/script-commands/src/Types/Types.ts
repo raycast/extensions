@@ -62,6 +62,14 @@ export enum State {
   Error,
 }
 
+export type Process = {
+  identifier: string
+  progress: Progress
+  state: State
+  current: number
+  total: number
+}
+
 export type Filter = State | string | null
 
 export type StateResult = Result<State>
