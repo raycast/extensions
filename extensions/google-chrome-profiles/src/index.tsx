@@ -1,5 +1,6 @@
 import {
   ActionPanel,
+  closeMainWindow,
   CopyToClipboardAction,
   Icon,
   ImageMask,
@@ -58,16 +59,19 @@ export default function Command() {
             keywords={profile.ga?.email ? [profile.ga.email, ...profile.ga.email.split("@")] : undefined}
             actions={
               <ActionPanel>
-                <ActionPanel.Item
-                  title="Open in Google Chrome"
-                  icon={Icon.Globe}
-                  onAction={onActionOpenInGoogleChrome(profile.directory, "new-tab")}
-                />
                 <PushAction
                   title="Show Bookmarks"
                   icon={Icon.Link}
                   target={<ListBookmarks profile={profile} />}
                   shortcut={{ modifiers: ["cmd", "opt"], key: "b" }}
+                />
+                <ActionPanel.Item
+                  title="Open in Google Chrome"
+                  icon={Icon.Globe}
+                  onAction={async () => {
+                    await openGoogleChrome(profile.directory, "new-tab");
+                    await closeMainWindow();
+                  }}
                 />
               </ActionPanel>
             }
@@ -113,7 +117,7 @@ const extractBookmarksUrlRecursively = (folder: GoogleChromeBookmarkFolder): Goo
     }
   });
 
-const onActionOpenInGoogleChrome = (profileDirectory: string, link: string) => async () => {
+const openGoogleChrome = async (profileDirectory: string, link: string) => {
   const script = `
     set theAppPath to quoted form of "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
     set theProfile to quoted form of "${profileDirectory}"
@@ -182,9 +186,16 @@ function ListBookmarks(props: { profile: Profile }) {
                 <ActionPanel.Item
                   title="Open in Google Chrome"
                   icon={Icon.Globe}
-                  onAction={onActionOpenInGoogleChrome(props.profile.directory, b.url)}
+                  onAction={async () => {
+                    await openGoogleChrome(props.profile.directory, b.url);
+                    await closeMainWindow();
+                  }}
                 />
-                <CopyToClipboardAction title="Copy URL" content={b.url} />
+                <ActionPanel.Item
+                  title="Open in Background"
+                  icon={Icon.Globe}
+                  onAction={() => openGoogleChrome(props.profile.directory, b.url)}
+                />
               </ActionPanel>
             }
           />
