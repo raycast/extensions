@@ -5,6 +5,11 @@ import * as fs from "fs/promises";
 import * as fsSync from "fs";
 import { constants } from 'fs';
 import * as crypto from "crypto";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en.json";
+
+TimeAgo.addDefaultLocale(en);
+const timeAgo = new TimeAgo("en-US");
 
 export function projectIconUrl(project: Project): string | undefined {
     let result: string | undefined;
@@ -147,23 +152,23 @@ export function toFormValues(values: any): Record<string, any> {
 
 
 export function stringToSlug(str: string): string {
-  str = str.replace(/^\s+|\s+$/g, ""); // trim
-  str = str.toLowerCase();
+    str = str.replace(/^\s+|\s+$/g, ""); // trim
+    str = str.toLowerCase();
 
-  // remove accents, swap ñ for n, etc
-  const from = "åàáãäâèéëêìíïîòóöôùúüûñç·/_,:;";
-  const to = "aaaaaaeeeeiiiioooouuuunc------";
+    // remove accents, swap ñ for n, etc
+    const from = "åàáãäâèéëêìíïîòóöôùúüûñç·/_,:;";
+    const to = "aaaaaaeeeeiiiioooouuuunc------";
 
-  for (let i = 0, l = from.length; i < l; i++) {
-    str = str.replace(new RegExp(from.charAt(i), "g"), to.charAt(i));
-  }
+    for (let i = 0, l = from.length; i < l; i++) {
+        str = str.replace(new RegExp(from.charAt(i), "g"), to.charAt(i));
+    }
 
-  str = str
-    .replace(/[^a-z0-9 -]/g, "") // remove invalid chars
-    .replace(/\s+/g, "-") // collapse whitespace and replace by -
-    .replace(/-+/g, "-"); // collapse dashes
+    str = str
+        .replace(/[^a-z0-9 -]/g, "") // remove invalid chars
+        .replace(/\s+/g, "-") // collapse whitespace and replace by -
+        .replace(/-+/g, "-"); // collapse dashes
 
-  return str;
+    return str;
 }
 
 export class Query {
@@ -207,4 +212,13 @@ export function tokenizeQueryText(query: string | undefined, namedKeywords: stri
         named: positivePairs,
         negativeNamed: negativePairs
     };
+}
+
+export function getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : "unknown error";
+}
+
+export function formatDate(input: Date | string) {
+    const date = typeof input === "string" ? new Date(input) : input;
+    return timeAgo.format(date) as string;
 }

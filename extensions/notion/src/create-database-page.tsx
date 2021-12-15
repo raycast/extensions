@@ -20,23 +20,17 @@ import {
 import { useEffect, useState } from 'react'
 import {
   Database,
-  DatabasePropertie,
+  DatabaseProperty,
   Page,
   fetchDatabases,
   fetchDatabaseProperties,
   createDatabasePage,
+  fetchExtensionReadMe,
+  notionColorToTintColor,
 } from './notion'
 
 
-
 export default function CreateDatabaseForm(): JSX.Element {
-  // Get preference values
-  const notion_token = String(preferences.notion_token.value)
-  const notion_workspace_slug = String(preferences.notion_workspace_slug.value)
-  if (notion_token.length !== 50) {
-    showToast(ToastStyle.Failure, 'Invalid token detected')
-    throw new Error('Invalid token length detected')
-  }
 
   // On form submit function
   const { pop } = useNavigation();
@@ -58,10 +52,25 @@ export default function CreateDatabaseForm(): JSX.Element {
 
   // Setup useState objects
   const [databases, setDatabases] = useState<Database[]>()
-  const [databaseProperties, setDatabaseProperties] = useState<DatabasePropertie[]>()  
+  const [databaseProperties, setDatabaseProperties] = useState<DatabaseProperty[]>()  
   const [databaseId, setDatabaseId] = useState<string>()
+  const [markdown, setMarkdown] = useState<string>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
+
+  // Currently supported properties
+  const supportedPropTypes = [
+    'title',
+    'rich_text',
+    'number',
+    'url',
+    'email',
+    'phone_number',
+    'date',
+    'checkbox',
+    'select',
+    'multi_select'
+  ]
   
   // Fetch databases
   useEffect(() => {
@@ -80,7 +89,6 @@ export default function CreateDatabaseForm(): JSX.Element {
       setIsLoading(false)
 
       await storeDatabases(fetchedDatabases)
-            
      
     }
     fetchData()
@@ -89,7 +97,8 @@ export default function CreateDatabaseForm(): JSX.Element {
   // Fetch selected database property
   useEffect(() => {
     const fetchData = async () => {
-      if(databaseId){
+      if(databaseId){        
+
         setIsLoading(true)
 
         const cachedDatabaseProperties = await loadDatabaseProperties(databaseId)
@@ -99,21 +108,36 @@ export default function CreateDatabaseForm(): JSX.Element {
         }
 
         const fetchedDatabaseProperties = await fetchDatabaseProperties(databaseId)
-      
-        setDatabaseProperties(fetchedDatabaseProperties)          
-        setIsLoading(false)
-
-        await storeDatabaseProperties(databaseId, fetchedDatabaseProperties)
+        if(fetchedDatabaseProperties){
+          const supportedDatabaseProperties = fetchedDatabaseProperties.filter(function (property){
+            return supportedPropTypes.includes(property.type)
+          })
+          setDatabaseProperties(supportedDatabaseProperties)   
+          await storeDatabaseProperties(databaseId, supportedDatabaseProperties)
+        }
         
+        setIsLoading(false)
       }      
     }
     fetchData()
   }, [databaseId])
 
 
-  if(databases && !databases[0]){
-    return NoSharedContent()
+  // Fetch Notion Extension README
+  useEffect(() => {
+    const fetchREADME = async () => {
+      if(!markdown){
+         const fetchedREADME = await fetchExtensionReadMe()
+        setMarkdown(fetchedREADME)
+      }     
+    }
+    fetchREADME()
+  }, [])
+
+  if(databases && !databases[0] && markdown){
+     return (<Detail markdown={markdown}/>)
   }
+  
   return (
     <Form 
       isLoading={isLoading} 
@@ -192,11 +216,6 @@ export default function CreateDatabaseForm(): JSX.Element {
   )
 }
 
-export function NoSharedContent(): JSX.Element{
-  return (<Detail markdown={`## No Shared Content 
-  \n\n Make sure to **Invite** at least one database with the integration you have created.\n ![NotionShare](https://images.ctfassets.net/lzny33ho1g45/2pIkZOvLY2o2dwfnJIYJxt/d5d9f1318b2e79ad92d8197e4abab655/automate-notion-with-zapier-11-share-options.png)`} />)
-}
-
 function validateForm(values: FormValues): boolean {
   const valueKeys = Object.keys(values) as string[]
   const titleKey = valueKeys.filter(function (vk){ return vk.includes('property::title')})[0]
@@ -205,24 +224,6 @@ function validateForm(values: FormValues): boolean {
     return false;
   }
   return true;
-}
-
-
-function notionColorToTintColor (notionColor: string): Color {
-   const colorMapper = {
-    'default': Color.PrimaryText,
-    'gray': Color.PrimaryText,
-    'brown': Color.Brown,
-    'red': Color.Red,
-    'blue': Color.Blue,
-    'green': Color.Green,
-    'yellow': Color.Yellow,
-    'orange': Color.Orange,
-    'purple': Color.Purple,
-    'pink': Color.Magenta
-  } as Record<string,Color>
-
-  return colorMapper[notionColor] 
 }
 
 async function storeDatabases(database: Database[]) {
@@ -235,7 +236,7 @@ async function loadDatabases() {
   return data !== undefined ? JSON.parse(data) : undefined
 }
 
-async function storeDatabaseProperties(databaseId: string, databaseProperties: DatabasePropertie[]) {
+async function storeDatabaseProperties(databaseId: string, databaseProperties: DatabaseProperty[]) {
   const data = JSON.stringify(databaseProperties)
   await setLocalStorageItem('DATABASE_PROPERTIES_'+databaseId, data)
 }

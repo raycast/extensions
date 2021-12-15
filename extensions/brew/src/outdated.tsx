@@ -20,14 +20,14 @@ export default function Main() {
   useEffect(() => {
     if (!state.isLoading) { return; }
     brewFetchOutdated(true) // include auto_update casks
-    .then(outdated => {
-      setState({outdated: outdated, isLoading: false});
-    })
-    .catch (err => {
-      console.log("brewFetchOutdated error:", err);
-      showFailureToast("Brew outdated failed", err);
-      setState({isLoading: false});
-    });
+      .then(outdated => {
+        setState({outdated: outdated, isLoading: false});
+      })
+      .catch (err => {
+        console.log("brewFetchOutdated error:", err);
+        showFailureToast("Brew outdated failed", err);
+        setState({isLoading: false});
+      });
   }, [state]);
 
 

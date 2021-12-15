@@ -1,4 +1,5 @@
 import { ActionPanel, PushAction, Icon, List, OpenInBrowserAction, render } from "@raycast/api";
+import { showApiToastError } from "./utils";
 
 import { Project as TProject } from "./types";
 import { useFetch } from "./api";
@@ -6,7 +7,11 @@ import { useFetch } from "./api";
 import Project from "./components/Project";
 
 function Projects() {
-  const { data, isLoading } = useFetch<TProject[]>("/projects");
+  const { data, isLoading, error } = useFetch<TProject[]>("/projects");
+
+  if (error) {
+    showApiToastError({ error, title: "Failed to get projects", message: error.message });
+  }
 
   const projects = data || [];
 
@@ -20,7 +25,7 @@ function Projects() {
           {...(project.favorite ? { accessoryIcon: Icon.Star } : {})}
           actions={
             <ActionPanel>
-              <PushAction icon={Icon.TextDocument} title="Show Details" target={<Project project={project} />} />
+              <PushAction icon={Icon.TextDocument} title="Show Details" target={<Project projectId={project.id} />} />
               <OpenInBrowserAction url={project.url} />
             </ActionPanel>
           }
