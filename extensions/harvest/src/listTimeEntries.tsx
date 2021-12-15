@@ -1,3 +1,11 @@
+// This fix is to prevent `TypeError: window.requestAnimationFrame is not a function` error from SWR
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+global.window = {};
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+global.window.requestAnimationFrame = setTimeout;
+
 import {
   ActionPanel,
   ActionPanelItem,
@@ -22,11 +30,6 @@ import Delete from "./delete";
 import { execSync } from "child_process";
 
 export default function Command() {
-  // This fix is to prevent `TypeError: window.requestAnimationFrame is not a function` error from SWR
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  global.window.requestAnimationFrame = setTimeout;
-
   const [items, setItems] = useState<HarvestTimeEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   // const [harvestInstallPath, setHarvestInstallPath] = useState<Application>();

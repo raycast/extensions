@@ -1,3 +1,11 @@
+// This fix is to prevent `TypeError: window.requestAnimationFrame is not a function` error from SWR
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+global.window = {};
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+global.window.requestAnimationFrame = setTimeout;
+
 import {
   Form,
   FormValue,
@@ -24,11 +32,6 @@ export default function Command({
   onSave: () => Promise<void>;
   entry?: HarvestTimeEntry;
 }) {
-  // This fix is to prevent `TypeError: window.requestAnimationFrame is not a function` error from SWR
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  global.window.requestAnimationFrame = setTimeout;
-
   const { pop } = useNavigation();
   const { data: company } = useCompany();
   const { data: projects } = useMyProjects();
