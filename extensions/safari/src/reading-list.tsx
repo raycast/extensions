@@ -1,10 +1,24 @@
-import { List, ActionPanel, CopyToClipboardAction, OpenInBrowserAction, Detail } from '@raycast/api';
+import {
+  List,
+  ActionPanel,
+  CopyToClipboardAction,
+  OpenInBrowserAction,
+  Detail,
+  getPreferenceValues,
+} from '@raycast/api';
 import { useState, useEffect, useCallback } from 'react';
 import os from 'os';
 import _ from 'lodash';
 import plist from 'simple-plist';
 import { promisify } from 'util';
 import { getUrlDomain, getFaviconUrl, plural, formatDate, permissionErrorMarkdown, search } from './shared';
+
+// Preferences
+type Preferences = {
+  groupByStatus: boolean;
+};
+
+const { groupByStatus }: Preferences = getPreferenceValues();
 
 const readPlist = promisify(plist.readFile);
 
@@ -40,7 +54,7 @@ interface Bookmark {
 interface ReadingListBookmark {
   uuid: string;
   url: string;
-  domain: string;
+  domain?: string;
   title: string;
   dateAdded: string;
   dateLastViewed?: string;
@@ -108,7 +122,9 @@ export default function Command() {
     return <Detail markdown={permissionErrorMarkdown} />;
   }
 
-  const groupedBookmarks = _.groupBy(bookmarks, ({ dateLastViewed }) => (dateLastViewed ? 'read' : 'unread'));
+  const groupedBookmarks = groupByStatus
+    ? _.groupBy(bookmarks, ({ dateLastViewed }) => (dateLastViewed ? 'read' : 'unread'))
+    : { All: bookmarks || [] };
 
   return (
     <List isLoading={!bookmarks} onSearchTextChange={setSearchText}>

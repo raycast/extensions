@@ -7,6 +7,7 @@ import {
   Detail,
   Icon,
   closeMainWindow,
+  getPreferenceValues,
 } from '@raycast/api';
 import { useState, useEffect, useCallback, Fragment } from 'react';
 import os from 'os';
@@ -20,8 +21,14 @@ import { executeJxa, getTabUrl, getUrlDomain, getFaviconUrl, plural, permissionE
 
 const asyncReadFile = promisify(readFile);
 
-const cloudTabsDbPath = `${os.homedir()}/Library/Safari/CloudTabs.db`;
+// Preferences
+type Preferences = {
+  safariAppIdentifier: string;
+};
 
+const { safariAppIdentifier }: Preferences = getPreferenceValues();
+
+// Current Device
 const getCurrentDeviceName = (): string => {
   try {
     return execa.commandSync('/usr/sbin/scutil --get ComputerName').stdout;
@@ -33,6 +40,8 @@ const getCurrentDeviceName = (): string => {
 
 const currentDeviceName = getCurrentDeviceName();
 
+// Cloud Tabs Database
+const cloudTabsDbPath = `${os.homedir()}/Library/Safari/CloudTabs.db`;
 let loadedDb: Database;
 const loadDb = async (): Promise<Database> => {
   if (loadedDb) {
@@ -63,14 +72,14 @@ const executeQuery = async (db: Database, query: string): Promise<unknown> => {
 
 const fetchLocalTabs = (): Promise<LocalTab[]> =>
   executeJxa(`
-    const safari = Application("Safari");
+    const safari = Application("${safariAppIdentifier}");
     const tabs = [];
     safari.windows().map(window => {
       return window.tabs().map(tab => {
         tabs.push({
           uuid: window.id() + '-' + tab.index(),
           title: tab.name(),
-          url: tab.url(),
+          url: tab.url() || '',
           window_id: window.id(),
           index: tab.index(),
           is_local: true
@@ -82,16 +91,21 @@ const fetchLocalTabs = (): Promise<LocalTab[]> =>
 `);
 
 const fetchRemoteTabs = async (): Promise<RemoteTab[]> => {
-  const db = await loadDb();
-  const tabs = (await executeQuery(
-    db,
-    `SELECT t.tab_uuid as uuid, d.device_uuid, d.device_name, t.title, t.url
+  try {
+    const db = await loadDb();
+    const tabs = (await executeQuery(
+      db,
+      `SELECT t.tab_uuid as uuid, d.device_uuid, d.device_name, t.title, t.url
          FROM cloud_tabs t
          INNER JOIN cloud_tab_devices d ON t.device_uuid = d.device_uuid
          WHERE device_name != "${currentDeviceName}"`
-  )) as RemoteTab[];
+    )) as RemoteTab[];
 
-  return tabs;
+    return tabs;
+  } catch (err) {
+    console.log(err);
+    return [];
+  }
 };
 
 const activateLocalTab = async (tab: LocalTab) =>
