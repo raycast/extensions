@@ -8,7 +8,6 @@ import {
   AuthorsActionPanel,
   FiltersActionPanel,
   ManagementActionPanel,
-  PackageToast,
   ReadmeActionPanel,
   StoreToast,
   ViewsActionPanel,
@@ -31,10 +30,11 @@ import {
 type Props = { 
   scriptCommand: ScriptCommand
   group: CompactGroup
+  onInstallPackage: () => void
 }
 
-export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element {
-  const { props, install, installPackage, uninstall, confirmSetup, editSourceCode, setFilter } = useScriptCommand(scriptCommand)
+export function ScriptCommandItem({ scriptCommand, group, onInstallPackage }: Props): JSX.Element {
+  const { props, install, uninstall, confirmSetup, editSourceCode, setFilter } = useScriptCommand(scriptCommand)
 
   const handleInstall = async () => {
     await StoreToast(props.state, Progress.InProgress, scriptCommand.title)
@@ -61,14 +61,6 @@ export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element 
     showHUD(`Opening ${props.title}'s local source code to be edited...`)
   }
 
-  const handlePackageInstall = async () => {
-    const result = await installPackage(group, process => {
-      PackageToast(Progress.InProgress, group.title, `Script Command: ${process.current} of ${process.total}...`)
-    })
-
-    PackageToast(result, group.title)
-  }
-
   return (
     <List.Item
       id={ props.identifier }
@@ -84,12 +76,12 @@ export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element 
           <ManagementActionPanel 
             state={ props.state }
             commandPath={ props.path }
-            onInstall={ handleInstall } 
-            onUninstall={ handleUninstall }
-            onSetup={ handleSetup }
             onConfirmSetup={ confirmSetup }
             onEditLocal={ handleEditLocal }
-            onInstallPackage={ handlePackageInstall }
+            onInstall={ handleInstall } 
+            onInstallPackage={ onInstallPackage }
+            onSetup={ handleSetup }
+            onUninstall={ handleUninstall }
           />
           <ViewsActionPanel 
             url={ props.sourceCodeURL } 

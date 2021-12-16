@@ -13,7 +13,7 @@ type Props = {
 export function InstallPackageActionItem({ onInstallPackage }: Props): JSX.Element {  
   return (
     <ActionPanel.Item 
-      icon={ IconConstants.Install } 
+      icon={ IconConstants.InstallPackage } 
       title="Install Package" 
       onAction={ onInstallPackage }
     />

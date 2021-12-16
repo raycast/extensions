@@ -14,6 +14,7 @@ import {
 
 import { 
   Filter, 
+  Process, 
   Progress, 
   State 
 } from "@types"
@@ -42,6 +43,7 @@ type UseScriptCommands = () => {
   props: UserScriptCommandsProps
   setFilter: (filter: Filter) => void
   setSelection:(identifier?: string) => void
+  installPackage: (group: CompactGroup, callback: (process: Process) => void) => Promise<Progress>
 }
 
 export const useScriptCommands: UseScriptCommands = () => {
@@ -70,6 +72,14 @@ export const useScriptCommands: UseScriptCommands = () => {
     else if (toast) {
       toast.hide()
     }
+  }
+
+  const installPackage = async (group: CompactGroup, callback: (process: Process) => void) => {
+    const result = await dataManager.installPackage(group, process => {
+      callback(process)
+    })
+
+    return result
   }
 
   useEffect(() => {    
@@ -105,7 +115,8 @@ export const useScriptCommands: UseScriptCommands = () => {
       filter: filter
     },
     setFilter,
-    setSelection
+    setSelection,
+    installPackage
   }
 }
 
