@@ -125,6 +125,20 @@ export class DataManager {
     const command = this.contentManager.contentFor(identifier)
     return command != null
   }
+  
+    private isCommandChanged(identifier: string): boolean {
+      const command = this.contentManager.contentFor(identifier)
+  
+      if (!command) {
+        return false
+      }
+  
+      const commandPath = command.files.command.path
+      const commandHash = command.sha
+      const currentFileHash = this.hashFromFile(commandPath)
+  
+      return commandHash != currentFileHash
+    }
 
   private commandNeedsSetup(identifier: string): boolean {
     const command = this.contentManager.contentFor(identifier)
@@ -134,20 +148,6 @@ export class DataManager {
     }
 
     return true
-  }
-
-  private isCommandChanged(identifier: string): boolean {
-    const command = this.contentManager.contentFor(identifier)
-
-    if (!command) {
-      return false
-    }
-
-    const commandPath = command.files.command.path
-    const commandHash = command.sha
-    const currentFileHash = this.hashFromFile(commandPath)
-
-    return commandHash != currentFileHash
   }
 
   monitorChangesFor(identifier: string, callback: (state: State) => void): FSWatcher | null {
@@ -371,7 +371,6 @@ export class DataManager {
         progress = process.progress
       }
 
-      console.log(`Script Command: ${process.current} of ${process.total}...`)
       currentInstall += 1
     })
 

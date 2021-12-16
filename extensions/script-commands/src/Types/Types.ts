@@ -40,7 +40,7 @@ export enum IconUsage {
 }
 
 interface IconPath  {
-  filename: string, 
+  filename: string
   path: string
 }
 
