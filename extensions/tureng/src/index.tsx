@@ -23,14 +23,14 @@ export default function Command() {
   const { state, search } = useSearch();
 
   return (
-    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Turkish or English word" throttle>
+    <List onSearchTextChange={search} searchBarPlaceholder="Search Turkish or English word" throttle>
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
           <SearchListItem key={searchResult.id} searchResult={searchResult} />
         ))}
       </List.Section>
     </List>
-  ); 
+  );
 }
 
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
@@ -50,7 +50,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
 }
 
 function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
+  const [state, setState] = useState<SearchState>({ results: [], isLoading: false });
   const cancelRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -105,18 +105,18 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 
 
 
-const json = (await response.json()) as Json;
-const jsonResults = (json?.meanings as Json) ?? [];
-return jsonResults.map((jsonResult) => {
-  const definition = jsonResult as Json;
-  return {
-    id: randomId(),
-    word: json?.word as string,
-    success: true as boolean,
-    meaning: definition as string,
-    url: theURL as string
-  };
-});
+  const json = (await response.json()) as Json;
+  const jsonResults = (json?.meanings as Json) ?? [];
+  return jsonResults.map((jsonResult) => {
+    const definition = jsonResult as Json;
+    return {
+      id: randomId(),
+      word: json?.word as string,
+      success: true as boolean,
+      meaning: definition as string,
+      url: theURL as string
+    };
+  });
 }
 
 interface SearchState {
