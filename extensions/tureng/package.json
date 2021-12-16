@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tureng",
   "title": "Tureng Turkish-English Dictionary",
-  "description": "Translate Turkish words to English and the other way around\n",
+  "description": "Translate Turkish words to English and the other way around",
   "icon": "command-icon.png",
   "author": "myucesan",
   "license": "MIT",
