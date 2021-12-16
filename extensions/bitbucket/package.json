@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bitbucket",
   "title": "Bitbucket Search",
-  "description": "The extension allow you to quickly access repositories, pipelines & pull-requests in Bitbucket",
+  "description": "The extension allow you to quickly access repositories, pipelines and pull-requests in Bitbucket",
   "icon": "bitbucket-logo.png",
   "author": "Francois",
   "license": "MIT",
