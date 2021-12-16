@@ -4,6 +4,67 @@ The Environment APIs are useful to get context about the setup in which your com
 
 ## API Reference
 
+### getSelectedFinderItems
+
+Gets the selected items from Finder.
+
+#### Signature
+
+```typescript
+async function getSelectedFinderItems(): Promise<FileSystemItem[]>
+```
+
+#### Example
+
+```typescript
+import { getSelectedFinderItems, pasteText, showToast, ToastStyle } from "@raycast/api";
+
+export default async () => {
+  try {
+    const selectedItems = await getSelectedFinderItems();
+    if (selectedItems.length) {
+      await pasteText(selectedItems[0].path);
+    }
+  } catch (error) {
+    await showToast(ToastStyle.Failure, "Cannot copy file path", String(error));
+  }
+};
+```
+
+#### Return
+
+Returns a promise that resolves with the selected file system items.
+
+### getSelectedText
+
+Gets the selected text of the frontmost application.
+
+#### Signature
+
+```typescript
+async function getSelectedText(): Promise<string>
+```
+
+#### Example
+
+```typescript
+import { getSelectedText, pasteText, showToast, ToastStyle } from "@raycast/api";
+
+export default async () => {
+  try {
+    const selectedText = await getSelectedText();
+    const transformedText = selectedText.toUpperCase();
+    await pasteText(transformedText);
+  } catch (error) {
+    await showToast(ToastStyle.Failure, "Cannot transform text", String(error));
+  }
+};
+```
+
+#### Return
+
+Returns a promise that resolves with the selected text.
+
 ### environment
 
 ```typescript
@@ -39,3 +100,13 @@ Holds data about the environment the command is running in. Use the global [envi
 | isDevelopment | <code>boolean</code> | Yes | Indicates whether the command is a development command (vs. an installed command from the Store). |
 | raycastVersion | <code>string</code> | Yes | The version of the main Raycast app |
 | supportPath | <code>string</code> | Yes | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. |
+
+### FileSystemItem
+
+Holds data about a File System item. Use the [getSelectedFinderItems](https://developers.raycast.com/api-reference/environment#getselectedfinderitems) method to retrieve values.
+
+#### Properties
+
+| Name | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| path | <code>string</code> | Yes | The path to the item |
