@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "tureng",
-      "subtitle": "Translate English and Turkish words bidirectionally",
+      "title": "Dictionary",
+      "subtitle": "Tureng",
       "description": "Turkish-English dictionary",
       "mode": "view"
     }
