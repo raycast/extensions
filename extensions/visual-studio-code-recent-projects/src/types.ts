@@ -33,7 +33,7 @@ export interface RemoteEntry {
 }
 
 export function isRemoteEntry(entry: EntryLike): entry is RemoteEntry {
-  return (entry as RemoteEntry).remoteAuthority !== undefined;
+  return isFolderEntry(entry) && (entry as RemoteEntry).remoteAuthority !== undefined;
 }
 
 export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry;

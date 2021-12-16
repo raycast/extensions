@@ -33,7 +33,7 @@ export default function Command() {
 
   const recentEntries = getRecentEntries();
   recentEntries.forEach((entry) => {
-    if (isFolderEntry(entry) && isRemoteEntry(entry)) {
+    if (isRemoteEntry(entry)) {
       remoteEntries.push(<RemoteListItem key={entry.folderUri} entry={entry} />);
     } else if (isFolderEntry(entry) && existsSync(new URL(entry.folderUri))) {
       folders.push(<LocalListItem key={entry.folderUri} uri={entry.folderUri} />);
