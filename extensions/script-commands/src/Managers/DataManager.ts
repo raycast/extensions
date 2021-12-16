@@ -407,5 +407,3 @@ const asyncForLoop: AsyncLoopCommand = async (items, callback) => {
     await callback(scriptCommand)
   }
 }
-
-// const waitFor = (ms: number) => new Promise(r => setTimeout(r, ms)) 

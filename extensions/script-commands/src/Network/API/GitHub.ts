@@ -50,7 +50,7 @@ export async function fetchScriptCommands(): Promise<MainCompactGroup> {
         flattenGroups(group)
       )
   
-      if (group.subGroups != undefined && group.subGroups.length > 0) {
+      if (group.subGroups && group.subGroups.length > 0) {
         group.subGroups.sort(
           (left: Group, right: Group) => 
           (left.name > right.name) ? 1 : -1
@@ -91,7 +91,7 @@ const flattenGroups: FlattenGroups = (group, parentGroupName = undefined) => {
   let title: string = group.name
   let subtitle: string | undefined = undefined
 
-  if (parentGroupName != undefined && parentGroupName.length > 0) {
+  if (parentGroupName && parentGroupName.length > 0) {
     const key = parentGroupName.replace(" ", "-").toLowerCase()
 
     identifier = `${key}-${group.path}`

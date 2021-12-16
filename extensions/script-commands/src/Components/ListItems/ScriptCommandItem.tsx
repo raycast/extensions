@@ -90,7 +90,7 @@ export function ScriptCommandItem({ scriptCommand, group, onInstallPackage }: Pr
           <AuthorsActionPanel 
             authors={ scriptCommand.authors ?? [] } 
           />
-          { group.readme != undefined && group.readme.length > 0 &&
+          { group.readme && group.readme.length > 0 &&
             <ReadmeActionPanel group={ group } /> 
           }
           <FiltersActionPanel 
