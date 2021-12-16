@@ -1,6 +1,6 @@
 <div align="center">
   <h1 align="center">Script Commands Store</h1>
-  <img src="assets/readme/header.png">
+  <img src="images/readme/header.png">
   </br></br>
 </div>
 
@@ -22,7 +22,7 @@ On the first open, you will have to:
   This is the setup screen. We strongly suggest you define a new folder for it.  
   Example: `~/raycast/script-commands`
 
-  ![](assets/readme/setup/first-screen.png)
+  ![](images/readme/setup/first-screen.png)
 
   After finishing the first step, the Script Commands Store will be loaded for you, however, this doesn't mean it is fully configured for you, yet.
 
@@ -30,15 +30,15 @@ On the first open, you will have to:
 
   First, open Raycast and press `⌘ Command + ,` and the following window will be presented:
 
-  ![](assets/readme/setup/preferences.png)
+  ![](images/readme/setup/preferences.png)
 
   Now, click on `Extensions` (1) ➔ `Scripts` (2) ➔ `Script Commands` (3) ➔ `Add Directories` (4)
 
-  ![](assets/readme/setup/preferences-extensions.png)
+  ![](images/readme/setup/preferences-extensions.png)
 
   After adding the directory, the right panel should be similar to this
 
-  ![](assets/readme/setup/setup-directory-added.png)
+  ![](images/readme/setup/setup-directory-added.png)
 
   Voilà, we are ready to install the first Script Command using our Store!
 
@@ -55,28 +55,28 @@ https://cln.sh/weZwo2
 <details>
  <summary>List Script Commands</summary>
 
- ![](assets/readme/content/main-list.png)
+ ![](images/readme/content/main-list.png)
 </details>
 <details>
  <summary>Install</summary>
 
- ![](assets/readme/actions/install.png)
+ ![](images/readme/actions/install.png)
 </details>
 <details>
  <summary>Uninstall</summary>
 
- ![](assets/readme/actions/uninstall.png)
+ ![](images/readme/actions/uninstall.png)
 </details>
 <details>
  <summary>Configure and confirm setup</summary>
 
- ![](assets/readme/actions/configure.png)  
- ![](assets/readme/actions/confirm.png)
+ ![](images/readme/actions/configure.png)  
+ ![](images/readme/actions/confirm.png)
 </details>
 <details>
  <summary>Search by indexed keys</summary>
 
- ![](assets/readme/search-bar/search-bar.png)
+ ![](images/readme/search-bar/search-bar.png)
  - *Categories*: `communication`, `web searches`...
  - *Subcategories*: `github`, `brew`...
  - *Author name*: `things`
@@ -86,35 +86,35 @@ https://cln.sh/weZwo2
 <details>
  <summary>Filters</summary>
 
- ![](assets/readme/panels/filter-by.png)
+ ![](images/readme/panels/filter-by.png)
  - Type  
- ![](assets/readme/panels/filter-by-type.png)
+ ![](images/readme/panels/filter-by-type.png)
  - Languages  
- ![](assets/readme/panels/filter-by-language.png)
+ ![](images/readme/panels/filter-by-language.png)
 </details>
 <details>
  <summary>Show README (if available)</summary>
 
- ![](assets/readme/panels/view-readme.png)
+ ![](images/readme/panels/view-readme.png)
 </details>
 <details>
  <summary>Show Source Code</summary>
 
- ![](assets/readme/panels/view-source-code.png)
+ ![](images/readme/panels/view-source-code.png)
 </details>
 <details>
  <summary>Show List of authors</summary>
 
- ![](assets/readme/panels/authors.png)
+ ![](images/readme/panels/authors.png)
 </details>
 
 ### Iconography
 
-- ![](assets/readme/icons/gear-orange.png) Need to be edited by the user before it is ready to be used. i.e: add token, set a username, etc...
-- ![](assets/readme/icons/checkmark-orange.png) Script Command was changed and the Store detected. A user's confirmation is required to activate the Script Command to be used.
-- ![](assets/readme/icons/checkmark-green.png) Indicates the Script Command is installed. In case it needs extra setup, this will indicate the user made the change, confirmed, and now it is ready to use.
+- ![](images/readme/icons/gear-orange.png) Need to be edited by the user before it is ready to be used. i.e: add token, set a username, etc...
+- ![](images/readme/icons/checkmark-orange.png) Script Command was changed and the Store detected. A user's confirmation is required to activate the Script Command to be used.
+- ![](images/readme/icons/checkmark-green.png) Indicates the Script Command is installed. In case it needs extra setup, this will indicate the user made the change, confirmed, and now it is ready to use.
 - If you are not seeing any of the icons above, this indicates the Script Command is not installed and you are seeing the programming language used to write it.  
-  Example: ![](assets/readme/icons/language.png)
+  Example: ![](images/readme/icons/language.png)
 
 ### Data
 
