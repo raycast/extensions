@@ -91,8 +91,7 @@ function useSearch() {
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
   const params = new URLSearchParams();
-  params.append("q", searchText.length === 0 ? "placeholder" : searchText);
-  console.log(params.get("q"))
+  params.append("q", searchText.length === 0 ? "" : searchText.toLowerCase());
   const response = await fetch("https://tureng-api.vercel.app/api/" + params.get("q"));
   // for "Open in Browser"
   const theURL = "https://tureng.com/en/turkish-english/" + params.get("q");
@@ -107,15 +106,9 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 
 
 const json = (await response.json()) as Json;
-console.log(json);
-console.log("arrives here 1");
 const jsonResults = (json?.meanings as Json) ?? [];
-console.log("arrives here 2");
-
 return jsonResults.map((jsonResult) => {
-  console.log("arrives here 3");
   const definition = jsonResult as Json;
-  console.log("WORD" +definition);
   return {
     id: randomId(),
     word: json?.word as string,
