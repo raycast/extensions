@@ -100,6 +100,7 @@
 /extensions/search-mdn                               @krzysztofzuraw
 /extensions/search-notion                            @reckoning-dev
 /extensions/search-npm                               @mrmartineau
+/extensions/search-rubygems                          @aleks
 /extensions/send-to-flomo                            @ahonn
 /extensions/single-disk-eject                        @johndturn
 /extensions/sketch                                   @aesign
