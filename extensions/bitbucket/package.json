@@ -57,7 +57,7 @@
     "dot-object": "^2.1.4",
     "node-fetch": "^3.0.0",
     "node-localstorage": "^2.2.1",
-    "swr": "^1.1.0"
+    "swr": "1.1.2-beta.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
