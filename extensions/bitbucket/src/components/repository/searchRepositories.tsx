@@ -8,10 +8,6 @@ import { icon } from "../../helpers/icon";
 import { cacheConfig, REPOSITORIES_CACHE_KEY } from "../../helpers/cache";
 import { ShowPipelinesActions } from "./actions";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-global.window.requestAnimationFrame = setTimeout;
-
 export function SearchRepositories() {
   return (
     <SWRConfig value={cacheConfig}>
