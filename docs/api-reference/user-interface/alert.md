@@ -67,8 +67,7 @@ export default async () => {
       }
     }
   };
-  const alert = new Alert(options);
-  await alert.show();
+  await confirmAlert(options);
 };
 ```
 
