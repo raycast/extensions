@@ -49,7 +49,7 @@ type UseScriptCommands = () => {
 export const useScriptCommands: UseScriptCommands = () => {
   let toast: Toast | null
 
-  const { dataManager, filter, setFilter } = useDataManager()
+  const { dataManager, filter, setFilter, setCommandToRefresh } = useDataManager()
 
   const [state, setState] = useState<UseScriptCommandsState>({
     main: { 
@@ -77,9 +77,17 @@ export const useScriptCommands: UseScriptCommands = () => {
   const installPackage = async (group: CompactGroup) => {
     const result = await dataManager.installPackage(group, process => {
       PackageToast(Progress.InProgress, group.title, `Script Command: ${process.current} of ${process.total}...`)
+      
+      if (process.progress == Progress.Finished) {
+        setCommandToRefresh(process.identifier)
+      }
     })
 
     PackageToast(result, group.title)
+    
+    if (result == Progress.Finished) {
+      setCommandToRefresh("")
+    }
   }
 
   useEffect(() => {
