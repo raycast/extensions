@@ -12,6 +12,7 @@ export type {
   FileNullable,
   Files,
   Filter,
+  Process,
   IconPathNullable,
   IconResultNullable,
   StateResult,

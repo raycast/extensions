@@ -23,21 +23,25 @@ import {
 type ProviderState = {
   dataManager: DataManager
   filter: Filter
+  commandIdentifier: string
 }
 
 type ContextType = {
   state: ProviderState
   setFilter: (filter: Filter) => void
+  setCommandToRefresh: (identifier: string) => void
 }
 
 const initialState: ProviderState = {
   dataManager: DataManager.shared(),
   filter: null,
+  commandIdentifier: ""
 }
 
 export const ApplicationContext = createContext<ContextType>({
   state: initialState,
-  setFilter: () => { return }
+  setFilter: () => { return },
+  setCommandToRefresh: () => { return }
 })
 
 type Props = {
@@ -48,6 +52,10 @@ export const ApplicationProvider = ({ children }: Props) => {
   let toast: Toast | null
   const [state, ] = useState<ProviderState>(initialState)
   const [filter, setCustomFilter] = useState<Filter>(null)
+  const [
+    commandIdentifier, 
+    setCommandToRefresh
+  ] = useState<string>("")
 
   const setFilter = async (filter: Filter) => {
     setCustomFilter(filter)
@@ -66,8 +74,10 @@ export const ApplicationProvider = ({ children }: Props) => {
         state: {
           dataManager: state.dataManager,
           filter,
+          commandIdentifier
         },
-        setFilter 
+        setFilter,
+        setCommandToRefresh 
       }}
       children={ children }
     />

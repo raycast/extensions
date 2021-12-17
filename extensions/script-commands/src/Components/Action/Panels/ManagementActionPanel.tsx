@@ -10,6 +10,7 @@ import {
   ConfirmChangeActionItem,
   EditLocalSourceCodeActionItem,
   InstallActionItem,
+  InstallPackageActionItem,
   SetupActionItem,
   UninstallActionItem,
 } from "@components"
@@ -22,6 +23,7 @@ type Props = {
   onSetup: () => void
   onConfirmSetup: () => void
   onEditLocal: () => void
+  onInstallPackage: () => void
 }
 
 export function ManagementActionPanel({ 
@@ -31,7 +33,8 @@ export function ManagementActionPanel({
   onUninstall, 
   onSetup, 
   onConfirmSetup,
-  onEditLocal 
+  onEditLocal,
+  onInstallPackage
 }: Props): JSX.Element | null {
   const elements: JSX.Element[] = [] 
 
@@ -63,6 +66,13 @@ export function ManagementActionPanel({
       <InstallActionItem 
         key="install"
         onInstall={ onInstall } 
+      />
+    )
+
+    elements.push(
+      <InstallPackageActionItem 
+        key="install-package"
+        onInstallPackage={ onInstallPackage }
       />
     )
     break

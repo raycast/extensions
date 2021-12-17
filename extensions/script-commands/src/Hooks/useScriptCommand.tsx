@@ -65,13 +65,13 @@ type UseScriptCommand = (initialScriptCommand: ScriptCommand) => UseScriptComman
 
 export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
   const abort = useRef<AbortController | null>(null)
-  const { dataManager, filter, setFilter } = useDataManager()
+  const { dataManager, filter, commandIdentifier, setFilter } = useDataManager()
 
   const [state, setState] = useState<ScriptCommandState>({
     commandState: dataManager.stateFor(initialScriptCommand.identifier), 
     scriptCommand: initialScriptCommand
   })
-  
+
   useEffect(() => {
     abort.current?.abort()
     abort.current = new AbortController()
@@ -81,7 +81,7 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
 
       const monitor = dataManager.monitorChangesFor(identifier, state => {
         if (state === State.ChangesDetected && !abort.current?.signal.aborted) {
-          setState((oldState) => ({
+          setState(oldState => ({
             ...oldState, 
             commandState: state
           }))
@@ -130,6 +130,15 @@ export const useScriptCommand: UseScriptCommand = (initialScriptCommand) => {
   }
 
   const file = dataManager.commandFileFor(state.scriptCommand.identifier)
+
+  useEffect(() => {
+    if (state.scriptCommand.identifier == commandIdentifier) {
+      setState(oldState => ({ 
+        ...oldState, 
+        commandState: dataManager.stateFor(state.scriptCommand.identifier)
+      }))
+    }
+  }, [commandIdentifier])
 
   return {
     props: {

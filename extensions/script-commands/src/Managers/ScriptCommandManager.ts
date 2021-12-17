@@ -39,7 +39,9 @@ import afs from "fs/promises"
 import { 
   existsSync, 
   mkdirSync, 
+  readdirSync, 
   readFileSync,
+  rmSync,
   renameSync
 } from 'fs'
 
@@ -377,8 +379,7 @@ export class ScriptCommandManager {
   private deleteCommand(file: FileNullable): boolean {
     if (file && file.path.length > 0 && file.link.length > 0) {
       if (existsSync(file.path) && existsSync(file.link)) {
-        afs.rm(file.link)
-        afs.rm(file.path)
+        this.deleteFile(file)
 
         return true
       }
@@ -392,14 +393,47 @@ export class ScriptCommandManager {
       const linkPath = path.parse(file.link)
 
       if (this.iconUsage(linkPath.name, style) == IconUsage.LastScriptUsing) {
-        afs.rm(file.link)
-        afs.rm(file.path)
+        this.deleteFile(file)
 
         return true
       }
     }
 
     return false
+  }
+
+  private deleteFile(file: File): void {
+    rmSync(file.link)
+    rmSync(file.path)
+
+    const filePath = path.parse(file.path)
+    const files = readdirSync(filePath.dir)
+    const dsStore = ".DS_Store"
+
+    if (files.length === 0) {
+      rmSync(filePath.dir, { recursive: true, force: true })
+    }
+    else if (files.length === 1 && files[0] === dsStore) {
+      const dsStorePath = path.join(filePath.dir, dsStore)
+      rmSync(dsStorePath)
+      rmSync(filePath.dir, { recursive: true, force: true })
+    }
+
+    // After delete all the files in the groups, we are checking if the first 
+    // level group above is also clear, if yes, we delete also that folder
+    const list = filePath.dir.split("/")
+    list.pop()
+
+    if (list){
+      const groupPath = list.join("/")
+      const groupFiles = readdirSync(groupPath)
+
+      if (groupFiles.length === 1 && groupFiles[0] === dsStore) {
+        const dsStorePath = path.join(groupPath, dsStore)
+        rmSync(dsStorePath)
+        rmSync(groupPath, { recursive: true, force: true })
+      }
+    }
   }
 
   private iconUsage(filename: string, style: IconStyle): IconUsage {
