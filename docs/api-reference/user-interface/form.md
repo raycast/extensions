@@ -6,14 +6,14 @@ Gonna put some content here.
 
 ### Form
 
-Shows a list of form items such as FormViewTextField, FormViewCheckbox or FormViewDropdown.
+Shows a list of form items such as [FormTextField](https://developers.raycast.com/api-reference/user-interface/form#formtextfield), [FormCheckbox](https://developers.raycast.com/api-reference/user-interface/form#formcheckbox) or [FormDropdown](https://developers.raycast.com/api-reference/user-interface/form#formdropdown).
 
 #### Props
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | actions | <code>null</code> or <code>[ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel)</code> | No | - | A reference to an [ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel). |
-| children | <code>null</code> or <code>ReactElement&lt;FormItemProps&lt;FormValue>, string></code> or <code>ReactElement&lt;FormItemProps&lt;FormValue>, string>[]</code> | No | - | The FormItemElement elements of the form. |
+| children | <code>null</code> or <code>ReactElement&lt;FormItemProps&lt;FormValue>, string></code> or <code>ReactElement&lt;FormItemProps&lt;FormValue>, string>[]</code> | No | - | The Form.Item elements of the form. |
 | isLoading | <code>boolean</code> | No | false | Indicates whether a loading bar should be shown or hidden below the search bar |
 | navigationTitle | <code>string</code> | No | Command title | The main title for that view displayed in Raycast |
 

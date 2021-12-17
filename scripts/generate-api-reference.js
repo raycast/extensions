@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require("fs").promises;
+const path = require("path");
 
 const START_CODE_BLOCK = "```typescript";
 const END_CODE_BLOCK = "```";
@@ -10,7 +11,7 @@ function getFilename(title) {
 }
 
 async function readDocsJson() {
-  const data = await fs.readFile("../docs/api-reference.json", { encoding: "utf8" });
+  const data = await fs.readFile(path.join(__dirname, "../docs/api-reference.json"), { encoding: "utf8" });
   return JSON.parse(data);
 }
 
@@ -58,7 +59,7 @@ function getLinkName(name) {
   return name;
 }
 
-const BASE_URL = 'https://developers.raycast.com/api-reference/';
+const BASE_URL = "https://developers.raycast.com/api-reference/";
 
 function generateLinkDestination(docs, name) {
   const found =
@@ -70,6 +71,7 @@ function generateLinkDestination(docs, name) {
     if (!category) {
       throw new Error(`no category found for: ${name}`);
     }
+    // TODO: relative link to avoid opening in new tabs
     const subcategory = getSubcategory(found);
     if (!subcategory) {
       return `${BASE_URL}${getFilename(category.title)}#${getLinkName(name)}`;
@@ -679,21 +681,25 @@ async function applyToTemplateFile(docs, title, subcategory, items) {
       }
     }
   }
-  const filepath = subcategory
-    ? `../docs/api-reference/${getFilename(title)}/${getFilename(subcategory)}.md`
-    : `../docs/api-reference/${getFilename(title)}.md`;
+  const filepath = path.join(
+    __dirname,
+    subcategory
+      ? `../docs/api-reference/${getFilename(title)}/${getFilename(subcategory)}.md`
+      : `../docs/api-reference/${getFilename(title)}.md`
+  );
   const startMarker = `
 ## API Reference
 `;
 
   //Generate .md file if it doesn't exist
   try {
-    await fs.access(filepath)
+    await fs.access(filepath);
   } catch (error) {
     const content = `# ${subcategory}
-${startMarker}`
-    await fs.writeFile(filepath, content)
+${startMarker}`;
+    await fs.writeFile(filepath, content);
   }
+
   let markdown = await fs.readFile(filepath, { encoding: "utf8" });
   const re = new RegExp(`${startMarker}(.|\n)*`);
   if (markdown.match(re)) {
@@ -702,6 +708,11 @@ ${startMarker}`
   } else {
     console.warn("template marker not available for", title, subcategory);
   }
+
+  if (subcategory) {
+    return `  * [${subcategory}](api-reference/${getFilename(title)}/${getFilename(subcategory)}.md)\n`;
+  }
+  return "";
 }
 
 async function parseCategory(docs, title, children) {
@@ -714,8 +725,36 @@ async function parseCategory(docs, title, children) {
     }
   }
 
-  for (const [subcategory, items] of subCategoryMap) {
-    await applyToTemplateFile(docs, title, subcategory, items);
+  // sort subcategories alphabetically
+  const subCategories = Array.from(subCategoryMap, ([subcategory, items]) => ({ subcategory, items })).sort((a, b) =>
+    a.subcategory > b.subcategory ? 1 : -1
+  );
+
+  let tableOfContent = `* [${title}](api-reference/${getFilename(title)}${
+    subCategories.length > 1 ? "/README" : ""
+  }.md)\n`;
+
+  for (const { subcategory, items } of subCategories) {
+    tableOfContent += await applyToTemplateFile(docs, title, subcategory, items);
+  }
+
+  return tableOfContent;
+}
+
+async function updateTableOfContent(tableOfContent) {
+  const startMarker = `
+## API Reference
+`;
+  const endMarker = `\\*\\*\\*`;
+  const filepath = path.join(__dirname, `../docs/SUMMARY.md`);
+
+  let markdown = await fs.readFile(filepath, { encoding: "utf8" });
+  const re = new RegExp(`${startMarker}(.|\n)*\\*\\*\\*`);
+  if (markdown.match(re)) {
+    markdown = markdown.replace(re, `${startMarker}\n${tableOfContent}\n***`);
+    await fs.writeFile(filepath, markdown);
+  } else {
+    console.warn("template marker not available for SUMMARY.md");
   }
 }
 
@@ -723,11 +762,15 @@ const SKIP_CATEGORIES = ["Other"];
 
 async function main() {
   const docs = await readDocsJson();
-  for (const category of docs.categories) {
+  let tableOfContent = "";
+
+  for (const category of docs.categories.sort((a, b) => (a.title > b.title ? 1 : -1))) {
     if (!SKIP_CATEGORIES.includes(category.title)) {
-      await parseCategory(docs, category.title, category.children);
+      tableOfContent += await parseCategory(docs, category.title, category.children);
     }
   }
+
+  await updateTableOfContent(tableOfContent);
 }
 
 main();
