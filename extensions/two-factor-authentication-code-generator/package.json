@@ -12,15 +12,6 @@
     "authentication",
     "login"
   ],
-  "preferences": [
-    {
-      "name": "sort",
-      "type": "checkbox",
-      "required": false,
-      "label": "Alphabetical Sorting for tokens",
-      "description": "Enable sorting"
-    }
-  ],
   "commands": [
     {
       "name": "index",
