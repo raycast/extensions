@@ -6,7 +6,7 @@ Gonna put some content here.
 
 ### Form
 
-Shows a list of form items such as [FormTextField](#formtextfield), [FormCheckbox](#formcheckbox) or [FormDropdown](#formdropdown).
+Shows a list of form items such as [Form.TextField](#form.textfield), [Form.Checkbox](#form.checkbox) or [Form.Dropdown](#form.dropdown).
 
 #### Props
 

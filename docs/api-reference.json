@@ -13931,7 +13931,7 @@
 					"kindString": "Call signature",
 					"flags": {},
 					"comment": {
-						"shortText": "Shows a list of form items such as {@link FormTextField}, {@link FormCheckbox} or {@link FormDropdown}.",
+						"shortText": "Shows a list of form items such as {@link Form.TextField}, {@link Form.Checkbox} or {@link Form.Dropdown}.",
 						"tags": [
 							{
 								"tag": "subcategory",
