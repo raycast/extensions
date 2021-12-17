@@ -81,7 +81,7 @@ ColorLike: Color | DynamicColor | string
 
 Union type for the supported color types.
 
-Besides the [Color](https://developers.raycast.com/api-reference/user-interface/colors#color), you can use any of the following color formats:
+Besides the [Color](#color), you can use any of the following color formats:
 - HEX, e.g `#FF0000`
 - Short HEX, e.g. `#F00`
 - RGBA, e.g. `rgb(255, 0, 0)`
@@ -89,7 +89,7 @@ Besides the [Color](https://developers.raycast.com/api-reference/user-interface/
 - HSL, e.g. `hsla(200, 20%, 33%, 0.2)`
 - Keywords, e.g. `red`
 
-Colors different to the built-in ones (see [Color](https://developers.raycast.com/api-reference/user-interface/colors#color)) will be dynamically adjusted to fit the contrast.
+Colors different to the built-in ones (see [Color](#color)) will be dynamically adjusted to fit the contrast.
 
 #### Example
 

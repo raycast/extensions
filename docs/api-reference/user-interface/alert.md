@@ -28,7 +28,7 @@ export default async () => {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| options | <code>[AlertOptions](https://developers.raycast.com/api-reference/user-interface/alert#alertoptions)</code> | Yes | The options used to create the Alert. |
+| options | <code>[AlertOptions](#alertoptions)</code> | Yes | The options used to create the Alert. |
 
 #### Return
 
@@ -43,7 +43,7 @@ The options to create an Alert Action.
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| style | <code>[AlertActionStyle](https://developers.raycast.com/api-reference/user-interface/alert#alertactionstyle)</code> | No | The style of the action. |
+| style | <code>[AlertActionStyle](#alertactionstyle)</code> | No | The style of the action. |
 | title | <code>string</code> | Yes | The title of the action. |
 | onAction | <code>() => void</code> | No | A callback called when the action is triggered. |
 
@@ -75,18 +75,18 @@ export default async () => {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| dismissAction | <code>[AlertActionOptions](https://developers.raycast.com/api-reference/user-interface/alert#alertactionoptions)</code> | No | The Action to dismiss the alert. There usually shouldn't be any side effects when the user takes this action. |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | The icon of an alert to illustrate the action. Displayed on the top. |
+| dismissAction | <code>[AlertActionOptions](#alertactionoptions)</code> | No | The Action to dismiss the alert. There usually shouldn't be any side effects when the user takes this action. |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | The icon of an alert to illustrate the action. Displayed on the top. |
 | message | <code>string</code> | No | An additional message for an Alert. Useful to show more information, e.g. a confirmation message for a destructive action. |
-| primaryAction | <code>[AlertActionOptions](https://developers.raycast.com/api-reference/user-interface/alert#alertactionoptions)</code> | No | The primary Action the user can take. |
+| primaryAction | <code>[AlertActionOptions](#alertactionoptions)</code> | No | The primary Action the user can take. |
 | title | <code>string</code> | Yes | The title of an alert. Displayed below the icon. |
 
 ### AlertActionStyle
 
 Defines the visual style of an Action of the Alert.
 
-Use [AlertActionStyle.Default](https://developers.raycast.com/api-reference/user-interface/alert#alertactionstyle) for confirmations of a positive action.
-Use [AlertActionStyle.Destructive](https://developers.raycast.com/api-reference/user-interface/alert#alertactionstyle) for confirmations of a destructive action (eg. deleting a file).
+Use [AlertActionStyle.Default](#alertactionstyle) for confirmations of a positive action.
+Use [AlertActionStyle.Destructive](#alertactionstyle) for confirmations of a destructive action (eg. deleting a file).
 
 #### Enumeration members
 

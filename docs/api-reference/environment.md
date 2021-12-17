@@ -88,7 +88,7 @@ console.log(`Is development mode: ${environment.isDevelopment}`);
 
 ### Environment
 
-Holds data about the environment the command is running in. Use the global [environment](https://developers.raycast.com/api-reference/environment#environment) object to retrieve values.
+Holds data about the environment the command is running in. Use the global [environment](#environment) object to retrieve values.
 
 #### Properties
 
@@ -103,7 +103,7 @@ Holds data about the environment the command is running in. Use the global [envi
 
 ### FileSystemItem
 
-Holds data about a File System item. Use the [getSelectedFinderItems](https://developers.raycast.com/api-reference/environment#getselectedfinderitems) method to retrieve values.
+Holds data about a File System item. Use the [getSelectedFinderItems](#getselectedfinderitems) method to retrieve values.
 
 #### Properties
 
