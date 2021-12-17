@@ -8,8 +8,8 @@ import { createSocket } from "./socket";
 export function createHomeAssistantClient(): HomeAssistant {
     const instance = preferences.instance?.value as string;
     const token = preferences.token?.value as string;
-    const ha = new HomeAssistant(instance, token);
-    return ha;
+    const hac = new HomeAssistant(instance, token);
+    return hac;
 }
 
 let con: Connection;
@@ -28,3 +28,10 @@ export async function getHAWSConnection(): Promise<Connection> {
         return con;
     }
 }
+
+export function shouldDisplayEntityID(): boolean {
+    const result = preferences.instance?.value as boolean || false;
+    return result;
+}
+
+export const ha = createHomeAssistantClient();

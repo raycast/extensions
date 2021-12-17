@@ -34,7 +34,7 @@ A promise that resolves when the HUD is shown.
 
 ### showToast
 
-Creates and shows a Toast with the the given style, title, and message.
+Creates and shows a Toast with the given style, title, and message.
 
 #### Signature
 
@@ -97,13 +97,15 @@ export default async () => {
 
 | Name | Type | Description |
 | :--- | :--- | :--- |
-| constructor | <code>(options: ToastOptions) => [Toast](https://developers.raycast.com/api-reference/user-interface/toast#toast)</code> |  |
+| constructor | <code>(props: ToastOptions) => [Toast](https://developers.raycast.com/api-reference/user-interface/toast#toast)</code> |  |
 
 #### Accessors
 
 | Name | Type | Description |
 | :--- | :--- | :--- |
 | message | <code>undefined</code> or <code>string</code> |  |
+| primaryAction | <code>undefined</code> or <code>[ToastActionOptions](https://developers.raycast.com/api-reference/user-interface/toast#toastactionoptions)</code> |  |
+| secondaryAction | <code>undefined</code> or <code>[ToastActionOptions](https://developers.raycast.com/api-reference/user-interface/toast#toastactionoptions)</code> |  |
 | style | <code>[ToastStyle](https://developers.raycast.com/api-reference/user-interface/toast#toaststyle)</code> |  |
 | title | <code>string</code> |  |
 
@@ -113,6 +115,18 @@ export default async () => {
 | :--- | :--- | :--- |
 | hide | <code>() => Promise&lt;void></code> | Hides the Toast. |
 | show | <code>() => Promise&lt;void></code> | Shows the Toast. |
+
+### ToastActionOptions
+
+The options to create a [Toast](https://developers.raycast.com/api-reference/user-interface/toast#toast) Action.
+
+#### Properties
+
+| Name | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | The keyboard shortcut for the action. |
+| title | <code>string</code> | Yes | The title of the action. |
+| onAction | <code>() => void</code> | Yes | A callback called when the action is triggered. |
 
 ### ToastOptions
 
@@ -128,6 +142,12 @@ export default async () => {
     style: ToastStyle.Success,
     title: "Finished cooking",
     message: "Delicious pasta for lunch",
+    primaryAction: {
+      title: 'Do something',
+      onAction: () => {
+        console.log("The toast action has been triggered")
+      }
+    }
   };
   const toast = new Toast(options);
   await toast.show();
@@ -138,7 +158,9 @@ export default async () => {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| message | <code>string</code> | No | An additional message for the toast. Useful to show more information, e.g. an identifier of a newly create asset |
+| message | <code>string</code> | No | An additional message for the toast. Useful to show more information, e.g. an identifier of a newly created asset. |
+| primaryAction | <code>[ToastActionOptions](https://developers.raycast.com/api-reference/user-interface/toast#toastactionoptions)</code> | No | The primary Action the user can take when hovering on the Toast. |
+| secondaryAction | <code>[ToastActionOptions](https://developers.raycast.com/api-reference/user-interface/toast#toastactionoptions)</code> | No | The secondary Action the user can take when hovering on the Toast. |
 | style | <code>[ToastStyle](https://developers.raycast.com/api-reference/user-interface/toast#toaststyle)</code> | Yes | The style of a toast. |
 | title | <code>string</code> | Yes | The title of a toast. Displayed on the top. |
 

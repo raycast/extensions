@@ -685,6 +685,15 @@ async function applyToTemplateFile(docs, title, subcategory, items) {
   const startMarker = `
 ## API Reference
 `;
+
+  //Generate .md file if it doesn't exist
+  try {
+    await fs.access(filepath)
+  } catch (error) {
+    const content = `# ${subcategory}
+${startMarker}`
+    await fs.writeFile(filepath, content)
+  }
   let markdown = await fs.readFile(filepath, { encoding: "utf8" });
   const re = new RegExp(`${startMarker}(.|\n)*`);
   if (markdown.match(re)) {

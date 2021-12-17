@@ -47,6 +47,18 @@
       "title": "Currently Playing Track",
       "description": "Get info about currently playing track.",
       "mode": "no-view"
+    },
+    {
+      "name": "love",
+      "title": "Love Track",
+      "description": "Love currently playing track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "dislike",
+      "title": "Dislike Track",
+      "description": "Dislike currently playing track.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

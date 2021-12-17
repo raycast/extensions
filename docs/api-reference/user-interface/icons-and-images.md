@@ -24,7 +24,7 @@ export default function Command() {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| fileIcon | <code>string</code> | Yes | The path to a file or folder to get it's icon from. |
+| fileIcon | <code>string</code> | Yes | The path to a file or folder to get its icon from. |
 
 ### Image
 
