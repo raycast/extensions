@@ -9,4 +9,7 @@ export type Preferences = {
     PUBLIC_API_TOKEN: string;
     TAGS_DEFAULT?: string;
     USER_EMAIL?: string;
+    FORM_FIELDS?: string;
 }
+
+export type FormValues = Record<string, string>;

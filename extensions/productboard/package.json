@@ -37,6 +37,14 @@
           "title": "Default tags",
           "placeholder": "Enter tags (separate by comma)",
           "description": "Default tags for notes. Separate by comma (,)"
+        },
+        {
+          "name": "FORM_FIELDS",
+          "type": "textfield",
+          "required": false,
+          "title": "Form Fields",
+          "placeholder": "Enter fields (separate by comma)",
+          "description": "Fields for notes. Separate by comma (,)"
         }
       ]
     }

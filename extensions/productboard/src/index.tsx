@@ -2,7 +2,7 @@ import got from "got";
 import showdown from "showdown";
 import EmailValidator from "email-validator";
 import { Form, popToRoot, ActionPanel, copyTextToClipboard, SubmitFormAction, showToast, Toast, ToastStyle, getPreferenceValues } from "@raycast/api";
-import { Note, Preferences } from "./types"
+import { FormValues, Note, Preferences } from "./types";
 
 export default function Command() {
 
@@ -52,7 +52,9 @@ export default function Command() {
     }
   }
 
-  return (
+  const { FORM_FIELDS } = preferences;
+
+  if (!FORM_FIELDS) return (
     <Form
       actions={
         <ActionPanel>
@@ -60,11 +62,44 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" placeholder="Enter title" />
-      <Form.TextArea id="content" title="Content" placeholder="Enter content of the note (markdown supported)" />
+      <Form.TextField id="title" title="Title" placeholder="Enter title..." />
+      <Form.TextArea id="content" title="Content" placeholder="Enter content of the note (markdown supported)..." />
       <Form.Separator />
-      <Form.TextField id="tags" title="Tags" placeholder="Enter tags (separate by comma)" defaultValue={preferences.TAGS_DEFAULT} />
-      <Form.TextField id="saidBy" title="Said by" placeholder="Enter valid email" defaultValue={preferences.USER_EMAIL} />
+      <Form.TextField id="tags" title="Tags" placeholder="Enter tags (separate by comma)..." defaultValue={preferences.TAGS_DEFAULT} />
+      <Form.TextField id="saidBy" title="Said by" placeholder="Enter valid email..." defaultValue={preferences.USER_EMAIL} />
     </Form>
   );
+
+  const fields = FORM_FIELDS.split(/,\s*/g);
+
+  async function handleFormTemplateSubmit(values: Omit<Note, 'content'> & FormValues) {
+    const { title, tags, saidBy } = values;
+    let content = '';
+    fields.forEach((field, index) => {
+      content += `<b>${field}:</b> ${values[index.toString()]} <br />`;
+    })
+    handleSubmit({
+      title,
+      tags,
+      saidBy,
+      content
+    })
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Create Note" onSubmit={handleFormTemplateSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="title" title="Title" placeholder="Enter title..." />
+      {fields.map((field, index) => <Form.TextArea id={index.toString()} title={field} placeholder={`Enter ${field}...`}/>)}
+      <Form.Separator />
+      <Form.TextField id="tags" title="Tags" placeholder="Enter tags (separate by comma)..." defaultValue={preferences.TAGS_DEFAULT} />
+      <Form.TextField id="saidBy" title="Said by" placeholder="Enter valid email..." defaultValue={preferences.USER_EMAIL} />
+    </Form>
+  );
+  
 }
