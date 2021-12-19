@@ -6702,7 +6702,7 @@
 				"tags": [
 					{
 						"tag": "example",
-						"text": "\n```typescript\nimport { Alert, AlertOptions, AlertActionStyle } from \"@raycast/api\";\n\nexport default async () => {\n  const options: AlertOptions = {\n    title: \"Finished cooking\",\n    message: \"Delicious pasta for lunch\",\n    primaryAction: {\n      title: 'Do something',\n      onAction: () => {\n        console.log(\"The alert action has been triggered\")\n      }\n    }\n  };\n  await confirmAlert(options);\n};\n```\n"
+						"text": "\n```typescript\nimport { AlertOptions, AlertActionStyle } from \"@raycast/api\";\n\nexport default async () => {\n  const options: AlertOptions = {\n    title: \"Finished cooking\",\n    message: \"Delicious pasta for lunch\",\n    primaryAction: {\n      title: 'Do something',\n      onAction: () => {\n        console.log(\"The alert action has been triggered\")\n      }\n    }\n  };\n  await confirmAlert(options);\n};\n```\n"
 					},
 					{
 						"tag": "subcategory",
