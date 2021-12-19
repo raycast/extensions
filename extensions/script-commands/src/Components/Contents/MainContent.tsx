@@ -13,7 +13,7 @@ import {
 } from "@hooks"
 
 export function MainContent(): JSX.Element {
-  const { props, setFilter, setSelection } = useScriptCommands()  
+  const { props, setFilter, setSelection, installPackage } = useScriptCommands()  
 
   return (
     <List 
@@ -23,8 +23,9 @@ export function MainContent(): JSX.Element {
       children={
         props.groups.map(group => (
           <GroupSection 
-            key={group.identifier}
+            key={ group.identifier }
             group={ group }
+            onInstallPackage={ () => installPackage(group) }
           />
         ))
       }

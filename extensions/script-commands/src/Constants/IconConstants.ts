@@ -10,6 +10,7 @@ interface Constants {
   ConfirmChange: ImageLike
   LocalSourceCode: ImageLike
   Install: ImageLike
+  InstallPackage: ImageLike
   Installed: ImageLike
   Languages: ImageLike
   NeedSetup: ImageLike
@@ -32,6 +33,12 @@ export const IconConstants: Constants = {
   ConfirmChange: Icon.TextDocument,
   LocalSourceCode: Icon.Pencil,
   Install: Icon.Download,
+  InstallPackage: { 
+    source: {
+      light: "icon-install-package@dark.png",
+      dark: "icon-install-package.png"
+    }
+  },
   Installed: {
     source: Icon.Checkmark,
     tintColor: Color.Green

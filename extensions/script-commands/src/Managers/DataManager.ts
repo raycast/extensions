@@ -24,6 +24,8 @@ import {
   Content,
   FileNullable,
   Filter,
+  Process,
+  Progress,
   State,
   StateResult, 
 } from "@types"
@@ -123,6 +125,20 @@ export class DataManager {
     const command = this.contentManager.contentFor(identifier)
     return command != null
   }
+  
+    private isCommandChanged(identifier: string): boolean {
+      const command = this.contentManager.contentFor(identifier)
+  
+      if (!command) {
+        return false
+      }
+  
+      const commandPath = command.files.command.path
+      const commandHash = command.sha
+      const currentFileHash = this.hashFromFile(commandPath)
+  
+      return commandHash != currentFileHash
+    }
 
   private commandNeedsSetup(identifier: string): boolean {
     const command = this.contentManager.contentFor(identifier)
@@ -132,20 +148,6 @@ export class DataManager {
     }
 
     return true
-  }
-
-  private isCommandChanged(identifier: string): boolean {
-    const command = this.contentManager.contentFor(identifier)
-
-    if (!command) {
-      return false
-    }
-
-    const commandPath = command.files.command.path
-    const commandHash = command.sha
-    const currentFileHash = this.hashFromFile(commandPath)
-
-    return commandHash != currentFileHash
   }
 
   monitorChangesFor(identifier: string, callback: (state: State) => void): FSWatcher | null {
@@ -329,6 +331,51 @@ export class DataManager {
 
     return result
   }
+
+  async installPackage(group: CompactGroup, callback: (process: Process) => void): Promise<Progress> {
+    let progress = Progress.InProgress
+    let currentInstall = 1
+
+    const scriptCommands: ScriptCommand[] = []
+    
+    group.scriptCommands.forEach(scriptCommand => {
+      const state = this.stateFor(scriptCommand.identifier)
+
+      if (state == State.NotInstalled) {
+        scriptCommands.push(scriptCommand)
+      }
+    })
+
+    await asyncForLoop(scriptCommands, async scriptCommand => {
+      let process: Process = {
+        identifier: scriptCommand.identifier,
+        progress: Progress.InProgress,
+        current: currentInstall,
+        state: State.NotInstalled,
+        total: scriptCommands.length
+      }
+
+      callback(process)
+      
+      const result = await this.installScriptCommand(scriptCommand)
+      
+      process = {
+        ...process, 
+        state: result.content,
+        progress: Progress.Finished
+      }
+
+      callback(process)
+
+      if (currentInstall == process.total) {
+        progress = process.progress
+      }
+
+      currentInstall += 1
+    })
+
+    return progress
+  }
   
   async deleteScriptCommand(scriptCommand: ScriptCommand): Promise<StateResult> {
     const result = await this.scriptCommandManager.delete(scriptCommand)
@@ -348,5 +395,15 @@ export class DataManager {
     }
 
     return result
+  }
+}
+
+type AsyncForLoop<T> = (items: T[], callback: (item: T) => Promise<void>) => Promise<void>
+
+type AsyncLoopCommand = AsyncForLoop<ScriptCommand>
+
+const asyncForLoop: AsyncLoopCommand = async (items, callback) => {
+  for (const scriptCommand of items) {
+    await callback(scriptCommand)
   }
 }

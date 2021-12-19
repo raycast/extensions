@@ -30,9 +30,10 @@ import {
 type Props = { 
   scriptCommand: ScriptCommand
   group: CompactGroup
+  onInstallPackage: () => void
 }
 
-export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element {
+export function ScriptCommandItem({ scriptCommand, group, onInstallPackage }: Props): JSX.Element {
   const { props, install, uninstall, confirmSetup, editSourceCode, setFilter } = useScriptCommand(scriptCommand)
 
   const handleInstall = async () => {
@@ -75,11 +76,12 @@ export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element 
           <ManagementActionPanel 
             state={ props.state }
             commandPath={ props.path }
-            onInstall={ handleInstall } 
-            onUninstall={ handleUninstall }
-            onSetup={ handleSetup }
             onConfirmSetup={ confirmSetup }
             onEditLocal={ handleEditLocal }
+            onInstall={ handleInstall } 
+            onInstallPackage={ onInstallPackage }
+            onSetup={ handleSetup }
+            onUninstall={ handleUninstall }
           />
           <ViewsActionPanel 
             url={ props.sourceCodeURL } 
@@ -88,7 +90,7 @@ export function ScriptCommandItem({ scriptCommand, group }: Props): JSX.Element 
           <AuthorsActionPanel 
             authors={ scriptCommand.authors ?? [] } 
           />
-          { group.readme != undefined && group.readme.length > 0 &&
+          { group.readme && group.readme.length > 0 &&
             <ReadmeActionPanel group={ group } /> 
           }
           <FiltersActionPanel 

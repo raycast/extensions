@@ -17,15 +17,19 @@ import {
 type UseDataManager = () => {
   dataManager: DataManager
   filter: Filter
+  commandIdentifier: string
   setFilter: (filter: Filter) => void
+  setCommandToRefresh: (identifier: string) => void
 }
 
 export const useDataManager: UseDataManager = () => {
-  const { state, setFilter } = useContext(ApplicationContext)
+  const { state, setFilter, setCommandToRefresh } = useContext(ApplicationContext)
   
   return {
     dataManager: state.dataManager,
     filter: state.filter,
-    setFilter
+    commandIdentifier: state.commandIdentifier,
+    setFilter,
+    setCommandToRefresh
   }
 }

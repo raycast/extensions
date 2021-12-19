@@ -13,12 +13,13 @@ import {
 } from "@models"
 
 import { 
-  Filter, 
+  Filter,
   Progress, 
   State 
 } from "@types"
 
 import { 
+  PackageToast,
   StoreToast 
 } from "@components"
 
@@ -42,13 +43,14 @@ type UseScriptCommands = () => {
   props: UserScriptCommandsProps
   setFilter: (filter: Filter) => void
   setSelection:(identifier?: string) => void
+  installPackage: (group: CompactGroup) => void
 }
 
 export const useScriptCommands: UseScriptCommands = () => {
   let toast: Toast | null
 
-  const { dataManager, filter, setFilter } = useDataManager()
-  
+  const { dataManager, filter, setFilter, setCommandToRefresh } = useDataManager()
+
   const [state, setState] = useState<UseScriptCommandsState>({
     main: { 
       groups: [],
@@ -72,7 +74,23 @@ export const useScriptCommands: UseScriptCommands = () => {
     }
   }
 
-  useEffect(() => {    
+  const installPackage = async (group: CompactGroup) => {
+    const result = await dataManager.installPackage(group, process => {
+      PackageToast(Progress.InProgress, group.title, `Script Command: ${process.current} of ${process.total}...`)
+      
+      if (process.progress == Progress.Finished) {
+        setCommandToRefresh(process.identifier)
+      }
+    })
+
+    PackageToast(result, group.title)
+    
+    if (result == Progress.Finished) {
+      setCommandToRefresh("")
+    }
+  }
+
+  useEffect(() => {
     async function fetch() {
       const response = await dataManager.fetchCommands(filter)
       
@@ -105,7 +123,8 @@ export const useScriptCommands: UseScriptCommands = () => {
       filter: filter
     },
     setFilter,
-    setSelection
+    setSelection,
+    installPackage
   }
 }
 

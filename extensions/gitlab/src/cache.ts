@@ -113,8 +113,8 @@ export function useCache<T>(
     error?: string;
     isLoading: boolean;
 } {
-    const secondsToRefetch = options.secondsToRefetch || 5 * 60;
-    const secondsToInvalid = options.secondsToInvalid || 24 * 60 * 60;
+    const secondsToRefetch = options.secondsToRefetch === undefined ? 5 * 60 : options.secondsToRefetch;
+    const secondsToInvalid = options.secondsToInvalid === undefined ? 24 * 60 * 60 : options.secondsToInvalid;
     const [data, setData] = useState<T>();
     const [error, setError] = useState<string>();
     const [isLoading, setIsLoading] = useState<boolean>(false);

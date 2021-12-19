@@ -12,9 +12,12 @@ import {
 
 type Props = { 
   group: CompactGroup
+  onInstallPackage: (group: CompactGroup) => void
 }
 
-export function GroupSection({ group }: Props): JSX.Element  {
+export function GroupSection({ group, onInstallPackage }: Props): JSX.Element  {
+  const handleInstallPackage = () => onInstallPackage(group)
+
   return (
     <List.Section 
       key={ group.identifier } 
@@ -26,6 +29,7 @@ export function GroupSection({ group }: Props): JSX.Element  {
             key={ scriptCommand.identifier } 
             scriptCommand={ scriptCommand }
             group={ group }
+            onInstallPackage={ handleInstallPackage }
           />
         ))
       }

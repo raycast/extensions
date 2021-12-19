@@ -40,7 +40,7 @@ export enum IconUsage {
 }
 
 interface IconPath  {
-  filename: string, 
+  filename: string
   path: string
 }
 
@@ -60,6 +60,14 @@ export enum State {
   NeedSetup,
   ChangesDetected,
   Error,
+}
+
+export type Process = {
+  identifier: string
+  progress: Progress
+  state: State
+  current: number
+  total: number
 }
 
 export type Filter = State | string | null

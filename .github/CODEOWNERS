@@ -3,12 +3,13 @@
 /extensions/1password7                               @khasbilegt
 /extensions/airport                                  @siddharthsharma94
 /extensions/algolia                                  @valentindotxyz
-/extensions/amazon-aws                               @falcon
+/extensions/amazon-aws                               @falcon @hodglim
 /extensions/api-icon-list                            @petr
 /extensions/authy                                    @guga4ka
 /extensions/base64                                   @danielsinclair
 /extensions/bear                                     @hmarr
 /extensions/binance                                  @grzegorzkrukowski
+/extensions/bitbucket                                @francois
 /extensions/bitly-url-shortener                      @blessanm86
 /extensions/bitrise                                  @ubuntudroid
 /extensions/bitwarden                                @pomdtr
@@ -39,6 +40,7 @@
 /extensions/docker                                   @priithaamer
 /extensions/domainr                                  @fedevitaledev
 /extensions/doppler-share-secrets                    @thomas
+/extensions/elgato-key-light                         @thomas
 /extensions/emoji                                    @fezvrasta
 /extensions/ens-name-lookup                          @yukai
 /extensions/envato                                   @astroon
@@ -58,6 +60,7 @@
 /extensions/google-trends                            @kang
 /extensions/grafana                                  @francois
 /extensions/hacker-news                              @thomas
+/extensions/harvest                                  @eluce2
 /extensions/hazeover                                 @ratoru
 /extensions/homeassistant                            @tonka3000
 /extensions/huggingcast                              @ragnor
@@ -73,11 +76,14 @@
 /extensions/microsoft-edge                           @kartikkumarsahoo @bromanko
 /extensions/mldocs                                   @reckoning-dev
 /extensions/music                                    @fedevitaledev
+/extensions/myip                                     @kang
 /extensions/notion                                   @henrichabrand
+/extensions/obsidian                                 @marcjulian
 /extensions/open-with-app                            @fturcheti
 /extensions/opsgenie                                 @ricoberger
 /extensions/party-parrot                             @thomas
 /extensions/pinboard                                 @fe9lix
+/extensions/pipedrive                                @stephendolan
 /extensions/productboard                             @honzatmn
 /extensions/producthunt                              @ragnor
 /extensions/quick-open-project                       @zerowidth
@@ -96,6 +102,7 @@
 /extensions/search-mdn                               @krzysztofzuraw
 /extensions/search-notion                            @reckoning-dev
 /extensions/search-npm                               @mrmartineau
+/extensions/search-rubygems                          @aleks
 /extensions/send-to-flomo                            @ahonn
 /extensions/single-disk-eject                        @johndturn
 /extensions/sketch                                   @aesign
@@ -105,6 +112,7 @@
 /extensions/spotify-controls                         @thomas
 /extensions/spotify-player                           @mattisssa
 /extensions/stackoverflow                            @reckoning-dev
+/extensions/surge                                    @ysj151215
 /extensions/swift-evolution                          @bprog
 /extensions/switchhosts                              @tiancheng92
 /extensions/tableplus                                @pernielsentikaer
