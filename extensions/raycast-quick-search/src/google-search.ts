@@ -7,11 +7,11 @@ export default async () => {
     const text = await readtext();
     if (isNotEmpty(text)) {
       await GoogleSearchOpner(text);
-      showHUD("🎉 Open google search");
+      showHUD("🎉 Open Google search");
     } else {
-      showHUD("👀 Can not found target text");
+      showHUD("❌ No text found in clipboard");
     }
   } catch (error) {
-    showHUD("💩 Sorry, Can not open google search for now!");
+    showHUD("💩 Sorry, Can not open Google search for now!");
   }
 };

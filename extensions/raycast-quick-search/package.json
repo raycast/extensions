@@ -10,28 +10,28 @@
     {
       "name": "google-search",
       "title": "Google Search",
-      "subtitle": "Search selected text or clipboard text via Google",
+      "subtitle": "Clipboard Searches",
       "description": "Search selected text or clipboard text via Google.",
       "mode": "no-view"
     },
     {
       "name": "github-search",
-      "title": "Github Search",
-      "subtitle": "Search selected text or clipboard text via Github",
+      "title": "GitHub Search",
+      "subtitle": "Clipboard Searches",
       "description": "Search selected text or clipboard text via Github.",
       "mode": "no-view"
     },
     {
       "name": "github-repo",
-      "title": "Github Repo",
-      "subtitle": "Search selected text or clipboard text via Github repo",
+      "title": "GitHub Repo",
+      "subtitle": "Clipboard Searches",
       "description": "Search selected text or clipboard text via Github repo.",
       "mode": "no-view"
     },
     {
       "name": "deepl-trans",
       "title": "Deepl Translation",
-      "subtitle": "Translate selected text or clipboard text via DeepL",
+      "subtitle": "Clipboard Searches",
       "description": "Translate selected text or clipboard text via DeepL.",
       "mode": "no-view"
     }

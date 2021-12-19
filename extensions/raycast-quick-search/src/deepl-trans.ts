@@ -7,11 +7,11 @@ export default async () => {
     const text = await readtext();
     if (isNotEmpty(text)) {
       await DeeplOpner(text);
-      showHUD("🎉 Open deepl search");
+      showHUD("🎉 Open Deepl search");
     } else {
-      showHUD("👀 Can not found target text");
+      showHUD("❌ No text found in clipboard");
     }
   } catch (error) {
-    showHUD("💩 Sorry, Can not open deepl for now!");
+    showHUD("💩 Sorry, Can not open Deepl for now!");
   }
 };
