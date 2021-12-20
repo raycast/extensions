@@ -53,12 +53,15 @@ function trigger(randName: string) {
         copyTextToClipboard(data)
         if (data.match(/[a-zA-z]+:\/\/[^\s]*/)) {
           confirmAlert({
-            title: "Open in Browser? ",
+            title: "Open in Browser?",
             message: data,
             primaryAction: {
               title: "Open",
               onAction: () => {
-                open(data).then(() => popToRoot())
+                open(data).then(() => {
+                  closeMainWindow()
+                  popToRoot()
+                })
               }
             },
             dismissAction: {
