@@ -59,6 +59,12 @@
       "title": "Dislike Track",
       "description": "Dislike currently playing track.",
       "mode": "no-view"
+    },
+    {
+      "name": "add-to-library",
+      "title": "Add to Library",
+      "description": "Add currently playing track to your library.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
