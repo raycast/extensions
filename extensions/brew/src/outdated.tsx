@@ -78,7 +78,7 @@ function OutdatedList(props: { outdated?: OutdatedResults, isLoading: boolean, o
   const casks = props.outdated?.casks ?? [];
 
   return (
-    <List searchBarPlaceholder="Filter formulae by name..." isLoading={props.isLoading}>
+    <List searchBarPlaceholder={"Filter formulae by name" + String.ellipsis} isLoading={props.isLoading}>
       <ListSection title="Formulae">
         {
           formulae.map((formula) => (

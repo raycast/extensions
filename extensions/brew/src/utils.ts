@@ -100,3 +100,16 @@ if (!Array.prototype.isTruncated) {
     return false;
   }
 }
+
+/// String
+
+declare global {
+  interface StringConstructor {
+    ellipsis: String;
+  }
+}
+
+
+if (!String.ellipsis) {
+  String.ellipsis = "…";
+}
