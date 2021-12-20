@@ -45,7 +45,7 @@ export default function CanIUse() {
             {...(accessoryIcon ? { accessoryIcon } : {})}
             actions={
               <ActionPanel>
-                <PushAction title="See details" target={<FeatureDetail feature={featureName} />} />
+                <PushAction title="Show details" icon={Icon.List} target={<FeatureDetail feature={featureName} />} />
                 <OpenInBrowserAction url={getCanIUseLink(featureName)} />
               </ActionPanel>
             }
