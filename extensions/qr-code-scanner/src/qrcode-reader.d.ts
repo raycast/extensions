@@ -5,6 +5,6 @@ export type QRDecoder = (bitmap: bitmap) => string
 declare module 'qrcode-reader' {
   export default class {
     decode: QRDecoder
-    callback: (err: Error | null, value: string) => void
+    callback: (err: string | null, value: string) => void
   }
 }

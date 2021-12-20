@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "qr-code-scanner",
   "title": "QR Code Scanner",
-  "description": "Simple on-screen QR code scanner. Based on qrcode-reader and jimp.",
+  "description": "Simple on-screen QR code scanner. (\"Screen recording\" permission is required)",
   "icon": "command-icon.png",
   "author": "StevenRCE0",
   "license": "MIT",
