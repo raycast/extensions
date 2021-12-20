@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { showFailureToast } from "./utils";
 import { OutdatedResults, OutdatedCask, OutdatedFormula, brewFetchOutdated } from "./brew";
 import { OutdatedActionPanel } from "./components/actionPanels";
+import { preferences } from "./preferences"
 
 interface State {
   outdated?: OutdatedResults;
@@ -19,7 +20,7 @@ export default function Main() {
 
   useEffect(() => {
     if (!state.isLoading) { return; }
-    brewFetchOutdated(true) // include auto_update casks
+    brewFetchOutdated(preferences.greedyUpgrades)
       .then(outdated => {
         setState({outdated: outdated, isLoading: false});
       })

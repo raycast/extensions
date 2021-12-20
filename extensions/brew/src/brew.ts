@@ -165,8 +165,11 @@ export async function brewFetchOutdated(greedy: boolean): Promise<OutdatedResult
   if (greedy) {
     cmd += ' --greedy'; // include auto_update casks
   }
-  return JSON.parse((await execp(cmd)).stdout);
+  const output = (await execp(cmd)).stdout;
+  return JSON.parse(output);
 }
+
+/// Search
 
 const formulaURL = "https://formulae.brew.sh/api/formula.json";
 const caskURL = "https://formulae.brew.sh/api/cask.json"
