@@ -63,6 +63,10 @@ function trigger(randName: string) {
               onAction: () => {
                 open(data).then(() => popToRoot())
               }
+            },
+            dismissAction: {
+              title: "Cancel",
+              onAction: () => popToRoot()
             }
           });
         } else {
