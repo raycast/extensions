@@ -7,6 +7,12 @@ import * as utils from "./utils";
 
 const execp = promisify(exec);
 
+interface ExecError extends Error {
+  code: number;
+  stdout: string;
+  stderr: string;
+}
+
 /// Types
 
 export interface Nameable {
@@ -98,6 +104,34 @@ export function brewPath(suffix: string): string {
 }
 
 const brewExecutable: string = path_join(brewPrefix, 'bin/brew');
+
+/// Commands
+
+export async function brewDoctorCommand(): Promise<string> {
+  try {
+    const output = await execp(`${brewExecutable} doctor`);
+    return output.stdout;
+  } catch (err) {
+    const execErr = err as ExecError;
+    if (execErr?.code == 1) {
+      return execErr.stderr;
+    } else {
+      return `${err}`;
+    }
+  }
+}
+
+export async function brewUpgradeCommand(greedy: boolean, dryRun: boolean = false): Promise<string> {
+  let cmd = `${brewExecutable} upgrade`;
+  if (greedy) {
+    cmd += ' --greedy'
+  }
+  if (dryRun) {
+    cmd += ' --dry-run';
+  }
+  const output = await execp(cmd);
+  return output.stdout;
+}
 
 /// Fetching
 

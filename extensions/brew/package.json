@@ -27,6 +27,20 @@
       "subtitle": "Brew",
       "description": "Show outdated brew formulae & casks",
       "mode": "view"
+    },
+    {
+      "name": "upgrade",
+      "title": "Upgrade",
+      "subtitle": "Brew",
+      "description": "Upgrade brew formulae & casks",
+      "mode": "no-view"
+    },
+    {
+      "name": "doctor",
+      "title": "Doctor",
+      "subtitle": "Brew",
+      "description": "Run brew doctor",
+      "mode": "view"
     }
   ],
   "preferences": [
