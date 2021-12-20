@@ -21,9 +21,7 @@ function qrDecode(filepath: string, callback: (data: string | boolean) => void) 
     }
     if (err) {
       showToast(ToastStyle.Failure, 'Image decoder error...')
-        .then(() => {
-          return
-        })
+      return;
     }
     const decodeQR = new qrcodeReader();
     decodeQR.callback = function(errorWhenDecodeQR, result) {
@@ -31,9 +29,8 @@ function qrDecode(filepath: string, callback: (data: string | boolean) => void) 
         if (errorWhenDecodeQR.indexOf('Couldn\'t find enough finder patterns') > -1) {
           callback(false)
         } else {
-          showToast(ToastStyle.Failure, 'Parser error...').then(() => {
-            return;
-          })
+          showToast(ToastStyle.Failure, 'Parser error...')
+          return;
         }
       } else {
         callback(JSON.parse(JSON.stringify(result)).result)
