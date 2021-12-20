@@ -20,6 +20,11 @@
 
 * Textfields do not auto-transform certain characters such as dashes any more ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)Issue #491](https://github.com/raycast/extensions/issues/491) and [![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)Issue #360](https://github.com/raycast/extensions/issues/360))
 
+### &#x20;⚙️ Build Updates
+
+* This CLI of this version contains an update of the build tool with changed (and "more correct") heuristics around how `default` exports are handled. This means that you should double check whether `import` statements for certain npm packages need to be adjusted. \
+  **Example**: `import caniuse from "caniuse-api"` has to be changed to `import * as caniuse from "caniuse-api"` because of the missing `default` export of the built `caniuse` library that has to run in a Node environment.
+
 ## 1.25.7 - 2021-11-26
 
 ### 💎 Improvements
