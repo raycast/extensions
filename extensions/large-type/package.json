@@ -9,8 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Large Type",
-      "subtitle": "Show text in large characters across your screen",
+      "title": "Show Large Type",
       "description": "Large Type allows you to show text in large characters across your screen",
       "mode": "view"
     }
