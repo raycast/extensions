@@ -56,8 +56,8 @@ export function filterCoins(coins: Coin[], input: string): Coin[] {
   return coins
     .filter((coin) => {
       return (
-        coin.symbol.toLowerCase().startsWith(input.toLowerCase()) ||
-        coin.name.toLowerCase().startsWith(input.toLowerCase())
+        coin.symbol.toLowerCase().includes(input.toLowerCase()) ||
+        coin.name.toLowerCase().includes(input.toLowerCase())
       );
     })
     .sort((a, b) => {
