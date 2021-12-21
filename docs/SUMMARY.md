@@ -34,6 +34,7 @@
 * [Lifecycle](information/lifecycle.md)
 * [Manifest](information/manifest.md)
 * [Versioning](information/versioning.md)
+* [Security](information/security.md)
 * [Terminology](information/terminology.md)
 
 ## API Reference
