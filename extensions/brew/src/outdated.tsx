@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { showFailureToast } from "./utils";
 import { OutdatedResults, OutdatedCask, OutdatedFormula, brewFetchOutdated } from "./brew";
 import { OutdatedActionPanel } from "./components/actionPanels";
+import { preferences } from "./preferences"
 
 interface State {
   outdated?: OutdatedResults;
@@ -19,7 +20,7 @@ export default function Main() {
 
   useEffect(() => {
     if (!state.isLoading) { return; }
-    brewFetchOutdated(true) // include auto_update casks
+    brewFetchOutdated(preferences.greedyUpgrades)
       .then(outdated => {
         setState({outdated: outdated, isLoading: false});
       })
@@ -78,7 +79,7 @@ function OutdatedList(props: { outdated?: OutdatedResults, isLoading: boolean, o
   const casks = props.outdated?.casks ?? [];
 
   return (
-    <List searchBarPlaceholder="Filter formulae by name..." isLoading={props.isLoading}>
+    <List searchBarPlaceholder={"Filter formulae by name" + String.ellipsis} isLoading={props.isLoading}>
       <ListSection title="Formulae">
         {
           formulae.map((formula) => (
