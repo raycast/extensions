@@ -21,7 +21,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Currency",
-      "description": "Currency that is used to diplay coin prices",
+      "description": "Currency that is used to display coin prices",
       "default": "usd",
       "data": [
         {
