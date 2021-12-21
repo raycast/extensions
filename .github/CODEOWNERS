@@ -26,6 +26,7 @@
 /extensions/clockify                                 @isma
 /extensions/coffee                                   @mooxl
 /extensions/coinbase-pro                             @farisaziz12
+/extensions/coingecko                                @destiner
 /extensions/coinmarketcap-crypto-crawler             @sonicspark
 /extensions/commitlint                               @lardissone
 /extensions/consoledev                               @fedevitaledev
