@@ -9,7 +9,7 @@ import {
   PushAction,
 } from "@raycast/api";
 import { features, feature } from "caniuse-lite";
-import caniuse from "caniuse-api";
+import * as caniuse from "caniuse-api";
 import browserslist from "browserslist";
 import { statusToName, resolvePath, getCanIUseLink } from "./utils";
 import FeatureDetail from "./components/FeatureDetail";
