@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pub-dev",
   "title": "pub.dev",
-  "description": "Search pub.dev for packages and copy the latest version",
+  "description": "Search pub.dev for Dart and Flutter packages and copy the install commands",
   "icon": "command-icon.png",
   "author": "prasadsunny1",
   "license": "MIT",
