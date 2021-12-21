@@ -10,7 +10,7 @@
     {
       "name": "index",
       "title": "Search Dart or Flutter Package",
-      "subtitle": "Search for a Flutter package",
+      "subtitle": "pub.dev",
       "description": "Search pub.dev for packages and copy the installation command",
       "mode": "view"
     }
