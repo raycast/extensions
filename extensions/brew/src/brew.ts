@@ -113,7 +113,7 @@ export async function brewDoctorCommand(): Promise<string> {
     return output.stdout;
   } catch (err) {
     const execErr = err as ExecError;
-    if (execErr?.code == 1) {
+    if (execErr?.code === 1) {
       return execErr.stderr;
     } else {
       return `${err}`;
