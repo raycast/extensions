@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Find and install Dart/Flutter packages",
+      "title": "Search Dart or Flutter Package",
       "subtitle": "Search for a Flutter package",
       "description": "Search pub.dev for packages and copy the installation command",
       "mode": "view"
