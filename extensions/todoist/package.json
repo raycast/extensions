@@ -29,10 +29,17 @@
       "mode": "view"
     },
     {
-      "name": "create",
+      "name": "create-task",
       "title": "Create Task",
       "subtitle": "Todoist",
       "description": "Create a Todoist task.",
+      "mode": "view"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "subtitle": "Todoist",
+      "description": "Create a Todoist project.",
       "mode": "view"
     }
   ],
@@ -47,7 +54,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.2",
+    "@raycast/api": "^1.26.3",
     "axios": "^0.24.0",
     "date-fns": "^2.27.0",
     "lodash": "^4.17.21",
