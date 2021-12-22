@@ -1,6 +1,7 @@
 import { ActionPanel, Form, SubmitFormAction, useNavigation, showToast, ToastStyle } from "@raycast/api"
 import { rgba, parseToHsl } from "polished"
 import { Results } from "./components"
+import { isBetween } from "./utils"
 
 type Values = {
   hex: string
@@ -16,6 +17,11 @@ export default function ConvertHex() {
 
     if (!hex) {
       showToast(ToastStyle.Failure, "HEX is required", "Please enter a value for HEX.")
+      return
+    }
+
+    if (a && !isBetween(a, [0, 1]) || isNaN(a)) {
+      showToast(ToastStyle.Failure, "Alpha Input incorrect", "Please enter a value between 0 and 1 for Alpha.")
       return
     }
 
@@ -39,7 +45,7 @@ export default function ConvertHex() {
       </ActionPanel>
     }>
       <Form.TextField id="hex" placeholder="#000" title="HEX" />
-      <Form.TextField id="alpha" defaultValue="1" title="Alpha (0 to 1)" />
+      <Form.TextField id="alpha" defaultValue="1" placeholder="1 (0 to 1)" title="Alpha" />
     </Form>
   )
 }

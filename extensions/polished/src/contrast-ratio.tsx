@@ -1,4 +1,4 @@
-import { Form, ActionPanel, useNavigation, Detail, SubmitFormAction } from "@raycast/api"
+import { Form, ActionPanel, useNavigation, Detail, SubmitFormAction, showToast, ToastStyle } from "@raycast/api"
 import { getContrast } from "polished"
 
 type Values = {
@@ -11,7 +11,14 @@ export default function ContrastRatio() {
 
   function handleSubmit(values: Values) {
     const { text, background } = values
-    const contrast = getContrast(text, background)
+    let contrast
+
+    try {
+      contrast = getContrast(text, background)
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Couldn't parse the color string", "Please provide the colors in a valid input format.")
+      return
+    }
 
     push(<Result text={text} background={background} contrast={contrast} />)
   }

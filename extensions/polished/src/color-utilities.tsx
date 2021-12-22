@@ -1,6 +1,7 @@
 import { Form, SubmitFormAction, ActionPanel, showToast, ToastStyle, useNavigation } from "@raycast/api"
 import { lighten, darken, transparentize, complement, grayscale, invert, readableColor, parseToHsl, hslToColorString } from "polished"
 import { Results } from "./components"
+import { isBetween } from "./utils"
 
 type Values = {
   color: string
@@ -20,6 +21,11 @@ export default function ColorUtilities() {
 
     if (!color) {
       showToast(ToastStyle.Failure, "Color is required", "Please enter a value for Color at the top.")
+      return
+    }
+
+    if (!isBetween(l, [0, 1]) && l || !isBetween(d, [0, 1]) && d || !isBetween(t, [0, 1]) && t) {
+      showToast(ToastStyle.Failure, "Input incorrect", "Please enter a value between 0 and 1 for Lighten, Darken, or Transparentize.")
       return
     }
 
@@ -61,12 +67,12 @@ export default function ColorUtilities() {
         <SubmitFormAction title="Convert" onSubmit={handleSubmit} />
       </ActionPanel>
     }>
-      <Form.TextField id="color" placeholder="#000 or rgb(255, 255, 255) or black" title="Color (HEX, RGB, RGBA, or CSS Color)" />
+      <Form.TextField id="color" placeholder="#000 or rgb(0, 0, 0) or black" title="Color" />
       <Form.Separator />
-      <Form.TextField id="lightenInput" placeholder="0.5" title="Lighten (0 to 1)" />
-      <Form.TextField id="darkenInput" placeholder="0.5" title="Darken (0 to 1)" />
+      <Form.TextField id="lightenInput" placeholder="0.5 (0 to 1)" title="Lighten" />
+      <Form.TextField id="darkenInput" placeholder="0.5 (0 to 1)" title="Darken" />
       <Form.Separator />
-      <Form.TextField id="transparentizeInput" placeholder="0.5" title="Transparentize (0 to 1)" />
+      <Form.TextField id="transparentizeInput" placeholder="0.5 (0 to 1)" title="Transparentize" />
     </Form>
   )
 }

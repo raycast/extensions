@@ -1,6 +1,7 @@
 import { ActionPanel, Form, SubmitFormAction, useNavigation, showToast, ToastStyle } from "@raycast/api"
 import { rgba, parseToHsl } from "polished"
 import { Results } from "./components"
+import { isBetween } from "./utils"
 
 type Values = {
   red: string
@@ -16,6 +17,11 @@ export default function ConvertRgb() {
     const r = parseInt(red)
     const g = parseInt(green)
     const b = parseInt(blue)
+
+    if (r && !isBetween(r, [0, 255]) || g && !isBetween(g, [0, 255]) || b && !isBetween(b, [0, 255])) {
+      showToast(ToastStyle.Failure, "Input incorrect", "Please enter a value between 0 and 255 for RGB.")
+      return
+    }
 
     let hexResult
     let hslResult

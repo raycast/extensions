@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "polished",
   "title": "Polished",
-  "description": "Convert & Modify Colors using polished.js",
+  "description": "Convert & Modify Colors with HEX, RGB, and HSL values. You can lighten & darken colors, invert them, do contrast calculations and much more.",
   "icon": "icon.png",
   "author": "lekoarts",
   "license": "MIT",
