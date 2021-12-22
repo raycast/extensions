@@ -15,6 +15,7 @@
     }
   ],
   "dependencies": {
+    "@jeromefitz/conventional-gitmoji": "^1.0.0",
     "@raycast/api": "^1.25.4"
   },
   "devDependencies": {
