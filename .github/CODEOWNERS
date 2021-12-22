@@ -71,6 +71,7 @@
 /extensions/json-format                              @destiner
 /extensions/kill-process                             @rolandleth
 /extensions/kinopoisk                                @mattisssa
+/extensions/large-type                               @gbarba
 /extensions/lark                                     @tmk
 /extensions/linguee                                  @geekdada
 /extensions/lobsters                                 @dev99problems
