@@ -24,10 +24,12 @@ function ConvertAction() {
     const { timestamp } = values;
     if (timestamp.length === 0) {
       showToast(ToastStyle.Failure, 'Empty input');
+      return;
     }
     const value = parseInt(timestamp);
     if (isNaN(value) || value < 0) {
       showToast(ToastStyle.Failure, 'Invalid timestamp');
+      return;
     }
     const date = getDate(value);
     const dateString = toDateString(date);
