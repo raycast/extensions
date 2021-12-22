@@ -38,7 +38,7 @@ function Projects() {
               <PushAction icon={Icon.TextDocument} title="Show Details" target={<Project projectId={project.id} />} />
               <OpenInBrowserAction url={project.url} />
               <ActionPanel.Item
-                title="Delete project"
+                title="Delete Project"
                 icon={Icon.Trash}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
                 onAction={() => deleteProject(project.id)}
