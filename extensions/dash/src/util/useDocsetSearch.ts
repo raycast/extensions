@@ -42,7 +42,7 @@ async function searchDash(query: string, signal: AbortSignal): Promise<DashResul
 }
 
 export function useDocsetSearch(searchText: string, keyword = ""): [DashResult[], boolean] {
-  const [isLoading, setLoading] = useState<boolean>(false);
+  const [isLoading, setLoading] = useState<boolean>(true);
   const [results, setResults] = useState<DashResult[]>([]);
   const cancel = useRef<AbortController>(new AbortController());
 

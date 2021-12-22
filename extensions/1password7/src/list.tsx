@@ -6,6 +6,7 @@ import os from "os";
 import shajs from "sha.js";
 import OnePasswordMetaItem from "./OnePasswordMetaItem.dto";
 import { useEffect, useState } from "react";
+import OnePasswordMetaItemsCategory from "./OnePasswordMetaItemsCategory.dto";
 
 // This is the official location, see for more information https://support.1password.com/integration-mac/
 const ONE_PASSWORD_7_CLI_FOLDER = `${os.homedir()}/Library/Containers/com.agilebits.onepassword7/Data/Library/Caches/Metadata/1Password`;
@@ -81,13 +82,29 @@ export default function Command() {
 }
 
 function PasswordList({ onePasswordMetaItems }: { onePasswordMetaItems: OnePasswordMetaItem[] | undefined }) {
+
+  interface OnePasswordMetaItemCategories {
+    [key: string]: OnePasswordMetaItemsCategory
+  }
+
+  const categories: OnePasswordMetaItemCategories = {};
+
+  onePasswordMetaItems?.forEach(onePasswordMetaItem => {
+    if(!categories[onePasswordMetaItem.categoryPluralName]){
+      categories[onePasswordMetaItem.categoryPluralName] = {
+        categoryPluralName: onePasswordMetaItem.categoryPluralName,
+        categoryUUID: onePasswordMetaItem.categoryUUID,
+        metaItems: []
+      }
+    }
+    categories[onePasswordMetaItem.categoryPluralName].metaItems.push(onePasswordMetaItem);
+  });
+
+  const sortedCategories = Object.values(categories).sort((a, b) => b.metaItems.length - a .metaItems.length);
   return (
     <List searchBarPlaceholder="Filter items by name..." isLoading={onePasswordMetaItems === undefined}>
-      {onePasswordMetaItems?.map((onePasswordMetaItem, index) => (
-        <PasswordListItem
-          key={onePasswordMetaItem.uuid + onePasswordMetaItem.vaultUUID + index + Math.random()}
-          onePasswordMetaItem={onePasswordMetaItem}
-        />
+      {sortedCategories?.map(onePasswordMetaItemsCategory => (
+          <PasswordListCategory onePasswordMetaItemsCategory={onePasswordMetaItemsCategory} key={onePasswordMetaItemsCategory.categoryUUID}/>
       ))}
     </List>
   );
@@ -112,24 +129,37 @@ function getIconForCategory(categoryUUID: string) {
   }
 }
 
+function PasswordListCategory(props: { onePasswordMetaItemsCategory: OnePasswordMetaItemsCategory }) {
+  const onePasswordMetaItemsCategory = props.onePasswordMetaItemsCategory;
+  return(
+      <List.Section
+          id={onePasswordMetaItemsCategory.categoryUUID + onePasswordMetaItemsCategory.categoryPluralName}
+          title={onePasswordMetaItemsCategory.categoryPluralName}
+          subtitle={`${onePasswordMetaItemsCategory.metaItems.length} Items`}
+      >
+        {onePasswordMetaItemsCategory.metaItems?.map((onePasswordMetaItem, index) => (
+            <PasswordListItem
+                key={onePasswordMetaItem.uuid + onePasswordMetaItem.vaultUUID + index + Math.random()}
+                onePasswordMetaItem={onePasswordMetaItem}
+            />
+        ))}
+      </List.Section>
+  )
+}
+
 function PasswordListItem(props: { onePasswordMetaItem: OnePasswordMetaItem }) {
   const onePasswordMetaItem = props.onePasswordMetaItem;
 
   return (
     <List.Item
-      id={onePasswordMetaItem.uuid}
       title={onePasswordMetaItem.itemTitle}
       subtitle={onePasswordMetaItem.categorySingularName}
       icon={getIconForCategory(onePasswordMetaItem.categoryUUID)}
       accessoryTitle={`👤 ${onePasswordMetaItem.accountName}  🗄 ${onePasswordMetaItem.vaultName}`}
       actions={
         <ActionPanel>
-          {onePasswordMetaItem.categoryUUID === "001" ? (
-            <OpenAndFillAction onePasswordMetaItem={onePasswordMetaItem} />
-          ) : (
-            <ViewAction onePasswordMetaItem={onePasswordMetaItem} />
-          )}
-          {onePasswordMetaItem.categoryUUID === "001" ? <ViewAction onePasswordMetaItem={onePasswordMetaItem} /> : null}
+          {onePasswordMetaItem.categoryUUID === "001" && <OpenAndFillAction onePasswordMetaItem={onePasswordMetaItem} />}
+          <ViewAction onePasswordMetaItem={onePasswordMetaItem} />
           <EditAction onePasswordMetaItem={onePasswordMetaItem} />
         </ActionPanel>
       }

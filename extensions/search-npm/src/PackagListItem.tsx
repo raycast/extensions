@@ -5,6 +5,7 @@ import {
   OpenInBrowserAction,
   PushAction,
   CopyToClipboardAction,
+  getPreferenceValues,
 } from '@raycast/api'
 import { CopyInstallCommandActions } from './CopyInstallCommandActions'
 import { parseRepoUrl } from './utils/parseRepoUrl'
@@ -15,11 +16,45 @@ interface PackageListItemProps {
   result: NpmsResultModel
 }
 
+interface Preferences {
+  defaultOpenAction: 'openRepository' | 'openHomepage' | 'npmPackagePage'
+}
+
 export const PackageListItem = ({
   result,
 }: PackageListItemProps): JSX.Element => {
+  const { defaultOpenAction }: Preferences = getPreferenceValues()
   const pkg = result.package
   const { owner, name, type } = parseRepoUrl(pkg.links.repository)
+
+  const actions = {
+    openRepository: pkg.links?.repository ? (
+      <OpenInBrowserAction
+        key="openRepository"
+        url={pkg.links.repository}
+        title="Open Repository"
+      />
+    ) : null,
+    openHomepage:
+      pkg.links?.homepage && pkg.links.homepage !== pkg.links?.repository ? (
+        <OpenInBrowserAction
+          key="openHomepage"
+          url={pkg.links.homepage}
+          title="Open Homepage"
+          icon={Icon.Link}
+        />
+      ) : null,
+    npmPackagePage: (
+      <OpenInBrowserAction
+        key="npmPackagePage"
+        url={pkg.links.npm}
+        title="npm Package Page"
+        icon={{
+          source: 'command-icon.png',
+        }}
+      />
+    ),
+  }
 
   return (
     <List.Item
@@ -33,27 +68,15 @@ export const PackageListItem = ({
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Links">
-            {pkg.links?.repository ? (
-              <OpenInBrowserAction
-                url={pkg.links.repository}
-                title="Open Repository"
-              />
-            ) : null}
-            {pkg.links?.homepage &&
-            pkg.links.homepage !== pkg.links?.repository ? (
-              <OpenInBrowserAction
-                url={pkg.links.homepage}
-                title="Open Homepage"
-                icon={Icon.Link}
-              />
-            ) : null}
-            <OpenInBrowserAction
-              url={pkg.links.npm}
-              title="npm Package Page"
-              icon={{
-                source: 'command-icon.png',
-              }}
-            />
+            {Object.entries(actions)
+              .sort(([a], [b]) => {
+                if (a === defaultOpenAction) {
+                  return -1
+                } else {
+                  return 0
+                }
+              })
+              .map(([key, action]) => action)}
             <OpenInBrowserAction
               url={`https://npms.io/search?q=${pkg.name}`}
               title="npms.io Search Results"

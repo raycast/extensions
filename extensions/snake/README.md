@@ -34,7 +34,7 @@ Raycast extension to play the classic game Snake 🐍.
         alt="Follow @tonka_2000"
       />
     </a>
-    <a href="https://open.vscode.dev/organization/repository">
+    <a href="https://open.vscode.dev/raycast/extensions">
       <img
         src="https://open.vscode.dev/badges/open-in-vscode.svg"
         alt="Open in Visual Studio Code"

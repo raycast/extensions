@@ -8,6 +8,8 @@ import {
   Detail,
   CopyToClipboardAction,
   getPreferenceValues,
+  copyTextToClipboard,
+  closeMainWindow,
 } from "@raycast/api";
 import { Item, Folder, VaultStatus } from "./types";
 import { useEffect, useState } from "react";
@@ -61,6 +63,16 @@ function ItemList(props: {
     }
   }
 
+  async function copyTotp(sessionToken: string | undefined, id: string) {
+    if (sessionToken) {
+        const totp = await bitwardenApi.getTotp(id, sessionToken)
+        copyTextToClipboard(totp);
+        closeMainWindow({ clearRootSearch: true });
+      } else {
+        showToast(ToastStyle.Failure, "Failed to fetch TOTP.");
+      }
+  }
+
   useEffect(() => {
     if (vaultStatus === "unlocked" && sessionToken) {
       loadItems(sessionToken);
@@ -91,6 +103,8 @@ function ItemList(props: {
             item={item}
             folder={item.folderId ? folderMap[item.folderId] : undefined}
             refreshItems={refreshItems}
+            sessionToken={sessionToken}
+            copyTotp={copyTotp}
           />
         ))}
       </List.Section>
@@ -101,6 +115,8 @@ function ItemList(props: {
           item={item}
           folder={item.folderId ? folderMap[item.folderId] : undefined}
           refreshItems={refreshItems}
+          sessionToken={sessionToken}
+          copyTotp={copyTotp}
         />
       ))}
       </List.Section>
@@ -119,8 +135,8 @@ function getIcon(item: Item) {
   }[item.type];
 }
 
-function ItemListItem(props: { item: Item; folder: Folder | undefined; refreshItems?: () => void }) {
-  const { item, folder, refreshItems } = props;
+function ItemListItem(props: { item: Item; folder: Folder | undefined; refreshItems?: () => void, sessionToken: string | undefined, copyTotp: (sessionToken: string | undefined, id: string) => void }) {
+  const { item, folder, refreshItems, sessionToken, copyTotp } = props;
   const { name, notes, identity, login, secureNote, fields, passwordHistory, card } = item;
   const accessoryIcons = [];
 
@@ -156,6 +172,7 @@ function ItemListItem(props: { item: Item; folder: Folder | undefined; refreshIt
       actions={
         <ActionPanel>
           {item.login?.password ? <CopyToClipboardAction title="Copy Password" content={item.login.password} /> : null}
+          {item.login?.totp ? <ActionPanel.Item title="Copy TOTP" icon={Icon.Clipboard} onAction={() => copyTotp(sessionToken, item.id)} /> : null}
           {item.notes ? (
             <PushAction
               title="Show Secure Note"

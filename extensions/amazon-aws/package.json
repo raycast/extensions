@@ -5,6 +5,9 @@
   "description": "Integrate your AWS account in Raycast",
   "icon": "command-icon.png",
   "author": "Falcon",
+  "contributors": [
+    "Hodglim"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -12,6 +15,27 @@
       "title": "EC2 Instances",
       "subtitle": "Amazon AWS",
       "description": "List and Filter All your EC2 Instances",
+      "mode": "view"
+    },
+    {
+      "name": "queues",
+      "title": "SQS Queues",
+      "subtitle": "Amazon AWS",
+      "description": "List All your SQS Queues",
+      "mode": "view"
+    },
+    {
+      "name": "codepipelines",
+      "title": "CodePipelines",
+      "subtitle": "Amazon AWS",
+      "description": "List All your CodePipelines",
+      "mode": "view"
+    },
+    {
+      "name": "console",
+      "title": "Console",
+      "subtitle": "Amazon AWS",
+      "description": "Launch AWS console links",
       "mode": "view"
     }
   ],

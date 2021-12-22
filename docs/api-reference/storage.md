@@ -36,7 +36,7 @@ export default async () => {
 
 #### Return
 
-A promise that resolves with an object containing all [LocalStorageValues](https://developers.raycast.com/api-reference/storage#localstoragevalues).
+A promise that resolves with an object containing all [LocalStorageValues](#localstoragevalues).
 
 ### clearLocalStorage
 
@@ -148,7 +148,7 @@ export default async () => {
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | key | <code>string</code> | Yes | The key you want to create or update the value of. |
-| value | <code>[LocalStorageValue](https://developers.raycast.com/api-reference/storage#localstoragevalue)</code> | Yes | The value you want to create or update for the given key. |
+| value | <code>[LocalStorageValue](#localstoragevalue)</code> | Yes | The value you want to create or update for the given key. |
 
 #### Return
 

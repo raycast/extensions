@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "music",
+  "title": "Music",
+  "description": "Control the Apple Music app with your keyboard.",
+  "icon": "icon.png",
+  "author": "fedevitaledev",
+  "license": "MIT",
+  "keywords": [
+    "music",
+    "player",
+    "media"
+  ],
+  "commands": [
+    {
+      "name": "toggle-play-pause",
+      "title": "Toggle Play/Pause",
+      "description": "Toggle play or pause of current track in Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "play",
+      "title": "Play",
+      "description": "Play current track in Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pause",
+      "title": "Pause",
+      "description": "Pause current track in Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "next-track",
+      "title": "Next Track",
+      "description": "Skip to the next track in Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous-track",
+      "title": "Previous Track",
+      "description": "Skip to the previous track in Music.",
+      "mode": "no-view"
+    },
+    {
+      "name": "currently-playing",
+      "title": "Currently Playing Track",
+      "description": "Get info about currently playing track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "love",
+      "title": "Love Track",
+      "description": "Love currently playing track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "dislike",
+      "title": "Dislike Track",
+      "description": "Dislike currently playing track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-to-library",
+      "title": "Add to Library",
+      "description": "Add currently playing track to your library.",
+      "mode": "no-view"
+    },
+    {
+      "name": "love-and-add-to-library",
+      "title": "Love and Add to Library",
+      "description": "Love and add currently playing track to your library.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.4",
+    "fp-ts": "^2.11.5",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

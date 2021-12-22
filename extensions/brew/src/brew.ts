@@ -1,6 +1,5 @@
 import { exec, execSync } from "child_process";
 import { promisify } from "util";
-import { accessSync, constants } from "fs";
 import { stat, readFile, writeFile } from "fs/promises";
 import { join as path_join } from "path";
 import { cpus } from "os";
@@ -8,9 +7,15 @@ import * as utils from "./utils";
 
 const execp = promisify(exec);
 
+interface ExecError extends Error {
+  code: number;
+  stdout: string;
+  stderr: string;
+}
+
 /// Types
 
-interface Nameable {
+export interface Nameable {
   name: string;
 }
 
@@ -86,21 +91,47 @@ export interface OutdatedResults {
 
 /// Paths
 
-export const brewPrefix: string = cpus()[0].model.includes('Apple') ? "/opt/homebrew" : "/usr/local";
+export const brewPrefix: string = (() => {
+  try {
+    return execSync('brew --prefix', {'encoding': 'utf8'}).trim();
+  } catch {
+    return cpus()[0].model.includes('Apple') ? "/opt/homebrew" : "/usr/local";
+  }
+})();
 
 export function brewPath(suffix: string): string {
   return path_join(brewPrefix, suffix);
 }
 
-const brewExecutable = (() => {
-  const path = path_join(brewPrefix, 'bin/brew');
+const brewExecutable: string = path_join(brewPrefix, 'bin/brew');
+
+/// Commands
+
+export async function brewDoctorCommand(): Promise<string> {
   try {
-    accessSync(path, constants.X_OK);
-    return path;
-  } catch {
-    return 'brew'; // assume brew is in PATH
+    const output = await execp(`${brewExecutable} doctor`);
+    return output.stdout;
+  } catch (err) {
+    const execErr = err as ExecError;
+    if (execErr?.code === 1) {
+      return execErr.stderr;
+    } else {
+      return `${err}`;
+    }
   }
-})();
+}
+
+export async function brewUpgradeCommand(greedy: boolean, dryRun: boolean = false): Promise<string> {
+  let cmd = `${brewExecutable} upgrade`;
+  if (greedy) {
+    cmd += ' --greedy'
+  }
+  if (dryRun) {
+    cmd += ' --dry-run';
+  }
+  const output = await execp(cmd);
+  return output.stdout;
+}
 
 /// Fetching
 
@@ -135,8 +166,9 @@ export async function brewFetchInstalled(useCache: boolean): Promise<Installable
     const cacheTime = await mtimeMs(installedCachePath);
     // 'var/homebrew/locks' is updated after installed keg_only or linked formula.
     const locksTime = await mtimeMs(brewPath('var/homebrew/locks'));
-    // Because '/var/homebrew/pinned can be removed, we need to also check the parent directory'
-    const homebrewTime = await mtimeMs(brewPath('var/homebrew'));
+    // Casks
+    const caskroomTime = await mtimeMs(brewPath('Caskroom'));
+
     // 'var/homebrew/pinned' is updated after pin/unpin actions (but does not exist if there are no pinned formula).
     let pinnedTime;
     try {
@@ -144,8 +176,10 @@ export async function brewFetchInstalled(useCache: boolean): Promise<Installable
     } catch {
       pinnedTime = 0;
     }
+    // Because '/var/homebrew/pinned can be removed, we need to also check the parent directory'
+    const homebrewTime = await mtimeMs(brewPath('var/homebrew'));
 
-    if (homebrewTime < cacheTime && locksTime < cacheTime && pinnedTime < cacheTime) {
+    if (homebrewTime < cacheTime && caskroomTime < cacheTime && locksTime < cacheTime && pinnedTime < cacheTime) {
       const cacheBuffer = await readFile(installedCachePath);
       return JSON.parse(cacheBuffer.toString());
     } else {
@@ -165,8 +199,11 @@ export async function brewFetchOutdated(greedy: boolean): Promise<OutdatedResult
   if (greedy) {
     cmd += ' --greedy'; // include auto_update casks
   }
-  return JSON.parse((await execp(cmd)).stdout);
+  const output = (await execp(cmd)).stdout;
+  return JSON.parse(output);
 }
+
+/// Search
 
 const formulaURL = "https://formulae.brew.sh/api/formula.json";
 const caskURL = "https://formulae.brew.sh/api/cask.json"
@@ -215,14 +252,19 @@ export async function brewSearch(searchText: string, limit?: number): Promise<In
 export async function brewInstall(installable: Cask | Formula): Promise<void> {
   const identifier = brewIdentifier(installable);
   await execp(`${brewExecutable} install ${identifier}`);
+  if (isCask(installable)) {
+    installable.installed = installable.version;
+  } else {
+    installable.installed = [{version: installable.versions.stable, installed_as_dependency: false, installed_on_request: true}];
+  }
 }
 
-export async function brewUninstall(installable: Cask | Formula): Promise<void> {
+export async function brewUninstall(installable: Cask | Nameable): Promise<void> {
   const identifier = brewIdentifier(installable);
   await execp(`${brewExecutable} rm ${identifier}`);
 }
 
-export async function brewUpgrade(upgradable: Cask | Formula | Outdated): Promise<void> {
+export async function brewUpgrade(upgradable: Cask | Nameable): Promise<void> {
   const identifier = brewIdentifier(upgradable);
   await execp(`${brewExecutable} upgrade ${identifier}`);
 }
@@ -316,9 +358,8 @@ function formulaInstallPath(formula: Formula): string {
 function formulaFormatVersion(formula: Formula): string {
   if (!formula.installed.length) { return ""; }
 
-  let version = "";
   const installed_version = formula.installed[0];
-  version = installed_version.version;
+  let version = installed_version.version;
   let status = "";
   if (installed_version.installed_as_dependency) {
     status += 'D';

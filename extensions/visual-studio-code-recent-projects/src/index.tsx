@@ -2,19 +2,21 @@ import {
   ActionPanel,
   CopyToClipboardAction,
   environment,
+  Icon,
   List,
   OpenAction,
+  OpenInBrowserAction,
   OpenWithAction,
   ShowInFinderAction,
-  TrashAction,
+  TrashAction
 } from "@raycast/api";
 import { existsSync, readFileSync } from "fs";
-import tildify from "tildify";
 import { homedir } from "os";
 import { basename, dirname } from "path";
-import { fileURLToPath, URL } from "url";
 import { ReactNode } from "react";
-import { EntryLike, isFileEntry, isFolderEntry, isWorkspaceEntry } from "./types";
+import tildify from "tildify";
+import { fileURLToPath, URL } from "url";
+import { EntryLike, isFileEntry, isFolderEntry, isRemoteEntry, isWorkspaceEntry, RemoteEntry } from "./types";
 
 const STORAGE = `${homedir()}/Library/Application Support/Code/storage.json`;
 
@@ -27,15 +29,18 @@ export default function Command() {
   const folders = new Array<ReactNode>();
   const files = new Array<ReactNode>();
   const workspaces = new Array<ReactNode>();
+  const remoteEntries = new Array<ReactNode>();
 
   const recentEntries = getRecentEntries();
   recentEntries.forEach((entry) => {
-    if (isFolderEntry(entry) && existsSync(new URL(entry.folderUri))) {
-      folders.push(<ProjectListItem key={entry.folderUri} uri={entry.folderUri} />);
+    if (isRemoteEntry(entry)) {
+      remoteEntries.push(<RemoteListItem key={entry.folderUri} entry={entry} />);
+    } else if (isFolderEntry(entry) && existsSync(new URL(entry.folderUri))) {
+      folders.push(<LocalListItem key={entry.folderUri} uri={entry.folderUri} />);
     } else if (isFileEntry(entry) && existsSync(new URL(entry.fileUri))) {
-      files.push(<ProjectListItem key={entry.fileUri} uri={entry.fileUri} />);
+      files.push(<LocalListItem key={entry.fileUri} uri={entry.fileUri} />);
     } else if (isWorkspaceEntry(entry) && existsSync(new URL(entry.workspace.configPath))) {
-      workspaces.push(<ProjectListItem key={entry.workspace.configPath} uri={entry.workspace.configPath} />);
+      workspaces.push(<LocalListItem key={entry.workspace.configPath} uri={entry.workspace.configPath} />);
     }
   });
 
@@ -43,12 +48,38 @@ export default function Command() {
     <List searchBarPlaceholder="Search recent projects...">
       <List.Section title="Workspaces">{workspaces}</List.Section>
       <List.Section title="Folders">{folders}</List.Section>
+      <List.Section title="Remotes Folders">{remoteEntries}</List.Section>
       <List.Section title="Files">{files}</List.Section>
     </List>
   );
 }
 
-function ProjectListItem(props: { uri: string }) {
+function RemoteListItem(props: { entry: RemoteEntry }) {
+  const remotePath = decodeURI(basename(props.entry.folderUri));
+  const uri = props.entry.folderUri.replace("vscode-remote://", "vscode://vscode-remote/");
+
+  return (
+    <List.Item
+    title={remotePath}
+    subtitle={props.entry.label || "/"}
+    icon={Icon.Globe}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <OpenInBrowserAction
+              title="Open in Code"
+              icon="action-icon.png"
+              url={uri}
+            />
+          </ActionPanel.Section>
+          <DevelopmentActionSection />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function LocalListItem(props: { uri: string }) {
   const name = decodeURI(basename(props.uri));
   const path = fileURLToPath(props.uri);
   const prettyPath = tildify(path);

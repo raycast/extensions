@@ -240,7 +240,12 @@ export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsRe
 }
 
 const computeRedirectedUrl = (objEntity: ObjEntity) => {
-  return objEntity.url.replace(/\/space\/doc\//, '/docs/').replace(/\/space\//, '/');
+  return objEntity.url
+    .replace(/\/space\/doc\//, '/docs/')
+    .replace(/\/space\/sheet\//, '/sheets/')
+    .replace(/\/space\/bitable\//, '/base/')
+    .replace(/\/space\/mindnote\//, '/mindnotes/')
+    .replace(/\/space\//, '/');
 };
 
 const CACHE_DOCS_RECENT_LIST = 'CACHE_DOCS_RECENT_LIST';
