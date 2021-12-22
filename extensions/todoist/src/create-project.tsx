@@ -46,7 +46,7 @@ function CreateProject() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <ActionPanel.Item title="Create project" onAction={submit} icon={Icon.Plus} />
+          <ActionPanel.Item title="Create Project" onAction={submit} icon={Icon.Plus} />
         </ActionPanel>
       }
     >
