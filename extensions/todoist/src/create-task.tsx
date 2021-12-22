@@ -1,21 +1,12 @@
 import { useState } from "react";
 import { ActionPanel, Form, Icon, render, showToast, ToastStyle, useNavigation } from "@raycast/api";
-import { Project as TProject, Label } from "./types";
+import { Project as TProject, Label, TaskPayload } from "./types";
 import { createTask, useFetch } from "./api";
 import { priorities } from "./constants";
 import { getAPIDate } from "./utils";
 import Project from "./components/Project";
 
-interface FormattedPayload {
-  content: string;
-  description: string;
-  due_date?: string;
-  priority?: number;
-  project_id?: number;
-  label_ids?: number[];
-}
-
-function Create() {
+function CreateTask() {
   const { push } = useNavigation();
   const { data: projects, isLoading: isLoadingProjects } = useFetch<TProject[]>("/projects");
   const { data: labels, isLoading: isLoadingLabels } = useFetch<Label[]>("/labels");
@@ -52,7 +43,7 @@ function Create() {
   }
 
   async function submit() {
-    const body: FormattedPayload = { content, description };
+    const body: TaskPayload = { content, description };
 
     if (!body.content) {
       await showToast(ToastStyle.Failure, "The title is required");
@@ -130,4 +121,4 @@ function Create() {
   );
 }
 
-render(<Create />);
+render(<CreateTask />);
