@@ -1,0 +1,42 @@
+{
+  "name": "search-cargo-packages",
+  "title": "Search Cargo Packages",
+  "description": "Search for cargo packages at crates.io and receive information about them.",
+  "icon": "app-icon.png",
+  "author": "runmaxde",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Cargo Packages",
+      "subtitle": "crates.io",
+      "description": "Goal of this extension is to find cargo packages at crates.io. Afterwards you cane\n- copy the toml command\n- open the specific crates.io page\n- open the external documentation\n\n⚠️ Legal notice:\nThe used Logo is part of the rust-lang.org/cargo.io, learn more about the license at https://www.rust-lang.org/policies/media-guide ",
+      "mode": "view",
+      "keywords": [
+        "cargo",
+        "crates.io",
+        "rust",
+        "packages",
+        "toml"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "axios": "^0.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
