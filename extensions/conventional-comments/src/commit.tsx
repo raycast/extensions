@@ -16,8 +16,7 @@ import gitmoji, { GitmojiFormat } from "./data/gitmoji";
 import formatDescription from "./utils/formatDescription";
 
 export default function Command() {
-  const [isBreakingChange, isBreakingChangeSet] = useState(true);
-  const handleBreakingChange = () => isBreakingChangeSet(!isBreakingChange);
+  const [isBreakingChange, isBreakingChangeSet] = useState(false);
 
   async function handleSubmit(values: Record<string, FormValue>) {
     if (!values?.ccType) {
@@ -30,7 +29,7 @@ export default function Command() {
       return;
     }
 
-    if (values?.ccBreakingChange && !values?.ccBreakingChangeText) {
+    if (values?.ccBreakingChange && !values?.ccBreakingChangeInfo) {
       showToast(ToastStyle.Failure, "Breaking Info required");
       return;
     }
@@ -55,7 +54,7 @@ ${values?.ccBody}`;
     if (values?.ccBreakingChange) {
       const identifier = hasEmoji ? "💥️ " : "";
       const title = "BREAKING CHANGE: ";
-      const text = values?.ccBreakingChangeText;
+      const text = values?.ccBreakingChangeInfo;
       const breakingChangeMessage = `${title}${identifier}${text}`;
       message = `${message}
 
@@ -91,10 +90,15 @@ ${breakingChangeMessage}`;
         id="ccBreakingChange"
         title="Breaking Change"
         label="Commit introduces breaking change."
-        onChange={() => handleBreakingChange()}
+        onChange={isBreakingChangeSet}
+        value={isBreakingChange}
       />
       {isBreakingChange && (
-        <Form.TextField id="ccBreakingChangeText" title="Breaking Info" placeholder="Specific breaking call-out" />
+        <Form.TextField
+          id="ccBreakingChangeInfo"
+          title="Breaking Change Info"
+          placeholder="Specific breaking call-out"
+        />
       )}
       <Form.Dropdown id="ccFormat" title="Format " storeValue>
         {formats.map((format: GitmojiFormat, formatIndex: number) => (

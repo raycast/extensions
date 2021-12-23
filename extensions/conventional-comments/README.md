@@ -37,10 +37,3 @@ Examples:
 #### Breaking Change
 
 If checkbox is selected will require additional notation.
-
-## Roadmap
-
-- [ ] Preview commit based on format selected
-- [ ] Custom formatting options (subject, breaking change, etc.)
-- [ ] Automatic updates from Gitmoji (?)
-- [ ] Issue Tracker integration (?)
