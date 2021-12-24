@@ -1,29 +1,33 @@
-name: Generate API Reference
+name: Update CODEOWNERs
+
 on:
   push:
     paths:
-      - "docs/api-reference.json"
-    branches: [main]
-  workflow_dispatch:
+      - "extensions/**/package.json"
+    branches: [main, master]
+
 jobs:
-  generate-api-reference:
+  update:
     runs-on: ubuntu-latest
+    if: github.repository == 'raycast/extensions'
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: raycast/github-actions/setup-node@master
 
       - name: Generate
         working-directory: scripts
-        run: ./generate-api-reference.js
+        run: ./generate-code-owners.js
 
       - name: Commit
         uses: raycast/github-actions/git-commit@master
         with:
           repo_dir: ${{ github.workspace }}
-          message: "Docs: Generate API reference"
+          message: "Update CODEOWNERs"
 
       - name: Notify Failure to Slack
         if: failure()
