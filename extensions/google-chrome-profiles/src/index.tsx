@@ -11,7 +11,7 @@ import {
   Profile,
 } from "./util/types";
 import getPrefs from "./util/preferences";
-import { createBookmarkListItem } from "./util/util";
+import { createBookmarkListItem, matchSearchText } from "./util/util";
 
 export default function Command() {
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
@@ -129,6 +129,7 @@ const openGoogleChrome = async (profileDirectory: string, link: string, willOpen
 function ListBookmarks(props: { profile: Profile }) {
   const [bookmarkFile, setBookmarkFile] = useState<GoogleChromeBookmarkFile>();
   const [error, setError] = useState<Error>();
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
     async function listBookmarks() {
@@ -145,10 +146,15 @@ function ListBookmarks(props: { profile: Profile }) {
     listBookmarks();
   }, []);
 
+  const onSearchTextChange = (text: string) => {
+    setSearchText(text);
+  };
+
   const bookmarks = Object.values((bookmarkFile ?? { roots: {} }).roots)
     .flatMap(extractBookmarksUrlRecursively)
     .filter((e) => !e.url.startsWith("chrome://"))
-    .map((b) => createBookmarkListItem(b.url, b.name));
+    .map((b) => createBookmarkListItem(b.url, b.name))
+    .filter((b) => !searchText || matchSearchText(searchText, b.url, b.title));
 
   const newTabURL = getPrefs().newTabURL;
   const newTabOnTop = getPrefs().shouldShowNewTabInBookmarks
@@ -162,7 +168,11 @@ function ListBookmarks(props: { profile: Profile }) {
   }
 
   return (
-    <List isLoading={!bookmarkFile && !error} searchBarPlaceholder="Search Bookmark">
+    <List
+      isLoading={!bookmarkFile && !error}
+      searchBarPlaceholder="Search Bookmark"
+      onSearchTextChange={onSearchTextChange}
+    >
       {items &&
         items.map((b, index) => (
           <List.Item
