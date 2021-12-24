@@ -1,14 +1,4 @@
-import {
-  ActionPanel,
-  closeMainWindow,
-  CopyToClipboardAction,
-  Icon,
-  ImageMask,
-  List,
-  PushAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, Icon, ImageMask, List, PushAction, showHUD, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
 import { homedir } from "os";
@@ -69,8 +59,7 @@ export default function Command() {
                   title="Open in Google Chrome"
                   icon={Icon.Globe}
                   onAction={async () => {
-                    await openGoogleChrome(profile.directory, "new-tab");
-                    await closeMainWindow();
+                    await openGoogleChrome(profile.directory, "new-tab", () => showHUD("Opening profile..."));
                   }}
                 />
               </ActionPanel>
@@ -117,7 +106,7 @@ const extractBookmarksUrlRecursively = (folder: GoogleChromeBookmarkFolder): Goo
     }
   });
 
-const openGoogleChrome = async (profileDirectory: string, link: string) => {
+const openGoogleChrome = async (profileDirectory: string, link: string, willOpen: () => Promise<void>) => {
   const script = `
     set theAppPath to quoted form of "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
     set theProfile to quoted form of "${profileDirectory}"
@@ -125,6 +114,7 @@ const openGoogleChrome = async (profileDirectory: string, link: string) => {
   `;
 
   try {
+    await willOpen();
     await runAppleScript(script);
   } catch (error) {
     await showToast(ToastStyle.Failure, "Could not found\nGoogle Chrome.app in Applications folder");
@@ -186,15 +176,18 @@ function ListBookmarks(props: { profile: Profile }) {
                 <ActionPanel.Item
                   title="Open in Google Chrome"
                   icon={Icon.Globe}
-                  onAction={async () => {
-                    await openGoogleChrome(props.profile.directory, b.url);
-                    await closeMainWindow();
+                  onAction={() => {
+                    openGoogleChrome(props.profile.directory, b.url, () => showHUD("Opening bookmark..."));
                   }}
                 />
                 <ActionPanel.Item
                   title="Open in Background"
                   icon={Icon.Globe}
-                  onAction={() => openGoogleChrome(props.profile.directory, b.url)}
+                  onAction={() => {
+                    openGoogleChrome(props.profile.directory, b.url, async () => {
+                      await showToast(ToastStyle.Success, "Opening bookmark...");
+                    });
+                  }}
                 />
               </ActionPanel>
             }
