@@ -10,7 +10,8 @@ import {
   GoogleChromeLocalState,
   Profile,
 } from "./util/types";
-import { URL } from "url";
+import getPrefs from "./util/preferences";
+import { createBookmarkListItem } from "./util/util";
 
 export default function Command() {
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
@@ -144,28 +145,26 @@ function ListBookmarks(props: { profile: Profile }) {
     listBookmarks();
   }, []);
 
-  if (error) {
-    showToast(ToastStyle.Failure, error.message);
-  }
-
   const bookmarks = Object.values((bookmarkFile ?? { roots: {} }).roots)
     .flatMap(extractBookmarksUrlRecursively)
     .filter((e) => !e.url.startsWith("chrome://"))
-    .map((b) => {
-      const url = new URL(b.url);
-      const urlToDisplay = b.url.replace(/(^\w+:|^)\/\//, "");
-      return {
-        url: b.url,
-        title: b.name ? b.name : urlToDisplay,
-        subtitle: b.name ? urlToDisplay : undefined,
-        iconURL: `${url.origin}/favicon.ico`,
-      };
-    });
+    .map((b) => createBookmarkListItem(b.url, b.name));
+
+  const newTabURL = getPrefs().newTabURL;
+  const newTabOnTop = getPrefs().shouldShowNewTabInBookmarks
+    ? [createBookmarkListItem(newTabURL, "New Tab")]
+    : undefined;
+
+  const items = newTabOnTop?.concat(bookmarks ?? []) ?? bookmarks;
+
+  if (error && (items?.length ?? 0) == 0) {
+    showToast(ToastStyle.Failure, error.message);
+  }
 
   return (
     <List isLoading={!bookmarkFile && !error} searchBarPlaceholder="Search Bookmark">
-      {bookmarks &&
-        bookmarks.map((b, index) => (
+      {items &&
+        items.map((b, index) => (
           <List.Item
             key={index}
             title={b.title}
