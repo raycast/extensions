@@ -19,9 +19,9 @@
     {
       "title": "New Tab",
       "name": "newTabURL",
-      "default": "https://google.com",
+      "default": "https://google.com/search?q=%query%",
       "required": false,
-      "description": "The URL to launch when opening a profile.",
+      "description": "The URL to launch when opening a profile. Any %query% will be replaced with the search text.",
       "type": "textfield",
       "placeholder": "cannot be empty"
     },

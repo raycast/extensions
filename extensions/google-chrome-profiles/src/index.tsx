@@ -156,7 +156,7 @@ function ListBookmarks(props: { profile: Profile }) {
     .map((b) => createBookmarkListItem(b.url, b.name))
     .filter((b) => !searchText || matchSearchText(searchText, b.url, b.title));
 
-  const newTabURL = getPrefs().newTabURL;
+  const newTabURL = getPrefs().newTabURL.replace("%query%", encodeURIComponent(searchText));
   const newTabOnTop = getPrefs().shouldShowNewTabInBookmarks
     ? [createBookmarkListItem(newTabURL, "New Tab")]
     : undefined;
