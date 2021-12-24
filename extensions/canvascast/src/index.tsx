@@ -38,7 +38,16 @@ export default function main() {
   const [assignments, setAssignments] = useState<assignment[]>();
   const [announcements, setAnnouncements] = useState<announcement[]>();
   useEffect(() => {
-    api['courses?state=available&enrollment_state=active'].get().then((json: any[]) => {
+    api['courses?state=available&enrollment_state=active'].get().then((json: any) => {
+      if (json.stauts == 'unauthenticated' || !(json instanceof Array)) setAssignments([
+        {
+          name: 'Invalid API key',
+          course: 'CanvasCast',
+          course_id: 0,
+          id: 0,
+          color: 'Green'
+        }
+      ])
       let courses = json;
       setItems((json.map((a: any) => ({
         name: a.name,
