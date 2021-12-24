@@ -54,7 +54,7 @@ The options to create an Alert.
 #### Example
 
 ```typescript
-import { Alert, AlertOptions, AlertActionStyle } from "@raycast/api";
+import { AlertOptions, AlertActionStyle } from "@raycast/api";
 
 export default async () => {
   const options: AlertOptions = {

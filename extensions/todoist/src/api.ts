@@ -1,7 +1,7 @@
 import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
 import axios, { AxiosError } from "axios";
 import useSWR from "swr";
-import { TaskPayload } from "./types";
+import { ProjectPayload, TaskPayload } from "./types";
 import { showApiToastError } from "./utils";
 
 const preferences = getPreferenceValues();
@@ -45,6 +45,24 @@ export async function deleteTask(id: number) {
     .delete(`tasks/${id}`)
     .then(() => showToast(ToastStyle.Success, "Task deleted"))
     .catch((error) => showApiToastError({ error, title: "Failed to delete task", message: error.message }));
+}
+
+export async function createProject(body: ProjectPayload) {
+  await showToast(ToastStyle.Animated, "Creating project");
+
+  return axiosInstance
+    .post("/projects", body)
+    .then(() => showToast(ToastStyle.Success, "Project created"))
+    .catch((error) => showApiToastError({ error, title: "Failed to create project", message: error.message }));
+}
+
+export async function deleteProject(id: number) {
+  await showToast(ToastStyle.Animated, "Deleting project");
+
+  return axiosInstance
+    .delete(`projects/${id}`)
+    .then(() => showToast(ToastStyle.Success, "Project deleted"))
+    .catch((error) => showApiToastError({ error, title: "Failed to delete project", message: error.message }));
 }
 
 interface FetchResult<T> {
