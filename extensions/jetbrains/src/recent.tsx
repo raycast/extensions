@@ -29,9 +29,6 @@ import {
   recentEntry, useUrl
 } from "./util";
 import History from "./.history.json";
-import {promisify} from "util";
-
-const execPromise = promisify(exec)
 
 const ICON_GLOB = "Applications/JetBrains Toolbox/*/Contents/Resources/icon.icns";
 const HISTORY_GLOB = "Library/Application Support/JetBrains/Toolbox/apps/**/.history.json";
@@ -113,7 +110,7 @@ function OpenInJetBrainsAppAction({tool, recent}: { tool: AppHistory; recent: re
       ? `${tool.tool} "${recent?.path ?? ''}"`
       : `open ${tool.url}${recent?.title ?? ''}`
     showHUD(`Opening ${recent ? recent.title : tool.title}`)
-      .then(() => execPromise(cmd))
+      .then(() => exec(cmd, {env: {}}))
       .then(() => popToRoot())
       .catch((error) => showToast(ToastStyle.Failure, "Failed", error.message)
         .then(() => console.error({error}))

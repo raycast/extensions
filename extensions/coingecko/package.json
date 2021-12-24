@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "coingecko",
+  "title": "Coingecko",
+  "description": "Get crypto data from Coingecko (price, ticker, ranking)",
+  "icon": "icon.png",
+  "author": "destiner",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Coins",
+      "subtitle": "Coingecko",
+      "description": "Searches the list of Coingecko coins by name or symbol",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "currency",
+      "type": "dropdown",
+      "required": false,
+      "title": "Currency",
+      "description": "Currency that is used to display coin prices",
+      "default": "usd",
+      "data": [
+        {
+          "title": "US Dollar",
+          "value": "usd"
+        },
+        {
+          "title": "Euro",
+          "value": "eur"
+        },
+        {
+          "title": "Great British Pound",
+          "value": "gbp"
+        },
+        {
+          "title": "Japanese Yen",
+          "value": "jpy"
+        },
+        {
+          "title": "Chinese Yuan",
+          "value": "cny"
+        },
+        {
+          "title": "Russian Ruble",
+          "value": "rub"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.2",
+    "axios": "^0.24.0",
+    "rss-parser": "^3.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

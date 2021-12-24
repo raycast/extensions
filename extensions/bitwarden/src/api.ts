@@ -34,6 +34,12 @@ export class Bitwarden {
     return JSON.parse(stdout)
   }
 
+  async getTotp(id: string, sessionToken: string): Promise<string> {
+    // this could return something like "Not found." but checks for totp code are done before calling this function
+    const {stdout} = await this.exec(["get", "totp", "--session", sessionToken, id])
+    return stdout
+  }
+
   async unlock(password: string): Promise<string> {
       const {stdout: sessionToken} = await this.exec(["unlock", password, "--raw"])
       return sessionToken

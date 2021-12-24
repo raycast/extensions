@@ -57,7 +57,7 @@ export default function Main() {
   return (
     <FormulaList formulae={formulae}
                  casks={casks}
-                 searchBarPlaceholder="Search formulae by name..."
+                 searchBarPlaceholder={"Search formulae by name" + String.ellipsis}
                  isLoading={state.isLoading}
                  onSearchTextChange={(query: string) => {
                    // Perhaps query should be another useState??

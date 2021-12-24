@@ -20,7 +20,7 @@ interface Otp {
   name: string,
   digits: number,
   seed: string,
-  otp: number
+  otp: string
 }
 
 export function OtpList(props: { isLogin: boolean | undefined, setLogin: (login: boolean) => void }) {

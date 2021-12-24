@@ -1,5 +1,6 @@
 import React from "react";
 import { mutate } from "swr";
+import { confirmAlert } from "@raycast/api";
 import * as api from "./api";
 
 import { Task, TaskPayload } from "./types";
@@ -22,8 +23,10 @@ export function TodoistProvider({ children, path }: TodoistProviderProps): JSX.E
   }
 
   async function deleteTask(task: Task) {
-    await api.deleteTask(task.id);
-    mutate(path);
+    if (await confirmAlert({ title: "Are you sure you want to delete this task?" })) {
+      await api.deleteTask(task.id);
+      mutate(path);
+    }
   }
 
   async function updateTask(updatedTask: Task, payload: TaskPayload) {

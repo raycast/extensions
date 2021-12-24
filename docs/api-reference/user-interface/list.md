@@ -78,7 +78,7 @@ export default function Command() {
 
 ### List
 
-Displays [List.Section](https://developers.raycast.com/api-reference/user-interface/list#list-section) or [List.Item](https://developers.raycast.com/api-reference/user-interface/list#list-item).
+Displays [List.Section](#list.section) or [List.Item](#list.item).
 
 The list uses built-in filtering by indexing the title of list items and additionally keywords.
 
@@ -103,19 +103,19 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| actions | <code>null</code> or <code>[ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel)</code> | No | - | A reference to an [ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel). |
-| children | <code>null</code> or <code>[List.Section](https://developers.raycast.com/api-reference/user-interface/list#list-section)</code> or <code>List.Section[]</code> or <code>[List.Item](https://developers.raycast.com/api-reference/user-interface/list#list-item)</code> or <code>List.Item[]</code> | No | - | List sections or items. If [List.Item](https://developers.raycast.com/api-reference/user-interface/list#list-item) elements are specified, a default section is automatically created. |
+| actions | <code>null</code> or <code>[ActionPanel](./action-panel.md#actionpanel)</code> | No | - | A reference to an [ActionPanel](./action-panel.md#actionpanel). |
+| children | <code>null</code> or <code>[List.Section](#list.section)</code> or <code>List.Section[]</code> or <code>[List.Item](#list.item)</code> or <code>List.Item[]</code> | No | - | List sections or items. If [List.Item](#list.item) elements are specified, a default section is automatically created. |
 | isLoading | <code>boolean</code> | No | false | Indicates whether a loading bar should be shown or hidden below the search bar |
 | navigationTitle | <code>string</code> | No | Command title | The main title for that view displayed in Raycast |
 | searchBarPlaceholder | <code>string</code> | No | Search value... | Placeholder text that will be shown in the search bar. |
 | selectedItemId | <code>string</code> | No | - | Selects the item with the specified id. |
-| throttle | <code>boolean</code> | No | false | Defines whether the [ListProps.onSearchTextChange](https://developers.raycast.com/api-reference/user-interface/list#listprops) will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). |
+| throttle | <code>boolean</code> | No | false | Defines whether the [ListProps.onSearchTextChange](#listprops) will be triggered on every keyboard press or with a delay for throttling the events. Recommended to set to `true` when using custom filtering logic with asynchronous operations (e.g. network requests). |
 | onSearchTextChange | <code>(text: string) => void</code> | No | - |  |
 | onSelectionChange | <code>(id: string) => void</code> | No | - |  |
 
 ### List.Item
 
-A item in the [List](https://developers.raycast.com/api-reference/user-interface/list#list).
+A item in the [List](#list).
 
 This is one of the foundational UI components of Raycast. A list item represents a single entity. It can be a
 GitHub pull request, a file or anything else. Most likely you want to perform actions on this item, so make it clear
@@ -139,10 +139,10 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| accessoryIcon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | A optional icon displayed as accessory for the list item. See [ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike) for the supported formats and types. |
+| accessoryIcon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | - | A optional icon displayed as accessory for the list item. See [ImageLike](./icons-and-images.md#imagelike) for the supported formats and types. |
 | accessoryTitle | <code>string</code> | No | - | An additional title displayed for the item. |
-| actions | <code>null</code> or <code>[ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel)</code> | No | - | An [ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel) that will be updated for the selected list item. |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | A optional icon displayed for the list item. See [ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike) for the supported formats and types. |
+| actions | <code>null</code> or <code>[ActionPanel](./action-panel.md#actionpanel)</code> | No | - | An [ActionPanel](./action-panel.md#actionpanel) that will be updated for the selected list item. |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | - | A optional icon displayed for the list item. See [ImageLike](./icons-and-images.md#imagelike) for the supported formats and types. |
 | id | <code>string</code> | No | - | ID of the item. Make sure to assign each item a unique ID or a UUID will be auto generated. |
 | keywords | <code>string[]</code> | No | - | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. |
 | subtitle | <code>string</code> | No | - | An optional subtitle displayed next to the main title. |
@@ -150,7 +150,7 @@ export default function Command() {
 
 ### List.Section
 
-A group of related [List.Item](https://developers.raycast.com/api-reference/user-interface/list#list-item).
+A group of related [List.Item](#list.item).
 
 Sections are a great way to structure your list. F.e. group GitHub issues with the same status and order them by priority.
 This way the user can quickly access what is most relevant.
@@ -178,7 +178,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | <code>null</code> or <code>[List.Item](https://developers.raycast.com/api-reference/user-interface/list#list-item)</code> or <code>List.Item[]</code> | No | - | The [List.Item](https://developers.raycast.com/api-reference/user-interface/list#list-item) elements of the section. |
+| children | <code>null</code> or <code>[List.Item](#list.item)</code> or <code>List.Item[]</code> | No | - | The [List.Item](#list.item) elements of the section. |
 | id | <code>string</code> | No | - | ID of the section. Make sure to assign each section a unique ID or a UUID will be auto generated. |
 | subtitle | <code>string</code> | No | - | An optional subtitle displayed next to the title of the section. |
 | title | <code>string</code> | No | - | Title displayed above the section. |

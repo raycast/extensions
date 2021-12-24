@@ -27,6 +27,7 @@ export const getPlayerState = pipe(
 )
 export const love = tell("Music", "set loved of current track to true")
 export const dislike = tell("Music", "set disliked of current track to true")
+export const addToLibrary = tell("Music", 'duplicate current track to source "Library"')
 
 export interface TrackInfo {
 	name: string;

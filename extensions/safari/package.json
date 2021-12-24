@@ -12,14 +12,44 @@
       "title": "Show Tabs",
       "subtitle": "Safari",
       "description": "List, filter and open your Safari Tabs (Local and iCloud)",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "safariAppIdentifier",
+          "type": "dropdown",
+          "required": false,
+          "title": "Local Safari Browser",
+          "description": "Switch between Safari or Safari Technology Preview",
+          "default": "Safari",
+          "data": [
+            {
+              "value": "Safari",
+              "title": "Safari"
+            },
+            {
+              "value": "Safari Technology Preview",
+              "title": "Safari Technology Preview"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "reading-list",
       "title": "Show Reading List",
       "subtitle": "Safari",
       "description": "List, filter and open your Safari Reading List",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "groupByStatus",
+          "type": "checkbox",
+          "required": false,
+          "label": "Group by status",
+          "default": true,
+          "description": "Group items by Read/Unread status"
+        }
+      ]
     },
     {
       "name": "add-to-reading-list",

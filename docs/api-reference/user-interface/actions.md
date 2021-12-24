@@ -34,8 +34,8 @@ export default function Command() {
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | content | <code>string</code> or <code>number</code> | Yes | - | The contents that will be written to the clipboard as string. |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | [Icon.Clipboard](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) | A optional icon displayed for the item. See [ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike) for the supported formats and types. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | [Icon.Clipboard](./icons-and-images.md#icon) | A optional icon displayed for the item. See [ImageLike](./icons-and-images.md#imagelike) for the supported formats and types. |
+| shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
 | title | <code>string</code> | No | - | An optional title for the action. |
 | onCopy | <code>(content: string \| number) => void</code> | No | - |  |
 
@@ -69,9 +69,9 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| application | <code>string</code> or <code>[Application](https://developers.raycast.com/api-reference/utilities#application)</code> | No | - | The application name to use for opening the file. |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | [Icon.Finder](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) | The icon displayed for the action. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
+| application | <code>string</code> or <code>[Application](../utilities.md#application)</code> | No | - | The application name to use for opening the file. |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | [Icon.Finder](./icons-and-images.md#icon) | The icon displayed for the action. |
+| shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
 | target | <code>string</code> | Yes | - | The file, folder or URL to open. |
 | title | <code>string</code> | Yes | - | The title for the action. |
 | onOpen | <code>(target: string) => void</code> | No | - |  |
@@ -105,8 +105,8 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | [Icon.Globe](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) | The icon displayed for the action. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The optional keyboard shortcut for the menu item |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | [Icon.Globe](./icons-and-images.md#icon) | The icon displayed for the action. |
+| shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The optional keyboard shortcut for the menu item |
 | title | <code>string</code> | No | - | An optional title for the action. |
 | url | <code>string</code> | Yes | - | The URL to open. |
 | onOpen | <code>(url: string) => void</code> | No | - |  |
@@ -144,9 +144,9 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | [Icon.Upload](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) | The icon displayed for the action. |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | [Icon.Upload](./icons-and-images.md#icon) | The icon displayed for the action. |
 | path | <code>string</code> | Yes | - | The path to open. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
+| shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
 | title | <code>string</code> | No | Open With | The title for the action. |
 | onOpen | <code>(path: string) => void</code> | No | - |  |
 
@@ -180,8 +180,8 @@ export default function Command() {
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
 | content | <code>string</code> or <code>number</code> | Yes | - | The contents that will be written to the clipboard as string. |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | [Icon.Clipboard](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) | The icon displayed for the action. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | [Icon.Clipboard](./icons-and-images.md#icon) | The icon displayed for the action. |
+| shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
 | title | <code>string</code> | No | - | An optional title for the action. |
 | onPaste | <code>(content: string \| number) => void</code> | No | - |  |
 
@@ -220,8 +220,8 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | The icon displayed for the action. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | - | The icon displayed for the action. |
+| shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
 | target | <code>ReactNode</code> | Yes | - | The target view that will be pushed to the navigation stack. |
 | title | <code>string</code> | Yes | - | The title displayed for the item. |
 | onPush | <code>() => void</code> | No | - |  |
@@ -258,9 +258,9 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | [Icon.Finder](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) | A optional icon displayed for the item. See [ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike) for the supported formats and types. |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | [Icon.Finder](./icons-and-images.md#icon) | A optional icon displayed for the item. See [ImageLike](./icons-and-images.md#imagelike) for the supported formats and types. |
 | path | <code>PathLike</code> | Yes | - | The path to open. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
+| shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
 | title | <code>string</code> | No | Show in Finder | An optional title for the action. |
 | onShow | <code>(path: PathLike) => void</code> | No | - |  |
 
@@ -272,8 +272,8 @@ Action that allows to add a submit handler for capturing form values.
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | The icon displayed for the action. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | - | The icon displayed for the action. |
+| shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the action. |
 | title | <code>string</code> | No | - | The title displayed for the item. |
 | onSubmit | <code>(input: Values) => void</code> | No | - |  |
 
@@ -307,8 +307,8 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | [Icon.Trash](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) | A optional icon displayed for the action. |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | [Icon.Trash](./icons-and-images.md#icon) | A optional icon displayed for the action. |
 | paths | <code>PathLike</code> or <code>PathLike[]</code> | Yes | - | The item or items to move to the trash. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The optional keyboard shortcut for the action. |
+| shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The optional keyboard shortcut for the action. |
 | title | <code>string</code> | No | Move to Trash | An optional title for the action. |
 | onTrash | <code>(paths: PathLike \| PathLike[]) => void</code> | No | - |  |

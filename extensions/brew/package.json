@@ -11,22 +11,40 @@
       "name": "installed",
       "title": "Show Installed",
       "subtitle": "Brew",
-      "description": "List installed brew formulae",
+      "description": "List installed brew formulae & casks",
       "mode": "view"
     },
     {
       "name": "search",
-      "title": "Search Formulae",
+      "title": "Search",
       "subtitle": "Brew",
-      "description": "Search brew formulae",
+      "description": "Search brew formulae & casks",
       "mode": "view"
     },
     {
       "name": "outdated",
       "title": "Show Outdated",
       "subtitle": "Brew",
-      "description": "Show outdated brew formulae",
+      "description": "Show outdated brew formulae & casks",
       "mode": "view"
+    },
+    {
+      "name": "upgrade",
+      "title": "Upgrade",
+      "subtitle": "Brew",
+      "description": "Upgrade brew formulae & casks",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "greedyUpgrades",
+      "type": "checkbox",
+      "required": false,
+      "title": "Upgrades",
+      "description": "Include auto-updating casks when upgrading or checking for outdated items.",
+      "default": false,
+      "label": "Include auto-updating casks when upgrading"
     }
   ],
   "dependencies": {
