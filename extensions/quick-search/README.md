@@ -1,6 +1,6 @@
 # raycast-quick-search
 
-Use keyboard shortcut quickly search selected text or clipboard text via Google or Github or DeepL etc.
+Use a global keyboard shortcut to quickly search selected text or clipboard text via Google or Github or DeepL etc.
 
 ## How is this extension different from Raycast's built-in "Quick Link"?
 
@@ -48,4 +48,4 @@ Ivan 是一个前端开发工程师。他正在阅读一篇关于“React”的�
 如果使用 `Quick Search`， 那么在 Ivan 选中那个技术名词的时候，他就已经可以通过 Hotkey 来直接打开 Google 搜索页面。
 
 Quick Search 和 Quick Link 的不同就在于 Quick Search 可以自动的从选中文本和剪贴板中自动获取 `Query`(需要查询的关键字)，然后直接打开特定的搜索地址。
-这跳过了由Ivan输入`Query` 的步骤，从而使得搜索更加的快速。
+这跳过了由 Ivan 输入`Query` 的步骤，从而使得搜索更加的快速。
