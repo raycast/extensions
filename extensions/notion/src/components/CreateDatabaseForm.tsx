@@ -21,6 +21,8 @@ import { useEffect, useState } from 'react'
 import {
   Database,
   DatabaseProperty,
+  DatabaseView,
+  User,
   Page,
   fetchDatabases,
   fetchDatabaseProperties,
@@ -47,7 +49,7 @@ import {
 } from '../utils/local-storage'
 
 
-export function CreateDatabaseForm( props : { databaseId: string | undefined, setRefreshView: any } ): JSX.Element {
+export function CreateDatabaseForm( props : { databaseId: string | null, setRefreshView: any } ): JSX.Element {
 
   const presetDatabaseId = props.databaseId
   const setParentRefreshView = props.setRefreshView
@@ -79,7 +81,7 @@ export function CreateDatabaseForm( props : { databaseId: string | undefined, se
   // Setup useState objects
   const [databases, setDatabases] = useState<Database[]>()
   const [databaseProperties, setDatabaseProperties] = useState<DatabaseProperty[]>()  
-  const [databaseId, setDatabaseId] = useState<string>(presetDatabaseId)
+  const [databaseId, setDatabaseId] = useState<string | null >((presetDatabaseId ? presetDatabaseId : null ))
   const [databaseView, setDatabaseView] = useState<DatabaseView>()
   const [refreshView, setRefreshView] = useState<number>()  
   const [markdown, setMarkdown] = useState<string>()
@@ -147,7 +149,7 @@ export function CreateDatabaseForm( props : { databaseId: string | undefined, se
           setDatabaseProperties(cachedDatabaseProperties)
 
           // Load realtion page
-          cachedDatabaseProperties.forEach(async function (cdp){
+          cachedDatabaseProperties.forEach(async function (cdp: DatabaseProperty){
             if(cdp.type === 'relation' && cdp.relation_id && !relationsPages[cdp.relation_id]){
               const cachedRelationPages = await loadDatabasePages(databaseId)
               if(cachedRelationPages){
@@ -159,7 +161,7 @@ export function CreateDatabaseForm( props : { databaseId: string | undefined, se
           })
 
           // Load users
-          hasPeopleProperty = cachedDatabaseProperties.some(function(cdp) {
+          const hasPeopleProperty = cachedDatabaseProperties.some(function(cdp: DatabaseProperty) {
             return cdp.type === 'people';
           })
           if(hasPeopleProperty){
@@ -178,7 +180,7 @@ export function CreateDatabaseForm( props : { databaseId: string | undefined, se
           setDatabaseProperties(supportedDatabaseProperties)
 
           // Fetch relation pages
-          supportedDatabaseProperties.forEach(async function (cdp){
+          supportedDatabaseProperties.forEach(async function (cdp: DatabaseProperty){
             if(cdp.type === 'relation' && cdp.relation_id){
               const fetchedRelationPages = await queryDatabase(cdp.relation_id, undefined)
               if(fetchedRelationPages && fetchedRelationPages[0]){
@@ -191,7 +193,7 @@ export function CreateDatabaseForm( props : { databaseId: string | undefined, se
           })
 
           // Fetch users
-          hasPeopleProperty = cachedDatabaseProperties.some(function(cdp) {
+          const hasPeopleProperty = cachedDatabaseProperties.some(function(cdp: DatabaseProperty) {
             return cdp.type === 'people';
           })
           if(hasPeopleProperty){
@@ -266,7 +268,7 @@ export function CreateDatabaseForm( props : { databaseId: string | undefined, se
 
   // Get Title Property
   const titleProperty = databaseProperties?.filter(function (dp) { return dp.id === 'title' })[0]
-
+  const databasePropertiesButTitle = databaseProperties?.filter(function (dp) { return dp.id !== 'title' })
   return (
     <Form 
       isLoading={isLoading}
@@ -282,14 +284,14 @@ export function CreateDatabaseForm( props : { databaseId: string | undefined, se
           <ActionPanel.Section title='View options'>
             <ActionSetVisibleProperties 
               key='set-visible-inputs'
-              databaseProperties={databaseProperties?.filter(function (dp) { return dp.id !== 'title' })} 
+              databaseProperties={(databasePropertiesButTitle ? databasePropertiesButTitle : [] )  } 
               selectedPropertiesIds={databaseView?.create_properties} 
-              onSelect={function (propertyId) {
+              onSelect={function (propertyId: string) {
                 databaseViewCopy.create_properties.push(propertyId)                                       
                 saveDatabaseView(databaseViewCopy)
               }} 
-              onUnselect={function (propertyId) {
-                const newVisiblePropertiesIds = databaseViewCopy?.create_properties.filter(function (pid) { return pid !== propertyId})
+              onUnselect={function (propertyId: string) {
+                const newVisiblePropertiesIds = databaseViewCopy?.create_properties.filter(function (pid: string) { return pid !== propertyId})
                 databaseViewCopy.create_properties = (newVisiblePropertiesIds ? newVisiblePropertiesIds : [])
                 saveDatabaseView(databaseViewCopy)
               }} />
@@ -376,7 +378,7 @@ export function CreateDatabaseForm( props : { databaseId: string | undefined, se
             break
           case 'relation':
             return (<Form.TagPicker key={key} id={id} title={title} placeholder={placeholder}>
-                {relationsPages[dp.relation_id]?.map((rp) => {
+                {relationsPages[dp.relation_id]?.map((rp: Page[]) => {
                   return (<Form.TagPicker.Item  
                       key={'relation::'+rp.id} 
                       value={rp.id} 

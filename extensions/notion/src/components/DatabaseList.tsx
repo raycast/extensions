@@ -112,7 +112,7 @@ export function DatabaseList (props: {databasePage: Page}): JSX.Element {
         setDatabaseProperties(cachedDatabaseProperties)
         
         // Load users
-        hasPeopleProperty = cachedDatabaseProperties.some(function(cdp) {
+        const hasPeopleProperty = cachedDatabaseProperties.some(function(cdp: DatabaseProperty) {
           return cdp.type === 'people';
         })
         if(hasPeopleProperty){
@@ -123,7 +123,7 @@ export function DatabaseList (props: {databasePage: Page}): JSX.Element {
 
           const copyCachedDatabaseProperties = JSON.parse(JSON.stringify(cachedDatabaseProperties))
 
-          copyCachedDatabaseProperties.forEach(function (ccdp){
+          copyCachedDatabaseProperties.forEach(function (ccdp: DatabaseProperty){
             if(ccdp.type === 'people'){
               ccdp.options = cachedUsers
             }
@@ -144,7 +144,7 @@ export function DatabaseList (props: {databasePage: Page}): JSX.Element {
         setDatabaseProperties(supportedDatabaseProperties)
 
         // Fetch users
-        hasPeopleProperty = supportedDatabaseProperties.some(function(sdp) {
+        const hasPeopleProperty = supportedDatabaseProperties.some(function(sdp: DatabaseProperty) {
           return sdp.type === 'people';
         })
         if(hasPeopleProperty){
@@ -153,7 +153,7 @@ export function DatabaseList (props: {databasePage: Page}): JSX.Element {
 
             const copySupportedDatabaseProperties = JSON.parse(JSON.stringify(supportedDatabaseProperties))
 
-            copySupportedDatabaseProperties.forEach(function (ccdp){
+            copySupportedDatabaseProperties.forEach(function (ccdp: DatabaseProperty){
               if(ccdp.type === 'people'){
                 ccdp.options = fetchedUsers
               }
@@ -182,7 +182,7 @@ export function DatabaseList (props: {databasePage: Page}): JSX.Element {
       } else {
         setDatabaseView({
           properties:{}
-        })
+        } as DatabaseView)
       }      
     }
     getDatabaseView()
@@ -219,7 +219,7 @@ export function DatabaseList (props: {databasePage: Page}): JSX.Element {
     storeDatabaseView(databaseId,newDatabaseView)
   }
 
-  const databaseViewTypes = {
+  const databaseViewTypes: Record<string:JSX.Element> = {
     list: DatabaseListView,
     kanban: DatabaseKanbanView
   }

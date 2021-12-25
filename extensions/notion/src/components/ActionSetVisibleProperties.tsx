@@ -6,9 +6,9 @@ import {
 } from '@raycast/api'
 import {
   DatabaseProperty,
-} from './utils/notion'
+} from '../utils/notion'
 
-export function ActionSetVisibleProperties (props: { title: string, icon: ImageLike, databaseProperties: DatabaseProperty[], selectedPropertiesIds: string[], onSelect, onUnselect }): JSX.Element {
+export function ActionSetVisibleProperties (props: { title: string, icon: ImageLike, databaseProperties: DatabaseProperty[], selectedPropertiesIds: string[], onSelect: any, onUnselect: any }): JSX.Element {
   
   const title = (props.title ? props.title : 'Show / Hide Properties...' )
   const icon = (props.icon ? props.icon : './icon/shown.png' )
@@ -18,7 +18,7 @@ export function ActionSetVisibleProperties (props: { title: string, icon: ImageL
   const onUnselect = props.onUnselect
 
   if(!onSelect || !onUnselect)
-    return
+    return []
 
   return ( <ActionPanel.Submenu 
     title={title}

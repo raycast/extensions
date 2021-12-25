@@ -19,12 +19,14 @@ import {
   ImageMask,
   useNavigation,
   Form,
+  KeyboardShortcut
   SubmitFormAction,
 } from '@raycast/api'
 import { useEffect, useState } from 'react'
 import {
   DatabaseView,
   Page,
+  PageProperty,
   DatabaseProperty,
   DatabasePropertyOption,
   PageContent,
@@ -69,7 +71,7 @@ import open from 'open'
 
 
 
-export function ActionEditPageProperty(props: { databaseProperty: DatabaseProperty, pageId: string, pageProperty: PageProperty, setRefreshView: any, shortcut: KeyboardShortcut, icon: ImageLike, customOptions: DatabasePropertyOption[] }) {
+export function ActionEditPageProperty(props: { databaseProperty: DatabaseProperty, pageId: string, pageProperty: PageProperty, setRefreshView: any, shortcut: KeyboardShortcut, icon: ImageLike, customOptions: DatabasePropertyOption[] }): JSX.Element {
   const dp = props.databaseProperty
   const propertyType = dp.type
   const pageId = props.pageId
@@ -205,7 +207,7 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
           <ActionPanel.Section>
             {pagePropertyValue?.map(function (user: User) {
               return (<ActionPanel.Item 
-                icon={{source:user.avatar_url, mask: ImageMask.Circle}} 
+                icon={(user?.avatar_url ? {source:user.avatar_url, mask: ImageMask.Circle} : null )} 
                 title={user.name+'  ✓'}
                 onAction={function () {
                   const peopleProperty = (pagePropertyValue ? pagePropertyValue : [])
@@ -221,8 +223,8 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
           {options?.map(function (user: User) {
             if(!peopleIds.includes(user.id)){
               return (<ActionPanel.Item 
-              icon={{source:user.avatar_url, mask: ImageMask.Circle}} 
-              title={user.name}
+              icon={( user?.avatar_url ? {source:user.avatar_url, mask: ImageMask.Circle} : null )} 
+              title={( user?.name ? user.name : 'Unknown' )}
               onAction={async function () {
                 const peopleProperty = (pagePropertyValue ? pagePropertyValue : [])
                 peopleProperty.push({id: user.id})
@@ -233,6 +235,10 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
         </ActionPanel.Section>
        </ActionPanel.Submenu>
       )
+      break
+
+    default
+      return []
       break
   }  
 }

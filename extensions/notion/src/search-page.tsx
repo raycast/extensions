@@ -3,6 +3,7 @@ import {
   List,
 } from '@raycast/api'
 import {
+  Page,
   searchPages,
 } from './utils/notion'
 import {

@@ -67,7 +67,7 @@ import open from 'open'
 
 
 
-export function DatabaseListView (props: {databasePage: Page}): JSX.Element {
+export function DatabaseListView (props: {databaseId: string, databasePages: Page[], databaseProperties: DatabaseProperty[], databaseView: DatabaseView, setRefreshView: any, saveDatabaseView: any  }): JSX.Element {
 
   // Get database page list info
   const databaseId = props.databaseId

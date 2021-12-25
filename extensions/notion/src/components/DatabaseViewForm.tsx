@@ -12,6 +12,7 @@ import {
 } from '@raycast/api'
 import { useEffect, useState } from 'react'
 import {
+  Database,
   DatabaseView,
   Page,
   DatabaseProperty,
@@ -33,7 +34,7 @@ import {
 } from '../utils/local-storage'
 
 
-export function DatabaseViewForm (props: { databaseId: string, databaseView: DatabaseView, saveDatabaseView: any, isDefaultView: boolean }): JSX.Element {
+export function DatabaseViewForm (props: { databaseId: string, databaseView: DatabaseView | null, saveDatabaseView: any, isDefaultView: boolean }): JSX.Element {
   const presetDatabaseId = props.databaseId
   const databaseView = props.databaseView
   const saveDatabaseView = props.saveDatabaseView
@@ -77,7 +78,7 @@ export function DatabaseViewForm (props: { databaseId: string, databaseView: Dat
   const [databaseId, setDatabaseId] = useState<string>()
   const [viewType, setViewType] = useState<string>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [viewForm, setViewForm] = useState()
+  const [viewForm, setViewForm] = useState<JSX.Element>()
   
   // Fetch databases
   useEffect(() => {
@@ -143,7 +144,7 @@ export function DatabaseViewForm (props: { databaseId: string, databaseView: Dat
           case 'kanban':
             if(!hasSelect){
               showToast(ToastStyle.Failure, 'Select Property Required','Kanban view requires a "Select" type property.');
-              setViewForm(null)
+              setViewForm([])
             }
             setViewForm(<KanbanViewFormItem 
               key={`${databaseId}-kanban-view-form`} 
@@ -152,7 +153,7 @@ export function DatabaseViewForm (props: { databaseId: string, databaseView: Dat
             break
 
           default:
-            setViewForm(null)
+            setViewForm([])
         }        
       }      
     }

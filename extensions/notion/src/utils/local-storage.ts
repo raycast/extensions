@@ -2,6 +2,13 @@ import {
   setLocalStorageItem,
   getLocalStorageItem,
 } from '@raycast/api'
+import {
+  Page,
+  Database,
+  DatabaseProperty,
+  DatabaseView,
+  User,
+} from './notion'
 
 export async function storeRecentlyOpenedPage(page: Page) {
   const cachedRecentlyOpenPages = await loadRecentlyOpenedPages()

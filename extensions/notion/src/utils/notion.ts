@@ -36,7 +36,7 @@ export interface DatabaseProperty {
   id: string
   type: string
   name: string
-  options: DatabasePropertyOption[]
+  options: DatabasePropertyOption[] | User[]
   relation_id: string | undefined
 }
 
@@ -67,11 +67,20 @@ export interface PageContent {
 }
 
 export interface DatabaseView {
-  properties: Record<string,any>
-  sort_by: Record<string,any>
-  type: string
+  properties: Record<string,any> | undefined
+  sort_by: Record<string,any> | undefined
+  type: string | undefined
   name: string | undefined
   kanban: KabanView | undefined
+}
+
+export interface KabanView {
+  property_id: string
+  backlog_ids: string[]
+  not_started_ids: string[]
+  started_ids: string[]
+  completed_ids: string[]
+  canceled_ids: string[]
 }
 
 // Fetch databases
@@ -798,7 +807,7 @@ export function notionColorToTintColor (notionColor: string | undefined): Color 
 }
 
 
-export function extractPropertyValue(page: Page, propId: string): sting | null {
+export function extractPropertyValue(page: Page, propId: string): string | null {
 
   const pageProperty = page.properties[propId]
   if(pageProperty){

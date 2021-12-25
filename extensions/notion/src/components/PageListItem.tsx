@@ -49,7 +49,7 @@ import {
 import moment from 'moment'
 import open from 'open'
 
-export function PageListItem (props: { page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined, saveDatabaseView: any, setRefreshView: any, users: User[], icon, accessoryIcon }): JSX.Element {
+export function PageListItem (props: { keywords: string[] | null, page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined, saveDatabaseView: any, setRefreshView: any, users: User[], icon: ImageLike | null, accessoryIcon: ImageLike | null, customActions: Element[] | null }): JSX.Element {
   const page = props.page
   const pageProperties = page.properties
   const icon = (props.icon ? props.icon : {source: ((page.icon_emoji) ? page.icon_emoji : ( page.icon_file ?  page.icon_file :  ( page.icon_external ?  page.icon_external : Icon.TextDocument)))})
@@ -174,11 +174,11 @@ export function PageListItem (props: { page: Page, databaseView: DatabaseView | 
           <ActionSetVisibleProperties 
             databaseProperties={databaseProperties} 
             selectedPropertiesIds={visiblePropertiesIds} 
-            onSelect={function (propertyId) {
+            onSelect={function (propertyId: sting) {
               databaseViewCopy.properties[propertyId] = {}                                          
               saveDatabaseView(databaseViewCopy)
             }} 
-            onUnselect={function (propertyId) {
+            onUnselect={function (propertyId: string) {
               delete databaseViewCopy.properties[propertyId]
               saveDatabaseView(databaseViewCopy)
             }} />

@@ -9,8 +9,13 @@ import {
 } from '@raycast/api'
 import { useEffect, useState } from 'react'
 import {
+  Page,
+  DatabaseProperty,
+  DatabaseView,
+  DatabasePropertyOption,
   notionColorToTintColor,
   extractPropertyValue,
+  KabanView
 } from '../utils/notion'
 import {
   storeRecentlyOpenedPage,
@@ -35,15 +40,7 @@ import {
   PageListItem,
 } from './'
 
-interface KabanView {
-  property_id: string
-  backlog_ids: string[]
-  not_started_ids: string[]
-  started_ids: string[]
-  completed_ids: string[]
-  canceled_ids: string[]
-}
-
+                                 
 export function DatabaseKanbanView (props: {databaseId: string, databasePages: Page[], databaseProperties: DatabaseProperty[], databaseView: DatabaseView, setRefreshView: any, saveDatabaseView: any  }): JSX.Element {
 
   // Get database page list info
@@ -85,7 +82,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
   }
 
 
-  function statusSourceIcon(dspoId){
+  function statusSourceIcon(dspoId: string){
     var source_icon = 'icon/kanban_status_backlog.png'
       
     if(notStartedIds.includes(dspoId)) {
@@ -96,7 +93,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
     if(startedIds.includes(dspoId)) {
       const statusIndex = startedIds.indexOf(dspoId)+1
       const statusSize = startedIds.length+1
-      const currentStatus = (statusIndex / statusSize).toFixed(2)
+      const currentStatus = (statusIndex / statusSize).toFixed(2) as numnber
       var percent = '25'
       if(currentStatus <= 0.26){
         percent = '25'
@@ -122,7 +119,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
     return source_icon
   }
   
-  const databaseSections: {pages:Page[], name:string, icon:ImageLike, key:string}[] = []
+  const databaseSections: {pages:Page[], name:string, icon:ImageLike }[] = []
   const tempSections: Record<string,Record<string,any>[]> = {}
 
   databasePages.forEach(function (p){
@@ -133,9 +130,9 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
     tempSections[propId].push(p)        
   })
 
-  const optionsMap = {}
-  const customOptions = []
-  statusProperty.options?.sort(function (dpa, dpb){
+  const optionsMap: Record<string,DatabasePropertyOption> = {}
+  const customOptions: DatabasePropertyOption[] = []
+  statusProperty.options?.sort(function (dpa: DatabaseProperty, dpb: DatabaseProperty){
       const value_a = actionEditIds.indexOf(dpa.id)
       const value_b = actionEditIds.indexOf(dpb.id)
 
@@ -153,7 +150,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
         return -1
 
       return 0
-    }).forEach(function (option) {
+    }).forEach(function (option: DatabasePropertyOption) {
       optionsMap[option.id] = option
       customOptions.push({
         icon: statusSourceIcon(option.id),
@@ -163,19 +160,18 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
       })
   })
 
-  sectionIds.forEach(function (sectionId) {
+  sectionIds.forEach(function (sectionId: string) {
     if(!tempSections[sectionId])
       return 
 
     databaseSections.push({ 
       pages:tempSections[sectionId],
       name: optionsMap[sectionId]?.name,
-      icon: { source: statusSourceIcon(sectionId), tintColor: notionColorToTintColor(optionsMap[sectionId]?.color) },
-      key: [optionsMap[sectionId]?.name]
+      icon: { source: statusSourceIcon(sectionId), tintColor: notionColorToTintColor(optionsMap[sectionId]?.color) }
     })
   })
 
-  const SectionElement = []
+  const SectionElement: JSX.Element[] = []
 
   databaseSections?.map(function (ds) {
     
