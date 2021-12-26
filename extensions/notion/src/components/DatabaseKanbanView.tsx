@@ -41,7 +41,7 @@ import {
 } from './'
 
                                  
-export function DatabaseKanbanView (props: {databaseId: string, databasePages: Page[], databaseProperties: DatabaseProperty[], databaseView: DatabaseView, setRefreshView: any, saveDatabaseView: any  }): JSX.Element {
+export function DatabaseKanbanView (props: {databaseId: string, databasePages: Page[], databaseProperties: DatabaseProperty[], databaseView: DatabaseView, setRefreshView: any, saveDatabaseView: any  }): JSX.Element[] {
 
   // Get database page list info
   const databaseId = props.databaseId
@@ -53,12 +53,12 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
   
   // Get kanban view settings
   const kanbanView = databaseView.kanban
-  const propertyId = kanbanView.property_id
-  const backlogIds = (kanbanView.backlog_ids ? kanbanView.backlog_ids : [])
-  const notStartedIds = (kanbanView.not_started_ids ? kanbanView.not_started_ids : [])
-  const startedIds = (kanbanView.started_ids ? kanbanView.started_ids : [])
-  const completedIds = (kanbanView.completed_ids ? kanbanView.completed_ids : [])
-  const canceledIds = (kanbanView.canceled_ids ? kanbanView.canceled_ids : [])
+  const propertyId = kanbanView?.property_id
+  const backlogIds = (kanbanView?.backlog_ids ? kanbanView.backlog_ids : [])
+  const notStartedIds = (kanbanView?.not_started_ids ? kanbanView.not_started_ids : [])
+  const startedIds = (kanbanView?.started_ids ? kanbanView.started_ids : [])
+  const completedIds = (kanbanView?.completed_ids ? kanbanView.completed_ids : [])
+  const canceledIds = (kanbanView?.canceled_ids ? kanbanView.canceled_ids : [])
 
   // Section Order: Started > Not Started > Completed > Canceled > Backlog | Other (hidden)      
   const sectionIds = startedIds.concat(notStartedIds).concat(completedIds).concat(canceledIds).concat(backlogIds)
@@ -93,7 +93,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
     if(startedIds.includes(dspoId)) {
       const statusIndex = startedIds.indexOf(dspoId)+1
       const statusSize = startedIds.length+1
-      const currentStatus = (statusIndex / statusSize).toFixed(2) as numnber
+      const currentStatus = (statusIndex / statusSize).toFixed(2) as number
       var percent = '25'
       if(currentStatus <= 0.26){
         percent = '25'
@@ -132,7 +132,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
 
   const optionsMap: Record<string,DatabasePropertyOption> = {}
   const customOptions: DatabasePropertyOption[] = []
-  statusProperty.options?.sort(function (dpa: DatabaseProperty, dpb: DatabaseProperty){
+  (statusProperty.options as DatabaseProperty[])?.sort(function (dpa, dpb){
       const value_a = actionEditIds.indexOf(dpa.id)
       const value_b = actionEditIds.indexOf(dpb.id)
 
@@ -150,7 +150,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
         return -1
 
       return 0
-    }).forEach(function (option: DatabasePropertyOption) {
+    }).forEach(function (option) {
       optionsMap[option.id] = option
       customOptions.push({
         icon: statusSourceIcon(option.id),
@@ -165,7 +165,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
       return 
 
     databaseSections.push({ 
-      pages:tempSections[sectionId],
+      pages:tempSections[sectionId] as Page[],
       name: optionsMap[sectionId]?.name,
       icon: { source: statusSourceIcon(sectionId), tintColor: notionColorToTintColor(optionsMap[sectionId]?.color) }
     })
