@@ -70,7 +70,7 @@ import open from 'open'
 
 
 
-export function ActionEditPageProperty(props: { databaseProperty: DatabaseProperty, pageId: string, pageProperty: any, setRefreshView: any, shortcut: KeyboardShortcut, icon: ImageLike, customOptions: DatabasePropertyOption[] }): JSX.Element {
+export function ActionEditPageProperty(props: { databaseProperty: DatabaseProperty, pageId: string, pageProperty: any, setRefreshView: any, shortcut: KeyboardShortcut, icon: ImageLike, customOptions: DatabasePropertyOption[] }): JSX.Element | null {
   const dp = props.databaseProperty
   const propertyType = dp.type
   const pageId = props.pageId
@@ -81,7 +81,7 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
 
   const title = 'Set '+dp.name
   const icon = (props.icon ? props.icon : 'icon/'+dp.type+'.png')
-  const options = (props.customOptions ? props.customOptions : (dp.options ? dp.options : []))
+  const options = (props.customOptions ? props.customOptions : (dp.options ? dp.options : [])) 
 
   async function setPageProperty (propertyValue: any) {
     var patchedProperty: Record<string,any> = {}
@@ -115,10 +115,10 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
           title={title}
           icon={icon}
           shortcut={shortcut}>
-          {options?.map(function (opt) {
+          {options?.map(function (opt: DatabasePropertyOption) {
             return (<ActionPanel.Item 
               icon={((opt.icon ? opt.icon : opt.id !== '_select_null_') ? {source: (opt.icon ? opt.icon : (pagePropertyValue?.id === opt.id ? Icon.Checkmark : Icon.Circle)), tintColor: notionColorToTintColor(opt.color)} : undefined )} 
-              title={(opt.icon ? opt.name + (pagePropertyValue?.id === opt.id ? '  ✓' : '') : opt.name)}
+              title={( opt.name ? opt.name : 'Untitled' ) + (opt.icon && pagePropertyValue?.id === opt.id ? '  ✓' : '')}
               onAction={function () {
                 if(opt.id !== '_select_null_'){
                   setPageProperty({ id : opt.id })
@@ -206,7 +206,7 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
           <ActionPanel.Section>
             {pagePropertyValue?.map(function (user: User) {
               return (<ActionPanel.Item 
-                icon={(user?.avatar_url ? {source:user.avatar_url, mask: ImageMask.Circle} : null )} 
+                icon={(user?.avatar_url ? {source:user.avatar_url, mask: ImageMask.Circle} : undefined )} 
                 title={user.name+'  ✓'}
                 onAction={function () {
                   const peopleProperty = (pagePropertyValue ? pagePropertyValue : [])
@@ -222,7 +222,7 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
           {options?.map(function (user: User) {
             if(!peopleIds.includes(user.id)){
               return (<ActionPanel.Item 
-              icon={( user?.avatar_url ? {source:user.avatar_url, mask: ImageMask.Circle} : null )} 
+              icon={( user?.avatar_url ? {source:user.avatar_url, mask: ImageMask.Circle} : undefined )} 
               title={( user?.name ? user.name : 'Unknown' )}
               onAction={async function () {
                 const peopleProperty = (pagePropertyValue ? pagePropertyValue : [])
@@ -237,7 +237,7 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
       break
 
     default:
-      return []
+      return null
       break
   }  
 }
