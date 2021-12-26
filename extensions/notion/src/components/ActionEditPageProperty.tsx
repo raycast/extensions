@@ -115,7 +115,7 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
           title={title}
           icon={icon}
           shortcut={shortcut}>
-          {options?.map(function (opt: DatabasePropertyOption) {
+          {(options as DatabasePropertyOption[])?.map(function (opt) {
             return (<ActionPanel.Item 
               icon={((opt.icon ? opt.icon : opt.id !== '_select_null_') ? {source: (opt.icon ? opt.icon : (pagePropertyValue?.id === opt.id ? Icon.Checkmark : Icon.Circle)), tintColor: notionColorToTintColor(opt.color)} : undefined )} 
               title={( opt.name ? opt.name : 'Untitled' ) + (opt.icon && pagePropertyValue?.id === opt.id ? '  ✓' : '')}
@@ -173,7 +173,7 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
           title={title}
           icon={icon}
           shortcut={shortcut}>
-          {options?.map(function (opt: DatabasePropertyOption) {
+          {(options as DatabasePropertyOption[])?.map(function (opt) {
             return (<ActionPanel.Item 
               icon={{source: (multiSelectIds.includes(opt.id) ? Icon.Checkmark : Icon.Circle), tintColor: notionColorToTintColor(opt.color)}} 
               title={opt.name}
@@ -219,7 +219,7 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
             })}
           </ActionPanel.Section>
           <ActionPanel.Section>
-          {options?.map(function (user: User) {
+          {(options as User[])?.map(function (user) {
             if(!peopleIds.includes(user.id)){
               return (<ActionPanel.Item 
               icon={( user?.avatar_url ? {source:user.avatar_url, mask: ImageMask.Circle} : undefined )} 
