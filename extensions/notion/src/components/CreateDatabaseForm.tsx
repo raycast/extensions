@@ -21,6 +21,7 @@ import { useEffect, useState } from 'react'
 import {
   Database,
   DatabaseProperty,
+  DatabasePropertyOption,
   DatabaseView,
   User,
   Page,
@@ -322,9 +323,9 @@ export function CreateDatabaseForm( props : { databaseId: string | null, setRefr
       <Form.Separator />]
       : null )}      
       <Form.TextField key='property::title::title' id='property::title::title' title={(titleProperty?.name ? titleProperty?.name : 'Untitled')} placeholder='Title' />
-      {databaseProperties?.filter(function(dp){ return (dp.id !== 'title' && databaseView?.create_properties.includes(dp.id))}).sort(function (dpa, dpb){
-        const value_a = databaseView?.create_properties?.indexOf(dpa.id)
-        const value_b = databaseView?.create_properties?.indexOf(dpb.id)
+      {databaseProperties?.filter(function(dp){ return (dp?.id !== 'title' && databaseView?.create_properties.includes(dp?.id))}).sort(function (dpa, dpb){
+        const value_a = databaseView?.create_properties?.indexOf(dpa?.id)
+        const value_b = databaseView?.create_properties?.indexOf(dpb?.id)
 
         if(value_a === -1)
           return 1
@@ -363,7 +364,7 @@ export function CreateDatabaseForm( props : { databaseId: string | null, setRefr
                     key={'option::'+opt.id} 
                     value={opt.id} 
                     title={(opt.name ? opt.name : 'Untitled')}
-                    icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined)}
+                    icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined )}
                     />)
                 })}
               </Form.Dropdown>
@@ -376,7 +377,7 @@ export function CreateDatabaseForm( props : { databaseId: string | null, setRefr
                     key={'option::'+opt.id} 
                     value={opt.id} 
                     title={(opt.name ? opt.name : 'Untitled')}
-                    icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined)}/>)
+                    icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined )}/>)
                 })}
               </Form.TagPicker>
             )            
@@ -390,7 +391,7 @@ export function CreateDatabaseForm( props : { databaseId: string | null, setRefr
                   return (<Form.TagPicker.Item  
                       key={'relation::'+rp.id} 
                       value={rp.id} 
-                      title={rp.title}
+                      title={( rp.title ? rp.title : 'Untitled')}
                       icon={{source: ((rp.icon_emoji) ? rp.icon_emoji : ( rp.icon_file ?  rp.icon_file :  ( rp.icon_external ?  rp.icon_external : Icon.TextDocument)))}}/>)
                 })}
               </Form.TagPicker>
@@ -403,7 +404,7 @@ export function CreateDatabaseForm( props : { databaseId: string | null, setRefr
                       key={'people::'+u.id} 
                       value={u.id} 
                       title={( u.name ? u.name : 'Unknown')}
-                      icon={(u.avatar_url ? {source: u.avatar_url, mask: ImageMask.Circle} : null )}/>)
+                      icon={(u.avatar_url ? {source: u.avatar_url, mask: ImageMask.Circle} : undefined )}/>)
                 })}
               </Form.TagPicker>
             )            
