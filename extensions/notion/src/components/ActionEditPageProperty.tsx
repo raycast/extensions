@@ -26,7 +26,6 @@ import { useEffect, useState } from 'react'
 import {
   DatabaseView,
   Page,
-  PageProperty,
   DatabaseProperty,
   DatabasePropertyOption,
   PageContent,
@@ -71,14 +70,14 @@ import open from 'open'
 
 
 
-export function ActionEditPageProperty(props: { databaseProperty: DatabaseProperty, pageId: string, pageProperty: PageProperty, setRefreshView: any, shortcut: KeyboardShortcut, icon: ImageLike, customOptions: DatabasePropertyOption[] }): JSX.Element {
+export function ActionEditPageProperty(props: { databaseProperty: DatabaseProperty, pageId: string, pageProperty: any, setRefreshView: any, shortcut: KeyboardShortcut, icon: ImageLike, customOptions: DatabasePropertyOption[] }): JSX.Element {
   const dp = props.databaseProperty
   const propertyType = dp.type
   const pageId = props.pageId
   const pageProperty = props.pageProperty
   const pagePropertyValue = (( pageProperty && pageProperty[propertyType] ) ? pageProperty[propertyType] : null)
   const setRefreshView = props.setRefreshView
-  const shortcut = (props.shortcut ? props.shortcut : null)
+  const shortcut = (props.shortcut ? props.shortcut : undefined)
 
   const title = 'Set '+dp.name
   const icon = (props.icon ? props.icon : 'icon/'+dp.type+'.png')

@@ -61,6 +61,7 @@ export interface Page {
   properties: Record<string, any>
 }
 
+
 export interface PageContent {  
   markdown: string | undefined
   blocks: Record<string,any>[]
