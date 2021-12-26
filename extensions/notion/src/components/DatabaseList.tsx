@@ -219,7 +219,7 @@ export function DatabaseList (props: {databasePage: Page}): JSX.Element {
     storeDatabaseView(databaseId,newDatabaseView)
   }
 
-  const databaseViewTypes: Record<string:JSX.Element> = {
+  const databaseViewTypes: Record<string,JSX.Element> = {
     list: DatabaseListView,
     kanban: DatabaseKanbanView
   }

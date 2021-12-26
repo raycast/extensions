@@ -19,7 +19,7 @@ import {
   ImageMask,
   useNavigation,
   Form,
-  KeyboardShortcut
+  KeyboardShortcut,
   SubmitFormAction,
 } from '@raycast/api'
 import { useEffect, useState } from 'react'
@@ -237,7 +237,7 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
       )
       break
 
-    default
+    default:
       return []
       break
   }  

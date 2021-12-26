@@ -353,13 +353,14 @@ export function CreateDatabaseForm( props : { databaseId: string | null, setRefr
             return (<Form.Checkbox key={key} id={id} title={title} label={placeholder} />)
             break
           case 'select':
-           return (<Form.Dropdown key={key} id={id} title={title} >
+           return (<Form.Dropdown key={key} id={id} title={title}>
                 {dp.options?.map((opt) => {
                   return (<Form.Dropdown.Item  
                     key={'option::'+opt.id} 
                     value={opt.id} 
                     title={opt.name}
-                    icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined)}/>)
+                    icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined)}
+                    />)
                 })}
               </Form.Dropdown>
             )
