@@ -60,6 +60,9 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
   const completedIds = (kanbanView?.completed_ids ? kanbanView.completed_ids : [])
   const canceledIds = (kanbanView?.canceled_ids ? kanbanView.canceled_ids : [])
 
+  if(!propertyId)
+    return []
+
   // Section Order: Started > Not Started > Completed > Canceled > Backlog | Other (hidden)      
   const sectionIds = startedIds.concat(notStartedIds).concat(completedIds).concat(canceledIds).concat(backlogIds)
 
@@ -93,7 +96,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
     if(startedIds.includes(dspoId)) {
       const statusIndex = startedIds.indexOf(dspoId)+1
       const statusSize = startedIds.length+1
-      const currentStatus = (statusIndex / statusSize).toFixed(2) as number
+      const currentStatus = Number.parseFloat((statusIndex / statusSize).toFixed(2))
       var percent = '25'
       if(currentStatus <= 0.26){
         percent = '25'
@@ -132,7 +135,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
 
   const optionsMap: Record<string,DatabasePropertyOption> = {}
   const customOptions: DatabasePropertyOption[] = []
-  (statusProperty.options as DatabaseProperty[])?.sort(function (dpa, dpb){
+  (statusProperty.options as DatabasePropertyOption[])?.sort(function (dpa, dpb){
       const value_a = actionEditIds.indexOf(dpa.id)
       const value_b = actionEditIds.indexOf(dpb.id)
 

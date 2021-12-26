@@ -323,14 +323,14 @@ export function CreateDatabaseForm( props : { databaseId: string | null, setRefr
       <Form.Separator />]
       : null )}      
       <Form.TextField key='property::title::title' id='property::title::title' title={(titleProperty?.name ? titleProperty?.name : 'Untitled')} placeholder='Title' />
-      {databaseProperties?.filter(function(dp){ return (dp?.id !== 'title' && databaseView?.create_properties.includes(dp?.id))}).sort(function (dpa, dpb){
+      {databaseProperties?.filter(function(dp){ return (dp?.id !== 'title' && databaseView?.create_properties?.includes(dp?.id))}).sort(function (dpa, dpb){
         const value_a = databaseView?.create_properties?.indexOf(dpa?.id)
         const value_b = databaseView?.create_properties?.indexOf(dpb?.id)
 
-        if(value_a === -1)
+        if(!value_a || value_a === -1)
           return 1
 
-        if(value_b === -1)
+        if(!value_b || value_b === -1)
           return -1
 
 
