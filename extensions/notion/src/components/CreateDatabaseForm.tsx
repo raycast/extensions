@@ -260,6 +260,10 @@ export function CreateDatabaseForm( props : { databaseId: string | null, setRefr
 
   // Handle save new database view
   function saveDatabaseView(newDatabaseView: DatabaseView): void {
+
+    if(!databaseId || !newDatabaseView)
+      return 
+
     setDatabaseView(newDatabaseView)
     setRefreshView(Date.now())
     showToast(ToastStyle.Success, 'View Updated')  
@@ -354,11 +358,11 @@ export function CreateDatabaseForm( props : { databaseId: string | null, setRefr
             break
           case 'select':
            return (<Form.Dropdown key={key} id={id} title={title}>
-                {dp.options?.map((opt) => {
+                {(dp.options as DatabasePropertyOption[])?.map((opt) => {
                   return (<Form.Dropdown.Item  
                     key={'option::'+opt.id} 
                     value={opt.id} 
-                    title={opt.name}
+                    title={(opt.name ? opt.name : 'Untitled')}
                     icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined)}
                     />)
                 })}
@@ -367,19 +371,22 @@ export function CreateDatabaseForm( props : { databaseId: string | null, setRefr
             break
           case 'multi_select':
             return (<Form.TagPicker key={key} id={id} title={title} placeholder={placeholder}>
-                {dp.options?.map((opt) => {
+                {(dp.options as DatabasePropertyOption[])?.map((opt) => {
                   return (<Form.TagPicker.Item  
                     key={'option::'+opt.id} 
                     value={opt.id} 
-                    title={opt.name}
+                    title={(opt.name ? opt.name : 'Untitled')}
                     icon={(opt.color ? {source: Icon.Dot, tintColor: notionColorToTintColor(opt.color)} : undefined)}/>)
                 })}
               </Form.TagPicker>
             )            
             break
           case 'relation':
+            if(!dp.relation_id)
+              return
+
             return (<Form.TagPicker key={key} id={id} title={title} placeholder={placeholder}>
-                {relationsPages[dp.relation_id]?.map((rp: Page[]) => {
+                {relationsPages[dp.relation_id]?.map((rp: Page) => {
                   return (<Form.TagPicker.Item  
                       key={'relation::'+rp.id} 
                       value={rp.id} 
@@ -395,8 +402,8 @@ export function CreateDatabaseForm( props : { databaseId: string | null, setRefr
                   return (<Form.TagPicker.Item  
                       key={'people::'+u.id} 
                       value={u.id} 
-                      title={u.name}
-                      icon={{source: u.avatar_url, mask: ImageMask.Circle}}/>)
+                      title={( u.name ? u.name : 'Unknown')}
+                      icon={(u.avatar_url ? {source: u.avatar_url, mask: ImageMask.Circle} : null )}/>)
                 })}
               </Form.TagPicker>
             )            

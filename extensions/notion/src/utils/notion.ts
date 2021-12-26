@@ -69,6 +69,7 @@ export interface PageContent {
 
 export interface DatabaseView {
   properties: Record<string,any> | undefined
+  create_properties: string[] | undefined
   sort_by: Record<string,any> | undefined
   type: string | undefined
   name: string | undefined
