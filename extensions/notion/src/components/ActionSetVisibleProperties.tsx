@@ -8,7 +8,7 @@ import {
   DatabaseProperty,
 } from '../utils/notion'
 
-export function ActionSetVisibleProperties (props: { title: string, icon: ImageLike, databaseProperties: DatabaseProperty[], selectedPropertiesIds: string[], onSelect: any, onUnselect: any }): JSX.Element {
+export function ActionSetVisibleProperties (props: { title: string, icon: ImageLike, databaseProperties: DatabaseProperty[], selectedPropertiesIds: string[], onSelect: any, onUnselect: any }): JSX.Element | null {
   
   const title = (props.title ? props.title : 'Show / Hide Properties...' )
   const icon = (props.icon ? props.icon : './icon/shown.png' )
@@ -18,7 +18,7 @@ export function ActionSetVisibleProperties (props: { title: string, icon: ImageL
   const onUnselect = props.onUnselect
 
   if(!onSelect || !onUnselect)
-    return []
+    return null
 
   return ( <ActionPanel.Submenu 
     title={title}
