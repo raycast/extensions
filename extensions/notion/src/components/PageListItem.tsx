@@ -117,7 +117,8 @@ export function PageListItem (props: { keywords?: string[], page: Page, database
   const visiblePropertiesIds:string[] = []
   if(databaseView && databaseView.properties){    
     databaseProperties?.forEach(function (dp: DatabaseProperty){
-      if(databaseView?.properties[dp.id])
+
+      if(dp?.id && databaseView?.properties[dp.id])
         visiblePropertiesIds.push(dp.id)
     })
   }

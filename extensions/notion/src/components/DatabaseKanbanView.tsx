@@ -41,7 +41,7 @@ import {
 } from './'
 
                                  
-export function DatabaseKanbanView (props: {databaseId: string, databasePages: Page[], databaseProperties: DatabaseProperty[], databaseView?: DatabaseView, setRefreshView: any, saveDatabaseView: any  }): JSX.Element[] {
+export function DatabaseKanbanView (props: {databaseId: string, databasePages: Page[], databaseProperties: DatabaseProperty[], databaseView?: DatabaseView, setRefreshView: any, saveDatabaseView: any  }): JSX.Element {
 
   // Get database page list info
   const databaseId = props.databaseId
@@ -211,5 +211,5 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
     )
   })  
 
-  return SectionElement
+  return SectionElement as JSX.Element
 }

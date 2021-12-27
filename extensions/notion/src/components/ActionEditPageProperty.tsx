@@ -70,7 +70,7 @@ import open from 'open'
 
 
 
-export function ActionEditPageProperty(props: { databaseProperty: DatabaseProperty, pageId: string, pageProperty: any, setRefreshView: any, shortcut?: KeyboardShortcut, icon?: ImageLike, customOptions?: DatabasePropertyOption[] }): JSX.Element | undefined {
+export function ActionEditPageProperty(props: { databaseProperty: DatabaseProperty, pageId: string, pageProperty: any, setRefreshView: any, shortcut?: KeyboardShortcut, icon?: ImageLike, customOptions?: DatabasePropertyOption[] }): JSX.Element | null {
   const dp = props.databaseProperty
   const propertyType = dp.type
   const pageId = props.pageId
@@ -237,7 +237,7 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
       break
 
     default:
-      return
+      return null
       break
   }  
 }

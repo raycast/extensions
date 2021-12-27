@@ -52,7 +52,7 @@ export function DatabaseViewForm (props: { databaseId: string, databaseView?: Da
       sort_by: (databaseView?.sort_by ? databaseView.sort_by : {}),
       type: (values.type ? values.type : 'list'),
       name: (values.name ? values.name : null)      
-    } as DatabaseProperty
+    } as DatabaseView
 
     if(values.type === 'kanban'){
       newDatabaseView.kanban = {
@@ -78,7 +78,7 @@ export function DatabaseViewForm (props: { databaseId: string, databaseView?: Da
   const [databaseId, setDatabaseId] = useState<string>()
   const [viewType, setViewType] = useState<string>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [viewForm, setViewForm] = useState<JSX.Element[]>()
+  const [viewForm, setViewForm] = useState<JSX.Element>()
   
   // Fetch databases
   useEffect(() => {
@@ -233,7 +233,7 @@ function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], data
   const databaseView = props.databaseView
 
   if(!selectProperties)
-    return []
+    return null
 
   const defaultPropertyId = (databaseView?.kanban?.property_id ? databaseView?.kanban?.property_id  : selectProperties[0]?.id)
   
@@ -304,7 +304,7 @@ function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], data
             icon={'./icon/select.png'} />
         )
       })}
-    </Form.Dropdown>].concat(FormItem)
+    </Form.Dropdown>].concat(FormItem) as JSX.Element
   
 }
 
@@ -317,11 +317,11 @@ function StatusTagPicker (props: {id: string, title: string, defaultValue: strin
   const statusProperty = props.statusProperty
   const propertyId = props.propertyId
 
-  const [defaultValueInit, setDefaultValueInit] = useState<string[]>((defaultValue ? defaultValue : undefined));
+  const [defaultValueInit, setDefaultValueInit] = useState<string[] | undefined>((defaultValue ? defaultValue : undefined));
 
 
   function onFirstChange(newValues: string[]) {
-    setDefaultValueInit(null)
+    setDefaultValueInit(undefined)
   }
 
   return (<Form.TagPicker 

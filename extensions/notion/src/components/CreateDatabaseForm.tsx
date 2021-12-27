@@ -124,11 +124,14 @@ export function CreateDatabaseForm( props : { databaseId?: string, setRefreshVie
 
       const fetchedDatabases = await fetchDatabases()
       
-      
-      setDatabases(fetchedDatabases)
       setIsLoading(false)
 
-      await storeDatabases(fetchedDatabases)
+      if(fetchedDatabases){
+        setDatabases(fetchedDatabases)
+        storeDatabases(fetchedDatabases)
+      }
+
+     
      
     }
     fetchData()
