@@ -57,7 +57,7 @@ Raycast extension for search and open [SimpRead Unreader](https://simpread.pro/p
 
 ## Feature
 
-1. <kbd>sr</kbd> Search Unreader
+1. <kbd>sr</kbd> Browse Posts
 
 2. Show Unreader Annoating Details
 
