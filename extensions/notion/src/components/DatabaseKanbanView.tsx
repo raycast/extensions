@@ -62,7 +62,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
   const canceledIds = (kanbanView?.canceled_ids ? kanbanView.canceled_ids : [])
 
   if(!propertyId)
-    return []
+    return null
 
   // Section Order: Started > Not Started > Completed > Canceled > Backlog | Other (hidden)      
   const sectionIds = startedIds.concat(notStartedIds).concat(completedIds).concat(canceledIds).concat(backlogIds)
@@ -75,14 +75,14 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
 
   if(!statusProperty) {
     showToast(ToastStyle.Failure, 'Kanban property missing','Please edit view configurat')
-    return ([<DatabaseListView
+    return (<DatabaseListView
       key={`database-${databaseId}-view-list`}
       databaseId={databaseId}
       databasePages={(databasePages ? databasePages : [] as Page[])} 
       databaseProperties={(databaseProperties ? databaseProperties : [] as DatabaseProperty[])} 
       databaseView={databaseView} 
       setRefreshView={setRefreshView} 
-      saveDatabaseView={saveDatabaseView}/>])
+      saveDatabaseView={saveDatabaseView}/>)
   }
 
 
@@ -211,5 +211,5 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
     )
   })  
 
-  return SectionElement as JSX.Element
+  return (SectionElement as unknown) as JSX.Element
 }

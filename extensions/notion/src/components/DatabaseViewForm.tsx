@@ -228,7 +228,7 @@ export function DatabaseViewForm (props: { databaseId: string, databaseView?: Da
   )
 }
 
-function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], databaseView?: DatabaseView }): JSX.Element {
+function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], databaseView?: DatabaseView }): JSX.Element | null {
   const selectProperties = props.selectProperties
   const databaseView = props.databaseView
 
@@ -289,7 +289,7 @@ function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], data
     presetForm()
   }, [statusProperty])
 
-  return [<Form.Dropdown 
+  return ([<Form.Dropdown 
     key='kanban-property-id'
     id='kanban::property_id'
     title='Kanban Status'
@@ -304,7 +304,7 @@ function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], data
             icon={'./icon/select.png'} />
         )
       })}
-    </Form.Dropdown>].concat(FormItem) as JSX.Element
+    </Form.Dropdown>].concat(FormItem) as unknown) as JSX.Element
   
 }
 
