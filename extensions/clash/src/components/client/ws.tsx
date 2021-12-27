@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { ConnectionsT, ConnectionT, LogLevelT, LogsT, LogT, TrafficT } from "../types";
 import { getFormatDateString } from "../../utils";
+import { ConnectionsT, ConnectionT, LogLevelT, LogsT, LogT, TrafficT } from "../types";
 import useWebsocket from "./util";
 
-function GetTraffic(): TrafficT {
+function GetTraffic(): [string, TrafficT] {
   const [detail, setDetail] = useState<TrafficT>({
     up: 0,
     down: 0,
   });
-  const { wsData, readyState, reconnect } = useWebsocket("/traffic");
+  const { url, wsData, readyState, reconnect } = useWebsocket("/traffic");
   useEffect(() => {
     if (readyState.key === 3) {
       reconnect();
@@ -18,16 +18,16 @@ function GetTraffic(): TrafficT {
       setDetail(message);
     }
   }, [wsData, readyState]);
-  return detail;
+  return [url, detail];
 }
 
-function GetConnections(): ConnectionsT {
+function GetConnections(): [string, ConnectionsT] {
   const [total, setTotal] = useState<ConnectionsT>({
     downloadTotal: 0,
     uploadTotal: 0,
     connections: [] as Array<ConnectionT>,
   });
-  const { wsData, readyState, reconnect } = useWebsocket("/connections");
+  const { url, wsData, readyState, reconnect } = useWebsocket("/connections");
   useEffect(() => {
     if (readyState.key === 3) {
       reconnect();
@@ -37,10 +37,10 @@ function GetConnections(): ConnectionsT {
       setTotal(message);
     }
   }, [wsData, readyState]);
-  return total;
+  return [url, total];
 }
 
-function GetLogs(logLevel: LogLevelT): LogsT {
+function GetLogs(logLevel: LogLevelT): [string, LogsT] {
   const [logs, setLogs] = useState<LogsT>([]);
   const { url, wsData, readyState, reconnect, closeWebSocket } = useWebsocket("/logs", { level: logLevel });
   useEffect(() => {
@@ -65,7 +65,7 @@ function GetLogs(logLevel: LogLevelT): LogsT {
       reconnect();
     }
   }, [logLevel]);
-  return logs;
+  return [url, logs];
 }
 
 export { GetTraffic, GetConnections, GetLogs };
