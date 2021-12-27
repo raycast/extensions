@@ -41,7 +41,7 @@ import {
 } from './'
 
                                  
-export function DatabaseKanbanView (props: {databaseId: string, databasePages: Page[], databaseProperties: DatabaseProperty[], databaseView: DatabaseView, setRefreshView: any, saveDatabaseView: any  }): JSX.Element[] {
+export function DatabaseKanbanView (props: {databaseId: string, databasePages: Page[], databaseProperties: DatabaseProperty[], databaseView?: DatabaseView, setRefreshView: any, saveDatabaseView: any  }): JSX.Element[] {
 
   // Get database page list info
   const databaseId = props.databaseId
@@ -53,7 +53,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
   
 
   // Get kanban view settings
-  const kanbanView = databaseView.kanban
+  const kanbanView = databaseView?.kanban
   const propertyId = kanbanView?.property_id
   const backlogIds = (kanbanView?.backlog_ids ? kanbanView.backlog_ids : [])
   const notStartedIds = (kanbanView?.not_started_ids ? kanbanView.not_started_ids : [])
@@ -75,14 +75,14 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
 
   if(!statusProperty) {
     showToast(ToastStyle.Failure, 'Kanban property missing','Please edit view configurat')
-    return (<DatabaseListView
+    return ([<DatabaseListView
       key={`database-${databaseId}-view-list`}
       databaseId={databaseId}
       databasePages={(databasePages ? databasePages : [] as Page[])} 
       databaseProperties={(databaseProperties ? databaseProperties : [] as DatabaseProperty[])} 
       databaseView={databaseView} 
       setRefreshView={setRefreshView} 
-      saveDatabaseView={saveDatabaseView}/>)
+      saveDatabaseView={saveDatabaseView}/>])
   }
 
 

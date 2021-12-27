@@ -223,7 +223,7 @@ export function DatabaseList (props: {databasePage: Page}): JSX.Element {
   const viewTitle = (databaseView?.name ? (databasePage.icon_emoji ? databasePage.icon_emoji+' ': '')+databaseView.name : null)
 
 
-  const databaseViewTypes: Record<string,(props: { databaseId: string; databasePages: Page[]; databaseProperties: DatabaseProperty[]; databaseView: DatabaseView; setRefreshView: any; saveDatabaseView: any; }) => Element[]> = {
+  const databaseViewTypes: Record<string,(props: { databaseId: string; databasePages: Page[]; databaseProperties: DatabaseProperty[]; databaseView: DatabaseView; setRefreshView: any; saveDatabaseView: any; }) => Element | Element[]> = {
     list: DatabaseListView,
     kanban: DatabaseKanbanView
   }

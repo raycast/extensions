@@ -8,7 +8,7 @@ import {
   DatabaseProperty,
 } from '../utils/notion'
 
-export function ActionSetVisibleProperties (props: { title?: string, icon?: ImageLike, databaseProperties: DatabaseProperty[], selectedPropertiesIds?: string[], onSelect: (propertyId: string) => void, onUnselect: (propertyId: string) => void }): JSX.Element[] {
+export function ActionSetVisibleProperties (props: { title?: string, icon?: ImageLike, databaseProperties: DatabaseProperty[], selectedPropertiesIds?: string[], onSelect: (propertyId: string) => void, onUnselect: (propertyId: string) => void }): JSX.Element {
   
   const title = (props.title ? props.title : 'Show / Hide Properties...' )
   const icon = (props.icon ? props.icon : './icon/shown.png' )
@@ -20,7 +20,7 @@ export function ActionSetVisibleProperties (props: { title?: string, icon?: Imag
   if(!onSelect || !onUnselect)
     return []
 
-  return ([<ActionPanel.Submenu 
+  return (<ActionPanel.Submenu 
     title={title}
     icon={icon}>
     <ActionPanel.Section>
@@ -47,5 +47,5 @@ export function ActionSetVisibleProperties (props: { title?: string, icon?: Imag
         }                      
       })}
     </ActionPanel.Section>
-  </ActionPanel.Submenu>])
+  </ActionPanel.Submenu>)
 }

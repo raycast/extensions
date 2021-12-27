@@ -52,7 +52,7 @@ export function DatabaseViewForm (props: { databaseId: string, databaseView?: Da
       sort_by: (databaseView?.sort_by ? databaseView.sort_by : {}),
       type: (values.type ? values.type : 'list'),
       name: (values.name ? values.name : null)      
-    }
+    } as DatabaseProperty
 
     if(values.type === 'kanban'){
       newDatabaseView.kanban = {
@@ -144,7 +144,7 @@ export function DatabaseViewForm (props: { databaseId: string, databaseView?: Da
           case 'kanban':
             if(!hasSelect){
               showToast(ToastStyle.Failure, 'Select Property Required','Kanban view requires a "Select" type property.');
-              setViewForm([])
+              setViewForm(undefined)
             }
 
             setViewForm(<KanbanViewFormItem 
@@ -154,7 +154,7 @@ export function DatabaseViewForm (props: { databaseId: string, databaseView?: Da
             break
 
           default:
-            setViewForm([])
+            setViewForm(undefined)
         }        
       }      
     }
@@ -228,7 +228,7 @@ export function DatabaseViewForm (props: { databaseId: string, databaseView?: Da
   )
 }
 
-function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], databaseView?: DatabaseView }): JSX.Element[] {
+function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], databaseView?: DatabaseView }): JSX.Element {
   const selectProperties = props.selectProperties
   const databaseView = props.databaseView
 
@@ -317,7 +317,7 @@ function StatusTagPicker (props: {id: string, title: string, defaultValue: strin
   const statusProperty = props.statusProperty
   const propertyId = props.propertyId
 
-  const [defaultValueInit, setDefaultValueInit] = useState<string[] | null>((defaultValue ? defaultValue : null));
+  const [defaultValueInit, setDefaultValueInit] = useState<string[]>((defaultValue ? defaultValue : undefined));
 
 
   function onFirstChange(newValues: string[]) {

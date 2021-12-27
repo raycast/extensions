@@ -42,15 +42,15 @@ export interface DatabaseProperty {
 export interface DatabasePropertyOption {
   id: string
   name: string
-  color: string | undefined
-  icon: string | undefined
+  color?: string
+  icon?: string
 }
 
 export interface Page {  
   object: string
   id: string
-  parent_page_id: string | null
-  parent_database_id: string | null
+  parent_page_id?: string
+  parent_database_id?: string
   last_edited_time: number  
   title: string | null
   icon_emoji: string | null
@@ -85,7 +85,7 @@ export interface KabanView {
 }
 
 // Fetch databases
-export async function fetchDatabases(): Promise<Database[]> {
+export async function fetchDatabases(): Promise<Database[] | undefined> {
   const databases: Database[] = await rawFetchDatabases();
   return databases;
 }
@@ -138,7 +138,7 @@ async function rawFetchDatabases(): Promise<Database[] | undefined> {
 }
 
 // Fetch database properties
-export async function fetchDatabaseProperties(databaseId: string): Promise<DatabaseProperty[]> {
+export async function fetchDatabaseProperties(databaseId: string): Promise<DatabaseProperty[] | undefined> {
   const databaseProperties: DatabaseProperty[] = await rawDatabaseProperties(databaseId);
   return databaseProperties;
 }
@@ -178,7 +178,7 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
       switch (property.type) {
         case 'select':
           databaseProperty.options.push({id:'_select_null_', name: 'No Selection'} as DatabasePropertyOption)
-          databaseProperty.options = databaseProperty.options.concat(property.select.options)
+          databaseProperty.options = (databaseProperty.options as DatabasePropertyOption).concat(property.select.options as DatabasePropertyOption[])
           break
         case 'multi_select':
           databaseProperty.options = property.multi_select.options
@@ -201,7 +201,7 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
 
 
 // Create database page
-export async function queryDatabase(databaseId: string, query: { title: string | undefined } | undefined): Promise<Page[]> {
+export async function queryDatabase(databaseId: string, query: { title: string | undefined } | undefined): Promise<Page[] | undefined> {
   const pages: Page[] = await rawQueryDatabase(databaseId, query);
   return pages;
 }
@@ -259,7 +259,7 @@ async function rawQueryDatabase(databaseId: string, query: { title: string | und
 
 
 // Create database page
-export async function createDatabasePage(values: FormValues): Promise<Page> {
+export async function createDatabasePage(values: FormValues): Promise<Page | undefined> {
   const page: Page = await rawCreateDatabasePage(values);
   return page;
 }
@@ -400,7 +400,7 @@ async function rawCreateDatabasePage(values: FormValues): Promise<Page | undefin
 
 
 // Patch page
-export async function patchPage(pageId: string, properties: Record<string,any>): Promise<Page> {
+export async function patchPage(pageId: string, properties: Record<string,any>): Promise<Page | undefined> {
   const page: Page = await rawPatchPage(pageId, properties);
   return page;
 }
@@ -437,7 +437,7 @@ async function rawPatchPage(pageId: string, properties: Record<string,any>): Pro
 }
 
 // Search pages
-export async function searchPages(query: string | undefined): Promise<Page[]> {
+export async function searchPages(query: string | undefined): Promise<Page[] | undefined> {
   const pages: Page[] = await rawSearchPages(query);
   return pages;
 }
@@ -483,7 +483,7 @@ async function rawSearchPages(query: string | undefined ): Promise<Page[] | unde
 
 
 // Fetch page content
-export async function fetchPageContent(pageId: string): Promise<PageContent> {
+export async function fetchPageContent(pageId: string): Promise<PageContent | undefined> {
 
   const fetchedPageContent = await rawFetchPageContent(pageId) as (Record<string,any> | null)
 
@@ -570,7 +570,7 @@ async function rawFetchPageContent(pageId: string): Promise<PageContent | undefi
 }
 
 // Fetch users
-export async function fetchUsers(): Promise<User[]> {
+export async function fetchUsers(): Promise<User[] | undefined> {
   const users: User[] = await rawListUsers();
   return users;
 }
