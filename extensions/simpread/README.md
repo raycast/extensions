@@ -83,7 +83,7 @@ Raycast extension for search and open [SimpRead Unreader](https://simpread.pro/p
 
 ![2021-11-29_13-40-45](https://user-images.githubusercontent.com/81074/143815343-ae525a66-1443-4a73-9f28-0a78d121f3c7.png)
 
-### Setting Simpread config Path
+### Setting SimpRead config Path
 
 ![image](https://user-images.githubusercontent.com/81074/144406599-2188d65e-cc65-48b0-a529-21aed868e5e0.png)
 
