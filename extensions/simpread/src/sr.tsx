@@ -56,11 +56,11 @@ function getDetail(unread: Unread) {
       const format = (value: any) => (value = value < 10 ? '0' + value : value);
       return (
         date.getFullYear() +
-        '年' +
+        'Year' +
         format(date.getMonth() + 1) +
-        '月' +
+        'Month' +
         format(date.getDate()) +
-        '日 ' +
+        'Day ' +
         format(date.getHours()) +
         ':' +
         format(date.getMinutes()) +
@@ -103,7 +103,7 @@ ${tags}
     template = `
 # ${unread.title}
 
-> 原文地址 [${host}](${unread.url}) at ${unread.create}
+> Origin url [${host}](${unread.url}) at ${unread.create}
 
 ${desc}
 
@@ -183,7 +183,7 @@ export default function Command() {
   }, []);
 
   if (state.error) {
-    showToast(ToastStyle.Failure, '获取失败，请确认是否存在 simpread_config.json');
+    showToast(ToastStyle.Failure, 'Failed to get. Please confirm simpread_config.json it exists.');
   }
 
   return <List isLoading={state.items === undefined}>{state.items}</List>;

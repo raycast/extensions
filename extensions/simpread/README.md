@@ -96,4 +96,4 @@ Raycast extension for search and open [SimpRead Unreader](https://simpread.pro/p
 
 ## Help & Tutorial
 
-- [SimpRaed Discussions](https://github.com/Kenshin/simpread/discussions/3119)
+- [SimpRead Discussions](https://github.com/Kenshin/simpread/discussions/3119)
