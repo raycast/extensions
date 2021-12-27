@@ -157,13 +157,9 @@ function ListBookmarks(props: { profile: Profile }) {
     .filter((b) => !searchText || matchSearchText(searchText, b.url, b.title));
 
   const newTabURL = getPrefs().newTabURL.replace("%query%", encodeURIComponent(searchText));
-  const newTabOnTop = getPrefs().shouldShowNewTabInBookmarks
-    ? [createBookmarkListItem(newTabURL, "New Tab")]
-    : undefined;
+  const newTabOnTop = getPrefs().shouldShowNewTabInBookmarks ? createBookmarkListItem(newTabURL, "New Tab") : undefined;
 
-  const items = newTabOnTop?.concat(bookmarks ?? []) ?? bookmarks;
-
-  if (error && (items?.length ?? 0) == 0) {
+  if (error && (bookmarks?.length ?? 0) == 0) {
     showToast(ToastStyle.Failure, error.message);
   }
 
@@ -173,35 +169,52 @@ function ListBookmarks(props: { profile: Profile }) {
       searchBarPlaceholder="Search Bookmark"
       onSearchTextChange={onSearchTextChange}
     >
-      {items &&
-        items.map((b, index) => (
+      {newTabOnTop && (
+        <List.Section title="New Tab">
           <List.Item
-            key={index}
-            title={b.title}
-            subtitle={b.subtitle}
-            icon={{ source: b.iconURL }}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Item
-                  title="Open in Google Chrome"
-                  icon={Icon.Globe}
-                  onAction={() => {
-                    openGoogleChrome(props.profile.directory, b.url, () => showHUD("Opening bookmark..."));
-                  }}
-                />
-                <ActionPanel.Item
-                  title="Open in Background"
-                  icon={Icon.Globe}
-                  onAction={() => {
-                    openGoogleChrome(props.profile.directory, b.url, async () => {
-                      await showToast(ToastStyle.Success, "Opening bookmark...");
-                    });
-                  }}
-                />
-              </ActionPanel>
-            }
+            title={newTabOnTop.title}
+            subtitle={newTabOnTop.subtitle}
+            icon={newTabOnTop.iconURL}
+            actions={<BookmarksActionPanel profileDirectory={props.profile.directory} url={newTabOnTop.url} />}
           />
-        ))}
+        </List.Section>
+      )}
+      {bookmarks && (
+        <List.Section title="Bookmarks">
+          {bookmarks.map((b, index) => (
+            <List.Item
+              key={index}
+              title={b.title}
+              subtitle={b.subtitle}
+              icon={{ source: b.iconURL }}
+              actions={<BookmarksActionPanel profileDirectory={props.profile.directory} url={b.url} />}
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
+  );
+}
+
+function BookmarksActionPanel(props: { profileDirectory: string; url: string }) {
+  return (
+    <ActionPanel>
+      <ActionPanel.Item
+        title="Open in Google Chrome"
+        icon={Icon.Globe}
+        onAction={() => {
+          openGoogleChrome(props.profileDirectory, props.url, () => showHUD("Opening bookmark..."));
+        }}
+      />
+      <ActionPanel.Item
+        title="Open in Background"
+        icon={Icon.Globe}
+        onAction={() => {
+          openGoogleChrome(props.profileDirectory, props.url, async () => {
+            await showToast(ToastStyle.Success, "Opening bookmark...");
+          });
+        }}
+      />
+    </ActionPanel>
   );
 }
