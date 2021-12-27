@@ -59,7 +59,7 @@ Raycast extension for search and open [SimpRead Unreader](https://simpread.pro/p
 
 1. <kbd>sr</kbd> Browse Posts
 
-2. Show Unreader Annoating Details
+2. Show SimpRead annotating Details
 
 3. Open local file
 
