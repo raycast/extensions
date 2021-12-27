@@ -62,7 +62,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
   const canceledIds = (kanbanView?.canceled_ids ? kanbanView.canceled_ids : [])
 
   if(!propertyId)
-    return null
+    return (null as unknown) as JSX.Element
 
   // Section Order: Started > Not Started > Completed > Canceled > Backlog | Other (hidden)      
   const sectionIds = startedIds.concat(notStartedIds).concat(completedIds).concat(canceledIds).concat(backlogIds)
