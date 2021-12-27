@@ -1,7 +1,7 @@
 import { ActionPanel, List, PushAction } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { ErrorHandler } from "../utils/error";
 import { GetProviders } from "./client/http";
-import { showFailureToast } from "../utils";
 import { ProxiesT, ProxyT } from "./types";
 
 // ref: https://github.com/yichengchen/clashX/blob/5c1049a3d214ac5577048282107d956f0d7a4249/ClashX/Models/ClashProxy.swift#L39
@@ -17,7 +17,7 @@ export default function Proxies(): JSX.Element {
         const data = await GetProviders();
         setProxies(data);
       } catch (e) {
-        await showFailureToast("Request failed", e);
+        ErrorHandler(e)
       } finally {
         setLoading(false);
       }

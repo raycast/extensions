@@ -1,6 +1,7 @@
 import { getLocalStorageItem, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
 import fetch from "node-fetch";
 import { URL } from "url";
+import { BackendNotExistError, NoBackendError } from "./error";
 
 const UNITS = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
@@ -33,10 +34,10 @@ async function fetchBackend(endpoint: string) {
     if (secret != undefined) {
       return fetch(finalUrl, secret ? { headers: { Authorization: `Bearer ${secret}` } } : undefined);
     } else {
-      throw new Error("backend not exist. configurate in 'Backends'");
+      throw BackendNotExistError
     }
   } else {
-    throw new Error("no available backend. configurate in 'Backends'");
+    throw NoBackendError
   }
 }
 
@@ -50,12 +51,12 @@ async function buildWSURLBase(endpoint: string, params = {}) {
     if (secret != undefined) {
       ps.set("token", secret);
     } else {
-      throw new Error("backend not exist. configurate in 'Backends'");
+      throw BackendNotExistError
     }
     const qs = "?" + ps.toString();
     return `${trimTrailingSlash(url.href)}${endpoint}${qs}`;
   } else {
-    throw new Error("no available backend. configurate in 'Backends'");
+    throw NoBackendError
   }
 }
 

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { buildWSURLBase, showFailureToast, wait } from "../../utils";
+import { ErrorHandler } from "../../utils/error";
 import WebSocket = require("ws");
 
 const stateArr = [
@@ -37,10 +38,7 @@ const useWebsocket = (endpoint: string, params = {}) => {
           isMounted.current && setMessage(e.data.toString());
         };
       })
-      .catch((e) => {
-        console.error(e);
-        showFailureToast("Request failed", e);
-      });
+      .catch(ErrorHandler);
   };
 
   const webSocketInit = () => {

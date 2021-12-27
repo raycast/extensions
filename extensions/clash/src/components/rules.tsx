@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { ErrorHandler } from "../utils/error";
 import { GetRules } from "./client/http";
-import { showFailureToast } from "../utils";
 import { RuleT } from "./types";
 
 // TODO: ruleProviders /providers/rules
@@ -16,7 +16,7 @@ export default function Rules(): JSX.Element {
         const data = await GetRules();
         setRules(data);
       } catch (e) {
-        await showFailureToast("Request failed", e);
+        ErrorHandler(e)
       } finally {
         setLoading(false);
       }
