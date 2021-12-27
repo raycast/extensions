@@ -70,14 +70,14 @@ import open from 'open'
 
 
 
-export function ActionEditPageProperty(props: { databaseProperty: DatabaseProperty, pageId: string, pageProperty: any, setRefreshView: any, shortcut: KeyboardShortcut, icon: ImageLike, customOptions: DatabasePropertyOption[] }): JSX.Element | null {
+export function ActionEditPageProperty(props: { databaseProperty: DatabaseProperty, pageId: string, pageProperty: any, setRefreshView: any, shortcut?: KeyboardShortcut, icon?: ImageLike, customOptions?: DatabasePropertyOption[] }): JSX.Element[] {
   const dp = props.databaseProperty
   const propertyType = dp.type
   const pageId = props.pageId
   const pageProperty = props.pageProperty
   const pagePropertyValue = (( pageProperty && pageProperty[propertyType] ) ? pageProperty[propertyType] : null)
   const setRefreshView = props.setRefreshView
-  const shortcut = (props.shortcut ? props.shortcut : undefined)
+  const shortcut = props.shortcut
 
   const title = 'Set '+dp.name
   const icon = (props.icon ? props.icon : 'icon/'+dp.type+'.png')
@@ -100,18 +100,18 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
   switch (dp.type) {    
     
     case 'checkbox':
-      return (<ActionPanel.Item 
+      return ([<ActionPanel.Item 
         title={( pageProperty?.checkbox ? 'Uncheck ' : 'Check ')+dp.name} 
         icon={'icon/'+dp.type+'_'+pageProperty?.checkbox+'.png'} 
         shortcut={shortcut}
         onAction={function () {                     
           setPageProperty(!pageProperty?.checkbox)              
-        }}/>)
+        }}/>])
       break
     
     case 'select': 
       return (                  
-        <ActionPanel.Submenu 
+        [<ActionPanel.Submenu 
           title={title}
           icon={icon}
           shortcut={shortcut}>
@@ -127,13 +127,13 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
                 }                       
               }}/>)
           })}
-       </ActionPanel.Submenu>
+       </ActionPanel.Submenu>]
       )
       break
     
     case 'date': 
       return (                  
-        <ActionPanel.Submenu 
+        [<ActionPanel.Submenu 
           title={title}
           icon={icon}
           shortcut={shortcut}>
@@ -159,7 +159,7 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
                 setPageProperty(dateProperty)               
               }}/>                            
           </ActionPanel.Submenu>                    
-        </ActionPanel.Submenu>
+        </ActionPanel.Submenu>]
       )
       break
     
@@ -169,7 +169,7 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
         multiSelectIds.push(selection.id as string)
       })
       return (
-        <ActionPanel.Submenu 
+        [<ActionPanel.Submenu 
           title={title}
           icon={icon}
           shortcut={shortcut}>
@@ -189,7 +189,7 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
                 }                            
               }}/>)
           })}
-       </ActionPanel.Submenu>
+       </ActionPanel.Submenu>]
       )
       break
     
@@ -199,7 +199,7 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
         peopleIds.push(user.id as string)
       })
       return (
-        <ActionPanel.Submenu 
+        [<ActionPanel.Submenu 
           title={title}
           icon={icon}
           shortcut={shortcut}>
@@ -232,12 +232,12 @@ export function ActionEditPageProperty(props: { databaseProperty: DatabaseProper
             }                      
           })}
         </ActionPanel.Section>
-       </ActionPanel.Submenu>
+       </ActionPanel.Submenu>]
       )
       break
 
     default:
-      return null
+      return []
       break
   }  
 }

@@ -34,22 +34,22 @@ import {
 } from '../utils/local-storage'
 
 
-export function DatabaseViewForm (props: { databaseId: string, databaseView: DatabaseView | null, saveDatabaseView: any, isDefaultView: boolean }): JSX.Element {
+export function DatabaseViewForm (props: { databaseId: string, databaseView?: DatabaseView, saveDatabaseView: any, isDefaultView: boolean }): JSX.Element {
   const presetDatabaseId = props.databaseId
   const databaseView = props.databaseView
   const saveDatabaseView = props.saveDatabaseView
   const isDefaultView = props.isDefaultView 
 
-  const currentViewName = (databaseView.name ? databaseView.name : null)
-  const currentViewType = (databaseView.type ? databaseView.type : null)
+  const currentViewName = (databaseView?.name ? databaseView.name : null)
+  const currentViewType = (databaseView?.type ? databaseView.type : null)
   
   // On form submit function
   const { pop } = useNavigation();
   async function handleSubmit(values: FormValues) {
 
     const newDatabaseView = {
-      properties: (databaseView.properties ? databaseView.properties : {}),
-      sort_by: (databaseView.sort_by ? databaseView.sort_by : {}),
+      properties: (databaseView?.properties ? databaseView.properties : {}),
+      sort_by: (databaseView?.sort_by ? databaseView.sort_by : {}),
       type: (values.type ? values.type : 'list'),
       name: (values.name ? values.name : null)      
     }
@@ -78,7 +78,7 @@ export function DatabaseViewForm (props: { databaseId: string, databaseView: Dat
   const [databaseId, setDatabaseId] = useState<string>()
   const [viewType, setViewType] = useState<string>()
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [viewForm, setViewForm] = useState<JSX.Element>()
+  const [viewForm, setViewForm] = useState<JSX.Element[]>()
   
   // Fetch databases
   useEffect(() => {
@@ -146,6 +146,7 @@ export function DatabaseViewForm (props: { databaseId: string, databaseView: Dat
               showToast(ToastStyle.Failure, 'Select Property Required','Kanban view requires a "Select" type property.');
               setViewForm([])
             }
+
             setViewForm(<KanbanViewFormItem 
               key={`${databaseId}-kanban-view-form`} 
               databaseView={databaseView}
@@ -183,7 +184,7 @@ export function DatabaseViewForm (props: { databaseId: string, databaseView: Dat
           id='database_id'
           title={'Database'}
           onChange={setDatabaseId}>
-            {databases?.map((d: Page) => {
+            {databases?.map((d: Database) => {
               return (
                 <Form.Dropdown.Item
                   key={d.id} 
@@ -200,14 +201,14 @@ export function DatabaseViewForm (props: { databaseId: string, databaseView: Dat
           key='view-name' 
           id='name'
           title='View Name' 
-          defaultValue={currentViewName}
+          defaultValue={( currentViewName ? currentViewName : undefined )}
           placeholder='My List View'/> 
       : null)} 
       <Form.Dropdown 
         key='view-type'
         id='type'
         title='View Type'
-        defaultValue={currentViewType}
+        defaultValue={( currentViewType ? currentViewType : undefined )}
         onChange={setViewType}>
           <Form.Dropdown.Item
             key='view-type-list'
@@ -227,18 +228,18 @@ export function DatabaseViewForm (props: { databaseId: string, databaseView: Dat
   )
 }
 
-function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], databaseView: DatabaseView }): JSX.Element {
+function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], databaseView?: DatabaseView }): JSX.Element[] {
   const selectProperties = props.selectProperties
   const databaseView = props.databaseView
 
   if(!selectProperties)
-    return null
+    return []
 
-  const defaultPropertyId = (databaseView.kanban?.property_id ? databaseView.kanban?.property_id  : selectProperties[0]?.id)
+  const defaultPropertyId = (databaseView?.kanban?.property_id ? databaseView?.kanban?.property_id  : selectProperties[0]?.id)
   
   // Setup useState objects
   const [statusProperty, setStatusProperty] = useState<DatabaseProperty>()
-  const [FormItem, setFormItem] = useState([])
+  const [FormItem, setFormItem] = useState<JSX.Element[]>([])
 
   function onPropertyChange (propertyId: string) {    
     if(!propertyId)
@@ -254,10 +255,10 @@ function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], data
 
   // Set form item
   useEffect(() => {
-    const test = () => {
+    const presetForm = () => {
       if(statusProperty && statusProperty.options){   
-        const currentConfig = databaseView.kanban
-        const statusOptions =  statusProperty.options.filter(function (o){ return o.id !== '_select_null_' })  
+        const currentConfig = databaseView?.kanban
+        const statusOptions =  (statusProperty.options as DatabasePropertyOption[]).filter(function (o){ return o.id !== '_select_null_' })  
 
         const defaultBacklogOpts = (currentConfig ? currentConfig.backlog_ids : ['_select_null_'])
         const defaultCompletedOpts = (currentConfig ? currentConfig.completed_ids : (statusOptions[statusOptions.length-1] ? [statusOptions[statusOptions.length-1].id] : []))
@@ -272,7 +273,7 @@ function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], data
           {propertyId:statusProperty.id, id:'completed', title:'Completed', defaultValue: defaultCompletedOpts},
           {propertyId:statusProperty.id, id:'canceled', title:'Canceled', defaultValue: defaultCanceledOpts}
         ]
-        const tempFormItem = []
+        const tempFormItem: JSX.Element[] = []
         statusTypes.forEach(function (statusType){          
           tempFormItem.push(<StatusTagPicker 
             key={`kanban-tag-picker-${statusType.propertyId}-${statusType.id}`}
@@ -285,7 +286,7 @@ function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], data
         setFormItem(tempFormItem)
       }    
     }
-    test()
+    presetForm()
   }, [statusProperty])
 
   return [<Form.Dropdown 
@@ -308,7 +309,7 @@ function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], data
 }
 
 
-function StatusTagPicker (props: {id: string, title: string, defaultValue: string[], propertyId: string, statusProperty}) {
+function StatusTagPicker (props: {id: string, title: string, defaultValue: string[], propertyId: string, statusProperty: DatabaseProperty}): JSX.Element {
 
   const id = props.id
   const title = props.title
@@ -316,10 +317,10 @@ function StatusTagPicker (props: {id: string, title: string, defaultValue: strin
   const statusProperty = props.statusProperty
   const propertyId = props.propertyId
 
-  const [defaultValueInit, setDefaultValueInit] = useState<string[]>((defaultValue ? defaultValue : null));
+  const [defaultValueInit, setDefaultValueInit] = useState<string[] | null>((defaultValue ? defaultValue : null));
 
 
-  function onFirstChange(newValues) {
+  function onFirstChange(newValues: string[]) {
     setDefaultValueInit(null)
   }
 
@@ -328,10 +329,10 @@ function StatusTagPicker (props: {id: string, title: string, defaultValue: strin
     id={`kanban::${id}_ids`}
     title={title+' →'}
     placeholder={`Status for "${title}" tasks`}
-    onChange={( defaultValueInit !== null ? onFirstChange : null)}
+    onChange={( defaultValueInit !== null ? onFirstChange : undefined)}
     value={defaultValueInit}
     defaultValue={defaultValue}>
-    {statusProperty?.options.map((o) => {
+    {(statusProperty?.options as DatabasePropertyOption[]).map((o) => {
       return (<Form.TagPicker.Item  
           key={`kanban-${propertyId}-${id}-tag-${o.id}`} 
           value={o.id} 

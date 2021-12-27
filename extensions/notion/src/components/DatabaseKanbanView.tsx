@@ -51,6 +51,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
   const setRefreshView = props.setRefreshView
   const saveDatabaseView = props.saveDatabaseView
   
+
   // Get kanban view settings
   const kanbanView = databaseView.kanban
   const propertyId = kanbanView?.property_id
@@ -133,9 +134,11 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
     tempSections[propId].push(p)        
   })
 
-  const optionsMap: Record<string,DatabasePropertyOption> = {}
-  const customOptions: DatabasePropertyOption[] = []
+  const optionsMap: Record<string,DatabasePropertyOption> = {};
+  const customOptions: DatabasePropertyOption[] = [];
+
   (statusProperty.options as DatabasePropertyOption[])?.sort(function (dpa, dpb){
+
       const value_a = actionEditIds.indexOf(dpa.id)
       const value_b = actionEditIds.indexOf(dpb.id)
 
@@ -163,6 +166,8 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
       })
   })
 
+
+
   sectionIds.forEach(function (sectionId: string) {
     if(!tempSections[sectionId])
       return 
@@ -187,7 +192,6 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
             keywords={[ds.name]}
             page={p}
             icon={ds.icon}
-            accessoryIcon={null}
             customActions={[
               <ActionEditPageProperty 
                 databaseProperty={statusProperty} 

@@ -219,14 +219,16 @@ export function DatabaseList (props: {databasePage: Page}): JSX.Element {
     storeDatabaseView(databaseId,newDatabaseView)
   }
 
-  const databaseViewTypes: Record<string,JSX.Element> = {
+  const viewType = (databaseView?.type ? databaseView.type : 'list')  
+  const viewTitle = (databaseView?.name ? (databasePage.icon_emoji ? databasePage.icon_emoji+' ': '')+databaseView.name : null)
+
+
+  const databaseViewTypes: Record<string,(props: { databaseId: string; databasePages: Page[]; databaseProperties: DatabaseProperty[]; databaseView: DatabaseView; setRefreshView: any; saveDatabaseView: any; }) => Element[]> = {
     list: DatabaseListView,
     kanban: DatabaseKanbanView
   }
 
-  const viewType = (databaseView?.type ? databaseView.type : 'list')
   const DatabaseViewType = databaseViewTypes[viewType]
-  const viewTitle = (databaseView?.name ? (databasePage.icon_emoji ? databasePage.icon_emoji+' ': '')+databaseView.name : null)
 
   return (
     <List 

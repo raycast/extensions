@@ -67,7 +67,7 @@ import open from 'open'
 
 
 
-export function DatabaseListView (props: {databaseId: string, databasePages: Page[], databaseProperties: DatabaseProperty[], databaseView: DatabaseView, setRefreshView: any, saveDatabaseView: any  }): JSX.Element {
+export function DatabaseListView (props: {databaseId: string, databasePages: Page[], databaseProperties: DatabaseProperty[], databaseView: DatabaseView, setRefreshView: any, saveDatabaseView: any  }): JSX.Element[] {
 
   // Get database page list info
   const databaseId = props.databaseId
@@ -77,7 +77,7 @@ export function DatabaseListView (props: {databaseId: string, databasePages: Pag
   const setRefreshView = props.setRefreshView
   const saveDatabaseView = props.saveDatabaseView
 
-  return (<List.Section key='database-view-list' title='Recent'>
+  return ([<List.Section key='database-view-list' title='Recent'>
     {databasePages?.map(function (p) {
       return (
       <PageListItem 
@@ -88,6 +88,6 @@ export function DatabaseListView (props: {databaseId: string, databasePages: Pag
         saveDatabaseView={saveDatabaseView}
         setRefreshView={setRefreshView}/>
       )})}
-    </List.Section>
+    </List.Section>]
   ) 
 }

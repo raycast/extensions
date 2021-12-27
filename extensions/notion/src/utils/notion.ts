@@ -22,7 +22,6 @@ export interface User {
   avatar_url: string | null
 }
 
-
 export interface Database {
   id: string
   last_edited_time: number  
@@ -37,7 +36,7 @@ export interface DatabaseProperty {
   type: string
   name: string
   options: DatabasePropertyOption[] | User[]
-  relation_id: string | undefined
+  relation_id?: string
 }
 
 export interface DatabasePropertyOption {
@@ -68,12 +67,12 @@ export interface PageContent {
 }
 
 export interface DatabaseView {
-  properties: Record<string,any> | undefined
-  create_properties: string[] | undefined
-  sort_by: Record<string,any> | undefined
-  type: string | undefined
-  name: string | undefined
-  kanban: KabanView | undefined
+  properties?: Record<string,any>
+  create_properties?: string[]
+  sort_by?: Record<string,any>
+  type?: string
+  name?: string | null
+  kanban?: KabanView
 }
 
 export interface KabanView {
@@ -92,7 +91,7 @@ export async function fetchDatabases(): Promise<Database[]> {
 }
 
 // Raw function for fetching databases
-async function rawFetchDatabases(): Promise<Database[]> {
+async function rawFetchDatabases(): Promise<Database[] | undefined> {
   try {
     const response = await fetch(
       apiURL + `v1/search`,
@@ -145,7 +144,7 @@ export async function fetchDatabaseProperties(databaseId: string): Promise<Datab
 }
 
 // Raw function for fetching databases
-async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProperty[]> {
+async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProperty[] | undefined> {
   
   const databaseProperties: DatabaseProperty[] = [];
   try {
@@ -170,11 +169,11 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
       let property = properties[name] as Record<string,any>
 
       let databaseProperty = {
-        id: property.id as string,
-        type: property.type as string,
-        name: name as string,
-        options: [] as DatabasePropertyOption[]
-      }
+        id: property.id,
+        type: property.type,
+        name: name,
+        options: []
+      } as DatabaseProperty
 
       switch (property.type) {
         case 'select':
@@ -208,7 +207,7 @@ export async function queryDatabase(databaseId: string, query: { title: string |
 }
 
 // Raw function to query databases
-async function rawQueryDatabase(databaseId: string, query: { title: string | undefined } | undefined): Promise<Page[]> {
+async function rawQueryDatabase(databaseId: string, query: { title: string | undefined } | undefined): Promise<Page[] | undefined> {
   try {
 
     var requestBody = {
@@ -266,7 +265,7 @@ export async function createDatabasePage(values: FormValues): Promise<Page> {
 }
 
 // Raw function for creating database page
-async function rawCreateDatabasePage(values: FormValues): Promise<Page> {
+async function rawCreateDatabasePage(values: FormValues): Promise<Page | undefined> {
   try {
 
     const requestBody = {
@@ -406,7 +405,7 @@ export async function patchPage(pageId: string, properties: Record<string,any>):
   return page;
 }
 // Raw function for updating page
-async function rawPatchPage(pageId: string, properties: Record<string,any>): Promise<Page> {
+async function rawPatchPage(pageId: string, properties: Record<string,any>): Promise<Page | undefined> {
   try {
     const requestBody = {
       properties: properties
@@ -424,7 +423,7 @@ async function rawPatchPage(pageId: string, properties: Record<string,any>): Pro
 
     if(json.object === 'error'){
       showToast(ToastStyle.Failure, json.message)
-      return {}
+      return undefined
     }
 
     const page = pageMapper(json)
@@ -444,7 +443,7 @@ export async function searchPages(query: string | undefined): Promise<Page[]> {
 }
 
 // Raw function for searching pages
-async function rawSearchPages(query: string | undefined ): Promise<Page[]> {
+async function rawSearchPages(query: string | undefined ): Promise<Page[] | undefined> {
   try {
 
     var requestBody = {
@@ -543,7 +542,7 @@ export async function fetchPageContent(pageId: string): Promise<PageContent> {
 }
 
 // Raw function for fetching page content
-async function rawFetchPageContent(pageId: string): Promise<PageContent | null> {
+async function rawFetchPageContent(pageId: string): Promise<PageContent | undefined> {
   
   try {
     const response = await fetch(
@@ -557,7 +556,7 @@ async function rawFetchPageContent(pageId: string): Promise<PageContent | null> 
 
     if(json.object === 'error'){
       showToast(ToastStyle.Failure, json.message)
-      return null
+      return
     }
 
     const blocks = json.results as Record<string,any>[]
@@ -577,7 +576,7 @@ export async function fetchUsers(): Promise<User[]> {
 }
 
 // Raw function for fetching users
-async function rawListUsers(): Promise<User[]> {
+async function rawListUsers(): Promise<User[] | undefined> {
   
   try {
     const response = await fetch(
@@ -617,7 +616,7 @@ async function rawListUsers(): Promise<User[]> {
 
 
 // Fetch Extension README
-export async function fetchExtensionReadMe(): Promise<string> {
+export async function fetchExtensionReadMe(): Promise<string | undefined> {
   try {
     var pjson = require('./package.json');
     const response = await fetch(

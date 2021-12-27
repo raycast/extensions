@@ -50,7 +50,7 @@ import {
 } from '../utils/local-storage'
 
 
-export function CreateDatabaseForm( props : { databaseId: string | null, setRefreshView: any } ): JSX.Element {
+export function CreateDatabaseForm( props : { databaseId?: string, setRefreshView?: any } ): JSX.Element {
 
   const presetDatabaseId = props.databaseId
   const setParentRefreshView = props.setRefreshView

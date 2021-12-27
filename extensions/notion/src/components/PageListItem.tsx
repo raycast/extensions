@@ -49,12 +49,12 @@ import {
 import moment from 'moment'
 import open from 'open'
 
-export function PageListItem (props: { keywords: string[] | null, page: Page, databaseView: DatabaseView | undefined, databaseProperties: DatabaseProperty[] | undefined, saveDatabaseView: any, setRefreshView: any, users: User[] | undefined, icon: ImageLike | undefined, accessoryIcon: ImageLike | undefined, customActions: Element[] | undefined }): JSX.Element {
+export function PageListItem (props: { keywords?: string[], page: Page, databaseView?: DatabaseView, databaseProperties?: DatabaseProperty[], saveDatabaseView: any, setRefreshView: any, users?: User[], icon?: ImageLike, accessoryIcon?: ImageLike, customActions?: Element[] }): JSX.Element {
   const page = props.page
   const pageProperties = page.properties
   const icon = (props.icon ? props.icon : {source: ((page.icon_emoji) ? page.icon_emoji : ( page.icon_file ?  page.icon_file :  ( page.icon_external ?  page.icon_external : Icon.TextDocument)))})
-  const accessoryIcon = (props.accessoryIcon ? props.accessoryIcon : null)
-  const customActions = (props.customActions ? props.customActions : null)
+  const accessoryIcon = props.accessoryIcon
+  const customActions = props.customActions
   const databaseProperties = props.databaseProperties
   const databaseView = props.databaseView
   const keywords: string[] = (props.keywords ? props.keywords : [])
@@ -117,7 +117,7 @@ export function PageListItem (props: { keywords: string[] | null, page: Page, da
   const visiblePropertiesIds:string[] = []
   if(databaseView && databaseView.properties){    
     databaseProperties?.forEach(function (dp: DatabaseProperty){
-      if(databaseView.properties[dp.id])
+      if(databaseView?.properties[dp.id])
         visiblePropertiesIds.push(dp.id)
     })
   }
@@ -170,11 +170,11 @@ export function PageListItem (props: { keywords: string[] | null, page: Page, da
           
       {(databaseProperties ? 
         <ActionPanel.Section title='View options'>
-          <PushAction title='Set View Type...' icon={(databaseView.type ? `./icon/view_${databaseView.type }.png` : './icon/view_list.png')} target={<DatabaseViewForm isDefaultView databaseId={page.parent_database_id} databaseView={databaseView} saveDatabaseView={saveDatabaseView} />}/>
+          <PushAction title='Set View Type...' icon={(databaseView?.type ? `./icon/view_${databaseView.type }.png` : './icon/view_list.png')} target={<DatabaseViewForm isDefaultView databaseId={page.parent_database_id!} databaseView={databaseView} saveDatabaseView={saveDatabaseView} />}/>
           <ActionSetVisibleProperties 
             databaseProperties={databaseProperties} 
             selectedPropertiesIds={visiblePropertiesIds} 
-            onSelect={function (propertyId: sting) {
+            onSelect={function (propertyId: string) {
               databaseViewCopy.properties[propertyId] = {}                                          
               saveDatabaseView(databaseViewCopy)
             }} 
