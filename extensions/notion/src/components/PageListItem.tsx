@@ -111,7 +111,7 @@ export function PageListItem (props: { keywords?: string[], page: Page, database
   }
 
   const quickEditProperties = databaseProperties?.filter(function(property){
-    return ['checkbox','select','multi_select','people','date'].includes(property.type)
+    return ['checkbox','select','multi_select','people'].includes(property.type)
   })
 
   const visiblePropertiesIds:string[] = []
