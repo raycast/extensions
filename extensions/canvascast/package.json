@@ -26,7 +26,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Open Dashboard",
+      "title": "My Courses",
       "subtitle": "Canvas",
       "description": "View the Canvas dashboard",
       "mode": "view"
