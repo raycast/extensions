@@ -56,11 +56,11 @@ function getDetail(unread: Unread) {
       const format = (value: any) => (value = value < 10 ? '0' + value : value);
       return (
         date.getFullYear() +
-        'Year' +
+        '/' +
         format(date.getMonth() + 1) +
-        'Month' +
+        '-' +
         format(date.getDate()) +
-        'Day ' +
+        ' ' +
         format(date.getHours()) +
         ':' +
         format(date.getMinutes()) +
@@ -103,7 +103,7 @@ ${tags}
     template = `
 # ${unread.title}
 
-> Origin url [${host}](${unread.url}) at ${unread.create.replace( '年', '/' ).replace( '月', '-' ).replace( '日', '' )}
+> Origin url [${host}](${unread.url}) at ${unread.create}
 
 ${desc}
 
