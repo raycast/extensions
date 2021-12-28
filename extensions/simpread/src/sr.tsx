@@ -103,7 +103,7 @@ ${tags}
     template = `
 # ${unread.title}
 
-> Origin url [${host}](${unread.url}) at ${unread.create}
+> Origin url [${host}](${unread.url}) at ${unread.create.replace( '年', '/' ).replace( '月', '-' ).replace( '日', '' )}
 
 ${desc}
 
