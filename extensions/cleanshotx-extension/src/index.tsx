@@ -48,7 +48,7 @@ export default function Command() {
     {
       key: "Text Recognition",
       title: "Text Recognition",
-      subtitle: "text recognition using OCR",
+      subtitle: "Text recognition using OCR",
       urlScheme: "cleanshot://capture-text",
     },
     {
