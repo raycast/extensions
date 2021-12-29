@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "cleanshotx-extension",
-  "title": "CleanshotX Extension",
+  "name": "cleanshotx",
+  "title": "Cleanshot X",
   "description": "Capture, Record your screen!",
   "icon": "command-icon.png",
   "author": "Aayush9029",
