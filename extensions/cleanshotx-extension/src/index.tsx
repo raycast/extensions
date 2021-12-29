@@ -66,7 +66,7 @@ export default function Command() {
     {
       key: "Toggle Desktop icons",
       title: "Toggle Desktop icons",
-      subtitle: "hide / show desktop icons visibility",
+      subtitle: "Toggle desktop icons visibility",
       urlScheme: "cleanshot://toggle-desktop-icons",
     },
 
