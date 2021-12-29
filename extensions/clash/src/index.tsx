@@ -1,5 +1,7 @@
 import { ActionPanel, ImageLike, List, PushAction } from "@raycast/api";
 import Commponents from "./components";
+import { getCurrentBackendWithSecret } from "./utils";
+import { ErrorHandler } from "./utils/error";
 
 type CommponentT = {
   title: string;
@@ -41,6 +43,7 @@ const commponents: Array<CommponentT> = [
 ];
 
 export default function Command() {
+  getCurrentBackendWithSecret().catch(ErrorHandler)
   return (
     <List>
       {commponents.map((commponent, index) => (
