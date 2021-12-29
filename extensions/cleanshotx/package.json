@@ -1,52 +1,140 @@
 {
-  "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "cleanshotx",
-  "title": "Cleanshot X",
-  "description": "Capture and record your screen!",
-  "icon": "command-icon.png",
-  "author": "Aayush9029",
-  "license": "MIT",
-  "commands": [
-    {
-      "name": "index",
-      "title": "Take screenshots",
-      "subtitle": "CleanShot X",
-      "description": "Capture your Mac’s screen like a pro.",
-      "mode": "view"
-    }
-  ],
-  "dependencies": {
-    "@raycast/api": "^1.26.3"
-  },
-  "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
-  },
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
-    "lint": "ray lint"
-  },
-  "version": "1.0.0",
-  "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Aayush9029/CleanShotX-Extension.git"
-  },
-  "keywords": [
-    "CleanshotX",
-    "screenshot",
-    "raycast",
-    "a29"
-  ],
-  "bugs": {
-    "url": "https://github.com/Aayush9029/CleanShotX-Extension/issues"
-  },
-  "homepage": "https://github.com/Aayush9029/CleanShotX-Extension#readme"
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "cleanshotx",
+    "title": "Cleanshot X",
+    "description": "Capture and record your screen!",
+    "icon": "command-icon.png",
+    "author": "Aayush9029",
+    "license": "MIT",
+    "commands": [{
+            "name": "capture-fullscreen",
+            "title": "Capture Fullscreen",
+            "subtitle": "CleanShotX",
+            "description": "Fullscreen screenshot",
+            "mode": "no-view"
+        },
+
+        {
+            "name": "capture-area",
+            "title": "Capture Area",
+            "subtitle": "CleanShotX",
+            "description": "Selection tool capture",
+            "mode": "no-view"
+        },
+
+        {
+            "name": "capture-previous-area",
+            "title": "Capture Previous Area",
+            "subtitle": "CleanShotX",
+            "description": "Previously selected area",
+            "mode": "no-view"
+        },
+
+        {
+            "name": "capture-window",
+            "title": "Capture Window",
+            "subtitle": "CleanShotX",
+            "description": "Window capture",
+            "mode": "no-view"
+        },
+
+        {
+            "name": "self-timer",
+            "title": "Self Timer",
+            "subtitle": "CleanShotX",
+            "description": "Timer based screen capture",
+            "mode": "no-view"
+        },
+
+        {
+            "name": "scrolling-capture",
+            "title": "Scrolling Capture",
+            "subtitle": "CleanShotX",
+            "description": "Scrolling capture mode",
+            "mode": "no-view"
+        },
+
+        {
+            "name": "record-screen",
+            "title": "Record Screen",
+            "subtitle": "CleanShotX",
+            "description": "Record entire screen",
+            "mode": "no-view"
+        },
+
+        {
+            "name": "text-recognition",
+            "title": "Text Recognition",
+            "subtitle": "CleanShotX",
+            "description": "Text recognition using OCR",
+            "mode": "no-view"
+        },
+
+        {
+            "name": "annotate",
+            "title": "Annotate",
+            "subtitle": "CleanShotX",
+            "description": "Annotate mode",
+            "mode": "no-view"
+        },
+
+        {
+            "name": "open-from-clipboard",
+            "title": "Open from clipboard",
+            "subtitle": "CleanShotX",
+            "description": "Open image from clipboard",
+            "mode": "no-view"
+        },
+
+        {
+            "name": "toggle-desktop-icons",
+            "title": "Toggle Desktop icons",
+            "subtitle": "CleanShotX",
+            "description": "Toggle desktop icons visibility",
+            "mode": "no-view"
+        },
+
+        {
+            "name": "restore-recently-closed",
+            "title": "Restore recently closed",
+            "subtitle": "CleanShotX",
+            "description": "Restore recently closed overlay",
+            "mode": "no-view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.26.3",
+        "got": "^12.0.0",
+        "node-fetch": "^3.1.0",
+        "node-run-cmd": "^1.0.1",
+        "request": "^2.88.2",
+        "run-applescript": "^6.0.0",
+        "typescript-http-client": "^0.10.4",
+        "whatwg-fetch": "^3.6.2"
+    },
+    "devDependencies": {
+        "@types/node": "~16.10.0",
+        "@types/react": "^17.0.28",
+        "@typescript-eslint/eslint-plugin": "^5.0.0",
+        "@typescript-eslint/parser": "^5.0.0",
+        "eslint": "^7.32.0",
+        "eslint-config-prettier": "^8.3.0",
+        "react-devtools": "^4.19.2",
+        "typescript": "^4.4.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "lint": "ray lint"
+    },
+    "version": "1.0.0",
+    "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Aayush9029/CleanShotX-Extension.git"
+    },
+    "bugs": {
+        "url": "https://github.com/Aayush9029/CleanShotX-Extension/issues"
+    },
+    "homepage": "https://github.com/Aayush9029/CleanShotX-Extension#readme"
 }
