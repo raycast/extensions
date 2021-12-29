@@ -24,7 +24,7 @@ export default function Command() {
     {
       key: "Capture Window",
       title: "Capture Window",
-      subtitle: "window capture",
+      subtitle: "Window capture",
       urlScheme: "cleanshot://capture-window",
     },
     {
