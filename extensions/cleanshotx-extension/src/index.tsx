@@ -12,7 +12,7 @@ export default function Command() {
     {
       key: "Capture Area",
       title: "Capture Area",
-      subtitle: "selection tool capture",
+      subtitle: "Selection tool capture",
       urlScheme: "cleanshot://capture-area",
     },
     {
