@@ -54,7 +54,7 @@ export default function Command() {
     {
       key: "Annotate",
       title: "Annotate",
-      subtitle: "annotate mode",
+      subtitle: "Annotate mode",
       urlScheme: "cleanshot://open-annotate",
     },
     {
