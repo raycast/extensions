@@ -36,7 +36,7 @@ export default function Command() {
     {
       key: "Scrolling Capture",
       title: "Scrolling Capture",
-      subtitle: "scrolling capture mode",
+      subtitle: "Scrolling capture mode",
       urlScheme: "cleanshot://scrolling-capture",
     },
     {
