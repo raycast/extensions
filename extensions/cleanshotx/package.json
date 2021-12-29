@@ -9,96 +9,96 @@
     "commands": [{
             "name": "capture-fullscreen",
             "title": "Capture Fullscreen",
-            "subtitle": "Fullscreen screenshot",
-            "description": "CleanShotX",
+            "subtitle": "CleanShotX",
+            "description": "Fullscreen screenshot",
             "mode": "no-view"
         },
 
         {
             "name": "capture-area",
             "title": "Capture Area",
-            "subtitle": "Selection tool capture",
-            "description": "CleanShotX",
+            "subtitle": "CleanShotX",
+            "description": "Selection tool capture",
             "mode": "no-view"
         },
 
         {
             "name": "capture-previous-area",
             "title": "Capture Previous Area",
-            "subtitle": "Previously selected area",
-            "description": "CleanShotX",
+            "subtitle": "CleanShotX",
+            "description": "Previously selected area",
             "mode": "no-view"
         },
 
         {
             "name": "capture-window",
             "title": "Capture Window",
-            "subtitle": "Window capture",
-            "description": "CleanShotX",
+            "subtitle": "CleanShotX",
+            "description": "Window capture",
             "mode": "no-view"
         },
 
         {
             "name": "self-timer",
             "title": "Self Timer",
-            "subtitle": "Timer based screen capture",
-            "description": "CleanShotX",
+            "subtitle": "CleanShotX",
+            "description": "Timer based screen capture",
             "mode": "no-view"
         },
 
         {
             "name": "scrolling-capture",
             "title": "Scrolling Capture",
-            "subtitle": "Scrolling capture mode",
-            "description": "CleanShotX",
+            "subtitle": "CleanShotX",
+            "description": "Scrolling capture mode",
             "mode": "no-view"
         },
 
         {
             "name": "record-screen",
             "title": "Record Screen",
-            "subtitle": "Record entire screen",
-            "description": "CleanShotX",
+            "subtitle": "CleanShotX",
+            "description": "Record entire screen",
             "mode": "no-view"
         },
 
         {
             "name": "text-recognition",
             "title": "Text Recognition",
-            "subtitle": "Text recognition using OCR",
-            "description": "CleanShotX",
+            "subtitle": "CleanShotX",
+            "description": "Text recognition using OCR",
             "mode": "no-view"
         },
 
         {
             "name": "annotate",
             "title": "Annotate",
-            "subtitle": "Annotate mode",
-            "description": "CleanShotX",
+            "subtitle": "CleanShotX",
+            "description": "Annotate mode",
             "mode": "no-view"
         },
 
         {
             "name": "open-from-clipboard",
             "title": "Open from clipboard",
-            "subtitle": "Open image from clipboard",
-            "description": "CleanShotX",
+            "subtitle": "CleanShotX",
+            "description": "Open image from clipboard",
             "mode": "no-view"
         },
 
         {
             "name": "toggle-desktop-icons",
             "title": "Toggle Desktop icons",
-            "subtitle": "Toggle desktop icons visibility",
-            "description": "CleanShotX",
+            "subtitle": "CleanShotX",
+            "description": "Toggle desktop icons visibility",
             "mode": "no-view"
         },
 
         {
             "name": "restore-recently-closed",
             "title": "Restore recently closed",
-            "subtitle": "Restore recently closed overlay",
-            "description": "CleanShotX",
+            "subtitle": "CleanShotX",
+            "description": "Restore recently closed overlay",
             "mode": "no-view"
         }
     ],
