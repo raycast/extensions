@@ -73,7 +73,7 @@ export default function Command() {
     {
       key: "Restore recently closed",
       title: "Restore recently closed",
-      subtitle: "restore recently closed overlay",
+      subtitle: "Restore recently closed overlay",
       urlScheme: "cleanshot://restore-recently-closed",
     }
   ]
