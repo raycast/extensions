@@ -18,7 +18,7 @@ export default function Command() {
     {
       key: "Capture Previous Area",
       title: "Capture Previous Area",
-      subtitle: "previously selected area",
+      subtitle: "Previously selected area",
       urlScheme: "cleanshot://capture-previous-area",
     },
     {
