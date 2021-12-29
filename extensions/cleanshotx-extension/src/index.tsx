@@ -42,7 +42,7 @@ export default function Command() {
     {
       key: "Record Screen",
       title: "Record Screen",
-      subtitle: "record entire screen",
+      subtitle: "Record entire screen",
       urlScheme: "cleanshot://record-screen",
     },
     {
