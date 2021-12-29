@@ -88,7 +88,7 @@ export default function Command() {
           subtitle={item.subtitle}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={item.urlScheme} />
+              <OpenInBrowserAction title="Run Action" url={item.urlScheme} />
             </ActionPanel>
           }
         />
