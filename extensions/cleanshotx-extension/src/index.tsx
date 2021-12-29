@@ -30,7 +30,7 @@ export default function Command() {
     {
       key: "Self Timer",
       title: "Self Timer",
-      subtitle: "timer base screen capture",
+      subtitle: "Timer based screen capture",
       urlScheme: "cleanshot://self-timer",
  },
     {
