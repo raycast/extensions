@@ -6,7 +6,7 @@ export default function Command() {
     {
       key: "Capture Fullscreen",
       title: "Capture Fullscreen",
-      subtitle: "fullscreen screenshot",
+      subtitle: "Fullscreen screenshot",
       urlScheme: "cleanshot://capture-fullscreen",
     },
     {
