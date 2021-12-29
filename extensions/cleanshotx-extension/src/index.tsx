@@ -60,7 +60,7 @@ export default function Command() {
     {
       key: "Open from clipboard",
       title: "Open from clipboard",
-      subtitle: "open image from clipboard",
+      subtitle: "Open image from clipboard",
       urlScheme: "cleanshot://open-from-clipboard",
     },
     {
