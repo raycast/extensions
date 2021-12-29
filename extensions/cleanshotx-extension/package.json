@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Screenshot",
-      "subtitle": "Take screenshots",
+      "title": "Take screenshots",
+      "subtitle": "CleanShot X",
       "description": "Capture your Mac’s screen like a pro.",
       "mode": "view"
     }
