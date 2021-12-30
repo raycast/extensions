@@ -80,7 +80,7 @@
 
         {
             "name": "open-from-clipboard",
-            "title": "Open from clipboard",
+            "title": "Open From Clipboard",
             "subtitle": "CleanShot X",
             "description": "Open Image From Clipboard",
             "mode": "no-view"
@@ -88,7 +88,7 @@
 
         {
             "name": "toggle-desktop-icons",
-            "title": "Toggle Desktop icons",
+            "title": "Toggle Desktop Icons",
             "subtitle": "CleanShot X",
             "description": "Toggle Desktop Icons Visibility",
             "mode": "no-view"
@@ -96,7 +96,7 @@
 
         {
             "name": "restore-recently-closed",
-            "title": "Restore recently closed",
+            "title": "Restore Recently Closed",
             "subtitle": "CleanShot X",
             "description": "Restore Recently Closed Overlay",
             "mode": "no-view"
