@@ -259,6 +259,7 @@ function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], data
       if(statusProperty && statusProperty.options){   
         const currentConfig = databaseView?.kanban
         const statusOptions =  (statusProperty.options as DatabasePropertyOption[]).filter(function (o){ return o.id !== '_select_null_' })  
+        const propertyId = statusProperty.id
 
         const defaultBacklogOpts = (currentConfig ? currentConfig.backlog_ids : ['_select_null_'])
         const defaultCompletedOpts = (currentConfig ? currentConfig.completed_ids : (statusOptions[statusOptions.length-1] ? [statusOptions[statusOptions.length-1].id] : []))
@@ -267,21 +268,23 @@ function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], data
         const defaultCanceledOpts = (currentConfig ? currentConfig.canceled_ids : []) 
 
         const statusTypes = [
-          {propertyId:statusProperty.id, id:'backlog', title:'Backlog', defaultValue: defaultBacklogOpts},
-          {propertyId:statusProperty.id, id:'not_started', title:'To Do', defaultValue: defaultNotStartedOpts},
-          {propertyId:statusProperty.id, id:'started', title:'In Progress', defaultValue: defaultStartedOpts},
-          {propertyId:statusProperty.id, id:'completed', title:'Completed', defaultValue: defaultCompletedOpts},
-          {propertyId:statusProperty.id, id:'canceled', title:'Canceled', defaultValue: defaultCanceledOpts}
+          { id:'backlog', title:'Backlog', defaultValue: defaultBacklogOpts},
+          { id:'not_started', title:'To Do', defaultValue: defaultNotStartedOpts},
+          { id:'started', title:'In Progress', defaultValue: defaultStartedOpts},
+          { id:'completed', title:'Completed', defaultValue: defaultCompletedOpts},
+          { id:'canceled', title:'Canceled', defaultValue: defaultCanceledOpts}
         ]
         const tempFormItem: JSX.Element[] = []
         statusTypes.forEach(function (statusType){          
           tempFormItem.push(<StatusTagPicker 
-            key={`kanban-tag-picker-${statusType.propertyId}-${statusType.id}`}
+            key={`kanban-tag-picker-${propertyId}-${statusType.id}`}
             statusProperty={statusProperty} 
-            propertyId={statusType.propertyId} 
+            propertyId={propertyId} 
             id={statusType.id} 
             title={statusType.title} 
-            defaultValue={statusType.defaultValue}/>)
+            // #TODO: Once TagPicker fixed
+            //defaultValue={statusType.defaultValue}
+            />)
         })
         setFormItem(tempFormItem)
       }    
@@ -293,7 +296,7 @@ function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], data
     key='kanban-property-id'
     id='kanban::property_id'
     title='Kanban Status'
-    defaultValue={defaultPropertyId}
+    // TODO once TagPicker fixed:defaultValue={defaultPropertyId}
     onChange={onPropertyChange}>
       {selectProperties?.map(function (dp) {
         return (
@@ -309,29 +312,31 @@ function KanbanViewFormItem (props: { selectProperties: DatabaseProperty[], data
 }
 
 
-function StatusTagPicker (props: {id: string, title: string, defaultValue: string[], propertyId: string, statusProperty: DatabaseProperty}): JSX.Element {
+function StatusTagPicker (props: {id: string, title: string, defaultValue?: string[], propertyId: string, statusProperty: DatabaseProperty}): JSX.Element {
 
   const id = props.id
   const title = props.title
-  const defaultValue = props.defaultValue
   const statusProperty = props.statusProperty
   const propertyId = props.propertyId
 
-  const [defaultValueInit, setDefaultValueInit] = useState<string[] | undefined>((defaultValue ? defaultValue : undefined));
+  // #TODO: Once TagPicker fixed
+  //const defaultValue = props.defaultValue
+  //const [defaultValueInit, setDefaultValueInit] = useState<string[] | undefined>((defaultValue ? defaultValue : undefined));
+  //function onFirstChange(newValues: string[]) {
+  //  setDefaultValueInit(undefined)
+  //}
 
 
-  function onFirstChange(newValues: string[]) {
-    setDefaultValueInit(undefined)
-  }
+  // #TODO: Once TagPicker fixed, add :
+  //onChange={( defaultValueInit !== null ? onFirstChange : undefined)}
+  //value={defaultValueInit}
+  //defaultValue={defaultValue}
 
   return (<Form.TagPicker 
     key={`kanban-${propertyId}-${id}-tags`}
     id={`kanban::${id}_ids`}
     title={title+' →'}
-    placeholder={`Status for "${title}" tasks`}
-    onChange={( defaultValueInit !== null ? onFirstChange : undefined)}
-    value={defaultValueInit}
-    defaultValue={defaultValue}>
+    placeholder={`Status for "${title}" tasks`}>
     {(statusProperty?.options as DatabasePropertyOption[]).map((o) => {
       return (<Form.TagPicker.Item  
           key={`kanban-${propertyId}-${id}-tag-${o.id}`} 

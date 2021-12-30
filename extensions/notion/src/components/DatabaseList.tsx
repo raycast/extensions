@@ -232,7 +232,7 @@ export function DatabaseList (props: {databasePage: Page}): JSX.Element {
 
   return (
     <List 
-      key={'database-view'}
+      key='database-view'
       isLoading={isLoading} 
       searchBarPlaceholder='Filter pages'
       navigationTitle={' →  '+(viewTitle ? viewTitle : databaseName)}

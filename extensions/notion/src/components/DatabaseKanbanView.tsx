@@ -6,6 +6,7 @@ import {
   ImageLike,
   showToast,
   ToastStyle,
+  randomId,
 } from '@raycast/api'
 import { useEffect, useState } from 'react'
 import {
@@ -123,7 +124,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
     return source_icon
   }
   
-  const databaseSections: {pages:Page[], name:string, icon:ImageLike }[] = []
+  const databaseSections: { pages:Page[], name:string, icon:ImageLike, id:string }[] = []
   const tempSections: Record<string,Record<string,any>[]> = {}
 
   databasePages.forEach(function (p){
@@ -173,6 +174,7 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
       return 
 
     databaseSections.push({ 
+      id: randomId(),
       pages:tempSections[sectionId] as Page[],
       name: optionsMap[sectionId]?.name,
       icon: { source: statusSourceIcon(sectionId), tintColor: notionColorToTintColor(optionsMap[sectionId]?.color) }
@@ -184,16 +186,17 @@ export function DatabaseKanbanView (props: {databaseId: string, databasePages: P
   databaseSections?.map(function (ds) {
     
     SectionElement.push(
-      <List.Section key='database-pages-list' title={ds.name} subtitle={ds?.pages?.length + (ds?.pages?.length > 1 ? ' Items' : ' Item')}>
+      <List.Section key={`kanban-section-${ds.id}`} title={ds.name} subtitle={ds?.pages?.length + (ds?.pages?.length > 1 ? ' Items' : ' Item')}>
       {ds?.pages?.map(function (p) {    
         return (          
           <PageListItem 
-            key={`database-${databaseId}-page-${p.id}`}
+            key={`kanban-section-${ds.id}-page-${p.id}`}
             keywords={[ds.name]}
             page={p}
             icon={ds.icon}
             customActions={[
-              <ActionEditPageProperty 
+              <ActionEditPageProperty
+                key={`kanban-section-${ds.id}-page-${p.id}-custom-edit-status-action`} 
                 databaseProperty={statusProperty} 
                 customOptions={customOptions}
                 pageId={p.id} 
