@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, ActionPanel, SubmitFormAction, Detail } from "@raycast/api";
+import { ActionPanel, closeMainWindow, Detail, Form, SubmitFormAction } from "@raycast/api";
 
 interface CommandForm {
   message: string;
@@ -18,7 +18,6 @@ export default function Command() {
   }
 
   function messageStyleClass() {
-    console.log(messageStyle);
     switch (messageStyle) {
       case "italic":
         return `*${message}*`;
@@ -39,6 +38,11 @@ export default function Command() {
                 title="Back"
                 shortcut={{ modifiers: ["cmd"], key: "enter" }}
                 onAction={() => setMessage("")}
+              />
+              <ActionPanel.Item
+                  title="Close window"
+                  shortcut={{ modifiers: ["cmd"], key: "escape" }}
+                  onAction={() => closeMainWindow()}
               />
             </ActionPanel>}
         />
