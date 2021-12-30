@@ -19,12 +19,16 @@
 /extensions/buildkite                                @mskelton
 /extensions/calendar                                 @fuksman
 /extensions/calendly                                 @eluce2
+/extensions/can-i-use                                @thomaslombart
+/extensions/canvascast                               @yoda
 /extensions/change-case                              @es183923
 /extensions/change-scroll-direction                  @gregoralbrecht
 /extensions/circle-ci                                @qeude
+/extensions/clash                                    @go2sheep
 /extensions/clockify                                 @isma
 /extensions/coffee                                   @mooxl
 /extensions/coinbase-pro                             @farisaziz12
+/extensions/coingecko                                @destiner
 /extensions/coinmarketcap-crypto-crawler             @sonicspark
 /extensions/commitlint                               @lardissone
 /extensions/consoledev                               @fedevitaledev
@@ -55,6 +59,7 @@
 /extensions/gitlab                                   @tonka3000
 /extensions/gitmoji                                  @ricoberger
 /extensions/google-chrome                            @codely @bromanko
+/extensions/google-chrome-profiles                   @frouo
 /extensions/google-maps-search                       @ratoru
 /extensions/google-translate                         @ospfranco
 /extensions/google-trends                            @kang
@@ -62,6 +67,7 @@
 /extensions/hacker-news                              @thomas
 /extensions/harvest                                  @eluce2
 /extensions/hazeover                                 @ratoru
+/extensions/hexlify                                  @gkpln3
 /extensions/homeassistant                            @tonka3000
 /extensions/huggingcast                              @ragnor
 /extensions/imdb                                     @ryan
@@ -69,6 +75,7 @@
 /extensions/json-format                              @destiner
 /extensions/kill-process                             @rolandleth
 /extensions/kinopoisk                                @mattisssa
+/extensions/large-type                               @gbarba
 /extensions/lark                                     @tmk
 /extensions/linguee                                  @geekdada
 /extensions/lobsters                                 @dev99problems
@@ -77,6 +84,7 @@
 /extensions/mldocs                                   @reckoning-dev
 /extensions/music                                    @fedevitaledev
 /extensions/myip                                     @kang
+/extensions/netlify                                  @destiner
 /extensions/notion                                   @henrichabrand
 /extensions/obsidian                                 @marcjulian
 /extensions/open-with-app                            @fturcheti
@@ -84,9 +92,12 @@
 /extensions/party-parrot                             @thomas
 /extensions/pinboard                                 @fe9lix
 /extensions/pipedrive                                @stephendolan
+/extensions/polished                                 @lekoarts
 /extensions/productboard                             @honzatmn
 /extensions/producthunt                              @ragnor
+/extensions/qr-code-scanner                          @stevenrce0
 /extensions/quick-open-project                       @zerowidth
+/extensions/quick-search                             @iwfan
 /extensions/radix                                    @peduarte
 /extensions/railway                                  @coffee-cup
 /extensions/raindrop                                 @lardissone
@@ -104,6 +115,7 @@
 /extensions/search-npm                               @mrmartineau
 /extensions/search-rubygems                          @aleks
 /extensions/send-to-flomo                            @ahonn
+/extensions/simpread                                 @kenshin
 /extensions/single-disk-eject                        @johndturn
 /extensions/sketch                                   @aesign
 /extensions/slack-status                             @petr
@@ -130,6 +142,7 @@
 /extensions/twitter                                  @tonka3000
 /extensions/two-factor-authentication-code-generator @cjdenio
 /extensions/unicode-symbols                          @mmazzarolo
+/extensions/unix-timestamp                           @destiner
 /extensions/uuid-generator                           @jmaeso
 /extensions/vault                                    @ricoberger
 /extensions/vercast                                  @matt

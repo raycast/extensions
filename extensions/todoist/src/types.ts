@@ -54,4 +54,12 @@ export type TaskPayload = Partial<{
   project_id: number;
   priority: number;
   due_date: string;
+  label_ids: number[];
 }>;
+
+export type ProjectPayload = {
+  name: string;
+  parent_id?: number;
+  color?: number;
+  favorite?: boolean;
+};
