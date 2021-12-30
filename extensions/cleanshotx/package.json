@@ -97,7 +97,7 @@
         {
             "name": "restore-recently-closed",
             "title": "Restore recently closed",
-            "subtitle": "CleanShotX",
+            "subtitle": "CleanShot X",
             "description": "Restore recently closed overlay",
             "mode": "no-view"
         }
