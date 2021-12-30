@@ -112,6 +112,7 @@
 /extensions/search-npm                               @mrmartineau
 /extensions/search-rubygems                          @aleks
 /extensions/send-to-flomo                            @ahonn
+/extensions/simpread                                 @kenshin
 /extensions/single-disk-eject                        @johndturn
 /extensions/sketch                                   @aesign
 /extensions/slack-status                             @petr
