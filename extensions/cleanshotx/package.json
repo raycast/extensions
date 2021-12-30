@@ -9,88 +9,88 @@
     "commands": [{
             "name": "capture-fullscreen",
             "title": "Capture Fullscreen",
-            "subtitle": "CleanShotX",
-            "description": "Fullscreen screenshot",
+            "subtitle": "CleanShot X",
+            "description": "Fullscreen Screenshot",
             "mode": "no-view"
         },
 
         {
             "name": "capture-area",
             "title": "Capture Area",
-            "subtitle": "CleanShotX",
-            "description": "Selection tool capture",
+            "subtitle": "CleanShot X",
+            "description": "Selection Tool Capture",
             "mode": "no-view"
         },
 
         {
             "name": "capture-previous-area",
             "title": "Capture Previous Area",
-            "subtitle": "CleanShotX",
-            "description": "Previously selected area",
+            "subtitle": "CleanShot X",
+            "description": "Previously Selected Area",
             "mode": "no-view"
         },
 
         {
             "name": "capture-window",
             "title": "Capture Window",
-            "subtitle": "CleanShotX",
-            "description": "Window capture",
+            "subtitle": "CleanShot X",
+            "description": "Window Capture",
             "mode": "no-view"
         },
 
         {
             "name": "self-timer",
             "title": "Self Timer",
-            "subtitle": "CleanShotX",
-            "description": "Timer based screen capture",
+            "subtitle": "CleanShot X",
+            "description": "Timer Based Screen Capture",
             "mode": "no-view"
         },
 
         {
             "name": "scrolling-capture",
             "title": "Scrolling Capture",
-            "subtitle": "CleanShotX",
-            "description": "Scrolling capture mode",
+            "subtitle": "CleanShot X",
+            "description": "Scrolling Capture Mode",
             "mode": "no-view"
         },
 
         {
             "name": "record-screen",
             "title": "Record Screen",
-            "subtitle": "CleanShotX",
-            "description": "Record entire screen",
+            "subtitle": "CleanShot X",
+            "description": "Record Entire Screen",
             "mode": "no-view"
         },
 
         {
             "name": "text-recognition",
             "title": "Text Recognition",
-            "subtitle": "CleanShotX",
-            "description": "Text recognition using OCR",
+            "subtitle": "CleanShot X",
+            "description": "Text Recognition Using Ocr",
             "mode": "no-view"
         },
 
         {
             "name": "annotate",
             "title": "Annotate",
-            "subtitle": "CleanShotX",
-            "description": "Annotate mode",
+            "subtitle": "CleanShot X",
+            "description": "Annotate Mode",
             "mode": "no-view"
         },
 
         {
             "name": "open-from-clipboard",
             "title": "Open from clipboard",
-            "subtitle": "CleanShotX",
-            "description": "Open image from clipboard",
+            "subtitle": "CleanShot X",
+            "description": "Open Image From Clipboard",
             "mode": "no-view"
         },
 
         {
             "name": "toggle-desktop-icons",
             "title": "Toggle Desktop icons",
-            "subtitle": "CleanShotX",
-            "description": "Toggle desktop icons visibility",
+            "subtitle": "CleanShot X",
+            "description": "Toggle Desktop Icons Visibility",
             "mode": "no-view"
         },
 
@@ -98,19 +98,13 @@
             "name": "restore-recently-closed",
             "title": "Restore recently closed",
             "subtitle": "CleanShot X",
-            "description": "Restore recently closed overlay",
+            "description": "Restore Recently Closed Overlay",
             "mode": "no-view"
         }
     ],
     "dependencies": {
         "@raycast/api": "^1.26.3",
-        "got": "^12.0.0",
-        "node-fetch": "^3.1.0",
-        "node-run-cmd": "^1.0.1",
-        "request": "^2.88.2",
-        "run-applescript": "^6.0.0",
-        "typescript-http-client": "^0.10.4",
-        "whatwg-fetch": "^3.6.2"
+        "open": "^8.4.0"
     },
     "devDependencies": {
         "@types/node": "~16.10.0",
@@ -128,13 +122,5 @@
         "lint": "ray lint"
     },
     "version": "1.0.0",
-    "main": "index.js",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/Aayush9029/CleanShotX-Extension.git"
-    },
-    "bugs": {
-        "url": "https://github.com/Aayush9029/CleanShotX-Extension/issues"
-    },
-    "homepage": "https://github.com/Aayush9029/CleanShotX-Extension#readme"
+    "main": "index.js"
 }

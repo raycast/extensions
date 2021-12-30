@@ -1,6 +1,9 @@
-var nrc = require('node-run-cmd');
+import open from "open";
+import {closeMainWindow } from "@raycast/api";
 
 export default async() => {
-  const url = "cleanshot://scrolling-capture";
-  nrc.run(`open ${url}`);
+    const url = "cleanshot://scrolling-capture";
+    open(url);
+    await closeMainWindow();
+    
 }
