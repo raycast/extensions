@@ -39,7 +39,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
           <ActionPanel.Section>
             <OpenInBrowserAction 
             title="Open in Browser" 
-            url={searchResult.url} 
+            url={`https://pub.dev/packages/${searchResult.name}`}  
             />
           </ActionPanel.Section>
         </ActionPanel>
