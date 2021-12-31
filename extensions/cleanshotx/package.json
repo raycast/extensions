@@ -11,6 +11,7 @@
             "title": "Capture Fullscreen",
             "subtitle": "CleanShot X",
             "description": "Fullscreen Screenshot",
+            "icon": "capture-fullscreen.png",
             "mode": "no-view"
         },
 
@@ -19,6 +20,7 @@
             "title": "Capture Area",
             "subtitle": "CleanShot X",
             "description": "Selection Tool Capture",
+            "icon": "capture-area.png",
             "mode": "no-view"
         },
 
@@ -27,6 +29,7 @@
             "title": "Capture Previous Area",
             "subtitle": "CleanShot X",
             "description": "Previously Selected Area",
+            "icon": "capture-previous-area.png",
             "mode": "no-view"
         },
 
@@ -35,6 +38,7 @@
             "title": "Capture Window",
             "subtitle": "CleanShot X",
             "description": "Window Capture",
+            "icon": "capture-window.png",
             "mode": "no-view"
         },
 
@@ -43,6 +47,7 @@
             "title": "Self Timer",
             "subtitle": "CleanShot X",
             "description": "Timer Based Screen Capture",
+            "icon": "self-timer.png",
             "mode": "no-view"
         },
 
@@ -51,6 +56,7 @@
             "title": "Scrolling Capture",
             "subtitle": "CleanShot X",
             "description": "Scrolling Capture Mode",
+            "icon": "scrolling-capture.png",
             "mode": "no-view"
         },
 
@@ -59,6 +65,7 @@
             "title": "Record Screen",
             "subtitle": "CleanShot X",
             "description": "Record Entire Screen",
+            "icon": "record-screen.png",
             "mode": "no-view"
         },
 
@@ -67,6 +74,7 @@
             "title": "Text Recognition",
             "subtitle": "CleanShot X",
             "description": "Text Recognition Using Ocr",
+            "icon": "capture-text.png",
             "mode": "no-view"
         },
 
@@ -75,6 +83,7 @@
             "title": "Annotate",
             "subtitle": "CleanShot X",
             "description": "Annotate Mode",
+            "icon": "annotate.png",
             "mode": "no-view"
         },
 
@@ -83,6 +92,7 @@
             "title": "Open From Clipboard",
             "subtitle": "CleanShot X",
             "description": "Open Image From Clipboard",
+            "icon": "clipboard.png",
             "mode": "no-view"
         },
 
@@ -91,6 +101,7 @@
             "title": "Toggle Desktop Icons",
             "subtitle": "CleanShot X",
             "description": "Toggle Desktop Icons Visibility",
+            "icon": "toggle-desktop-icons.png",
             "mode": "no-view"
         },
 
@@ -99,6 +110,15 @@
             "title": "Restore Recently Closed",
             "subtitle": "CleanShot X",
             "description": "Restore Recently Closed Overlay",
+            "icon": "capture-previous-area.png",
+            "mode": "no-view"
+        },
+        {
+            "name": "pin",
+            "title": "Pin Screenshot",
+            "subtitle": "CleanShot X",
+            "description": "Pin Screenshot to the Screen.",
+            "icon": "pin.png",
             "mode": "no-view"
         }
     ],
