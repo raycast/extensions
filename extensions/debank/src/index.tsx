@@ -12,7 +12,7 @@ import {
   SubmitFormAction,
   useNavigation,
 } from "@raycast/api";
-import { ChainId, ComplexProtocol, Protocol, Token } from "@yukaii/debank-types";
+import { ChainId, ComplexProtocol, Token } from "@yukaii/debank-types";
 import { useEffect, useMemo, useState } from "react";
 import { getComplexProtocolList, getTokenList, getTotalBalance, TotalBalance } from "./api";
 import useFavoriteAddresses from "./utils/useFavoriteAddresses";
