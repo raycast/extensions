@@ -256,9 +256,13 @@ export function ComplexProtocolView(props: ComplexProtocolViewProps) {
 
                 return (
                   <List.Item
-                    icon={{
-                      source: protocol.logo_url!,
-                    }}
+                    icon={
+                      protocol.logo_url
+                        ? {
+                            source: protocol.logo_url,
+                          }
+                        : Icon.QuestionMark
+                    }
                     key={`${protocol.id}-${item.name}`}
                     title={item.name}
                     subtitle={`${balance}${rewarded && ` | (${rewarded})`}`}
