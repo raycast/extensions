@@ -84,6 +84,7 @@ export default function Command() {
                         push(<BalanceView address={address.address} />);
                       }}
                     />
+                    <OpenInBrowserAction url={`https://debank.com/profile/${address.address}`} title="Open on DeBank" />
                     <ActionPanelItem
                       title={`Remove from Favorites`}
                       icon={Icon.Star}
@@ -92,7 +93,6 @@ export default function Command() {
                         removeFavoriteAddress(address.address);
                       }}
                     />
-                    <OpenInBrowserAction url={`https://debank.com/profile/${address.address}`} title="Open on DeBank" />
                   </ActionPanel>
                 }
               />
