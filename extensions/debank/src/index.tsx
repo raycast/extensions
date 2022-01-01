@@ -1,7 +1,17 @@
-import { ActionPanel, ActionPanelItem, List, ListSection, OpenInBrowserAction, useNavigation } from "@raycast/api";
-import { ChainId, ComplexProtocol } from "@yukaii/debank-types";
+import {
+  ActionPanel,
+  ActionPanelItem,
+  Color,
+  Icon,
+  List,
+  ListSection,
+  OpenInBrowserAction,
+  useNavigation,
+} from "@raycast/api";
+import { ChainId, ComplexProtocol, Token } from "@yukaii/debank-types";
 import { useEffect, useMemo, useState } from "react";
 import { getComplexProtocolList, getTotalBalance, TotalBalance } from "./api";
+import useFavoriteAddresses from "./utils/useFavoriteAddresses";
 
 export default function Command() {
   const [address, setAddress] = useState("");
@@ -16,24 +26,82 @@ export default function Command() {
     }
   }, [address]);
 
-  return (
-    <List onSearchTextChange={onChange}>
-      <List.Item
-        title={title}
-        actions={
-          address && (
-            <ActionPanel>
+  const { loading, favoriteAddresses, addFavoriteAddress, removeFavoriteAddress } = useFavoriteAddresses();
+
+  const defaultItem = (
+    <List.Item
+      title={title}
+      actions={
+        address && (
+          <ActionPanel>
+            <ActionPanelItem
+              title={`Show Balance`}
+              icon={Icon.Binoculars}
+              onAction={() => {
+                push(<BalanceView address={address} />);
+              }}
+            />
+            {!favoriteAddresses.find((add) => address && add.address === address) && (
               <ActionPanelItem
-                title={`Show Balance`}
+                title={`Add to Favorites`}
+                icon={Icon.Star}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                 onAction={() => {
-                  push(<BalanceView address={address} />);
+                  // TODO: push form to add identifier
+                  addFavoriteAddress(address);
                 }}
               />
-              <OpenInBrowserAction url={`https://debank.com/profile/${address}`} title="Open on DeBank" />
-            </ActionPanel>
-          )
-        }
-      />
+            )}
+            <OpenInBrowserAction url={`https://debank.com/profile/${address}`} title="Open on DeBank" />
+          </ActionPanel>
+        )
+      }
+    />
+  );
+
+  return (
+    <List onSearchTextChange={onChange}>
+      {loading || favoriteAddresses.length === 0 ? (
+        defaultItem
+      ) : (
+        <>
+          <ListSection title="Favorites">
+            {favoriteAddresses.map((address) => (
+              <List.Item
+                key={address.address}
+                title={address.identifier || address.address}
+                accessoryTitle={!address.identifier ? "" : address.address}
+                icon={{
+                  source: Icon.Star,
+                  tintColor: Color.Yellow,
+                }}
+                actions={
+                  <ActionPanel>
+                    <ActionPanelItem
+                      title={`Show Balance`}
+                      icon={Icon.Binoculars}
+                      onAction={() => {
+                        push(<BalanceView address={address.address} />);
+                      }}
+                    />
+                    <ActionPanelItem
+                      title={`Remove from Favorites`}
+                      icon={Icon.Star}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                      onAction={() => {
+                        removeFavoriteAddress(address.address);
+                      }}
+                    />
+                    <OpenInBrowserAction url={`https://debank.com/profile/${address.address}`} title="Open on DeBank" />
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </ListSection>
+
+          <ListSection title="Search for Address">{defaultItem}</ListSection>
+        </>
+      )}
     </List>
   );
 }
@@ -63,7 +131,7 @@ export function BalanceView(props: BalanceViewProps) {
     );
   } else {
     return (
-      <List>
+      <List navigationTitle={`Account Balance of ${props.address}`}>
         <ListSection title="Total">
           <List.Item key="1" title="Total Balance" accessoryTitle={`$${balance.total_usd_value.toFixed(2)}`} />
         </ListSection>
@@ -80,7 +148,7 @@ export function BalanceView(props: BalanceViewProps) {
                   actions={
                     <ActionPanel>
                       <ActionPanelItem
-                        title={`Show ${chain.name} Protocols`}
+                        title={`Show Protocols on ${chain.name}`}
                         onAction={() => {
                           push(
                             <ComplexProtocolView address={props.address} chainId={chain.id} chainName={chain.name} />
@@ -103,6 +171,10 @@ type ComplexProtocolViewProps = {
   chainId: ChainId;
   chainName: string;
 };
+
+function formatTokenList(tokens?: Token[]) {
+  return tokens?.map((token) => `${token.amount.toFixed(2)} ${token.optimized_symbol}`).join(", ") || "";
+}
 
 export function ComplexProtocolView(props: ComplexProtocolViewProps) {
   const [protocols, setProtocols] = useState<ComplexProtocol[] | null>(null);
@@ -134,15 +206,8 @@ export function ComplexProtocolView(props: ComplexProtocolViewProps) {
           return (
             <List.Section title={`${protocol.name}`}>
               {protocol.portfolio_item_list.map((item) => {
-                const balance =
-                  item.detail.supply_token_list
-                    ?.map((token) => `${token.amount.toFixed(2)} ${token.optimized_symbol}`)
-                    .join(", ") || "";
-
-                const rewarded =
-                  item.detail.reward_token_list
-                    ?.map((token) => `${token.amount.toFixed(2)} ${token.optimized_symbol}`)
-                    .join(", ") || "";
+                const balance = formatTokenList(item.detail.supply_token_list);
+                const rewarded = formatTokenList(item.detail.reward_token_list);
 
                 return (
                   <List.Item
