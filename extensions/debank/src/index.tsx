@@ -175,7 +175,11 @@ export function BalanceView(props: BalanceViewProps) {
     return (
       <List navigationTitle={`Account Balance of ${props.address}`}>
         <ListSection title="Total">
-          <List.Item key="1" title="Total Balance" accessoryTitle={`$${balance.total_usd_value.toLocaleString()}`} />
+          <List.Item
+            key="1"
+            title="Total Balance"
+            accessoryTitle={`$${balance.total_usd_value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`}
+          />
         </ListSection>
 
         <ListSection title="Chain">
@@ -186,7 +190,7 @@ export function BalanceView(props: BalanceViewProps) {
                 <List.Item
                   key={chain.id}
                   title={chain.name}
-                  accessoryTitle={`$${chain.usd_value.toLocaleString()}`}
+                  accessoryTitle={`$${chain.usd_value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`}
                   icon={{
                     source: chain.logo_url,
                   }}
@@ -216,7 +220,13 @@ type AssetsViewProps = {
 };
 
 function formatTokenList(tokens?: Token[]) {
-  return tokens?.map((token) => `${token.amount.toLocaleString()} ${token.optimized_symbol}`).join(", ") || "";
+  return (
+    tokens
+      ?.map(
+        (token) => `${token.amount.toLocaleString("en-US", { maximumFractionDigits: 2 })} ${token.optimized_symbol}`
+      )
+      .join(", ") || ""
+  );
 }
 
 function protocolNetValueSum(protocol: ComplexProtocol) {
@@ -259,8 +269,12 @@ export function AssetsView(props: AssetsViewProps) {
               <List.Item
                 key={token.id}
                 title={token.display_symbol || token.optimized_symbol}
-                subtitle={`$${token.price?.toString() || 0} * ${token.amount.toLocaleString()}`}
-                accessoryTitle={`$${((token.price || 0) * token.amount).toLocaleString()}`}
+                subtitle={`$${token.price?.toString() || 0} * ${token.amount.toLocaleString("en-US", {
+                  maximumFractionDigits: 2,
+                })}`}
+                accessoryTitle={`$${((token.price || 0) * token.amount).toLocaleString("en-US", {
+                  maximumFractionDigits: 2,
+                })}`}
                 icon={token.logo_url ? { source: token.logo_url } : undefined}
               />
             ))}
@@ -270,7 +284,11 @@ export function AssetsView(props: AssetsViewProps) {
           .sort((a, b) => protocolNetValueSum(b) - protocolNetValueSum(a))
           .map((protocol) => {
             return (
-              <List.Section title={`${protocol.name} ($${protocolNetValueSum(protocol).toLocaleString()})`}>
+              <List.Section
+                title={`${protocol.name} ($${protocolNetValueSum(protocol).toLocaleString("en-US", {
+                  maximumFractionDigits: 2,
+                })})`}
+              >
                 {protocol.portfolio_item_list
                   .sort((a, b) => b.stats.net_usd_value - a.stats.net_usd_value)
                   .map((item) => {
@@ -289,7 +307,9 @@ export function AssetsView(props: AssetsViewProps) {
                         key={`${protocol.id}-${item.name}`}
                         title={item.name}
                         subtitle={`${balance}${rewarded && ` | (${rewarded})`}`}
-                        accessoryTitle={`$${item.stats.net_usd_value.toLocaleString()}`}
+                        accessoryTitle={`$${item.stats.net_usd_value.toLocaleString("en-US", {
+                          maximumFractionDigits: 2,
+                        })}`}
                       />
                     );
                   })}
