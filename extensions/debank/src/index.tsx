@@ -80,7 +80,7 @@ export function BalanceView(props: BalanceViewProps) {
                   actions={
                     <ActionPanel>
                       <ActionPanelItem
-                        title={`Show ${chain.name}`}
+                        title={`Show ${chain.name} Protocols`}
                         onAction={() => {
                           push(
                             <ComplexProtocolView address={props.address} chainId={chain.id} chainName={chain.name} />
@@ -115,10 +115,16 @@ export function ComplexProtocolView(props: ComplexProtocolViewProps) {
     }
   }, []);
 
-  if (!protocols || protocols.length === 0) {
+  if (!protocols) {
     return (
       <List>
         <List.Item key="1" title="Loading..." />
+      </List>
+    );
+  } else if (protocols.length === 0) {
+    return (
+      <List>
+        <List.Item key="1" title="No Protocols" />
       </List>
     );
   } else {
