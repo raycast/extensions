@@ -187,6 +187,9 @@ export function BalanceView(props: BalanceViewProps) {
                   key={chain.id}
                   title={chain.name}
                   accessoryTitle={`$${chain.usd_value.toFixed(2)}`}
+                  icon={{
+                    source: chain.logo_url,
+                  }}
                   actions={
                     <ActionPanel>
                       <ActionPanelItem
@@ -253,6 +256,9 @@ export function ComplexProtocolView(props: ComplexProtocolViewProps) {
 
                 return (
                   <List.Item
+                    icon={{
+                      source: protocol.logo_url!,
+                    }}
                     key={`${protocol.id}-${item.name}`}
                     title={item.name}
                     subtitle={`${balance}${rewarded && ` | (${rewarded})`}`}
