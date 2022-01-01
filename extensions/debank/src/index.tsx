@@ -12,9 +12,9 @@ import {
   SubmitFormAction,
   useNavigation,
 } from "@raycast/api";
-import { ChainId, ComplexProtocol, Token } from "@yukaii/debank-types";
+import { ChainId, ComplexProtocol, Protocol, Token } from "@yukaii/debank-types";
 import { useEffect, useMemo, useState } from "react";
-import { getComplexProtocolList, getTotalBalance, TotalBalance } from "./api";
+import { getComplexProtocolList, getTokenList, getTotalBalance, TotalBalance } from "./api";
 import useFavoriteAddresses from "./utils/useFavoriteAddresses";
 
 export default function Command() {
@@ -175,7 +175,7 @@ export function BalanceView(props: BalanceViewProps) {
     return (
       <List navigationTitle={`Account Balance of ${props.address}`}>
         <ListSection title="Total">
-          <List.Item key="1" title="Total Balance" accessoryTitle={`$${balance.total_usd_value.toFixed(2)}`} />
+          <List.Item key="1" title="Total Balance" accessoryTitle={`$${balance.total_usd_value.toLocaleString()}`} />
         </ListSection>
 
         <ListSection title="Chain">
@@ -186,7 +186,7 @@ export function BalanceView(props: BalanceViewProps) {
                 <List.Item
                   key={chain.id}
                   title={chain.name}
-                  accessoryTitle={`$${chain.usd_value.toFixed(2)}`}
+                  accessoryTitle={`$${chain.usd_value.toLocaleString()}`}
                   icon={{
                     source: chain.logo_url,
                   }}
@@ -195,9 +195,7 @@ export function BalanceView(props: BalanceViewProps) {
                       <ActionPanelItem
                         title={`Show Protocols on ${chain.name}`}
                         onAction={() => {
-                          push(
-                            <ComplexProtocolView address={props.address} chainId={chain.id} chainName={chain.name} />
-                          );
+                          push(<AssetsView address={props.address} chainId={chain.id} chainName={chain.name} />);
                         }}
                       />
                     </ActionPanel>
@@ -211,68 +209,93 @@ export function BalanceView(props: BalanceViewProps) {
   }
 }
 
-type ComplexProtocolViewProps = {
+type AssetsViewProps = {
   address: string;
   chainId: ChainId;
   chainName: string;
 };
 
 function formatTokenList(tokens?: Token[]) {
-  return tokens?.map((token) => `${token.amount.toFixed(2)} ${token.optimized_symbol}`).join(", ") || "";
+  return tokens?.map((token) => `${token.amount.toLocaleString()} ${token.optimized_symbol}`).join(", ") || "";
 }
 
-export function ComplexProtocolView(props: ComplexProtocolViewProps) {
+function protocolNetValueSum(protocol: ComplexProtocol) {
+  return protocol.portfolio_item_list.reduce((acc, item) => acc + item.stats.net_usd_value, 0);
+}
+
+export function AssetsView(props: AssetsViewProps) {
   const [protocols, setProtocols] = useState<ComplexProtocol[] | null>(null);
+  const [tokens, setTokens] = useState<Token[] | null>(null);
 
   useEffect(() => {
     if (props.address && props.chainId) {
       getComplexProtocolList(props.address, props.chainId).then((data) => {
         setProtocols(data);
       });
+
+      getTokenList(props.address, props.chainId).then((data) => {
+        setTokens(data);
+      });
     }
   }, []);
 
-  if (!protocols) {
+  const hasSomething = (protocols && protocols?.length > 0) || (tokens && tokens?.length > 0);
+
+  if (!protocols || !tokens) {
     return (
       <List>
         <List.Item key="1" title="Loading..." />
       </List>
     );
-  } else if (protocols.length === 0) {
-    return (
-      <List>
-        <List.Item key="1" title="No Protocols" />
-      </List>
-    );
   } else {
     return (
-      <List navigationTitle={`${props.chainName} Protocols`}>
-        {protocols.map((protocol) => {
-          return (
-            <List.Section title={`${protocol.name}`}>
-              {protocol.portfolio_item_list.map((item) => {
-                const balance = formatTokenList(item.detail.supply_token_list);
-                const rewarded = formatTokenList(item.detail.reward_token_list);
+      <List navigationTitle={`${props.chainName}`}>
+        {!hasSomething && <List.Item key="1" title="No Tokens or Protocols" />}
 
-                return (
-                  <List.Item
-                    icon={
-                      protocol.logo_url
-                        ? {
-                            source: protocol.logo_url,
-                          }
-                        : Icon.QuestionMark
-                    }
-                    key={`${protocol.id}-${item.name}`}
-                    title={item.name}
-                    subtitle={`${balance}${rewarded && ` | (${rewarded})`}`}
-                    accessoryTitle={`$${item.stats.net_usd_value.toFixed(2)}`}
-                  />
-                );
-              })}
-            </List.Section>
-          );
-        })}
+        <List.Section title="Tokens">
+          {tokens
+            ?.sort((a, b) => b.price * b.amount - a.price * a.amount)
+            .map((token) => (
+              <List.Item
+                key={token.id}
+                title={token.display_symbol || token.optimized_symbol}
+                subtitle={`$${token.price?.toString() || 0} * ${token.amount.toLocaleString()}`}
+                accessoryTitle={`$${((token.price || 0) * token.amount).toLocaleString()}`}
+                icon={token.logo_url ? { source: token.logo_url } : undefined}
+              />
+            ))}
+        </List.Section>
+
+        {protocols
+          .sort((a, b) => protocolNetValueSum(b) - protocolNetValueSum(a))
+          .map((protocol) => {
+            return (
+              <List.Section title={`${protocol.name} ($${protocolNetValueSum(protocol).toLocaleString()})`}>
+                {protocol.portfolio_item_list
+                  .sort((a, b) => b.stats.net_usd_value - a.stats.net_usd_value)
+                  .map((item) => {
+                    const balance = formatTokenList(item.detail.supply_token_list);
+                    const rewarded = formatTokenList(item.detail.reward_token_list);
+
+                    return (
+                      <List.Item
+                        icon={
+                          protocol.logo_url
+                            ? {
+                                source: protocol.logo_url,
+                              }
+                            : Icon.QuestionMark
+                        }
+                        key={`${protocol.id}-${item.name}`}
+                        title={item.name}
+                        subtitle={`${balance}${rewarded && ` | (${rewarded})`}`}
+                        accessoryTitle={`$${item.stats.net_usd_value.toLocaleString()}`}
+                      />
+                    );
+                  })}
+              </List.Section>
+            );
+          })}
       </List>
     );
   }

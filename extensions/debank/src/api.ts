@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Chain, ChainId, ComplexProtocol } from '@yukaii/debank-types'
+import { Chain, ChainId, ComplexProtocol, Token } from '@yukaii/debank-types'
 
 const api = axios.create({
   baseURL: 'https://openapi.debank.com/',
@@ -29,6 +29,16 @@ export function getComplexProtocolList (id: string, chain_id: ChainId): Promise<
     params: {
       id,
       chain_id
+    }
+  })
+}
+
+export function getTokenList (id: string, chain_id: ChainId, is_all = false): Promise<Token[]> {
+  return api.get('/v1/user/token_list', {
+    params: {
+      id,
+      chain_id,
+      is_all
     }
   })
 }
