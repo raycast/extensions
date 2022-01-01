@@ -2,10 +2,12 @@ import {
   ActionPanel,
   ActionPanelItem,
   Color,
+  Form,
   Icon,
   List,
   ListSection,
   OpenInBrowserAction,
+  SubmitFormAction,
   useNavigation,
 } from "@raycast/api";
 import { ChainId, ComplexProtocol, Token } from "@yukaii/debank-types";
@@ -27,6 +29,7 @@ export default function Command() {
   }, [address]);
 
   const { loading, favoriteAddresses, addFavoriteAddress, removeFavoriteAddress } = useFavoriteAddresses();
+  const { pop } = useNavigation();
 
   const defaultItem = (
     <List.Item
@@ -41,18 +44,25 @@ export default function Command() {
                 push(<BalanceView address={address} />);
               }}
             />
+            <OpenInBrowserAction url={`https://debank.com/profile/${address}`} title="Open on DeBank" />
             {!favoriteAddresses.find((add) => address && add.address === address) && (
               <ActionPanelItem
                 title={`Add to Favorites`}
                 icon={Icon.Star}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                 onAction={() => {
-                  // TODO: push form to add identifier
-                  addFavoriteAddress(address);
+                  push(
+                    <AddFavoriteAddressForm
+                      address={address}
+                      onSubmit={({ address, identifier }) => {
+                        addFavoriteAddress(address, identifier);
+                        pop();
+                      }}
+                    />
+                  );
                 }}
               />
             )}
-            <OpenInBrowserAction url={`https://debank.com/profile/${address}`} title="Open on DeBank" />
           </ActionPanel>
         )
       }
@@ -103,6 +113,26 @@ export default function Command() {
         </>
       )}
     </List>
+  );
+}
+
+type AddFavoriteAddressFormProps = {
+  address: string;
+  onSubmit: (values: any) => void;
+};
+
+function AddFavoriteAddressForm(props: AddFavoriteAddressFormProps) {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Add to Favorites" onSubmit={props.onSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Address" id="address" defaultValue={props.address} />
+      <Form.TextField title="Identifier" id="identifier" />
+    </Form>
   );
 }
 
