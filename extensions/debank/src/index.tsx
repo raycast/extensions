@@ -1,7 +1,9 @@
 import {
   ActionPanel,
   ActionPanelItem,
+  AlertActionStyle,
   Color,
+  confirmAlert,
   Form,
   Icon,
   List,
@@ -99,8 +101,18 @@ export default function Command() {
                       title={`Remove from Favorites`}
                       icon={Icon.Star}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-                      onAction={() => {
-                        removeFavoriteAddress(address.address);
+                      onAction={async () => {
+                        confirmAlert({
+                          title: "Confirm Removal",
+                          message: `Are you sure you want to remove "${
+                            address.identifier || address.address
+                          }" from your favorites?`,
+                          primaryAction: {
+                            title: "Remove",
+                            style: AlertActionStyle.Destructive,
+                            onAction: () => removeFavoriteAddress(address.address),
+                          },
+                        });
                       }}
                     />
                   </ActionPanel>
