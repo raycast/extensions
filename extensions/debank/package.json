@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "debank",
   "title": "debank",
-  "description": "DeBank",
+  "description": "A Raycast Extension to query DeBank data with its OpenAPI",
   "icon": "debank.png",
   "author": "Yukai",
   "license": "MIT",
