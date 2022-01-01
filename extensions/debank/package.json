@@ -3,7 +3,7 @@
   "name": "debank",
   "title": "debank",
   "description": "DeBank",
-  "icon": "command-icon.png",
+  "icon": "debank.png",
   "author": "Yukai",
   "license": "MIT",
   "commands": [
