@@ -11,7 +11,7 @@
       "name": "index",
       "title": "Show Account Balances",
       "subtitle": "DeBank",
-      "description": "Show DeBank Account Balances",
+      "description": "Show Account Balances with DeBank API",
       "mode": "view"
     }
   ],
