@@ -78,7 +78,7 @@ function SearchHit({ subject }: SearchHitProps) {
             target={
               <Detail markdown={md} actions={
                 <ActionPanel>
-                  <OpenInBrowserAction title="Open in browser" url={subject} />
+                  <OpenInBrowserAction url={subject} />
                 </ActionPanel>
               } />
             }
