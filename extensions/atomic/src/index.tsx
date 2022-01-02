@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, Detail, getPreferenceValues, List, OpenInBrowserAction, Preferences, PushAction } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, Detail, getPreferenceValues, Icon, List, OpenInBrowserAction, Preferences, PushAction } from "@raycast/api";
 import { useServerSearch, StoreContext, useTitle, useResource, useString, useMarkdown } from '@tomic/react';
 import { Store, urls } from '@tomic/lib';
 import React from "react";
@@ -74,6 +74,7 @@ function SearchHit({ subject }: SearchHitProps) {
       actions={
         <ActionPanel>
           <PushAction
+            icon={Icon.Eye}
             title="Show Details"
             target={
               <Detail markdown={md} actions={
