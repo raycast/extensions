@@ -50,7 +50,15 @@
       "type": "textfield",
       "required": false,
       "title": "Bitwarden CLI Installation Path",
-      "description": "Location of the local Bitwarden CLI installation. Defaults to '/usr/local/bin/bw'.",
+      "description": "Location of the local Bitwarden CLI installation. Defaults to '/usr/local/bin/bw' on Intel and /opt/homebrew/bin/bw on M1.",
+      "placeholder": "CLI Installation Path"
+    },
+    {
+      "name": "nodePath",
+      "type": "textfield",
+      "required": false,
+      "title": "Node Installation Path",
+      "description": "Location of the local node installation. Defaults to /usr/local/bin/node on Intel and /opt/homebrew/bin/node on M1.",
       "placeholder": "CLI Installation Path"
     },
     {
