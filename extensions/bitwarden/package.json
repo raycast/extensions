@@ -67,7 +67,7 @@
       "required": false,
       "default": false,
       "title": "Privacy",
-      "label": "Fetch vaut items icons",
+      "label": "Fetch Vault Items Icons",
       "description": "Whether to use a Google-owned service to fetch icons for vault items. If left unchecked, built-in icons will be used."
     }
   ],
