@@ -69,10 +69,9 @@ export default function Command() {
 
     try {
       timeEntries = await getMyTimeEntries({ from: date, to: date });
-    } catch (error) {
+    } catch (error: any) {
       if (error.isAxiosError) {
-        const e: AxiosError = error;
-        if (e.response?.status === 401) {
+        if (error.response?.status === 401) {
           await showToast(
             ToastStyle.Failure,
             "Invalid Token",
