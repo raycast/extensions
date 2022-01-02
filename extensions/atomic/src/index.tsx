@@ -84,7 +84,7 @@ function SearchHit({ subject }: SearchHitProps) {
             }
           />
           <CopyToClipboardAction content={subject} title="Copy URL to clipboard" />
-          <OpenInBrowserAction title="Open in browser" url={subject} />
+          <OpenInBrowserAction url={subject} />
         </ActionPanel>
       }
     />
