@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Atomic Search",
-      "subtitle": "Find things stored in your Atomic Server",
+      "title": "Search Data",
+      "subtitle": "Atomic Server",
       "description": "Search inside your Atomic Server data",
       "mode": "view"
     }
