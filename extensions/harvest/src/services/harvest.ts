@@ -11,8 +11,8 @@ import {
   HarvestProjectAssignment,
   HarvestUserResponse,
 } from "./responseTypes";
-import { clearLocalStorage, getLocalStorageItem, getPreferenceValues, setLocalStorageItem } from "@raycast/api";
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import { getLocalStorageItem, getPreferenceValues, setLocalStorageItem } from "@raycast/api";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
 import dayjs from "dayjs";
 import useSWR from "swr";
@@ -39,7 +39,7 @@ async function harvestAPI<T = AxiosResponse>({ method = "GET", ...props }: Axios
 }
 
 export function useCompany() {
-  const { data, error } = useSWR<HarvestCompany>("company", async () => {
+  const { data, error } = useSWR<HarvestCompany, AxiosError>("company", async () => {
     const resp = await harvestAPI<HarvestCompanyResponse>({ url: "/company" });
     return resp.data;
   });
@@ -47,7 +47,7 @@ export function useCompany() {
 }
 
 export function useActiveClients() {
-  const { data, error } = useSWR<HarvestClient[]>("clients", async () => {
+  const { data, error } = useSWR<HarvestClient[], AxiosError>("clients", async () => {
     const resp = await harvestAPI<HarvestClientsResponse>({ url: "/clients", params: { is_active: true } });
     return resp.data.clients;
   });
@@ -55,7 +55,7 @@ export function useActiveClients() {
 }
 
 export function useMyProjects() {
-  const { data, error } = useSWR<HarvestProjectAssignment[]>("project-assignments", async () => {
+  const { data, error } = useSWR<HarvestProjectAssignment[], AxiosError>("project-assignments", async () => {
     const resp = await harvestAPI<HarvestProjectAssignmentsResponse>({ url: "/users/me/project_assignments" });
     return resp.data.project_assignments;
   });

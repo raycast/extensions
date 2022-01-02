@@ -35,7 +35,7 @@ export default function Command({
   viewDate: Date;
 }) {
   const { pop } = useNavigation();
-  const { data: company } = useCompany();
+  const { data: company, error } = useCompany();
   const { data: projects } = useMyProjects();
   const [projectId, setProjectId] = useState<string>();
   const [tasks, setTasks] = useState<HarvestTaskAssignment[]>([]);
@@ -43,6 +43,20 @@ export default function Command({
   const [notes, setNotes] = useState<string>();
   const [hours, setHours] = useState<string>();
   const [spentDate, setSpentDate] = useState<Date>();
+
+  useEffect(() => {
+    if (error?.isAxiosError) {
+      if (error.response?.status === 401) {
+        showToast(
+          ToastStyle.Failure,
+          "Invalid Token",
+          "Your API token or Account ID is invalid. Go to Raycast Preferences to update it."
+        );
+      } else {
+        showToast(ToastStyle.Failure, "Unknown Error", "Could not get your company data");
+      }
+    }
+  }, [error]);
 
   const groupedProjects = useMemo(() => {
     // return an array of arrays thats grouped by client to easily group them via a map function

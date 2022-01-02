@@ -45,6 +45,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import isToday from "dayjs/plugin/isToday";
 import isTomorrow from "dayjs/plugin/isTomorrow";
 import isYesterday from "dayjs/plugin/isYesterday";
+import { AxiosError } from "axios";
 dayjs.extend(isToday);
 dayjs.extend(isTomorrow);
 dayjs.extend(isYesterday);
@@ -64,7 +65,24 @@ export default function Command() {
 
   async function init(date?: Date) {
     if (!date) date = viewDate;
-    const timeEntries = await getMyTimeEntries({ from: date, to: date });
+    let timeEntries: HarvestTimeEntry[] = [];
+
+    try {
+      timeEntries = await getMyTimeEntries({ from: date, to: date });
+    } catch (error) {
+      if (error.isAxiosError) {
+        const e: AxiosError = error;
+        if (e.response?.status === 401) {
+          await showToast(
+            ToastStyle.Failure,
+            "Invalid Token",
+            "Your API token or Account ID is invalid. Go to Raycast Preferences to update it."
+          );
+        }
+      } else {
+        await showToast(ToastStyle.Failure, "Unknown Error", "Could not fetch time entries");
+      }
+    }
 
     const { sortBy }: Preferences = getPreferenceValues();
     switch (sortBy) {
