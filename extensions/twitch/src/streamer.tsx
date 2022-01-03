@@ -1,6 +1,7 @@
 import { ActionPanel, confirmAlert, Detail, getPreferenceValues, List, ListItem, OpenAction } from "@raycast/api";
 import React from "react";
 import fetch from 'node-fetch';
+import { exec } from "child_process";
 
 import Preferences from "./interfaces/preferences";
 import Item from "./interfaces/item";
@@ -9,6 +10,9 @@ export default function main() {
   const preferences: Preferences = getPreferenceValues();
   const clientId = preferences.clientId;
   const authorization = preferences.authorization;
+  const streamlinkLocation = preferences.streamlink || "/opt/homebrew/bin/streamlink";
+  const playerLocation = preferences.player || "";
+  const quality = preferences.quality || "best";
 
   const [loading, setLoading] = React.useState(false);
   const [query, setQuery] = React.useState<string>("");
@@ -39,9 +43,20 @@ export default function main() {
   return (<>
     <List isLoading={loading} searchBarPlaceholder="Search for a Streamer on Twitch" navigationTitle="Search a Channel" onSearchTextChange={(text) => setQuery(text)}>
       {items.map((item: Item) => {
-        return <ListItem key={item.id} icon={item.thumbnail_url} id={item.id} title={item.title} subtitle={`${item.display_name} - ${item.is_live ? `${item.game_name}`:"Offline"}`} actions={
+        return <ListItem key={item.id} icon={item.thumbnail_url} id={item.id} title={item.title} subtitle={`${item.display_name} - ${item.is_live ? `${item.game_name}` : "Offline"}`} actions={
           <ActionPanel>
             <OpenAction title="Open Channel" target={`https://twitch.tv/${item.broadcaster_login}`} />
+            <OpenAction title="Open Stream in Streamlink" target="streamlink" onOpen={(target) => {
+              if (!item.is_live) { confirmAlert({ title: "Info", message: "This streamer is offline" }); return; }
+              exec(`${streamlinkLocation} https://twitch.tv/${item.broadcaster_login} ${quality} ${playerLocation ? `--player ${playerLocation}` : ""}`, (err, stdout, stderr) => {
+                if (err) {
+                  confirmAlert({
+                    title: "Error",
+                    message: "Error at starting Streamlink",
+                  });
+                }
+              });
+            }} shortcut={{ modifiers: ["opt"], key: "enter" }} />
           </ActionPanel>
         } />
       })}
