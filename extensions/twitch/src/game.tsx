@@ -9,13 +9,13 @@ export default function main() {
   const preferences: Preferences = getPreferenceValues();
   const clientId = preferences.clientId;
   const authorization = preferences.authorization;
-  
+
   const [loading, setLoading] = React.useState(false);
   const [query, setQuery] = React.useState<string>("");
-  const [items,setItems] = React.useState<Game[]>([]);
- 
+  const [items, setItems] = React.useState<Game[]>([]);
+
   React.useEffect(() => {
-    if(query.length == 0) return;
+    if (query.length == 0) return;
     setLoading(true);
 
     fetch(`https://api.twitch.tv/helix/search/categories?query=${query}&live_only=true`, {
@@ -24,10 +24,10 @@ export default function main() {
         'Authorization': `Bearer ${authorization}`,
       }
     }).then(res => res.json()).then((data: any) => {
-      if(data && data.data) {
+      if (data && data.data) {
         setItems(data.data);
         setLoading(false);
-      } else if(data.error && data.error.toLowerCase().includes("invalid")) {
+      } else if (data.error && data.message.toLowerCase().includes("invalid")) {
         confirmAlert({
           title: "Error",
           message: data.message,
@@ -41,9 +41,9 @@ export default function main() {
       {items.map((item: Game) => {
         return <ListItem icon={item.box_art_url} key={item.id} id={item.id} title={item.name} actions={
           <ActionPanel>
-            <OpenAction title="Open Channel" target={`https://twitch.tv/directory/game/${encodeURIComponent(item.name)}`} />
+            <OpenAction title="Open Categorie" target={`https://twitch.tv/directory/game/${encodeURIComponent(item.name)}`} />
           </ActionPanel>
-        }  />
+        } />
       })}
     </List>
   </>)
