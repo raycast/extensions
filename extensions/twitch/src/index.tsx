@@ -1,4 +1,4 @@
-import { ActionPanel, confirmAlert, Detail, getPreferenceValues, List, ListItem, OpenAction } from "@raycast/api";
+import { ActionPanel, confirmAlert, Detail, getPreferenceValues, ImageMask, List, ListItem, OpenAction } from "@raycast/api";
 import React from "react";
 import fetch from 'node-fetch';
 import { exec } from "child_process";
@@ -43,7 +43,7 @@ export default function main() {
   return (<>
     <List isLoading={loading} searchBarPlaceholder="Search for a Streamer on Twitch" navigationTitle="Search a Channel" onSearchTextChange={(text) => setQuery(text)}>
       {items.map((item: Item) => {
-        return <ListItem key={item.id} icon={item.thumbnail_url} id={item.id} title={item.title} subtitle={`${item.display_name} - ${item.is_live ? `${item.game_name}` : "Offline"}`} actions={
+        return <ListItem key={item.id} icon={{ source: item.thumbnail_url, mask: ImageMask.Circle }} accessoryIcon={{ tintColor: item.is_live ? "green" : "red", source: item.is_live ? "checkmark-circle-16" : "xmark-circle-16" }} accessoryTitle={`${item.is_live ? item.game_name : "Offline"}`} id={item.id} title={item.title} subtitle={item.display_name} actions={
           <ActionPanel>
             <OpenAction title="Open Channel" target={`https://twitch.tv/${item.broadcaster_login}`} />
             <OpenAction title="Open Stream in Streamlink" target="streamlink" onOpen={(target) => {
