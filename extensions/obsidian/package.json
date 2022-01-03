@@ -5,44 +5,76 @@
   "icon": "command-icon.png",
   "author": "marcjulian",
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "vaultPath",
-      "type": "textfield",
-      "placeholder": "path/to/vault",
-      "title": "Path to Vault",
-      "required": true,
-      "description": "Specify the path to your own vault"
-    },{
-      "name": "excludedFolders",
-      "type": "textfield",
-      "placeholder": "folder1, folder2, ...",
-      "title": "Exclude following folders",
-      "required": false,
-      "description": "Specify which folders to exclude (comma seperated)"
-    }, {
-      "name": "removeYAML",
-      "label": "Hide content",
-      "type": "checkbox",
-      "title": "Hide YAML",
-      "required": false,
-      "description": "Hide YAML frontmatter for copying and viewing notes"
-    }, {
-      "name": "removeLinks",
-      "label": "Hide content",
-      "type": "checkbox",
-      "title": "Hide Links",
-      "required": false,
-      "description": "Hide links for copying and viewing notes"
-    }
-  ],
   "commands": [
     {
       "name": "index",
       "title": "Search Note",
       "subtitle": "Obsidian",
-      "description": "Search, open, copy and paste any note in Obsidian",
-      "mode": "view" 
+      "description": "Search, open, view, copy, paste and edit any note in Obsidian",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "vaultPath",
+          "type": "textfield",
+          "placeholder": "path/to/vault",
+          "title": "Path to Vault",
+          "required": true,
+          "description": "Specify the path or multiple paths (comma separated) to your vault/vaults"
+        },{
+          "name": "excludedFolders",
+          "type": "textfield",
+          "placeholder": "folder1, folder2, ...",
+          "title": "Exclude following folders",
+          "required": false,
+          "description": "Specify which folders to exclude (comma separated)"
+        }, {
+          "name": "removeYAML",
+          "label": "Hide content",
+          "type": "checkbox",
+          "title": "Hide YAML",
+          "required": false,
+          "description": "Hide YAML frontmatter for copying and viewing notes"
+        }, {
+          "name": "removeLinks",
+          "label": "Hide content",
+          "type": "checkbox",
+          "title": "Hide Links",
+          "required": false,
+          "description": "Hide links for copying and viewing notes"
+        }, {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "title": "Primary Action",
+          "required": false,
+          "description": "Select a primary action to be executed on enter",
+          "data": [
+            {
+              "title": "Quick Look",
+              "value": "quicklook"
+            }, {
+              "title": "Open in Obsidian",
+              "value": "obsidian"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "openvault",
+      "title": "Open Vault",
+      "subtitle": "Obsidian",
+      "description": "Open a vault in Obsidian",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "vaults",
+          "type": "textfield",
+          "title": "Your vaults",
+          "required": true,
+          "description": "The names of your vaults (comma separated)",
+          "placeholder": "vault1, vault2, ..."
+        }
+      ]
     }
   ],
   "dependencies": {
