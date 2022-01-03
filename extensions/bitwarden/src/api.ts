@@ -2,23 +2,25 @@ import { getPreferenceValues } from "@raycast/api";
 import execa from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
-import which from "which";
 import { VaultStatus } from "./types";
 
-const BREW_PATH = "/usr/local/bin:/opt/homebrew/bin"
 export class Bitwarden {
   private env: Record<string, string>;
   private cliPath: string
   constructor() {
-    const { cliPath, clientId, nodePath, clientSecret } = getPreferenceValues()
-    this.cliPath = cliPath ? cliPath : which.sync('bw', {path: BREW_PATH})
+    const { cliPath, clientId, clientSecret } = getPreferenceValues()
+    if (cliPath) {
+      this.cliPath = cliPath
+    } else {
+      this.cliPath = process.arch == "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw"
+    }
     if (!existsSync(this.cliPath)) {
       throw Error(`Invalid Cli Path: ${this.cliPath}`)
     }
     this.env = {
       BW_CLIENTSECRET: clientSecret.trim(),
       BW_CLIENTID: clientId.trim(),
-      PATH: nodePath ? dirname(nodePath) : BREW_PATH
+      PATH: dirname(process.execPath),
     };
   }
 
