@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "biaodian",
-      "title": "Biaodian (Chinese Punctuation Marks)",
+      "title": "Biaodian",
       "description": "Search Chinese Punctuation Marks",
       "mode": "view"
     }
