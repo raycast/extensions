@@ -50,7 +50,7 @@
       "type": "textfield",
       "required": false,
       "title": "Bitwarden CLI Installation Path",
-      "description": "Location of the local Bitwarden CLI installation. Defaults to '/usr/local/bin/bw' on Intel and /opt/homebrew/bin/bw on M1.",
+      "description": "Location of the local Bitwarden CLI installation. Defaults to '/usr/local/bin/bw' on Intel and '/opt/homebrew/bin/bw' on M1.",
       "placeholder": "CLI Installation Path"
     },
     {
