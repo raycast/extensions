@@ -22,6 +22,30 @@
       "title": "Authorization Token",
       "required": true,
       "description": "Twitch Bearer Token (Must be matching with ClientId) https://twitchapps.com/tokengen/"
+    },
+    {
+      "name": "streamlink",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/streamlink",
+      "title": "Location of Streamlink binary",
+      "required": false,
+      "description": "Use 'where streamlink' or install via brew install streamlink"
+    },
+    {
+      "name": "player",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/VLC",
+      "title": "Location of Video Player",
+      "required": false,
+      "description": "Use 'where vlc' or install via brew install cask vlc"
+    },
+    {
+      "name": "quality",
+      "type": "textfield",
+      "default": "best",
+      "title": "Video Quality",
+      "required": false,
+      "description": "Standard video quality"
     }
   ],
   "commands": [
@@ -43,6 +67,13 @@
       "name": "game",
       "title": "Search Games",
       "description": "Search a game on Twitch",
+      "icon": "icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "following",
+      "title": "Search Following Channels",
+      "description": "Search following Channels",
       "icon": "icon.png",
       "mode": "view"
     }
