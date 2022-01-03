@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "twitch",
   "title": "Twitch",
-  "description": "Search Twitch",
+  "description": "Search for Streams, Channels or Games on Twitch",
   "icon": "icon.png",
   "author": "dieserRobin",
   "license": "MIT",
