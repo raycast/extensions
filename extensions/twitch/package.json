@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "twitch",
+  "title": "Twitch",
+  "description": "Search Twitch",
+  "icon": "icon.png",
+  "author": "dieserRobin",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "clientId",
+      "type": "password",
+      "default": "",
+      "title": "Client ID",
+      "required": true,
+      "description": "Twitch ClientId https://twitchapps.com/tokengen/"
+    },
+    {
+      "name": "authorization",
+      "type": "password",
+      "default": "",
+      "title": "Authorization Token",
+      "required": true,
+      "description": "Twitch Bearer Token (Must be matching with ClientId) https://twitchapps.com/tokengen/"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Streams",
+      "description": "Search a Live Twitch Stream",
+      "icon": "icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "streamer",
+      "title": "Search Channels",
+      "description": "Search a Twitch Stream",
+      "icon": "icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "game",
+      "title": "Search Games",
+      "description": "Search a game on Twitch",
+      "icon": "icon.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.3",
+    "node-fetch": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
