@@ -2,6 +2,7 @@ import {jiraFetchObject, jiraUrl} from "./jira";
 import {jiraAvatarImage} from "./avatar";
 import {ResultItem, SearchCommand} from "./command";
 import {Color, ColorLike, Icon, Image, ImageSource} from "@raycast/api";
+import {ErrorText} from "./exception";
 
 interface IssueType {
     id: string,
@@ -47,15 +48,19 @@ function isIssueKey(query: string): boolean {
 }
 
 function buildJql(query: string): string {
-    const spaceAndInvalidCharacters = /[- +!"]/;
-    const terms = query.split(spaceAndInvalidCharacters).filter(term => term.length > 0)
+    const spaceAndInvalidChars = /[ "]/
+    const terms = query.split(spaceAndInvalidChars).filter(term => term.length > 0)
 
     const collectPrefixed = (prefix: string, terms: string[]): string[] => terms
         .filter(term => term.startsWith(prefix) && term.length > prefix.length)
         .map(term => term.substring(prefix.length))
     const projects = collectPrefixed("@", terms)
     const issueTypes = collectPrefixed("#", terms)
-    const textTerms = terms.filter(term => !"@#".includes(term[0]))
+    const unwantedTextTermChars = /[-+!]/
+    const textTerms = terms
+        .filter(term => !"@#".includes(term[0]))
+        .flatMap(term => term.split(unwantedTextTermChars))
+        .filter(term => term.length > 0)
 
     const escapeStr = (str: string) => `"${str}"`
     const inClause = (entity: string, items: string[]) =>
@@ -76,7 +81,12 @@ function jqlFor(query: string): string {
 
 export async function searchIssues(query: string): Promise<ResultItem[]> {
     const jql = jqlFor(query)
-    const result = await jiraFetchObject<Issues>("/rest/api/3/search", { jql, fields })
+    console.debug(jql)
+    const result = await jiraFetchObject<Issues>(
+        "/rest/api/3/search",
+        { jql, fields },
+        { 400: ErrorText("Invalid Query", "Unknown project or issue type") }
+    )
     const mapResult = async (issue: Issue): Promise<ResultItem> => ({
         id: issue.id,
         title: issue.fields.summary,

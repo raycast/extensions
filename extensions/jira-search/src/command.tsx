@@ -8,6 +8,7 @@ import {
     ToastStyle
 } from "@raycast/api"
 import {useEffect, useState} from "react"
+import {ErrorText} from "./exception"
 
 export type ResultItem = ListItemProps & { url: string }
 type SearchFunction = (query: string) => Promise<ResultItem[]>
@@ -16,7 +17,7 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
     const [query, setQuery] = useState("")
     const [items, setItems] = useState<ResultItem[]>([])
     const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string>()
+    const [error, setError] = useState<ErrorText>()
     useEffect(() => {
         setError(undefined)
         setIsLoading(true)
@@ -27,7 +28,7 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
         .catch(e => {
             setItems([])
             if (e instanceof Error) {
-                setError(e.message)
+                setError(ErrorText(e.name, e.message))
             }
         })
         .finally(() => {
@@ -56,7 +57,7 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
     )
 
     if (error) {
-        showToast(ToastStyle.Failure, "An error occured", error)
+        showToast(ToastStyle.Failure, error.name, error.message)
     }
 
     return (
