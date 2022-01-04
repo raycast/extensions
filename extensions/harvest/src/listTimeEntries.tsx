@@ -77,6 +77,8 @@ export default function Command() {
             "Invalid Token",
             "Your API token or Account ID is invalid. Go to Raycast Preferences to update it."
           );
+        } else {
+          await showToast(ToastStyle.Failure, "Unknown Error", "Could not fetch time entries");
         }
       } else {
         await showToast(ToastStyle.Failure, "Unknown Error", "Could not fetch time entries");
@@ -367,15 +369,17 @@ function DeleteEntryAction({
   return (
     <ActionPanelItem
       onAction={async () => {
-        if (await confirmAlert({
-          title: "Delete Time Entry",
-          message: "Are you sure? This cannot be undone",
-          icon: Icon.Trash,
-          primaryAction: {
-            title: "Delete",
-            style: AlertActionStyle.Destructive,
-          },
-        })) {
+        if (
+          await confirmAlert({
+            title: "Delete Time Entry",
+            message: "Are you sure? This cannot be undone",
+            icon: Icon.Trash,
+            primaryAction: {
+              title: "Delete",
+              style: AlertActionStyle.Destructive,
+            },
+          })
+        ) {
           await deleteTimeEntry(entry);
           await onComplete();
         }
