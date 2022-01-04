@@ -13,7 +13,7 @@ Features
 
 ## Installing
 
-_Note: this extension is beta and not yet available in the Raycast store_
+Make sure RayCast is installed and go to https://www.raycast.com/joepio/atomic
 
 ## Running locally
 
