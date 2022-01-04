@@ -32,12 +32,12 @@
       "description": "Use 'where streamlink' or install via brew install streamlink"
     },
     {
-      "name": "player",
-      "type": "textfield",
-      "default": "/opt/homebrew/bin/VLC",
-      "title": "Location of Video Player",
+      "name": "lowlatency",
+      "type": "checkbox",
+      "default": "false",
+      "title": "Low latency",
       "required": false,
-      "description": "Use 'where vlc' or install via brew install cask vlc"
+      "description": "VLC Player is required for low latency streams"
     },
     {
       "name": "quality",
