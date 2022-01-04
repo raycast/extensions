@@ -1,4 +1,4 @@
-import { ActionPanel, confirmAlert, Detail, getPreferenceValues, List, ListItem, OpenAction } from "@raycast/api";
+import { ActionPanel, confirmAlert, Detail, getPreferenceValues, List, ListItem, OpenAction, showToast, ToastStyle } from "@raycast/api";
 import React from "react";
 import fetch from 'node-fetch';
 
@@ -28,10 +28,7 @@ export default function main() {
         setItems(data.data);
         setLoading(false);
       } else if (data.error && data.message.toLowerCase().includes("invalid")) {
-        confirmAlert({
-          title: "Error",
-          message: data.message,
-        });
+        showToast(ToastStyle.Failure, data.message);
       }
     });
   }, [query]);

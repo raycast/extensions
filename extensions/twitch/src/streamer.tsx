@@ -1,4 +1,4 @@
-import { ActionPanel, confirmAlert, Detail, getPreferenceValues, ImageMask, List, ListItem, OpenAction } from "@raycast/api";
+import { ActionPanel, confirmAlert, Detail, getPreferenceValues, ImageMask, List, ListItem, OpenAction, showToast, ToastStyle } from "@raycast/api";
 import React from "react";
 import fetch from 'node-fetch';
 import { exec } from "child_process";
@@ -32,10 +32,7 @@ export default function main() {
         setItems(data.data);
         setLoading(false);
       } else if (data.error && data.error.toLowerCase().includes("invalid")) {
-        confirmAlert({
-          title: "Error",
-          message: data.message,
-        });
+        showToast(ToastStyle.Failure, data.message);
       }
     });
   }, [query]);
@@ -47,13 +44,10 @@ export default function main() {
           <ActionPanel>
             <OpenAction title="Open Channel" target={`https://twitch.tv/${item.broadcaster_login}`} />
             <OpenAction title="Open Stream in Streamlink" target="streamlink" onOpen={(target) => {
-              if (!item.is_live) { confirmAlert({ title: "Info", message: "This streamer is offline" }); return; }
+              if (!item.is_live) { showToast(ToastStyle.Failure, "This streamer is offline!"); return; }
               exec(`${streamlinkLocation} https://twitch.tv/${item.broadcaster_login} ${quality} ${playerLocation ? `--player ${playerLocation}` : ""}`, (err, stdout, stderr) => {
                 if (err) {
-                  confirmAlert({
-                    title: "Error",
-                    message: "Error at starting Streamlink",
-                  });
+                  showToast(ToastStyle.Failure, "Error at starting Streamlink");
                 }
               });
             }} shortcut={{ modifiers: ["opt"], key: "enter" }} />
