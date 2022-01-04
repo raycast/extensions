@@ -25,7 +25,7 @@
       "name": "searchBookmarksWithConstantTags",
       "title": "Search Bookmarks with constant tags",
       "subtitle": "Pinboard",
-      "description": "Searches your Pinboard bookmarks by tags, but adds oen or more tags from preferences. Optional.",
+      "description": "Searches your Pinboard bookmarks by tags, but add one or more tags from preferences. Optional.",
       "mode": "view"
     }
   ],
