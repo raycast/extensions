@@ -10,8 +10,14 @@ import {
 import {useEffect, useState} from "react"
 import {ErrorText} from "./exception"
 
-export type ResultItem = ListItemProps & { url: string }
+export type ResultItem = ListItemProps & {
+    url: string,
+    linkText?: string,
+}
 type SearchFunction = (query: string) => Promise<ResultItem[]>
+
+const markdownLink = (item: ResultItem) => `[${item.linkText ?? item.title}](${item.url})`
+const htmlLink = (item: ResultItem) => `<a href="${item.url}">${item.linkText ?? item.title}</a>`
 
 export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: string) {
     const [query, setQuery] = useState("")
@@ -48,8 +54,8 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
                         <CopyToClipboardAction content={item.url} title="Copy URL"/>
                     </ActionPanel.Section>
                     <ActionPanel.Section title="Link">
-                        <CopyToClipboardAction content={`[${item.title}](${item.url})`} title="Copy Markdown Link"/>
-                        <CopyToClipboardAction content={`<a href="${item.url}">${item.title}</a>`} title="Copy HTML Link"/>
+                        <CopyToClipboardAction content={markdownLink(item)} title="Copy Markdown Link"/>
+                        <CopyToClipboardAction content={htmlLink(item)} title="Copy HTML Link"/>
                     </ActionPanel.Section>
                 </ActionPanel>
             }

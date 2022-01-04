@@ -95,6 +95,7 @@ export async function searchIssues(query: string): Promise<ResultItem[]> {
         accessoryIcon: statusIcon(issue.fields.status),
         accessoryTitle: issue.fields.status.name,
         url: `${jiraUrl}/browse/${issue.key}`,
+        linkText: `${issue.key}: ${issue.fields.summary}`
     })
     return result.issues && result.issues.length > 0 ? Promise.all(result.issues.map(mapResult)) : []
 }
