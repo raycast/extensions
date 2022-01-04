@@ -36,7 +36,12 @@ export default class Bookmark {
   }
 
   get getPath() {
-    return this.Folder ? this.Folder.replace("file://", "") : "";
+    return this.Folder
+      ? this.Folder
+        .replace("file://", "")
+        .replaceAll("&", "\&")
+        .replaceAll("%20", "\ ")
+      : "";
   }
 
   get isComplete() {
