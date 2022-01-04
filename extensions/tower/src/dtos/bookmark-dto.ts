@@ -26,11 +26,22 @@ export default class Bookmark {
   }
 
   get getFolder() {
-    return this.Folder ? tildify(this.Folder.replace("file:/", "")) : "";
+    return this.Folder
+      ? tildify(
+        this.Folder
+          .replace("file:/", "")
+          .replaceAll("&", "\\&")
+          .replaceAll("%20", "\\ "))
+      : "";
   }
 
   get getPath() {
-    return this.Folder ? this.Folder.replace("file://", "") : "";
+    return this.Folder
+      ? this.Folder
+        .replace("file://", "")
+        .replaceAll("&", "\&")
+        .replaceAll("%20", "\ ")
+      : "";
   }
 
   get isComplete() {
