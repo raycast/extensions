@@ -34,8 +34,9 @@
     {
       "name": "lowlatency",
       "type": "checkbox",
+      "label": "Low Latency",
       "default": "false",
-      "title": "Low latency",
+      "title": "Latency (VLC Player is required if enabled)",
       "required": false,
       "description": "VLC Player is required for low latency streams"
     },
