@@ -33,6 +33,7 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
         })
         .catch(e => {
             setItems([])
+            console.warn(e)
             if (e instanceof Error) {
                 setError(ErrorText(e.name, e.message))
             }

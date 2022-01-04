@@ -1,5 +1,7 @@
 # Raycast Jira Search
-This [Raycast](https://raycast.com) extension lets you quickly find Jira issues, projects, boards and filters. 
+This [Raycast](https://raycast.com) extension lets you quickly find Jira issues, projects, boards and filters.
+
+![screencast](assets/screencast.gif)
 
 ## Features
 * Find issues by text and project and type, where the text search is much more tolerant than the one built in to Raycast.

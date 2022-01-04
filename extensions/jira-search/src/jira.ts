@@ -24,7 +24,7 @@ type StatusErrors = { [key: number]: ErrorText }
  * @throws if the response's status code is not okay
  * @return the jira response
  */
-export async function jiraFetchObject<Result>(path: string, params: QueryParams, statusErrors?: StatusErrors): Promise<Result> {
+export async function jiraFetchObject<Result>(path: string, params: QueryParams = {}, statusErrors?: StatusErrors): Promise<Result> {
     const response = await jiraFetch(path, params, statusErrors)
     return await response.json() as unknown as Result
 }
@@ -37,11 +37,13 @@ export async function jiraFetchObject<Result>(path: string, params: QueryParams,
  * @throws if the response's status code is not okay
  * @return the jira response
  */
-export async function jiraFetch(path: string, params: QueryParams, statusErrors?: StatusErrors): Promise<Response> {
+export async function jiraFetch(path: string, params: QueryParams = {}, statusErrors?: StatusErrors): Promise<Response> {
     const paramKeys = Object.keys(params)
     const query = paramKeys.map(key => `${key}=${encodeURI(params[key])}`).join('&')
     try {
-        const response = await fetch(`${jiraUrl}/${path}?${query}`, init)
+        const sanitizedPath = path.startsWith("/") ? path.substring(1) : path
+        const url = `${jiraUrl}/${sanitizedPath}` + (query.length > 0 ? `?${query}` : "")
+        const response = await fetch(url, init)
         throwIfResponseNotOkay(response, statusErrors)
         return response
     } catch (error) {

@@ -1,6 +1,6 @@
 import {ResultItem, SearchCommand} from "./command";
 import {jiraFetchObject, jiraUrl} from "./jira";
-import {jiraAvatarImage} from "./avatar";
+import {jiraImage} from "./image";
 
 interface Project {
     id: string,
@@ -21,7 +21,7 @@ export async function searchProjects(query: string): Promise<ResultItem[]> {
         id: project.id,
         title: project.name,
         subtitle: project.key,
-        icon: await jiraAvatarImage(project.avatarUrls["48x48"]),
+        icon: await jiraImage(project.avatarUrls["48x48"]),
         url: `${jiraUrl}/browse/${project.key}`,
     })
     return result.values && result.values.length > 0 ? Promise.all(result.values.map(mapResult)) : []

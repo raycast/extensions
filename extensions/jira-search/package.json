@@ -36,10 +36,10 @@
       "mode": "view"
     },
     {
-      "name": "avatar",
-      "title": "Reload Icons",
+      "name": "image",
+      "title": "Clear Image Cache",
       "subtitle": "Jira Search",
-      "description": "Delete cached Jira icons and reload them",
+      "description": "Delete cached Jira images and reload them on next search",
       "mode": "no-view"
     }
   ],

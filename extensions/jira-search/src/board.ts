@@ -1,6 +1,6 @@
 import {ResultItem, SearchCommand} from "./command";
 import {jiraFetchObject, jiraUrl} from "./jira";
-import {jiraAvatarImage} from "./avatar";
+import {jiraImage} from "./image";
 
 interface Board {
     id: number,
@@ -21,7 +21,7 @@ export async function searchBoards(query: string): Promise<ResultItem[]> {
         id: board.id.toString(),
         title: board.name,
         subtitle: board.location.displayName,
-        icon: await jiraAvatarImage(board.location.avatarURI),
+        icon: await jiraImage(board.location.avatarURI),
         url: `${jiraUrl}/secure/RapidBoard.jspa?rapidView=${board.id}`,
     })
     return result.values && result.values.length > 0 ? Promise.all(result.values.map(mapResult)) : []

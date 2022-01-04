@@ -1,5 +1,5 @@
 import {jiraFetchObject, jiraUrl} from "./jira";
-import {jiraAvatarImage} from "./avatar";
+import {jiraImage} from "./image";
 import {ResultItem, SearchCommand} from "./command";
 import {Color, ColorLike, Icon, Image, ImageSource} from "@raycast/api";
 import {ErrorText} from "./exception";
@@ -56,7 +56,7 @@ function buildJql(query: string): string {
         .map(term => term.substring(prefix.length))
     const projects = collectPrefixed("@", terms)
     const issueTypes = collectPrefixed("#", terms)
-    const unwantedTextTermChars = /[-+!]/
+    const unwantedTextTermChars = /[-+!*]/
     const textTerms = terms
         .filter(term => !"@#".includes(term[0]))
         .flatMap(term => term.split(unwantedTextTermChars))
@@ -91,7 +91,7 @@ export async function searchIssues(query: string): Promise<ResultItem[]> {
         id: issue.id,
         title: issue.fields.summary,
         subtitle: `${issue.key} · ${issue.fields.issuetype.name}`,
-        icon: await jiraAvatarImage(issue.fields.issuetype.iconUrl),
+        icon: await jiraImage(issue.fields.issuetype.iconUrl),
         accessoryIcon: statusIcon(issue.fields.status),
         accessoryTitle: issue.fields.status.name,
         url: `${jiraUrl}/browse/${issue.key}`,
