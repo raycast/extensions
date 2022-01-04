@@ -3,8 +3,6 @@ import {
   ActionPanel,
   OpenAction,
   getPreferenceValues,
-  showToast,
-  ToastStyle
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 
@@ -14,27 +12,13 @@ interface Preferences {
 
 interface Vault {
   name: string;
-  key: number;
+  key: string;
 }
 
 function parseVaults() {
   const pref: Preferences = getPreferenceValues();
-  const vaultstring = pref.vaults
-  let vaults = [];
-
-  if (vaultstring) {
-    const strings = vaultstring.split(",");
-    for (let i = 0; i < strings.length; i++) {
-      vaults.push({
-        name: strings[i].trim(),
-        key: i
-      });
-    }
-    return vaults;
-  } else {
-    showToast(ToastStyle.Failure, "There are no vaults")
-    return [];
-  }
+  const vaultString = pref.vaults
+  return vaultString.split(",").map(vault => ({name: vault.trim(), key: vault.trim()})).filter(vault => !!vault);
 }
 
 

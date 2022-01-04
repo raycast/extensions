@@ -24,6 +24,11 @@ interface Note {
   path: string;
 }
 
+interface Vault {
+  name: string;
+  key: string;
+}
+
 interface Preferences {
   vaultPath: string;
   excludedFolders: string;
@@ -75,15 +80,7 @@ function getFiles(vaultPath: string) {
 function prefVaults() {
   const pref: Preferences = getPreferenceValues();
   const vaultString = pref.vaultPath
-  if (vaultString) {
-    const vaults = vaultString.split(",");
-    for (let i = 0; i < vaults.length; i++) {
-      vaults[i] = vaults[i].trim();
-    }
-    return vaults;
-  } else {
-    return [];
-  }
+  return vaultString.split(",").map(vault => ({name: vault.trim(), key: vault.trim()})).filter(vault => !!vault);
 }
 
 function prefExcludedFolders() {
@@ -302,18 +299,19 @@ function NoteList(props: { vaultPath: string }) {
   );
 }
 
-function VaultSelection(props: { vaults: string[] }) {
+function VaultSelection(props: { vaults: Vault[] }) {
   const vaults = props.vaults;
   return (
     <List>
       {vaults?.map((vault) => (
         <List.Item
-          title={vault}
+          title={vault.name}
+          key={vault.key}
           actions={
             <ActionPanel>
               <PushAction
                 title="Select Vault"
-                target={<NoteList vaultPath={vault} />}
+                target={<NoteList vaultPath={vault.name} />}
               />
             </ActionPanel>
           }
@@ -328,7 +326,7 @@ export default function Command() {
   if (vaults.length > 1) {
     return <VaultSelection vaults={vaults} />
   } else if (vaults.length == 1) {
-    return <NoteList vaultPath={vaults[0]} />
+    return <NoteList vaultPath={vaults[0].name} />
   } else {
     showToast(ToastStyle.Failure, "Path Error", "Something went wrong with your vault path.")
   }
