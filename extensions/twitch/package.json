@@ -42,11 +42,12 @@
     },
     {
       "name": "quality",
-      "type": "textfield",
+      "type": "dropdown",
       "default": "best",
       "title": "Video Quality",
       "required": false,
-      "description": "Standard video quality"
+      "description": "Standard video quality",
+	  "data": [{"title":  "Best", "value":  "best"},{"title":  "720p", "value":  "720p"},{"title":  "480p", "value":  "480p"},{"title":  "Worst", "value":  "worst"}]
     }
   ],
   "commands": [
