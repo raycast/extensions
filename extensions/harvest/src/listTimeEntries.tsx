@@ -367,19 +367,18 @@ function DeleteEntryAction({
   return (
     <ActionPanelItem
       onAction={async () => {
-        await confirmAlert({
+        if (await confirmAlert({
           title: "Delete Time Entry",
           message: "Are you sure? This cannot be undone",
           icon: Icon.Trash,
           primaryAction: {
             title: "Delete",
             style: AlertActionStyle.Destructive,
-            onAction: async () => {
-              await deleteTimeEntry(entry);
-              await onComplete();
-            },
           },
-        });
+        })) {
+          await deleteTimeEntry(entry);
+          await onComplete();
+        }
       }}
       title="Delete Time Entry"
       shortcut={{ key: "delete", modifiers: ["cmd"] }}
