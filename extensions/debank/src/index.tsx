@@ -37,7 +37,7 @@ export default function Command() {
     <List.Item
       title={title}
       actions={
-        address && (
+        address ? (
           <ActionPanel>
             <ActionPanelItem
               title={`Show Balance`}
@@ -66,7 +66,7 @@ export default function Command() {
               />
             )}
           </ActionPanel>
-        )
+        ) : null
       }
     />
   );
