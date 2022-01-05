@@ -55,8 +55,6 @@ export default function Command({
       } else {
         showToast(ToastStyle.Failure, "Unknown Error", "Could not get your company data");
       }
-    } else {
-      showToast(ToastStyle.Failure, "Unknown Error", "Could not fetch time entries");
     }
   }, [error]);
 
