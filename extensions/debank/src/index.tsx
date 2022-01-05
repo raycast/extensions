@@ -154,63 +154,62 @@ type BalanceViewProps = {
 
 export function BalanceView(props: BalanceViewProps) {
   const [balance, setBalance] = useState<TotalBalance | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (props.address) {
       getTotalBalance(props.address).then((data) => {
         setBalance(data);
+
+        setIsLoading(false);
       });
     }
   }, []);
 
   const { push } = useNavigation();
 
-  if (!balance) {
-    return (
-      <List>
-        <List.Item key="1" title="Loading..." />
-      </List>
-    );
-  } else {
-    return (
-      <List navigationTitle={`Account Balance of ${props.address}`}>
-        <ListSection title="Total">
-          <List.Item
-            key="1"
-            title="Total Balance"
-            accessoryTitle={`$${balance.total_usd_value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`}
-          />
-        </ListSection>
+  return (
+    <List navigationTitle={`Account Balance of ${props.address}`} isLoading={isLoading}>
+      {balance && (
+        <>
+          <ListSection title="Total">
+            <List.Item
+              key="1"
+              title="Total Balance"
+              accessoryTitle={`$${balance.total_usd_value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`}
+            />
+          </ListSection>
 
-        <ListSection title="Chain">
-          {balance.chain_list
-            .filter((chain) => chain.usd_value > 0)
-            .map((chain) => {
-              return (
-                <List.Item
-                  key={chain.id}
-                  title={chain.name}
-                  accessoryTitle={`$${chain.usd_value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`}
-                  icon={{
-                    source: chain.logo_url,
-                  }}
-                  actions={
-                    <ActionPanel>
-                      <ActionPanelItem
-                        title={`Show Protocols on ${chain.name}`}
-                        onAction={() => {
-                          push(<AssetsView address={props.address} chainId={chain.id} chainName={chain.name} />);
-                        }}
-                      />
-                    </ActionPanel>
-                  }
-                />
-              );
-            })}
-        </ListSection>
-      </List>
-    );
-  }
+          <ListSection title="Chain">
+            {balance.chain_list
+              .filter((chain) => chain.usd_value > 0)
+              .map((chain) => {
+                return (
+                  <List.Item
+                    key={chain.id}
+                    title={chain.name}
+                    accessoryTitle={`$${chain.usd_value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`}
+                    icon={{
+                      source: chain.logo_url,
+                    }}
+                    actions={
+                      <ActionPanel>
+                        <ActionPanelItem
+                          title={`Show Protocols on ${chain.name}`}
+                          onAction={() => {
+                            push(<AssetsView address={props.address} chainId={chain.id} chainName={chain.name} />);
+                          }}
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                );
+              })}
+          </ListSection>
+        </>
+      )}
+    </List>
+  );
 }
 
 type AssetsViewProps = {
@@ -236,51 +235,50 @@ function protocolNetValueSum(protocol: ComplexProtocol) {
 export function AssetsView(props: AssetsViewProps) {
   const [protocols, setProtocols] = useState<ComplexProtocol[] | null>(null);
   const [tokens, setTokens] = useState<Token[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (props.address && props.chainId) {
-      getComplexProtocolList(props.address, props.chainId).then((data) => {
-        setProtocols(data);
-      });
-
       getTokenList(props.address, props.chainId).then((data) => {
         setTokens(data);
+
+        setIsLoading(false);
+      });
+
+      getComplexProtocolList(props.address, props.chainId).then((data) => {
+        setProtocols(data);
+
+        setIsLoading(false);
       });
     }
   }, []);
 
-  const hasSomething = (protocols && protocols?.length > 0) || (tokens && tokens?.length > 0);
+  const hasProtocolsOrTokens = (protocols && protocols?.length > 0) || (tokens && tokens?.length > 0);
 
-  if (!protocols || !tokens) {
-    return (
-      <List>
-        <List.Item key="1" title="Loading..." />
-      </List>
-    );
-  } else {
-    return (
-      <List navigationTitle={`${props.chainName}`}>
-        {!hasSomething && <List.Item key="1" title="No Tokens or Protocols" />}
+  return (
+    <List navigationTitle={`${props.chainName}`} isLoading={isLoading}>
+      {!hasProtocolsOrTokens && !isLoading && <List.Item key="1" title="No Tokens or Protocols" />}
 
-        <List.Section title="Tokens">
-          {tokens
-            ?.sort((a, b) => b.price * b.amount - a.price * a.amount)
-            .map((token) => (
-              <List.Item
-                key={token.id}
-                title={token.display_symbol || token.optimized_symbol}
-                subtitle={`$${token.price?.toString() || 0} * ${token.amount.toLocaleString("en-US", {
-                  maximumFractionDigits: 2,
-                })}`}
-                accessoryTitle={`$${((token.price || 0) * token.amount).toLocaleString("en-US", {
-                  maximumFractionDigits: 2,
-                })}`}
-                icon={token.logo_url ? { source: token.logo_url } : undefined}
-              />
-            ))}
-        </List.Section>
+      <List.Section title="Tokens">
+        {tokens
+          ?.sort((a, b) => b.price * b.amount - a.price * a.amount)
+          .map((token) => (
+            <List.Item
+              key={token.id}
+              title={token.display_symbol || token.optimized_symbol}
+              subtitle={`$${token.price?.toString() || 0} * ${token.amount.toLocaleString("en-US", {
+                maximumFractionDigits: 2,
+              })}`}
+              accessoryTitle={`$${((token.price || 0) * token.amount).toLocaleString("en-US", {
+                maximumFractionDigits: 2,
+              })}`}
+              icon={token.logo_url ? { source: token.logo_url } : undefined}
+            />
+          ))}
+      </List.Section>
 
-        {protocols
+      {protocols &&
+        protocols
           .sort((a, b) => protocolNetValueSum(b) - protocolNetValueSum(a))
           .map((protocol) => {
             return (
@@ -288,10 +286,11 @@ export function AssetsView(props: AssetsViewProps) {
                 title={`${protocol.name} ($${protocolNetValueSum(protocol).toLocaleString("en-US", {
                   maximumFractionDigits: 2,
                 })})`}
+                key={protocol.id}
               >
                 {protocol.portfolio_item_list
                   .sort((a, b) => b.stats.net_usd_value - a.stats.net_usd_value)
-                  .map((item) => {
+                  .map((item, index) => {
                     const balance = formatTokenList(item.detail.supply_token_list);
                     const rewarded = formatTokenList(item.detail.reward_token_list);
 
@@ -304,7 +303,7 @@ export function AssetsView(props: AssetsViewProps) {
                               }
                             : Icon.QuestionMark
                         }
-                        key={`${protocol.id}-${item.name}`}
+                        key={`${protocol.id}-${item.name}-${index}`}
                         title={item.name}
                         subtitle={`${balance}${rewarded && ` | (${rewarded})`}`}
                         accessoryTitle={`$${item.stats.net_usd_value.toLocaleString("en-US", {
@@ -316,7 +315,6 @@ export function AssetsView(props: AssetsViewProps) {
               </List.Section>
             );
           })}
-      </List>
-    );
-  }
+    </List>
+  );
 }
