@@ -1,6 +1,5 @@
 import { ActionPanel, CopyToClipboardAction, Detail, getPreferenceValues, Icon, List, OpenInBrowserAction, Preferences, PushAction } from "@raycast/api";
-import { useServerSearch, StoreContext, useTitle, useResource, useString, useMarkdown } from '@tomic/react';
-import { Store, urls } from '@tomic/lib';
+import { useServerSearch, StoreContext, useTitle, useResource, useString, useMarkdown, Store, urls } from '@tomic/react';
 import React from "react";
 
 const preferences: Preferences = getPreferenceValues();
