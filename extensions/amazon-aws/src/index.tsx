@@ -13,13 +13,17 @@ interface Preferences {
   region: string;
 }
 
+function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
+  return value !== null && value !== undefined;
+}
+
 export default function DescribeInstances() {
   const preferences: Preferences = getPreferenceValues();
   AWS.config.update({ region: preferences.region });
   const ec2 = new AWS.EC2({ apiVersion: "2016-11-15" });
   const params = { DryRun: false };
 
-  const [state, setState] = useState<{ instances: Instance[]; loaded: boolean; hasError: boolean }>({
+  const [state, setState] = useState<{ instances: AWS.EC2.Instance[]; loaded: boolean; hasError: boolean }>({
     instances: [],
     loaded: false,
     hasError: false,
@@ -40,7 +44,7 @@ export default function DescribeInstances() {
             loaded: true,
             instances:
               data.Reservations?.map((r) => r.Instances)
-                .filter((x) => !!x)
+                .filter(notEmpty)
                 .flat() || [],
           });
         }
@@ -64,9 +68,9 @@ export default function DescribeInstances() {
   );
 }
 
-function InstanceListItem(props: { instance: Instance }) {
+function InstanceListItem(props: { instance: AWS.EC2.Instance }) {
   const instance = props.instance;
-  const name = instance.Tags.find((t) => t.Key === "Name")?.Value.replace(/-/g, " ");
+  const name = instance.Tags?.find((t) => t.Key === "Name")?.Value?.replace(/-/g, " ");
   const preferences: Preferences = getPreferenceValues();
 
   return (
@@ -76,7 +80,7 @@ function InstanceListItem(props: { instance: Instance }) {
       title={name || "Unknown Instance name"}
       subtitle={instance.InstanceType + " (" + instance.PublicIpAddress + " / " + instance.PrivateIpAddress + ")"}
       icon="list-icon.png"
-      accessoryTitle={new Date(instance.LaunchTime).toLocaleDateString()}
+      accessoryTitle={instance.LaunchTime ? instance.LaunchTime.toLocaleDateString() : undefined}
       actions={
         <ActionPanel>
           <OpenInBrowserAction
@@ -90,20 +94,10 @@ function InstanceListItem(props: { instance: Instance }) {
               instance.InstanceId
             }
           />
-          <CopyToClipboardAction title="Copy Public IP" content={instance.PublicIpAddress} />
-          <CopyToClipboardAction title="Copy Private IP" content={instance.PrivateIpAddress} />
+          <CopyToClipboardAction title="Copy Public IP" content={instance.PublicIpAddress || ""} />
+          <CopyToClipboardAction title="Copy Private IP" content={instance.PrivateIpAddress || ""} />
         </ActionPanel>
       }
     />
   );
 }
-
-type Instance = {
-  InstanceId: string;
-  InstanceType: string;
-  Name: string;
-  Tags: { Key: string; Value: string }[];
-  PublicIpAddress: string;
-  PrivateIpAddress: string;
-  LaunchTime: string;
-};

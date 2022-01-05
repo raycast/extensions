@@ -57,10 +57,10 @@ export default function ListSQSQueues() {
           setState((o) => ({
             ...o,
             loaded: true,
-            queues: data.QueueUrls,
-            showingQueues: data.QueueUrls,
+            queues: data.QueueUrls || [],
+            showingQueues: data.QueueUrls || [],
           }));
-          loadItems(data.QueueUrls);
+          loadItems(data.QueueUrls || []);
         }
       });
     }
