@@ -1,5 +1,24 @@
-import { ActionPanel, CopyToClipboardAction, Detail, getPreferenceValues, Icon, List, OpenInBrowserAction, Preferences, PushAction } from "@raycast/api";
-import { useServerSearch, StoreContext, useTitle, useResource, useString, useMarkdown, Store, urls } from '@tomic/react';
+import {
+  ActionPanel,
+  CopyToClipboardAction,
+  Detail,
+  getPreferenceValues,
+  Icon,
+  List,
+  OpenInBrowserAction,
+  Preferences,
+  PushAction,
+} from "@raycast/api";
+import {
+  useServerSearch,
+  StoreContext,
+  useTitle,
+  useResource,
+  useString,
+  useMarkdown,
+  Store,
+  urls,
+} from "@tomic/react";
 import React from "react";
 
 const preferences: Preferences = getPreferenceValues();
@@ -13,7 +32,6 @@ store.fetchResource(urls.properties.getAll);
 store.fetchResource(urls.classes.getAll);
 
 export default function Command() {
-
   return (
     <StoreContext.Provider value={store}>
       <Content />
@@ -29,7 +47,7 @@ function Content() {
 
   const onSearchTextChange = async (text: string) => {
     setQuery(text);
-  }
+  };
 
   return (
     <List
@@ -39,18 +57,13 @@ function Content() {
       onSearchTextChange={onSearchTextChange}
     >
       {error && <List.Item title={error.message} />}
-      {results && results.map(subject => (
-        <SearchHit
-          subject={subject}
-          key={subject}
-        />
-      ))}
+      {results && results.map((subject) => <SearchHit subject={subject} key={subject} />)}
     </List>
-  )
+  );
 }
 
 interface SearchHitProps {
-  subject: string,
+  subject: string;
 }
 
 function SearchHit({ subject }: SearchHitProps) {
@@ -76,11 +89,14 @@ function SearchHit({ subject }: SearchHitProps) {
             icon={Icon.Eye}
             title="Show Details"
             target={
-              <Detail markdown={md} actions={
-                <ActionPanel>
-                  <OpenInBrowserAction url={subject} />
-                </ActionPanel>
-              } />
+              <Detail
+                markdown={md}
+                actions={
+                  <ActionPanel>
+                    <OpenInBrowserAction url={subject} />
+                  </ActionPanel>
+                }
+              />
             }
           />
           <CopyToClipboardAction content={subject} title="Copy URL to clipboard" />
@@ -88,5 +104,5 @@ function SearchHit({ subject }: SearchHitProps) {
         </ActionPanel>
       }
     />
-  )
+  );
 }

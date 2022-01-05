@@ -10,7 +10,7 @@ export const SecretEngines = () => {
   const fetchSecretEngines = async () => {
     const secretEngines = await getSecretEngines();
     setState((oldState) => ({ ...oldState, secretEngines: secretEngines }));
-  }
+  };
 
   useEffect(() => {
     fetchSecretEngines();
@@ -23,7 +23,7 @@ export const SecretEngines = () => {
       ))}
     </List>
   );
-}
+};
 
 const SecretEngineItem = (props: { secretEngine: SecretEngine }) => {
   const { push } = useNavigation();
@@ -37,9 +37,13 @@ const SecretEngineItem = (props: { secretEngine: SecretEngine }) => {
       icon={Icon.Globe}
       actions={
         <ActionPanel>
-          <ActionPanel.Item title="Select" icon={Icon.List} onAction={() => push(<Paths secretEngine={props.secretEngine.name} prefix="/" />)} />
+          <ActionPanel.Item
+            title="Select"
+            icon={Icon.List}
+            onAction={() => push(<Paths secretEngine={props.secretEngine.name} prefix="/" />)}
+          />
         </ActionPanel>
       }
     />
   );
-}
+};

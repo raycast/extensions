@@ -1,13 +1,7 @@
-import {
-  ActionPanel,
-  List,
-  ListItem,
-  ListSection,
-  OpenInBrowserAction,
-} from '@raycast/api';
-import { useEffect, useMemo, useState } from 'react';
-import Service, { Domain } from './service';
-import { getDomainUrl, getToken } from './utils';
+import { ActionPanel, List, ListItem, ListSection, OpenInBrowserAction } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
+import Service, { Domain } from "./service";
+import { getDomainUrl, getToken } from "./utils";
 
 const service = new Service(getToken());
 
@@ -60,10 +54,7 @@ export default function Command() {
                 title={domain}
                 actions={
                   <ActionPanel>
-                    <OpenInBrowserAction
-                      title="Open in Netlify"
-                      url={getDomainUrl(domain)}
-                    />
+                    <OpenInBrowserAction title="Open in Netlify" url={getDomainUrl(domain)} />
                   </ActionPanel>
                 }
               />

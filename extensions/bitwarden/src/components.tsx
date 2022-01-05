@@ -30,11 +30,14 @@ export function TroubleshootingGuide(): JSX.Element {
   );
 }
 
-export function UnlockForm(props: { setSessionToken: (session: string) => void, bitwardenApi: Bitwarden }): JSX.Element {
+export function UnlockForm(props: {
+  setSessionToken: (session: string) => void;
+  bitwardenApi: Bitwarden;
+}): JSX.Element {
   async function onSubmit(values: { password: string }) {
     try {
       const toast = await showToast(ToastStyle.Animated, "Unlocking Vault...", "Please wait");
-      const sessionToken = await props.bitwardenApi.unlock(values.password)
+      const sessionToken = await props.bitwardenApi.unlock(values.password);
       toast.hide();
 
       props.setSessionToken(sessionToken);

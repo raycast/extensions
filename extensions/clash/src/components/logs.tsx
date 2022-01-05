@@ -16,26 +16,27 @@ export default function Logs(): JSX.Element {
   const [logsUrl, logs] = GetLogs(level);
   return (
     <List>
-      {
-        logsUrl ? <><List.Item
-          key={-1}
-          title="Time"
-          subtitle="Payload"
-          accessoryTitle={`LogLevel(${level})`}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Item
-                title="Swith Level"
-                onAction={() => {
-                  setLevel((old) => {
-                    const oldIndex = logLevels.indexOf(old);
-                    return oldIndex >= logLevels.length - 1 ? logLevels[0] : logLevels[oldIndex + 1];
-                  });
-                }}
-              />
-            </ActionPanel>
-          }
-        />
+      {logsUrl ? (
+        <>
+          <List.Item
+            key={-1}
+            title="Time"
+            subtitle="Payload"
+            accessoryTitle={`LogLevel(${level})`}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Item
+                  title="Swith Level"
+                  onAction={() => {
+                    setLevel((old) => {
+                      const oldIndex = logLevels.indexOf(old);
+                      return oldIndex >= logLevels.length - 1 ? logLevels[0] : logLevels[oldIndex + 1];
+                    });
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
           {logs.map((log, index) => (
             <List.Item
               icon={{ source: Icon.Circle, tintColor: logLevelColors[log.type] }}
@@ -49,8 +50,11 @@ export default function Logs(): JSX.Element {
                 </ActionPanel>
               }
             />
-          ))}</> : <></>
-      }
+          ))}
+        </>
+      ) : (
+        <></>
+      )}
     </List>
   );
 }

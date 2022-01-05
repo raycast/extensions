@@ -28,8 +28,8 @@ export default function Command() {
   }
 
   async function closeWindow() {
-      await closeMainWindow();
-      await popToRoot({ clearSearchBar: true });
+    await closeMainWindow();
+    await popToRoot({ clearSearchBar: true });
   }
 
   if (message !== "") {
@@ -45,11 +45,12 @@ export default function Command() {
                 onAction={() => setMessage("")}
               />
               <ActionPanel.Item
-                  title="Close Window"
-                  shortcut={{ modifiers: ["cmd"], key: "escape" }}
-                  onAction={() => closeWindow()}
+                title="Close Window"
+                shortcut={{ modifiers: ["cmd"], key: "escape" }}
+                onAction={() => closeWindow()}
               />
-            </ActionPanel>}
+            </ActionPanel>
+          }
         />
       </>
     );

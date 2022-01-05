@@ -36,8 +36,17 @@
       "type": "dropdown",
       "title": "Open in...",
       "required": false,
-      "default":"app",
-      "data":[{"title": "Notion Application", "value": "app"},{"title": "Default Browser", "value": "web"}],
+      "default": "app",
+      "data": [
+        {
+          "title": "Notion Application",
+          "value": "app"
+        },
+        {
+          "title": "Default Browser",
+          "value": "web"
+        }
+      ],
       "description": "Choose where to open Notion page."
     }
   ],

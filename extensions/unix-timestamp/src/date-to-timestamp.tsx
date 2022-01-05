@@ -1,13 +1,5 @@
-import {
-  showToast,
-  ActionPanel,
-  Icon,
-  SubmitFormAction,
-  Form,
-  ToastStyle,
-  copyTextToClipboard,
-} from '@raycast/api';
-import { getTimestamp, toDate } from './utils';
+import { showToast, ActionPanel, Icon, SubmitFormAction, Form, ToastStyle, copyTextToClipboard } from "@raycast/api";
+import { getTimestamp, toDate } from "./utils";
 
 interface Form {
   year: string;
@@ -41,12 +33,12 @@ function ConvertAction() {
   async function handleSubmit(values: Form) {
     const { year, month, day, hours, minutes, seconds } = values;
 
-    const yearNumber = parseInt(year || '0');
-    const monthNumber = parseInt(month || '0');
-    const dayNumber = parseInt(day || '0');
-    const hoursNumber = parseInt(hours || '0');
-    const minutesNumber = parseInt(minutes || '0');
-    const secondsNumber = parseInt(seconds || '0');
+    const yearNumber = parseInt(year || "0");
+    const monthNumber = parseInt(month || "0");
+    const dayNumber = parseInt(day || "0");
+    const hoursNumber = parseInt(hours || "0");
+    const minutesNumber = parseInt(minutes || "0");
+    const secondsNumber = parseInt(seconds || "0");
 
     if (isNaN(yearNumber)) {
       showToast(ToastStyle.Failure, 'Invalid field value: "Year"');
@@ -73,18 +65,11 @@ function ConvertAction() {
       return;
     }
 
-    const date = toDate(
-      yearNumber,
-      monthNumber,
-      dayNumber,
-      hoursNumber,
-      minutesNumber,
-      secondsNumber
-    );
+    const date = toDate(yearNumber, monthNumber, dayNumber, hoursNumber, minutesNumber, secondsNumber);
     const timestamp = getTimestamp(date);
 
     copyTextToClipboard(timestamp.toString());
-    showToast(ToastStyle.Success, 'Copied to clipboard');
+    showToast(ToastStyle.Success, "Copied to clipboard");
   }
 
   return <SubmitFormAction icon={Icon.Checkmark} title="Convert" onSubmit={handleSubmit} />;

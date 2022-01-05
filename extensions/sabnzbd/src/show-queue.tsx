@@ -194,9 +194,8 @@ function SlotListItem(props: { slot: QueueSlot; setSlots: any; slots: any }) {
 
 function Details(props: { slot: QueueSlot; setSlots: any }) {
   const slot = props.slot;
-  const setSlots = props.slot;
 
-  let labels: String;
+  let labels: string;
 
   if (slot.labels && slot.labels.length > 0) {
     labels = slot.labels.join(", ");
@@ -210,7 +209,7 @@ function Details(props: { slot: QueueSlot; setSlots: any }) {
 }
 
 async function onMoveUp(slot: QueueSlot, slots: QueueSlot[], setSlots: any) {
-  let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
+  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
 
   // The job being moved up
   const firstId = slot.nzo_id;
@@ -232,7 +231,7 @@ async function onMoveUp(slot: QueueSlot, slots: QueueSlot[], setSlots: any) {
 }
 
 async function onMoveDown(slot: QueueSlot, slots: QueueSlot[], setSlots: any) {
-  let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
+  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
 
   // The job being shifted up
   const firstId = slots[slot.index + 1].nzo_id;
@@ -254,7 +253,7 @@ async function onMoveDown(slot: QueueSlot, slots: QueueSlot[], setSlots: any) {
 }
 
 async function onDelete(slot: QueueSlot, setSlots: any) {
-  let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
+  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
 
   try {
     const results = (await client.jobDelete(slot.nzo_id)) as Results;
@@ -271,7 +270,7 @@ async function onDelete(slot: QueueSlot, setSlots: any) {
 }
 
 async function onPause(slot: QueueSlot, setSlots: any) {
-  let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
+  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
 
   try {
     const results = (await client.jobPause(slot.nzo_id)) as Results;
@@ -288,7 +287,7 @@ async function onPause(slot: QueueSlot, setSlots: any) {
 }
 
 async function onResume(slot: QueueSlot, setSlots: any) {
-  let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
+  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
 
   try {
     const results = (await client.jobResume(slot.nzo_id)) as Results;
@@ -305,7 +304,7 @@ async function onResume(slot: QueueSlot, setSlots: any) {
 }
 
 async function fetchSlots(): Promise<QueueSlot[]> {
-  let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
+  const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
 
   try {
     const queue = (await client.queue()) as Queue;

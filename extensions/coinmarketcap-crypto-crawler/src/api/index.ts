@@ -20,7 +20,7 @@ export const fetchAllCrypto = ({ limit, start }: FetchParameters) =>
   });
 
 export const BASE_URL = "https://coinmarketcap.com/currencies/";
-  
+
 export async function fetchPrice(slug: string): Promise<PriceData | null> {
   return fetch(`${BASE_URL}${slug}/`)
     .then((r) => r.text())

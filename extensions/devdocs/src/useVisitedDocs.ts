@@ -32,10 +32,7 @@ export function useVisitedDocs() {
   }, []);
 
   function visitDoc(doc: Doc) {
-    const nextDocs = [doc, ...(docs?.filter((item) => item.slug !== doc.slug) ?? [])].slice(
-      0,
-      VISITED_DOCS_LENGTH
-    );
+    const nextDocs = [doc, ...(docs?.filter((item) => item.slug !== doc.slug) ?? [])].slice(0, VISITED_DOCS_LENGTH);
     setDocs(nextDocs);
     saveVisitedDocs(nextDocs);
   }

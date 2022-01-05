@@ -1,6 +1,13 @@
-import { getPreferenceValues, ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle, Detail } from "@raycast/api";
+import {
+  getPreferenceValues,
+  ActionPanel,
+  CopyToClipboardAction,
+  List,
+  OpenInBrowserAction,
+  Detail,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
-var AWS = require('aws-sdk');
+import AWS from "aws-sdk";
 
 interface Preferences {
   region: string;
@@ -8,27 +15,34 @@ interface Preferences {
 
 export default function DescribeInstances() {
   const preferences: Preferences = getPreferenceValues();
-  AWS.config.update({region: preferences.region});
-  var ec2 = new AWS.EC2({apiVersion: '2016-11-15'});
-  var params = {DryRun: false};
-  
-  const [state, setState] = useState<{ instances: Instance[], loaded: boolean, hasError: boolean }>({ instances: [], loaded: false, hasError: false });
+  AWS.config.update({ region: preferences.region });
+  const ec2 = new AWS.EC2({ apiVersion: "2016-11-15" });
+  const params = { DryRun: false };
+
+  const [state, setState] = useState<{ instances: Instance[]; loaded: boolean; hasError: boolean }>({
+    instances: [],
+    loaded: false,
+    hasError: false,
+  });
 
   useEffect(() => {
     async function fetch() {
-      ec2.describeInstances(params, function(err: { stack: any; }, data: any) {
+      ec2.describeInstances(params, (err, data) => {
         if (err) {
-          setState(oldstate => ({
+          setState({
             hasError: true,
             loaded: false,
-            instances: []
-          }));
+            instances: [],
+          });
         } else {
-          setState(oldstate => ({
+          setState({
             hasError: false,
             loaded: true,
-            instances: data.Reservations.map((r: any) => r.Instances).flat()
-          }));
+            instances:
+              data.Reservations?.map((r) => r.Instances)
+                .filter((x) => !!x)
+                .flat() || [],
+          });
         }
       });
     }
@@ -36,7 +50,9 @@ export default function DescribeInstances() {
   }, []);
 
   if (state.hasError) {
-    return (<Detail markdown="No valid [configuration and credential file] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />)
+    return (
+      <Detail markdown="No valid [configuration and credential file] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />
+    );
   }
 
   return (
@@ -50,28 +66,30 @@ export default function DescribeInstances() {
 
 function InstanceListItem(props: { instance: Instance }) {
   const instance = props.instance;
-  let name = instance.Tags.filter((t: { Key: string; Value: string; }) => t.Key === 'Name').pop().Value
-    .replaceAll('-', ' ');
+  const name = instance.Tags.find((t) => t.Key === "Name")?.Value.replace(/-/g, " ");
   const preferences: Preferences = getPreferenceValues();
 
   return (
     <List.Item
       id={instance.InstanceId}
       key={instance.InstanceId}
-      title={name}
-      subtitle={instance.InstanceType + " (" + instance.PublicIpAddress + " / " + instance.PrivateIpAddress + ")"} 
+      title={name || "Unknown Instance name"}
+      subtitle={instance.InstanceType + " (" + instance.PublicIpAddress + " / " + instance.PrivateIpAddress + ")"}
       icon="list-icon.png"
       accessoryTitle={new Date(instance.LaunchTime).toLocaleDateString()}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction title="Open in Browser" url={
-            "https://" +
-            preferences.region +
-            ".console.aws.amazon.com/ec2/v2/home?region=" +
-            preferences.region +
-            "#InstanceDetails:instanceId=" +
-            instance.InstanceId
-          } />
+          <OpenInBrowserAction
+            title="Open in Browser"
+            url={
+              "https://" +
+              preferences.region +
+              ".console.aws.amazon.com/ec2/v2/home?region=" +
+              preferences.region +
+              "#InstanceDetails:instanceId=" +
+              instance.InstanceId
+            }
+          />
           <CopyToClipboardAction title="Copy Public IP" content={instance.PublicIpAddress} />
           <CopyToClipboardAction title="Copy Private IP" content={instance.PrivateIpAddress} />
         </ActionPanel>
@@ -84,7 +102,7 @@ type Instance = {
   InstanceId: string;
   InstanceType: string;
   Name: string;
-  Tags: any;
+  Tags: { Key: string; Value: string }[];
   PublicIpAddress: string;
   PrivateIpAddress: string;
   LaunchTime: string;

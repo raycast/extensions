@@ -6,7 +6,7 @@ const KEY = "FAVORITE_ADDRESSES";
 export type Address = {
   address: string;
   identifier: string;
-}
+};
 
 async function loadFavoriteAddresses() {
   const item = await getLocalStorageItem<string>(KEY);
@@ -37,11 +37,14 @@ export default function useFavoriteAddresses() {
       .then(() => setLoading(false));
   }, []);
 
-  const addFavoriteAddress = async (address: string, identifier = '') => {
-    const addresses = [...favoriteAddresses, {
-      address,
-      identifier
-    }];
+  const addFavoriteAddress = async (address: string, identifier = "") => {
+    const addresses = [
+      ...favoriteAddresses,
+      {
+        address,
+        identifier,
+      },
+    ];
 
     setFavoriteAddresses(addresses);
     saveFavoriteAddresses(addresses);

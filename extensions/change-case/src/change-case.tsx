@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 async function runShellScript(command: string) {
   const { stdout } = await execa.command(command, {
-    env: { LC_CTYPE: "UTF-8" }
+    env: { LC_CTYPE: "UTF-8" },
   });
   return stdout;
 }
@@ -32,7 +32,7 @@ export default function changeChase() {
     { label: "Swap Case", func: changeCase.swap },
     { label: "Title Case", func: changeCase.title },
     { label: "Upper Case", func: changeCase.upper },
-    { label: "Upper First ", func: changeCase.ucFirst }
+    { label: "Upper First ", func: changeCase.ucFirst },
   ];
 
   const [clipboard, setClipboard] = useState<string>();
@@ -42,26 +42,24 @@ export default function changeChase() {
 
   return (
     <List isLoading={!clipboard}>
-      {
-        data.map((d) => {
-          const modified = d.func(clipboard ?? "");
-          console.log(modified);
-          return (
-            <List.Item
-              key={d.label}
-              id={d.label}
-              title={d.label}
-              subtitle={modified}
-              actions={
-                <ActionPanel>
-                  <CopyToClipboardAction title="Copy to Clipboard" content={modified} />
-                  <PasteAction title="Paste in Frontmost App" content={modified} />
-                </ActionPanel>
-              }
-            />
-          );
-        })
-      }
+      {data.map((d) => {
+        const modified = d.func(clipboard ?? "");
+        console.log(modified);
+        return (
+          <List.Item
+            key={d.label}
+            id={d.label}
+            title={d.label}
+            subtitle={modified}
+            actions={
+              <ActionPanel>
+                <CopyToClipboardAction title="Copy to Clipboard" content={modified} />
+                <PasteAction title="Paste in Frontmost App" content={modified} />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }

@@ -1,32 +1,13 @@
-export {
-  avatarURL
-} from "./AvatarURL"
+export { avatarURL } from "./AvatarURL";
 
-export {
-  iconDarkURLFor,
-  iconLightURLFor, 
-  IconType,
-  IconStyle
-} from "./IconURL"
+export { iconDarkURLFor, iconLightURLFor, IconType, IconStyle } from "./IconURL";
 
-export type { 
-  IconResult
-} from "./IconURL"
+export type { IconResult } from "./IconURL";
 
-export { 
-  checkIsValidURL
-} from "./CheckURL"
+export { checkIsValidURL } from "./CheckURL";
 
-export {
-  languageURL
-} from "./LanguageURL"
+export { languageURL } from "./LanguageURL";
 
-export { 
-  readmeNormalURL,
-  readmeRawURL
-} from "./ReadmeURL"
+export { readmeNormalURL, readmeRawURL } from "./ReadmeURL";
 
-export {
-  sourceCodeNormalURL,
-  sourceCodeRawURL
-} from "./SourceCodeURL"
+export { sourceCodeNormalURL, sourceCodeRawURL } from "./SourceCodeURL";
