@@ -1,8 +1,8 @@
-export const icondir = "icons";
+exports.icondir = "icons";
 
-export const logos = ["amazon", "aws", "slack", "github", "lastpass", "hubspot", "microsoft", "google", "twitter"];
+exports.logos = ["amazon", "aws", "slack", "github", "lastpass", "hubspot", "microsoft", "google", "twitter"];
 
-export const genericColors = [
+exports.genericColors = [
   { name: "black", value: "#464646" },
   { name: "blue", value: "#098FCE" },
   { name: "green", value: "#3DA329" },
@@ -11,4 +11,4 @@ export const genericColors = [
   { name: "red", value: "#DF1112" },
 ];
 
-export const icons = ["key"];
+exports.icons = ["key"];

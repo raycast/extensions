@@ -6,7 +6,6 @@
   "icon": "command-icon.png",
   "author": "guga4ka",
   "license": "MIT",
-  "type": "module",
   "commands": [
     {
       "name": "search-otp",

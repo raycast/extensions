@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 
-import { Transform as transform } from "stream";
-import sharp from "sharp";
-import { Buffer } from "buffer";
-import { genericColors, icondir, icons, logos } from "./src/constants.js";
-import glob from "fast-glob";
-import { createReadStream, createWriteStream, mkdir } from "fs";
-import { basename, dirname, extname, resolve } from "path";
-import { promisify } from "util";
+/* eslint-disable @typescript-eslint/no-var-requires */
+const { Transform: transform } = require("stream");
+const sharp = require("sharp");
+const { Buffer } = require("buffer");
+const { genericColors, icondir, icons, logos } = require("./src/constants.js");
+const glob = require("fast-glob");
+const { createReadStream, createWriteStream, mkdir } = require("fs");
+const { basename, dirname, extname, resolve } = require("path");
+const { promisify } = require("util");
 
 const mkdirProm = promisify(mkdir);
 const mappedLogos = logos.map((logo) => logo.replace("aws", "amazonaws"));
