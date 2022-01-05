@@ -35,6 +35,15 @@
       "placeholder": "/usr/local/bin"
     },
     {
+      "name": "toolsInstall",
+      "type": "textfield",
+      "required": false,
+      "title": "Tools Install location",
+      "description": "What is the JetBrains Tools install Location? (in Toolbox → Settings → Tools)",
+      "default": "~/Library/Application Support/JetBrains/Toolbox",
+      "placeholder": "~/Library/Application Support/JetBrains/Toolbox"
+    },
+    {
       "name": "fallback",
       "type": "checkbox",
       "required": false,
