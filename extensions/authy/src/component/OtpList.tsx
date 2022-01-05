@@ -1,10 +1,12 @@
 import {
   ActionPanel,
   CopyToClipboardAction,
+  environment,
   getPreferenceValues,
   Icon,
   List,
   popToRoot,
+  preferences,
   showToast,
   ToastStyle,
 } from "@raycast/api";
@@ -15,21 +17,70 @@ import { decryptSeed, genTOTP } from "../util/utils";
 import { encode } from "hi-base32";
 import { generateTOTP } from "../util/totp";
 import { getAuthyApps, getServices } from "../client/authy-client";
+import { OutputToCurrentApp } from "./OutputToCurrentApp";
+import { icon } from "../util/icon";
+import { icondir } from "../constants";
 
-interface Otp {
+export const preferCustomName = Boolean(
+  preferences["preferCustomName"].value !== undefined
+    ? preferences["preferCustomName"].value
+    : preferences["preferCustomName"].default
+);
+export const primaryActionIsCopy = Boolean(
+  preferences["primaryActionIsCopy"].value !== undefined
+    ? preferences["primaryActionIsCopy"].value
+    : preferences["primaryActionIsCopy"].default
+);
+
+export interface Otp {
   name: string;
   digits: number;
   seed: string;
-  otp: string;
+  period: number;
+  generate: () => string;
+  otp?: string;
+  issuer?: string;
+  logo?: string;
+  accountType?: string;
+}
+
+function PrimaryAction({ pin }: { pin: string }) {
+  return primaryActionIsCopy ? (
+    <CopyToClipboardAction title="Copy OTP" content={pin} />
+  ) : (
+    <OutputToCurrentApp title="Output OTP" pin={pin} />
+  );
+}
+
+function SecondaryAction({ pin }: { pin: string }) {
+  return primaryActionIsCopy ? (
+    <OutputToCurrentApp title="Output OTP" pin={pin} />
+  ) : (
+    <CopyToClipboardAction title="Copy OTP" content={pin} />
+  );
+}
+
+function calculateTimeLeft(basis: number) {
+  return basis - (new Date().getSeconds() % basis);
+}
+
+interface OtpListState {
+  state: Otp[];
+  timeLeft10: number;
+  timeLeft30: number;
 }
 
 export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login: boolean) => void }) {
-  const [state, setState] = useState<Otp[]>([]);
+  const [{ state, timeLeft10, timeLeft30 }, setState] = useState<OtpListState>({
+    state: [],
+    timeLeft10: calculateTimeLeft(10),
+    timeLeft30: calculateTimeLeft(30),
+  });
 
   async function refresh(): Promise<void> {
     const toast = await showToast(ToastStyle.Animated, "Authy", "Refreshing");
     await toast.show();
-    setState([]);
+    setState({ state: [], timeLeft10: calculateTimeLeft(10), timeLeft30: calculateTimeLeft(30) });
     try {
       const { authyId } = getPreferenceValues<{ authyId: number }>();
       const deviceId: number = await getFromCache(DEVICE_ID);
@@ -64,10 +115,14 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
       const services: Otp[] = servicesResponse.authenticator_tokens.map((i) => {
         const seed = decryptSeed(i.encrypted_seed, i.salt, authyPassword);
         return {
-          name: i.original_name ? i.original_name : i.name,
+          name: preferCustomName ? i.name || i.original_name : i.original_name || i.name,
+          accountType: i.account_type,
+          issuer: i.issuer,
+          logo: i.logo,
           digits: i.digits,
           seed: seed,
-          otp: generateTOTP(seed, { digits: i.digits, period: 30 }),
+          generate: () => generateTOTP(seed, { digits: i.digits, period: 30 }),
+          period: 30,
         };
       });
       const apps: Otp[] = appsResponse.apps.map((i) => {
@@ -75,10 +130,31 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
           name: i.name,
           digits: i.digits,
           seed: i.secret_seed,
-          otp: generateTOTP(encode(Buffer.from(i.secret_seed, "hex")), { digits: i.digits, period: 10 }),
+          generate: () => generateTOTP(encode(Buffer.from(i.secret_seed, "hex")), { digits: i.digits, period: 10 }),
+          period: 10,
         };
       });
-      setState([...services, ...apps]);
+      const updateOtp = () =>
+        setState({
+          timeLeft10: calculateTimeLeft(10),
+          timeLeft30: calculateTimeLeft(30),
+          state: [...services, ...apps].map((item) => ({
+            ...item,
+            otp: item.generate(),
+          })),
+        });
+      setInterval(
+        () =>
+          calculateTimeLeft(10) === 10 && new Date().getMilliseconds() < 250
+            ? updateOtp()
+            : setState((current) => ({
+                ...current,
+                timeLeft10: calculateTimeLeft(10),
+                timeLeft30: calculateTimeLeft(30),
+              })),
+        250
+      );
+      updateOtp();
     } catch (error) {
       if (error instanceof Error) {
         await showToast(ToastStyle.Failure, "Authy", error.message);
@@ -100,10 +176,28 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
         <List.Item
           key={index}
           title={item.name}
-          subtitle={`${item.otp}`}
+          accessoryTitle={`${item.otp}`}
+          subtitle={`${item.issuer || item.accountType}`}
+          accessoryIcon={
+            item.period === 30
+              ? {
+                  source: {
+                    light: `${environment.assetsPath}/${icondir}/light/pie-${timeLeft30}.png`,
+                    dark: `${environment.assetsPath}/${icondir}/dark/pie-${timeLeft30}.png`,
+                  },
+                }
+              : {
+                  source: {
+                    light: `${environment.assetsPath}/${icondir}/light/pie-${timeLeft10 * 3}.png`,
+                    dark: `${environment.assetsPath}/${icondir}/dark/pie-${timeLeft10 * 3}.png`,
+                  },
+                }
+          }
+          icon={icon(item)}
           actions={
             <ActionPanel>
-              <CopyToClipboardAction title="Copy OTP" content={item.otp} />
+              <PrimaryAction pin={item.otp ?? ""} />
+              <SecondaryAction pin={item.otp ?? ""} />
               <ActionPanel.Item
                 title={"Sync"}
                 icon={Icon.ArrowClockwise}
