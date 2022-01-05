@@ -16,7 +16,7 @@
   ],
   "preferences": [
     {
-      "name": "Camel Case",
+      "name": "CamelCase",
       "type": "checkbox",
       "title": "Enabled Transformations",
       "description": "Enable the Camel Case Transformation",
@@ -25,7 +25,7 @@
       "required": false
     },
     {
-      "name": "Capital Case",
+      "name": "CapitalCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Capital Case Transformation",
@@ -34,7 +34,7 @@
       "required": false
     },
     {
-      "name": "Constant Case",
+      "name": "ConstantCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Constant Case Transformation",
@@ -43,7 +43,7 @@
       "required": false
     },
     {
-      "name": "Dot Case",
+      "name": "DotCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Dot Case Transformation",
@@ -52,7 +52,7 @@
       "required": false
     },
     {
-      "name": "Header Case",
+      "name": "HeaderCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Header Case Transformation",
@@ -61,7 +61,7 @@
       "required": false
     },
     {
-      "name": "Kebab Case",
+      "name": "KebabCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Kebab Case Transformation",
@@ -70,7 +70,7 @@
       "required": false
     },
     {
-      "name": "Lower Case",
+      "name": "LowerCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Lower Case Transformation",
@@ -79,7 +79,7 @@
       "required": false
     },
     {
-      "name": "Lower First",
+      "name": "LowerFirst",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Lower First Transformation",
@@ -88,7 +88,7 @@
       "required": false
     },
     {
-      "name": "Macro Case",
+      "name": "MacroCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Macro Case Transformation",
@@ -97,7 +97,7 @@
       "required": false
     },
     {
-      "name": "No Case",
+      "name": "NoCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the No Case Transformation",
@@ -106,7 +106,7 @@
       "required": false
     },
     {
-      "name": "Param Case",
+      "name": "ParamCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Param Case Transformation",
@@ -115,7 +115,7 @@
       "required": false
     },
     {
-      "name": "Pascal Case",
+      "name": "PascalCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Pascal Case Transformation",
@@ -124,7 +124,7 @@
       "required": false
     },
     {
-      "name": "Path Case",
+      "name": "PathCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Path Case Transformation",
@@ -133,7 +133,7 @@
       "required": false
     },
     {
-      "name": "Random Case",
+      "name": "RandomCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Random Case Transformation",
@@ -142,7 +142,7 @@
       "required": false
     },
     {
-      "name": "Sentence Case",
+      "name": "SentenceCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Sentence Case Transformation",
@@ -151,7 +151,7 @@
       "required": false
     },
     {
-      "name": "Snake Case",
+      "name": "SnakeCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Snake Case Transformation",
@@ -160,7 +160,7 @@
       "required": false
     },
     {
-      "name": "Swap Case",
+      "name": "SwapCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Swap Case Transformation",
@@ -169,7 +169,7 @@
       "required": false
     },
     {
-      "name": "Title Case",
+      "name": "TitleCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Title Case Transformation",
@@ -178,7 +178,7 @@
       "required": false
     },
     {
-      "name": "Upper Case",
+      "name": "UpperCase",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Upper Case Transformation",
@@ -187,7 +187,7 @@
       "required": false
     },
     {
-      "name": "Upper First",
+      "name": "UpperFirst",
       "type": "checkbox",
       "title": "",
       "description": "Enable the Upper First Transformation",
@@ -202,11 +202,11 @@
     "execa": "^6.0.0"
   },
   "devDependencies": {
-    "@types/node": "~17.0.5",
+    "@types/node": "~17.0.8",
     "@types/react": "^17.0.38",
-    "@typescript-eslint/eslint-plugin": "^5.8.1",
-    "@typescript-eslint/parser": "^5.8.1",
-    "eslint": "^8.5.0",
+    "@typescript-eslint/eslint-plugin": "^5.9.0",
+    "@typescript-eslint/parser": "^5.9.0",
+    "eslint": "^8.6.0",
     "eslint-config-prettier": "^8.3.0",
     "react-devtools": "^4.22.1",
     "typescript": "^4.5.4"
