@@ -73,7 +73,7 @@ export default function changeChase() {
       {
         data.map((d) => {
           const modified = d.func(clipboard);
-          if (preferences[(d.type as string).replaceAll(' ', '')] !== true) return;
+          if (preferences[d.type.replace(/ +/g, '')] !== true) return;
           return (
             <List.Item
               key={d.type}
