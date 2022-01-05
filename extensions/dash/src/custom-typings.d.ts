@@ -1,4 +1,4 @@
-declare module 'child_process' {
+declare module "child_process" {
   interface ExecOptions extends CommonOptions {
     shell?: string | undefined;
     maxBuffer?: number | undefined;

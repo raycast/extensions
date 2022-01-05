@@ -1,7 +1,6 @@
 import {
   ActionPanel,
   ActionPanelItem,
-  closeMainWindow,
   Color,
   Form,
   FormCheckbox,

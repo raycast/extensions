@@ -1,9 +1,21 @@
-import { ActionPanel, Color, CopyToClipboardAction, getPreferenceValues, Icon, ImageLike, List, OpenInBrowserAction, PushAction, showToast, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  Color,
+  CopyToClipboardAction,
+  getPreferenceValues,
+  Icon,
+  ImageLike,
+  List,
+  OpenInBrowserAction,
+  PushAction,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
 
 export default function WorkflowList() {
-  const [state, setState] = useState<{ workflows: Workflow[], loading: boolean }>({ workflows: [], loading: true });
+  const [state, setState] = useState<{ workflows: Workflow[]; loading: boolean }>({ workflows: [], loading: true });
 
   useEffect(() => {
     async function fetch() {
@@ -12,7 +24,7 @@ export default function WorkflowList() {
       setState((oldState) => ({
         ...oldState,
         workflows: workflows,
-        loading: false
+        loading: false,
       }));
     }
     fetch();
@@ -59,7 +71,10 @@ function JobList({ workflow }: { workflow: Workflow }) {
   }, []);
 
   return (
-    <List navigationTitle={`${workflow.project_slug} -> ${workflow.repository.branch}`} isLoading={state.jobs.length === 0}>
+    <List
+      navigationTitle={`${workflow.project_slug} -> ${workflow.repository.branch}`}
+      isLoading={state.jobs.length === 0}
+    >
       {state.jobs.map((job) => (
         <JobListItem key={job.id} job={job} />
       ))}
@@ -84,13 +99,12 @@ function JobListItem(props: { job: Job }) {
 async function fetchJobs(workflow: Workflow): Promise<Job[]> {
   try {
     const preferences: Preferences = getPreferenceValues();
-    const response = await fetch(`https://circleci.com/api/v2/workflow/${workflow.id}/job`,
-      {
-        "method": "GET",
-        "headers": {
-          "Circle-Token": preferences.apiKey
-        }
-      });
+    const response = await fetch(`https://circleci.com/api/v2/workflow/${workflow.id}/job`, {
+      method: "GET",
+      headers: {
+        "Circle-Token": preferences.apiKey,
+      },
+    });
 
     const json = await response.json();
     return (json as Record<string, unknown>).items as Job[];
@@ -104,14 +118,12 @@ async function fetchWorkflows(pipelines: Pipeline[]): Promise<Workflow[]> {
   try {
     const preferences: Preferences = getPreferenceValues();
     const workflowsPromises = pipelines.map(async (pipeline) => {
-      const response = await fetch(`https://circleci.com/api/v2/pipeline/${pipeline.id}/workflow`,
-        {
-          "method": "GET",
-          "headers": {
-            "Circle-Token": preferences.apiKey
-          }
-        }
-      );
+      const response = await fetch(`https://circleci.com/api/v2/pipeline/${pipeline.id}/workflow`, {
+        method: "GET",
+        headers: {
+          "Circle-Token": preferences.apiKey,
+        },
+      });
 
       const json = await response.json();
       const items = ((json as Record<string, unknown>).items as Workflow[]).map((workflow) => {
@@ -132,15 +144,18 @@ async function fetchWorkflows(pipelines: Pipeline[]): Promise<Workflow[]> {
 async function fetchPipelines(): Promise<Pipeline[]> {
   try {
     const preferences: Preferences = getPreferenceValues();
-    const response = await fetch("https://circleci.com/api/v2/pipeline?" + new URLSearchParams({
-      "org-slug": preferences.orgSlug,
-    }),
+    const response = await fetch(
+      "https://circleci.com/api/v2/pipeline?" +
+        new URLSearchParams({
+          "org-slug": preferences.orgSlug,
+        }),
       {
-        "method": "GET",
-        "headers": {
-          "Circle-Token": preferences.apiKey
-        }
-      });
+        method: "GET",
+        headers: {
+          "Circle-Token": preferences.apiKey,
+        },
+      }
+    );
 
     const json = await response.json();
     return (json as Record<string, unknown>).items as Pipeline[];
@@ -151,8 +166,8 @@ async function fetchPipelines(): Promise<Pipeline[]> {
 }
 
 function getWorkflowAccessoryTitle(workflow: Workflow): string {
-  const createdAt = new Date(workflow.created_at).toLocaleString()
-  const stoppedAt = new Date(workflow.stopped_at).toLocaleString()
+  const createdAt = new Date(workflow.created_at).toLocaleString();
+  const stoppedAt = new Date(workflow.stopped_at).toLocaleString();
   switch (workflow.status) {
     case WorkflowStatus.success:
       return `Succeeded at ${stoppedAt}`;
@@ -202,7 +217,6 @@ function getWorkflowAccessoryIcon(workflow: Workflow): ImageLike {
   }
 }
 
-
 function getWorkflowActions(workflow: Workflow) {
   const workflowUrl = `https://app.circleci.com/pipelines/workflows/${workflow.id}`;
   if (!workflow.repository.target_repository_url) {
@@ -212,7 +226,7 @@ function getWorkflowActions(workflow: Workflow) {
         <OpenInBrowserAction title="Open Workflow" url={workflowUrl} />
         <CopyToClipboardAction title="Copy Workflow URL" content={workflowUrl} />
       </ActionPanel>
-    )
+    );
   } else {
     return (
       <ActionPanel>
@@ -222,7 +236,7 @@ function getWorkflowActions(workflow: Workflow) {
         <OpenInBrowserAction title="Open PR" url={workflow.repository.target_repository_url} />
         <CopyToClipboardAction title="Copy PR URL" content={workflow.repository.target_repository_url} />
       </ActionPanel>
-    )
+    );
   }
 }
 
@@ -238,8 +252,8 @@ function getJobAccessoryIcon(job: Job): ImageLike {
 }
 
 function getJobAccessoryTitle(job: Job): string {
-  const createdAt = new Date(job.started_at).toLocaleString()
-  const stoppedAt = new Date(job.stopped_at).toLocaleString()
+  const createdAt = new Date(job.started_at).toLocaleString();
+  const stoppedAt = new Date(job.stopped_at).toLocaleString();
   switch (job.status) {
     case JobStatus.success:
       return `Succeeded at ${stoppedAt}`;
@@ -267,29 +281,29 @@ enum WorkflowStatus {
   on_hold = "on_hold",
   canceled = "canceled",
   unauthorized = "unauthorized",
-};
+}
 
 type Pipeline = {
-  id: string,
-  vcs: Repository,
-  number: number,
-}
+  id: string;
+  vcs: Repository;
+  number: number;
+};
 
 type Workflow = {
-  id: string,
-  created_at: string,
-  stopped_at: number,
-  status: WorkflowStatus,
-  project_slug: string,
-  repository: Repository,
-  pipeline_number: number,
-}
+  id: string;
+  created_at: string;
+  stopped_at: number;
+  status: WorkflowStatus;
+  project_slug: string;
+  repository: Repository;
+  pipeline_number: number;
+};
 
 type Repository = {
   branch: string;
   provider_name: string;
   target_repository_url: string;
-}
+};
 
 enum JobStatus {
   success = "success",
@@ -298,10 +312,10 @@ enum JobStatus {
 }
 
 type Job = {
-  id: string,
-  started_at: string,
-  stopped_at: string,
-  project_slug: string,
-  name: string,
-  status: JobStatus,
-}
+  id: string;
+  started_at: string;
+  stopped_at: string;
+  project_slug: string;
+  name: string;
+  status: JobStatus;
+};

@@ -1,19 +1,9 @@
-import {
-  Application,
-  getApplications,
-  Icon,
-  OpenAction,
-  OpenInBrowserAction,
-} from "@raycast/api";
+import { Application, getApplications, Icon, OpenAction, OpenInBrowserAction } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 import type { File, Node } from "../types";
 
-export function OpenPageAction(props: {
-  file: File;
-  node: Node;
-  onVisit: (file: File) => void;
-}) {
+export function OpenPageAction(props: { file: File; node: Node; onVisit: (file: File) => void }) {
   const [desktopApp, setDesktopApp] = useState<Application>();
 
   useEffect(() => {

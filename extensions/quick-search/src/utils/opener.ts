@@ -5,9 +5,7 @@ export const openInBrowser = async (url: string) => {
 };
 
 export const urlBuilder = (prefix: string, text: string) => {
-  return /^https?:\/\//g.test(text)
-    ? text
-    : `${prefix}${encodeURIComponent(text)}`;
+  return /^https?:\/\//g.test(text) ? text : `${prefix}${encodeURIComponent(text)}`;
 };
 
 export const GoogleSearchOpner = async (text: string) => {

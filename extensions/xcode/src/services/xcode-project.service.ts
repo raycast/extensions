@@ -9,7 +9,6 @@ import { joinPathComponents } from "../shared/join-path-components";
  * XcodeProjectService
  */
 export class XcodeProjectService {
-
   /**
    * The XcodeProjects JSON LocalStorage Key
    */
@@ -20,9 +19,7 @@ export class XcodeProjectService {
    */
   async cachedXcodeProjects(): Promise<XcodeProject[] | undefined> {
     // Retrieve XcodeProjects JSON from LocalStorage
-    const xcodeProjectsJSON = await getLocalStorageItem<string>(
-      this.xcodeProjectsJSONLocalStorageKey
-    );
+    const xcodeProjectsJSON = await getLocalStorageItem<string>(this.xcodeProjectsJSONLocalStorageKey);
     // Check if XcodeProjects JSON is not available
     if (!xcodeProjectsJSON) {
       // Return undefined
@@ -36,14 +33,9 @@ export class XcodeProjectService {
    * Cache XcodeProjects
    * @param xcodeProjects The XcodeProjects that should be cached
    */
-  private cacheXcodeProjects(
-    xcodeProjects: XcodeProject[]
-  ): Promise<void> {
+  private cacheXcodeProjects(xcodeProjects: XcodeProject[]): Promise<void> {
     // Store XcodeProjects JSON in LocalStorage
-    return setLocalStorageItem(
-      this.xcodeProjectsJSONLocalStorageKey,
-      JSON.stringify(xcodeProjects)
-    );
+    return setLocalStorageItem(this.xcodeProjectsJSONLocalStorageKey, JSON.stringify(xcodeProjects));
   }
 
   /**
@@ -55,27 +47,26 @@ export class XcodeProjectService {
       "kMDItemDisplayName == *.xcodeproj",
       "kMDItemDisplayName == *.xcworkspace",
       "kMDItemDisplayName == Package.swift",
-      "kMDItemDisplayName == *.playground"
+      "kMDItemDisplayName == *.playground",
     ];
     // Execute command
-    const output = await execAsync(
-      `mdfind '${spotlightSearchParameters.join(" || ")}'`
-    );
+    const output = await execAsync(`mdfind '${spotlightSearchParameters.join(" || ")}'`);
     // Initialize XcodeProjects
-    const xcodeProjects = output
-      .stdout
+    const xcodeProjects = output.stdout
       // Split standard output by new line
       .split("\n")
       // Filter out any Xcode Project that is included in Carthage/Checkouts or Pods from CocoaPods
-      .filter(xcodeProjectPath => {
-        return !xcodeProjectPath.includes("Carthage/Checkouts")
-          && !xcodeProjectPath.includes("Pods")
-          && !xcodeProjectPath.includes("Library/Autosave Information");
+      .filter((xcodeProjectPath) => {
+        return (
+          !xcodeProjectPath.includes("Carthage/Checkouts") &&
+          !xcodeProjectPath.includes("Pods") &&
+          !xcodeProjectPath.includes("Library/Autosave Information")
+        );
       })
       // Decode each Xcode Project Path
-      .map(xcodeProjectPath => XcodeProjectService.decodeXcodeProject(xcodeProjectPath))
+      .map((xcodeProjectPath) => XcodeProjectService.decodeXcodeProject(xcodeProjectPath))
       // Filter out null values
-      .filter(xcodeProject => !!xcodeProject) as XcodeProject[];
+      .filter((xcodeProject) => !!xcodeProject) as XcodeProject[];
     // Cache XcodeProjects
     this.cacheXcodeProjects(xcodeProjects).then();
     // Return XcodeProjects
@@ -90,13 +81,11 @@ export class XcodeProjectService {
     let openedXcodeProjectPaths: string;
     try {
       // Run AppleScript to retrieve the opened XcodeProject paths
-      openedXcodeProjectPaths = await runAppleScript(
-        [
-          'tell application "Xcode"',
-            'return path of workspace documents',
-          'end tell'
-        ]
-      );
+      openedXcodeProjectPaths = await runAppleScript([
+        'tell application "Xcode"',
+        "return path of workspace documents",
+        "end tell",
+      ]);
     } catch {
       // Catch error and return an empty error
       // usually the error indicates that either
@@ -109,37 +98,37 @@ export class XcodeProjectService {
       return [];
     }
     // Decode opened XcodeProject paths
-    return openedXcodeProjectPaths
-      // Split by semicolon
-      .split(",")
-      // Trim each path
-      .map(path => path.trim())
-      .map(path => {
-        // Check if path does not contain a file extension
-        if (!path.split("/").at(-1)?.includes(".")) {
-          // As no file extension is available in the path
-          // the opened XcodeProject path is a Swift Package Project
-          // which has been opened by clicking the "Package.swift" file.
-          // Therefore the path will be appended with the "Package.swift" file
-          return joinPathComponents(path, "Package.swift");
-        } else {
-          // Otherwise return unmodified path
-          return path;
-        }
-      })
-      // Decode each Xcode Project Path
-      .map(xcodeProjectPath => XcodeProjectService.decodeXcodeProject(xcodeProjectPath))
-      // Filter out null values
-      .filter(xcodeProject => !!xcodeProject) as XcodeProject[]
+    return (
+      openedXcodeProjectPaths
+        // Split by semicolon
+        .split(",")
+        // Trim each path
+        .map((path) => path.trim())
+        .map((path) => {
+          // Check if path does not contain a file extension
+          if (!path.split("/").at(-1)?.includes(".")) {
+            // As no file extension is available in the path
+            // the opened XcodeProject path is a Swift Package Project
+            // which has been opened by clicking the "Package.swift" file.
+            // Therefore the path will be appended with the "Package.swift" file
+            return joinPathComponents(path, "Package.swift");
+          } else {
+            // Otherwise return unmodified path
+            return path;
+          }
+        })
+        // Decode each Xcode Project Path
+        .map((xcodeProjectPath) => XcodeProjectService.decodeXcodeProject(xcodeProjectPath))
+        // Filter out null values
+        .filter((xcodeProject) => !!xcodeProject) as XcodeProject[]
+    );
   }
 
   /**
    * Decode XcodeProject from Xcode Project Path
    * @param xcodeProjectPath The Xcode Project Path
    */
-  private static decodeXcodeProject(
-    xcodeProjectPath: string
-  ): XcodeProject | undefined {
+  private static decodeXcodeProject(xcodeProjectPath: string): XcodeProject | undefined {
     // Initialize the last path component
     const lastPathComponent = xcodeProjectPath.substring(xcodeProjectPath.lastIndexOf("/") + 1);
     // Initialize the file extension
@@ -180,8 +169,7 @@ export class XcodeProjectService {
       name: name,
       type: fileExtension,
       filePath: xcodeProjectPath,
-      keywords: keywords.reverse()
+      keywords: keywords.reverse(),
     };
   }
-
 }

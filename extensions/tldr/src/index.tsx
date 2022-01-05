@@ -9,7 +9,7 @@ import {
   popToRoot,
   PushAction,
   showToast,
-  ToastStyle
+  ToastStyle,
 } from "@raycast/api";
 import degit from "degit";
 import fs, { existsSync } from "fs";

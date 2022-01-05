@@ -1,9 +1,9 @@
-import { getLocalStorageItem, setLocalStorageItem } from '@raycast/api';
+import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
 
-const KEY_FAVORITES = 'favorites';
+const KEY_FAVORITES = "favorites";
 
 export async function getFavorites(): Promise<string[]> {
-  const favoriteString = await getLocalStorageItem(KEY_FAVORITES) || '[]';
+  const favoriteString = (await getLocalStorageItem(KEY_FAVORITES)) || "[]";
   return JSON.parse(favoriteString.toString());
 }
 

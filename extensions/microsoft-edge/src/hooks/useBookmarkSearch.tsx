@@ -1,8 +1,8 @@
-import fs from 'fs';
-import util from 'util';
-import { bookmarksFilePath, getProfileName } from '../utils/pathUtils';
-import { NullableString, UrlDetail, UrlSearchResult } from '../schema/types';
-import { useUrlSearch } from './useUrlSearch';
+import fs from "fs";
+import util from "util";
+import { bookmarksFilePath, getProfileName } from "../utils/pathUtils";
+import { NullableString, UrlDetail, UrlSearchResult } from "../schema/types";
+import { useUrlSearch } from "./useUrlSearch";
 
 const fsReadFile = util.promisify(fs.readFile);
 

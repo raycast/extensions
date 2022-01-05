@@ -4,10 +4,7 @@
  * @param list The list
  * @param keyProvider The key provider that is used for grouping
  */
-export function groupBy<Key, Value>(
-  list: Array<Value>,
-  keyProvider: (input: Value) => Key
-): Map<Key, Array<Value>> {
+export function groupBy<Key, Value>(list: Array<Value>, keyProvider: (input: Value) => Key): Map<Key, Array<Value>> {
   // Initialize the grouping Map
   const map = new Map<Key, Array<Value>>();
   // For each value in the list
