@@ -3,8 +3,8 @@ import Preferences from "./interfaces/preferences";
 import Stream from './stream';
 
 interface Props {
-    live: Boolean,
-    name: String
+    live: boolean,
+    name: string
 }
 
 const action: React.FC<Props> = (({ live, name }) => {
