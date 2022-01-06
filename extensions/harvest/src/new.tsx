@@ -45,8 +45,8 @@ export default function Command({
   const [spentDate, setSpentDate] = useState<Date>();
 
   useEffect(() => {
-    if (error?.isAxiosError) {
-      if (error.response?.status === 401) {
+    if (error) {
+      if (error.isAxiosError && error.response?.status === 401) {
         showToast(
           ToastStyle.Failure,
           "Invalid Token",
