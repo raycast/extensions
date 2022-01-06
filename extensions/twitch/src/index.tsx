@@ -3,7 +3,7 @@ import React from "react";
 import fetch from 'node-fetch';
 
 import Item from "./interfaces/Item";
-import { Preferences } from "./interfaces/preferences";
+import { Preferences } from "./interfaces/Preferences";
 import Action from './utils';
 
 export default function main() {

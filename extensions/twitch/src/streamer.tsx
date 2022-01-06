@@ -3,7 +3,7 @@ import React from "react";
 import fetch from 'node-fetch';
 import { exec } from "child_process";
 
-import { Preferences } from "./interfaces/preferences";
+import { Preferences } from "./interfaces/Preferences";
 import Item from "./interfaces/item";
 import Action from "./utils";
 

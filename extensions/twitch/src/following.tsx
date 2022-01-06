@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
 import { exec } from "child_process";
 
 import Item from "./interfaces/FollowingItem";
-import { Preferences } from "./interfaces/preferences";
+import { Preferences } from "./interfaces/Preferences";
 import User from "./interfaces/user";
 import Action from "./utils";
 
