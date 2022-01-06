@@ -43,10 +43,10 @@ export interface PipelineItem {
 }
 
 
-export const circleCIPipelines = (uri: string): Promise<PipelineItem[]> =>
-  pipelines(uriToVCSAndFullName(uri));
+export const circleCIProjectPipelines = (uri: string): Promise<PipelineItem[]> =>
+  projectPipelines(uriToVCSAndFullName(uri));
 
-const pipelines = ({ vcs, full_name }: PipelinesParams) =>
+const projectPipelines = ({ vcs, full_name }: PipelinesParams) =>
   fetch(`https://circleci.com/api/v2/project/${vcs}/${full_name}/pipeline`, circleCIHeaders)
     .then(resp => resp.json())
     .then(json => json as { items: PipelineItem[] })

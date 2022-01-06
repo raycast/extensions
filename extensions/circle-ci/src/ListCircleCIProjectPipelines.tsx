@@ -1,6 +1,6 @@
 import {ActionPanel, Icon, List, OpenInBrowserAction, showToast, SubmitFormAction, ToastStyle} from "@raycast/api";
 import {useEffect, useState} from "react";
-import {circleCIPipelines, circleCIWorkflows, PipelineItem} from "./circleci-functions";
+import {circleCIProjectPipelines, circleCIWorkflows, PipelineItem} from "./circleci-functions";
 import {uriToLongerSlug} from "./utils";
 
 interface Params {
@@ -15,7 +15,7 @@ export const ListCircleCIProjectPipelines = ({ full_name, uri }: Params) => {
   const load = () =>
     Promise.resolve()
       .then(() => setIsLoading(true))
-      .then(() => circleCIPipelines(uri))
+      .then(() => circleCIProjectPipelines(uri))
       .then(pipelines => {
         setPipelines(pipelines);
         return pipelines;
