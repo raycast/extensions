@@ -39,7 +39,7 @@ export interface Cask extends Installable {
 }
 
 export interface CaskDependency {
-  macos?: {[key: string]: string[]};
+  macos?: { [key: string]: string[] };
 }
 
 export interface Formula extends Installable, Nameable {
@@ -48,7 +48,7 @@ export interface Formula extends Installable, Nameable {
   dependencies: string[];
   build_dependencies: string[];
   installed: InstalledVersion[];
-  keg_only: boolean,
+  keg_only: boolean;
   linked_key: string;
   pinned: boolean;
 }
@@ -93,9 +93,9 @@ export interface OutdatedResults {
 
 export const brewPrefix: string = (() => {
   try {
-    return execSync('brew --prefix', {'encoding': 'utf8'}).trim();
+    return execSync("brew --prefix", { encoding: "utf8" }).trim();
   } catch {
-    return cpus()[0].model.includes('Apple') ? "/opt/homebrew" : "/usr/local";
+    return cpus()[0].model.includes("Apple") ? "/opt/homebrew" : "/usr/local";
   }
 })();
 
@@ -103,7 +103,7 @@ export function brewPath(suffix: string): string {
   return path_join(brewPrefix, suffix);
 }
 
-const brewExecutable: string = path_join(brewPrefix, 'bin/brew');
+const brewExecutable: string = path_join(brewPrefix, "bin/brew");
 
 /// Commands
 
@@ -121,13 +121,13 @@ export async function brewDoctorCommand(): Promise<string> {
   }
 }
 
-export async function brewUpgradeCommand(greedy: boolean, dryRun: boolean = false): Promise<string> {
+export async function brewUpgradeCommand(greedy: boolean, dryRun = false): Promise<string> {
   let cmd = `${brewExecutable} upgrade`;
   if (greedy) {
-    cmd += ' --greedy'
+    cmd += " --greedy";
   }
   if (dryRun) {
-    cmd += ' --dry-run';
+    cmd += " --dry-run";
   }
   const output = await execp(cmd);
   return output.stdout;
@@ -135,9 +135,9 @@ export async function brewUpgradeCommand(greedy: boolean, dryRun: boolean = fals
 
 /// Fetching
 
-const installedCachePath = utils.cachePath('installedv2.json');
-const formulaCachePath = utils.cachePath('formula.json');
-const caskCachePath = utils.cachePath('cask.json');
+const installedCachePath = utils.cachePath("installedv2.json");
+const formulaCachePath = utils.cachePath("formula.json");
+const caskCachePath = utils.cachePath("cask.json");
 
 export async function brewFetchInstalled(useCache: boolean): Promise<InstallableResults> {
   async function installed(): Promise<string> {
@@ -153,7 +153,7 @@ export async function brewFetchInstalled(useCache: boolean): Promise<Installable
     try {
       await writeFile(installedCachePath, info);
     } catch (err) {
-      console.error("Failed to write installed cache:", err)
+      console.error("Failed to write installed cache:", err);
     }
     return JSON.parse(info);
   }
@@ -165,25 +165,25 @@ export async function brewFetchInstalled(useCache: boolean): Promise<Installable
   async function readCache(): Promise<InstallableResults> {
     const cacheTime = await mtimeMs(installedCachePath);
     // 'var/homebrew/locks' is updated after installed keg_only or linked formula.
-    const locksTime = await mtimeMs(brewPath('var/homebrew/locks'));
+    const locksTime = await mtimeMs(brewPath("var/homebrew/locks"));
     // Casks
-    const caskroomTime = await mtimeMs(brewPath('Caskroom'));
+    const caskroomTime = await mtimeMs(brewPath("Caskroom"));
 
     // 'var/homebrew/pinned' is updated after pin/unpin actions (but does not exist if there are no pinned formula).
     let pinnedTime;
     try {
-      pinnedTime = await mtimeMs(brewPath('var/homebrew/pinned'));
+      pinnedTime = await mtimeMs(brewPath("var/homebrew/pinned"));
     } catch {
       pinnedTime = 0;
     }
     // Because '/var/homebrew/pinned can be removed, we need to also check the parent directory'
-    const homebrewTime = await mtimeMs(brewPath('var/homebrew'));
+    const homebrewTime = await mtimeMs(brewPath("var/homebrew"));
 
     if (homebrewTime < cacheTime && caskroomTime < cacheTime && locksTime < cacheTime && pinnedTime < cacheTime) {
       const cacheBuffer = await readFile(installedCachePath);
       return JSON.parse(cacheBuffer.toString());
     } else {
-      throw 'Invalid cache';
+      throw "Invalid cache";
     }
   }
 
@@ -197,7 +197,7 @@ export async function brewFetchInstalled(useCache: boolean): Promise<Installable
 export async function brewFetchOutdated(greedy: boolean): Promise<OutdatedResults> {
   let cmd = `${brewExecutable} outdated --json=v2`;
   if (greedy) {
-    cmd += ' --greedy'; // include auto_update casks
+    cmd += " --greedy"; // include auto_update casks
   }
   const output = (await execp(cmd)).stdout;
   return JSON.parse(output);
@@ -206,10 +206,10 @@ export async function brewFetchOutdated(greedy: boolean): Promise<OutdatedResult
 /// Search
 
 const formulaURL = "https://formulae.brew.sh/api/formula.json";
-const caskURL = "https://formulae.brew.sh/api/cask.json"
+const caskURL = "https://formulae.brew.sh/api/cask.json";
 
-const formulaRemote: utils.Remote<Formula> = {url: formulaURL, cachePath: formulaCachePath};
-const caskRemote: utils.Remote<Cask> = {url: caskURL, cachePath: caskCachePath};
+const formulaRemote: utils.Remote<Formula> = { url: formulaURL, cachePath: formulaCachePath };
+const caskRemote: utils.Remote<Cask> = { url: caskURL, cachePath: caskCachePath };
 
 export async function brewFetchFormulae(): Promise<Formula[]> {
   return await utils.fetchRemote(formulaRemote);
@@ -225,10 +225,10 @@ export async function brewSearch(searchText: string, limit?: number): Promise<In
 
   if (searchText.length > 0) {
     const target = searchText.toLowerCase();
-    formulae = formulae?.filter(formula => {
+    formulae = formulae?.filter((formula) => {
       return formula.name.toLowerCase().includes(target);
     });
-    casks = casks?.filter(cask => {
+    casks = casks?.filter((cask) => {
       return cask.token.toLowerCase().includes(target);
     });
   }
@@ -244,7 +244,7 @@ export async function brewSearch(searchText: string, limit?: number): Promise<In
   formulae.totalLength = formulaeLen;
   casks.totalLength = casksLen;
 
-  return {formulae: formulae, casks: casks};
+  return { formulae: formulae, casks: casks };
 }
 
 /// Actions
@@ -255,7 +255,9 @@ export async function brewInstall(installable: Cask | Formula): Promise<void> {
   if (isCask(installable)) {
     installable.installed = installable.version;
   } else {
-    installable.installed = [{version: installable.versions.stable, installed_as_dependency: false, installed_on_request: true}];
+    installable.installed = [
+      { version: installable.versions.stable, installed_as_dependency: false, installed_on_request: true },
+    ];
   }
 }
 
@@ -295,7 +297,7 @@ export function brewName(item: Cask | Nameable): string {
 
 export function brewIsInstalled(installable: Cask | Formula): boolean {
   if (isCask(installable)) {
-    return caskIsInstalled(installable)
+    return caskIsInstalled(installable);
   } else {
     return formulaIsInstalled(installable);
   }
@@ -303,7 +305,7 @@ export function brewIsInstalled(installable: Cask | Formula): boolean {
 
 export function brewInstallPath(installable: Cask | Formula): string {
   if (isCask(installable)) {
-    return caskInstallPath(installable)
+    return caskInstallPath(installable);
   } else {
     return formulaInstallPath(installable);
   }
@@ -311,7 +313,7 @@ export function brewInstallPath(installable: Cask | Formula): string {
 
 export function brewFormatVersion(installable: Cask | Formula): string {
   if (isCask(installable)) {
-    return caskFormatVersion(installable)
+    return caskFormatVersion(installable);
   } else {
     return formulaFormatVersion(installable);
   }
@@ -320,11 +322,13 @@ export function brewFormatVersion(installable: Cask | Formula): string {
 /// Private
 
 function caskFormatVersion(cask: Cask): string {
-  if (!cask.installed) { return ""; }
+  if (!cask.installed) {
+    return "";
+  }
 
   let version = cask.installed;
   if (cask.outdated) {
-    version += ' (O)';
+    version += " (O)";
   }
   return version;
 }
@@ -338,7 +342,7 @@ function caskIsInstalled(cask: Cask): boolean {
 
 function caskInstallPath(cask: Cask): string {
   // Casks are not updated as reliably, so we don't include the cask installed version here.
-  const basePath = brewPath(path_join('Caskroom', cask.token));
+  const basePath = brewPath(path_join("Caskroom", cask.token));
   if (cask.installed) {
     return path_join(basePath, cask.installed);
   } else {
@@ -347,7 +351,7 @@ function caskInstallPath(cask: Cask): string {
 }
 
 function formulaInstallPath(formula: Formula): string {
-  const basePath = brewPath(path_join('Cellar', formula.name));
+  const basePath = brewPath(path_join("Cellar", formula.name));
   if (formula.installed.length) {
     return path_join(basePath, formula.installed[0].version);
   } else {
@@ -356,19 +360,21 @@ function formulaInstallPath(formula: Formula): string {
 }
 
 function formulaFormatVersion(formula: Formula): string {
-  if (!formula.installed.length) { return ""; }
+  if (!formula.installed.length) {
+    return "";
+  }
 
   const installed_version = formula.installed[0];
   let version = installed_version.version;
   let status = "";
   if (installed_version.installed_as_dependency) {
-    status += 'D';
+    status += "D";
   }
   if (formula.pinned) {
-    status += 'P';
+    status += "P";
   }
   if (formula.outdated) {
-    status += 'O';
+    status += "O";
   }
   if (status) {
     version += ` (${status})`;

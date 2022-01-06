@@ -23,7 +23,12 @@ export default function IncidentList() {
   }, []);
 
   return (
-    <List isLoading={state.incidents.length === 0} searchBarPlaceholder="Filter incidents..." throttle={true} onSearchTextChange={(text: string) => fetch(text)}>
+    <List
+      isLoading={state.incidents.length === 0}
+      searchBarPlaceholder="Filter incidents..."
+      throttle={true}
+      onSearchTextChange={(text: string) => fetch(text)}
+    >
       {state.incidents.map((incident) => (
         <IncidentListItem key={incident.id} incident={incident} />
       ))}
@@ -36,14 +41,23 @@ function IncidentListItem(props: { incident: Incident }) {
 
   const createdAt = new Date(incident.createdAt);
   const subtitle = incident.status === "closed" ? "Closed" : "Open";
-  const icon = incident.priority === "P1" ? "icon-p1.png" : incident.priority === "P2" ? "icon-p2.png" : incident.priority === "P3" ? "icon-p3.png": incident.priority === "P4" ? "icon-p4.png": "icon-p5.png";
+  const icon =
+    incident.priority === "P1"
+      ? "icon-p1.png"
+      : incident.priority === "P2"
+      ? "icon-p2.png"
+      : incident.priority === "P3"
+      ? "icon-p3.png"
+      : incident.priority === "P4"
+      ? "icon-p4.png"
+      : "icon-p5.png";
 
   return (
     <List.Item
       id={incident.id}
       key={incident.id}
       title={incident.message}
-      subtitle={`${subtitle}${incident.tags && incident.tags.length > 0 ? ` [${incident.tags.join(', ')}]` : ''}`}
+      subtitle={`${subtitle}${incident.tags && incident.tags.length > 0 ? ` [${incident.tags.join(", ")}]` : ""}`}
       icon={icon}
       keywords={[incident.status, incident.priority, ...incident.tags]}
       accessoryTitle={`${createdAt.toLocaleDateString()} ${createdAt.toLocaleTimeString()}`}
@@ -58,11 +72,14 @@ function IncidentListItem(props: { incident: Incident }) {
 
 async function fetchIncident(query: string): Promise<Incident[]> {
   try {
-    const response = await fetch(`${preferences.apiUrl}/v1/incidents?query=${encodeURIComponent(query)}&limit=100&sort=createdAt&order=desc`, {
-      headers: {
-        "Authorization": `GenieKey ${preferences.apiKey}`
+    const response = await fetch(
+      `${preferences.apiUrl}/v1/incidents?query=${encodeURIComponent(query)}&limit=100&sort=createdAt&order=desc`,
+      {
+        headers: {
+          Authorization: `GenieKey ${preferences.apiKey}`,
+        },
       }
-    });
+    );
 
     const json = await response.json();
 
@@ -73,8 +90,8 @@ async function fetchIncident(query: string): Promise<Incident[]> {
 
       return [];
     } else {
-      if ((json as Record<string, string>).message) throw new Error((json as Record<string, string>).message)
-      throw new Error('An unknown error occured')
+      if ((json as Record<string, string>).message) throw new Error((json as Record<string, string>).message);
+      throw new Error("An unknown error occured");
     }
   } catch (error) {
     console.error(error);

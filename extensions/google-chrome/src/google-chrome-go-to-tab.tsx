@@ -1,10 +1,18 @@
-import { ActionPanel, closeMainWindow, popToRoot, CopyToClipboardAction, getPreferenceValues, Icon, List } from "@raycast/api";
+import {
+  ActionPanel,
+  closeMainWindow,
+  popToRoot,
+  CopyToClipboardAction,
+  getPreferenceValues,
+  Icon,
+  List,
+} from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { useEffect, useState } from "react";
-import { faviconUrl } from "./utils"
+import { faviconUrl } from "./utils";
 
 class Tab {
-  static readonly TAB_CONTENTS_SEPARATOR: string = '~~~';
+  static readonly TAB_CONTENTS_SEPARATOR: string = "~~~";
 
   constructor(
     public readonly title: string,
@@ -12,7 +20,7 @@ class Tab {
     public readonly favicon: string,
     public readonly windowsIndex: number,
     public readonly tabIndex: number
-  ) { }
+  ) {}
 
   static parse(line: string): Tab {
     const parts = line.split(this.TAB_CONTENTS_SEPARATOR);
@@ -25,15 +33,15 @@ class Tab {
   }
 
   urlWithoutScheme(): string {
-    return this.url.replace(/(^\w+:|^)\/\//, '').replace('www.', '');
+    return this.url.replace(/(^\w+:|^)\/\//, "").replace("www.", "");
   }
 
   urlDomain(): string {
-    return this.urlWithoutScheme().split('/')[0];
+    return this.urlWithoutScheme().split("/")[0];
   }
 
   googleFavicon(): string {
-    return faviconUrl(64, this.url)
+    return faviconUrl(64, this.url);
   }
 }
 
@@ -41,7 +49,7 @@ async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   const faviconFormula = useOriginalFavicon
     ? `execute of tab _tab_index of window _window_index javascript ¬
                     "document.head.querySelector('link[rel~=icon]').href;"`
-    : '""'
+    : '""';
 
   const openTabs = await runAppleScript(`
       set _output to ""
@@ -63,7 +71,10 @@ async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
       return _output
   `);
 
-  return openTabs.split("\n").filter(line => line.length !== 0).map(line => Tab.parse(line));
+  return openTabs
+    .split("\n")
+    .filter((line) => line.length !== 0)
+    .map((line) => Tab.parse(line));
 }
 
 async function setActiveTab(tab: Tab): Promise<void> {
@@ -102,7 +113,7 @@ export default function Command() {
   );
 }
 
-function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; }) {
+function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean }) {
   return (
     <List.Item
       title={props.tab.title}

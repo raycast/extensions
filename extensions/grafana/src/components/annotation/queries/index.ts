@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { preferences } from "../../../helpers/preferences";
-import { Annotation, Patch } from './../interface'
+import { Annotation, Patch } from "./../interface";
 
 export async function annotationGetQuery(signal: AbortSignal): Promise<any> {
   return await fetch(`${preferences.rootApiUrl}/api/annotations?from=1506676478816&to=${Date.now()}&limit=10`, {
@@ -8,10 +8,10 @@ export async function annotationGetQuery(signal: AbortSignal): Promise<any> {
     signal: signal,
     headers: {
       "Content-Type": "application/json",
-      "accept": "application/json",
-      "Authorization": `Bearer ${preferences.apikey}`
-    }
-  })
+      accept: "application/json",
+      Authorization: `Bearer ${preferences.apikey}`,
+    },
+  });
 }
 
 export async function annotationCreationQuery(body: Annotation): Promise<any> {
@@ -25,18 +25,18 @@ export async function annotationCreationQuery(body: Annotation): Promise<any> {
     }),
     headers: {
       "Content-Type": "application/json",
-      "accept": "application/json",
-      "Authorization": `Bearer ${preferences.apikey}`
-    }
+      accept: "application/json",
+      Authorization: `Bearer ${preferences.apikey}`,
+    },
   });
 
   if (!response.ok) {
     console.error(response.statusText);
     return Promise.reject(response.statusText);
   }
-  
-  console.log(response.statusText)
-  console.log(response.text)
+
+  console.log(response.statusText);
+  console.log(response.text);
 
   return response;
 }
@@ -46,12 +46,12 @@ export async function annotationPatchQuery(valuesToPatch: Patch, id: number): Pr
     method: "patch",
     headers: {
       "Content-Type": "application/json",
-      "accept": "application/json",
-      "Authorization": `Bearer ${preferences.apikey}`
+      accept: "application/json",
+      Authorization: `Bearer ${preferences.apikey}`,
     },
     body: JSON.stringify({
       text: valuesToPatch.text,
-    })
+    }),
   });
 }
 
@@ -60,8 +60,8 @@ export async function annotationDeleteQuery(id: number): Promise<any> {
     method: "delete",
     headers: {
       "Content-Type": "application/json",
-      "accept": "application/json",
-      "Authorization": `Bearer ${preferences.apikey}`
-    }
+      accept: "application/json",
+      Authorization: `Bearer ${preferences.apikey}`,
+    },
   });
 }

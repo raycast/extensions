@@ -5,9 +5,11 @@
 /extensions/algolia                                  @valentindotxyz
 /extensions/amazon-aws                               @falcon @hodglim
 /extensions/api-icon-list                            @petr
+/extensions/atomic                                   @joepio
 /extensions/authy                                    @guga4ka
 /extensions/base64                                   @danielsinclair
 /extensions/bear                                     @hmarr
+/extensions/biaodian                                 @gasolin
 /extensions/binance                                  @grzegorzkrukowski
 /extensions/bitbucket                                @francois
 /extensions/bitly-url-shortener                      @blessanm86
@@ -20,9 +22,12 @@
 /extensions/calendar                                 @fuksman
 /extensions/calendly                                 @eluce2
 /extensions/can-i-use                                @thomaslombart
+/extensions/canvascast                               @yoda
 /extensions/change-case                              @es183923
 /extensions/change-scroll-direction                  @gregoralbrecht
 /extensions/circle-ci                                @qeude
+/extensions/clash                                    @go2sheep
+/extensions/cleanshotx                               @aayush9029
 /extensions/clockify                                 @isma
 /extensions/coffee                                   @mooxl
 /extensions/coinbase-pro                             @farisaziz12
@@ -36,6 +41,7 @@
 /extensions/css-gg                                   @astrit
 /extensions/dash                                     @rso
 /extensions/days-until-christmas                     @megapixel23
+/extensions/debank                                   @yukai
 /extensions/deepcast                                 @mooxl
 /extensions/devdocs                                  @pomdtr
 /extensions/displayplacer                            @eluce2
@@ -57,6 +63,7 @@
 /extensions/gitlab                                   @tonka3000
 /extensions/gitmoji                                  @ricoberger
 /extensions/google-chrome                            @codely @bromanko
+/extensions/google-chrome-profiles                   @frouo
 /extensions/google-maps-search                       @ratoru
 /extensions/google-translate                         @ospfranco
 /extensions/google-trends                            @kang
@@ -64,6 +71,7 @@
 /extensions/hacker-news                              @thomas
 /extensions/harvest                                  @eluce2
 /extensions/hazeover                                 @ratoru
+/extensions/hexlify                                  @gkpln3
 /extensions/homeassistant                            @tonka3000
 /extensions/huggingcast                              @ragnor
 /extensions/imdb                                     @ryan
@@ -111,6 +119,7 @@
 /extensions/search-npm                               @mrmartineau
 /extensions/search-rubygems                          @aleks
 /extensions/send-to-flomo                            @ahonn
+/extensions/simpread                                 @kenshin
 /extensions/single-disk-eject                        @johndturn
 /extensions/sketch                                   @aesign
 /extensions/slack-status                             @petr

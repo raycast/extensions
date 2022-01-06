@@ -6,7 +6,7 @@ import plist from "plist";
 import Bookmark from "./dtos/bookmark-dto";
 import ImportedTowerBookmarks, { ImportedTowerBookmark } from "./interfaces/imported-tower-bookmark";
 
-const towerBookmarksPlistLocation = `${os.homedir()}/Library/Application\ Support/com.fournova.Tower3/bookmarks-v2.plist`;
+const towerBookmarksPlistLocation = `${os.homedir()}/Library/Application Support/com.fournova.Tower3/bookmarks-v2.plist`;
 
 export function isTowerCliInstalled(): boolean {
   try {
@@ -29,14 +29,14 @@ export function towerCliRequiredMessage(): string {
 }
 
 async function extractBookmarks(obj: ImportedTowerBookmark[], parents?: string): Promise<Bookmark[]> {
-  let bookmarks: Bookmark[] = [];
+  const bookmarks: Bookmark[] = [];
 
   if (!obj || obj.length === 0) {
     return Promise.resolve(bookmarks);
   }
 
   obj.forEach(async (bookmark: ImportedTowerBookmark) => {
-    let name = parents ? `${parents} / ${bookmark.name}` : bookmark.name;
+    const name = parents ? `${parents} / ${bookmark.name}` : bookmark.name;
 
     if (bookmark.children && bookmark.children.length > 0) {
       const childBookmarks = await extractBookmarks(bookmark.children, name);

@@ -6,7 +6,6 @@ import { joinPathComponents } from "../shared/join-path-components";
  * AppleDeveloperDocumentationService
  */
 export class AppleDeveloperDocumentationService {
-
   /**
    * The host URL
    */
@@ -16,9 +15,7 @@ export class AppleDeveloperDocumentationService {
    * Search Developer Documentation by search text
    * @param searchText The search text
    */
-  async search(
-    searchText: string
-  ): Promise<AppleDeveloperDocumentationEntry[]> {
+  async search(searchText: string): Promise<AppleDeveloperDocumentationEntry[]> {
     // Fetch Documentation Response
     const response = await fetch(
       joinPathComponents(
@@ -30,26 +27,22 @@ export class AppleDeveloperDocumentationService {
         headers: {
           // Important search_data endpoint requires
           // an refer HTTP header
-          Referer: this.hostUrl
-        }
+          Referer: this.hostUrl,
+        },
       }
     );
     // Retrieve search response as JSON
-    const searchResponse = await response.json() as AppleDeveloperDocumentationSearchResponse;
+    const searchResponse = (await response.json()) as AppleDeveloperDocumentationSearchResponse;
     // Initialize Documentation Entries
     const entries = searchResponse.results ?? [];
     // For each Entry
     for (const entry of entries) {
       // Update URL
-      entry.url = joinPathComponents(
-        this.hostUrl,
-        entry.url
-      );
+      entry.url = joinPathComponents(this.hostUrl, entry.url);
     }
     // Return Documentation Entries
     return entries;
   }
-
 }
 
 /**

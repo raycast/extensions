@@ -6,7 +6,7 @@ export function useWhatsAppChats() {
   const [chats, setChats] = useState<Array<WhatsAppChat>>();
 
   useEffect(() => {
-    getStoredWhatsAppChats().then(chats => {
+    getStoredWhatsAppChats().then((chats) => {
       setChats(chats);
     });
   }, []);
@@ -17,7 +17,6 @@ export function useWhatsAppChats() {
     updateChats: async (chats: Array<WhatsAppChat>) => {
       setChats(chats);
       await saveStoredWhatsAppChats(chats);
-    }
+    },
   };
 }
-
