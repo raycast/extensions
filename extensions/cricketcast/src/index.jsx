@@ -1,6 +1,6 @@
 import { ActionPanel, OpenInBrowserAction, List, showToast, ToastStyle, CopyToClipboardAction } from "@raycast/api";
 import { useEffect, useState } from "react";
-var convert = require("xml-js");
+import convert from "xml-js";
 import fetch from "node-fetch";
 
 function Actions({ item }) {
@@ -27,7 +27,7 @@ export default function Command() {
         let matches = JSONdata.rss.channel.item.map((match) => ({
           title: match.title["_text"].replace(" *", "*"),
           id: match.guid["_text"].replace("http://www.cricinfo.com/ci/engine/match/", "").replace(".html", ""),
-          link: match.guid["_text"]
+          link: match.guid["_text"],
         }));
         for (let matchIndex in matches) {
           let indepthData = await fetch(
