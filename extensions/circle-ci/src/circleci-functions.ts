@@ -19,14 +19,10 @@ interface PipelinesParams {
 
 export interface PipelineItem {
   id: string;
-  errors: Record<string, string>[];
-  project_slug: string;
   number: number;
   state: string;
   trigger: {
-    type: string;
     actor: {
-      login: string;
       avatar_url: string | null;
     }
   };
@@ -38,7 +34,6 @@ export interface PipelineItem {
     }
   };
   created_at: string;
-  updated_at: string;
   workflow?: WorkflowItem;
 }
 
@@ -56,7 +51,6 @@ const projectPipelines = ({ vcs, full_name }: PipelinesParams) =>
 export interface WorkflowItem {
   id: string;
   name: string;
-  tag: string;
   status: string;
 }
 

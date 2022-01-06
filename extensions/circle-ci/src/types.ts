@@ -19,10 +19,17 @@ export type Pipeline = {
   id: string;
   vcs: Repository;
   number: number;
+  workflow?: Workflow;
+  trigger: {
+    actor: {
+      avatar_url: string | null;
+    }
+  }
 };
 
 export type Workflow = {
   id: string;
+  name: string;
   created_at: string;
   stopped_at: number;
   status: WorkflowStatus;
