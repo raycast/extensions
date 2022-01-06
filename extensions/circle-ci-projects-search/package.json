@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "circleci-project-navigation",
+  "title": "CircleCI Project Navigation",
+  "description": "The extension helps to quickly navigate to projects.",
+  "icon": "icon.png",
+  "author": "bgnfu7re",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "circleci-project-search",
+      "title": "CircleCI Project Search",
+      "description": "List CircleCI projects and quickly navigate to them.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "label": "API Token",
+      "name": "api-token",
+      "description": "Your CircleCI API Token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "placeholder": "https://app.circleci.com/settings/user/tokens"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.3",
+    "got": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
