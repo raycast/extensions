@@ -1,5 +1,5 @@
 import { ActionPanel, getPreferenceValues, OpenAction, showHUD, showToast, ToastStyle } from "@raycast/api";
-import Preferences from "./interfaces/preferences";
+import Preferences, { PrimaryAction } from "./interfaces/preferences";
 import Stream from './stream';
 
 interface Props {
@@ -12,14 +12,13 @@ const action: React.FC<Props> = (({ live, name }) => {
     const streamlinkLocation = preferences.streamlink;
     const quality = preferences.quality;
     const lowlatency = preferences.lowlatency;
-
-    console.log(preferences)
+    const primary = preferences.primaryaction;
 
     return (<>
         <ActionPanel>
-            <OpenAction title="Open Channel" target={`https://twitch.tv/${name}`} onOpen={(target) => {
+            {primary === PrimaryAction.Browser && <OpenAction title="Open Channel" target={`https://twitch.tv/${name}`} onOpen={(target) => {
                 showHUD("✅ Opening stream");
-            }} />
+            }} />}
             <OpenAction title="Open Stream in Streamlink" target="streamlink" onOpen={(target) => {
                 if (!live) { showToast(ToastStyle.Failure, "This streamer is offline!"); return; }
 
@@ -35,7 +34,10 @@ const action: React.FC<Props> = (({ live, name }) => {
                     });
                     showHUD("✅ Starting Streamlink");
                 }
-            }} shortcut={{ modifiers: ["opt"], key: "enter" }} />
+            }} />
+            {primary === PrimaryAction.Streamlink && <OpenAction title="Open Channel" target={`https://twitch.tv/${name}`} onOpen={(target) => {
+                showHUD("✅ Opening stream");
+            }} />}
         </ActionPanel>
     </>);
 });
