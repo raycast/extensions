@@ -4,7 +4,7 @@
   "title": "CircleCI Project Navigation",
   "description": "The extension helps to quickly navigate to projects.",
   "icon": "icon.png",
-  "author": "kudrykv",
+  "author": "bgnfu7re",
   "license": "MIT",
   "commands": [
     {
