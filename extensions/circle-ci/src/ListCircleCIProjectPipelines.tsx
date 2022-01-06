@@ -1,7 +1,8 @@
 import {ActionPanel, Icon, List, OpenInBrowserAction, showToast, SubmitFormAction, ToastStyle} from "@raycast/api";
 import {useEffect, useState} from "react";
-import {circleCIProjectPipelines, circleCIWorkflows, PipelineItem} from "./circleci-functions";
+import {circleCIProjectPipelines, circleCIWorkflows} from "./circleci-functions";
 import {uriToLongerSlug} from "./utils";
+import { Pipeline } from "./types";
 
 interface Params {
   full_name: string;
@@ -10,7 +11,7 @@ interface Params {
 
 export const ListCircleCIProjectPipelines = ({ full_name, uri }: Params) => {
   const [isLoading, setIsLoading] = useState(true);
-  const [pipelines, setPipelines] = useState<PipelineItem[]>([]);
+  const [pipelines, setPipelines] = useState<Pipeline[]>([]);
 
   const load = () =>
     Promise.resolve()
@@ -41,7 +42,7 @@ export const ListCircleCIProjectPipelines = ({ full_name, uri }: Params) => {
       (acc[date] = acc[date] || []).push(val);
 
       return acc;
-    }, {} as Record<string, PipelineItem[]>))
+    }, {} as Record<string, Pipeline[]>))
       .sort(([l], [r]) => new Date(l).getTime() - new Date(r).getTime())
       .reverse()
       .map(([date, entries]) => <List.Section key={date} title={date}>

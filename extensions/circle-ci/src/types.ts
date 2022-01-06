@@ -24,7 +24,9 @@ export type Pipeline = {
     actor: {
       avatar_url: string | null;
     }
-  }
+  };
+  state: string;
+  created_at: string;
 };
 
 export type Workflow = {
@@ -39,9 +41,10 @@ export type Workflow = {
 };
 
 export type Repository = {
-  branch: string;
+  branch?: string;
   provider_name: string;
   target_repository_url: string;
+  tag?: string;
 };
 
 export enum JobStatus {
