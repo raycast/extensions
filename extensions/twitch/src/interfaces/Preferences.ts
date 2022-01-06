@@ -4,4 +4,10 @@ export default interface Preferences {
     streamlink?: string,
     lowlatency?: boolean,
     quality?: string,
+    primaryaction?: PrimaryAction
+}
+
+export enum PrimaryAction {
+    Browser = "web",
+    Streamlink = "streamlink",
 }
