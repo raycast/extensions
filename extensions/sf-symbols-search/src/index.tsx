@@ -7,7 +7,9 @@ interface Preferences {
 
 export default function Command() {
   const prefs: Preferences = getPreferenceValues();
-  const symbols: { name: string, symbol: string, categories: string[] }[] = JSON.parse(fs.readFileSync(`.${__dirname}/assets/symbols.json`, { encoding: "utf8" }));
+  const symbols: { name: string; symbol: string; categories: string[] }[] = JSON.parse(
+    fs.readFileSync(`.${__dirname}/assets/symbols.json`, { encoding: "utf8" })
+  );
 
   return (
     <List isLoading={false} searchBarPlaceholder="Filter SF Symbols...">
@@ -20,17 +22,21 @@ export default function Command() {
           keywords={symbol.categories.concat([symbol.name])} // Add symbol name to categories so it can be searched, since the title is only the symbol
           actions={
             <ActionPanel>
-              {
-                prefs.primaryAction == "paste"
-                  ? <PasteAction title="Paste Symbol" content={symbol.symbol} />
-                  : <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol} />
-              }
-              {
-                prefs.primaryAction == "paste"
-                  ? <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol} />
-                  : <PasteAction title="Paste Symbol" content={symbol.symbol} />
-              }
-              <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{ modifiers: ["opt"], key: "c" }} />
+              {prefs.primaryAction == "paste" ? (
+                <PasteAction title="Paste Symbol" content={symbol.symbol} />
+              ) : (
+                <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol} />
+              )}
+              {prefs.primaryAction == "paste" ? (
+                <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol} />
+              ) : (
+                <PasteAction title="Paste Symbol" content={symbol.symbol} />
+              )}
+              <CopyToClipboardAction
+                title="Copy Name"
+                content={symbol.name}
+                shortcut={{ modifiers: ["opt"], key: "c" }}
+              />
             </ActionPanel>
           }
         />
