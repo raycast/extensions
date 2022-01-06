@@ -1,5 +1,4 @@
 import { ActionPanel, CopyToClipboardAction, PasteAction, getPreferenceValues, List } from "@raycast/api";
-import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 
 interface Preferences {
@@ -8,11 +7,7 @@ interface Preferences {
 
 export default function Command() {
   const prefs: Preferences = getPreferenceValues();
-  const execPath = `.${__dirname}/assets/sfsymbols`;
-  
-  fs.chmodSync(execPath, "755");
-  
-  const symbols: { name: string, symbol: string, categories: string[] }[] = JSON.parse(execFileSync(execPath).toString());
+  const symbols: { name: string, symbol: string, categories: string[] }[] = JSON.parse(fs.readFileSync(`.${__dirname}/assets/symbols.json`, { encoding: "utf8" }));
 
   return (
     <List isLoading={false} searchBarPlaceholder="Filter SF Symbols...">

@@ -2,16 +2,12 @@ node_modules:
 	@npm install
 
 .PHONY: build
-build: node_modules compile_swift
+build: node_modules symbols.json
 	@npm run build
 
 .PHONY: run
-run: node_modules compile_swift
+run: node_modules symbols.json
 	@npm run dev
 
-.PHONY: compile_swift
-compile_swift:
-	@swiftc SFSymbolsSearch.playground/Contents.swift -o assets/sfsymbols && \
-		cp SFSymbolsSearch.playground/Resources/symbol_names.txt assets/ && \
-		cp SFSymbolsSearch.playground/Resources/symbol_glyphs.txt assets/ && \
-		cp SFSymbolsSearch.playground/Resources/symbol_categories.plist assets/
+symbols.json:
+	@swift SFSymbolsSearch.playground/Contents.swift > assets/symbols.json
