@@ -4,7 +4,7 @@
   "title": "kubectx",
   "description": "Switch between clusters from Raycast",
   "icon": "kubernetes-icon.png",
-  "author": "Oktay Şenkan",
+  "author": "oktaysenkan",
   "license": "MIT",
   "commands": [
     {
