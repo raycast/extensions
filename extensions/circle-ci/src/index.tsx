@@ -13,7 +13,9 @@ import {
 } from "@raycast/api";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
+import { Job, JobStatus, Pipeline, Preferences, Workflow, WorkflowStatus } from "./types";
 
+// noinspection JSUnusedGlobalSymbols
 export default function WorkflowList() {
   const [state, setState] = useState<{ workflows: Workflow[]; loading: boolean }>({ workflows: [], loading: true });
 
@@ -265,57 +267,3 @@ function getJobAccessoryTitle(job: Job): string {
       return "Unknown";
   }
 }
-
-interface Preferences {
-  apiKey: string;
-  orgSlug: string;
-}
-
-enum WorkflowStatus {
-  success = "success",
-  running = "running",
-  not_run = "not_run",
-  failed = "failed",
-  error = "error",
-  failing = "failing",
-  on_hold = "on_hold",
-  canceled = "canceled",
-  unauthorized = "unauthorized",
-}
-
-type Pipeline = {
-  id: string;
-  vcs: Repository;
-  number: number;
-};
-
-type Workflow = {
-  id: string;
-  created_at: string;
-  stopped_at: number;
-  status: WorkflowStatus;
-  project_slug: string;
-  repository: Repository;
-  pipeline_number: number;
-};
-
-type Repository = {
-  branch: string;
-  provider_name: string;
-  target_repository_url: string;
-};
-
-enum JobStatus {
-  success = "success",
-  failed = "failed",
-  running = "running",
-}
-
-type Job = {
-  id: string;
-  started_at: string;
-  stopped_at: string;
-  project_slug: string;
-  name: string;
-  status: JobStatus;
-};

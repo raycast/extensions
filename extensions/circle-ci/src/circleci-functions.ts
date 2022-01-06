@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 
 
-const API_TOKEN = getPreferenceValues()["api-token"];
+const API_TOKEN = getPreferenceValues()["apiKey"];
 
 
 export const circleCIListProjects = (): Promise<string[]> =>
