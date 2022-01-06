@@ -266,7 +266,7 @@ export function CreateDatabaseForm(props: { databaseId?: string; setRefreshView?
               databaseProperties={databasePropertiesButTitle ? databasePropertiesButTitle : []}
               selectedPropertiesIds={databaseView?.create_properties}
               onSelect={function (propertyId: string) {
-                databaseViewCop?.create_properties.push(propertyId);
+                databaseViewCopy?.create_properties.push(propertyId);
                 saveDatabaseView(databaseViewCopy);
               }}
               onUnselect={function (propertyId: string) {
