@@ -18,20 +18,20 @@ import { circleCIPipelines, circleCIWorkflowsPipelines } from "./circleci-functi
 
 // noinspection JSUnusedGlobalSymbols
 export default function WorkflowList() {
-  const [state, setState] = useState<{ workflows: Workflow[]; loading: boolean }>({ workflows: [], loading: true });
+  const [isLoading, setIsLoading] = useState(true);
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
 
   useEffect(() => {
     circleCIPipelines()
       .then(pipelines => circleCIWorkflowsPipelines({ pipelines }))
       .then(wow => wow.flat())
-      .then(workflows => setState({
-        workflows, loading: false
-      }));
+      .then(setWorkflows)
+      .then(() => setIsLoading(false));
   }, []);
 
   return (
-    <List isLoading={state.loading} searchBarPlaceholder="Filter workflows by project name...">
-      {state.workflows.map((workflow) => (
+    <List isLoading={isLoading} searchBarPlaceholder="Filter workflows by project name...">
+      {workflows.map((workflow) => (
         <WorkflowListItem key={workflow.id} workflow={workflow} />
       ))}
     </List>
