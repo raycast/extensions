@@ -9,6 +9,7 @@ const glob = require("fast-glob");
 const { createReadStream, createWriteStream, mkdir } = require("fs");
 const { basename, dirname, extname, resolve } = require("path");
 const { promisify } = require("util");
+const fetch = (...args) => import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
 const mkdirProm = promisify(mkdir);
 const mappedLogos = logos.map((logo) => logo.replace("aws", "amazonaws"));
@@ -94,10 +95,15 @@ const modeColors = [
 ];
 
 async function makeBrandedIcons() {
+  const tools = await (await fetch("https://api.authy.com/assets/chrome/high")).json();
+  const logos = [];
   for (const color of modeColors) {
-    for (const file of await glob(`node_modules/simple-icons/icons/{${mappedLogos.join(",")}}.svg`)) {
+    for (const file of await glob(
+      `node_modules/simple-icons/icons/{${[...mappedLogos, ...Object.keys(tools.urls)].join(",")}}.svg`
+    )) {
       const ext = extname(file);
       const name = basename(file).replace(ext, "").replace("amazonaws", "aws");
+      logos.push(name);
       const out = await getWriteStream(`./assets/${icondir}/${color.name}/brand/${name}.png`);
       createReadStream(file)
         .pipe(replace("path ", `path fill="${color.value}" `))
@@ -105,6 +111,11 @@ async function makeBrandedIcons() {
         .pipe(out);
     }
   }
+  console.log(
+    "missing",
+    Object.keys(tools.urls).filter((logo) => !logos.includes(logo))
+  );
+  console.log("available", logos);
 }
 
 async function makeColoredIcons(color) {
