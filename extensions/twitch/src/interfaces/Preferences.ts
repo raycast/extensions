@@ -1,4 +1,4 @@
-export default interface Preferences {
+export interface Preferences {
     clientId: string,
     authorization: string,
     streamlink?: string,

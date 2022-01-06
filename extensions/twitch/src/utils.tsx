@@ -1,5 +1,5 @@
 import { ActionPanel, getPreferenceValues, OpenAction, showHUD, showToast, ToastStyle } from "@raycast/api";
-import Preferences, { PrimaryAction } from "./interfaces/preferences";
+import { Preferences, PrimaryAction } from "./interfaces/preferences";
 import Stream from './stream';
 
 interface Props {

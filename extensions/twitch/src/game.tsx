@@ -2,7 +2,7 @@ import { ActionPanel, confirmAlert, Detail, getPreferenceValues, List, ListItem,
 import React from "react";
 import fetch from 'node-fetch';
 
-import Preferences from "./interfaces/preferences";
+import { Preferences } from "./interfaces/preferences";
 import Game from "./interfaces/game";
 
 export default function main() {
