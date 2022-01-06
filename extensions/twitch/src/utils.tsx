@@ -1,4 +1,4 @@
-import { ActionPanel, getPreferenceValues, OpenAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, getPreferenceValues, OpenAction, showHUD, showToast, ToastStyle } from "@raycast/api";
 import Preferences from "./interfaces/preferences";
 import Stream from './stream';
 
@@ -17,7 +17,9 @@ const action: React.FC<Props> = (({ live, name }) => {
 
     return (<>
         <ActionPanel>
-            <OpenAction title="Open Channel" target={`https://twitch.tv/${name}`} />
+            <OpenAction title="Open Channel" target={`https://twitch.tv/${name}`} onOpen={(target) => {
+                showHUD("✅ Opening stream");
+            }} />
             <OpenAction title="Open Stream in Streamlink" target="streamlink" onOpen={(target) => {
                 if (!live) { showToast(ToastStyle.Failure, "This streamer is offline!"); return; }
 
@@ -25,10 +27,13 @@ const action: React.FC<Props> = (({ live, name }) => {
                     Stream.startLowLatencyStream(streamlinkLocation, quality, name).catch(err => {
                         showToast(ToastStyle.Failure, err);
                     });
+
+                    showHUD("✅ Starting Streamlink");
                 } else {
                     Stream.streamUsingM3U8(streamlinkLocation, quality, name).catch(err => {
                         showToast(ToastStyle.Failure, err);
                     });
+                    showHUD("✅ Starting Streamlink");
                 }
             }} shortcut={{ modifiers: ["opt"], key: "enter" }} />
         </ActionPanel>
