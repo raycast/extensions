@@ -24,6 +24,24 @@
       "description": "Twitch Bearer Token (Must be matching with ClientId) https://twitchapps.com/tokengen/"
     },
     {
+      "name": "primaryaction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "required": false,
+      "default": "detail",
+      "data": [
+        {
+          "title": "Open via Browser",
+          "value": "web"
+        },
+        {
+          "title": "Open via Streamlink",
+          "value": "streamlink"
+        }
+      ],
+      "description": "Set the default action"
+    },
+    {
       "name": "streamlink",
       "type": "textfield",
       "default": "/opt/homebrew/bin/streamlink",
@@ -47,7 +65,24 @@
       "title": "Video Quality",
       "required": false,
       "description": "Standard video quality",
-	  "data": [{"title":  "Best", "value":  "best"},{"title":  "720p", "value":  "720p"},{"title":  "480p", "value":  "480p"},{"title":  "Worst", "value":  "worst"}]
+      "data": [
+        {
+          "title": "Best",
+          "value": "best"
+        },
+        {
+          "title": "720p",
+          "value": "720p"
+        },
+        {
+          "title": "480p",
+          "value": "480p"
+        },
+        {
+          "title": "Worst",
+          "value": "worst"
+        }
+      ]
     }
   ],
   "commands": [
