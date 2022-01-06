@@ -9,27 +9,24 @@ import {
   OpenInBrowserAction,
   PushAction,
   showToast,
-  ToastStyle,
+  ToastStyle
 } from "@raycast/api";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
 import { Job, JobStatus, Pipeline, Preferences, Workflow, WorkflowStatus } from "./types";
+import { circleCIPipelines, circleCIWorkflowsPipelines } from "./circleci-functions";
 
 // noinspection JSUnusedGlobalSymbols
 export default function WorkflowList() {
   const [state, setState] = useState<{ workflows: Workflow[]; loading: boolean }>({ workflows: [], loading: true });
 
   useEffect(() => {
-    async function fetch() {
-      const pipelines = await fetchPipelines();
-      const workflows = await fetchWorkflows(pipelines);
-      setState((oldState) => ({
-        ...oldState,
-        workflows: workflows,
-        loading: false,
+    circleCIPipelines()
+      .then(pipelines => circleCIWorkflowsPipelines({ pipelines }))
+      .then(wow => wow.flat())
+      .then(workflows => setState({
+        workflows, loading: false
       }));
-    }
-    fetch();
   }, []);
 
   return (
@@ -66,9 +63,10 @@ function JobList({ workflow }: { workflow: Workflow }) {
       const jobs = await fetchJobs(workflow);
       setState((oldState) => ({
         ...oldState,
-        jobs: jobs,
+        jobs: jobs
       }));
     }
+
     fetch();
   }, []);
 
@@ -83,6 +81,7 @@ function JobList({ workflow }: { workflow: Workflow }) {
     </List>
   );
 }
+
 function JobListItem(props: { job: Job }) {
   const job = props.job;
 
@@ -104,8 +103,8 @@ async function fetchJobs(workflow: Workflow): Promise<Job[]> {
     const response = await fetch(`https://circleci.com/api/v2/workflow/${workflow.id}/job`, {
       method: "GET",
       headers: {
-        "Circle-Token": preferences.apiKey,
-      },
+        "Circle-Token": preferences.apiKey
+      }
     });
 
     const json = await response.json();
@@ -123,8 +122,8 @@ async function fetchWorkflows(pipelines: Pipeline[]): Promise<Workflow[]> {
       const response = await fetch(`https://circleci.com/api/v2/pipeline/${pipeline.id}/workflow`, {
         method: "GET",
         headers: {
-          "Circle-Token": preferences.apiKey,
-        },
+          "Circle-Token": preferences.apiKey
+        }
       });
 
       const json = await response.json();
@@ -148,14 +147,14 @@ async function fetchPipelines(): Promise<Pipeline[]> {
     const preferences: Preferences = getPreferenceValues();
     const response = await fetch(
       "https://circleci.com/api/v2/pipeline?" +
-        new URLSearchParams({
-          "org-slug": preferences.orgSlug,
-        }),
+      new URLSearchParams({
+        "org-slug": preferences.orgSlug
+      }),
       {
         method: "GET",
         headers: {
-          "Circle-Token": preferences.apiKey,
-        },
+          "Circle-Token": preferences.apiKey
+        }
       }
     );
 

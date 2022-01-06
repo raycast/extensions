@@ -1,42 +1,58 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
-import { Pipeline, Workflow } from "./types";
+import { Pipeline, Preferences, Workflow } from "./types";
+import { URLSearchParams } from "url";
 
 
-const API_TOKEN = getPreferenceValues()["apiKey"];
+const { apiKey, orgSlug }: Preferences = getPreferenceValues();
 
 
 export const circleCIListProjects = (): Promise<string[]> =>
-  fetch("https://circleci.com/api/v1.1/me", circleCIHeaders)
+  fetch("https://circleci.com/api/v1.1/me", headers)
     .then(resp => resp.json())
     .then((json) => (json as { projects: Record<string, unknown> }).projects)
     .then(Object.keys);
 
 
-interface PipelinesParams {
-  vcs: string;
-  full_name: string;
-}
-
-export const circleCIProjectPipelines = (uri: string): Promise<Pipeline[]> =>
-  projectPipelines(uriToVCSAndFullName(uri));
-
-const projectPipelines = ({ vcs, full_name }: PipelinesParams) =>
-  fetch(`https://circleci.com/api/v2/project/${vcs}/${full_name}/pipeline`, circleCIHeaders)
+export const circleCIPipelines = (): Promise<Pipeline[]> =>
+  fetch(`https://circleci.com/api/v2/pipeline?${new URLSearchParams({ "org-slug": orgSlug })}`, headers)
     .then(resp => resp.json())
     .then(json => json as { items: Pipeline[] })
     .then(json => json.items);
 
 
-interface WorkflowParams {
-  id: string;
-}
+export const circleCIProjectPipelines = (uri: string): Promise<Pipeline[]> =>
+  projectPipelines(uriToVCSAndFullName(uri));
 
-export const circleCIWorkflows = ({ id }: WorkflowParams): Promise<Workflow[]> =>
-  fetch(`https://circleci.com/api/v2/pipeline/${id}/workflow`, circleCIHeaders)
+const projectPipelines = ({ vcs, full_name }: { vcs: string, full_name: string }) =>
+  fetch(`https://circleci.com/api/v2/project/${vcs}/${full_name}/pipeline`, headers)
+    .then(resp => resp.json())
+    .then(json => json as { items: Pipeline[] })
+    .then(json => json.items);
+
+
+export const circleCIWorkflows = ({ id }: { id: string }): Promise<Workflow[]> =>
+  fetch(`https://circleci.com/api/v2/pipeline/${id}/workflow`, headers)
     .then(resp => resp.json())
     .then(json => json as { items: Workflow[] })
     .then(json => json.items);
+
+
+export const circleCIWorkflowsPipelines = ({ pipelines }: { pipelines: Pipeline[] }) => {
+  return Promise.all(
+    pipelines.map(
+      pipeline => {
+        return circleCIWorkflows({ id: pipeline.id })
+          .then(workflows => workflows.map(workflow => {
+            workflow.repository = pipeline.vcs;
+            workflow.pipeline_number = pipeline.number;
+
+            return workflow;
+          }).flat());
+      }
+    )
+  );
+};
 
 
 const uriToVCSAndFullName = (uri: string): { vcs: string, full_name: string } => {
@@ -52,9 +68,9 @@ const uriToVCSAndFullName = (uri: string): { vcs: string, full_name: string } =>
 };
 
 
-const circleCIHeaders = {
+const headers = {
   headers: {
-    "Circle-Token": API_TOKEN,
+    "Circle-Token": apiKey,
     "Accept": "application/json"
   }
 };
