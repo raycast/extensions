@@ -65,7 +65,7 @@ const MarkdownReference = () => {
 const Reference = (reference: Reference) => {
   const { pop } = useNavigation();
 
-  let mdString: string = `# ${reference.name}\n${reference.description}\n\n\`${reference.examples[0].markdown}\``;
+  const mdString = `# ${reference.name}\n${reference.description}\n\n\`${reference.examples[0].markdown}\``;
   return (
     <Detail
       markdown={mdString}
