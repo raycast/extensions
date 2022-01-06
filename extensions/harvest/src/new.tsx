@@ -45,8 +45,8 @@ export default function Command({
   const [spentDate, setSpentDate] = useState<Date>();
 
   useEffect(() => {
-    if (error?.isAxiosError) {
-      if (error.response?.status === 401) {
+    if (error) {
+      if (error.isAxiosError && error.response?.status === 401) {
         showToast(
           ToastStyle.Failure,
           "Invalid Token",
@@ -55,8 +55,6 @@ export default function Command({
       } else {
         showToast(ToastStyle.Failure, "Unknown Error", "Could not get your company data");
       }
-    } else {
-      showToast(ToastStyle.Failure, "Unknown Error", "Could not fetch time entries");
     }
   }, [error]);
 
