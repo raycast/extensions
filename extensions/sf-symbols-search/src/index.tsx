@@ -8,7 +8,7 @@ interface Preferences {
 export default function Command() {
   const prefs: Preferences = getPreferenceValues();
   const symbols: { name: string; symbol: string; categories: string[] }[] = JSON.parse(
-    fs.readFileSync(`.${environment.assetsPath}/symbols.json`, { encoding: "utf8" })
+    fs.readFileSync(`${environment.assetsPath}/symbols.json`, { encoding: "utf8" })
   );
 
   return (
