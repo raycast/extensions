@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "list-workflows",
       "title": "List Workflows",
       "description": "Shows a list of the latest Circle CI workflows, including meta data. Allows to quickly open each workflow and - if applicable - PR.",
       "mode": "view",
