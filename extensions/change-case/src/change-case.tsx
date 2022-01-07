@@ -24,8 +24,6 @@ type CaseType = "Camel Case"
   | "Upper Case"
   | "Upper First";
 
-type PreferencesType = { [key in CaseType]: boolean };
-
 async function runShellScript(command: string) {
   const { stdout } = await execa(command, {
     env: { LC_CTYPE: "UTF-8" }
@@ -38,7 +36,7 @@ async function readClipboard() {
 }
 
 export default function changeChase() {
-  const data: { type: CaseType, func: (input: string, options?: any) => string }[] = [
+  const data: { type: CaseType, func: (input: string, options?: object) => string }[] = [
     { type: "Camel Case", func: changeCase.camelCase },
     { type: "Capital Case", func: changeCase.capitalCase },
     { type: "Constant Case", func: changeCase.constantCase },
@@ -66,7 +64,7 @@ export default function changeChase() {
     readClipboard().then((c) => setClipboard(c));
   });
 
-  const preferences: PreferencesType = getPreferenceValues();
+  const preferences = getPreferenceValues();
 
   return (
     <List>
