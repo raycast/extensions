@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
-import { Pipeline, Preferences, Workflow } from "./types";
+import { Job, Pipeline, Preferences, Workflow } from "./types";
 import { URLSearchParams } from "url";
 
 
@@ -53,6 +53,13 @@ export const circleCIWorkflowsPipelines = ({ pipelines }: { pipelines: Pipeline[
     )
   );
 };
+
+
+export const circleCIJobs = ({ id }: { id: string }): Promise<Job[]> =>
+  fetch(`https://circleci.com/api/v2/workflow/${id}/job`, headers)
+    .then(resp => resp.json())
+    .then(json => json as { items: Job[] })
+    .then(json => json.items);
 
 
 const uriToVCSAndFullName = (uri: string): { vcs: string, full_name: string } => {

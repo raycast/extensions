@@ -14,7 +14,7 @@ import {
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
 import { Job, JobStatus, Preferences, Workflow, WorkflowStatus } from "./types";
-import { circleCIPipelines, circleCIWorkflowsPipelines } from "./circleci-functions";
+import { circleCIJobs, circleCIPipelines, circleCIWorkflowsPipelines } from "./circleci-functions";
 
 // noinspection JSUnusedGlobalSymbols
 export default function WorkflowList() {
@@ -48,29 +48,23 @@ const WorkflowListItem = ({ workflow }: { workflow: Workflow }) =>
     accessoryTitle={getWorkflowAccessoryTitle(workflow)}
     accessoryIcon={getWorkflowAccessoryIcon(workflow)}
     actions={getWorkflowActions(workflow)}
-  />
+  />;
 
 function JobList({ workflow }: { workflow: Workflow }) {
-  const [state, setState] = useState<{ jobs: Job[] }>({ jobs: [] });
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const { id, project_slug, repository } = workflow;
 
   useEffect(() => {
-    async function fetch() {
-      const jobs = await fetchJobs(workflow);
-      setState((oldState) => ({
-        ...oldState,
-        jobs: jobs
-      }));
-    }
-
-    fetch();
+    circleCIJobs({ id })
+      .then(setJobs);
   }, []);
 
   return (
     <List
-      navigationTitle={`${workflow.project_slug} -> ${workflow.repository.branch}`}
-      isLoading={state.jobs.length === 0}
+      navigationTitle={`${project_slug} -> ${repository.branch}`}
+      isLoading={jobs.length === 0}
     >
-      {state.jobs.map((job) => (
+      {jobs.map((job) => (
         <JobListItem key={job.id} job={job} />
       ))}
     </List>
