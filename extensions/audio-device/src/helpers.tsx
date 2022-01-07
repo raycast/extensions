@@ -63,7 +63,7 @@ export function DeviceList({ type }: DeviceListProps) {
             accessoryIcon={d.uid === data.current.uid ? Icon.Checkmark : undefined}
             actions={
               <ActionPanel>
-                <SetAudioDeviceAction device={d} />
+                <SetAudioDeviceAction device={d} type={type} />
               </ActionPanel>
             }
           />
@@ -74,15 +74,16 @@ export function DeviceList({ type }: DeviceListProps) {
 
 type SetAudioDeviceActionProps = {
   device: AudioDevice;
+  type: "input" | "output";
 };
 
-function SetAudioDeviceAction({ device }: SetAudioDeviceActionProps) {
+function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
   return (
     <ActionPanel.Item
       title="Select"
       onAction={async () => {
         try {
-          await (device.isInput ? setDefaultInputDevice(device.id) : setDefaultOutputDevice(device.id));
+          await (type === "input" ? setDefaultInputDevice(device.id) : setDefaultOutputDevice(device.id));
           closeMainWindow({ clearRootSearch: true });
           popToRoot({ clearSearchBar: true });
           showHUD(`${deviceIcon(device)} Active audio device set to ${device.name}`);
