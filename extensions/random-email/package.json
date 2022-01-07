@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "generate-copy",
-      "title": "Copy random email",
+      "title": "Copy Random Email",
       "subtitle": "Random Email",
       "description": "Copies a random email to the clipboard",
       "mode": "no-view"
