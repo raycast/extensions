@@ -1,7 +1,7 @@
-import { getLocalStorageItem, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
+import { getLocalStorageItem, List, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { ListCircleCIProjects } from "./ListCircleCIProjects";
 import { circleCIListProjects } from "./circleci-functions";
+import { ProjectListItem } from "./components/ProjectListItem";
 
 
 const Command = () => {
@@ -9,6 +9,7 @@ const Command = () => {
   const [projectURIs, setProjectURIs] = useState<string[]>([]);
 
   let temp: string[] = [];
+
   const restore = (list: string[]) => {
     setProjectURIs(list);
     setIsLoading(false);
@@ -33,11 +34,12 @@ const Command = () => {
       .catch(showErrorRestoreList(temp, restore));
   }, []);
 
-  return <ListCircleCIProjects
-    isLoading={isLoading}
-    uris={projectURIs}
-    onReload={reload}
-  />;
+  return <List isLoading={isLoading}>
+    {projectURIs
+      .map(uri => ({ uri, name: uri.replace(/^https?:\/\/[^/]+\//, "") }))
+      .map(({uri, name}) => <ProjectListItem key={uri} uri={uri} name={name} onReload={reload} />)
+    }
+  </List>;
 };
 
 // noinspection JSUnusedGlobalSymbols
