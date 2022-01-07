@@ -1,5 +1,5 @@
 import { getLocalStorageItem, List, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { circleCIListProjects } from "./circleci-functions";
 import { ProjectListItem } from "./components/ProjectListItem";
 
@@ -35,9 +35,10 @@ const Command = () => {
   }, []);
 
   return <List isLoading={isLoading}>
-    {projectURIs
-      .map(uri => ({ uri, name: uri.replace(/^https?:\/\/[^/]+\//, "") }))
-      .map(({uri, name}) => <ProjectListItem key={uri} uri={uri} name={name} onReload={reload} />)
+    {
+      projectURIs
+        .map(uri => ({ uri, name: uri.replace(/^https?:\/\/[^/]+\//, "") }))
+        .map(({ uri, name }) => <ProjectListItem key={uri} uri={uri} name={name} onReload={reload} />)
     }
   </List>;
 };
@@ -84,7 +85,5 @@ const cacheIfPulled = ({ list, cache }: { list: string[], cache: boolean }) =>
 
 const showErrorRestoreList =
   (list: string[], restore: (list: string[]) => void) =>
-    (e: Error) => {
-      showToast(ToastStyle.Failure, e.message);
-      restore(list);
-    };
+    (e: Error) => showToast(ToastStyle.Failure, e.message)
+      .then(() => restore(list));
