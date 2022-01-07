@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import fetch from "node-fetch";
 import { useEffect, useState } from "react";
-import { Job, JobStatus, Pipeline, Preferences, Workflow, WorkflowStatus } from "./types";
+import { Job, JobStatus, Preferences, Workflow, WorkflowStatus } from "./types";
 import { circleCIPipelines, circleCIWorkflowsPipelines } from "./circleci-functions";
 
 // noinspection JSUnusedGlobalSymbols
@@ -106,57 +106,6 @@ async function fetchJobs(workflow: Workflow): Promise<Job[]> {
     return (json as Record<string, unknown>).items as Job[];
   } catch (error) {
     showToast(ToastStyle.Failure, `Could not load jobs due to ${error}`);
-    return Promise.resolve([]);
-  }
-}
-
-async function fetchWorkflows(pipelines: Pipeline[]): Promise<Workflow[]> {
-  try {
-    const preferences: Preferences = getPreferenceValues();
-    const workflowsPromises = pipelines.map(async (pipeline) => {
-      const response = await fetch(`https://circleci.com/api/v2/pipeline/${pipeline.id}/workflow`, {
-        method: "GET",
-        headers: {
-          "Circle-Token": preferences.apiKey
-        }
-      });
-
-      const json = await response.json();
-      const items = ((json as Record<string, unknown>).items as Workflow[]).map((workflow) => {
-        workflow.repository = pipeline.vcs;
-        workflow.pipeline_number = pipeline.number;
-        return workflow;
-      });
-      return items;
-    });
-    const values = await Promise.all(workflowsPromises);
-    return values.flat();
-  } catch (error) {
-    showToast(ToastStyle.Failure, `Could not load workflows due to ${error}`);
-    return [];
-  }
-}
-
-async function fetchPipelines(): Promise<Pipeline[]> {
-  try {
-    const preferences: Preferences = getPreferenceValues();
-    const response = await fetch(
-      "https://circleci.com/api/v2/pipeline?" +
-      new URLSearchParams({
-        "org-slug": preferences.orgSlug
-      }),
-      {
-        method: "GET",
-        headers: {
-          "Circle-Token": preferences.apiKey
-        }
-      }
-    );
-
-    const json = await response.json();
-    return (json as Record<string, unknown>).items as Pipeline[];
-  } catch (error) {
-    showToast(ToastStyle.Failure, `Could not load pipelines due to ${error}`);
     return Promise.resolve([]);
   }
 }
