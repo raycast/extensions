@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, PasteAction, getPreferenceValues, List } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, List, PasteAction, environment, getPreferenceValues } from "@raycast/api";
 import fs from "node:fs";
 
 interface Preferences {
@@ -8,7 +8,7 @@ interface Preferences {
 export default function Command() {
   const prefs: Preferences = getPreferenceValues();
   const symbols: { name: string; symbol: string; categories: string[] }[] = JSON.parse(
-    fs.readFileSync(`.${__dirname}/assets/symbols.json`, { encoding: "utf8" })
+    fs.readFileSync(`.${environment.assetsPath}/symbols.json`, { encoding: "utf8" })
   );
 
   return (
