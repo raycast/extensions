@@ -1,4 +1,4 @@
-var replacements = [
+const replacements = [
   [/\*/g, "\\*", "asterisks"],
   [/#/g, "\\#", "number signs"],
   [/\//g, "\\/", "slashes"],
@@ -13,9 +13,9 @@ var replacements = [
   [/-/g, "\n\\-", "hyphen"],
 ];
 
-export default function (string, skips = []) {
+export default function (string: string, skips: [] = []) {
   return replacements.reduce(function (string, replacement) {
-    var name = replacement[2];
+    const name: RegExp | string = replacement[2];
     return name && skips.indexOf(name) !== -1 ? string : string.replace(replacement[0], replacement[1]);
   }, string);
 }
