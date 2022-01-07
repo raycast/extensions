@@ -1,5 +1,5 @@
 import { ActionPanel, Icon, List, OpenInBrowserAction, PushAction, SubmitFormAction } from "@raycast/api";
-import { ListCircleCIProjectPipelines } from "../ListCircleCIProjectPipelines";
+import { ListCircleCIProjectPipelines } from "./ListCircleCIProjectPipelines";
 import { uriToLongerSlug } from "../utils";
 
 

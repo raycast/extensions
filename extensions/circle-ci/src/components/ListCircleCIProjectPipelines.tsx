@@ -1,8 +1,8 @@
 import {ActionPanel, Icon, List, OpenInBrowserAction, showToast, SubmitFormAction, ToastStyle} from "@raycast/api";
 import {useEffect, useState} from "react";
-import {circleCIProjectPipelines, circleCIWorkflows} from "./circleci-functions";
-import {uriToLongerSlug} from "./utils";
-import { Pipeline } from "./types";
+import {circleCIProjectPipelines, circleCIWorkflows} from "../circleci-functions";
+import {uriToLongerSlug} from "../utils";
+import { Pipeline } from "../types";
 
 interface Params {
   full_name: string;
