@@ -2,18 +2,14 @@ import {
   ActionPanel,
   Color,
   CopyToClipboardAction,
-  getPreferenceValues,
   Icon,
   ImageLike,
   List,
   OpenInBrowserAction,
-  PushAction,
-  showToast,
-  ToastStyle
+  PushAction
 } from "@raycast/api";
-import fetch from "node-fetch";
 import { useEffect, useState } from "react";
-import { Job, JobStatus, Preferences, Workflow, WorkflowStatus } from "./types";
+import { Job, JobStatus, Workflow, WorkflowStatus } from "./types";
 import { circleCIJobs, circleCIPipelines, circleCIWorkflowsPipelines } from "./circleci-functions";
 
 // noinspection JSUnusedGlobalSymbols
@@ -84,24 +80,6 @@ function JobListItem(props: { job: Job }) {
       accessoryIcon={getJobAccessoryIcon(job)}
     />
   );
-}
-
-async function fetchJobs(workflow: Workflow): Promise<Job[]> {
-  try {
-    const preferences: Preferences = getPreferenceValues();
-    const response = await fetch(`https://circleci.com/api/v2/workflow/${workflow.id}/job`, {
-      method: "GET",
-      headers: {
-        "Circle-Token": preferences.apiKey
-      }
-    });
-
-    const json = await response.json();
-    return (json as Record<string, unknown>).items as Job[];
-  } catch (error) {
-    showToast(ToastStyle.Failure, `Could not load jobs due to ${error}`);
-    return Promise.resolve([]);
-  }
 }
 
 function getWorkflowAccessoryTitle(workflow: Workflow): string {
