@@ -1,5 +1,5 @@
 import { ActionPanel, Icon, List, OpenInBrowserAction, PushAction, SubmitFormAction } from "@raycast/api";
-import { ListCircleCIProjectPipelines } from "./ListCircleCIProjectPipelines";
+import { ListProjectPipelines } from "./ListProjectPipelines";
 import { uriToLongerSlug } from "../utils";
 
 
@@ -20,7 +20,7 @@ export const ProjectListItem = ({ uri, name, onReload }: { uri: string, name: st
           title={"List Pipelines"}
           icon={Icon.Binoculars}
           shortcut={{ key: "p", modifiers: ["cmd", "shift"] }}
-          target={<ListCircleCIProjectPipelines full_name={name} uri={uri} />}
+          target={<ListProjectPipelines full_name={name} uri={uri} />}
         />
         <OpenInBrowserAction
           title="Project Settings"

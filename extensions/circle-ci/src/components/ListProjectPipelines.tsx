@@ -9,7 +9,7 @@ interface Params {
   uri: string;
 }
 
-export const ListCircleCIProjectPipelines = ({ full_name, uri }: Params) => {
+export const ListProjectPipelines = ({ full_name, uri }: Params) => {
   const [isLoading, setIsLoading] = useState(true);
   const [pipelines, setPipelines] = useState<Pipeline[]>([]);
 
