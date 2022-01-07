@@ -38,22 +38,17 @@ export default function WorkflowList() {
   );
 }
 
-function WorkflowListItem(props: { workflow: Workflow }) {
-  const workflow = props.workflow;
-
-  return (
-    <List.Item
-      id={workflow.id}
-      icon={{ source: Icon.Hammer, tintColor: Color.SecondaryText }}
-      key={workflow.id}
-      title={workflow.project_slug}
-      subtitle={workflow.repository.branch}
-      accessoryTitle={getWorkflowAccessoryTitle(workflow)}
-      accessoryIcon={getWorkflowAccessoryIcon(workflow)}
-      actions={getWorkflowActions(workflow)}
-    />
-  );
-}
+const WorkflowListItem = ({ workflow }: { workflow: Workflow }) =>
+  <List.Item
+    id={workflow.id}
+    icon={{ source: Icon.Hammer, tintColor: Color.SecondaryText }}
+    key={workflow.id}
+    title={workflow.project_slug}
+    subtitle={workflow.repository.branch}
+    accessoryTitle={getWorkflowAccessoryTitle(workflow)}
+    accessoryIcon={getWorkflowAccessoryIcon(workflow)}
+    actions={getWorkflowActions(workflow)}
+  />
 
 function JobList({ workflow }: { workflow: Workflow }) {
   const [state, setState] = useState<{ jobs: Job[] }>({ jobs: [] });
