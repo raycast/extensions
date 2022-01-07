@@ -1,10 +1,6 @@
 import { render } from "@raycast/api";
-import { isSwitchAudioInstalled, DependenciesNotMet, DeviceList } from "./helpers";
+import { DeviceList } from "./helpers";
 
 export default async function main() {
-  if (isSwitchAudioInstalled()) {
-    render(<DeviceList type="output" />);
-  } else {
-    render(<DependenciesNotMet />);
-  }
+  render(<DeviceList type="output" />);
 }

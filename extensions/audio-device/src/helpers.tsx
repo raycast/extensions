@@ -1,22 +1,14 @@
-import {
-  ActionPanel,
-  closeMainWindow,
-  Detail,
-  Icon,
-  List,
-  popToRoot,
-  preferences,
-  showHUD,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
-import fs from "fs";
+import { ActionPanel, closeMainWindow, Icon, List, popToRoot, showHUD, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { AudioDevice } from "./audio-device";
-import { exec } from "child_process";
-import { promisify } from "util";
-
-const execp = promisify(exec);
+import {
+  AudioDevice,
+  getInputDevices,
+  getOutputDevices,
+  getDefaultInputDevice,
+  getDefaultOutputDevice,
+  setDefaultInputDevice,
+  setDefaultOutputDevice,
+} from "./audio-device";
 
 type UseAudioDevicesResponse = {
   isLoading: boolean;
@@ -32,10 +24,8 @@ export function useAudioDevices(type: "input" | "output") {
 
   useEffect(() => {
     const fetchDevices = async () => {
-      const allDevicesResult = await execp(`${switchAudioPath()} -a -t ${type} -f json`);
-      const currentDeviceResult = await execp(`${switchAudioPath()} -c -t ${type} -f json`);
-      const devices = parseSwitchAudioOutput(allDevicesResult.stdout);
-      const current = parseSwitchAudioOutput(currentDeviceResult.stdout)[0];
+      const devices = await (type === "input" ? getInputDevices() : getOutputDevices());
+      const current = await (type === "input" ? getDefaultInputDevice() : getDefaultOutputDevice());
 
       return {
         devices,
@@ -45,7 +35,7 @@ export function useAudioDevices(type: "input" | "output") {
 
     fetchDevices()
       .then(setAudioDevices)
-      .catch(() => showToast(ToastStyle.Failure, `Error!`, `There was an error fetching the audio devices.`))
+      .catch((err) => showToast(ToastStyle.Failure, `There was an error fetching the audio devices.`, err.message))
       .finally(() => setIsLoading(false));
   }, [type]);
 
@@ -92,7 +82,7 @@ function SetAudioDeviceAction({ device }: SetAudioDeviceActionProps) {
       title="Select"
       onAction={async () => {
         try {
-          await execp(`${switchAudioPath()} -t ${device.type} -i ${device.id}`);
+          await (device.isInput ? setDefaultInputDevice(device.id) : setDefaultOutputDevice(device.id));
           closeMainWindow({ clearRootSearch: true });
           popToRoot({ clearSearchBar: true });
           showHUD(`${deviceIcon(device)} Active audio device set to ${device.name}`);
@@ -106,37 +96,5 @@ function SetAudioDeviceAction({ device }: SetAudioDeviceActionProps) {
 }
 
 export function deviceIcon(device: AudioDevice) {
-  return device.type === "input" ? "🎙" : "🔈";
-}
-
-export function parseSwitchAudioOutput(raw: string): AudioDevice[] {
-  return raw
-    .split("\n")
-    .filter((x) => !!x)
-    .map((x) => JSON.parse(x));
-}
-
-export function switchAudioPath() {
-  return preferences.switchAudioSourcePath.value as string;
-}
-
-export function isSwitchAudioInstalled() {
-  try {
-    return fs.existsSync(switchAudioPath());
-  } catch (e) {
-    return false;
-  }
-}
-
-export function DependenciesNotMet() {
-  const msg = `
-  # switchaudio-osx not installed
-  Please install the switchaudio-osx package via Homebrew by running the following command.
-
-  \`brew install switchaudio-osx\`
-
-  You can find more information over [here](https://github.com/deweller/switchaudio-osx).
-  `;
-
-  return <Detail navigationTitle="switchaudio-osx not installed" markdown={msg} />;
+  return device.isInput ? "🎙" : "🔈";
 }
