@@ -38,7 +38,7 @@ export const circleCIWorkflows = ({ id }: { id: string }): Promise<Workflow[]> =
     .then(json => json.items);
 
 
-export const circleCIWorkflowsPipelines = ({ pipelines }: { pipelines: Pipeline[] }) => {
+export const circleCIWorkflowsPipelines = ({ pipelines }: { pipelines: Pipeline[] }): Promise<Workflow[][]> => {
   return Promise.all(
     pipelines.map(
       pipeline => {
