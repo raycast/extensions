@@ -17,7 +17,8 @@ enum StorageKey {
 
 export class Client {
   public readonly url: string;
-  public baseURL?: string;
+  public projectBaseURL?: string;
+  public wikiBaseURL?: string;
   private readonly baseAPI: string;
   private httpClient?: AxiosInstance;
   private email?: string;
@@ -137,7 +138,8 @@ export class Client {
         }
       }
 
-      this.baseURL = `${this.url}/project/#/team/${this.teamUUID}`;
+      this.projectBaseURL = `${this.url}/project/#/team/${this.teamUUID}`;
+      this.wikiBaseURL = `${this.url}/wiki/#/team/${this.teamUUID}`;
     } catch (err) {
       return Promise.reject(err);
     }
