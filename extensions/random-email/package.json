@@ -16,7 +16,7 @@
     },
     {
       "name": "generate-paste",
-      "title": "Paste random email",
+      "title": "Paste Random Email",
       "subtitle": "Random Email",
       "description": "Pastes a random email to the current selection of the frontmost application",
       "mode": "no-view"
