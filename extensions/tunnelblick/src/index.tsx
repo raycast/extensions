@@ -1,8 +1,9 @@
-import { ActionPanel, Detail, List, PushAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, List, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript, runAppleScriptSync } from "run-applescript";
+import { Connection } from "./types/connection";
 
-async function getVpnConnections() {
+async function getVpnConnections(): Promise<Connection[]> {
   const result = await runAppleScript(`
     tell application "Tunnelblick" to get configurations
   `)
@@ -24,10 +25,10 @@ async function getVpnConnections() {
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true)
-  const [connections, setConnections] = useState<any>([])
+  const [connections, setConnections] = useState<Connection[]>([])
 
   useEffect(() => {
-    getVpnConnections().then(connections => {
+    getVpnConnections().then((connections: Connection[]) => {
       setConnections(connections)
       setIsLoading(false)
     })
@@ -35,7 +36,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {connections.map((connection: any) => (
+      {connections.map(connection => (
         <List.Item
           key={connection.name}
           icon={connection.status === "EXITING" ? "xmark-circle-16" : "checkmark-circle-16"}
