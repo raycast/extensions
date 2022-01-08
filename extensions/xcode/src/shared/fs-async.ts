@@ -5,10 +5,8 @@ import { PathLike } from "node:fs";
  * Exists
  */
 export const existsAsync = (path: PathLike) => {
-  return fs.promises.access(
-    path,
-    fs.constants.F_OK
-  )
+  return fs.promises
+    .access(path, fs.constants.F_OK)
     .then(() => true)
     .catch(() => false);
 };

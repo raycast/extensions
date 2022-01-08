@@ -58,36 +58,6 @@ export default async () => {
 
 A promise that resolves when the text got copied to the clipboard.
 
-### getSelectedText
-
-Gets the selected text of the frontmost application.
-
-#### Signature
-
-```typescript
-async function getSelectedText(): Promise<string>
-```
-
-#### Example
-
-```typescript
-import { getSelectedText, pasteText, showToast, ToastStyle } from "@raycast/api";
-
-export default async () => {
-  try {
-    const selectedText = await getSelectedText();
-    const transformedText = selectedText.toUpperCase();
-    await pasteText(transformedText);
-  } catch (error) {
-    await showToast(ToastStyle.Failure, "Cannot transform text", String(error));
-  }
-};
-```
-
-#### Return
-
-Returns a promise that resolves with the selected text.
-
 ### pasteText
 
 Pastes text to the current selection of the frontmost application.

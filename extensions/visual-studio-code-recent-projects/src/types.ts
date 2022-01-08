@@ -26,4 +26,14 @@ export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
   );
 }
 
-export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry;
+export interface RemoteEntry {
+  folderUri: string;
+  remoteAuthority: string;
+  label: string;
+}
+
+export function isRemoteEntry(entry: EntryLike): entry is RemoteEntry {
+  return isFolderEntry(entry) && (entry as RemoteEntry).remoteAuthority !== undefined;
+}
+
+export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry;

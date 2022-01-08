@@ -6,7 +6,7 @@ Use the Preferences API to make your extension configurable. Preferences can be 
 
 ### getPreferenceValues
 
-A convenience function for type-safe access to the values of the [preferences](https://developers.raycast.com/api-reference/preferences#preferences) object.
+A convenience function for type-safe access to the values of the [preferences](#preferences) object.
 
 Each preference name is mapped to its value and the defined default values are used as fallback values.
 
@@ -47,8 +47,8 @@ Contains the preference values that have been passed to the command.
 
 ### Preference
 
-Holds data about a single preference item (entered in Raycast Preferences). Use the [getPreferenceValues](https://developers.raycast.com/api-reference/preferences#getpreferencevalues)
-function or the global [preferences](https://developers.raycast.com/api-reference/preferences#preferences) object to retrieve values.
+Holds data about a single preference item (entered in Raycast Preferences). Use the [getPreferenceValues](#getpreferencevalues)
+function or the global [preferences](#preferences) object to retrieve values.
 
 The object maps to a defined preference in the `package.json` manifest file.
 
