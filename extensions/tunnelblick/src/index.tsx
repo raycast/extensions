@@ -3,13 +3,13 @@ import { useEffect, useState } from "react";
 import { runAppleScript, runAppleScriptSync } from "run-applescript";
 
 async function getVpnConnections() {
-  let result = await runAppleScript(`
+  const result = await runAppleScript(`
     tell application "Tunnelblick" to get configurations
   `)
 
-  let connections = result.split(",").map(connection => {
-    let name = connection.replace("configuration ", "").trim()
-    let status = runAppleScriptSync(`
+  const connections = result.split(",").map(connection => {
+    const name = connection.replace("configuration ", "").trim()
+    const status = runAppleScriptSync(`
       tell application "Tunnelblick" to get state of first configuration where name = "${name}"
     `)
 
