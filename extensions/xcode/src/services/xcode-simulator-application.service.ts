@@ -10,7 +10,6 @@ import { joinPathComponents } from "../shared/join-path-components";
  * XcodeSimulatorApplicationService
  */
 export class XcodeSimulatorApplicationService {
-
   /**
    * The XcodeSimulatorService
    */
@@ -42,9 +41,7 @@ export class XcodeSimulatorApplicationService {
    * Cache XcodeSimulatorApplications
    * @param xcodeSimulatorApplications The XcodeSimulatorApplications that should be cached
    */
-  private cacheXcodeSimulatorApplication(
-    xcodeSimulatorApplications: XcodeSimulatorApplication[]
-  ): Promise<void> {
+  private cacheXcodeSimulatorApplication(xcodeSimulatorApplications: XcodeSimulatorApplication[]): Promise<void> {
     // Store XcodeSimulatorApplications JSON in LocalStorage
     return setLocalStorageItem(
       this.xcodeSimulatorApplicationsJSONLocalStorageKey,
@@ -72,19 +69,11 @@ export class XcodeSimulatorApplicationService {
    * Find all installed applications of the given XcodeSimulator
    * @param simulator The XcodeSimulator
    */
-  private async findXcodeSimulatorApplications(
-    simulator: XcodeSimulator
-  ): Promise<XcodeSimulatorApplication[]> {
+  private async findXcodeSimulatorApplications(simulator: XcodeSimulator): Promise<XcodeSimulatorApplication[]> {
     // The container application directory path
-    const containerApplicationDirectoryPath = joinPathComponents(
-      simulator.dataPath,
-      "Containers/Bundle/Application"
-    );
+    const containerApplicationDirectoryPath = joinPathComponents(simulator.dataPath, "Containers/Bundle/Application");
     /// The container sandbox directory path
-    const containerSandboxDirectoryPath = joinPathComponents(
-      simulator.dataPath,
-      "Containers/Data/Application"
-    );
+    const containerSandboxDirectoryPath = joinPathComponents(simulator.dataPath, "Containers/Data/Application");
     // Declare Application Directory Paths
     let applicationDirectoryPaths: string[];
     // Declare SandBox Directory Paths
@@ -93,48 +82,38 @@ export class XcodeSimulatorApplicationService {
     let sandBoxDirectoryBundleIds: string[];
     try {
       // Read application child directories paths
-      applicationDirectoryPaths = await readDirectoryAsync(
-        containerApplicationDirectoryPath,
-        {
-          withFileTypes: true
-        }
-      ).then(entries => {
+      applicationDirectoryPaths = await readDirectoryAsync(containerApplicationDirectoryPath, {
+        withFileTypes: true,
+      }).then((entries) => {
         return entries
-          .filter(entry => entry.isDirectory())
-          .map(entry => joinPathComponents(containerApplicationDirectoryPath, entry.name));
+          .filter((entry) => entry.isDirectory())
+          .map((entry) => joinPathComponents(containerApplicationDirectoryPath, entry.name));
       });
       // Read SandBox child directory paths
-      sandBoxDirectoryPaths = await readDirectoryAsync(
-        containerSandboxDirectoryPath,
-        {
-          withFileTypes: true
-        }
-      ).then(entries => {
+      sandBoxDirectoryPaths = await readDirectoryAsync(containerSandboxDirectoryPath, {
+        withFileTypes: true,
+      }).then((entries) => {
         return entries
-          .filter(entry => entry.isDirectory())
-          .map(entry => joinPathComponents(containerSandboxDirectoryPath, entry.name));
+          .filter((entry) => entry.isDirectory())
+          .map((entry) => joinPathComponents(containerSandboxDirectoryPath, entry.name));
       });
       // Read SandBox Bundle identifiers for each SandBox directory path
       sandBoxDirectoryBundleIds = (
         await execAsync(
           sandBoxDirectoryPaths
-            .map(sandBoxDirectoryPath => {
+            .map((sandBoxDirectoryPath) => {
               return [
                 "defaults",
                 "read",
-                joinPathComponents(
-                  sandBoxDirectoryPath,
-                  ".com.apple.mobile_container_manager.metadata.plist"
-                ),
-                "MCMMetadataIdentifier"
+                joinPathComponents(sandBoxDirectoryPath, ".com.apple.mobile_container_manager.metadata.plist"),
+                "MCMMetadataIdentifier",
               ].join(" ");
             })
             .join(" && ")
         )
-      )
-        .stdout
+      ).stdout
         .split("\n")
-        .map(bundleId => bundleId.trim());
+        .map((bundleId) => bundleId.trim());
     } catch {
       // On error return empty applications
       return [];
@@ -156,18 +135,16 @@ export class XcodeSimulatorApplicationService {
     }
     // Retrieve all Applications in parallel
     const applications = await Promise.all(
-      applicationDirectoryPaths
-        .map(applicationDirectoryPath => {
-          return XcodeSimulatorApplicationService.findXcodeSimulatorApplication(
-            simulator,
-            applicationDirectoryPath,
-            sandBoxBundleIdDirectoryPathMap
-          );
-        })
+      applicationDirectoryPaths.map((applicationDirectoryPath) => {
+        return XcodeSimulatorApplicationService.findXcodeSimulatorApplication(
+          simulator,
+          applicationDirectoryPath,
+          sandBoxBundleIdDirectoryPathMap
+        );
+      })
     );
     // Filter out falsy values and return Applications
-    return applications
-      .filter(application => !!application) as XcodeSimulatorApplication[];
+    return applications.filter((application) => !!application) as XcodeSimulatorApplication[];
   }
 
   /**
@@ -187,7 +164,7 @@ export class XcodeSimulatorApplicationService {
       // Retrieve file names in application directory
       const fileNames = await readDirectoryAsync(applicationDirectoryPath);
       // Initialize matching application file name where file name ends with '.app'
-      const matchingApplicationFileName = fileNames.find(fileName => fileName.endsWith(".app"));
+      const matchingApplicationFileName = fileNames.find((fileName) => fileName.endsWith(".app"));
       // Check if matching application file name is unavailable
       if (!matchingApplicationFileName) {
         // Return no application
@@ -224,7 +201,7 @@ export class XcodeSimulatorApplicationService {
                  the output will be printed in the stdout instead into a local file
                  Read more: https://www.manpagez.com/man/1/plutil/
               */
-              "-"
+              "-",
             ].join(" ")
           )
         ).stdout.trim()
@@ -254,15 +231,10 @@ export class XcodeSimulatorApplicationService {
     // Retrieve application name from Info.plist
     // by either using the `CFBundleDisplayName` or `CFBundleName`
     // otherwise use application file name as fallback
-    const applicationName = infoPlistJSON["CFBundleDisplayName"]
-      ?? infoPlistJSON["CFBundleName"]
-      ?? applicationFileName.split(".")[0];
+    const applicationName =
+      infoPlistJSON["CFBundleDisplayName"] ?? infoPlistJSON["CFBundleName"] ?? applicationFileName.split(".")[0];
     // Retrieve primary app icon name from Info.plist
-    const primaryAppIconName = infoPlistJSON
-      ["CFBundleIcons"]
-      ?.["CFBundlePrimaryIcon"]
-      ?.["CFBundleIconFiles"]
-      ?.at(0);
+    const primaryAppIconName = infoPlistJSON["CFBundleIcons"]?.["CFBundlePrimaryIcon"]?.["CFBundleIconFiles"]?.at(0);
     // Declare an optional app icon path
     let appIconPath: string | undefined;
     // Check if a primary app icon name is available
@@ -273,16 +245,13 @@ export class XcodeSimulatorApplicationService {
           joinPathComponents(applicationDirectoryPath, applicationFileName)
         );
         // Find matching application file name that starts with the primary app icon name
-        const matchingApplicationFileName = applicationFileNames
-          .find(fileName => fileName.startsWith(primaryAppIconName));
+        const matchingApplicationFileName = applicationFileNames.find((fileName) =>
+          fileName.startsWith(primaryAppIconName)
+        );
         // Check if a matching application file name is available
         if (matchingApplicationFileName) {
           // Initialize app icon path
-          appIconPath = joinPathComponents(
-            applicationDirectoryPath,
-            applicationFileName,
-            matchingApplicationFileName
-          );
+          appIconPath = joinPathComponents(applicationDirectoryPath, applicationFileName, matchingApplicationFileName);
         }
       } catch {
         // Simply ignore this error
@@ -300,8 +269,7 @@ export class XcodeSimulatorApplicationService {
       bundlePath: applicationDirectoryPath,
       sandBoxPath: sandBoxDirectoryPath,
       sandBoxDocumentsPath: joinPathComponents(sandBoxDirectoryPath, "Documents"),
-      sandBoxCachesPath: joinPathComponents(sandBoxDirectoryPath, "Library", "Caches")
+      sandBoxCachesPath: joinPathComponents(sandBoxDirectoryPath, "Library", "Caches"),
     };
   }
-
 }

@@ -119,6 +119,13 @@
       "subtitle": "GitLab",
       "description": "Recent GitLab Activities",
       "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Set Status",
+      "subtitle": "GitLab",
+      "description": "Managed My GitLab Status",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -146,11 +153,13 @@
     "apollo-link-context": "^1.0.20",
     "fuse.js": "^6.4.6",
     "graphql": "^15.5.1",
+    "javascript-time-ago": "^2.3.10",
     "node-fetch": "^2.6.1",
     "open": "^8.2.1"
   },
   "devDependencies": {
     "@types/node": "^16.4.3",
+    "@types/node-emoji": "^1.8.1",
     "@types/node-fetch": "^2.5.12",
     "@types/open": "^6.2.1",
     "@types/react": "^17.0.20",

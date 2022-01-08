@@ -1,8 +1,8 @@
-import { Database } from 'sql.js';
-import { getProfileName, historyDbPath } from '../utils/pathUtils';
-import { loadDataToLocalDb, termsAsParamNames, termsAsParams } from '../utils/sqlUtils';
-import { NullableString, UrlDetail, UrlSearchResult } from '../schema/types';
-import { useUrlSearch } from './useUrlSearch';
+import { Database } from "sql.js";
+import { getProfileName, historyDbPath } from "../utils/pathUtils";
+import { loadDataToLocalDb, termsAsParamNames, termsAsParams } from "../utils/sqlUtils";
+import { NullableString, UrlDetail, UrlSearchResult } from "../schema/types";
+import { useUrlSearch } from "./useUrlSearch";
 
 const loadHistoryToLocalDb = async (): Promise<Database> => {
   const profileName = getProfileName();

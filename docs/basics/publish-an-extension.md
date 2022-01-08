@@ -28,7 +28,7 @@ We're still figuring things out and update our guidelines. If something is uncle
 
 ### Share your extension
 
-Once your extension is published in the Rayast Store, you can share it with our community. Open the Manage Extensions command, search for your extension and press `⌘` `⌥` `.` to copy the link.&#x20;
+Once your extension is published in the Raycast Store, you can share it with our community. Open the Manage Extensions command, search for your extension and press `⌘` `⌥` `.` to copy the link.&#x20;
 
 ![Manage your extensions](../.gitbook/assets/basics-manage-extensions.png)
 

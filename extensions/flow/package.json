@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "flow",
+  "title": "Flow Timer",
+  "description": "Control Flow application timer",
+  "icon": "flow.png",
+  "author": "vimtor",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "subtitle": "Flow",
+      "description": "Start or resume timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "subtitle": "Flow",
+      "description": "Stop or pause timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "skip-session",
+      "title": "Skip Session",
+      "subtitle": "Flow",
+      "description": "Skip current session",
+      "mode": "no-view"
+    },
+    {
+      "name": "hide-timer",
+      "title": "Hide Timer",
+      "subtitle": "Flow",
+      "description": "Hide visible timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-timer",
+      "title": "Show Timer",
+      "subtitle": "Flow",
+      "description": "Show current timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "reset-timer",
+      "title": "Reset Timer",
+      "subtitle": "Flow",
+      "description": "Reset current timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "quit-flow",
+      "title": "Quit Flow",
+      "description": "Quit Flow application",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.1",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

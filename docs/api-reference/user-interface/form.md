@@ -6,14 +6,14 @@ Gonna put some content here.
 
 ### Form
 
-Shows a list of form items such as FormViewTextField, FormViewCheckbox or FormViewDropdown.
+Shows a list of form items such as [Form.TextField](#form.textfield), [Form.Checkbox](#form.checkbox) or [Form.Dropdown](#form.dropdown).
 
 #### Props
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| actions | <code>null</code> or <code>[ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel)</code> | No | - | A reference to an [ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel). |
-| children | <code>null</code> or <code>ReactElement&lt;FormItemProps&lt;FormValue>, string></code> or <code>ReactElement&lt;FormItemProps&lt;FormValue>, string>[]</code> | No | - | The FormItemElement elements of the form. |
+| actions | <code>null</code> or <code>[ActionPanel](./action-panel.md#actionpanel)</code> | No | - | A reference to an [ActionPanel](./action-panel.md#actionpanel). |
+| children | <code>null</code> or <code>ReactElement&lt;FormItemProps&lt;FormValue>, string></code> or <code>ReactElement&lt;FormItemProps&lt;FormValue>, string>[]</code> | No | - | The Form.Item elements of the form. |
 | isLoading | <code>boolean</code> | No | false | Indicates whether a loading bar should be shown or hidden below the search bar |
 | navigationTitle | <code>string</code> | No | Command title | The main title for that view displayed in Raycast |
 
@@ -180,7 +180,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | <code>null</code> or <code>[Form.Dropdown.Section](https://developers.raycast.com/api-reference/user-interface/form#form-dropdown-section)</code> or <code>Form.Dropdown.Section[]</code> or <code>[Form.Dropdown.Item](https://developers.raycast.com/api-reference/user-interface/form#form-dropdown-item)</code> or <code>Form.Dropdown.Item[]</code> | No | - | Sections or items. If [FormDropdownItem](https://developers.raycast.com/api-reference/user-interface/form#formdropdownitem) elements are specified, a default section is automatically created. |
+| children | <code>null</code> or <code>[Form.Dropdown.Section](#form.dropdown.section)</code> or <code>Form.Dropdown.Section[]</code> or <code>[Form.Dropdown.Item](#form.dropdown.item)</code> or <code>Form.Dropdown.Item[]</code> | No | - | Sections or items. If [FormDropdownItem](#formdropdownitem) elements are specified, a default section is automatically created. |
 | defaultValue | <code>string</code> | No | - | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
 | id | <code>string</code> | Yes | - | ID of the form item. Make sure to assign each form item a unique id. |
 | storeValue | <code>boolean</code> | No | - | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. |
@@ -212,7 +212,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | A optional icon displayed for the item. See [ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike) for the supported formats and types. |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | - | A optional icon displayed for the item. See [ImageLike](./icons-and-images.md#imagelike) for the supported formats and types. |
 | title | <code>string</code> | Yes | - | The title displayed for the item. |
 | value | <code>string</code> | Yes | - | Value of the dropdown item. Make sure to assign each unique value for each item. |
 
@@ -249,7 +249,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | <code>null</code> or <code>[Form.Dropdown.Item](https://developers.raycast.com/api-reference/user-interface/form#form-dropdown-item)</code> or <code>Form.Dropdown.Item[]</code> | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
+| children | <code>null</code> or <code>[Form.Dropdown.Item](#form.dropdown.item)</code> or <code>Form.Dropdown.Item[]</code> | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
 | title | <code>string</code> | No | - | Title displayed above the section |
 
 ### Form.Separator
@@ -335,7 +335,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | <code>null</code> or <code>[Form.TagPicker.Item](https://developers.raycast.com/api-reference/user-interface/form#form-tagpicker-item)</code> or <code>Form.TagPicker.Item[]</code> | No | - | The list of tag picker's items. |
+| children | <code>null</code> or <code>[Form.TagPicker.Item](#form.tagpicker.item)</code> or <code>Form.TagPicker.Item[]</code> | No | - | The list of tag picker's items. |
 | defaultValue | <code>string[]</code> | No | - | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
 | id | <code>string</code> | Yes | - | ID of the form item. Make sure to assign each form item a unique id. |
 | placeholder | <code>string</code> | No | - | Placeholder text shown in the token field. |
@@ -346,7 +346,7 @@ export default function Command() {
 
 ### Form.TagPicker.Item
 
-A tag picker item in a [FormTagPicker](https://developers.raycast.com/api-reference/user-interface/form#formtagpicker).
+A tag picker item in a [FormTagPicker](#formtagpicker).
 
 #### Example
 
@@ -368,7 +368,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | An icon to show in the token. |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | - | An icon to show in the token. |
 | title | <code>string</code> | Yes | - | The display title of the token. |
 | value | <code>string</code> | Yes | - | Value of the tag picker item. Make sure to assign unique value for each item. |
 

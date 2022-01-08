@@ -1,0 +1,38 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "toolbox",
+  "title": "ToolBox",
+  "description": "Collection of scripts that process data",
+  "icon": "icon.png",
+  "author": "Kang",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "ToolBox",
+      "subtitle": "Tools",
+      "description": "Collection of scripts that process data",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.6",
+    "@types/lodash": "^4.14.177",
+    "execa": "^6.0.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

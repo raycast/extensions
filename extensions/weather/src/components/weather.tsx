@@ -51,7 +51,6 @@ export function WeatherList() {
 
   const area = data.nearest_area[0];
   const curcon = data.current_condition[0];
-  const curcon_data = curcon as any;
 
   const title = `${area.areaName[0].value}, ${area.region[0].value}, ${area.country[0].value}`;
 

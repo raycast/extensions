@@ -243,7 +243,7 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
                 },
               }}
               title={"Download " + nameFormatted + " as White .PNG"}
-              url={ apiPathDark + name + ".png"}
+              url={apiPathDark + name + ".png"}
             />
             <OpenInBrowserAction
               icon={{
@@ -322,14 +322,14 @@ function IconListItem(props: { name: string; svg_path: string; tsx: string; css:
           </ActionPanel.Section>
           <ActionPanel.Section title="NPM">
             <CopyToClipboardAction
-                icon={{
-                  source: {
-                    light: apiPathLight + "npm.png",
-                    dark: apiPathDark + "npm.png",
-                  },
-                }}
-                title="npm i css.gg"
-                content="npm i css.gg"
+              icon={{
+                source: {
+                  light: apiPathLight + "npm.png",
+                  dark: apiPathDark + "npm.png",
+                },
+              }}
+              title="npm i css.gg"
+              content="npm i css.gg"
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Links">

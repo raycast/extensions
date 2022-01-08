@@ -1,4 +1,4 @@
-import { ActionPanel, closeMainWindow, Form, Icon, showToast, SubmitFormAction, ToastStyle} from "@raycast/api";
+import { ActionPanel, closeMainWindow, Form, Icon, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
 import open from "open";
 import { useEffect, useState } from "react";
 import { Note } from "./bear-db";
@@ -56,7 +56,7 @@ export default function AddText({ note }: { note: Note }) {
         }&show_window=${values.openNote !== "no" ? "yes" : "no"}&edit=${
           values.openNote === "no" ? "no" : "yes"
         }&timestamp=${values.timestamp ? "yes" : "no"}&text=${encodeURIComponent(values.text)}`,
-        {background: values.openNote === "no" ? true : false}
+        { background: values.openNote === "no" ? true : false }
       );
       await closeMainWindow();
     };
@@ -79,7 +79,7 @@ export default function AddText({ note }: { note: Note }) {
         <Form.Dropdown.Item value="replace_all" title="Replace All" />
       </Form.Dropdown>
       <Form.TextArea id="text" title="Text" placeholder="Text to add to note ..." />
-      <Form.Separator/>
+      <Form.Separator />
       <Form.TextField id="tags" title="Tags" placeholder="comma,separated,tags" />
       <Form.Dropdown id="header" title="Append To Header">
         <Form.Dropdown.Item value="none" title="-" />
