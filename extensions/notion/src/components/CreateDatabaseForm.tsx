@@ -203,7 +203,7 @@ export function CreateDatabaseForm(props: { databaseId?: string; setRefreshView?
       const loadedDatabaseView = await loadDatabaseView(databaseId);
       const loadedDatabaseViewCopy = loadedDatabaseView ? JSON.parse(JSON.stringify(loadedDatabaseView)) : {};
 
-      if (loadedDatabaseViewCopy?.create_properties) {
+      if (loadedDatabaseViewCopy.create_properties) {
         setDatabaseView(loadedDatabaseViewCopy);
       } else {
         loadedDatabaseViewCopy.create_properties = [];
