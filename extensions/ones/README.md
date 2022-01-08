@@ -11,27 +11,27 @@
 ## Support
 
 - Search Content
-    - Project
-        - [x] project
-        - [x] task
-            - [x] record manhour
-            - [x] delete task
-        - [x] sprint
-        - [x] resource
-    - Wiki
-        - [x] space
-        - [x] page
-        - [x] resource
+  - Project
+    - [x] project
+    - [x] task
+      - [x] record manhour
+      - [x] delete task
+    - [x] sprint
+    - [x] resource
+  - Wiki
+    - [x] space
+    - [x] page
+    - [x] resource
 - Manage Manhour
-    - [x] query
-    - [x] modify
-    - [x] record
-    - [x] delete
+  - [x] query
+  - [x] modify
+  - [x] record
+  - [x] delete
 
 ## Preferences
 
-| Name          | Required | Description                                                        | DefaultValue    | 
-|---------------|----------|--------------------------------------------------------------------|-----------------|
+| Name          | Required | Description                                                        | DefaultValue    |
+| ------------- | -------- | ------------------------------------------------------------------ | --------------- |
 | URL           | true     | URL for ONES                                                       | https://ones.ai |
 | Email         | true     | Email for ONES                                                     |                 |
 | Password      | true     | Password for ONES                                                  |                 |

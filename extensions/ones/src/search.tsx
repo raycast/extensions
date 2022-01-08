@@ -6,7 +6,7 @@ import {
   PushAction,
   showToast,
   SubmitFormAction,
-  ToastStyle
+  ToastStyle,
 } from "@raycast/api";
 import { deleteTask, mapProjects, mapSpaces, mapTasks, mapUsers, search, SearchType } from "./lib/api";
 import { Project, SearchItem, SearchResult, Space, Task, User } from "./lib/type";
@@ -28,7 +28,7 @@ export function Search(props: Props) {
     total: 0,
     has_next: false,
     next_cursor: 0,
-    took_time: 0
+    took_time: 0,
   });
   const [loading, setLoading] = useState<boolean>(true);
   const [users, setUsers] = useState<{ [key: string]: User }>({});
@@ -110,14 +110,9 @@ export function Search(props: Props) {
   };
 
   return (
-    <List
-      isLoading={loading}
-      onSearchTextChange={onSearchTextChange}
-      throttle
-    >
-      {searchResult.datas.project ?
-        searchResult.datas.project.map(
-          (item: SearchItem, index: number) => (
+    <List isLoading={loading} onSearchTextChange={onSearchTextChange} throttle>
+      {searchResult.datas.project
+        ? searchResult.datas.project.map((item: SearchItem, index: number) => (
             <List.Item
               key={index}
               title={item.fields.name}
@@ -130,41 +125,47 @@ export function Search(props: Props) {
                 </ActionPanel>
               }
             />
-          )
-        ) : null}
-      {searchResult.datas.task ?
-        searchResult.datas.task.map(
-          (item: SearchItem, index: number) => (
+          ))
+        : null}
+      {searchResult.datas.task
+        ? searchResult.datas.task.map((item: SearchItem, index: number) => (
             <List.Item
               key={index}
-              title={`${tasks[item.fields.uuid] ? tasks[item.fields.uuid].priority?.value : ""} #${item.fields.number} ${item.fields.summary}`}
+              title={`${tasks[item.fields.uuid] ? tasks[item.fields.uuid].priority?.value : ""} #${
+                item.fields.number
+              } ${item.fields.summary}`}
               subtitle={projects[item.fields.project_uuid] ? projects[item.fields.project_uuid].name : ""}
               accessoryTitle={users[item.fields.assign] ? users[item.fields.assign].name : ""}
               accessoryIcon={users[item.fields.assign] ? users[item.fields.assign].avatar : ""}
               actions={
                 <ActionPanel>
                   <OpenInBrowserAction url={item.url ? item.url : ""} />
-                  <PushAction icon="⌛️" title="Add Manhour"
-                              target={<AddOrUpdateManhour manhourTask={tasks[item.fields.uuid]} />} />
-                  <PushAction icon="🗓" title="Manage Manhour"
-                              target={<ManageManhour taskUUID={item.fields.uuid} />} />
-                  <SubmitFormAction title="Delete Task" icon="⚠️" onSubmit={async () => {
-                    try {
-                      await deleteTask(item.fields.uuid);
-                      showToast(ToastStyle.Success, "Delete task successfully");
-                    } catch (err) {
-                      showToast(ToastStyle.Failure, "Delete task failed", (err as Error).message);
-                    }
-                  }} />
+                  <PushAction
+                    icon="⌛️"
+                    title="Add Manhour"
+                    target={<AddOrUpdateManhour manhourTask={tasks[item.fields.uuid]} />}
+                  />
+                  <PushAction icon="🗓" title="Manage Manhour" target={<ManageManhour taskUUID={item.fields.uuid} />} />
+                  <SubmitFormAction
+                    title="Delete Task"
+                    icon="⚠️"
+                    onSubmit={async () => {
+                      try {
+                        await deleteTask(item.fields.uuid);
+                        showToast(ToastStyle.Success, "Delete task successfully");
+                      } catch (err) {
+                        showToast(ToastStyle.Failure, "Delete task failed", (err as Error).message);
+                      }
+                    }}
+                  />
                   <CopyToClipboardAction title="Copy URL" content={item.url ? item.url : ""} />
                 </ActionPanel>
               }
             />
-          )
-        ) : null}
-      {searchResult.datas.space ?
-        searchResult.datas.space.map(
-          (item: SearchItem, index: number) => (
+          ))
+        : null}
+      {searchResult.datas.space
+        ? searchResult.datas.space.map((item: SearchItem, index: number) => (
             <List.Item
               key={index}
               title={item.fields.title}
@@ -176,11 +177,10 @@ export function Search(props: Props) {
                 </ActionPanel>
               }
             />
-          )
-        ) : null}
-      {searchResult.datas.page ?
-        searchResult.datas.page.map(
-          (item: SearchItem, index: number) => (
+          ))
+        : null}
+      {searchResult.datas.page
+        ? searchResult.datas.page.map((item: SearchItem, index: number) => (
             <List.Item
               key={index}
               title={item.fields.title}
@@ -194,15 +194,20 @@ export function Search(props: Props) {
                 </ActionPanel>
               }
             />
-          )
-        ) : null}
-      {searchResult.datas.resource ?
-        searchResult.datas.resource.map(
-          (item: SearchItem, index: number) => (
+          ))
+        : null}
+      {searchResult.datas.resource
+        ? searchResult.datas.resource.map((item: SearchItem, index: number) => (
             <List.Item
               key={index}
               title={item.fields.name}
-              subtitle={props.product === Product.WIKI ? item.fields.page_title : (projects[item.fields.project_uuid] ? projects[item.fields.project_uuid].name : "")}
+              subtitle={
+                props.product === Product.WIKI
+                  ? item.fields.page_title
+                  : projects[item.fields.project_uuid]
+                  ? projects[item.fields.project_uuid].name
+                  : ""
+              }
               accessoryTitle={users[item.fields.owner_uuid] ? users[item.fields.owner_uuid].name : ""}
               accessoryIcon={users[item.fields.owner_uuid] ? users[item.fields.owner_uuid].avatar : ""}
               actions={
@@ -212,8 +217,8 @@ export function Search(props: Props) {
                 </ActionPanel>
               }
             />
-          )
-        ) : null}
+          ))
+        : null}
     </List>
   );
 }

@@ -4,7 +4,7 @@ import { login } from "./api";
 
 export enum Product {
   PROJECT = "project",
-  WIKI = "wiki"
+  WIKI = "wiki",
 }
 
 enum StorageKey {
@@ -12,7 +12,7 @@ enum StorageKey {
   UserUUID = "ones-user-uuid",
   TeamUUID = "ones-team-uuid",
   Email = "ones-email",
-  Password = "ones-password"
+  Password = "ones-password",
 }
 
 export class Client {
@@ -123,8 +123,13 @@ export class Client {
       }
       this.userUUID = await this.getUserUUID();
       this.token = await this.getToken();
-      if (!this.teamUUID || !this.userUUID || !this.token ||
-        (this.email !== preferences.email.value || this.password !== preferences.password.value)) {
+      if (
+        !this.teamUUID ||
+        !this.userUUID ||
+        !this.token ||
+        this.email !== preferences.email.value ||
+        this.password !== preferences.password.value
+      ) {
         await this.setEmail(preferences.email.value as string);
         await this.setPassword(preferences.password.value as string);
         console.log("login");
@@ -146,30 +151,34 @@ export class Client {
 
     this.httpClient = axios.create({
       baseURL: this.baseAPI,
-      timeout: 30000
+      timeout: 30000,
     });
-    this.httpClient.interceptors.request.use((config: AxiosRequestConfig) => {
-      if (config.headers === undefined) {
-        config.headers = {} as AxiosRequestHeaders;
+    this.httpClient.interceptors.request.use(
+      (config: AxiosRequestConfig) => {
+        if (config.headers === undefined) {
+          config.headers = {} as AxiosRequestHeaders;
+        }
+        config.headers["Ones-User-ID"] = this.userUUID ? this.userUUID : "";
+        config.headers["Ones-Auth-Token"] = this.token ? this.token : "";
+        return config;
+      },
+      function (err) {
+        return Promise.reject(err);
       }
-      config.headers["Ones-User-ID"] = this.userUUID ? this.userUUID : "";
-      config.headers["Ones-Auth-Token"] = this.token ? this.token : "";
-      return config;
-    }, function(err) {
-      return Promise.reject(err);
-    });
-    this.httpClient.interceptors.response.use((response) => {
-      if (response.status === 200) {
-        return response.data;
+    );
+    this.httpClient.interceptors.response.use(
+      (response) => {
+        if (response.status === 200) {
+          return response.data;
+        }
+        return Promise.reject(new Error(response.data));
+      },
+      function (err) {
+        console.log(err.response.data);
+        return Promise.reject(err);
       }
-      return Promise.reject(new Error(response.data));
-    }, function(err) {
-      console.log(err.response.data);
-      return Promise.reject(err);
-    });
+    );
   }
 }
 
-export default new Client(
-  preferences.url.value as string
-);
+export default new Client(preferences.url.value as string);

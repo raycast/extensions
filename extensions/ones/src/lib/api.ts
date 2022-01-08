@@ -9,7 +9,7 @@ export enum SearchType {
   TASK = "task",
   RESOURCE = "resource",
   PAGE = "page",
-  SPACE = "space"
+  SPACE = "space",
 }
 
 export enum ManhourType {
@@ -49,7 +49,7 @@ export async function mapTasks(uuids: string[]): Promise<{ [key: string]: Task }
   try {
     const resp = await client.post(Product.PROJECT, "items/graphql", data);
     const tasks: { [key: string]: Task } = {};
-    (resp.data.tasks as Task[]).forEach(task => {
+    (resp.data.tasks as Task[]).forEach((task) => {
       tasks[task.uuid] = task;
     });
     return Promise.resolve(tasks);
@@ -118,7 +118,7 @@ export async function mapUsers(uuids: string[]): Promise<{ [key: string]: User }
   try {
     const resp = await client.post(Product.PROJECT, "items/graphql", data);
     const users = {} as { [key: string]: User };
-    (resp.data.users as User[]).forEach(user => {
+    (resp.data.users as User[]).forEach((user) => {
       users[user.uuid as string] = user;
     });
     return Promise.resolve(users);
@@ -143,7 +143,7 @@ export async function mapSpaces(uuids: string[]): Promise<{ [key: string]: Space
   try {
     const resp = await client.post(Product.WIKI, "items/graphql", data);
     const spaces = {} as { [key: string]: Space };
-    (resp.data.spaces as Space[]).forEach(space => {
+    (resp.data.spaces as Space[]).forEach((space) => {
       spaces[space.uuid as string] = space;
     });
     return Promise.resolve(spaces);
@@ -168,7 +168,7 @@ export async function mapProjects(uuids: string[]): Promise<{ [key: string]: Pro
   try {
     const resp = await client.post(Product.PROJECT, "items/graphql", data);
     const projects = {} as { [key: string]: Project };
-    (resp.data.projects as Project[]).forEach(project => {
+    (resp.data.projects as Project[]).forEach((project) => {
       projects[project.uuid as string] = project;
     });
     return Promise.resolve(projects);
@@ -182,7 +182,7 @@ export async function search(product: Product, q: string, types: SearchType[], s
     q,
     limit: 200,
     start: start ? start : 0,
-    types: types.join(",")
+    types: types.join(","),
   };
   try {
     const resp = await client.get(product, "search", params);
@@ -291,7 +291,7 @@ export async function addManhour(manhour: Manhour): Promise<void> {
     mode: manhourMode(),
     start_time: manhour.startTime,
     hours: manhour.hours,
-    description: manhour.description
+    description: manhour.description,
   };
   const data: GraphqlData = { query, variables };
   try {
@@ -325,7 +325,7 @@ export async function updateManhour(manhour: Manhour): Promise<void> {
     start_time: manhour.startTime,
     hours: manhour.hours,
     description: manhour.description,
-    key: `manhour-${manhour.uuid}`
+    key: `manhour-${manhour.uuid}`,
   };
   const data: GraphqlData = { query, variables };
   try {
@@ -347,7 +347,7 @@ export async function deleteManhour(uuid: string): Promise<void> {
   }`;
   const variables = {
     key: `manhour-${uuid}`,
-    mode: manhourMode()
+    mode: manhourMode(),
   };
   const data: GraphqlData = { query, variables };
   try {
@@ -358,12 +358,12 @@ export async function deleteManhour(uuid: string): Promise<void> {
   }
 }
 
-export async function login(data: { email: string; password: string; }): Promise<LoginResult> {
+export async function login(data: { email: string; password: string }): Promise<LoginResult> {
   try {
     const resp = await axios.post(`${preferences.url.value}/project/api/project/auth/login`, data, {
       headers: {
-        "Content-Type": "application/json"
-      }
+        "Content-Type": "application/json",
+      },
     });
     return Promise.resolve(resp.data as LoginResult);
   } catch (err) {
