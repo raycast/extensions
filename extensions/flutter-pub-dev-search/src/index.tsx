@@ -30,18 +30,13 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       title={searchResult.name}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>
-            <CopyToClipboardAction
-              title="Copy Install Command"
-              content={`flutter pub add ${searchResult.name}`}
-            />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <OpenInBrowserAction 
-            title="Open in Browser" 
+          <CopyToClipboardAction
+            title="Copy Install Command"
+            content={`flutter pub add ${searchResult.name}`}
+          />
+          <OpenInBrowserAction 
             url={`https://pub.dev/packages/${searchResult.name}`}  
-            />
-          </ActionPanel.Section>
+          />
         </ActionPanel>
       }
     />
