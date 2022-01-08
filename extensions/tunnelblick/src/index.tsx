@@ -6,37 +6,37 @@ import { Connection } from "./types/connection";
 async function getVpnConnections(): Promise<Connection[]> {
   const result = await runAppleScript(`
     tell application "Tunnelblick" to get configurations
-  `)
+  `);
 
-  const connections = result.split(",").map(connection => {
-    const name = connection.replace("configuration ", "").trim()
+  const connections = result.split(",").map((connection) => {
+    const name = connection.replace("configuration ", "").trim();
     const status = runAppleScriptSync(`
       tell application "Tunnelblick" to get state of first configuration where name = "${name}"
-    `)
+    `);
 
     return {
       name,
-      status
-    }
-  })
+      status,
+    };
+  });
 
-  return connections
+  return connections;
 }
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState(true)
-  const [connections, setConnections] = useState<Connection[]>([])
+  const [isLoading, setIsLoading] = useState(true);
+  const [connections, setConnections] = useState<Connection[]>([]);
 
   useEffect(() => {
     getVpnConnections().then((connections: Connection[]) => {
-      setConnections(connections)
-      setIsLoading(false)
-    })
-  }, [])
+      setConnections(connections);
+      setIsLoading(false);
+    });
+  }, []);
 
   return (
     <List isLoading={isLoading}>
-      {connections.map(connection => (
+      {connections.map((connection) => (
         <List.Item
           key={connection.name}
           icon={connection.status === "EXITING" ? "xmark-circle-16" : "checkmark-circle-16"}
@@ -49,13 +49,13 @@ export default function Command() {
                 key={connection.name}
                 onAction={() => {
                   if (connection.status === "EXITING") {
-                    runAppleScriptSync(`tell application "Tunnelblick" to connect "${connection.name}"`)
-                    showToast(ToastStyle.Success, "Connected")
+                    runAppleScriptSync(`tell application "Tunnelblick" to connect "${connection.name}"`);
+                    showToast(ToastStyle.Success, "Connected");
                   } else {
-                    runAppleScriptSync(`tell application "Tunnelblick" to disconnect "${connection.name}"`)
-                    showToast(ToastStyle.Success, "Disconnected")
+                    runAppleScriptSync(`tell application "Tunnelblick" to disconnect "${connection.name}"`);
+                    showToast(ToastStyle.Success, "Disconnected");
                   }
-                  getVpnConnections().then(setConnections)
+                  getVpnConnections().then(setConnections);
                 }}
               />
             </ActionPanel>
