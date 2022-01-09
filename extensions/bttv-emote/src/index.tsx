@@ -45,7 +45,7 @@ function SearchListItem({ searchResult }: { searchResult: Emote }) {
         <ActionPanel>
           <ActionPanel.Section>
           <CopyToClipboardAction
-              title="Copy emote"
+              title="Copy Emote"
               content={image2x}
             />
             <PasteAction
