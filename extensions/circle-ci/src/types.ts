@@ -45,6 +45,7 @@ export type Repository = {
   branch?: string;
   provider_name: string;
   target_repository_url: string;
+  review_url: string;
   tag?: string;
 };
 

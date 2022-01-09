@@ -24,7 +24,7 @@ export const WorkflowListItem = ({ workflow }: { workflow: Workflow }) =>
   />;
 
 
-const getWorkflowActions = (workflow: Workflow) => {
+export const getWorkflowActions = (workflow: Workflow) => {
   const workflowUrl = `https://app.circleci.com/pipelines/workflows/${workflow.id}`;
   if (!workflow.repository.target_repository_url) {
     return (
@@ -49,7 +49,7 @@ const getWorkflowActions = (workflow: Workflow) => {
 
 
 
-export const getWorkflowAccessoryTitle = (workflow: Workflow): string => {
+const getWorkflowAccessoryTitle = (workflow: Workflow): string => {
   const createdAt = new Date(workflow.created_at).toLocaleString();
   const stoppedAt = new Date(workflow.stopped_at).toLocaleString();
 

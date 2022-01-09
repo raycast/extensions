@@ -27,6 +27,7 @@ export const ListProjectPipelines = ({ full_name, uri }: Params) => {
         pipelines.forEach((p, i) => {
           p.workflows = workflows[i];
           workflows[i].forEach(workflow => workflow.pipeline = p);
+          workflows[i].forEach(workflow => workflow.repository = p.vcs);
         });
         setPipelines(pipelines);
       })
