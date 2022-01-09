@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Workflow } from "./types";
 import { circleCIPipelines, circleCIWorkflowsPipelines } from "./circleci-functions";
 import { WorkflowListItem } from "./components/WorkflowListItem";
+import { showError } from "./utils";
 
 // noinspection JSUnusedGlobalSymbols
 export default function WorkflowList() {
@@ -14,7 +15,8 @@ export default function WorkflowList() {
       .then(pipelines => circleCIWorkflowsPipelines({ pipelines }))
       .then(wow => wow.flat())
       .then(setWorkflows)
-      .then(() => setIsLoading(false));
+      .then(() => setIsLoading(false))
+      .catch(showError);
   }, []);
 
   return (

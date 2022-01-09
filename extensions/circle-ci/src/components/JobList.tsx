@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { circleCIJobs } from "../circleci-functions";
 import { List } from "@raycast/api";
 import { JobListItem } from "./JobListItem";
+import { showError } from "../utils";
 
 export const JobList = ({ workflow }: { workflow: Workflow }) => {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -10,7 +11,8 @@ export const JobList = ({ workflow }: { workflow: Workflow }) => {
 
   useEffect(() => {
     circleCIJobs({ id })
-      .then(setJobs);
+      .then(setJobs)
+      .catch(showError);
   }, []);
 
   return (

@@ -1,9 +1,10 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { circleCIProjectPipelines, circleCIWorkflows } from "../circleci-functions";
 import { Pipeline } from "../types";
 import { PipelineItem } from "./PipelineItem";
 import { ProjectWorkflowListItem } from "./ProjectWorkflowListItem";
+import { showError } from "../utils";
 
 interface Params {
   full_name: string;
@@ -31,12 +32,10 @@ export const ListProjectPipelines = ({ full_name, uri }: Params) => {
         });
         setPipelines(pipelines);
       })
-      .then(() => setIsLoading(false))
-      .catch(e => showToast(ToastStyle.Failure, e.message));
+      .then(() => setIsLoading(false));
 
   useEffect(() => {
-    // noinspection JSIgnoredPromiseFromCall
-    load();
+    load().catch(showError);
   }, []);
 
   return <List isLoading={isLoading} navigationTitle={full_name}>

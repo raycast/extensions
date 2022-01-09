@@ -1,3 +1,5 @@
+import { showToast, ToastStyle } from "@raycast/api";
+
 export const uriToLongerSlug = (uri: string) => {
   const groups = uri.match(/https?:\/\/(?<host>[^/]+)\/(?<rest>.+$)/)?.groups;
   if (!groups) {
@@ -13,3 +15,6 @@ export const uriToLongerSlug = (uri: string) => {
 
   return `${slug}/${rest}`;
 };
+
+
+export const showError = (e: Error) => showToast(ToastStyle.Failure, e.message);
