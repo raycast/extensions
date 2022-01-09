@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Show The Cricket Scores",
+      "title": "Cricket Scores",
       "description": "View all of the ongoing cricket scores",
       "mode": "view"
     }
