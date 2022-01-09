@@ -1,20 +1,15 @@
 import { Job, JobStatus } from "../types";
 import { Color, Icon, ImageLike, List } from "@raycast/api";
 
-export const JobListItem = (props: { job: Job }) => {
-  const job = props.job;
-
-  return (
-    <List.Item
-      id={job.id}
-      icon={{ source: Icon.Terminal, tintColor: Color.SecondaryText }}
-      key={job.id}
-      title={job.name}
-      accessoryTitle={getJobAccessoryTitle(job)}
-      accessoryIcon={getJobAccessoryIcon(job)}
-    />
-  );
-};
+export const JobListItem = ({ job }: { job: Job }) =>
+  <List.Item
+    id={job.id}
+    icon={{ source: Icon.Terminal, tintColor: Color.SecondaryText }}
+    key={job.id}
+    title={job.name}
+    accessoryTitle={getJobAccessoryTitle(job)}
+    accessoryIcon={getJobAccessoryIcon(job)}
+  />;
 
 
 const getJobAccessoryIcon = ({ status }: { status: JobStatus }): ImageLike => {

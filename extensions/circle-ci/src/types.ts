@@ -63,4 +63,5 @@ export type Job = {
   project_slug: string;
   name: string;
   status: JobStatus;
+  job_number: number;
 };
