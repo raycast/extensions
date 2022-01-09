@@ -6,7 +6,7 @@ import { uriToLongerSlug } from "../utils";
 export const ProjectListItem = ({ uri, name, onReload }: { uri: string, name: string, onReload: () => void }) =>
   <List.Item
     title={name}
-    icon={{ source: { light: "icon.png", dark: "icon@dark.jpg" } }}
+    icon={"hammer-16"}
     actions={
       <ActionPanel>
         <OpenInBrowserAction url={`https://app.circleci.com/pipelines/github/${name}`} />

@@ -11,7 +11,8 @@ export const circleCIListProjects = (): Promise<string[]> =>
   fetch("https://circleci.com/api/v1.1/me", headers)
     .then(resp => resp.json())
     .then((json) => (json as { projects: Record<string, unknown> }).projects)
-    .then(Object.keys);
+    .then(Object.keys)
+    .then(list => list.sort());
 
 
 export const circleCIPipelines = (): Promise<Pipeline[]> =>
