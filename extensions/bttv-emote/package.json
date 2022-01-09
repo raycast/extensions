@@ -8,8 +8,8 @@
     "license": "MIT",
     "commands": [{
         "name": "index",
-        "title": "Emote",
-        "subtitle": "BTTV Emotes Search",
+        "title": "Search Emote",
+        "subtitle": "BetterTTV",
         "description": "Browse BTTV's Emote Library",
         "mode": "view"
     }],
