@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "command-list-workflows",
-      "title": "List Workflows",
+      "title": "CircleCI List Workflows",
       "description": "Shows a list of the latest Circle CI workflows, including meta data. Allows to quickly open each workflow and - if applicable - PR.",
       "mode": "view",
       "preferences": [
