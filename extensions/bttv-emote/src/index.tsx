@@ -49,7 +49,7 @@ function SearchListItem({ searchResult }: { searchResult: Emote }) {
               content={image2x}
             />
             <PasteAction
-              title="Paste emote"
+              title="Paste Emote"
               content={image2x}
             />
           </ActionPanel.Section>
