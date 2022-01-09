@@ -1,15 +1,26 @@
-import { Job, JobStatus } from "../types";
-import { Color, Icon, ImageLike, List } from "@raycast/api";
+import { Job, JobStatus, Workflow } from "../types";
+import { ActionPanel, Color, Icon, ImageLike, List, OpenInBrowserAction } from "@raycast/api";
 
-export const JobListItem = ({ job }: { job: Job }) =>
-  <List.Item
+export const JobListItem = ({ job, workflow }: { job: Job, workflow: Workflow }) => {
+  const { project_slug, job_number } = job;
+  const { id, pipeline_number } = workflow;
+  const slug = project_slug.replace(/\bgh\b/, "github");
+
+  return <List.Item
     id={job.id}
     icon={{ source: Icon.Terminal, tintColor: Color.SecondaryText }}
     key={job.id}
     title={job.name}
     accessoryTitle={getJobAccessoryTitle(job)}
     accessoryIcon={getJobAccessoryIcon(job)}
+    actions={
+      <ActionPanel>
+        <OpenInBrowserAction
+          url={`https://app.circleci.com/pipelines/${slug}/${pipeline_number}/workflows/${id}/jobs/${job_number}`} />
+      </ActionPanel>
+    }
   />;
+};
 
 
 const getJobAccessoryIcon = ({ status }: { status: JobStatus }): ImageLike => {
