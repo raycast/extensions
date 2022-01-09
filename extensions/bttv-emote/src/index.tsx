@@ -75,7 +75,6 @@ function SearchListItem({ searchResult }: { searchResult: Emote }) {
           </ActionPanel.Section>
           <ActionPanel.Section>
             <OpenInBrowserAction
-              title="Open in Browser"
               url={browserUrl}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
