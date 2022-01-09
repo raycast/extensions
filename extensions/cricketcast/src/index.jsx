@@ -23,7 +23,7 @@ export default function Command() {
     async function fetchStories() {
       try {
         let XMLdata = await fetch("http://static.cricinfo.com/rss/livescores.xml").then((r) => r.text());
-        let JSONdata = JSON.parse(await convert.xml2json(XMLdata, { compact: true, spaces: 4 }));
+        let JSONdata = JSON.parse(convert.xml2json(XMLdata, {compact: true, spaces: 4}));
         let matches = JSONdata.rss.channel.item.map((match) => ({
           title: match.title["_text"].replace(" *", "*"),
           id: match.guid["_text"].replace("http://www.cricinfo.com/ci/engine/match/", "").replace(".html", ""),
