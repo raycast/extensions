@@ -119,6 +119,13 @@
       "subtitle": "Home Assistant",
       "description": "Query Scripts",
       "mode": "view"
+    },
+    {
+      "name": "buttons",
+      "title": "Buttons",
+      "subtitle": "Home Assistant",
+      "description": "Query Buttons",
+      "mode": "view"
     }
   ],
   "preferences": [

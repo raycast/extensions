@@ -38,6 +38,7 @@ import {
 } from "./vacuum";
 import { CameraShowImage, CameraTurnOffAction, CameraTurnOnAction } from "./cameras";
 import { ScriptRunAction } from "./scripts";
+import { ButtonPressAction } from "./buttons";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -682,6 +683,26 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
         <ActionPanel>
           <ActionPanel.Section title="Controls">
             <ScriptRunAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "button": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <ButtonPressAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
