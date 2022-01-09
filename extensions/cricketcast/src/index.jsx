@@ -26,7 +26,7 @@ export default function Command() {
         let JSONdata = JSON.parse(convert.xml2json(XMLdata, {compact: true, spaces: 4}));
         let matches = JSONdata.rss.channel.item.map((match) => ({
           title: match.title["_text"].replace(" *", "*"),
-          id: match.guid["_text"].replace("http://www.cricinfo.com/ci/engine/match/", "").replace(".html", ""),
+          id: match.guid["_text"].replace( /\D+/g, ''),
           link: match.guid["_text"],
         }));
         for (let matchIndex in matches) {
