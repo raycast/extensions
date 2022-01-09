@@ -27,6 +27,15 @@ import {
 } from "./light";
 import { changeRGBBrightness, RGBtoString } from "../color";
 import { AutomationTriggerAction, AutomationTurnOffAction, AutomationTurnOnAction } from "./automation";
+import {
+  VacuumLocateAction,
+  VacuumPauseAction,
+  VacuumReturnToBaseAction,
+  VacuumStartAction,
+  VacuumStopAction,
+  VacuumTurnOffAction,
+  VacuumTurnOnAction,
+} from "./vacuum";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -593,6 +602,32 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             <AutomationTurnOnAction state={state} />
             <AutomationTurnOffAction state={state} />
             <AutomationTriggerAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "vacuum": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <VacuumLocateAction state={state} />
+            <VacuumStartAction state={state} />
+            <VacuumPauseAction state={state} />
+            <VacuumStopAction state={state} />
+            <VacuumTurnOnAction state={state} />
+            <VacuumTurnOffAction state={state} />
+            <VacuumReturnToBaseAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />

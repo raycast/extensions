@@ -98,6 +98,13 @@
       "subtitle": "Home Assistant",
       "description": "Query Motion Sensors",
       "mode": "view"
+    },
+    {
+      "name": "vacuums",
+      "title": "Vacuum Cleaners",
+      "subtitle": "Home Assistant",
+      "description": "Query Vacuum Cleaners",
+      "mode": "view"
     }
   ],
   "preferences": [
