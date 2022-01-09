@@ -18,9 +18,7 @@ export const JobList = ({ workflow }: { workflow: Workflow }) => {
       navigationTitle={`${project_slug} -> ${repository.branch}`}
       isLoading={jobs.length === 0}
     >
-      {jobs.map((job) => (
-        <JobListItem key={job.id} job={job} />
-      ))}
+      {jobs.map((job) => <JobListItem key={job.id} job={job} />)}
     </List>
   );
-}
+};

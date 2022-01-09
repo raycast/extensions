@@ -26,27 +26,18 @@ export const WorkflowListItem = ({ workflow }: { workflow: Workflow }) =>
 
 export const getWorkflowActions = (workflow: Workflow) => {
   const workflowUrl = `https://app.circleci.com/pipelines/workflows/${workflow.id}`;
-  if (!workflow.repository.target_repository_url) {
-    return (
-      <ActionPanel>
-        <PushAction icon={Icon.Binoculars} title="Workflow Job List" target={<JobList workflow={workflow} />} />
-        <OpenInBrowserAction title="Open Workflow" url={workflowUrl} />
-        <CopyToClipboardAction title="Copy Workflow URL" content={workflowUrl} />
-      </ActionPanel>
-    );
-  } else {
-    return (
-      <ActionPanel>
-        <PushAction icon={Icon.Binoculars} title="Workflow Job List" target={<JobList workflow={workflow} />} />
-        <OpenInBrowserAction title="Open Workflow" url={workflowUrl} />
-        <CopyToClipboardAction title="Copy Workflow URL" content={workflowUrl} />
-        <OpenInBrowserAction title="Open PR" url={workflow.repository.target_repository_url} />
-        <CopyToClipboardAction title="Copy PR URL" content={workflow.repository.target_repository_url} />
-      </ActionPanel>
-    );
-  }
-}
+  const url = workflow.repository.target_repository_url;
 
+  console.log(workflow.repository);
+
+  return <ActionPanel>
+    <PushAction icon={Icon.Binoculars} title="Workflow Job List" target={<JobList workflow={workflow} />} />
+    <OpenInBrowserAction title="Open Workflow" url={workflowUrl} />
+    <CopyToClipboardAction title="Copy Workflow URL" content={workflowUrl} />
+    {url && <OpenInBrowserAction title="Open PR" url={url} />}
+    {url && <CopyToClipboardAction title="Copy PR URL" content={url} />}
+  </ActionPanel>;
+};
 
 
 const getWorkflowAccessoryTitle = (workflow: Workflow): string => {
