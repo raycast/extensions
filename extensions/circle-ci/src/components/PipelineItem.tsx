@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List, SubmitFormAction } from "@raycast/api";
+import { ActionPanel, Icon, List, SubmitFormAction, OpenInBrowserAction } from "@raycast/api";
 import { Pipeline } from "../types";
 
 export const PipelineItem = ({ pipeline, onReload }: { pipeline: Pipeline, onReload: () => void }) =>
@@ -11,6 +11,10 @@ export const PipelineItem = ({ pipeline, onReload }: { pipeline: Pipeline, onRel
     keywords={[pipeline.vcs.branch || pipeline.vcs.tag || ""]}
     actions={
       <ActionPanel>
+        <OpenInBrowserAction
+          title={"Open Project Pipelines"}
+          url={`https://app.circleci.com/pipelines/${pipeline.project_slug.replace(/\bgh\b/, "github")}`}
+        />
         <SubmitFormAction
           title="Refresh"
           onSubmit={onReload}

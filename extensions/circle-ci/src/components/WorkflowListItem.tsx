@@ -11,6 +11,7 @@ import {
 } from "@raycast/api";
 import { JobList } from "./JobList";
 
+
 export const WorkflowListItem = ({ workflow }: { workflow: Workflow }) =>
   <List.Item
     id={workflow.id}
@@ -27,8 +28,6 @@ export const WorkflowListItem = ({ workflow }: { workflow: Workflow }) =>
 export const getWorkflowActions = (workflow: Workflow) => {
   const workflowUrl = `https://app.circleci.com/pipelines/workflows/${workflow.id}`;
   const url = workflow.repository.target_repository_url;
-
-  console.log(workflow.repository);
 
   return <ActionPanel>
     <PushAction icon={Icon.Binoculars} title="Workflow Job List" target={<JobList workflow={workflow} />} />

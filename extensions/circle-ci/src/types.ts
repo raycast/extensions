@@ -19,6 +19,7 @@ export type Pipeline = {
   id: string;
   vcs: Repository;
   number: number;
+  project_slug: string;
   workflows?: Workflow[];
   trigger: {
     actor: {
