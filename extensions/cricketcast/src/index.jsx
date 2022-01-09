@@ -6,11 +6,13 @@ import fetch from "node-fetch";
 function Actions({ item }) {
   return (
     <ActionPanel title={item.title}>
-      <ActionPanel.Section>{item.link && <OpenInBrowserAction url={item.link} />}</ActionPanel.Section>
       <ActionPanel.Section>
-        {item.link && (
-          <CopyToClipboardAction content={item.link} title="Copy Link" shortcut={{ modifiers: ["cmd"], key: "." }} />
-        )}
+        <>
+          {item.link && <OpenInBrowserAction url={item.link} />}
+          {item.link && (
+            <CopyToClipboardAction content={item.link} title="Copy Link" shortcut={{ modifiers: ["cmd"], key: "." }} />
+          )}
+        </>
       </ActionPanel.Section>
     </ActionPanel>
   );
