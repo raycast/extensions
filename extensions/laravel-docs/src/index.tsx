@@ -3,34 +3,36 @@ import { useEffect, useMemo, useState } from "react";
 import algoliasearch from "algoliasearch/lite";
 import striptags from "striptags";
 
-const APPID  = "E3MIRNPJH5";
+const APPID = "E3MIRNPJH5";
 const APIKEY = "1fa3a8fec06eb1858d6ca137211225c0";
-const INDEX  = "laravel";
+const INDEX = "laravel";
 
 type KeyValueHierarchy = {
-    [key: string]: string;
-}
+  [key: string]: string;
+};
 
 type LaravelDocsHit = {
   url: string;
   hierarchy: KeyValueHierarchy;
   objectID: string;
   _highlightResult: {
-    content: {
-      value: string;
-      matchlevel: string;
-      fullyHighlighted: boolean;
-      matchedWords: string[];
-    } | undefined;
+    content:
+      | {
+          value: string;
+          matchlevel: string;
+          fullyHighlighted: boolean;
+          matchedWords: string[];
+        }
+      | undefined;
     hierarchy: {
       [key: string]: {
         value: string;
         matchLevel: string;
         matchedWords: string[];
-      }
-    }
-  }
-}
+      };
+    };
+  };
+};
 
 export default function main() {
   const preferences = getPreferenceValues();
@@ -48,23 +50,23 @@ export default function main() {
 
   const hierarchyToArray = (hierarchy: KeyValueHierarchy) => {
     return Object.values(hierarchy)
-      .filter((hierarchyEntry: string|unknown) => hierarchyEntry)
-      .map((hierarchyEntry: string) => hierarchyEntry.replaceAll('&amp;', '&'));
+      .filter((hierarchyEntry: string | unknown) => hierarchyEntry)
+      .map((hierarchyEntry: string) => hierarchyEntry.replaceAll("&amp;", "&"));
   };
 
-  const getTitle = (hit: LaravelDocsHit) : string => {
-    return hierarchyToArray(hit.hierarchy).pop() || '';
+  const getTitle = (hit: LaravelDocsHit): string => {
+    return hierarchyToArray(hit.hierarchy).pop() || "";
   };
 
-  const getSubTitle = (hit: LaravelDocsHit) : string => {
-    const highlightResult = striptags(hit._highlightResult?.content?.value || '');
+  const getSubTitle = (hit: LaravelDocsHit): string => {
+    const highlightResult = striptags(hit._highlightResult?.content?.value || "");
     if (highlightResult) {
       return highlightResult;
     }
 
     const hierarchy = hierarchyToArray(hit.hierarchy) || [];
     hierarchy.pop();
-    return hierarchy.join(' > ');
+    return hierarchy.join(" > ");
   };
 
   const search = async (query = "") => {
@@ -72,8 +74,8 @@ export default function main() {
 
     return await algoliaIndex
       .search(query, {
-          hitsPerPage: 11,
-          facetFilters: ['version:' + preferences.laravelVersion]
+        hitsPerPage: 11,
+        facetFilters: ["version:" + preferences.laravelVersion],
       })
       .then((res) => {
         setIsLoading(false);
@@ -98,18 +100,19 @@ export default function main() {
     >
       {searchResults?.map((hit: LaravelDocsHit) => {
         return (
-        <List.Item
-          key={hit.objectID}
-          title={getTitle(hit)}
-          subtitle={getSubTitle(hit)}
-          icon="command-icon.png"
-          actions={
-            <ActionPanel title={hit.url}>
-              <OpenInBrowserAction url={hit.url} title="Open in Browser" />
-            </ActionPanel>
-          }
-        />
-      )})}
+          <List.Item
+            key={hit.objectID}
+            title={getTitle(hit)}
+            subtitle={getSubTitle(hit)}
+            icon="command-icon.png"
+            actions={
+              <ActionPanel title={hit.url}>
+                <OpenInBrowserAction url={hit.url} title="Open in Browser" />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
