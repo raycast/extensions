@@ -105,6 +105,13 @@
       "subtitle": "Home Assistant",
       "description": "Query Vacuum Cleaners",
       "mode": "view"
+    },
+    {
+      "name": "cameras",
+      "title": "Cameras",
+      "subtitle": "Home Assistant",
+      "description": "Query Cameras",
+      "mode": "view"
     }
   ],
   "preferences": [

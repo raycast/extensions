@@ -36,6 +36,7 @@ import {
   VacuumTurnOffAction,
   VacuumTurnOnAction,
 } from "./vacuum";
+import { CameraShowImage, CameraTurnOffAction, CameraTurnOnAction } from "./cameras";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -159,6 +160,8 @@ function getIcon(state: State): ImageLike | undefined {
     return { source: "raspberry-pi.png", tintColor: PrimaryIconColor };
   } else if (e.startsWith("water_heater")) {
     return { source: "temperature.png", tintColor: PrimaryIconColor };
+  } else if (e.startsWith("camera")) {
+    return { source: "video.png", tintColor: PrimaryIconColor };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
@@ -628,6 +631,30 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             <VacuumTurnOnAction state={state} />
             <VacuumTurnOffAction state={state} />
             <VacuumReturnToBaseAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "camera": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Image">
+            <CameraShowImage state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Controls">
+            <CameraTurnOnAction state={state} />
+            <CameraTurnOffAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
