@@ -49,7 +49,7 @@ const getWorkflowActions = (workflow: Workflow) => {
 
 
 
-const getWorkflowAccessoryTitle = (workflow: Workflow): string => {
+export const getWorkflowAccessoryTitle = (workflow: Workflow): string => {
   const createdAt = new Date(workflow.created_at).toLocaleString();
   const stoppedAt = new Date(workflow.stopped_at).toLocaleString();
 
@@ -78,7 +78,7 @@ const getWorkflowAccessoryTitle = (workflow: Workflow): string => {
 };
 
 
-const getWorkflowAccessoryIcon = ({ status }: { status: WorkflowStatus }): ImageLike => {
+export const getWorkflowAccessoryIcon = ({ status }: { status: WorkflowStatus }): ImageLike => {
   switch (status) {
     case WorkflowStatus.success:
       return { source: Icon.Checkmark, tintColor: Color.Green };

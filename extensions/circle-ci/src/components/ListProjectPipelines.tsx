@@ -1,8 +1,9 @@
-import {ActionPanel, Icon, List, OpenInBrowserAction, showToast, SubmitFormAction, ToastStyle} from "@raycast/api";
-import {useEffect, useState} from "react";
-import {circleCIProjectPipelines, circleCIWorkflows} from "../circleci-functions";
-import {uriToLongerSlug} from "../utils";
+import { List, showToast, ToastStyle } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { circleCIProjectPipelines, circleCIWorkflows } from "../circleci-functions";
 import { Pipeline } from "../types";
+import { PipelineItem } from "./PipelineItem";
+import { ProjectWorkflowListItem } from "./ProjectWorkflowListItem";
 
 interface Params {
   full_name: string;
@@ -17,16 +18,18 @@ export const ListProjectPipelines = ({ full_name, uri }: Params) => {
     Promise.resolve()
       .then(() => setIsLoading(true))
       .then(() => circleCIProjectPipelines(uri))
-      .then(pipelines => {
-        setPipelines(pipelines);
-        return pipelines;
-      })
       .then(pipelines =>
         Promise
-          .all(pipelines.map(({ id }) => circleCIWorkflows({ id }).then(list => list.pop())))
+          .all(pipelines.map(({ id }) => circleCIWorkflows({ id })))
           .then(workflows => ({ pipelines, workflows }))
       )
-      .then(({ pipelines, workflows }) => pipelines.forEach((p, i) => p.workflow = workflows[i]))
+      .then(({ pipelines, workflows }) => {
+        pipelines.forEach((p, i) => {
+          p.workflows = workflows[i];
+          workflows[i].forEach(workflow => workflow.pipeline = p);
+        });
+        setPipelines(pipelines);
+      })
       .then(() => setIsLoading(false))
       .catch(e => showToast(ToastStyle.Failure, e.message));
 
@@ -45,44 +48,14 @@ export const ListProjectPipelines = ({ full_name, uri }: Params) => {
     }, {} as Record<string, Pipeline[]>))
       .sort(([l], [r]) => new Date(l).getTime() - new Date(r).getTime())
       .reverse()
-      .map(([date, entries]) => <List.Section key={date} title={date}>
-        {entries.map(item => <List.Item
-          key={item.id}
-          icon={iconForPipelines(item.workflow?.status || item.state)}
-          accessoryIcon={item.trigger.actor.avatar_url || "gearshape-16"}
-          title={item.workflow?.status || "No status"}
-          subtitle={item.vcs.tag || item.vcs.branch || ""}
-          accessoryTitle={item.workflow?.name || "No workflow"}
-          keywords={[item.vcs.branch || item.vcs.tag || ""]}
-          actions={
-            <ActionPanel>
-              {item.workflow && <OpenInBrowserAction
-                url={`https://app.circleci.com/pipelines/${uriToLongerSlug(uri)}/${item.number}/workflows/${item.workflow.id}`}
-              />}
-              <SubmitFormAction
-                title="Refresh"
-                onSubmit={() => load()}
-                icon={Icon.ArrowClockwise}
-                shortcut={{key: "r", modifiers: ["cmd", "shift"]}}
-              />
-            </ActionPanel>
-          }
-        />)}
+      .map(([date, items]) => <List.Section key={date} title={date}>
+        {
+          items.map(item =>
+            item.workflows && item.workflows.length > 0
+              ? item.workflows.map(workflow => <ProjectWorkflowListItem key={workflow.id} workflow={workflow} />)
+              : <PipelineItem key={item.id} pipeline={item} onReload={load} />)
+            .flat()
+        }
       </List.Section>)}
   </List>;
-};
-
-const iconForPipelines = (status: string | undefined) => {
-  switch (status) {
-    case "success":
-      return "✅";
-    case "failed":
-      return "❌";
-    case "canceled":
-      return "⏹";
-    case "created":
-      return "🏷";
-    default:
-      return "😱";
-  }
 };
