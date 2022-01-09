@@ -1,5 +1,5 @@
 import { getLocalStorageItem, List, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { circleCIListProjects } from "./circleci-functions";
 import { ProjectListItem } from "./components/ProjectListItem";
 
