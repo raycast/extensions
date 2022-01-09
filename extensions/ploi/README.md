@@ -1,5 +1,6 @@
 # Ploi Raycast
-A command center for managing your servers & sites by [Ploi](https://ploi.io/). 
+
+A command center for managing your servers & sites by [Ploi](https://ploi.io/).
 
 ![Banner](screenshots/banner.png)
 
@@ -13,6 +14,7 @@ Make sure to tick the required permissions and copy the token, next you can ente
 ![Banner](screenshots/installation.png)
 
 ## Features from Ploi API
+
 - View site details
 - View deployment status
 - Trigger deploy script
@@ -22,6 +24,7 @@ Make sure to tick the required permissions and copy the token, next you can ente
 - Refresh server OPcache
 
 ## Non-Ploi API Features
+
 - Open terminal session
 - Copy IP address
 - Open site or server in ploi.io
