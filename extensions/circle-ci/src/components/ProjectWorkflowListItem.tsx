@@ -6,7 +6,7 @@ import {
   ImageLike,
   List,
   OpenInBrowserAction,
-  PushAction
+  PushAction,
 } from "@raycast/api";
 import { Workflow, WorkflowStatus } from "../types";
 import { JobList } from "./JobList";
