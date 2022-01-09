@@ -232,7 +232,6 @@ export function ManageManhour(props: ManageManhourProps) {
 
   useEffect(() => {
     (async () => {
-      console.log("useEffect");
       try {
         const userUUID = await getManhourUserUUID();
         const manhourDays: number = preferences.manhourDays.value ? (preferences.manhourDays.value as number) : 7;
@@ -247,7 +246,6 @@ export function ManageManhour(props: ManageManhourProps) {
   }, []);
 
   const onSearchTextChange = async (text: string) => {
-    console.log("onSearchTextChange");
     let startDate: string;
     if (text.length === 0) {
       const manhourDays: number = preferences.manhourDays.value ? (preferences.manhourDays.value as number) : 7;

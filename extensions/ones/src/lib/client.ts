@@ -113,7 +113,6 @@ export class Client {
   }
 
   public async initHttpClient(): Promise<any> {
-    console.log("initHttpClient");
     try {
       this.email = await this.getEmail();
       this.password = await this.getPassword();
@@ -132,7 +131,6 @@ export class Client {
       ) {
         await this.setEmail(preferences.email.value as string);
         await this.setPassword(preferences.password.value as string);
-        console.log("login");
         const result = await login({ email: this.email, password: this.password });
         await this.setToken(result.user.token);
         await this.setUserUUID(result.user.uuid);
@@ -174,7 +172,6 @@ export class Client {
         return Promise.reject(new Error(response.data));
       },
       function (err) {
-        console.log(err.response.data);
         return Promise.reject(err);
       }
     );
