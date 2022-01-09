@@ -11,7 +11,7 @@
       "name": "index",
       "title": "Manage Servers",
       "subtitle": "Laravel Forge",
-      "icon": "forge.png",
+      "icon": "command-icon.png",
       "description": "Search and manage your Laravel Forge servers and sites",
       "mode": "view"
     }
