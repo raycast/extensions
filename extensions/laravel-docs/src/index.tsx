@@ -1,17 +1,35 @@
 import { ActionPanel, getPreferenceValues, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import algoliasearch from "algoliasearch/lite";
+import striptags from "striptags";
 
 const APPID  = "E3MIRNPJH5";
 const APIKEY = "1fa3a8fec06eb1858d6ca137211225c0";
 const INDEX  = "laravel";
 
-type AlgoliaHit = {
-  url: string;
-  hierarchy: {
+type KeyValueHierarchy = {
     [key: string]: string;
-  }
+}
+
+type LaravelDocsHit = {
+  url: string;
+  hierarchy: KeyValueHierarchy;
   objectID: string;
+  _highlightResult: {
+    content: {
+      value: string;
+      matchlevel: string;
+      fullyHighlighted: boolean;
+      matchedWords: string[];
+    } | undefined;
+    hierarchy: {
+      [key: string]: {
+        value: string;
+        matchLevel: string;
+        matchedWords: string[];
+      }
+    }
+  }
 }
 
 export default function main() {
@@ -28,6 +46,27 @@ export default function main() {
   const [searchResults, setSearchResults] = useState<any[] | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
+  const hierarchyToArray = (hierarchy: KeyValueHierarchy) => {
+    return Object.values(hierarchy)
+      .filter((hierarchyEntry: string|unknown) => hierarchyEntry)
+      .map((hierarchyEntry: string) => hierarchyEntry.replaceAll('&amp;', '&'));
+  };
+
+  const getTitle = (hit: LaravelDocsHit) : string => {
+    return hierarchyToArray(hit.hierarchy).pop() || '';
+  };
+
+  const getSubTitle = (hit: LaravelDocsHit) : string => {
+    const highlightResult = striptags(hit._highlightResult?.content?.value || '');
+    if (highlightResult) {
+      return highlightResult;
+    }
+
+    const hierarchy = hierarchyToArray(hit.hierarchy) || [];
+    hierarchy.pop();
+    return hierarchy.join(' > ');
+  };
+
   const search = async (query = "") => {
     setIsLoading(true);
 
@@ -42,7 +81,7 @@ export default function main() {
       })
       .catch((err) => {
         setIsLoading(false);
-        showToast(ToastStyle.Failure, "Search Error", err.message);
+        showToast(ToastStyle.Failure, "Error searching Laravel Documentation", err.message);
         return [];
       });
   };
@@ -57,20 +96,16 @@ export default function main() {
       isLoading={isLoading || searchResults === undefined}
       onSearchTextChange={async (query) => setSearchResults(await search(query))}
     >
-      {searchResults?.map((result: AlgoliaHit) => {
-        const hierarchy:string[] = Object.values(result.hierarchy)
-          .filter((hierarchyEntry: string|unknown) => hierarchyEntry)
-          .map((hierarchyEntry: string) => hierarchyEntry.replaceAll('&amp;', '&'));
-
+      {searchResults?.map((hit: LaravelDocsHit) => {
         return (
         <List.Item
-          key={result.objectID}
-          title={hierarchy.pop() || ''}
-          subtitle={hierarchy.join(' > ')}
+          key={hit.objectID}
+          title={getTitle(hit)}
+          subtitle={getSubTitle(hit)}
           icon="command-icon.png"
           actions={
-            <ActionPanel title={result.url}>
-              <OpenInBrowserAction url={result.url} title="Open in Browser" />
+            <ActionPanel title={hit.url}>
+              <OpenInBrowserAction url={hit.url} title="Open in Browser" />
             </ActionPanel>
           }
         />
