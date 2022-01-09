@@ -16,5 +16,4 @@ export const uriToLongerSlug = (uri: string) => {
   return `${slug}/${rest}`;
 };
 
-
 export const showError = (e: Error) => showToast(ToastStyle.Failure, e.message);

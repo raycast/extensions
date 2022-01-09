@@ -12,8 +12,8 @@ export default function WorkflowList() {
 
   useEffect(() => {
     circleCIPipelines()
-      .then(pipelines => circleCIWorkflowsPipelines({ pipelines }))
-      .then(wow => wow.flat())
+      .then((pipelines) => circleCIWorkflowsPipelines({ pipelines }))
+      .then((wow) => wow.flat())
       .then(setWorkflows)
       .then(() => setIsLoading(false))
       .catch(showError);

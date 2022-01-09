@@ -45,7 +45,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
-    "node-fetch": "^3.0.0"
+    "node-fetch": "^3.0.0",
+    "prettier": "^2.5.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

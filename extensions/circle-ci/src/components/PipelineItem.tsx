@@ -1,7 +1,7 @@
 import { ActionPanel, Icon, List, SubmitFormAction, OpenInBrowserAction } from "@raycast/api";
 import { Pipeline } from "../types";
 
-export const PipelineItem = ({ pipeline, onReload }: { pipeline: Pipeline, onReload: () => void }) =>
+export const PipelineItem = ({ pipeline, onReload }: { pipeline: Pipeline; onReload: () => void }) => (
   <List.Item
     icon={{ source: Icon.Checkmark }}
     accessoryIcon={pipeline.trigger.actor.avatar_url || "gearshape-16"}
@@ -23,4 +23,5 @@ export const PipelineItem = ({ pipeline, onReload }: { pipeline: Pipeline, onRel
         />
       </ActionPanel>
     }
-  />;
+  />
+);

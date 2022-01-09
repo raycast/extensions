@@ -10,17 +10,14 @@ export const JobList = ({ workflow }: { workflow: Workflow }) => {
   const { id, project_slug, repository } = workflow;
 
   useEffect(() => {
-    circleCIJobs({ id })
-      .then(setJobs)
-      .catch(showError);
+    circleCIJobs({ id }).then(setJobs).catch(showError);
   }, []);
 
   return (
-    <List
-      navigationTitle={`${project_slug} -> ${repository.branch}`}
-      isLoading={jobs.length === 0}
-    >
-      {jobs.map((job) => <JobListItem key={job.id} job={job} workflow={workflow} />)}
+    <List navigationTitle={`${project_slug} -> ${repository.branch}`} isLoading={jobs.length === 0}>
+      {jobs.map((job) => (
+        <JobListItem key={job.id} job={job} workflow={workflow} />
+      ))}
     </List>
   );
 };

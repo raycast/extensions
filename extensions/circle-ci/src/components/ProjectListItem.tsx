@@ -2,8 +2,7 @@ import { ActionPanel, Icon, List, OpenInBrowserAction, PushAction, SubmitFormAct
 import { ListProjectPipelines } from "./ListProjectPipelines";
 import { uriToLongerSlug } from "../utils";
 
-
-export const ProjectListItem = ({ uri, name, onReload }: { uri: string, name: string, onReload: () => void }) =>
+export const ProjectListItem = ({ uri, name, onReload }: { uri: string; name: string; onReload: () => void }) => (
   <List.Item
     title={name}
     icon={"hammer-16"}
@@ -29,4 +28,5 @@ export const ProjectListItem = ({ uri, name, onReload }: { uri: string, name: st
         />
       </ActionPanel>
     }
-  />;
+  />
+);

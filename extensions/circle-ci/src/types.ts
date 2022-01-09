@@ -1,7 +1,7 @@
 export type Preferences = {
   apiKey: string;
   orgSlug: string;
-}
+};
 
 export enum WorkflowStatus {
   success = "success",
@@ -24,7 +24,7 @@ export type Pipeline = {
   trigger: {
     actor: {
       avatar_url: string | null;
-    }
+    };
   };
   state: string;
   created_at: string;
