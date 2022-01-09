@@ -112,6 +112,13 @@
       "subtitle": "Home Assistant",
       "description": "Query Cameras",
       "mode": "view"
+    },
+    {
+      "name": "scripts",
+      "title": "Scripts",
+      "subtitle": "Home Assistant",
+      "description": "Query Scripts",
+      "mode": "view"
     }
   ],
   "preferences": [

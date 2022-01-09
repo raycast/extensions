@@ -37,6 +37,7 @@ import {
   VacuumTurnOnAction,
 } from "./vacuum";
 import { CameraShowImage, CameraTurnOffAction, CameraTurnOnAction } from "./cameras";
+import { ScriptRunAction } from "./scripts";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -165,6 +166,9 @@ function getIcon(state: State): ImageLike | undefined {
   } else if (e.startsWith("vacuum")) {
     const color = state.state === "cleaning" ? Color.Yellow : PrimaryIconColor;
     return { source: "robot-vacuum.png", tintColor: color };
+  } else if (e.startsWith("script")) {
+    const color = state.state === "on" ? Color.Yellow : PrimaryIconColor;
+    return { source: "play.png", tintColor: color };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
@@ -658,6 +662,26 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           <ActionPanel.Section title="Controls">
             <CameraTurnOnAction state={state} />
             <CameraTurnOffAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "script": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <ScriptRunAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
