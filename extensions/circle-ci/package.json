@@ -11,22 +11,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "command-list-workflows",
-      "title": "List Workflows",
-      "subtitle": "Circle CI",
-      "description": "Shows a list of the latest Circle CI workflows, including meta data. Allows to quickly open each workflow and - if applicable - PR.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "orgSlug",
-          "type": "textfield",
-          "required": true,
-          "title": "Circle CI Organization Slug",
-          "description": "eg: gh/CircleCI-Public"
-        }
-      ]
-    },
-    {
       "name": "command-project-search",
       "title": "Project Search",
       "subtitle": "Circle CI",

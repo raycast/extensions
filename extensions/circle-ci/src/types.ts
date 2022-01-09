@@ -1,6 +1,5 @@
 export type Preferences = {
   apiKey: string;
-  orgSlug: string;
 };
 
 export enum WorkflowStatus {

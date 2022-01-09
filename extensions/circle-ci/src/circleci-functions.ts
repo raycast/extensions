@@ -1,9 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 import { Job, Pipeline, Preferences, Workflow } from "./types";
-import { URLSearchParams } from "url";
 
-const { apiKey, orgSlug }: Preferences = getPreferenceValues();
+const { apiKey }: Preferences = getPreferenceValues();
 
 export const circleCIListProjects = (): Promise<string[]> =>
   fetch("https://circleci.com/api/v1.1/me", headers)
@@ -11,12 +10,6 @@ export const circleCIListProjects = (): Promise<string[]> =>
     .then((json) => (json as { projects: Record<string, unknown> }).projects)
     .then(Object.keys)
     .then((list) => list.sort());
-
-export const circleCIPipelines = (): Promise<Pipeline[]> =>
-  fetch(`https://circleci.com/api/v2/pipeline?${new URLSearchParams({ "org-slug": orgSlug })}`, headers)
-    .then((resp) => resp.json())
-    .then((json) => json as { items: Pipeline[] })
-    .then((json) => json.items);
 
 export const circleCIProjectPipelines = (uri: string): Promise<Pipeline[]> =>
   projectPipelines(uriToVCSAndFullName(uri));
