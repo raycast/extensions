@@ -12,7 +12,8 @@
   "commands": [
     {
       "name": "command-list-workflows",
-      "title": "CircleCI List Workflows",
+      "title": "List Workflows",
+      "subtitle": "Circle CI",
       "description": "Shows a list of the latest Circle CI workflows, including meta data. Allows to quickly open each workflow and - if applicable - PR.",
       "mode": "view",
       "preferences": [
@@ -27,7 +28,8 @@
     },
     {
       "name": "command-project-search",
-      "title": "CircleCI Project Search",
+      "title": "Project Search",
+      "subtitle": "Circle CI",
       "description": "List CircleCI projects and quickly navigate to them.",
       "mode": "view"
     }
