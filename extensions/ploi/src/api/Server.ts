@@ -1,5 +1,5 @@
 import { showToast, ToastStyle } from "@raycast/api";
-import { ServerInterface } from "../Server";
+import { IServer } from "../Server";
 import { camelCase, mapKeys, sortBy } from "lodash";
 import { PLOI_API_URL } from "../config";
 import axios, { AxiosError } from "axios";
@@ -78,15 +78,11 @@ const getServers = async () => {
     const response = await axios.get(`${PLOI_API_URL}/servers`);
 
     const serverData = (await response.data) as ServersResponse;
-    let servers = serverData?.data ?? [];
+    const servers = serverData?.data ?? [];
 
     // eslint-disable-next-line
     // @ts-ignore Not sure how to convert Dictionary from lodash to IServer
-    servers = servers.map(
-      (s) => mapKeys(s, (_, k) => camelCase(k)) as ServerInterface
-    );
-
-    return servers;
+    return servers.map((s) => mapKeys(s, (_, k) => camelCase(k)) as IServer);
   } catch (error) {
     const axiosError = (error as AxiosError).response;
 
@@ -106,5 +102,5 @@ const getServers = async () => {
 };
 
 type ServersResponse = {
-  data: ServerInterface[];
+  data: IServer[];
 };

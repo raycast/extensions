@@ -18,7 +18,7 @@ import { useIsMounted } from "./helpers";
 import { PLOI_PANEL_URL } from "./config";
 
 export const ServersList = () => {
-  const [servers, setServers] = useState<ServerInterface[]>([]);
+  const [servers, setServers] = useState<IServer[]>([]);
   const [siteData, setSiteData] = useState<LocalStorageValues>({});
   const isMounted = useIsMounted();
 
@@ -26,9 +26,7 @@ export const ServersList = () => {
     const key = `ploi-sites-${serverId.toString()}`;
     // If the sites already exist in the cache, or not found, do nothing
     if (siteData[key] || !isMounted.current) return;
-    const server = servers.find(
-      (s) => s.id.toString() === serverId
-    ) as ServerInterface;
+    const server = servers.find((s) => s.id.toString() === serverId) as IServer;
     if (!Object.keys(server).length) return;
     const thisSiteData = (await Site.getAll(server)) as ISite[] | undefined;
     thisSiteData &&
@@ -46,20 +44,18 @@ export const ServersList = () => {
         delete data["ploi-servers"];
         const serverList = JSON.parse(
           servers?.toString() ?? "[]"
-        ) as Array<ServerInterface>;
+        ) as Array<IServer>;
         setServers(serverList?.length ? serverList : []);
         setSiteData(data ?? {});
       })
       .finally(() => {
         if (!isMounted.current) return;
-        Server.getAll().then(
-          async (servers: Array<ServerInterface> | undefined) => {
-            if (!isMounted.current) return;
-            // Add the server list to storage to avoid content flash
-            servers && setServers(servers);
-            await setLocalStorageItem("ploi-servers", JSON.stringify(servers));
-          }
-        );
+        Server.getAll().then(async (servers: Array<IServer> | undefined) => {
+          if (!isMounted.current) return;
+          // Add the server list to storage to avoid content flash
+          servers && setServers(servers);
+          await setLocalStorageItem("ploi-servers", JSON.stringify(servers));
+        });
       });
   }, []);
 
@@ -69,7 +65,7 @@ export const ServersList = () => {
       searchBarPlaceholder="Search Servers..."
       onSelectionChange={(serverId) => serverId && fetchAndCacheSites(serverId)}
     >
-      {servers.map((server: ServerInterface) => {
+      {servers.map((server: IServer) => {
         const key = `ploi-sites-${server.id.toString()}`;
         const sites = JSON.parse(siteData[key] ?? "[]") as ISite[];
         return <ServerListItem key={server.id} server={server} sites={sites} />;
@@ -82,7 +78,7 @@ const ServerListItem = ({
   server,
   sites,
 }: {
-  server: ServerInterface;
+  server: IServer;
   sites: ISite[];
 }) => {
   return (
@@ -118,7 +114,7 @@ const SingleServerView = ({
   server,
   sites,
 }: {
-  server: ServerInterface;
+  server: IServer;
   sites: ISite[];
 }) => {
   const sshUser = preferences?.ploi_ssh_user?.value ?? "ploi";
@@ -246,7 +242,7 @@ const SingleServerView = ({
   );
 };
 
-export const ServerCommands = ({ server }: { server: ServerInterface }) => {
+export const ServerCommands = ({ server }: { server: IServer }) => {
   const sshUser = preferences?.ploi_ssh_user?.value ?? "ploi";
   return (
     <>
@@ -272,7 +268,7 @@ export const ServerCommands = ({ server }: { server: ServerInterface }) => {
   );
 };
 
-export interface ServerInterface {
+export interface IServer {
   id: number;
   type: string;
   name: string;

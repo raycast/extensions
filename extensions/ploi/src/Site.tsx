@@ -9,7 +9,7 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 import { Site } from "./api/Site";
-import { ServerInterface, ServerCommands } from "./Server";
+import { IServer, ServerCommands } from "./Server";
 import { siteStatusState, useIsMounted, usePolling } from "./helpers";
 import { PLOI_PANEL_URL } from "./config";
 
@@ -17,7 +17,7 @@ export const SitesList = ({
   server,
   sites: sitesArray,
 }: {
-  server: ServerInterface;
+  server: IServer;
   sites: ISite[];
 }) => {
   const [sites, setSites] = useState<ISite[]>(sitesArray);
@@ -44,13 +44,7 @@ export const SitesList = ({
   );
 };
 
-const SiteListItem = ({
-  site,
-  server,
-}: {
-  site: ISite;
-  server: ServerInterface;
-}) => {
+const SiteListItem = ({ site, server }: { site: ISite; server: IServer }) => {
   const { icon: stateIcon, text: stateText } = siteStatusState(site);
   return (
     <List.Item
@@ -88,7 +82,7 @@ export const SitesSingleView = ({
   server,
 }: {
   site: ISite;
-  server: ServerInterface;
+  server: IServer;
 }) => {
   const [current, setCurrent] = useState<ISite>(site);
   const isMounted = useIsMounted();
@@ -186,7 +180,7 @@ export const SiteCommands = ({
   server,
 }: {
   site: ISite;
-  server: ServerInterface;
+  server: IServer;
 }) => {
   let url;
   try {

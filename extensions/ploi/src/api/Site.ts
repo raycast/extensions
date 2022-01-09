@@ -1,12 +1,12 @@
 import { showToast, ToastStyle } from "@raycast/api";
 import { ISite } from "../Site";
 import { camelCase, mapKeys, sortBy } from "lodash";
-import { ServerInterface } from "../Server";
+import { IServer } from "../Server";
 import { PLOI_API_URL } from "../config";
 import axios, { AxiosError } from "axios";
 
 export const Site = {
-  async getAll(server: ServerInterface) {
+  async getAll(server: IServer) {
     try {
       const response = await axios.get(
         `${PLOI_API_URL}/servers/${server.id}/sites`
@@ -24,7 +24,7 @@ export const Site = {
     }
   },
 
-  async get(site: ISite, server: ServerInterface) {
+  async get(site: ISite, server: IServer) {
     try {
       const response = await axios.get(
         `${PLOI_API_URL}/servers/${server.id}/sites/${site.id}`
@@ -39,7 +39,7 @@ export const Site = {
     }
   },
 
-  async deploy(site: ISite, server: ServerInterface) {
+  async deploy(site: ISite, server: IServer) {
     try {
       await axios.post(
         `${PLOI_API_URL}/servers/${server.id}/sites/${site.id}/deploy`
@@ -63,7 +63,7 @@ export const Site = {
     }
   },
 
-  async flushFastCgiCache(site: ISite, server: ServerInterface) {
+  async flushFastCgiCache(site: ISite, server: IServer) {
     try {
       await axios.post(
         `${PLOI_API_URL}/servers/${server.id}/sites/${site.id}/fastcgi-cache/flush`
