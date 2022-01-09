@@ -39,21 +39,19 @@ export const circleCIWorkflows = ({ id }: { id: string }): Promise<Workflow[]> =
     .then(json => json.items);
 
 
-export const circleCIWorkflowsPipelines = ({ pipelines }: { pipelines: Pipeline[] }): Promise<Workflow[][]> => {
-  return Promise.all(
+export const circleCIWorkflowsPipelines = ({ pipelines }: { pipelines: Pipeline[] }): Promise<Workflow[][]> =>
+  Promise.all(
     pipelines.map(
-      pipeline => {
-        return circleCIWorkflows({ id: pipeline.id })
+      pipeline =>
+        circleCIWorkflows({ id: pipeline.id })
           .then(workflows => workflows.map(workflow => {
             workflow.repository = pipeline.vcs;
             workflow.pipeline_number = pipeline.number;
 
             return workflow;
-          }).flat());
-      }
+          }).flat())
     )
   );
-};
 
 
 export const circleCIJobs = ({ id }: { id: string }): Promise<Job[]> =>
