@@ -162,6 +162,9 @@ function getIcon(state: State): ImageLike | undefined {
     return { source: "temperature.png", tintColor: PrimaryIconColor };
   } else if (e.startsWith("camera")) {
     return { source: "video.png", tintColor: PrimaryIconColor };
+  } else if (e.startsWith("vacuum")) {
+    const color = state.state === "cleaning" ? Color.Yellow : PrimaryIconColor;
+    return { source: "robot-vacuum.png", tintColor: color };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
