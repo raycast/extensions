@@ -4,7 +4,7 @@
     "title": "Ploi",
     "description": "View and manage your ploi.io servers and sites",
     "icon": "ploi-icon.png",
-    "author": "Cannonb4ll",
+    "author": "Cannonball",
     "license": "MIT",
     "commands": [
         {
