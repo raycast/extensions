@@ -1,0 +1,137 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "twitch",
+  "title": "Twitch",
+  "description": "Search for Streams, Channels or Games on Twitch",
+  "icon": "icon.png",
+  "author": "dieserRobin",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "clientId",
+      "type": "password",
+      "default": "",
+      "title": "Client ID",
+      "required": true,
+      "description": "Twitch ClientId https://twitchapps.com/tokengen/"
+    },
+    {
+      "name": "authorization",
+      "type": "password",
+      "default": "",
+      "title": "Authorization Token",
+      "required": true,
+      "description": "Twitch Bearer Token (Must be matching with ClientId) https://twitchapps.com/tokengen/"
+    },
+    {
+      "name": "primaryaction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "required": false,
+      "default": "detail",
+      "data": [
+        {
+          "title": "Open via Browser",
+          "value": "web"
+        },
+        {
+          "title": "Open via Streamlink",
+          "value": "streamlink"
+        }
+      ],
+      "description": "Set the default action"
+    },
+    {
+      "name": "streamlink",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/streamlink",
+      "title": "Location of Streamlink binary",
+      "required": false,
+      "description": "Use 'where streamlink' or install via brew install streamlink"
+    },
+    {
+      "name": "lowlatency",
+      "type": "checkbox",
+      "label": "Low Latency",
+      "default": false,
+      "title": "Latency (VLC Player is required if enabled)",
+      "required": false,
+      "description": "VLC Player is required for low latency streams"
+    },
+    {
+      "name": "quality",
+      "type": "dropdown",
+      "default": "best",
+      "title": "Video Quality",
+      "required": false,
+      "description": "Standard video quality",
+      "data": [
+        {
+          "title": "Best",
+          "value": "best"
+        },
+        {
+          "title": "720p",
+          "value": "720p"
+        },
+        {
+          "title": "480p",
+          "value": "480p"
+        },
+        {
+          "title": "Worst",
+          "value": "worst"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Streams",
+      "description": "Search a Live Twitch Stream",
+      "icon": "icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "streamer",
+      "title": "Search Channels",
+      "description": "Search a Twitch Stream",
+      "icon": "icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "game",
+      "title": "Search Games",
+      "description": "Search a game on Twitch",
+      "icon": "icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "following",
+      "title": "Search Following Channels",
+      "description": "Search following Channels",
+      "icon": "icon.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.3",
+    "node-fetch": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
