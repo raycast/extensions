@@ -3,7 +3,8 @@ import * as changeCase from "change-case-all";
 import { execa } from "execa";
 import { useEffect, useState } from "react";
 
-type CaseType = "Camel Case"
+type CaseType =
+  | "Camel Case"
   | "Capital Case"
   | "Constant Case"
   | "Dot Case"
@@ -26,7 +27,7 @@ type CaseType = "Camel Case"
 
 async function runShellScript(command: string) {
   const { stdout } = await execa(command, {
-    env: { LC_CTYPE: "UTF-8" }
+    env: { LC_CTYPE: "UTF-8" },
   });
   return stdout;
 }
@@ -36,7 +37,7 @@ async function readClipboard() {
 }
 
 export default function changeChase() {
-  const data: { type: CaseType, func: (input: string, options?: object) => string }[] = [
+  const data: { type: CaseType; func: (input: string, options?: object) => string }[] = [
     { type: "Camel Case", func: changeCase.camelCase },
     { type: "Capital Case", func: changeCase.capitalCase },
     { type: "Constant Case", func: changeCase.constantCase },
@@ -59,7 +60,7 @@ export default function changeChase() {
     { type: "Upper First", func: changeCase.upperCaseFirst },
   ];
 
-  const [clipboard, setClipboard] = useState<string>('');
+  const [clipboard, setClipboard] = useState<string>("");
   useEffect(() => {
     readClipboard().then((c) => setClipboard(c));
   });
@@ -68,26 +69,24 @@ export default function changeChase() {
 
   return (
     <List>
-      {
-        data.map((d) => {
-          const modified = d.func(clipboard);
-          if (preferences[d.type.replace(/ +/g, '')] !== true) return;
-          return (
-            <List.Item
-              key={d.type}
-              id={d.type}
-              title={d.type}
-              subtitle={modified}
-              actions={
-                <ActionPanel>
-                  <CopyToClipboardAction title="Copy to Clipboard" content={modified} />
-                  <PasteAction title="Paste in Frontmost App" content={modified} />
-                </ActionPanel>
-              }
-            />
-          );
-        })
-      }
+      {data.map((d) => {
+        const modified = d.func(clipboard);
+        if (preferences[d.type.replace(/ +/g, "")] !== true) return;
+        return (
+          <List.Item
+            key={d.type}
+            id={d.type}
+            title={d.type}
+            subtitle={modified}
+            actions={
+              <ActionPanel>
+                <CopyToClipboardAction title="Copy to Clipboard" content={modified} />
+                <PasteAction title="Paste in Frontmost App" content={modified} />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
