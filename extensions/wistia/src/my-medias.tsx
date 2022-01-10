@@ -25,7 +25,6 @@ export default function Command() {
           showToast(ToastStyle.Failure, "Invalid Credentials", "Check your API token and try again.");
           popToRoot({ clearSearchBar: true });
         } else {
-          console.log({ error });
           showToast(ToastStyle.Failure, "Failed to load medias");
         }
       }
