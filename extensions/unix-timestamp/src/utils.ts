@@ -1,6 +1,6 @@
-import { getPreferenceValues } from '@raycast/api';
+import { getPreferenceValues } from "@raycast/api";
 
-type TimestampFormat = 'seconds' | 'milliseconds';
+type TimestampFormat = "seconds" | "milliseconds";
 
 interface Preferences {
   format: TimestampFormat;
@@ -43,18 +43,18 @@ export function toDateString(date: Date): string {
   const { isUTC } = getPreferenceValues<Preferences>();
 
   const formatConfig: Intl.DateTimeFormatOptions = {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-    timeZoneName: 'short',
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    timeZoneName: "short",
   };
 
-  const timeZone = isUTC ? 'UTC' : undefined;
+  const timeZone = isUTC ? "UTC" : undefined;
 
-  const dateString = date.toLocaleDateString('en-US', {
+  const dateString = date.toLocaleDateString("en-US", {
     ...formatConfig,
     timeZone,
   });
@@ -62,14 +62,7 @@ export function toDateString(date: Date): string {
   return dateString;
 }
 
-export function toDate(
-  year: number,
-  month: number,
-  day: number,
-  hours: number,
-  minutes: number,
-  seconds: number
-) {
+export function toDate(year: number, month: number, day: number, hours: number, minutes: number, seconds: number) {
   const { isUTC } = getPreferenceValues<Preferences>();
   const date = new Date(year, month - 1, day, hours, minutes, seconds);
 
@@ -86,7 +79,7 @@ export function toDate(
 
 export function getRelativeTime(oldDate: Date, newDate: Date): string {
   const { value, unit } = getDifference(oldDate.getTime(), newDate.getTime());
-  const formatter = new Intl.RelativeTimeFormat('en-US', { style: 'narrow' });
+  const formatter = new Intl.RelativeTimeFormat("en-US", { style: "narrow" });
   const relativeTime = formatter.format(value, unit);
   return relativeTime;
 }
@@ -97,32 +90,32 @@ function getDifference(oldTimestamp: number, newTimestamp: number): Difference {
   if (diffAbs < 60) {
     return {
       value: diff,
-      unit: 'second',
+      unit: "second",
     };
   } else if (diffAbs < 60 * 60) {
     return {
       value: Math.round(diff / 60),
-      unit: 'minute',
+      unit: "minute",
     };
   } else if (diffAbs < 24 * 60 * 60) {
     return {
       value: Math.round(diff / (60 * 60)),
-      unit: 'hour',
+      unit: "hour",
     };
   } else if (diffAbs < 30 * 24 * 60 * 60) {
     return {
       value: Math.round(diff / (24 * 60 * 60)),
-      unit: 'day',
+      unit: "day",
     };
   } else if (diffAbs < 365 * 24 * 60 * 60) {
     return {
       value: Math.round(diff / (30 * 24 * 60 * 60)),
-      unit: 'month',
+      unit: "month",
     };
   } else {
     return {
       value: Math.round(diff / (365 * 24 * 60 * 60)),
-      unit: 'year',
+      unit: "year",
     };
   }
 }

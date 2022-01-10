@@ -5,9 +5,11 @@
 /extensions/algolia                                  @valentindotxyz
 /extensions/amazon-aws                               @falcon @hodglim
 /extensions/api-icon-list                            @petr
+/extensions/atomic                                   @joepio
 /extensions/authy                                    @guga4ka
 /extensions/base64                                   @danielsinclair
 /extensions/bear                                     @hmarr
+/extensions/biaodian                                 @gasolin
 /extensions/binance                                  @grzegorzkrukowski
 /extensions/bitbucket                                @francois
 /extensions/bitly-url-shortener                      @blessanm86
@@ -25,6 +27,7 @@
 /extensions/change-scroll-direction                  @gregoralbrecht
 /extensions/circle-ci                                @qeude
 /extensions/clash                                    @go2sheep
+/extensions/cleanshotx                               @aayush9029
 /extensions/clockify                                 @isma
 /extensions/coffee                                   @mooxl
 /extensions/coinbase-pro                             @farisaziz12
@@ -38,6 +41,7 @@
 /extensions/css-gg                                   @astrit
 /extensions/dash                                     @rso
 /extensions/days-until-christmas                     @megapixel23
+/extensions/debank                                   @yukai
 /extensions/deepcast                                 @mooxl
 /extensions/devdocs                                  @pomdtr
 /extensions/displayplacer                            @eluce2
@@ -115,6 +119,7 @@
 /extensions/search-npm                               @mrmartineau
 /extensions/search-rubygems                          @aleks
 /extensions/send-to-flomo                            @ahonn
+/extensions/sf-symbols-search                        @peteschaffner
 /extensions/simpread                                 @kenshin
 /extensions/single-disk-eject                        @johndturn
 /extensions/sketch                                   @aesign

@@ -1,9 +1,4 @@
-export {
-  ContentType,
-  IconUsage,
-  Progress,
-  State,
-} from "./Types"
+export { ContentType, IconUsage, Progress, State } from "./Types";
 
 export type {
   Command,
@@ -16,4 +11,4 @@ export type {
   IconPathNullable,
   IconResultNullable,
   StateResult,
-} from "./Types"
+} from "./Types";

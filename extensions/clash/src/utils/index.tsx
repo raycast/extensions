@@ -30,24 +30,24 @@ async function getCurrentBackendWithSecret() {
   if (backend) {
     const secret = await getBackendSecret(backend);
     if (secret == undefined) {
-      throw BackendNotExistError
+      throw BackendNotExistError;
     } else {
-      return [backend, secret]
+      return [backend, secret];
     }
   } else {
-    throw NoBackendError
+    throw NoBackendError;
   }
 }
 
 async function fetchBackend(endpoint: string) {
-  const [backend, secret] = await getCurrentBackendWithSecret()
+  const [backend, secret] = await getCurrentBackendWithSecret();
   const url = new URL(backend);
   const finalUrl = `${trimTrailingSlash(url.href)}${endpoint}`;
   return fetch(finalUrl, secret ? { headers: { Authorization: `Bearer ${secret}` } } : undefined);
 }
 
 async function buildWSURLBase(endpoint: string, params = {}) {
-  const [backend, secret] = await getCurrentBackendWithSecret()
+  const [backend, secret] = await getCurrentBackendWithSecret();
   const url = new URL(backend);
   url.protocol === "https:" ? (url.protocol = "wss:") : (url.protocol = "ws:");
   const ps = new URLSearchParams(params);

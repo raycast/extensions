@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
-import { dataToProject, Group, Issue, Project } from "../gitlabapi";
+import { dataToProject, Group, Project } from "../gitlabapi";
 import { GitLabIcons, useImage } from "../icons";
 import { EpicList } from "./epics";
 import { IssueList, IssueScope, IssueState } from "./issues";

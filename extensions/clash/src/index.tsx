@@ -43,7 +43,7 @@ const commponents: Array<CommponentT> = [
 ];
 
 export default function Command() {
-  getCurrentBackendWithSecret().catch(ErrorHandler)
+  getCurrentBackendWithSecret().catch(ErrorHandler);
   return (
     <List>
       {commponents.map((commponent, index) => (

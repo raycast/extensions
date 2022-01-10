@@ -16,7 +16,7 @@ const OpenBookMarkAction = ({ bookmark, ...props }: OpenBookMarkActionProps): JS
     onAction={async () => {
       try {
         const towerCliPath = preferences.towerCliPath.value as string;
-        await execp(`${towerCliPath} ${bookmark.Folder}`);
+        await execp(`${towerCliPath} ${bookmark.getFolder}`);
       } catch (e) {
         showToast(ToastStyle.Failure, `Error!`, `There was a error opening: ${bookmark.Folder}`);
       } finally {

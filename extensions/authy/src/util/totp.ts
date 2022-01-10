@@ -2,9 +2,9 @@ import { createHmac } from "crypto";
 import { decode } from "hi-base32";
 
 interface Options {
-  period: number,
-  digits: number,
-  timestamp?: number
+  period: number;
+  digits: number;
+  timestamp?: number;
 }
 
 function hash(key: Buffer, count: bigint): Buffer {

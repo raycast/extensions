@@ -49,8 +49,8 @@ Raycast extension to search dashboards, create, search and modify annotations, a
 - Give your key a name e.g. `Raycast`, select the viewer role (recommended), and set an expiration date (recommended
 - Store in a secure location the given access token
 - Start a grafana command and fill the required fields
-    - Root API Url: is the URL of your grafana instance. If you use Grafana Cloud, it is like `https://<organization>.grafana.net`
-    - API-key with your access token previsouly generated.
+  - Root API Url: is the URL of your grafana instance. If you use Grafana Cloud, it is like `https://<organization>.grafana.net`
+  - API-key with your access token previsouly generated.
 
 Now you should be able to manage your Grafana Dashboards with Raycast 🚀.
 
@@ -59,7 +59,6 @@ Now you should be able to manage your Grafana Dashboards with Raycast 🚀.
 ### List Dahsboards
 
 ![search-dashboards](./assets/showcase_search_dashboards.png)
-
 
 ### List Annotations
 
@@ -74,7 +73,6 @@ Now you should be able to manage your Grafana Dashboards with Raycast 🚀.
 - Improve annotation creation with a custom time, and choosing a time range
 - Let the user choose tags from a dropdown for the annotation
 
-__________
-
+---
 
 _Extension built & tested for Grafana Cloud v8_

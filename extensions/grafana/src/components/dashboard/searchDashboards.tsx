@@ -1,12 +1,4 @@
-import {
-  ActionPanel,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-  Icon,
-  Color,
-} from "@raycast/api";
+import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle, Icon, Color } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import fetch, { AbortError } from "node-fetch";
 
@@ -91,24 +83,27 @@ function useSearch() {
 }
 
 async function performSearchOnDashboards(searchText: string, signal: AbortSignal): Promise<Dashboard[]> {
-  const response = await fetch(`
-    ${preferences.rootApiUrl}/api/search?limit=10&type=dash-db&query=${searchText.length ? searchText.toString() : ''}
-  `, {
-    method: "get",
-    signal: signal,
-    headers: {
-      "Content-Type": "application/json",
-      "accept": "application/json",
-      "Authorization": `Bearer ${preferences.apikey}`
+  const response = await fetch(
+    `
+    ${preferences.rootApiUrl}/api/search?limit=10&type=dash-db&query=${searchText.length ? searchText.toString() : ""}
+  `,
+    {
+      method: "get",
+      signal: signal,
+      headers: {
+        "Content-Type": "application/json",
+        accept: "application/json",
+        Authorization: `Bearer ${preferences.apikey}`,
+      },
     }
-  });
+  );
 
   if (!response.ok) {
     return Promise.reject(response.statusText);
   }
 
   type Json = Record<string, unknown>;
-  
+
   const dashboards = (await response.json()) as Json[];
 
   return dashboards.map((dashboard) => {
@@ -126,7 +121,7 @@ async function performSearchOnDashboards(searchText: string, signal: AbortSignal
       folderUid: dashboard.folderUid as string,
       folderTitle: dashboard.folderTitle as string,
       folderUrl: dashboard.folderUrl as string,
-      sortMeta: dashboard.sortMeta as number
+      sortMeta: dashboard.sortMeta as number,
     };
   });
 }

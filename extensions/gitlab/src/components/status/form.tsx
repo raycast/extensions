@@ -45,7 +45,6 @@ function StatusDurationDropDown(props: { id: string; defaultValue: string | unde
 }
 
 function StatusEmojiDropDown(props: { id: string; title: string; defaultValue?: string | undefined }): JSX.Element {
-  const em = getAllEmojiSymbolAliases();
   return (
     <Form.Dropdown id={props.id} title={props.title} defaultValue={props.defaultValue}>
       <Form.DropdownItem key="-" title="-" value="" />

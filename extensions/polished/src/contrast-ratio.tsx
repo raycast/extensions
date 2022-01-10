@@ -1,45 +1,52 @@
-import { Form, ActionPanel, useNavigation, Detail, SubmitFormAction, showToast, ToastStyle } from "@raycast/api"
-import { getContrast } from "polished"
+import { Form, ActionPanel, useNavigation, Detail, SubmitFormAction, showToast, ToastStyle } from "@raycast/api";
+import { getContrast } from "polished";
 
 type Values = {
-  text: string
-  background: string
-}
+  text: string;
+  background: string;
+};
 
 export default function ContrastRatio() {
-  const { push } = useNavigation()
+  const { push } = useNavigation();
 
   function handleSubmit(values: Values) {
-    const { text, background } = values
-    let contrast
+    const { text, background } = values;
+    let contrast;
 
     try {
-      contrast = getContrast(text, background)
+      contrast = getContrast(text, background);
     } catch (error) {
-      showToast(ToastStyle.Failure, "Couldn't parse the color string", "Please provide the colors in a valid input format.")
-      return
+      showToast(
+        ToastStyle.Failure,
+        "Couldn't parse the color string",
+        "Please provide the colors in a valid input format."
+      );
+      return;
     }
 
-    push(<Result text={text} background={background} contrast={contrast} />)
+    push(<Result text={text} background={background} contrast={contrast} />);
   }
 
   return (
-    <Form navigationTitle="Contrast Ratio" actions={
-      <ActionPanel>
-        <SubmitFormAction title="Calculate" onSubmit={handleSubmit} />
-      </ActionPanel>
-    }>
+    <Form
+      navigationTitle="Contrast Ratio"
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Calculate" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
       <Form.TextField id="text" placeholder="#000" title="Text Color" />
       <Form.TextField id="background" placeholder="#fff" title="Background Color" />
     </Form>
-  )
+  );
 }
 
 type Result = {
-  contrast: number
-  text: string
-  background: string
-}
+  contrast: number;
+  text: string;
+  background: string;
+};
 
 function Result({ contrast, text, background }: Result) {
   const ratios = {
@@ -47,7 +54,7 @@ function Result({ contrast, text, background }: Result) {
     AALarge: contrast >= 3,
     AAA: contrast >= 7,
     AAALarge: contrast >= 4.5,
-  }
+  };
 
   const markdown = `
 ## Result
@@ -68,9 +75,7 @@ Based on the [contrast calculations recommended by W3](https://www.w3.org/WAI/WC
 ---
 
 Contrast is the difference in luminance or color that makes an object (or its representation in an image or display) distinguishable. In visual perception of the real world, contrast is determined by the difference in the color and brightness of the object and other objects within the same field of view.
-  `
+  `;
 
-  return (
-    <Detail markdown={markdown} />
-  )
+  return <Detail markdown={markdown} />;
 }

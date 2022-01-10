@@ -1,36 +1,36 @@
 {
-	"$schema": "https://www.raycast.com/schemas/extension.json",
-	"name": "tuple",
-	"title": "Tuple",
-	"description": "Initiate pairing sessions in Tuple.",
-	"icon": "tuple.png",
-	"author": "inxilpro",
-	"license": "MIT",
-	"commands": [
-		{
-			"name": "index",
-			"title": "Start a Pairing Session",
-			"subtitle": "Tuple",
-			"description": "Start pairing sessions in Tuple.",
-			"mode": "view"
-		}
-	],
-	"dependencies": {
-		"@raycast/api": "^1.25.4",
-		"node-fetch": "^3.0.0"
-	},
-	"devDependencies": {
-		"@types/node": "~16.10.0",
-		"@types/react": "^17.0.28",
-		"@typescript-eslint/eslint-plugin": "^5.0.0",
-		"@typescript-eslint/parser": "^5.0.0",
-		"eslint": "^7.32.0",
-		"eslint-config-prettier": "^8.3.0",
-		"react-devtools": "^4.19.2",
-		"typescript": "^4.4.3"
-	},
-	"scripts": {
-		"build": "ray build -e dist",
-		"dev": "ray develop"
-	}
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tuple",
+  "title": "Tuple",
+  "description": "Initiate pairing sessions in Tuple.",
+  "icon": "tuple.png",
+  "author": "inxilpro",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Start a Pairing Session",
+      "subtitle": "Tuple",
+      "description": "Start pairing sessions in Tuple.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.4",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
 }

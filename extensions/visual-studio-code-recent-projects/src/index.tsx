@@ -8,7 +8,7 @@ import {
   OpenInBrowserAction,
   OpenWithAction,
   ShowInFinderAction,
-  TrashAction
+  TrashAction,
 } from "@raycast/api";
 import { existsSync, readFileSync } from "fs";
 import { homedir } from "os";
@@ -60,17 +60,13 @@ function RemoteListItem(props: { entry: RemoteEntry }) {
 
   return (
     <List.Item
-    title={remotePath}
-    subtitle={props.entry.label || "/"}
-    icon={Icon.Globe}
+      title={remotePath}
+      subtitle={props.entry.label || "/"}
+      icon={Icon.Globe}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction
-              title="Open in Code"
-              icon="action-icon.png"
-              url={uri}
-            />
+            <OpenInBrowserAction title="Open in Code" icon="action-icon.png" url={uri} />
           </ActionPanel.Section>
           <DevelopmentActionSection />
         </ActionPanel>

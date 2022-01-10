@@ -1,19 +1,15 @@
-import { 
-  useDataManager 
-} from "@hooks"
+import { useDataManager } from "@hooks";
 
-import { 
-  Language 
-} from "@models"
+import { Language } from "@models";
 
 type UseLanguages = () => {
-  languages: Language[]
-} 
+  languages: Language[];
+};
 
 export const useLanguages: UseLanguages = () => {
-  const { dataManager } = useDataManager()
+  const { dataManager } = useDataManager();
 
   return {
-    languages: dataManager.fetchLanguages()
-  }
-}
+    languages: dataManager.fetchLanguages(),
+  };
+};

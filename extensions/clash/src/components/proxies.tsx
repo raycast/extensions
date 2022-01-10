@@ -17,7 +17,7 @@ export default function Proxies(): JSX.Element {
         const data = await GetProviders();
         setProxies(data);
       } catch (e) {
-        ErrorHandler(e)
+        ErrorHandler(e);
       } finally {
         setLoading(false);
       }
