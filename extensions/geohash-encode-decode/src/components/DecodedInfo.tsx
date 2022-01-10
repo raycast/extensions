@@ -23,14 +23,7 @@ export default function DecodedInfo({ geohash }: GeohashInfoProps) {
   }, [geohash]);
 
   if (isValidGeohash) {
-    const {
-      latitude,
-      longitude,
-      centroidWKT,
-      neighborsList,
-      polygonGeoJSON,
-      polygonWKT
-    } = useMemo(() => {
+    const { latitude, longitude, centroidWKT, neighborsList, polygonGeoJSON, polygonWKT } = useMemo(() => {
       const { latitude, longitude } = decode(geohash);
       const polygonGeoJSON = geohashToPolygonGeometry(geohash);
 
@@ -40,7 +33,7 @@ export default function DecodedInfo({ geohash }: GeohashInfoProps) {
         centroidWKT: `POINT (${longitude} ${latitude})`,
         neighborsList: neighbors(geohash),
         polygonGeoJSON,
-        polygonWKT: convertToWK(polygonGeoJSON)
+        polygonWKT: convertToWK(polygonGeoJSON),
       };
     }, [geohash]);
 

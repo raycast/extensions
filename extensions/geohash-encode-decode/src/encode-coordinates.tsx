@@ -8,9 +8,11 @@ export default function EncodeCoordinates() {
 
   const list = <EncodedList latitude={latitude} longitude={longitude} />;
 
-  const Actions = <ActionPanel>
-    <PushAction title="Encode Coordinates" target={list} />
-  </ActionPanel>;
+  const Actions = (
+    <ActionPanel>
+      <PushAction title="Encode Coordinates" target={list} />
+    </ActionPanel>
+  );
 
   return (
     <Form actions={Actions}>

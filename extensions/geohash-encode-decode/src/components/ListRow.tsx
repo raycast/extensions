@@ -6,11 +6,11 @@ interface ListRowProps {
 }
 
 export default function ListRow({ title, value }: ListRowProps) {
-  const ListItemActions = <ActionPanel>
-    <CopyToClipboardAction content={value} />
-  </ActionPanel>;
-
-  return (
-    <List.Item title={title} accessoryTitle={value} actions={ListItemActions} />
+  const ListItemActions = (
+    <ActionPanel>
+      <CopyToClipboardAction content={value} />
+    </ActionPanel>
   );
+
+  return <List.Item title={title} accessoryTitle={value} actions={ListItemActions} />;
 }

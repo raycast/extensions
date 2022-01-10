@@ -7,9 +7,11 @@ export default function DecodeGeohash() {
 
   const target = <DecodedInfo geohash={geohash} />;
 
-  const Actions = <ActionPanel>
-    <PushAction title="Decode Geohash" target={target} />
-  </ActionPanel>;
+  const Actions = (
+    <ActionPanel>
+      <PushAction title="Decode Geohash" target={target} />
+    </ActionPanel>
+  );
 
   return (
     <Form actions={Actions}>

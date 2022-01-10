@@ -38,17 +38,21 @@ export default function EncodedList({ latitude, longitude }: EncodeListProps) {
     }, [latitude, longitude]);
 
     listContent = asGeohash.map((geohash) => {
-      const ListItemActions = <ActionPanel>
-        <CopyToClipboardAction content={geohash} />
-        <OpenInBrowserAction url={`https://www.geohash.es/decode?geohash=${geohash}`} />
-      </ActionPanel>;
+      const ListItemActions = (
+        <ActionPanel>
+          <CopyToClipboardAction content={geohash} />
+          <OpenInBrowserAction url={`https://www.geohash.es/decode?geohash=${geohash}`} />
+        </ActionPanel>
+      );
 
-      return <List.Item
-        title={geohash}
-        accessoryTitle={`Precision ${geohash.length}`}
-        key={geohash}
-        actions={ListItemActions}
-      />;
+      return (
+        <List.Item
+          title={geohash}
+          accessoryTitle={`Precision ${geohash.length}`}
+          key={geohash}
+          actions={ListItemActions}
+        />
+      );
     });
   } else {
     listContent = <InvalidCoordinates />;
