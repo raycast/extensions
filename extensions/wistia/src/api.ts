@@ -23,8 +23,7 @@ export async function fetchEmbedCode({
   });
 
   if (!response.ok) {
-    const errInfo = (await response.json()) as WistiaApiError;
-    throw errInfo;
+    throw (await response.json()) as WistiaApiError;
   }
 
   return (await response.json()) as EmbedObject;
@@ -45,8 +44,7 @@ export async function fetchMedias(): Promise<WistiaMedia[]> {
   });
 
   if (!response.ok) {
-    const errInfo = (await response.json()) as WistiaApiError;
-    throw errInfo;
+    throw (await response.json()) as WistiaApiError;
   }
 
   return (await response.json()) as WistiaMedia[];
@@ -66,8 +64,7 @@ export async function fetchAccountInfo(): Promise<AccountInfo> {
   });
 
   if (!response.ok) {
-    const errInfo = (await response.json()) as WistiaApiError;
-    throw errInfo;
+    throw (await response.json()) as WistiaApiError;
   }
 
   const accountInfo = (await response.json()) as AccountInfo;
@@ -89,8 +86,7 @@ export async function fetchProjects(): Promise<WistiaProject[]> {
   });
 
   if (!response.ok) {
-    const errInfo = (await response.json()) as WistiaApiError;
-    throw errInfo;
+    throw (await response.json()) as WistiaApiError;
   }
 
   return (await response.json()) as WistiaProject[];
@@ -111,8 +107,7 @@ export async function fetchProjectMedias(projectHashedId: string): Promise<Wisti
   });
 
   if (!response.ok) {
-    const errInfo = (await response.json()) as WistiaApiError;
-    throw errInfo;
+    throw (await response.json()) as WistiaApiError;
   }
 
   return (await response.json()) as WistiaProject;
