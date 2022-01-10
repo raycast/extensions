@@ -13,7 +13,17 @@
       "title": "Search Recent Projects",
       "subtitle": "Xcode",
       "description": "Search and open your recent Xcode Projects",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "excludedXcodeProjectPaths",
+          "type": "textfield",
+          "required": false,
+          "title": "Excluded Xcode Project paths (comma separated)",
+          "description": "A comma separated list of directory paths that should be excluded when searching for recent Xcode Projects.",
+          "placeholder": "~/Backup,~/Archive/Xcode"
+        }
+      ]
     },
     {
       "name": "simulator-applications.command",
