@@ -9,16 +9,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Google or type a URL",
-      "subtitle": "Google",
+      "title": "Google Search",
       "description": "Google search with autosuggestions",
-      "mode": "view",
-      "keywords": [
-        "google",
-        "search",
-        "suggestions",
-        "autocomplete"
-      ]
+      "mode": "view"
     }
   ],
   "dependencies": {

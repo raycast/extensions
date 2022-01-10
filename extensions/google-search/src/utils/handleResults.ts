@@ -15,10 +15,13 @@ export async function getSearchHistory(): Promise<SearchResult[]> {
 
 export async function getSearchResults(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
   const response = await fetch(
-    `http://suggestqueries.google.com/complete/search?hl=en-us&output=chrome&q=${encodeURIComponent(searchText)}`,
+    `https://suggestqueries.google.com/complete/search?hl=en-us&output=chrome&q=${encodeURIComponent(searchText)}`,
     {
       method: "get",
       signal: signal,
+      headers: {
+        "Content-Type": "text/plain; charset=UTF-8",
+      },
     }
   );
 
@@ -26,7 +29,10 @@ export async function getSearchResults(searchText: string, signal: AbortSignal):
     return Promise.reject(response.statusText);
   }
 
-  const json: any = await response.json();
+  const buffer = await response.arrayBuffer();
+  const decoder = new TextDecoder("iso-8859-1");
+  const text = decoder.decode(buffer);
+  const json = JSON.parse(text);
 
   const results: SearchResult[] = [
     {
