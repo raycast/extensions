@@ -1,4 +1,5 @@
-![](images/readme/logo/store-icon@light.png#gh-light-mode-only)![](images/readme/logo/store-icon@dark.png#gh-dark-mode-only)  
+![](images/readme/logo/store-icon@light.png#gh-light-mode-only)![](images/readme/logo/store-icon@dark.png#gh-dark-mode-only)
+
 # Script Commands Store
 
 ![](images/readme/header-light.png#gh-light-mode-only)![](images/readme/header-dark.png#gh-dark-mode-only)
@@ -8,6 +9,7 @@ The Script Commands Store extension was built to help users to manage their Scri
 ### Getting started
 
 On the first open, you will have to:
+
 - Define a folder to store the Script Commands
 - Setup the path you defined for the Script Commands in Raycast Preferences window.
 
@@ -16,32 +18,32 @@ On the first open, you will have to:
 <details>
  <summary>Instructions</summary>
 
-  At the first time you open Script Commands Store, you will need to define the folder which will be used to store the Script Commands downloaded.
+At the first time you open Script Commands Store, you will need to define the folder which will be used to store the Script Commands downloaded.
 
-  This is the setup screen. We strongly suggest you define a new folder for it.  
-  Example: `~/raycast/script-commands`
+This is the setup screen. We strongly suggest you define a new folder for it.  
+ Example: `~/raycast/script-commands`
 
-  ![](images/readme/setup/first-screen.png)
+![](images/readme/setup/first-screen.png)
 
-  After finishing the first step, the Script Commands Store will be loaded for you, however, this doesn't mean it is fully configured for you, yet.
+After finishing the first step, the Script Commands Store will be loaded for you, however, this doesn't mean it is fully configured for you, yet.
 
-  In the next step, we will need to inform Raycast which folder it needs to watch. Let's take as example the suggestion above.
+In the next step, we will need to inform Raycast which folder it needs to watch. Let's take as example the suggestion above.
 
-  First, open Raycast and press `⌘ Command + ,` and the following window will be presented:
+First, open Raycast and press `⌘ Command + ,` and the following window will be presented:
 
-  ![](images/readme/setup/preferences.png)
+![](images/readme/setup/preferences.png)
 
-  Now, click on `Extensions` (1) ➔ `Scripts` (2) ➔ `Script Commands` (3) ➔ `Add Directories` (4)
+Now, click on `Extensions` (1) ➔ `Scripts` (2) ➔ `Script Commands` (3) ➔ `Add Directories` (4)
 
-  ![](images/readme/setup/preferences-extensions.png)
+![](images/readme/setup/preferences-extensions.png)
 
-  After adding the directory, the right panel should be similar to this
+After adding the directory, the right panel should be similar to this
 
-  ![](images/readme/setup/setup-directory-added.png)
+![](images/readme/setup/setup-directory-added.png)
 
-  Voilà, we are ready to install the first Script Command using our Store!
+Voilà, we are ready to install the first Script Command using our Store!
 
-  💡 Tip: Watch the screencast to see the extension in action.
+💡 Tip: Watch the screencast to see the extension in action.
 
 </details>
 
@@ -54,67 +56,78 @@ https://cln.sh/weZwo2
 <details>
  <summary>List Script Commands</summary>
 
- ![](images/readme/content/main-list.png)
+![](images/readme/content/main-list.png)
+
 </details>
 <details>
  <summary>Install</summary>
 
- ![](images/readme/actions/install.png)
+![](images/readme/actions/install.png)
+
 </details>
 <details>
  <summary>Install Package</summary>
 
- ![](images/readme/panels/install-package.png)
+![](images/readme/panels/install-package.png)
+
 </details>
 <details>
  <summary>Edit Local Source Code</summary>
 
- ![](images/readme/actions/edit-local.png)
+![](images/readme/actions/edit-local.png)
+
 </details>
 <details>
  <summary>Uninstall</summary>
 
- ![](images/readme/actions/uninstall.png)
+![](images/readme/actions/uninstall.png)
+
 </details>
 <details>
  <summary>Configure and confirm setup</summary>
 
- ![](images/readme/actions/configure.png)  
+![](images/readme/actions/configure.png)  
  ![](images/readme/actions/confirm.png)
+
 </details>
 <details>
  <summary>Search by indexed keys</summary>
 
- ![](images/readme/search-bar/search-bar.png)
- - *Categories*: `communication`, `web searches`...
- - *Subcategories*: `github`, `brew`...
- - *Author name*: `things`
- - *Type*: `installed`, `template`, `setup`
- - *Programming language*: `bash`, `swift`, `python`... 
+![](images/readme/search-bar/search-bar.png)
+
+- _Categories_: `communication`, `web searches`...
+- _Subcategories_: `github`, `brew`...
+- _Author name_: `things`
+- _Type_: `installed`, `template`, `setup`
+- _Programming language_: `bash`, `swift`, `python`...
 </details>
 <details>
  <summary>Filters</summary>
 
- ![](images/readme/panels/filter-by.png)
- - Type  
- ![](images/readme/panels/filter-by-type.png)
- - Languages  
+![](images/readme/panels/filter-by.png)
+
+- Type  
+  ![](images/readme/panels/filter-by-type.png)
+- Languages  
  ![](images/readme/panels/filter-by-language.png)
 </details>
 <details>
  <summary>Show README (if available)</summary>
 
- ![](images/readme/panels/view-readme.png)
+![](images/readme/panels/view-readme.png)
+
 </details>
 <details>
  <summary>Show Source Code</summary>
 
- ![](images/readme/panels/view-source-code.png)
+![](images/readme/panels/view-source-code.png)
+
 </details>
 <details>
  <summary>Show List of authors</summary>
 
- ![](images/readme/panels/authors.png)
+![](images/readme/panels/authors.png)
+
 </details>
 
 ### Iconography
@@ -128,7 +141,7 @@ https://cln.sh/weZwo2
 ### Data
 
 The data consumed by this extension is automatically generated by [Raycast Toolkit](https://github.com/raycast/script-commands/tree/master/Tools/Toolkit).
- 
+
 ### Thanks
 
 - Special thanks to my personal friend [**Diego Ventura**](https://github.com/diegoventura), who dedicated some hours to teach me some concepts about React and TypeScript. Appreciated it, bro!

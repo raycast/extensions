@@ -16,7 +16,7 @@ function getIcon(merged: boolean): Image {
 export function BranchListItem(props: { branch: any; project: Project }) {
   const branch = props.branch;
   const icon = getIcon(branch.merged as boolean);
-  let states = [];
+  const states = [];
   if (branch.default) {
     states.push("[default]");
   }

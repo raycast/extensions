@@ -15,7 +15,7 @@ import { readFileSync } from 'fs';
 import { useEffect, useState } from 'react';
 import { URL } from 'url';
 
-const TurndownService = require('turndown');
+import TurndownService from 'turndown';
 
 interface Preferences {
   path: string;

@@ -7,7 +7,6 @@ import { showToast, ToastStyle } from "@raycast/api";
  * XcodeSimulatorService
  */
 export class XcodeSimulatorService {
-
   /**
    * The XcodeSimulators BehaviorSubject
    */
@@ -28,9 +27,7 @@ export class XcodeSimulatorService {
    */
   async getXcodeSimulators(): Promise<XcodeSimulator[]> {
     // Execute command
-    const output = await execAsync(
-      "xcrun simctl list -j -v devices"
-    );
+    const output = await execAsync("xcrun simctl list -j -v devices");
     // Parse stdout as JSON
     const devicesResponseJSON = JSON.parse(output.stdout);
     // Check if JSON or devices within the JSON are not available
@@ -43,22 +40,15 @@ export class XcodeSimulatorService {
     // For each DeviceGroup
     for (const deviceGroup in devicesResponseJSON.devices) {
       // Initialize runtime components from DeviceGroup
-      const runtimeComponents = deviceGroup
-        .substring(deviceGroup.lastIndexOf(".") + 1)
-        .split("-");
+      const runtimeComponents = deviceGroup.substring(deviceGroup.lastIndexOf(".") + 1).split("-");
       // Initialize runtime string
-      const runtime = [
-        runtimeComponents.shift(),
-        runtimeComponents.join(".")
-      ].join(" ");
+      const runtime = [runtimeComponents.shift(), runtimeComponents.join(".")].join(" ");
       // Push Simulators in DeviceGroup
       simulators.push(
-        ...devicesResponseJSON
-          .devices[deviceGroup]
-          .map((simulator: XcodeSimulator) => {
-            simulator.runtime = runtime;
-            return simulator;
-          })
+        ...devicesResponseJSON.devices[deviceGroup].map((simulator: XcodeSimulator) => {
+          simulator.runtime = runtime;
+          return simulator;
+        })
       );
     }
     // Return XcodeSimulators
@@ -69,15 +59,11 @@ export class XcodeSimulatorService {
    * Boot XcodeSimulator
    * @param xcodeSimulator The XcodeSimulator to boot
    */
-  async boot(
-    xcodeSimulator: XcodeSimulator
-  ): Promise<void> {
+  async boot(xcodeSimulator: XcodeSimulator): Promise<void> {
     // Update to pending state
     this.updateToPendingStateIfNeeded(xcodeSimulator);
     // Boot Simulator
-    await execAsync(
-      `xcrun simctl boot ${xcodeSimulator.udid}`
-    );
+    await execAsync(`xcrun simctl boot ${xcodeSimulator.udid}`);
     // Refresh XcodeSimulators
     this.refreshXcodeSimulators().then();
   }
@@ -86,15 +72,11 @@ export class XcodeSimulatorService {
    * Shutdown XcodeSimulator
    * @param xcodeSimulator The XcodeSimulator to shutdown
    */
-  async shutdown(
-    xcodeSimulator: XcodeSimulator
-  ): Promise<void> {
+  async shutdown(xcodeSimulator: XcodeSimulator): Promise<void> {
     // Update to pending state
     this.updateToPendingStateIfNeeded(xcodeSimulator);
     // Shutdown Simulator
-    await execAsync(
-      `xcrun simctl shutdown ${xcodeSimulator.udid}`
-    );
+    await execAsync(`xcrun simctl shutdown ${xcodeSimulator.udid}`);
     // Refresh XcodeSimulators
     this.refreshXcodeSimulators().then();
   }
@@ -124,9 +106,7 @@ export class XcodeSimulatorService {
    * Update a given XcodeSimulator to pending state if needed
    * @param xcodeSimulator The XcodeSimulator
    */
-  private updateToPendingStateIfNeeded(
-    xcodeSimulator: XcodeSimulator
-  ) {
+  private updateToPendingStateIfNeeded(xcodeSimulator: XcodeSimulator) {
     // Retrieve the current XcodeSimulators
     const xcodeSimulators = this.xcodeSimulatorsSubject.value;
     // Check if XcodeSimulators are not available
@@ -136,17 +116,15 @@ export class XcodeSimulatorService {
     }
     // Emit updated XcodeSimulators
     this.xcodeSimulatorsSubject.next(
-      xcodeSimulators
-        .map(currentXcodeSimulator => {
-          // Check if current XcodeSimulator matches the given XcodeSimulator
-          if (currentXcodeSimulator.udid === xcodeSimulator.udid) {
-            // Update state to pending
-            currentXcodeSimulator.state = "Pending";
-          }
-          // Return current XcodeSimulator
-          return currentXcodeSimulator;
-        })
+      xcodeSimulators.map((currentXcodeSimulator) => {
+        // Check if current XcodeSimulator matches the given XcodeSimulator
+        if (currentXcodeSimulator.udid === xcodeSimulator.udid) {
+          // Update state to pending
+          currentXcodeSimulator.state = "Pending";
+        }
+        // Return current XcodeSimulator
+        return currentXcodeSimulator;
+      })
     );
   }
-
 }

@@ -1,91 +1,56 @@
-import { 
-  CompactGroup,
-  Language,
-  MainCompactGroup, 
-  ScriptCommand,
-} from "@models"
+import { CompactGroup, Language, MainCompactGroup, ScriptCommand } from "@models";
 
-import { 
-  fetchReadme,
-  fetchScriptCommands,
-  fetchSourceCode,
-} from "@network"
+import { fetchReadme, fetchScriptCommands, fetchSourceCode } from "@network";
 
-import { 
-  ContentStore,
-} from "@stores"
+import { ContentStore } from "@stores";
 
-import { 
-  ScriptCommandManager, 
-  Settings, 
-} from "@managers"
+import { ScriptCommandManager, Settings } from "@managers";
 
-import { 
-  Content,
-  FileNullable,
-  Filter,
-  Process,
-  Progress,
-  State,
-  StateResult, 
-} from "@types"
+import { Content, FileNullable, Filter, Process, Progress, State, StateResult } from "@types";
 
-import { 
-  constants,
-  accessSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-  watch,
-  FSWatcher,
-} from 'fs'
+import { constants, accessSync, existsSync, mkdirSync, readFileSync, writeFileSync, watch, FSWatcher } from "fs";
 
 export class DataManager {
-  private static instance = new DataManager()
+  private static instance = new DataManager();
 
-  private contentManager: ContentStore
-  private scriptCommandManager: ScriptCommandManager
-  private settings = new Settings()
-  private mainContent: MainCompactGroup
+  private contentManager: ContentStore;
+  private scriptCommandManager: ScriptCommandManager;
+  private settings = new Settings();
+  private mainContent: MainCompactGroup;
 
-  static shared(): DataManager { 
-    return this.instance
+  static shared(): DataManager {
+    return this.instance;
   }
 
   private constructor() {
-    this.contentManager = new ContentStore()
+    this.contentManager = new ContentStore();
 
-    this.scriptCommandManager = new ScriptCommandManager(
-      this.contentManager,
-      this.settings
-    )
+    this.scriptCommandManager = new ScriptCommandManager(this.contentManager, this.settings);
 
     this.mainContent = {
       groups: [],
       languages: [],
-      totalScriptCommands: 0
-    }
+      totalScriptCommands: 0,
+    };
 
-    this.setupFolders()
-    this.loadDatabase()
+    this.setupFolders();
+    this.loadDatabase();
   }
-  
+
   private loadDatabase(): void {
     try {
-      accessSync(this.settings.databaseFile, constants.R_OK)
+      accessSync(this.settings.databaseFile, constants.R_OK);
 
       if (existsSync(this.settings.databaseFile)) {
-        const data = readFileSync(this.settings.databaseFile).toString()
-        
+        const data = readFileSync(this.settings.databaseFile).toString();
+
         if (data.length > 0) {
-          const content: Content = JSON.parse(data)
-          this.contentManager.setContent(content)
+          const content: Content = JSON.parse(data);
+          this.contentManager.setContent(content);
         }
       }
-    }
-    catch (error) {
-      this.persist()
+    } catch (error) {
+      this.persist();
     }
   }
 
@@ -93,317 +58,304 @@ export class DataManager {
     const paths = [
       this.settings.supportPath,
       this.settings.repositoryCommandsFolderPath,
-      this.settings.imagesCommandsFolderPath
-    ]
+      this.settings.imagesCommandsFolderPath,
+    ];
 
     paths.forEach((path) => {
-      mkdirSync(
-        path, 
-        { recursive: true }
-      )  
-    })
+      mkdirSync(path, { recursive: true });
+    });
   }
 
   persist(): void {
-    const data = JSON.stringify(this.contentManager.getContent(), null, 2)
+    const data = JSON.stringify(this.contentManager.getContent(), null, 2);
 
     if (data && data.length > 0) {
-      writeFileSync(this.settings.databaseFile, data)
+      writeFileSync(this.settings.databaseFile, data);
     }
   }
 
   clear(): void {
-    this.contentManager.clear()
-    this.persist()
+    this.contentManager.clear();
+    this.persist();
   }
-  
+
   private hashFromFile(path: string): string {
-    return this.scriptCommandManager.hashFromFile(path)
+    return this.scriptCommandManager.hashFromFile(path);
   }
 
   private isCommandDownloaded(identifier: string): boolean {
-    const command = this.contentManager.contentFor(identifier)
-    return command != null
+    const command = this.contentManager.contentFor(identifier);
+    return command != null;
   }
-  
-    private isCommandChanged(identifier: string): boolean {
-      const command = this.contentManager.contentFor(identifier)
-  
-      if (!command) {
-        return false
-      }
-  
-      const commandPath = command.files.command.path
-      const commandHash = command.sha
-      const currentFileHash = this.hashFromFile(commandPath)
-  
-      return commandHash != currentFileHash
+
+  private isCommandChanged(identifier: string): boolean {
+    const command = this.contentManager.contentFor(identifier);
+
+    if (!command) {
+      return false;
     }
+
+    const commandPath = command.files.command.path;
+    const commandHash = command.sha;
+    const currentFileHash = this.hashFromFile(commandPath);
+
+    return commandHash != currentFileHash;
+  }
 
   private commandNeedsSetup(identifier: string): boolean {
-    const command = this.contentManager.contentFor(identifier)
+    const command = this.contentManager.contentFor(identifier);
 
     if (command) {
-      return command.needsSetup
+      return command.needsSetup;
     }
 
-    return true
+    return true;
   }
 
   monitorChangesFor(identifier: string, callback: (state: State) => void): FSWatcher | null {
-    const file = this.commandFileFor(identifier)
-    const state = this.stateFor(identifier)
-    
+    const file = this.commandFileFor(identifier);
+    const state = this.stateFor(identifier);
+
     if (file && state === State.NeedSetup) {
-      return watch(file.path, (event, ) => {
+      return watch(file.path, (event) => {
         if (!this.isCommandChanged(identifier)) {
-          callback(State.NeedSetup)
-          return
+          callback(State.NeedSetup);
+          return;
         }
 
-        if (event == 'change') {
-          callback(
-            this.stateFor(identifier)
-          )
+        if (event == "change") {
+          callback(this.stateFor(identifier));
         }
-      })
+      });
     }
 
-    return null
+    return null;
   }
 
   updateHashOnChangeFor(identifier: string, onChange: () => void): FSWatcher | null {
-    const file = this.commandFileFor(identifier)
-    const state = this.stateFor(identifier)
-    
+    const file = this.commandFileFor(identifier);
+    const state = this.stateFor(identifier);
+
     if (file && state == State.Installed) {
       return watch(file.path, (event) => {
-        if (event === 'change' && this.isCommandChanged(identifier)) {
-          this.scriptCommandManager.updateHashFor(identifier)
-          this.persist()
+        if (event === "change" && this.isCommandChanged(identifier)) {
+          this.scriptCommandManager.updateHashFor(identifier);
+          this.persist();
 
-          onChange()
+          onChange();
         }
-      })
+      });
     }
 
-    return null
+    return null;
   }
 
   commandFileFor(identifier: string): FileNullable {
-    const command = this.contentManager.contentFor(identifier)
+    const command = this.contentManager.contentFor(identifier);
 
     if (!command) {
-      return null
+      return null;
     }
 
-    return command.files.command
+    return command.files.command;
   }
 
   stateFor(identifier: string): State {
-    const downloaded = this.isCommandDownloaded(identifier)
-    const needSetup = this.commandNeedsSetup(identifier)
-    const changedContent = this.isCommandChanged(identifier)
+    const downloaded = this.isCommandDownloaded(identifier);
+    const needSetup = this.commandNeedsSetup(identifier);
+    const changedContent = this.isCommandChanged(identifier);
 
-    let state: State = State.NotInstalled
+    let state: State = State.NotInstalled;
 
     if (downloaded) {
-      state = State.Installed
+      state = State.Installed;
 
       if (changedContent && needSetup) {
-        state = State.ChangesDetected
-      }
-      else if (needSetup) {
-        state = State.NeedSetup
+        state = State.ChangesDetected;
+      } else if (needSetup) {
+        state = State.NeedSetup;
       }
     }
 
-    return state
+    return state;
   }
 
   fetchLanguages(): Language[] {
-    return this.mainContent.languages
+    return this.mainContent.languages;
   }
 
   async fetchCommands(filter: Filter = null): Promise<MainCompactGroup> {
     if (filter != null) {
-      return this.filterCommands(filter)
+      return this.filterCommands(filter);
     }
 
     if (this.mainContent.groups.length > 0) {
-      return this.mainContent
+      return this.mainContent;
     }
 
-    this.mainContent = await fetchScriptCommands()
+    this.mainContent = await fetchScriptCommands();
 
-    return this.mainContent
+    return this.mainContent;
   }
 
   private filterCommands(filter: Filter): MainCompactGroup {
-    let data = {... this.mainContent }
-    data.totalScriptCommands = 0
+    let data = { ...this.mainContent };
+    data.totalScriptCommands = 0;
 
     if (filter == null) {
-      return data
+      return data;
     }
 
-    if (typeof(filter) === "string") {
-      const groups: CompactGroup[] = []
+    if (typeof filter === "string") {
+      const groups: CompactGroup[] = [];
 
-      data.groups.forEach(group => {
-        const groupCopy = {... group}
-        groupCopy.scriptCommands = []
+      data.groups.forEach((group) => {
+        const groupCopy = { ...group };
+        groupCopy.scriptCommands = [];
 
-        group.scriptCommands.forEach(scriptCommand => { 
+        group.scriptCommands.forEach((scriptCommand) => {
           if (scriptCommand.language == filter) {
-            groupCopy.scriptCommands.push(scriptCommand)
+            groupCopy.scriptCommands.push(scriptCommand);
           }
-        })
+        });
 
         if (groupCopy.scriptCommands.length > 0) {
-          groupCopy.scriptCommands.sort(
-            (left: ScriptCommand, right: ScriptCommand) => 
-            (left.title > right.title) ? 1 : -1
-          )
+          groupCopy.scriptCommands.sort((left: ScriptCommand, right: ScriptCommand) =>
+            left.title > right.title ? 1 : -1
+          );
 
-          data.totalScriptCommands += groupCopy.scriptCommands.length
-          groups.push(groupCopy)
+          data.totalScriptCommands += groupCopy.scriptCommands.length;
+          groups.push(groupCopy);
         }
-      })
+      });
 
-      groups.sort(
-        (left: CompactGroup, right: CompactGroup) => 
-        (left.title > right.title) ? 1 : -1
-      )
+      groups.sort((left: CompactGroup, right: CompactGroup) => (left.title > right.title ? 1 : -1));
 
-      data.groups = groups
-    }
-    else {
-      const content = this.contentManager.getContent()
+      data.groups = groups;
+    } else {
+      const content = this.contentManager.getContent();
 
       const group: CompactGroup = {
         identifier: "installed-script-commands",
         title: "Installed",
         subtitle: "Script Commands",
-        scriptCommands: []
-      }
-      
-      Object.values(content).forEach(item => {
+        scriptCommands: [],
+      };
+
+      Object.values(content).forEach((item) => {
         if ((filter === State.NeedSetup && item.needsSetup === true) || filter === State.Installed) {
-          group.scriptCommands.push(item.scriptCommand)
+          group.scriptCommands.push(item.scriptCommand);
         }
-      })
+      });
 
-      group.scriptCommands.sort(
-        (left: ScriptCommand, right: ScriptCommand) => {
-          if (left.packageName && right.packageName) {
-            return (left.packageName > right.packageName) ? 1 : -1
-          }
-
-          return 0
+      group.scriptCommands.sort((left: ScriptCommand, right: ScriptCommand) => {
+        if (left.packageName && right.packageName) {
+          return left.packageName > right.packageName ? 1 : -1;
         }
-      )
+
+        return 0;
+      });
 
       data = {
         groups: [group],
         totalScriptCommands: group.scriptCommands.length,
-        languages: []
-      }
+        languages: [],
+      };
     }
 
-    return data
+    return data;
   }
 
   async fetchSourceCode(scriptCommand: ScriptCommand, signal: AbortSignal): Promise<string> {
-    return fetchSourceCode(scriptCommand, signal)
+    return fetchSourceCode(scriptCommand, signal);
   }
 
   async fetchReadme(path: string, signal: AbortSignal): Promise<string> {
-    return fetchReadme(path, signal)
+    return fetchReadme(path, signal);
   }
-  
+
   async installScriptCommand(scriptCommand: ScriptCommand): Promise<StateResult> {
-    const result = await this.scriptCommandManager.install(scriptCommand)
+    const result = await this.scriptCommandManager.install(scriptCommand);
 
     if (result.content === State.Installed || result.content === State.NeedSetup) {
-      this.persist()
+      this.persist();
     }
 
-    return result
+    return result;
   }
 
   async installPackage(group: CompactGroup, callback: (process: Process) => void): Promise<Progress> {
-    let progress = Progress.InProgress
-    let currentInstall = 1
+    let progress = Progress.InProgress;
+    let currentInstall = 1;
 
-    const scriptCommands: ScriptCommand[] = []
-    
-    group.scriptCommands.forEach(scriptCommand => {
-      const state = this.stateFor(scriptCommand.identifier)
+    const scriptCommands: ScriptCommand[] = [];
+
+    group.scriptCommands.forEach((scriptCommand) => {
+      const state = this.stateFor(scriptCommand.identifier);
 
       if (state == State.NotInstalled) {
-        scriptCommands.push(scriptCommand)
+        scriptCommands.push(scriptCommand);
       }
-    })
+    });
 
-    await asyncForLoop(scriptCommands, async scriptCommand => {
+    await asyncForLoop(scriptCommands, async (scriptCommand) => {
       let process: Process = {
         identifier: scriptCommand.identifier,
         progress: Progress.InProgress,
         current: currentInstall,
         state: State.NotInstalled,
-        total: scriptCommands.length
-      }
+        total: scriptCommands.length,
+      };
 
-      callback(process)
-      
-      const result = await this.installScriptCommand(scriptCommand)
-      
+      callback(process);
+
+      const result = await this.installScriptCommand(scriptCommand);
+
       process = {
-        ...process, 
+        ...process,
         state: result.content,
-        progress: Progress.Finished
-      }
+        progress: Progress.Finished,
+      };
 
-      callback(process)
+      callback(process);
 
       if (currentInstall == process.total) {
-        progress = process.progress
+        progress = process.progress;
       }
 
-      currentInstall += 1
-    })
+      currentInstall += 1;
+    });
 
-    return progress
+    return progress;
   }
-  
+
   async deleteScriptCommand(scriptCommand: ScriptCommand): Promise<StateResult> {
-    const result = await this.scriptCommandManager.delete(scriptCommand)
+    const result = await this.scriptCommandManager.delete(scriptCommand);
 
     if (result.content === State.NotInstalled) {
-      this.persist()
+      this.persist();
     }
 
-    return result
+    return result;
   }
 
   async confirmScriptCommandSetupFor(scriptCommand: ScriptCommand): Promise<StateResult> {
-    const result = this.scriptCommandManager.finishSetup(scriptCommand)
+    const result = this.scriptCommandManager.finishSetup(scriptCommand);
 
     if (result.content === State.Installed) {
-      this.persist()
+      this.persist();
     }
 
-    return result
+    return result;
   }
 }
 
-type AsyncForLoop<T> = (items: T[], callback: (item: T) => Promise<void>) => Promise<void>
+type AsyncForLoop<T> = (items: T[], callback: (item: T) => Promise<void>) => Promise<void>;
 
-type AsyncLoopCommand = AsyncForLoop<ScriptCommand>
+type AsyncLoopCommand = AsyncForLoop<ScriptCommand>;
 
 const asyncForLoop: AsyncLoopCommand = async (items, callback) => {
   for (const scriptCommand of items) {
-    await callback(scriptCommand)
+    await callback(scriptCommand);
   }
-}
+};

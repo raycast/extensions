@@ -1,15 +1,11 @@
-import { 
-  MainContent 
-} from "@components"
+import { MainContent } from "@components";
 
-import {
-   ApplicationProvider
-} from "@providers"
+import { ApplicationProvider } from "@providers";
 
 export function ScriptCommandsList(): JSX.Element {
   return (
     <ApplicationProvider>
       <MainContent />
     </ApplicationProvider>
-  )
+  );
 }

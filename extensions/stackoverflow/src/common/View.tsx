@@ -3,7 +3,6 @@ import type { QueryResultItem } from "./SoApi";
 import { useVisitedUrls } from "./useVisitedUrls";
 import { QuestionDetail } from "./questionDetail";
 
-
 type Props = {
   sectionNames: string[];
   queryResults: QueryResultItem[][];
@@ -29,12 +28,16 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
               id={item.id}
               title={item.title + (urls.includes(item.url) ? " (visited)" : "")}
               subtitle={item.subtitle}
-              icon={item.icon !== '' ? item.icon : Icon.QuestionMark}
+              icon={item.icon !== "" ? item.icon : Icon.QuestionMark}
               accessoryTitle={item.accessoryTitle}
               actions={
                 <ActionPanel>
                   <OpenInBrowserAction url={item.url} />
-                  <PushAction title="Read Question" target={<QuestionDetail quid={item.id} url={item.url} title={item.title}/>} icon={Icon.Download} />
+                  <PushAction
+                    title="Read Question"
+                    target={<QuestionDetail quid={item.id} url={item.url} title={item.title} />}
+                    icon={Icon.Download}
+                  />
                   <CopyToClipboardAction title="Copy URL" content={item.url} />
                 </ActionPanel>
               }
@@ -45,4 +48,3 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
     </List>
   );
 };
-

@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from "axios";
 
-import { getCurrency } from './utils';
+import { getCurrency } from "./utils";
 
 type Price = Record<string, Record<string, number>>;
 
@@ -9,7 +9,7 @@ interface PriceResponse {
 }
 
 const client = axios.create({
-  baseURL: 'https://api.coingecko.com/api/v3',
+  baseURL: "https://api.coingecko.com/api/v3",
 });
 
 export interface Coin {
@@ -31,7 +31,7 @@ interface CoinInfo {
 export default class Service {
   async getPrice(id: string): Promise<number | undefined> {
     const currency = getCurrency();
-    const response = await client.get<Price>('/simple/price', {
+    const response = await client.get<Price>("/simple/price", {
       params: {
         ids: id,
         vs_currencies: currency,
@@ -60,22 +60,19 @@ export default class Service {
   }
 
   async getCoinList(): Promise<Coin[]> {
-    const response = await client.get<Coin[]>('/coins/list');
+    const response = await client.get<Coin[]>("/coins/list");
     return response.data;
   }
 
   async getCoinPriceHistory(id: string, days = 30) {
     const currency = getCurrency();
-    const response = await client.get<PriceResponse>(
-      `/coins/${id}/market_chart`,
-      {
-        params: {
-          vs_currency: currency,
-          days,
-          interval: 'daily',
-        },
-      }
-    );
+    const response = await client.get<PriceResponse>(`/coins/${id}/market_chart`, {
+      params: {
+        vs_currency: currency,
+        days,
+        interval: "daily",
+      },
+    });
     return response.data.prices;
   }
 }

@@ -1,4 +1,4 @@
-import { ActionPanel, List, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, ToastStyle } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";

@@ -1,7 +1,7 @@
 import { showToast, ToastStyle } from "@raycast/api";
-import { showFailureToast } from "./utils"
-import { brewUpgradeCommand } from "./brew"
-import { preferences } from "./preferences"
+import { showFailureToast } from "./utils";
+import { brewUpgradeCommand } from "./brew";
+import { preferences } from "./preferences";
 
 export default async () => {
   try {
@@ -11,4 +11,4 @@ export default async () => {
   } catch (err) {
     showFailureToast("Upgrade failed", err);
   }
-}
+};

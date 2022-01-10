@@ -15,7 +15,7 @@ export function useBearDb(): [BearDb | undefined, Error | undefined] {
     };
     connect();
 
-    return () => db?.close()
+    return () => db?.close();
   }, []);
 
   return [db, error];

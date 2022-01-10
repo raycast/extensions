@@ -6,7 +6,7 @@ import { CaskActionPanel, FormulaActionPanel } from "./actionPanels";
 export interface FormulaListProps {
   formulae: Formula[];
   casks: Cask[];
-  searchBarPlaceholder: string,
+  searchBarPlaceholder: string;
   isLoading: boolean;
   onSearchTextChange?: (q: string) => void;
   onAction: () => void;
@@ -17,14 +17,18 @@ export function FormulaList(props: FormulaListProps) {
   const casks = props.casks;
 
   return (
-    <List searchBarPlaceholder={props.searchBarPlaceholder} onSearchTextChange={props.onSearchTextChange} isLoading={props.isLoading}>
+    <List
+      searchBarPlaceholder={props.searchBarPlaceholder}
+      onSearchTextChange={props.onSearchTextChange}
+      isLoading={props.isLoading}
+    >
       <ListSection title="Formulae">
         {formulae.map((formula) => (
           <FormulaListItem key={`formula-${formula.name}`} formula={formula} onAction={props.onAction} />
         ))}
         {formulae.isTruncated() && <MoreListItem />}
       </ListSection>
-      <ListSection title="Casks" >
+      <ListSection title="Casks">
         {props.casks.map((cask) => (
           <CaskListItem key={`cask-${cask.token}`} cask={cask} onAction={props.onAction} />
         ))}
@@ -34,7 +38,7 @@ export function FormulaList(props: FormulaListProps) {
   );
 }
 
-export function FormulaListItem(props: { formula: Formula, onAction: () => void }) {
+export function FormulaListItem(props: { formula: Formula; onAction: () => void }) {
   const formula = props.formula;
   let version = formula.versions.stable;
   let tintColor = Color.SecondaryText;
@@ -49,13 +53,13 @@ export function FormulaListItem(props: { formula: Formula, onAction: () => void 
       title={formula.name}
       subtitle={formula.desc}
       accessoryTitle={version}
-      icon={ {source: Icon.Checkmark, tintColor: tintColor} }
+      icon={{ source: Icon.Checkmark, tintColor: tintColor }}
       actions={<FormulaActionPanel formula={formula} showDetails={true} onAction={props.onAction} />}
     />
   );
 }
 
-export function CaskListItem(props: { cask: Cask, onAction: () => void }) {
+export function CaskListItem(props: { cask: Cask; onAction: () => void }) {
   const cask = props.cask;
   let version = cask.version;
   let tintColor = Color.SecondaryText;
@@ -70,14 +74,12 @@ export function CaskListItem(props: { cask: Cask, onAction: () => void }) {
       title={brewName(cask)}
       subtitle={cask.desc}
       accessoryTitle={version}
-      icon={ {source: Icon.Checkmark, tintColor: tintColor} }
+      icon={{ source: Icon.Checkmark, tintColor: tintColor }}
       actions={<CaskActionPanel cask={cask} showDetails={true} onAction={props.onAction} />}
     />
   );
 }
 
 export function MoreListItem() {
-  return (
-    <List.Item title="" icon={Icon.Dot} />
-  );
+  return <List.Item title="" icon={Icon.Dot} />;
 }

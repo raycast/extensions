@@ -14,22 +14,26 @@ export default () => {
   // Use Navigation
   const navigation = useNavigation();
   // Use XcodeSimulatorApplication State
-  const [xcodeSimulatorApplications, setXcodeSimulatorApplication] = useState<Source<XcodeSimulatorApplication[]> | undefined>(undefined);
+  const [xcodeSimulatorApplications, setXcodeSimulatorApplication] = useState<
+    Source<XcodeSimulatorApplication[]> | undefined
+  >(undefined);
   // Use Effect
   useEffect(() => {
     // Retrieve cached Xcode Simulator Applications
     xcodeSimulatorApplicationService
       .cachedXcodeSimulatorApplications()
-      .then(cachedXcodeSimulatorApplications => {
+      .then((cachedXcodeSimulatorApplications) => {
         // Check if no XcodeSimulatorApplications have been set
         // and cached XcodeSimulatorApplications are available and not empty
-        if (!xcodeSimulatorApplications
-          && cachedXcodeSimulatorApplications
-          && cachedXcodeSimulatorApplications.length > 0) {
+        if (
+          !xcodeSimulatorApplications &&
+          cachedXcodeSimulatorApplications &&
+          cachedXcodeSimulatorApplications.length > 0
+        ) {
           // Set cached XcodeSimulatorApplications
           setXcodeSimulatorApplication({
             value: cachedXcodeSimulatorApplications,
-            isCache: true
+            isCache: true,
           });
         }
       })
@@ -37,35 +41,28 @@ export default () => {
     // Retrieve Xcode Simulator Applications
     xcodeSimulatorApplicationService
       .xcodeSimulatorApplications()
-      .then(applications => {
+      .then((applications) => {
         // Set XcodeSimulatorApplications
         setXcodeSimulatorApplication({
           value: applications,
-          isCache: false
+          isCache: false,
         });
       })
-      .catch(error => {
+      .catch((error) => {
         // Check if no XcodeSimulatorApplications are available
         if (!xcodeSimulatorApplications) {
           // Set empty applications
           setXcodeSimulatorApplication({
             value: [],
-            isCache: false
+            isCache: false,
           });
         }
         // Log Error
         console.error(error);
         // Show Toast
-        return showToast(
-          ToastStyle.Failure,
-          "An error occurred while fetching the Apps",
-          error
-        );
+        return showToast(ToastStyle.Failure, "An error occurred while fetching the Apps", error);
       });
   }, []);
   // Return XcodeRelease List with Navigation
-  return xcodeSimulatorApplicationList(
-    xcodeSimulatorApplications,
-    navigation
-  );
+  return xcodeSimulatorApplicationList(xcodeSimulatorApplications, navigation);
 };

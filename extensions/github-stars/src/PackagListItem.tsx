@@ -6,21 +6,17 @@ import {
   PushAction,
   ImageMask,
   CopyToClipboardAction,
-} from '@raycast/api'
-import { Readme } from './Readme'
-import { Star } from './response.model'
+} from "@raycast/api";
+import { Readme } from "./Readme";
+import { Star } from "./response.model";
 
 interface PackageListItemProps {
-  result: Star
+  result: Star;
 }
 
-export const PackageListItem = ({
-  result,
-}: PackageListItemProps): JSX.Element => {
-  const descriptionAsArray = result?.description
-    ? result.description.split(' ')
-    : []
-  const keywords = [result.name, ...descriptionAsArray]
+export const PackageListItem = ({ result }: PackageListItemProps): JSX.Element => {
+  const descriptionAsArray = result?.description ? result.description.split(" ") : [];
+  const keywords = [result.name, ...descriptionAsArray];
 
   return (
     <List.Item
@@ -41,41 +37,32 @@ export const PackageListItem = ({
             icon={Icon.TextDocument}
           />
           <OpenInBrowserAction
-            url={result.html_url.replace('github.com', 'github.dev')}
+            url={result.html_url.replace("github.com", "github.dev")}
             title="View Code in GitHub.dev"
             icon={{
               source: {
-                light: 'github-bright.png',
-                dark: 'github-dark.png',
+                light: "github-bright.png",
+                dark: "github-dark.png",
               },
             }}
-            shortcut={{ modifiers: ['cmd'], key: '.' }}
+            shortcut={{ modifiers: ["cmd"], key: "." }}
           />
           <OpenInBrowserAction
             url={`https://codesandbox.io/s/github/${result.full_name}`}
             title="View in CodeSandbox"
             icon={{
               source: {
-                light: 'codesandbox-bright.png',
-                dark: 'codesandbox-dark.png',
+                light: "codesandbox-bright.png",
+                dark: "codesandbox-dark.png",
               },
             }}
           />
-          <CopyToClipboardAction
-            title="Copy gh repo clone Command"
-            content={`gh repo clone ${result.full_name}`}
-          />
-          <CopyToClipboardAction
-            title="Copy git clone SSH Command"
-            content={`git clone ${result.ssh_url}`}
-          />
-          <CopyToClipboardAction
-            title="Copy git clone HTTPS Command"
-            content={`git clone ${result.clone_url}`}
-          />
+          <CopyToClipboardAction title="Copy gh repo clone Command" content={`gh repo clone ${result.full_name}`} />
+          <CopyToClipboardAction title="Copy git clone SSH Command" content={`git clone ${result.ssh_url}`} />
+          <CopyToClipboardAction title="Copy git clone HTTPS Command" content={`git clone ${result.clone_url}`} />
         </ActionPanel>
       }
       keywords={keywords}
     />
-  )
-}
+  );
+};

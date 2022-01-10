@@ -7,9 +7,15 @@ export default function Overview(): JSX.Element {
   const [connectionsUrl, connections] = GetConnections();
   return (
     <List>
-      {
-        (trafficUrl && connectionsUrl) ? (<><List.Item key="1" icon={Icon.ChevronUp} title="Upload" accessoryTitle={`${prettyBytes(traffic.up)}/s`} />
-          <List.Item key="2" icon={Icon.ChevronDown} title="Download" accessoryTitle={`${prettyBytes(traffic.down)}/s`} />
+      {trafficUrl && connectionsUrl ? (
+        <>
+          <List.Item key="1" icon={Icon.ChevronUp} title="Upload" accessoryTitle={`${prettyBytes(traffic.up)}/s`} />
+          <List.Item
+            key="2"
+            icon={Icon.ChevronDown}
+            title="Download"
+            accessoryTitle={`${prettyBytes(traffic.down)}/s`}
+          />
           <List.Item
             key="3"
             icon={Icon.Upload}
@@ -27,8 +33,11 @@ export default function Overview(): JSX.Element {
             icon={Icon.LevelMeter}
             title="Active Connections"
             accessoryTitle={`${connections.connections.length}`}
-          /></>) : <></>
-      }
+          />
+        </>
+      ) : (
+        <></>
+      )}
     </List>
   );
 }

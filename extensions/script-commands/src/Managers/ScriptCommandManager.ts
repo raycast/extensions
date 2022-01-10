@@ -1,9 +1,7 @@
-import { 
-  Settings,
-} from "@managers"
+import { Settings } from "@managers";
 
-import { 
-  Command, 
+import {
+  Command,
   File,
   FileNullable,
   Files,
@@ -12,453 +10,400 @@ import {
   IconUsage,
   State,
   StateResult,
-} from "@types"
+} from "@types";
 
-import { 
-  ScriptCommand,
-} from "@models"
+import { ScriptCommand } from "@models";
 
-import { 
-  ContentStore 
-} from "@stores"  
+import { ContentStore } from "@stores";
 
-import { 
-  iconDarkURLFor,
-  iconLightURLFor,
-  IconStyle, 
-  IconType,
-  sourceCodeRawURL,
-} from "@urls"  
+import { iconDarkURLFor, iconLightURLFor, IconStyle, IconType, sourceCodeRawURL } from "@urls";
 
-import path from "path"
+import path from "path";
 
-import download from "download"
+import download from "download";
 
-import afs from "fs/promises"
+import afs from "fs/promises";
 
-import { 
-  existsSync, 
-  mkdirSync, 
-  readdirSync, 
-  readFileSync,
-  rmSync,
-  renameSync
-} from 'fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, renameSync } from "fs";
 
-import { 
-  createHash 
-} from "crypto"
+import { createHash } from "crypto";
 
 export class ScriptCommandManager {
-  private contentStore: ContentStore
-  private settings: Settings
+  private contentStore: ContentStore;
+  private settings: Settings;
 
-  constructor(
-    contentStore: ContentStore, 
-    settings: Settings
-  ) {
-    this.contentStore = contentStore
-    this.settings = settings
+  constructor(contentStore: ContentStore, settings: Settings) {
+    this.contentStore = contentStore;
+    this.settings = settings;
   }
 
   hashFromFile(path: string): string {
     if (!existsSync(path)) {
-      return ""
+      return "";
     }
 
-    const hash = createHash("sha256")
-    const buffer = readFileSync(path)
+    const hash = createHash("sha256");
+    const buffer = readFileSync(path);
 
-    hash.update(buffer)
+    hash.update(buffer);
 
-    return hash.digest("hex")
+    return hash.digest("hex");
   }
 
   async install(scriptCommand: ScriptCommand): Promise<StateResult> {
-    const commandFullPath = path.join(this.settings.repositoryCommandsFolderPath, scriptCommand.path)
-  
-    const icons = await this.downloadIcons(
-      scriptCommand, 
-      commandFullPath
-    )
+    const commandFullPath = path.join(this.settings.repositoryCommandsFolderPath, scriptCommand.path);
 
-    const command = await this.downloadCommand(
-      scriptCommand,
-      commandFullPath
-    )
+    const icons = await this.downloadIcons(scriptCommand, commandFullPath);
+
+    const command = await this.downloadCommand(scriptCommand, commandFullPath);
 
     if (!command) {
       return {
         content: State.Error,
-        message: "Script Command couldn't be downloaded"  
-      }
+        message: "Script Command couldn't be downloaded",
+      };
     }
 
     const files: Files = {
       command: command,
       iconDark: null,
-      iconLight: null
-    }
+      iconLight: null,
+    };
 
     if (icons.light) {
-      files.iconLight = icons.light
+      files.iconLight = icons.light;
     }
 
     if (icons.dark) {
-      files.iconDark = icons.dark
+      files.iconDark = icons.dark;
     }
-    
-    const hash = this.hashFromFile(command.path)
-    
+
+    const hash = this.hashFromFile(command.path);
+
     const resource: Command = {
       identifier: scriptCommand.identifier,
       needsSetup: scriptCommand.isTemplate,
       sha: hash,
       files: files,
-      scriptCommand: scriptCommand
-    }
+      scriptCommand: scriptCommand,
+    };
 
-    this.contentStore.add(resource)
+    this.contentStore.add(resource);
 
     return {
       content: scriptCommand.isTemplate ? State.NeedSetup : State.Installed,
-      message: ""
-    }
+      message: "",
+    };
   }
 
   async delete(scriptCommand: ScriptCommand): Promise<StateResult> {
-    const content = this.contentStore.contentFor(scriptCommand.identifier)
- 
-    if (content) {
-      const files = content.files
+    const content = this.contentStore.contentFor(scriptCommand.identifier);
 
-      let filesDeleted = 0
+    if (content) {
+      const files = content.files;
+
+      let filesDeleted = 0;
 
       if (this.deleteIcon(files.iconLight, IconStyle.Light)) {
-        filesDeleted += 0.5
+        filesDeleted += 0.5;
       }
 
       if (this.deleteIcon(files.iconDark, IconStyle.Dark)) {
-        filesDeleted += 0.5
+        filesDeleted += 0.5;
       }
 
       if (this.deleteCommand(files.command)) {
-        filesDeleted += 1
+        filesDeleted += 1;
       }
-  
+
       if (filesDeleted >= 1) {
-        this.contentStore.delete(scriptCommand.identifier)
+        this.contentStore.delete(scriptCommand.identifier);
 
         return {
           content: State.NotInstalled,
-          message: ""
-        }
+          message: "",
+        };
       }
     }
 
     return {
       content: State.Error,
-      message: "Something went wrong"
-    }
+      message: "Something went wrong",
+    };
   }
 
   finishSetup(scriptCommand: ScriptCommand): StateResult {
-    const content = this.contentStore.contentFor(scriptCommand.identifier)
- 
+    const content = this.contentStore.contentFor(scriptCommand.identifier);
+
     if (content) {
-      const files = content.files
-      const command = files.command
+      const files = content.files;
+      const command = files.command;
 
       if (existsSync(command.link)) {
-        const link = path.parse(command.link)
-        const linkPath = path.join(link.dir, link.name)
+        const link = path.parse(command.link);
+        const linkPath = path.join(link.dir, link.name);
 
-        renameSync(command.link, linkPath)
+        renameSync(command.link, linkPath);
 
-        command.link = linkPath
-        files.command = command
+        command.link = linkPath;
+        files.command = command;
 
-        content.files = files
-        content.needsSetup = false
-        content.sha = this.hashFromFile(command.path)
-        
-        this.contentStore.update(content)
-  
+        content.files = files;
+        content.needsSetup = false;
+        content.sha = this.hashFromFile(command.path);
+
+        this.contentStore.update(content);
+
         return {
           content: State.Installed,
-          message: ""
-        }
+          message: "",
+        };
       }
     }
 
     return {
       content: State.Error,
-      message: "Something went wrong to confirm the setup for the Script Command"
-    }
+      message: "Something went wrong to confirm the setup for the Script Command",
+    };
   }
 
   updateHashFor(identifier: string) {
-    const content = this.contentStore.contentFor(identifier)
+    const content = this.contentStore.contentFor(identifier);
 
     if (!content) {
-      return
+      return;
     }
 
-    const files = content.files
-    const command = files.command
+    const files = content.files;
+    const command = files.command;
 
     if (existsSync(command.path)) {
-      const newHash = this.hashFromFile(command.path)
-      content.sha = newHash
-      
-      this.contentStore.update(content)
+      const newHash = this.hashFromFile(command.path);
+      content.sha = newHash;
+
+      this.contentStore.update(content);
     }
   }
 
   private iconPaths(icon?: string | null): IconPathNullable {
     if (!icon) {
-      return null
+      return null;
     }
 
-    let imagePath = ""
-    let filename = ""
+    let imagePath = "";
+    let filename = "";
 
     if (icon.length > 0) {
-      const fullpath = path.parse(icon)
+      const fullpath = path.parse(icon);
 
-      filename = fullpath.base
-      imagePath = fullpath.dir
+      filename = fullpath.base;
+      imagePath = fullpath.dir;
     }
 
     return {
       filename: filename,
-      path: imagePath
-    }
+      path: imagePath,
+    };
   }
 
-  private async downloadIcons(scriptCommand: ScriptCommand, commandPath: string): Promise<{ dark: FileNullable, light: FileNullable }> {
-    const icons: { dark: FileNullable, light: FileNullable } = { 
-      dark: null, 
-      light: null 
-    }
-    
+  private async downloadIcons(
+    scriptCommand: ScriptCommand,
+    commandPath: string
+  ): Promise<{ dark: FileNullable; light: FileNullable }> {
+    const icons: { dark: FileNullable; light: FileNullable } = {
+      dark: null,
+      light: null,
+    };
+
     if (!scriptCommand.icon) {
-      return icons
+      return icons;
     }
 
-    let imagePath = ""
-    const icon = scriptCommand.icon
+    let imagePath = "";
+    const icon = scriptCommand.icon;
 
-    const lightIcon = this.iconPaths(icon.light)
-    const darkIcon = this.iconPaths(icon.dark)
+    const lightIcon = this.iconPaths(icon.light);
+    const darkIcon = this.iconPaths(icon.dark);
 
     if (lightIcon && lightIcon.path.length > 0) {
-      imagePath = lightIcon.path
-    }
-    else if (darkIcon && darkIcon.path.length > 0) {
-      imagePath = darkIcon.path
+      imagePath = lightIcon.path;
+    } else if (darkIcon && darkIcon.path.length > 0) {
+      imagePath = darkIcon.path;
     }
 
     if (imagePath.length == 0) {
-      return icons
+      return icons;
     }
 
-    const imageFolderPath = path.join(commandPath, imagePath)
-      
+    const imageFolderPath = path.join(commandPath, imagePath);
+
     if (!existsSync(imageFolderPath)) {
-      afs.mkdir(imageFolderPath, { recursive: true })
+      afs.mkdir(imageFolderPath, { recursive: true });
     }
 
-    icons.light = await this.downloadIconFor(scriptCommand, lightIcon, imageFolderPath, IconStyle.Light)
-    icons.dark = await this.downloadIconFor(scriptCommand, darkIcon, imageFolderPath, IconStyle.Dark)
+    icons.light = await this.downloadIconFor(scriptCommand, lightIcon, imageFolderPath, IconStyle.Light);
+    icons.dark = await this.downloadIconFor(scriptCommand, darkIcon, imageFolderPath, IconStyle.Dark);
 
-    return icons
+    return icons;
   }
 
   private async downloadIconFor(
-    scriptCommand: ScriptCommand, 
-    iconPath: IconPathNullable, 
-    imageFolderPath: string, 
+    scriptCommand: ScriptCommand,
+    iconPath: IconPathNullable,
+    imageFolderPath: string,
     style: IconStyle
   ): Promise<FileNullable> {
     if (!iconPath) {
-      return null
-    }
-    
-    if (iconPath.filename.length == 0) {
-      return null
+      return null;
     }
 
-    let resource: IconResultNullable = null
-    resource = style == IconStyle.Light ? iconLightURLFor(scriptCommand) : iconDarkURLFor(scriptCommand)
+    if (iconPath.filename.length == 0) {
+      return null;
+    }
+
+    let resource: IconResultNullable = null;
+    resource = style == IconStyle.Light ? iconLightURLFor(scriptCommand) : iconDarkURLFor(scriptCommand);
 
     if (resource && resource.type == IconType.URL) {
-      const result = await this.downloadIcon(
-        resource.content,
-        imageFolderPath,
-        iconPath.filename
-      )
+      const result = await this.downloadIcon(resource.content, imageFolderPath, iconPath.filename);
 
-      return result
+      return result;
     }
 
-    return null
+    return null;
   }
 
-  private async downloadIcon(
-    url: string, 
-    imageFolderPath: string, 
-    filename: string
-  ): Promise<File | null> {
-    const imagePath = path.join(imageFolderPath, filename)
-    const linkImagePath = path.join(this.settings.imagesCommandsFolderPath, filename)
+  private async downloadIcon(url: string, imageFolderPath: string, filename: string): Promise<File | null> {
+    const imagePath = path.join(imageFolderPath, filename);
+    const linkImagePath = path.join(this.settings.imagesCommandsFolderPath, filename);
 
     if (!existsSync(imagePath)) {
-      await download(
-        url, 
-        imageFolderPath, 
-        { filename: filename }
-      )
+      await download(url, imageFolderPath, { filename: filename });
 
       if (!existsSync(this.settings.imagesCommandsFolderPath)) {
-        mkdirSync(
-          this.settings.imagesCommandsFolderPath, 
-          {recursive: true}
-        )
-      }      
+        mkdirSync(this.settings.imagesCommandsFolderPath, { recursive: true });
+      }
     }
 
     if (!existsSync(linkImagePath)) {
-      await afs.symlink(
-        imagePath, 
-        linkImagePath
-      )
+      await afs.symlink(imagePath, linkImagePath);
     }
 
-    if (!existsSync(linkImagePath))
-      return null
-    
+    if (!existsSync(linkImagePath)) return null;
+
     return {
       path: imagePath,
-      link: linkImagePath
-    }
+      link: linkImagePath,
+    };
   }
 
   private async downloadCommand(scriptCommand: ScriptCommand, commandPath: string): Promise<FileNullable> {
-    const filename = scriptCommand.filename
-    const commandFilePath = path.join(commandPath, scriptCommand.filename)
+    const filename = scriptCommand.filename;
+    const commandFilePath = path.join(commandPath, scriptCommand.filename);
 
-    const linkFilename = scriptCommand.isTemplate ? `${scriptCommand.identifier}.template` : scriptCommand.identifier
-    const linkCommandFilePath = path.join(this.settings.commandsFolderPath, linkFilename)
+    const linkFilename = scriptCommand.isTemplate ? `${scriptCommand.identifier}.template` : scriptCommand.identifier;
+    const linkCommandFilePath = path.join(this.settings.commandsFolderPath, linkFilename);
 
     if (!existsSync(commandFilePath)) {
-      await download(
-        sourceCodeRawURL(scriptCommand), 
-        commandPath,
-        { filename: filename }
-      )
+      await download(sourceCodeRawURL(scriptCommand), commandPath, { filename: filename });
     }
 
     if (!existsSync(linkCommandFilePath)) {
-      await afs.symlink(
-        commandFilePath,
-        linkCommandFilePath
-      )
+      await afs.symlink(commandFilePath, linkCommandFilePath);
     }
 
     if (!existsSync(linkCommandFilePath)) {
-      return null
+      return null;
     }
 
     return {
       path: commandFilePath,
-      link: linkCommandFilePath
-    }
+      link: linkCommandFilePath,
+    };
   }
 
   private deleteCommand(file: FileNullable): boolean {
     if (file && file.path.length > 0 && file.link.length > 0) {
       if (existsSync(file.path) && existsSync(file.link)) {
-        this.deleteFile(file)
+        this.deleteFile(file);
 
-        return true
+        return true;
       }
     }
 
-    return false
-  }  
+    return false;
+  }
 
   private deleteIcon(file: FileNullable, style: IconStyle): boolean {
     if (file && file.path.length > 0 && file.link.length > 0) {
-      const linkPath = path.parse(file.link)
+      const linkPath = path.parse(file.link);
 
       if (this.iconUsage(linkPath.name, style) == IconUsage.LastScriptUsing) {
-        this.deleteFile(file)
+        this.deleteFile(file);
 
-        return true
+        return true;
       }
     }
 
-    return false
+    return false;
   }
 
   private deleteFile(file: File): void {
-    rmSync(file.link)
-    rmSync(file.path)
+    rmSync(file.link);
+    rmSync(file.path);
 
-    const filePath = path.parse(file.path)
-    const files = readdirSync(filePath.dir)
-    const dsStore = ".DS_Store"
+    const filePath = path.parse(file.path);
+    const files = readdirSync(filePath.dir);
+    const dsStore = ".DS_Store";
 
     if (files.length === 0) {
-      rmSync(filePath.dir, { recursive: true, force: true })
-    }
-    else if (files.length === 1 && files[0] === dsStore) {
-      const dsStorePath = path.join(filePath.dir, dsStore)
-      rmSync(dsStorePath)
-      rmSync(filePath.dir, { recursive: true, force: true })
+      rmSync(filePath.dir, { recursive: true, force: true });
+    } else if (files.length === 1 && files[0] === dsStore) {
+      const dsStorePath = path.join(filePath.dir, dsStore);
+      rmSync(dsStorePath);
+      rmSync(filePath.dir, { recursive: true, force: true });
     }
 
-    // After delete all the files in the groups, we are checking if the first 
+    // After delete all the files in the groups, we are checking if the first
     // level group above is also clear, if yes, we delete also that folder
-    const list = filePath.dir.split("/")
-    list.pop()
+    const list = filePath.dir.split("/");
+    list.pop();
 
-    if (list){
-      const groupPath = list.join("/")
-      const groupFiles = readdirSync(groupPath)
+    if (list) {
+      const groupPath = list.join("/");
+      const groupFiles = readdirSync(groupPath);
 
       if (groupFiles.length === 1 && groupFiles[0] === dsStore) {
-        const dsStorePath = path.join(groupPath, dsStore)
-        rmSync(dsStorePath)
-        rmSync(groupPath, { recursive: true, force: true })
+        const dsStorePath = path.join(groupPath, dsStore);
+        rmSync(dsStorePath);
+        rmSync(groupPath, { recursive: true, force: true });
       }
     }
   }
 
   private iconUsage(filename: string, style: IconStyle): IconUsage {
-    let counter = 0
+    let counter = 0;
 
-    const content = this.contentStore.getContent()
+    const content = this.contentStore.getContent();
 
     Object.values(content).forEach((command: Command) => {
-      const files = command.files
-      
-      const file = style == IconStyle.Light ? files.iconLight : files.iconDark
+      const files = command.files;
+
+      const file = style == IconStyle.Light ? files.iconLight : files.iconDark;
 
       if (file && file.link.length > 0) {
-        const parsedpath = path.parse(file.link)
+        const parsedpath = path.parse(file.link);
 
         if (parsedpath.name == filename && existsSync(file.link)) {
-          counter += 1
+          counter += 1;
         }
       }
-    })
+    });
 
     if (counter >= 2) {
-      return IconUsage.BeingUsedByMore
+      return IconUsage.BeingUsedByMore;
     }
 
-    return IconUsage.LastScriptUsing
+    return IconUsage.LastScriptUsing;
   }
 }
