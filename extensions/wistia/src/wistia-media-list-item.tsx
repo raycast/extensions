@@ -4,11 +4,9 @@ import {
   showToast,
   ActionPanel,
   CopyToClipboardAction,
-  Detail,
   ImageMask,
   List,
   OpenInBrowserAction,
-  PushAction,
   ToastStyle,
 } from "@raycast/api";
 
