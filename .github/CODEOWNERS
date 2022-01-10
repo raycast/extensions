@@ -107,6 +107,7 @@
 /extensions/railway                                  @coffee-cup
 /extensions/raindrop                                 @lardissone
 /extensions/random-data-generator                    @loris
+/extensions/random-email                             @rkjaer
 /extensions/ray-so                                   @garrett
 /extensions/rebrandly                                @grikomsn
 /extensions/ricescore                                @tonka3000
