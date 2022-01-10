@@ -7,6 +7,7 @@ const useKubectx = () => {
   const [loading, setLoading] = useState(true);
   const [contextes, setContextes] = useState<string[]>([]);
   const [currentContext, setCurrrentContext] = useState<string>();
+  const [loadingError, setLoadingError] = useState<boolean>();
 
   const getData = async () => {
     try {
@@ -15,9 +16,11 @@ const useKubectx = () => {
 
       setContextes(allContextes);
       setCurrrentContext(_currentContext);
+      setLoadingError(false);
+    } catch (e) {
+      setLoadingError(true);
+    } finally {
       setLoading(false);
-    } catch (error) {
-      showToast(ToastStyle.Failure, "An error occurred");
     }
   };
 
@@ -30,12 +33,12 @@ const useKubectx = () => {
       await kubectxService.switchContext(newContextName);
       setCurrrentContext(newContextName);
       await closeMainWindow();
-    } catch (error) {
+    } catch (e) {
       showToast(ToastStyle.Failure, "An error occurred");
     }
   };
 
-  return { loading, contextes, currentContext, switchContext };
+  return { loading, contextes, currentContext, switchContext, loadingError };
 };
 
 export default useKubectx;
