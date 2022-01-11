@@ -4,17 +4,17 @@ import {
   OpenInBrowserAction,
   CopyToClipboardAction,
   getPreferenceValues,
-  showToast, ToastStyle
+  showToast,
+  ToastStyle,
 } from "@raycast/api";
 
 export default function SearchDocumentation() {
-
   const getPreference = getPreferenceValues();
   const documentation = {
     "1.x": require("./documentation/1.x.json"),
-    "2.x": require("./documentation/2.x.json")
-  }
-  
+    "2.x": require("./documentation/2.x.json"),
+  };
+
   return (
     <List>
       {Object.entries(documentation[getPreference.livewireVersion]).map(([section, items]) => (
