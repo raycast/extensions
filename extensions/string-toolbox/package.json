@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "string-toolbox",
+  "title": "String Toolbox",
+  "description": "A Raycast extension for performing various operations (encode, format, change casing etc) on strings.",
+  "icon": "command-icon.png",
+  "author": "sxn",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Transform String…",
+      "description": "Encode, format or transform strings.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.27.0",
+    "lodash": "^4.17.21",
+    "prettier": "2.5.1",
+    "terser": "5.10.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.178",
+    "@types/node": "17.0.10",
+    "@types/prettier": "2.4.3",
+    "@types/react": "17.0.38",
+    "@types/terser": "^3.12.0",
+    "@typescript-eslint/eslint-plugin": "5.10.0",
+    "@typescript-eslint/parser": "5.10.0",
+    "eslint": "8.7.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-react-hooks": "4.3.0",
+    "ts-node": "^10.4.0",
+    "typescript": "4.5.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "generate-readme": "ts-node src/generate-readme.ts"
+  }
+}
