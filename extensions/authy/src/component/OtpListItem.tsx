@@ -52,6 +52,7 @@ export default function OtpListItem({ item, basis, timeLeft, refresh }: OtpListI
         },
       }}
       icon={icon(item)}
+      keywords={[subtitle]}
       actions={
         <ActionPanel>
           <PrimaryAction pin={otp ?? ""} />
