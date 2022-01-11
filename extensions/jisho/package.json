@@ -1,17 +1,17 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jisho",
-  "title": "Jisho - Japanese Dictionary ",
-  "description": "Search Jisho.org ",
+  "title": "Jisho - Japanese Dictionary",
+  "description": "Search Jisho.org",
   "icon": "jisho-icon.png",
   "author": "dmacdermott",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Search Japanese Dictionary",
-      "subtitle": "Jisho.org",
-      "description": "Jisho.org search ",
+      "title": "Translate Japanese",
+      "subtitle": "Search Jisho.org",
+      "description": "Search Jisho.org for Japanese translations ",
       "mode": "view"
     }
   ],
