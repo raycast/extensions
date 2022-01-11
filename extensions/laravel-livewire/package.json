@@ -3,7 +3,7 @@
   "name": "laravel-livewire",
   "title": "Laravel Livewire",
   "description": "Quickly search through Laravel Livewire documentation and open it in the browser",
-  "icon": "livewire-icon.png",
+  "icon": "livewire-icon-transparent.png",
   "author": "tafhyseni",
   "license": "MIT",
   "commands": [
@@ -12,7 +12,27 @@
       "title": "Search Documentation",
       "subtitle": "Laravel Livewire",
       "description": "Search Livewire",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "livewireVersion",
+          "type": "dropdown",
+          "required": true,
+          "title": "Livewire Version",
+          "description": "Specify the Laravel livewire version it will search the docs for.",
+          "default": "1.x",
+          "data": [
+            {
+              "title": "2.x",
+              "value": "2.x"
+            },
+            {
+              "title": "1.x",
+              "value": "1.x"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
