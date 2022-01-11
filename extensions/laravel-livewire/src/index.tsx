@@ -1,10 +1,4 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  getPreferenceValues,
-  List,
-  OpenInBrowserAction
-} from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, getPreferenceValues, List, OpenInBrowserAction } from "@raycast/api";
 
 export default function SearchDocumentation() {
   const getPreference = getPreferenceValues();
