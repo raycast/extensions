@@ -1,6 +1,6 @@
 {
   "Start": [
-    { "url": "https://laravel-livewire.com/docs/1.x/quickstart", "title": "Quickstart" },
+    { "url": "https://laravel-livewire.com/docs/1.x/quickstart", "title": "Quickstart1" },
     { "url": "https://laravel-livewire.com/docs/1.x/reference", "title": "Reference" }
   ],
   "The Essentials": [

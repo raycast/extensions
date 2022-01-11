@@ -1,6 +1,6 @@
 {
   "Start": [
-    { "url": "https://laravel-livewire.com/docs/2.x/quickstart", "title": "Quickstart" },
+    { "url": "https://laravel-livewire.com/docs/2.x/quickstart", "title": "Quickstart2" },
     { "url": "https://laravel-livewire.com/docs/2.x/reference", "title": "Reference" },
     { "url": "https://laravel-livewire.com/docs/2.x/upgrading", "title": "Upgrading From 1.x" }
   ],

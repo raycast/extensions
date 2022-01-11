@@ -1,16 +1,22 @@
 import {
   ActionPanel,
-  List,
-  OpenInBrowserAction,
   CopyToClipboardAction,
   getPreferenceValues,
-  showToast,
-  ToastStyle,
+  List,
+  OpenInBrowserAction
 } from "@raycast/api";
 
 export default function SearchDocumentation() {
   const getPreference = getPreferenceValues();
-  const documentation = {
+
+  type docList = {
+    [key: string]: {
+      url: string;
+      title: string;
+    }[];
+  };
+
+  const documentation: { [key: string]: docList } = {
     "1.x": require("./documentation/1.x.json"),
     "2.x": require("./documentation/2.x.json"),
   };
