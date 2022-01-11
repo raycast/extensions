@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Livewire Documentation",
+      "title": "Search Documentation",
       "subtitle": "Laravel Livewire",
       "description": "Search Livewire",
       "mode": "view"
