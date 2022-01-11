@@ -14,7 +14,12 @@ export default function Command() {
   const { state, search } = useSearch();
 
   return (
-    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search for a Dart/Flutter package..." throttle>
+    <List
+      isLoading={state.isLoading}
+      onSearchTextChange={search}
+      searchBarPlaceholder="Search for a Dart/Flutter package..."
+      throttle
+    >
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
           <SearchListItem key={searchResult.id} searchResult={searchResult} />
@@ -30,13 +35,8 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       title={searchResult.name}
       actions={
         <ActionPanel>
-          <CopyToClipboardAction
-            title="Copy Install Command"
-            content={`flutter pub add ${searchResult.name}`}
-          />
-          <OpenInBrowserAction 
-            url={`https://pub.dev/packages/${searchResult.name}`}  
-          />
+          <CopyToClipboardAction title="Copy Install Command" content={`flutter pub add ${searchResult.name}`} />
+          <OpenInBrowserAction url={`https://pub.dev/packages/${searchResult.name}`} />
         </ActionPanel>
       }
     />
@@ -105,7 +105,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
     return {
       id: randomId(),
       name: packageName as string,
-      url: 'https://pub.dev/api/packages/' + (packageName as string),
+      url: "https://pub.dev/api/packages/" + (packageName as string),
     };
   });
 }
