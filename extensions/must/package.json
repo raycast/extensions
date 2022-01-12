@@ -6,6 +6,12 @@
   "icon": "command-icon.png",
   "author": "eggsy",
   "license": "MIT",
+  "keywords": [
+    "must",
+    "movie",
+    "series",
+    "tracking"
+  ],
   "commands": [
     {
       "name": "index",
