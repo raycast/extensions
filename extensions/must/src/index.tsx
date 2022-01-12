@@ -30,8 +30,8 @@ const Raycast: React.FC = () => {
   // Render
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search entries...">
-      <ListSection title="Shows">
-        {list.shows.map((show) => (
+      <ListSection title="Series">
+        {list.series.map((show) => (
           <MustListItem key={show.id} item={show} />
         ))}
       </ListSection>

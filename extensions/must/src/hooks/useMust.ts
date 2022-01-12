@@ -11,7 +11,7 @@ import { ListResponse, Product } from "@/types/ListResponse";
 
 const useMust = (username: string) => {
   try {
-    const [want, setWant] = useState<{ shows: Product[]; movies: Product[] }>({ shows: [], movies: [] });
+    const [want, setWant] = useState<{ series: Product[]; movies: Product[] }>({ series: [], movies: [] });
 
     // State values
     const [loading, setLoading] = useState(true);
@@ -25,12 +25,12 @@ const useMust = (username: string) => {
       return {
         isLoading: false,
         error: true,
-        list: { shows: [], movies: [] },
+        list: { series: [], movies: [] },
       };
 
     const listsWant = user?.lists?.want || [];
 
-    // Shows info fetching
+    // Series info fetching
     const listFetcher = (url: string) =>
       fetch(url, {
         method: "POST",
@@ -47,11 +47,11 @@ const useMust = (username: string) => {
         if (data?.length) {
           const products = data?.map((item) => item.product);
 
-          const shows = products.filter((item) => item.items_count);
+          const series = products.filter((item) => item.items_count);
           const movies = products.filter((item) => !item.items_count);
 
           setWant({
-            shows,
+            series,
             movies,
           });
           setLoading(false);
@@ -72,7 +72,7 @@ const useMust = (username: string) => {
     return {
       isLoading: false,
       error: err,
-      list: { shows: [], movies: [] },
+      list: { series: [], movies: [] },
     };
   }
 };
