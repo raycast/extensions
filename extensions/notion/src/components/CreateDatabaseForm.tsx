@@ -39,10 +39,10 @@ import {
   storeDatabaseView,
   loadDatabaseView,
 } from "../utils/local-storage";
+import { useForceRenderer } from "../utils/useForceRenderer";
 
-export function CreateDatabaseForm(props: { databaseId?: string; setRefreshView?: any }): JSX.Element {
+export function CreateDatabaseForm(props: { databaseId?: string; onForceRerender?: () => void }): JSX.Element {
   const presetDatabaseId = props.databaseId;
-  const setParentRefreshView = props.setRefreshView;
 
   // On form submit function
   const { pop } = useNavigation();
@@ -60,18 +60,18 @@ export function CreateDatabaseForm(props: { databaseId?: string; setRefreshView?
       showToast(ToastStyle.Failure, "Couldn't create database page");
     } else {
       showToast(ToastStyle.Success, "Page created!");
-      if (setParentRefreshView) setParentRefreshView(Date.now());
+      props.onForceRerender?.();
 
       pop();
     }
   }
 
   // Setup useState objects
-  const [databases, setDatabases] = useState<Database[]>();
-  const [databaseProperties, setDatabaseProperties] = useState<DatabaseProperty[]>();
+  const [databases, setDatabases] = useState<Database[]>([]);
+  const [databaseProperties, setDatabaseProperties] = useState<DatabaseProperty[]>([]);
   const [databaseId, setDatabaseId] = useState<string | null>(presetDatabaseId ? presetDatabaseId : null);
   const [databaseView, setDatabaseView] = useState<DatabaseView>();
-  const [refreshView, setRefreshView] = useState<number>();
+  const [didRerender, forceRerender] = useForceRenderer();
   const [markdown, setMarkdown] = useState<string>();
   const [relationsPages, setRelationsPages] = useState<Record<string, Page[]>>({});
   const [users, setUsers] = useState<User[]>();
@@ -125,92 +125,79 @@ export function CreateDatabaseForm(props: { databaseId?: string; setRefreshView?
       if (databaseId) {
         setIsLoading(true);
 
+        // load from the cache first
+
         const cachedDatabaseProperties = await loadDatabaseProperties(databaseId);
+        setDatabaseProperties(cachedDatabaseProperties);
 
-        if (cachedDatabaseProperties) {
-          setDatabaseProperties(cachedDatabaseProperties);
-
-          // Load realtion page
-          cachedDatabaseProperties.forEach(async function (cdp: DatabaseProperty) {
-            if (cdp.type === "relation" && cdp.relation_id && !relationsPages[cdp.relation_id]) {
-              const cachedRelationPages = await loadDatabasePages(databaseId);
-              if (cachedRelationPages) {
-                const copyRelationsPages = JSON.parse(JSON.stringify(relationsPages));
-                copyRelationsPages[cdp.relation_id] = cachedRelationPages;
-                setRelationsPages(copyRelationsPages);
-              }
-            }
-          });
-
-          // Load users
-          const hasPeopleProperty = cachedDatabaseProperties.some(function (cdp: DatabaseProperty) {
-            return cdp.type === "people";
-          });
-          if (hasPeopleProperty) {
-            const cachedUsers = await loadUsers();
-            if (cachedUsers) {
-              setUsers(cachedUsers);
-            }
+        cachedDatabaseProperties.forEach(async function (cdp: DatabaseProperty) {
+          if (cdp.type === "relation" && cdp.relation_id && !relationsPages[cdp.relation_id]) {
+            const cachedRelationPages = await loadDatabasePages(databaseId);
+            setRelationsPages((relationsPages) => ({
+              ...relationsPages,
+              [cdp.relation_id!]: cachedRelationPages,
+            }));
           }
+        });
+
+        let hasPeopleProperty = cachedDatabaseProperties.some((cdp) => cdp.type === "people");
+        if (hasPeopleProperty) {
+          const cachedUsers = await loadUsers();
+          setUsers(cachedUsers);
         }
+
+        // then we fetch
 
         const fetchedDatabaseProperties = await fetchDatabaseProperties(databaseId);
-        if (fetchedDatabaseProperties) {
-          const supportedDatabaseProperties = fetchedDatabaseProperties.filter(function (property) {
-            return supportedPropTypes.includes(property.type);
-          });
-          setDatabaseProperties(supportedDatabaseProperties);
+        const supportedDatabaseProperties = fetchedDatabaseProperties.filter(function (property) {
+          return supportedPropTypes.includes(property.type);
+        });
+        setDatabaseProperties(supportedDatabaseProperties);
 
-          // Fetch relation pages
-          supportedDatabaseProperties.forEach(async function (cdp: DatabaseProperty) {
-            if (cdp.type === "relation" && cdp.relation_id) {
-              const fetchedRelationPages = await queryDatabase(cdp.relation_id, undefined);
-              if (fetchedRelationPages && fetchedRelationPages[0]) {
-                const copyRelationsPages = JSON.parse(JSON.stringify(relationsPages));
-                copyRelationsPages[cdp.relation_id] = fetchedRelationPages;
-                setRelationsPages(copyRelationsPages);
-                storeDatabasePages(cdp.relation_id, fetchedRelationPages);
-              }
-            }
-          });
-
-          // Fetch users
-          const hasPeopleProperty = cachedDatabaseProperties.some(function (cdp: DatabaseProperty) {
-            return cdp.type === "people";
-          });
-          if (hasPeopleProperty) {
-            const fetchedUsers = await fetchUsers();
-            if (fetchedUsers) {
-              setUsers(fetchedUsers);
-              await storeUsers(fetchedUsers);
+        // Fetch relation pages
+        supportedDatabaseProperties.forEach(async function (cdp: DatabaseProperty) {
+          if (cdp.type === "relation" && cdp.relation_id) {
+            const fetchedRelationPages = await queryDatabase(cdp.relation_id, undefined);
+            if (fetchedRelationPages.length > 0) {
+              setRelationsPages((relationsPages) => ({ ...relationsPages, [cdp.relation_id!]: fetchedRelationPages }));
+              storeDatabasePages(cdp.relation_id, fetchedRelationPages);
             }
           }
+        });
 
-          await storeDatabaseProperties(databaseId, supportedDatabaseProperties);
+        // Fetch users
+        hasPeopleProperty = supportedDatabaseProperties.some((cdp) => cdp.type === "people");
+        if (hasPeopleProperty) {
+          const fetchedUsers = await fetchUsers();
+          setUsers(fetchedUsers);
+          await storeUsers(fetchedUsers);
         }
+
+        await storeDatabaseProperties(databaseId, supportedDatabaseProperties);
 
         setIsLoading(false);
       }
     };
     fetchData();
-  }, [databaseId, refreshView]);
+  }, [databaseId, didRerender]);
 
   // Load database view
   useEffect(() => {
     const getDatabaseView = async () => {
-      if (!databaseId) return;
+      if (!databaseId) {
+        return;
+      }
 
       const loadedDatabaseView = await loadDatabaseView(databaseId);
-      const loadedDatabaseViewCopy = loadedDatabaseView ? JSON.parse(JSON.stringify(loadedDatabaseView)) : {};
 
-      if (loadedDatabaseViewCopy.create_properties) {
-        setDatabaseView(loadedDatabaseViewCopy);
+      if (loadedDatabaseView?.create_properties) {
+        setDatabaseView(loadedDatabaseView);
       } else {
-        loadedDatabaseViewCopy.create_properties = [];
+        const dbView = { ...(loadedDatabaseView || {}), create_properties: [] as string[] };
         databaseProperties?.forEach(function (dp) {
-          loadedDatabaseViewCopy.create_properties.push(dp.id);
+          dbView.create_properties.push(dp.id);
         });
-        setDatabaseView(loadedDatabaseViewCopy);
+        setDatabaseView(dbView);
       }
     };
     getDatabaseView();
@@ -227,19 +214,16 @@ export function CreateDatabaseForm(props: { databaseId?: string; setRefreshView?
     fetchREADME();
   }, []);
 
-  if (databases && !databases[0] && markdown) {
-    return <Detail markdown={markdown} />;
+  if (databases && !databases[0]) {
+    return <Detail markdown={markdown} isLoading={!markdown} />;
   }
-
-  // Set visible inputs
-  const databaseViewCopy = databaseView ? JSON.parse(JSON.stringify(databaseView)) : {};
 
   // Handle save new database view
   function saveDatabaseView(newDatabaseView: DatabaseView): void {
     if (!databaseId || !newDatabaseView) return;
 
     setDatabaseView(newDatabaseView);
-    setRefreshView(Date.now());
+    forceRerender();
     showToast(ToastStyle.Success, "View Updated");
     storeDatabaseView(databaseId, newDatabaseView);
   }
@@ -263,13 +247,15 @@ export function CreateDatabaseForm(props: { databaseId?: string; setRefreshView?
           <ActionPanel.Section title="View options">
             <ActionSetVisibleProperties
               key="set-visible-inputs"
-              databaseProperties={databasePropertiesButTitle ? databasePropertiesButTitle : []}
+              databaseProperties={databasePropertiesButTitle || []}
               selectedPropertiesIds={databaseView?.create_properties}
               onSelect={function (propertyId: string) {
+                const databaseViewCopy = databaseView ? JSON.parse(JSON.stringify(databaseView)) : {};
                 databaseViewCopy?.create_properties.push(propertyId);
                 saveDatabaseView(databaseViewCopy);
               }}
               onUnselect={function (propertyId: string) {
+                const databaseViewCopy = databaseView ? JSON.parse(JSON.stringify(databaseView)) : {};
                 const newVisiblePropertiesIds = databaseViewCopy?.create_properties.filter(function (pid: string) {
                   return pid !== propertyId;
                 });
@@ -303,11 +289,10 @@ export function CreateDatabaseForm(props: { databaseId?: string; setRefreshView?
                 );
               })}
             </Form.Dropdown>,
-            <Form.Separator />,
+            <Form.Separator key="separator" />,
           ]
         : null}
       <Form.TextField
-        key="property::title::title"
         id="property::title::title"
         title={titleProperty?.name ? titleProperty?.name : "Untitled"}
         placeholder="Title"
@@ -341,14 +326,15 @@ export function CreateDatabaseForm(props: { databaseId?: string; setRefreshView?
           switch (dp.type) {
             case "date":
               return <Form.DatePicker key={key} id={id} title={title} />;
-              break;
             case "checkbox":
               return <Form.Checkbox key={key} id={id} title={title} label={placeholder} />;
-              break;
             case "select":
               return (
                 <Form.Dropdown key={key} id={id} title={title}>
                   {(dp.options as DatabasePropertyOption[])?.map((opt) => {
+                    if (!opt.id) {
+                      return null;
+                    }
                     return (
                       <Form.Dropdown.Item
                         key={"option::" + opt.id}
@@ -362,11 +348,13 @@ export function CreateDatabaseForm(props: { databaseId?: string; setRefreshView?
                   })}
                 </Form.Dropdown>
               );
-              break;
             case "multi_select":
               return (
                 <Form.TagPicker key={key} id={id} title={title} placeholder={placeholder}>
                   {(dp.options as DatabasePropertyOption[])?.map((opt) => {
+                    if (!opt.id) {
+                      return null;
+                    }
                     return (
                       <Form.TagPicker.Item
                         key={"option::" + opt.id}
@@ -380,9 +368,8 @@ export function CreateDatabaseForm(props: { databaseId?: string; setRefreshView?
                   })}
                 </Form.TagPicker>
               );
-              break;
             case "relation":
-              if (!dp.relation_id) return;
+              if (!dp.relation_id) return null;
 
               return (
                 <Form.TagPicker key={key} id={id} title={title} placeholder={placeholder}>
@@ -406,7 +393,6 @@ export function CreateDatabaseForm(props: { databaseId?: string; setRefreshView?
                   })}
                 </Form.TagPicker>
               );
-              break;
             case "people":
               return (
                 <Form.TagPicker key={key} id={id} title={title} placeholder={placeholder}>
@@ -422,7 +408,6 @@ export function CreateDatabaseForm(props: { databaseId?: string; setRefreshView?
                   })}
                 </Form.TagPicker>
               );
-              break;
             default:
               return <Form.TextField key={key} id={id} title={title} placeholder={placeholder} />;
           }
