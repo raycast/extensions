@@ -30,13 +30,13 @@ const Raycast: React.FC = () => {
   // Render
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search entries...">
-      <ListSection title="Series">
+      <ListSection title="Series" subtitle={String(list.series.length)}>
         {list.series.map((show) => (
           <MustListItem key={show.id} item={show} />
         ))}
       </ListSection>
 
-      <ListSection title="Movies">
+      <ListSection title="Movies" subtitle={String(list.movies.length)}>
         {list.movies.map((movie) => (
           <MustListItem key={movie.id} item={movie} />
         ))}
