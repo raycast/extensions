@@ -31,7 +31,7 @@
         }
       ],
       "description": "Copy the emoji or copy the code",
-      "default": "1"
+      "default": "emoji"
     }
   ],
   "dependencies": {
