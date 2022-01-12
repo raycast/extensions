@@ -20,7 +20,7 @@
           "required": true,
           "title": "Livewire Version",
           "description": "Specify the Laravel livewire version it will search the docs for.",
-          "default": "1.x",
+          "default": "2.x",
           "data": [
             {
               "title": "2.x",
