@@ -21,7 +21,7 @@ interface AdditionalExample extends Example {
 }
 
 const MarkdownReference = () => {
-  const [results, setResults] = useState<ReferenceType[] | []>([]);
+  const [results, setResults] = useState<ReferenceType[]>(markdownReference);
 
   const { push } = useNavigation();
 
@@ -35,7 +35,7 @@ const MarkdownReference = () => {
 
       setResults(searchResults);
     } else {
-      setResults([]);
+      setResults(markdownReference);
     }
   };
 
