@@ -1,133 +1,147 @@
-import { ActionPanel, Detail, List, getLocalStorageItem, setLocalStorageItem, closeMainWindow, getPreferenceValues } from "@raycast/api";
+import {
+  ActionPanel,
+  Detail,
+  List,
+  getLocalStorageItem,
+  setLocalStorageItem,
+  closeMainWindow,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
-import { parse } from 'date-format-parse';
+import { parse } from "date-format-parse";
 
 interface Note {
-    name: string,
-    date: Date|null,
-    folder: string,
-    account: string,
+  name: string;
+  date: Date | null;
+  folder: string;
+  account: string;
 }
 
 interface State {
-    notes: Note[];
-    error?: Error;
+  notes: Note[];
+  error?: Error;
 }
 
 interface Preferences {
-    accounts: boolean;
-    folders: boolean;
+  accounts: boolean;
+  folders: boolean;
 }
 
 export default function Command() {
-    const [state, setState] = useState<State>({
-        notes: [],
-    });
-    function parseNotes(result:string) {
-        const lines = result.split("\n");
+  const [state, setState] = useState<State>({
+    notes: [],
+  });
+  function parseNotes(result: string) {
+    const lines = result.split("\n");
 
-        const notes: Note[] = [];
-        let lastAccount = ''
-        let lastFolder = ''
-        let lastNote:Note|null = null
+    const notes: Note[] = [];
+    let lastAccount = "";
+    let lastFolder = "";
+    let lastNote: Note | null = null;
 
-        for (const line of lines) {
-            const [key, ...rest] = line.split(': ')
-            const value = rest.join(': ')
+    for (const line of lines) {
+      const [key, ...rest] = line.split(": ");
+      const value = rest.join(": ");
 
-            switch (key) {
-                case 'account':
-                    lastAccount = value
-                    break
-                case 'folder':
-                    lastFolder = value
-                    break
-                case 'note':
-                    lastNote = {
-                        name: value,
-                        date: null,
-                    } as Note
-                    break;
-                case 'date':
-                    if (lastNote) {
-                        lastNote.date = parse(value, 'dddd, D MMMM YYYY at HH:mm:ss')
-                        lastNote.folder = lastFolder
-                        lastNote.account = lastAccount
-                        notes.push(lastNote);
-                    }
-                    break;
-            }
-        }
-
-        notes.sort((a, b) => (a.date && b.date && a.date < b.date) ? 1 : -1)
-        setState({ notes: notes });
-    }
-    async function checkCachedNotes() {
-        const cachedNotes = await getLocalStorageItem("notes") as string
-        if (cachedNotes) {
-            parseNotes(cachedNotes)
-        }
-    }
-    async function fetchItems() {
-        const result = await runAppleScript(
-            'set output to ""\n' +
-            'tell application "Notes"\n' +
-            'repeat with theAccount in every account\n' +
-            'set theAccountName to the name of theAccount\n' +
-            'set output to output & "account: " & theAccountName & "\n"\n' +
-            'repeat with theFolder in every folder in theAccount\n' +
-            'set theFolderName to the name of theFolder\n' +
-            'set output to output & "folder: " & theFolderName & "\n"\n' +
-            'repeat with theNote in every note in theFolder\n' +
-            'set theNoteName to the name of theNote\n' +
-            'set theNoteDate to the modification date of theNote\n' +
-            'set output to output & "note: " & theNoteName & "\n"\n' +
-            'set output to output & "date: " & theNoteDate & "\n"\n' +
-            '-- say theNoteNumber\n' +
-            '-- show (note whose id is theNoteNumber)\n' +
-            '-- show note theNoteName\n' +
-            'end repeat\n' +
-            'end repeat\n' +
-            'end repeat\n' +
-            'end tell\n' +
-            'return output'
-        );
-        parseNotes(result);
-
-        await setLocalStorageItem("notes", result);
-    }
-    async function openNote(number:number) {
-        await closeMainWindow();
-        await runAppleScript(
-            'tell application "Notes" \n' +
-            'show note "' + state.notes[number].name + '" \n' +
-            'end tell'
-        );
+      switch (key) {
+        case "account":
+          lastAccount = value;
+          break;
+        case "folder":
+          lastFolder = value;
+          break;
+        case "note":
+          lastNote = {
+            name: value,
+            date: null,
+          } as Note;
+          break;
+        case "date":
+          if (lastNote) {
+            lastNote.date = parse(value, "dddd, D MMMM YYYY at HH:mm:ss");
+            lastNote.folder = lastFolder;
+            lastNote.account = lastAccount;
+            notes.push(lastNote);
+          }
+          break;
+      }
     }
 
-    useEffect(() => {
-        fetchItems();
-        checkCachedNotes();
-    }, []);
+    notes.sort((a, b) => (a.date && b.date && a.date < b.date ? 1 : -1));
+    setState({ notes: notes });
+  }
+  async function checkCachedNotes() {
+    const cachedNotes = (await getLocalStorageItem("notes")) as string;
+    if (cachedNotes) {
+      parseNotes(cachedNotes);
+    }
+  }
+  async function fetchItems() {
+    const result = await runAppleScript(
+      'set output to ""\n' +
+        'tell application "Notes"\n' +
+        "repeat with theAccount in every account\n" +
+        "set theAccountName to the name of theAccount\n" +
+        'set output to output & "account: " & theAccountName & "\n"\n' +
+        "repeat with theFolder in every folder in theAccount\n" +
+        "set theFolderName to the name of theFolder\n" +
+        'set output to output & "folder: " & theFolderName & "\n"\n' +
+        "repeat with theNote in every note in theFolder\n" +
+        "set theNoteName to the name of theNote\n" +
+        "set theNoteDate to the modification date of theNote\n" +
+        'set output to output & "note: " & theNoteName & "\n"\n' +
+        'set output to output & "date: " & theNoteDate & "\n"\n' +
+        "-- say theNoteNumber\n" +
+        "-- show (note whose id is theNoteNumber)\n" +
+        "-- show note theNoteName\n" +
+        "end repeat\n" +
+        "end repeat\n" +
+        "end repeat\n" +
+        "end tell\n" +
+        "return output"
+    );
+    parseNotes(result);
 
-    const preferences: Preferences = getPreferenceValues();
+    await setLocalStorageItem("notes", result);
+  }
+  async function openNote(number: number) {
+    await closeMainWindow();
+    await runAppleScript(
+      'tell application "Notes" \n' + 'show note "' + state.notes[number].name + '" \n' + "end tell"
+    );
+  }
+
+  useEffect(() => {
+    fetchItems();
+    checkCachedNotes();
+  }, []);
+
+  const preferences: Preferences = getPreferenceValues();
 
   return (
     <List isLoading={state.notes.length < 1}>
-        { state.notes.map((note,i) => (
-          <List.Item
-            key={i}
-            icon="notes-icon.png"
-            title={note.name}
-            subtitle={preferences.accounts ? (preferences.folders ? note.account + ' -> ' + note.folder : note.account) : (preferences.folders ? note.folder : '')}
-            actions={
-                <ActionPanel title="Actions">
-                    <ActionPanel.Item title="Open in Notes" onAction={() => openNote(i)} />
-                </ActionPanel>
-            }
-          />
-        ))}
+      {state.notes.map((note, i) => (
+        <List.Item
+          key={i}
+          icon="notes-icon.png"
+          title={note.name}
+          subtitle={
+            preferences.accounts
+              ? preferences.folders
+                ? note.account + " -> " + note.folder
+                : note.account
+              : preferences.folders
+              ? note.folder
+              : ""
+          }
+          actions={
+            <ActionPanel title="Actions">
+              <ActionPanel.Item title="Open in Notes" onAction={() => openNote(i)} />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }
