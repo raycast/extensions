@@ -28,7 +28,6 @@ export function useAudioDevices(type: "input" | "output") {
       const devices = await (type === "input" ? getInputDevices() : getOutputDevices());
       const current = await (type === "input" ? getDefaultInputDevice() : getDefaultOutputDevice());
 
-      console.log(current);
       return {
         devices,
         current,
