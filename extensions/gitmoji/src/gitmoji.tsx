@@ -14,7 +14,7 @@ export default function GitmojiList() {
 function GitmojiListItem(props: { gitmoji: Gitmoji }) {
   const gitmoji = props.gitmoji;
 
-  const { copy } = getPreferenceValues<PreferenceValues>()
+  const { copy } = getPreferenceValues<PreferenceValues>();
 
   return (
     <List.Item
@@ -34,8 +34,8 @@ function GitmojiListItem(props: { gitmoji: Gitmoji }) {
   );
 }
 
-interface PreferenceValues  {
-    copy: 'emoji' | 'code'
+interface PreferenceValues {
+  copy: "emoji" | "code";
 }
 
 type Gitmoji = {
