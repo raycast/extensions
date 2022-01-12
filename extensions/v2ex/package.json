@@ -1,0 +1,46 @@
+{
+  "name": "v2ex",
+  "title": "v2ex",
+  "description": "hot list of v2ex",
+  "icon": "icon-v2ex.png",
+  "author": "leo",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show v2ex List",
+      "subtitle": "",
+      "description": "Template to show a list received from a networking response",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "proxy",
+      "type": "textfield",
+      "required": false,
+      "title": "Proxy URL",
+      "description": "URL of proxy",
+      "placeholder": "URL of proxy e.g. http://127.0.0.1:7890"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.1",
+    "https-proxy-agent": "^5.0.0",
+    "node-fetch": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
