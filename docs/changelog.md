@@ -7,12 +7,12 @@
 * **Developer Tools:** Added `Open Support Directory` action to local dev extensions
 * **Developer Tools**: Removed auto-injecting of globals for enabling React Developer Tools in dev mode
 * **Developer Tools**: Added `prettier` checks to CLI `lint` command
-* **Documentation**: Fixes and updates
+* **Documentation**: Updates and fixes
 
 ### 🐞 Bugfixes
 
 * **Forms:** Fixed controlled updates for the `Form.TagPicker`
-* **Navigation**: Fixed a bug where a programmatic pop, followed by a manual pop (e.g. ESC) could lead to wrong stat (![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)[Issue #571](https://github.com/raycast/extensions/issues/571))
+* **Navigation**: Fixed a bug where a programmatic pop, followed by a manual pop (e.g. ESC) could lead to wrong state (![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)[Issue #571](https://github.com/raycast/extensions/issues/571))
 
 ## 1.26.3 - 2021-12-16
 
