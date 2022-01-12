@@ -1,7 +1,7 @@
 ---
 name: "🛠 🐞 Dev Tools Bug Report"
 about: Report a reproducible bug or regression related to dev tools (CLI, publishing, commands like Manage Extension or Create Extension, etc)
-title: '[Dev Tools Bug] '
+title: ''
 labels: 'dev tools, bug'
 
 ---
