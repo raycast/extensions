@@ -3,9 +3,11 @@
    <h1 align="center">Must</h1>
  </p>
 
-A [Raycast](https://raycast.com/) extension that lets you list your Watch list on [Must](https://mustapp.com).
+A [Raycast](https://raycast.com/) extension that lets you to list your Watch list on [Must](https://mustapp.com).
 
-![Example of Must Extension on Raycast](https://user-images.githubusercontent.com/13917975/149185404-b20a463d-d0e4-48e4-b8c8-abe19795c684.mov)
+<p align="center">
+   <video src="https://user-images.githubusercontent.com/13917975/149185404-b20a463d-d0e4-48e4-b8c8-abe19795c684.mov" />
+</p>
 
 ### Features
 
