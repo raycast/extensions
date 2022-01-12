@@ -53,7 +53,7 @@
     "@raycast/api": "^1.25.6",
     "hi-base32": "^0.5.1",
     "node-fetch": "^3.1.0",
-    "node-forge": "^0.10.0"
+    "node-forge": "^1.2.0"
   },
   "devDependencies": {
     "@primer/octicons": "^16.2.0",

@@ -1,22 +1,12 @@
 import { List, ImageLike, showToast, ToastStyle, randomId } from "@raycast/api";
-import { Page, DatabaseProperty, DatabaseView, DatabasePropertyOption, notionColorToTintColor } from "../utils/notion";
-import { ActionEditPageProperty, DatabaseListView, PageListItem } from "./";
+import { Page, DatabasePropertyOption, notionColorToTintColor } from "../../utils/notion";
+import { ActionEditPageProperty, PageListItem } from "..";
+import { DatabaseListView } from "./DatabaseListView";
+import { DatabaseViewProps } from "./types";
 
-export function DatabaseKanbanView(props: {
-  databaseId: string;
-  databasePages: Page[];
-  databaseProperties: DatabaseProperty[];
-  databaseView?: DatabaseView;
-  setRefreshView: any;
-  saveDatabaseView: any;
-}): JSX.Element {
+export function DatabaseKanbanView(props: DatabaseViewProps): JSX.Element | null {
   // Get database page list info
-  const databaseId = props.databaseId;
-  const databasePages = props.databasePages;
-  const databaseProperties = props.databaseProperties;
-  const databaseView = props.databaseView;
-  const setRefreshView = props.setRefreshView;
-  const saveDatabaseView = props.saveDatabaseView;
+  const { databaseId, databasePages, databaseProperties, databaseView, onForceRerender, saveDatabaseView } = props;
 
   // Get kanban view settings
   const kanbanView = databaseView?.kanban;
@@ -27,7 +17,7 @@ export function DatabaseKanbanView(props: {
   const completedIds = kanbanView?.completed_ids ? kanbanView.completed_ids : [];
   const canceledIds = kanbanView?.canceled_ids ? kanbanView.canceled_ids : [];
 
-  if (!propertyId) return null as unknown as JSX.Element;
+  if (!propertyId) return null;
 
   // Section Order: Started > Not Started > Completed > Canceled > Backlog | Other (hidden)
   const sectionIds = startedIds.concat(notStartedIds).concat(completedIds).concat(canceledIds).concat(backlogIds);
@@ -36,20 +26,20 @@ export function DatabaseKanbanView(props: {
   const actionEditIds = backlogIds.concat(notStartedIds).concat(startedIds).concat(completedIds).concat(canceledIds);
 
   // Get kanban status
-  const statusProperty = databaseProperties.filter(function (dp) {
+  const statusProperty = databaseProperties.find(function (dp) {
     return dp.id === propertyId;
-  })[0];
+  });
 
   if (!statusProperty) {
-    showToast(ToastStyle.Failure, "Kanban property missing", "Please edit view configurat");
+    showToast(ToastStyle.Failure, "Kanban property missing", "Please edit view configuration");
     return (
       <DatabaseListView
         key={`database-${databaseId}-view-list`}
         databaseId={databaseId}
-        databasePages={databasePages ? databasePages : ([] as Page[])}
-        databaseProperties={databaseProperties ? databaseProperties : ([] as DatabaseProperty[])}
+        databasePages={databasePages}
+        databaseProperties={databaseProperties}
         databaseView={databaseView}
-        setRefreshView={setRefreshView}
+        onForceRerender={onForceRerender}
         saveDatabaseView={saveDatabaseView}
       />
     );
@@ -89,11 +79,15 @@ export function DatabaseKanbanView(props: {
   }
 
   const databaseSections: { pages: Page[]; name: string; icon: ImageLike; id: string }[] = [];
-  const tempSections: Record<string, Record<string, any>[]> = {};
+  const tempSections: Record<string, Page[]> = {};
 
   databasePages.forEach(function (p) {
-    const propId = p.properties[propertyId]?.select?.id ? p.properties[propertyId].select.id : "_select_null_";
-    if (!tempSections[propId]) tempSections[propId] = [];
+    const prop = p.properties[propertyId];
+
+    const propId = prop && "select" in prop && prop.select?.id ? prop.select.id : "_select_null_";
+    if (!tempSections[propId]) {
+      tempSections[propId] = [];
+    }
 
     tempSections[propId].push(p);
   });
@@ -103,8 +97,8 @@ export function DatabaseKanbanView(props: {
 
   (statusProperty.options as DatabasePropertyOption[])
     ?.sort(function (dpa, dpb) {
-      const value_a = actionEditIds.indexOf(dpa.id);
-      const value_b = actionEditIds.indexOf(dpb.id);
+      const value_a = dpa.id ? actionEditIds.indexOf(dpa.id) : -1;
+      const value_b = dpb.id ? actionEditIds.indexOf(dpb.id) : -1;
 
       if (value_a === -1) return 1;
 
@@ -117,6 +111,9 @@ export function DatabaseKanbanView(props: {
       return 0;
     })
     .forEach(function (option) {
+      if (!option.id) {
+        return;
+      }
       optionsMap[option.id] = option;
       customOptions.push({
         icon: statusSourceIcon(option.id),
@@ -131,7 +128,7 @@ export function DatabaseKanbanView(props: {
 
     databaseSections.push({
       id: randomId(),
-      pages: tempSections[sectionId] as Page[],
+      pages: tempSections[sectionId],
       name: optionsMap[sectionId]?.name,
       icon: { source: statusSourceIcon(sectionId), tintColor: notionColorToTintColor(optionsMap[sectionId]?.color) },
     });
@@ -162,13 +159,13 @@ export function DatabaseKanbanView(props: {
                   pageProperty={p.properties[propertyId]}
                   icon={"./icon/kanban_status_started.png"}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                  setRefreshView={setRefreshView}
+                  onForceRerender={onForceRerender}
                 />,
               ]}
               databaseView={databaseView}
               databaseProperties={databaseProperties}
               saveDatabaseView={saveDatabaseView}
-              setRefreshView={setRefreshView}
+              onForceRerender={onForceRerender}
             />
           );
         })}

@@ -51,9 +51,10 @@
     }
   ],
   "dependencies": {
+    "@notionhq/client": "^0.4.12",
     "@raycast/api": "^1.25.0",
-    "node-fetch": "^2.6.1",
     "moment": "^2.29.1",
+    "node-fetch": "^2.6.1",
     "open": "^8.4.0"
   },
   "devDependencies": {

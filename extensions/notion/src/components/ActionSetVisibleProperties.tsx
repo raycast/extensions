@@ -8,15 +8,13 @@ export function ActionSetVisibleProperties(props: {
   selectedPropertiesIds?: string[];
   onSelect: (propertyId: string) => void;
   onUnselect: (propertyId: string) => void;
-}): JSX.Element | null {
+}): JSX.Element {
   const title = props.title ? props.title : "Show / Hide Properties...";
   const icon = props.icon ? props.icon : "./icon/shown.png";
   const selectedPropertiesIds = props.selectedPropertiesIds ? props.selectedPropertiesIds : [];
-  const databaseProperties = props.databaseProperties ? props.databaseProperties : [];
+  const databaseProperties = props.databaseProperties;
   const onSelect = props.onSelect;
   const onUnselect = props.onUnselect;
-
-  if (!onSelect || !onUnselect) return null;
 
   return (
     <ActionPanel.Submenu title={title} icon={icon}>
