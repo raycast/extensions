@@ -8,7 +8,7 @@ import {
     showHUD,
     popToRoot
 } from "@raycast/api";
-import {json2ts} from "json-ts";
+import { json2ts } from "json-ts";
 
 interface CommandForm {
     jsonTextarea: string;
@@ -17,7 +17,7 @@ interface CommandForm {
 
 export default function Command() {
     async function handleSubmit(values: CommandForm) {
-        const {jsonTextarea, rootName} = values;
+        const { jsonTextarea, rootName } = values;
 
         if (jsonTextarea.length === 0) {
             await showToast(ToastStyle.Failure, "Empty JSON");
@@ -30,7 +30,7 @@ export default function Command() {
         }
 
         try {
-            const ts = json2ts(values.jsonTextarea, {rootName, flow: false, prefix: ''});
+            const ts = json2ts(values.jsonTextarea, { rootName, flow: false, prefix: '' });
             await copyTextToClipboard(ts);
         } catch (e) {
             await showToast(ToastStyle.Failure, "Invalid JSON");
@@ -46,12 +46,12 @@ export default function Command() {
         <Form
             actions={
                 <ActionPanel>
-                    <SubmitFormAction onSubmit={handleSubmit}/>
+                    <SubmitFormAction onSubmit={handleSubmit} />
                 </ActionPanel>
             }
         >
-            <Form.TextArea id="jsonTextarea" title="JSON" placeholder="Enter JSON here"/>
-            <Form.TextField id="rootName" title="Interface Name" defaultValue="rootName"/>
+            <Form.TextArea id="jsonTextarea" title="JSON" placeholder="Enter JSON here" />
+            <Form.TextField id="rootName" title="Interface Name" defaultValue="rootName" />
         </Form>
     );
 }
