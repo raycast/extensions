@@ -24,16 +24,15 @@ export default function Command() {
     const [state, setState] = useState<State>({
         notes: [],
     });
-    const { exec } = require("child_process");
     function parseNotes(result:string) {
-        let lines = result.split("\n");
+        const lines = result.split("\n");
 
-        let notes: Note[] = [];
+        const notes: Note[] = [];
         let lastAccount = ''
         let lastFolder = ''
         let lastNote:Note|null = null
 
-        for (var line of lines) {
+        for (const line of lines) {
             const [key, ...rest] = line.split(': ')
             const value = rest.join(': ')
 
@@ -65,13 +64,13 @@ export default function Command() {
         setState({ notes: notes });
     }
     async function checkCachedNotes() {
-        let cachedNotes = await getLocalStorageItem("notes") as string
+        const cachedNotes = await getLocalStorageItem("notes") as string
         if (cachedNotes) {
             parseNotes(cachedNotes)
         }
     }
     async function fetchItems() {
-        let result = await runAppleScript(
+        const result = await runAppleScript(
             'set output to ""\n' +
             'tell application "Notes"\n' +
             'repeat with theAccount in every account\n' +
