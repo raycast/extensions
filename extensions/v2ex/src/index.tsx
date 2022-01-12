@@ -51,7 +51,7 @@ function ArticleListItem(props: { article: Article }) {
 async function fetchArticles(): Promise<Article[]> {
   try {
     const proxy: string = preferences.proxy?.value as string;
-    const proxyAgent = proxy ? new HttpsProxyAgent(proxy) : undefined;
+    const proxyAgent = proxy ? new (HttpsProxyAgent as any)(proxy) : undefined;
     const response = await fetch("https://www.v2ex.com/api/topics/hot.json", { agent: proxyAgent });
     const json = await response.json();
     return (json as []).map((item: any) => ({ ...item, id: String(item.id) })) as Article[];
