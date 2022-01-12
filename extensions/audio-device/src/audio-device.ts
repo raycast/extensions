@@ -3,22 +3,22 @@ import { execa } from "execa";
 import { environment } from "@raycast/api";
 import fs from "fs";
 
-enum TransportType {
-  avb,
-  aggregate,
-  airplay,
-  autoaggregate,
-  bluetooth,
-  bluetoothle,
-  builtin,
-  displayport,
-  firewire,
-  hdmi,
-  pci,
-  thunderbolt,
-  usb,
-  virtual,
-  unknown,
+export enum TransportType {
+  Avb = "avb",
+  Aggregate = "aggregate",
+  Airplay = "airplay",
+  Autoaggregate = "autoaggregate",
+  Bluetooth = "bluetooth",
+  BluetoothLowEnergy = "bluetoothle",
+  BuiltIn = "builtin",
+  DisplayPort = "displayport",
+  Firewire = "firewire",
+  HDMI = "hdmi",
+  PCI = "pci",
+  Thunderbolt = "thunderbolt",
+  Usb = "usb",
+  Virtual = "virtual",
+  Unknown = "unknown",
 }
 
 export type AudioDevice = {

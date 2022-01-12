@@ -8,6 +8,7 @@ import {
   getDefaultOutputDevice,
   setDefaultInputDevice,
   setDefaultOutputDevice,
+  TransportType,
 } from "./audio-device";
 
 type UseAudioDevicesResponse = {
@@ -27,6 +28,7 @@ export function useAudioDevices(type: "input" | "output") {
       const devices = await (type === "input" ? getInputDevices() : getOutputDevices());
       const current = await (type === "input" ? getDefaultInputDevice() : getDefaultOutputDevice());
 
+      console.log(current);
       return {
         devices,
         current,
@@ -51,6 +53,8 @@ type DeviceListProps = {
 
 export function DeviceList({ type }: DeviceListProps) {
   const { isLoading, data } = useAudioDevices(type);
+  const subtitle = (device: AudioDevice) =>
+    Object.entries(TransportType).find(([, v]) => v === device.transportType)?.[0];
 
   return (
     <List isLoading={isLoading}>
@@ -59,6 +63,7 @@ export function DeviceList({ type }: DeviceListProps) {
           <List.Item
             key={d.uid}
             title={d.name}
+            subtitle={subtitle(d)}
             icon={deviceIcon(d)}
             accessoryIcon={d.uid === data.current.uid ? Icon.Checkmark : undefined}
             actions={
