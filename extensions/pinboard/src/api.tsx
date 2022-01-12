@@ -21,7 +21,7 @@ export interface BookmarksState {
 
 export enum SearchKind {
   Constant,
-  All
+  All,
 }
 
 export function useSearchBookmarks(searchKind: SearchKind) {
@@ -49,10 +49,14 @@ export function useSearchBookmarks(searchKind: SearchKind) {
           bookmarks = await searchBookmarks(searchText, searchKind, cancel.current.signal);
           break;
         case SearchKind.Constant:
-          bookmarks = await searchBookmarks(searchText + " " + preferences.constantTags.value, searchKind, cancel.current.signal)
+          bookmarks = await searchBookmarks(
+            searchText + " " + preferences.constantTags.value,
+            searchKind,
+            cancel.current.signal
+          );
           break;
       }
-      
+
       setState((oldState) => ({
         ...oldState,
         bookmarks: bookmarks,
