@@ -42,7 +42,7 @@
       "name": "constantTags",
       "type": "textfield",
       "required": false,
-      "title": "Tags for use when searching with constant tags",
+      "title": "Constant tags",
       "description": "Enter the tags you want to add when searching with constant tags",
       "placeholder": "bookmarks"
     }
