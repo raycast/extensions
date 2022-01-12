@@ -16,16 +16,14 @@ export default function SearchPageList(): JSX.Element {
     const loadRecentlyOpenPage = async () => {
       const cachedRecentlyOpenPages = await loadRecentlyOpenedPages();
 
-      if (cachedRecentlyOpenPages) {
-        if (searchText) {
-          setRecentlyOpenPages(
-            cachedRecentlyOpenPages.filter(function (p: Page) {
-              return (p.title ? p.title : "Untitled").toLowerCase().includes(searchText.toLowerCase());
-            })
-          );
-        } else {
-          setRecentlyOpenPages(cachedRecentlyOpenPages);
-        }
+      if (searchText) {
+        setRecentlyOpenPages(
+          cachedRecentlyOpenPages.filter(function (p: Page) {
+            return (p.title ? p.title : "Untitled").toLowerCase().includes(searchText.toLowerCase());
+          })
+        );
+      } else {
+        setRecentlyOpenPages(cachedRecentlyOpenPages);
       }
     };
     loadRecentlyOpenPage();
@@ -58,8 +56,6 @@ export default function SearchPageList(): JSX.Element {
             page={p}
             databaseView={undefined}
             databaseProperties={undefined}
-            saveDatabaseView={undefined}
-            setRefreshView={undefined}
           />
         ))}
       </List.Section>
@@ -70,8 +66,6 @@ export default function SearchPageList(): JSX.Element {
             page={p}
             databaseView={undefined}
             databaseProperties={undefined}
-            saveDatabaseView={undefined}
-            setRefreshView={undefined}
           />
         ))}
       </List.Section>

@@ -4,7 +4,6 @@ import {
   DatabaseView,
   Page,
   DatabaseProperty,
-  User,
   queryDatabase,
   fetchDatabaseProperties,
   fetchUsers,
@@ -20,7 +19,8 @@ import {
   storeUsers,
   loadUsers,
 } from "../utils/local-storage";
-import { DatabaseKanbanView, DatabaseListView } from "./";
+import { DatabaseKanbanView, DatabaseListView, DatabaseViewProps } from "./databaseViews";
+import { useForceRenderer } from "../utils/useForceRenderer";
 
 export function DatabaseList(props: { databasePage: Page }): JSX.Element {
   // Get database info
@@ -30,16 +30,17 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
     (databasePage.icon_emoji ? databasePage.icon_emoji + " " : "") +
     (databasePage.title ? databasePage.title : "Untitled");
 
-  // Store as recently opned page
-  storeRecentlyOpenedPage(databasePage);
+  // Store as recently opened page
+  useEffect(() => {
+    storeRecentlyOpenedPage(databasePage);
+  }, [databasePage]);
 
   // Setup useState objects
-  const [databasePages, setDatabasePages] = useState<Page[]>();
+  const [databasePages, setDatabasePages] = useState<Page[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [databaseView, setDatabaseView] = useState<DatabaseView>();
-  const [databaseProperties, setDatabaseProperties] = useState<DatabaseProperty[]>();
-  const [users, setUsers] = useState<User[]>();
-  const [refreshView, setRefreshView] = useState<number>();
+  const [databaseProperties, setDatabaseProperties] = useState<DatabaseProperty[]>([]);
+  const [didRerender, forceRerender] = useForceRenderer();
 
   // Currently supported properties
   const supportedPropTypes = [
@@ -60,61 +61,46 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
   useEffect(() => {
     const getDatabaseProperties = async () => {
       const cachedDatabaseProperties = await loadDatabaseProperties(databaseId);
-      if (cachedDatabaseProperties) {
-        setDatabaseProperties(cachedDatabaseProperties);
+      setDatabaseProperties(cachedDatabaseProperties);
 
-        // Load users
-        const hasPeopleProperty = cachedDatabaseProperties.some(function (cdp: DatabaseProperty) {
-          return cdp.type === "people";
-        });
-        if (hasPeopleProperty) {
-          const cachedUsers = await loadUsers();
+      // Load users
+      let hasPeopleProperty = cachedDatabaseProperties.some((cdp) => cdp.type === "people");
+      if (hasPeopleProperty) {
+        const cachedUsers = await loadUsers();
 
-          if (!cachedUsers) return;
-
-          const copyCachedDatabaseProperties = JSON.parse(JSON.stringify(cachedDatabaseProperties));
-
-          copyCachedDatabaseProperties.forEach(function (ccdp: DatabaseProperty) {
-            if (ccdp.type === "people") {
-              ccdp.options = cachedUsers;
+        setDatabaseProperties((props) =>
+          props.map((prop) => {
+            if (prop.type === "people") {
+              return { ...prop, options: cachedUsers };
             }
-          });
-
-          setDatabaseProperties(copyCachedDatabaseProperties);
-        }
+            return prop;
+          })
+        );
       }
 
       const fetchedDatabaseProperties = await fetchDatabaseProperties(databaseId);
 
-      if (fetchedDatabaseProperties) {
-        const supportedDatabaseProperties = fetchedDatabaseProperties.filter(function (property: DatabaseProperty) {
-          return supportedPropTypes.includes(property.type);
-        });
-        setDatabaseProperties(supportedDatabaseProperties);
+      const supportedDatabaseProperties = fetchedDatabaseProperties.filter(function (property) {
+        return supportedPropTypes.includes(property.type);
+      });
+      setDatabaseProperties(supportedDatabaseProperties);
 
-        // Fetch users
-        const hasPeopleProperty = supportedDatabaseProperties.some(function (sdp: DatabaseProperty) {
-          return sdp.type === "people";
-        });
-        if (hasPeopleProperty) {
-          const fetchedUsers = await fetchUsers();
-          if (fetchedUsers) {
-            const copySupportedDatabaseProperties = JSON.parse(JSON.stringify(supportedDatabaseProperties));
+      // Fetch users
+      hasPeopleProperty = supportedDatabaseProperties.some((cdp) => cdp.type === "people");
+      if (hasPeopleProperty) {
+        const fetchedUsers = await fetchUsers();
 
-            copySupportedDatabaseProperties.forEach(function (ccdp: DatabaseProperty) {
-              if (ccdp.type === "people") {
-                ccdp.options = fetchedUsers;
-              }
-            });
-
-            setDatabaseProperties(copySupportedDatabaseProperties);
-            setUsers(fetchedUsers);
-            storeUsers(fetchedUsers);
-          }
-        }
-
-        storeDatabaseProperties(databaseId, supportedDatabaseProperties);
+        setDatabaseProperties((props) =>
+          props.map((prop) => {
+            if (prop.type === "people") {
+              return { ...prop, options: fetchedUsers };
+            }
+            return prop;
+          })
+        );
+        storeUsers(fetchedUsers);
       }
+      storeDatabaseProperties(databaseId, supportedDatabaseProperties);
     };
     getDatabaseProperties();
   }, []);
@@ -124,7 +110,7 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
     const getDatabaseView = async () => {
       const loadedDatabaseView = await loadDatabaseView(databaseId);
 
-      if (loadedDatabaseView && loadedDatabaseView.properties) {
+      if (loadedDatabaseView?.properties) {
         setDatabaseView(loadedDatabaseView);
       } else {
         setDatabaseView({
@@ -154,7 +140,7 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
       }
     };
     getDatabasePages();
-  }, [refreshView, databaseView]);
+  }, [didRerender, databaseView]);
 
   // Handle save new database view
   function saveDatabaseView(newDatabaseView: DatabaseView): void {
@@ -168,17 +154,7 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
     ? (databasePage.icon_emoji ? databasePage.icon_emoji + " " : "") + databaseView.name
     : null;
 
-  const databaseViewTypes: Record<
-    string,
-    (props: {
-      databaseId: string;
-      databasePages: Page[];
-      databaseProperties: DatabaseProperty[];
-      databaseView?: DatabaseView;
-      setRefreshView: any;
-      saveDatabaseView: any;
-    }) => JSX.Element
-  > = {
+  const databaseViewTypes: Record<string, (props: DatabaseViewProps) => JSX.Element | null> = {
     list: DatabaseListView,
     kanban: DatabaseKanbanView,
   };
@@ -199,7 +175,7 @@ export function DatabaseList(props: { databasePage: Page }): JSX.Element {
         databasePages={databasePages ? databasePages : ([] as Page[])}
         databaseProperties={databaseProperties ? databaseProperties : ([] as DatabaseProperty[])}
         databaseView={databaseView}
-        setRefreshView={setRefreshView}
+        onForceRerender={forceRerender}
         saveDatabaseView={saveDatabaseView}
       />
     </List>
