@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "markdown-reference",
-      "title": "Markdown Reference - Search Markdown Syntax",
+      "title": "Search Markdown Syntax",
+      "subtitle": "Markdown Reference",
       "description": "Quickly search up how to format with Markdown",
       "mode": "view"
     }
