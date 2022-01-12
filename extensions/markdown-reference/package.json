@@ -10,7 +10,6 @@
     {
       "name": "markdown-reference",
       "title": "Search Markdown Syntax",
-      "subtitle": "Markdown Reference",
       "description": "Quickly search up how to format with Markdown",
       "mode": "view"
     }
