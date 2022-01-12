@@ -27,6 +27,7 @@ export const ServersList = () => {
     // If the sites already exist in the cache, or not found, do nothing
     if (siteData[key] || !isMounted.current) return;
     const server = servers.find((s) => s.id.toString() === serverId) as IServer;
+    if (!server) return;
     if (!Object.keys(server).length) return;
     const thisSiteData = (await Site.getAll(server)) as ISite[] | undefined;
     thisSiteData &&
@@ -58,6 +59,17 @@ export const ServersList = () => {
         });
       });
   }, []);
+
+  if (!servers.length) {
+    return (
+      <List>
+        <List.Item
+          title="There are no results to display."
+          accessoryTitle="If you create your first server in ploi.io, it will show up here."
+        />
+      </List>
+    );
+  }
 
   return (
     <List
