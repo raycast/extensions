@@ -1,4 +1,9 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import {
+  clearLocalStorage,
+  showToast,
+  ToastStyle,
+  popToRoot,
+} from "@raycast/api";
 import { IServer } from "../Server";
 import { camelCase, mapKeys, sortBy } from "lodash";
 import { PLOI_API_URL } from "../config";
@@ -86,16 +91,20 @@ const getServers = async () => {
   } catch (error) {
     const axiosError = (error as AxiosError).response;
 
-    if (
-      axiosError?.status === 422 &&
-      axiosError?.data &&
-      axiosError?.data.errors[0]
-    ) {
+    if (axiosError?.status === 401 && axiosError?.data) {
+      // Show something is wrong
       await showToast(
         ToastStyle.Failure,
         "Wrong API key used",
-        "Please remove your API key in the preferences and enter a valid one"
+        "Please remove your API key in the preferences window, and enter a valid one"
       );
+
+      // Clear anything we have
+      await clearLocalStorage();
+
+      // Pop to the main window
+      await popToRoot();
+
       return;
     }
   }
