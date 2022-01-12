@@ -5,7 +5,7 @@ const replacements: Array<Array<RegExp | string>> = [
   [/\(/g, "\\(", "parentheses"],
   [/\)/g, "\\)", "parentheses"],
   [/\[/g, "\\[", "square brackets"],
-  [/\]/g, "\\]", "square brackets"],
+  [/]/g, "\\]", "square brackets"],
   [/</g, "&lt;", "angle brackets"],
   [/>/g, "&gt;", "angle brackets"],
   [/_/g, "\\_", "underscores"],
