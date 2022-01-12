@@ -31,6 +31,7 @@ const LastFm: React.FC = () => {
           const song = s as Track;
           const image = song.image.find((image) => image.size === "large")?.["#text"];
           const artist = song.artist?.["#text"];
+          const nowPlaying = song["@attr"]?.nowplaying || false;
 
           return (
             <List.Item
@@ -38,8 +39,7 @@ const LastFm: React.FC = () => {
               icon={image}
               title={song.name}
               subtitle={artist ? `by ${artist}` : undefined}
-              accessoryTitle={song.playcount ? `${song.playcount} plays` : undefined}
-              accessoryIcon={song.playcount ? Icon.Star : undefined}
+              accessoryTitle={nowPlaying ? `Now Playing` : undefined}
               actions={
                 <ActionPanel>
                   <OpenInBrowserAction url={song.url} title="Open on Last.fm" />
