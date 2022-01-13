@@ -56,8 +56,20 @@ export function useActiveClients() {
 
 export function useMyProjects() {
   const { data, error } = useSWR<HarvestProjectAssignment[], AxiosError>("project-assignments", async () => {
-    const resp = await harvestAPI<HarvestProjectAssignmentsResponse>({ url: "/users/me/project_assignments" });
-    return resp.data.project_assignments;
+    let project_assignments: HarvestProjectAssignment[] = [];
+    let page = 1;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const resp = await harvestAPI<HarvestProjectAssignmentsResponse>({
+        url: "/users/me/project_assignments",
+        params: { page },
+      });
+      console.log(resp.data.total_entries);
+      project_assignments = project_assignments.concat(resp.data.project_assignments);
+      if (resp.data.total_pages >= resp.data.page) break;
+      page += 1;
+    }
+    return project_assignments;
   });
   return { data, error, isLoading: !data && !error };
 }
