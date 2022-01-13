@@ -1,6 +1,6 @@
 import { runAppleScript } from "run-applescript";
-import Caffeinate from "./caffeinate"
-import Decaffinate from "./decaffeinate"
+import Caffeinate from "./caffeinate";
+import Decaffinate from "./decaffeinate";
 
 const ToggleCaffeinate = async () => {
   try {
