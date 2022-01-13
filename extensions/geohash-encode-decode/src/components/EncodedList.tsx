@@ -3,6 +3,7 @@ import { encode } from "ngeohash";
 import { List, ActionPanel, CopyToClipboardAction, OpenInBrowserAction } from "@raycast/api";
 import is from "@sindresorhus/is";
 import InvalidCoordinates from "./InvalidCoordinates";
+import { getGeohashShapeLink } from "../helpers/getGeohashLink";
 
 interface EncodeListProps {
   latitude: string;
@@ -41,7 +42,7 @@ export default function EncodedList({ latitude, longitude }: EncodeListProps) {
       const ListItemActions = (
         <ActionPanel>
           <CopyToClipboardAction content={geohash} />
-          <OpenInBrowserAction url={`https://www.geohash.es/decode?geohash=${geohash}`} />
+          <OpenInBrowserAction url={getGeohashShapeLink(geohash)} />
         </ActionPanel>
       );
 
