@@ -62,15 +62,15 @@ const pullIfNoCircleCIProjectsWereFound = (list: string[]): Promise<{ list: stri
       return resolve({ list, cache: true });
     }
 
-    return circleCIListProjects().then((list) => resolve({ list, cache: false })).catch(reject);
+    return circleCIListProjects()
+      .then((list) => resolve({ list, cache: false }))
+      .catch(reject);
   });
 
 const cacheIfPulled = ({ list, cache }: { list: string[]; cache: boolean }) =>
   cache ? list : setLocalStorageItem(KEY_PROJECT_URIS, JSON.stringify(list)).then(() => list);
 
-const showErrorStopLoading = (setIsLoading: (value: boolean) => void) =>
-  (e: Error) => {
-    showToast(ToastStyle.Failure, e.message);
-    setIsLoading(false);
-  };
-
+const showErrorStopLoading = (setIsLoading: (value: boolean) => void) => (e: Error) => {
+  showToast(ToastStyle.Failure, e.message);
+  setIsLoading(false);
+};
