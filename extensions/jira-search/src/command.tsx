@@ -22,7 +22,7 @@ const htmlLink = (item: ResultItem) => `<a href="${item.url}">${item.linkText ??
 export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: string) {
     const [query, setQuery] = useState("")
     const [items, setItems] = useState<ResultItem[]>([])
-    const [isLoading, setIsLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<ErrorText>()
     useEffect(() => {
         setError(undefined)

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-const target = path.join("..", "extensions", "extensions", "jira-search")
+const target = path.join("..", "extensions-jira-search", "extensions", "jira-search")
 const ignoreList = [
     ".git",
     ".idea",
