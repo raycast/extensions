@@ -15,9 +15,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "Must",
+      "title": "Watch list",
+      "subtitle": "Must",
       "description": "Your want to watch list on Must.",
-      "subtitle": "Your want to watch list on Must.",
       "mode": "view"
     }
   ],
