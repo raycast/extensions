@@ -20,32 +20,28 @@
           "title": "Path to Vault",
           "required": true,
           "description": "Specify the path or multiple paths (comma separated) to your vault/vaults"
-        },
-        {
+        },{
           "name": "excludedFolders",
           "type": "textfield",
           "placeholder": "folder1, folder2, ...",
           "title": "Exclude following folders",
           "required": false,
           "description": "Specify which folders to exclude (comma separated)"
-        },
-        {
+        }, {
           "name": "removeYAML",
           "label": "Hide content",
           "type": "checkbox",
           "title": "Hide YAML",
           "required": false,
           "description": "Hide YAML frontmatter for copying and viewing notes"
-        },
-        {
+        }, {
           "name": "removeLinks",
           "label": "Hide content",
           "type": "checkbox",
           "title": "Hide Links",
           "required": false,
           "description": "Hide links for copying and viewing notes"
-        },
-        {
+        }, {
           "name": "primaryAction",
           "type": "dropdown",
           "title": "Primary Action",
@@ -55,8 +51,7 @@
             {
               "title": "Quick Look",
               "value": "quicklook"
-            },
-            {
+            }, {
               "title": "Open in Obsidian",
               "value": "obsidian"
             }
@@ -80,7 +75,33 @@
           "placeholder": "vault1, vault2, ..."
         }
       ]
+    },
+    {
+      "name": "createnote",
+      "title": "Create Note",
+      "subtitle": "Obsidian",
+      "description": "Create new note",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "vaultPath",
+          "type": "textfield",
+          "placeholder": "path/to/vault",
+          "title": "Path to Vault",
+          "required": true,
+          "description": "Specify the path or multiple paths (comma separated) to your vault/vaults"
+        },
+        {
+          "name": "prefPath",
+          "type": "textfield",
+          "placeholder": "path/to/note",
+          "title": "Default Path",
+          "required": false,
+          "description": "The default path where a new note will be created"
+        }
+      ]
     }
+
   ],
   "dependencies": {
     "@raycast/api": "^1.25.1"
@@ -100,3 +121,4 @@
     "dev": "ray develop"
   }
 }
+

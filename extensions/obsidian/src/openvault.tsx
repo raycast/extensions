@@ -1,8 +1,13 @@
-import { List, ActionPanel, OpenAction, getPreferenceValues } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  OpenAction,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 
 interface Preferences {
-  vaults: string;
+  vaults: String;
 }
 
 interface Vault {
@@ -13,18 +18,16 @@ interface Vault {
 function parseVaults() {
   const pref: Preferences = getPreferenceValues();
   const vaultString = pref.vaults;
-  return vaultString
-    .split(",")
-    .map((vault) => ({ name: vault.trim(), key: vault.trim() }))
-    .filter((vault) => !!vault);
+  return vaultString.split(",").map(vault => ({name: vault.trim(), key: vault.trim()})).filter(vault => !!vault);
 }
+
 
 export default function Command() {
   const [vaults, setVaults] = useState<Vault[]>();
 
   useEffect(() => {
     async function fetch() {
-      const vaults = parseVaults();
+      let vaults = parseVaults();
       setVaults(vaults);
     }
     fetch();
@@ -38,7 +41,10 @@ export default function Command() {
           key={vault.key}
           actions={
             <ActionPanel>
-              <OpenAction title="Open vault" target={"obsidian://open?vault=" + encodeURIComponent(vault.name)} />
+              <OpenAction
+                title="Open vault"
+                target={"obsidian://open?vault=" + encodeURIComponent(vault.name)}
+              />
             </ActionPanel>
           }
         />
