@@ -57,12 +57,12 @@ const getCircleCIProjectFromCache = (): Promise<string[]> =>
   });
 
 const pullIfNoCircleCIProjectsWereFound = (list: string[]): Promise<{ list: string[]; cache: boolean }> =>
-  new Promise((resolve) => {
+  new Promise((resolve, reject) => {
     if (list.length > 0) {
       return resolve({ list, cache: true });
     }
 
-    return circleCIListProjects().then((list) => resolve({ list, cache: false }));
+    return circleCIListProjects().then((list) => resolve({ list, cache: false })).catch(reject);
   });
 
 const cacheIfPulled = ({ list, cache }: { list: string[]; cache: boolean }) =>
