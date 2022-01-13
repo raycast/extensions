@@ -37,9 +37,12 @@ export const ServersList = () => {
       ));
   };
 
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     allLocalStorageItems()
       .then((data) => {
+        setIsLoading(false);
         if (!isMounted.current) return;
         const servers = data["ploi-servers"];
         delete data["ploi-servers"];
@@ -50,6 +53,7 @@ export const ServersList = () => {
         setSiteData(data ?? {});
       })
       .finally(() => {
+        setIsLoading(false);
         if (!isMounted.current) return;
         Server.getAll().then(async (servers: Array<IServer> | undefined) => {
           if (!isMounted.current) return;
@@ -60,7 +64,7 @@ export const ServersList = () => {
       });
   }, []);
 
-  if (!servers.length) {
+  if (!servers?.length && !isLoading) {
     return (
       <List>
         <List.Item
@@ -73,7 +77,7 @@ export const ServersList = () => {
 
   return (
     <List
-      isLoading={!servers?.length}
+      isLoading={isLoading}
       searchBarPlaceholder="Search Servers..."
       onSelectionChange={(serverId) => serverId && fetchAndCacheSites(serverId)}
     >
