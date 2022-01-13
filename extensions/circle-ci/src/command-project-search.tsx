@@ -7,23 +7,15 @@ const Command = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [projectURIs, setProjectURIs] = useState<string[]>([]);
 
-  let temp: string[] = [];
-
-  const restore = (list: string[]) => {
-    setProjectURIs(list);
-    setIsLoading(false);
-  };
-
   const reload = () =>
     Promise.resolve()
       .then(() => setIsLoading(true))
-      .then(() => (temp = projectURIs))
-      .then(() => setProjectURIs([]))
       .then(() => circleCIListProjects())
       .then((list) => cacheIfPulled({ list, cache: false }))
       .then(setProjectURIs)
       .then(() => setIsLoading(false))
-      .catch(showErrorRestoreList(temp, restore));
+      .then(() => showToast(ToastStyle.Success, "Project list refreshed!"))
+      .catch(showErrorStopLoading(setIsLoading));
 
   useEffect(() => {
     getCircleCIProjectFromCache()
@@ -31,7 +23,7 @@ const Command = () => {
       .then(cacheIfPulled)
       .then(setProjectURIs)
       .then(() => setIsLoading(false))
-      .catch(showErrorRestoreList(temp, restore));
+      .catch(showErrorStopLoading(setIsLoading));
   }, []);
 
   return (
@@ -76,5 +68,9 @@ const pullIfNoCircleCIProjectsWereFound = (list: string[]): Promise<{ list: stri
 const cacheIfPulled = ({ list, cache }: { list: string[]; cache: boolean }) =>
   cache ? list : setLocalStorageItem(KEY_PROJECT_URIS, JSON.stringify(list)).then(() => list);
 
-const showErrorRestoreList = (list: string[], restore: (list: string[]) => void) => (e: Error) =>
-  showToast(ToastStyle.Failure, e.message).then(() => restore(list));
+const showErrorStopLoading = (setIsLoading: (value: boolean) => void) =>
+  (e: Error) => {
+    showToast(ToastStyle.Failure, e.message);
+    setIsLoading(false);
+  };
+

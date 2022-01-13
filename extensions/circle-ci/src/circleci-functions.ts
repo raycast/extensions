@@ -4,12 +4,17 @@ import { Job, Pipeline, Preferences, Workflow } from "./types";
 
 const { apiKey }: Preferences = getPreferenceValues();
 
-export const circleCIListProjects = (): Promise<string[]> =>
-  fetch("https://circleci.com/api/v1.1/me", headers)
+export const circleCIListProjects = (): Promise<string[]> => {
+  return fetch("https://circleci.com/api/v1.1/me", headers)
     .then((resp) => resp.json())
-    .then((json) => (json as { projects: Record<string, unknown> }).projects)
+    .then((json) => (json as { projects: Record<string, unknown>, message?: string }))
+    .then(json =>
+      json.projects
+        ? json.projects
+        : Promise.reject(new Error(json.message || JSON.stringify(json))))
     .then(Object.keys)
     .then((list) => list.sort());
+};
 
 export const circleCIProjectPipelines = (uri: string): Promise<Pipeline[]> =>
   projectPipelines(uriToVCSAndFullName(uri));
