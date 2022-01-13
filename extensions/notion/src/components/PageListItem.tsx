@@ -1,17 +1,5 @@
-import {
-  ActionPanel,
-  Icon,
-  List,
-  ImageLike,
-  closeMainWindow,
-  CopyToClipboardAction,
-  PasteAction,
-  PushAction,
-  preferences,
-  getApplications,
-} from "@raycast/api";
+import { ActionPanel, Icon, List, ImageLike, CopyToClipboardAction, PasteAction, PushAction } from "@raycast/api";
 import { DatabaseView, Page, DatabaseProperty, User, extractPropertyValue } from "../utils/notion";
-import { storeRecentlyOpenedPage } from "../utils/local-storage";
 import {
   ActionSetVisibleProperties,
   ActionEditPageProperty,
@@ -21,23 +9,23 @@ import {
   PageDetail,
 } from "./";
 import moment from "moment";
-import open from "open";
+import { handleOnOpenPage } from "../utils/openPage";
 
 export function PageListItem(props: {
   keywords?: string[];
   page: Page;
   databaseView?: DatabaseView;
   databaseProperties?: DatabaseProperty[];
-  saveDatabaseView: any;
-  setRefreshView: any;
+  saveDatabaseView?: (newDatabaseView: DatabaseView) => void;
+  onForceRerender?: () => void;
   users?: User[];
   icon?: ImageLike;
   accessoryIcon?: ImageLike;
-  customActions?: Element[];
+  customActions?: JSX.Element[];
 }): JSX.Element {
-  const page = props.page;
+  const { page, accessoryIcon, customActions, databaseProperties, databaseView, saveDatabaseView, onForceRerender } =
+    props;
   const pageId = page.id;
-  const pageProperties = page.properties;
   const icon = props.icon
     ? props.icon
     : {
@@ -49,35 +37,7 @@ export function PageListItem(props: {
           ? page.icon_external
           : Icon.TextDocument,
       };
-  const accessoryIcon = props.accessoryIcon;
-  const customActions = props.customActions;
-  const databaseProperties = props.databaseProperties;
-  const databaseView = props.databaseView;
   const keywords: string[] = props.keywords ? props.keywords : [];
-  let databaseViewCopy: any;
-  if (databaseView && databaseView.properties) {
-    databaseViewCopy = JSON.parse(JSON.stringify(databaseView)) as DatabaseView;
-  }
-  const users = props.users;
-  const saveDatabaseView = props.saveDatabaseView;
-  const setRefreshView = props.setRefreshView;
-
-  const isDatabase = page.object === "database";
-  const parentIsDatabase = page.parent_database_id ? true : false;
-
-  async function handleOnOpenPage(page: Page) {
-    const openIn = preferences.open_in?.value;
-    let isNotionInstalled;
-    if (!openIn || openIn === "app") {
-      const installedApplications = await getApplications();
-      isNotionInstalled = installedApplications.some(function (app) {
-        return app.bundleId === "notion.id";
-      });
-    }
-    open(isNotionInstalled ? page.url.replace("https", "notion") : page.url);
-    await storeRecentlyOpenedPage(page);
-    closeMainWindow();
-  }
 
   // Set database view properties
   let accessoryTitle = moment(page.last_edited_time).fromNow();
@@ -88,7 +48,7 @@ export function PageListItem(props: {
       accessoryTitle = "";
       const accessoryTitles: string[] = [];
       visiblePropertiesIds.forEach(function (propId: string) {
-        const extractedProperty = extractPropertyValue(page, propId);
+        const extractedProperty = extractPropertyValue(page.properties[propId]);
         if (extractedProperty) {
           keywords.push(extractedProperty);
           accessoryTitles.push(extractedProperty);
@@ -122,10 +82,9 @@ export function PageListItem(props: {
       subtitle={page.object === "database" ? "Database" : undefined}
       actions={
         <ActionPanel>
-          <ActionPanel.Section key="main-action-section" title={page.title ? page.title : "Untitled"}>
+          <ActionPanel.Section title={page.title ? page.title : "Untitled"}>
             {page.object === "database" ? (
               <PushAction
-                key="navigate-to-database-action"
                 title="Navigate to Database"
                 icon={Icon.ArrowRight}
                 target={<DatabaseList databasePage={page} />}
@@ -134,7 +93,6 @@ export function PageListItem(props: {
               <PushAction title="Preview Page" icon={Icon.TextDocument} target={<PageDetail page={page} />} />
             )}
             <ActionPanel.Item
-              key={`page-${pageId}-action-open-in-notion`}
               title="Open in Notion"
               icon={"notion-logo.png"}
               onAction={function () {
@@ -156,7 +114,7 @@ export function PageListItem(props: {
                       databaseProperty={dp}
                       pageId={page.id}
                       pageProperty={page.properties[dp.id]}
-                      setRefreshView={setRefreshView}
+                      onForceRerender={onForceRerender}
                     />
                   );
                 })}
@@ -166,38 +124,45 @@ export function PageListItem(props: {
 
           <ActionPanel.Section>
             <PushAction
-              key={`page-${pageId}-create-new-page-action`}
               title="Create New Page"
               icon={Icon.Plus}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
-              target={<CreateDatabaseForm databaseId={page.parent_database_id} setRefreshView={setRefreshView} />}
+              target={<CreateDatabaseForm databaseId={page.parent_database_id} onForceRerender={onForceRerender} />}
             />
           </ActionPanel.Section>
 
-          {databaseProperties ? (
+          {databaseProperties && saveDatabaseView ? (
             <ActionPanel.Section title="View options">
-              <PushAction
-                key={`page-${pageId}-set-view-type-action`}
-                title="Set View Type..."
-                icon={databaseView?.type ? `./icon/view_${databaseView.type}.png` : "./icon/view_list.png"}
-                target={
-                  <DatabaseViewForm
-                    isDefaultView
-                    databaseId={page.parent_database_id!}
-                    databaseView={databaseView}
-                    saveDatabaseView={saveDatabaseView}
-                  />
-                }
-              />
+              {page.parent_database_id ? (
+                <PushAction
+                  title="Set View Type..."
+                  icon={databaseView?.type ? `./icon/view_${databaseView.type}.png` : "./icon/view_list.png"}
+                  target={
+                    <DatabaseViewForm
+                      isDefaultView
+                      databaseId={page.parent_database_id}
+                      databaseView={databaseView}
+                      saveDatabaseView={saveDatabaseView}
+                    />
+                  }
+                />
+              ) : null}
               <ActionSetVisibleProperties
-                key={`page-${pageId}-set-visble-property-action`}
                 databaseProperties={databaseProperties}
                 selectedPropertiesIds={visiblePropertiesIds}
                 onSelect={function (propertyId: string) {
+                  const databaseViewCopy = JSON.parse(JSON.stringify(databaseView)) as DatabaseView;
+                  if (!databaseViewCopy.properties) {
+                    databaseViewCopy.properties = {};
+                  }
                   databaseViewCopy.properties[propertyId] = {};
                   saveDatabaseView(databaseViewCopy);
                 }}
                 onUnselect={function (propertyId: string) {
+                  const databaseViewCopy = JSON.parse(JSON.stringify(databaseView)) as DatabaseView;
+                  if (!databaseViewCopy.properties) {
+                    databaseViewCopy.properties = {};
+                  }
                   delete databaseViewCopy.properties[propertyId];
                   saveDatabaseView(databaseViewCopy);
                 }}
@@ -205,20 +170,20 @@ export function PageListItem(props: {
             </ActionPanel.Section>
           ) : null}
 
-          <ActionPanel.Section>
-            <CopyToClipboardAction
-              key={`page-${pageId}-copy-page-url`}
-              title="Copy Page URL"
-              content={page.url}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
-            <PasteAction
-              key={`page-${pageId}-past-page-url`}
-              title="Paste Page URL"
-              content={page.url}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-            />
-          </ActionPanel.Section>
+          {page.url ? (
+            <ActionPanel.Section>
+              <CopyToClipboardAction
+                title="Copy Page URL"
+                content={page.url}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              />
+              <PasteAction
+                title="Paste Page URL"
+                content={page.url}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+              />
+            </ActionPanel.Section>
+          ) : null}
         </ActionPanel>
       }
     />

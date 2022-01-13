@@ -1,13 +1,11 @@
-import { preferences, FormValues, showToast, ToastStyle, Color } from "@raycast/api";
-import fetch, { Headers } from "node-fetch";
+import { getPreferenceValues, FormValues, showToast, ToastStyle, Color } from "@raycast/api";
+import { Client, isNotionClientError } from "@notionhq/client";
+import fetch from "node-fetch";
 import moment from "moment";
 
-const headers = new Headers({
-  Authorization: "Bearer " + preferences.notion_token.value,
-  "Notion-Version": "2021-08-16",
-  "Content-Type": "application/json;charset=UTF-8",
+const notion = new Client({
+  auth: getPreferenceValues().notion_token,
 });
-const apiURL = "https://api.notion.com/";
 
 export interface User {
   id: string;
@@ -18,7 +16,7 @@ export interface User {
 
 export interface Database {
   id: string;
-  last_edited_time: number;
+  last_edited_time: string;
   title: string | null;
   icon_emoji: string | null;
   icon_file: string | null;
@@ -34,7 +32,7 @@ export interface DatabaseProperty {
 }
 
 export interface DatabasePropertyOption {
-  id: string;
+  id?: string;
   name: string;
   color?: string;
   icon?: string;
@@ -45,18 +43,17 @@ export interface Page {
   id: string;
   parent_page_id?: string;
   parent_database_id?: string;
-  last_edited_time: number;
+  last_edited_time?: string;
   title: string | null;
   icon_emoji: string | null;
   icon_file: string | null;
   icon_external: string | null;
-  url: string;
-  properties: Record<string, any>;
+  url?: string;
+  properties: Record<string, PagePropertyType>;
 }
 
 export interface PageContent {
   markdown: string | undefined;
-  blocks: Record<string, any>[];
 }
 
 export interface DatabaseView {
@@ -77,82 +74,55 @@ export interface KabanView {
   canceled_ids: string[];
 }
 
-// Fetch databases
-export async function fetchDatabases(): Promise<Database[] | undefined> {
-  const databases = await rawFetchDatabases();
-  return databases;
+function isNotNullOrUndefined<T>(input: null | undefined | T): input is T {
+  return input != null;
 }
 
-// Raw function for fetching databases
-async function rawFetchDatabases(): Promise<Database[] | undefined> {
+// Fetch databases
+export async function fetchDatabases(): Promise<Database[]> {
   try {
-    const response = await fetch(apiURL + `v1/search`, {
-      method: "post",
-      headers: headers,
-      body: JSON.stringify({
-        sort: {
-          direction: "descending",
-          timestamp: "last_edited_time",
-        },
-        filter: {
-          value: "database",
-          property: "object",
-        },
-      }),
+    const databases = await notion.search({
+      sort: {
+        direction: "descending",
+        timestamp: "last_edited_time",
+      },
+      filter: { property: "object", value: "database" },
     });
-    const json = await response.json();
-
-    if (json.object === "error") {
-      showToast(ToastStyle.Failure, json.message);
-      return [];
-    }
-
-    const databases = recordsMapper({
-      sourceRecords: json.results as any[],
-      models: [
-        { targetKey: "last_edited_time", sourceKeys: ["last_edited_time"] },
-        { targetKey: "id", sourceKeys: ["id"] },
-        { targetKey: "title", sourceKeys: ["title", "0", "plain_text"] },
-        { targetKey: "icon_emoji", sourceKeys: ["icon", "emoji"] },
-        { targetKey: "icon_file", sourceKeys: ["icon", "file", "url"] },
-        { targetKey: "icon_external", sourceKeys: ["icon", "external", "url"] },
-      ] as any,
-    }) as Database[];
-
-    return databases;
-  } catch (err) {
+    return databases.results
+      .map((x) => (x.object === "database" && "last_edited_time" in x ? x : undefined))
+      .filter(isNotNullOrUndefined)
+      .map(
+        (x) =>
+          ({
+            id: x.id,
+            last_edited_time: x.last_edited_time,
+            title: x.title[0]?.plain_text,
+            icon_emoji: x.icon?.type === "emoji" ? x.icon.emoji : null,
+            icon_file: x.icon?.type === "file" ? x.icon.file.url : null,
+            icon_external: x.icon?.type === "external" ? x.icon.external.url : null,
+          } as Database)
+      );
+  } catch (err: unknown) {
     console.error(err);
-    showToast(ToastStyle.Failure, "Failed to fetch databases");
-    // throw new Error('Failed to fetch databases')
+    if (isNotionClientError(err)) {
+      showToast(ToastStyle.Failure, err.message);
+    } else {
+      showToast(ToastStyle.Failure, "Failed to fetch databases");
+    }
+    return [];
   }
 }
 
 // Fetch database properties
-export async function fetchDatabaseProperties(databaseId: string): Promise<DatabaseProperty[] | undefined> {
-  const databaseProperties = await rawDatabaseProperties(databaseId);
-  return databaseProperties;
-}
-
-// Raw function for fetching databases
-async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProperty[] | undefined> {
-  const databaseProperties: DatabaseProperty[] = [];
+export async function fetchDatabaseProperties(databaseId: string): Promise<DatabaseProperty[]> {
   try {
-    const response = await fetch(apiURL + `v1/databases/${databaseId}`, {
-      method: "get",
-      headers: headers,
-    });
-    const json = await response.json();
+    const database = await notion.databases.retrieve({ database_id: databaseId });
+    const propertyNames = Object.keys(database.properties).reverse();
 
-    if (json.object === "error") {
-      showToast(ToastStyle.Failure, json.message);
-      return [];
-    }
-
-    const properties = json.properties as Record<string, any>;
-    const propertyNames = Object.keys(properties).reverse() as string[];
+    const databaseProperties: DatabaseProperty[] = [];
 
     propertyNames.forEach(function (name: string) {
-      const property = properties[name] as Record<string, any>;
+      const property = database.properties[name];
 
       const databaseProperty = {
         id: property.id,
@@ -166,9 +136,9 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
           (databaseProperty.options as DatabasePropertyOption[]).push({
             id: "_select_null_",
             name: "No Selection",
-          } as DatabasePropertyOption);
+          });
           databaseProperty.options = (databaseProperty.options as DatabasePropertyOption[]).concat(
-            property.select.options as DatabasePropertyOption[]
+            property.select.options
           );
           break;
         case "multi_select":
@@ -183,29 +153,27 @@ async function rawDatabaseProperties(databaseId: string): Promise<DatabaseProper
     });
 
     return databaseProperties;
-  } catch (err) {
+  } catch (err: unknown) {
     console.error(err);
-    showToast(ToastStyle.Failure, "Failed to fetch database properties");
-    // throw new Error('Failed to fetch database properties')
+    if (isNotionClientError(err)) {
+      showToast(ToastStyle.Failure, err.message);
+    } else {
+      showToast(ToastStyle.Failure, "Failed to fetch database properties");
+    }
+    return [];
   }
 }
 
-// Create database page
+/**
+ * Query a database
+ */
 export async function queryDatabase(
   databaseId: string,
   query: { title: string | undefined } | undefined
-): Promise<Page[] | undefined> {
-  const pages = await rawQueryDatabase(databaseId, query);
-  return pages;
-}
-
-// Raw function to query databases
-async function rawQueryDatabase(
-  databaseId: string,
-  query: { title: string | undefined } | undefined
-): Promise<Page[] | undefined> {
+): Promise<Page[]> {
   try {
-    const requestBody = {
+    const database = await notion.databases.query({
+      database_id: databaseId,
       page_size: 100,
       sorts: [
         {
@@ -213,70 +181,58 @@ async function rawQueryDatabase(
           timestamp: "last_edited_time",
         },
       ],
-    } as Record<string, any>;
-
-    if (query && query.title) {
-      requestBody.filter = {
-        and: [
-          {
-            property: "title",
-            title: {
-              contains: query.title,
-            },
-          },
-        ],
-      };
-    }
-
-    const response = await fetch(apiURL + `v1/databases/${databaseId}/query`, {
-      method: "post",
-      headers: headers,
-      body: JSON.stringify(requestBody),
+      filter:
+        query && query.title
+          ? {
+              and: [
+                {
+                  property: "title",
+                  title: {
+                    contains: query.title,
+                  },
+                },
+              ],
+            }
+          : undefined,
     });
-    const json = await response.json();
 
-    if (json.object === "error") {
-      showToast(ToastStyle.Failure, json.message);
-      return [];
-    }
-
-    const fetchedPages = pageListMapper(json.results as Record<string, any>[]);
-
-    return fetchedPages;
-  } catch (err) {
+    return database.results.map(pageMapper);
+  } catch (err: unknown) {
     console.error(err);
-    showToast(ToastStyle.Failure, "Failed to query databases");
-    // throw new Error('Failed to query databases')
+    if (isNotionClientError(err)) {
+      showToast(ToastStyle.Failure, err.message);
+    } else {
+      showToast(ToastStyle.Failure, "Failed to fetch database properties");
+    }
+    return [];
   }
 }
 
 // Create database page
 export async function createDatabasePage(values: FormValues): Promise<Page | undefined> {
-  const page = await rawCreateDatabasePage(values);
-  return page;
-}
-
-// Raw function for creating database page
-async function rawCreateDatabasePage(values: FormValues): Promise<Page | undefined> {
   try {
-    const requestBody = {
-      parent: {
-        database_id: values.database,
-      },
+    const { database, ...props } = values;
+
+    const arg: Parameters<typeof notion.pages.create>[0] = {
+      parent: { database_id: database },
       properties: {},
-    } as Record<string, any>;
+    };
 
-    delete values.database;
-
-    Object.keys(values).forEach(function (formId: string) {
-      const type = formId.match(/(?<=property::).*(?=::)/g)![0];
-      const propId = formId.match(new RegExp("(?<=property::" + type + "::).*", "g"))![0];
+    Object.keys(props).forEach(function (formId) {
+      const type = formId.match(/(?<=property::).*(?=::)/g)?.[0];
+      if (!type) {
+        return;
+      }
+      const propId = formId.match(new RegExp("(?<=property::" + type + "::).*", "g"))?.[0];
+      if (!propId) {
+        return;
+      }
       const value = values[formId];
 
       if (value) {
         switch (type) {
           case "title":
-            requestBody.properties[propId] = {
+            arg.properties[propId] = {
               title: [
                 {
                   text: {
@@ -287,12 +243,12 @@ async function rawCreateDatabasePage(values: FormValues): Promise<Page | undefin
             };
             break;
           case "number":
-            requestBody.properties[propId] = {
+            arg.properties[propId] = {
               number: parseFloat(value),
             };
             break;
           case "rich_text":
-            requestBody.properties[propId] = {
+            arg.properties[propId] = {
               rich_text: [
                 {
                   text: {
@@ -303,55 +259,55 @@ async function rawCreateDatabasePage(values: FormValues): Promise<Page | undefin
             };
             break;
           case "url":
-            requestBody.properties[propId] = {
+            arg.properties[propId] = {
               url: value,
             };
             break;
           case "email":
-            requestBody.properties[propId] = {
+            arg.properties[propId] = {
               email: value,
             };
             break;
           case "phone_number":
-            requestBody.properties[propId] = {
+            arg.properties[propId] = {
               phone_number: value,
             };
             break;
           case "date":
-            requestBody.properties[propId] = {
+            arg.properties[propId] = {
               date: {
                 start: value,
               },
             };
             break;
           case "checkbox":
-            requestBody.properties[propId] = {
+            arg.properties[propId] = {
               checkbox: value === 1 ? true : false,
             };
             break;
           case "select":
             if (value !== "_select_null_") {
-              requestBody.properties[propId] = {
+              arg.properties[propId] = {
                 select: { id: value },
               };
             }
             break;
           case "multi_select":
-            requestBody.properties[propId] = {
+            arg.properties[propId] = {
               multi_select: value.map(function (multi_select_id: string) {
                 return { id: multi_select_id };
               }),
             };
             break;
           case "relation":
-            requestBody.properties[propId] = {
+            arg.properties[propId] = {
               relation: value.map(function (relation_page_id: string) {
                 return { id: relation_page_id };
               }),
             };
             break;
           case "people":
-            requestBody.properties[propId] = {
+            arg.properties[propId] = {
               people: value.map(function (user_id: string) {
                 return { id: user_id };
               }),
@@ -360,211 +316,263 @@ async function rawCreateDatabasePage(values: FormValues): Promise<Page | undefin
         }
       }
     });
-    const response = await fetch(apiURL + `v1/pages`, {
-      method: "post",
-      headers: headers,
-      body: JSON.stringify(requestBody),
-    });
-    const json = (await response.json()) as Record<string, any>;
 
-    const page = pageMapper(json);
+    const page = await notion.pages.create(arg);
 
-    return page;
-  } catch (err) {
+    return pageMapper(page);
+  } catch (err: unknown) {
     console.error(err);
-    showToast(ToastStyle.Failure, "Failed to create page");
-    // throw new Error('Failed to create page')
+    if (isNotionClientError(err)) {
+      showToast(ToastStyle.Failure, err.message);
+    } else {
+      showToast(ToastStyle.Failure, "Failed to create page");
+    }
+    return undefined;
   }
 }
 
 // Patch page
-export async function patchPage(pageId: string, properties: Record<string, any>): Promise<Page | undefined> {
-  const page = await rawPatchPage(pageId, properties);
-  return page;
-}
-// Raw function for updating page
-async function rawPatchPage(pageId: string, properties: Record<string, any>): Promise<Page | undefined> {
+export async function patchPage(
+  pageId: string,
+  properties: Parameters<typeof notion.pages.update>[0]["properties"]
+): Promise<Page | undefined> {
   try {
-    const requestBody = {
-      properties: properties,
-    };
-
-    const response = await fetch(apiURL + `v1/pages/${pageId}`, {
-      method: "patch",
-      headers: headers,
-      body: JSON.stringify(requestBody),
+    const page = await notion.pages.update({
+      page_id: pageId,
+      properties,
     });
-    const json = (await response.json()) as Record<string, any>;
 
-    if (json.object === "error") {
-      showToast(ToastStyle.Failure, json.message);
-      return undefined;
-    }
-
-    const page = pageMapper(json);
-
-    return page;
-  } catch (err) {
+    return pageMapper(page);
+  } catch (err: unknown) {
     console.error(err);
-    showToast(ToastStyle.Failure, "Failed to update page");
-    // throw new Error('Failed to update page')
+    if (isNotionClientError(err)) {
+      showToast(ToastStyle.Failure, err.message);
+    } else {
+      showToast(ToastStyle.Failure, "Failed to fetch database properties");
+    }
+    return undefined;
   }
 }
 
 // Search pages
-export async function searchPages(query: string | undefined): Promise<Page[] | undefined> {
-  const pages = await rawSearchPages(query);
-  return pages;
-}
-
-// Raw function for searching pages
-async function rawSearchPages(query: string | undefined): Promise<Page[] | undefined> {
+export async function searchPages(query: string | undefined): Promise<Page[]> {
   try {
-    const requestBody = {
+    const database = await notion.search({
       sort: {
         direction: "descending",
         timestamp: "last_edited_time",
       },
-    } as Record<string, any>;
-
-    if (query) {
-      requestBody.query = query;
-    }
-
-    const response = await fetch(apiURL + `v1/search`, {
-      method: "post",
-      headers: headers,
-      body: JSON.stringify(requestBody),
+      filter: { property: "object", value: "page" },
+      query,
     });
-    const json = (await response.json()) as Record<string, any>;
 
-    if (json.object === "error") {
-      showToast(ToastStyle.Failure, json.message);
-      return [];
+    return database.results.map(pageMapper);
+  } catch (err: unknown) {
+    console.error(err);
+    if (isNotionClientError(err)) {
+      showToast(ToastStyle.Failure, err.message);
+    } else {
+      showToast(ToastStyle.Failure, "Failed to load pages");
     }
-
-    const pages = pageListMapper(json.results as Record<string, any>[]);
-
-    return pages;
-  } catch (err) {
-    showToast(ToastStyle.Failure, "Failed to load pages");
-    // throw new Error('Failed to load pages')
+    return [];
   }
 }
 
 // Fetch page content
 export async function fetchPageContent(pageId: string): Promise<PageContent | undefined> {
-  const fetchedPageContent = (await rawFetchPageContent(pageId)) as Record<string, any> | null;
+  try {
+    const { results } = await notion.blocks.children.list({
+      block_id: pageId,
+    });
 
-  let pageContent: PageContent = {
-    blocks: [],
-    markdown: "",
-  };
+    const pageContent: PageContent = {
+      markdown: results.length === 0 ? "*Page is empty*" : "",
+    };
 
-  if (fetchedPageContent && fetchedPageContent.blocks) {
-    pageContent = fetchedPageContent as PageContent;
-    pageContent.markdown = "";
+    results.forEach(function (block) {
+      if (!("type" in block)) {
+        return;
+      }
 
-    const pageBlocks = pageContent.blocks;
-    pageBlocks.forEach(function (block: Record<string, any>) {
-      try {
-        if (block.type !== "image") {
-          let tempText = "";
+      if (block.type === "image") {
+        pageContent.markdown += `![${block.image.caption[0]?.plain_text || "image"}](${
+          block.image.type === "external" ? block.image.external.url : block.image.file.url
+        })\n`;
+        return;
+      }
 
-          if (block[block.type].text[0]) {
-            try {
-              block[block.type].text.forEach(function (text: Record<string, any>) {
-                if (text.plain_text) {
-                  tempText += notionTextToMarkdown(text);
-                }
-              });
-            } catch (e) {
-              // ignore the error?
-            }
-          } else {
-            if (block[block.type].text.plain_text) {
-              tempText += notionTextToMarkdown(block[block.type].text);
-            }
+      if (block.type === "audio") {
+        pageContent.markdown += `[${block.audio.caption[0]?.plain_text || "audio"}](${
+          block.audio.type === "external" ? block.audio.external.url : block.audio.file.url
+        })\n`;
+        return;
+      }
+
+      if (block.type === "bookmark") {
+        pageContent.markdown += `[${block.bookmark.caption[0]?.plain_text || "bookmark"}](${block.bookmark.url})\n`;
+        return;
+      }
+
+      if (block.type === "embed") {
+        pageContent.markdown += `[${block.embed.caption[0]?.plain_text || "embed"}](${block.embed.url})\n`;
+        return;
+      }
+
+      if (block.type === "link_preview") {
+        pageContent.markdown += `[link preview](${block.link_preview.url})\n`;
+        return;
+      }
+
+      if (block.type === "file") {
+        pageContent.markdown += `[${block.file.caption[0]?.plain_text || "file"}](${
+          block.file.type === "external" ? block.file.external.url : block.file.file.url
+        })\n`;
+        return;
+      }
+
+      if (block.type === "pdf") {
+        pageContent.markdown += `[${block.pdf.caption[0]?.plain_text || "pdf"}](${
+          block.pdf.type === "external" ? block.pdf.external.url : block.pdf.file.url
+        })\n`;
+        return;
+      }
+
+      if (block.type === "video") {
+        pageContent.markdown += `[${block.video.caption[0]?.plain_text || "video"}](${
+          block.video.type === "external" ? block.video.external.url : block.video.file.url
+        })\n`;
+        return;
+      }
+
+      if (block.type === "link_to_page") {
+        pageContent.markdown += `[${
+          block.link_to_page.type === "database_id" ? "Link to Database" : "Link to Page"
+        }]\n`;
+        return;
+      }
+
+      if (block.type === "synced_block") {
+        pageContent.markdown += `[${"Synced block"}]\n`;
+        return;
+      }
+
+      if (block.type === "child_database") {
+        return (pageContent.markdown += `${block.child_database.title}\n`);
+      }
+
+      if (block.type === "child_page") {
+        return (pageContent.markdown += `${block.child_page.title}\n`);
+      }
+
+      if (block.type === "equation") {
+        return (pageContent.markdown += `${block.equation.expression}\n`);
+      }
+
+      if (block.type === "divider") {
+        return (pageContent.markdown += `---\n`);
+      }
+
+      if (
+        block.type === "breadcrumb" ||
+        block.type === "column" ||
+        block.type === "column_list" ||
+        block.type === "unsupported" ||
+        block.type === "table" ||
+        block.type === "table_of_contents" ||
+        block.type === "table_row" ||
+        block.type === "template"
+      ) {
+        return;
+      }
+
+      let tempText = "";
+
+      const value =
+        block.type === "bulleted_list_item"
+          ? block.bulleted_list_item.text
+          : block.type === "callout"
+          ? block.callout.text
+          : block.type === "code"
+          ? block.code.text
+          : block.type === "paragraph"
+          ? block.paragraph.text
+          : block.type === "heading_1"
+          ? block.heading_1.text
+          : block.type === "heading_2"
+          ? block.heading_2.text
+          : block.type === "heading_3"
+          ? block.heading_3.text
+          : block.type === "numbered_list_item"
+          ? block.numbered_list_item.text
+          : block.type === "quote"
+          ? block.quote.text
+          : block.type === "to_do"
+          ? block.to_do.text
+          : block.type === "toggle"
+          ? block.toggle.text
+          : [];
+
+      value.forEach(function (text) {
+        if (text.plain_text) {
+          let plainText = text.plain_text;
+          if (text.annotations.bold as boolean) {
+            plainText = "**" + plainText + "**";
+          } else if (text.annotations.italic as boolean) {
+            plainText = "*" + plainText + "*";
+          } else if (text.annotations.code as boolean) {
+            plainText = "`" + plainText + "`";
           }
 
-          pageContent.markdown += notionBlockToMarkdown(tempText, block) + "\n";
-        } else {
-          pageContent.markdown += "![image](" + block.image.file.url + ")" + "\n";
+          if (text.href) {
+            if (text.href.startsWith("/")) {
+              plainText = "[" + plainText + "](https://notion.so" + text.href + ")";
+            } else {
+              plainText = "[" + plainText + "](" + text.href + ")";
+            }
+          }
+          tempText += plainText;
         }
-      } catch (e) {
-        // ignore the error?
-      }
+      });
+
+      pageContent.markdown += notionBlockToMarkdown(tempText, block) + "\n";
     });
 
-    if (!pageBlocks[0]) {
-      pageContent.markdown += "*Page is empty*";
-    }
-  }
-
-  return pageContent;
-}
-
-// Raw function for fetching page content
-async function rawFetchPageContent(pageId: string): Promise<PageContent | undefined> {
-  try {
-    const response = await fetch(apiURL + `v1/blocks/${pageId}/children`, {
-      method: "get",
-      headers: headers,
-    });
-    const json = await response.json();
-
-    if (json.object === "error") {
-      showToast(ToastStyle.Failure, json.message);
-      return;
-    }
-
-    const blocks = json.results as Record<string, any>[];
-
-    return { blocks } as PageContent;
-  } catch (err) {
+    return pageContent;
+  } catch (err: unknown) {
     console.error(err);
-    showToast(ToastStyle.Failure, "Failed to fetch page content");
-    // throw new Error('Failed to fetch page content')
+    if (isNotionClientError(err)) {
+      showToast(ToastStyle.Failure, err.message);
+    } else {
+      showToast(ToastStyle.Failure, "Failed to fetch page content");
+    }
+    return undefined;
   }
 }
 
 // Fetch users
-export async function fetchUsers(): Promise<User[] | undefined> {
-  const users = await rawListUsers();
-  return users;
-}
-
-// Raw function for fetching users
-async function rawListUsers(): Promise<User[] | undefined> {
+export async function fetchUsers(): Promise<User[]> {
   try {
-    const response = await fetch(apiURL + `v1/users`, {
-      method: "get",
-      headers: headers,
-    });
-    const json = await response.json();
-
-    if (json.object === "error") {
-      showToast(ToastStyle.Failure, json.message);
-      return [];
-    }
-
-    const users = recordsMapper({
-      sourceRecords: json.results as any[],
-      models: [
-        { targetKey: "id", sourceKeys: ["id"] },
-        { targetKey: "name", sourceKeys: ["name"] },
-        { targetKey: "type", sourceKeys: ["type"] },
-        { targetKey: "avatar_url", sourceKeys: ["avatar_url"] },
-      ] as any,
-    }) as User[];
-
-    return users.filter(function (user) {
-      return user.type === "person";
-    });
-  } catch (err) {
+    const users = await notion.users.list({});
+    return users.results
+      .map((x) => (x.object === "user" && x.type === "person" ? x : undefined))
+      .filter(isNotNullOrUndefined)
+      .map(
+        (x) =>
+          ({
+            id: x.id,
+            name: x.name,
+            type: x.type,
+            avatar_url: x.avatar_url,
+          } as User)
+      );
+  } catch (err: unknown) {
     console.error(err);
-    showToast(ToastStyle.Failure, "Failed to fetch users");
-    // throw new Error('Failed to fetch users')
+    if (isNotionClientError(err)) {
+      showToast(ToastStyle.Failure, err.message);
+    } else {
+      showToast(ToastStyle.Failure, "Failed to fetch users");
+    }
+    return [];
   }
 }
 
@@ -582,113 +590,70 @@ export async function fetchExtensionReadMe(): Promise<string | undefined> {
     return text;
   } catch (err) {
     showToast(ToastStyle.Failure, "Failed to load Extension README");
-    // throw new Error('Failed to load Extension README')
   }
 }
 
-function pageListMapper(jsonPageList: Record<string, any>[]): Page[] {
-  const pages: Page[] = [];
-
-  jsonPageList.forEach(function (jsonPage) {
-    const page = pageMapper(jsonPage);
-    pages.push(page);
-  });
-
-  return pages;
+function getPropertiesTypes(page: UnwrapArray<UnwrapPromise<ReturnType<typeof notion.search>>["results"]>) {
+  if (page.object === "page" && "properties" in page) {
+    return page.properties;
+  }
+  throw new Error("this function won't ever be called, it's only for typescript");
 }
 
-function pageMapper(jsonPage: Record<string, any>): Page {
-  const page = recordMapper({
-    sourceRecord: jsonPage,
-    models: [
-      { targetKey: "object", sourceKeys: ["object"] },
-      { targetKey: "id", sourceKeys: ["id"] },
-      { targetKey: "parent_page_id", sourceKeys: ["parent", "page_id"] },
-      { targetKey: "parent_database_id", sourceKeys: ["parent", "database_id"] },
-      { targetKey: "last_edited_time", sourceKeys: ["last_edited_time"] },
-      { targetKey: "icon_emoji", sourceKeys: ["icon", "emoji"] },
-      { targetKey: "icon_file", sourceKeys: ["icon", "file", "url"] },
-      { targetKey: "icon_external", sourceKeys: ["icon", "external", "url"] },
-      { targetKey: "url", sourceKeys: ["url"] },
-    ] as any,
-  }) as Page;
+type UnwrapRecord<T> = T extends Record<string, infer U> ? U : T;
 
-  if (page.object === "page") {
-    const pageProperties = jsonPage.properties;
-    const propertyKeys = Object.keys(pageProperties);
-    page.title = "Untitled";
-    page.properties = {};
+type UnwrapPromise<T> = T extends Promise<infer U> ? U : T;
 
-    propertyKeys.forEach(function (pk) {
-      const pageProperty = pageProperties[pk];
+type UnwrapArray<T> = T extends Array<infer U> ? U : T;
+
+export type PagePropertyType = UnwrapRecord<ReturnType<typeof getPropertiesTypes>>;
+
+function pageMapper(jsonPage: UnwrapArray<UnwrapPromise<ReturnType<typeof notion.search>>["results"]>): Page {
+  const page: Page = {
+    object: jsonPage.object,
+    id: jsonPage.id,
+    title: "Untitled",
+    properties: {},
+    parent_page_id: "parent" in jsonPage && "page_id" in jsonPage.parent ? jsonPage.parent.page_id : undefined,
+    parent_database_id:
+      "parent" in jsonPage && "database_id" in jsonPage.parent ? jsonPage.parent.database_id : undefined,
+    last_edited_time: "last_edited_time" in jsonPage ? jsonPage.last_edited_time : undefined,
+    icon_emoji: "icon" in jsonPage && jsonPage.icon?.type === "emoji" ? jsonPage.icon.emoji : null,
+    icon_file: "icon" in jsonPage && jsonPage.icon?.type === "file" ? jsonPage.icon.file.url : null,
+    icon_external: "icon" in jsonPage && jsonPage.icon?.type === "external" ? jsonPage.icon.external.url : null,
+    url: "url" in jsonPage ? jsonPage.url : undefined,
+  };
+
+  if (jsonPage.object === "page" && "properties" in jsonPage) {
+    page.properties = jsonPage.properties;
+    Object.keys(jsonPage.properties).forEach(function (pk) {
+      const property = jsonPage.properties[pk];
 
       // Save page title
-      if (pageProperty.type === "title") {
-        if (pageProperty.title[0] && pageProperty.title[0].plain_text) {
-          page.title = pageProperty.title[0].plain_text;
+      if (property.type === "title") {
+        if (property.title[0]?.plain_text) {
+          page.title = property.title[0].plain_text;
         }
       }
-
-      // Save page property
-      propertyKeys.forEach(function (name) {
-        const property = pageProperties[name];
-        property.name = name;
-        page.properties[property.id] = property;
-      });
     });
-  } else if (jsonPage.title && jsonPage.title[0] && jsonPage.title[0].plain_text) {
-    page.title = jsonPage.title[0].plain_text;
   }
+
+  if ("title" in jsonPage && jsonPage.title[0]?.plain_text) {
+    page.title = jsonPage.title[0]?.plain_text;
+  }
+
   return page;
 }
 
-function recordsMapper(mapper: {
-  sourceRecords: any[];
-  models: [{ targetKey: string; sourceKeys: string[] }];
-}): Record<string, any>[] {
-  const sourceRecords = mapper.sourceRecords;
-  const models = mapper.models;
+function notionBlockToMarkdown(
+  text: string,
+  block: UnwrapArray<UnwrapPromise<ReturnType<typeof notion.blocks.children.list>>["results"]>
+): string {
+  if (!("type" in block)) {
+    return text;
+  }
 
-  const mappedRecords = [] as any[];
-
-  sourceRecords.forEach(function (sourceRecord) {
-    mappedRecords.push(recordMapper({ sourceRecord, models }));
-  });
-
-  return mappedRecords;
-}
-
-function recordMapper(mapper: {
-  sourceRecord: any;
-  models: [{ targetKey: string; sourceKeys: string[] }];
-}): Record<string, any> {
-  const sourceRecord = mapper.sourceRecord;
-  const models = mapper.models;
-
-  const mappedRecord = {} as any;
-  models.forEach(function (model) {
-    const sourceKeys = model.sourceKeys;
-    const targetKey = model.targetKey;
-    let tempRecord = JSON.parse(JSON.stringify(sourceRecord));
-    sourceKeys.forEach(function (sourceKey) {
-      if (!tempRecord) {
-        return;
-      }
-      if (sourceKey in tempRecord) {
-        tempRecord = tempRecord[sourceKey];
-      } else {
-        tempRecord = null;
-        return;
-      }
-    });
-    mappedRecord[targetKey] = tempRecord;
-  });
-  return mappedRecord;
-}
-
-function notionBlockToMarkdown(text: string, block: Record<string, any>): string {
-  const blockValue: Record<string, any> = block[block.type as string];
-  switch (block.type as string) {
+  switch (block.type) {
     case "heading_1": {
       return "# " + text;
     }
@@ -704,35 +669,20 @@ function notionBlockToMarkdown(text: string, block: Record<string, any>): string
     case "numbered_list_item": {
       return "1. " + text;
     }
+    case "quote": {
+      return "> " + text;
+    }
+    case "code": {
+      return "```" + block.code.language + "\n" + text + "\n```";
+    }
     case "to_do": {
-      return "\n " + (blockValue.checked ? "☑ " : "☐ ") + text;
+      return "\n " + (block.to_do.checked ? "☑ " : "☐ ") + text;
     }
 
     default: {
       return text;
     }
   }
-}
-
-function notionTextToMarkdown(text: Record<string, any>): string {
-  let plainText = text.plain_text;
-  if (text.annotations.bold as boolean) {
-    plainText = "**" + plainText + "**";
-  } else if (text.annotations.italic as boolean) {
-    plainText = "*" + plainText + "*";
-  } else if (text.annotations.code as boolean) {
-    plainText = "`" + plainText + "`";
-  }
-
-  if (text.href) {
-    if (text.href.startsWith("/")) {
-      plainText = "[" + plainText + "](https://notion.so" + text.href + ")";
-    } else {
-      plainText = "[" + plainText + "](" + text.href + ")";
-    }
-  }
-
-  return plainText;
 }
 
 export function notionColorToTintColor(notionColor: string | undefined): Color {
@@ -755,64 +705,64 @@ export function notionColorToTintColor(notionColor: string | undefined): Color {
   return colorMapper[notionColor];
 }
 
-export function extractPropertyValue(page: Page, propId: string): string | null {
-  const pageProperty = page.properties[propId];
-  if (pageProperty) {
-    let type = pageProperty.type;
-    let propertyValue = pageProperty[type];
-
-    if (propertyValue) {
-      let stringPropertyValue = "";
-
-      if (type === "formula") {
-        type = propertyValue.type;
-        propertyValue = propertyValue[type];
+export function extractPropertyValue(
+  property?:
+    | PagePropertyType
+    | {
+        type: "string";
+        string: string | null;
       }
-
-      switch (type) {
-        case "title":
-          stringPropertyValue = propertyValue[0] ? propertyValue[0].plain_text : "Untitled";
-          break;
-        case "number":
-          stringPropertyValue = propertyValue?.toString();
-          break;
-        case "rich_text":
-          stringPropertyValue = propertyValue[0] ? propertyValue[0].plain_text : null;
-          break;
-        case "url":
-          stringPropertyValue = propertyValue[0] ? propertyValue[0].plain_text : null;
-          break;
-        case "email":
-          stringPropertyValue = propertyValue[0] ? propertyValue[0].plain_text : null;
-          break;
-        case "phone_number":
-          stringPropertyValue = propertyValue[0] ? propertyValue[0].plain_text : null;
-          break;
-        case "date":
-          stringPropertyValue = moment(propertyValue.start).fromNow();
-          break;
-        case "checkbox":
-          stringPropertyValue = propertyValue ? "☑" : "☐";
-          break;
-        case "select":
-          stringPropertyValue = propertyValue.name;
-          break;
-        case "multi_select":
-          stringPropertyValue = propertyValue
-            .map(function (selection: Record<string, any>) {
-              return selection.name as string;
-            })
-            .join(", ");
-          break;
-        case "string":
-          stringPropertyValue = propertyValue;
-          break;
+    | {
+        type: "date";
+        date: {
+          start: string;
+          end: string | null;
+        } | null;
       }
-
-      if (stringPropertyValue) {
-        return stringPropertyValue;
+    | {
+        type: "number";
+        number: number | null;
       }
-    }
+    | {
+        type: "boolean";
+        boolean: boolean | null;
+      }
+): string | null {
+  if (!property) {
+    return null;
+  }
+
+  switch (property.type) {
+    case "title":
+      return property.title[0] ? property.title[0].plain_text : "Untitled";
+    case "number":
+      return property.number?.toString() || null;
+    case "rich_text":
+      return property.rich_text[0] ? property.rich_text[0].plain_text : null;
+    case "url":
+      return property.url;
+    case "email":
+      return property.email;
+    case "phone_number":
+      return property.phone_number;
+    case "date":
+      return moment(property.date?.start).fromNow();
+    case "checkbox":
+      return property.checkbox ? "☑" : "☐";
+    case "select":
+      return property.select?.name || null;
+    case "multi_select":
+      return property.multi_select
+        .map(function (selection) {
+          return selection.name;
+        })
+        .join(", ");
+    case "string":
+      return property.string;
+    case "boolean":
+      return property.boolean ? "☑" : "☐";
+    case "formula":
+      return extractPropertyValue(property.formula);
   }
 
   return null;

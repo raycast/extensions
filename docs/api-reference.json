@@ -4916,7 +4916,7 @@
 			]
 		},
 		{
-			"id": 904,
+			"id": 906,
 			"name": "AlertActionStyle",
 			"kind": 8,
 			"kindString": "Enumeration",
@@ -4936,7 +4936,7 @@
 			},
 			"children": [
 				{
-					"id": 906,
+					"id": 908,
 					"name": "Cancel",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4944,7 +4944,7 @@
 					"defaultValue": "\"CANCEL\""
 				},
 				{
-					"id": 905,
+					"id": 907,
 					"name": "Default",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4952,7 +4952,7 @@
 					"defaultValue": "\"DEFAULT\""
 				},
 				{
-					"id": 907,
+					"id": 909,
 					"name": "Destructive",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -4965,15 +4965,15 @@
 					"title": "Enumeration members",
 					"kind": 16,
 					"children": [
-						906,
-						905,
-						907
+						908,
+						907,
+						909
 					]
 				}
 			]
 		},
 		{
-			"id": 741,
+			"id": 743,
 			"name": "Color",
 			"kind": 8,
 			"kindString": "Enumeration",
@@ -4997,7 +4997,7 @@
 			},
 			"children": [
 				{
-					"id": 742,
+					"id": 744,
 					"name": "Blue",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5005,7 +5005,7 @@
 					"defaultValue": "\"raycast-blue\""
 				},
 				{
-					"id": 743,
+					"id": 745,
 					"name": "Brown",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5013,7 +5013,7 @@
 					"defaultValue": "\"raycast-brown\""
 				},
 				{
-					"id": 744,
+					"id": 746,
 					"name": "Green",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5021,7 +5021,7 @@
 					"defaultValue": "\"raycast-green\""
 				},
 				{
-					"id": 745,
+					"id": 747,
 					"name": "Magenta",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5029,7 +5029,7 @@
 					"defaultValue": "\"raycast-magenta\""
 				},
 				{
-					"id": 746,
+					"id": 748,
 					"name": "Orange",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5037,7 +5037,7 @@
 					"defaultValue": "\"raycast-orange\""
 				},
 				{
-					"id": 750,
+					"id": 752,
 					"name": "PrimaryText",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5045,7 +5045,7 @@
 					"defaultValue": "\"raycast-primary-text\""
 				},
 				{
-					"id": 747,
+					"id": 749,
 					"name": "Purple",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5053,7 +5053,7 @@
 					"defaultValue": "\"raycast-purple\""
 				},
 				{
-					"id": 748,
+					"id": 750,
 					"name": "Red",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5061,7 +5061,7 @@
 					"defaultValue": "\"raycast-red\""
 				},
 				{
-					"id": 751,
+					"id": 753,
 					"name": "SecondaryText",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5069,7 +5069,7 @@
 					"defaultValue": "\"raycast-secondary-text\""
 				},
 				{
-					"id": 749,
+					"id": 751,
 					"name": "Yellow",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5082,22 +5082,22 @@
 					"title": "Enumeration members",
 					"kind": 16,
 					"children": [
-						742,
-						743,
 						744,
 						745,
 						746,
-						750,
 						747,
 						748,
-						751,
-						749
+						752,
+						749,
+						750,
+						753,
+						751
 					]
 				}
 			]
 		},
 		{
-			"id": 759,
+			"id": 761,
 			"name": "Icon",
 			"kind": 8,
 			"kindString": "Enumeration",
@@ -5117,7 +5117,7 @@
 			},
 			"children": [
 				{
-					"id": 760,
+					"id": 762,
 					"name": "ArrowClockwise",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5125,7 +5125,7 @@
 					"defaultValue": "\"arrow-clockwise-16\""
 				},
 				{
-					"id": 761,
+					"id": 763,
 					"name": "ArrowRight",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5133,7 +5133,7 @@
 					"defaultValue": "\"arrow-right-16\""
 				},
 				{
-					"id": 762,
+					"id": 764,
 					"name": "Binoculars",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5141,7 +5141,7 @@
 					"defaultValue": "\"binoculars-16\""
 				},
 				{
-					"id": 763,
+					"id": 765,
 					"name": "Bubble",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5149,7 +5149,7 @@
 					"defaultValue": "\"bubble-left-16\""
 				},
 				{
-					"id": 764,
+					"id": 766,
 					"name": "Calendar",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5157,7 +5157,7 @@
 					"defaultValue": "\"calendar-16\""
 				},
 				{
-					"id": 765,
+					"id": 767,
 					"name": "Checkmark",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5165,7 +5165,7 @@
 					"defaultValue": "\"checkmark-circle-16\""
 				},
 				{
-					"id": 766,
+					"id": 768,
 					"name": "ChevronDown",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5173,7 +5173,7 @@
 					"defaultValue": "\"chevron-down-16\""
 				},
 				{
-					"id": 767,
+					"id": 769,
 					"name": "ChevronUp",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5181,7 +5181,7 @@
 					"defaultValue": "\"chevron-up-16\""
 				},
 				{
-					"id": 768,
+					"id": 770,
 					"name": "Circle",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5189,7 +5189,7 @@
 					"defaultValue": "\"circle-16\""
 				},
 				{
-					"id": 769,
+					"id": 771,
 					"name": "Clipboard",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5197,7 +5197,7 @@
 					"defaultValue": "\"doc-on-clipboard-16\""
 				},
 				{
-					"id": 770,
+					"id": 772,
 					"name": "Clock",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5205,7 +5205,7 @@
 					"defaultValue": "\"clock-16\""
 				},
 				{
-					"id": 771,
+					"id": 773,
 					"name": "Desktop",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5213,7 +5213,7 @@
 					"defaultValue": "\"desktopcomputer-16\""
 				},
 				{
-					"id": 772,
+					"id": 774,
 					"name": "Document",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5221,7 +5221,7 @@
 					"defaultValue": "\"doc-16\""
 				},
 				{
-					"id": 773,
+					"id": 775,
 					"name": "Dot",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5229,7 +5229,7 @@
 					"defaultValue": "\"dot-16\""
 				},
 				{
-					"id": 774,
+					"id": 776,
 					"name": "Download",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5237,7 +5237,7 @@
 					"defaultValue": "\"square-and-arrow-down-16\""
 				},
 				{
-					"id": 775,
+					"id": 777,
 					"name": "Envelope",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5245,7 +5245,7 @@
 					"defaultValue": "\"envelope-16\""
 				},
 				{
-					"id": 776,
+					"id": 778,
 					"name": "ExclamationMark",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5253,7 +5253,7 @@
 					"defaultValue": "\"exclamation-mark-triangle-16\""
 				},
 				{
-					"id": 777,
+					"id": 779,
 					"name": "Eye",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5261,7 +5261,7 @@
 					"defaultValue": "\"eye-16\""
 				},
 				{
-					"id": 778,
+					"id": 780,
 					"name": "EyeSlash",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5269,7 +5269,7 @@
 					"defaultValue": "\"eye-slash-16\""
 				},
 				{
-					"id": 779,
+					"id": 781,
 					"name": "Finder",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5277,7 +5277,7 @@
 					"defaultValue": "\"finder-16\""
 				},
 				{
-					"id": 780,
+					"id": 782,
 					"name": "Gear",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5285,7 +5285,7 @@
 					"defaultValue": "\"gearshape-16\""
 				},
 				{
-					"id": 781,
+					"id": 783,
 					"name": "Globe",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5293,7 +5293,7 @@
 					"defaultValue": "\"globe-16\""
 				},
 				{
-					"id": 782,
+					"id": 784,
 					"name": "Hammer",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5301,7 +5301,7 @@
 					"defaultValue": "\"hammer-16\""
 				},
 				{
-					"id": 783,
+					"id": 785,
 					"name": "LevelMeter",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5309,7 +5309,7 @@
 					"defaultValue": "\"level-meter-16\""
 				},
 				{
-					"id": 784,
+					"id": 786,
 					"name": "Link",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5317,7 +5317,7 @@
 					"defaultValue": "\"link-16\""
 				},
 				{
-					"id": 785,
+					"id": 787,
 					"name": "List",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5325,7 +5325,7 @@
 					"defaultValue": "\"main-list-view-16\""
 				},
 				{
-					"id": 786,
+					"id": 788,
 					"name": "MagnifyingGlass",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5333,7 +5333,7 @@
 					"defaultValue": "\"magnifyingglass-16\""
 				},
 				{
-					"id": 787,
+					"id": 789,
 					"name": "MemoryChip",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5341,7 +5341,7 @@
 					"defaultValue": "\"memorychip-16\""
 				},
 				{
-					"id": 788,
+					"id": 790,
 					"name": "Message",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5349,7 +5349,7 @@
 					"defaultValue": "\"message-16\""
 				},
 				{
-					"id": 789,
+					"id": 791,
 					"name": "Pencil",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5357,7 +5357,7 @@
 					"defaultValue": "\"pencil-16\""
 				},
 				{
-					"id": 790,
+					"id": 792,
 					"name": "Person",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5365,7 +5365,7 @@
 					"defaultValue": "\"person-crop-circle-16\""
 				},
 				{
-					"id": 791,
+					"id": 793,
 					"name": "Phone",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5373,7 +5373,7 @@
 					"defaultValue": "\"phone-16\""
 				},
 				{
-					"id": 792,
+					"id": 794,
 					"name": "Pin",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5381,7 +5381,7 @@
 					"defaultValue": "\"pin-16\""
 				},
 				{
-					"id": 793,
+					"id": 795,
 					"name": "Plus",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5389,7 +5389,7 @@
 					"defaultValue": "\"plus-16\""
 				},
 				{
-					"id": 801,
+					"id": 803,
 					"name": "QuestionMark",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5397,7 +5397,7 @@
 					"defaultValue": "\"questionmark-circle-16\""
 				},
 				{
-					"id": 794,
+					"id": 796,
 					"name": "Sidebar",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5405,7 +5405,7 @@
 					"defaultValue": "\"sidebar-right-16\""
 				},
 				{
-					"id": 795,
+					"id": 797,
 					"name": "SpeakerArrowDown",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5413,7 +5413,7 @@
 					"defaultValue": "\"speaker-arrow-down-16\""
 				},
 				{
-					"id": 796,
+					"id": 798,
 					"name": "SpeakerArrowUp",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5421,7 +5421,7 @@
 					"defaultValue": "\"speaker-arrow-up-16\""
 				},
 				{
-					"id": 797,
+					"id": 799,
 					"name": "SpeakerSlash",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5429,7 +5429,7 @@
 					"defaultValue": "\"speaker-slash-16\""
 				},
 				{
-					"id": 798,
+					"id": 800,
 					"name": "Star",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5437,7 +5437,7 @@
 					"defaultValue": "\"star-16\""
 				},
 				{
-					"id": 802,
+					"id": 804,
 					"name": "Terminal",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5445,7 +5445,7 @@
 					"defaultValue": "\"terminal-16\""
 				},
 				{
-					"id": 799,
+					"id": 801,
 					"name": "Text",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5453,7 +5453,7 @@
 					"defaultValue": "\"text-alignleft-16\""
 				},
 				{
-					"id": 800,
+					"id": 802,
 					"name": "TextDocument",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5461,7 +5461,7 @@
 					"defaultValue": "\"doc-plaintext-16\""
 				},
 				{
-					"id": 803,
+					"id": 805,
 					"name": "Trash",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5469,7 +5469,7 @@
 					"defaultValue": "\"trash-16\""
 				},
 				{
-					"id": 804,
+					"id": 806,
 					"name": "Upload",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5477,7 +5477,7 @@
 					"defaultValue": "\"square-and-arrow-up-16\""
 				},
 				{
-					"id": 805,
+					"id": 807,
 					"name": "Video",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5485,7 +5485,7 @@
 					"defaultValue": "\"video-16\""
 				},
 				{
-					"id": 806,
+					"id": 808,
 					"name": "Window",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5493,7 +5493,7 @@
 					"defaultValue": "\"macwindow-16\""
 				},
 				{
-					"id": 807,
+					"id": 809,
 					"name": "XmarkCircle",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5506,8 +5506,6 @@
 					"title": "Enumeration members",
 					"kind": 16,
 					"children": [
-						760,
-						761,
 						762,
 						763,
 						764,
@@ -5540,26 +5538,28 @@
 						791,
 						792,
 						793,
-						801,
 						794,
 						795,
+						803,
 						796,
 						797,
 						798,
-						802,
 						799,
 						800,
-						803,
 						804,
+						801,
+						802,
 						805,
 						806,
-						807
+						807,
+						808,
+						809
 					]
 				}
 			]
 		},
 		{
-			"id": 822,
+			"id": 824,
 			"name": "ImageMask",
 			"kind": 8,
 			"kindString": "Enumeration",
@@ -5583,7 +5583,7 @@
 			},
 			"children": [
 				{
-					"id": 823,
+					"id": 825,
 					"name": "Circle",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5594,7 +5594,7 @@
 					"defaultValue": "\"circle\""
 				},
 				{
-					"id": 824,
+					"id": 826,
 					"name": "RoundedRectangle",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5610,14 +5610,14 @@
 					"title": "Enumeration members",
 					"kind": 16,
 					"children": [
-						823,
-						824
+						825,
+						826
 					]
 				}
 			]
 		},
 		{
-			"id": 877,
+			"id": 879,
 			"name": "ToastStyle",
 			"kind": 8,
 			"kindString": "Enumeration",
@@ -5637,7 +5637,7 @@
 			},
 			"children": [
 				{
-					"id": 880,
+					"id": 882,
 					"name": "Animated",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5645,7 +5645,7 @@
 					"defaultValue": "\"ANIMATED\""
 				},
 				{
-					"id": 879,
+					"id": 881,
 					"name": "Failure",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5653,7 +5653,7 @@
 					"defaultValue": "\"FAILURE\""
 				},
 				{
-					"id": 878,
+					"id": 880,
 					"name": "Success",
 					"kind": 16,
 					"kindString": "Enumeration member",
@@ -5666,15 +5666,15 @@
 					"title": "Enumeration members",
 					"kind": 16,
 					"children": [
-						880,
-						879,
-						878
+						882,
+						881,
+						880
 					]
 				}
 			]
 		},
 		{
-			"id": 833,
+			"id": 835,
 			"name": "Toast",
 			"kind": 128,
 			"kindString": "Class",
@@ -5698,42 +5698,42 @@
 			},
 			"children": [
 				{
-					"id": 834,
+					"id": 836,
 					"name": "constructor",
 					"kind": 512,
 					"kindString": "Constructor",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 835,
+							"id": 837,
 							"name": "new Toast",
 							"kind": 16384,
 							"kindString": "Constructor signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 836,
+									"id": 838,
 									"name": "props",
 									"kind": 32768,
 									"kindString": "Parameter",
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 866,
+										"id": 868,
 										"name": "ToastOptions"
 									}
 								}
 							],
 							"type": {
 								"type": "reference",
-								"id": 833,
+								"id": 835,
 								"name": "Toast"
 							}
 						}
 					]
 				},
 				{
-					"id": 848,
+					"id": 850,
 					"name": "message",
 					"kind": 262144,
 					"kindString": "Accessor",
@@ -5742,7 +5742,7 @@
 					},
 					"getSignature": [
 						{
-							"id": 849,
+							"id": 851,
 							"name": "message",
 							"kind": 524288,
 							"kindString": "Get signature",
@@ -5764,14 +5764,14 @@
 					],
 					"setSignature": [
 						{
-							"id": 850,
+							"id": 852,
 							"name": "message",
 							"kind": 1048576,
 							"kindString": "Set signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 851,
+									"id": 853,
 									"name": "message",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -5799,7 +5799,7 @@
 					]
 				},
 				{
-					"id": 852,
+					"id": 854,
 					"name": "primaryAction",
 					"kind": 262144,
 					"kindString": "Accessor",
@@ -5808,7 +5808,7 @@
 					},
 					"getSignature": [
 						{
-							"id": 853,
+							"id": 855,
 							"name": "primaryAction",
 							"kind": 524288,
 							"kindString": "Get signature",
@@ -5822,7 +5822,7 @@
 									},
 									{
 										"type": "reference",
-										"id": 872,
+										"id": 874,
 										"name": "ToastActionOptions"
 									}
 								]
@@ -5831,14 +5831,14 @@
 					],
 					"setSignature": [
 						{
-							"id": 854,
+							"id": 856,
 							"name": "primaryAction",
 							"kind": 1048576,
 							"kindString": "Set signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 855,
+									"id": 857,
 									"name": "action",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -5852,7 +5852,7 @@
 											},
 											{
 												"type": "reference",
-												"id": 872,
+												"id": 874,
 												"name": "ToastActionOptions"
 											}
 										]
@@ -5867,7 +5867,7 @@
 					]
 				},
 				{
-					"id": 856,
+					"id": 858,
 					"name": "secondaryAction",
 					"kind": 262144,
 					"kindString": "Accessor",
@@ -5876,7 +5876,7 @@
 					},
 					"getSignature": [
 						{
-							"id": 857,
+							"id": 859,
 							"name": "secondaryAction",
 							"kind": 524288,
 							"kindString": "Get signature",
@@ -5890,7 +5890,7 @@
 									},
 									{
 										"type": "reference",
-										"id": 872,
+										"id": 874,
 										"name": "ToastActionOptions"
 									}
 								]
@@ -5899,14 +5899,14 @@
 					],
 					"setSignature": [
 						{
-							"id": 858,
+							"id": 860,
 							"name": "secondaryAction",
 							"kind": 1048576,
 							"kindString": "Set signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 859,
+									"id": 861,
 									"name": "action",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -5920,7 +5920,7 @@
 											},
 											{
 												"type": "reference",
-												"id": 872,
+												"id": 874,
 												"name": "ToastActionOptions"
 											}
 										]
@@ -5935,7 +5935,7 @@
 					]
 				},
 				{
-					"id": 840,
+					"id": 842,
 					"name": "style",
 					"kind": 262144,
 					"kindString": "Accessor",
@@ -5944,35 +5944,35 @@
 					},
 					"getSignature": [
 						{
-							"id": 841,
+							"id": 843,
 							"name": "style",
 							"kind": 524288,
 							"kindString": "Get signature",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 877,
+								"id": 879,
 								"name": "ToastStyle"
 							}
 						}
 					],
 					"setSignature": [
 						{
-							"id": 842,
+							"id": 844,
 							"name": "style",
 							"kind": 1048576,
 							"kindString": "Set signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 843,
+									"id": 845,
 									"name": "style",
 									"kind": 32768,
 									"kindString": "Parameter",
 									"flags": {},
 									"type": {
 										"type": "reference",
-										"id": 877,
+										"id": 879,
 										"name": "ToastStyle"
 									}
 								}
@@ -5985,7 +5985,7 @@
 					]
 				},
 				{
-					"id": 844,
+					"id": 846,
 					"name": "title",
 					"kind": 262144,
 					"kindString": "Accessor",
@@ -5994,7 +5994,7 @@
 					},
 					"getSignature": [
 						{
-							"id": 845,
+							"id": 847,
 							"name": "title",
 							"kind": 524288,
 							"kindString": "Get signature",
@@ -6007,14 +6007,14 @@
 					],
 					"setSignature": [
 						{
-							"id": 846,
+							"id": 848,
 							"name": "title",
 							"kind": 1048576,
 							"kindString": "Set signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 847,
+									"id": 849,
 									"name": "title",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -6033,7 +6033,7 @@
 					]
 				},
 				{
-					"id": 862,
+					"id": 864,
 					"name": "hide",
 					"kind": 2048,
 					"kindString": "Method",
@@ -6042,7 +6042,7 @@
 					},
 					"signatures": [
 						{
-							"id": 863,
+							"id": 865,
 							"name": "hide",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -6065,7 +6065,7 @@
 					]
 				},
 				{
-					"id": 860,
+					"id": 862,
 					"name": "show",
 					"kind": 2048,
 					"kindString": "Method",
@@ -6074,7 +6074,7 @@
 					},
 					"signatures": [
 						{
-							"id": 861,
+							"id": 863,
 							"name": "show",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -6102,26 +6102,26 @@
 					"title": "Constructors",
 					"kind": 512,
 					"children": [
-						834
+						836
 					]
 				},
 				{
 					"title": "Accessors",
 					"kind": 262144,
 					"children": [
-						848,
-						852,
-						856,
-						840,
-						844
+						850,
+						854,
+						858,
+						842,
+						846
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						862,
-						860
+						864,
+						862
 					]
 				}
 			]
@@ -6155,7 +6155,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
@@ -6381,7 +6381,7 @@
 			]
 		},
 		{
-			"id": 708,
+			"id": 710,
 			"name": "ActionPanelState",
 			"kind": 256,
 			"kindString": "Interface",
@@ -6397,14 +6397,14 @@
 			},
 			"children": [
 				{
-					"id": 709,
+					"id": 711,
 					"name": "update",
 					"kind": 2048,
 					"kindString": "Method",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 710,
+							"id": 712,
 							"name": "update",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -6414,7 +6414,7 @@
 							},
 							"parameters": [
 								{
-									"id": 711,
+									"id": 713,
 									"name": "actionPanel",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -6473,7 +6473,7 @@
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						709
+						711
 					]
 				}
 			]
@@ -6534,7 +6534,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
@@ -6601,13 +6601,13 @@
 			]
 		},
 		{
-			"id": 899,
+			"id": 901,
 			"name": "AlertActionOptions",
 			"kind": 256,
 			"kindString": "Interface",
 			"flags": {},
 			"comment": {
-				"shortText": "The options to create an Alert Action.",
+				"shortText": "The options to create an {@link Alert} Action.",
 				"tags": [
 					{
 						"tag": "subcategory",
@@ -6617,7 +6617,7 @@
 			},
 			"children": [
 				{
-					"id": 901,
+					"id": 903,
 					"name": "style",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6629,12 +6629,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 904,
+						"id": 906,
 						"name": "AlertActionStyle"
 					}
 				},
 				{
-					"id": 900,
+					"id": 902,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6648,7 +6648,7 @@
 					}
 				},
 				{
-					"id": 902,
+					"id": 904,
 					"name": "onAction",
 					"kind": 2048,
 					"kindString": "Method",
@@ -6657,7 +6657,7 @@
 					},
 					"signatures": [
 						{
-							"id": 903,
+							"id": 905,
 							"name": "onAction",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -6678,31 +6678,31 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						901,
-						900
+						903,
+						902
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						902
+						904
 					]
 				}
 			]
 		},
 		{
-			"id": 893,
+			"id": 895,
 			"name": "AlertOptions",
 			"kind": 256,
 			"kindString": "Interface",
 			"flags": {},
 			"comment": {
-				"shortText": "The options to create an Alert.",
+				"shortText": "The options to create an {@link Alert}.",
 				"tags": [
 					{
 						"tag": "example",
-						"text": "\n```typescript\nimport { AlertOptions, AlertActionStyle } from \"@raycast/api\";\n\nexport default async () => {\n  const options: AlertOptions = {\n    title: \"Finished cooking\",\n    message: \"Delicious pasta for lunch\",\n    primaryAction: {\n      title: 'Do something',\n      onAction: () => {\n        console.log(\"The alert action has been triggered\")\n      }\n    }\n  };\n  await confirmAlert(options);\n};\n```\n"
+						"text": "\n```typescript\nimport { AlertOptions } from \"@raycast/api\";\n\nexport default async () => {\n  const options: AlertOptions = {\n    title: \"Finished cooking\",\n    message: \"Delicious pasta for lunch\",\n    primaryAction: {\n      title: 'Do something',\n      onAction: () => {\n        // while you can register a handler for an action, it's more elegant\n        // to use the `if (await confirmAlert(...)) { ... }` pattern\n        console.log(\"The alert action has been triggered\")\n      }\n    }\n  };\n  await confirmAlert(options);\n};\n```\n"
 					},
 					{
 						"tag": "subcategory",
@@ -6712,7 +6712,7 @@
 			},
 			"children": [
 				{
-					"id": 898,
+					"id": 900,
 					"name": "dismissAction",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6724,12 +6724,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 899,
+						"id": 901,
 						"name": "AlertActionOptions"
 					}
 				},
 				{
-					"id": 894,
+					"id": 896,
 					"name": "icon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6741,12 +6741,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
 				{
-					"id": 896,
+					"id": 898,
 					"name": "message",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6762,7 +6762,7 @@
 					}
 				},
 				{
-					"id": 897,
+					"id": 899,
 					"name": "primaryAction",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6774,12 +6774,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 899,
+						"id": 901,
 						"name": "AlertActionOptions"
 					}
 				},
 				{
-					"id": 895,
+					"id": 897,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -6798,11 +6798,11 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						898,
-						894,
+						900,
 						896,
-						897,
-						895
+						898,
+						899,
+						897
 					]
 				}
 			]
@@ -6938,7 +6938,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
@@ -7278,7 +7278,7 @@
 			]
 		},
 		{
-			"id": 752,
+			"id": 754,
 			"name": "DynamicColor",
 			"kind": 256,
 			"kindString": "Interface",
@@ -7298,7 +7298,7 @@
 			},
 			"children": [
 				{
-					"id": 755,
+					"id": 757,
 					"name": "adjustContrast",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7324,7 +7324,7 @@
 					}
 				},
 				{
-					"id": 754,
+					"id": 756,
 					"name": "dark",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7344,7 +7344,7 @@
 					}
 				},
 				{
-					"id": 753,
+					"id": 755,
 					"name": "light",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7369,15 +7369,15 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						755,
-						754,
-						753
+						757,
+						756,
+						755
 					]
 				}
 			]
 		},
 		{
-			"id": 673,
+			"id": 675,
 			"name": "Environment",
 			"kind": 256,
 			"kindString": "Interface",
@@ -7387,7 +7387,7 @@
 			},
 			"children": [
 				{
-					"id": 677,
+					"id": 679,
 					"name": "assetsPath",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7407,7 +7407,7 @@
 					}
 				},
 				{
-					"id": 676,
+					"id": 678,
 					"name": "commandName",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7421,7 +7421,7 @@
 					}
 				},
 				{
-					"id": 675,
+					"id": 677,
 					"name": "extensionName",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7435,7 +7435,7 @@
 					}
 				},
 				{
-					"id": 679,
+					"id": 681,
 					"name": "isDevelopment",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7449,7 +7449,7 @@
 					}
 				},
 				{
-					"id": 674,
+					"id": 676,
 					"name": "raycastVersion",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7463,7 +7463,7 @@
 					}
 				},
 				{
-					"id": 678,
+					"id": 680,
 					"name": "supportPath",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7482,18 +7482,18 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						677,
-						676,
-						675,
 						679,
-						674,
-						678
+						678,
+						677,
+						681,
+						676,
+						680
 					]
 				}
 			]
 		},
 		{
-			"id": 808,
+			"id": 810,
 			"name": "FileIcon",
 			"kind": 256,
 			"kindString": "Interface",
@@ -7513,7 +7513,7 @@
 			},
 			"children": [
 				{
-					"id": 809,
+					"id": 811,
 					"name": "fileIcon",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7532,13 +7532,13 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						809
+						811
 					]
 				}
 			]
 		},
 		{
-			"id": 704,
+			"id": 706,
 			"name": "FileSystemItem",
 			"kind": 256,
 			"kindString": "Interface",
@@ -7548,7 +7548,7 @@
 			},
 			"children": [
 				{
-					"id": 705,
+					"id": 707,
 					"name": "path",
 					"kind": 1024,
 					"kindString": "Property",
@@ -7567,7 +7567,7 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						705
+						707
 					]
 				}
 			]
@@ -8042,7 +8042,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
@@ -9079,7 +9079,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
@@ -9959,7 +9959,7 @@
 			}
 		},
 		{
-			"id": 814,
+			"id": 816,
 			"name": "Image",
 			"kind": 256,
 			"kindString": "Interface",
@@ -9983,7 +9983,7 @@
 			},
 			"children": [
 				{
-					"id": 816,
+					"id": 818,
 					"name": "mask",
 					"kind": 1024,
 					"kindString": "Property",
@@ -9995,12 +9995,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 822,
+						"id": 824,
 						"name": "ImageMask"
 					}
 				},
 				{
-					"id": 815,
+					"id": 817,
 					"name": "source",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10010,12 +10010,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 818,
+						"id": 820,
 						"name": "ImageSource"
 					}
 				},
 				{
-					"id": 817,
+					"id": 819,
 					"name": "tintColor",
 					"kind": 1024,
 					"kindString": "Property",
@@ -10027,7 +10027,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 740,
+						"id": 742,
 						"name": "ColorLike"
 					}
 				}
@@ -10037,9 +10037,9 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						816,
-						815,
-						817
+						818,
+						817,
+						819
 					]
 				}
 			]
@@ -10134,7 +10134,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
@@ -10222,7 +10222,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
@@ -10963,7 +10963,7 @@
 			}
 		},
 		{
-			"id": 724,
+			"id": 726,
 			"name": "Navigation",
 			"kind": 256,
 			"kindString": "Interface",
@@ -10979,14 +10979,14 @@
 			},
 			"children": [
 				{
-					"id": 728,
+					"id": 730,
 					"name": "pop",
 					"kind": 2048,
 					"kindString": "Method",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 729,
+							"id": 731,
 							"name": "pop",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -11002,14 +11002,14 @@
 					]
 				},
 				{
-					"id": 725,
+					"id": 727,
 					"name": "push",
 					"kind": 2048,
 					"kindString": "Method",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 726,
+							"id": 728,
 							"name": "push",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -11019,7 +11019,7 @@
 							},
 							"parameters": [
 								{
-									"id": 727,
+									"id": 729,
 									"name": "component",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -11046,8 +11046,8 @@
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						728,
-						725
+						730,
+						727
 					]
 				}
 			]
@@ -11119,7 +11119,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
@@ -11269,7 +11269,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
@@ -11420,7 +11420,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
@@ -11600,7 +11600,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
@@ -11712,7 +11712,7 @@
 			]
 		},
 		{
-			"id": 685,
+			"id": 687,
 			"name": "Preference",
 			"kind": 256,
 			"kindString": "Interface",
@@ -11728,7 +11728,7 @@
 			},
 			"children": [
 				{
-					"id": 695,
+					"id": 697,
 					"name": "data",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11747,7 +11747,7 @@
 					}
 				},
 				{
-					"id": 692,
+					"id": 694,
 					"name": "default",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11763,7 +11763,7 @@
 					}
 				},
 				{
-					"id": 690,
+					"id": 692,
 					"name": "description",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11783,7 +11783,7 @@
 					}
 				},
 				{
-					"id": 694,
+					"id": 696,
 					"name": "label",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11799,7 +11799,7 @@
 					}
 				},
 				{
-					"id": 686,
+					"id": 688,
 					"name": "name",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11813,7 +11813,7 @@
 					}
 				},
 				{
-					"id": 693,
+					"id": 695,
 					"name": "placeholder",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11829,7 +11829,7 @@
 					}
 				},
 				{
-					"id": 688,
+					"id": 690,
 					"name": "required",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11853,7 +11853,7 @@
 					}
 				},
 				{
-					"id": 689,
+					"id": 691,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11873,7 +11873,7 @@
 					}
 				},
 				{
-					"id": 687,
+					"id": 689,
 					"name": "type",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11904,7 +11904,7 @@
 					}
 				},
 				{
-					"id": 691,
+					"id": 693,
 					"name": "value",
 					"kind": 1024,
 					"kindString": "Property",
@@ -11925,22 +11925,22 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						695,
-						692,
-						690,
+						697,
 						694,
-						686,
-						693,
+						692,
+						696,
 						688,
+						695,
+						690,
+						691,
 						689,
-						687,
-						691
+						693
 					]
 				}
 			]
 		},
 		{
-			"id": 697,
+			"id": 699,
 			"name": "PreferenceValues",
 			"kind": 256,
 			"kindString": "Interface",
@@ -11949,14 +11949,14 @@
 				"shortText": "Values of preference items."
 			},
 			"indexSignature": {
-				"id": 698,
+				"id": 700,
 				"name": "__index",
 				"kind": 8192,
 				"kindString": "Index signature",
 				"flags": {},
 				"parameters": [
 					{
-						"id": 699,
+						"id": 701,
 						"name": "name",
 						"kind": 32768,
 						"flags": {},
@@ -12001,7 +12001,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
@@ -12137,7 +12137,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
@@ -12288,7 +12288,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
@@ -12394,7 +12394,7 @@
 			]
 		},
 		{
-			"id": 872,
+			"id": 874,
 			"name": "ToastActionOptions",
 			"kind": 256,
 			"kindString": "Interface",
@@ -12410,7 +12410,7 @@
 			},
 			"children": [
 				{
-					"id": 874,
+					"id": 876,
 					"name": "shortcut",
 					"kind": 1024,
 					"kindString": "Property",
@@ -12427,7 +12427,7 @@
 					}
 				},
 				{
-					"id": 873,
+					"id": 875,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -12441,14 +12441,14 @@
 					}
 				},
 				{
-					"id": 875,
+					"id": 877,
 					"name": "onAction",
 					"kind": 2048,
 					"kindString": "Method",
 					"flags": {},
 					"signatures": [
 						{
-							"id": 876,
+							"id": 878,
 							"name": "onAction",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -12469,21 +12469,21 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						874,
-						873
+						876,
+						875
 					]
 				},
 				{
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						875
+						877
 					]
 				}
 			]
 		},
 		{
-			"id": 866,
+			"id": 868,
 			"name": "ToastOptions",
 			"kind": 256,
 			"kindString": "Interface",
@@ -12503,7 +12503,7 @@
 			},
 			"children": [
 				{
-					"id": 869,
+					"id": 871,
 					"name": "message",
 					"kind": 1024,
 					"kindString": "Property",
@@ -12519,7 +12519,7 @@
 					}
 				},
 				{
-					"id": 870,
+					"id": 872,
 					"name": "primaryAction",
 					"kind": 1024,
 					"kindString": "Property",
@@ -12531,12 +12531,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 872,
+						"id": 874,
 						"name": "ToastActionOptions"
 					}
 				},
 				{
-					"id": 871,
+					"id": 873,
 					"name": "secondaryAction",
 					"kind": 1024,
 					"kindString": "Property",
@@ -12548,12 +12548,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 872,
+						"id": 874,
 						"name": "ToastActionOptions"
 					}
 				},
 				{
-					"id": 867,
+					"id": 869,
 					"name": "style",
 					"kind": 1024,
 					"kindString": "Property",
@@ -12563,12 +12563,12 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 877,
+						"id": 879,
 						"name": "ToastStyle"
 					}
 				},
 				{
-					"id": 868,
+					"id": 870,
 					"name": "title",
 					"kind": 1024,
 					"kindString": "Property",
@@ -12587,11 +12587,11 @@
 					"title": "Properties",
 					"kind": 1024,
 					"children": [
-						869,
-						870,
 						871,
-						867,
-						868
+						872,
+						873,
+						869,
+						870
 					]
 				}
 			]
@@ -12631,7 +12631,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 813,
+						"id": 815,
 						"name": "ImageLike"
 					}
 				},
@@ -12908,7 +12908,7 @@
 			}
 		},
 		{
-			"id": 740,
+			"id": 742,
 			"name": "ColorLike",
 			"kind": 4194304,
 			"kindString": "Type alias",
@@ -12935,12 +12935,12 @@
 				"types": [
 					{
 						"type": "reference",
-						"id": 741,
+						"id": 743,
 						"name": "Color"
 					},
 					{
 						"type": "reference",
-						"id": 752,
+						"id": 754,
 						"name": "DynamicColor"
 					},
 					{
@@ -13006,7 +13006,7 @@
 			}
 		},
 		{
-			"id": 813,
+			"id": 815,
 			"name": "ImageLike",
 			"kind": 4194304,
 			"kindString": "Type alias",
@@ -13033,24 +13033,24 @@
 					},
 					{
 						"type": "reference",
-						"id": 759,
+						"id": 761,
 						"name": "Icon"
 					},
 					{
 						"type": "reference",
-						"id": 808,
+						"id": 810,
 						"name": "FileIcon"
 					},
 					{
 						"type": "reference",
-						"id": 814,
+						"id": 816,
 						"name": "Image"
 					}
 				]
 			}
 		},
 		{
-			"id": 818,
+			"id": 820,
 			"name": "ImageSource",
 			"kind": 4194304,
 			"kindString": "Type alias",
@@ -13081,20 +13081,20 @@
 					},
 					{
 						"type": "reference",
-						"id": 759,
+						"id": 761,
 						"name": "Icon"
 					},
 					{
 						"type": "reflection",
 						"declaration": {
-							"id": 819,
+							"id": 821,
 							"name": "__type",
 							"kind": 65536,
 							"kindString": "Type literal",
 							"flags": {},
 							"children": [
 								{
-									"id": 821,
+									"id": 823,
 									"name": "dark",
 									"kind": 1024,
 									"kindString": "Property",
@@ -13105,7 +13105,7 @@
 									}
 								},
 								{
-									"id": 820,
+									"id": 822,
 									"name": "light",
 									"kind": 1024,
 									"kindString": "Property",
@@ -13121,8 +13121,8 @@
 									"title": "Properties",
 									"kind": 1024,
 									"children": [
-										821,
-										820
+										823,
+										822
 									]
 								}
 							]
@@ -13507,7 +13507,7 @@
 			}
 		},
 		{
-			"id": 684,
+			"id": 686,
 			"name": "Preferences",
 			"kind": 4194304,
 			"kindString": "Type alias",
@@ -13524,7 +13524,7 @@
 					},
 					{
 						"type": "reference",
-						"id": 685,
+						"id": 687,
 						"name": "Preference"
 					}
 				],
@@ -13532,7 +13532,7 @@
 			}
 		},
 		{
-			"id": 680,
+			"id": 682,
 			"name": "environment",
 			"kind": 32,
 			"kindString": "Variable",
@@ -13548,13 +13548,13 @@
 			},
 			"type": {
 				"type": "reference",
-				"id": 673,
+				"id": 675,
 				"name": "Environment"
 			},
 			"defaultValue": "..."
 		},
 		{
-			"id": 696,
+			"id": 698,
 			"name": "preferences",
 			"kind": 32,
 			"kindString": "Variable",
@@ -13564,7 +13564,7 @@
 			},
 			"type": {
 				"type": "reference",
-				"id": 684,
+				"id": 686,
 				"name": "Preferences"
 			},
 			"defaultValue": "workerData.preferences"
@@ -13985,11 +13985,11 @@
 						"tags": [
 							{
 								"tag": "example",
-								"text": "\nUncontrolled checkbox\n\n```typescript\nimport { Form } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.Checkbox id=\"checkbox\" label=\"Are you happy?\" defaultValue={true} />\n    </Form>\n  );\n}\n```\n"
+								"text": "\nUncontrolled checkbox\n\n```typescript\nimport { ActionPanel, Form, SubmitFormAction } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Answer\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.Checkbox id=\"answer\" label=\"Are you happy?\" defaultValue={true} />\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "example",
-								"text": "\nControlled checkbox\n\n```typescript\nimport { Form } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [checked, setChecked] = useState(true);\n\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.Checkbox id=\"checkbox\" label=\"Do you like orange juice?\" value={checked} onChange={setChecked} />\n    </Form>\n  );\n}\n```\n"
+								"text": "\nControlled checkbox\n\n```typescript\nimport { ActionPanel, Form, SubmitFormAction } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [checked, setChecked] = useState(true);\n\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Answer\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.Checkbox id=\"answer\" label=\"Do you like orange juice?\" value={checked} onChange={setChecked} />\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "subcategory",
@@ -14043,11 +14043,11 @@
 						"tags": [
 							{
 								"tag": "example",
-								"text": "\nUncontrolled date picker\n\n```typescript\nimport { Form } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.DatePicker id=\"dateOfBirth\" title=\"Date of Birth\" defaultValue={new Date(1955, 1, 24)} />\n    </Form>\n  );\n}\n```\n"
+								"text": "\nUncontrolled date picker\n\n```typescript\nimport { ActionPanel, Form, SubmitFormAction } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Form\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.DatePicker id=\"dateOfBirth\" title=\"Date of Birth\" defaultValue={new Date(1955, 1, 24)} />\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "example",
-								"text": "\nControlled date picker\n\n```typescript\nimport { Form } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [date, setDate] = useState<Date>();\n\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.DatePicker id=\"launchDate\" title=\"Launch Date\" value={date} onChange={setDate} />\n    </Form>\n  );\n}\n```\n"
+								"text": "\nControlled date picker\n\n```typescript\nimport { ActionPanel, Form, SubmitFormAction } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [date, setDate] = useState<Date>();\n\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Form\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.DatePicker id=\"launchDate\" title=\"Launch Date\" value={date} onChange={setDate} />\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "subcategory",
@@ -14101,11 +14101,11 @@
 						"tags": [
 							{
 								"tag": "example",
-								"text": "\nUncontrolled dropdown\n\n```typescript\nimport { Form } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.Dropdown id=\"emoji\" title=\"Favorite Emoji\" defaultValue=\"lol\">\n        <Form.Dropdown.Item value=\"poop\" title=\"Pile of poop\" icon=\"💩\" />\n        <Form.Dropdown.Item value=\"rocket\" title=\"Rocket\" icon=\"🚀\" />\n        <Form.Dropdown.Item value=\"lol\" title=\"Rolling on the floor laughing face\" icon=\"🤣\" />\n      </Form.Dropdown>\n    </Form>\n  );\n}\n```\n"
+								"text": "\nUncontrolled dropdown\n\n```typescript\nimport { ActionPanel, Form, SubmitFormAction } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Favorite\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.Dropdown id=\"emoji\" title=\"Favorite Emoji\" defaultValue=\"lol\">\n        <Form.Dropdown.Item value=\"poop\" title=\"Pile of poop\" icon=\"💩\" />\n        <Form.Dropdown.Item value=\"rocket\" title=\"Rocket\" icon=\"🚀\" />\n        <Form.Dropdown.Item value=\"lol\" title=\"Rolling on the floor laughing face\" icon=\"🤣\" />\n      </Form.Dropdown>\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "example",
-								"text": "\nControlled dropdown\n\n```typescript\nimport { Form } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [programmingLanguage, setProgrammingLanguage] = useState<string>(\"typescript\");\n\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.Dropdown\n        id=\"dropdown\"\n        title=\"Favorite Language\"\n        value={programmingLanguage}\n        onChange={setProgrammingLanguage}\n      >\n        <Form.Dropdown.Item value=\"cpp\" title=\"C++\" />\n        <Form.Dropdown.Item value=\"javascript\" title=\"JavaScript\" />\n        <Form.Dropdown.Item value=\"ruby\" title=\"Ruby\" />\n        <Form.Dropdown.Item value=\"python\" title=\"Python\" />\n        <Form.Dropdown.Item value=\"swift\" title=\"Swift\" />\n        <Form.Dropdown.Item value=\"typescript\" title=\"TypeScript\" />\n      </Form.Dropdown>\n    </Form>\n  );\n}\n```\n"
+								"text": "\nControlled dropdown\n\n```typescript\nimport { ActionPanel, Form, SubmitFormAction } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [programmingLanguage, setProgrammingLanguage] = useState<string>(\"typescript\");\n\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Favorite\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.Dropdown\n        id=\"dropdown\"\n        title=\"Favorite Language\"\n        value={programmingLanguage}\n        onChange={setProgrammingLanguage}\n      >\n        <Form.Dropdown.Item value=\"cpp\" title=\"C++\" />\n        <Form.Dropdown.Item value=\"javascript\" title=\"JavaScript\" />\n        <Form.Dropdown.Item value=\"ruby\" title=\"Ruby\" />\n        <Form.Dropdown.Item value=\"python\" title=\"Python\" />\n        <Form.Dropdown.Item value=\"swift\" title=\"Swift\" />\n        <Form.Dropdown.Item value=\"typescript\" title=\"TypeScript\" />\n      </Form.Dropdown>\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "subcategory",
@@ -14159,7 +14159,7 @@
 						"tags": [
 							{
 								"tag": "example",
-								"text": "\n```typescript\nimport { Form, Icon } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.Dropdown id=\"icon\" title=\"Icon\">\n        <Form.Dropdown.Item value=\"circle\" title=\"Cirlce\" icon={Icon.Circle} />\n      </Form.Dropdown>\n    </Form>\n  );\n}\n```\n"
+								"text": "\n```typescript\nimport { ActionPanel, Form, SubmitFormAction } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Icon\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.Dropdown id=\"icon\" title=\"Icon\">\n        <Form.Dropdown.Item value=\"circle\" title=\"Cirlce\" icon={Icon.Circle} />\n      </Form.Dropdown>\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "subcategory",
@@ -14217,7 +14217,7 @@
 							},
 							{
 								"tag": "example",
-								"text": "\n```typescript\nimport { Form } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.Dropdown id=\"food\" title=\"Favorite Food\">\n        <Form.Dropdown.Section title=\"Fruits\">\n          <Form.Dropdown.Item value=\"apple\" title=\"Apple\" icon=\"🍎\" />\n          <Form.Dropdown.Item value=\"banana\" title=\"Banana\" icon=\"🍌\" />\n        </Form.Dropdown.Section>\n        <Form.Dropdown.Section title=\"Vegetables\">\n          <Form.Dropdown.Item value=\"broccoli\" title=\"Broccoli\" icon=\"🥦\" />\n          <Form.Dropdown.Item value=\"carrot\" title=\"Carrot\" icon=\"🥕\" />\n        </Form.Dropdown.Section>\n      </Form.Dropdown>\n    </Form>\n  );\n}\n```\n"
+								"text": "\n```typescript\nimport { ActionPanel, Form, SubmitFormAction } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Favorite\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.Dropdown id=\"food\" title=\"Favorite Food\">\n        <Form.Dropdown.Section title=\"Fruits\">\n          <Form.Dropdown.Item value=\"apple\" title=\"Apple\" icon=\"🍎\" />\n          <Form.Dropdown.Item value=\"banana\" title=\"Banana\" icon=\"🍌\" />\n        </Form.Dropdown.Section>\n        <Form.Dropdown.Section title=\"Vegetables\">\n          <Form.Dropdown.Item value=\"broccoli\" title=\"Broccoli\" icon=\"🥦\" />\n          <Form.Dropdown.Item value=\"carrot\" title=\"Carrot\" icon=\"🥕\" />\n        </Form.Dropdown.Section>\n      </Form.Dropdown>\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "subcategory",
@@ -14271,7 +14271,7 @@
 						"tags": [
 							{
 								"tag": "example",
-								"text": "\n```typescript\nimport { Form } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TextField id=\"textfield\" />\n      <Form.Separator />\n      <Form.TextArea id=\"textarea\" />\n    </Form>\n  );\n}\n```\n"
+								"text": "\n```typescript\nimport { ActionPanel, Form, SubmitFormAction } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Form\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.TextField id=\"textfield\" />\n      <Form.Separator />\n      <Form.TextArea id=\"textarea\" />\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "subcategory",
@@ -14311,11 +14311,11 @@
 						"tags": [
 							{
 								"tag": "example",
-								"text": "\nUncontrolled tag picker\n\n```typescript\nimport { Form } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TagPicker id=\"sports\" title=\"Favorite Sports\" defaultValue={[\"football\"]}>\n        <Form.TagPicker.Item value=\"basketball\" title=\"Basketball\" icon=\"🏀\" />\n        <Form.TagPicker.Item value=\"football\" title=\"Football\" icon=\"⚽️\" />\n        <Form.TagPicker.Item value=\"tennis\" title=\"Tennis\" icon=\"🎾\" />\n      </Form.TagPicker>\n    </Form>\n  );\n}\n```\n"
+								"text": "\nUncontrolled tag picker\n\n```typescript\nimport { ActionPanel, Form, SubmitFormAction } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Favorite\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.TagPicker id=\"sports\" title=\"Favorite Sports\" defaultValue={[\"football\"]}>\n        <Form.TagPicker.Item value=\"basketball\" title=\"Basketball\" icon=\"🏀\" />\n        <Form.TagPicker.Item value=\"football\" title=\"Football\" icon=\"⚽️\" />\n        <Form.TagPicker.Item value=\"tennis\" title=\"Tennis\" icon=\"🎾\" />\n      </Form.TagPicker>\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "example",
-								"text": "\nControlled tag picker\n\n```typescript\nimport { Form } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [countries, setCountries] = useState<string[]>([\"ger\", \"ned\", \"pol\"]);\n\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TagPicker id=\"countries\" title=\"Visited Countries\" value={countries} onChange={setCountries}>\n        <Form.TagPicker.Item value=\"ger\" title=\"Germany\" icon=\"🇩🇪\" />\n        <Form.TagPicker.Item value=\"ind\" title=\"India\" icon=\"🇮🇳\" />\n        <Form.TagPicker.Item value=\"ned\" title=\"Netherlands\" icon=\"🇳🇱\" />\n        <Form.TagPicker.Item value=\"nor\" title=\"Norway\" icon=\"🇳🇴\" />\n        <Form.TagPicker.Item value=\"pol\" title=\"Poland\" icon=\"🇵🇱\" />\n        <Form.TagPicker.Item value=\"rus\" title=\"Russia\" icon=\"🇷🇺\" />\n        <Form.TagPicker.Item value=\"sco\" title=\"Scotland\" icon=\"🏴󠁧󠁢󠁳󠁣󠁴󠁿\" />\n      </Form.TagPicker>\n    </Form>\n  );\n}\n```\n"
+								"text": "\nControlled tag picker\n\n```typescript\nimport { ActionPanel, Form, SubmitFormAction } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [countries, setCountries] = useState<string[]>([\"ger\", \"ned\", \"pol\"]);\n\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Countries\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.TagPicker id=\"countries\" title=\"Visited Countries\" value={countries} onChange={setCountries}>\n        <Form.TagPicker.Item value=\"ger\" title=\"Germany\" icon=\"🇩🇪\" />\n        <Form.TagPicker.Item value=\"ind\" title=\"India\" icon=\"🇮🇳\" />\n        <Form.TagPicker.Item value=\"ned\" title=\"Netherlands\" icon=\"🇳🇱\" />\n        <Form.TagPicker.Item value=\"nor\" title=\"Norway\" icon=\"🇳🇴\" />\n        <Form.TagPicker.Item value=\"pol\" title=\"Poland\" icon=\"🇵🇱\" />\n        <Form.TagPicker.Item value=\"rus\" title=\"Russia\" icon=\"🇷🇺\" />\n        <Form.TagPicker.Item value=\"sco\" title=\"Scotland\" icon=\"🏴󠁧󠁢󠁳󠁣󠁴󠁿\" />\n      </Form.TagPicker>\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "subcategory",
@@ -14369,7 +14369,7 @@
 						"tags": [
 							{
 								"tag": "example",
-								"text": "\n```typescript\nimport { Color, Form, Icon } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TagPicker id=\"color\" title=\"Color\">\n        <Form.TagPicker.Item value=\"ger\" title=\"Germany\" icon={{ source: Icon.Circle, tintColor: Color.Red }} />\n      </Form.TagPicker>\n    </Form>\n  );\n}\n```\n"
+								"text": "\n```typescript\nimport { ActionPanel, Color, Form, Icon, SubmitFormAction } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Color\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.TagPicker id=\"color\" title=\"Color\">\n        <Form.TagPicker.Item value=\"red\" title=\"Red\" icon={{ source: Icon.Circle, tintColor: Color.Red }} />\n        <Form.TagPicker.Item value=\"green\" title=\"Green\" icon={{ source: Icon.Circle, tintColor: Color.Green }} />\n        <Form.TagPicker.Item value=\"blue\" title=\"Blue\" icon={{ source: Icon.Circle, tintColor: Color.Blue }} />\n      </Form.TagPicker>\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "subcategory",
@@ -14423,11 +14423,11 @@
 						"tags": [
 							{
 								"tag": "example",
-								"text": "\nUncontrolled text area\n\n```typescript\nimport { Form } from \"@raycast/api\";\n\nconst DESCRIPTION =\n  \"We spend too much time starring at loading indicators. The Raycast team is dedicated to make everybody interact faster with their computers.\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TextArea id=\"description\" defaultValue={DESCRIPTION} />\n    </Form>\n  );\n}\n```\n"
+								"text": "\nUncontrolled text area\n\n```typescript\nimport { ActionPanel, Form, SubmitFormAction } from \"@raycast/api\";\n\nconst DESCRIPTION =\n  \"We spend too much time starring at loading indicators. The Raycast team is dedicated to make everybody interact faster with their computers.\";\n\nexport default function Command() {\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Description\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.TextArea id=\"description\" defaultValue={DESCRIPTION} />\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "example",
-								"text": "\nControlled text area\n\n```typescript\nimport { Form } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [text, setText] = useState<string>();\n\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TextArea id=\"textarea\" value={text} onChange={setText} />\n    </Form>\n  );\n}\n```\n"
+								"text": "\nControlled text area\n\n```typescript\nimport { ActionPanel, Form, SubmitFormAction } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [description, setDescription] = useState<string>();\n\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Description\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.TextArea id=\"description\" value={description} onChange={setDescription} />\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "subcategory",
@@ -14481,11 +14481,11 @@
 						"tags": [
 							{
 								"tag": "example",
-								"text": "\nUncontrolled text field\n\n```typescript\nimport { Form } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TextField id=\"name\" defaultValue=\"Steve\" />\n    </Form>\n  );\n}\n```\n"
+								"text": "\nUncontrolled text field\n\n```typescript\nimport { ActionPanel, Form, SubmitFormAction } from \"@raycast/api\";\n\nexport default function Command() {\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Name\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.TextField id=\"name\" defaultValue=\"Steve\" />\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "example",
-								"text": "\nControlled text field\n\n```typescript\nimport { Form } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [text, setText] = useState<string>();\n\n  return (\n    <Form onSubmit={(values) => console.log(values)}>\n      <Form.TextField id=\"textfield\" value={text} onChange={setText} />\n    </Form>\n  );\n}\n```\n"
+								"text": "\nControlled text field\n\n```typescript\nimport { ActionPanel, Form, SubmitFormAction } from \"@raycast/api\";\nimport { useState } from \"react\";\n\nexport default function Command() {\n  const [name, setName] = useState<string>();\n\n  return (\n    <Form\n      actions={\n        <ActionPanel>\n          <SubmitFormAction title=\"Submit Name\" onSubmit={(values) => console.log(values)} />\n        </ActionPanel>\n      }\n    >\n      <Form.TextField id=\"name\" value={name} onChange={setName} />\n    </Form>\n  );\n}\n```\n"
 							},
 							{
 								"tag": "subcategory",
@@ -15477,14 +15477,14 @@
 			]
 		},
 		{
-			"id": 881,
+			"id": 883,
 			"name": "confirmAlert",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 882,
+					"id": 884,
 					"name": "confirmAlert",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -15505,7 +15505,7 @@
 					},
 					"parameters": [
 						{
-							"id": 883,
+							"id": 885,
 							"name": "options",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -15515,7 +15515,7 @@
 							},
 							"type": {
 								"type": "reference",
-								"id": 893,
+								"id": 895,
 								"name": "AlertOptions"
 							}
 						}
@@ -15778,14 +15778,14 @@
 			]
 		},
 		{
-			"id": 681,
+			"id": 683,
 			"name": "getPreferenceValues",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 682,
+					"id": 684,
 					"name": "getPreferenceValues",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -15806,40 +15806,40 @@
 					},
 					"typeParameter": [
 						{
-							"id": 683,
+							"id": 685,
 							"name": "Values",
 							"kind": 131072,
 							"kindString": "Type parameter",
 							"flags": {},
 							"type": {
 								"type": "reference",
-								"id": 697,
+								"id": 699,
 								"name": "PreferenceValues"
 							},
 							"default": {
 								"type": "reference",
-								"id": 697,
+								"id": 699,
 								"name": "PreferenceValues"
 							}
 						}
 					],
 					"type": {
 						"type": "reference",
-						"id": 683,
+						"id": 685,
 						"name": "Values"
 					}
 				}
 			]
 		},
 		{
-			"id": 702,
+			"id": 704,
 			"name": "getSelectedFinderItems",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 703,
+					"id": 705,
 					"name": "getSelectedFinderItems",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -15865,7 +15865,7 @@
 								"type": "array",
 								"elementType": {
 									"type": "reference",
-									"id": 704,
+									"id": 706,
 									"name": "FileSystemItem"
 								}
 							}
@@ -15876,14 +15876,14 @@
 			]
 		},
 		{
-			"id": 700,
+			"id": 702,
 			"name": "getSelectedText",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 701,
+					"id": 703,
 					"name": "getSelectedText",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -16056,14 +16056,14 @@
 			]
 		},
 		{
-			"id": 908,
+			"id": 910,
 			"name": "randomId",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 909,
+					"id": 911,
 					"name": "randomId",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -16081,7 +16081,7 @@
 					},
 					"parameters": [
 						{
-							"id": 910,
+							"id": 912,
 							"name": "size",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -16157,14 +16157,14 @@
 			]
 		},
 		{
-			"id": 731,
+			"id": 733,
 			"name": "render",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 732,
+					"id": 734,
 					"name": "render",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -16184,7 +16184,7 @@
 					},
 					"parameters": [
 						{
-							"id": 733,
+							"id": 735,
 							"name": "nodeToRender",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -16270,14 +16270,14 @@
 			]
 		},
 		{
-			"id": 830,
+			"id": 832,
 			"name": "showHUD",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 831,
+					"id": 833,
 					"name": "showHUD",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -16298,7 +16298,7 @@
 					},
 					"parameters": [
 						{
-							"id": 832,
+							"id": 834,
 							"name": "title",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -16378,14 +16378,14 @@
 			]
 		},
 		{
-			"id": 825,
+			"id": 827,
 			"name": "showToast",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 826,
+					"id": 828,
 					"name": "showToast",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -16406,7 +16406,7 @@
 					},
 					"parameters": [
 						{
-							"id": 827,
+							"id": 829,
 							"name": "style",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -16416,12 +16416,12 @@
 							},
 							"type": {
 								"type": "reference",
-								"id": 877,
+								"id": 879,
 								"name": "ToastStyle"
 							}
 						},
 						{
-							"id": 828,
+							"id": 830,
 							"name": "title",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -16435,7 +16435,7 @@
 							}
 						},
 						{
-							"id": 829,
+							"id": 831,
 							"name": "message",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -16456,7 +16456,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"id": 833,
+								"id": 835,
 								"name": "Toast"
 							}
 						],
@@ -16527,14 +16527,14 @@
 			]
 		},
 		{
-			"id": 706,
+			"id": 708,
 			"name": "useActionPanel",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 707,
+					"id": 709,
 					"name": "useActionPanel",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -16551,21 +16551,21 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 708,
+						"id": 710,
 						"name": "ActionPanelState"
 					}
 				}
 			]
 		},
 		{
-			"id": 716,
+			"id": 718,
 			"name": "useId",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 717,
+					"id": 719,
 					"name": "useId",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -16590,7 +16590,7 @@
 					},
 					"parameters": [
 						{
-							"id": 718,
+							"id": 720,
 							"name": "defaultId",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -16606,7 +16606,7 @@
 							}
 						},
 						{
-							"id": 719,
+							"id": 721,
 							"name": "generateId",
 							"kind": 32768,
 							"kindString": "Parameter",
@@ -16617,14 +16617,14 @@
 							"type": {
 								"type": "reflection",
 								"declaration": {
-									"id": 720,
+									"id": 722,
 									"name": "__type",
 									"kind": 65536,
 									"kindString": "Type literal",
 									"flags": {},
 									"signatures": [
 										{
-											"id": 721,
+											"id": 723,
 											"name": "__type",
 											"kind": 4096,
 											"kindString": "Call signature",
@@ -16648,14 +16648,14 @@
 			]
 		},
 		{
-			"id": 722,
+			"id": 724,
 			"name": "useNavigation",
 			"kind": 64,
 			"kindString": "Function",
 			"flags": {},
 			"signatures": [
 				{
-					"id": 723,
+					"id": 725,
 					"name": "useNavigation",
 					"kind": 4096,
 					"kindString": "Call signature",
@@ -16680,7 +16680,7 @@
 					},
 					"type": {
 						"type": "reference",
-						"id": 724,
+						"id": 726,
 						"name": "Navigation"
 					}
 				}
@@ -16718,18 +16718,18 @@
 			"title": "Enumerations",
 			"kind": 8,
 			"children": [
-				904,
-				741,
-				759,
-				822,
-				877
+				906,
+				743,
+				761,
+				824,
+				879
 			]
 		},
 		{
 			"title": "Classes",
 			"kind": 128,
 			"children": [
-				833
+				835
 			]
 		},
 		{
@@ -16739,17 +16739,17 @@
 				175,
 				169,
 				172,
-				708,
+				710,
 				182,
-				899,
-				893,
+				901,
+				895,
 				32,
 				569,
 				198,
-				752,
-				673,
-				808,
-				704,
+				754,
+				675,
+				810,
+				706,
 				428,
 				438,
 				461,
@@ -16763,24 +16763,24 @@
 				418,
 				408,
 				390,
-				814,
+				816,
 				44,
 				555,
 				536,
 				550,
 				67,
-				724,
+				726,
 				580,
 				592,
 				603,
 				614,
-				685,
-				697,
+				687,
+				699,
 				625,
 				635,
 				647,
-				872,
-				866,
+				874,
+				868,
 				658
 			]
 		},
@@ -16790,22 +16790,22 @@
 			"children": [
 				167,
 				168,
-				740,
+				742,
 				385,
-				813,
-				818,
+				815,
+				820,
 				49,
 				48,
 				66,
-				684
+				686
 			]
 		},
 		{
 			"title": "Variables",
 			"kind": 32,
 			"children": [
-				680,
-				696
+				682,
+				698
 			]
 		},
 		{
@@ -16845,27 +16845,27 @@
 				64,
 				11,
 				1,
-				881,
+				883,
 				36,
 				22,
 				25,
 				53,
-				681,
+				683,
+				704,
 				702,
-				700,
 				41,
 				6,
-				908,
+				910,
 				61,
-				731,
+				733,
 				57,
-				830,
+				832,
 				16,
-				825,
+				827,
 				19,
-				706,
-				716,
-				722
+				708,
+				718,
+				724
 			]
 		}
 	],
@@ -16873,23 +16873,23 @@
 		{
 			"title": "User Interface",
 			"children": [
-				904,
-				741,
-				759,
-				822,
-				877,
-				833,
+				906,
+				743,
+				761,
+				824,
+				879,
+				835,
 				175,
 				169,
 				172,
-				708,
+				710,
 				182,
-				899,
-				893,
+				901,
+				895,
 				569,
 				198,
-				752,
-				808,
+				754,
+				810,
 				428,
 				438,
 				461,
@@ -16903,11 +16903,11 @@
 				418,
 				408,
 				390,
-				814,
+				816,
 				555,
 				536,
 				550,
-				724,
+				726,
 				580,
 				592,
 				603,
@@ -16915,15 +16915,15 @@
 				625,
 				635,
 				647,
-				872,
-				866,
+				874,
+				868,
 				658,
 				167,
 				168,
-				740,
+				742,
 				385,
-				813,
-				818,
+				815,
+				820,
 				90,
 				109,
 				101,
@@ -16954,14 +16954,14 @@
 				655,
 				11,
 				1,
-				881,
+				883,
 				6,
-				731,
-				830,
-				825,
-				706,
-				716,
-				722
+				733,
+				832,
+				827,
+				708,
+				718,
+				724
 			]
 		},
 		{
@@ -16995,11 +16995,11 @@
 		{
 			"title": "Environment",
 			"children": [
-				673,
+				675,
+				706,
+				682,
 				704,
-				680,
-				702,
-				700
+				702
 			]
 		},
 		{
@@ -17030,11 +17030,11 @@
 		{
 			"title": "Preferences",
 			"children": [
-				685,
-				697,
-				684,
-				696,
-				681
+				687,
+				699,
+				686,
+				698,
+				683
 			]
 		},
 		{
@@ -17043,7 +17043,7 @@
 				32,
 				22,
 				25,
-				908,
+				910,
 				16,
 				19
 			]

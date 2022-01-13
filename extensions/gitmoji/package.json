@@ -14,6 +14,26 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "copy",
+      "type": "dropdown",
+      "required": false,
+      "title": "Copy",
+      "data": [
+        {
+          "title": "Emoji ✨",
+          "value": "emoji"
+        },
+        {
+          "title": "Code :sparkles:",
+          "value": "code"
+        }
+      ],
+      "description": "Copy the emoji or copy the code",
+      "default": "emoji"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "gitmojis": "^3.5.0"
