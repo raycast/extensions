@@ -64,7 +64,6 @@ export function useMyProjects() {
         url: "/users/me/project_assignments",
         params: { page },
       });
-      console.log(resp.data.total_entries);
       project_assignments = project_assignments.concat(resp.data.project_assignments);
       if (resp.data.total_pages >= resp.data.page) break;
       page += 1;
