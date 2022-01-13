@@ -10,7 +10,7 @@
     {
       "name": "index",
       "title": "Translate Japanese",
-      "subtitle": "Search Jisho.org",
+      "subtitle": "Jisho",
       "description": "Search Jisho.org for Japanese translations",
       "mode": "view"
     }

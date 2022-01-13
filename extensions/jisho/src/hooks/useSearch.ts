@@ -1,7 +1,7 @@
 import { randomId, showToast, ToastStyle } from "@raycast/api";
 import fetch, { AbortError } from "node-fetch";
 import { useState, useEffect, useRef } from "react";
-import { SearchState, SearchResult } from "../../types/types";
+import { SearchState, SearchResult } from "../types/types";
 
 const useSearch = () => {
   const [state, setState] = useState<SearchState>({ results: [], isLoading: true });

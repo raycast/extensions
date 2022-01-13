@@ -1,6 +1,6 @@
 import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from "@raycast/api";
 import useSearch from "./hooks/useSearch";
-import { SearchResult } from "../types/types";
+import { SearchResult } from "./types/types";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -26,7 +26,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction title="Open in Browser" url={searchResult.url} />
+            <OpenInBrowserAction url={searchResult.url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CopyToClipboardAction title="Copy" content={title} shortcut={{ modifiers: ["cmd"], key: "." }} />
