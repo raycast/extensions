@@ -21,7 +21,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.27.0",
     "@sindresorhus/is": "^4.2.1",
     "geohash-to-geojson": "^4.1.0",
     "ngeohash": "^0.6.3",
