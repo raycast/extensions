@@ -1,4 +1,8 @@
 export interface UserResponse {
+  error?: {
+    code?: string;
+    message?: string;
+  };
   lists: Lists;
   followers: number[];
   following: number[];
