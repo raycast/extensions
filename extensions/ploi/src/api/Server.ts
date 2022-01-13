@@ -86,7 +86,7 @@ const getServers = async () => {
     const servers = serverData?.data ?? [];
 
     // eslint-disable-next-line
-    // @ts-ignore Not sure how to convert Dictionary from lodash to IServer
+    // @ts-expect-error Not sure how to convert Dictionary from lodash to IServer
     return servers.map((s) => mapKeys(s, (_, k) => camelCase(k)) as IServer);
   } catch (error) {
     const axiosError = (error as AxiosError).response;

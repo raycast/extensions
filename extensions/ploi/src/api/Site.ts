@@ -15,7 +15,7 @@ export const Site = {
       let sites = siteData?.data ?? [];
 
       // eslint-disable-next-line
-      // @ts-ignore Not sure how to convert Dictionary from lodash to IServer
+      // @ts-expect-error Not sure how to convert Dictionary from lodash to IServer
       sites = sites.map((s) => mapKeys(s, (_, k) => camelCase(k)) as ISite);
       return sortBy(sites, "domain") as ISite[];
     } catch (error: unknown) {
@@ -31,7 +31,7 @@ export const Site = {
       );
       const siteData = (await response.data) as ISite;
       // eslint-disable-next-line
-      // @ts-ignore Not sure how to convert Dictionary from lodash to IServer
+      // @ts-expect-error Not sure how to convert Dictionary from lodash to IServer
       return mapKeys(siteData?.data ?? [], (_, k) => camelCase(k)) as ISite;
     } catch (error: unknown) {
       await showToast(ToastStyle.Failure, (error as Error).message);

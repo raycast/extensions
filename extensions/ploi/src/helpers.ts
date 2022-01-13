@@ -21,7 +21,6 @@ export const capitalizeFirstLetter = (text: string) => {
 export const usePolling = (callback: () => Promise<void>) => {
   const [isPolling, setIsPolling] = useState(false);
   const isMounted = useIsMounted();
-  const pollingId = useRef(0);
   const poll = () => {
     if (isPolling && isMounted.current) {
       return;
@@ -31,11 +30,9 @@ export const usePolling = (callback: () => Promise<void>) => {
   };
   useEffect(() => {
     isPolling || callback();
-    // Poll for the rate limit per minute plus 500ms leeway
-    pollingId.current = window.setInterval(poll, 60000 / API_RATE_LIMIT + 500);
-    return () => {
-      window.clearInterval(pollingId.current);
-    };
+
+    const id = setInterval(poll, 60000 / API_RATE_LIMIT + 500);
+    return () => clearInterval(id);
   }, []);
   return isPolling;
 };

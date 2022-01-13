@@ -135,7 +135,7 @@ const SingleServerView = ({
       <List.Section title={`Sites (${server.name})`}>
         <SitesList server={server} sites={sites} />
       </List.Section>
-      <List.Section title="Common Commands">
+      <List.Section title="Server Information">
         <List.Item
           id="open-in-ssh"
           key="open-in-ssh"
@@ -154,7 +154,7 @@ const SingleServerView = ({
         <List.Item
           id="open-in-ploi"
           key="open-in-ploi"
-          title="Open In ploi.io"
+          title="Open in ploi.io"
           icon={Icon.Globe}
           accessoryTitle="ploi.io"
           actions={
@@ -177,6 +177,18 @@ const SingleServerView = ({
                 title="Copy IP Address"
                 content={server.ipAddress}
               />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          id="server-id"
+          key="server-id"
+          title="Server ID"
+          icon={Icon.Document}
+          accessoryTitle={`${server.id}`}
+          actions={
+            <ActionPanel>
+              <CopyToClipboardAction content={server.id ?? ""} />
             </ActionPanel>
           }
         />
@@ -273,7 +285,7 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
         content={server.ipAddress}
       />
       <OpenInBrowserAction
-        title="Open In ploi.io"
+        title="Open in ploi.io"
         url={`${PLOI_PANEL_URL}/servers/${server.id}`}
       />
     </>

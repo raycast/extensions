@@ -14,7 +14,7 @@ import { siteStatusState, useIsMounted, usePolling } from "./helpers";
 import { PLOI_PANEL_URL } from "./config";
 
 export const SitesList = ({
-  server,
+  server: server,
   sites: sitesArray,
 }: {
   server: IServer;
@@ -102,6 +102,7 @@ export const SitesSingleView = ({
               key="site-deploy"
               title="Deploy"
               accessoryTitle="This Will Run The Deploy Script For Your Site"
+              icon={Icon.Hammer}
               actions={
                 <ActionPanel>
                   <ActionPanel.Item
@@ -118,6 +119,7 @@ export const SitesSingleView = ({
             key="site-flush-fastcgi-cache"
             title="Flush FastCGI Cache"
             accessoryTitle="This Flushes The FastCGI Cache"
+            icon={Icon.ArrowClockwise}
             actions={
               <ActionPanel>
                 <ActionPanel.Item
@@ -148,9 +150,9 @@ export const SitesSingleView = ({
             id: "Site ID",
             serverId: "Server ID",
             domain: "Domain",
-            webDirectory: "Public directory",
-            projectType: "Project type",
-            zeroDowntimeDeployment: "Zero-downtime deployments enabled",
+            webDirectory: "Public Directory",
+            projectType: "Project Type",
+            zeroDowntimeDeployment: "Zero-downtime Deployments Enabled",
           }).map(([key, label]) => {
             const value = current[key as keyof ISite]?.toString() ?? "";
             return (
@@ -160,6 +162,7 @@ export const SitesSingleView = ({
                   key={key}
                   title={label}
                   accessoryTitle={value}
+                  icon={Icon.Document}
                   actions={
                     <ActionPanel>
                       <CopyToClipboardAction content={value ?? ""} />
