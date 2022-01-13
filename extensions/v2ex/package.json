@@ -9,7 +9,7 @@
     {
       "name": "index",
       "title": "Show v2ex Top 10",
-      "subtitle": " ",
+      "subtitle": "v2ex",
       "description": "Template to show a list received from a networking response",
       "mode": "view"
     }
