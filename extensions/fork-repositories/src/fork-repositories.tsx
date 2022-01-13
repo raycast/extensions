@@ -28,20 +28,16 @@ const Command = () => {
   const [isLoading, hasFork] = useHasApplication(FORK_BUNDLE_ID);
   const repos = useRepos(REPO_FILE_PATH);
 
-  if (isLoading) {
-    return <Detail markdown="Loading.." />;
-  }
-
-  if (!hasFork) {
+  if (!isLoading && !hasFork) {
     return <ForkNotFound />;
   }
 
-  if (repos.length === 0) {
+  if (!isLoading && repos.length === 0) {
     return <Detail markdown="Couldn't find any repositories." />;
   }
 
   return (
-    <List searchBarPlaceholder="Search repositories…">
+    <List searchBarPlaceholder="Search repositories…" isLoading={isLoading}>
       {repos.map((repo, index) => {
         const { path, name } = repo;
         return (
