@@ -82,6 +82,7 @@
 /extensions/json-format                              @destiner
 /extensions/kill-process                             @rolandleth
 /extensions/kinopoisk                                @mattisssa
+/extensions/laravel-livewire                         @tafhyseni
 /extensions/large-type                               @gbarba
 /extensions/lark                                     @tmk
 /extensions/linguee                                  @geekdada
