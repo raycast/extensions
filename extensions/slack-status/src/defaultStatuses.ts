@@ -26,14 +26,4 @@ export const defaultStatuses: SlackStatusPreset[] = [
     emojiCode: ":walking:",
     defaultDuration: 0,
   },
-  {
-    title: "Working from Home",
-    emojiCode: ":house_with_garden:",
-    defaultDuration: 0,
-  },
-  {
-    title: "Working from Office",
-    emojiCode: ":office:",
-    defaultDuration: 0,
-  },
 ];
