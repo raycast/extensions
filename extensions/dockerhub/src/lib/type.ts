@@ -55,7 +55,7 @@ export interface SearchSummary {
 
 export interface SearchResult {
   count: number;
-  summaries: SearchSummary[];
+  summaries?: SearchSummary[];
   page: number;
   page_size: number;
   next: string;

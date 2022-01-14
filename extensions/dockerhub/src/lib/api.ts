@@ -20,7 +20,7 @@ export async function search(query: {
       },
     });
     const result: SearchResult = resp.data;
-    result.summaries = result.summaries.map((summary: SearchSummary) => {
+    result.summaries = result.summaries?.map((summary: SearchSummary) => {
       if (summary.filter_type === FilterType.OFFICIAL) {
         summary.url = `https://hub.docker.com/_/${summary.slug}`;
       } else {
