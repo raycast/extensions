@@ -33,11 +33,15 @@ const useLastFm = (props: Props) => {
       }&format=json&period=${props.period}&limit=${props.limit || 24}`,
       fetcher,
       {
-        onSuccess: (data: SongResponse) => {
-          const tracks = data.recenttracks?.track || data.toptracks?.track || [];
+        onSuccess: (data) => {
+          if (data.error === 6) {
+            handleError(new Error("User not found."));
+          } else {
+            const tracks = data.recenttracks?.track || data.toptracks?.track || [];
 
-          setSongs(tracks);
-          setLoading(false);
+            setSongs(tracks);
+            setLoading(false);
+          }
         },
         onError: handleError,
       }

@@ -1,4 +1,6 @@
 export interface SongResponse {
+  message?: string;
+  error?: number;
   recenttracks?: RecentTracks;
   toptracks?: TopTracks;
 }

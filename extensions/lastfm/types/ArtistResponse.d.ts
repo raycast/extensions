@@ -1,4 +1,6 @@
 export interface ArtistResponse {
+  message?: string;
+  error?: number;
   topartists: Topartists;
 }
 

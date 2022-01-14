@@ -1,4 +1,6 @@
 export interface AlbumResponse {
+  message?: string;
+  error?: number;
   topalbums: TopAlbums;
 }
 

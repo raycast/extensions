@@ -26,8 +26,13 @@ const useTopArtists = (props: Props) => {
       fetcher,
       {
         onSuccess: (data) => {
-          setArtists(data.topartists.artist);
-          setLoading(false);
+          if (data.error === 6) {
+            setError(new Error("User not found."));
+            setLoading(false);
+          } else {
+            setArtists(data.topartists.artist);
+            setLoading(false);
+          }
         },
         onError: (err: unknown) => {
           setError(err);

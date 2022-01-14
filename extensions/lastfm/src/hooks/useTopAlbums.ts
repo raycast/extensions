@@ -26,8 +26,13 @@ const useTopAlbums = (props: Props) => {
       fetcher,
       {
         onSuccess: (data) => {
-          setAlbums(data.topalbums.album);
-          setLoading(false);
+          if (data.error === 6) {
+            setError(new Error("User not found."));
+            setLoading(false);
+          } else {
+            setAlbums(data.topalbums.album);
+            setLoading(false);
+          }
         },
         onError: (err: unknown) => {
           setError(err);
