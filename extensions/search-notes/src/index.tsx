@@ -6,6 +6,7 @@ import {
   setLocalStorageItem,
   closeMainWindow,
   getPreferenceValues,
+  Icon,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
@@ -20,6 +21,7 @@ interface Note {
 
 interface State {
   notes: Note[];
+  loading: boolean;
   error?: Error;
 }
 
@@ -31,6 +33,7 @@ interface Preferences {
 export default function Command() {
   const [state, setState] = useState<State>({
     notes: [],
+    loading: true,
   });
   function parseNotes(result: string) {
     const lines = result.split("\n");
@@ -69,7 +72,7 @@ export default function Command() {
     }
 
     notes.sort((a, b) => (a.date && b.date && a.date < b.date ? 1 : -1));
-    setState({ notes: notes });
+    setState({ notes: notes, loading: false });
   }
   async function checkCachedNotes() {
     const cachedNotes = (await getLocalStorageItem("notes")) as string;
@@ -92,9 +95,6 @@ export default function Command() {
         "set theNoteDate to the modification date of theNote\n" +
         'set output to output & "note: " & theNoteName & "\n"\n' +
         'set output to output & "date: " & theNoteDate & "\n"\n' +
-        "-- say theNoteNumber\n" +
-        "-- show (note whose id is theNoteNumber)\n" +
-        "-- show note theNoteName\n" +
         "end repeat\n" +
         "end repeat\n" +
         "end repeat\n" +
@@ -120,13 +120,13 @@ export default function Command() {
   const preferences: Preferences = getPreferenceValues();
 
   return (
-    <List isLoading={state.notes.length < 1}>
+    <List isLoading={state.loading}>
       {state.notes.map((note, i) => (
         <List.Item
           key={i}
           icon="notes-icon.png"
           title={note.name}
-          subtitle={
+          accessoryTitle={
             preferences.accounts
               ? preferences.folders
                 ? note.account + " -> " + note.folder
@@ -137,7 +137,7 @@ export default function Command() {
           }
           actions={
             <ActionPanel title="Actions">
-              <ActionPanel.Item title="Open in Notes" onAction={() => openNote(i)} />
+              <ActionPanel.Item title="Open in Notes" icon={Icon.TextDocument} onAction={() => openNote(i)} />
             </ActionPanel>
           }
         />

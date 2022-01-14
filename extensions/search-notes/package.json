@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Note",
+      "title": "Search Notes",
       "subtitle": "Notes",
       "description": "Search notes in the Apple Notes app",
       "mode": "view"
