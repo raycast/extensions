@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import fetch from "node-fetch";
 import useSWR from "swr";
 
@@ -9,38 +9,46 @@ const USERINFO_URL = "https://mustapp.com/api/users/uri";
 import { UserResponse } from "@/types/UserResponse";
 import { ListResponse, Product } from "@/types/ListResponse";
 
+interface WantList {
+  series: Product[];
+  movies: Product[];
+}
+
 const useMust = (username: string) => {
   try {
-    const [want, setWant] = useState<{ series: Product[]; movies: Product[] }>({ series: [], movies: [] });
-
     // State values
+    const [want, setWant] = useState<WantList>({ series: [], movies: [] });
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<unknown>(null);
 
     // User data fetching
     const userFetcher = (url: string) => fetch(url).then((r) => r.json() as Promise<UserResponse>);
     const { data: user, error: userError } = useSWR<UserResponse>(`${USERINFO_URL}/${username}`, userFetcher);
 
-    if (userError)
-      return {
-        isLoading: false,
-        error: true,
-        list: { series: [], movies: [] },
-      };
+    useEffect(() => {
+      if (userError || user?.error?.message) {
+        setLoading(false);
+        setError(new Error(userError || user?.error?.message));
+      }
+    }, [userError, user?.error]);
 
-    const listsWant = user?.lists?.want || [];
+    const listsWant = useMemo(() => user?.lists?.want || [], [user?.lists]);
 
     // Series info fetching
-    const listFetcher = (url: string) =>
-      fetch(url, {
+    const listFetcher = (url: string) => {
+      if (listsWant.length === 0) return [];
+
+      return fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "User-Agent": "RaycastApp",
         },
         body: JSON.stringify({
           ids: listsWant,
         }),
       }).then((r) => r.json() as Promise<ListResponse[]>);
+    };
 
     useSWR<ListResponse[]>(`https://mustapp.com/api/users/id/${user?.id}/products?embed=product`, listFetcher, {
       onSuccess: (data) => {
@@ -65,14 +73,14 @@ const useMust = (username: string) => {
 
     return {
       isLoading: loading && !error,
-      error: !loading && error,
       list: want,
+      error,
     };
-  } catch (err: unknown) {
+  } catch (error) {
     return {
       isLoading: false,
-      error: err,
       list: { series: [], movies: [] },
+      error,
     };
   }
 };
