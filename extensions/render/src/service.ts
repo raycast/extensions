@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 
 interface OwnerResponse {
   cursor: string;
@@ -112,6 +112,10 @@ export interface DomainResponse {
   verified: boolean;
 }
 
+export class NetworkError extends Error {};
+
+export class AuthError extends NetworkError {};
+
 export default class Service {
   client: AxiosInstance;
 
@@ -125,80 +129,164 @@ export default class Service {
   }
 
   async getOwners(): Promise<Owner[]> {
-    const { data } = await this.client.get<OwnerResponse[]>('/owners', {
-      params: {
-        limit: 100,
-      },
-    });
+    try {
+      const { data } = await this.client.get<OwnerResponse[]>('/owners', {
+        params: {
+          limit: 100,
+        },
+      });
 
-    return data.map((item) => {
-      const { id, name, type } = item.owner;
-      return {
-        id,
-        name,
-        type,
-      };
-    });
+      return data.map((item) => {
+        const { id, name, type } = item.owner;
+        return {
+          id,
+          name,
+          type,
+        };
+      });
+    } catch (e) {
+      const error = e as AxiosError;
+      const status = error.response?.status;
+      if (!status) {
+        throw new Error();
+      }
+      if (status !== 401) {
+        throw new NetworkError();
+      }
+      throw new AuthError();
+    }
   }
 
   async getServices(): Promise<ServiceResponse[]> {
-    const { data } = await this.client.get<ServiceItemResponse[]>('/services', {
-      params: {
-        limit: 100,
-      },
-    });
-    return data.map((item) => {
-      return item.service;
-    });
+    try {
+      const { data } = await this.client.get<ServiceItemResponse[]>('/services', {
+        params: {
+          limit: 100,
+        },
+      });
+      return data.map((item) => {
+        return item.service;
+      });
+    } catch (e) {
+      const error = e as AxiosError;
+      const status = error.response?.status;
+      if (!status) {
+        throw new Error();
+      }
+      if (status !== 401) {
+        throw new NetworkError();
+      }
+      throw new AuthError();
+    }
   }
 
   async getService(id: string): Promise<ServiceResponse> {
-    const { data } = await this.client.get<ServiceResponse>(`/services/${id}`);
-    return data;
+    try {
+      const { data } = await this.client.get<ServiceResponse>(`/services/${id}`);
+      return data;
+    } catch (e) {
+      const error = e as AxiosError;
+      const status = error.response?.status;
+      if (!status) {
+        throw new Error();
+      }
+      if (status !== 401) {
+        throw new NetworkError();
+      }
+      throw new AuthError();
+    }
   }
 
   async getDeploys(serviceId: string): Promise<DeployResponse[]> {
-    const { data } = await this.client.get<DeployItemResponse[]>(
-      `/services/${serviceId}/deploys`,
-      {
-        params: {
-          limit: 100,
-        },
+    try {
+      const { data } = await this.client.get<DeployItemResponse[]>(
+        `/services/${serviceId}/deploys`,
+        {
+          params: {
+            limit: 100,
+          },
+        }
+      );
+      return data.map((item) => item.deploy);
+    } catch (e) {
+      const error = e as AxiosError;
+      const status = error.response?.status;
+      if (!status) {
+        throw new Error();
       }
-    );
-    return data.map((item) => item.deploy);
+      if (status !== 401) {
+        throw new NetworkError();
+      }
+      throw new AuthError();
+    }
   }
 
   async getDeploy(serviceId: string, id: string): Promise<DeployResponse> {
-    const { data } = await this.client.get<DeployResponse>(
-      `/services/${serviceId}/deploys/${id}`
-    );
-    return data;
+    try {
+      const { data } = await this.client.get<DeployResponse>(
+        `/services/${serviceId}/deploys/${id}`
+      );
+      return data;
+    } catch (e) {
+      const error = e as AxiosError;
+      const status = error.response?.status;
+      if (!status) {
+        throw new Error();
+      }
+      if (status !== 401) {
+        throw new NetworkError();
+      }
+      throw new AuthError();
+    }
   }
 
   async getEnvVariables(serviceId: string): Promise<EnvVariables> {
-    const { data } = await this.client.get<EnvVariableItemResponse[]>(
-      `/services/${serviceId}/env-vars`,
-      {
-        params: {
-          limit: 100,
-        },
+    try {
+      const { data } = await this.client.get<EnvVariableItemResponse[]>(
+        `/services/${serviceId}/env-vars`,
+        {
+          params: {
+            limit: 100,
+          },
+        }
+      );
+      return Object.fromEntries(
+        data.map((item) => [item.envVar.key, item.envVar.value])
+      );
+    } catch (e) {
+      const error = e as AxiosError;
+      const status = error.response?.status;
+      if (!status) {
+        throw new Error();
       }
-    );
-    return Object.fromEntries(
-      data.map((item) => [item.envVar.key, item.envVar.value])
-    );
+      if (status !== 401) {
+        throw new NetworkError();
+      }
+      throw new AuthError();
+    }
   }
 
   async getDomains(serviceId: string): Promise<DomainResponse[]> {
-    const { data } = await this.client.get<DomainItemResponse[]>(
-      `/services/${serviceId}/custom-domains`,
-      {
-        params: {
-          limit: 100,
-        },
+    try {
+      const { data } = await this.client.get<DomainItemResponse[]>(
+        `/services/${serviceId}/custom-domains`,
+        {
+          params: {
+            limit: 100,
+          },
+        }
+      );
+      return data.map((item) => item.customDomain);
+    } catch (e) {
+      const error = e as AxiosError;
+      const status = error.response?.status;
+      if (!status) {
+        throw new Error();
       }
-    );
-    return data.map((item) => item.customDomain);
+      if (status !== 401) {
+        throw new NetworkError();
+      }
+      throw new AuthError();
+    }
   }
 }

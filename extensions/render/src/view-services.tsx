@@ -8,11 +8,15 @@ import {
   ListSection,
   OpenInBrowserAction,
   PushAction,
+  showToast,
+  ToastStyle,
 } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
 import Service, {
+  AuthError,
   DeployResponse,
   DomainResponse,
+  NetworkError,
   Owner,
   ServiceResponse,
 } from './service';
@@ -63,10 +67,14 @@ export default function Command() {
 
   useEffect(() => {
     async function fetchServices() {
-      const owners = await renderService.getOwners();
-      const services = await renderService.getServices();
-      setOwners(owners);
-      setServices(services);
+      try {
+        const owners = await renderService.getOwners();
+        const services = await renderService.getServices();
+        setOwners(owners);
+        setServices(services);
+      } catch (e) {
+        handleError(e);
+      }
       setLoading(false);
     }
 
@@ -221,8 +229,12 @@ function DeployListView(props: ServiceProps) {
 
   useEffect(() => {
     async function fetchDeploys() {
-      const deploys = await renderService.getDeploys(service.id);
-      setDeploys(deploys);
+      try {
+        const deploys = await renderService.getDeploys(service.id);
+        setDeploys(deploys);
+      } catch (e) {
+        handleError(e);
+      }
       setLoading(false);
     }
 
@@ -314,8 +326,12 @@ function EnvVariableListView(props: EnvVariableListProps) {
 
   useEffect(() => {
     async function fetchVariables() {
-      const variables = await renderService.getEnvVariables(serviceId);
-      setVariables(variables);
+      try {
+        const variables = await renderService.getEnvVariables(serviceId);
+        setVariables(variables);
+      } catch (e) {
+        handleError(e);
+      }
       setLoading(false);
     }
 
@@ -355,8 +371,12 @@ function DomainListView(props: DomainListProps) {
 
   useEffect(() => {
     async function fetchDomains() {
-      const domains = await renderService.getDomains(serviceId);
-      setDomains(domains);
+      try {
+        const domains = await renderService.getDomains(serviceId);
+        setDomains(domains);
+      } catch (e) {
+        handleError(e);
+      }
       setLoading(false);
     }
 
@@ -370,4 +390,18 @@ function DomainListView(props: DomainListProps) {
       ))}
     </List>
   );
+}
+
+function handleError(e: unknown) {
+  if (e instanceof AuthError) {
+    showToast(
+      ToastStyle.Failure,
+      'Failed to authorize',
+      'Please make sure that your API key is valid.'
+    );
+  } else if (e instanceof NetworkError) {
+    showToast(ToastStyle.Failure, 'Network error', 'Please try again later.');
+  } else {
+    showToast(ToastStyle.Failure, 'Unknown error');
+  }
 }
