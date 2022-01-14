@@ -159,6 +159,7 @@
 /extensions/unicode-symbols                          @mmazzarolo
 /extensions/unix-timestamp                           @Destiner
 /extensions/uuid-generator                           @jmaeso
+/extensions/v2ex                                     @mopig
 /extensions/vault                                    @ricoberger
 /extensions/vercast                                  @gleich
 /extensions/visual-studio-code-project-manager       @MarkusLanger
