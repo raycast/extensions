@@ -112,9 +112,9 @@ export interface DomainResponse {
   verified: boolean;
 }
 
-export class NetworkError extends Error {};
+export class NetworkError extends Error {}
 
-export class AuthError extends NetworkError {};
+export class AuthError extends NetworkError {}
 
 export default class Service {
   client: AxiosInstance;
@@ -159,11 +159,14 @@ export default class Service {
 
   async getServices(): Promise<ServiceResponse[]> {
     try {
-      const { data } = await this.client.get<ServiceItemResponse[]>('/services', {
-        params: {
-          limit: 100,
-        },
-      });
+      const { data } = await this.client.get<ServiceItemResponse[]>(
+        '/services',
+        {
+          params: {
+            limit: 100,
+          },
+        }
+      );
       return data.map((item) => {
         return item.service;
       });
@@ -182,7 +185,9 @@ export default class Service {
 
   async getService(id: string): Promise<ServiceResponse> {
     try {
-      const { data } = await this.client.get<ServiceResponse>(`/services/${id}`);
+      const { data } = await this.client.get<ServiceResponse>(
+        `/services/${id}`
+      );
       return data;
     } catch (e) {
       const error = e as AxiosError;
