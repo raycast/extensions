@@ -83,6 +83,7 @@
 /extensions/jira-search                              @svenwiegand
 /extensions/jisho                                    @dmacdermott
 /extensions/json-format                              @Destiner
+/extensions/json2ts                                  @gon250
 /extensions/kill-process                             @rolandleth
 /extensions/kinopoisk                                @mattisssa
 /extensions/laravel-livewire                         @tafhyseni
