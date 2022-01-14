@@ -1,6 +1,5 @@
 import {
   ActionPanel,
-  Detail,
   List,
   getLocalStorageItem,
   setLocalStorageItem,

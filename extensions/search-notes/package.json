@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "search-notes",
-  "title": "Search Apple Notes",
-  "description": "Search notes within the Apple Notes application.",
+  "name": "apple-notes",
+  "title": "Apple Notes",
+  "description": "Search and create notes within the Apple Notes application.",
   "icon": "command-icon.png",
   "author": "tumtum",
   "license": "MIT",
