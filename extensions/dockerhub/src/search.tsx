@@ -21,21 +21,15 @@ export function Search(props: Props) {
 
   useEffect(() => {
     (async () => {
-      if (props.text) {
-        await onSearchTextChange(props.text);
-      }
+      await onSearchTextChange(props.text ? props.text : "");
       setLoading(false);
     })();
   }, []);
 
   const onSearchTextChange = async (text: string) => {
-    if (text.length === 0) {
-      return;
-    }
     setLoading(true);
     try {
       const result: SearchResult = await search({ q: text, type: props.searchType, page_size: 25 });
-      console.log(result.summaries[0]);
       setSearchResult(result);
     } catch (err) {
       showToast(ToastStyle.Failure, "Search failed", (err as Error).message);

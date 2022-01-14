@@ -9,8 +9,7 @@
   "commands": [
     {
       "name": "search-image",
-      "title": "Search Images",
-      "subtitle": "Images on Docker Hub",
+      "title": "Search Docker Images",
       "description": "Search images on Docker Hub",
       "mode": "view"
     }
