@@ -7,7 +7,7 @@ interface CommandForm {
   file: string;
   size: "preview" | "small" | "regular" | "medium" | "full" | "auto" | "hd" | "4k";
   type: "auto" | "person" | "product" | "car";
-  crop: boolean;
+  crop: number;
 }
 
 const processFile = ({ file, size, type, crop }: CommandForm): Promise<string> => {
@@ -30,19 +30,14 @@ const processFile = ({ file, size, type, crop }: CommandForm): Promise<string> =
     apiKey: preferences.apiKey,
     scale: "original",
     size,
-    crop,
+    crop: crop === 1,
     type,
     outputFile,
-  })
-    .then(({ base64img }: RemoveBgResult) => {
-      showToast(ToastStyle.Success, `Image saved as removed-${fileName}`);
+  }).then(({ base64img }: RemoveBgResult) => {
+    showToast(ToastStyle.Success, `Image saved as removed-${fileName}`);
 
-      return base64img;
-    })
-    .catch((errors: Array<RemoveBgError>) => {
-      showToast(ToastStyle.Failure, errors[0].title);
-      return errors[0].title;
-    });
+    return base64img;
+  });
 };
 
 export default function Command() {
@@ -54,6 +49,9 @@ export default function Command() {
 
     processFile(input)
       .then(setBase64)
+      .catch((errors: Array<RemoveBgError>) => {
+        showToast(ToastStyle.Failure, errors[0].title);
+      })
       .finally(() => {
         setLoading(false);
       });
