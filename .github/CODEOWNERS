@@ -59,6 +59,7 @@
 /extensions/file-manager                             @es183923
 /extensions/flow                                     @vimtor
 /extensions/flutter-pub-dev-search                   @prasadsunny1
+/extensions/fork-repositories                        @sxn
 /extensions/git-repos                                @moored
 /extensions/github-for-enterprise                    @Kinbaum
 /extensions/github-repository-search                 @thomaspaulmann
