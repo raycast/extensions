@@ -6,7 +6,7 @@
 A [Raycast](https://raycast.com/) extension that lets you to list your **Top Songs**, **Top Artists**, **Top Albums** and **Recent Songs** from your [Last.fm](https://last.fm) profile.
 
 <p align="center">
-   <video src="TO_BE_ADDED" />
+   <video src="https://user-images.githubusercontent.com/13917975/149525948-9b23ae6c-ed08-4fb7-99c5-c8376f40d59f.mov" />
 </p>
 
 ### Installation
