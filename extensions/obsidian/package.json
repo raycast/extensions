@@ -20,28 +20,32 @@
           "title": "Path to Vault",
           "required": true,
           "description": "Specify the path or multiple paths (comma separated) to your vault/vaults"
-        },{
+        },
+        {
           "name": "excludedFolders",
           "type": "textfield",
           "placeholder": "folder1, folder2, ...",
           "title": "Exclude following folders",
           "required": false,
           "description": "Specify which folders to exclude (comma separated)"
-        }, {
+        },
+        {
           "name": "removeYAML",
           "label": "Hide content",
           "type": "checkbox",
           "title": "Hide YAML",
           "required": false,
           "description": "Hide YAML frontmatter for copying and viewing notes"
-        }, {
+        },
+        {
           "name": "removeLinks",
           "label": "Hide content",
           "type": "checkbox",
           "title": "Hide Links",
           "required": false,
           "description": "Hide links for copying and viewing notes"
-        }, {
+        },
+        {
           "name": "primaryAction",
           "type": "dropdown",
           "title": "Primary Action",
@@ -51,7 +55,8 @@
             {
               "title": "Quick Look",
               "value": "quicklook"
-            }, {
+            },
+            {
               "title": "Open in Obsidian",
               "value": "obsidian"
             }
@@ -101,7 +106,6 @@
         }
       ]
     }
-
   ],
   "dependencies": {
     "@raycast/api": "^1.25.1"
@@ -114,11 +118,10 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "typescript": "^4.5.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop"
   }
 }
-

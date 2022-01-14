@@ -7,7 +7,7 @@ import {
 import { useEffect, useState } from "react";
 
 interface Preferences {
-  vaults: String;
+  vaults: string;
 }
 
 interface Vault {
@@ -27,7 +27,7 @@ export default function Command() {
 
   useEffect(() => {
     async function fetch() {
-      let vaults = parseVaults();
+      const vaults = parseVaults();
       setVaults(vaults);
     }
     fetch();
