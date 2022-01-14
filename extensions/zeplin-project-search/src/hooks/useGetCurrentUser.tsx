@@ -1,10 +1,4 @@
-import {
-  getLocalStorageItem,
-  getPreferenceValues,
-  setLocalStorageItem,
-  showToast,
-  ToastStyle
-} from "@raycast/api";
+import { getLocalStorageItem, getPreferenceValues, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
 import { useState, useEffect } from "react";
 import type { User } from "../types";
 import fetch from "node-fetch";
@@ -15,7 +9,7 @@ async function fetchCurrentUserFromLocalStorage(): Promise<User | undefined> {
   const item = await getLocalStorageItem<string>(CURRENT_ZEPLIN_USER_KEY);
   if (item) {
     const user = JSON.parse(item) as User;
-    return user
+    return user;
   }
 }
 
@@ -28,16 +22,13 @@ async function fetchCurrentUserFromAPI(): Promise<User | undefined> {
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
 
   try {
-    const response = await fetch(
-      `https://api.zeplin.dev/v1/users/me`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${PERSONAL_ACCESS_TOKEN}`,
-        },
-      }
-    );
+    const response = await fetch(`https://api.zeplin.dev/v1/users/me`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${PERSONAL_ACCESS_TOKEN}`,
+      },
+    });
 
     return (await response.json()) as User;
   } catch (error) {
@@ -54,7 +45,7 @@ export function useGetCurrentUser() {
       if (user) {
         setCurrentUser(user);
       }
-    })
+    });
 
     // A user (token) might be changed so refetch it async even if exists in local storage
     fetchCurrentUserFromAPI().then((user) => {
@@ -62,7 +53,7 @@ export function useGetCurrentUser() {
         saveCurrentUser(user);
         setCurrentUser(user);
       }
-    })
+    });
   }, []);
 
   return { currentUser };

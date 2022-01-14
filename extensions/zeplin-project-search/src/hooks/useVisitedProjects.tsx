@@ -1,8 +1,4 @@
-import {
-  getLocalStorageItem,
-  removeLocalStorageItem,
-  setLocalStorageItem,
-} from "@raycast/api";
+import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from "@raycast/api";
 import { useState, useEffect } from "react";
 import type { Project } from "../types";
 
@@ -36,16 +32,16 @@ export function useVisitedProjects() {
   }, []);
 
   function visitProject(project: Project) {
-    const updatedProjects = [
-      project,
-      ...(projects?.filter((p) => p.id !== project.id) ?? []),
-    ].slice(0, VISITED_ZEPLIN_FILES_LENGTH);
+    const updatedProjects = [project, ...(projects?.filter((p) => p.id !== project.id) ?? [])].slice(
+      0,
+      VISITED_ZEPLIN_FILES_LENGTH
+    );
     setProjects(updatedProjects);
     saveVisitedProject(updatedProjects);
   }
 
   function removeProjectFromVisit(project: Project) {
-    const updatedProjects = (projects || []).filter(p => p.id !== project.id);
+    const updatedProjects = (projects || []).filter((p) => p.id !== project.id);
     setProjects(updatedProjects);
     saveVisitedProject(updatedProjects);
   }

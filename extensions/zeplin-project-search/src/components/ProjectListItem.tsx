@@ -1,5 +1,14 @@
-import { ActionPanel, List, Application, getApplications, OpenInBrowserAction, CopyToClipboardAction, OpenAction, Icon } from "@raycast/api";
-import { formatDistanceToNow } from 'date-fns'
+import {
+  ActionPanel,
+  List,
+  Application,
+  getApplications,
+  OpenInBrowserAction,
+  CopyToClipboardAction,
+  OpenAction,
+  Icon,
+} from "@raycast/api";
+import { formatDistanceToNow } from "date-fns";
 import type { Project } from "../types";
 import { useState, useEffect } from "react";
 
@@ -7,7 +16,7 @@ export default function ProjectListItem(props: {
   project: Project;
   onVisit: (project: Project) => void;
   onLeave: (project: Project) => void;
-  removeFromVisits?: (project: Project) => void
+  removeFromVisits?: (project: Project) => void;
 }) {
   const { project, onVisit, onLeave, removeFromVisits } = props;
   const [desktopApp, setDesktopApp] = useState<Application>();
@@ -27,13 +36,15 @@ export default function ProjectListItem(props: {
       subtitle={project.platform}
       actions={
         <ActionPanel>
-          {desktopApp ? <OpenAction
-            title='Open in Zeplin App'
-            icon={Icon.Document}
-            target={`zpl://project?pid=${project.id}`}
-            application={desktopApp}
-            onOpen={() => onVisit(project)}
-          /> : null}
+          {desktopApp ? (
+            <OpenAction
+              title="Open in Zeplin App"
+              icon={Icon.Document}
+              target={`zpl://project?pid=${project.id}`}
+              application={desktopApp}
+              onOpen={() => onVisit(project)}
+            />
+          ) : null}
           <OpenInBrowserAction
             title={`Open in Browser`}
             url={`https://app.zeplin.io/project/${project.id}`}
@@ -44,20 +55,14 @@ export default function ProjectListItem(props: {
             icon={Icon.Clipboard}
             content={`https://app.zeplin.io/project/${project.id}`}
           />
-          {
-            removeFromVisits ?
-              <ActionPanel.Item
-                icon={Icon.Trash}
-                title="Remove from Recenlty Visited Projects"
-                onAction={() => removeFromVisits(project)}
-              />
-              : null
-          }
-          <ActionPanel.Item
-            icon={Icon.ExclamationMark}
-            title="Leave Project"
-            onAction={() => onLeave(project)}
-          />
+          {removeFromVisits ? (
+            <ActionPanel.Item
+              icon={Icon.Trash}
+              title="Remove from Recenlty Visited Projects"
+              onAction={() => removeFromVisits(project)}
+            />
+          ) : null}
+          <ActionPanel.Item icon={Icon.ExclamationMark} title="Leave Project" onAction={() => onLeave(project)} />
         </ActionPanel>
       }
     />
