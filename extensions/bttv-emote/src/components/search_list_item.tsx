@@ -29,11 +29,11 @@ export function SearchListItem({ searchResult }: { searchResult: Emote }) {
                 <ActionPanel>
                     <ActionPanel.Section>
                         <CopyToClipboardAction
-                            title="Copy emote"
+                            title="Copy Emote"
                             content={image2x}
                         />
                         <PasteAction
-                            title="Paste emote"
+                            title="Paste Emote"
                             content={image2x}
                         />
                     </ActionPanel.Section>
@@ -59,7 +59,6 @@ export function SearchListItem({ searchResult }: { searchResult: Emote }) {
                     </ActionPanel.Section>
                     <ActionPanel.Section>
                         <OpenInBrowserAction
-                            title="Open in Browser"
                             url={browserUrl}
                             shortcut={{ modifiers: ["cmd"], key: "o" }}
                         />
