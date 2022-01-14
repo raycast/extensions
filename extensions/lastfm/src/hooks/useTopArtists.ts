@@ -23,7 +23,7 @@ const useTopArtists = (props: Props) => {
 
     const fetcher = (url: string) => fetch(url).then((r) => r.json() as Promise<ArtistResponse>);
     useSWR(
-      `http://ws.audioscrobbler.com/2.0/?method=user.gettopartists&user=${props.username}&api_key=${
+      `https://ws.audioscrobbler.com/2.0/?method=user.gettopartists&user=${props.username}&api_key=${
         props.apikey
       }&format=json&period=${props.period}&limit=${props.limit || 24}`,
       fetcher,
