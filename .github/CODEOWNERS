@@ -6,6 +6,7 @@
 /extensions/amazon-aws                               @victor-falcon @Hodglim
 /extensions/api-icon-list                            @PitNikola
 /extensions/atomic                                   @joepio
+/extensions/audio-device                             @benvp @mathieudutour
 /extensions/authy                                    @guga4ka
 /extensions/base64                                   @DanielSinclair
 /extensions/bear                                     @hmarr
@@ -64,7 +65,7 @@
 /extensions/github-stars                             @mrmartineau
 /extensions/gitlab                                   @tonka3000
 /extensions/gitmoji                                  @ricoberger
-/extensions/google-chrome                            @rgomezcasas @grzegorzkrukowski
+/extensions/google-chrome                            @rgomezcasas @bromanko
 /extensions/google-chrome-profiles                   @frouo
 /extensions/google-maps-search                       @ratoru
 /extensions/google-search                            @mblode
@@ -89,7 +90,7 @@
 /extensions/lobsters                                 @dev99problems
 /extensions/lorem-ipsum                              @AntonNiklasson
 /extensions/markdown-reference                       @codedbyjordan
-/extensions/microsoft-edge                           @KartikKumarSahoo @grzegorzkrukowski
+/extensions/microsoft-edge                           @KartikKumarSahoo @bromanko
 /extensions/mldocs                                   @sadanand-singh
 /extensions/music                                    @splash-cli
 /extensions/myip                                     @kkange
