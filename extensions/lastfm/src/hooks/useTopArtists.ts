@@ -2,6 +2,9 @@ import { useState } from "react";
 import fetch from "node-fetch";
 import useSWR from "swr";
 
+// Functions
+import getErrorMessage from "../functions/getErrorMessage";
+
 // Types
 import { ArtistResponse, Artist } from "@/types/ArtistResponse";
 
@@ -26,8 +29,10 @@ const useTopArtists = (props: Props) => {
       fetcher,
       {
         onSuccess: (data) => {
-          if (data.error === 6) {
-            setError(new Error("User not found."));
+          if (data.error) {
+            const message = getErrorMessage(data.error);
+
+            setError(new Error(message));
             setLoading(false);
           } else {
             setArtists(data.topartists.artist);

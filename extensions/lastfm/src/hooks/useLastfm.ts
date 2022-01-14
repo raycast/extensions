@@ -2,6 +2,9 @@ import { useState } from "react";
 import fetch from "node-fetch";
 import useSWR from "swr";
 
+// Functions
+import { getErrorMessage } from "../functions/getErrorMessage";
+
 // Types
 import type { SongResponse, Track, TopTrack } from "@/types/SongResponse";
 
@@ -34,8 +37,9 @@ const useLastFm = (props: Props) => {
       fetcher,
       {
         onSuccess: (data) => {
-          if (data.error === 6) {
-            handleError(new Error("User not found."));
+          if (data.error) {
+            const message = getErrorMessage(data.error);
+            handleError(new Error(message));
           } else {
             const tracks = data.recenttracks?.track || data.toptracks?.track || [];
 
