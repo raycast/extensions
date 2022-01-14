@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "ethereum-evm-development",
+  "name": "ethereum-utils",
   "title": "Ethereum Utils — EVM Development",
   "description": "Collection of utils for Ethereum and EVM-compatible chain development",
   "icon": "icon.png",
