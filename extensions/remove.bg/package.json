@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "remove-bg",
-  "title": "Remove BG",
+  "name": "remove-background",
+  "title": "Remove Background",
   "description": "Removes the background from an image with remove.bg",
   "icon": "command-icon.png",
   "author": "maantje",
@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "remove.bg",
-      "subtitle": "Remove the background from an image",
+      "title": "Remove Background From Image",
+      "subtitle": "remove.bg",
       "description": "Remove the background from an image",
       "mode": "view",
       "preferences": [
