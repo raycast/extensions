@@ -30,7 +30,7 @@ const LastFm: React.FC = () => {
         {albums.map((a, idx) => {
           const album = a as Album;
           const image =
-            album.image?.find((image) => image.size === "large")?.["#text"] || "https://i.imgur.com/ekASTF4.jpg";
+            album.image?.find((image) => image.size === "large")?.["#text"] || "../assets/default-album.jpeg";
           const { url, name } = album.artist;
 
           return (
