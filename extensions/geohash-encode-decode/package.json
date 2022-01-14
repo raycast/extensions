@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "geohash-encode-decode",
-  "title": "Geohash Encode/Decode",
+  "title": "Geohash",
   "description": "Encode coordinates as geohash, or decode a geohash and get useful info",
   "icon": "command-icon.png",
   "author": "alrico88",
