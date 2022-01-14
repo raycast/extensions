@@ -20,6 +20,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "label": "Close on action",
+      "description": "Close extension on action execution (Copy to Clipboard / Open in Browser)",
+      "default": false,
+      "type": "checkbox",
+      "name": "closeOnAction",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.27.0",
     "@sindresorhus/is": "^4.2.1",

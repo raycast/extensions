@@ -4,6 +4,7 @@ import { List, ActionPanel, CopyToClipboardAction, OpenInBrowserAction } from "@
 import is from "@sindresorhus/is";
 import InvalidCoordinates from "./InvalidCoordinates";
 import { getGeohashShapeLink } from "../helpers/getGeohashLink";
+import { afterActionHandler } from "../helpers/actions";
 
 interface EncodeListProps {
   latitude: string;
@@ -41,8 +42,8 @@ export default function EncodedList({ latitude, longitude }: EncodeListProps) {
     listContent = asGeohash.map((geohash) => {
       const ListItemActions = (
         <ActionPanel>
-          <CopyToClipboardAction content={geohash} />
-          <OpenInBrowserAction url={getGeohashShapeLink(geohash)} />
+          <CopyToClipboardAction content={geohash} onCopy={afterActionHandler} />
+          <OpenInBrowserAction url={getGeohashShapeLink(geohash)} onOpen={afterActionHandler} />
         </ActionPanel>
       );
 
