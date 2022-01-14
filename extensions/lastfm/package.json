@@ -18,36 +18,36 @@
     {
       "name": "combined",
       "title": "Top & Recent Songs",
+      "subtitle": "Last.fm",
       "description": "Display your top and recent songs!",
-      "subtitle": "Display your top and recent songs!",
       "mode": "view"
     },
     {
       "name": "songs",
       "title": "Top Songs",
+      "subtitle": "Last.fm",
       "description": "Your top songs!",
-      "subtitle": "Your top songs!",
       "mode": "view"
     },
     {
       "name": "recent",
       "title": "Recent Songs",
+      "subtitle": "Last.fm",
       "description": "Your recent songs!",
-      "subtitle": "Your recent songs!",
       "mode": "view"
     },
     {
       "name": "artists",
       "title": "Top Artists",
+      "subtitle": "Last.fm",
       "description": "Your top artists!",
-      "subtitle": "Your top artists!",
       "mode": "view"
     },
     {
       "name": "albums",
       "title": "Top Albums",
+      "subtitle": "Last.fm",
       "description": "Your top albums!",
-      "subtitle": "Your top albums!",
       "mode": "view"
     }
   ],
