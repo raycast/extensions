@@ -10,6 +10,7 @@
     {
       "name": "context",
       "title": "Switch Cluster",
+      "subtitle": "Kubernetes",
       "description": "Change current cluster",
       "mode": "view",
       "preferences": [
