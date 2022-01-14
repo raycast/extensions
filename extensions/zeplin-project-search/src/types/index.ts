@@ -16,7 +16,7 @@ export type Organization = {
     logo: string,
 }
 
-export type User ={
+export type User = {
     id: string;
     email: string;
     username: string;

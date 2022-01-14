@@ -49,12 +49,12 @@ export function useGetProjects() {
 async function getProjects(): Promise<Project[]> {
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
 
-  let limit = 100;
+  const limit = 100;
   let offset = 0;
   let hasMore = true;
   let projects: Project[] = [];
 
-  while(hasMore) {
+  while (hasMore) {
     try {
       const response = await fetch(
         `https://api.zeplin.dev/v1/projects?status=active&limit=${limit}&offset=${offset}`,
@@ -71,17 +71,17 @@ async function getProjects(): Promise<Project[]> {
         const result = (await response.json()) as APIErrorResponse;
         throw new Error(result.message);
       }
-  
+
       const result = (await response.json()) as Project[];
-      projects = projects.concat(result); 
+      projects = projects.concat(result);
 
       if (result.length < limit) {
         hasMore = false;
-      }else {
+      } else {
         offset += limit;
       }
     } catch (error) {
-      console.error(error); 
+      console.error(error);
       showToast(ToastStyle.Failure, "Could not fetch projects");
     }
   }
@@ -111,9 +111,9 @@ async function removeUserFromProject(project: Project, member?: User) {
       const result = (await response.json()) as APIErrorResponse;
       throw new Error(result.message);
     }
-   
+
   } catch (error) {
-    console.error(error); 
+    console.error(error);
     throw error;
   }
 }

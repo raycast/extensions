@@ -26,39 +26,39 @@ export default function ProjectListItem(props: {
       accessoryTitle={formatDistanceToNow(project.updated * 1000)}
       subtitle={project.platform}
       actions={
-          <ActionPanel>
-            {desktopApp ? <OpenAction
-                title='Open in Zeplin App'
-                icon={Icon.Document}
-                target={`zpl://project?pid=${project.id}`}
-                application={desktopApp}
-                onOpen={() => onVisit(project)}
-            />: null}
-            <OpenInBrowserAction 
-                title={`Open in Browser`}
-                url={`https://app.zeplin.io/project/${project.id}`}
-                onOpen={() => onVisit(project)}
-            />
-            <CopyToClipboardAction  
-                title="Copy URL to Clipboard"
-                icon={Icon.Clipboard}
-                content={`https://app.zeplin.io/project/${project.id}`} 
-            />
-            {
-                removeFromVisits ? 
-                    <ActionPanel.Item
-                        icon={Icon.Trash}
-                        title="Remove from Recenlty Visited Projects"
-                        onAction={() => removeFromVisits(project)}
-                    /> 
-                    : null
-            }
-            <ActionPanel.Item
-                icon={Icon.ExclamationMark}
-                title="Leave Project"
-                onAction={() => onLeave(project)}
-             />
-          </ActionPanel>
+        <ActionPanel>
+          {desktopApp ? <OpenAction
+            title='Open in Zeplin App'
+            icon={Icon.Document}
+            target={`zpl://project?pid=${project.id}`}
+            application={desktopApp}
+            onOpen={() => onVisit(project)}
+          /> : null}
+          <OpenInBrowserAction
+            title={`Open in Browser`}
+            url={`https://app.zeplin.io/project/${project.id}`}
+            onOpen={() => onVisit(project)}
+          />
+          <CopyToClipboardAction
+            title="Copy URL to Clipboard"
+            icon={Icon.Clipboard}
+            content={`https://app.zeplin.io/project/${project.id}`}
+          />
+          {
+            removeFromVisits ?
+              <ActionPanel.Item
+                icon={Icon.Trash}
+                title="Remove from Recenlty Visited Projects"
+                onAction={() => removeFromVisits(project)}
+              />
+              : null
+          }
+          <ActionPanel.Item
+            icon={Icon.ExclamationMark}
+            title="Leave Project"
+            onAction={() => onLeave(project)}
+          />
+        </ActionPanel>
       }
     />
   );

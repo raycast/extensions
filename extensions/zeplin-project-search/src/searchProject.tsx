@@ -29,44 +29,45 @@ export default function Command() {
             }
             return isProjectFound;
           })
-          .map((visitedProject) => (
-            <ProjectListItem
-              key={`${visitedProject.id}-recent-project`} 
-              removeFromVisits={removeProjectFromVisit} 
-              project={(projects.find(project => project.id === visitedProject.id))!} 
-              onVisit={visitProject}
-              onLeave={leaveProject}
-            />
-          )) :
-          visitedProjects?.map((visitedProject) => (
-            <ProjectListItem
-              key={`${visitedProject.id}-recent-project`}
-              removeFromVisits={removeProjectFromVisit}
-              project={visitedProject}
-              onVisit={visitProject}
-              onLeave={leaveProject}
-            />
-          ))
+            .map((visitedProject) => (
+              <ProjectListItem
+                key={`${visitedProject.id}-recent-project`}
+                removeFromVisits={removeProjectFromVisit}
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                project={(projects.find(project => project.id === visitedProject.id))!}
+                onVisit={visitProject}
+                onLeave={leaveProject}
+              />
+            )) :
+            visitedProjects?.map((visitedProject) => (
+              <ProjectListItem
+                key={`${visitedProject.id}-recent-project`}
+                removeFromVisits={removeProjectFromVisit}
+                project={visitedProject}
+                onVisit={visitProject}
+                onLeave={leaveProject}
+              />
+            ))
         }
       </List.Section>
       <List.Section key="other-projects" title="Other Projects">
         {projects?.filter((project) => {
           return !visitedProjects?.find(vp => vp.id === project.id)
         })
-        .sort((a, b) => {
-          // Show latest updated projects on the top
-          return b.updated - a.updated
-        })
-        .map((project) => (
+          .sort((a, b) => {
+            // Show latest updated projects on the top
+            return b.updated - a.updated
+          })
+          .map((project) => (
             <ProjectListItem
               key={`${project.id}-project`}
-              project={project} 
+              project={project}
               onVisit={visitProject}
               onLeave={leaveProject}
             />
           ))
         }
       </List.Section>
-  </List>
+    </List>
   );
 }
