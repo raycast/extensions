@@ -63,7 +63,7 @@ const pickIcon = (packageJSON: PackageJSONInterface) => {
   }
 
   if (raw.includes('graphql')) {
-    return 'graphql-small.png';
+    return 'graphql.png';
   }
 
   return 'nodejs.png';
@@ -78,7 +78,7 @@ const getDevDirProjects = (devDir: string): Array<string> => {
 const createConfigForNodeProjects = (devDir: string, projectDirs: Array<string>): Array<ProjectInterface> => {
   const projects: Array<ProjectInterface> = [];
 
-   projectDirs.forEach((dir: string) => {
+  projectDirs.forEach((dir: string) => {
     const json = checkForPackageJSON(devDir, dir);
 
     if (!json) {
@@ -113,7 +113,7 @@ const Dev = () => {
     projectDirs = getDevDirProjects(devDir);
   }
   catch {
-    return <Detail markdown={"Error finding project directories."}/>;
+    return <Detail markdown={"Error finding project directories."} />;
   }
 
   try {

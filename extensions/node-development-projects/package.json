@@ -4,12 +4,12 @@
   "version": "1.0.0",
   "title": "Node Development Projects",
   "description": "Perform actions on Node projects in your development directory. Open projects in VSCode or Hyper Terminal.",
-  "icon": "nodejs.png",
+  "icon": "node-title.png",
   "author": "grantcodesgg",
   "license": "MIT",
   "commands": [
     {
-      "name": "nd",
+      "name": "node-dev",
       "title": "Node Dev",
       "description": "List projects in the development directory.",
       "mode": "view"
