@@ -1,14 +1,28 @@
+import { getPreferenceValues } from "@raycast/api";
 import { accessSync, constants } from "fs";
-import { cpus } from "os";
 
 export const getBrewExecutablePath = (packageName: string) => {
-  const path = cpus()[0].model.includes("Apple") ? `/opt/homebrew/bin/${packageName}` : `/usr/local/bin/${packageName}`;
+  const preferences: { kubectxPath: string } = getPreferenceValues();
 
-  try {
-    accessSync(path, constants.X_OK);
-
-    return path;
-  } catch {
-    return packageName;
+  if (preferences.kubectxPath) {
+    return preferences.kubectxPath;
   }
+
+  const possiblePaths = [`/usr/local/bin/${packageName}`, `/opt/homebrew/bin/${packageName}`];
+
+  let validPath = packageName;
+
+  possiblePaths.some((path) => {
+    try {
+      accessSync(path, constants.X_OK);
+
+      validPath = path;
+
+      return true;
+    } catch (e) {
+      return false;
+    }
+  });
+
+  return validPath;
 };

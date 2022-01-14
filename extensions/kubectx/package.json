@@ -11,7 +11,16 @@
       "name": "context",
       "title": "Switch Cluster",
       "description": "Change current cluster",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "kubectxPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Kubectx Installation Path",
+          "description": "Location to the Brew installation (Defaults to `/opt/homebrew/bin/kubectx` on M1 Macs, and `/usr/local/bin/kubectx` otherwise)"
+        }
+      ]
     }
   ],
   "dependencies": {
