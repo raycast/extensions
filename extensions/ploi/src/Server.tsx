@@ -114,6 +114,12 @@ const ServerListItem = ({
           <ActionPanel.Section>
             <PushAction
               title="Open Server Info"
+              icon={{
+                source: {
+                  light: "server.png",
+                  dark: "server-dark.png",
+                },
+              }}
               target={<SingleServerView server={server} sites={sites} />}
             />
           </ActionPanel.Section>

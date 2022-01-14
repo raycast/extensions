@@ -61,6 +61,7 @@ const SiteListItem = ({ site, server }: { site: ISite; server: IServer }) => {
         <ActionPanel>
           <ActionPanel.Section>
             <PushAction
+              icon={Icon.Globe}
               title="Open Site Info"
               target={<SitesSingleView site={site} server={server} />}
             />
@@ -101,7 +102,7 @@ export const SitesSingleView = ({
               id="site-deploy"
               key="site-deploy"
               title="Deploy"
-              accessoryTitle="This Will Run The Deploy Script For Your Site"
+              accessoryTitle="This will run the deploy script for your site"
               icon={Icon.Hammer}
               actions={
                 <ActionPanel>
@@ -118,7 +119,7 @@ export const SitesSingleView = ({
             id="site-flush-fastcgi-cache"
             key="site-flush-fastcgi-cache"
             title="Flush FastCGI Cache"
-            accessoryTitle="This Flushes The FastCGI Cache"
+            accessoryTitle="This will flush the FastCGI cache"
             icon={Icon.ArrowClockwise}
             actions={
               <ActionPanel>
