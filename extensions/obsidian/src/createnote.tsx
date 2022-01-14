@@ -12,7 +12,6 @@ import {
 import fs from "fs";
 import path from "path";
 
-
 interface Vault {
   name: string;
   key: string;
@@ -24,18 +23,19 @@ interface Preferences {
   primaryAction: string;
 }
 
-
 interface FormValue {
   path: string;
   name: string;
   content: string;
 }
 
-
 function prefVaults() {
   const pref: Preferences = getPreferenceValues();
   const vaultString = pref.vaultPath;
-  return vaultString.split(",").map(vault => ({ name: vault.trim(), key: vault.trim() })).filter(vault => !!vault);
+  return vaultString
+    .split(",")
+    .map((vault) => ({ name: vault.trim(), key: vault.trim() }))
+    .filter((vault) => !!vault);
 }
 
 function prefPath(): string {
@@ -46,7 +46,6 @@ function prefPath(): string {
   }
   return "";
 }
-
 
 function NoteForm(props: { vaultPath: string }) {
   const vaultPath = props.vaultPath;
@@ -60,8 +59,7 @@ function NoteForm(props: { vaultPath: string }) {
         fs.writeFileSync(path.join(vaultPath, noteProps.path, noteProps.name + ".md"), noteProps.content);
         showToast(ToastStyle.Success, "Created new note");
         pop();
-      }
-      catch {
+      } catch {
         showToast(ToastStyle.Failure, "Something went wrong. Maybe your path doesnt exist.");
       }
     }
@@ -83,7 +81,6 @@ function NoteForm(props: { vaultPath: string }) {
   );
 }
 
-
 function VaultSelection(props: { vaults: Vault[] }) {
   const vaults = props.vaults;
   return (
@@ -94,10 +91,7 @@ function VaultSelection(props: { vaults: Vault[] }) {
           key={vault.key}
           actions={
             <ActionPanel>
-              <PushAction
-                title="Select Vault"
-                target={<NoteForm vaultPath={vault.name} />}
-              />
+              <PushAction title="Select Vault" target={<NoteForm vaultPath={vault.name} />} />
             </ActionPanel>
           }
         />
@@ -105,7 +99,6 @@ function VaultSelection(props: { vaults: Vault[] }) {
     </List>
   );
 }
-
 
 export default function Command() {
   const vaults = prefVaults();

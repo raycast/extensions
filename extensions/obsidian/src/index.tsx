@@ -39,7 +39,7 @@ interface Preferences {
 
 enum PrimaryAction {
   QuickLook = "quicklook",
-  OpenInObsidian = "obsidian"
+  OpenInObsidian = "obsidian",
 }
 
 interface FormValue {
@@ -80,7 +80,10 @@ function getFiles(vaultPath: string) {
 function prefVaults() {
   const pref: Preferences = getPreferenceValues();
   const vaultString = pref.vaultPath;
-  return vaultString.split(",").map(vault => ({ name: vault.trim(), key: vault.trim() })).filter(vault => !!vault);
+  return vaultString
+    .split(",")
+    .map((vault) => ({ name: vault.trim(), key: vault.trim() }))
+    .filter((vault) => !!vault);
 }
 
 function prefExcludedFolders() {
@@ -200,15 +203,15 @@ function NoteQuickLook(props: { note: Note }) {
   const note = props.note;
   const content = getNoteContent(note);
   return (
-    <Detail markdown={content} actions={
-      <ActionPanel>
-        <OpenAction
-          title="Open in Obsidian"
-          target={"obsidian://open?path=" + encodeURIComponent(note.path)}
-        />
-        <NoteActions note={note} />
-      </ActionPanel>
-    } />
+    <Detail
+      markdown={content}
+      actions={
+        <ActionPanel>
+          <OpenAction title="Open in Obsidian" target={"obsidian://open?path=" + encodeURIComponent(note.path)} />
+          <NoteActions note={note} />
+        </ActionPanel>
+      }
+    />
   );
 }
 
@@ -241,20 +244,10 @@ function OpenNoteActions(props: { note: Note }) {
   const pref: Preferences = getPreferenceValues();
   const primaryAction = pref.primaryAction;
 
-  const quicklook = (
-    <PushAction
-      title="Quick Look"
-      target={<NoteQuickLook
-        note={note} />}
-      icon={Icon.Eye}
-    />
-  );
+  const quicklook = <PushAction title="Quick Look" target={<NoteQuickLook note={note} />} icon={Icon.Eye} />;
 
   const obsidian = (
-    <OpenAction
-      title="Open in Obsidian"
-      target={"obsidian://open?path=" + encodeURIComponent(note.path)}
-    />
+    <OpenAction title="Open in Obsidian" target={"obsidian://open?path=" + encodeURIComponent(note.path)} />
   );
 
   if (primaryAction == PrimaryAction.QuickLook) {
@@ -274,7 +267,7 @@ function OpenNoteActions(props: { note: Note }) {
   } else {
     return <React.Fragment></React.Fragment>;
   }
-};
+}
 
 function NoteList(props: { vaultPath: string }) {
   const vaultPath = props.vaultPath;
@@ -321,10 +314,7 @@ function VaultSelection(props: { vaults: Vault[] }) {
           key={vault.key}
           actions={
             <ActionPanel>
-              <PushAction
-                title="Select Vault"
-                target={<NoteList vaultPath={vault.name} />}
-              />
+              <PushAction title="Select Vault" target={<NoteList vaultPath={vault.name} />} />
             </ActionPanel>
           }
         />
