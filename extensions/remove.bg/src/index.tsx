@@ -13,30 +13,36 @@ interface CommandForm {
 const processFile = ({ file, size, type, crop }: CommandForm): Promise<string> => {
   const preferences = getPreferenceValues();
 
-  if (!existsSync(file)) {
-    return Promise.reject(showToast(ToastStyle.Failure, "File does not exist"));
-  }
+  return new Promise((resolve, reject) => {
+    if (!existsSync(file)) {
+      return reject("File does not exist");
+    }
 
-  const parts = file.split("/");
-  const fileName = parts.pop();
-  const outputFile = `${parts.join("/")}/removed-${fileName}`;
+    const parts = file.split("/");
+    const fileName = parts.pop();
+    const outputFile = `${parts.join("/")}/removed-${fileName}`;
 
-  if (existsSync(outputFile)) {
-    return Promise.reject(showToast(ToastStyle.Failure, "Output file already exists"));
-  }
+    if (existsSync(outputFile)) {
+      return reject("Output file already exists");
+    }
 
-  return removeBackgroundFromImageFile({
-    path: file,
-    apiKey: preferences.apiKey,
-    scale: "original",
-    size,
-    crop: crop === 1,
-    type,
-    outputFile,
-  }).then(({ base64img }: RemoveBgResult) => {
-    showToast(ToastStyle.Success, `Image saved as removed-${fileName}`);
+    return removeBackgroundFromImageFile({
+      path: file,
+      apiKey: preferences.apiKey,
+      scale: "original",
+      size,
+      crop: crop === 1,
+      type,
+      outputFile,
+    })
+      .then(({ base64img }: RemoveBgResult) => {
+        showToast(ToastStyle.Success, `Image saved as removed-${fileName}`);
 
-    return base64img;
+        resolve(base64img);
+      })
+      .catch((errors: Array<RemoveBgError>) => {
+        reject(errors[0].title);
+      });
   });
 };
 
@@ -49,8 +55,8 @@ export default function Command() {
 
     processFile(input)
       .then(setBase64)
-      .catch((errors: Array<RemoveBgError>) => {
-        showToast(ToastStyle.Failure, errors[0].title);
+      .catch((error: string) => {
+        showToast(ToastStyle.Failure, error);
       })
       .finally(() => {
         setLoading(false);
