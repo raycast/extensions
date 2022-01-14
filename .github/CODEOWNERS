@@ -81,6 +81,7 @@
 /extensions/imdb                                     @ryan-exe
 /extensions/jetbrains                                @gdsmith
 /extensions/jira-search                              @svenwiegand
+/extensions/jisho                                    @dmacdermott
 /extensions/json-format                              @Destiner
 /extensions/kill-process                             @rolandleth
 /extensions/kinopoisk                                @mattisssa
