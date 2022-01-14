@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "lastfm",
   "title": "Last.fm",
-  "description": "Last.fm!",
+  "description": "Display your favourite, recently played tracks, your top albums and artists and more from Last.fm on Raycast!",
   "icon": "command-icon.png",
   "author": "eggsy",
   "license": "MIT",
@@ -63,7 +63,7 @@
     {
       "type": "textfield",
       "name": "username",
-      "description": "Your Last.fm username",
+      "description": "Your Last.fm username, can be found on your profile page",
       "placeholder": "Your Last.fm username",
       "required": true,
       "title": "Username"
@@ -71,10 +71,10 @@
     {
       "type": "textfield",
       "name": "limit",
-      "description": "The number of results to show.",
+      "description": "The number of results to show in results page.",
+      "placeholder": "The number of results to show",
       "required": true,
       "title": "Limit",
-      "placeholder": "The number of results to show.",
       "default": "24"
     },
     {
@@ -83,7 +83,7 @@
       "name": "period",
       "required": true,
       "default": "7day",
-      "description": "Select the period of songs.",
+      "description": "Select the period of songs that you want to display.",
       "data": [
         {
           "title": "7 days",
