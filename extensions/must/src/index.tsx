@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   getPreferenceValues,
   ActionPanel,
@@ -23,21 +23,21 @@ const Raycast: React.FC = () => {
   const { username }: Preferences = getPreferenceValues();
   const { isLoading, error, list } = useMust(username);
 
-  if (error) {
+  if (error !== null) {
     showToast(ToastStyle.Failure, "Something went wrong.", String(error));
   }
 
   // Render
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search entries...">
-      <ListSection title="Series" subtitle={String(list.series.length)}>
-        {list.series.map((show) => (
+      <ListSection title="Series" subtitle={String(list?.series?.length)}>
+        {list?.series?.map((show) => (
           <MustListItem key={show.id} item={show} />
         ))}
       </ListSection>
 
-      <ListSection title="Movies" subtitle={String(list.movies.length)}>
-        {list.movies.map((movie) => (
+      <ListSection title="Movies" subtitle={String(list?.movies?.length)}>
+        {list?.movies?.map((movie) => (
           <MustListItem key={movie.id} item={movie} />
         ))}
       </ListSection>
@@ -45,27 +45,23 @@ const Raycast: React.FC = () => {
   );
 };
 
-function MustListItem({ item }: { item: Product }) {
-  return (
-    <ListItem
-      title={item.title}
-      icon={`https://image.tmdb.org/t/p/w342${item.poster_file_path}`}
-      accessoryTitle={item.items_count ? `${item.items_count} episodes` : undefined}
-      accessoryIcon={item.items_count ? Icon.Calendar : undefined}
-      actions={
-        <ActionPanel>
-          <OpenInBrowserAction url={`https://mustapp.com/p/${item.id}`} title="Open on Must" />
-          {item.trailer_url && <OpenInBrowserAction url={item.trailer_url} title="Open Trailer on YouTube" />}
+const MustListItem: React.FC<{ item: Product }> = ({ item }) => (
+  <ListItem
+    title={item.title}
+    icon={`https://image.tmdb.org/t/p/w342${item.poster_file_path}`}
+    accessoryTitle={item.items_count ? `${item.items_count} episodes` : undefined}
+    accessoryIcon={item.items_count ? Icon.Calendar : undefined}
+    actions={
+      <ActionPanel>
+        <OpenInBrowserAction url={`https://mustapp.com/p/${item.id}`} title="Open on Must" />
+        {item.trailer_url && <OpenInBrowserAction url={item.trailer_url} title="Open Trailer on YouTube" />}
 
-          <CopyToClipboardAction title="Copy Name to Clipboard" content={item.title} />
-          <CopyToClipboardAction title="Copy Must URL to Clipboard" content={`https://mustapp.com/p/${item.id}`} />
-          {item.trailer_url && (
-            <CopyToClipboardAction title="Copy Trailer URL to Clipboard" content={item.trailer_url} />
-          )}
-        </ActionPanel>
-      }
-    />
-  );
-}
+        <CopyToClipboardAction title="Copy Name to Clipboard" content={item.title} />
+        <CopyToClipboardAction title="Copy Must URL to Clipboard" content={`https://mustapp.com/p/${item.id}`} />
+        {item.trailer_url && <CopyToClipboardAction title="Copy Trailer URL to Clipboard" content={item.trailer_url} />}
+      </ActionPanel>
+    }
+  />
+);
 
 export default Raycast;
