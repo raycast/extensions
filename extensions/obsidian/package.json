@@ -51,6 +51,7 @@
           "title": "Primary Action",
           "required": false,
           "description": "Select a primary action to be executed on enter",
+          "defaultValue": "quicklook",
           "data": [
             {
               "title": "Quick Look",
@@ -103,6 +104,22 @@
           "title": "Default Path",
           "required": false,
           "description": "The default path where a new note will be created"
+        },
+        {
+          "name": "prefTag",
+          "type": "textfield",
+          "placeholder": "untagges",
+          "title": "Default Tag",
+          "required": false,
+          "description": "The default selected tag"
+        },
+        {
+          "name": "tags",
+          "type": "textfield",
+          "placeholder": "tag1, tag2, tag3, ...",
+          "title": "Tags",
+          "required": false,
+          "description": "The tags which will be suggested on note creation"
         }
       ]
     }

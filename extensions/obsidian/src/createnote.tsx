@@ -20,6 +20,8 @@ interface Vault {
 interface Preferences {
   vaultPath: string;
   prefPath: string;
+  prefTag: string;
+  tags: string;
   primaryAction: string;
 }
 
@@ -27,6 +29,7 @@ interface FormValue {
   path: string;
   name: string;
   content: string;
+  tags: Array<string>;
 }
 
 function prefVaults() {
@@ -47,6 +50,30 @@ function prefPath(): string {
   return "";
 }
 
+function prefTag(): Array<string> {
+  const pref: Preferences = getPreferenceValues();
+  const prefTag = pref.prefTag;
+  if (prefTag) {
+    return [prefTag];
+  }
+  return [];
+}
+
+function tags() {
+  const pref: Preferences = getPreferenceValues();
+  const tagsString = pref.tags;
+  const prefTag = pref.prefTag;
+  if (!tagsString) {
+    return [{ name: prefTag, key: prefTag }];
+  }
+  let tags = tagsString
+    .split(",")
+    .map((tag) => ({ name: tag.trim(), key: tag.trim() }))
+    .filter((tag) => !!tag);
+  tags.push({ name: prefTag, key: prefTag });
+  return tags;
+}
+
 function NoteForm(props: { vaultPath: string }) {
   const vaultPath = props.vaultPath;
   const { pop } = useNavigation();
@@ -55,9 +82,18 @@ function NoteForm(props: { vaultPath: string }) {
     if (noteProps.name == "") {
       showToast(ToastStyle.Failure, "Please enter a name");
     } else {
+      let content = "";
+      if (noteProps.tags.length > 0) {
+        content = "---\ntags: [";
+        for (let i = 0; i < noteProps.tags.length - 1; i++) {
+          content += "\"" + noteProps.tags[i] + "\",";
+        }
+        content += "\"" + noteProps.tags.pop() + "\"]\n---\n";
+      }
+      content += noteProps.content;
       try {
         fs.mkdirSync(path.join(vaultPath, noteProps.path), { recursive: true });
-        fs.writeFileSync(path.join(vaultPath, noteProps.path, noteProps.name + ".md"), noteProps.content);
+        fs.writeFileSync(path.join(vaultPath, noteProps.path, noteProps.name + ".md"), content);
         showToast(ToastStyle.Success, "Created new note");
         pop();
       } catch {
@@ -77,6 +113,11 @@ function NoteForm(props: { vaultPath: string }) {
     >
       <Form.TextField title="Name" id="name" placeholder="Name of note" />
       <Form.TextField title="Path" id="path" defaultValue={prefPath()} placeholder="path/to/note" />
+      <Form.TagPicker id="tags" title="Tags" defaultValue={prefTag()}>
+        {tags()?.map((tag) => (
+          <Form.TagPicker.Item value={tag.name.toLowerCase()} title={tag.name} key={tag.key} />
+        ))}
+      </Form.TagPicker>
       <Form.TextArea title="Content:" id="content" placeholder={"Text"} />
     </Form>
   );
