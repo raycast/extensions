@@ -16,7 +16,7 @@
     },
     {
       "name": "show",
-      "title": "Show HN",
+      "title": "Read Show HN",
       "subtitle": "Hacker News",
       "description": "Get the latest from Show HN.",
       "mode": "view"
