@@ -66,7 +66,7 @@ function tags() {
   if (!tagsString) {
     return [{ name: prefTag, key: prefTag }];
   }
-  let tags = tagsString
+  const tags = tagsString
     .split(",")
     .map((tag) => ({ name: tag.trim(), key: tag.trim() }))
     .filter((tag) => !!tag);
@@ -86,9 +86,9 @@ function NoteForm(props: { vaultPath: string }) {
       if (noteProps.tags.length > 0) {
         content = "---\ntags: [";
         for (let i = 0; i < noteProps.tags.length - 1; i++) {
-          content += "\"" + noteProps.tags[i] + "\",";
+          content += '"' + noteProps.tags[i] + '",';
         }
-        content += "\"" + noteProps.tags.pop() + "\"]\n---\n";
+        content += '"' + noteProps.tags.pop() + '"]\n---\n';
       }
       content += noteProps.content;
       try {

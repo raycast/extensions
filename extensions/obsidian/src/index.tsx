@@ -243,7 +243,6 @@ function OpenNoteActions(props: { note: Note }) {
   const note = props.note;
   const pref: Preferences = getPreferenceValues();
   const primaryAction = pref.primaryAction;
-  console.log(primaryAction)
 
   const quicklook = <PushAction title="Quick Look" target={<NoteQuickLook note={note} />} icon={Icon.Eye} />;
 
