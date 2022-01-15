@@ -8,6 +8,9 @@ import {
   useNavigation,
   showToast,
   ToastStyle,
+  AlertOptions,
+  confirmAlert,
+  Icon,
 } from "@raycast/api";
 import fs from "fs";
 import path from "path";
@@ -78,6 +81,28 @@ function NoteForm(props: { vaultPath: string }) {
   const vaultPath = props.vaultPath;
   const { pop } = useNavigation();
 
+  async function writeNote(notePath: string, name: string, content: string) {
+    if (fs.existsSync(path.join(notePath, name + ".md"))) {
+      const options: AlertOptions = {
+        title: "Override note",
+        message: 'Are you sure you want to override the note: "' + name + '"?',
+        icon: Icon.ExclamationMark,
+      };
+      if (await !confirmAlert(options)) {
+        return;
+      }
+    }
+
+    try {
+      fs.mkdirSync(notePath, { recursive: true });
+      fs.writeFileSync(path.join(notePath, name + ".md"), content);
+      showToast(ToastStyle.Success, "Created new note");
+      pop();
+    } catch {
+      showToast(ToastStyle.Failure, "Something went wrong. Maybe your vault, path or filename is not valid.");
+    }
+  }
+
   function createNewNote(noteProps: FormValue) {
     if (noteProps.name == "") {
       showToast(ToastStyle.Failure, "Please enter a name");
@@ -91,14 +116,7 @@ function NoteForm(props: { vaultPath: string }) {
         content += '"' + noteProps.tags.pop() + '"]\n---\n';
       }
       content += noteProps.content;
-      try {
-        fs.mkdirSync(path.join(vaultPath, noteProps.path), { recursive: true });
-        fs.writeFileSync(path.join(vaultPath, noteProps.path, noteProps.name + ".md"), content);
-        showToast(ToastStyle.Success, "Created new note");
-        pop();
-      } catch {
-        showToast(ToastStyle.Failure, "Something went wrong. Maybe your vault, path or filename is not valid.");
-      }
+      writeNote(path.join(vaultPath, noteProps.path), noteProps.name, content);
     }
   }
 
