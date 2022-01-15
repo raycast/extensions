@@ -4,7 +4,7 @@ import { StoryListItem } from "./StoryListItem";
 import useHNRss from "./useHNRss";
 
 export default function Command() {
-  const state = useHNRss("frontpage");
+  const state = useHNRss("show");
 
   if (state.error) {
     showToast(ToastStyle.Failure, "Failed loading stories", state.error.message);
