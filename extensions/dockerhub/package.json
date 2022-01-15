@@ -10,7 +10,7 @@
     {
       "name": "search-image",
       "title": "Search Docker Images",
-      "description": "Search images on Docker Hub",
+      "description": "Search images on DockerHub",
       "mode": "view"
     }
   ],

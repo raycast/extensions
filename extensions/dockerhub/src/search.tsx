@@ -1,22 +1,27 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
-import { search, SearchType } from "./lib/api";
+import {
+  ActionPanel,
+  CopyToClipboardAction,
+  List,
+  OpenInBrowserAction,
+  PushAction,
+  showToast,
+  ToastStyle,
+  Icon,
+} from "@raycast/api";
+import { searchImage, searchTag, SearchType } from "./lib/api";
 import { useEffect, useState } from "react";
-import { SearchResult, SearchSummary } from "./lib/type";
+import { Image, Tag, TagImage } from "./lib/type";
+import { SearchTag } from "./search-tag";
 
-interface Props {
+interface SearchProps {
   searchType: SearchType;
   text?: string;
+  image?: string;
 }
 
-export function Search(props: Props) {
-  const [searchResult, setSearchResult] = useState<SearchResult>({
-    count: 0,
-    page: 0,
-    page_size: 0,
-    next: "",
-    previous: "",
-    summaries: [],
-  });
+export function Search(props: SearchProps) {
+  const [images, setImages] = useState<Image[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -29,8 +34,17 @@ export function Search(props: Props) {
   const onSearchTextChange = async (text: string) => {
     setLoading(true);
     try {
-      const result: SearchResult = await search({ q: text, type: props.searchType, page_size: 25 });
-      setSearchResult(result);
+      if (props.searchType === SearchType.IMAGE) {
+        const result: Image[] = await searchImage({ q: text, type: props.searchType, page_size: 50 });
+        setImages(result);
+      } else if (props.searchType === SearchType.TAG) {
+        if (!props.image) {
+          showToast(ToastStyle.Failure, "Please specify an image");
+          return;
+        }
+        const result: Tag[] = await searchTag(props.image, { page_size: 50, name: text });
+        setTags(result);
+      }
     } catch (err) {
       showToast(ToastStyle.Failure, "Search failed", (err as Error).message);
     } finally {
@@ -40,23 +54,40 @@ export function Search(props: Props) {
 
   return (
     <List isLoading={loading} onSearchTextChange={onSearchTextChange} throttle>
-      {searchResult.summaries
-        ? searchResult.summaries.map((item: SearchSummary, index: number) => (
-            <List.Item
-              key={index}
-              title={`[${item.from}] ${item.name}`}
-              subtitle={item.short_description}
-              accessoryTitle={`${item.pull_count} Downloads`}
-              accessoryIcon={item.logo_url.small}
-              actions={
-                <ActionPanel>
-                  <OpenInBrowserAction url={item.url ? item.url : ""} />
-                  <CopyToClipboardAction title="Copy URL" content={item.url ? item.url : ""} />
-                </ActionPanel>
-              }
-            />
-          ))
-        : null}
+      {images.map((item: Image, index: number) => (
+        <List.Item
+          key={index}
+          title={`[${item.from}] ${item.name}`}
+          subtitle={item.short_description}
+          accessoryTitle={`${item.pull_count} Downloads`}
+          accessoryIcon={item.logo_url.small}
+          actions={
+            <ActionPanel>
+              <PushAction icon={Icon.List} title="Tags" target={<SearchTag image={item.slug} />} />
+              <OpenInBrowserAction url={item.url ? item.url : ""} />
+              <CopyToClipboardAction title="Copy Pull Command" content={`docker pull ${item.slug}`} />
+              <CopyToClipboardAction title="Copy URL" content={item.url ? item.url : ""} />
+            </ActionPanel>
+          }
+        />
+      ))}
+      {tags.map((tag: Tag) =>
+        tag.images?.map((image: TagImage) => (
+          <List.Item
+            key={`${props.image}:${tag.name}-${image.os_arch}`}
+            title={`${tag.name}`}
+            subtitle={`${tag.update_time ? tag.update_time : ""} by ${tag.last_updater_username}`}
+            accessoryTitle={`${image.os_arch ? image.os_arch : ""} ${image.sizeHuman ? image.sizeHuman : ""}`}
+            actions={
+              <ActionPanel>
+                <OpenInBrowserAction url={image.url ? image.url : ""} />
+                <CopyToClipboardAction title="Copy Pull Command" content={`docker pull ${props.image}:${tag.name}`} />
+                <CopyToClipboardAction title="Copy URL" content={image.url ? image.url : ""} />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 }

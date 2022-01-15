@@ -30,7 +30,7 @@ export enum FilterType {
   COMMUNITY = "community",
 }
 
-export interface SearchSummary {
+export interface Image {
   id: string;
   name: string;
   slug: string;
@@ -53,11 +53,53 @@ export interface SearchSummary {
   from?: string;
 }
 
-export interface SearchResult {
+export interface SearchImageResult {
   count: number;
-  summaries?: SearchSummary[];
+  summaries?: Image[];
   page: number;
   page_size: number;
   next: string;
   previous: string;
+}
+
+export interface SearchTagResult {
+  results?: Tag[];
+  previous?: any;
+  next?: string;
+  count: number;
+}
+
+export interface Tag {
+  creator: number;
+  id: number;
+  image_id?: any;
+  images?: TagImage[];
+  last_updated: string;
+  last_updater: number;
+  last_updater_username: string;
+  name: string;
+  repository: number;
+  full_size: number;
+  v2: boolean;
+  tag_status: string;
+  tag_last_pulled: string;
+  tag_last_pushed: string;
+  update_time?: string;
+}
+
+export interface TagImage {
+  architecture: string;
+  features: string;
+  variant?: any;
+  digest: string;
+  os: string;
+  os_features: string;
+  os_version?: any;
+  size: number;
+  status: string;
+  last_pulled: string;
+  last_pushed: string;
+  os_arch?: string;
+  url?: string;
+  sizeHuman: string;
 }
