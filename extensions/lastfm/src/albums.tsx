@@ -20,7 +20,7 @@ const LastFm: React.FC = () => {
   const { username, apikey, period, limit } = getPreferenceValues();
   const { loading, error, albums } = useTopAlbums({ username, apikey, period, limit });
 
-  if (error) {
+  if (error !== null) {
     showToast(ToastStyle.Failure, "Something went wrong.", String(error));
   }
 

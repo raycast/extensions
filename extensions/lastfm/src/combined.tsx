@@ -32,7 +32,7 @@ const LastFm: React.FC = () => {
     songs: recentSongs,
   } = useLastFm({ username, apikey, period, limit: "10", method: "recent" });
 
-  if (recentError || topError) {
+  if (recentError !== null || topError !== null) {
     showToast(ToastStyle.Failure, "Something went wrong.", String(recentError || topError));
   }
 
