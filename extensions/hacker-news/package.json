@@ -13,6 +13,13 @@
       "subtitle": "Hacker News",
       "description": "Get the latest from the fontpage of Hacker News.",
       "mode": "view"
+    },
+    {
+      "name": "show",
+      "title": "Read Show HN",
+      "subtitle": "Hacker News",
+      "description": "Get the latest from Show HN.",
+      "mode": "view"
     }
   ],
   "dependencies": {
