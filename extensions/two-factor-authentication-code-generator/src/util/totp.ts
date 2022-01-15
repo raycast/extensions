@@ -8,17 +8,17 @@ const Algorithms = ["SHA1", "SHA256", "SHA512"] as const;
 export type Algorithm = typeof Algorithms[number];
 
 export interface Options {
-  period: number,
-  digits: Digits,
-  algorithm: Algorithm
+  period: number;
+  digits: Digits;
+  algorithm: Algorithm;
 }
 
 export function isValidAlgorithm(alg: unknown): alg is Algorithm {
-  return !!Algorithms.find(validAlg => validAlg === alg);
+  return !!Algorithms.find((validAlg) => validAlg === alg);
 }
 
 export function isValidDigit(digit: unknown): digit is Digits {
-  return !!AllDigits.find(validDigit => validDigit == digit);
+  return !!AllDigits.find((validDigit) => validDigit == digit);
 }
 
 /**
@@ -47,7 +47,6 @@ function truncate(input: Buffer, digits: number): number {
 }
 
 export function generateTOTP(key: string, options: Options): number {
-
   const time = Math.floor(new Date().getTime() / 1000 / options.period);
 
   const decodedKey = decode.asBytes(key.toUpperCase());

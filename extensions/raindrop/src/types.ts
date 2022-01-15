@@ -22,4 +22,4 @@ export type Bookmark = {
 
 export interface Preferences {
   token: string;
-};
+}

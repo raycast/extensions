@@ -8,22 +8,10 @@ import {
   ListSection,
   OpenInBrowserAction,
   PushAction,
-} from '@raycast/api';
-import { useEffect, useMemo, useState } from 'react';
-import Service, {
-  Deploy,
-  DeployItem,
-  DeployStatus,
-  Site,
-  SiteItem,
-} from './service';
-import {
-  formatDate,
-  formatDeployDate,
-  getDeployUrl,
-  getSiteUrl,
-  getToken,
-} from './utils';
+} from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
+import Service, { Deploy, DeployItem, DeployStatus, Site, SiteItem } from "./service";
+import { formatDate, formatDeployDate, getDeployUrl, getSiteUrl, getToken } from "./utils";
 
 const service = new Service(getToken());
 
@@ -76,27 +64,15 @@ export default function Command() {
               subtitle={site.siteUrl}
               actions={
                 <ActionPanel>
-                  <PushAction
-                    icon={Icon.TextDocument}
-                    title="Show Details"
-                    target={<SiteView id={site.id} />}
-                  />
+                  <PushAction icon={Icon.TextDocument} title="Show Details" target={<SiteView id={site.id} />} />
                   <PushAction
                     icon={Icon.Hammer}
                     title="Show Deploys"
-                    target={
-                      <DeployListView siteId={site.id} siteName={site.name} />
-                    }
+                    target={<DeployListView siteId={site.id} siteName={site.name} />}
                   />
-                  <OpenInBrowserAction
-                    title="Open in Netlify"
-                    url={getSiteUrl(site.name)}
-                  />
+                  <OpenInBrowserAction title="Open in Netlify" url={getSiteUrl(site.name)} />
                   <OpenInBrowserAction title="Open Site" url={site.siteUrl} />
-                  <OpenInBrowserAction
-                    title="Open Repository"
-                    url={site.repositoryUrl}
-                  />
+                  <OpenInBrowserAction title="Open Repository" url={site.repositoryUrl} />
                 </ActionPanel>
               }
             />
@@ -145,18 +121,12 @@ function SiteView(props: SiteProps) {
   if (!site) {
     return <Detail isLoading={isLoading} />;
   }
-  const {
-    name,
-    publishDate,
-    createDate,
-    isAutoPublishEnabled,
-    environmentVariables,
-  } = site;
+  const { name, publishDate, createDate, isAutoPublishEnabled, environmentVariables } = site;
 
   const markdown = `
   # ${name}
 
-  Autopublish **${isAutoPublishEnabled ? 'enabled' : 'disabled'}**.
+  Autopublish **${isAutoPublishEnabled ? "enabled" : "disabled"}**.
 
   Last published on ${formatDate(publishDate)}.
   
@@ -170,27 +140,15 @@ function SiteView(props: SiteProps) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <PushAction
-            icon={Icon.Hammer}
-            title="Show Deploys"
-            target={<DeployListView siteId={id} siteName={name} />}
-          />
+          <PushAction icon={Icon.Hammer} title="Show Deploys" target={<DeployListView siteId={id} siteName={name} />} />
           <PushAction
             icon={Icon.Text}
             title="Show Environment Variables"
-            target={
-              <EnvVariableView value={environmentVariables} siteName={name} />
-            }
+            target={<EnvVariableView value={environmentVariables} siteName={name} />}
           />
-          <OpenInBrowserAction
-            title="Open in Netlify"
-            url={getSiteUrl(site.name)}
-          />
+          <OpenInBrowserAction title="Open in Netlify" url={getSiteUrl(site.name)} />
           <OpenInBrowserAction title="Open Site" url={site.siteUrl} />
-          <OpenInBrowserAction
-            title="Open Repository"
-            url={site.repositoryUrl}
-          />
+          <OpenInBrowserAction title="Open Repository" url={site.repositoryUrl} />
         </ActionPanel>
       }
     />
@@ -215,11 +173,11 @@ function DeployListView(props: DeployListProps) {
 
   function getStatusIcon(status: DeployStatus): Icon {
     switch (status) {
-      case 'ok':
+      case "ok":
         return Icon.Checkmark;
-      case 'error':
+      case "error":
         return Icon.XmarkCircle;
-      case 'skipped':
+      case "skipped":
         return Icon.Circle;
     }
   }
@@ -238,10 +196,7 @@ function DeployListView(props: DeployListProps) {
                 title="Show Details"
                 target={<DeployView siteId={siteId} id={deploy.id} />}
               />
-              <OpenInBrowserAction
-                title="Open in Netlify"
-                url={getDeployUrl(siteName, deploy.id)}
-              />
+              <OpenInBrowserAction title="Open in Netlify" url={getDeployUrl(siteName, deploy.id)} />
             </ActionPanel>
           }
         />
@@ -271,7 +226,7 @@ function DeployView(props: DeployProps) {
   }
   const { name, site, siteUrl, author, publishDate, commitUrl } = deploy;
 
-  const authorMessage = author ? ` by ${author}` : '';
+  const authorMessage = author ? ` by ${author}` : "";
 
   const markdown = `
   # ${name}
@@ -286,10 +241,7 @@ function DeployView(props: DeployProps) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction
-            title="Open in Netlify"
-            url={getDeployUrl(site.name, id)}
-          />
+          <OpenInBrowserAction title="Open in Netlify" url={getDeployUrl(site.name, id)} />
           <OpenInBrowserAction title="Open Site" url={siteUrl} />
           <OpenInBrowserAction title="Open Commit" url={commitUrl} />
         </ActionPanel>

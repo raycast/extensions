@@ -30,29 +30,35 @@
       "mode": "view"
     }
   ],
-  "preferences": [{
-    "name": "format",
-    "type": "dropdown",
-    "required": false,
-    "title": "Format",
-    "description": "Format of the timestamp",
-    "default": "seconds",
-    "data": [{
-      "title": "Seconds",
-      "value": "seconds"
-    }, {
-      "title": "Milliseconds",
-      "value": "milliseconds"
-    }]
-  }, {
-    "name": "isUTC",
-    "type": "checkbox",
-    "required": false,
-    "title": "Timezone",
-    "description": "If checked, UTC timezone will be used. Otherwise, local timezone will be used.",
-    "default": true,
-    "label": "Use UTC"
-  }],
+  "preferences": [
+    {
+      "name": "format",
+      "type": "dropdown",
+      "required": false,
+      "title": "Format",
+      "description": "Format of the timestamp",
+      "default": "seconds",
+      "data": [
+        {
+          "title": "Seconds",
+          "value": "seconds"
+        },
+        {
+          "title": "Milliseconds",
+          "value": "milliseconds"
+        }
+      ]
+    },
+    {
+      "name": "isUTC",
+      "type": "checkbox",
+      "required": false,
+      "title": "Timezone",
+      "description": "If checked, UTC timezone will be used. Otherwise, local timezone will be used.",
+      "default": true,
+      "label": "Use UTC"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.26.2"
   },

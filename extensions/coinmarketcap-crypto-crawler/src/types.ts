@@ -17,4 +17,4 @@ export type PriceData = {
   currencyPrice: string;
   priceDiff: string;
   isUp: boolean;
-}
+};

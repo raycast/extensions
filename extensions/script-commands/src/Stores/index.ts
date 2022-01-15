@@ -1,3 +1,1 @@
-export {
-  ContentStore,
-} from "./ContentStore"
+export { ContentStore } from "./ContentStore";

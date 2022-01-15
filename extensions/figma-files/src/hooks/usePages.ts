@@ -42,17 +42,14 @@ async function fetchPages(file: File, signal: AbortSignal): Promise<Node[]> {
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
 
   try {
-    const response = await fetch(
-      `https://api.figma.com/v1/files/${file.key}?depth=1`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Figma-Token": PERSONAL_ACCESS_TOKEN,
-        },
-        signal,
-      }
-    );
+    const response = await fetch(`https://api.figma.com/v1/files/${file.key}?depth=1`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Figma-Token": PERSONAL_ACCESS_TOKEN,
+      },
+      signal,
+    });
 
     const json = (await response.json()) as FileDetail;
     return json.document.children;

@@ -40,16 +40,13 @@ export function useProjectFiles() {
 async function fetchTeamProjects(): Promise<TeamProjects> {
   const { PERSONAL_ACCESS_TOKEN, TEAM_ID } = getPreferenceValues();
   try {
-    const response = await fetch(
-      `https://api.figma.com/v1/teams/${TEAM_ID}/projects`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Figma-Token": PERSONAL_ACCESS_TOKEN,
-        },
-      }
-    );
+    const response = await fetch(`https://api.figma.com/v1/teams/${TEAM_ID}/projects`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Figma-Token": PERSONAL_ACCESS_TOKEN,
+      },
+    });
 
     const json = (await response.json()) as TeamProjects;
     return json;
@@ -65,16 +62,13 @@ async function fetchFiles(): Promise<ProjectFiles[]> {
   const teamProjects = await fetchTeamProjects();
   const projects = teamProjects.projects.map(async (project) => {
     try {
-      const response = await fetch(
-        `https://api.figma.com/v1/projects/${project.id}/files`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Figma-Token": PERSONAL_ACCESS_TOKEN,
-          },
-        }
-      );
+      const response = await fetch(`https://api.figma.com/v1/projects/${project.id}/files`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Figma-Token": PERSONAL_ACCESS_TOKEN,
+        },
+      });
 
       const json = (await response.json()) as ProjectFiles;
       return { name: project.name, files: json.files as File[] };

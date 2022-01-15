@@ -2,11 +2,10 @@ import { ActionPanel, Form, Icon, showToast, SubmitFormAction, ToastStyle } from
 import open from "open";
 
 interface FormValues {
-  url: string,
-  tags: string,
-  pin: boolean
+  url: string;
+  tags: string;
+  pin: boolean;
 }
-
 
 function GrabUrlAction() {
   function handleSubmit({ url, tags, pin }: FormValues) {
@@ -14,10 +13,14 @@ function GrabUrlAction() {
       showToast(ToastStyle.Failure, "URL is required");
       return;
     }
-    open(`bear://x-callback-url/grab-url?url=${encodeURIComponent(url)}&tags=${encodeURIComponent(tags)}&pin=${pin ? "yes" : "no"}`)
+    open(
+      `bear://x-callback-url/grab-url?url=${encodeURIComponent(url)}&tags=${encodeURIComponent(tags)}&pin=${
+        pin ? "yes" : "no"
+      }`
+    );
   }
 
-  return <SubmitFormAction icon={Icon.Globe} title="Capture in New Note" onSubmit={handleSubmit}/>
+  return <SubmitFormAction icon={Icon.Globe} title="Capture in New Note" onSubmit={handleSubmit} />;
 }
 
 export default function GrabUrl() {
@@ -26,7 +29,7 @@ export default function GrabUrl() {
       navigationTitle="Grab URL"
       actions={
         <ActionPanel>
-          <GrabUrlAction/>
+          <GrabUrlAction />
         </ActionPanel>
       }
     >

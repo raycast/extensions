@@ -1,4 +1,4 @@
-import { ActionPanel, clearSearchBar, Color, Icon, showHUD, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, clearSearchBar, Icon, showToast, ToastStyle } from "@raycast/api";
 import { useAtom } from "jotai";
 import { searchModeAtom } from "./atoms";
 

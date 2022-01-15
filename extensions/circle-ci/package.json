@@ -5,13 +5,16 @@
   "description": "This extension shows a list of your latest Circle CI workflows.\n\nIt requires a Circle CI API token which you can get on https://app.circleci.com/settings/user/tokens.\n.",
   "icon": "circle-logo.png",
   "author": "qeude",
+  "contributors": [
+    "bgnfu7re"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "List Workflows",
+      "name": "command-project-search",
+      "title": "Project Search",
       "subtitle": "Circle CI",
-      "description": "Shows a list of the latest Circle CI workflows, including meta data. Allows to quickly open each workflow and - if applicable - PR.",
+      "description": "List CircleCI projects and quickly navigate to them.",
       "mode": "view"
     }
   ],
@@ -22,18 +25,12 @@
       "required": true,
       "title": "Circle CI API token",
       "description": "Get it on https://app.circleci.com/settings/user/tokens"
-    },
-    {
-      "name": "orgSlug",
-      "type": "textfield",
-      "required": true,
-      "title": "Circle CI Organization Slug",
-      "description": "eg: gh/CircleCI-Public"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
-    "node-fetch": "^3.0.0"
+    "node-fetch": "^3.0.0",
+    "prettier": "^2.5.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

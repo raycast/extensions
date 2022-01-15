@@ -1,14 +1,6 @@
-import {
-  ActionPanel,
-  showToast,
-  ToastStyle,
-  PushAction,
-  Color,
-  Icon,
-  popToRoot
-} from "@raycast/api";
+import { ActionPanel, showToast, ToastStyle, PushAction, Color, Icon, popToRoot } from "@raycast/api";
 import { getErrorMessage } from "../../utils";
-import { annotationDeleteQuery, annotationPatchQuery } from "./queries";
+import { annotationDeleteQuery } from "./queries";
 import { PatchAnnotationForm } from "./patchAnnotationForm";
 
 export function PatchAnnotationAction(props: { annotation: any }) {
@@ -19,14 +11,14 @@ export function PatchAnnotationAction(props: { annotation: any }) {
       icon={{ source: Icon.Text, tintColor: Color.Green }}
     />
   );
-};
+}
 
 export function DeleteAnnotationAction(props: { annotation: any }) {
   const annotation = props.annotation;
 
   const deleteAnnotation = async () => {
     try {
-      await annotationDeleteQuery(annotation.id)
+      await annotationDeleteQuery(annotation.id);
       showToast(ToastStyle.Success, "Annotation Deleted", "Annotation deletion successful");
       popToRoot();
     } catch (error) {
@@ -42,4 +34,3 @@ export function DeleteAnnotationAction(props: { annotation: any }) {
     />
   );
 }
-

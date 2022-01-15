@@ -1,10 +1,6 @@
 import fetch from "node-fetch";
-import {
-  assertNumberProp,
-  assertStringProp,
-  assertArrayProp,
-} from "./typeUtils";
-var he = require('he');
+import { assertNumberProp, assertStringProp, assertArrayProp } from "./typeUtils";
+import he from "he";
 
 export type QueryResultItem = {
   id: string;
@@ -27,59 +23,53 @@ const parseResponse = (item: unknown) => {
   return {
     id: `${item.question_id}`,
     title: `${he.decode(item.title)}`,
-    subtitle: `${he.decode(item.tags.join(' '))}`,
+    subtitle: `${he.decode(item.tags.join(" "))}`,
     url: `${item.link}`,
     accessoryTitle: `${item.answer_count} Answers`,
-    icon: 'so.png',
+    icon: "so.png",
     view_count: parseInt(`${item.view_count}`, 0),
-    answer_count: parseInt(`${item.answer_count}`, 0)
-  }
-};
-
-const parseQuery = (q:string) => {
-  const queryItems = q.split(" ");
-  const qs = queryItems.filter((c) => !c.startsWith("."))
-  const ts = queryItems.filter((c) => c.startsWith("."))
-
-  let qss = ''
-  if (qs.length) {
-    qss = qs.join(' ')
-  }
-
-  let tss = ''
-  if (ts.length) {
-    tss = ts.map(x => encodeURIComponent(x.substring(1))).join(';')
-  }
-
-  return {qss, tss};
-
-};
-
-export const searchResources = async (
-  q: string
-): Promise<QueryResultItem[]> => {
-  const requestOptions = {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept-Encoding': 'gzip, deflate, br'
-    }
+    answer_count: parseInt(`${item.answer_count}`, 0),
   };
-  const {qss, tss} = parseQuery(q);
-  const query = `https://api.stackexchange.com/2.3/search/advanced?key=U4DMV*8nvpm3EOpvf69Rxw((&site=stackoverflow&page=1&pagesize=20&order=desc&sort=relevance&q=${encodeURIComponent(qss)}&tagged=${tss}&filter=default`
-  const response = await fetch(
-    query,
-    requestOptions
-  );
+};
+
+const parseQuery = (q: string) => {
+  const queryItems = q.split(" ");
+  const qs = queryItems.filter((c) => !c.startsWith("."));
+  const ts = queryItems.filter((c) => c.startsWith("."));
+
+  let qss = "";
+  if (qs.length) {
+    qss = qs.join(" ");
+  }
+
+  let tss = "";
+  if (ts.length) {
+    tss = ts.map((x) => encodeURIComponent(x.substring(1))).join(";");
+  }
+
+  return { qss, tss };
+};
+
+export const searchResources = async (q: string): Promise<QueryResultItem[]> => {
+  const requestOptions = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept-Encoding": "gzip, deflate, br",
+    },
+  };
+  const { qss, tss } = parseQuery(q);
+  const query = `https://api.stackexchange.com/2.3/search/advanced?key=U4DMV*8nvpm3EOpvf69Rxw((&site=stackoverflow&page=1&pagesize=20&order=desc&sort=relevance&q=${encodeURIComponent(
+    qss
+  )}&tagged=${tss}&filter=default`;
+  const response = await fetch(query, requestOptions);
   if (response.status !== 200) {
     const data = (await response.json()) as { message?: unknown } | undefined;
     throw new Error(`${data?.message || "Not OK"}`);
   }
   const data = await response.json();
   assertArrayProp(data, "items");
-  return data.items
-  .map(parseResponse)
-  .sort(function (a, b) {
+  return data.items.map(parseResponse).sort(function (a, b) {
     return b.answer_count - a.answer_count || b.view_count - a.view_count;
-});;
+  });
 };

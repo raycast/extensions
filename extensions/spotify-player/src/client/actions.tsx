@@ -1,4 +1,4 @@
-import { closeMainWindow, showToast, ToastStyle, ActionPanel, Image } from "@raycast/api";
+import { closeMainWindow, showToast, ToastStyle, ActionPanel } from "@raycast/api";
 import { playSong } from "./spotify-applescript";
 
 export function PlayAction(props: { itemURI: string }) {

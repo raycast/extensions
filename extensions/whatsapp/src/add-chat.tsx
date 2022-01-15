@@ -27,11 +27,13 @@ export default function WhatsAppPhoneChatForm({ defaultValue }: WhatsAppPhoneCha
       id: isCreation ? randomId() : defaultValue.id,
       name: formValues.name,
       pinned: !!formValues.pinned,
-      phone: phoneInformation.phoneNumber
+      phone: phoneInformation.phoneNumber,
     };
 
     const isNewPhoneNumber = isCreation || savedChat.phone !== defaultValue.phone;
-    const doesPhoneNumberAlreadyExist = chats.filter(isPhoneChat).some(chat => chat.phone === phoneInformation.phoneNumber);
+    const doesPhoneNumberAlreadyExist = chats
+      .filter(isPhoneChat)
+      .some((chat) => chat.phone === phoneInformation.phoneNumber);
 
     if (isNewPhoneNumber && doesPhoneNumberAlreadyExist) {
       await showToast(ToastStyle.Failure, "Chat already exists");
@@ -42,7 +44,7 @@ export default function WhatsAppPhoneChatForm({ defaultValue }: WhatsAppPhoneCha
       await updateChats([...chats, savedChat]);
       await showToast(ToastStyle.Success, `Created new chat`, savedChat.name);
     } else {
-      const newChats = chats.map(chat => {
+      const newChats = chats.map((chat) => {
         if (chat.id === savedChat.id) {
           return savedChat;
         }
@@ -63,23 +65,9 @@ export default function WhatsAppPhoneChatForm({ defaultValue }: WhatsAppPhoneCha
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="John Doe"
-        defaultValue={defaultValue?.name}
-      />
-      <Form.TextField
-        id="phone"
-        title="Phone"
-        placeholder="+1 (817) 569-8900"
-        defaultValue={defaultValue?.phone}
-      />
-      <Form.Checkbox
-        id="pinned"
-        label="Pinned Chat"
-        defaultValue={defaultValue?.pinned}
-      />
+      <Form.TextField id="name" title="Name" placeholder="John Doe" defaultValue={defaultValue?.name} />
+      <Form.TextField id="phone" title="Phone" placeholder="+1 (817) 569-8900" defaultValue={defaultValue?.phone} />
+      <Form.Checkbox id="pinned" label="Pinned Chat" defaultValue={defaultValue?.pinned} />
     </Form>
   );
 }

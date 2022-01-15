@@ -30,12 +30,31 @@
       "description": "In Notion go to Settings & Members > Integration > Develop your own > New integration",
       "placeholder": "secret_1l3892KIWCJHJVikbiyJ7",
       "link": "https://www.notion.so/my-integrations"
+    },
+    {
+      "name": "open_in",
+      "type": "dropdown",
+      "title": "Open in...",
+      "required": false,
+      "default": "app",
+      "data": [
+        {
+          "title": "Notion Application",
+          "value": "app"
+        },
+        {
+          "title": "Default Browser",
+          "value": "web"
+        }
+      ],
+      "description": "Choose where to open Notion page."
     }
   ],
   "dependencies": {
+    "@notionhq/client": "^0.4.12",
     "@raycast/api": "^1.25.0",
-    "node-fetch": "^2.6.1",
     "moment": "^2.29.1",
+    "node-fetch": "^2.6.1",
     "open": "^8.4.0"
   },
   "devDependencies": {

@@ -243,7 +243,7 @@ export function EventListItem(props: { event: Event }) {
   );
 }
 
-export function EventList(props: {}) {
+export function EventList() {
   const [searchText, setSearchText] = useState<string>();
   const { data, error, isLoading } = useCache<Event[]>(
     "events",

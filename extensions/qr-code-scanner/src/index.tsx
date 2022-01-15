@@ -5,7 +5,7 @@ import {
   popToRoot,
   showHUD,
   showToast,
-  ToastStyle
+  ToastStyle,
 } from "@raycast/api";
 import { exec } from "child_process";
 import open from "open";
@@ -16,26 +16,26 @@ import { randomInt } from "crypto";
 function qrDecode(filepath: string, callback: (data: string | boolean) => void) {
   decodeImage(filepath, (err, image) => {
     if (!image) {
-      popToRoot()
+      popToRoot();
       return;
     }
     if (err) {
-      showToast(ToastStyle.Failure, 'Image decoder error...')
+      showToast(ToastStyle.Failure, "Image decoder error...");
       return;
     }
     const decodeQR = new qrcodeReader();
-    decodeQR.callback = function(errorWhenDecodeQR, result) {
+    decodeQR.callback = function (errorWhenDecodeQR, result) {
       if (errorWhenDecodeQR) {
-        if (errorWhenDecodeQR.indexOf('Couldn\'t find enough finder patterns') > -1) {
-          callback(false)
+        if (errorWhenDecodeQR.indexOf("Couldn't find enough finder patterns") > -1) {
+          callback(false);
         } else {
-          showToast(ToastStyle.Failure, 'Parser error...')
+          showToast(ToastStyle.Failure, "Parser error...");
           return;
         }
       } else {
-        callback(JSON.parse(JSON.stringify(result)).result)
+        callback(JSON.parse(JSON.stringify(result)).result);
       }
-      exec('rm ' + filepath)
+      exec("rm " + filepath);
     };
     decodeQR.decode(image.bitmap);
   });
@@ -44,13 +44,13 @@ function qrDecode(filepath: string, callback: (data: string | boolean) => void) 
 function trigger(randName: string) {
   closeMainWindow();
 
-  exec("/usr/sbin/screencapture -i /tmp/shotTemp" + randName + ".jpg", function() {
+  exec("/usr/sbin/screencapture -i /tmp/shotTemp" + randName + ".jpg", function () {
     qrDecode("/tmp/shotTemp" + randName + ".jpg", (data: string | boolean) => {
       if (data === false) {
         showHUD("No QR Code Found :(");
-        popToRoot()
+        popToRoot();
       } else if (typeof data === "string") {
-        copyTextToClipboard(data)
+        copyTextToClipboard(data);
         if (data.match(/[a-zA-z]+:\/\/[^\s]*/)) {
           confirmAlert({
             title: "Open in Browser?",
@@ -59,27 +59,26 @@ function trigger(randName: string) {
               title: "Open",
               onAction: () => {
                 open(data).then(() => {
-                  closeMainWindow()
-                  popToRoot()
-                })
-              }
+                  closeMainWindow();
+                  popToRoot();
+                });
+              },
             },
             dismissAction: {
               title: "Cancel",
-              onAction: () => popToRoot()
-            }
+              onAction: () => popToRoot(),
+            },
           });
         } else {
-          showHUD('Copied: ' + (data.length > 20 ? data.substring(0, 30) + '...' : data))
-          popToRoot()
+          showHUD("Copied: " + (data.length > 20 ? data.substring(0, 30) + "..." : data));
+          popToRoot();
         }
       }
-    })
-  })
-
+    });
+  });
 }
 
 export default async function main() {
-  const randName = randomInt(100, 999).toString()
-  trigger(randName)
+  const randName = randomInt(100, 999).toString();
+  trigger(randName);
 }

@@ -1,8 +1,4 @@
-import {
-  setLocalStorageItem,
-  getLocalStorageItem,
-  removeLocalStorageItem,
-} from "@raycast/api";
+import { setLocalStorageItem, getLocalStorageItem, removeLocalStorageItem } from "@raycast/api";
 import type { File, ProjectFiles, Node } from "./types";
 
 const PROJECT_FILES_CACHE_KEY = "PROJECT_FILES";
@@ -14,9 +10,7 @@ export async function storeFiles(projectFiles: ProjectFiles[]) {
 }
 
 export async function loadFiles() {
-  const data: string | undefined = await getLocalStorageItem(
-    PROJECT_FILES_CACHE_KEY
-  );
+  const data: string | undefined = await getLocalStorageItem(PROJECT_FILES_CACHE_KEY);
   return data !== undefined ? JSON.parse(data) : undefined;
 }
 
@@ -30,8 +24,6 @@ export async function storePages(pages: Node[], file: File) {
 }
 
 export async function loadPages(file: File) {
-  const data: string | undefined = await getLocalStorageItem(
-    `${PAGES_CACHE_KEY}-${file.key}`
-  );
+  const data: string | undefined = await getLocalStorageItem(`${PAGES_CACHE_KEY}-${file.key}`);
   return data !== undefined ? JSON.parse(data) : undefined;
 }

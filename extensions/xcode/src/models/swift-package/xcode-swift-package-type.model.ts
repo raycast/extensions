@@ -6,5 +6,5 @@ export enum XcodeSwiftPackageType {
   executable = "executable",
   systemModule = "system-module",
   manifest = "manifest",
-  empty = "empty"
+  empty = "empty",
 }

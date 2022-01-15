@@ -15,7 +15,7 @@ import { useState, useEffect } from "react";
 import { ShowTodoDetailsAction, TodoItemActions } from "./todo_actions";
 
 function userToIcon(user?: User): ImageLike {
-  let result: string = "";
+  let result = "";
   if (!user) {
     return "";
   }

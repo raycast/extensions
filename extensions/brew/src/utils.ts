@@ -10,7 +10,7 @@ export const supportPath = (() => {
   try {
     mkdirSync(environment.supportPath, { recursive: true });
   } catch (err) {
-    console.log('Failed to create supportPath');
+    console.log("Failed to create supportPath");
   }
   return environment.supportPath;
 })();
@@ -26,19 +26,21 @@ export interface Remote<T> {
 }
 
 export async function fetchRemote<T>(remote: Remote<T>): Promise<T[]> {
-  if (remote.value) { return remote.value; }
+  if (remote.value) {
+    return remote.value;
+  }
 
   async function readCache(): Promise<T[] | undefined> {
     const cacheTime = (await stat(remote.cachePath)).mtimeMs;
-    const response = await fetch(remote.url, {method: "HEAD"});
-    const lastModified = Date.parse(response.headers.get('last-modified') ?? "");
+    const response = await fetch(remote.url, { method: "HEAD" });
+    const lastModified = Date.parse(response.headers.get("last-modified") ?? "");
 
     if (!isNaN(lastModified) && lastModified < cacheTime) {
       const cacheBuffer = await readFile(remote.cachePath);
       remote.value = JSON.parse(cacheBuffer.toString());
       return remote.value;
     } else {
-      throw 'Invalid cache';
+      throw "Invalid cache";
     }
   }
 
@@ -48,7 +50,7 @@ export async function fetchRemote<T>(remote: Remote<T>): Promise<T[]> {
     try {
       await writeFile(remote.cachePath, JSON.stringify(remote.value));
     } catch (err) {
-      console.error("Failed to write formula cache:", err)
+      console.error("Failed to write formula cache:", err);
     }
     return remote.value;
   }
@@ -59,13 +61,13 @@ export async function fetchRemote<T>(remote: Remote<T>): Promise<T[]> {
   } catch {
     value = await fetchURL();
   }
-  return (value ? [...value] : []);
+  return value ? [...value] : [];
 }
 
 /// Toast
 
 export function showFailureToast(title: string, error: any) {
-  const msg = error['stderr']?.trim() ?? '';
+  const msg = error["stderr"]?.trim() ?? "";
   showToast(ToastStyle.Failure, title, msg);
 }
 
@@ -81,34 +83,33 @@ declare global {
 }
 
 if (!Array.prototype.first) {
-  Array.prototype.first = function<T>(this: T[]): T | undefined {
-    return (this.length > 0 ? this[0] : undefined);
-  }
+  Array.prototype.first = function <T>(this: T[]): T | undefined {
+    return this.length > 0 ? this[0] : undefined;
+  };
 }
 
 if (!Array.prototype.last) {
-  Array.prototype.last = function<T>(this: T[]): T | undefined {
-    return (this.length > 0 ? this[this.length - 1] : undefined);
-  }
+  Array.prototype.last = function <T>(this: T[]): T | undefined {
+    return this.length > 0 ? this[this.length - 1] : undefined;
+  };
 }
 
 if (!Array.prototype.isTruncated) {
-  Array.prototype.isTruncated = function<T>(this: T[]): boolean {
+  Array.prototype.isTruncated = function <T>(this: T[]): boolean {
     if (this.totalLength) {
       return this.length < this.totalLength;
     }
     return false;
-  }
+  };
 }
 
 /// String
 
 declare global {
   interface StringConstructor {
-    ellipsis: String;
+    ellipsis: string;
   }
 }
-
 
 if (!String.ellipsis) {
   String.ellipsis = "…";
