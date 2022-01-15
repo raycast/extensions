@@ -64,8 +64,8 @@ export function Search(props: SearchProps) {
           actions={
             <ActionPanel>
               <PushAction icon={Icon.List} title="Tags" target={<SearchTag image={item.slug} />} />
-              <OpenInBrowserAction url={item.url ? item.url : ""} />
               <CopyToClipboardAction title="Copy Pull Command" content={`docker pull ${item.slug}`} />
+              <OpenInBrowserAction url={item.url ? item.url : ""} />
               <CopyToClipboardAction title="Copy URL" content={item.url ? item.url : ""} />
             </ActionPanel>
           }
@@ -80,8 +80,8 @@ export function Search(props: SearchProps) {
             accessoryTitle={`${image.os_arch ? image.os_arch : ""} ${image.sizeHuman ? image.sizeHuman : ""}`}
             actions={
               <ActionPanel>
-                <OpenInBrowserAction url={image.url ? image.url : ""} />
                 <CopyToClipboardAction title="Copy Pull Command" content={`docker pull ${props.image}:${tag.name}`} />
+                <OpenInBrowserAction url={image.url ? image.url : ""} />
                 <CopyToClipboardAction title="Copy URL" content={image.url ? image.url : ""} />
               </ActionPanel>
             }
