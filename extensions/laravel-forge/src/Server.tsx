@@ -14,11 +14,12 @@ import { useEffect, useState } from "react";
 import { Server } from "./api/Server";
 import { Site } from "./api/Site";
 import { SitesList, ISite } from "./Site";
-import { getProviderIcon, useIsMounted } from "./helpers";
+import { getServerColor, useIsMounted } from "./helpers";
 
 export const ServersList = () => {
   const [servers, setServers] = useState<IServer[]>([]);
   const [siteData, setSiteData] = useState<LocalStorageValues>({});
+  const [loading, setLoading] = useState(true);
   const isMounted = useIsMounted();
 
   /**
@@ -33,7 +34,7 @@ export const ServersList = () => {
     // If the sites already exist in the cache, or not found, do nothign
     if (siteData[key] || !isMounted.current) return;
     const server = servers.find((s) => s.id.toString() === serverId) as IServer;
-    if (!Object.keys(server).length) return;
+    if (!server) return;
     const thisSiteData = (await Site.getAll(server)) as ISite[] | undefined;
     thisSiteData && (await setLocalStorageItem(`forge-sites-${serverId}`, JSON.stringify(thisSiteData)));
   };
@@ -50,6 +51,7 @@ export const ServersList = () => {
       })
       .finally(() => {
         if (!isMounted.current) return;
+        setLoading(false);
         Server.getAll().then(async (servers: Array<IServer> | undefined) => {
           if (!isMounted.current) return;
           // Add the server list to storage to avoid content flash
@@ -59,9 +61,17 @@ export const ServersList = () => {
       });
   }, []);
 
+  if (!servers.length) {
+    return (
+      <List>
+        <List.Item title="Nothing found..." />
+      </List>
+    );
+  }
+
   return (
     <List
-      isLoading={!servers?.length}
+      isLoading={!servers?.length && !loading}
       searchBarPlaceholder="Search servers..."
       onSelectionChange={(serverId) => serverId && maybeFetchAndCacheSites(serverId)}
     >
@@ -81,7 +91,8 @@ const ServerListItem = ({ server, sites }: { server: IServer; sites: ISite[] }) 
       key={server.id}
       title={server.name}
       icon={{
-        source: getProviderIcon(server.provider),
+        source: "server.png",
+        tintColor: getServerColor(server.provider),
       }}
       accessoryTitle={server.ipAddress}
       actions={

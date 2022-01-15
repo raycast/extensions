@@ -4,22 +4,23 @@ import fetch from "node-fetch";
 import { ISite } from "./Site";
 import { Color, Icon } from "@raycast/api";
 
-export const getProviderIcon = (provider: string): string => {
+export const getServerColor = (provider: string): string => {
+  // Colors pulled from their respective sites
   switch (provider) {
     case "ocean2":
-      return "https://forge.laravel.com/images/icons/digital-ocean.png";
+      return "rgb(0, 105, 255)";
     case "linode":
-      return "https://forge.laravel.com/images/icons/linode.png";
+      return "#02b159";
     case "vultr":
-      return "https://forge.laravel.com/images/icons/vultr.png";
+      return "#007bfc";
     case "aws":
-      return "https://forge.laravel.com/images/icons/aws.png";
+      return "#ec7211";
     case "hetzner":
-      return "https://forge.laravel.com/images/icons/hetzner.png";
+      return "#d50c2d";
     case "custom":
-      return "https://forge.laravel.com/images/icons/custom.png";
+      return "rgb(24, 182, 155)"; // Forge color
   }
-  return "";
+  return "rgb(24, 182, 155)";
 };
 export const useIsMounted = () => {
   const isMounted = useRef(false);
@@ -35,7 +36,6 @@ export const useIsMounted = () => {
 export const usePolling = (callback: () => Promise<void>) => {
   const [isPolling, setIsPolling] = useState(false);
   const isMounted = useIsMounted();
-  const pollingId = useRef(0);
   const poll = () => {
     if (isPolling && isMounted.current) {
       return;
@@ -46,10 +46,8 @@ export const usePolling = (callback: () => Promise<void>) => {
   useEffect(() => {
     isPolling || callback();
     // Poll for the rate limit per minute plus 500ms leeway
-    pollingId.current = window.setInterval(poll, 60000 / API_RATE_LIMIT + 500);
-    return () => {
-      window.clearInterval(pollingId.current);
-    };
+    const id = setInterval(poll, 60000 / API_RATE_LIMIT + 500);
+    return () => clearInterval(id);
   }, []);
   return isPolling;
 };

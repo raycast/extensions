@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, ToastStyle, popToRoot } from "@raycast/api";
 import { preferences } from "@raycast/api";
 import fetch from "node-fetch";
 import { IServer } from "../Server";
@@ -60,10 +60,13 @@ const getServers = async (token: string) => {
       method: "get",
       headers,
     });
+    if (response.status === 401) {
+      throw new Error("Error authenticating with Forge");
+    }
     const serverData = (await response.json()) as ServersResponse;
     let servers = serverData?.servers ?? [];
     // eslint-disable-next-line
-    // @ts-ignore Not sure how to convert Dictionary from lodash to IServer
+    // @ts-expect-error Not sure how to convert Dictionary from lodash to IServer
     servers = servers.map((s) => mapKeys(s, (_, k) => camelCase(k)) as IServer);
     return servers
       .map((server) => {
@@ -73,6 +76,11 @@ const getServers = async (token: string) => {
       .filter((s) => !s.revoked);
   } catch (error) {
     console.error(error);
+    await popToRoot();
+    if (error instanceof Error) {
+      showToast(ToastStyle.Failure, error?.message);
+      return [];
+    }
     showToast(ToastStyle.Failure, "Api request failed");
     return [];
   }
