@@ -56,11 +56,12 @@ function NoteForm(props: { vaultPath: string }) {
       showToast(ToastStyle.Failure, "Please enter a name");
     } else {
       try {
+        fs.mkdirSync(path.join(vaultPath, noteProps.path), { recursive: true });
         fs.writeFileSync(path.join(vaultPath, noteProps.path, noteProps.name + ".md"), noteProps.content);
         showToast(ToastStyle.Success, "Created new note");
         pop();
       } catch {
-        showToast(ToastStyle.Failure, "Something went wrong. Maybe your path doesnt exist.");
+        showToast(ToastStyle.Failure, "Something went wrong. Maybe your vault, path or filename is not valid.");
       }
     }
   }
