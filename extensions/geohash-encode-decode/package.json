@@ -22,9 +22,9 @@
   ],
   "preferences": [
     {
-      "label": "Close on action",
+      "label": "Close on Action",
       "description": "Close extension on action execution (Copy to Clipboard / Open in Browser)",
-      "default": false,
+      "default": true,
       "type": "checkbox",
       "name": "closeOnAction",
       "required": false
