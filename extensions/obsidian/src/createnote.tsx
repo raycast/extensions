@@ -129,7 +129,7 @@ function NoteForm(props: { vaultPath: string }) {
     if (noteProps.name == "") {
       showToast(ToastStyle.Failure, "Please enter a name");
     } else {
-      let content = buildNoteContent(noteProps.tags, noteProps.content);
+      const content = buildNoteContent(noteProps.tags, noteProps.content);
       writeNote(path.join(vaultPath, noteProps.path), noteProps.name, content);
     }
   }
