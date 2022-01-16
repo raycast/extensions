@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "toggl-unofficial",
+  "title": "Toggl (Unofficial)",
+  "description": "Start and stop Toggl timers! Not endorsed by Toggl in any way.",
+  "icon": "command-icon.png",
+  "author": "ThatNerd",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "startTimer",
+      "title": "Start Timer",
+      "description": "Start a Toggl timer from a list of unique timers used over the last 30 days.",
+      "mode": "view"
+    },
+    {
+      "name": "stopTimer",
+      "title": "Stop Running Timer",
+      "description": "Stop your currently running Toggl timer.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "textfield",
+      "required": true,
+      "title": "Toggl API Token",
+      "placeholder": "1a2b3c4d5e6f7g8h9i",
+      "description": "The API token for your Toggl account."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.3",
+    "node-fetch": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
+    "eslint": "^8.2.0",
+    "eslint-config-airbnb": "^19.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-react": "^7.27.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "eslint --cache ."
+  }
+}
