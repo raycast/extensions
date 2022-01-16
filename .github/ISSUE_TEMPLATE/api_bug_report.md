@@ -1,7 +1,7 @@
 ---
 name: "🧬 🐞 API Bug Report"
 about: Report a reproducible bug or regression related to extensions API
-title: '[API Bug] '
+title: ''
 labels: 'api, bug'
 
 ---

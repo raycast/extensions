@@ -1,10 +1,24 @@
 # Changelog
 
+## 1.27.0 - 2022-01-12
+
+### 💎 Improvements
+
+* **Developer Tools:** Added `Open Support Directory` action to local dev extensions
+* **Developer Tools**: Removed auto-injecting of globals for enabling React Developer Tools in dev mode
+* **Developer Tools**: Added `prettier` checks to CLI `lint` command
+* **Documentation**: Updates and fixes
+
+### 🐞 Bugfixes
+
+* **Forms:** Fixed controlled updates for the `Form.TagPicker`
+* **Navigation**: Fixed a bug where a programmatic pop, followed by a manual pop (e.g. ESC) could lead to wrong state (![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)[Issue #571](https://github.com/raycast/extensions/issues/571))
+
 ## 1.26.3 - 2021-12-16
 
 ### ✨ New
 
-* New API for **Alert** views: Alerts are useful for destructive actions or actions that require user confirmation; new methods let you display our beautiful native Alert component \
+* New API for **Alert** views: Alerts are useful for destructive actions or actions that require user confirmation; new methods let you display our beautiful native Alert component\
   ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)Issue #48](https://github.com/raycast/extensions/issues/48))
 * New API for **interactive Toasts**: you can now add buttons to Toasts, e.g. to give the user options for created items, to open the browser, or for any other relevant context ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)Issue #438](https://github.com/raycast/extensions/issues/438))
 * New API for retrieving the current **Finder selection**: unlocks a couple of use cases for extensions that perform actions on selected files and folders ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)Issue #153](https://github.com/raycast/extensions/issues/153))
@@ -20,9 +34,9 @@
 
 * Textfields do not auto-transform certain characters such as dashes any more ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)Issue #491](https://github.com/raycast/extensions/issues/491) and [![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)Issue #360](https://github.com/raycast/extensions/issues/360))
 
-### &#x20;⚙️ Build Updates
+### ⚙️ Build Updates
 
-* This CLI of this version contains an update of the build tool with changed (and "more compatible") heuristics around how `default` exports are handled. This means that you should double check whether `import` statements for certain npm packages need to be adjusted. \
+* This CLI of this version contains an update of the build tool with changed (and "more compatible") heuristics around how `default` exports are handled. This means that you should double check whether `import` statements for certain npm packages need to be adjusted.\
   **Example**: `import caniuse from "caniuse-api"` has to be changed to `import * as caniuse from "caniuse-api"` because of the missing `default` export of the built `caniuse` library that has to run in a Node environment.
 
 ## 1.25.7 - 2021-11-26

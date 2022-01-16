@@ -54,7 +54,7 @@ The options to create an Alert.
 #### Example
 
 ```typescript
-import { AlertOptions, AlertActionStyle } from "@raycast/api";
+import { AlertOptions } from "@raycast/api";
 
 export default async () => {
   const options: AlertOptions = {
@@ -63,6 +63,8 @@ export default async () => {
     primaryAction: {
       title: 'Do something',
       onAction: () => {
+        // while you can register a handler for an action, it's more elegant
+        // to use the `if (await confirmAlert(...)) { ... }` pattern
         console.log("The alert action has been triggered")
       }
     }

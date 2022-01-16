@@ -98,7 +98,11 @@ const ServerListItem = ({ server, sites }: { server: IServer; sites: ISite[] }) 
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction title="Open Server Information" target={<SingleServerView server={server} sites={sites} />} />
+            <PushAction
+              title="Open Server Information"
+              icon={Icon.Binoculars}
+              target={<SingleServerView server={server} sites={sites} />}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="Commands">
             <ServerCommands server={server} />
