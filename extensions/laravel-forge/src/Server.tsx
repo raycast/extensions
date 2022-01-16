@@ -51,9 +51,9 @@ export const ServersList = () => {
       })
       .finally(() => {
         if (!isMounted.current) return;
-        setLoading(false);
         Server.getAll().then(async (servers: Array<IServer> | undefined) => {
           if (!isMounted.current) return;
+          setLoading(false);
           // Add the server list to storage to avoid content flash
           servers && setServers(servers);
           await setLocalStorageItem("forge-servers", JSON.stringify(servers));
@@ -61,7 +61,7 @@ export const ServersList = () => {
       });
   }, []);
 
-  if (!servers.length) {
+  if (!servers.length && !loading) {
     return (
       <List>
         <List.Item title="Nothing found..." />
@@ -98,7 +98,11 @@ const ServerListItem = ({ server, sites }: { server: IServer; sites: ISite[] }) 
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction title="Open Server Information" target={<SingleServerView server={server} sites={sites} />} />
+            <PushAction
+              title="Open Server Information"
+              icon={Icon.Binoculars}
+              target={<SingleServerView server={server} sites={sites} />}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="Commands">
             <ServerCommands server={server} />
