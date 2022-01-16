@@ -18,6 +18,7 @@ import path from "path";
 interface Vault {
   name: string;
   key: string;
+  path: string;
 }
 
 interface Preferences {
@@ -35,12 +36,16 @@ interface FormValue {
   tags: Array<string>;
 }
 
-function prefVaults() {
+function getVaultNameFromPath(vaultPath: string) {
+  return vaultPath.substring(vaultPath.lastIndexOf(path.sep) + 1);
+}
+
+function parseVaults() {
   const pref: Preferences = getPreferenceValues();
   const vaultString = pref.vaultPath;
   return vaultString
     .split(",")
-    .map((vault) => ({ name: vault.trim(), key: vault.trim() }))
+    .map((vault) => ({ name: getVaultNameFromPath(vault.trim()), key: vault.trim(), path: vault.trim() }))
     .filter((vault) => !!vault);
 }
 
@@ -88,11 +93,15 @@ function NoteForm(props: { vaultPath: string }) {
         message: 'Are you sure you want to override the note: "' + name + '"?',
         icon: Icon.ExclamationMark,
       };
-      if (await !confirmAlert(options)) {
-        return;
+      if (await confirmAlert(options)) {
+        saveMDFile(notePath, name, content);
       }
+    } else {
+      saveMDFile(notePath, name, content);
     }
+  }
 
+  function saveMDFile(notePath: string, name: string, content: string) {
     try {
       fs.mkdirSync(notePath, { recursive: true });
       fs.writeFileSync(path.join(notePath, name + ".md"), content);
@@ -103,19 +112,24 @@ function NoteForm(props: { vaultPath: string }) {
     }
   }
 
+  function buildNoteContent(tags: Array<string>, noteContent: string) {
+    let content = "";
+    if (tags.length > 0) {
+      content = "---\ntags: [";
+      for (let i = 0; i < tags.length - 1; i++) {
+        content += '"' + tags[i] + '",';
+      }
+      content += '"' + tags.pop() + '"]\n---\n';
+    }
+    content += noteContent;
+    return noteContent;
+  }
+
   function createNewNote(noteProps: FormValue) {
     if (noteProps.name == "") {
       showToast(ToastStyle.Failure, "Please enter a name");
     } else {
-      let content = "";
-      if (noteProps.tags.length > 0) {
-        content = "---\ntags: [";
-        for (let i = 0; i < noteProps.tags.length - 1; i++) {
-          content += '"' + noteProps.tags[i] + '",';
-        }
-        content += '"' + noteProps.tags.pop() + '"]\n---\n';
-      }
-      content += noteProps.content;
+      let content = buildNoteContent(noteProps.tags, noteProps.content);
       writeNote(path.join(vaultPath, noteProps.path), noteProps.name, content);
     }
   }
@@ -151,7 +165,7 @@ function VaultSelection(props: { vaults: Vault[] }) {
           key={vault.key}
           actions={
             <ActionPanel>
-              <PushAction title="Select Vault" target={<NoteForm vaultPath={vault.name} />} />
+              <PushAction title="Select Vault" target={<NoteForm vaultPath={vault.path} />} />
             </ActionPanel>
           }
         />
@@ -161,7 +175,7 @@ function VaultSelection(props: { vaults: Vault[] }) {
 }
 
 export default function Command() {
-  const vaults = prefVaults();
+  const vaults = parseVaults();
   if (vaults.length > 1) {
     return <VaultSelection vaults={vaults} />;
   } else if (vaults.length == 1) {

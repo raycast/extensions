@@ -27,6 +27,7 @@ interface Note {
 interface Vault {
   name: string;
   key: string;
+  path: string;
 }
 
 interface Preferences {
@@ -77,12 +78,16 @@ function getFiles(vaultPath: string) {
   return files;
 }
 
-function prefVaults() {
+function getVaultNameFromPath(vaultPath: string) {
+  return vaultPath.substring(vaultPath.lastIndexOf(path.sep) + 1);
+}
+
+function parseVaults() {
   const pref: Preferences = getPreferenceValues();
   const vaultString = pref.vaultPath;
   return vaultString
     .split(",")
-    .map((vault) => ({ name: vault.trim(), key: vault.trim() }))
+    .map((vault) => ({ name: getVaultNameFromPath(vault.trim()), key: vault.trim(), path: vault.trim() }))
     .filter((vault) => !!vault);
 }
 
@@ -319,7 +324,7 @@ function VaultSelection(props: { vaults: Vault[] }) {
           key={vault.key}
           actions={
             <ActionPanel>
-              <PushAction title="Select Vault" target={<NoteList vaultPath={vault.name} />} />
+              <PushAction title="Select Vault" target={<NoteList vaultPath={vault.path} />} />
             </ActionPanel>
           }
         />
@@ -329,7 +334,7 @@ function VaultSelection(props: { vaults: Vault[] }) {
 }
 
 export default function Command() {
-  const vaults = prefVaults();
+  const vaults = parseVaults();
   if (vaults.length > 1) {
     return <VaultSelection vaults={vaults} />;
   } else if (vaults.length == 1) {

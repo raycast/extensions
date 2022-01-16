@@ -5,6 +5,16 @@
   "icon": "command-icon.png",
   "author": "marcjulian",
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "type": "textfield",
+      "placeholder": "path/to/vault",
+      "title": "Path to Vault",
+      "required": true,
+      "description": "Specify the path or multiple paths (comma separated) to your vault/vaults"
+    }
+  ],
   "commands": [
     {
       "name": "index",
@@ -13,14 +23,6 @@
       "description": "Search, open, view, copy, paste and edit any note in Obsidian",
       "mode": "view",
       "preferences": [
-        {
-          "name": "vaultPath",
-          "type": "textfield",
-          "placeholder": "path/to/vault",
-          "title": "Path to Vault",
-          "required": true,
-          "description": "Specify the path or multiple paths (comma separated) to your vault/vaults"
-        },
         {
           "name": "excludedFolders",
           "type": "textfield",
@@ -70,17 +72,7 @@
       "title": "Open Vault",
       "subtitle": "Obsidian",
       "description": "Open a vault in Obsidian",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "vaults",
-          "type": "textfield",
-          "title": "Your vaults",
-          "required": true,
-          "description": "The names of your vaults (comma separated)",
-          "placeholder": "vault1, vault2, ..."
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "createnote",
@@ -89,14 +81,6 @@
       "description": "Create new note",
       "mode": "view",
       "preferences": [
-        {
-          "name": "vaultPath",
-          "type": "textfield",
-          "placeholder": "path/to/vault",
-          "title": "Path to Vault",
-          "required": true,
-          "description": "Specify the path or multiple paths (comma separated) to your vault/vaults"
-        },
         {
           "name": "prefPath",
           "type": "textfield",
