@@ -122,7 +122,7 @@ function NoteForm(props: { vaultPath: string }) {
       content += '"' + tags.pop() + '"]\n---\n';
     }
     content += noteContent;
-    return noteContent;
+    return content;
   }
 
   function createNewNote(noteProps: FormValue) {
