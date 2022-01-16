@@ -23,9 +23,9 @@ This command will show a list of previously specified vaults which you can open 
 <img width="795" alt="Obsidian Open Vault command" src="https://user-images.githubusercontent.com/67844154/147991366-ef494cf8-bae7-4141-8fb6-fc14cf10182e.png">
 
 ## Create Note
-This command lets you create new notes on the fly by entering a name, optionally a path to a subfolder in your vault and some content.
+This command lets you create new notes on the fly by entering a name, optionally a path to a subfolder in your vault and some content. You can use the tag picker to add tags to the notes YAML frontmatter.
 
-<img width="822" alt="Obsidian Create Note command" src="https://user-images.githubusercontent.com/67844154/149306847-3d180cd6-defe-44b6-a32a-3dc9f598e885.png">
+<img width="831" alt="Create Note command" src="https://user-images.githubusercontent.com/67844154/149658484-50b87db0-e6cf-4669-89b1-e3c674723066.png">
 
 ## Preferences
 ### Search Note
@@ -41,6 +41,8 @@ This command lets you create new notes on the fly by entering a name, optionally
 ### Create Note
 - set path/paths to your vault/vaults (comma separated)
 - default path where a new note will be created
+- default tag (will be selected by default in the tag picker)
+- list of tags to be suggested in the tag picker (comma separated)
 
 ## Demo (old)
 https://user-images.githubusercontent.com/67844154/145954580-2a1cde55-a597-4298-8c6c-9cdc8d297a55.mov
