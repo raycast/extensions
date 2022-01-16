@@ -89,8 +89,14 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 ### Binary Dependencies and Additional Configuration
 
 * Avoid asking users to perform additional downloads and try to automate as much as possible from the extension, especially if you are targeting non-developers. See the [Speedtest](https://github.com/raycast/extensions/pull/302) extension that downloads a CLI in the background and later uses it under the hood.
+* If you do end up downloading executable binaries in the background, please make sure it's done from a server that you don't have access to. Otherwise we cannot guarantee that you won't replace the binary with malicious code after the review. E.g. downloading `speedtest-cli` from [`install.speedtest.net`](http://install.speedtest.net) is acceptable, but doing this from some custom AWS server would lead to a rejection. Add additional integrity checks through hashes.
+* Don't bundle opaque binaries where sources are unavailable or where it's unclear how they have been built.
 * Don't bundle heavy binary dependencies in the extension – this would lead to increased extension download size.
-* If you do end up downloading executable binaries in the background, please make sure it's done from a server that you don't have access to. Otherwise we cannot guarantee that you won't replace the binary with malicious code after the review. E.g. downloading `speedtest-cli` from [`install.speedtest.net`](http://install.speedtest.net) is acceptable, but doing this from some custom AWS server would lead to a rejection.
+* **Examples for interacting with binaries**
+  * ✅ Calling known system binaries
+  * ✅ Binary downloaded or installed from a trusted location with additional integrity checking through hashes (that is, verify whether the downloaded binary really matches the expected binary)
+  * ✅ Binary extracted from an npm package and copied to assets, with traceable sources how the binary is built; **note**: we have yet to integrate CI actions for copying and comparing the files; meanwhile, ask a member of the Raycast team to add the binary for you
+  * ❌ Any binary with unavailable sources or unclear builds just added to the assets folder
 
 ### Keychain Access
 

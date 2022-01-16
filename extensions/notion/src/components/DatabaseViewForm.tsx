@@ -23,7 +23,7 @@ import { storeDatabases, loadDatabases, storeDatabaseProperties, loadDatabasePro
 export function DatabaseViewForm(props: {
   databaseId: string;
   databaseView?: DatabaseView;
-  saveDatabaseView: any;
+  saveDatabaseView: (newDatabaseView: DatabaseView) => void;
   isDefaultView: boolean;
 }): JSX.Element {
   const presetDatabaseId = props.databaseId;
@@ -361,6 +361,9 @@ function StatusTagPicker(props: {
       placeholder={`Status for "${title}" tasks`}
     >
       {(statusProperty?.options as DatabasePropertyOption[]).map((o) => {
+        if (!o.id) {
+          return null;
+        }
         return (
           <Form.TagPicker.Item
             key={`kanban-${propertyId}-${id}-tag-${o.id}`}

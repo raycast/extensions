@@ -20,6 +20,13 @@
       "subtitle": "Pinboard",
       "description": "Searches your Pinboard bookmarks by tags.",
       "mode": "view"
+    },
+    {
+      "name": "searchBookmarksWithConstantTags",
+      "title": "Search Bookmarks With Constant Tags",
+      "subtitle": "Pinboard",
+      "description": "Searches your Pinboard bookmarks by tags, but add one or more tags from preferences. Optional.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -30,6 +37,14 @@
       "title": "API Token",
       "description": "Enter your API Token (Pinboard Settings > Password)",
       "placeholder": "Enter your API Token (Pinboard Settings > Password)"
+    },
+    {
+      "name": "constantTags",
+      "type": "textfield",
+      "required": false,
+      "title": "Constant tags",
+      "description": "Enter the tags you want to add when searching with constant tags",
+      "placeholder": "bookmarks"
     }
   ],
   "dependencies": {
