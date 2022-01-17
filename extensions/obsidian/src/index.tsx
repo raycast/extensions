@@ -61,7 +61,7 @@ const getFilesHelp = function (dirPath: string, exFolders: Array<string>, arrayO
   arrayOfFiles = arrayOfFiles || [];
   files.forEach(function (file: string) {
     const next = fs.statSync(dirPath + "/" + file);
-    if (next.isDirectory()) {
+    if (next.isDirectory() && !file.includes(".obsidian")) {
       arrayOfFiles = getFilesHelp(dirPath + "/" + file, exFolders, arrayOfFiles);
     } else {
       if (file.endsWith(".md") && file !== ".md" && !dirPath.includes(".obsidian") && isValidFile(dirPath, exFolders)) {
