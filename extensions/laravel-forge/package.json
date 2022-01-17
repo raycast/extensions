@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "laravel-forge",
+  "title": "Laravel Forge",
+  "description": "View and manage your Laravel Forge-managed servers",
+  "icon": "command-icon.png",
+  "author": "KevinBatdorf",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Servers",
+      "subtitle": "Laravel Forge",
+      "icon": "command-icon.png",
+      "description": "Search and manage your Laravel Forge servers and sites",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "laravel_forge_api_key",
+      "type": "password",
+      "required": true,
+      "title": "Laravel Forge API Key",
+      "description": "Generate from your Laravel Forge profile",
+      "placeholder": "API Key"
+    },
+    {
+      "name": "laravel_forge_ssh_user",
+      "type": "textfield",
+      "required": false,
+      "title": "Laravel Forge SSH User",
+      "default": "forge",
+      "description": "Change the SSH user to login with",
+      "placeholder": "SSH User"
+    },
+    {
+      "name": "laravel_forge_api_key_two",
+      "type": "password",
+      "required": false,
+      "title": "Laravel Forge API Key 2 (optional)",
+      "description": "Optionally add a second account.",
+      "placeholder": "API Key (optional)"
+    },
+    {
+      "name": "laravel_forge_ssh_user_two",
+      "type": "textfield",
+      "required": false,
+      "title": "Laravel Forge SSH User 2 (optional)",
+      "default": "forge",
+      "description": "Change the SSH user to login with ont he second account",
+      "placeholder": "SSH User"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.3",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.178",
+    "@types/node": "~17.0.1",
+    "@types/react": "^17.0.37",
+    "@typescript-eslint/eslint-plugin": "^5.7.0",
+    "@typescript-eslint/parser": "^5.7.0",
+    "eslint": "^8.5.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.22.1",
+    "typescript": "^4.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
