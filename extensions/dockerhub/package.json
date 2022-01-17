@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dockerhub",
-  "title": "dockerhub",
-  "description": "Search images on DockerHub.",
+  "title": "Docker Hub",
+  "description": "Search images on Docker Hub.",
   "icon": "docker-icon.png",
   "author": "k8scat",
   "license": "MIT",
@@ -10,7 +10,7 @@
     {
       "name": "search-image",
       "title": "Search Docker Images",
-      "description": "Search images on DockerHub",
+      "description": "Search images on Docker Hub",
       "mode": "view"
     }
   ],
