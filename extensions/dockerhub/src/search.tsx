@@ -8,7 +8,7 @@ import {
   ToastStyle,
   Icon,
 } from "@raycast/api";
-import { searchImage, searchTag, SearchType } from "./lib/api";
+import { searchImage, searchTag, SearchType, TagStatus } from "./lib/api";
 import { useEffect, useState } from "react";
 import { Image, Tag, TagImage } from "./lib/type";
 import { SearchTag } from "./search-tag";
@@ -63,7 +63,7 @@ export function Search(props: SearchProps) {
           accessoryIcon={item.logo_url.small}
           actions={
             <ActionPanel>
-              <PushAction icon={Icon.List} title="Tags" target={<SearchTag image={item.slug} />} />
+              <PushAction icon={Icon.List} title="Show Tags" target={<SearchTag image={item.slug} />} />
               <CopyToClipboardAction title="Copy Pull Command" content={`docker pull ${item.slug}`} />
               <OpenInBrowserAction url={item.url ? item.url : ""} />
               <CopyToClipboardAction title="Copy URL" content={item.url ? item.url : ""} />
@@ -74,7 +74,7 @@ export function Search(props: SearchProps) {
       {tags.map((tag: Tag) =>
         tag.images?.map((image: TagImage) => (
           <List.Item
-            key={`${props.image}:${tag.name}-${image.os_arch}`}
+            key={`${tag.id}-${image.digest}`}
             title={`${tag.name}`}
             subtitle={`${tag.update_time ? tag.update_time : ""} by ${tag.last_updater_username}`}
             accessoryTitle={`${image.os_arch ? image.os_arch : ""} ${image.sizeHuman ? image.sizeHuman : ""}`}

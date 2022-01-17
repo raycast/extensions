@@ -81,6 +81,7 @@ export async function searchTag(
     }
     result.results = result.results.filter((tag: Tag) => tag.tag_status === TagStatus.ACTIVE);
     result.results = result.results.map((tag: Tag) => {
+      tag.images = tag.images?.filter((i: TagImage) => i.status === TagStatus.ACTIVE);
       tag.images = tag.images?.map((i: TagImage) => {
         i.os_arch = `${i.os}/${i.architecture}`;
         if (i.digest) {
