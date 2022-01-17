@@ -36,13 +36,20 @@ interface FormValue {
   tags: Array<string>;
 }
 
-function getVaultNameFromPath(vaultPath: string) {
-  return vaultPath
+function getVaultNameFromPath(vaultPath: string): string {
+  let name = vaultPath
     .split(path.sep)
-    .filter(function (i) {
-      return i;
+    .filter((i) => {
+      if (i != "") {
+        return i;
+      }
     })
     .pop();
+  if (name) {
+    return name;
+  } else {
+    return "Default Vault Name (check your path preferences)";
+  }
 }
 
 function parseVaults() {
