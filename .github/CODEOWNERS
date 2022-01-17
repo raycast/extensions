@@ -49,6 +49,7 @@
 /extensions/devdocs                                  @pomdtr
 /extensions/displayplacer                            @eluce2
 /extensions/docker                                   @priithaamer
+/extensions/dockerhub                                @k8scat
 /extensions/domainr                                  @splash-cli
 /extensions/doppler-share-secrets                    @thomaspaulmann
 /extensions/elgato-key-light                         @thomaspaulmann
