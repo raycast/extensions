@@ -27,6 +27,11 @@ export const ListItem = (props: { title: EnrichedTitle }) => {
             title="Copy URL"
             content={`https://www.imdb.com/title/${title.imdbID}/`}
           />
+          <CopyToClipboardAction
+            title="Copy ID"
+            shortcut={{ modifiers: ["opt", "cmd"], key: "return" }}
+            content={`${title.imdbID}`}
+          />
         </ActionPanel>
       }
     />
