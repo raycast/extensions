@@ -79,7 +79,12 @@ function getFiles(vaultPath: string) {
 }
 
 function getVaultNameFromPath(vaultPath: string) {
-  return vaultPath.substring(vaultPath.lastIndexOf(path.sep) + 1);
+  return vaultPath
+    .split(path.sep)
+    .filter(function (i) {
+      return i;
+    })
+    .pop();
 }
 
 function parseVaults() {

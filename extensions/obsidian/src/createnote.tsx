@@ -37,7 +37,12 @@ interface FormValue {
 }
 
 function getVaultNameFromPath(vaultPath: string) {
-  return vaultPath.split(path.sep).filter(function(i){return i}).pop();
+  return vaultPath
+    .split(path.sep)
+    .filter(function (i) {
+      return i;
+    })
+    .pop();
 }
 
 function parseVaults() {
