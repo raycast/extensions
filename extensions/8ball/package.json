@@ -10,7 +10,7 @@
     {
       "name": "index",
       "title": "8ball",
-      "subtitle": "Random answers",
+      "subtitle": "Random Answers",
       "description": "Returns a random answer to questions",
       "mode": "no-view"
     }
