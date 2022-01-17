@@ -33,12 +33,21 @@ Raycast extension to remove the background from an image using the remove.bg API
 
 ## How to get the API key for remove.bg
 
-- Navigate https://www.remove.bg
+- Navigate to https://www.remove.bg
 - Sign in
 - Navigate to https://www.remove.bg/dashboard#api-key
 - Click the "Show" button
 - Copy displayed API key
 
-## Showcases
+## How to use
 
-<img src="./assets/showcase.gif"/>
+1. Open Raycast and start typing `remove background from image`
+2. Select the extension and press enter
+3. Open Finder and browse to the image you want the background removed from
+4. Click your image and hold down the mouse button to start dragging
+5. Press your keybinding to open Raycast
+6. Drag the image to the input field labeled `Select image`
+7. Optionally change the options
+8. Submit the form
+
+If everything went well, a toast will appear with the name of the output image. Your output image will be saved to the same directory as your input image.
