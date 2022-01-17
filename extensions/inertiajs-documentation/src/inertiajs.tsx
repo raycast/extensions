@@ -1,8 +1,15 @@
-import { ActionPanel, CopyToClipboardAction, getPreferenceValues, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  CopyToClipboardAction,
+  getPreferenceValues,
+  List,
+  OpenInBrowserAction,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import algoliaSearch from "algoliasearch/lite";
 import striptags from "striptags";
-
 
 type docList = {
   [versions: string]: {
@@ -12,7 +19,7 @@ type docList = {
 };
 
 const documentation: { [key: string]: docList } = {
-  "v1.x": require("./documentation/v1.x.json")
+  "v1.x": require("./documentation/v1.x.json"),
 };
 
 const APPID = "BH4D9OD16A";
@@ -30,11 +37,11 @@ type InertiaJSDocsHit = {
   _highlightResult: {
     content:
       | {
-      value: string;
-      matchlevel: string;
-      fullyHighlighted: boolean;
-      matchedWords: string[];
-    }
+          value: string;
+          matchlevel: string;
+          fullyHighlighted: boolean;
+          matchedWords: string[];
+        }
       | undefined;
     hierarchy: {
       [key: string]: {
@@ -89,7 +96,7 @@ export default function SearchDocumentation() {
 
     return await algoliaIndex
       .search(query, {
-        hitsPerPage: 11
+        hitsPerPage: 11,
         // facetFilters: ["version:" + getPreference.inertiajsVersion],
       })
       .then((res) => {
@@ -114,23 +121,22 @@ export default function SearchDocumentation() {
       isLoading={isLoading}
       onSearchTextChange={async (query) => setSearchResults(await search(query))}
     >
-
       {searchResults?.map((hit: InertiaJSDocsHit) => {
-          return (
-            <List.Item
-              key={hit.objectID}
-              title={getTitle(hit)}
-              subtitle={getSubTitle(hit)}
-              icon="command-icon.png"
-              actions={
-                <ActionPanel title={hit.url}>
-                  <OpenInBrowserAction url={hit.url} title="Open in Browser" />
-                  <CopyToClipboardAction content={hit.url} title="Copy URL" />
-                </ActionPanel>
-              }
-            />
-          );
-        }) ||
+        return (
+          <List.Item
+            key={hit.objectID}
+            title={getTitle(hit)}
+            subtitle={getSubTitle(hit)}
+            icon="inertiajs-icon.png"
+            actions={
+              <ActionPanel title={hit.url}>
+                <OpenInBrowserAction url={hit.url} title="Open in Browser" />
+                <CopyToClipboardAction content={hit.url} title="Copy URL" />
+              </ActionPanel>
+            }
+          />
+        );
+      }) ||
         Object.entries(currentDocs).map(([section, items]: Array<any>) => {
           return (
             <List.Section title={section} key={section}>
@@ -139,7 +145,7 @@ export default function SearchDocumentation() {
                   <List.Item
                     key={item.url}
                     title={item.title}
-                    icon="command-icon.png"
+                    icon="inertiajs-icon.png"
                     actions={
                       <ActionPanel title={item.url}>
                         <OpenInBrowserAction url={item.url} title="Open in Browser" />
