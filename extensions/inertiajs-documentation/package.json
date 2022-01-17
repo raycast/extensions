@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "inertiajs",
-      "title": "Inertiajs",
+      "title": "Search Documentation",
       "subtitle": "Inertiajs",
       "description": "Search InertiaJS Documentation",
       "mode": "view",
