@@ -1,0 +1,234 @@
+{
+  "Prologue": [
+    {
+      "title": "Release Notes",
+      "url": "https://laravel.com/docs/5.1/releases"
+    },
+    {
+      "title": "Upgrade Guide",
+      "url": "https://laravel.com/docs/5.1/upgrade"
+    },
+    {
+      "title": "Contribution Guide",
+      "url": "https://laravel.com/docs/5.1/contributions"
+    },
+    {
+      "title": "API Documentation",
+      "url": "https://laravel.com/api/5.1"
+    }
+  ],
+  "Setup": [
+    {
+      "title": "Installation",
+      "url": "https://laravel.com/docs/5.1/installation"
+    },
+    {
+      "title": "Homestead",
+      "url": "https://laravel.com/docs/5.1/homestead"
+    }
+  ],
+  "Tutorials": [
+    {
+      "title": "Beginner Task List",
+      "url": "https://laravel.com/docs/5.1/quickstart"
+    },
+    {
+      "title": "Intermediate Task List",
+      "url": "https://laravel.com/docs/5.1/quickstart-intermediate"
+    }
+  ],
+  "The Basics": [
+    {
+      "title": "Routing",
+      "url": "https://laravel.com/docs/5.1/routing"
+    },
+    {
+      "title": "Middleware",
+      "url": "https://laravel.com/docs/5.1/middleware"
+    },
+    {
+      "title": "Controllers",
+      "url": "https://laravel.com/docs/5.1/controllers"
+    },
+    {
+      "title": "Requests",
+      "url": "https://laravel.com/docs/5.1/requests"
+    },
+    {
+      "title": "Responses",
+      "url": "https://laravel.com/docs/5.1/responses"
+    },
+    {
+      "title": "Views",
+      "url": "https://laravel.com/docs/5.1/views"
+    },
+    {
+      "title": "Blade Templates",
+      "url": "https://laravel.com/docs/5.1/blade"
+    }
+  ],
+  "Architecture Foundations": [
+    {
+      "title": "Request Lifecycle",
+      "url": "https://laravel.com/docs/5.1/lifecycle"
+    },
+    {
+      "title": "Application Structure",
+      "url": "https://laravel.com/docs/5.1/structure"
+    },
+    {
+      "title": "Service Providers",
+      "url": "https://laravel.com/docs/5.1/providers"
+    },
+    {
+      "title": "Service Container",
+      "url": "https://laravel.com/docs/5.1/container"
+    },
+    {
+      "title": "Contracts",
+      "url": "https://laravel.com/docs/5.1/contracts"
+    },
+    {
+      "title": "Facades",
+      "url": "https://laravel.com/docs/5.1/facades"
+    }
+  ],
+  "Services": [
+    {
+      "title": "Authentication",
+      "url": "https://laravel.com/docs/5.1/authentication"
+    },
+    {
+      "title": "Authorization",
+      "url": "https://laravel.com/docs/5.1/authorization"
+    },
+    {
+      "title": "Artisan Console",
+      "url": "https://laravel.com/docs/5.1/artisan"
+    },
+    {
+      "title": "Billing",
+      "url": "https://laravel.com/docs/5.1/billing"
+    },
+    {
+      "title": "Cache",
+      "url": "https://laravel.com/docs/5.1/cache"
+    },
+    {
+      "title": "Collections",
+      "url": "https://laravel.com/docs/5.1/collections"
+    },
+    {
+      "title": "Elixir",
+      "url": "https://laravel.com/docs/5.1/elixir"
+    },
+    {
+      "title": "Encryption",
+      "url": "https://laravel.com/docs/5.1/encryption"
+    },
+    {
+      "title": "Errors & Logging",
+      "url": "https://laravel.com/docs/5.1/errors"
+    },
+    {
+      "title": "Events",
+      "url": "https://laravel.com/docs/5.1/events"
+    },
+    {
+      "title": "Filesystem / Cloud Storage",
+      "url": "https://laravel.com/docs/5.1/filesystem"
+    },
+    {
+      "title": "Hashing",
+      "url": "https://laravel.com/docs/5.1/hashing"
+    },
+    {
+      "title": "Helpers",
+      "url": "https://laravel.com/docs/5.1/helpers"
+    },
+    {
+      "title": "Localization",
+      "url": "https://laravel.com/docs/5.1/localization"
+    },
+    {
+      "title": "Mail",
+      "url": "https://laravel.com/docs/5.1/mail"
+    },
+    {
+      "title": "Package Development",
+      "url": "https://laravel.com/docs/5.1/packages"
+    },
+    {
+      "title": "Pagination",
+      "url": "https://laravel.com/docs/5.1/pagination"
+    },
+    {
+      "title": "Queues",
+      "url": "https://laravel.com/docs/5.1/queues"
+    },
+    {
+      "title": "Redis",
+      "url": "https://laravel.com/docs/5.1/redis"
+    },
+    {
+      "title": "Session",
+      "url": "https://laravel.com/docs/5.1/session"
+    },
+    {
+      "title": "SSH Tasks",
+      "url": "https://laravel.com/docs/5.1/envoy"
+    },
+    {
+      "title": "Task Scheduling",
+      "url": "https://laravel.com/docs/5.1/scheduling"
+    },
+    {
+      "title": "Testing",
+      "url": "https://laravel.com/docs/5.1/testing"
+    },
+    {
+      "title": "Validation",
+      "url": "https://laravel.com/docs/5.1/validation"
+    }
+  ],
+  "Database": [
+    {
+      "title": "Getting Started",
+      "url": "https://laravel.com/docs/5.1/database"
+    },
+    {
+      "title": "Query Builder",
+      "url": "https://laravel.com/docs/5.1/queries"
+    },
+    {
+      "title": "Migrations",
+      "url": "https://laravel.com/docs/5.1/migrations"
+    },
+    {
+      "title": "Seeding",
+      "url": "https://laravel.com/docs/5.1/seeding"
+    }
+  ],
+  "Eloquent ORM": [
+    {
+      "title": "Getting Started",
+      "url": "https://laravel.com/docs/5.1/eloquent"
+    },
+    {
+      "title": "Relationships",
+      "url": "https://laravel.com/docs/5.1/eloquent-relationships"
+    },
+    {
+      "title": "Collections",
+      "url": "https://laravel.com/docs/5.1/eloquent-collections"
+    },
+    {
+      "title": "Mutators",
+      "url": "https://laravel.com/docs/5.1/eloquent-mutators"
+    },
+    {
+      "title": "Serialization",
+      "url": "https://laravel.com/docs/5.1/eloquent-serialization"
+    }
+  ]
+}
