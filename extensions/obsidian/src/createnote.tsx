@@ -144,7 +144,7 @@ function NoteForm(props: { vaultPath: string }) {
       }
     >
       <Form.TextField title="Name" id="name" placeholder="Name of note" />
-      <Form.TextField title="Path" id="path" defaultValue={prefPath()} placeholder="path/to/note" />
+      <Form.TextField title="Path" id="path" defaultValue={prefPath()} placeholder="path/to/note (optional)" />
       <Form.TagPicker id="tags" title="Tags" defaultValue={prefTag()}>
         {tags()?.map((tag) => (
           <Form.TagPicker.Item value={tag.name.toLowerCase()} title={tag.name} key={tag.key} />
