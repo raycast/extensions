@@ -1,0 +1,140 @@
+{
+  "INTRODUCTION": [
+    {
+      "title": "Introduction",
+      "url": "https://inertiajs.com"
+    },
+    {
+      "title": "Demo app",
+      "url": "https://inertiajs.com/demo-application"
+    },
+    {
+      "title": "Sponsors",
+      "url": "https://inertiajs.com/sponsors"
+    },
+    {
+      "title": "Releases",
+      "url": "https://inertiajs.com/releases"
+    }
+  ],
+  "CORE CONCEPTS": [
+    {
+      "title": "Who is it for",
+      "url": "https://inertiajs.com/who-is-it-for"
+    },
+    {
+      "title": "How it works",
+      "url": "https://inertiajs.com/how-it-works"
+    },
+    {
+      "title": "The protocol",
+      "url": "https://inertiajs.com/the-protocol"
+    }
+  ],
+  "INSTALLATION": [
+    {
+      "title": "Server-side",
+      "url": "https://inertiajs.com/server-side-setup"
+    },
+    {
+      "title": "Client-side",
+      "url": "https://inertiajs.com/routing"
+    }
+  ],
+  "THE BASICS": [
+    {
+      "title": "Routing",
+      "url": "https://inertiajs.com/routing"
+    },
+    {
+      "title": "Responses",
+      "url": "https://inertiajs.com/responses"
+    },
+    {
+      "title": "Pages",
+      "url": "https://inertiajs.com/pages"
+    },
+    {
+      "title": "Title & meta",
+      "url": "https://inertiajs.com/title-and-meta"
+    },
+    {
+      "title": "Links",
+      "url": "https://inertiajs.com/links"
+    },
+    {
+      "title": "Manual visits",
+      "url": "https://inertiajs.com/manual-visits"
+    },
+    {
+      "title": "Redirects",
+      "url": "https://inertiajs.com/redirects"
+    },
+    {
+      "title": "Forms",
+      "url": "https://inertiajs.com/forms"
+    },
+    {
+      "title": "File uploads",
+      "url": "https://inertiajs.com/file-uploads"
+    },
+    {
+      "title": "Validation",
+      "url": "https://inertiajs.com/validation"
+    },
+    {
+      "title": "Shared data",
+      "url": "https://inertiajs.com/shared-data"
+    }
+  ],
+  "ADVANCED": [
+    {
+      "title": "Events",
+      "url": "https://inertiajs.com/events"
+    },
+    {
+      "title": "Testing",
+      "url": "https://inertiajs.com/testing"
+    },
+    {
+      "title": "Partial reloads",
+      "url": "https://inertiajs.com/partial-reloads"
+    },
+    {
+      "title": "Scroll management",
+      "url": "https://inertiajs.com/scroll-management"
+    },
+    {
+      "title": "Authentication",
+      "url": "https://inertiajs.com/authentication"
+    },
+    {
+      "title": "Authorization",
+      "url": "https://inertiajs.com/authorization"
+    },
+    {
+      "title": "CSRF protection",
+      "url": "https://inertiajs.com/csrf-protection"
+    },
+    {
+      "title": "Error handling",
+      "url": "https://inertiajs.com/error-handling"
+    },
+    {
+      "title": "Asset versioning",
+      "url": "https://inertiajs.com/asset-versioning"
+    },
+    {
+      "title": "Progress indicators",
+      "url": "https://inertiajs.com/progress-indicators"
+    },
+    {
+      "title": "Remembering state",
+      "url": "https://inertiajs.com/remembering-state"
+    },
+    {
+      "title": "Server-side rendering",
+      "url": "https://inertiajs.com/server-side-rendering"
+    }
+  ]
+}
