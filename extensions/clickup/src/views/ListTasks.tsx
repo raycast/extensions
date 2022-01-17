@@ -1,4 +1,4 @@
-import { useTasks } from "../../hooks/useTasks";
+import { useTasks } from "../hooks/useTasks";
 import { ActionPanel, Icon, List, PushAction } from "@raycast/api";
 import { TaskDetail } from "./TaskDetail";
 

@@ -1,4 +1,4 @@
-import { useFolders } from "../../hooks/useFolders";
+import { useFolders } from "../hooks/useFolders";
 import { ActionPanel, Icon, List, PushAction } from "@raycast/api";
 import { FolderLists } from "./FolderLists";
 

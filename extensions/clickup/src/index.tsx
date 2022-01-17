@@ -1,5 +1,5 @@
 import { ActionPanel, PushAction, Icon, List } from "@raycast/api";
-import { useTeams } from "../hooks/useTeams";
+import { useTeams } from "./hooks/useTeams";
 import { TeamSpaces } from "./views/TeamSpaces";
 
 export default function Teams() {

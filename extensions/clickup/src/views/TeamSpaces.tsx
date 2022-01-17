@@ -1,5 +1,5 @@
 import { ActionPanel, Icon, List, PushAction } from "@raycast/api";
-import { useSpaces } from "../../hooks/useSpaces";
+import { useSpaces } from "../hooks/useSpaces";
 import { SpaceFolders } from "./SpaceFolders";
 
 function TeamSpaces({ teamId, teamName }: { teamId: string; teamName: string }) {

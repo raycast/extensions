@@ -1,4 +1,4 @@
-import { TaskItem } from "../../types/tasks.dt";
+import { TaskItem } from "../types/tasks.dt";
 import { Detail, OpenInBrowserAction, ActionPanel } from "@raycast/api";
 
 function TaskDetail({ task }: { task: TaskItem }) {
