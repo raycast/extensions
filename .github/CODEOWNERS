@@ -91,6 +91,7 @@
 /extensions/kill-process                             @rolandleth
 /extensions/kinopoisk                                @mattisssa
 /extensions/kubectx                                  @oktaysenkan
+/extensions/laravel-forge                            @KevinBatdorf
 /extensions/laravel-livewire                         @tafhyseni
 /extensions/large-type                               @gon250
 /extensions/lark                                     @tmkx
