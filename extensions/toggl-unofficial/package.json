@@ -10,12 +10,14 @@
     {
       "name": "startTimer",
       "title": "Start Timer",
+      "subtitle": "Toggl",
       "description": "Start a Toggl timer from a list of unique timers used over the last 30 days.",
       "mode": "view"
     },
     {
       "name": "stopTimer",
       "title": "Stop Running Timer",
+      "subtitle": "Toggl",
       "description": "Stop your currently running Toggl timer.",
       "mode": "no-view"
     }
