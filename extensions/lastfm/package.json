@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lastfm",
+  "title": "Last.fm",
+  "description": "Display your favourite, recently played tracks, your top albums and artists and more from Last.fm on Raycast!",
+  "icon": "command-icon.png",
+  "author": "eggsy",
+  "license": "MIT",
+  "keywords": [
+    "lastfm",
+    "last.fm",
+    "last",
+    "scrobbler",
+    "song",
+    "music"
+  ],
+  "commands": [
+    {
+      "name": "combined",
+      "title": "Top & Recent Songs",
+      "subtitle": "Last.fm",
+      "description": "Display your top and recent songs!",
+      "mode": "view"
+    },
+    {
+      "name": "songs",
+      "title": "Top Songs",
+      "subtitle": "Last.fm",
+      "description": "Your top songs!",
+      "mode": "view"
+    },
+    {
+      "name": "recent",
+      "title": "Recent Songs",
+      "subtitle": "Last.fm",
+      "description": "Your recent songs!",
+      "mode": "view"
+    },
+    {
+      "name": "artists",
+      "title": "Top Artists",
+      "subtitle": "Last.fm",
+      "description": "Your top artists!",
+      "mode": "view"
+    },
+    {
+      "name": "albums",
+      "title": "Top Albums",
+      "subtitle": "Last.fm",
+      "description": "Your top albums!",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "password",
+      "name": "apikey",
+      "description": "You can get one from https://www.last.fm/api/accounts",
+      "placeholder": "Your Last.fm API key",
+      "required": true,
+      "title": "API key"
+    },
+    {
+      "type": "textfield",
+      "name": "username",
+      "description": "Your Last.fm username, can be found on your profile page",
+      "placeholder": "Your Last.fm username",
+      "required": true,
+      "title": "Username"
+    },
+    {
+      "type": "textfield",
+      "name": "limit",
+      "description": "The number of results to show in results page.",
+      "placeholder": "The number of results to show",
+      "required": true,
+      "title": "Limit",
+      "default": "24"
+    },
+    {
+      "type": "dropdown",
+      "title": "Period",
+      "name": "period",
+      "required": true,
+      "default": "7day",
+      "description": "Select the period of songs that you want to display.",
+      "data": [
+        {
+          "title": "7 days",
+          "value": "7day"
+        },
+        {
+          "title": "1 month",
+          "value": "1month"
+        },
+        {
+          "title": "3 months",
+          "value": "3month"
+        },
+        {
+          "title": "6 months",
+          "value": "6month"
+        },
+        {
+          "title": "12 months",
+          "value": "12month"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.3",
+    "node-fetch": "^3.1.0",
+    "swr": "^1.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

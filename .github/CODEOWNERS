@@ -1,10 +1,12 @@
 # This file is generated. Do not modify directly.
 
 /extensions/1password7                               @khasbilegt
+/extensions/8ball                                    @Gitsack
 /extensions/airport                                  @siddharthsharma94
 /extensions/algolia                                  @valentindotxyz
 /extensions/amazon-aws                               @victor-falcon @Hodglim
 /extensions/api-icon-list                            @PitNikola
+/extensions/apple-notes                              @tumispro
 /extensions/atomic                                   @joepio
 /extensions/audio-device                             @benvp @mathieudutour
 /extensions/authy                                    @guga4ka
@@ -41,13 +43,14 @@
 /extensions/cratecast                                @gleich
 /extensions/cricketcast                              @sampoder
 /extensions/css-gg                                   @astrit
-/extensions/dash                                     @RSO
+/extensions/dash                                     @RSO @sxn
 /extensions/days-until-christmas                     @MEGApixel23
 /extensions/debank                                   @Yukaii
 /extensions/deepcast                                 @mooxl
 /extensions/devdocs                                  @pomdtr
 /extensions/displayplacer                            @eluce2
 /extensions/docker                                   @priithaamer
+/extensions/dockerhub                                @k8scat
 /extensions/domainr                                  @splash-cli
 /extensions/doppler-share-secrets                    @thomaspaulmann
 /extensions/elgato-key-light                         @thomaspaulmann
@@ -60,6 +63,7 @@
 /extensions/flow                                     @vimtor
 /extensions/flutter-pub-dev-search                   @prasadsunny1
 /extensions/fork-repositories                        @sxn
+/extensions/geohash-encode-decode                    @alrico88
 /extensions/git-repos                                @moored
 /extensions/github-for-enterprise                    @Kinbaum
 /extensions/github-repository-search                 @thomaspaulmann
@@ -80,16 +84,22 @@
 /extensions/homeassistant                            @tonka3000
 /extensions/huggingcast                              @ragnorc
 /extensions/imdb                                     @ryan-exe
+/extensions/inertiajs-documentation                  @danyelkeddah
 /extensions/jetbrains                                @gdsmith
 /extensions/jira-search                              @svenwiegand
 /extensions/jisho                                    @dmacdermott
 /extensions/json-format                              @Destiner
 /extensions/json2ts                                  @gon250
+/extensions/kaalam                                   @heertheeswaran
 /extensions/kill-process                             @rolandleth
 /extensions/kinopoisk                                @mattisssa
+/extensions/kubectx                                  @oktaysenkan
+/extensions/laravel-docs                             @indykoning @indykoning @indykoning
+/extensions/laravel-forge                            @KevinBatdorf
 /extensions/laravel-livewire                         @tafhyseni
 /extensions/large-type                               @gon250
 /extensions/lark                                     @tmkx
+/extensions/lastfm                                   @eggsy
 /extensions/linguee                                  @geekdada
 /extensions/lobsters                                 @dev99problems
 /extensions/lorem-ipsum                              @AntonNiklasson
@@ -122,6 +132,7 @@
 /extensions/random-email                             @rkjaer
 /extensions/ray-so                                   @gt-codes
 /extensions/rebrandly                                @grikomsn
+/extensions/render                                   @Destiner
 /extensions/ricescore                                @tonka3000
 /extensions/rss-reader                               @fuksman
 /extensions/sabnzbd                                  @jesse-c
@@ -172,9 +183,11 @@
 /extensions/visual-studio-code-recent-projects       @thomaspaulmann
 /extensions/weather                                  @tonka3000
 /extensions/whatsapp                                 @vimtor
+/extensions/wikipedia                                @vimtor
 /extensions/wistia                                   @ddoria921
 /extensions/xcode                                    @SvenTiigi
 /extensions/xkcd                                     @maggie-j-liu
 /extensions/youdao-translate                         @tiancheng92
 /extensions/youtube                                  @tonka3000
+/extensions/zeplin-project-search                    @dorukgunes
 /extensions/zotero                                   @sadanand-singh
