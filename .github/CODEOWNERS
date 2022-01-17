@@ -60,6 +60,7 @@
 /extensions/flow                                     @vimtor
 /extensions/flutter-pub-dev-search                   @prasadsunny1
 /extensions/fork-repositories                        @sxn
+/extensions/geohash-encode-decode                    @alrico88
 /extensions/git-repos                                @moored
 /extensions/github-for-enterprise                    @Kinbaum
 /extensions/github-repository-search                 @thomaspaulmann
