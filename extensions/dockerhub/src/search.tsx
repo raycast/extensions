@@ -8,7 +8,7 @@ import {
   ToastStyle,
   Icon,
 } from "@raycast/api";
-import { searchImage, searchTag, SearchType, TagStatus } from "./lib/api";
+import { searchImage, searchTag, SearchType } from "./lib/api";
 import { useEffect, useState } from "react";
 import { Image, Tag, TagImage } from "./lib/type";
 import { SearchTag } from "./search-tag";
