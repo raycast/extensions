@@ -179,7 +179,7 @@ export default function Command() {
   if (vaults.length > 1) {
     return <VaultSelection vaults={vaults} />;
   } else if (vaults.length == 1) {
-    return <NoteForm vaultPath={vaults[0].name} />;
+    return <NoteForm vaultPath={vaults[0].path} />;
   } else {
     showToast(ToastStyle.Failure, "Path Error", "Something went wrong with your vault path.");
   }
