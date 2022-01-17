@@ -17,7 +17,7 @@ interface WikipediaSearchResponse {
   query: {
     prefixsearch: Array<{
       title: string;
-    }>
+    }>;
   };
 }
 
@@ -31,7 +31,7 @@ interface WikipediaPageContentResponse {
 
 const client = got.extend({
   prefixUrl: "https://en.wikipedia.org/",
-  responseType: "json"
+  responseType: "json",
 });
 
 export async function getRandomPageTitle() {
@@ -44,7 +44,9 @@ export async function getTodayFeaturedPageTitle() {
   const year = today.getFullYear();
   const month = (today.getMonth() + 1).toString().padStart(2, "0");
   const day = today.getDate().toString().padStart(2, "0");
-  const response = await client.get(`api/rest_v1/feed/featured/${year}/${month}/${day}`).json<WikipediaFeaturedSearchResponse>();
+  const response = await client
+    .get(`api/rest_v1/feed/featured/${year}/${month}/${day}`)
+    .json<WikipediaFeaturedSearchResponse>();
   return response.tfa.displaytitle;
 }
 
@@ -52,16 +54,18 @@ async function findPagesByTitle(search: string) {
   if (!search) {
     return [];
   }
-  const response = await client.get("w/api.php", {
-    searchParams: {
-      action: "query",
-      list: "prefixsearch",
-      format: "json",
-      pssearch: search,
-      pslimit: 9
-    }
-  }).json<WikipediaSearchResponse>();
-  return response.query.prefixsearch.map(result => result.title);
+  const response = await client
+    .get("w/api.php", {
+      searchParams: {
+        action: "query",
+        list: "prefixsearch",
+        format: "json",
+        pssearch: search,
+        pslimit: 9,
+      },
+    })
+    .json<WikipediaSearchResponse>();
+  return response.query.prefixsearch.map((result) => result.title);
 }
 
 async function getPageExtract(title: string) {
@@ -70,17 +74,19 @@ async function getPageExtract(title: string) {
 }
 
 async function getPageContent(title: string) {
-  const response = await client.get(`w/api.php`, {
-    searchParams: {
-      action: "parse",
-      disabletoc: true,
-      disableeditsection: true,
-      format: "json",
-      mobileformat: true,
-      page: title,
-      disablestylededuplication: true
-    }
-  }).json<WikipediaPageContentResponse>();
+  const response = await client
+    .get(`w/api.php`, {
+      searchParams: {
+        action: "parse",
+        disabletoc: true,
+        disableeditsection: true,
+        format: "json",
+        mobileformat: true,
+        page: title,
+        disablestylededuplication: true,
+      },
+    })
+    .json<WikipediaPageContentResponse>();
   return markdownWikipediaPage(response.parse.text["*"]);
 }
 

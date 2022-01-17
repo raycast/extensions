@@ -14,7 +14,9 @@ export default function SearchPage() {
       onSearchTextChange={setSearch}
       searchBarPlaceholder="Search pages by name..."
     >
-      {titles?.map((title) => <PageItem key={title} title={title} />)}
+      {titles?.map((title) => (
+        <PageItem key={title} title={title} />
+      ))}
     </List>
   );
 }
@@ -31,11 +33,7 @@ function PageItem({ title }: { title: string }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction
-              icon={Icon.Sidebar}
-              title="Show Summary"
-              target={<PageDetail title={title} />}
-            />
+            <PushAction icon={Icon.Sidebar} title="Show Summary" target={<PageDetail title={title} />} />
             <OpenInBrowserAction url={`https://wikipedia.org/wiki/${title}`} />
           </ActionPanel.Section>
           <ActionPanel.Section>

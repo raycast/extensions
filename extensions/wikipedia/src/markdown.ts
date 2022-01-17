@@ -10,35 +10,42 @@ turndownService.addRule("initalSections", {
   filter: (node) => {
     return node.nodeName === "SECTION" && !!node.getAttribute("id")?.includes("mf-section-0");
   },
-  replacement: () => ""
+  replacement: () => "",
 });
 
 turndownService.addRule("linkedImages", {
   filter: (node) => {
     return node.firstChild?.nodeName === "IMG";
   },
-  replacement: () => ""
+  replacement: () => "",
 });
 
 turndownService.addRule("referenceLinks", {
   filter: (node) => {
-    return node.nodeName === "SPAN" && node.className.includes("reference-text") && Array.from(node.children || []).some(child => child.nodeName === "UL");
+    return (
+      node.nodeName === "SPAN" &&
+      node.className.includes("reference-text") &&
+      Array.from(node.children || []).some((child) => child.nodeName === "UL")
+    );
   },
-  replacement: () => ""
+  replacement: () => "",
 });
 
 turndownService.addRule("citeNotes", {
   filter: (node) => {
     return node.nodeName === "A" && !!node.getAttribute("href")?.includes("#cite_note");
   },
-  replacement: () => ""
+  replacement: () => "",
 });
 
 turndownService.addRule("citeReferences", {
   filter: (node) => {
-    return (node.nodeName === "SPAN" && node.className.includes("cite-backlink")) || !!(node.nodeName === "A" && node.getAttribute("href")?.includes("#cite_ref"));
+    return (
+      (node.nodeName === "SPAN" && node.className.includes("cite-backlink")) ||
+      !!(node.nodeName === "A" && node.getAttribute("href")?.includes("#cite_ref"))
+    );
   },
-  replacement: () => ""
+  replacement: () => "",
 });
 
 turndownService.addRule("trimListItems", {
@@ -46,23 +53,23 @@ turndownService.addRule("trimListItems", {
   replacement(content, node) {
     if (node && node.parentNode) {
       if (content.trim() === "") {
-        return '';
+        return "";
       }
       if (node.parentNode.nodeName === "UL") {
         return `- ${content.trim()}\n`;
       }
       return `1. ${content.trim()}\n`;
     }
-    return '';
-  }
+    return "";
+  },
 });
 
 turndownService.addRule("thumbnails", {
   filter: (node) => {
     return node.nodeName === "DIV" && node.className.includes("thumbinner");
   },
-  replacement: () => ""
-})
+  replacement: () => "",
+});
 
 turndownService.addRule("internalLinks", {
   filter: (node) => {
@@ -71,8 +78,8 @@ turndownService.addRule("internalLinks", {
   replacement: (content, node) => {
     const href = (node as HTMLElement).getAttribute("href");
     return `[${content}](https://wikipedia.com${href})`;
-  }
-})
+  },
+});
 
 export default function markdownWikipediaPage(html: string): string {
   return turndownService.turndown(html);
