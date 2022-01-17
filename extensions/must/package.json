@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "must",
   "title": "Must",
-  "description": "Your want to watch list on Must and display them directly via Raycast!",
+  "description": "Display your Want to Watch list on Must Movie Tracking app directly on Raycast!",
   "icon": "command-icon.png",
   "author": "eggsy",
   "license": "MIT",
