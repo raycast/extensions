@@ -37,7 +37,7 @@ interface FormValue {
 }
 
 function getVaultNameFromPath(vaultPath: string): string {
-  let name = vaultPath
+  const name = vaultPath
     .split(path.sep)
     .filter((i) => {
       if (i != "") {
