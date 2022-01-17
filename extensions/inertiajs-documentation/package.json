@@ -12,7 +12,7 @@
       "name": "inertiajs",
       "title": "Search Documentation",
       "subtitle": "Inertiajs",
-      "description": "Search InertiaJS Documentation",
+      "description": "Searches Documentation for InertiaJS",
       "mode": "view",
       "preferences": [
         {
