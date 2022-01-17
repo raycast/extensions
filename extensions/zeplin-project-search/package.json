@@ -10,6 +10,7 @@
     {
       "name": "searchProject",
       "title": "Search Project",
+      "subtitle": "Zeplin",
       "description": "List and Search Zeplin Projects",
       "mode": "view"
     }
