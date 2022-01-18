@@ -69,7 +69,7 @@ const Actions = ({ isLoading, tracking, activity, activities, note, start, updat
             activities={activities}
             activity={activity}
             startedAt={tracking.startedAt}
-            onSubmit={update}
+            onSubmit={params => update(params).catch(showError)}
           />
         }
       />
@@ -77,7 +77,7 @@ const Actions = ({ isLoading, tracking, activity, activities, note, start, updat
     {tracking && (
       <ActionPanel.Item
         title="Stop"
-        onAction={() => stop().catch(e => showToast(ToastStyle.Failure, e.message))}
+        onAction={() => stop().catch(showError)}
         shortcut={{ key: "w", modifiers: ["cmd"] }}
       />
     )}
@@ -87,7 +87,7 @@ const Actions = ({ isLoading, tracking, activity, activities, note, start, updat
           <ActionPanel.Item
             key={activity.id}
             title={activity.name}
-            onAction={() => start({ activityId: activity.id }).catch(e => showToast(ToastStyle.Failure, e.message))}
+            onAction={() => start({ activityId: activity.id }).catch(showError)}
           />
         ))}
       </ActionPanel.Submenu>
@@ -95,3 +95,5 @@ const Actions = ({ isLoading, tracking, activity, activities, note, start, updat
     <OpenInBrowserAction url="https://app.timeular.com/#/weekly_view/calendar" title="Open Calendar in Browser" />
   </ActionPanel>
 );
+
+const showError = (e: Error) => showToast(ToastStyle.Failure, e.message);
