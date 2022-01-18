@@ -31,7 +31,7 @@
 /extensions/circle-ci                                @qeude @kudrykv
 /extensions/clash                                    @ciiiii
 /extensions/cleanshotx                               @Aayush9029
-/extensions/clockify                                 @ismamz
+/extensions/clockify                                 @ismamz @sxn
 /extensions/coffee                                   @mooxl
 /extensions/coinbase-pro                             @farisaziz12
 /extensions/coingecko                                @Destiner
@@ -132,6 +132,7 @@
 /extensions/random-email                             @rkjaer
 /extensions/ray-so                                   @gt-codes
 /extensions/rebrandly                                @grikomsn
+/extensions/remove-background                        @maantje
 /extensions/render                                   @Destiner
 /extensions/ricescore                                @tonka3000
 /extensions/rss-reader                               @fuksman
@@ -150,6 +151,7 @@
 /extensions/sketch                                   @aesign
 /extensions/slack-status                             @PitNikola
 /extensions/snake                                    @tonka3000
+/extensions/spatie-documentation                     @danyelkeddah
 /extensions/speedtest                                @tonka3000
 /extensions/spotify-controls                         @thomaspaulmann
 /extensions/spotify-player                           @mattisssa
