@@ -25,8 +25,6 @@ export default function CommandGitmojiSearch() {
             .then(setToCache)
             .then(setGitmojis);
         }
-
-        return Promise.resolve();
       })
       .catch(e => showToast(ToastStyle.Failure, e.message))
       .finally(() => setIsLoading(false));
