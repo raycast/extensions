@@ -10,6 +10,7 @@
     {
       "name": "new-empty-sheet",
       "title": "New Empty Sheet",
+      "subtitle": "Ulysses",
       "description": "Open a new empty sheet in Ulysses",
       "mode": "no-view"
     }
