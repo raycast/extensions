@@ -1,4 +1,4 @@
-import { environment, showToast, ToastStyle } from "@raycast/api";
+import { copyTextToClipboard, environment, Toast, ToastStyle, ToastOptions } from "@raycast/api";
 import { join as path_join } from "path";
 import { mkdirSync } from "fs";
 import { stat, readFile, writeFile } from "fs/promises";
@@ -66,9 +66,59 @@ export async function fetchRemote<T>(remote: Remote<T>): Promise<T[]> {
 
 /// Toast
 
+interface ActionToastOptions {
+  title: string;
+  message?: string;
+  cancelable: boolean;
+}
+
+export function showActionToast(actionOptions: ActionToastOptions): AbortController | undefined {
+  const options: ToastOptions = {
+    style: ToastStyle.Animated,
+    title: actionOptions.title,
+    message: actionOptions.message
+  };
+
+  let toast: Toast | undefined;
+  let controller: AbortController | undefined;
+
+  if (actionOptions.cancelable) {
+    controller = new AbortController();
+    options.primaryAction = {
+      title: "Cancel",
+      onAction: () => {
+        controller?.abort();
+        toast?.hide();
+      }
+    }
+  }
+
+  toast = new Toast(options);
+  toast.show();
+  return controller
+}
+
 export function showFailureToast(title: string, error: any) {
-  const msg = error["stderr"]?.trim() ?? "";
-  showToast(ToastStyle.Failure, title, msg);
+  if ((error as Error).name == "AbortError") {
+    console.log("AbortError");
+    return;
+  }
+  console.log(`${title}: ${error}`);
+  const stderr = error["stderr"]?.trim() ?? "";
+  const options: ToastOptions = {
+    style: ToastStyle.Failure,
+    title: title,
+    message: stderr,
+    primaryAction: {
+      title: "Copy Error Log",
+      onAction: () => {
+        copyTextToClipboard(stderr);
+      }
+    }
+  };
+
+  const toast = new Toast(options);
+  toast.show();
 }
 
 /// Array

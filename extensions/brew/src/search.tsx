@@ -46,8 +46,7 @@ export default function Main() {
         updateInstalled(results, state.installed);
         setState((oldState) => ({ ...oldState, results: results, isLoading: false }));
       })
-      .catch((err) => {
-        console.log("brewSearch error:", err);
+      .catch ((err) => {
         showFailureToast("Brew search failed", err);
         setState((oldState) => ({ ...oldState, results: undefined, isLoading: false }));
       });

@@ -21,7 +21,6 @@ export default function Main() {
         setState({ results: results, isLoading: false });
       })
       .catch((err) => {
-        console.log("brewFetchInstalled error:", err);
         showFailureToast("Brew list failed", err);
         setState({ isLoading: false });
       });

@@ -21,8 +21,7 @@ export default function Main() {
       .then((outdated) => {
         setState({ outdated: outdated, isLoading: false });
       })
-      .catch((err) => {
-        console.log("brewFetchOutdated error:", err);
+      .catch ((err) => {
         showFailureToast("Brew outdated failed", err);
         setState({ isLoading: false });
       });
@@ -80,14 +79,18 @@ function OutdatedList(props: { outdated?: OutdatedResults; isLoading: boolean; o
   return (
     <List searchBarPlaceholder={"Filter formulae by name" + String.ellipsis} isLoading={props.isLoading}>
       <ListSection title="Formulae">
-        {formulae.map((formula) => (
-          <OutdatedFormulaeListItem key={formula.name} outdated={formula} onAction={props.onAction} />
-        ))}
+        {
+          formulae.map((formula) => (
+            <OutdatedFormulaeListItem key={formula.name} outdated={formula} onAction={props.onAction} />
+          ))
+        }
       </ListSection>
       <ListSection title="Casks">
-        {casks.map((cask) => (
-          <OutdatedCaskListItem key={cask.name} outdated={cask} onAction={props.onAction} />
-        ))}
+        {
+          casks.map((cask) => (
+            <OutdatedCaskListItem key={cask.name} outdated={cask} onAction={props.onAction} />
+          ))
+        }
       </ListSection>
     </List>
   );

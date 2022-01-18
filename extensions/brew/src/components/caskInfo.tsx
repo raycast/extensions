@@ -31,6 +31,8 @@ ${cask.desc}
 
 [${cask.homepage}](${cask.homepage})
 
+${formatTokenAndTap(cask)}
+
 ${formatVersion(cask)}
 
 ${formatDependencies(cask)}
@@ -39,6 +41,15 @@ ${formatConflicts(cask)}
 
 ${formatCaveats(cask)}
   `;
+}
+
+function formatTokenAndTap(cask: Cask): string {
+  return `
+#### Cask
+${cask.token}
+
+Tap: ${cask.tap}
+  `
 }
 
 function formatVersion(cask: Cask): string {
