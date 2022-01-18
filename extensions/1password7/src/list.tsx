@@ -152,7 +152,7 @@ function PasswordListCategory(props: { onePasswordMetaItemsCategory: OnePassword
 function getItemAccessoryTitle(item: OnePasswordMetaItem) {
   const vaultName = `🗄 ${item.vaultName}`;
   if (item.accountName) {
-    return `👤 ${item.accountName} ${vaultName}`
+    return `👤 ${item.accountName} ${vaultName}`;
   }
   return vaultName;
 }
