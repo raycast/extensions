@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raycast-timeular",
-  "title": "raycast-timeular",
+  "title": "Timeular",
   "description": "Track time with Timeular",
   "icon": "icon.png",
   "author": "bgnfu7re",
