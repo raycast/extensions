@@ -54,13 +54,15 @@ export class XcodeProjectService {
       return [];
     }
     // Return excluded Xcode Project paths
-    return excludedXcodeProjectPathsString
-      // Split by comma
-      .split(",")
-      // Trim each path
-      .map(path => path.trim())
-      // Untildify each path
-      .map(path => untildify(path));
+    return (
+      excludedXcodeProjectPathsString
+        // Split by comma
+        .split(",")
+        // Trim each path
+        .map((path) => path.trim())
+        // Untildify each path
+        .map((path) => untildify(path))
+    );
   }
 
   /**
@@ -92,9 +94,7 @@ export class XcodeProjectService {
       })
       // Filter out Xcode Projects that should be excluded based on the preferences
       .filter((xcodeProjectPath) => {
-        return !excludedXcodeProjectPaths.find(
-          excludedPath => xcodeProjectPath.startsWith(excludedPath)
-        )
+        return !excludedXcodeProjectPaths.find((excludedPath) => xcodeProjectPath.startsWith(excludedPath));
       })
       // Decode each Xcode Project Path
       .map((xcodeProjectPath) => XcodeProjectService.decodeXcodeProject(xcodeProjectPath))
