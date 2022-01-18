@@ -5,7 +5,7 @@ import {
   OpenInBrowserAction,
   ImageMask,
   getPreferenceValues,
-  Icon
+  Icon,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
@@ -15,11 +15,11 @@ export const confluenceUrl = `https://${prefs.instance}`;
 
 const headers = {
   Accept: "application/json",
-  Authorization: "Basic " + Buffer.from(`${prefs.user}:${prefs.token}`).toString("base64")
+  Authorization: "Basic " + Buffer.from(`${prefs.user}:${prefs.token}`).toString("base64"),
 };
 
 const init = {
-  headers
+  headers,
 };
 
 export default function Command() {
@@ -30,8 +30,8 @@ export default function Command() {
       url: "",
       type: "",
       author: "",
-      icon: ""
-    }
+      icon: "",
+    },
   ]);
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export default function Command() {
   return (
     <List isLoading={loadingState} searchBarPlaceholder="Search by name..." throttle>
       <List.Section title="Results">
-        {results.map(searchResult => (
+        {results.map((searchResult) => (
           <SearchListItem key={searchResult.id} searchResult={searchResult} />
         ))}
       </List.Section>
@@ -68,7 +68,7 @@ async function searchConfluence() {
       type: jsonResult.type as string,
       url: jsonResult._links.webui as string,
       author: jsonResult.version.by.displayName as string,
-      icon: jsonResult.version.by.profilePicture.path as string
+      icon: jsonResult.version.by.profilePicture.path as string,
     };
   });
 }
