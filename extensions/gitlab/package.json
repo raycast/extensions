@@ -188,6 +188,24 @@
       "default": false,
       "title": "Behavior",
       "description": "Pop to root after e.g. open the browser"
+    },
+    {
+      "name": "ignorecerts",
+      "type": "checkbox",
+      "label": "Ignore Certificate Errors (not recommended)",
+      "required": false,
+      "default": false,
+      "title": "Certificate errors",
+      "description": "If checked the server will not reject any connection which is not authorized with the list of supplied CAs",
+      "placeholder": "Ignore Certificates "
+    },
+    {
+      "name" : "customcacert",
+      "type" : "textfield",
+      "title": "Custom CA Certificate",
+      "placeholder" : "/my/ca.pem",
+      "required": false,
+      "description": "Optionally override the trusted CA certificates"
     }
   ],
   "categories": [
