@@ -122,7 +122,7 @@ interface ResultsItem {
   status: string;
   title: string;
   version: Version;
-  macroRenderedOutput: MacroRenderedOutput;
+  macroRenderedOutput: Record<string, unknown>;
   extensions: Extensions;
   _expandable: _expandable;
   _links: _links;
@@ -185,7 +185,7 @@ interface _links {
   base?: string;
   context?: string;
 }
-interface MacroRenderedOutput {}
+
 interface Extensions {
   position: number;
 }
