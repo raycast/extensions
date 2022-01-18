@@ -3,7 +3,7 @@ import {useDashboards} from "./useDashboards";
 
 
 // noinspection JSUnusedGlobalSymbols
-export default function Command() {
+export default function CommandListDashboards() {
   const {dashboards, dashboardsAreLoading} = useDashboards();
 
   return <List isLoading={dashboardsAreLoading}>
