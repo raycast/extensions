@@ -10,6 +10,8 @@ type State = {
   activity?: Activity;
 };
 
+const noTracking = "No tracking is happening at the moment.";
+
 export const useCurrenTrackingStatus = () => {
   const currentTracking = useCurrentTracking();
   const { tracking, updateTracking, isLoadingTracking, startTracking } = currentTracking;
@@ -24,23 +26,21 @@ export const useCurrenTrackingStatus = () => {
     currentTracking.stopTracking().then(() => setState(prev => ({ ...prev, activity: undefined })));
 
   useEffect(() => {
-    const activity = tracking && activities.find(a => a.id === tracking.activityId);
+    setState(prev => ({ ...prev, isLoading: isLoadingTracking || isLoadingActivities }));
 
     if (!isLoadingTracking && !isLoadingActivities && !tracking) {
-      setState(prev => ({ ...prev, isLoading: false, markdown: "No tracking" }));
+      setState(prev => ({ ...prev, isLoading: false, markdown: noTracking }));
       return;
     }
+
+    const activity = tracking && activities.find(a => a.id === tracking.activityId);
 
     tracking &&
       activity &&
       Promise.resolve(restoreNote(tracking))
         .then(note => ({ note, markdown: formatText(note, tracking, activity) }))
         .then(({ note, markdown }) => setState(prev => ({ ...prev, activity, note, markdown })));
-  }, [tracking, activities]);
-
-  useEffect(() => {
-    setState(prev => ({ ...prev, isLoading: isLoadingTracking || isLoadingActivities }));
-  }, [isLoadingTracking, isLoadingActivities]);
+  }, [tracking, activities, isLoadingTracking, isLoadingActivities]);
 
   return {
     presentation: { markdown, note, isLoading },
