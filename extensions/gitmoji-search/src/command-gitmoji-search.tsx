@@ -6,10 +6,10 @@ import {
   PasteAction,
   setLocalStorageItem,
   showToast,
-  ToastStyle
+  ToastStyle,
 } from "@raycast/api";
 import fetch from "node-fetch";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 // noinspection JSUnusedGlobalSymbols
 export default function CommandGitmojiSearch() {
@@ -21,40 +21,40 @@ export default function CommandGitmojiSearch() {
       .then(cache => {
         if (cache.cached) setGitmojis(cache.gitmojis);
         if (Date.now() - cache.timestamp > oneDay) {
-          return pullGitmojis()
-            .then(setToCache)
-            .then(setGitmojis);
+          return pullGitmojis().then(setToCache).then(setGitmojis);
         }
       })
       .catch(e => showToast(ToastStyle.Failure, e.message))
       .finally(() => setIsLoading(false));
   }, []);
 
-  return <List isLoading={isLoading}>
-    {gitmojis.map(gitmoji => <List.Item
-      key={gitmoji.code}
-      icon={gitmoji.emoji}
-      title={gitmoji.description}
-      accessoryTitle={gitmoji.code}
-      actions={<Actions gitmoji={gitmoji}/>}
-    />)}
-  </List>;
+  return (
+    <List isLoading={isLoading}>
+      {gitmojis.map(gitmoji => (
+        <List.Item
+          key={gitmoji.code}
+          icon={gitmoji.emoji}
+          title={gitmoji.description}
+          accessoryTitle={gitmoji.code}
+          actions={<Actions gitmoji={gitmoji} />}
+        />
+      ))}
+    </List>
+  );
 }
 
-const Actions = ({gitmoji}: { gitmoji: Gitmoji }) => <ActionPanel>
-  <PasteAction title="Paste emoji" content={gitmoji.emoji}/>
-  <PasteAction title="Paste emoji code" content={gitmoji.code}/>
-  <CopyToClipboardAction
-    title="Copy emoji"
-    content={gitmoji.emoji}
-    shortcut={{key: "e", modifiers: ["cmd"]}}
-  />
-  <CopyToClipboardAction
-    title="Copy emoji code"
-    content={gitmoji.code}
-    shortcut={{key: "e", modifiers: ["cmd", "shift"]}}
-  />
-</ActionPanel>;
+const Actions = ({ gitmoji }: { gitmoji: Gitmoji }) => (
+  <ActionPanel>
+    <PasteAction title="Paste emoji" content={gitmoji.emoji} />
+    <PasteAction title="Paste emoji code" content={gitmoji.code} />
+    <CopyToClipboardAction title="Copy emoji" content={gitmoji.emoji} shortcut={{ key: "e", modifiers: ["cmd"] }} />
+    <CopyToClipboardAction
+      title="Copy emoji code"
+      content={gitmoji.code}
+      shortcut={{ key: "e", modifiers: ["cmd", "shift"] }}
+    />
+  </ActionPanel>
+);
 
 const url = "https://raw.githubusercontent.com/carloscuesta/gitmoji/master/src/data/gitmojis.json";
 const cacheKey = "gitmojis-cached";
@@ -69,23 +69,21 @@ const pullGitmojis = () =>
     .then(json => json.gitmojis);
 
 const readFromCache = (): Promise<Cache> =>
-  getLocalStorageItem(cacheKey)
-    .then(serialized => {
-      if (!serialized || typeof serialized !== "string") return noCache();
+  getLocalStorageItem(cacheKey).then(serialized => {
+    if (!serialized || typeof serialized !== "string") return noCache();
 
-      const parsed = JSON.parse(serialized) as Cache;
-      if (!parsed.cached) return noCache();
+    const parsed = JSON.parse(serialized) as Cache;
+    if (!parsed.cached) return noCache();
 
-      parsed.cached = true;
+    parsed.cached = true;
 
-      return parsed;
-    });
+    return parsed;
+  });
 
 const setToCache = (gitmojis: Gitmoji[]) =>
-  setLocalStorageItem(cacheKey, JSON.stringify({gitmojis, timestamp: Date.now()} as Cache))
-    .then(() => gitmojis);
+  setLocalStorageItem(cacheKey, JSON.stringify({ gitmojis, timestamp: Date.now() } as Cache)).then(() => gitmojis);
 
-const noCache = (): Cache => ({cached: false, gitmojis: [], timestamp: 0});
+const noCache = (): Cache => ({ cached: false, gitmojis: [], timestamp: 0 });
 
 type Gitmoji = {
   emoji: string;
