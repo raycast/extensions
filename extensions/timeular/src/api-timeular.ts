@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import { Activity, Mention, Preferences, Tag, TimeEntry, Tracking } from "./types";
+import { date } from "./utils";
 
 const { apiToken } = getPreferenceValues() as Preferences;
 
@@ -103,4 +104,3 @@ const params = {
   },
 };
 
-const date = (date: Date) => date.toISOString().substring(0, 23);
