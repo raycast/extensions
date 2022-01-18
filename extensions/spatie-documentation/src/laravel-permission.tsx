@@ -132,7 +132,7 @@ export default function SearchDocumentation() {
             icon="spatie-icon.png"
             actions={
               <ActionPanel title={hit.url}>
-                <OpenInBrowserAction url={hit.url} title="Open in Browser" />
+                <OpenInBrowserAction url={hit.url}/>
                 <CopyToClipboardAction content={hit.url} title="Copy URL" />
               </ActionPanel>
             }
@@ -150,7 +150,7 @@ export default function SearchDocumentation() {
                     icon="spatie-icon.png"
                     actions={
                       <ActionPanel title={item.url}>
-                        <OpenInBrowserAction url={item.url} title="Open in Browser" />
+                        <OpenInBrowserAction url={item.url}/>
                         <CopyToClipboardAction content={item.url} title="Copy URL" />
                       </ActionPanel>
                     }
