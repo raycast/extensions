@@ -193,7 +193,11 @@ export function StatesList(props: { domain: string; deviceClass?: string | undef
   }
 
   return (
-    <List searchBarPlaceholder="Filter by name or ID..." isLoading={isLoading} onSearchTextChange={setSearchText}>
+    <List
+      searchBarPlaceholder="Filter by name or ID..."
+      isLoading={isLoading && !error}
+      onSearchTextChange={setSearchText}
+    >
       {states?.map((state) => (
         <StateListItem key={state.entity_id} state={state} />
       ))}
