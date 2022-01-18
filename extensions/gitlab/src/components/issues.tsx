@@ -47,7 +47,7 @@ export function IssueDetail(props: { issue: Issue }) {
 
   let md = "";
   if (props.issue) {
-    md = props.issue.labels.map((i) => `\`${i.name}\``).join(" ") + "  \n";
+    md = props.issue.labels.map((i) => `\`${i.name || i}\``).join(" ") + "  \n";
   }
   md += "## Description\n" + optimizeMarkdownText(desc);
 
