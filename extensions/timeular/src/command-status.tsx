@@ -1,9 +1,10 @@
-import { ActionPanel, Detail, OpenInBrowserAction, PushAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Detail, OpenInBrowserAction, PushAction } from "@raycast/api";
 import { useCurrenTrackingStatus } from "./useCurrenTrackingStatus";
 import { ComponentEditNote } from "./ComponentEditNote";
 import { useEffect, useState } from "react";
 import { Activity, Tracking } from "./types";
 import { useTodayReport } from "./useTodayReport";
+import { showError } from "./utils";
 
 // noinspection JSUnusedGlobalSymbols
 export default function CommandStatus() {
@@ -95,5 +96,3 @@ const Actions = ({ isLoading, tracking, activity, activities, note, start, updat
     <OpenInBrowserAction url="https://app.timeular.com/#/weekly_view/calendar" title="Open Calendar in Browser" />
   </ActionPanel>
 );
-
-const showError = (e: Error) => showToast(ToastStyle.Failure, e.message);

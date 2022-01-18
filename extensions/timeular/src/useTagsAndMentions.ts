@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Mention, Tag } from "./types";
 import { apiListAllTagsAndMentions } from "./api-timeular";
+import { showError } from "./utils";
 
 export const useTagsAndMentions = () => {
   const [{ tags, mentions }, setTagsAndMentions] = useState({ tags: [] as Tag[], mentions: [] as Mention[] });
@@ -14,7 +15,9 @@ export const useTagsAndMentions = () => {
   };
 
   useEffect(() => {
-    apiListAllTagsAndMentions().then(setTagsAndMentions);
+    apiListAllTagsAndMentions()
+      .then(setTagsAndMentions)
+      .catch(showError);
   }, []);
 
   return { tags, mentions, addTags };

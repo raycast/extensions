@@ -8,6 +8,7 @@ import {
 import { useEffect, useState } from "react";
 import { Tag, Tracking } from "./types";
 import { useTagsAndMentions } from "./useTagsAndMentions";
+import { showError } from "./utils";
 
 type State = {
   isLoadingTracking: boolean;
@@ -54,6 +55,7 @@ export const useCurrentTracking = () => {
   useEffect(() => {
     apiGetCurrentTracking()
       .then(tracking => setState(prev => ({ ...prev, tracking })))
+      .catch(showError)
       .finally(() => setState(prev => ({ ...prev, isLoadingTracking: false })));
   }, []);
 
