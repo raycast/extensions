@@ -15,9 +15,7 @@ export const useTagsAndMentions = () => {
   };
 
   useEffect(() => {
-    apiListAllTagsAndMentions()
-      .then(setTagsAndMentions)
-      .catch(showError);
+    apiListAllTagsAndMentions().then(setTagsAndMentions).catch(showError);
   }, []);
 
   return { tags, mentions, addTags };

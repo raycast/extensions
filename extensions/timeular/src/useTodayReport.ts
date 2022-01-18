@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { apiGetTimeTrackingEntries } from "./api-timeular";
 import { Activity, ActivityReport, TimeEntry, Tracking } from "./types";
 import { humanizeDuration } from "./useCurrenTrackingStatus";
-import { showError } from "./utils";
+import { date, showError } from "./utils";
 
 export const useTodayReport = (tracking?: Tracking, activity?: Activity) => {
   const [entries, setEntries] = useState<TimeEntry[]>([]);
@@ -68,6 +68,6 @@ const mockEntry = ({ startedAt }: Tracking, activity: Activity) =>
     note: {},
     duration: {
       startedAt,
-      stoppedAt: new Date().toISOString().substring(0, 23)
-    }
+      stoppedAt: date(new Date()),
+    },
   } as TimeEntry);

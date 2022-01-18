@@ -92,16 +92,16 @@ export const apiCreateTag = ({ spaceId, label, key, scope = "timeular" }: Create
 const makeParams = (method: string, body: unknown) => ({
   headers: {
     ...params.headers,
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
   },
   method,
-  body: JSON.stringify(body)
+  body: JSON.stringify(body),
 });
 
 const params = {
   headers: {
-    Authorization: `Bearer ${apiToken}`
-  }
+    Authorization: `Bearer ${apiToken}`,
+  },
 };
 
 const jsonFromResponse = (resp: Response): Promise<unknown> => {

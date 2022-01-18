@@ -18,7 +18,7 @@ export const useActivities = () => {
     apiListAllActivities()
       .then(activities => setState(prev => ({ ...prev, activities })))
       .catch(showError)
-      .finally(() => setState(prev => ({...prev, isLoadingActivities: false})));
+      .finally(() => setState(prev => ({ ...prev, isLoadingActivities: false })));
   }, []);
 
   return { activities, isLoadingActivities };
