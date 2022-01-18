@@ -8,7 +8,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "dashboards-list",
+      "name": "command-list-dashboards",
       "title": "Dashboards List",
       "description": "List Dashboards",
       "mode": "view"
