@@ -9,7 +9,7 @@ extension that lets you control
 the [Timeular](https://timeular.com/)
 tracker.
 
-<!-- put a screencast here -->
+![Screencast example](https://user-images.githubusercontent.com/12697803/149980015-38d5340a-2bed-43cf-b642-17b4894c00a3.mp4)
 
 ### Configure `apiToken`
 
