@@ -81,18 +81,17 @@ const Actions = ({ isLoading, tracking, activity, activities, note, start, updat
         shortcut={{ key: "w", modifiers: ["cmd"] }}
       />
     )}
-    {!isLoading && <ActionPanel.Submenu title="Start Tracking..." shortcut={{ key: "n", modifiers: ["cmd"] }}>
-      {(activity ? activities.filter(a => a.id !== activity.id) : activities).map(activity => (
-        <ActionPanel.Item
-          key={activity.id}
-          title={activity.name}
-          onAction={() => start({ activityId: activity.id }).catch(e => showToast(ToastStyle.Failure, e.message))}
-        />
-      ))}
-    </ActionPanel.Submenu>}
-    <OpenInBrowserAction
-      url="https://app.timeular.com/#/weekly_view/calendar"
-      title="Open Calendar in Browser"
-    />
+    {!isLoading && (
+      <ActionPanel.Submenu title="Start Tracking..." shortcut={{ key: "n", modifiers: ["cmd"] }}>
+        {(activity ? activities.filter(a => a.id !== activity.id) : activities).map(activity => (
+          <ActionPanel.Item
+            key={activity.id}
+            title={activity.name}
+            onAction={() => start({ activityId: activity.id }).catch(e => showToast(ToastStyle.Failure, e.message))}
+          />
+        ))}
+      </ActionPanel.Submenu>
+    )}
+    <OpenInBrowserAction url="https://app.timeular.com/#/weekly_view/calendar" title="Open Calendar in Browser" />
   </ActionPanel>
 );

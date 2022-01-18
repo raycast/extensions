@@ -50,13 +50,13 @@ export const apiListAllTagsAndMentions = () =>
     .then(resp => resp.json())
     .then(json => json as { tags: Tag[]; mentions: Mention[] });
 
-export const apiGetTimeTrackingEntries = ({ from, to }: { from: Date, to: Date }) =>
+export const apiGetTimeTrackingEntries = ({ from, to }: { from: Date; to: Date }) =>
   Promise.resolve()
     .then(() => console.debug(`api get time tracking entries from ${from} to ${to}`))
     .then(() => fetch(`https://api.timeular.com/api/v3/report/data/${date(from)}/${date(to)}`, params))
     .then(resp => resp.json())
-    .then(json => json as { timeEntries: TimeEntry[], message?: string })
-    .then(json => json.message ? Promise.reject(new Error(json.message)) : json.timeEntries);
+    .then(json => json as { timeEntries: TimeEntry[]; message?: string })
+    .then(json => (json.message ? Promise.reject(new Error(json.message)) : json.timeEntries));
 
 type EditTracking = {
   note?: {
@@ -91,16 +91,16 @@ export const apiCreateTag = ({ spaceId, label, key, scope = "timeular" }: Create
 const makeParams = (method: string, body: unknown) => ({
   headers: {
     ...params.headers,
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
   },
   method,
-  body: JSON.stringify(body)
+  body: JSON.stringify(body),
 });
 
 const params = {
   headers: {
-    Authorization: `Bearer ${apiToken}`
-  }
+    Authorization: `Bearer ${apiToken}`,
+  },
 };
 
 const date = (date: Date) => date.toISOString().substring(0, 23);

@@ -27,7 +27,7 @@ export const useTodayReport = (tracking?: Tracking, activity?: Activity) => {
     Promise.resolve(tracking && activity ? entries.concat([mockEntry(tracking, activity)]) : entries)
       .then(entries => entries.reduce(groupByActivity, [] as TimeEntry[][]))
       .then(groupped => groupped.map(arr => arr.reduce(groupIntoReport, blankReport(arr[0].activity))))
-      .then(entries => entries.sort((l, r) => l.duration > r.duration ? -1 : 1))
+      .then(entries => entries.sort((l, r) => (l.duration > r.duration ? -1 : 1)))
       .then(entries => entries.map(entry => `* ${entry.activity.name} for ${humanizeDuration(entry.duration)}`))
       .then(list => list.join("\n\n"))
       .then(markdown =>
@@ -35,7 +35,7 @@ export const useTodayReport = (tracking?: Tracking, activity?: Activity) => {
           ? setReportMarkdown("Time entries you have tracked today:\n" + markdown)
           : setReportMarkdown("You didn't track anything today yet.")
       )
-      .finally(() => console.debug(`building today report took ${Date.now()-markStart}ms`));
+      .finally(() => console.debug(`building today report took ${Date.now() - markStart}ms`));
   }, [reportIsLoading, entries, tracking, activity]);
 
   return { reportMarkdown, reportIsLoading };
@@ -58,13 +58,14 @@ const groupIntoReport = (acc: ActivityReport, val: TimeEntry) => {
 };
 
 const blankReport = (activity: Activity) => ({ activity, duration: 0 } as ActivityReport);
-const mockEntry = ({ startedAt }: Tracking, activity: Activity) => ({
-  id: "",
-  creator: "",
-  activity,
-  note: {},
-  duration: {
-    startedAt,
-    stoppedAt: new Date().toISOString().substring(0, 23)
-  }
-}) as TimeEntry;
+const mockEntry = ({ startedAt }: Tracking, activity: Activity) =>
+  ({
+    id: "",
+    creator: "",
+    activity,
+    note: {},
+    duration: {
+      startedAt,
+      stoppedAt: new Date().toISOString().substring(0, 23),
+    },
+  } as TimeEntry);

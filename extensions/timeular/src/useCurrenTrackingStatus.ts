@@ -17,13 +17,11 @@ export const useCurrenTrackingStatus = () => {
   const [{ isLoading, note, markdown, activity }, setState] = useState<State>({
     isLoading: isLoadingTracking || isLoadingActivities,
     note: "",
-    markdown: ""
+    markdown: "",
   });
 
   const stopTracking = () =>
-    currentTracking
-      .stopTracking()
-      .then(() => setState(prev => ({ ...prev, activity: undefined })));
+    currentTracking.stopTracking().then(() => setState(prev => ({ ...prev, activity: undefined })));
 
   useEffect(() => {
     const activity = tracking && activities.find(a => a.id === tracking.activityId);
@@ -33,9 +31,11 @@ export const useCurrenTrackingStatus = () => {
       return;
     }
 
-    tracking && activity && Promise.resolve(restoreNote(tracking))
-      .then(note => ({ note, markdown: formatText(note, tracking, activity) }))
-      .then(({ note, markdown }) => setState(prev => ({ ...prev, activity, note, markdown })));
+    tracking &&
+      activity &&
+      Promise.resolve(restoreNote(tracking))
+        .then(note => ({ note, markdown: formatText(note, tracking, activity) }))
+        .then(({ note, markdown }) => setState(prev => ({ ...prev, activity, note, markdown })));
   }, [tracking, activities]);
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export const useCurrenTrackingStatus = () => {
   return {
     presentation: { markdown, note, isLoading },
     data: { tracking, activity, activities },
-    actions: { startTracking, stopTracking, updateTracking }
+    actions: { startTracking, stopTracking, updateTracking },
   };
 };
 

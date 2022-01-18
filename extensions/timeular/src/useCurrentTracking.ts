@@ -3,7 +3,7 @@ import {
   apiEditTracking,
   apiGetCurrentTracking,
   apiStartTracking,
-  apiStopTracking
+  apiStopTracking,
 } from "./api-timeular";
 import { useEffect, useState } from "react";
 import { Tag, Tracking } from "./types";
