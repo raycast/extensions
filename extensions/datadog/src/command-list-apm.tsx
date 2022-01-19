@@ -12,7 +12,7 @@ export default function CommandListAPM() {
           key={`${apm.env}-${apm.name}`}
           icon={{source: {light: "icon@light.png", dark: "icon@dark.png"}}}
           title={apm.name}
-          subtitle={apm.calls.length > 0 ? `Calls ${apm.calls.join(", ")}` : undefined}
+          subtitle={apm.calls?.length > 0 ? `Calls ${apm.calls.join(", ")}` : undefined}
           accessoryTitle={apm.env}
           keywords={[apm.env].concat(apm.calls)}
           actions={
