@@ -26,7 +26,6 @@
       "type": "textfield",
       "title": "Workspace",
       "required": true,
-      "default": "my-organization",
       "description": "Bitbucket workspace",
       "placeholder": "my-organization"
     },
@@ -35,9 +34,8 @@
       "type": "textfield",
       "title": "Account Name",
       "required": true,
-      "default": "accountName",
       "description": "Bitbucket Account Name",
-      "placeholder": "john_doe"
+      "placeholder": "accountName"
     },
     {
       "name": "appPassword",
