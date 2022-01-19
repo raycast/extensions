@@ -37,6 +37,7 @@
     {
       "name": "typeSearch",
       "title": "Search Types",
+      "subtitle": "Elm",
       "description": "Search packages by type, author, module and package name. Uses https://klaftertief.github.io/elm-search",
       "mode": "view"
     }
