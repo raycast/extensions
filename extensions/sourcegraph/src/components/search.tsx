@@ -76,7 +76,7 @@ This may be an issue with your configuration - try updating the Sourcegraph exte
     >
       {/* show suggestions IFF no results */}
       {!state.isLoading && state.results.length === 0 ? (
-        <List.Section title="Suggestions" subtitle={state.summary || ''}>
+        <List.Section title="Suggestions" subtitle={state.summary || ""}>
           {state.suggestions.slice(0, 3).map((suggestion) => (
             <SuggestionItem key={randomId()} suggestion={suggestion} />
           ))}
@@ -172,7 +172,7 @@ function SearchResultItem({
         icon.tintColor = Color.Yellow;
       }
       title = match.repository;
-      subtitle = match.description || '';
+      subtitle = match.description || "";
       context = match.repoStars ? `${match.repoStars} stars` : "";
       break;
     case "commit":
