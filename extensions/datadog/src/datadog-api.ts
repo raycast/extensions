@@ -1,10 +1,25 @@
-import { getPreferenceValues } from "@raycast/api";
-import { v1 } from "@datadog/datadog-api-client";
+import {getPreferenceValues} from "@raycast/api";
+import {v1} from "@datadog/datadog-api-client";
+import fetch from "node-fetch";
 
 
 const API_KEY = getPreferenceValues()["api-key"];
 const APP_KEY = getPreferenceValues()["app-key"];
 
-const configuration = v1.createConfiguration({ authMethods: { apiKeyAuth: API_KEY, appKeyAuth: APP_KEY } });
+const configuration = v1.createConfiguration({authMethods: {apiKeyAuth: API_KEY, appKeyAuth: APP_KEY}});
 
 export const dashboardsApi = new v1.DashboardsApi(configuration);
+
+export const apiAPM = ({env = "development"}: { env?: string }) =>
+  fetch(`https://api.datadoghq.com/api/v1/service_dependencies?env=${env}`, params)
+    .then(resp => resp.json())
+    .then(json => json as Record<string, { calls: string[] }>)
+    .then(rec => Object.entries(rec).sort(([l], [r]) => l < r ? -1 : 1));
+
+const params = {
+  headers: {
+    "Content-Type": "application/json",
+    "DD-API-KEY": API_KEY,
+    "DD-APPLICATION-KEY": APP_KEY,
+  }
+}

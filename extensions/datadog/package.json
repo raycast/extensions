@@ -12,7 +12,14 @@
       "title": "Dashboards List",
       "description": "List Dashboards",
       "mode": "view"
+    },
+    {
+      "name": "command-list-apm",
+      "title": "APM list",
+      "description": "List available APM",
+      "mode": "view"
     }
+
   ],
   "preferences": [
     {
