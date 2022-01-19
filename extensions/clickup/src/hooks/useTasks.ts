@@ -12,6 +12,7 @@ function useTasks(listId: string) {
         const response = await ClickUpClient<TasksResponse>(`/list/${listId}/task?archived=false`);
         setTasks(response.data?.tasks ?? []);
       } catch (error: any) {
+        setTasks([]);
         error?.response?.data
           ? await showToast(
               ToastStyle.Failure,

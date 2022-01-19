@@ -12,6 +12,7 @@ function useSpaces(teamId: string) {
         const response = await ClickUpClient<SpacesResponse>(`/team/${teamId}/space?archived=false`);
         setSpaces(response.data?.spaces ?? []);
       } catch (error: any) {
+        setSpaces([]);
         error?.response?.data
           ? await showToast(
               ToastStyle.Failure,

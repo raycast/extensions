@@ -1,8 +1,8 @@
-import { TaskItem } from "../types/tasks.dt";
+import { TaskItem } from "../../types/tasks.dt";
 import { Detail, OpenInBrowserAction, ActionPanel } from "@raycast/api";
 
 function TaskDetail({ task }: { task: TaskItem }) {
-  return (
+  return task ? (
     <Detail
       navigationTitle={task.name}
       markdown={task.description}
@@ -12,6 +12,8 @@ function TaskDetail({ task }: { task: TaskItem }) {
         </ActionPanel>
       }
     />
+  ) : (
+    <Detail navigationTitle="Error Loading task" markdown="Something went wrong loading the task" />
   );
 }
 

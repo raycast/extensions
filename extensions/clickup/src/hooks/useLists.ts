@@ -12,6 +12,7 @@ function useLists(folderId: string) {
         const response = await ClickUpClient<ListsResponse>(`/folder/${folderId}/list?archived=false`);
         setLists(response.data?.lists ?? []);
       } catch (error: any) {
+        setLists([]);
         error?.response?.data
           ? await showToast(
               ToastStyle.Failure,

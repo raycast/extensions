@@ -12,6 +12,7 @@ function useTeams() {
         const response = await ClickUpClient<TeamsResponse>("/team", "GET");
         setTeams(response.data?.teams ?? []);
       } catch (error: any) {
+        setTeams([]);
         error?.response?.data
           ? await showToast(
               ToastStyle.Failure,

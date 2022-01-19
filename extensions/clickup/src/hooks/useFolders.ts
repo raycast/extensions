@@ -12,6 +12,7 @@ function useFolders(spaceId: string) {
         const response = await ClickUpClient<FoldersResponse>(`/space/${spaceId}/folder?archived=false`);
         setFolders(response.data?.folders ?? []);
       } catch (error: any) {
+        setFolders([]);
         error?.response?.data
           ? await showToast(
               ToastStyle.Failure,
