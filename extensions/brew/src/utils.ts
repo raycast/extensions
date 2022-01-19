@@ -79,7 +79,6 @@ export function showActionToast(actionOptions: ActionToastOptions): AbortControl
     message: actionOptions.message
   };
 
-  let toast: Toast | undefined;
   let controller: AbortController | undefined;
 
   if (actionOptions.cancelable) {
@@ -93,7 +92,7 @@ export function showActionToast(actionOptions: ActionToastOptions): AbortControl
     }
   }
 
-  toast = new Toast(options);
+  const toast = new Toast(options);
   toast.show();
   return controller
 }
