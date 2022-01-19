@@ -20,4 +20,4 @@ export default function PandasView() {
       throttle
     />
   );
-};
+}

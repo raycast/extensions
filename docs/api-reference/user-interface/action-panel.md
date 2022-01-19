@@ -43,7 +43,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | <code>[ActionPanelChildren](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanelchildren)</code> | No | - | Sections or items. If [ActionPanel.Item](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel-item) elements are specified, a default section is automatically created. |
+| children | <code>[ActionPanelChildren](#actionpanelchildren)</code> | No | - | Sections or items. If [ActionPanel.Item](#actionpanel.item) elements are specified, a default section is automatically created. |
 | title | <code>string</code> | No | - | The title displayed at the top of the panel |
 
 ### ActionPanel.Item
@@ -80,9 +80,9 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | The icon displayed for the action. |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | - | The icon displayed for the action. |
 | id | <code>string</code> | No | - | ID of the item. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the item. |
+| shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the item. |
 | title | <code>string</code> | Yes | - | The title displayed for the item. |
 | onAction | <code>() => void</code> | No | - |  |
 
@@ -90,7 +90,7 @@ export default function Command() {
 
 A group of visually separated items.
 
-Use sections if the [ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel) contains a lot of actions to help guide the user to related actions.
+Use sections if the [ActionPanel](#actionpanel) contains a lot of actions to help guide the user to related actions.
 For example, create a section for all copy actions.
 
 #### Example
@@ -129,7 +129,7 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | <code>[ActionPanelSectionChildren](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanelsectionchildren)</code> | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
+| children | <code>[ActionPanelSectionChildren](#actionpanelsectionchildren)</code> | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
 | title | <code>string</code> | No | - | Title displayed above the section |
 
 ### ActionPanel.Submenu
@@ -181,10 +181,10 @@ export default function Command() {
 
 | Prop | Type | Required | Default | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| children | <code>[ActionPanelChildren](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanelchildren)</code> | No | - | Items of the submenu. |
-| icon | <code>[ImageLike](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagelike)</code> | No | - | The icon displayed for the submenu. |
+| children | <code>[ActionPanelChildren](#actionpanelchildren)</code> | No | - | Items of the submenu. |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No | - | The icon displayed for the submenu. |
 | id | <code>string</code> | No | - | ID of the submenu. Make sure to assign each submenu a unique ID or a UUID will be auto-generated. |
-| shortcut | <code>[KeyboardShortcut](https://developers.raycast.com/api-reference/keyboard#keyboardshortcut)</code> | No | - | The keyboard shortcut for the submenu. |
+| shortcut | <code>[KeyboardShortcut](../keyboard.md#keyboardshortcut)</code> | No | - | The keyboard shortcut for the submenu. |
 | title | <code>string</code> | Yes | - | The title displayed for submenu. |
 
 ### useActionPanel
@@ -199,12 +199,12 @@ function useActionPanel(): ActionPanelState
 
 #### Return
 
-A [ActionPanelState](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanelstate) object with an update function.
+A [ActionPanelState](#actionpanelstate) object with an update function.
 Use the function to update the global Action Panel.
 
 ### ActionPanelState
 
-Return type of the [useActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#useactionpanel) hook to perform global Action Panel updates.
+Return type of the [useActionPanel](#useactionpanel) hook to perform global Action Panel updates.
 
 #### Properties
 
@@ -218,7 +218,7 @@ Return type of the [useActionPanel](https://developers.raycast.com/api-reference
 ActionPanelChildren: ActionPanel.Section | ActionPanel.Section[] | ActionPanelSectionChildren | null
 ```
 
-Supported children for the [ActionPanel](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel) and [ActionPanel.Submenu](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel-submenu) components.
+Supported children for the [ActionPanel](#actionpanel) and [ActionPanel.Submenu](#actionpanel.submenu) components.
 
 ### ActionPanelSectionChildren
 
@@ -226,4 +226,4 @@ Supported children for the [ActionPanel](https://developers.raycast.com/api-refe
 ActionPanelSectionChildren: ActionPanel.Item | ActionPanel.Item[] | ReactElement<ActionPanelSubmenuProps> | ReactElement<ActionPanelSubmenuProps>[] | null
 ```
 
-Supported children for the [ActionPanel.Section](https://developers.raycast.com/api-reference/user-interface/action-panel#actionpanel-section) component.
+Supported children for the [ActionPanel.Section](#actionpanel.section) component.

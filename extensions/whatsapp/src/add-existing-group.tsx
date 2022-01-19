@@ -19,11 +19,13 @@ export default function WhatsAppGroupChatForm({ defaultValue }: WhatsAppGroupCha
       id: isCreation ? randomId() : defaultValue.id,
       name: formValues.name,
       pinned: !!formValues.pinned,
-      groupCode: formValues.groupCode
+      groupCode: formValues.groupCode,
     };
 
     const isNewGroupCode = isCreation || savedChat.groupCode !== defaultValue.groupCode;
-    const doesPhoneNumberAlreadyExist = chats.filter(isGroupChat).some(chat => chat.groupCode === savedChat.groupCode);
+    const doesPhoneNumberAlreadyExist = chats
+      .filter(isGroupChat)
+      .some((chat) => chat.groupCode === savedChat.groupCode);
 
     if (isNewGroupCode && doesPhoneNumberAlreadyExist) {
       await showToast(ToastStyle.Failure, "Chat already exists");
@@ -34,7 +36,7 @@ export default function WhatsAppGroupChatForm({ defaultValue }: WhatsAppGroupCha
       await updateChats([...chats, savedChat]);
       await showToast(ToastStyle.Success, `Created new group`, savedChat.name);
     } else {
-      const newChats = chats.map(chat => {
+      const newChats = chats.map((chat) => {
         if (chat.id === savedChat.id) {
           return savedChat;
         }
@@ -55,23 +57,14 @@ export default function WhatsAppGroupChatForm({ defaultValue }: WhatsAppGroupCha
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="Raycasters"
-        defaultValue={defaultValue?.name}
-      />
+      <Form.TextField id="name" title="Name" placeholder="Raycasters" defaultValue={defaultValue?.name} />
       <Form.TextField
         id="groupCode"
         title="Group Code"
         placeholder="LkXPP0Lij10I3OYynP3MXb"
         defaultValue={defaultValue?.groupCode}
       />
-      <Form.Checkbox
-        id="pinned"
-        label="Pinned Chat"
-        defaultValue={defaultValue?.pinned}
-      />
+      <Form.Checkbox id="pinned" label="Pinned Chat" defaultValue={defaultValue?.pinned} />
     </Form>
   );
 }

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kubectx",
+  "title": "kubectx",
+  "description": "Switch between clusters from Raycast",
+  "icon": "kubernetes-icon.png",
+  "author": "oktay",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "context",
+      "title": "Switch Cluster",
+      "subtitle": "Kubernetes",
+      "description": "Change current cluster",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "kubectxPath",
+          "type": "textfield",
+          "required": false,
+          "title": "Kubectx Installation Path",
+          "description": "Location to the Brew installation (Defaults to `/opt/homebrew/bin/kubectx` on M1 Macs, and `/usr/local/bin/kubectx` otherwise)"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.2",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

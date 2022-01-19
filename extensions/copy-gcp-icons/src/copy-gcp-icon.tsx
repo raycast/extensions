@@ -6,7 +6,7 @@ import {
   popToRoot,
   showHUD,
   showToast,
-  ToastStyle
+  ToastStyle,
 } from "@raycast/api";
 import download from "download";
 import { existsSync, mkdirSync, readdirSync } from "fs";
@@ -23,7 +23,7 @@ export default function IconList() {
   useEffect(() => {
     async function loadIcons() {
       if (!existsSync(ICON_DIR)) {
-        mkdirSync(ICON_DIR, {recursive: true});
+        mkdirSync(ICON_DIR, { recursive: true });
       }
 
       let dirs = readdirSync(ICON_DIR);
@@ -31,7 +31,7 @@ export default function IconList() {
         const toast = await showToast(ToastStyle.Animated, "Fetching GCP Icons...");
         await download(ZIP_URL, ICON_DIR, { extract: true });
         toast.hide();
-        dirs = readdirSync(ICON_DIR)
+        dirs = readdirSync(ICON_DIR);
       }
 
       setIconDirs(dirs);

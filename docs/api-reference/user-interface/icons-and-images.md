@@ -24,7 +24,7 @@ export default function Command() {
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| fileIcon | <code>string</code> | Yes | The path to a file or folder to get it's icon from. |
+| fileIcon | <code>string</code> | Yes | The path to a file or folder to get its icon from. |
 
 ### Image
 
@@ -52,9 +52,9 @@ const icon = { source: { light: "icon-light.png", dark: "icon-dark.png" }}
 
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| mask | <code>[ImageMask](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagemask)</code> | No | A [ImageMask](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagemask) to apply to the image. |
-| source | <code>[ImageSource](https://developers.raycast.com/api-reference/user-interface/icons-and-images#imagesource)</code> | Yes | The source of the image. |
-| tintColor | <code>[ColorLike](https://developers.raycast.com/api-reference/user-interface/colors#colorlike)</code> | No | A [ColorLike](https://developers.raycast.com/api-reference/user-interface/colors#colorlike) to tint all the non-transparent pixels of the image. |
+| mask | <code>[ImageMask](#imagemask)</code> | No | A [ImageMask](#imagemask) to apply to the image. |
+| source | <code>[ImageSource](#imagesource)</code> | Yes | The source of the image. |
+| tintColor | <code>[ColorLike](./colors.md#colorlike)</code> | No | A [ColorLike](./colors.md#colorlike) to tint all the non-transparent pixels of the image. |
 
 ### Icon
 
@@ -185,10 +185,10 @@ export default function Command() {
 ImageSource: string | Icon | { dark: string; light: string }
 ```
 
-The source of an [Image](https://developers.raycast.com/api-reference/user-interface/icons-and-images#image). Can be either a remote URL, a local file resource, a built-in [Icon](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) or
+The source of an [Image](#image). Can be either a remote URL, a local file resource, a built-in [Icon](#icon) or
 a single emoji.
 
-For consistency, it's best to use the built-in [Icon](https://developers.raycast.com/api-reference/user-interface/icons-and-images#icon) in lists, the Action Panel and other places. If a
+For consistency, it's best to use the built-in [Icon](#icon) in lists, the Action Panel and other places. If a
 specific icon isn't built-in, you can reference custom ones from the `assets` folder of the extension by file name,
 e.g. `my-icon.png`. Alternatively, you can reference an absolute HTTPS url that points to an image or use an emoji.
 You can also specify different remote or local assets for light and dark theme.

@@ -1,19 +1,29 @@
-import { ActionPanel, PushAction, Icon, List, OpenInBrowserAction, render } from "@raycast/api";
+import { ActionPanel, PushAction, Icon, List, OpenInBrowserAction, confirmAlert, render } from "@raycast/api";
+import { mutate } from "swr";
+
 import { showApiToastError } from "./utils";
 
 import { Project as TProject } from "./types";
-import { useFetch } from "./api";
+import { deleteProject as apiDeleteProject, useFetch } from "./api";
 
 import Project from "./components/Project";
 
 function Projects() {
-  const { data, isLoading, error } = useFetch<TProject[]>("/projects");
+  const path = "/projects";
+  const { data, isLoading, error } = useFetch<TProject[]>(path);
 
   if (error) {
     showApiToastError({ error, title: "Failed to get projects", message: error.message });
   }
 
   const projects = data || [];
+
+  async function deleteProject(id: number) {
+    if (await confirmAlert({ title: "Are you sure you want to delete this project?" })) {
+      await apiDeleteProject(id);
+      mutate(path);
+    }
+  }
 
   return (
     <List searchBarPlaceholder="Filter projects by name..." isLoading={isLoading}>
@@ -27,6 +37,12 @@ function Projects() {
             <ActionPanel>
               <PushAction icon={Icon.TextDocument} title="Show Details" target={<Project projectId={project.id} />} />
               <OpenInBrowserAction url={project.url} />
+              <ActionPanel.Item
+                title="Delete Project"
+                icon={Icon.Trash}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+                onAction={() => deleteProject(project.id)}
+              />
             </ActionPanel>
           }
         />

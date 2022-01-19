@@ -1,7 +1,7 @@
 ---
 name: "🧬 💎 API Feature Request"
 about: Suggest new API or an improvement to existing API
-title: '[API Feature Request] '
+title: ''
 labels: 'api, feature request'
 
 ---
