@@ -4,7 +4,7 @@
   "title": "Sourcegraph",
   "description": "Search your code and 2M+ public repositories on Sourcegraph.",
   "icon": "command-icon.png",
-  "author": "@bobheadxi",
+  "author": "bobheadxi",
   "license": "MIT",
   "keywords": [
     "search",
