@@ -10,6 +10,7 @@ export default function CommandListDashboards() {
     {apm.map(([name, calls]) =>
       <List.Item
         key={name}
+        icon={{source: {light: "icon@light.png", dark: "icon@dark.png"}}}
         title={name}
         subtitle={calls.calls.length > 0 ? `Calls ${calls.calls.join(", ")}` : undefined}
       />
