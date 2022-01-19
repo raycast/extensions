@@ -1,6 +1,7 @@
 import {getPreferenceValues} from "@raycast/api";
 import {v1} from "@datadog/datadog-api-client";
 import fetch from "node-fetch";
+import {APM} from "./types";
 
 
 const API_KEY = getPreferenceValues()["api-key"];
@@ -10,11 +11,12 @@ const configuration = v1.createConfiguration({authMethods: {apiKeyAuth: API_KEY,
 
 export const dashboardsApi = new v1.DashboardsApi(configuration);
 
-export const apiAPM = ({env = "development"}: { env?: string }) =>
+export const apiAPM = ({ env }: { env: string }): Promise<APM[]> =>
   fetch(`https://api.datadoghq.com/api/v1/service_dependencies?env=${env}`, params)
     .then(resp => resp.json())
     .then(json => json as Record<string, { calls: string[] }>)
-    .then(rec => Object.entries(rec).sort(([l], [r]) => l < r ? -1 : 1));
+    .then(rec => Object.entries(rec).sort(([l], [r]) => l < r ? -1 : 1))
+    .then(entries => entries.map(([name, {calls}]) => ({env, name, calls} as APM)));
 
 const params = {
   headers: {

@@ -17,7 +17,16 @@
       "name": "command-list-apm",
       "title": "APM list",
       "description": "List available APM",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "envs",
+          "title": "Environments",
+          "description": "Comma-separated environments for listing",
+          "type": "textfield",
+          "required": true
+        }
+      ]
     }
 
   ],
