@@ -4,7 +4,7 @@
   "title": "Sourcegraph",
   "description": "Search your code and 2M+ public repositories on Sourcegraph.",
   "icon": "command-icon.png",
-  "author": "bobheadxi",
+  "author": "@bobheadxi",
   "license": "MIT",
   "keywords": [
     "search",
@@ -107,6 +107,6 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fmt": "prettier -w ./",
-    "raycast-publish": "rm -rf ../../raycast/extensions/extensions/sourcegraph && rsync -rv --exclude=.git --exclude=.gitignore --exclude=node_modules ./ ../../raycast/extensions/extensions/sourcegraph"
+    "raycast-publish": ".scripts/raycast-publish.sh"
   }
 }
