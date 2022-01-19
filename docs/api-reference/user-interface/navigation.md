@@ -6,7 +6,7 @@
 
 A hook that lets you push and pop view components in the navigation stack.
 
-Most likely you won't use this hook too often. To push a new component, use the [PushAction](https://developers.raycast.com/api-reference/user-interface/actions#pushaction).
+Most likely you won't use this hook too often. To push a new component, use the [PushAction](./actions.md#pushaction).
 When a user presses `ESC`, we automatically push to the previous component.
 
 #### Signature
@@ -57,12 +57,12 @@ export default function Command() {
 
 #### Return
 
-A [Navigation](https://developers.raycast.com/api-reference/user-interface/navigation#navigation) object with [Navigation.push](https://developers.raycast.com/api-reference/user-interface/navigation#navigation) and [Navigation.pop](https://developers.raycast.com/api-reference/user-interface/navigation#navigation) functions.
+A [Navigation](#navigation) object with [Navigation.push](#navigation) and [Navigation.pop](#navigation) functions.
 Use the functions to alter the navigation stack.
 
 ### Navigation
 
-Return type of the [useNavigation](https://developers.raycast.com/api-reference/user-interface/navigation#usenavigation) hook to perform push and pop actions.
+Return type of the [useNavigation](#usenavigation) hook to perform push and pop actions.
 
 #### Properties
 

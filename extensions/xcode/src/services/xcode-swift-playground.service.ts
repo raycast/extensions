@@ -12,7 +12,6 @@ import { joinPathComponents } from "../shared/join-path-components";
  * XcodeSwiftPlaygroundService
  */
 export class XcodeSwiftPlaygroundService {
-
   /**
    * The scaffold Swift Playground TemplateFiles
    */
@@ -26,7 +25,7 @@ export class XcodeSwiftPlaygroundService {
          <TimelineItems>
          </TimelineItems>
       </Timeline>
-      `
+      `,
     },
     {
       path: "playground.xcworkspace",
@@ -38,17 +37,15 @@ export class XcodeSwiftPlaygroundService {
         <FileRef location="group:self:">
         </FileRef>
       </Workspace>
-      `
-    }
+      `,
+    },
   ];
 
   /**
    * Create a new Swift Playground
    * @param parameters The XcodeSwiftPlaygroundCreationParameters
    */
-  async createSwiftPlayground(
-    parameters: XcodeSwiftPlaygroundCreationParameters
-  ): Promise<XcodeSwiftPlayground> {
+  async createSwiftPlayground(parameters: XcodeSwiftPlaygroundCreationParameters): Promise<XcodeSwiftPlayground> {
     // Initialize Playground Path
     const playgroundPath = joinPathComponents(
       // Replace tilde (~) with home directory
@@ -63,10 +60,8 @@ export class XcodeSwiftPlaygroundService {
         path: playgroundPath,
         alreadyExists: true,
         open: () => {
-          return execAsync(
-            `open ${playgroundPath}`
-          ).then();
-        }
+          return execAsync(`open ${playgroundPath}`).then();
+        },
       };
     }
     // Make playground directory
@@ -74,53 +69,33 @@ export class XcodeSwiftPlaygroundService {
     // Initialize template files
     const templateFiles = [
       ...this.scaffoldTemplateFiles,
-      XcodeSwiftPlaygroundService.swiftSourceContentsTemplateFile(
-        parameters.template
-      ),
-      XcodeSwiftPlaygroundService.contentsTemplateFile(
-        parameters.platform
-      )
+      XcodeSwiftPlaygroundService.swiftSourceContentsTemplateFile(parameters.template),
+      XcodeSwiftPlaygroundService.contentsTemplateFile(parameters.platform),
     ];
     try {
       // Create TemplateFiles in parallel
       await Promise.all(
-        templateFiles
-          .map(async templateFile => {
-            // Initialize file path with current playground path
-            let filePath = playgroundPath;
-            // Check if template file has a path
-            if (templateFile.path) {
-              // Join current file path with template file path
-              filePath = joinPathComponents(
-                filePath,
-                templateFile.path
-              );
-              // Make directory
-              await makeDirectoryAsync(filePath);
-            }
-            // Join current file path with file name
-            filePath = joinPathComponents(
-              filePath,
-              [
-                templateFile.name,
-                templateFile.extension
-              ].join(".")
-            );
-            // Write file
-            await writeFileAsync(
-              filePath,
-              dedent(templateFile.contents)
-            );
-          })
+        templateFiles.map(async (templateFile) => {
+          // Initialize file path with current playground path
+          let filePath = playgroundPath;
+          // Check if template file has a path
+          if (templateFile.path) {
+            // Join current file path with template file path
+            filePath = joinPathComponents(filePath, templateFile.path);
+            // Make directory
+            await makeDirectoryAsync(filePath);
+          }
+          // Join current file path with file name
+          filePath = joinPathComponents(filePath, [templateFile.name, templateFile.extension].join("."));
+          // Write file
+          await writeFileAsync(filePath, dedent(templateFile.contents));
+        })
       );
     } catch (error) {
       try {
         // On error perform rollback
         // Try to remove the playground directory
-        await removeDirectoryAsync(
-          playgroundPath,
-          { recursive: true }
-        );
+        await removeDirectoryAsync(playgroundPath, { recursive: true });
       } catch (error) {
         // Log and ignore this error
         // As we only try to clean up the Playground directory
@@ -136,10 +111,8 @@ export class XcodeSwiftPlaygroundService {
       path: playgroundPath,
       alreadyExists: false,
       open: () => {
-        return execAsync(
-          `open ${playgroundPath}`
-        ).then();
-      }
+        return execAsync(`open ${playgroundPath}`).then();
+      },
     };
   }
 
@@ -148,9 +121,7 @@ export class XcodeSwiftPlaygroundService {
    * @param platform The XcodeSwiftPlaygroundPlatform
    * @private
    */
-  private static contentsTemplateFile(
-    platform: XcodeSwiftPlaygroundPlatform
-  ): TemplateFile {
+  private static contentsTemplateFile(platform: XcodeSwiftPlaygroundPlatform): TemplateFile {
     return {
       name: "contents",
       extension: "xcplayground",
@@ -163,7 +134,7 @@ export class XcodeSwiftPlaygroundService {
                   importAppTypes='true'>
           <timeline fileName='timeline.xctimeline'/>
       </playground>
-      `
+      `,
     };
   }
 
@@ -171,9 +142,7 @@ export class XcodeSwiftPlaygroundService {
    * Swift Source Contents TemplateFile
    * @param template The XcodeSwiftPlaygroundTemplate
    */
-  private static swiftSourceContentsTemplateFile(
-    template: XcodeSwiftPlaygroundTemplate
-  ): TemplateFile {
+  private static swiftSourceContentsTemplateFile(template: XcodeSwiftPlaygroundTemplate): TemplateFile {
     let contents: string;
     switch (template) {
       case XcodeSwiftPlaygroundTemplate.empty:
@@ -199,10 +168,9 @@ export class XcodeSwiftPlaygroundService {
     return {
       name: "Contents",
       extension: "swift",
-      contents: contents
+      contents: contents,
     };
   }
-
 }
 
 /**

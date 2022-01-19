@@ -1,4 +1,9 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from "@raycast/api";
+import {
+  ActionPanel,
+  CopyToClipboardAction,
+  List,
+  OpenInBrowserAction,
+} from "@raycast/api";
 import type { EnrichedTitle } from "../types";
 
 export const ListItem = (props: { title: EnrichedTitle }) => {
@@ -15,8 +20,18 @@ export const ListItem = (props: { title: EnrichedTitle }) => {
       accessoryTitle={title.imdbRating}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`https://www.imdb.com/title/${title.imdbID}/`} />
-          <CopyToClipboardAction title="Copy URL" content={`https://www.imdb.com/title/${title.imdbID}/`} />
+          <OpenInBrowserAction
+            url={`https://www.imdb.com/title/${title.imdbID}/`}
+          />
+          <CopyToClipboardAction
+            title="Copy URL"
+            content={`https://www.imdb.com/title/${title.imdbID}/`}
+          />
+          <CopyToClipboardAction
+            title="Copy ID"
+            shortcut={{ modifiers: ["opt", "cmd"], key: "return" }}
+            content={`${title.imdbID}`}
+          />
         </ActionPanel>
       }
     />

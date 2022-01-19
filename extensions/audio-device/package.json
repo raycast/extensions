@@ -1,0 +1,46 @@
+{
+  "name": "audio-device",
+  "title": "Set Audio Device",
+  "description": "Switch the active audio device of your mac.",
+  "icon": "command-icon.png",
+  "author": "benvp",
+  "contributors": [
+    "mathieudutour"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "set-output-device",
+      "title": "Set Output Device",
+      "subtitle": "Audio Device",
+      "description": "Sets the active audio output device.",
+      "mode": "view"
+    },
+    {
+      "name": "set-input-device",
+      "title": "Set Input Device",
+      "subtitle": "Audio Device",
+      "description": "Sets the active audio input device.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "execa": "^6.0.0",
+    "macos-audio-devices": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "copy-binary": "cp node_modules/macos-audio-devices/audio-devices assets/audio-devices",
+    "build": "npm run copy-binary && ray build -e dist",
+    "dev": "npm run copy-binary && ray develop"
+  }
+}

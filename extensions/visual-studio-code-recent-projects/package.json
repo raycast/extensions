@@ -15,16 +15,6 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "codeCliPath",
-      "type": "textfield",
-      "required": false,
-      "default": "/usr/local/bin/code",
-      "title": "Path of the Vscode Cli",
-      "description": "Use `Shell Command: Install 'code' command in PATH` from the command palette to install."
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "tildify": "^3.0.0"

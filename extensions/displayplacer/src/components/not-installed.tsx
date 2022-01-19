@@ -1,7 +1,6 @@
-import { ActionPanel, ActionPanelItem, Detail, showToast, Toast, ToastStyle, useNavigation } from "@raycast/api";
+import { ActionPanel, ActionPanelItem, Detail, showToast, Toast, ToastStyle } from "@raycast/api";
 import { execSync } from "child_process";
 import { useState } from "react";
-import { promisify } from "util";
 
 export default function NotInstalled({
   onRefresh = () => {
@@ -39,14 +38,14 @@ export default function NotInstalled({
         </ActionPanel>
       }
       markdown={`
-  # 🚨 Error: Displayplacer Utility is not installed
-  This extension depends on a command-line utilty that is not detected on your system. You must install it continue.
+# 🚨 Error: Displayplacer Utility is not installed
+This extension depends on a command-line utilty that is not detected on your system. You must install it continue.
 
-  If you have homebrew installed, simply press **⏎** to have this extension install it for you.
+If you have homebrew installed, simply press **⏎** to have this extension install it for you.
 
-  To install homebrew, visit [this link](https://brew.sh)
+To install homebrew, visit [this link](https://brew.sh)
 
-  Or, to install displayplacer manually, [click here](https://github.com/jakehilborn/displayplacer).
+Or, to install displayplacer manually, [click here](https://github.com/jakehilborn/displayplacer).
   `}
     />
   );

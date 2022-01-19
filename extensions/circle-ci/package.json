@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "circle-ci",
+  "title": "Circle CI Workflows",
+  "description": "This extension shows a list of your latest Circle CI workflows.\n\nIt requires a Circle CI API token which you can get on https://app.circleci.com/settings/user/tokens.\n.",
+  "icon": "circle-logo.png",
+  "author": "qeude",
+  "contributors": [
+    "bgnfu7re"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "command-project-search",
+      "title": "Project Search",
+      "subtitle": "Circle CI",
+      "description": "List CircleCI projects and quickly navigate to them.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Circle CI API token",
+      "description": "Get it on https://app.circleci.com/settings/user/tokens"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.0",
+    "node-fetch": "^3.0.0",
+    "prettier": "^2.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

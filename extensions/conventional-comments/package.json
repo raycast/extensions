@@ -8,13 +8,20 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "comment",
       "title": "Insert Conventional Comment",
       "description": "Easily insert conventional comments into the frontmost application.",
+      "mode": "view"
+    },
+    {
+      "name": "commit",
+      "title": "Insert Conventional Commit",
+      "description": "Easily insert conventional commit into the frontmost application.",
       "mode": "view"
     }
   ],
   "dependencies": {
+    "@jeromefitz/conventional-gitmoji": "^1.0.0",
     "@raycast/api": "^1.25.0"
   },
   "devDependencies": {

@@ -1,9 +1,9 @@
-import { DEFAULT_ERROR_TITLE, EDGE_NOT_INSTALLED_MESSAGE } from './common/constants';
-import { List, showToast, ToastStyle } from '@raycast/api';
-import { NotInstalled } from './components/NotInstalled';
-import { ReactElement, useState } from 'react';
-import { UrlListItem } from './components/UrlListItem';
-import { useEdgeBookmarkSearch } from './hooks/useBookmarkSearch';
+import { DEFAULT_ERROR_TITLE, EDGE_NOT_INSTALLED_MESSAGE } from "./common/constants";
+import { List, showToast, ToastStyle } from "@raycast/api";
+import { NotInstalled } from "./components/NotInstalled";
+import { ReactElement, useState } from "react";
+import { UrlListItem } from "./components/UrlListItem";
+import { useEdgeBookmarkSearch } from "./hooks/useBookmarkSearch";
 
 export default function Command(): ReactElement {
   const [searchText, setSearchText] = useState<string>();
