@@ -6,4 +6,5 @@ export interface Preferences {
   workspace: string;
   accountName: string;
   appPassword: string;
+  baseUrl: string;
 }

@@ -2,7 +2,7 @@ import { Bitbucket, Schema } from "bitbucket";
 import { preferences } from "../helpers/preferences";
 
 const clientOptions = {
-  baseUrl: "https://api.bitbucket.org/2.0",
+  baseUrl: preferences.baseUrl,
   auth: {
     username: preferences.accountName,
     password: preferences.appPassword,

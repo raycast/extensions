@@ -55,6 +55,7 @@ Raycast extension to search repositories, check pipelines status, open recent Pu
   - Workspace: You can see your workspaces [here](https://bitbucket.org/account/workspaces/), and use the slug. You can find it in the URL of your workspace: `https://bitbucket.org/{organization}/`
   - Account Name: You can find it [here](https://bitbucket.org/account/settings/) under `Bitbucket profile settings > Username`
   - App Password
+  - Base URL (optional): Bitbucket Cloud base URL, you can modify it to your Bitbucket server if you don't use Bitbucket Cloud
 
 Now you should be able to run Bitbucket commands with Raycast 🚀.
 

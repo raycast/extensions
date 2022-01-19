@@ -6,8 +6,7 @@
   "icon": "bitbucket-logo.png",
   "author": "Francois",
   "license": "MIT",
-  "commands": [
-    {
+  "commands": [{
       "name": "searchRepositories",
       "title": "Search Repositories",
       "subtitle": "Bitbucket",
@@ -22,8 +21,7 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
+  "preferences": [{
       "name": "workspace",
       "type": "textfield",
       "title": "Workspace",
@@ -49,6 +47,15 @@
       "default": "",
       "description": "Bitbucket App password",
       "placeholder": "bXlzZWNyZXRhcGlrZXkqwd"
+    },
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "title": "Base URL",
+      "required": true,
+      "default": "https://api.bitbucket.org/2.0",
+      "description": "Bitbucket base URL (modify only if you don't use Bitbucket Cloud)",
+      "placeholder": "https://api.bitbucket.org/2.0"
     }
   ],
   "dependencies": {
