@@ -7,6 +7,7 @@ import {
   Detail,
   CopyToClipboardAction,
 } from "@raycast/api";
+import { useState } from "react";
 import { Bitwarden } from "./api";
 
 export function TroubleshootingGuide(): JSX.Element {
@@ -34,6 +35,9 @@ export function UnlockForm(props: {
   setSessionToken: (session: string) => void;
   bitwardenApi: Bitwarden;
 }): JSX.Element {
+  const [password, setPassword] = useState("");
+  const [hiddenPassword, setHiddenPassword] = useState("");
+
   async function onSubmit(values: { password: string }) {
     try {
       const toast = await showToast(ToastStyle.Animated, "Unlocking Vault...", "Please wait");
@@ -45,6 +49,12 @@ export function UnlockForm(props: {
       showToast(ToastStyle.Failure, "Failed to unlock vault", "Invalid credentials");
     }
   }
+
+  async function onChange(newValue: string) {
+    setHiddenPassword("*".repeat(newValue.length));
+    setPassword(password + newValue[newValue.length - 1]);
+  }
+
   return (
     <Form
       actions={
@@ -53,7 +63,7 @@ export function UnlockForm(props: {
         </ActionPanel>
       }
     >
-      <Form.TextField id="password" title="Master Password" />
+      <Form.TextField id="password" title="Master Password" onChange={onChange} value={hiddenPassword} />
     </Form>
   );
 }
