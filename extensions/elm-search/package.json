@@ -10,6 +10,7 @@
     {
       "name": "nameSearch",
       "title": "Search Package Name",
+      "subtitle": "Elm",
       "description": "Search packages by name and open them in the official package website or on the dark mode version of it",
       "mode": "view",
       "preferences": [
