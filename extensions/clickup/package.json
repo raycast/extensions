@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Clickup Tasks Explorer",
+      "title": "Tasks Explorer",
+      "subtitle": "Clickup",
       "description": "Browse ClickUp tasks from RayCast",
       "mode": "view"
     }
