@@ -21,8 +21,9 @@ const parseResponseToJSON = (resp: Response) =>
   resp.json().then(json => {
     if (resp.ok) return json;
 
-    // @ts-ignore
-    throw new Error(json.errors.join(", "));
+    const err = json as { errors: string[] };
+
+    throw new Error(err.errors.join(", "));
   });
 
 const params = {
