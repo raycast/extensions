@@ -3,7 +3,7 @@
 Plugin for Raycast to explore your [ClickUpTasks](https://github.com/Ali-Parandeh/raycast-clickup-extension).
 
 ## How to obtain an API Token
-- Go to [ClickUp](https://clickup.com/login)
+- Go to [ClickUp](https://app.clickup.com/login)
 - Click on **USER SETTINGS**
 - Click on **APPS**
 
