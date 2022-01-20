@@ -22,7 +22,7 @@ function useSearch(query: string | undefined): UseSearchReturn {
         ? await showToast(
             ToastStyle.Failure,
             "Something went wrong",
-              `${error?.response?.data.error?.code} - ${error?.response?.data.error.message}`
+            `${error?.response?.data.error?.code} - ${error?.response?.data.error.message}`
           )
         : await showToast(ToastStyle.Failure, "Something went wrong");
     }
