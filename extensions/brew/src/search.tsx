@@ -46,7 +46,7 @@ export default function Main(): JSX.Element {
         updateInstalled(results, state.installed);
         setState((oldState) => ({ ...oldState, results: results, isLoading: false }));
       })
-      .catch ((err) => {
+      .catch((err) => {
         showFailureToast("Brew search failed", err);
         setState((oldState) => ({ ...oldState, results: undefined, isLoading: false }));
       });

@@ -5,7 +5,7 @@ import { showActionToast, showFailureToast } from "./utils";
 
 export default async (): Promise<void> => {
   try {
-    const abort = showActionToast({title: "Upgrading formula & casks" + String.ellipsis, cancelable: true});
+    const abort = showActionToast({ title: "Upgrading formula & casks" + String.ellipsis, cancelable: true });
     await brewUpgradeCommand(preferences.greedyUpgrades, true, abort);
     showToast(ToastStyle.Success, "Upgrade completed");
   } catch (err) {
@@ -18,5 +18,5 @@ export default async (): Promise<void> => {
 };
 
 async function wait(ms: number): Promise<void> {
-  return new Promise( resolve => setTimeout(resolve, ms) );
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

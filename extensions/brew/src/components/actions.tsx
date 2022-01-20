@@ -11,7 +11,10 @@ import {
 import { showActionToast, showFailureToast } from "../utils";
 import { Cask, Formula, OutdatedFormula, Nameable } from "../brew";
 
-export function FormulaInstallAction(props: { formula: Cask | Formula; onAction: (result: boolean) => void }): JSX.Element {
+export function FormulaInstallAction(props: {
+  formula: Cask | Formula;
+  onAction: (result: boolean) => void;
+}): JSX.Element {
   // TD: Support installing other versions?
   return (
     <ActionPanelItem
@@ -25,7 +28,10 @@ export function FormulaInstallAction(props: { formula: Cask | Formula; onAction:
   );
 }
 
-export function FormulaUninstallAction(props: { formula: Cask | Nameable; onAction: (result: boolean) => void }): JSX.Element {
+export function FormulaUninstallAction(props: {
+  formula: Cask | Nameable;
+  onAction: (result: boolean) => void;
+}): JSX.Element {
   return (
     <ActionPanelItem
       title="Uninstall"
@@ -39,7 +45,10 @@ export function FormulaUninstallAction(props: { formula: Cask | Nameable; onActi
   );
 }
 
-export function FormulaUpgradeAction(props: { formula: Cask | Nameable; onAction: (result: boolean) => void }): JSX.Element {
+export function FormulaUpgradeAction(props: {
+  formula: Cask | Nameable;
+  onAction: (result: boolean) => void;
+}): JSX.Element {
   return (
     <ActionPanelItem
       title="Upgrade"
@@ -66,7 +75,10 @@ export function FormulaUpgradeAllAction(props: { onAction: (result: boolean) => 
   );
 }
 
-export function FormulaPinAction(props: { formula: Formula | OutdatedFormula; onAction: (result: boolean) => void; }): JSX.Element {
+export function FormulaPinAction(props: {
+  formula: Formula | OutdatedFormula;
+  onAction: (result: boolean) => void;
+}): JSX.Element {
   const isPinned = props.formula.pinned;
   return (
     <ActionPanelItem
@@ -87,7 +99,7 @@ export function FormulaPinAction(props: { formula: Formula | OutdatedFormula; on
 /// Utilties
 
 async function install(formula: Cask | Formula): Promise<boolean> {
-  const abort = showActionToast({title: `Installing ${brewName(formula)}`, cancelable: true});
+  const abort = showActionToast({ title: `Installing ${brewName(formula)}`, cancelable: true });
   try {
     await brewInstall(formula, abort);
     showToast(ToastStyle.Success, `Installed ${brewName(formula)}`);
@@ -99,7 +111,7 @@ async function install(formula: Cask | Formula): Promise<boolean> {
 }
 
 async function uninstall(formula: Cask | Nameable): Promise<boolean> {
-  const abort = showActionToast({title: `Uninstalling ${brewName(formula)}`, cancelable: true});
+  const abort = showActionToast({ title: `Uninstalling ${brewName(formula)}`, cancelable: true });
   try {
     await brewUninstall(formula, abort);
     showToast(ToastStyle.Success, `Uninstalled ${brewName(formula)}`);
@@ -111,7 +123,7 @@ async function uninstall(formula: Cask | Nameable): Promise<boolean> {
 }
 
 async function upgrade(formula: Cask | Nameable): Promise<boolean> {
-  const abort = showActionToast({title: `Upgrading ${brewName(formula)}`, cancelable: true});
+  const abort = showActionToast({ title: `Upgrading ${brewName(formula)}`, cancelable: true });
   try {
     await brewUpgrade(formula, abort);
     showToast(ToastStyle.Success, `Upgraded ${brewName(formula)}`);

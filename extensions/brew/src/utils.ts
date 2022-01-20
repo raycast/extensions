@@ -77,7 +77,7 @@ export function showActionToast(actionOptions: ActionToastOptions): AbortControl
   const options: ToastOptions = {
     style: ToastStyle.Animated,
     title: actionOptions.title,
-    message: actionOptions.message
+    message: actionOptions.message,
   };
 
   let controller: AbortController | undefined;
@@ -89,13 +89,13 @@ export function showActionToast(actionOptions: ActionToastOptions): AbortControl
       onAction: () => {
         controller?.abort();
         toast.hide();
-      }
-    }
+      },
+    };
   }
 
   const toast = new Toast(options);
   toast.show();
-  return controller
+  return controller;
 }
 
 export async function showFailureToast(title: string, error: Error): Promise<void> {
@@ -114,8 +114,8 @@ export async function showFailureToast(title: string, error: Error): Promise<voi
       title: "Copy Error Log",
       onAction: () => {
         copyTextToClipboard(stderr);
-      }
-    }
+      },
+    },
   };
 
   const toast = new Toast(options);

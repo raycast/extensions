@@ -48,7 +48,7 @@ function formatTokenAndTap(cask: Cask): string {
 ${cask.token}
 
 Tap: ${cask.tap}
-  `
+  `;
 }
 
 function formatVersion(cask: Cask): string {

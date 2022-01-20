@@ -210,7 +210,7 @@ export async function brewFetchOutdated(greedy: boolean, cancel?: AbortControlle
   }
   // 'outdated' is only reliable after performing a 'brew update'
   await brewUpdateCommand(cancel);
-  const output = await execSignal(cmd, cancel)
+  const output = await execSignal(cmd, cancel);
   return JSON.parse(output.stdout);
 }
 

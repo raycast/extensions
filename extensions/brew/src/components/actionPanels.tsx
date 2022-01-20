@@ -12,7 +12,11 @@ import { FormulaInfo } from "./formulaInfo";
 import { CaskInfo } from "./caskInfo";
 import * as Actions from "./actions";
 
-export function CaskActionPanel(props: { cask: Cask; showDetails: boolean; onAction: (result: boolean) => void }): JSX.Element {
+export function CaskActionPanel(props: {
+  cask: Cask;
+  showDetails: boolean;
+  onAction: (result: boolean) => void;
+}): JSX.Element {
   const cask = props.cask;
 
   function installedActionPanel() {
@@ -27,7 +31,11 @@ export function CaskActionPanel(props: { cask: Cask; showDetails: boolean; onAct
             />
           )}
           <ShowInFinderAction path={brewInstallPath(cask)} />
-          <CopyToClipboardAction title="Copy Cask Name" content={cask.token} shortcut={{ modifiers:["cmd", "shift"], key: "c" }}/>
+          <CopyToClipboardAction
+            title="Copy Cask Name"
+            content={cask.token}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          />
           <CopyToClipboardAction title="Copy Tap Name" content={cask.tap} />
         </ActionPanel.Section>
         <ActionPanel.Section>
@@ -54,7 +62,11 @@ export function CaskActionPanel(props: { cask: Cask; showDetails: boolean; onAct
             />
           )}
           <Actions.FormulaInstallAction formula={cask} onAction={props.onAction} />
-          <CopyToClipboardAction title="Copy Cask Name" content={cask.token} shortcut={{ modifiers:["cmd", "shift"], key: "c" }}/>
+          <CopyToClipboardAction
+            title="Copy Cask Name"
+            content={cask.token}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          />
           <CopyToClipboardAction title="Copy Tap Name" content={cask.tap} />
         </ActionPanel.Section>
         <ActionPanel.Section>
@@ -72,7 +84,11 @@ export function CaskActionPanel(props: { cask: Cask; showDetails: boolean; onAct
   }
 }
 
-export function FormulaActionPanel(props: { formula: Formula; showDetails: boolean; onAction: (result: boolean) => void; }): JSX.Element {
+export function FormulaActionPanel(props: {
+  formula: Formula;
+  showDetails: boolean;
+  onAction: (result: boolean) => void;
+}): JSX.Element {
   const formula = props.formula;
 
   function installedActionPanel() {
@@ -87,7 +103,11 @@ export function FormulaActionPanel(props: { formula: Formula; showDetails: boole
             />
           )}
           <ShowInFinderAction path={brewInstallPath(formula)} />
-          <CopyToClipboardAction title="Copy Formula Name" content={formula.name} shortcut={{ modifiers:["cmd", "shift"], key: "c" }}/>
+          <CopyToClipboardAction
+            title="Copy Formula Name"
+            content={formula.name}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <OpenInBrowserAction url={formula.homepage} />
@@ -114,7 +134,11 @@ export function FormulaActionPanel(props: { formula: Formula; showDetails: boole
             />
           )}
           <Actions.FormulaInstallAction formula={formula} onAction={props.onAction} />
-          <CopyToClipboardAction title="Copy Formula Name" content={formula.name} shortcut={{ modifiers:["cmd", "shift"], key: "c" }}/>
+          <CopyToClipboardAction
+            title="Copy Formula Name"
+            content={formula.name}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <OpenInBrowserAction url={formula.homepage} />
