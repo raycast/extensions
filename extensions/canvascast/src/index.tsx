@@ -54,7 +54,7 @@ export default function main() {
         ]);
       api.users.self.favorites['courses?state=available&enrollment_state=active'].get().then((favorites: any) => {
         let courses = json;
-        let ids = favorites.map(favorite => favorite.id);
+        const ids = favorites.map(favorite => favorite.id);
         courses = courses.filter(course => ids.includes(course.id));
         setItems(
           json.map((a: any) => ({
