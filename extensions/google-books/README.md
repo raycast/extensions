@@ -5,7 +5,7 @@ Extension for Raycast to search [Google Books](https://books.google.co.uk/).
 
 ## Installing
 
-Make sure RayCast is installed and go to https://github.com/Ali-Parandeh/raycast-google-books-extension
+Make sure Raycast is installed and go to https://github.com/Ali-Parandeh/raycast-google-books-extension
 
 ## Running locally
 
