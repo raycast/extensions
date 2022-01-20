@@ -58,6 +58,7 @@ export default function Command() {
                     <ActionPanel>
                       <PushAction
                         title="Show Book Details"
+                        icon={Icon.List}
                         target={
                           <Detail
                             actions={
