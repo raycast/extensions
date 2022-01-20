@@ -17,12 +17,12 @@ function useSearch(query: string | undefined): UseSearchReturn {
       setItems(response?.data?.items);
     } catch (error: any) {
       setItems([]);
-      console.error(error);
+      console.error(error?.response?.data);
       error?.response?.data
         ? await showToast(
             ToastStyle.Failure,
             "Something went wrong",
-            `${error?.response?.data?.err} - ${error?.response?.data?.ECODE}`
+              `${error?.response?.data.error?.code} - ${error?.response?.data.error.message}`
           )
         : await showToast(ToastStyle.Failure, "Something went wrong");
     }
