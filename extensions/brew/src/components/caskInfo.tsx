@@ -2,9 +2,8 @@ import { Detail, useNavigation } from "@raycast/api";
 import { CaskActionPanel } from "./actionPanels";
 import { Cask, brewName } from "../brew";
 
-export function CaskInfo(props: { cask: Cask; onAction: (result: boolean) => void }) {
+export function CaskInfo(props: { cask: Cask; onAction: (result: boolean) => void }): JSX.Element {
   const { pop } = useNavigation();
-
   return (
     <Detail
       markdown={formatInfo(props.cask)}

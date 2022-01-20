@@ -7,13 +7,13 @@ import * as utils from "./utils";
 
 const execp = promisify(exec);
 
-interface ExecError extends Error {
+export interface ExecError extends Error {
   code: number;
   stdout: string;
   stderr: string;
 }
 
-interface ExecResult {
+export interface ExecResult {
   stdout: string;
   stderr: string;
 }

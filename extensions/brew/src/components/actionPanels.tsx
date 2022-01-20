@@ -12,7 +12,7 @@ import { FormulaInfo } from "./formulaInfo";
 import { CaskInfo } from "./caskInfo";
 import * as Actions from "./actions";
 
-export function CaskActionPanel(props: { cask: Cask; showDetails: boolean; onAction: (result: boolean) => void }) {
+export function CaskActionPanel(props: { cask: Cask; showDetails: boolean; onAction: (result: boolean) => void }): JSX.Element {
   const cask = props.cask;
 
   function installedActionPanel() {
@@ -72,11 +72,7 @@ export function CaskActionPanel(props: { cask: Cask; showDetails: boolean; onAct
   }
 }
 
-export function FormulaActionPanel(props: {
-  formula: Formula;
-  showDetails: boolean;
-  onAction: (result: boolean) => void;
-}) {
+export function FormulaActionPanel(props: { formula: Formula; showDetails: boolean; onAction: (result: boolean) => void; }): JSX.Element {
   const formula = props.formula;
 
   function installedActionPanel() {

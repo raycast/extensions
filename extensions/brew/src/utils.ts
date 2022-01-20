@@ -3,6 +3,7 @@ import { join as path_join } from "path";
 import { mkdirSync } from "fs";
 import { stat, readFile, writeFile } from "fs/promises";
 import fetch from "node-fetch";
+import { ExecError } from "./brew";
 
 /// Utils
 
@@ -87,7 +88,7 @@ export function showActionToast(actionOptions: ActionToastOptions): AbortControl
       title: "Cancel",
       onAction: () => {
         controller?.abort();
-        toast?.hide();
+        toast.hide();
       }
     }
   }
@@ -97,13 +98,14 @@ export function showActionToast(actionOptions: ActionToastOptions): AbortControl
   return controller
 }
 
-export function showFailureToast(title: string, error: any) {
-  if ((error as Error).name == "AbortError") {
+export function showFailureToast(title: string, error: Error): void {
+  if (error.name == "AbortError") {
     console.log("AbortError");
     return;
   }
+
   console.log(`${title}: ${error}`);
-  const stderr = error["stderr"]?.trim() ?? "";
+  const stderr = (error as ExecError).stderr?.trim() ?? "";
   const options: ToastOptions = {
     style: ToastStyle.Failure,
     title: title,
@@ -111,6 +113,7 @@ export function showFailureToast(title: string, error: any) {
     primaryAction: {
       title: "Copy Error Log",
       onAction: () => {
+        console.log('copyTextToClipboard...');
         copyTextToClipboard(stderr);
       }
     }

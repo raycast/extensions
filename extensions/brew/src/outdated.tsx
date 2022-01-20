@@ -10,7 +10,7 @@ interface State {
   isLoading: boolean;
 }
 
-export default function Main() {
+export default function Main(): JSX.Element {
   const [state, setState] = useState<State>({ isLoading: true });
 
   useEffect(() => {

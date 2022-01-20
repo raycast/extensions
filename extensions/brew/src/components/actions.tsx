@@ -11,9 +11,8 @@ import {
 import { showActionToast, showFailureToast } from "../utils";
 import { Cask, Formula, OutdatedFormula, Nameable } from "../brew";
 
-export function FormulaInstallAction(props: { formula: Cask | Formula; onAction: (result: boolean) => void }) {
+export function FormulaInstallAction(props: { formula: Cask | Formula; onAction: (result: boolean) => void }): JSX.Element {
   // TD: Support installing other versions?
-
   return (
     <ActionPanelItem
       title={"Install"}
@@ -26,7 +25,7 @@ export function FormulaInstallAction(props: { formula: Cask | Formula; onAction:
   );
 }
 
-export function FormulaUninstallAction(props: { formula: Cask | Nameable; onAction: (result: boolean) => void }) {
+export function FormulaUninstallAction(props: { formula: Cask | Nameable; onAction: (result: boolean) => void }): JSX.Element {
   return (
     <ActionPanelItem
       title="Uninstall"
@@ -40,7 +39,7 @@ export function FormulaUninstallAction(props: { formula: Cask | Nameable; onActi
   );
 }
 
-export function FormulaUpgradeAction(props: { formula: Cask | Nameable; onAction: (result: boolean) => void }) {
+export function FormulaUpgradeAction(props: { formula: Cask | Nameable; onAction: (result: boolean) => void }): JSX.Element {
   return (
     <ActionPanelItem
       title="Upgrade"
@@ -54,7 +53,7 @@ export function FormulaUpgradeAction(props: { formula: Cask | Nameable; onAction
   );
 }
 
-export function FormulaUpgradeAllAction(props: { onAction: (result: boolean) => void }) {
+export function FormulaUpgradeAllAction(props: { onAction: (result: boolean) => void }): JSX.Element {
   return (
     <ActionPanelItem
       title="Upgrade All"
@@ -67,12 +66,8 @@ export function FormulaUpgradeAllAction(props: { onAction: (result: boolean) => 
   );
 }
 
-export function FormulaPinAction(props: {
-  formula: Formula | OutdatedFormula;
-  onAction: (result: boolean) => void;
-}): JSX.Element {
+export function FormulaPinAction(props: { formula: Formula | OutdatedFormula; onAction: (result: boolean) => void; }): JSX.Element {
   const isPinned = props.formula.pinned;
-
   return (
     <ActionPanelItem
       title={isPinned ? "Unpin" : "Pin"}
@@ -98,7 +93,7 @@ async function install(formula: Cask | Formula): Promise<boolean> {
     showToast(ToastStyle.Success, `Installed ${brewName(formula)}`);
     return true;
   } catch (err) {
-    showFailureToast("Install failed", err);
+    showFailureToast("Install failed", err as Error);
     return false;
   }
 }
@@ -110,7 +105,7 @@ async function uninstall(formula: Cask | Nameable): Promise<boolean> {
     showToast(ToastStyle.Success, `Uninstalled ${brewName(formula)}`);
     return true;
   } catch (err) {
-    showFailureToast("Uninstall failed", err);
+    showFailureToast("Uninstall failed", err as Error);
     return false;
   }
 }
@@ -122,7 +117,7 @@ async function upgrade(formula: Cask | Nameable): Promise<boolean> {
     showToast(ToastStyle.Success, `Upgraded ${brewName(formula)}`);
     return true;
   } catch (err) {
-    showFailureToast("Upgrade formula failed", err);
+    showFailureToast("Upgrade formula failed", err as Error);
     return false;
   }
 }
@@ -134,7 +129,7 @@ async function upgradeAll(): Promise<boolean> {
     showToast(ToastStyle.Success, "Upgrade formula succeeded");
     return true;
   } catch (err) {
-    showFailureToast("Upgrade formula failed", err);
+    showFailureToast("Upgrade formula failed", err as Error);
     return false;
   }
 }
@@ -147,7 +142,7 @@ async function pin(formula: Formula | OutdatedFormula): Promise<boolean> {
     showToast(ToastStyle.Success, `Pinned ${brewName(formula)}`);
     return true;
   } catch (err) {
-    showFailureToast("Pin formula failed", err);
+    showFailureToast("Pin formula failed", err as Error);
     return false;
   }
 }
@@ -160,7 +155,7 @@ async function unpin(formula: Formula | OutdatedFormula): Promise<boolean> {
     showToast(ToastStyle.Success, `Unpinned ${brewName(formula)}`);
     return true;
   } catch (err) {
-    showFailureToast("Unpin formula failed", err);
+    showFailureToast("Unpin formula failed", err as Error);
     return false;
   }
 }
