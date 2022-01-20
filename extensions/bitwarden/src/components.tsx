@@ -41,7 +41,7 @@ export function UnlockForm(props: {
   async function onSubmit(values: { password: string }) {
     try {
       const toast = await showToast(ToastStyle.Animated, "Unlocking Vault...", "Please wait");
-      const sessionToken = await props.bitwardenApi.unlock(values.password);
+      const sessionToken = await props.bitwardenApi.unlock(password);
       toast.hide();
 
       props.setSessionToken(sessionToken);
@@ -51,8 +51,20 @@ export function UnlockForm(props: {
   }
 
   async function onChange(newValue: string) {
-    setHiddenPassword("*".repeat(newValue.length));
-    setPassword(password + newValue[newValue.length - 1]);
+    const newLength: number = newValue.length;
+    const oldLength: number = password.length;
+
+    let newPassword: string = password;
+    if(newLength > oldLength) {
+        newPassword += newValue[newLength - 1];
+    } else if(newLength < oldLength) {
+        newPassword = newPassword.slice(0, newLength);
+    } else {
+        return;
+    }
+
+    setHiddenPassword("*".repeat(newLength));
+    setPassword(newPassword);
   }
 
   return (
