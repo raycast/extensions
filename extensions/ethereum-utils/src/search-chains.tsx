@@ -61,7 +61,7 @@ export default function Command() {
               )}
             </ActionPanel>
           }
-        ></ListItem>
+        />
       ))}
     </List>
   );
