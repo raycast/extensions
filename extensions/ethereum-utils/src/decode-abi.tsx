@@ -71,7 +71,7 @@ export default function Command() {
         const constructor = coder.decodeConstructor(data);
         push(<DecodedDataView constr={constructor} />);
       } catch {
-        showToast(ToastStyle.Failure, 'Convertion failed');
+        showToast(ToastStyle.Failure, 'Conversion failed');
       }
       return;
     }
