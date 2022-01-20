@@ -32,10 +32,14 @@ export const apiStopTracking = ({ stoppedAt = new Date() }: { stoppedAt?: Date }
       fetch("https://api.timeular.com/api/v3/tracking/stop", makeParams("POST", { stoppedAt: date(stoppedAt) }))
     )
     .then(jsonFromResponse)
-    .then(json => json as { message: string })
-    .then(
-      json => json.message && !json.message.includes("at least 1 minute") && Promise.reject(new Error(json.message))
-    );
+    .catch(e => {
+      const message = e.message.toLocaleLowerCase();
+
+      if (message.includes("is not at least 1 minute")) return;
+      if (message.includes("no tracking in progress")) return;
+
+      throw e;
+    });
 
 export const apiListAllActivities = () =>
   Promise.resolve()
@@ -104,8 +108,15 @@ const params = {
   },
 };
 
-const jsonFromResponse = (resp: Response): Promise<unknown> => {
-  if (resp.ok) return resp.json();
+const jsonFromResponse = (resp: Response): Promise<unknown> =>
+  Promise.resolve()
+    .then(() => console.debug(`json from response for ${resp.url}`))
+    .then(() => resp.json())
+    .then(json => json as Record<string, unknown>)
+    .then(json => {
+      if (resp.ok) return json;
 
-  throw new Error(resp.statusText);
-};
+      console.debug(`status ${resp.status} ${resp.statusText}, message ${json.message}`);
+
+      throw new Error((json.message as string) || resp.statusText);
+    });
