@@ -1,1 +1,1 @@
-GET https://www.googleapis.com/books/v1/volumes?q=business&key={{apiID}}
+GET https://www.googleapis.com/books/v1/volumes?q=business

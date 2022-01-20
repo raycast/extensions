@@ -23,7 +23,7 @@ export default function Command() {
             item.volumeInfo.authors?.slice(0, 1).join(", ") +
             " ⭐ " +
             (item.volumeInfo.averageRating ?? "?") +
-            "/10" +
+            "/5" +
             " 📄 " +
             (item.volumeInfo.pageCount ?? "?")
           }
