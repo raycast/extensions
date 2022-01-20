@@ -98,7 +98,7 @@ export function showActionToast(actionOptions: ActionToastOptions): AbortControl
   return controller
 }
 
-export function showFailureToast(title: string, error: Error): void {
+export async function showFailureToast(title: string, error: Error): Promise<void> {
   if (error.name == "AbortError") {
     console.log("AbortError");
     return;
@@ -113,14 +113,13 @@ export function showFailureToast(title: string, error: Error): void {
     primaryAction: {
       title: "Copy Error Log",
       onAction: () => {
-        console.log('copyTextToClipboard...');
         copyTextToClipboard(stderr);
       }
     }
   };
 
   const toast = new Toast(options);
-  toast.show();
+  await toast.show();
 }
 
 /// Array
