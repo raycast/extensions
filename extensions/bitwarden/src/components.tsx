@@ -56,11 +56,11 @@ export function UnlockForm(props: {
 
     let newPassword: string = password;
     if(newLength > oldLength) {
-        newPassword += newValue[newLength - 1];
+      newPassword += newValue[newLength - 1];
     } else if(newLength < oldLength) {
-        newPassword = newPassword.slice(0, newLength);
+      newPassword = newPassword.slice(0, newLength);
     } else {
-        return;
+      return;
     }
 
     setHiddenPassword("*".repeat(newLength));
