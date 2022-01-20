@@ -49,7 +49,7 @@ export default function CommandStatus() {
 
 type ActionsParams = {
   isLoading: boolean;
-  tracking?: Tracking;
+  tracking: Tracking | null;
   activity?: Activity;
   activities: Activity[];
   note: string;

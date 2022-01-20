@@ -4,7 +4,7 @@ import { Activity, ActivityReport, TimeEntry, Tracking } from "./types";
 import { humanizeDuration } from "./useCurrenTrackingStatus";
 import { date, showError } from "./utils";
 
-export const useTodayReport = (tracking?: Tracking, activity?: Activity) => {
+export const useTodayReport = (tracking: Tracking | null, activity?: Activity) => {
   const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [reportIsLoading, setReportIsLoading] = useState(true);
   const [reportMarkdown, setReportMarkdown] = useState("");
@@ -17,7 +17,7 @@ export const useTodayReport = (tracking?: Tracking, activity?: Activity) => {
       .then(setEntries)
       .catch(showError)
       .finally(() => setReportIsLoading(false));
-  }, []);
+  }, [tracking]);
 
   useEffect(() => {
     if (reportIsLoading) {

@@ -12,7 +12,7 @@ import { showError } from "./utils";
 
 type State = {
   isLoadingTracking: boolean;
-  tracking?: Tracking;
+  tracking: Tracking | null;
 };
 
 type UpdateParams = {
@@ -23,7 +23,7 @@ type UpdateParams = {
 };
 
 export const useCurrentTracking = () => {
-  const [{ tracking, isLoadingTracking }, setState] = useState<State>({ isLoadingTracking: true });
+  const [{ tracking, isLoadingTracking }, setState] = useState<State>({ isLoadingTracking: true, tracking: null });
   const { tags, addTags } = useTagsAndMentions();
 
   const updateTracking = ({ spaceId, activityId, text, startedAt }: UpdateParams) =>
@@ -41,7 +41,7 @@ export const useCurrentTracking = () => {
       .then(() => console.debug("stop tracking"))
       .then(() => setState(prev => ({ ...prev, isLoadingTracking: true })))
       .then(() => apiStopTracking({}))
-      .then(() => setState(prev => ({ ...prev, tracking: undefined, isLoadingTracking: false })))
+      .then(() => setState(prev => ({ ...prev, tracking: null, isLoadingTracking: false })))
       .finally(() => setState(prev => ({ ...prev, isLoadingTracking: false })));
 
   const startTracking = ({ activityId }: { activityId: string }) =>
