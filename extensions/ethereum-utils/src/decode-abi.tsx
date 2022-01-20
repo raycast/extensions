@@ -90,7 +90,7 @@ export default function Command() {
         const event = coder.decodeEvent(allTopics, data);
         push(<DecodedDataView event={event} />);
       } catch {
-        showToast(ToastStyle.Failure, 'Convertion failed');
+        showToast(ToastStyle.Failure, 'Conversion failed');
       }
       return;
     }
