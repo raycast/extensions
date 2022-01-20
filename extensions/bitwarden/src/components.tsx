@@ -55,9 +55,9 @@ export function UnlockForm(props: {
     const oldLength: number = password.length;
 
     let newPassword: string = password;
-    if(newLength > oldLength) {
+    if (newLength > oldLength) {
       newPassword += newValue[newLength - 1];
-    } else if(newLength < oldLength) {
+    } else if (newLength < oldLength) {
       newPassword = newPassword.slice(0, newLength);
     } else {
       return;
