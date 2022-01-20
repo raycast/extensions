@@ -24,6 +24,15 @@
       "description": "Trello Access token",
       "link": "https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/",
       "placeholder": "Trello Access token"
+    },
+    {
+      "name": "apitoken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Application Trello API token",
+      "link": "https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/",
+      "placeholder": "13f8c59607ba6d82531d3db5f46999c1"
     }
   ],
   "dependencies": {

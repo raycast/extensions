@@ -1,19 +1,20 @@
 import { getPreferenceValues, showToast, ToastStyle } from '@raycast/api'
 import fetch from 'node-fetch'
 import { TrelloFetchResponse } from '../trelloResponse.model'
-const TRELLO_APP_KEY = "13f8c59607ba6d82531d3db5f46999c1";
 
 export interface Preferences {
   token: string;
+  apitoken: string;
 }
 
 const { token }: Preferences = getPreferenceValues();
+const { apitoken }: Preferences = getPreferenceValues();
 
 export const fetchTodos = async (
 ): Promise<TrelloFetchResponse> => {
   try {
     const response = await fetch(
-      `https://api.trello.com/1/members/chrischinchilla/cards?filter=visible&key=${TRELLO_APP_KEY}&token=${token}`,
+      `https://api.trello.com/1/members/chrischinchilla/cards?filter=visible&key=${apitoken}&token=${token}`,
     )
     const json = await response.json()
     return json as TrelloFetchResponse
@@ -28,7 +29,7 @@ export const searchTodos = async (
 ): Promise<TrelloFetchResponse> => {
   try {
     const response = await fetch(
-      `https://api.trello.com/1/search?filter=visible&key=${TRELLO_APP_KEY}&token=${token}&modelTypes=cards&query=${searchTerm}`,
+      `https://api.trello.com/1/search?filter=visible&key=${apitoken}&token=${token}&modelTypes=cards&query=${searchTerm}`,
     )
     const json = await response.json()
     return json.cards as TrelloFetchResponse
