@@ -1,13 +1,9 @@
 import { getRandomPageTitle } from "./wikipedia";
-import { PageDetail } from "./page-detail";
-import { useEffect, useState } from "react";
+import { openInBrowser } from "./utils";
+import { closeMainWindow } from "@raycast/api";
 
-export default function RandomPage() {
-  const [title, setTitle] = useState("");
-
-  useEffect(() => {
-    getRandomPageTitle().then(setTitle);
-  }, []);
-
-  return <PageDetail title={title} />;
+export default async function () {
+  const pageTitle = await getRandomPageTitle();
+  await openInBrowser(`https://wikipedia.org/wiki/${pageTitle}`);
+  await closeMainWindow({ clearRootSearch: true });
 }

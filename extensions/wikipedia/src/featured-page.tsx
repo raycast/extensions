@@ -1,13 +1,9 @@
-import { getRandomPageTitle, getTodayFeaturedPageTitle } from "./wikipedia";
-import { PageDetail } from "./page-detail";
-import { useEffect, useState } from "react";
+import { getTodayFeaturedPageTitle } from "./wikipedia";
+import { openInBrowser } from "./utils";
+import { closeMainWindow } from "@raycast/api";
 
-export default function FeaturedPage() {
-  const [title, setTitle] = useState("");
-
-  useEffect(() => {
-    getTodayFeaturedPageTitle().then(setTitle);
-  }, []);
-
-  return <PageDetail title={title} />;
+export default async function () {
+  const pageTitle = await getTodayFeaturedPageTitle();
+  await openInBrowser(`https://wikipedia.org/wiki/${pageTitle}`);
+  await closeMainWindow({ clearRootSearch: true });
 }
