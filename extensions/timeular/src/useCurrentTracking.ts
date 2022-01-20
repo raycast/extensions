@@ -47,6 +47,7 @@ export const useCurrentTracking = () => {
   const startTracking = ({ activityId }: { activityId: string }) =>
     Promise.resolve()
       .then(() => console.debug(`start tracking activity ${activityId}`))
+      .then(() => tracking && stopTracking())
       .then(() => setState(prev => ({ ...prev, isLoadingTracking: true })))
       .then(() => apiStartTracking({ activityId }))
       .then(tracking => setState(prev => ({ ...prev, tracking })))
