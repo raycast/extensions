@@ -56,7 +56,7 @@ export default function main() {
           .get()
           .then((favorites: any) => {
             let courses = json;
-            let ids = favorites.map((favorite) => favorite.id);
+            const ids = favorites.map((favorite) => favorite.id);
             courses = courses.filter((course) => ids.includes(course.id));
             setItems(
               json.map((a: any) => ({
