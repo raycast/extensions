@@ -9,13 +9,15 @@
   "commands": [
     {
       "name": "command-list-dashboards",
-      "title": "Dashboards List",
+      "title": "List Dashboards",
+      "subtitle": "Datadog",
       "description": "List Dashboards",
       "mode": "view"
     },
     {
       "name": "command-list-apm",
-      "title": "APM list",
+      "title": "List APM",
+      "subtitle": "Datadog",
       "description": "List available APM",
       "mode": "view",
       "preferences": [
