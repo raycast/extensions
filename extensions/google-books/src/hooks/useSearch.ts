@@ -12,7 +12,9 @@ function useSearch(query: string | undefined): UseSearchReturn {
   async function searchBooks(query: string) {
     try {
       setLoading(true);
-      const response = await axios.get<GoogleBooksResponse>(`https://www.googleapis.com/books/v1/volumes?q=${query}`);
+      const response = await axios.get<GoogleBooksResponse>(
+        `https://www.googleapis.com/books/v1/volumes?q=${query}&maxResults=40`
+      );
       setLoading(false);
       setItems(response?.data?.items);
     } catch (error: any) {
