@@ -1,0 +1,113 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sourcegraph",
+  "title": "Sourcegraph",
+  "description": "Search your code and 2M+ public repositories on Sourcegraph.",
+  "icon": "command-icon.png",
+  "author": "bobheadxi",
+  "license": "MIT",
+  "keywords": [
+    "search",
+    "code",
+    "sourcegraph",
+    "codesearch"
+  ],
+  "preferences": [],
+  "commands": [
+    {
+      "name": "searchCloud",
+      "title": "Search Code",
+      "subtitle": "Sourcegraph Cloud",
+      "description": "Search your code and 2M+ public repositories.",
+      "mode": "view",
+      "keywords": [
+        "search",
+        "code",
+        "sourcegraph",
+        "src",
+        "cloud"
+      ],
+      "preferences": [
+        {
+          "name": "cloudToken",
+          "title": "Sourcegraph Cloud access token",
+          "description": "Available under 'Profile' -> 'Access token' on Sourcegraph Cloud",
+          "required": false,
+          "type": "password"
+        },
+        {
+          "name": "cloudDefaultContext",
+          "title": "Sourcegraph Cloud default context",
+          "description": "Default context to set on all queries",
+          "placeholder": "global",
+          "required": false,
+          "type": "textfield"
+        }
+      ]
+    },
+    {
+      "name": "searchInstance",
+      "title": "Search Code",
+      "subtitle": "Sourcegraph Instance",
+      "description": "Search code on a specific Sourcegraph instance.",
+      "mode": "view",
+      "keywords": [
+        "search",
+        "code",
+        "sourcegraph",
+        "src"
+      ],
+      "preferences": [
+        {
+          "name": "customInstance",
+          "title": "URL",
+          "description": "Sourcegraph instance URL",
+          "placeholder": "https://sourcegraph.my-company.com",
+          "required": true,
+          "type": "textfield"
+        },
+        {
+          "name": "customInstanceToken",
+          "title": "Access token",
+          "description": "Available under 'Profile' -> 'Access token' on the Sourcegraph instance",
+          "required": true,
+          "type": "password"
+        },
+        {
+          "name": "customInstanceDefaultContext",
+          "title": "Default context",
+          "description": "Default context to set on all queries",
+          "placeholder": "global",
+          "required": false,
+          "type": "textfield"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@bobheadxi/node-eventsource-http2": "^1.1.1",
+    "@raycast/api": "^1.27.0",
+    "node-fetch": "^3.0.0",
+    "remark": "^14.0.2",
+    "sourcegraph": "^25.4.0",
+    "strip-markdown": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "~4.13.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fmt": "prettier --config .prettierrc -w ./",
+    "raycast-publish": ".scripts/raycast-publish.sh"
+  }
+}
