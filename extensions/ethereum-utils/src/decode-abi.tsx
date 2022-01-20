@@ -80,7 +80,7 @@ export default function Command() {
         const func = coder.decodeFunction(data);
         push(<DecodedDataView func={func} />);
       } catch {
-        showToast(ToastStyle.Failure, 'Convertion failed');
+        showToast(ToastStyle.Failure, 'Conversion failed');
       }
       return;
     }
