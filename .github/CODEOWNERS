@@ -153,6 +153,7 @@
 /extensions/sketch                                   @aesign
 /extensions/slack-status                             @PitNikola
 /extensions/snake                                    @tonka3000
+/extensions/sourcegraph                              @bobheadxi
 /extensions/spatie-documentation                     @danyelkeddah
 /extensions/speedtest                                @tonka3000
 /extensions/spotify-controls                         @thomaspaulmann
