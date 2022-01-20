@@ -10,42 +10,49 @@
     {
       "name": "convert-decimals",
       "title": "Convert Decimal Units",
+      "subtitle": "Ethereum (EVM) Utils",
       "description": "Converts decimal unit values",
       "mode": "view"
     },
     {
       "name": "checksum-address",
       "title": "Checksum Address",
+      "subtitle": "Ethereum (EVM) Utils",
       "description": "Validates and converts address checksum casing",
       "mode": "view"
     },
     {
       "name": "search-chains",
       "title": "Search Chains",
+      "subtitle": "Ethereum (EVM) Utils",
       "description": "Searches EVM chain by name or id",
       "mode": "view"
     },
     {
       "name": "decode-function-signature",
       "title": "Decode Function Signature",
+      "subtitle": "Ethereum (EVM) Utils",
       "description": "Decodes the signature using 4Byte registry",
       "mode": "view"
     },
     {
       "name": "decode-event-topic",
       "title": "Decode Event Topic",
+      "subtitle": "Ethereum (EVM) Utils",
       "description": "Decodes the topic using topic0 registry",
       "mode": "view"
     },
     {
       "name": "decode-abi",
       "title": "Decode ABI",
+      "subtitle": "Ethereum (EVM) Utils",
       "description": "Decodes a constructor, function, or event using given ABI",
       "mode": "view"
     },
     {
       "name": "encode-abi",
       "title": "Encode ABI",
+      "subtitle": "Ethereum (EVM) Utils",
       "description": "Encodes a constructor, function, or event using given ABI",
       "mode": "view"
     }
