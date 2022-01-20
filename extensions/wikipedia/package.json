@@ -16,16 +16,16 @@
     },
     {
       "name": "random-page",
-      "title": "Random Page",
+      "title": "Open Random Page",
       "subtitle": "Wikipedia",
-      "description": "Open a random Wikipedia page",
+      "description": "Open a random Wikipedia page in browser",
       "mode": "no-view"
     },
     {
       "name": "featured-page",
-      "title": "Featured Page",
+      "title": "Open Featured Page",
       "subtitle": "Wikipedia",
-      "description": "Open today's featured Wikipedia page",
+      "description": "Open today's featured Wikipedia page in browser",
       "mode": "no-view"
     }
   ],
