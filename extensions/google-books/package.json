@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Google Books",
+      "title": "Search Books",
+      "subtitle": "Google Books",
       "description": "Search and view google books from RayCast",
       "mode": "view"
     }
