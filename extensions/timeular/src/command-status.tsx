@@ -82,7 +82,7 @@ const Actions = ({ isLoading, tracking, activity, activities, note, start, updat
         shortcut={{ key: "w", modifiers: ["cmd"] }}
       />
     )}
-    {!isLoading && (
+    {!isLoading && (activity ? activities.filter(a => a.id !== activity.id) : activities).length > 0 && (
       <ActionPanel.Submenu title="Start Tracking..." shortcut={{ key: "n", modifiers: ["cmd"] }}>
         {(activity ? activities.filter(a => a.id !== activity.id) : activities).map(activity => (
           <ActionPanel.Item
