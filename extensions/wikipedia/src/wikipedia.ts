@@ -22,7 +22,7 @@ interface WikipediaSearchResponse {
 
 const client = got.extend({
   prefixUrl: "https://en.wikipedia.org/",
-  responseType: "json"
+  responseType: "json",
 });
 
 export async function getRandomPageTitle() {
@@ -52,8 +52,8 @@ async function findPagesByTitle(search: string) {
         list: "prefixsearch",
         format: "json",
         pssearch: search,
-        pslimit: 9
-      }
+        pslimit: 9,
+      },
     })
     .json<WikipediaSearchResponse>();
   return response.query.prefixsearch.map((result) => result.title);
