@@ -1,6 +1,6 @@
 # Search Google Books from Raycast
 
-Plugin for Raycast to search [Google Books](https://books.google.co.uk/).
+Extension for Raycast to search [Google Books](https://books.google.co.uk/).
 
 
 ## Installing
