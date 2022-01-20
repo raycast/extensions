@@ -16,6 +16,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 *   Please check the terms of service of third party services that your extension uses. If your extension doesn't comply with the terms, include a warning in your extension's README. The warning should be similar to:
 
     > Warning: This extension is not compliant with the Terms of Service of \[service name]. Use at your own risk.
+* Make sure to **run a distribution build** with `npm run build` locally before submitting the extension for review. This will perform additional type checking and create an optimized build. Open the extension in Raycast to check whether everything works as expected with the distribution build. In addition, you can perform linting and code style checks by running `npm run lint`. (Those checks will later also run via automated GitHub checks.)
 
 ### Extensions and Commands Naming
 
