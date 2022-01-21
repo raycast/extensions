@@ -2,7 +2,7 @@ import { getSelectedText, showToast, ToastStyle, getPreferenceValues } from "@ra
 import fetch from "node-fetch";
 import tempy from "tempy";
 import fs from "fs";
-import { encodeURI } from 'js-base64';
+import { encodeURI } from "js-base64";
 import { runAppleScript } from "run-applescript";
 
 interface Preferences {
@@ -37,7 +37,7 @@ export default async () => {
   const response = await fetch(url);
 
   if (response.status !== 200) {
-    showToast(ToastStyle.Failure, "Screenshot generation failed", `Server responded with ${response.status}`)
+    showToast(ToastStyle.Failure, "Screenshot generation failed", `Server responded with ${response.status}`);
     return;
   }
 
