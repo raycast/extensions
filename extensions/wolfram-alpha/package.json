@@ -21,7 +21,6 @@
       "required": true,
       "title": "Wolfram Alpha App ID",
       "description": "See the extension's README for instructions about how to create an App ID",
-      "placeholder": "",
       "link": "https://developer.wolframalpha.com/portal/myapps/"
     },
     {
