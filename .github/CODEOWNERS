@@ -31,7 +31,8 @@
 /extensions/circle-ci                                @qeude @kudrykv
 /extensions/clash                                    @ciiiii
 /extensions/cleanshotx                               @Aayush9029
-/extensions/clockify                                 @ismamz
+/extensions/clickup                                  @Ali-Parandeh
+/extensions/clockify                                 @ismamz @sxn
 /extensions/coffee                                   @mooxl
 /extensions/coinbase-pro                             @farisaziz12
 /extensions/coingecko                                @Destiner
@@ -44,6 +45,7 @@
 /extensions/cricketcast                              @sampoder
 /extensions/css-gg                                   @astrit
 /extensions/dash                                     @RSO @sxn
+/extensions/datadog                                  @kudrykv
 /extensions/days-until-christmas                     @MEGApixel23
 /extensions/debank                                   @Yukaii
 /extensions/deepcast                                 @mooxl
@@ -54,6 +56,7 @@
 /extensions/domainr                                  @splash-cli
 /extensions/doppler-share-secrets                    @thomaspaulmann
 /extensions/elgato-key-light                         @thomaspaulmann
+/extensions/elm-search                               @NeoVier
 /extensions/emoji                                    @FezVrasta
 /extensions/ens-name-lookup                          @Yukaii
 /extensions/envato                                   @Slllava
@@ -132,6 +135,7 @@
 /extensions/random-email                             @rkjaer
 /extensions/ray-so                                   @gt-codes
 /extensions/rebrandly                                @grikomsn
+/extensions/remove-background                        @maantje
 /extensions/render                                   @Destiner
 /extensions/ricescore                                @tonka3000
 /extensions/rss-reader                               @fuksman
@@ -150,6 +154,8 @@
 /extensions/sketch                                   @aesign
 /extensions/slack-status                             @PitNikola
 /extensions/snake                                    @tonka3000
+/extensions/sourcegraph                              @bobheadxi
+/extensions/spatie-documentation                     @danyelkeddah
 /extensions/speedtest                                @tonka3000
 /extensions/spotify-controls                         @thomaspaulmann
 /extensions/spotify-player                           @mattisssa

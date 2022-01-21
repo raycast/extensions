@@ -34,6 +34,13 @@
       "subtitle": "Coffee",
       "description": "Get the status of the current caffeination",
       "mode": "no-view"
+    },
+    {
+      "name": "toggleCaffeinate",
+      "title": "Toggle Caffeinate",
+      "subtitle": "Coffee",
+      "description": "Toggle caffeination",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
