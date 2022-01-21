@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search GraphCDN services",
+      "title": "Search GraphCDN Services",
       "description": "List your GraphCDN services and inspect their configuration",
       "mode": "view"
     }
