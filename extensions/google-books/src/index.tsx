@@ -75,7 +75,7 @@ export default function Command() {
                         }
                       />
                       <OpenInBrowserAction icon={Icon.Globe} url={item.volumeInfo.infoLink} />
-                      <CopyToClipboardAction icon={Icon.Clipboard} content={item.volumeInfo.infoLink} />
+                      <CopyToClipboardAction icon={Icon.Clipboard} title="Copy URL to Clipboard" content={item.volumeInfo.infoLink} />
                     </ActionPanel>
                   }
                 />
