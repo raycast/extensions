@@ -1,4 +1,13 @@
-import { ActionPanel, CopyToClipboardAction, Detail, Icon, List, OpenInBrowserAction, PushAction } from "@raycast/api";
+import {
+  ActionPanel,
+  CopyToClipboardAction,
+  Detail,
+  Icon,
+  ImageMask,
+  List,
+  OpenInBrowserAction,
+  PushAction,
+} from "@raycast/api";
 import { useSearch } from "./hooks/useSearch";
 import { useState } from "react";
 import { VolumeItem } from "./types/google-books.dt";
@@ -16,7 +25,58 @@ function getIcon(index: number) {
   return iconToEmojiMap.get(index % 5);
 }
 
-export default function Command() {
+function getAccessoryTitle(item: VolumeItem) {
+  return (
+    (item?.volumeInfo?.averageRating ? "  ⭐  " + item.volumeInfo.averageRating + "/5" : "  ⭐  N/A") +
+    (item.volumeInfo?.pageCount ? "  📄  " + item.volumeInfo.pageCount : "  📄  N/A")
+  );
+}
+
+function convertInfoToMarkdown(item: VolumeItem) {
+  return (
+    "# " +
+    item.volumeInfo?.title +
+    "\n\n*" +
+    (item.volumeInfo?.authors ? item.volumeInfo?.authors?.join(", ") : "") +
+    "*\n\n ![thumbnail](" +
+    (item.volumeInfo?.imageLinks?.thumbnail ? item.volumeInfo?.imageLinks?.thumbnail.replace("http", "https") : "") +
+    ") \n\n**" +
+    (item.volumeInfo?.subtitle ? item.volumeInfo?.subtitle : "") +
+    "**\n\n" +
+    // Chunk long text into paragraphs
+    (item.volumeInfo?.description ? item.volumeInfo?.description?.replace(/(.*?\. ){3}/g, "$&\n\n") : "")
+  );
+}
+
+function getMaskedImage(item: VolumeItem | undefined, catIndex: number) {
+  return item?.volumeInfo?.imageLinks?.thumbnail
+    ? {
+        source: item.volumeInfo.imageLinks.thumbnail.replace("http", "https"),
+        mask: ImageMask.RoundedRectangle,
+      }
+    : getIcon(catIndex);
+}
+
+function BookDetail({ item }: { item: VolumeItem }) {
+  return (
+    <Detail
+      actions={
+        <ActionPanel>
+          <OpenInBrowserAction icon={Icon.Globe} url={item.volumeInfo.infoLink} />
+          <CopyToClipboardAction
+            title="Copy URL to Clipboard"
+            icon={Icon.Clipboard}
+            content={item.volumeInfo.infoLink}
+          />
+        </ActionPanel>
+      }
+      navigationTitle={item.volumeInfo.title}
+      markdown={convertInfoToMarkdown(item)}
+    />
+  );
+}
+
+export default function SearchGoogleBooks() {
   const [searchText, setSearchText] = useState<string>();
   const { items, loading } = useSearch(searchText);
 
@@ -47,35 +107,19 @@ export default function Command() {
               {categorisedItems[category]?.map((item) => (
                 <List.Item
                   key={item.id}
-                  icon={item?.volumeInfo.printType === "BOOK" ? getIcon(catIndex) : "📑"}
+                  icon={getMaskedImage(item, catIndex)}
                   title={item.volumeInfo.title}
                   subtitle={item?.volumeInfo?.authors ? item.volumeInfo.authors[0] : "Various Authors"}
-                  accessoryTitle={
-                    (item?.volumeInfo?.averageRating ? "  ⭐  " + item.volumeInfo.averageRating + "/5" : "  ⭐  N/A") +
-                    (item.volumeInfo?.pageCount ? "  📄  " + item.volumeInfo.pageCount : "  📄  N/A")
-                  }
+                  accessoryTitle={getAccessoryTitle(item)}
                   actions={
                     <ActionPanel>
-                      <PushAction
-                        title="Show Book Details"
-                        icon={Icon.List}
-                        target={
-                          <Detail
-                            actions={
-                              <ActionPanel>
-                                <OpenInBrowserAction icon={Icon.Globe} url={item.volumeInfo.infoLink} />
-                                <CopyToClipboardAction title="Copy URL to Clipboard" icon={Icon.Clipboard} content={item.volumeInfo.infoLink} />
-                              </ActionPanel>
-                            }
-                            navigationTitle={item.volumeInfo.title}
-                            markdown={`## ${item.volumeInfo.title} ${item?.volumeInfo?.subtitle ?? "" + "\n\n"} ${
-                              item?.volumeInfo?.description ?? ""
-                            }`}
-                          />
-                        }
-                      />
+                      <PushAction title="Show Book Details" target={<BookDetail item={item} />} />
                       <OpenInBrowserAction icon={Icon.Globe} url={item.volumeInfo.infoLink} />
-                      <CopyToClipboardAction icon={Icon.Clipboard} title="Copy URL to Clipboard" content={item.volumeInfo.infoLink} />
+                      <CopyToClipboardAction
+                        title="Copy URL to Clipboard"
+                        icon={Icon.Clipboard}
+                        content={item.volumeInfo.infoLink}
+                      />
                     </ActionPanel>
                   }
                 />
