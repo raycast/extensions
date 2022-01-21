@@ -57,6 +57,13 @@
       "subtitle": "Safari",
       "description": "Add URL to Safari Reading List",
       "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Safari",
+      "description": "Browse your history",
+      "mode": "view"
     }
   ],
   "dependencies": {
