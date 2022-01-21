@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "graphcdn",
   "title": "GraphCDN",
-  "description": "GraphCDN",
+  "description": "List your GraphCDN services and inspect their configuration",
   "icon": "command-icon.png",
   "author": "mathieudutour",
   "license": "MIT",
