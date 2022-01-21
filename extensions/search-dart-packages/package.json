@@ -11,7 +11,7 @@
       "name": "search-dart-packages",
       "title": "Search dart Packages",
       "subtitle": "Search for dart package information",
-      "description": "",
+      "description": "Search and get dart package information",
       "mode": "view"
     }
   ],
