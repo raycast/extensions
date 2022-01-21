@@ -1,4 +1,4 @@
-import { getSelectedText, showToast, ToastStyle, getPreferenceValues } from "@raycast/api";
+import { getSelectedText, showToast, ToastStyle, showHUD, getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 import tempy from "tempy";
 import fs from "fs";
@@ -19,10 +19,8 @@ export default async () => {
   try {
     selectedText = await getSelectedText();
   } catch (e) {
-    await showToast(
-      ToastStyle.Failure,
-      "Screenshot generation failed",
-      "Please make sure you've selected the text you want to take a screenshot of."
+    await showHUD(
+      "❌ Screenshot generation failed. Please make sure you've selected the text you want to take a screenshot of."
     );
     return;
   }
@@ -37,7 +35,7 @@ export default async () => {
   const response = await fetch(url);
 
   if (response.status !== 200) {
-    showToast(ToastStyle.Failure, "Screenshot generation failed", `Server responded with ${response.status}`);
+    await showHUD(`❌ Screenshot generation failed. Server responded with ${response.status}`);
     return;
   }
 
@@ -46,6 +44,6 @@ export default async () => {
 
     await runAppleScript(`tell app "Finder" to set the clipboard to ( POSIX file "${tempFile}" )`);
 
-    await showToast(ToastStyle.Success, "Screenshot copied to clipboard!");
+    await showHUD("✅ Screenshot copied to clipboard!");
   }
 };
