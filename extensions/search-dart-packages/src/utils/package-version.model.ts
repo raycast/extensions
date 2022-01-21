@@ -6,7 +6,14 @@ export class PackageVersion {
   public documentation?: string;
   public published: string;
 
-  constructor(version: string, description: string, repositiory: string, homepage: string, documentation: string, published: string) {
+  constructor(
+    version: string,
+    description: string,
+    repositiory: string,
+    homepage: string,
+    documentation: string,
+    published: string
+  ) {
     this.version = version;
     this.description = description;
     this.repositiory = repositiory;
