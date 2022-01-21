@@ -1,14 +1,8 @@
-import {
-  List,
-  showToast,
-  ToastStyle
-} from "@raycast/api";
-
+import { List, showToast, ToastStyle } from "@raycast/api";
+import fetch, { AbortError } from "node-fetch";
+import { useEffect, useRef, useState } from "react";
 import { Emote } from "./components/emote";
 import { SearchListItem } from "./components/search_list_item";
-import { useState, useEffect, useRef } from "react";
-import fetch, { AbortError } from "node-fetch";
-
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -64,9 +58,7 @@ function useSearch() {
       if (error instanceof AbortError) {
         return;
       }
-      showToast(
-        ToastStyle.Failure, "Error", "Emote not found"
-      )
+      showToast(ToastStyle.Failure, "Error", "Emote not found");
     }
   }
 
@@ -109,4 +101,3 @@ interface SearchState {
   results: Emote[];
   isLoading: boolean;
 }
-
