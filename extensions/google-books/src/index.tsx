@@ -64,7 +64,7 @@ export default function Command() {
                             actions={
                               <ActionPanel>
                                 <OpenInBrowserAction icon={Icon.Globe} url={item.volumeInfo.infoLink} />
-                                <CopyToClipboardAction icon={Icon.Clipboard} content={item.volumeInfo.infoLink} />
+                                <CopyToClipboardAction title="Copy URL to Clipboard" icon={Icon.Clipboard} content={item.volumeInfo.infoLink} />
                               </ActionPanel>
                             }
                             navigationTitle={item.volumeInfo.title}
