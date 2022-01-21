@@ -64,7 +64,7 @@ const Actions = ({ isLoading, tracking, activity, activities, note, start, updat
     {tracking && activity && (
       <PushAction
         icon={"✏️"}
-        title={"Edit note"}
+        title={"Edit Note"}
         target={
           <ComponentEditNote
             note={note}
@@ -85,7 +85,7 @@ const Actions = ({ isLoading, tracking, activity, activities, note, start, updat
       />
     )}
     {!isLoading && (activity ? activities.filter(a => a.id !== activity.id) : activities).length > 0 && (
-      <ActionPanel.Submenu icon={"▶️"} title="Start Tracking..." shortcut={{ key: "n", modifiers: ["cmd"] }}>
+      <ActionPanel.Submenu icon={"▶️"} title="Start Tracking" shortcut={{ key: "n", modifiers: ["cmd"] }}>
         {(activity ? activities.filter(a => a.id !== activity.id) : activities).map(activity => (
           <ActionPanel.Item
             key={activity.id}
