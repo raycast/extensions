@@ -68,7 +68,7 @@ export default function Command() {
                               </ActionPanel>
                             }
                             navigationTitle={item.volumeInfo.title}
-                            markdown={`${item?.volumeInfo?.subtitle ?? "" + "\n\n"} ${
+                            markdown={`## ${item.volumeInfo.title} ${item?.volumeInfo?.subtitle ?? "" + "\n\n"} ${
                               item?.volumeInfo?.description ?? ""
                             }`}
                           />
