@@ -77,6 +77,7 @@ export function PipelineListItem(props: { pipeline: any; projectFullPath: string
           <PushAction
             title="Show Jobs"
             target={<JobList projectFullPath={props.projectFullPath} pipelineIID={pipeline.iid} />}
+            icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
           />
           <OpenInBrowserAction url={pipeline.webUrl} />
         </ActionPanel>
