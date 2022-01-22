@@ -221,7 +221,7 @@ function SearchResultItem({
 function MultiResultPeek({ searchResult }: { searchResult: { url: string; match: ContentMatch | SymbolMatch } }) {
   const { match } = searchResult;
   const navigationTitle = `Peek ${match.type} results`;
-  const matchTitle = `${match.repository} ${match.repoStars ? `(${match.repoStars} ★)` : ""}`;
+  const matchTitle = `${match.repository} ${match.repoStars ? `- ${match.repoStars} ★` : ""}`;
 
   // Match types with expanded peek support
   switch (match.type) {
