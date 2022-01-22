@@ -218,17 +218,12 @@ async function performSearch(searchText: string, signal: AbortSignal) {
         buffer.album = value[0];
       }
     }
-
-    const [key, value] = [
-      line.match(/(?<=<key>).*?(?=<\/key>)/) || [],
-      line.match(/(?<=<string>).*?(?=<\/string>)/) || "",
-    ];
   });
   read.on("close", () => {
     match = Array.from(new Set(match));
     sherlock = true;
   });
-  await waitUntil(() => sherlock);
+  await waitUntil(() => sherlock || signal.aborted);
 }
 
 const waitUntil = (condition: () => boolean) => {

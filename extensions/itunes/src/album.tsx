@@ -154,7 +154,7 @@ function useSearch() {
 }
 
 async function performSearch(searchText: string, signal: AbortSignal) {
-  if (searchText.length < 2) return [];
+  if (searchText.length < 2) return;
 
   let sherlock = false;
   let dictBlock = false;
@@ -206,7 +206,7 @@ async function performSearch(searchText: string, signal: AbortSignal) {
     match = Array.from(new Set(match));
     sherlock = true;
   });
-  await waitUntil(() => sherlock);
+  await waitUntil(() => sherlock || signal.aborted);
 }
 
 const waitUntil = (condition: () => boolean) => {
