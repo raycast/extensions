@@ -218,15 +218,10 @@ function SearchResultItem({
   );
 }
 
-function getPeekFields(match: SearchMatch) {
-  const navigationTitle = `Peek ${match.type} result`;
-  const matchTitle = `${match.repository} ${match.repoStars ? `(${match.repoStars} ★)` : ""}`;
-  return { navigationTitle, matchTitle };
-}
-
 function MultiResultPeek({ searchResult }: { searchResult: { url: string; match: ContentMatch | SymbolMatch } }) {
   const { match } = searchResult;
-  const { navigationTitle, matchTitle } = getPeekFields(match);
+  const navigationTitle = `Peek ${match.type} results`;
+  const matchTitle = `${match.repository} ${match.repoStars ? `(${match.repoStars} ★)` : ""}`;
 
   // Match types with expanded peek support
   switch (match.type) {
@@ -267,7 +262,8 @@ function MultiResultPeek({ searchResult }: { searchResult: { url: string; match:
 
 function PeekSearchResult({ searchResult }: { searchResult: SearchResult }) {
   const { match } = searchResult;
-  const { navigationTitle, matchTitle } = getPeekFields(match);
+  const navigationTitle = `Peek ${match.type} result`;
+  const matchTitle = `**${match.repository}** ${match.repoStars ? `- ${match.repoStars} ★` : ""}`;
 
   // Match types that use markdown view support
   let markdownContent = "";
@@ -279,29 +275,29 @@ function PeekSearchResult({ searchResult }: { searchResult: SearchResult }) {
     case "repo":
       markdownContent = `> ${match.private ? "Private" : "Public"} ${match.type} match
   
-  ---
-  
-  ${match.description || ""}`;
+---
+
+${match.description || ""}`;
       break;
 
     case "path":
       markdownContent = `> ${match.type} match
-  
-  ---
-  
-  \`${match.path}\`
-  `;
+
+---
+
+\`${match.path}\`
+`;
       break;
 
     case "commit":
       markdownContent = `> ${match.type} match in ${match.detail}
   
-  ---
-  
-  ${match.label}
-  
-  ${match.content}
-  `;
+---
+
+${match.label}
+
+${match.content}
+`;
       break;
 
     default:
@@ -310,13 +306,13 @@ function PeekSearchResult({ searchResult }: { searchResult: SearchResult }) {
 \`\`\`
 ${JSON.stringify(match, null, "  ")}
 \`\`\`
-  `;
+`;
   }
 
   return (
     <Detail
       navigationTitle={navigationTitle}
-      markdown={`## ${matchTitle}\n\n${markdownContent}`}
+      markdown={`${matchTitle}\n\n${markdownContent}`}
       actions={<ActionPanel>{resultActions(searchResult.url)}</ActionPanel>}
     ></Detail>
   );

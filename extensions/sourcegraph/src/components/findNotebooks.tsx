@@ -136,7 +136,7 @@ function NotebookPeek({ notebook, src }: { notebook: SearchNotebook; src: Source
   } catch (e) {
     console.warn(`notebook ${notebook.id}: invalid date: ${e}`);
   }
-  const preview = `**${notebook.title}** ${notebook.stars?.totalCount ? `| ${notebook.stars.totalCount} stars` : ""}
+  const preview = `**${notebook.title}** ${notebook.stars?.totalCount ? `- ${notebook.stars.totalCount} ★` : ""}
 
 > ${blurb}
 
