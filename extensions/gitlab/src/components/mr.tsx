@@ -9,12 +9,13 @@ import {
   Detail,
   PushAction,
   ImageMask,
+  ImageLike,
 } from "@raycast/api";
 import { Group, MergeRequest, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab, gitlabgql } from "../common";
 import { useState, useEffect } from "react";
-import { optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
+import { now, optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
 import { gql } from "@apollo/client";
 import { MRItemActions } from "./mr_actions";
 
@@ -145,7 +146,7 @@ export function MRList({
   group = undefined,
 }: MRListProps) {
   const [searchText, setSearchText] = useState<string>();
-  const { mrs, error, isLoading } = useSearch(searchText, scope, state, project, group);
+  const { mrs, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
 
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search Merge Requests", error);
@@ -167,19 +168,26 @@ export function MRList({
     >
       <List.Section title={title} subtitle={mrs?.length.toString() || "0"}>
         {mrs?.map((mr) => (
-          <MRListItem key={mr.id} mr={mr} />
+          <MRListItem key={mr.id} mr={mr} refreshData={refresh} />
         ))}
       </List.Section>
     </List>
   );
 }
 
-export function MRListItem(props: { mr: MergeRequest }) {
+export function MRListItem(props: { mr: MergeRequest; refreshData: () => void }) {
   const mr = props.mr;
-  const icon: Image =
-    mr.state == "merged"
-      ? { source: GitLabIcons.merged, tintColor: Color.Purple, mask: ImageMask.Circle }
-      : { source: GitLabIcons.mropen, tintColor: Color.Green, mask: ImageMask.Circle };
+
+  const getIcon = (): ImageLike => {
+    if (mr.state === "merged") {
+      return { source: GitLabIcons.merged, tintColor: Color.Purple, mask: ImageMask.Circle };
+    } else if (mr.state === "closed") {
+      return { source: GitLabIcons.mropen, tintColor: Color.Red, mask: ImageMask.Circle };
+    } else {
+      return { source: GitLabIcons.mropen, tintColor: Color.Green, mask: ImageMask.Circle };
+    }
+  };
+  const icon = getIcon();
   return (
     <List.Item
       id={mr.id.toString()}
@@ -196,7 +204,7 @@ export function MRListItem(props: { mr: MergeRequest }) {
             icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
           />
           <OpenInBrowserAction url={mr.web_url} />
-          <MRItemActions mr={mr} />
+          <MRItemActions mr={mr} onDataChange={props.refreshData} />
         </ActionPanel>
       }
     />
@@ -275,10 +283,16 @@ export function useSearch(
   mrs?: MergeRequest[];
   error?: string;
   isLoading: boolean;
+  refresh: () => void;
 } {
   const [mrs, setMRs] = useState<MergeRequest[]>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [timestamp, setTimestamp] = useState<Date>(now());
+
+  const refresh = () => {
+    setTimestamp(now());
+  };
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -331,7 +345,7 @@ export function useSearch(
     return () => {
       didUnmount = true;
     };
-  }, [query, project]);
+  }, [query, project, timestamp]);
 
-  return { mrs, error, isLoading };
+  return { mrs, error, isLoading, refresh };
 }
