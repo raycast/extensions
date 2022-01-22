@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Emote",
-      "subtitle": "BTTV Emotes Search",
+      "title": "Search Emote",
+      "subtitle": "BTTV Emotes",
       "description": "Browse BTTV's Emote Library",
       "mode": "view"
     }
