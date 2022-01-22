@@ -60,7 +60,7 @@ const RunScript: FC<runScriptProps> = (props) => {
     popToRoot().then()
     closeMainWindow({ clearRootSearch: true }).then()
   })
-  return <Detail markdown={`#Calling ${preferences.using}...`} />
+  return <Detail markdown={`# Calling ${preferences.using}...`} />
 }
 
 export default function Command() {
@@ -141,7 +141,7 @@ function useSearch() {
 }
 
 async function performSearch(searchText: string, signal: AbortSignal) {
-  if (searchText.length <= 3) return []
+  if (searchText.length < 2) return []
 
   let sherlock = false
   let dictBlock = false
