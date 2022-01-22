@@ -2,6 +2,7 @@ import {
   ActionPanel,
   Color,
   CopyToClipboardAction,
+  Icon,
   ImageLike,
   ImageMask,
   List,
@@ -57,9 +58,10 @@ export function GroupListItem(props: { group: any }) {
       actions={
         <ActionPanel>
           <PushAction
-            title="Open Group"
+            title="Show Group"
             shortcut={{ modifiers: ["cmd"], key: "n" }}
             target={<GroupList parentGroup={props.group} />}
+            icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
           />
           <OpenInBrowserAction url={group.web_url} />
           <CopyToClipboardAction title="Copy Group ID" content={group.id} />
