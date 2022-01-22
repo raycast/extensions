@@ -3,7 +3,6 @@ import {
   List,
   OpenInBrowserAction,
   ToastStyle,
-  Color,
   Icon,
   useNavigation,
   randomId,
@@ -20,6 +19,7 @@ import { Sourcegraph, instanceName } from "../sourcegraph";
 import { findNotebooks, SearchNotebook } from "../sourcegraph/gql";
 import checkAuthEffect from "../hooks/checkAuthEffect";
 import { copyShortcut, secondaryActionShortcut } from "./shortcuts";
+import { ColorDefault, ColorEmphasis, ColorPrivate } from "./colors";
 
 export default function FindNotebooksCommand(src: Sourcegraph) {
   const { state, find } = useNotebooks(src);
@@ -94,12 +94,13 @@ function NotebookResultItem({
         notebook.stars?.totalCount
           ? {
               source: Icon.Star,
+              tintColor: notebook.viewerHasStarred ? ColorEmphasis : undefined,
             }
           : undefined
       }
       icon={{
-        source: notebook.viewerHasStarred ? Icon.Star : Icon.Dot,
-        tintColor: notebook.public ? Color.Blue : Color.Yellow,
+        source: Icon.Document,
+        tintColor: notebook.public ? ColorDefault : ColorPrivate,
       }}
       actions={
         <ActionPanel>

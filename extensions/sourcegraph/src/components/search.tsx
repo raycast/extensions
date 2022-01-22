@@ -8,7 +8,6 @@ import {
   randomId,
   PushAction,
   Detail,
-  Color,
   Icon,
   ImageLike,
   copyTextToClipboard,
@@ -26,6 +25,7 @@ import { copyShortcut, secondaryActionShortcut, tertiaryActionShortcut } from ".
 import { Sourcegraph, instanceName } from "../sourcegraph";
 import { performSearch, SearchResult, Suggestion } from "../sourcegraph/stream-search";
 import { ContentMatch, SearchMatch, SymbolMatch } from "../sourcegraph/stream-search/stream";
+import { ColorDefault, ColorPrivate } from "./colors";
 
 export default function SearchCommand(src: Sourcegraph) {
   const { state, search } = useSearch(src);
@@ -133,7 +133,7 @@ function SearchResultItem({
   let url = searchResult.url;
   let multiResult = false;
 
-  const icon: ImageLike = { source: Icon.Dot, tintColor: Color.Blue };
+  const icon: ImageLike = { source: Icon.Dot, tintColor: ColorDefault };
   switch (match.type) {
     case "repo":
       if (match.fork) {
@@ -144,7 +144,7 @@ function SearchResultItem({
       }
       // TODO color results of all matches based on repo privacy
       if (match.private) {
-        icon.tintColor = Color.Yellow;
+        icon.tintColor = ColorPrivate;
       }
       title = match.repository;
       subtitle = match.description || "";
