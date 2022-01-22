@@ -7,7 +7,7 @@ export default function SystemMonitor() {
   const [freeMemPercentage, setFreeMemPercentage] = useState(0);
   const [freeMem, setFreeMem] = useState(0);
 
-  cpuUsage((v) => {
+  cpuUsage((v: number) => {
     setcpu(Math.round(v * 100));
     setFreeMemPercentage(Math.round(freememPercentage() * 100));
     setFreeMem(Math.round(freemem() / 1024));
