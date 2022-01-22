@@ -132,13 +132,17 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }) 
       accessoryTitle={extraSubtitle + toDateString(issue.updated_at)}
       actions={
         <ActionPanel>
-          <PushAction
-            title="Show Details"
-            target={<IssueDetail issue={issue} />}
-            icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
-          />
-          <OpenInBrowserAction url={issue.web_url} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
-          <IssueItemActions issue={issue} onDataChange={props.refreshData} />
+          <ActionPanel.Section>
+            <PushAction
+              title="Show Details"
+              target={<IssueDetail issue={issue} />}
+              icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
+            />
+            <OpenInBrowserAction url={issue.web_url} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <IssueItemActions issue={issue} onDataChange={props.refreshData} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

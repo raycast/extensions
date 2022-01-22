@@ -198,13 +198,17 @@ export function MRListItem(props: { mr: MergeRequest; refreshData: () => void })
       accessoryTitle={toDateString(mr.updated_at)}
       actions={
         <ActionPanel>
-          <PushAction
-            title="Show Details"
-            target={<MRDetail mr={mr} />}
-            icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
-          />
-          <OpenInBrowserAction url={mr.web_url} />
-          <MRItemActions mr={mr} onDataChange={props.refreshData} />
+          <ActionPanel.Section>
+            <PushAction
+              title="Show Details"
+              target={<MRDetail mr={mr} />}
+              icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
+            />
+            <OpenInBrowserAction url={mr.web_url} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <MRItemActions mr={mr} onDataChange={props.refreshData} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

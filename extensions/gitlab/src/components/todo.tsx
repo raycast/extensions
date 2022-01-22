@@ -65,10 +65,14 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }) {
       icon={{ source: GitLabIcons.todo, tintColor: Color.Green }}
       actions={
         <ActionPanel>
-          <ShowTodoDetailsAction todo={todo} />
-          <OpenInBrowserAction url={todo.target_url} />
-          <CloseTodoAction todo={todo} finished={props.refreshData} />
-          <CloseAllTodoAction finished={props.refreshData} />
+          <ActionPanel.Section>
+            <ShowTodoDetailsAction todo={todo} />
+            <OpenInBrowserAction url={todo.target_url} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <CloseTodoAction todo={todo} finished={props.refreshData} />
+            <CloseAllTodoAction finished={props.refreshData} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
