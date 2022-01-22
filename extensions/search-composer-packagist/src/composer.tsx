@@ -56,7 +56,7 @@ export default function SearchDocumentation() {
 
     return await algoliaIndex
       .search(query, {
-        hitsPerPage: 11,
+        hitsPerPage: 30,
         facets: ["tags", "type", "type"],
       })
       .then((res) => {
@@ -65,7 +65,7 @@ export default function SearchDocumentation() {
       })
       .catch((err) => {
         setIsLoading(false);
-        showToast(ToastStyle.Failure, "Error searching Composer Packagist.", err.message);
+        showToast(ToastStyle.Failure, "Error Searching Composer Packagist.", err.message);
         return [];
       });
   };

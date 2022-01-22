@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-composer-packagist",
-  "title": "Composer Packagist",
-  "description": "Search Packagist Gor PHP Packages",
+  "title": "Composer Composer Packagist",
+  "description": "Search Composer Packagist For PHP Packages",
   "icon": "composer-icon.png",
   "author": "danyelkeddah",
   "license": "MIT",
@@ -10,9 +10,9 @@
   "commands": [
     {
       "name": "composer",
-      "title": "Search Packagist",
-      "subtitle": "Composer",
-      "description": "Searches Packagist for PHP Packages",
+      "title": "Search Composer Packagist",
+      "subtitle": "Composer Pacjagist",
+      "description": "Searches Composer Packagist for PHP Packages",
       "mode": "view"
     }
   ],
