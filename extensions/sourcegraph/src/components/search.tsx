@@ -15,55 +15,24 @@ import {
   ActionPanelItem,
   Toast,
   useNavigation,
+  ListSection,
+  ListItem,
+  KeyboardShortcut,
 } from "@raycast/api";
 import { useState, useRef, Fragment, useEffect } from "react";
+import checkAuthEffect from "../hooks/checkAuthEffect";
+import { copyShortcut, secondaryActionShortcut, tertiaryActionShortcut } from "./shortcuts";
 
 import { Sourcegraph, instanceName } from "../sourcegraph";
 import { performSearch, SearchResult, Suggestion } from "../sourcegraph/stream-search";
-import { AuthError, checkAuth } from "../sourcegraph/gql";
+import { ContentMatch, SearchMatch, SymbolMatch } from "../sourcegraph/stream-search/stream";
 
 export default function SearchCommand(src: Sourcegraph) {
-  const { push } = useNavigation();
   const { state, search } = useSearch(src);
   const srcName = instanceName(src);
+  const nav = useNavigation();
 
-  useEffect(() => {
-    async function checkSrc() {
-      try {
-        if (src.token) {
-          await checkAuth(src);
-        }
-      } catch (err) {
-        const toast =
-          err instanceof AuthError
-            ? new Toast({
-                title: `Failed to authenticate against ${srcName}`,
-                message: err.message,
-                style: ToastStyle.Failure,
-              })
-            : new Toast({
-                title: `Error authenticating against ${srcName}`,
-                message: JSON.stringify(err),
-                style: ToastStyle.Failure,
-              });
-        (toast.primaryAction = {
-          title: "View details",
-          onAction: () => {
-            push(
-              <Detail
-                navigationTitle="Error"
-                markdown={`**${toast.title}:** ${toast.message}.
-
-This may be an issue with your configuration - try updating the Sourcegraph extension settings!`}
-              />
-            );
-          },
-        }),
-          await toast.show();
-      }
-    }
-    checkSrc();
-  });
+  useEffect(checkAuthEffect(src, nav));
 
   return (
     <List
@@ -83,20 +52,20 @@ This may be an issue with your configuration - try updating the Sourcegraph exte
 
           <Fragment>
             <List.Item
-              title="View search query syntax reference"
-              icon={{ source: Icon.Globe }}
-              actions={
-                <ActionPanel>
-                  <OpenInBrowserAction url="https://docs.sourcegraph.com/code_search/reference/queries" />
-                </ActionPanel>
-              }
-            />
-            <List.Item
               title={`${state.searchText.length > 0 ? "Continue" : "Compose"} query in browser`}
               icon={{ source: Icon.MagnifyingGlass }}
               actions={
                 <ActionPanel>
                   <OpenInBrowserAction url={getQueryURL(src, state.searchText)} />
+                </ActionPanel>
+              }
+            />
+            <List.Item
+              title="View search query syntax reference"
+              icon={{ source: Icon.Globe }}
+              actions={
+                <ActionPanel>
+                  <OpenInBrowserAction url="https://docs.sourcegraph.com/code_search/reference/queries" />
                 </ActionPanel>
               }
             />
@@ -116,20 +85,24 @@ This may be an issue with your configuration - try updating the Sourcegraph exte
   );
 }
 
-function resultActions(searchResult: SearchResult, extraActions?: JSX.Element[]) {
-  const actions: JSX.Element[] = [<OpenInBrowserAction key={randomId()} title="Open Result" url={searchResult.url} />];
-  if (extraActions) {
-    actions.push(...extraActions);
+interface CustomResultActions {
+  openAction?: JSX.Element;
+  extraActions?: JSX.Element[];
+}
+
+function resultActions(url: string, customActions?: CustomResultActions) {
+  const actions: JSX.Element[] = [];
+  if (customActions?.openAction) {
+    actions.push(customActions.openAction);
+  }
+  actions.push(<OpenInBrowserAction key={randomId()} title="Open Result in Browser" url={url} />);
+  if (customActions?.extraActions) {
+    actions.push(...customActions.extraActions);
   }
   actions.push(
     // Can't seem to override the shortcut on this thing if it's the second action, so
     // add it as the third action instead.
-    <CopyToClipboardAction
-      key={randomId()}
-      title="Copy Link to Result"
-      content={searchResult.url}
-      shortcut={{ modifiers: ["ctrl", "shift"], key: "c" }}
-    />
+    <CopyToClipboardAction key={randomId()} title="Copy Link to Result" content={url} shortcut={copyShortcut} />
   );
   return (
     <ActionPanel.Section key={randomId()} title="Result Actions">
@@ -157,6 +130,8 @@ function SearchResultItem({
   let title = "";
   let subtitle = "";
   let context = match.repository;
+  let url = searchResult.url;
+  let multiResult = false;
 
   const icon: ImageLike = { source: Icon.Dot, tintColor: Color.Blue };
   switch (match.type) {
@@ -189,12 +164,38 @@ function SearchResultItem({
       icon.source = Icon.Text;
       title = match.lineMatches.map((l) => l.line.trim()).join(" ... ");
       subtitle = match.path;
+      if (match.lineMatches.length === 1) {
+        url = `${searchResult.url}?L${match.lineMatches[0].lineNumber}`;
+      } else {
+        multiResult = true;
+      }
       break;
     case "symbol":
       icon.source = Icon.Link;
       title = match.symbols.map((s) => s.name).join(", ");
       subtitle = match.path;
+      if (match.symbols.length === 1) {
+        url = `${searchResult.url}${match.symbols[0].url}`;
+      } else {
+        multiResult = true;
+      }
       break;
+  }
+
+  const peekAction = (shortcut?: KeyboardShortcut) => (
+    <PushAction
+      key={randomId()}
+      title="Peek Result Details"
+      target={<PeekSearchResult searchResult={searchResult} />}
+      shortcut={shortcut}
+      icon={{ source: Icon.MagnifyingGlass }}
+    />
+  );
+  const customActions: CustomResultActions = {};
+  if (multiResult) {
+    customActions.openAction = peekAction();
+  } else {
+    customActions.extraActions = [peekAction(secondaryActionShortcut)];
   }
 
   return (
@@ -203,23 +204,12 @@ function SearchResultItem({
       subtitle={subtitle}
       accessoryTitle={context}
       icon={icon}
+      accessoryIcon={multiResult ? { source: Icon.ArrowRight } : undefined}
       actions={
         <ActionPanel>
-          {resultActions(searchResult, [
-            <PushAction
-              key={randomId()}
-              title="Peek Result Details"
-              target={<PeekSearchResult searchResult={searchResult} src={src} />}
-              icon={{ source: Icon.MagnifyingGlass }}
-              shortcut={{ modifiers: ["cmd"], key: "enter" }}
-            />,
-          ])}
+          {resultActions(url, customActions)}
           <ActionPanel.Section key={randomId()} title="Query Actions">
-            <OpenInBrowserAction
-              title="Open Query"
-              url={queryURL}
-              shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
-            />
+            <OpenInBrowserAction title="Open Query" url={queryURL} shortcut={tertiaryActionShortcut} />
             <CopyToClipboardAction title="Copy Link to Query" content={queryURL} />
           </ActionPanel.Section>
         </ActionPanel>
@@ -228,54 +218,74 @@ function SearchResultItem({
   );
 }
 
-function PeekSearchResult({ searchResult, src }: { searchResult: SearchResult; src: Sourcegraph }) {
-  const { match } = searchResult;
-  const title = `**${match.repository}** ${match.repoStars ? `| ${match.repoStars} stars` : ""}`;
+function getPeekFields(match: SearchMatch) {
+  const navigationTitle = `Peek ${match.type} result`;
+  const matchTitle = `${match.repository} ${match.repoStars ? `(${match.repoStars} stars)` : ""}`;
+  return { navigationTitle, matchTitle };
+}
 
-  let body = "";
+function MultiResultPeek({ searchResult }: { searchResult: { url: string; match: ContentMatch | SymbolMatch } }) {
+  const { match } = searchResult;
+  const { navigationTitle, matchTitle } = getPeekFields(match);
+
+  // Match types with expanded peek support
   switch (match.type) {
+    case "content":
+      return (
+        <List navigationTitle={navigationTitle} searchBarPlaceholder="Filter matches">
+          <ListSection title={match.path} subtitle={matchTitle}>
+            {match.lineMatches.map((l) => (
+              <ListItem
+                key={randomId()}
+                title={l.line}
+                accessoryTitle={`L${l.lineNumber}`}
+                actions={<ActionPanel>{resultActions(`${searchResult.url}?L${l.lineNumber}`)}</ActionPanel>}
+              />
+            ))}
+          </ListSection>
+        </List>
+      );
+
+    case "symbol":
+      return (
+        <List navigationTitle={navigationTitle} searchBarPlaceholder="Filter symbols">
+          <ListSection title={match.path} subtitle={matchTitle}>
+            {match.symbols.map((s) => (
+              <ListItem
+                key={randomId()}
+                title={s.name}
+                subtitle={s.containerName}
+                accessoryTitle={s.kind.toLowerCase()}
+                actions={<ActionPanel>{resultActions(`${searchResult.url}${s.url}`)}</ActionPanel>}
+              />
+            ))}
+          </ListSection>
+        </List>
+      );
+  }
+}
+
+function PeekSearchResult({ searchResult }: { searchResult: SearchResult }) {
+  const { match } = searchResult;
+  const { navigationTitle, matchTitle } = getPeekFields(match);
+
+  // Match types that use markdown view support
+  let markdownContent = "";
+  switch (match.type) {
+    case "content":
+    case "symbol":
+      return <MultiResultPeek searchResult={{ url: searchResult.url, match }} />;
+
     case "repo":
-      body = `${title}
-  
-  > ${match.private ? "Private" : "Public"} ${match.type} match
+      markdownContent = `> ${match.private ? "Private" : "Public"} ${match.type} match
   
   ---
   
   ${match.description || ""}`;
       break;
 
-    case "content":
-      body = `${title}
-  
-  > ${match.type} match in \`${match.path}\`
-  
-  ---
-  
-  ${match.lineMatches
-    .map(
-      (l) => `[Line ${l.lineNumber}](${searchResult.url}?${l.lineNumber})\n\`\`\`
-  ${l.line}
-  \`\`\``
-    )
-    .join("\n\n")}`;
-      break;
-
-    case "symbol":
-      body = `${title}
-  
-  > ${match.type} match in \`${match.path}\`
-  
-  ---
-  
-  ${match.symbols
-    .map((s) => `- [\`${s.containerName ? `${s.containerName} > ` : ""}${s.name}\`](${src.instance}${s.url})`)
-    .join("\n")}`;
-      break;
-
     case "path":
-      body = `${title}
-        
-  > ${match.type} match
+      markdownContent = `> ${match.type} match
   
   ---
   
@@ -284,9 +294,7 @@ function PeekSearchResult({ searchResult, src }: { searchResult: SearchResult; s
       break;
 
     case "commit":
-      body = `${title}
-  
-  > ${match.type} match in ${match.detail}
+      markdownContent = `> ${match.type} match in ${match.detail}
   
   ---
   
@@ -297,19 +305,19 @@ function PeekSearchResult({ searchResult, src }: { searchResult: SearchResult; s
       break;
 
     default:
-      body = `Unsupported result type - full data:
-  
-  \`\`\`
-  ${JSON.stringify(match, null, "  ")}
-  \`\`\`
+      markdownContent = `Unsupported result type - full data:
+
+\`\`\`
+${JSON.stringify(match, null, "  ")}
+\`\`\`
   `;
   }
 
   return (
     <Detail
-      navigationTitle={`Peek ${match.type} result`}
-      markdown={body}
-      actions={<ActionPanel>{resultActions(searchResult)}</ActionPanel>}
+      navigationTitle={navigationTitle}
+      markdown={`## ${matchTitle}\n\n${markdownContent}`}
+      actions={<ActionPanel>{resultActions(searchResult.url)}</ActionPanel>}
     ></Detail>
   );
 }
@@ -391,7 +399,7 @@ function useSearch(src: Sourcegraph) {
         summary: null,
         isLoading: true,
       }));
-      await performSearch(searchText, src, cancelRef.current.signal, {
+      await performSearch(cancelRef.current.signal, src, searchText, {
         onResults: (results) => {
           setState((oldState) => ({
             ...oldState,
@@ -430,7 +438,17 @@ function useSearch(src: Sourcegraph) {
         isLoading: false,
       }));
     } catch (error) {
-      showToast(ToastStyle.Failure, "Search failed", String(error));
+      new Toast({
+        style: ToastStyle.Failure,
+        title: "Search failed",
+        message: String(error),
+        primaryAction: {
+          title: "View details",
+          onAction: () => {
+            push(<Detail markdown={`**Search failed:** ${String(error)}`} navigationTitle="Unexpected error" />);
+          },
+        },
+      }).show();
 
       setState((oldState) => ({
         ...oldState,
