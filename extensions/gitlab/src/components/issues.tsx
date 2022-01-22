@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
 import { Group, Issue, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
+import { now, optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
 import { IssueItemActions } from "./issue_actions";
 
 export enum IssueScope {
@@ -118,7 +118,7 @@ export function useDetail(issueID: number): {
   return { description, error, isLoading };
 }
 
-export function IssueListItem(props: { issue: Issue }) {
+export function IssueListItem(props: { issue: Issue; refreshData: () => void }) {
   const issue = props.issue;
   const tintColor = issue.state === "opened" ? Color.Green : Color.Red;
   const extraSubtitle = issue.milestone ? `${issue.milestone.title}  |  ` : "";
@@ -138,7 +138,7 @@ export function IssueListItem(props: { issue: Issue }) {
             icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
           />
           <OpenInBrowserAction url={issue.web_url} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
-          <IssueItemActions issue={issue} />
+          <IssueItemActions issue={issue} onDataChange={props.refreshData} />
         </ActionPanel>
       }
     />
@@ -169,7 +169,7 @@ export function IssueList({
   group = undefined,
 }: IssueListProps) {
   const [searchText, setSearchText] = useState<string>();
-  const { issues, error, isLoading } = useSearch(searchText, scope, state, project, group);
+  const { issues, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
 
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search issue", error);
@@ -191,7 +191,7 @@ export function IssueList({
     >
       <List.Section title={title} subtitle={issues?.length.toString() || ""}>
         {issues?.map((issue) => (
-          <IssueListItem key={issue.id} issue={issue} />
+          <IssueListItem key={issue.id} issue={issue} refreshData={refresh} />
         ))}
       </List.Section>
     </List>
@@ -255,10 +255,16 @@ export function useSearch(
   issues?: Issue[];
   error?: string;
   isLoading: boolean;
+  refresh: () => void;
 } {
   const [issues, setIssues] = useState<Issue[]>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [timestamp, setTimestamp] = useState<Date>(now());
+
+  const refresh = () => {
+    setTimestamp(now());
+  };
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -311,7 +317,7 @@ export function useSearch(
     return () => {
       didUnmount = true;
     };
-  }, [query]);
+  }, [query, timestamp]);
 
-  return { issues, error, isLoading };
+  return { issues, error, isLoading, refresh };
 }
