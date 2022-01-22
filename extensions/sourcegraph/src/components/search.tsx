@@ -148,7 +148,7 @@ function SearchResultItem({
       }
       title = match.repository;
       subtitle = match.description || "";
-      context = match.repoStars ? `${match.repoStars} stars` : "";
+      context = match.repoStars ? `${match.repoStars} ★` : "";
       break;
     case "commit":
       icon.source = Icon.MemoryChip;
@@ -220,7 +220,7 @@ function SearchResultItem({
 
 function getPeekFields(match: SearchMatch) {
   const navigationTitle = `Peek ${match.type} result`;
-  const matchTitle = `${match.repository} ${match.repoStars ? `(${match.repoStars} stars)` : ""}`;
+  const matchTitle = `${match.repository} ${match.repoStars ? `(${match.repoStars} ★)` : ""}`;
   return { navigationTitle, matchTitle };
 }
 
