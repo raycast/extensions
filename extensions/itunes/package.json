@@ -28,8 +28,14 @@
       "title": "Music Application",
       "type": "dropdown",
       "data": [
-        {"title": "iTunes.app", "value": "iTunes"},
-        {"title": "Music.app", "value": "Music"}
+        {
+          "title": "iTunes.app",
+          "value": "iTunes"
+        },
+        {
+          "title": "Music.app",
+          "value": "Music"
+        }
       ],
       "description": "Select the music application you're using",
       "required": true
