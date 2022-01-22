@@ -20,7 +20,7 @@ interface State {
   query?: string;
 }
 
-export default function Main() {
+export default function Main(): JSX.Element {
   const [state, setState] = useState<State>({ isLoading: true });
 
   useEffect(() => {
@@ -47,7 +47,6 @@ export default function Main() {
         setState((oldState) => ({ ...oldState, results: results, isLoading: false }));
       })
       .catch((err) => {
-        console.log("brewSearch error:", err);
         showFailureToast("Brew search failed", err);
         setState((oldState) => ({ ...oldState, results: undefined, isLoading: false }));
       });

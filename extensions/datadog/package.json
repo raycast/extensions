@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-datadog",
+  "title": "Datadog",
+  "description": "Access Datadog resources",
+  "icon": "icon@light.png",
+  "author": "bgnfu7re",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "command-list-dashboards",
+      "title": "List Dashboards",
+      "subtitle": "Datadog",
+      "description": "List Dashboards",
+      "mode": "view"
+    },
+    {
+      "name": "command-list-apm",
+      "title": "List APM",
+      "subtitle": "Datadog",
+      "description": "List available APM",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "envs",
+          "title": "Environments",
+          "description": "Comma-separated environments for listing",
+          "type": "textfield",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "type": "password",
+      "name": "api-key",
+      "title": "API Key",
+      "description": "Datadog API Key",
+      "required": true
+    },
+    {
+      "type": "password",
+      "name": "app-key",
+      "title": "App Key",
+      "description": "Datadog Application Key",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@datadog/datadog-api-client": "^1.0.0-beta.6",
+    "@raycast/api": "^1.26.3",
+    "node-fetch": "^3.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

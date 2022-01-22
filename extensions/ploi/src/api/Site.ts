@@ -9,7 +9,7 @@ export const Site = {
   async getAll(server: IServer) {
     try {
       const response = await axios.get(
-        `${PLOI_API_URL}/servers/${server.id}/sites`
+        `${PLOI_API_URL}/servers/${server.id}/sites?per_page=50`
       );
       const siteData = (await response.data) as Sites;
       let sites = siteData?.data ?? [];
