@@ -113,7 +113,7 @@ export default function SearchGoogleBooks() {
                   accessoryTitle={getAccessoryTitle(item)}
                   actions={
                     <ActionPanel>
-                      <PushAction title="Show Book Details" target={<BookDetail item={item} />} />
+                      <PushAction icon={Icon.List} title="Show Book Details" target={<BookDetail item={item} />} />
                       <OpenInBrowserAction icon={Icon.Globe} url={item.volumeInfo.infoLink} />
                       <CopyToClipboardAction
                         title="Copy URL to Clipboard"
