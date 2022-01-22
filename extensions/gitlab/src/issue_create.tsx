@@ -75,7 +75,6 @@ function IssueForm() {
 
   return (
     <Form
-      onSubmit={submit}
       isLoading={isLoading}
       actions={
         <ActionPanel>
