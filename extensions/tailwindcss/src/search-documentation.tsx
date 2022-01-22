@@ -1,9 +1,4 @@
-import {
-  ActionPanel,
-  List,
-  OpenInBrowserAction,
-  CopyToClipboardAction,
-} from "@raycast/api";
+import { ActionPanel, List, OpenInBrowserAction, CopyToClipboardAction } from "@raycast/api";
 
 export default function SearchDocumentation() {
   return (
@@ -74,7 +69,10 @@ const documentation = {
       url: "https://tailwindcss.com/docs/adding-new-utilities",
       title: "Adding New Utilities",
     },
-    { url: "https://tailwindcss.com/docs/dark-mode", title: "Dark Mode" },
+    {
+      url: "https://tailwindcss.com/docs/dark-mode",
+      title: "Dark Mode",
+    },
     {
       url: "https://tailwindcss.com/docs/extracting-components",
       title: "Extracting Components",
@@ -673,7 +671,10 @@ const documentation = {
     },
   ],
   "Transitions And Animation": [
-    { url: "https://tailwindcss.com/docs/animation", title: "Animation" },
+    {
+      url: "https://tailwindcss.com/docs/animation",
+      title: "Animation",
+    },
     {
       url: "https://tailwindcss.com/docs/transition-delay",
       title: "Transition Delay",
