@@ -1,16 +1,26 @@
-import { Detail } from "@raycast/api";
+import { ActionPanel, Detail, OpenInBrowserAction } from "@raycast/api";
 import { ReactElement } from "react";
 import { sourcegraphSelfHosted, Sourcegraph, isCloud } from "../sourcegraph";
 
 export default function SelfHostedCommand({ command }: { command: (src: Sourcegraph) => ReactElement }) {
   const tryCloudMessage = "Alternatively, you can try the Sourcegraph Cloud version of this command first.";
 
+  const helpActions = (
+    <ActionPanel>
+      <OpenInBrowserAction
+        title="Open Setup Guide"
+        url="https://github.com/raycast/extensions/tree/main/extensions/sourcegraph#setup"
+      />
+    </ActionPanel>
+  );
+
   const src = sourcegraphSelfHosted();
   if (!src) {
     return (
       <Detail
-        navigationTitle="Invalid self-hosted Sourcegraph URL"
+        navigationTitle="No Sourcegraph Self-Hosted instance configured"
         markdown={`**⚠️ No Sourcegraph Sourcegraph Self-Hosted instance configured** - set one up in the extension preferences!\n\n${tryCloudMessage}`}
+        actions={helpActions}
       />
     );
   }
@@ -21,6 +31,7 @@ export default function SelfHostedCommand({ command }: { command: (src: Sourcegr
       <Detail
         navigationTitle="Invalid Sourcegraph Self-Hosted URL"
         markdown={`**⚠️ Sourcegraph Self-Hosted URL '${src.instance}' is invalid:** ${e}\n\nUpdate it in the extension preferences!\n\n${tryCloudMessage}`}
+        actions={helpActions}
       />
     );
   }
@@ -28,7 +39,8 @@ export default function SelfHostedCommand({ command }: { command: (src: Sourcegr
     return (
       <Detail
         navigationTitle="Invalid Sourcegraph Self-Hosted access token"
-        markdown={`**⚠️ A token is required for Sourcegraph Self-Hosted instance '${src.instance}'** - add an access token for Sourcegraph Self-Hosted in your preferences!\n\n${tryCloudMessage}`}
+        markdown={`**⚠️ A token is required for Sourcegraph Self-Hosted instance '${src.instance}'** - add an access token for Sourcegraph Self-Hosted in the extension preferences!\n\n${tryCloudMessage}`}
+        actions={helpActions}
       />
     );
   }

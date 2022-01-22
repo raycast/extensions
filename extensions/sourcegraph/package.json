@@ -96,6 +96,7 @@
         "sourcegraph",
         "search",
         "notebook",
+        "snb",
         "cloud"
       ],
       "preferences": []
@@ -111,6 +112,7 @@
         "sourcegraph",
         "search",
         "notebook",
+        "snb",
         "selfhosted"
       ],
       "preferences": []
