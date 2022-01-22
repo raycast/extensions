@@ -50,7 +50,6 @@ export function MRDetail(props: { mr: MergeRequest }) {
 
   let md = "";
   if (props.mr) {
-    console.log(props.mr.labels);
     md = props.mr.labels.map((i) => `\`${i.name || i}\``).join(" ") + "  \n";
   }
   md += "## Description\n" + optimizeMarkdownText(desc);
