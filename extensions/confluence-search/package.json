@@ -20,8 +20,8 @@
       "name": "instance",
       "type": "textfield",
       "required": true,
-      "title": "Domain URL",
-      "description": "URL of your Atlassian instance",
+      "title": "Domain",
+      "description": "Domain of your Atlassian instance",
       "placeholder": "my.atlassian.net"
     },
     {

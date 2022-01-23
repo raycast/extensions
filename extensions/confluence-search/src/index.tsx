@@ -37,15 +37,16 @@ export default function Command() {
   ]);
 
   const [status, setStatus] = useState<Status>(Status.Failure);
+  const [loadingState, setLoadingState] = useState(true);
 
   useEffect(() => {
     searchConfluence().then((response) => {
+      setLoadingState(false);
       if (!response.ok) {
         const failureMessage = response.message ? response.message : response.statusText;
         setStatus(Status.Failure);
         showToast(ToastStyle.Failure, "API request failed", failureMessage);
       } else {
-        showToast(ToastStyle.Success, "API request succeedeed", response.statusText);
         parseResponse(response).then((response: SearchResult[]) => {
           setStatus(Status.Success);
           setResults(response);
@@ -54,7 +55,7 @@ export default function Command() {
     });
   }, []);
 
-  const loadingState = results[0].id.length > 0 ? false : true;
+  //const loadingState = results[0].id.length > 0 ? false : true;
   if (status) {
     return (
       <List isLoading={loadingState} searchBarPlaceholder="Search by name..." throttle>
@@ -92,7 +93,7 @@ async function searchConfluence() {
 async function parseResponse(response: Response) {
   const json = (await response.json()) as APIResponse;
   const jsonResults = (json?.results as ResultsItem[]) ?? [];
-  return await jsonResults.map((jsonResult: ResultsItem) => {
+  return jsonResults.map((jsonResult: ResultsItem) => {
     return {
       id: jsonResult.id as string,
       name: jsonResult.title as string,
