@@ -103,8 +103,12 @@ export function JobListItem(props: { job: Job; projectFullPath: string; onRefres
       accessoryTitle={status}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={gitlabgql.urlJoin(`${props.projectFullPath}/-/jobs/${getIdFromGqlId(job.id)}`)} />
-          <RefreshJobsAction onRefreshJobs={props.onRefreshJobs} />
+          <ActionPanel.Section>
+            <OpenInBrowserAction url={gitlabgql.urlJoin(`${props.projectFullPath}/-/jobs/${getIdFromGqlId(job.id)}`)} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <RefreshJobsAction onRefreshJobs={props.onRefreshJobs} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

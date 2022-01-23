@@ -76,13 +76,17 @@ export function PipelineListItem(props: { pipeline: any; projectFullPath: string
       accessoryTitle={getStatusText(pipeline.status.toLowerCase())}
       actions={
         <ActionPanel>
-          <PushAction
-            title="Show Jobs"
-            target={<JobList projectFullPath={props.projectFullPath} pipelineIID={pipeline.iid} />}
-            icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
-          />
-          <OpenInBrowserAction url={pipeline.webUrl} />
-          <RefreshPipelinesAction onRefreshPipelines={props.onRefreshPipelines} />
+          <ActionPanel.Section>
+            <PushAction
+              title="Show Jobs"
+              target={<JobList projectFullPath={props.projectFullPath} pipelineIID={pipeline.iid} />}
+              icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
+            />
+            <OpenInBrowserAction url={pipeline.webUrl} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <RefreshPipelinesAction onRefreshPipelines={props.onRefreshPipelines} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
