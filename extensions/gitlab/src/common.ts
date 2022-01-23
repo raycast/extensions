@@ -48,3 +48,22 @@ export function createGitLabGQLClient() {
 
 export const gitlab = createGitLabClient();
 export const gitlabgql = createGitLabGQLClient();
+
+const defaultRefreshInterval = 10 * 1000;
+
+export function getCIRefreshInterval(): number | null {
+  const userValue = (preferences.cirefreshinterval?.value as string) || "10";
+  if (!userValue || userValue.length <= 0) {
+    return defaultRefreshInterval;
+  }
+  const sec = parseFloat(userValue);
+  if (Number.isNaN(sec)) {
+    console.log(`invalid value ${userValue}, fallback to null`);
+    return null;
+  }
+  if (sec < 1) {
+    return null;
+  } else {
+    return sec * 1000; // ms
+  }
+}
