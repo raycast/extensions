@@ -7,10 +7,6 @@
   "author": "franzwilhelm",
   "license": "MIT",
   "owner": "franzwilhelm",
-  "contributors": [
-    "franzwilhelm",
-    "ThatNerdSquared"
-  ],
   "commands": [
     {
       "name": "index",
