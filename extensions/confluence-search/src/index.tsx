@@ -7,7 +7,7 @@ import {
   getPreferenceValues,
   Icon,
   showToast,
-  ToastStyle
+  ToastStyle,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch, { Response } from "node-fetch";
@@ -17,11 +17,11 @@ export const confluenceUrl = `https://${prefs.instance}`;
 
 const headers = {
   Accept: "application/json",
-  Authorization: "Basic " + Buffer.from(`${prefs.user}:${prefs.token}`).toString("base64")
+  Authorization: "Basic " + Buffer.from(`${prefs.user}:${prefs.token}`).toString("base64"),
 };
 
 const init = {
-  headers
+  headers,
 };
 
 export default function Command() {
@@ -32,14 +32,14 @@ export default function Command() {
       url: "",
       type: "",
       author: "",
-      icon: ""
-    }
+      icon: "",
+    },
   ]);
 
   const [status, setStatus] = useState<Status>(Status.Failure);
 
   useEffect(() => {
-    searchConfluence().then(response => {
+    searchConfluence().then((response) => {
       if (!response.ok) {
         const failureMessage = response.message ? response.message : response.statusText;
         setStatus(Status.Failure);
@@ -59,7 +59,7 @@ export default function Command() {
     return (
       <List isLoading={loadingState} searchBarPlaceholder="Search by name..." throttle>
         <List.Section title="Results">
-          {results.map(searchResult => (
+          {results.map((searchResult) => (
             <SearchListItem key={searchResult.id} searchResult={searchResult} />
           ))}
         </List.Section>
@@ -77,10 +77,10 @@ export default function Command() {
 async function searchConfluence() {
   const apiUrl = `${confluenceUrl}/wiki/rest/api/content?expand=version`;
   const response = await fetch(apiUrl, init)
-    .then(response => {
+    .then((response) => {
       return response;
     })
-    .catch(error => {
+    .catch((error) => {
       {
         return error;
       }
@@ -99,7 +99,7 @@ async function parseResponse(response: Response) {
       type: jsonResult.type as string,
       url: jsonResult._links.webui as string,
       author: jsonResult.version.by.displayName as string,
-      icon: jsonResult.version.by.profilePicture.path as string
+      icon: jsonResult.version.by.profilePicture.path as string,
     };
   });
 }
@@ -133,7 +133,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
 
 enum Status {
   Failure,
-  Success
+  Success,
 }
 
 interface SearchResult {
