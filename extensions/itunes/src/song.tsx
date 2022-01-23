@@ -19,7 +19,6 @@ import { execSync } from "child_process";
 import os from "os";
 
 interface Preferences {
-  using: "iTunes" | "Music";
   path: string;
 }
 
@@ -49,6 +48,7 @@ interface searchEntry {
 
 let match: searchEntry[] = [];
 const preferences: Preferences = getPreferenceValues();
+const using = "iTunes";
 const XMLPath = preferences.path.replace(/^\s/, "").replace(/^~/, os.homedir());
 if (!fs.existsSync(XMLPath)) {
   showToast(
@@ -61,28 +61,43 @@ if (!fs.existsSync(XMLPath)) {
 
 const RunScript: FC<runScriptProps> = (props) => {
   useEffect(() => {
-    if (props.name) {
-      execSync(
-        `osascript -e "tell application \\"${preferences.using}\\" to play (the first track of library playlist 1 whose album is \\"${props.album}\\" and name is \\"${props.name}\\")"`
-      );
-    } else {
-      execSync(`osascript \
-       -e "tell application \\"${preferences.using}\\"" \
+    const escapingNames = {
+      album: props.album.replace(/"/g, `\\"`),
+      artist: props.artist.replace(/"/g, `\\"`),
+    };
+    try {
+      if (props.name) {
+        execSync(
+          `osascript -e "tell application \\"${using}\\" to play (the first track of library playlist 1 whose album is \\"${props.album}\\" and name is \\"${props.name}\\")"`
+        );
+      } else {
+        execSync(`osascript \
+       -e "tell application \\"${using}\\"" \
        -e "if (exists playlist \\"ExtensionAlbumPlaying\\") then" -e \
        "delete playlist \\"ExtensionAlbumPlaying\\"" \
        -e "end if" \
        -e "set name of (make new playlist) to \\"ExtensionAlbumPlaying\\"" \
-       -e "set theseTracks to every track of library playlist 1 whose album is \\"${props.album}\\" and artist is \\"${props.artist}\\"" \
+       -e "set theseTracks to every track of library playlist 1 whose album is \\"${escapingNames.album}\\" and artist is \\"${escapingNames.artist}\\"" \
        -e "repeat with thisTrack in theseTracks" \
        -e "duplicate thisTrack to playlist \\"ExtensionAlbumPlaying\\"" \
        -e "end repeat" \
        -e "play playlist \\"ExtensionAlbumPlaying\\"" \
        -e "end tell"`);
+      }
+    } catch (error) {
+      console.error("execution error", error);
+      showToast(
+        ToastStyle.Failure,
+        "Failed to play the track",
+        "Maybe the song is not in your library or has a weird title"
+      ).then();
+      return;
     }
+
     popToRoot().then();
     closeMainWindow({ clearRootSearch: true }).then();
   });
-  return <Detail markdown={`# Calling ${preferences.using}...`} />;
+  return <Detail markdown={`# Calling ${using}...`} />;
 };
 
 export default function Command() {
@@ -124,7 +139,10 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
 }
 
 function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
+  const [state, setState] = useState<SearchState>({
+    results: [],
+    isLoading: true,
+  });
   const cancelRef = useRef<AbortController | null>(null);
 
   useEffect(() => {

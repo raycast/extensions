@@ -24,23 +24,6 @@
   ],
   "preferences": [
     {
-      "name": "using",
-      "title": "Music Application",
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "iTunes.app",
-          "value": "iTunes"
-        },
-        {
-          "title": "Music.app",
-          "value": "Music"
-        }
-      ],
-      "description": "Select the music application you're using",
-      "required": true
-    },
-    {
       "name": "path",
       "title": "Library XML Path",
       "type": "textfield",
