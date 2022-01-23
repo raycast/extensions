@@ -75,7 +75,6 @@ export default function SearchDocumentation() {
     (async () => setSearchResults(await search()))();
   }, []);
 
-
   return (
     <List
       throttle={true}
@@ -99,6 +98,7 @@ export default function SearchDocumentation() {
                   content={getComposerRequireDevCommand(hit)}
                   title={"Copy Composer Require Dev Command"}
                 />
+                <CopyToClipboardAction content={hit.name} title={"Copy Package Name"} />
                 <OpenInBrowserAction url={hit.repository} title="Open Repository URL in Browser" />
                 <OpenInBrowserAction url={getPackagistPageURL(hit)} title="Open Packagist Page in Browser" />
               </ActionPanel>
