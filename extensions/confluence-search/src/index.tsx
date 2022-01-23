@@ -6,20 +6,22 @@ import {
   ImageMask,
   getPreferenceValues,
   Icon,
+  showToast,
+  ToastStyle
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import fetch from "node-fetch";
+import fetch, { Response } from "node-fetch";
 
 const prefs: { instance: string; user: string; token: string } = getPreferenceValues();
 export const confluenceUrl = `https://${prefs.instance}`;
 
 const headers = {
   Accept: "application/json",
-  Authorization: "Basic " + Buffer.from(`${prefs.user}:${prefs.token}`).toString("base64"),
+  Authorization: "Basic " + Buffer.from(`${prefs.user}:${prefs.token}`).toString("base64")
 };
 
 const init = {
-  headers,
+  headers
 };
 
 export default function Command() {
@@ -30,36 +32,65 @@ export default function Command() {
       url: "",
       type: "",
       author: "",
-      icon: "",
-    },
+      icon: ""
+    }
   ]);
 
+  const [status, setStatus] = useState<Status>(Status.Failure);
+
   useEffect(() => {
-    searchConfluence().then((results: SearchResult[]) => setResults(results));
+    searchConfluence().then(response => {
+      if (!response.ok) {
+        const failureMessage = response.message ? response.message : response.statusText;
+        setStatus(Status.Failure);
+        showToast(ToastStyle.Failure, "API request failed", failureMessage);
+      } else {
+        showToast(ToastStyle.Success, "API request succeedeed", response.statusText);
+        parseResponse(response).then((response: SearchResult[]) => {
+          setStatus(Status.Success);
+          setResults(response);
+        });
+      }
+    });
   }, []);
 
   const loadingState = results[0].id.length > 0 ? false : true;
-
-  return (
-    <List isLoading={loadingState} searchBarPlaceholder="Search by name..." throttle>
-      <List.Section title="Results">
-        {results.map((searchResult) => (
-          <SearchListItem key={searchResult.id} searchResult={searchResult} />
-        ))}
-      </List.Section>
-    </List>
-  );
+  if (status) {
+    return (
+      <List isLoading={loadingState} searchBarPlaceholder="Search by name..." throttle>
+        <List.Section title="Results">
+          {results.map(searchResult => (
+            <SearchListItem key={searchResult.id} searchResult={searchResult} />
+          ))}
+        </List.Section>
+      </List>
+    );
+  } else {
+    return (
+      <List>
+        <List.Section></List.Section>
+      </List>
+    );
+  }
 }
 
 async function searchConfluence() {
   const apiUrl = `${confluenceUrl}/wiki/rest/api/content?expand=version`;
-  const response = await fetch(apiUrl, init);
+  const response = await fetch(apiUrl, init)
+    .then(response => {
+      return response;
+    })
+    .catch(error => {
+      {
+        return error;
+      }
+    });
 
-  if (!response.ok) {
-    return Promise.reject(response.statusText);
-  }
+  return response;
+}
 
-  const json = (await response.json()) as Response;
+async function parseResponse(response: Response) {
+  const json = (await response.json()) as APIResponse;
   const jsonResults = (json?.results as ResultsItem[]) ?? [];
   return await jsonResults.map((jsonResult: ResultsItem) => {
     return {
@@ -68,7 +99,7 @@ async function searchConfluence() {
       type: jsonResult.type as string,
       url: jsonResult._links.webui as string,
       author: jsonResult.version.by.displayName as string,
-      icon: jsonResult.version.by.profilePicture.path as string,
+      icon: jsonResult.version.by.profilePicture.path as string
     };
   });
 }
@@ -100,6 +131,11 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   );
 }
 
+enum Status {
+  Failure,
+  Success
+}
+
 interface SearchResult {
   id: string;
   name: string;
@@ -109,7 +145,7 @@ interface SearchResult {
   icon: string;
 }
 
-interface Response {
+interface APIResponse {
   results: ResultsItem[];
   start: number;
   limit: number;
