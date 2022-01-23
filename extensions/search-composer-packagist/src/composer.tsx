@@ -49,7 +49,7 @@ export default function SearchDocumentation() {
     return algoliaClient.initIndex(INDEX);
   }, [algoliaClient, INDEX]);
 
-  const [searchResults, setSearchResults] = useState<any[] | undefined>();
+  const [searchResults, setSearchResults] = useState<PackagistHit[] | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
   const search = async (query = "") => {
@@ -58,7 +58,7 @@ export default function SearchDocumentation() {
     }
     setIsLoading(true);
     try {
-      const res = await algoliaIndex.search(query, {
+      const res = await algoliaIndex.search<PackagistHit>(query, {
         hitsPerPage: 30,
         facets: ["tags", "type", "type"],
       });
