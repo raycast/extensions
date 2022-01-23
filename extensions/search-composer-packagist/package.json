@@ -11,7 +11,7 @@
     {
       "name": "composer",
       "title": "Search Composer Packagist",
-      "subtitle": "Composer Pacjagist",
+      "subtitle": "Composer Packagist",
       "description": "Searches Composer Packagist for PHP Packages",
       "mode": "view"
     }

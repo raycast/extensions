@@ -32,6 +32,10 @@ function getComposerRequireCommand(hit: PackagistHit) {
   return `composer require ${hit.name}`;
 }
 
+function getComposerRequireDevCommand(hit: PackagistHit) {
+  return `composer require --dev ${hit.name}`;
+}
+
 function getPackagistPageURL(hit: PackagistHit) {
   return `https://packagist.org/packages/${hit.name}`;
 }
@@ -50,29 +54,27 @@ export default function SearchDocumentation() {
 
   const search = async (query = "") => {
     if (query === "") {
-      return;
+      return [];
     }
     setIsLoading(true);
-
-    return await algoliaIndex
-      .search(query, {
+    try {
+      const res = await algoliaIndex.search(query, {
         hitsPerPage: 30,
         facets: ["tags", "type", "type"],
-      })
-      .then((res) => {
-        setIsLoading(false);
-        return res.hits;
-      })
-      .catch((err) => {
-        setIsLoading(false);
-        showToast(ToastStyle.Failure, "Error Searching Composer Packagist.", err.message);
-        return [];
       });
+      setIsLoading(false);
+      return res.hits;
+    } catch (err: any) {
+      setIsLoading(false);
+      await showToast(ToastStyle.Failure, "Error Searching Composer Packagist.", err.message);
+      return [];
+    }
   };
 
   useEffect(() => {
     (async () => setSearchResults(await search()))();
   }, []);
+
 
   return (
     <List
@@ -92,6 +94,10 @@ export default function SearchDocumentation() {
                 <CopyToClipboardAction
                   content={getComposerRequireCommand(hit)}
                   title={"Copy Composer Require Command"}
+                />
+                <CopyToClipboardAction
+                  content={getComposerRequireDevCommand(hit)}
+                  title={"Copy Composer Require Dev Command"}
                 />
                 <OpenInBrowserAction url={hit.repository} title="Open Repository URL in Browser" />
                 <OpenInBrowserAction url={getPackagistPageURL(hit)} title="Open Packagist Page in Browser" />
