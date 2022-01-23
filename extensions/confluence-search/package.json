@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Confluence Wiki",
+      "title": "Search Wiki",
+      "subtitle": "Confluence",
       "description": "Showing search results in Confleunce Wiki",
       "mode": "view"
     }
