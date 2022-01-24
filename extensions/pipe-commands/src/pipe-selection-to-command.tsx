@@ -10,6 +10,7 @@ import {
   OpenWithAction,
   pasteText,
   popToRoot,
+  PushAction,
   showHUD,
   showToast,
   Toast,
@@ -19,6 +20,7 @@ import { execa } from "execa";
 import { chmodSync } from "fs";
 import { resolve } from "path";
 import { useEffect, useState } from "react";
+import PipeCommandForm from "./create-pipe-command";
 import { ArgumentType, ScriptCommand } from "./types";
 import { isValidUrl, loadScriptCommands } from "./utils";
 
@@ -41,11 +43,11 @@ export default function TextActions(): JSX.Element {
 
   useEffect(() => {
     async function loadScripts() {
-      const [defaultCommands, userCommands] = await Promise.all([
-        loadScriptCommands(defaultScripts),
+      const [userCommands, defaultCommands] = await Promise.all([
         loadScriptCommands(userScripts),
+        loadScriptCommands(defaultScripts),
       ]);
-      return [...defaultCommands, ...userCommands];
+      return [...userCommands, ...defaultCommands];
     }
 
     async function getSelection(): Promise<Selection> {
@@ -68,7 +70,7 @@ export default function TextActions(): JSX.Element {
   }, []);
 
   return (
-    <List isLoading={typeof state == undefined} searchBarPlaceholder="Send selection to...">
+    <List isLoading={typeof state == "undefined"} searchBarPlaceholder="Send selection to...">
       {state
         ? Object.entries(packages).map(([packageName, commands]) => (
             <List.Section key={packageName} title={packageName}>
@@ -131,6 +133,7 @@ function TextAction(props: { command: ScriptCommand; selection: string }) {
         <ActionPanel>
           <ActionPanel.Item title="Run" icon={Icon.Terminal} onAction={runCommand} />
           <OpenWithAction path={scriptPath} />
+          <PushAction title="New Pipe Command" target={<PipeCommandForm/>} />
         </ActionPanel>
       }
     />

@@ -8,14 +8,14 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "pass-selection-to-text-command",
-      "title": "Send selection to Pipe command",
+      "name": "pipe-selection-to-command",
+      "title": "Pipe Selection to Command",
       "subtitle": "Pipe command",
       "description": "Take action on your current selection.",
       "mode": "view"
     },
     {
-      "name": "create-text-command",
+      "name": "create-pipe-command",
       "title": "Create Pipe command",
       "subtitle": "Pipe command",
       "description": "Generate a new pipe command template",

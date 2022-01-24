@@ -44,7 +44,7 @@ interface FormValues {
   type: ArgumentType;
 }
 
-export default function TextCommandForm(): JSX.Element {
+export default function PipeCommandForm(): JSX.Element {
   function onSubmit(values: FormValues) {
     console.debug(values);
     if (!values.title) {
