@@ -3,7 +3,7 @@
   "name": "chakra-ui-docs",
   "title": "Chakra UI Docs",
   "description": "Provide quick links to the Chakra UI component documentation.",
-  "icon": "command-icon.png",
+  "icon": "chakra.png",
   "author": "pgvr",
   "license": "MIT",
   "commands": [
