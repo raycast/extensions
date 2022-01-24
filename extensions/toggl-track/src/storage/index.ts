@@ -21,17 +21,17 @@ export const storage: TogglStorage = {
   projects: persistedStorage({
     key: "projects",
     fetch: allWorkspacesFetch(api.getWorkspaceProjects),
-    expirySeconds: 1800,
+    expirySeconds: 60,
   }),
   workspaces: persistedStorage({
     key: "workspaces",
     fetch: api.getWorkspaces,
-    expirySeconds: 3600 * 12,
+    expirySeconds: 3600,
   }),
   clients: persistedStorage({
     key: "clients",
     fetch: allWorkspacesFetch(api.getWorkspaceClients),
-    expirySeconds: 60 * 5,
+    expirySeconds: 60,
   }),
   runningTimeEntry: persistedStorage({
     key: "runningTimeEntry",
