@@ -2,14 +2,24 @@ import { ActionPanel, List } from "@raycast/api";
 import { Tab } from "../types";
 import { getTitle, getFaviconUrl, getTabUrl, getUrlDomain } from "../utils";
 import CloseLocalTabAction from "./CloseLocalTabAction";
-import CopyTabUrlAction from "./CopyTabUrlAction";
+import CopyMarkdownLinkAction from "./CopyMarkdownLinkAction";
+import CopyTitleAction from "./CopyTitleAction";
+import CopyUrlAction from "./CopyUrlAction";
 import OpenTabAction from "./OpenTabAction";
 
 const Actions = (props: { tab: Tab; refresh: () => void }) => (
   <ActionPanel>
-    <OpenTabAction tab={props.tab} />
-    <CopyTabUrlAction tab={props.tab} />
-    <CloseLocalTabAction tab={props.tab} refresh={props.refresh} />
+    <ActionPanel.Section>
+      <OpenTabAction tab={props.tab} />
+    </ActionPanel.Section>
+    <ActionPanel.Section>
+      <CopyUrlAction url={props.tab.url} />
+      <CopyTitleAction title={props.tab.title} />
+      <CopyMarkdownLinkAction title={props.tab.title} url={props.tab.url} />
+    </ActionPanel.Section>
+    <ActionPanel.Section>
+      <CloseLocalTabAction tab={props.tab} refresh={props.refresh} />
+    </ActionPanel.Section>
   </ActionPanel>
 );
 

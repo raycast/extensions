@@ -1,6 +1,9 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
 import { HistoryItem } from "../types";
 import { getFaviconUrl, getUrlDomain } from "../utils";
+import CopyMarkdownLinkAction from "./CopyMarkdownLinkAction";
+import CopyTitleAction from "./CopyTitleAction";
+import CopyUrlAction from "./CopyUrlAction";
 import SearchInBrowserAction from "./SearchInBrowserAction";
 
 const Actions = (props: { entry: HistoryItem; searchText?: string }) => {
@@ -11,23 +14,9 @@ const Actions = (props: { entry: HistoryItem; searchText?: string }) => {
         <SearchInBrowserAction searchText={props.searchText} />
       </ActionPanel.Section>
       <ActionPanel.Section>
-        {props.entry.title && (
-          <CopyToClipboardAction
-            title="Copy Title"
-            content={props.entry.title}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
-          />
-        )}
-        <CopyToClipboardAction
-          title="Copy URL"
-          content={props.entry.url}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-        />
-        <CopyToClipboardAction
-          title="Copy Markdown"
-          content={`[${props.entry.title}](${props.entry.url})`}
-          shortcut={{ modifiers: ["cmd", "ctrl"], key: "." }}
-        />
+        <CopyUrlAction url={props.entry.url} />
+        <CopyTitleAction title={props.entry.title} />
+        <CopyMarkdownLinkAction title={props.entry.title} url={props.entry.url} />
       </ActionPanel.Section>
     </ActionPanel>
   );
