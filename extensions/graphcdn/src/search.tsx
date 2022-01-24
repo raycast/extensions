@@ -44,7 +44,6 @@ export default function Command() {
         await Promise.all(
           orgs.map(async (org) => {
             const services = await getServices(org.slug);
-            console.log(services);
             return services.map((service) => ({ ...service, org: org.slug }));
           })
         )
@@ -62,12 +61,7 @@ export default function Command() {
     setLoading(true);
     try {
       const config = await getConfig(serviceName);
-      push(
-        <Detail
-          markdown={`\`\`\`\n${JSON.stringify(config, null, "  ")}\n\`\`\``}
-          actions={<ActionPanel></ActionPanel>}
-        />
-      );
+      push(<Detail markdown={`\`\`\`\n${JSON.stringify(config, null, "  ")}\n\`\`\``} />);
     } catch (err) {
       console.log(err);
     } finally {

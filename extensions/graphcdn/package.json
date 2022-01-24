@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search GraphCDN Services",
+      "title": "Search Services",
+      "subtitle": "GraphCDN",
       "description": "List your GraphCDN services and inspect their configuration",
       "mode": "view"
     }
@@ -17,7 +18,7 @@
   "preferences": [
     {
       "name": "token",
-      "type": "textfield",
+      "type": "password",
       "required": true,
       "title": "Personal access token",
       "description": "See the extension's README for instructions about how to create an access token",
