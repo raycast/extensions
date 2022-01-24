@@ -1,9 +1,10 @@
-import { getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
+import { getLocalStorageItem, getPreferenceValues, setLocalStorageItem } from "@raycast/api";
 import { XcodeProject } from "../models/project/xcode-project.model";
 import { XcodeProjectType } from "../models/project/xcode-project-type.model";
 import { execAsync } from "../shared/exec-async";
 import { runAppleScript } from "../shared/run-apple-script";
 import { joinPathComponents } from "../shared/join-path-components";
+import untildify from "untildify";
 
 /**
  * XcodeProjectService
@@ -39,6 +40,32 @@ export class XcodeProjectService {
   }
 
   /**
+   * Retrieve the excluded Xcode Project paths
+   * which are configured via the Raycast Preferences
+   */
+  private excludedXcodeProjectPaths(): string[] {
+    // Retrieve the preference values
+    const preferences = getPreferenceValues();
+    // Retrieve the excluded Xcode Project paths string from preference values
+    const excludedXcodeProjectPathsString = preferences.excludedXcodeProjectPaths as string;
+    // Check if excluded Xcode Project path string is falsy
+    if (!excludedXcodeProjectPathsString) {
+      // Return an empty array
+      return [];
+    }
+    // Return excluded Xcode Project paths
+    return (
+      excludedXcodeProjectPathsString
+        // Split by comma
+        .split(",")
+        // Trim each path
+        .map((path) => path.trim())
+        // Untildify each path
+        .map((path) => untildify(path))
+    );
+  }
+
+  /**
    * Retrieve XcodeProjects
    */
   async xcodeProjects(): Promise<XcodeProject[]> {
@@ -51,6 +78,8 @@ export class XcodeProjectService {
     ];
     // Execute command
     const output = await execAsync(`mdfind '${spotlightSearchParameters.join(" || ")}'`);
+    // Retrieve the excluded Xcode Project Paths
+    const excludedXcodeProjectPaths = this.excludedXcodeProjectPaths();
     // Initialize XcodeProjects
     const xcodeProjects = output.stdout
       // Split standard output by new line
@@ -62,6 +91,10 @@ export class XcodeProjectService {
           !xcodeProjectPath.includes("Pods") &&
           !xcodeProjectPath.includes("Library/Autosave Information")
         );
+      })
+      // Filter out Xcode Projects that should be excluded based on the preferences
+      .filter((xcodeProjectPath) => {
+        return !excludedXcodeProjectPaths.find((excludedPath) => xcodeProjectPath.startsWith(excludedPath));
       })
       // Decode each Xcode Project Path
       .map((xcodeProjectPath) => XcodeProjectService.decodeXcodeProject(xcodeProjectPath))
