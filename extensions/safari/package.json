@@ -9,9 +9,9 @@
   "commands": [
     {
       "name": "cloud-tabs",
-      "title": "Show Tabs",
+      "title": "Search Tabs",
       "subtitle": "Safari",
-      "description": "Search your open tabs (Local and iCloud)",
+      "description": "Browse your open tabs (Local and iCloud)",
       "mode": "view",
       "preferences": [
         {
@@ -36,9 +36,9 @@
     },
     {
       "name": "reading-list",
-      "title": "Show Reading List",
+      "title": "Search Reading List",
       "subtitle": "Safari",
-      "description": "Search your reading list",
+      "description": "Browse your reading list",
       "mode": "view",
       "preferences": [
         {
