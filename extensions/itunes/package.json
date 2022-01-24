@@ -9,15 +9,15 @@
   "commands": [
     {
       "name": "song",
-      "title": "Search",
-      "subtitle": "Song",
+      "title": "Search Song",
+      "subtitle": "iTunes",
       "description": "Search for a song and play.",
       "mode": "view"
     },
     {
       "name": "album",
-      "title": "Search",
-      "subtitle": "Album",
+      "title": "Search Album",
+      "subtitle": "iTunes",
       "description": "Search for an album and play.",
       "mode": "view"
     }
