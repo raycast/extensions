@@ -11,7 +11,7 @@
       "name": "index",
       "title": "Search Books",
       "subtitle": "Google Books",
-      "description": "Search and view google books from RayCast",
+      "description": "Search and view Google Books from Raycast",
       "mode": "view"
     }
   ],
