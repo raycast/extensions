@@ -5,8 +5,8 @@ import { Project } from "../toggl/types";
 import { useAppContext } from "../context";
 import { useMemo, useState } from "react";
 
-function CreateTimeEntryForm({ project }: { project?: Project }) {
-  const { pop } = useNavigation();
+function CreateTimeEntryForm({ project, description }: { project?: Project; description?: string }) {
+  const navigation = useNavigation();
   const { projects, tags, isLoading, projectGroups } = useAppContext();
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(project);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -20,7 +20,7 @@ function CreateTimeEntryForm({ project }: { project?: Project }) {
     await storage.runningTimeEntry.refresh();
     const runningTimeEntry = await storage.runningTimeEntry.get();
     await showToast(ToastStyle.Success, `Started time entry ${runningTimeEntry?.description}`);
-    pop();
+    navigation.pop();
   }
 
   const projectTags = useMemo(() => {
@@ -47,7 +47,7 @@ function CreateTimeEntryForm({ project }: { project?: Project }) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" />
+      <Form.TextField id="description" title="Description" defaultValue={description} />
       <Form.Dropdown
         id="project"
         title="Project"
