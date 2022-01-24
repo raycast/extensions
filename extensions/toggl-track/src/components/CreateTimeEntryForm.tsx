@@ -1,4 +1,13 @@
-import { useNavigation, Form, ActionPanel, SubmitFormAction, Icon, showToast, ToastStyle } from "@raycast/api";
+import {
+  useNavigation,
+  Form,
+  ActionPanel,
+  SubmitFormAction,
+  Icon,
+  showToast,
+  ToastStyle,
+  clearSearchBar,
+} from "@raycast/api";
 import toggl from "../toggl";
 import { storage } from "../storage";
 import { Project } from "../toggl/types";
@@ -11,16 +20,17 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(project);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  async function handleSubmit(values: { title: string }) {
+  async function handleSubmit(values: { description: string }) {
     await toggl.createTimeEntry({
       projectId: selectedProject?.id,
-      description: values.title,
+      description: values.description,
       tags: selectedTags,
     });
     await storage.runningTimeEntry.refresh();
     const runningTimeEntry = await storage.runningTimeEntry.get();
     await showToast(ToastStyle.Success, `Started time entry ${runningTimeEntry?.description}`);
     navigation.pop();
+    await clearSearchBar();
   }
 
   const projectTags = useMemo(() => {

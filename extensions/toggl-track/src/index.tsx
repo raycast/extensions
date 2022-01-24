@@ -2,7 +2,16 @@ import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
 import { AppContextProvider, useAppContext } from "./context";
 import RunningTimeEntry from "./components/RunningTimeEntry";
-import { ActionPanel, Icon, List, PushAction, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  clearSearchBar,
+  Icon,
+  List,
+  PushAction,
+  showToast,
+  SubmitFormAction,
+  ToastStyle,
+} from "@raycast/api";
 import { TimeEntry } from "./toggl/types";
 import toggl from "./toggl";
 import { storage } from "./storage";
@@ -30,8 +39,10 @@ function ListView() {
       tags: timeEntry.tags,
     });
     await storage.runningTimeEntry.refresh();
-    showToast(ToastStyle.Success, "Time entry resumed");
+    await showToast(ToastStyle.Success, "Time entry resumed");
+    await clearSearchBar({ forceScrollToTop: true });
   }
+
   return (
     <List isLoading={isLoading} throttle>
       {isValidToken ? (
