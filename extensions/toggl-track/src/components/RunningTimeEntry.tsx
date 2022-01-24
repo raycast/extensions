@@ -14,7 +14,7 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry })
   const stopTimeEntry = async () => {
     await toggl.stopTimeEntry({ id: runningTimeEntry.id });
     await storage.runningTimeEntry.refresh();
-    await showToast(ToastStyle.Success, `Stopped time entry ${runningTimeEntry.description}`);
+    await showToast(ToastStyle.Success, `Stopped time entry`);
   };
 
   return (
