@@ -3,7 +3,7 @@
 import { AggregableBadge } from "sourcegraph";
 
 // https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/cmd/frontend/graphqlbackend/schema.graphql?L3323&subtree=true
-export type SymbolKind = number;
+export type SymbolKind = string;
 
 // https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/client/common/src/errors/types.ts?L3&subtree=true
 export interface ErrorLike {
