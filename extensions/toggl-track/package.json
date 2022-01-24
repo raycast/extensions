@@ -10,7 +10,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Toggl Track",
+      "title": "Track Time",
+      "subtitle": "Toggl",
       "description": "Start and stop time entries with Toggl Track",
       "mode": "view"
     }
@@ -18,7 +19,7 @@
   "preferences": [
     {
       "name": "togglApiToken",
-      "type": "textfield",
+      "type": "password",
       "required": true,
       "title": "Toggl API Token",
       "description": "The API token for your Toggl account."

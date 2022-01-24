@@ -43,7 +43,7 @@ function CreateTimeEntryForm({ project }: { project?: Project }) {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create time entry" onSubmit={handleSubmit} />
+          <SubmitFormAction title="Create Time Entry" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

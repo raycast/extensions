@@ -21,7 +21,7 @@ export default function ProjectListItem({
       actions={
         <ActionPanel>
           <PushAction
-            title="Create time entry"
+            title="Create Time Entry"
             target={
               <AppContextProvider>
                 <CreateTimeEntryForm project={project} />
