@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "toggl-unofficial",
-  "title": "Toggl (Unofficial)",
-  "description": "Start and stop Toggl timers! Not endorsed by Toggl in any way.",
+  "name": "toggl",
+  "title": "Toggl",
+  "description": "Start and stop Toggl timers",
   "icon": "command-icon.png",
   "author": "ThatNerd",
   "license": "MIT",
@@ -20,6 +20,13 @@
       "subtitle": "Toggl",
       "description": "Stop your currently running Toggl timer.",
       "mode": "no-view"
+    },
+    {
+        "name": "createTimer",
+        "title": "Create New Timer",
+        "subtitle": "Toggl",
+        "description": "Create a new Toggl timer.",
+        "mode": "view"
     }
   ],
   "preferences": [
