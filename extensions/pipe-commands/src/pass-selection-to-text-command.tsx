@@ -124,9 +124,9 @@ function TextAction(props: { command: ScriptCommand; selection: string }) {
   return (
     <List.Item
       key={scriptPath}
+      icon={{ text: Icon.Text, file: Icon.TextDocument, url: Icon.Globe }[metadatas.argument1.type]}
       title={metadatas.title}
       subtitle={metadatas.description}
-      accessoryTitle={metadatas.argument1.type}
       actions={
         <ActionPanel>
           <ActionPanel.Item title="Run" icon={Icon.Terminal} onAction={runCommand} />
