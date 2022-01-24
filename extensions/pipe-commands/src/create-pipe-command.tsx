@@ -52,8 +52,8 @@ export default function PipeCommandForm(): JSX.Element {
       return;
     }
     const languageProperties = languageToProperties[values.template];
-    const filename = `${values.title.trim().toLowerCase().replace(/\s+/, "-")}${languageProperties.extension}`;
-    const filepath = resolve(environment.supportPath, filename);
+    const title = values.title.trim().toLowerCase().replace(/\s+/g, "-");
+    const filepath = resolve(environment.supportPath, `${title}${languageProperties.extension}`);
 
     const metadataLines = [
       `${languageProperties.comments} @raycast.title ${values.title}`,
@@ -69,7 +69,7 @@ export default function PipeCommandForm(): JSX.Element {
 
     const content = [languageProperties.shebang, "", ...metadataLines, "", languageProperties.helloWorld].join("\n");
 
-    writeFileSync(filepath, content);
+    writeFileSync(filepath, content, {mode: 0o755});
     showInFinder(filepath);
     popToRoot();
   }
@@ -100,7 +100,7 @@ export default function PipeCommandForm(): JSX.Element {
         defaultValue={false}
         title="Percent Encoded"
         id="percentEncoded"
-        label="Perform percent encoding on the argument value."
+        label="Perform percent encoding on the selection value."
       />
     </Form>
   );

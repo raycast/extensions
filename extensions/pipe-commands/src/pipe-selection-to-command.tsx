@@ -90,7 +90,6 @@ function TextAction(props: { command: ScriptCommand; selection: string }) {
   const { path: scriptPath, metadatas } = props.command;
 
   async function runCommand() {
-    chmodSync(scriptPath, "755");
     const argument = metadatas.argument1;
 
     execa(scriptPath, [argument.percentEncoded ? encodeURIComponent(props.selection) : props.selection], {
