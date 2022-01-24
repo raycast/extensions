@@ -24,9 +24,6 @@ import PipeCommandForm from "./create-pipe-command";
 import { ArgumentType, ScriptCommand } from "./types";
 import { isValidUrl, loadScriptCommands } from "./utils";
 
-const defaultScripts = resolve(environment.assetsPath, "commands");
-const userScripts = resolve(environment.supportPath);
-
 interface Selection {
   type: ArgumentType;
   content: string;
@@ -44,8 +41,8 @@ export default function TextActions(): JSX.Element {
   useEffect(() => {
     async function loadScripts() {
       const [userCommands, defaultCommands] = await Promise.all([
-        loadScriptCommands(userScripts),
-        loadScriptCommands(defaultScripts),
+        loadScriptCommands(environment.supportPath),
+        loadScriptCommands(resolve(environment.assetsPath, "commands")),
       ]);
       return [...userCommands, ...defaultCommands];
     }
@@ -90,6 +87,7 @@ function TextAction(props: { command: ScriptCommand; selection: string }) {
   const { path: scriptPath, metadatas } = props.command;
 
   async function runCommand() {
+    chmodSync(scriptPath, 0o755);
     const argument = metadatas.argument1;
 
     execa(scriptPath, [argument.percentEncoded ? encodeURIComponent(props.selection) : props.selection], {
