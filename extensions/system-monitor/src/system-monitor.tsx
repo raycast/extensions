@@ -1,4 +1,4 @@
-import { Detail } from "@raycast/api";
+import { List } from "@raycast/api";
 import { cpuUsage, freemem, freememPercentage } from "os-utils";
 import { useState } from "react";
 
@@ -7,16 +7,21 @@ export default function SystemMonitor() {
   const [freeMemPercentage, setFreeMemPercentage] = useState(0);
   const [freeMem, setFreeMem] = useState(0);
 
-  cpuUsage((v: number) => {
+  cpuUsage((v) => {
     setcpu(Math.round(v * 100));
     setFreeMemPercentage(Math.round(freememPercentage() * 100));
     setFreeMem(Math.round(freemem() / 1024));
   });
 
-  const markdown = `
-  * 🖥️ CPU Usage: **${cpu}%**
-  * 📝 Free Memory: **${freeMemPercentage}% (~ ${freeMem} GB)**
-  `;
+  const render = () => {
+    if (!cpu) return <List.Item title="Calculating..." />;
+    return (
+      <>
+        <List.Item title={`🖥️ CPU Usage: ${cpu}%`} />
+        <List.Item title={`📝 Free Memory: ${freeMemPercentage}% (~ ${freeMem} GB)`} />
+      </>
+    );
+  };
 
-  return <Detail markdown={!cpu ? "Calculating..." : markdown} />;
+  return <List>{render()}</List>;
 }
