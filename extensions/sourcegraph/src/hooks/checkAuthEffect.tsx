@@ -26,7 +26,7 @@ export default function checkAuthEffect(src: Sourcegraph, { push }: Navigation) 
                 message: JSON.stringify(err),
                 style: ToastStyle.Failure,
               });
-        (toast.primaryAction = {
+        toast.primaryAction = {
           title: "View details",
           onAction: () => {
             push(
@@ -38,8 +38,8 @@ This may be an issue with your configuration - try updating the Sourcegraph exte
               />
             );
           },
-        }),
-          await toast.show();
+        };
+        await toast.show();
       }
     }
     checkSrc();
