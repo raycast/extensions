@@ -37,6 +37,7 @@ export default function main() {
   const [items, setItems] = useState<course[]>();
   const [assignments, setAssignments] = useState<assignment[]>();
   const [announcements, setAnnouncements] = useState<announcement[]>();
+
   useEffect(() => {
     api["courses?state=available&enrollment_state=active"]
       .get()
@@ -51,48 +52,57 @@ export default function main() {
               color: "Green",
             },
           ]);
-        const courses = json;
-        setItems(
-          json.map((a: any) => ({
-            name: a.name,
-            code: a.course_code,
-            id: a.id,
-          }))
-        );
-        api.users.self.todo
+        api.users.self.favorites["courses?state=available&enrollment_state=active"]
           .get()
-          .then((json: any[]) => {
-            setAssignments(
-              json.map((a) => ({
-                name: a.assignment.name,
-                course: courses.filter((course: any) => course.id == a.course_id)[0].name,
-                course_id: a.course_id,
-                id: a.assignment.id,
-                color:
-                  Color[
-                    Colors[courses.indexOf(courses.filter((course) => course.id == a.course_id)[0]) % Colors.length]
-                  ],
+          .then((favorites: any) => {
+            let courses = json;
+            const ids = favorites.map((favorite) => favorite.id);
+            courses = courses.filter((course) => ids.includes(course.id));
+            setItems(
+              json.map((a: any) => ({
+                name: a.name,
+                code: a.course_code,
+                id: a.id,
               }))
             );
-            api["announcements?" + courses.map((a) => "context_codes[]=course_" + a.id).join("&")]
+            api.users.self.todo
               .get()
               .then((json: any[]) => {
-                setAnnouncements(
+                setAssignments(
                   json.map((a) => ({
-                    title: a.title,
-                    course_id: +a.context_code.substring(7),
+                    name: a.assignment.name,
+                    course: courses.filter((course: any) => course.id == a.course_id)[0].name,
+                    course_id: a.course_id,
+                    id: a.assignment.id,
                     color:
                       Color[
-                        Colors[
-                          courses.indexOf(
-                            courses.filter((course: any) => course.id == a.context_code.substring(7))[0]
-                          ) % Colors.length
-                        ]
+                        Colors[courses.indexOf(courses.filter((course) => course.id == a.course_id)[0]) % Colors.length]
                       ],
-                    course: courses.filter((course) => course.id == a.context_code.substring(7))[0].name,
-                    id: a.id,
                   }))
                 );
+                api["announcements?" + courses.map((a) => "context_codes[]=course_" + a.id).join("&")]
+                  .get()
+                  .then((json: any[]) => {
+                    setAnnouncements(
+                      json.map((a) => ({
+                        title: a.title,
+                        course_id: +a.context_code.substring(7),
+                        color:
+                          Color[
+                            Colors[
+                              courses.indexOf(
+                                courses.filter((course: any) => course.id == a.context_code.substring(7))[0]
+                              ) % Colors.length
+                            ]
+                          ],
+                        course: courses.filter((course) => course.id == a.context_code.substring(7))[0].name,
+                        id: a.id,
+                      }))
+                    );
+                  })
+                  .catch(() => {
+                    // ignore error?
+                  });
               })
               .catch(() => {
                 // ignore error?
@@ -106,6 +116,7 @@ export default function main() {
         // ignore error?
       });
   });
+
   return (
     <List isLoading={items === undefined}>
       <List.Section title="Courses" subtitle="Your enrolled courses">
