@@ -46,7 +46,7 @@ export default function Command() {
         params.append("background", "transparent");
         params.append("foreground", theme === "light" ? "black" : "white");
       }
-      const res = await fetch(`http://api.wolframalpha.com/v1/simple?${params.toString()}`);
+      const res = await fetch(`https://api.wolframalpha.com/v1/simple?${params.toString()}`);
       if (!res.ok) {
         if (res.status === 403) {
           showToast(ToastStyle.Failure, "Invalid App ID", "Update the App ID in the preferences");
