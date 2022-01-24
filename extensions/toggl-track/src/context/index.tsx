@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getStorage, StorageValues } from "../storage";
 import useCurrentTime from "../hooks/useCurrentTime";
 import { generateProjectGroups, ProjectGroup } from "./ProjectGroup";
-import { showToast, ToastStyle } from "@raycast/api";
+import { clearLocalStorage, showToast, ToastStyle } from "@raycast/api";
 
 interface AppContextProps extends StorageValues {
   projectGroups: ProjectGroup[];
@@ -42,6 +42,7 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
         setProjectGroups(projectGroups);
       } catch (e: any) {
         if (e.message.includes("403")) {
+          clearLocalStorage();
           setIsValidToken(false);
         }
         showToast(ToastStyle.Failure, e.message);
