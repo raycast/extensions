@@ -65,8 +65,8 @@ const RunScript: FC<runScriptProps> = (props) => {
     try {
       execSync(`osascript \
      -e "tell application \\"${using}\\"" \
-     -e "if (exists playlist \\"ExtensionAlbumPlaying\\") then" -e \
-     "delete playlist \\"ExtensionAlbumPlaying\\"" \
+     -e "if (exists playlist \\"ExtensionAlbumPlaying\\") then" \
+     -e "delete playlist \\"ExtensionAlbumPlaying\\"" \
      -e "end if" \
      -e "set name of (make new playlist) to \\"ExtensionAlbumPlaying\\"" \
      -e "set theseTracks to every track of library playlist 1 whose album is \\"${escapingNames.album}\\" and artist is \\"${escapingNames.artist}\\"" \
@@ -94,7 +94,12 @@ export default function Command() {
   const { state, search } = useSearch();
 
   return (
-    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search by name..." throttle>
+    <List
+      isLoading={state.isLoading}
+      onSearchTextChange={search}
+      searchBarPlaceholder="Search by name..."
+      throttle
+    >
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
           <SearchListItem key={searchResult.id} searchResult={searchResult} />
@@ -113,7 +118,12 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
         <ActionPanel>
           <PushAction
             title={`Play the Album`}
-            target={<RunScript album={searchResult.album} artist={searchResult.artist} />}
+            target={
+              <RunScript
+                album={searchResult.album}
+                artist={searchResult.artist}
+              />
+            }
             icon={Icon.ArrowRight}
           />
         </ActionPanel>
@@ -160,7 +170,11 @@ function useSearch() {
         return;
       }
       console.error("search error", error);
-      showToast(ToastStyle.Failure, "Could not perform search", String(error)).then();
+      showToast(
+        ToastStyle.Failure,
+        "Could not perform search",
+        String(error)
+      ).then();
     }
   }
 
