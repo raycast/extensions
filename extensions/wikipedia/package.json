@@ -16,24 +16,24 @@
     },
     {
       "name": "random-page",
-      "title": "Random Page",
+      "title": "Open Random Page",
       "subtitle": "Wikipedia",
-      "description": "Open a random Wikipedia page",
-      "mode": "view"
+      "description": "Open a random Wikipedia page in browser",
+      "mode": "no-view"
     },
     {
       "name": "featured-page",
-      "title": "Featured Page",
+      "title": "Open Featured Page",
       "subtitle": "Wikipedia",
-      "description": "Open today's featured Wikipedia page",
-      "mode": "view"
+      "description": "Open today's featured Wikipedia page in browser",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.25.7",
     "swr": "^1.0.1",
     "got": "^11.8.3",
-    "turndown": "^7.1.1"
+    "run-applescript": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -43,8 +43,7 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3",
-    "@types/turndown": "^5.0.1"
+    "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",

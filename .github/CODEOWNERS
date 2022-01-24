@@ -20,6 +20,7 @@
 /extensions/bitwarden                                @pomdtr
 /extensions/brew                                     @nhojb
 /extensions/brew-services                            @es183923
+/extensions/bttv-emote                               @Aayush9029
 /extensions/bugmenot                                 @Yukaii
 /extensions/buildkite                                @mskelton
 /extensions/calendar                                 @fuksman
@@ -31,7 +32,8 @@
 /extensions/circle-ci                                @qeude @kudrykv
 /extensions/clash                                    @ciiiii
 /extensions/cleanshotx                               @Aayush9029
-/extensions/clockify                                 @ismamz
+/extensions/clickup                                  @Ali-Parandeh
+/extensions/clockify                                 @ismamz @sxn
 /extensions/coffee                                   @mooxl
 /extensions/coinbase-pro                             @farisaziz12
 /extensions/coingecko                                @Destiner
@@ -44,6 +46,7 @@
 /extensions/cricketcast                              @sampoder
 /extensions/css-gg                                   @astrit
 /extensions/dash                                     @RSO @sxn
+/extensions/datadog                                  @kudrykv
 /extensions/days-until-christmas                     @MEGApixel23
 /extensions/debank                                   @Yukaii
 /extensions/deepcast                                 @mooxl
@@ -54,6 +57,7 @@
 /extensions/domainr                                  @splash-cli
 /extensions/doppler-share-secrets                    @thomaspaulmann
 /extensions/elgato-key-light                         @thomaspaulmann
+/extensions/elm-search                               @NeoVier
 /extensions/emoji                                    @FezVrasta
 /extensions/ens-name-lookup                          @Yukaii
 /extensions/envato                                   @Slllava
@@ -70,6 +74,7 @@
 /extensions/github-stars                             @mrmartineau
 /extensions/gitlab                                   @tonka3000
 /extensions/gitmoji                                  @ricoberger
+/extensions/google-books                             @Ali-Parandeh
 /extensions/google-chrome                            @rgomezcasas @bromanko
 /extensions/google-chrome-profiles                   @frouo
 /extensions/google-maps-search                       @ratoru
@@ -77,8 +82,10 @@
 /extensions/google-translate                         @ospfranco
 /extensions/google-trends                            @kkange
 /extensions/grafana                                  @Lp-Francois
+/extensions/graphcdn                                 @mathieudutour
 /extensions/hacker-news                              @thomaspaulmann
 /extensions/harvest                                  @eluce2
+/extensions/hashnode                                 @dpnick
 /extensions/hazeover                                 @ratoru
 /extensions/hexlify                                  @gkpln3
 /extensions/homeassistant                            @tonka3000
@@ -132,6 +139,7 @@
 /extensions/random-email                             @rkjaer
 /extensions/ray-so                                   @gt-codes
 /extensions/rebrandly                                @grikomsn
+/extensions/remove-background                        @maantje
 /extensions/render                                   @Destiner
 /extensions/ricescore                                @tonka3000
 /extensions/rss-reader                               @fuksman
@@ -150,6 +158,8 @@
 /extensions/sketch                                   @aesign
 /extensions/slack-status                             @PitNikola
 /extensions/snake                                    @tonka3000
+/extensions/sourcegraph                              @bobheadxi
+/extensions/spatie-documentation                     @danyelkeddah
 /extensions/speedtest                                @tonka3000
 /extensions/spotify-controls                         @thomaspaulmann
 /extensions/spotify-player                           @mattisssa
@@ -162,6 +172,7 @@
 /extensions/terminalfinder                           @yedongze
 /extensions/things                                   @loris
 /extensions/ticktick                                 @viduycheung
+/extensions/timeular                                 @kudrykv
 /extensions/tldr                                     @pomdtr
 /extensions/todo-list                                @maggie-j-liu
 /extensions/todoist                                  @thomaslombart
@@ -173,6 +184,7 @@
 /extensions/twitch                                   @dieserRobin
 /extensions/twitter                                  @tonka3000
 /extensions/two-factor-authentication-code-generator @cjdenio
+/extensions/ulysses                                  @praveenjuge
 /extensions/unicode-symbols                          @mmazzarolo
 /extensions/unix-timestamp                           @Destiner
 /extensions/uuid-generator                           @jmaeso
@@ -185,6 +197,7 @@
 /extensions/whatsapp                                 @vimtor
 /extensions/wikipedia                                @vimtor
 /extensions/wistia                                   @ddoria921
+/extensions/wolfram-alpha                            @mathieudutour
 /extensions/xcode                                    @SvenTiigi
 /extensions/xkcd                                     @maggie-j-liu
 /extensions/youdao-translate                         @tiancheng92

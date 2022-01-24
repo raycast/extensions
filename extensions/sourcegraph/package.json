@@ -1,0 +1,149 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sourcegraph",
+  "title": "Sourcegraph",
+  "description": "Search your code and 2M+ public repositories on Sourcegraph.",
+  "icon": "command-icon.png",
+  "author": "bobheadxi",
+  "license": "MIT",
+  "keywords": [
+    "sourcegraph",
+    "search",
+    "code",
+    "codesearch"
+  ],
+  "preferences": [
+    {
+      "name": "cloudToken",
+      "title": "Sourcegraph Cloud: Access token",
+      "description": "Available under 'Profile' -> 'Access token' on Sourcegraph Cloud",
+      "required": false,
+      "type": "password"
+    },
+    {
+      "name": "customInstance",
+      "title": "Sourcegraph Self-Hosted: Instance URL",
+      "description": "Required to use the Sourcegraph Self-Hosted commands - URL of the Sourcegraph instance you want to connect to",
+      "placeholder": "https://sourcegraph.my-company.com",
+      "required": false,
+      "type": "textfield"
+    },
+    {
+      "name": "customInstanceToken",
+      "title": "Sourcegraph Self-Hosted: Access token",
+      "description": "Required to use the Sourcegraph Self-Hosted commands - available under 'Profile' -> 'Access token' on the Sourcegraph instance",
+      "required": false,
+      "type": "password"
+    }
+  ],
+  "commands": [
+    {
+      "name": "searchCloud",
+      "title": "Search Code",
+      "subtitle": "Sourcegraph Cloud",
+      "description": "Search your code and 2M+ public repositories.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "src",
+        "cloud"
+      ],
+      "preferences": [
+        {
+          "name": "cloudDefaultContext",
+          "title": "Default search context",
+          "description": "Default search context to set on all queries",
+          "placeholder": "global",
+          "required": false,
+          "type": "textfield"
+        }
+      ]
+    },
+    {
+      "name": "searchSelfHosted",
+      "icon": "logo-bw.png",
+      "title": "Search Code",
+      "subtitle": "Sourcegraph Self-Hosted",
+      "description": "Search code on a self-hosted Sourcegraph instance.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "code",
+        "src",
+        "selfhosted"
+      ],
+      "preferences": [
+        {
+          "name": "customInstanceDefaultContext",
+          "title": "Default context",
+          "description": "Default search context to set on all queries",
+          "placeholder": "global",
+          "required": false,
+          "type": "textfield"
+        }
+      ]
+    },
+    {
+      "name": "findNotebooksCloud",
+      "title": "Find Search Notebooks",
+      "subtitle": "Sourcegraph Cloud",
+      "description": "Browse search notebooks on Sourcegraph Cloud.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "notebook",
+        "snb",
+        "cloud"
+      ],
+      "preferences": []
+    },
+    {
+      "name": "findNotebooksSelfHosted",
+      "icon": "logo-bw.png",
+      "title": "Find Search Notebooks",
+      "subtitle": "Sourcegraph Self-Hosted",
+      "description": "Browse search notebooks on a self-hosted Sourcegraph instance.",
+      "mode": "view",
+      "keywords": [
+        "sourcegraph",
+        "search",
+        "notebook",
+        "snb",
+        "selfhosted"
+      ],
+      "preferences": []
+    }
+  ],
+  "dependencies": {
+    "@bobheadxi/node-eventsource-http2": "^1.1.1",
+    "@raycast/api": "^1.27.0",
+    "luxon": "^2.3.0",
+    "node-fetch": "^3.0.0",
+    "remark": "^14.0.2",
+    "sourcegraph": "^25.4.0",
+    "strip-markdown": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/luxon": "^2.0.9",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "~4.13.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fmt": "prettier --config .prettierrc -w ./src",
+    "raycast-publish": ".scripts/raycast-publish.sh"
+  }
+}
