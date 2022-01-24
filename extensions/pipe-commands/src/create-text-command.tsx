@@ -58,7 +58,9 @@ export default function TextCommandForm(): JSX.Element {
     const metadataLines = [
       `${languageProperties.comments} @raycast.title ${values.title}`,
       `${languageProperties.comments} @raycast.mode silent`,
-      `${languageProperties.comments} @raycast.argument1 {"type": "${values.type}", "placeholder": "selection", "percentEncoded": ${!!values.percentEncoded}}`,
+      `${languageProperties.comments} @raycast.argument1 {"type": "${
+        values.type
+      }", "placeholder": "selection", "percentEncoded": ${!!values.percentEncoded}}`,
     ];
     if (values.description)
       metadataLines.push(`${languageProperties.comments} @raycast.description ${values.description}`);
@@ -88,9 +90,9 @@ export default function TextCommandForm(): JSX.Element {
       <Form.TextField title="Title" placeholder="Command Title" id="title" />
       <Form.TextArea title="Description" id="description" placeholder="Descriptive Summary" />
       <Form.TextField title="Package Name" id="packageName" placeholder="E.g., Developer Utils" />
-      <List.Section/>
+      <List.Section />
       <Form.Dropdown title="Accept" id="type">
-        {["text", "file" , "url"].map((type) => (
+        {["text", "file", "url"].map((type) => (
           <Form.Dropdown.Item key={type} title={type} value={type} />
         ))}
       </Form.Dropdown>
