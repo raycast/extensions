@@ -75,7 +75,6 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
 
   async function runCommand(onSuccess: (stdout: string) => void) {
     chmodSync(scriptPath, 0o755);
-    console.log(props.selection.content.map(encodeURIComponent))
 
     execa(
       scriptPath,

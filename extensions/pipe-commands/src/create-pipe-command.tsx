@@ -69,7 +69,7 @@ export default function PipeCommandForm(): JSX.Element {
 
     const content = [languageProperties.shebang, "", ...metadataLines, "", languageProperties.helloWorld].join("\n");
 
-    writeFileSync(filepath, content, {mode: 0o755});
+    writeFileSync(filepath, content, { mode: 0o755 });
     showInFinder(filepath);
     popToRoot();
   }
