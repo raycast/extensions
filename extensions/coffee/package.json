@@ -41,6 +41,13 @@
       "subtitle": "Coffee",
       "description": "Toggle caffeination",
       "mode": "no-view"
+    },
+    {
+      "name": "caffeinateFor",
+      "title": "Caffeinate For",
+      "subtitle": "Coffee",
+      "description": "Prevent your Mac from sleeping for a certain time",
+      "mode": "view"
     }
   ],
   "dependencies": {

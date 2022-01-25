@@ -35,7 +35,7 @@ const CaffeinateWhile = () => {
           <SubmitFormAction
             title="Caffeinate"
             onSubmit={(data) => {
-              Caffeinate(" -w " + data.process);
+              Caffeinate(`-w ${data.process}`);
             }}
           />
         </ActionPanel>
