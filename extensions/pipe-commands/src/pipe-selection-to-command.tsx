@@ -33,12 +33,6 @@ interface Selection {
 function PipeCommands(props: { selection: Selection }): JSX.Element {
   const [commands, setCommands] = useState<ScriptCommand[]>();
 
-  const packages: Record<string, ScriptCommand[]> = {};
-  for (const script of commands || []) {
-    const packageName = script.metadatas.packageName || "Others";
-    packages[packageName] = [...(packages[packageName] || []), script];
-  }
-
   useEffect(() => {
     async function loadCommands() {
       const [userCommands, defaultCommands] = await Promise.all([
@@ -58,15 +52,11 @@ function PipeCommands(props: { selection: Selection }): JSX.Element {
 
   return (
     <List isLoading={typeof commands == "undefined"} searchBarPlaceholder="Pipe selection to...">
-      {Object.entries(packages).map(([packageName, commands]) => (
-        <List.Section key={packageName} title={packageName}>
-          {commands
-            ?.filter((command) => command.metadatas.selection.type == props.selection.type)
-            .map((command) => (
-              <TextAction key={command.path} command={command} selection={props.selection} />
-            ))}
-        </List.Section>
-      ))}
+      {commands
+        ?.filter((command) => command.metadatas.selection.type == props.selection.type)
+        .map((command) => (
+          <TextAction key={command.path} command={command} selection={props.selection} />
+        ))}
     </List>
   );
 }
@@ -107,6 +97,7 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
         } else if (res.stderr) {
           showHUD(res.stderr);
         }
+        closeMainWindow();
       });
   }
 
@@ -115,27 +106,21 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
       key={scriptPath}
       icon={{ text: Icon.Text, file: Icon.TextDocument, url: Icon.Globe }[metadatas.selection.type]}
       title={metadatas.title}
-      subtitle={metadatas.description}
+      subtitle={metadatas.packageName}
       actions={
         <ActionPanel>
           <ActionPanel.Item
             title="Paste Output"
             icon={Icon.Terminal}
             onAction={() =>
-              runCommand((stdout) => {
-                pasteText(stdout);
-                closeMainWindow();
-              })
+              runCommand(pasteText)
             }
           />
           <ActionPanel.Item
             title="Copy Output"
             icon={Icon.Terminal}
             onAction={() =>
-              runCommand((stdout) => {
-                copyTextToClipboard(stdout);
-                closeMainWindow();
-              })
+              runCommand(copyTextToClipboard)
             }
           />
           <OpenWithAction path={scriptPath} />

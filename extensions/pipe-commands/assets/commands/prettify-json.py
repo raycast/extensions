@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 # @raycast.title Prettify JSON
-# @raycast.mode silent
 # @raycast.packageName JSON
 # @raycast.selection {"type": "text"}
 

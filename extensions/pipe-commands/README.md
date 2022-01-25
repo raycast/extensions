@@ -12,22 +12,21 @@ Use the `Create Pipe command` command to generate a new pipe command template.
 
 The Pipe command syntax is very similar to the script command syntax, with some caveats:
 
-- Only some field are supported (title, description, packageName, author, authorUrl)
+- Only the `title` and `packageName` fields are parsed (the other fields are ignored)
 - A new field is introduced: `@raycast.selection`. It is similar to the script command arguments, but support other types.
 
-| field          | description              | required |
-| -------------- | ------------------------ | -------- |
-| type           | text, url or file        | ✅        |
-| percentEncoded | useful for query strings | ❌        |
-
-Every unsupported Fields will be ignored by the extensions.
+  | field          | description                                    | values            | required |
+  | -------------- | ---------------------------------------------- | ----------------- | -------- |
+  | type           | What type of selection the pipe command handle | text, url or file | ✅        |
+  | percentEncoded | useful for query strings                       | boolean           | ❌        |
 
 ## Pipe Commands logic
 
 The user selection will be passed to the script as the first argument.
+
 If the selection of the user is composed of multiple items, multiple args will be provided to the script.
 
-When manipulating text selections, the output of the script will replace the current selection. If you want to print a message to the user, use stderr.
+When manipulating text selections, the output of the script will replace the user selection.
 
 ## Example scripts
 
@@ -37,7 +36,6 @@ When manipulating text selections, the output of the script will replace the cur
 #!/bin/bash
 
 # @raycast.title Google Search
-# @raycast.mode silent
 # @raycast.packageName Web Searches
 # @raycast.selection {"type": "text", "percentEncoded": true}
 
@@ -51,7 +49,6 @@ open "https://www.google.com/search?q=$1"
 
 # @raycast.title Switch to Uppercase
 # @raycast.packageName Change Case
-# @raycast.description Change text to uppercase
 # @raycast.selection {"type": "text"}
 
 import sys

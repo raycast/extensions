@@ -5,7 +5,6 @@ export interface ScriptCommand {
 
 export interface ScriptMetadatas {
   title: string;
-  description?: string;
   packageName?: string;
   selection: ScriptSelection;
 }

@@ -28,14 +28,13 @@ export function parseMetadatas(script: string): ScriptMetadatas {
 
 export async function loadScriptCommands(scriptFolder: string): Promise<ScriptCommand[]> {
   const paths = await fs.readdir(scriptFolder);
-  return await Promise.all(
+  const commands = await Promise.all(
     paths.map(async (path) => {
       const scriptPath = `${scriptFolder}/${path}`;
       const script = await fs.readFile(scriptPath, "utf8");
       const metadatas = parseMetadatas(script);
-      if (!metadatas.title) throw new Error(`Script ${path} has no title!`);
-      if (!metadatas.selection) throw new Error(`Script ${path} has no selection!`);
       return { path: scriptPath, metadatas };
     })
-  );
+  )
+  return commands.filter(command => command.metadatas.title && command.metadatas.selection);
 }

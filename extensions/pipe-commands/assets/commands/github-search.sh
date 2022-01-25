@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # @raycast.title Github Search
-# @raycast.mode silent
 # @raycast.packageName Web Searches
 # @raycast.selection {"type": "text"}
 
