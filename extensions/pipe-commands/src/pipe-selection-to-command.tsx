@@ -52,6 +52,18 @@ function PipeCommands(props: { selection: Selection }): JSX.Element {
 
   return (
     <List isLoading={typeof commands == "undefined"} searchBarPlaceholder="Pipe selection to...">
+      {props.selection.type == "file" && props.selection.content.length == 1 ? (
+          <List.Item
+            icon={Icon.TextDocument}
+            subtitle="File Actions"
+            title="Open With"
+            actions={
+              <ActionPanel>
+                <OpenWithAction path={props.selection.content[0]} />
+              </ActionPanel>
+            }
+          />
+      ) : null}
       {commands
         ?.filter((command) => command.metadatas.selection.type == props.selection.type)
         .map((command) => (
@@ -109,22 +121,18 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
       subtitle={metadatas.packageName}
       actions={
         <ActionPanel>
-          <ActionPanel.Item
-            title="Paste Output"
-            icon={Icon.Terminal}
-            onAction={() =>
-              runCommand(pasteText)
-            }
-          />
-          <ActionPanel.Item
-            title="Copy Output"
-            icon={Icon.Terminal}
-            onAction={() =>
-              runCommand(copyTextToClipboard)
-            }
-          />
-          <OpenWithAction path={scriptPath} />
-          <PushAction title="New Pipe Command" target={<PipeCommandForm />} />
+          <ActionPanel.Section>
+            <ActionPanel.Item title="Paste Output" icon={Icon.Terminal} onAction={() => runCommand(pasteText)} />
+            <ActionPanel.Item
+              title="Copy Output"
+              icon={Icon.Terminal}
+              onAction={() => runCommand(copyTextToClipboard)}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <OpenWithAction title="Open Pipe Command" path={scriptPath} />
+            <PushAction title="New Pipe Command" target={<PipeCommandForm />} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
