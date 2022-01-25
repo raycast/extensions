@@ -1,9 +1,8 @@
 #!/bin/bash
 
-# @raycast.title Copy File Content
+# @raycast.title Echo
 # @raycast.mode silent
 # @raycast.packageName File Actions
-# @raycast.argument1 {"type": "file", "placeholder": "query", "percentEncoded": false}
+# @raycast.selection {"type": "file", "percentEncoded": true}
 
-pbcopy < "$1"
-echo "Content of $(basename "$1") copied to clipboard!" >&2
+echo "$1"

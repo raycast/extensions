@@ -26,7 +26,7 @@ import { isValidUrl, loadScriptCommands } from "./utils";
 
 interface Selection {
   type: ArgumentType;
-  content: string;
+  content: string[];
 }
 
 function PipeCommands(props: { selection: Selection }): JSX.Element {
@@ -47,7 +47,6 @@ function PipeCommands(props: { selection: Selection }): JSX.Element {
       return [...userCommands, ...defaultCommands];
     }
 
-
     loadCommands()
       .then(setCommands)
       .catch((e) => {
@@ -56,16 +55,14 @@ function PipeCommands(props: { selection: Selection }): JSX.Element {
       });
   }, []);
 
-  console.log(packages);
-
   return (
-    <List isLoading={typeof commands == "undefined"} searchBarPlaceholder="Send selection to...">
+    <List isLoading={typeof commands == "undefined"} searchBarPlaceholder="Pipe selection to...">
       {Object.entries(packages).map(([packageName, commands]) => (
         <List.Section key={packageName} title={packageName}>
           {commands
-            ?.filter((command) => command.metadatas.argument1.type == props.selection.type)
+            ?.filter((command) => command.metadatas.selection.type == props.selection.type)
             .map((command) => (
-              <TextAction key={command.path} command={command} selection={props.selection.content} />
+              <TextAction key={command.path} command={command} selection={props.selection} />
             ))}
         </List.Section>
       ))}
@@ -73,16 +70,20 @@ function PipeCommands(props: { selection: Selection }): JSX.Element {
   );
 }
 
-function TextAction(props: { command: ScriptCommand; selection: string }) {
+function TextAction(props: { command: ScriptCommand; selection: Selection }) {
   const { path: scriptPath, metadatas } = props.command;
 
-  async function runCommand() {
+  async function runCommand(onSuccess: (stdout: string) => void) {
     chmodSync(scriptPath, 0o755);
-    const argument = metadatas.argument1;
+    console.log(props.selection.content.map(encodeURIComponent))
 
-    execa(scriptPath, [argument.percentEncoded ? encodeURIComponent(props.selection) : props.selection], {
-      encoding: "utf-8",
-    })
+    execa(
+      scriptPath,
+      metadatas.selection.percentEncoded ? props.selection.content.map(encodeURIComponent) : props.selection.content,
+      {
+        encoding: "utf-8",
+      }
+    )
       .catch(async (e) => {
         const toast = new Toast({
           style: ToastStyle.Failure,
@@ -102,8 +103,7 @@ function TextAction(props: { command: ScriptCommand; selection: string }) {
       .then(async (res) => {
         if (!res) return;
         if (res.stdout) {
-          await pasteText(res.stdout);
-          closeMainWindow();
+          onSuccess(res.stdout);
         } else if (res.stderr) {
           showHUD(res.stderr);
         }
@@ -113,12 +113,31 @@ function TextAction(props: { command: ScriptCommand; selection: string }) {
   return (
     <List.Item
       key={scriptPath}
-      icon={{ text: Icon.Text, file: Icon.TextDocument, url: Icon.Globe }[metadatas.argument1.type]}
+      icon={{ text: Icon.Text, file: Icon.TextDocument, url: Icon.Globe }[metadatas.selection.type]}
       title={metadatas.title}
       subtitle={metadatas.description}
       actions={
         <ActionPanel>
-          <ActionPanel.Item title="Run" icon={Icon.Terminal} onAction={runCommand} />
+          <ActionPanel.Item
+            title="Paste Output"
+            icon={Icon.Terminal}
+            onAction={() =>
+              runCommand((stdout) => {
+                pasteText(stdout);
+                closeMainWindow();
+              })
+            }
+          />
+          <ActionPanel.Item
+            title="Copy Output"
+            icon={Icon.Terminal}
+            onAction={() =>
+              runCommand((stdout) => {
+                copyTextToClipboard(stdout);
+                closeMainWindow();
+              })
+            }
+          />
           <OpenWithAction path={scriptPath} />
           <PushAction title="New Pipe Command" target={<PipeCommandForm />} />
         </ActionPanel>
@@ -131,10 +150,10 @@ async function getSelection(): Promise<Selection> {
   try {
     const files = await getSelectedFinderItems();
     if (files.length == 0) throw new Error("No file selected!");
-    return { type: "file", content: files[0].path };
+    return { type: "file", content: files.map((file) => file.path) };
   } catch {
     const text = await getSelectedText();
-    return { type: isValidUrl(text) ? "url" : "text", content: text };
+    return { type: isValidUrl(text) ? "url" : "text", content: [text] };
   }
 }
 

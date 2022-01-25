@@ -4,7 +4,7 @@
 # @raycast.mode silent
 # @raycast.packageName Change Case
 # @raycast.description Change text to lowercase
-# @raycast.argument1 {"type": "text", "placeholder": "text", "percentEncoded": false}
+# @raycast.selection {"type": "text"}
 
 import sys
 

@@ -58,7 +58,7 @@ export default function PipeCommandForm(): JSX.Element {
     const metadataLines = [
       `${languageProperties.comments} @raycast.title ${values.title}`,
       `${languageProperties.comments} @raycast.mode silent`,
-      `${languageProperties.comments} @raycast.argument1 {"type": "${
+      `${languageProperties.comments} @raycast.selection {"type": "${
         values.type
       }", "placeholder": "selection", "percentEncoded": ${!!values.percentEncoded}}`,
     ];

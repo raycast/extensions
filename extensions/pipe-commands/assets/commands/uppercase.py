@@ -3,7 +3,7 @@
 # @raycast.title Switch to Uppercase
 # @raycast.packageName Change Case
 # @raycast.description Change text to uppercase
-# @raycast.argument1 {"type": "text", "placeholder": "text", "percentEncoded": false}
+# @raycast.selection {"type": "text"}
 
 import sys
 

@@ -7,12 +7,12 @@ export interface ScriptMetadatas {
   title: string;
   description?: string;
   packageName?: string;
-  argument1: ScriptArgument;
+  selection: ScriptSelection;
 }
 
 export type ArgumentType = "text" | "file" | "url";
 
-export interface ScriptArgument {
+export interface ScriptSelection {
   type: ArgumentType;
   percentEncoded?: boolean;
 }

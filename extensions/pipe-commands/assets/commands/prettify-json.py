@@ -3,7 +3,7 @@
 # @raycast.title Prettify JSON
 # @raycast.mode silent
 # @raycast.packageName JSON
-# @raycast.argument1 {"type": "text", "placeholder": "query", "percentEncoded": false}
+# @raycast.selection {"type": "text"}
 
 import json
 import sys

@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "text-commands",
+  "name": "pipe-commands",
   "title": "Pipe commands",
-  "description": "",
+  "description": "Pass your selection to any scripts.",
   "icon": "command-icon.png",
   "author": "pomdtr",
   "license": "MIT",

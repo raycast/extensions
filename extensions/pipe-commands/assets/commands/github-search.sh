@@ -3,6 +3,6 @@
 # @raycast.title Github Search
 # @raycast.mode silent
 # @raycast.packageName Web Searches
-# @raycast.argument1 {"type": "text", "placeholder": "query"}
+# @raycast.selection {"type": "text"}
 
 open "https://github.com/search?q=$1"
