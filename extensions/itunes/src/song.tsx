@@ -1,26 +1,7 @@
-import {
-  ActionPanel,
-  closeMainWindow,
-  Detail,
-  getPreferenceValues,
-  Icon,
-  List,
-  popToRoot,
-  PushAction,
-  randomId,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
-import { FC, useEffect, useRef, useState } from "react";
+import { ActionPanel, Icon, List, randomId, showToast, ToastStyle, getPreferenceValues, Detail } from "@raycast/api";
+import { useEffect, useRef, useState } from "react";
 import { AbortError } from "node-fetch";
-import fs from "fs";
-import readline from "readline";
-import { execSync } from "child_process";
-import os from "os";
-
-interface Preferences {
-  path: string;
-}
+import { testXML, cue, performSearch } from "./functions";
 
 interface SearchState {
   results: SearchResult[];
@@ -34,82 +15,19 @@ interface SearchResult {
   album: string;
 }
 
-interface runScriptProps {
-  name?: string;
-  album: string;
-  artist: string;
-}
-
-interface searchEntry {
-  name: string;
-  artist: string;
-  album: string;
-}
-
-let match: searchEntry[] = [];
-const preferences: Preferences = getPreferenceValues();
-const using = "iTunes";
-const XMLPath = preferences.path.replace(/^\s/, "").replace(/^~/, os.homedir());
-if (!fs.existsSync(XMLPath)) {
-  showToast(
-    ToastStyle.Failure,
-    "Library XML File Not Found",
-    "Please correct the XML file path in extension preferences."
-  ).then();
-  throw "Invalid XML file path";
-}
-
-const RunScript: FC<runScriptProps> = (props) => {
-  useEffect(() => {
-    const escapingNames = {
-      album: props.album.replace(/"/g, `\\"`),
-      artist: props.artist.replace(/"/g, `\\"`),
-    };
-    try {
-      if (props.name) {
-        execSync(
-          `osascript -e "tell application \\"${using}\\" to play (the first track of library playlist 1 whose album is \\"${props.album}\\" and name is \\"${props.name}\\")"`
-        );
-      } else {
-        execSync(`osascript \
-       -e "tell application \\"${using}\\"" \
-       -e "if (exists playlist \\"ExtensionAlbumPlaying\\") then" \
-       -e "delete playlist \\"ExtensionAlbumPlaying\\"" \
-       -e "end if" \
-       -e "set name of (make new playlist) to \\"ExtensionAlbumPlaying\\"" \
-       -e "set theseTracks to every track of library playlist 1 whose album is \\"${escapingNames.album}\\" and artist is \\"${escapingNames.artist}\\"" \
-       -e "repeat with thisTrack in theseTracks" \
-       -e "duplicate thisTrack to playlist \\"ExtensionAlbumPlaying\\"" \
-       -e "end repeat" \
-       -e "play playlist \\"ExtensionAlbumPlaying\\"" \
-       -e "end tell"`);
-      }
-    } catch (error) {
-      console.error("execution error", error);
-      showToast(
-        ToastStyle.Failure,
-        "Failed to play the track",
-        "Maybe the song is not in your library or has a weird title"
-      ).then();
-      return;
-    }
-
-    popToRoot().then();
-    closeMainWindow({ clearRootSearch: true }).then();
-  });
-  return <Detail markdown={`# Calling ${using}...`} />;
-};
-
 export default function Command() {
   const { state, search } = useSearch();
-
+  if (!testXML()) {
+    return (
+      <Detail
+        markdown={
+          "# XML Path is Not Valid  \nPlease check the XML path in ```Extension Preferences -> Library XML Path```"
+        }
+      />
+    );
+  }
   return (
-    <List
-      isLoading={state.isLoading}
-      onSearchTextChange={search}
-      searchBarPlaceholder="Search by name..."
-      throttle
-    >
+    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search by name..." throttle>
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
           <SearchListItem key={searchResult.id} searchResult={searchResult} />
@@ -127,26 +45,15 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       subtitle={searchResult.artist}
       actions={
         <ActionPanel>
-          <PushAction
-            title={`Cue the Track`}
-            target={
-              <RunScript
-                name={searchResult.name}
-                album={searchResult.album}
-                artist={searchResult.artist}
-              />
-            }
+          <ActionPanel.Item
+            title="Cue the Track"
             icon={Icon.ArrowRight}
+            onAction={() => cue({ name: searchResult.name, album: searchResult.album, artist: searchResult.artist })}
           />
-          <PushAction
-            title={`Play the Album`}
-            target={
-              <RunScript
-                album={searchResult.album}
-                artist={searchResult.artist}
-              />
-            }
+          <ActionPanel.Item
+            title="Play the Album"
             icon={Icon.ArrowRight}
+            onAction={() => cue({ album: searchResult.album, artist: searchResult.artist })}
           />
         </ActionPanel>
       }
@@ -176,7 +83,7 @@ function useSearch() {
         ...oldState,
         isLoading: true,
       }));
-      await performSearch(searchText, cancelRef.current.signal);
+      const match = await performSearch(searchText, "song", cancelRef.current.signal);
       setState((oldState) => ({
         ...oldState,
         results: match.map((entry) => {
@@ -192,11 +99,7 @@ function useSearch() {
         return;
       }
       console.error("search error", error);
-      showToast(
-        ToastStyle.Failure,
-        "Could not perform search",
-        String(error)
-      ).then();
+      showToast(ToastStyle.Failure, "Could not perform search", String(error));
     }
   }
 
@@ -205,76 +108,3 @@ function useSearch() {
     search: search,
   };
 }
-
-async function performSearch(searchText: string, signal: AbortSignal) {
-  if (searchText.length < 2) return [];
-
-  let sherlock = false;
-  let dictBlock = false;
-  let buffer = {
-    album: "",
-    artist: "",
-    name: "",
-  };
-  match = [];
-
-  const read = readline.createInterface({
-    input: fs.createReadStream(XMLPath),
-    output: process.stdout,
-    terminal: false,
-  });
-  read.on("line", (line) => {
-    if (line.indexOf("</dict>") >= 0) {
-      dictBlock = false;
-      if (
-        buffer.name.length > 0 &&
-        buffer.name.toLowerCase().indexOf(searchText.toLowerCase()) >= 0
-      ) {
-        match = [...match, buffer];
-      }
-      buffer = {
-        album: "",
-        artist: "",
-        name: "",
-      };
-    }
-
-    if (line.indexOf("<dict>") >= 0) {
-      dictBlock = true;
-      return;
-    }
-
-    if (dictBlock) {
-      const [key, value] = [
-        line.match(/(?<=<key>).*?(?=<\/key>)/) || [],
-        line.match(/(?<=<string>).*?(?=<\/string>)/) || "",
-      ];
-      if (key[0] === "Name") {
-        buffer.name = value[0];
-      }
-      if (key[0] === "Artist") {
-        buffer.artist = value[0];
-      }
-      if (key[0] === "Album") {
-        buffer.album = value[0];
-      }
-    }
-  });
-  read.on("close", () => {
-    match = Array.from(new Set(match));
-    sherlock = true;
-  });
-  await waitUntil(() => sherlock || signal.aborted);
-}
-
-const waitUntil = (condition: () => boolean) => {
-  return new Promise<void>((resolve) => {
-    const interval = setInterval(() => {
-      if (!condition()) {
-        return;
-      }
-      clearInterval(interval);
-      resolve();
-    }, 100);
-  });
-};

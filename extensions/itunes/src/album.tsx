@@ -1,26 +1,7 @@
-import {
-  ActionPanel,
-  List,
-  showToast,
-  ToastStyle,
-  randomId,
-  popToRoot,
-  closeMainWindow,
-  Detail,
-  Icon,
-  PushAction,
-  getPreferenceValues,
-} from "@raycast/api";
-import { useState, useEffect, useRef, FC } from "react";
+import { ActionPanel, List, showToast, ToastStyle, randomId, Detail, Icon } from "@raycast/api";
+import { useState, useEffect, useRef } from "react";
 import { AbortError } from "node-fetch";
-import fs from "fs";
-import readline from "readline";
-import { execSync } from "child_process";
-import os from "os";
-
-interface Preferences {
-  path: string;
-}
+import { testXML, cue, performSearch } from "./functions";
 
 interface SearchState {
   results: SearchResult[];
@@ -33,73 +14,19 @@ interface SearchResult {
   album: string;
 }
 
-interface runScriptProps {
-  album: string;
-  artist: string;
-}
-
-interface searchEntry {
-  artist: string;
-  album: string;
-}
-
-let match: searchEntry[] = [];
-const preferences: Preferences = getPreferenceValues();
-const using = "iTunes";
-const XMLPath = preferences.path.replace(/^\s/, "").replace(/^~/, os.homedir());
-if (!fs.existsSync(XMLPath)) {
-  showToast(
-    ToastStyle.Failure,
-    "Library XML File Not Found",
-    "Please correct the XML file path in extension preferences."
-  ).then();
-  throw "Invalid XML file path";
-}
-
-const RunScript: FC<runScriptProps> = (props) => {
-  useEffect(() => {
-    const escapingNames = {
-      album: props.album.replace(/"/g, `\\"`),
-      artist: props.artist.replace(/"/g, `\\"`),
-    };
-    try {
-      execSync(`osascript \
-     -e "tell application \\"${using}\\"" \
-     -e "if (exists playlist \\"ExtensionAlbumPlaying\\") then" \
-     -e "delete playlist \\"ExtensionAlbumPlaying\\"" \
-     -e "end if" \
-     -e "set name of (make new playlist) to \\"ExtensionAlbumPlaying\\"" \
-     -e "set theseTracks to every track of library playlist 1 whose album is \\"${escapingNames.album}\\" and artist is \\"${escapingNames.artist}\\"" \
-     -e "repeat with thisTrack in theseTracks" \
-     -e "duplicate thisTrack to playlist \\"ExtensionAlbumPlaying\\"" \
-     -e "end repeat" \
-     -e "play playlist \\"ExtensionAlbumPlaying\\"" \
-     -e "end tell"`);
-      popToRoot().then();
-      closeMainWindow({ clearRootSearch: true }).then();
-    } catch (error) {
-      console.error("execution error", error);
-      showToast(
-        ToastStyle.Failure,
-        "Failed to play the track",
-        "Maybe the song is not in you library or has weird title"
-      ).then();
-      return;
-    }
-  });
-  return <Detail markdown={`# Calling ${using}...`} />;
-};
-
 export default function Command() {
   const { state, search } = useSearch();
-
+  if (!testXML()) {
+    return (
+      <Detail
+        markdown={
+          "# XML Path is Not Valid  \nPlease check the XML path in ```Extension Preferences -> Library XML Path```"
+        }
+      />
+    );
+  }
   return (
-    <List
-      isLoading={state.isLoading}
-      onSearchTextChange={search}
-      searchBarPlaceholder="Search by name..."
-      throttle
-    >
+    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search by name..." throttle>
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
           <SearchListItem key={searchResult.id} searchResult={searchResult} />
@@ -116,15 +43,10 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       subtitle={searchResult.artist}
       actions={
         <ActionPanel>
-          <PushAction
+          <ActionPanel.Item
             title={`Play the Album`}
-            target={
-              <RunScript
-                album={searchResult.album}
-                artist={searchResult.artist}
-              />
-            }
             icon={Icon.ArrowRight}
+            onAction={() => cue({ album: searchResult.album, artist: searchResult.artist })}
           />
         </ActionPanel>
       }
@@ -154,7 +76,7 @@ function useSearch() {
         ...oldState,
         isLoading: true,
       }));
-      await performSearch(searchText, cancelRef.current.signal);
+      const match = await performSearch(searchText, "album", cancelRef.current.signal);
       setState((oldState) => ({
         ...oldState,
         results: match.map((entry) => {
@@ -170,11 +92,7 @@ function useSearch() {
         return;
       }
       console.error("search error", error);
-      showToast(
-        ToastStyle.Failure,
-        "Could not perform search",
-        String(error)
-      ).then();
+      showToast(ToastStyle.Failure, "Could not perform search", String(error));
     }
   }
 
@@ -183,71 +101,3 @@ function useSearch() {
     search: search,
   };
 }
-
-async function performSearch(searchText: string, signal: AbortSignal) {
-  if (searchText.length < 2) return;
-
-  let sherlock = false;
-  let dictBlock = false;
-  let buffer = {
-    album: "",
-    artist: "",
-  };
-  match = [];
-  const read = readline.createInterface({
-    input: fs.createReadStream(XMLPath),
-    output: process.stdout,
-    terminal: false,
-  });
-  read.on("line", (line) => {
-    if (line.indexOf("</dict>") >= 0) {
-      dictBlock = false;
-      if (
-        match.filter((entry) => {
-          return entry.artist === buffer.artist && entry.album === buffer.album;
-        }).length === 0 &&
-        buffer.album.length > 0 &&
-        buffer.album.toLowerCase().indexOf(searchText.toLowerCase()) >= 0
-      ) {
-        match = [...match, buffer];
-      }
-      buffer = {
-        album: "",
-        artist: "",
-      };
-    }
-    if (line.indexOf("<dict>") >= 0) {
-      dictBlock = true;
-      return;
-    }
-    if (dictBlock) {
-      const [key, value] = [
-        line.match(/(?<=<key>).*?(?=<\/key>)/) || [],
-        line.match(/(?<=<string>).*?(?=<\/string>)/) || "",
-      ];
-      if (key[0] === "Artist") {
-        buffer.artist = value[0];
-      }
-      if (key[0] === "Album") {
-        buffer.album = value[0];
-      }
-    }
-  });
-  read.on("close", () => {
-    match = Array.from(new Set(match));
-    sherlock = true;
-  });
-  await waitUntil(() => sherlock || signal.aborted);
-}
-
-const waitUntil = (condition: () => boolean) => {
-  return new Promise<void>((resolve) => {
-    const interval = setInterval(() => {
-      if (!condition()) {
-        return;
-      }
-      clearInterval(interval);
-      resolve();
-    }, 100);
-  });
-};

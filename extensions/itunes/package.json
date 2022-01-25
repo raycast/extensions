@@ -30,6 +30,14 @@
       "description": "Enable \"Share iTunes Library XML with other applications\" and provide the XML file path.",
       "default": "~/Music/iTunes/iTunes Music Library.xml",
       "required": true
+    },
+    {
+      "name": "wait",
+      "title": "Seconds to Wait",
+      "type": "textfield",
+      "description": "Seconds to wait untill your iTunes is ready.",
+      "default": "10",
+      "required": true
     }
   ],
   "dependencies": {
