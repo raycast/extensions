@@ -5,11 +5,11 @@ const CaffeinateFor = () => {
   const onSubmit = async ({ time }: FormValues) => {
     if (!/^\d+$/.test(time)) {
       await showToast(ToastStyle.Failure, "Invalid time");
-      return
+      return;
     }
 
     await Caffeinate(`-t ${time}`);
-  }
+  };
 
   return (
     <Form
