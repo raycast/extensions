@@ -12,6 +12,7 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry })
   const getProjectById = (id: number) => projects.find((p) => p.id === id);
 
   const stopTimeEntry = async () => {
+    await showToast(ToastStyle.Animated, "Stopping time entry...");
     await toggl.stopTimeEntry({ id: runningTimeEntry.id });
     await storage.runningTimeEntry.refresh();
     await showToast(ToastStyle.Success, `Stopped time entry`);

@@ -26,6 +26,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
       description: values.description,
       tags: selectedTags,
     });
+    await showToast(ToastStyle.Animated, "Starting time entry...");
     await storage.runningTimeEntry.refresh();
     await showToast(ToastStyle.Success, "Started time entry");
     navigation.pop();
