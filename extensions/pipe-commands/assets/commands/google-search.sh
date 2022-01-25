@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# @raycast.title Google Search
+# @raycast.title Google
 # @raycast.packageName Web Searches
 # @raycast.selection {"type": "text", "percentEncoded": true}
 

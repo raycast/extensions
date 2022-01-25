@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# @raycast.title Copy File Content to Clipboard
+# @raycast.title Move to Trash
 # @raycast.packageName File Actions
 # @raycast.selection {"type": "file"}
 
-pbcopy < "$1"
+mv "$1" "$HOME/.Trash"
