@@ -12,7 +12,7 @@ Use the `Create Pipe command` command to generate a new pipe command template.
 
 The Pipe command syntax is very similar to the script command syntax, with some caveats:
 
-- Only the `title` fields is parsed (the other fields are ignored)
+- Only the `title` field is parsed (the other fields are ignored)
 - A new field is introduced: `@raycast.selection`. It is similar to the script command arguments, but support other types.
 
   | field          | description                                    | values            | required |
@@ -23,10 +23,10 @@ The Pipe command syntax is very similar to the script command syntax, with some 
 ## Pipe Commands logic
 
 The user selection will be passed to the script as the first argument.
-
 If the selection of the user is composed of multiple items, multiple args will be provided to the script.
 
-When manipulating text selections, the output of the script will replace the user selection.
+The output of the script will replace the current selection.
+If you want to provide a message to the user, use stderr.
 
 ## Example scripts
 

@@ -79,7 +79,7 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
   const { path: scriptPath, metadatas } = props.command;
   const isCustom = scriptPath.startsWith(environment.supportPath);
 
-  async function runCommand(onSuccess: (stdout: string) => void) {
+  async function runCommand() {
     chmodSync(scriptPath, 0o755);
 
     execa(
@@ -108,7 +108,7 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
       .then(async (res) => {
         if (!res) return;
         if (res.stdout) {
-          onSuccess(res.stdout);
+          pasteText(res.stdout);
         } else if (res.stderr) {
           showHUD(res.stderr);
         }
@@ -126,8 +126,7 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <ActionPanel.Item title="Run" icon={Icon.Terminal} onAction={() => runCommand(pasteText)} />
-            <ActionPanel.Item title="Copy" icon={Icon.Clipboard} onAction={() => runCommand(copyTextToClipboard)} />
+            <ActionPanel.Item title="Run" icon={Icon.Terminal} onAction={runCommand} />
           </ActionPanel.Section>
           {isCustom ? (
             <ActionPanel.Section>
