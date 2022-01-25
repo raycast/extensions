@@ -13,6 +13,7 @@ import {
   PushAction,
   render,
   showHUD,
+  showToast,
   Toast,
   ToastStyle,
 } from "@raycast/api";
@@ -160,8 +161,8 @@ async function main() {
   try {
     const selection = await getSelection();
     render(<PipeCommands selection={selection} />);
-  } catch (e: any) {
-    showHUD(e.message);
+  } catch (e: unknown) {
+    showToast(ToastStyle.Failure, (e as Error).message);
   }
 }
 
