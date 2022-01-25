@@ -53,16 +53,16 @@ function PipeCommands(props: { selection: Selection }): JSX.Element {
   return (
     <List isLoading={typeof commands == "undefined"} searchBarPlaceholder="Pipe selection to...">
       {props.selection.type == "file" && props.selection.content.length == 1 ? (
-          <List.Item
-            icon={Icon.TextDocument}
-            subtitle="File Actions"
-            title="Open With"
-            actions={
-              <ActionPanel>
-                <OpenWithAction path={props.selection.content[0]} />
-              </ActionPanel>
-            }
-          />
+        <List.Item
+          icon={Icon.TextDocument}
+          subtitle="File Actions"
+          title="Open With"
+          actions={
+            <ActionPanel>
+              <OpenWithAction path={props.selection.content[0]} />
+            </ActionPanel>
+          }
+        />
       ) : null}
       {commands
         ?.filter((command) => command.metadatas.selection.type == props.selection.type)

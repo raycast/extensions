@@ -35,6 +35,6 @@ export async function loadScriptCommands(scriptFolder: string): Promise<ScriptCo
       const metadatas = parseMetadatas(script);
       return { path: scriptPath, metadatas };
     })
-  )
-  return commands.filter(command => command.metadatas.title && command.metadatas.selection);
+  );
+  return commands.filter((command) => command.metadatas.title && command.metadatas.selection);
 }

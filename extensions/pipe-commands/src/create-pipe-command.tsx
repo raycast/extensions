@@ -33,7 +33,12 @@ const languageToProperties: Record<
   Ruby: { extension: ".rb", comments: "#", shebang: "#!/usr/bin/env ruby", helloWorld: "puts 'Hello World!'" },
   Swift: { extension: ".swift", comments: "//", shebang: "#!/usr/bin/swift", helloWorld: "print('Hello World!')" },
   PHP: { extension: ".php", comments: "//", shebang: "#!/usr/bin/env php", helloWorld: "<?php echo 'Hello World!' ?>" },
-  Applescript: { extension: ".applescript", comments: "#", shebang: "#!/usr/bin/osascript", helloWorld: "say \"Hello World!\"" },
+  Applescript: {
+    extension: ".applescript",
+    comments: "#",
+    shebang: "#!/usr/bin/osascript",
+    helloWorld: 'say "Hello World!"',
+  },
 };
 
 interface FormValues {
