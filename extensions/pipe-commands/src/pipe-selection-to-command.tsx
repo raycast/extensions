@@ -7,19 +7,22 @@ import {
   getSelectedText,
   Icon,
   List,
+  OpenAction,
   OpenWithAction,
   pasteText,
   popToRoot,
   PushAction,
   render,
   showHUD,
+  ShowInFinderAction,
   showToast,
   Toast,
   ToastStyle,
+  TrashAction,
 } from "@raycast/api";
 import { execa } from "execa";
 import { chmodSync } from "fs";
-import { resolve } from "path";
+import { basename, resolve } from "path";
 import { useEffect, useState } from "react";
 import PipeCommandForm from "./create-pipe-command";
 import { ArgumentType, ScriptCommand } from "./types";
@@ -55,7 +58,6 @@ function PipeCommands(props: { selection: Selection }): JSX.Element {
       {props.selection.type == "file" && props.selection.content.length == 1 ? (
         <List.Item
           icon={Icon.TextDocument}
-          subtitle="File Actions"
           title="Open With"
           actions={
             <ActionPanel>
@@ -75,6 +77,7 @@ function PipeCommands(props: { selection: Selection }): JSX.Element {
 
 function TextAction(props: { command: ScriptCommand; selection: Selection }) {
   const { path: scriptPath, metadatas } = props.command;
+  const isCustom = scriptPath.startsWith(environment.supportPath);
 
   async function runCommand(onSuccess: (stdout: string) => void) {
     chmodSync(scriptPath, 0o755);
@@ -118,18 +121,23 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
       key={scriptPath}
       icon={{ text: Icon.Text, file: Icon.TextDocument, url: Icon.Globe }[metadatas.selection.type]}
       title={metadatas.title}
+      subtitle={isCustom ? basename(scriptPath) : undefined}
+      accessoryIcon={isCustom ? Icon.Person : undefined}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <ActionPanel.Item title="Paste Output" icon={Icon.Terminal} onAction={() => runCommand(pasteText)} />
-            <ActionPanel.Item
-              title="Copy Output"
-              icon={Icon.Terminal}
-              onAction={() => runCommand(copyTextToClipboard)}
-            />
+            <ActionPanel.Item title="Run" icon={Icon.Terminal} onAction={() => runCommand(pasteText)} />
+            <ActionPanel.Item title="Copy" icon={Icon.Clipboard} onAction={() => runCommand(copyTextToClipboard)} />
           </ActionPanel.Section>
+          {isCustom ? (
+            <ActionPanel.Section>
+              <OpenAction icon={Icon.Upload} title="Open Pipe Command" target={scriptPath} />
+              <OpenWithAction path={scriptPath} />
+              <ShowInFinderAction path={scriptPath} />
+              <TrashAction paths={scriptPath} />
+            </ActionPanel.Section>
+          ) : null}
           <ActionPanel.Section>
-            <OpenWithAction title="Open Pipe Command" path={scriptPath} />
             <PushAction title="New Pipe Command" target={<PipeCommandForm />} />
           </ActionPanel.Section>
         </ActionPanel>
