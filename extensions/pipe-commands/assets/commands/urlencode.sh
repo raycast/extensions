@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# @raycast.title Echo
+# @raycast.title URL Encode
 # @raycast.packageName File Actions
 # @raycast.selection {"type": "text", "percentEncoded": true}
 
