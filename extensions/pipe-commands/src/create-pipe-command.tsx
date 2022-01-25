@@ -44,7 +44,6 @@ const languageToProperties: Record<
 interface FormValues {
   template: string;
   title: string;
-  packageName: string;
   percentEncoded: boolean;
   type: ArgumentType;
 }
@@ -66,8 +65,6 @@ export default function PipeCommandForm(): JSX.Element {
         values.type
       }", "placeholder": "selection", "percentEncoded": ${!!values.percentEncoded}}`,
     ];
-    if (values.packageName)
-      metadataLines.push(`${languageProperties.comments} @raycast.packageName ${values.packageName}`);
 
     const content = [languageProperties.shebang, "", ...metadataLines, "", languageProperties.helloWorld].join("\n");
 
@@ -90,7 +87,6 @@ export default function PipeCommandForm(): JSX.Element {
         ))}
       </Form.Dropdown>
       <Form.TextField title="Title" placeholder="Command Title" id="title" />
-      <Form.TextField title="Package Name" id="packageName" placeholder="E.g., Developer Utils" />
       <List.Section />
       <Form.Dropdown title="Accept" id="type">
         {["text", "file", "url"].map((type) => (

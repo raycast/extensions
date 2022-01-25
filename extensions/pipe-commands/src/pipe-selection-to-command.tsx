@@ -118,7 +118,6 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
       key={scriptPath}
       icon={{ text: Icon.Text, file: Icon.TextDocument, url: Icon.Globe }[metadatas.selection.type]}
       title={metadatas.title}
-      subtitle={metadatas.packageName}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

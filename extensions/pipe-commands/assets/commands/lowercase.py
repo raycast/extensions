@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 # @raycast.title Switch to Lowercase
-# @raycast.packageName Change Case
 # @raycast.selection {"type": "text"}
 
 import sys

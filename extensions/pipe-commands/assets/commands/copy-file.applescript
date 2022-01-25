@@ -1,7 +1,6 @@
 #!/usr/bin/osascript
 
 # @raycast.title Copy File to Clipboard
-# @raycast.packageName File Actions
 # @raycast.selection {"type": "file"}
 
 on run args

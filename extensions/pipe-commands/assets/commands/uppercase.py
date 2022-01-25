@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 # @raycast.title Switch to Uppercase
-# @raycast.packageName Change Case
 # @raycast.selection {"type": "text"}
 
 import sys

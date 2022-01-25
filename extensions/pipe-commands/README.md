@@ -12,7 +12,7 @@ Use the `Create Pipe command` command to generate a new pipe command template.
 
 The Pipe command syntax is very similar to the script command syntax, with some caveats:
 
-- Only the `title` and `packageName` fields are parsed (the other fields are ignored)
+- Only the `title` fields is parsed (the other fields are ignored)
 - A new field is introduced: `@raycast.selection`. It is similar to the script command arguments, but support other types.
 
   | field          | description                                    | values            | required |
@@ -36,7 +36,6 @@ When manipulating text selections, the output of the script will replace the use
 #!/bin/bash
 
 # @raycast.title Google Search
-# @raycast.packageName Web Searches
 # @raycast.selection {"type": "text", "percentEncoded": true}
 
 open "https://www.google.com/search?q=$1"
@@ -48,7 +47,6 @@ open "https://www.google.com/search?q=$1"
 #!/usr/bin/env python3
 
 # @raycast.title Switch to Uppercase
-# @raycast.packageName Change Case
 # @raycast.selection {"type": "text"}
 
 import sys

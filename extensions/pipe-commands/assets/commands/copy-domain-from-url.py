@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 # @raycast.title Copy Domain from URL
-# @raycast.packageName Developer Utils
 # @raycast.selection {"type": "url"}
 
 from urllib.parse import urlparse
