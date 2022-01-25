@@ -58,6 +58,7 @@ function ListView() {
                   <ActionPanel>
                     <PushAction
                       title="Create Time Entry"
+                      icon={{ source: Icon.Clock }}
                       target={
                         <AppContextProvider>
                           <CreateTimeEntryForm />
@@ -68,23 +69,29 @@ function ListView() {
                 }
               />
             </List.Section>
-            <List.Section title="Resume recent time entry">
-              {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
-                <List.Item
-                  key={timeEntry.id}
-                  keywords={[timeEntry.description, getProjectById(timeEntry.pid)?.name || ""]}
-                  title={timeEntry.description || "No description"}
-                  accessoryTitle={getProjectById(timeEntry?.pid)?.name}
-                  accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}
-                  icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}
-                  actions={
-                    <ActionPanel>
-                      <SubmitFormAction title="Resume Time Entry" onSubmit={() => resumeTimeEntry(timeEntry)} />
-                    </ActionPanel>
-                  }
-                />
-              ))}
-            </List.Section>
+            {timeEntriesWithUniqueProjectAndDescription.length > 0 && (
+              <List.Section title="Resume recent time entry">
+                {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
+                  <List.Item
+                    key={timeEntry.id}
+                    keywords={[timeEntry.description, getProjectById(timeEntry.pid)?.name || ""]}
+                    title={timeEntry.description || "No description"}
+                    accessoryTitle={getProjectById(timeEntry?.pid)?.name}
+                    accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}
+                    icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}
+                    actions={
+                      <ActionPanel>
+                        <SubmitFormAction
+                          title="Resume Time Entry"
+                          onSubmit={() => resumeTimeEntry(timeEntry)}
+                          icon={{ source: Icon.Clock }}
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                ))}
+              </List.Section>
+            )}
             <List.Section title="Projects">
               {projectGroups &&
                 projectGroups.map((group) =>
