@@ -11,8 +11,8 @@ import {
   pasteText,
   popToRoot,
   PushAction,
+  render,
   showHUD,
-  showToast,
   Toast,
   ToastStyle,
 } from "@raycast/api";
@@ -29,17 +29,17 @@ interface Selection {
   content: string;
 }
 
-export default function TextActions(): JSX.Element {
-  const [state, setState] = useState<{ selection: Selection; commands: ScriptCommand[] }>();
+function PipeCommands(props: { selection: Selection }): JSX.Element {
+  const [commands, setCommands] = useState<ScriptCommand[]>();
 
   const packages: Record<string, ScriptCommand[]> = {};
-  for (const script of state?.commands || []) {
+  for (const script of commands || []) {
     const packageName = script.metadatas.packageName || "Others";
     packages[packageName] = [...(packages[packageName] || []), script];
   }
 
   useEffect(() => {
-    async function loadScripts() {
+    async function loadCommands() {
       const [userCommands, defaultCommands] = await Promise.all([
         loadScriptCommands(environment.supportPath),
         loadScriptCommands(resolve(environment.assetsPath, "commands")),
@@ -47,38 +47,28 @@ export default function TextActions(): JSX.Element {
       return [...userCommands, ...defaultCommands];
     }
 
-    async function getSelection(): Promise<Selection> {
-      try {
-        const files = await getSelectedFinderItems();
-        if (files.length == 0) throw new Error("No file selected!");
-        return { type: "file", content: files[0].path };
-      } catch {
-        const text = await getSelectedText();
-        return { type: isValidUrl(text) ? "url" : "text", content: text };
-      }
-    }
 
-    Promise.all([loadScripts(), getSelection()])
-      .then(([scripts, selection]) => setState({ selection, commands: scripts }))
+    loadCommands()
+      .then(setCommands)
       .catch((e) => {
-        showToast(ToastStyle.Failure, e.message);
+        showHUD(e.message);
         popToRoot();
       });
   }, []);
 
+  console.log(packages);
+
   return (
-    <List isLoading={typeof state == "undefined"} searchBarPlaceholder="Send selection to...">
-      {state
-        ? Object.entries(packages).map(([packageName, commands]) => (
-            <List.Section key={packageName} title={packageName}>
-              {commands
-                ?.filter((command) => command.metadatas.argument1.type == state.selection.type)
-                .map((command) => (
-                  <TextAction key={command.path} command={command} selection={state.selection.content} />
-                ))}
-            </List.Section>
-          ))
-        : null}
+    <List isLoading={typeof commands == "undefined"} searchBarPlaceholder="Send selection to...">
+      {Object.entries(packages).map(([packageName, commands]) => (
+        <List.Section key={packageName} title={packageName}>
+          {commands
+            ?.filter((command) => command.metadatas.argument1.type == props.selection.type)
+            .map((command) => (
+              <TextAction key={command.path} command={command} selection={props.selection.content} />
+            ))}
+        </List.Section>
+      ))}
     </List>
   );
 }
@@ -130,9 +120,31 @@ function TextAction(props: { command: ScriptCommand; selection: string }) {
         <ActionPanel>
           <ActionPanel.Item title="Run" icon={Icon.Terminal} onAction={runCommand} />
           <OpenWithAction path={scriptPath} />
-          <PushAction title="New Pipe Command" target={<PipeCommandForm/>} />
+          <PushAction title="New Pipe Command" target={<PipeCommandForm />} />
         </ActionPanel>
       }
     />
   );
 }
+
+async function getSelection(): Promise<Selection> {
+  try {
+    const files = await getSelectedFinderItems();
+    if (files.length == 0) throw new Error("No file selected!");
+    return { type: "file", content: files[0].path };
+  } catch {
+    const text = await getSelectedText();
+    return { type: isValidUrl(text) ? "url" : "text", content: text };
+  }
+}
+
+async function main() {
+  try {
+    const selection = await getSelection();
+    render(<PipeCommands selection={selection} />);
+  } catch (e: any) {
+    showHUD(e.message);
+  }
+}
+
+main();
