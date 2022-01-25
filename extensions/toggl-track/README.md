@@ -2,7 +2,7 @@
 
 ## Getting started
 
-To use the extension you need to submit your API Token. This can be found on the bottom of your profile in toggle track: https://track.toggl.com/profile
+To use this extension, you need your Toggl Track API Token. This can be found on the bottom of your profile in toggle Track: https://track.toggl.com/profile
 
 ## Features
 
@@ -10,7 +10,7 @@ To use the extension you need to submit your API Token. This can be found on the
 
 <img width="600" alt="Screenshot 2022-01-23 at 01 57 00" src="https://user-images.githubusercontent.com/22563154/150660444-88b9ed81-d5d5-4aed-9bf7-41d8972dce3c.png">
 
-The running time entry is always shown on the top of the window with its duration, description and project. It is easily stopped by clicking on it or using the enter command.
+The running time entry is always visible on the top of the window with its duration, description, and project. It is easily stopped by clicking on it or using the enter command.
 
 ### Start a new time entry
 
@@ -32,7 +32,7 @@ The extension supports multiple workspaces and clients out of the box, and will 
 
 ### Cached resources
 
-The extension caches projects, workspaces, tags and recent projects from toggl, to spare internet bandwidth and unnecessary loading!
+The extension caches projects, workspaces, tags and recent projects from Toggl Track, to spare internet bandwidth and unnecessary loading!
 
 ## Planned features
 

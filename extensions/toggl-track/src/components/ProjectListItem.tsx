@@ -22,6 +22,7 @@ export default function ProjectListItem({
         <ActionPanel>
           <PushAction
             title="Create Time Entry"
+            icon={Icon.Clock}
             target={
               <AppContextProvider>
                 <CreateTimeEntryForm project={project} />

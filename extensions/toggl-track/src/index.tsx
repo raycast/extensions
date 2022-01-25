@@ -33,6 +33,7 @@ function ListView() {
   }, [] as TimeEntry[]);
 
   async function resumeTimeEntry(timeEntry: TimeEntry) {
+    await showToast(ToastStyle.Animated, "Starting timer...");
     await toggl.createTimeEntry({
       projectId: timeEntry.pid,
       description: timeEntry.description,

@@ -10,7 +10,7 @@
     {
       "name": "index",
       "title": "Track Time",
-      "subtitle": "Toggl",
+      "subtitle": "Toggl Track",
       "description": "Start and stop time entries with Toggl Track",
       "mode": "view"
     }
