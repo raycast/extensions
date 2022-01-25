@@ -3,15 +3,17 @@ import { v1 } from "@datadog/datadog-api-client";
 import fetch, { Response } from "node-fetch";
 import { APM } from "./types";
 
-const API_KEY = getPreferenceValues()["api-key"];
-const APP_KEY = getPreferenceValues()["app-key"];
+const { "api-key": API_KEY, "app-key": APP_KEY, server: SERVER } = getPreferenceValues();
 
 const configuration = v1.createConfiguration({ authMethods: { apiKeyAuth: API_KEY, appKeyAuth: APP_KEY } });
+v1.setServerVariables(configuration, {
+  site: SERVER,
+});
 
 export const dashboardsApi = new v1.DashboardsApi(configuration);
 
 export const apiAPM = ({ env }: { env: string }): Promise<APM[]> =>
-  fetch(`https://api.datadoghq.com/api/v1/service_dependencies?env=${env}`, params)
+  fetch(`https://api.${SERVER}/api/v1/service_dependencies?env=${env}`, params)
     .then(parseResponseToJSON)
     .then(json => json as Record<string, { calls: string[] }>)
     .then(rec => Object.entries(rec).sort(([l], [r]) => (l < r ? -1 : 1)))

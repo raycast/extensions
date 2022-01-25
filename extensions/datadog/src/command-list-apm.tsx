@@ -1,9 +1,10 @@
-import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, getPreferenceValues, List, OpenInBrowserAction } from "@raycast/api";
 import { useAPM } from "./useAPM";
 
 // noinspection JSUnusedGlobalSymbols
 export default function CommandListAPM() {
   const { apm, apmIsLoading } = useAPM();
+  const SERVER = getPreferenceValues()["server"];
 
   return (
     <List isLoading={apmIsLoading}>
@@ -17,7 +18,7 @@ export default function CommandListAPM() {
           keywords={[apm.env].concat(apm.calls)}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={`https://app.datadoghq.com/apm/service/${apm.name}?env=${apm.env}`} />
+              <OpenInBrowserAction url={`https://app.${SERVER}/apm/service/${apm.name}?env=${apm.env}`} />
             </ActionPanel>
           }
         />
