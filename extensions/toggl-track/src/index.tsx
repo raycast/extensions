@@ -34,14 +34,18 @@ function ListView() {
 
   async function resumeTimeEntry(timeEntry: TimeEntry) {
     await showToast(ToastStyle.Animated, "Starting timer...");
-    await toggl.createTimeEntry({
-      projectId: timeEntry.pid,
-      description: timeEntry.description,
-      tags: timeEntry.tags,
-    });
-    await storage.runningTimeEntry.refresh();
-    await showToast(ToastStyle.Success, "Time entry resumed");
-    await clearSearchBar({ forceScrollToTop: true });
+    try {
+      await toggl.createTimeEntry({
+        projectId: timeEntry.pid,
+        description: timeEntry.description,
+        tags: timeEntry.tags,
+      });
+      await storage.runningTimeEntry.refresh();
+      await showToast(ToastStyle.Success, "Time entry resumed");
+      await clearSearchBar({ forceScrollToTop: true });
+    } catch (e) {
+      await showToast(ToastStyle.Failure, "Failed to resume time entry");
+    }
   }
 
   return (

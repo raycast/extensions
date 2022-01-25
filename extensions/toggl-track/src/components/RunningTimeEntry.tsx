@@ -13,9 +13,13 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry })
 
   const stopTimeEntry = async () => {
     await showToast(ToastStyle.Animated, "Stopping time entry...");
-    await toggl.stopTimeEntry({ id: runningTimeEntry.id });
-    await storage.runningTimeEntry.refresh();
-    await showToast(ToastStyle.Success, `Stopped time entry`);
+    try {
+      await toggl.stopTimeEntry({ id: runningTimeEntry.id });
+      await storage.runningTimeEntry.refresh();
+      await showToast(ToastStyle.Success, `Stopped time entry`);
+    } catch (e) {
+      await showToast(ToastStyle.Failure, "Failed to stop time entry");
+    }
   };
 
   return (

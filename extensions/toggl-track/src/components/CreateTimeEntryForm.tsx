@@ -21,16 +21,20 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   async function handleSubmit(values: { description: string }) {
-    await toggl.createTimeEntry({
-      projectId: selectedProject?.id,
-      description: values.description,
-      tags: selectedTags,
-    });
-    await showToast(ToastStyle.Animated, "Starting time entry...");
-    await storage.runningTimeEntry.refresh();
-    await showToast(ToastStyle.Success, "Started time entry");
-    navigation.pop();
-    await clearSearchBar();
+    try {
+      await toggl.createTimeEntry({
+        projectId: selectedProject?.id,
+        description: values.description,
+        tags: selectedTags,
+      });
+      await showToast(ToastStyle.Animated, "Starting time entry...");
+      await storage.runningTimeEntry.refresh();
+      await showToast(ToastStyle.Success, "Started time entry");
+      navigation.pop();
+      await clearSearchBar();
+    } catch (e) {
+      await showToast(ToastStyle.Failure, "Failed to start time entry");
+    }
   }
 
   const projectTags = useMemo(() => {
