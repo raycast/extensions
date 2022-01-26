@@ -5,6 +5,9 @@
   "description": "Prevent the sleep function on your mac",
   "icon": "logo.png",
   "author": "mooxl",
+  "contributors": [
+    "bibixx"
+  ],
   "license": "MIT",
   "commands": [
     {
