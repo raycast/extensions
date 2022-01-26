@@ -45,7 +45,7 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
           clearLocalStorage();
           setIsValidToken(false);
         }
-        showToast(ToastStyle.Failure, "Failed to load data from toggl. Please try again.");
+        showToast(ToastStyle.Failure, "Failed to load data from Toggl. Please try again.");
       }
 
       setIsLoading(false);
