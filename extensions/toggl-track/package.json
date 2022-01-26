@@ -21,6 +21,7 @@
       "type": "password",
       "required": true,
       "title": "Toggl API Token",
+      "placeholder": "Can be found at https://track.toggl.com/profile",
       "description": "The API token for your Toggl account."
     }
   ],
