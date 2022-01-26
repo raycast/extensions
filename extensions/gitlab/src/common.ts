@@ -55,7 +55,7 @@ const defaultRefreshInterval = 10 * 1000;
 
 export function getCIRefreshInterval(): number | null {
   const preferences = getPreferenceValues();
-  const userValue = (preferences.cirefreshinterval as string);
+  const userValue = preferences.cirefreshinterval as string;
   if (!userValue || userValue.length <= 0) {
     return defaultRefreshInterval;
   }
