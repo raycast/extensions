@@ -1,12 +1,13 @@
 import { ApolloClient, ApolloLink, HttpLink, InMemoryCache, concat, NormalizedCacheObject } from "@apollo/client";
 import fetch from "node-fetch";
 
-import { preferences } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { GitLab } from "./gitlabapi";
 
 export function createGitLabClient() {
-  const instance = (preferences.instance?.value as string) || "https://gitlab.com";
-  const token = preferences.token?.value as string;
+  const preferences = getPreferenceValues();
+  const instance = (preferences.instance as string) || "https://gitlab.com";
+  const token = preferences.token as string;
   const gitlab = new GitLab(instance, token);
   return gitlab;
 }
@@ -24,8 +25,9 @@ export class GitLabGQL {
 }
 
 export function createGitLabGQLClient() {
-  const instance = (preferences.instance?.value as string) || "https://gitlab.com";
-  const token = preferences.token?.value as string;
+  const preferences = getPreferenceValues();
+  const instance = (preferences.instance as string) || "https://gitlab.com";
+  const token = preferences.token as string;
   const graphqlEndpoint = `${instance}/api/graphql`;
   const httpLink = new HttpLink({ uri: graphqlEndpoint, fetch });
 
@@ -52,7 +54,8 @@ export const gitlabgql = createGitLabGQLClient();
 const defaultRefreshInterval = 10 * 1000;
 
 export function getCIRefreshInterval(): number | null {
-  const userValue = (preferences.cirefreshinterval?.value as string) || "10";
+  const preferences = getPreferenceValues();
+  const userValue = (preferences.cirefreshinterval as string);
   if (!userValue || userValue.length <= 0) {
     return defaultRefreshInterval;
   }
