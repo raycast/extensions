@@ -121,7 +121,6 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
       key={scriptPath}
       icon={{ text: Icon.Text, file: Icon.TextDocument, url: Icon.Globe }[metadatas.selection.type]}
       title={metadatas.title}
-      subtitle={isCustom ? basename(scriptPath) : undefined}
       accessoryIcon={isCustom ? Icon.Person : undefined}
       actions={
         <ActionPanel>
