@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nsis-reference",
   "title": "NSIS Reference",
-  "description": "",
+  "description": "Search NSIS references",
   "icon": "command-icon.png",
   "author": "idleberg",
   "license": "MIT",
