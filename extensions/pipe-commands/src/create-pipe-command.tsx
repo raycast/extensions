@@ -2,7 +2,6 @@ import {
   ActionPanel,
   environment,
   Form,
-  List,
   popToRoot,
   showInFinder,
   showToast,
@@ -63,7 +62,7 @@ export default function PipeCommandForm(): JSX.Element {
       `${languageProperties.comments} @raycast.title ${values.title}`,
       `${languageProperties.comments} @raycast.selection {"type": "${
         values.type
-      }", "placeholder": "selection", "percentEncoded": ${!!values.percentEncoded}}`,
+      }", "percentEncoded": ${!!values.percentEncoded}}`,
     ];
 
     const content = [languageProperties.shebang, "", ...metadataLines, "", languageProperties.helloWorld].join("\n");
@@ -87,7 +86,6 @@ export default function PipeCommandForm(): JSX.Element {
         ))}
       </Form.Dropdown>
       <Form.TextField title="Title" placeholder="Command Title" id="title" />
-      <List.Section />
       <Form.Dropdown title="Accept" id="type">
         {["text", "file", "url"].map((type) => (
           <Form.Dropdown.Item key={type} title={type} value={type} />
