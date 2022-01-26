@@ -57,7 +57,7 @@ function PipeCommands(props: { selection: Selection }): JSX.Element {
     <List isLoading={typeof commands == "undefined"} searchBarPlaceholder="Pipe selection to...">
       {props.selection.type == "file" && props.selection.content.length == 1 ? (
         <List.Item
-          icon={Icon.TextDocument}
+          icon={Icon.Document}
           title="Open With"
           actions={
             <ActionPanel>
@@ -119,7 +119,7 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
   return (
     <List.Item
       key={scriptPath}
-      icon={{ text: Icon.Text, file: Icon.TextDocument, url: Icon.Globe }[metadatas.selection.type]}
+      icon={{ text: Icon.Text, file: Icon.Document, url: Icon.Globe }[metadatas.selection.type]}
       title={metadatas.title}
       accessoryIcon={isCustom ? Icon.Person : undefined}
       actions={
@@ -136,7 +136,7 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
             </ActionPanel.Section>
           ) : null}
           <ActionPanel.Section>
-            <PushAction title="New Pipe Command" target={<PipeCommandForm />} />
+            <PushAction icon={Icon.Plus} title="New Pipe Command" target={<PipeCommandForm />} />
           </ActionPanel.Section>
         </ActionPanel>
       }
