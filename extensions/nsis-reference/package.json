@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "NSIS Reference",
+      "title": "Search References",
+      "subtitle": "NSIS",
       "description": "Look up the NSIS documentation",
       "mode": "view"
     }
