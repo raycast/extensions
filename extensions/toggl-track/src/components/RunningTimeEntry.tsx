@@ -32,7 +32,7 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry })
         icon={{ source: Icon.Clock, tintColor: getProjectById(runningTimeEntry?.pid)?.hex_color }}
         actions={
           <ActionPanel>
-            <SubmitFormAction onSubmit={stopTimeEntry} title="Stop Time Entry" />
+            <SubmitFormAction icon={{ source: Icon.Clock }} onSubmit={stopTimeEntry} title="Stop Time Entry" />
           </ActionPanel>
         }
       />
