@@ -80,6 +80,7 @@ interface CollectionResult {
 // Likes Result
 interface LikesResult {
   id: number;
+  title: string;
   created_at: string;
   updated_at: string;
   width: number;
