@@ -8,6 +8,7 @@ import {
 } from "@raycast/api";
 
 // Functions
+import { saveImage } from "@/functions/saveImage";
 import { setWallpaper } from "@/functions/setWallpaper";
 import { copyFileToClipboard } from "@/functions/copyFileToClipboard";
 
@@ -74,6 +75,13 @@ export const Sections: React.FC<BaseProps> = ({ back = false, details = false, i
               icon={Icon.Desktop}
               shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
               onAction={() => setWallpaper({ url: imageUrl, id: String(item.id) })}
+            />
+
+            <ActionPanel.Item
+              title="Download Image"
+              icon={Icon.Desktop}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              onAction={() => saveImage({ url: imageUrl, id: String(item.id) })}
             />
           </>
         )}
