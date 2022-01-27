@@ -1,39 +1,19 @@
-import { ActionPanel, SubmitFormAction, Form, showToast, ToastStyle } from '@raycast/api';
-import { useState } from 'react';
-import { URL } from 'url';
-import { executeJxa } from './shared';
+import { ActionPanel, Form } from "@raycast/api";
 
-const addToReadingList = async (url: string) =>
-  executeJxa(`
-    const safari = Application("Safari");
-    safari.addReadingListItem("${url}")
-  `);
+import { AddToReadingListAction } from "./components";
 
-export default function Command() {
-  const [url, setUrl] = useState('');
-
-  const handleSubmit = async () => {
-    if (url) {
-      try {
-        const parsedUrl = new URL(url);
-        await addToReadingList(parsedUrl.href);
-        await showToast(ToastStyle.Success, 'Added to Reading List');
-        setUrl('');
-      } catch (err) {
-        await showToast(ToastStyle.Failure, 'Invalid URL', 'URL must start with http[s]://');
-      }
-    }
-  };
-
+const Command = () => {
   return (
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Add to Reading List" onSubmit={handleSubmit} />
+          <AddToReadingListAction />
         </ActionPanel>
       }
     >
-      <Form.TextField id="url" title="URL" value={url} onChange={setUrl} />
+      <Form.TextField id="url" title="URL" />
     </Form>
   );
-}
+};
+
+export default Command;

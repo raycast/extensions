@@ -9,9 +9,9 @@
   "commands": [
     {
       "name": "cloud-tabs",
-      "title": "Show Tabs",
+      "title": "Search Tabs",
       "subtitle": "Safari",
-      "description": "List, filter and open your Safari Tabs (Local and iCloud)",
+      "description": "Browse your open tabs (Local and iCloud)",
       "mode": "view",
       "preferences": [
         {
@@ -36,9 +36,9 @@
     },
     {
       "name": "reading-list",
-      "title": "Show Reading List",
+      "title": "Search Reading List",
       "subtitle": "Safari",
-      "description": "List, filter and open your Safari Reading List",
+      "description": "Browse your reading list",
       "mode": "view",
       "preferences": [
         {
@@ -55,7 +55,14 @@
       "name": "add-to-reading-list",
       "title": "Add to Reading List",
       "subtitle": "Safari",
-      "description": "Add URL to Safari Reading List",
+      "description": "Add an item to your reading list",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "subtitle": "Safari",
+      "description": "Browse your history",
       "mode": "view"
     }
   ],
@@ -81,6 +88,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }
