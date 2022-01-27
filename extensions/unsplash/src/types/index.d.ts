@@ -30,6 +30,7 @@ interface Urls {
 
 // Image Search
 interface SearchResult {
+  errors?: string[];
   id: number;
   created_at: string;
   title: string;

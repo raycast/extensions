@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, showHUD } from "@raycast/api";
 import fetch from "node-fetch";
 
 // Functions
@@ -21,7 +21,7 @@ export const useRandom = async () => {
     "932210", // Snow
   ].join(",");
 
-  const { urls, id } = await fetch(
+  const response = await fetch(
     `https://api.unsplash.com/photos/random?orientation=landscape&collections=${
       customCollections || defaultCollections
     }`,
@@ -30,10 +30,17 @@ export const useRandom = async () => {
         Authorization: `Client-ID ${accessKey}`,
       },
     }
-  ).then(async (res) => res.json() as Promise<SearchResult>);
+  ).then((res) => res.json() as Promise<SearchResult>);
+
+  if (response.errors) {
+    showHUD(response.errors[0]);
+    return;
+  }
+
+  const { urls, id } = response;
 
   const image = urls?.raw || urls?.full || urls?.regular;
-  await setWallpaper({ url: image, id: `${id}` });
+  await setWallpaper({ url: image, id: String(id) });
 };
 
 export default useRandom;
