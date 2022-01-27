@@ -10,7 +10,7 @@ export const useLikes = () => {
     showToast(ToastStyle.Failure, "Username is missing.", "Please set a username from extension settings.");
   }
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [likes, setLikes] = useState<LikesResult[]>([]);
 
   const fetcher = (url: string) =>
@@ -25,9 +25,10 @@ export const useLikes = () => {
       if ((data as Errors).errors) {
         setLoading(false);
         showToast(ToastStyle.Failure, "Failed to fetch likes.", (data as Errors).errors?.join("\n"));
+      } else {
+        setLikes(data);
       }
 
-      setLikes(data);
       setLoading(false);
     },
     onError: (error) => {
