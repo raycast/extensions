@@ -10,7 +10,7 @@ interface SetWallpaperProps {
 }
 
 export const setWallpaper = async ({ url, id }: SetWallpaperProps) => {
-  const toast = await showToast(ToastStyle.Animated, "Setting wallpaper...");
+  const toast = await showToast(ToastStyle.Animated, "Downloading and setting wallpaper...");
 
   const { path, downloadSize }: { path: string; downloadSize: DownloadSize } = getPreferenceValues();
   const selectedPath = path || environment.supportPath;
