@@ -2,10 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unsplash",
   "title": "Unsplash",
-  "description": "Set your desktop wallpaper with a random or recent picture from Unsplash!",
+  "description": "Search images or collections on Unsplash, download, copy or set them as background without leaving Raycast!",
   "icon": "command-icon.png",
   "author": "eggsy",
   "license": "MIT",
+  "keywords": [
+    "wallpaper",
+    "photo",
+    "desktop"
+  ],
   "commands": [
     {
       "name": "images",
