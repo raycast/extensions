@@ -10,7 +10,7 @@
     {
       "name": "system-monitor",
       "title": "System Monitor",
-      "description": "Show cpu and memory usages",
+      "description": "Show CPU and memory usage",
       "mode": "view"
     }
   ],
