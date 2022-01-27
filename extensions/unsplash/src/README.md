@@ -1,8 +1,7 @@
-#<p align="center">
-<img src="assets/command-icon.png" height="128">
-
+<p align="center">
+  <img src="assets/command-icon.png" height="128">
    <h1 align="center">Unsplash</h1>
- </p>
+</p>
 
 A [Raycast](https://raycast.com/) extension that lets you communicate with Unsplash's API and gives you access to some functions.
 
