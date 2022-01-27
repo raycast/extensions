@@ -39,6 +39,7 @@ interface SearchResult {
   likes: number;
   description: string;
   alt_description: string;
+  liked_by_user: boolean;
   user: User;
   urls: Urls;
   total_photos?: number;
