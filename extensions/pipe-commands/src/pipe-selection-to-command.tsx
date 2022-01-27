@@ -1,7 +1,6 @@
 import {
   ActionPanel,
   closeMainWindow,
-  copyTextToClipboard,
   environment,
   getSelectedFinderItems,
   getSelectedText,
@@ -16,7 +15,6 @@ import {
   showHUD,
   ShowInFinderAction,
   showToast,
-  Toast,
   ToastStyle,
   TrashAction,
 } from "@raycast/api";
@@ -80,8 +78,10 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
   const isCustom = scriptPath.startsWith(environment.supportPath);
 
   async function runCommand() {
-    chmodSync(scriptPath, 0o755);
+    closeMainWindow();
+    popToRoot();
 
+    chmodSync(scriptPath, 0o755);
     execa(
       scriptPath,
       metadatas.selection.percentEncoded ? props.selection.content.map(encodeURIComponent) : props.selection.content,
@@ -90,20 +90,7 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
       }
     )
       .catch(async (e) => {
-        const toast = new Toast({
-          style: ToastStyle.Failure,
-          title: "An error occured!",
-          message: e.shortMessage,
-          primaryAction: {
-            title: "Copy Error",
-            onAction: async () => {
-              await copyTextToClipboard(e.stderr);
-              await toast.hide();
-            },
-          },
-        });
-        await toast.show();
-        popToRoot();
+        showHUD(e.shortMessage);
       })
       .then(async (res) => {
         if (!res) return;
@@ -112,7 +99,6 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
         } else if (res.stderr) {
           showHUD(res.stderr);
         }
-        closeMainWindow();
       });
   }
 
