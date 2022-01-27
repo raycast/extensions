@@ -6,7 +6,7 @@
 A [Raycast](https://raycast.com/) extension that lets you communicate with Unsplash's API and gives you access to some functions.
 
 <p align="center">
-   <video src="TO_BE_ADDED" />
+   <video src="https://user-images.githubusercontent.com/13917975/151459995-19c353cf-33b2-427c-b50b-2670bc059566.mp4" />
 </p>
 
 ### Configuration
