@@ -22,11 +22,11 @@ import {
 } from "@raycast/api";
 import { execa } from "execa";
 import { chmodSync } from "fs";
-import { basename, resolve } from "path";
+import { resolve } from "path";
 import { useEffect, useState } from "react";
 import PipeCommandForm from "./create-pipe-command";
 import { ArgumentType, ScriptCommand } from "./types";
-import { isValidUrl, loadScriptCommands } from "./utils";
+import { loadScriptCommands } from "./utils";
 
 interface Selection {
   type: ArgumentType;
@@ -151,7 +151,7 @@ async function getSelection(): Promise<Selection> {
     return { type: "file", content: files.map((file) => file.path) };
   } catch {
     const text = await getSelectedText();
-    return { type: isValidUrl(text) ? "url" : "text", content: [text] };
+    return { type: "text", content: [text] };
   }
 }
 

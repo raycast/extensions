@@ -67,7 +67,7 @@ export default function PipeCommandForm(): JSX.Element {
 
     const content = [languageProperties.shebang, "", ...metadataLines, "", languageProperties.helloWorld].join("\n");
 
-    writeFileSync(filepath, content, { mode: 0o755 });
+    writeFileSync(filepath, content);
     showInFinder(filepath);
     popToRoot();
   }
@@ -87,7 +87,7 @@ export default function PipeCommandForm(): JSX.Element {
       </Form.Dropdown>
       <Form.TextField title="Title" placeholder="Command Title" id="title" />
       <Form.Dropdown title="Accept" id="type">
-        {["text", "file", "url"].map((type) => (
+        {["text", "file"].map((type) => (
           <Form.Dropdown.Item key={type} title={type} value={type} />
         ))}
       </Form.Dropdown>

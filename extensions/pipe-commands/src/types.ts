@@ -8,7 +8,7 @@ export interface ScriptMetadatas {
   selection: ScriptSelection;
 }
 
-export type ArgumentType = "text" | "file" | "url";
+export type ArgumentType = "text" | "file";
 
 export interface ScriptSelection {
   type: ArgumentType;
