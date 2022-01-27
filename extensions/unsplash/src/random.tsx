@@ -4,9 +4,9 @@ import { closeMainWindow, popToRoot } from "@raycast/api";
 import { useRandom } from "@/hooks/useRandom";
 
 const setDailyWallpaper = async () => {
-  await popToRoot();
   await closeMainWindow();
   await useRandom();
+  await popToRoot();
 };
 
 export default setDailyWallpaper;
