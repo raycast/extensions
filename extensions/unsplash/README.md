@@ -13,7 +13,7 @@ A [Raycast](https://raycast.com/) extension that lets you communicate with Unspl
 
 You will need some additional steps to install this plugin.
 
-- Unsplash API key, you can get one from [here](https://unsplash.com/developers)
+- Unsplash API key, you can get one from [here](https://unsplash.com/developers) (only "Public access" and "Write like acccess" permissions are enough)
 - Install the extension from [Raycast Store](https://www.raycast.com/eggsy/unsplash)
 - Type `Unsplash` to display all available options
 - Choose one and fill in the blanks with the details
