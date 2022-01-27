@@ -1,5 +1,5 @@
 interface SearchState<T> {
-  results: T extends "collection" ? CollectionResult[] : SearchResult[];
+  results: T extends "collections" ? CollectionResult[] : SearchResult[];
   isLoading: boolean;
 }
 

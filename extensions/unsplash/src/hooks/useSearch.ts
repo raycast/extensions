@@ -2,7 +2,7 @@ import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 
-export const useSearch = <T extends "photos" | "collections">(type: T) => {
+export const useSearch = <T extends "collections" | "photos">(type: T) => {
   const { accessKey, orientation } = getPreferenceValues();
 
   const [state, setState] = useState<SearchState<T>>({ results: [], isLoading: true });
@@ -69,7 +69,7 @@ export const useSearch = <T extends "photos" | "collections">(type: T) => {
       state: {
         results: [],
         isLoading: false,
-      } as SearchState<T>,
+      },
     };
 
     showToast(ToastStyle.Failure, "Something went wrong", String(error));
