@@ -1,16 +1,20 @@
 import { List, showToast, ToastStyle } from "@raycast/api";
 import _ from "lodash";
 import { useState } from "react";
-import { FallbackSearchSection, HistoryListSection } from "./components";
+import { FallbackSearchSection, HistoryListSection, PermissionError } from "./components";
 import { useHistorySearch } from "./hooks";
-import { groupHistoryByDay } from "./utils";
+import { groupHistoryByDay, isPermissionError } from "./utils";
 
 const Command = () => {
   const [searchText, setSearchText] = useState<string>();
   const { results, error, isLoading } = useHistorySearch(searchText);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search history", error instanceof Error ? error.message : undefined);
+    if (isPermissionError(error)) {
+      return <PermissionError />;
+    } else {
+      showToast(ToastStyle.Failure, "Cannot search history", error instanceof Error ? error.message : undefined);
+    }
   }
 
   const groupedHistoryEntries = _.chain(results).reduce(groupHistoryByDay, new Map()).value();

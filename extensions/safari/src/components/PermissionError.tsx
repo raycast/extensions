@@ -1,4 +1,5 @@
-import { Detail } from "@raycast/api";
+import { ActionPanel, Detail } from "@raycast/api";
+import OpenFullDiskAccessPreferencePaneAction from "./OpenFullDiskAccessPreferencePane";
 
 // @TODO: This screen should be handled by Raycast itself (https://github.com/raycast/extensions/issues/101)
 const permissionErrorMarkdown = `## Raycast needs full disk access in order to display your Safari bookmarks.
@@ -11,6 +12,12 @@ const permissionErrorMarkdown = `## Raycast needs full disk access in order to d
 4. Enter your macOS administrator password
 5. Drag and Drop the icon for the **Raycast** application into the list as seen above`;
 
-const PermissionError = () => <Detail markdown={permissionErrorMarkdown} />;
+const Actions = () => (
+  <ActionPanel>
+    <OpenFullDiskAccessPreferencePaneAction />
+  </ActionPanel>
+);
+
+const PermissionError = () => <Detail markdown={permissionErrorMarkdown} actions={<Actions />} />;
 
 export default PermissionError;

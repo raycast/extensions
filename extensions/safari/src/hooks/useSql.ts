@@ -3,6 +3,7 @@ import { readFile } from "fs/promises";
 import { resolve } from "path";
 import { useRef, useState, useEffect } from "react";
 import initSqlJs, { Database } from "sql.js";
+import { PermissionError } from "../utils";
 
 const loadDatabase = async (path: string) => {
   const fileContents = await readFile(path);
@@ -20,7 +21,16 @@ const useSql = <Result>(path: string, query: string) => {
   useEffect(() => {
     (async () => {
       if (!databaseRef.current) {
-        databaseRef.current = await loadDatabase(path);
+        try {
+          databaseRef.current = await loadDatabase(path);
+        } catch (e) {
+          if (e instanceof Error && e.message.includes("operation not permitted")) {
+            setError(new PermissionError("You do not have permission to access the History database."));
+          } else {
+            setError(e);
+          }
+          return;
+        }
       }
 
       try {
@@ -34,7 +44,16 @@ const useSql = <Result>(path: string, query: string) => {
 
         statement.free();
       } catch (e) {
-        setError(e);
+        console.log("type", typeof e);
+        if (error instanceof Error && error.message.includes("operation not permitted")) {
+          console.log("ERRRORROROR");
+
+          setError(new PermissionError("You do not have permission to access the History database."));
+        } else {
+          console.log("asdfasdf");
+
+          setError(e);
+        }
       } finally {
         setIsLoading(false);
       }
