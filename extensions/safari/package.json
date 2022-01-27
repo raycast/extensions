@@ -5,6 +5,9 @@
   "description": "Manage your Safari Tabs (Local and iCloud) and Reading List",
   "icon": "safari-icon.png",
   "author": "loris",
+  "contributors": [
+    "thomas"
+  ],
   "license": "MIT",
   "commands": [
     {
