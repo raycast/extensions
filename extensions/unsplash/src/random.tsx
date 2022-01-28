@@ -1,12 +1,11 @@
-import { closeMainWindow, popToRoot } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 
 // Functions
 import { useRandom } from "@/hooks/useRandom";
 
-const setDailyWallpaper = async () => {
-  await closeMainWindow();
+const setRandomWallpaper = async () => {
+  showHUD("Downloading and setting a new wallpaper...");
   await useRandom();
-  await popToRoot();
 };
 
-export default setDailyWallpaper;
+export default setRandomWallpaper;
