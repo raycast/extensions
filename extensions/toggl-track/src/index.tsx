@@ -33,7 +33,7 @@ function ListView() {
   const { isLoading, isValidToken, projectGroups, runningTimeEntry, timeEntries, projects } = useAppContext();
   const getProjectById = (id: number) => projects.find((p) => p.id === id);
   const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce((acc, timeEntry) => {
-    const existing = acc.find((t) => (t.description === timeEntry.description && t.pid === timeEntry.pid) || !timeEntry.stop);
+    const existing = acc.find((t) => (t.description === timeEntry.description && t.pid === timeEntry.pid) || !("stop" in timeEntry));
     if (!existing) {
       acc.push(timeEntry);
     }

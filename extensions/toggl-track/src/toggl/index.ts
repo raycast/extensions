@@ -59,7 +59,7 @@ const TogglAPI = function (apiToken: string) {
       description: string;
       tags: string[];
       start: string;
-      duration: string;
+      duration: number;
     }) => {
       return api.post<{ data: TimeEntry }>(`/time_entries`, {
         time_entry: {
@@ -85,7 +85,7 @@ const TogglAPI = function (apiToken: string) {
       description: string;
       tags: string[];
       start: string;
-      duration?: string;
+      duration?: number;
     }) => {
       return api.post<{ data: TimeEntry }>(`/time_entries/${id}`, {
         time_entry: {

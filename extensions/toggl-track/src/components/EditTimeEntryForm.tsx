@@ -10,12 +10,11 @@ import {
 } from "@raycast/api";
 import toggl from "../toggl";
 import { storage } from "../storage";
-import { Project } from "../toggl/types";
+import { Project, TimeEntry } from "../toggl/types";
 import { useAppContext } from "../context";
 import { useMemo, useState } from "react";
-import { TimeEntry } from "./toggl/types";
 
-function EditTimeEntryForm({ project, entry }: { project: Project; timeEntry: TimeEntry }) {
+function EditTimeEntryForm({ project, entry }: { project?: Project; entry: TimeEntry }) {
   const navigation = useNavigation();
   const { projects, tags, isLoading, projectGroups } = useAppContext();
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(project);
@@ -29,15 +28,14 @@ function EditTimeEntryForm({ project, entry }: { project: Project; timeEntry: Ti
         description: values.description,
         tags: values.tags,
         start: values.start,
-        duration: (entry.stop ? Math.trunc((new Date(values.end) - new Date(values.start)) / 1000) : -1)
+        duration: (values.end ? Math.trunc((new Date(values.end).getTime() - new Date(values.start).getTime()) / 1000) : -1)
       });
       await showToast(ToastStyle.Animated, "Updating time entry...");
-      entry.stop ? await storage.timeEntries.refresh() : await storage.runningTimeEntry.refresh();;
+      "stop" in entry ? await storage.timeEntries.refresh() : await storage.runningTimeEntry.refresh();;
       await showToast(ToastStyle.Success, "Updated time entry");
       navigation.pop();
       await clearSearchBar();
     } catch (e) {
-      console.log(e)
       await showToast(ToastStyle.Failure, "Failed to update time entry");
     }
   }
@@ -56,7 +54,7 @@ function EditTimeEntryForm({ project, entry }: { project: Project; timeEntry: Ti
   const onTagsChange = (tags: string[]) => {
     setSelectedTags(tags);
   };
-  
+
   return(
     <Form
       isLoading={isLoading}
@@ -68,7 +66,7 @@ function EditTimeEntryForm({ project, entry }: { project: Project; timeEntry: Ti
     >
       <Form.TextArea id="description" title="Description" defaultValue={entry.description} />
       <Form.DatePicker id="start" title="Start Time" defaultValue={new Date(entry.start).toISOString().replace("T", " ").substring(0, 16) + " UTC" } />
-      {entry.stop ?
+      {"stop" in entry ?
         <Form.DatePicker id="end" title="End Time" defaultValue={ new Date(entry.stop).toISOString().replace("T", " ").substring(0, 16) + " UTC" } /> : undefined
       }
       <Form.Dropdown

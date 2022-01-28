@@ -27,14 +27,14 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(project);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  async function handleSubmit(values: { description: string }) {
+  async function handleSubmit(values: { description: string; start: string; end: string; }) {
     try {
       await toggl.createTimeEntry({
         projectId: selectedProject?.id,
         description: values.description,
         tags: selectedTags,
         start: values.start,
-        duration: Math.trunc((new Date(values.end) - new Date(values.start)) / 1000)
+        duration: Math.trunc((new Date(values.end).getTime() - new Date(values.start).getTime()) / 1000)
       });
       await showToast(ToastStyle.Animated, "Creating time entry...");
       await storage.timeEntries.refresh();
