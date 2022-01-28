@@ -253,7 +253,7 @@ TODO
     await execPromise(
       `gh pr create --base main --head ${owner}:${branch} --title "${isUpdate ? "Update" : "Add"} ${
         packageJSON.name
-      } extension" --body "${PRBody}"`,
+      } extension" --body "${PRBody}" --repo raycast/extensions`,
       {
         env: { ...process.env },
         cwd: forkPath,
