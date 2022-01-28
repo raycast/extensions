@@ -16,8 +16,8 @@
   ],
   "preferences": [
     {
-      "name": "kagiToken",
-      "type": "textfield",
+      "name": "token",
+      "type": "private",
       "title": "Kagi Token",
       "description": "Please enter your Kagi Token",
       "required": true

@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { getSearchResults, getSearchHistory } from "./handleResults";
 import { SearchResult, HISTORY_KEY } from "./types";
 
-export function useSearch(kagiToken: string) {
+export function useSearch(token: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [history, setHistory] = useState<SearchResult[]>([]);
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -73,7 +73,7 @@ export function useSearch(kagiToken: string) {
       let results: SearchResult[] = [];
 
       if (query) {
-        results = await getSearchResults(query, kagiToken, cancelRef.current.signal);
+        results = await getSearchResults(query, token, cancelRef.current.signal);
       }
 
       setIsLoading(false);

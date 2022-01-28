@@ -15,7 +15,7 @@ export async function getSearchHistory(): Promise<SearchResult[]> {
 
 export async function getSearchResults(
   searchText: string,
-  kagiToken: string,
+  token: string,
   signal: AbortSignal
 ): Promise<SearchResult[]> {
   const response = await fetch(`https://kagi.com/api/autosuggest?q=${encodeURIComponent(searchText)}`, {
@@ -40,7 +40,7 @@ export async function getSearchResults(
       id: randomId(),
       query: searchText,
       description: `Search Kagi for '${searchText}'`,
-      url: `https://kagi.com/search?token=${kagiToken}&q=${encodeURIComponent(searchText)}`,
+      url: `https://kagi.com/search?token=${token}&q=${encodeURIComponent(searchText)}`,
     },
   ];
 
@@ -49,7 +49,7 @@ export async function getSearchResults(
       id: randomId(),
       query: item,
       description: `Search Kagi for '${item}'`,
-      url: `https://kagi.com/search?token=${kagiToken}&q=${encodeURIComponent(item)}`,
+      url: `https://kagi.com/search?token=${token}&q=${encodeURIComponent(item)}`,
     };
   });
 
