@@ -19,8 +19,6 @@ export const copyFileToClipboard = async ({ url, id }: CopyFileToClipboardProps)
   try {
     const actualPath = path ? join(homedir(), fixedPathName) : fixedPathName;
 
-    console.log(actualPath);
-
     const command = !existsSync(actualPath)
       ? `set cmd to "curl -o " & q_temp_folder & " " & "${url}"
         do shell script cmd`
