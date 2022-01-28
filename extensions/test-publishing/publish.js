@@ -8,8 +8,6 @@ const os = require("os");
 const supportPath = path.join(os.homedir(), "Library/Application Support/com.raycast.macos.debug");
 const forkPath = path.join(supportPath, "extensions-fork");
 
-console.log(forkPath);
-
 const packageJSON = require("./package.json");
 
 const execPromise = promisify(exec);
@@ -157,7 +155,7 @@ async function assertSomethingToPublish() {
 }
 
 async function isPRAlreadyOpen(branch) {
-  const prs = JSON.parse(
+  const prs = (
     await execPromise(
       `gh pr list --repo raycast/extensions --author mathieudutour --state open --json headRefName,url`,
       {
@@ -165,6 +163,8 @@ async function isPRAlreadyOpen(branch) {
       }
     )
   ).stdout.trim();
+
+  console.log(prs);
 
   return prs.find((x) => x.headRefName === branch)?.url;
 }
