@@ -23,6 +23,7 @@ import {
   ColorTempControlAction,
   ColorTempControlDownAction,
   ColorTempControlUpAction,
+  ColorRgbControlAction,
   getLightRGBFromState,
 } from "./light";
 import { changeRGBBrightness, RGBtoString } from "../color";
@@ -403,10 +404,11 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             <BrightnessUpAction state={state} />
             <BrightnessDownAction state={state} />
           </ActionPanel.Section>
-          <ActionPanel.Section title="Color Temperature">
+          <ActionPanel.Section title="Color">
             <ColorTempControlAction state={state} />
             <ColorTempControlUpAction state={state} />
             <ColorTempControlDownAction state={state} />
+            <ColorRgbControlAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
