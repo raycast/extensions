@@ -95,12 +95,12 @@ function TextAction(props: { command: ScriptCommand; selection: Selection; reloa
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <ActionPanel.Item title="Run (Paste Output)" icon={Icon.Terminal} onAction={handleCommand(pasteText)} />
             <ActionPanel.Item
               title="Run (Copy Output)"
               icon={Icon.Terminal}
               onAction={handleCommand(copyTextToClipboard)}
             />
+            <ActionPanel.Item title="Run (Paste Output)" icon={Icon.Terminal} onAction={handleCommand(pasteText)} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <OpenAction icon={Icon.Upload} title="Open Pipe Command" target={scriptPath} />
