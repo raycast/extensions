@@ -1,3 +1,3 @@
 import { environment } from "@raycast/api";
 
-console.log(environment);
+console.log(environment, 2);
