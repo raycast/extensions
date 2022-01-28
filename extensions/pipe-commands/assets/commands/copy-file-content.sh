@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# @raycast.title Copy File Content to Clipboard
+# @raycast.title Copy File Content
 # @raycast.selection {"type": "file"}
 
-pbcopy < "$1"
+cat "$1"
