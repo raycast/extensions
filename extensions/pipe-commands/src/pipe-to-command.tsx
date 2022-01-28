@@ -80,10 +80,10 @@ function TextAction(props: { command: ScriptCommand; selection: Selection; reloa
       toast.hide();
       if (res.stdout) {
         await outputHandler(res.stdout);
-        await closeMainWindow();
       } else if (res.stderr) {
         await showHUD(res.stderr);
       }
+      await closeMainWindow();
     };
   }
 
