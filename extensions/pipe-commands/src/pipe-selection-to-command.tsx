@@ -131,8 +131,13 @@ async function getSelection(): Promise<Selection> {
     if (files.length == 0) throw new Error("No file selected!");
     return { type: "file", content: files.map((file) => file.path) };
   } catch {
+    try {
     const text = await getSelectedText();
     return { type: "text", content: [text] };
+    } catch {
+      const {stdout: clipboard} = await execa("pbpaste");
+      return { type: "text", content: [clipboard] };
+    }
   }
 }
 
