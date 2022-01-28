@@ -110,7 +110,7 @@ async function cloneFork(owner, repo) {
 
 async function isPublishingUpdate(branch) {
   try {
-    await execPromise(`git show-ref --quiet refs/heads/${branch}`);
+    console.log(await execPromise(`git show-ref --quiet refs/heads/${branch}`));
     return true;
   } catch (err) {
     return false;
@@ -227,6 +227,8 @@ ${existingPR}`);
     // await execPromise("git checkout release && git pull && git checkout master && git pull");
     process.exit(0);
   }
+
+  console.log("here");
 
   const PRBody = `## Description
 
