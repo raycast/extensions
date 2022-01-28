@@ -1,23 +1,15 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-  randomId,
-} from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
+import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 
 export default function Command() {
-  const { state, search } = useSearch();
+  const [results, isLoading, search] = useSearch();
 
   return (
-    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search by name..." throttle>
-      <List.Section title="Results" subtitle={state.results.length + ""}>
-        {state.results.map((searchResult) => (
-          <SearchListItem key={searchResult.id} searchResult={searchResult} />
+    <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search npm packages..." throttle>
+      <List.Section title="Results" subtitle={results.length + ""}>
+        {results.map((searchResult) => (
+          <SearchListItem key={searchResult.name} searchResult={searchResult} />
         ))}
       </List.Section>
     </List>
@@ -49,8 +41,30 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
 }
 
 function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
+  const [isLoading, setIsLoading] = useState(true);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const cancelRef = useRef<AbortController | null>(null);
+
+  const search = useCallback(
+    async function search(searchText: string) {
+      cancelRef.current?.abort();
+      cancelRef.current = new AbortController();
+      setIsLoading(true);
+      try {
+        const results = await performSearch(searchText, cancelRef.current.signal);
+        setResults(results);
+      } catch (error) {
+        if (error instanceof AbortError) {
+          return;
+        }
+        console.error("search error", error);
+        showToast(ToastStyle.Failure, "Could not perform search", String(error));
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [cancelRef, setIsLoading, setResults]
+  );
 
   useEffect(() => {
     search("");
@@ -59,33 +73,7 @@ function useSearch() {
     };
   }, []);
 
-  async function search(searchText: string) {
-    cancelRef.current?.abort();
-    cancelRef.current = new AbortController();
-    try {
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-      const results = await performSearch(searchText, cancelRef.current.signal);
-      setState((oldState) => ({
-        ...oldState,
-        results: results,
-        isLoading: false,
-      }));
-    } catch (error) {
-      if (error instanceof AbortError) {
-        return;
-      }
-      console.error("search error", error);
-      showToast(ToastStyle.Failure, "Could not perform search", String(error));
-    }
-  }
-
-  return {
-    state: state,
-    search: search,
-  };
+  return [results, isLoading, search] as const;
 }
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
@@ -97,35 +85,31 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
     signal: signal,
   });
 
-  if (!response.ok) {
-    return Promise.reject(response.statusText);
+  const json = (await response.json()) as
+    | {
+        results: {
+          package: { name: string; description?: string; publisher?: { username: string }; links: { npm: string } };
+        }[];
+      }
+    | { code: string; message: string };
+
+  if (!response.ok || "message" in json) {
+    throw new Error("message" in json ? json.message : response.statusText);
   }
 
-  type Json = Record<string, unknown>;
-
-  const json = (await response.json()) as Json;
-  const jsonResults = (json?.results as Json[]) ?? [];
-  return jsonResults.map((jsonResult) => {
-    const npmPackage = jsonResult.package as Json;
+  return json.results.map((result) => {
     return {
-      id: randomId(),
-      name: npmPackage.name as string,
-      description: (npmPackage?.description as string) ?? "",
-      username: ((npmPackage.publisher as Json)?.username as string) ?? "",
-      url: (npmPackage.links as Json).npm as string,
+      name: result.package.name,
+      description: result.package.description,
+      username: result.package.publisher?.username,
+      url: result.package.links.npm,
     };
   });
 }
 
-interface SearchState {
-  results: SearchResult[];
-  isLoading: boolean;
-}
-
 interface SearchResult {
-  id: string;
   name: string;
-  description: string;
+  description?: string;
   username?: string;
   url: string;
 }

@@ -90,7 +90,6 @@ export function IssueMRCreateForm({
 
   return (
     <Form
-      onSubmit={submit}
       isLoading={project === undefined && branches === undefined}
       actions={
         <ActionPanel>
@@ -144,7 +143,6 @@ export function MRCreateForm(props: { project?: Project | undefined; branch?: st
 
   return (
     <Form
-      onSubmit={submit}
       isLoading={isLoading}
       actions={
         <ActionPanel>

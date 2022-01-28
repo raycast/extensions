@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "manage-clickup-tasks",
+  "title": "Clickup Tasks Explorer",
+  "description": "Browse ClickUp tasks from RayCast",
+  "icon": "clickup-icon.png",
+  "author": "aparandeh",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Tasks Explorer",
+      "subtitle": "Clickup",
+      "description": "Browse ClickUp tasks from RayCast",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your ClickUp API token taken from User Settings > apps > API Token in ClickUp Desktop",
+      "link": "https://github.com/Ali-Parandeh/raycast-clickup-extension",
+      "placeholder": "Enter your ClickUp API token."
+    },
+    {
+      "name": "teamId",
+      "type": "textfield" ,
+      "required": false,
+      "title": "Default Team ID",
+      "description": "Your default ClickUp team ID taken from https://app.clickup.com/<team_id>",
+      "link": "https://github.com/Ali-Parandeh/raycast-clickup-extension",
+      "placeholder": "123456789"
+    },
+    {
+      "name": "spaceId",
+      "type": "textfield" ,
+      "required": false,
+      "title": "Default Space ID",
+      "description": "Set your default ClickUp space ID taken from https://app.clickup.com/<team_id>/v/b/1234-{space_id}-1234",
+      "link": "https://github.com/Ali-Parandeh/raycast-clickup-extension",
+      "placeholder": "123456789"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.0",
+    "axios": "^0.24.0",
+    "prettier": "^2.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

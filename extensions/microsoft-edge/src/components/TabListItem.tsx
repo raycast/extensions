@@ -1,6 +1,6 @@
-import { DEFAULT_ERROR_TITLE } from '../common/constants';
-import { runAppleScript } from 'run-applescript';
-import { Tab } from '../lib/Tab';
+import { DEFAULT_ERROR_TITLE } from "../common/constants";
+import { runAppleScript } from "run-applescript";
+import { Tab } from "../lib/Tab";
 import {
   ActionPanel,
   closeMainWindow,

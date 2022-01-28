@@ -19,49 +19,27 @@ export function xcodeCreateSwiftPackageForm(
         <ActionPanel>
           <SubmitFormAction
             title={"Create Swift Package"}
-            onSubmit={
-              formValues => {
-                onFormSubmit(
-                  formValues,
-                  xcodeSwiftPackageService,
-                  navigation
-                );
-              }
-            }
+            onSubmit={(formValues) => {
+              onFormSubmit(formValues, xcodeSwiftPackageService, navigation);
+            }}
           />
         </ActionPanel>
-      }>
-      <Form.TextField
-        id="name"
-        title={"Name"}
-        defaultValue="MyLibrary"
-      />
-      <Form.TextField
-        id="location"
-        title="Location"
-        defaultValue="~/Desktop"
-      />
-      <Form.Dropdown
-        id="type"
-        title="Type"
-        defaultValue={XcodeSwiftPackageType.library}>
-        {
-          Object
-            .keys(XcodeSwiftPackageType)
-            .map((packageType) => {
-              return <Form.Dropdown.Item
-                key={packageType}
-                value={packageType}
-                title={packageType.charAt(0).toUpperCase() + packageType.slice(1)}
-              />;
-            })
-        }
+      }
+    >
+      <Form.TextField id="name" title={"Name"} defaultValue="MyLibrary" />
+      <Form.TextField id="location" title="Location" defaultValue="~/Desktop" />
+      <Form.Dropdown id="type" title="Type" defaultValue={XcodeSwiftPackageType.library}>
+        {Object.keys(XcodeSwiftPackageType).map((packageType) => {
+          return (
+            <Form.Dropdown.Item
+              key={packageType}
+              value={packageType}
+              title={packageType.charAt(0).toUpperCase() + packageType.slice(1)}
+            />
+          );
+        })}
       </Form.Dropdown>
-      <Form.Checkbox
-        id="open"
-        label="Open in Xcode after creation"
-        defaultValue={true}
-      />
+      <Form.Checkbox id="open" label="Open in Xcode after creation" defaultValue={true} />
     </Form>
   );
 }
@@ -81,15 +59,10 @@ async function onFormSubmit(
   let swiftPackage: XcodeSwiftPackage;
   try {
     // Create Swift Package with parameters
-    swiftPackage = await xcodeSwiftPackageService.createSwiftPackage(
-      formValues as XcodeSwiftPackageCreationParameters
-    );
+    swiftPackage = await xcodeSwiftPackageService.createSwiftPackage(formValues as XcodeSwiftPackageCreationParameters);
   } catch {
     // Show failure Toast
-    await showToast(
-      ToastStyle.Failure,
-      "An error occurred while creating the Swift Package"
-    );
+    await showToast(ToastStyle.Failure, "An error occurred while creating the Swift Package");
     // Return out of function
     return;
   }
@@ -104,17 +77,11 @@ async function onFormSubmit(
       await showHUD(successMessageTitle);
     } catch {
       // Show failure Toast
-      await showToast(
-        ToastStyle.Failure,
-        "Swift Package could not be opened"
-      );
+      await showToast(ToastStyle.Failure, "Swift Package could not be opened");
     }
   } else {
     // Show success Toast
-    await showToast(
-      ToastStyle.Success,
-      successMessageTitle
-    );
+    await showToast(ToastStyle.Success, successMessageTitle);
   }
   // Pop to root
   navigation.pop();

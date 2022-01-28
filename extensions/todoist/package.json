@@ -29,10 +29,17 @@
       "mode": "view"
     },
     {
-      "name": "create",
+      "name": "create-task",
       "title": "Create Task",
       "subtitle": "Todoist",
       "description": "Create a Todoist task.",
+      "mode": "view"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "subtitle": "Todoist",
+      "description": "Create a Todoist project.",
       "mode": "view"
     }
   ],
@@ -47,19 +54,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "axios": "^0.21.4",
-    "date-fns": "^2.25.0",
-    "swr": "^1.0.1"
+    "@raycast/api": "^1.26.3",
+    "axios": "^0.24.0",
+    "date-fns": "^2.27.0",
+    "lodash": "^4.17.21",
+    "swr": "^1.0.0"
   },
   "devDependencies": {
-    "@types/node": "^16.11.0",
-    "@types/react": "^17.0.30",
-    "@typescript-eslint/eslint-plugin": "^4.33.0",
-    "@typescript-eslint/parser": "^4.33.0",
-    "eslint": "^7.32.0",
+    "@types/lodash": "^4.14.178",
+    "@types/node": "^16.11.12",
+    "@types/react": "^17.0.37",
+    "@typescript-eslint/eslint-plugin": "^5.6.0",
+    "@typescript-eslint/parser": "^5.6.0",
+    "eslint": "^8.4.1",
     "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.5.3"
   },
   "scripts": {
     "build": "ray build -e dist",

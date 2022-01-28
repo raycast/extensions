@@ -1,4 +1,14 @@
-import { ActionPanel, getLocalStorageItem, getPreferenceValues, Icon, List, removeLocalStorageItem, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  getLocalStorageItem,
+  getPreferenceValues,
+  Icon,
+  List,
+  removeLocalStorageItem,
+  setLocalStorageItem,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 
@@ -8,7 +18,11 @@ import { Alert, AlertListItem, fetchAlerts } from "./alerts";
 const preferences: Preferences = getPreferenceValues();
 
 export default function SavedSearchesList() {
-  const [state, setState] = useState<{ alerts: Alert[], active: string, savedSearches: SavedSearch[] }>({ alerts: [], active: '', savedSearches: [] });
+  const [state, setState] = useState<{ alerts: Alert[]; active: string; savedSearches: SavedSearch[] }>({
+    alerts: [],
+    active: "",
+    savedSearches: [],
+  });
 
   async function selectSearch(query: string) {
     await setLocalStorageItem("saved-search-active-query", query);
@@ -27,7 +41,7 @@ export default function SavedSearchesList() {
 
     setState((oldState) => ({
       ...oldState,
-      active: '',
+      active: "",
       savedSearches: savedSearches,
     }));
   }
@@ -57,14 +71,14 @@ export default function SavedSearchesList() {
     fetch();
   }, []);
 
-  if (state.active !== '') {
+  if (state.active !== "") {
     return (
       <List isLoading={state.alerts.length === 0} searchBarPlaceholder="Filter alerts...">
         {state.alerts.map((alert) => (
           <AlertListItem key={alert.id} alert={alert} goBackToSavedSearches={goBackToSavedSearches} />
         ))}
       </List>
-    )
+    );
   }
 
   return (
@@ -76,7 +90,7 @@ export default function SavedSearchesList() {
   );
 }
 
-function SavedSearchesListItem(props: { savedSearch: SavedSearch, selectSearch: (query: string) => Promise<void> }) {
+function SavedSearchesListItem(props: { savedSearch: SavedSearch; selectSearch: (query: string) => Promise<void> }) {
   const savedSearch = props.savedSearch;
   const selectSearch = props.selectSearch;
 
@@ -99,8 +113,8 @@ async function fetchSavedSearches(): Promise<SavedSearch[]> {
   try {
     const response = await fetch(`${preferences.apiUrl}/v2/alerts/saved-searches`, {
       headers: {
-        "Authorization": `GenieKey ${preferences.apiKey}`
-      }
+        Authorization: `GenieKey ${preferences.apiKey}`,
+      },
     });
 
     const json = await response.json();
@@ -109,19 +123,19 @@ async function fetchSavedSearches(): Promise<SavedSearch[]> {
       if ((json as Record<string, unknown>).data) {
         const savedSearches: SavedSearch[] = [];
 
-        for (const savedSearch of ((json as Record<string, unknown>).data) as SavedSearchItem[]) {
+        for (const savedSearch of (json as Record<string, unknown>).data as SavedSearchItem[]) {
           const s = await fetchSavedSearch(savedSearch.id);
           savedSearches.push(s);
         }
 
-        console.log(savedSearches)
+        console.log(savedSearches);
         return savedSearches;
       }
 
       return [];
     } else {
-      if ((json as Record<string, string>).message) throw new Error((json as Record<string, string>).message)
-      throw new Error('An unknown error occurred')
+      if ((json as Record<string, string>).message) throw new Error((json as Record<string, string>).message);
+      throw new Error("An unknown error occurred");
     }
   } catch (error) {
     console.error(error);
@@ -134,8 +148,8 @@ async function fetchSavedSearch(id: string): Promise<SavedSearch> {
   try {
     const response = await fetch(`${preferences.apiUrl}/v2/alerts/saved-searches/${id}`, {
       headers: {
-        "Authorization": `GenieKey ${preferences.apiKey}`
-      }
+        Authorization: `GenieKey ${preferences.apiKey}`,
+      },
     });
 
     const json = await response.json();
@@ -145,10 +159,10 @@ async function fetchSavedSearch(id: string): Promise<SavedSearch> {
         return (json as Record<string, unknown>).data as SavedSearch;
       }
 
-      throw new Error('Could not parse Opsgenie API response')
+      throw new Error("Could not parse Opsgenie API response");
     } else {
-      if ((json as Record<string, string>).message) throw new Error((json as Record<string, string>).message)
-      throw new Error('An unknown error occurred')
+      if ((json as Record<string, string>).message) throw new Error((json as Record<string, string>).message);
+      throw new Error("An unknown error occurred");
     }
   } catch (error) {
     throw new Error(error.message);

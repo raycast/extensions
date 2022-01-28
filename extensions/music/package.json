@@ -47,6 +47,30 @@
       "title": "Currently Playing Track",
       "description": "Get info about currently playing track.",
       "mode": "no-view"
+    },
+    {
+      "name": "love",
+      "title": "Love Track",
+      "description": "Love currently playing track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "dislike",
+      "title": "Dislike Track",
+      "description": "Dislike currently playing track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-to-library",
+      "title": "Add to Library",
+      "description": "Add currently playing track to your library.",
+      "mode": "no-view"
+    },
+    {
+      "name": "love-and-add-to-library",
+      "title": "Love and Add to Library",
+      "description": "Love and add currently playing track to your library.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

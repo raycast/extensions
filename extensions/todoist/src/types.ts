@@ -24,6 +24,11 @@ export interface Section {
   project_id: number;
 }
 
+export interface Label {
+  id: number;
+  name: string;
+}
+
 export interface DueDate {
   recurring: boolean;
   string: string;
@@ -39,13 +44,22 @@ export interface Task {
   priority: number;
   section_id: number;
   project_id: number;
+  parent_id?: number;
   order: number;
 }
 
 export type TaskPayload = Partial<{
-  title: string;
+  content: string;
   description: string;
   project_id: number;
   priority: number;
   due_date: string;
+  label_ids: number[];
 }>;
+
+export type ProjectPayload = {
+  name: string;
+  parent_id?: number;
+  color?: number;
+  favorite?: boolean;
+};

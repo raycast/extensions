@@ -79,13 +79,13 @@ export async function getShares(
         return body.data.workspace.shares.entries as Share[];
       } else {
         if (body.errors?.length) {
-          const errs : string[] = [];
+          const errs: string[] = [];
           body.errors.map((error) => errs.push(error.message));
           throw new Error(errs.toString());
         }
       }
     } else {
-      throw new Error('Unknown error');
+      throw new Error("Unknown error");
     }
   } catch (error) {
     throw new Error((error as FetchError).message);
@@ -127,13 +127,13 @@ export async function getProjectShares(
         return body.data.project.shares.entries as EntriesEntity[];
       } else {
         if (body.errors?.length) {
-          const errs : string[] = [];
+          const errs: string[] = [];
           body.errors.map((error) => errs.push(error.message));
           throw new Error(errs.toString());
         }
       }
     } else {
-      throw new Error('Unknown error');
+      throw new Error("Unknown error");
     }
   } catch (error) {
     throw new Error((error as FetchError).message);
@@ -168,13 +168,13 @@ export async function getProjects(token: string, selectedWorkspace: SelectedWork
         return body.data.workspace.projects.entries as Project[];
       } else {
         if (body.errors?.length) {
-          const errs : string[] = [];
+          const errs: string[] = [];
           body.errors.map((error) => errs.push(error.message));
           throw new Error(errs.toString());
         }
       }
     } else {
-      throw new Error('Unknown error');
+      throw new Error("Unknown error");
     }
   } catch (error) {
     throw new Error((error as FetchError).message);
@@ -205,13 +205,13 @@ export async function getWorkspaces(token: string): Promise<GetWorkspacesBodyRes
         return body;
       } else {
         if (body.errors?.length) {
-          const errs : string[] = [];
+          const errs: string[] = [];
           body.errors.map((error) => errs.push(error.message));
           throw new Error(errs.toString());
         }
       }
     } else {
-      throw new Error('Unknown error');
+      throw new Error("Unknown error");
     }
   } catch (error) {
     throw new Error((error as FetchError).message);
@@ -250,4 +250,3 @@ export async function getWorkspaces(token: string): Promise<GetWorkspacesBodyRes
 //     throw new Error((error as FetchError).message);
 //   }
 // }
-

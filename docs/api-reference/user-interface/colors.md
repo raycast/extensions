@@ -2,6 +2,33 @@
 
 ## API Reference
 
+### DynamicColor
+
+A dynamic color applies different colors depending on the active Raycast theme.
+
+#### Example
+
+```typescript
+import { Color, Icon, List } from "@raycast/api";
+
+export default function Command() {
+ return (
+ <List>
+   <List.Item title="Dynamic Tint Color" icon={{ source: Icon.Circle, tintColor: { light: "#FF01FF", dark: "#FFFF50", adjustContrast: true } }} />
+   <List.Item title="Dynamic Tint Color" icon={{ source: Icon.Circle, tintColor: { light: "#FF01FF", dark: "#FFFF50" } }} />
+ </List>
+ );
+};
+```
+
+#### Properties
+
+| Name | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| adjustContrast | <code>boolean</code> | No | Enables dynamic contrast adjustment for light and dark theme color. |
+| dark | <code>string</code> | Yes | The color which is used in light theme. |
+| light | <code>string</code> | Yes | The color which is used in light theme. |
+
 ### Color
 
 The standard colors. Use this colors for consistency.
@@ -49,12 +76,12 @@ export default function Command() {
 ### ColorLike
 
 ```typescript
-ColorLike: DynamicColor | Color | string
+ColorLike: Color | DynamicColor | string
 ```
 
 Union type for the supported color types.
 
-Besides the [Color](https://developers.raycast.com/api-reference/user-interface/colors#color), you can use any of the following color formats:
+Besides the [Color](#color), you can use any of the following color formats:
 - HEX, e.g `#FF0000`
 - Short HEX, e.g. `#F00`
 - RGBA, e.g. `rgb(255, 0, 0)`
@@ -62,7 +89,7 @@ Besides the [Color](https://developers.raycast.com/api-reference/user-interface/
 - HSL, e.g. `hsla(200, 20%, 33%, 0.2)`
 - Keywords, e.g. `red`
 
-Colors different to the built-in ones (see [Color](https://developers.raycast.com/api-reference/user-interface/colors#color)) will be dynamically adjusted to fit the contrast.
+Colors different to the built-in ones (see [Color](#color)) will be dynamically adjusted to fit the contrast.
 
 #### Example
 

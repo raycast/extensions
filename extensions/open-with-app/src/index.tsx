@@ -24,9 +24,7 @@ export default function ApplicationsList() {
   }, []);
 
   return (
-    <List
-      isLoading={applications.length === 0}
-      searchBarPlaceholder="Filter applications by name...">
+    <List isLoading={applications.length === 0} searchBarPlaceholder="Filter applications by name...">
       {applications.map((application) => (
         <ApplicationsListItem key={application.bundleId} application={application} />
       ))}
@@ -34,7 +32,7 @@ export default function ApplicationsList() {
   );
 }
 
-async function getFinderSelection():Promise<string[]> {
+async function getFinderSelection(): Promise<string[]> {
   // The applescript below returns a string with a list of the items
   // selected in Finder separated by return characters
   const applescript = `
@@ -54,9 +52,7 @@ async function getFinderSelection():Promise<string[]> {
 
   const response = await runAppleScript(applescript);
 
-  return (response === '')
-    ? []
-    : response.split('\r');
+  return response === "" ? [] : response.split("\r");
 }
 
 function ApplicationsListItem(props: { application: Application }) {
@@ -78,7 +74,7 @@ function ApplicationsListItem(props: { application: Application }) {
               } else {
                 selectedItems.forEach((item) => {
                   execSync(`open -b ${application.bundleId} "${item.replace(/"/g, '\\"')}"`);
-                })
+                });
               }
               closeMainWindow();
               popToRoot({ clearSearchBar: true });

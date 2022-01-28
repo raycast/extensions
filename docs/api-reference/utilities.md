@@ -34,7 +34,7 @@ export default async () => {
 
 #### Return
 
-An array of [Application](https://developers.raycast.com/api-reference/utilities#application).
+An array of [Application](#application).
 
 ### getDefaultApplication
 
@@ -65,7 +65,38 @@ export default async () => {
 
 #### Return
 
-The default [Application](https://developers.raycast.com/api-reference/utilities#application) that would open the file. Throws an error if no application was found.
+The default [Application](#application) that would open the file. Throws an error if no application was found.
+
+### open
+
+Opens a target with the default application or specified application.
+
+#### Signature
+
+```typescript
+async function open(target: string, application: string | Application): Promise<void>
+```
+
+#### Example
+
+```typescript
+import { open } from "@raycast/api";
+
+export default async () => {
+  await open("https://www.raycast.com", "com.google.Chrome");
+};
+```
+
+#### Parameters
+
+| Name | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| target | <code>string</code> | Yes | The file, folder or URL to open. |
+| application | <code>string</code> or <code>[Application](#application)</code> | No | The application name to use for opening the file. If no application is specified, the default application as determined by the system is used to open the specified file. Note that you can use the application name, app identifier, or absolute path to the app. |
+
+#### Return
+
+A promise that resolves when the target has been opened.
 
 ### randomId
 
@@ -164,8 +195,8 @@ A promise that resolves when all files are moved to the trash.
 
 An object that represents a locally installed application on the system.
 
-It can be used to open files or folders in a specific application. Use [getApplications](https://developers.raycast.com/api-reference/utilities#getapplications) or
-[getDefaultApplication](https://developers.raycast.com/api-reference/utilities#getdefaultapplication) to get applications that can open a specific file or folder.
+It can be used to open files or folders in a specific application. Use [getApplications](#getapplications) or
+[getDefaultApplication](#getdefaultapplication) to get applications that can open a specific file or folder.
 
 #### Properties
 

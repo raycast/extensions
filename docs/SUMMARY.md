@@ -33,6 +33,8 @@
 * [File Structure](information/file-structure.md)
 * [Lifecycle](information/lifecycle.md)
 * [Manifest](information/manifest.md)
+* [Versioning](information/versioning.md)
+* [Security](information/security.md)
 * [Terminology](information/terminology.md)
 
 ## API Reference
@@ -45,6 +47,7 @@
 * [User Interface](api-reference/user-interface/README.md)
   * [Action Panel](api-reference/user-interface/action-panel.md)
   * [Actions](api-reference/user-interface/actions.md)
+  * [Alert](api-reference/user-interface/alert.md)
   * [Colors](api-reference/user-interface/colors.md)
   * [Detail](api-reference/user-interface/detail.md)
   * [Form](api-reference/user-interface/form.md)

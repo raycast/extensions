@@ -8,8 +8,8 @@ interface BookmarksResponse {
 }
 
 export function faviconUrl(size: number, url: string): string {
-  const domain = new URL(url).hostname
-  return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`
+  const domain = new URL(url).hostname;
+  return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`;
 }
 
 export function useBookmarksSearch(query: string | undefined): {
@@ -105,7 +105,7 @@ export function useLatestBookmarks(): {
       try {
         const preferences: Preferences = getPreferenceValues();
 
-        const url = 'https://api.raindrop.io/rest/v1/raindrops/0';
+        const url = "https://api.raindrop.io/rest/v1/raindrops/0";
         const response = await fetch(url, {
           method: "GET",
           headers: {

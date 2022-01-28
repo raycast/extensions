@@ -31,7 +31,7 @@ async function searchDash(query: string, signal: AbortSignal): Promise<DashResul
           if (Array.isArray(jsonData.output.items.item)) {
             resolve(jsonData.output.items.item);
           } else {
-            resolve([ jsonData.output.items.item ]);
+            resolve([jsonData.output.items.item]);
           }
         } else {
           resolve([]);
@@ -52,7 +52,7 @@ export function useDocsetSearch(searchText: string, keyword = ""): [DashResult[]
 
     setLoading(true);
     if (searchText.length) {
-      setResults(await searchDash(`${keyword ? `${keyword}:`: ''}${searchText}`, cancel.current.signal));
+      setResults(await searchDash(`${keyword ? `${keyword}:` : ""}${searchText}`, cancel.current.signal));
     } else {
       setResults([]);
     }

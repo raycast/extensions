@@ -1,4 +1,4 @@
-import { ActionPanel, Color, CopyToClipboardAction, Icon, List, OpenAction, ShowInFinderAction } from "@raycast/api";
+import { ActionPanel, Color, CopyToClipboardAction, List, OpenAction, ShowInFinderAction } from "@raycast/api";
 import Bookmark from "../dtos/bookmark-dto";
 import OpenBookMarkAction from "./open-bookmark-action";
 

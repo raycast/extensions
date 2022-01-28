@@ -1,7 +1,7 @@
 ---
 name: "🧩 💎 Extension Feature Request"
 about: Suggest new Feature or an improvement to existing Extension
-title: '[Extension Feature Request] '
+title: ''
 labels: 'extension, feature request'
 
 ---
