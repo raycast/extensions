@@ -10,7 +10,6 @@ import {
   OpenAction,
   OpenWithAction,
   pasteText,
-  popToRoot,
   PushAction,
   render,
   showHUD,
@@ -20,12 +19,12 @@ import {
   TrashAction,
 } from "@raycast/api";
 import { execa } from "execa";
-import { chmodSync } from "fs";
-import { resolve } from "path";
+import { readdirSync } from "fs";
+import { chmod } from "fs/promises";
 import { useEffect, useState } from "react";
 import PipeCommandForm from "./create-pipe-command";
 import { ArgumentType, ScriptCommand } from "./types";
-import { loadScriptCommands } from "./utils";
+import { copyAssetsCommands, parseScriptCommands } from "./utils";
 
 interface Selection {
   type: ArgumentType;
@@ -35,21 +34,13 @@ interface Selection {
 function PipeCommands(props: { selection: Selection }): JSX.Element {
   const [commands, setCommands] = useState<ScriptCommand[]>();
 
-  useEffect(() => {
-    async function loadCommands() {
-      const [userCommands, defaultCommands] = await Promise.all([
-        loadScriptCommands(environment.supportPath),
-        loadScriptCommands(resolve(environment.assetsPath, "commands")),
-      ]);
-      return [...userCommands, ...defaultCommands];
-    }
+  const loadCommands = async () => {
+    const commands = await parseScriptCommands(environment.supportPath);
+    setCommands(commands);
+  };
 
-    loadCommands()
-      .then(setCommands)
-      .catch((e) => {
-        showHUD(e.message);
-        popToRoot();
-      });
+  useEffect(() => {
+    loadCommands();
   }, []);
 
   return (
@@ -68,19 +59,19 @@ function PipeCommands(props: { selection: Selection }): JSX.Element {
       {commands
         ?.filter((command) => command.metadatas.selection.type == props.selection.type)
         .map((command) => (
-          <TextAction key={command.path} command={command} selection={props.selection} />
+          <TextAction key={command.path} command={command} selection={props.selection} reload={loadCommands} />
         ))}
     </List>
   );
 }
 
-function TextAction(props: { command: ScriptCommand; selection: Selection }) {
+function TextAction(props: { command: ScriptCommand; selection: Selection; reload: () => void }) {
   const { path: scriptPath, metadatas } = props.command;
-  const isCustom = scriptPath.startsWith(environment.supportPath);
 
   function handleCommand(outputHandler: (output: string) => void) {
     return async () => {
-      chmodSync(scriptPath, 0o755);
+      const toast = await showToast(ToastStyle.Animated, "Running...");
+      await chmod(scriptPath, 0o755);
       const res = await execa(
         scriptPath,
         metadatas.selection.percentEncoded ? props.selection.content.map(encodeURIComponent) : props.selection.content,
@@ -88,6 +79,7 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
           encoding: "utf-8",
         }
       );
+      toast.hide()
       if (res.stdout) {
         await outputHandler(res.stdout);
         await closeMainWindow();
@@ -102,27 +94,32 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
       key={scriptPath}
       icon={{ text: Icon.Text, file: Icon.Document, url: Icon.Globe }[metadatas.selection.type]}
       title={metadatas.title}
-      accessoryIcon={isCustom ? Icon.Person : undefined}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
+            <ActionPanel.Item title="Run (Paste Output)" icon={Icon.Terminal} onAction={handleCommand(pasteText)} />
             <ActionPanel.Item
-              title="Run (Paste Output)"
+              title="Run (Copy Output)"
               icon={Icon.Terminal}
-              onAction={handleCommand(pasteText)}
+              onAction={handleCommand(copyTextToClipboard)}
             />
-            <ActionPanel.Item title="Run (Copy Output)" icon={Icon.Terminal} onAction={handleCommand(copyTextToClipboard)} />
           </ActionPanel.Section>
-          { isCustom ?
-            <ActionPanel.Section>
-              <OpenAction icon={Icon.Upload} title="Open Pipe Command" target={scriptPath} />
-              <OpenWithAction path={scriptPath} />
-              <ShowInFinderAction path={scriptPath} />
-              <TrashAction paths={scriptPath} />
-            </ActionPanel.Section>
-           : null}
+          <ActionPanel.Section>
+            <OpenAction icon={Icon.Upload} title="Open Pipe Command" target={scriptPath} />
+            <OpenWithAction path={scriptPath} />
+            <ShowInFinderAction path={scriptPath} />
+            <TrashAction paths={scriptPath} onTrash={props.reload} />
+          </ActionPanel.Section>
           <ActionPanel.Section>
             <PushAction icon={Icon.Plus} title="New Pipe Command" target={<PipeCommandForm />} />
+            <ActionPanel.Item
+              icon={Icon.ArrowClockwise}
+              title="Restore Default Commands"
+              onAction={async () => {
+                await copyAssetsCommands();
+                props.reload();
+              }}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -142,6 +139,10 @@ async function getSelection(): Promise<Selection> {
 }
 
 async function main() {
+  if (readdirSync(environment.supportPath).length == 0) {
+    await copyAssetsCommands();
+  }
+
   try {
     const selection = await getSelection();
     render(<PipeCommands selection={selection} />);

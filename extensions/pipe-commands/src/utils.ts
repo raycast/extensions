@@ -1,6 +1,9 @@
 import { ScriptCommand, ScriptMetadatas } from "./types";
-import fs from "fs/promises";
+import fs, { copyFile } from "fs/promises";
 import { URL } from "url";
+import { readdirSync } from "fs";
+import { resolve } from "path";
+import { environment } from "@raycast/api";
 
 export function isValidUrl(text: string) {
   let url;
@@ -26,7 +29,7 @@ export function parseMetadatas(script: string): ScriptMetadatas {
   return (metadatas as unknown) as ScriptMetadatas;
 }
 
-export async function loadScriptCommands(scriptFolder: string): Promise<ScriptCommand[]> {
+export async function parseScriptCommands(scriptFolder: string): Promise<ScriptCommand[]> {
   const paths = await fs.readdir(scriptFolder);
   const commands = await Promise.all(
     paths.map(async (path) => {
@@ -37,4 +40,9 @@ export async function loadScriptCommands(scriptFolder: string): Promise<ScriptCo
     })
   );
   return commands.filter((command) => command.metadatas.title && command.metadatas.selection);
+}
+
+export async function copyAssetsCommands() {
+    const assetsDir = resolve(environment.assetsPath, "commands");
+    await Promise.all(readdirSync(assetsDir).map(scriptName => copyFile(resolve(assetsDir, scriptName), resolve(environment.supportPath, scriptName))));
 }
