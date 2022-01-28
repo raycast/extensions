@@ -23,7 +23,7 @@ import { readdirSync } from "fs";
 import { useEffect, useState } from "react";
 import PipeCommandForm from "./create-pipe-command";
 import { ArgumentType, ScriptCommand } from "./types";
-import { copyAssetsCommands, parseScriptCommands } from "./utils";
+import { copyAssetsCommands, parseScriptCommands, sortByAccessTime } from "./utils";
 
 interface Selection {
   type: ArgumentType;
@@ -35,7 +35,7 @@ function PipeCommands(props: { selection: Selection }): JSX.Element {
 
   const loadCommands = async () => {
     const commands = await parseScriptCommands(environment.supportPath);
-    setCommands(commands);
+    setCommands(await sortByAccessTime(commands));
   };
 
   useEffect(() => {

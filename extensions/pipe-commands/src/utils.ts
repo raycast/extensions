@@ -1,5 +1,5 @@
 import { ScriptCommand, ScriptMetadatas } from "./types";
-import { chmod, copyFile, readdir, readFile } from "fs/promises";
+import { chmod, copyFile, readdir, readFile, stat } from "fs/promises";
 import { URL } from "url";
 import { readdirSync } from "fs";
 import { resolve } from "path";
@@ -50,4 +50,14 @@ export async function copyAssetsCommands() {
       await chmod(resolve(environment.supportPath, scriptName), 0o755);
     })
   );
+}
+
+export async function sortByAccessTime(commands: ScriptCommand[]): Promise<ScriptCommand[]> {
+  const commandsWithAccessTime = await Promise.all(
+    commands.map(async (command) => {
+      const stats = await stat(command.path);
+      return { ...command, accessTime: stats.atimeMs };
+    })
+  );
+  return commandsWithAccessTime.sort((a, b) => b.accessTime - a.accessTime);
 }
