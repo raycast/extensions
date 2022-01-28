@@ -17,9 +17,9 @@
   "preferences": [
     {
       "name": "token",
-      "type": "private",
+      "type": "password",
       "title": "Kagi Token",
-      "description": "Please enter your Kagi Token",
+      "description": "Please enter your Kagi token, which can be found at https://kagi.com/settings?p=user_details in your Session Link",
       "required": true
     }
   ],
