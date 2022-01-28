@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# @raycast.title Copy Domain from URL
+# @raycast.title Extract Domain from URL
 # @raycast.selection {"type": "text"}
 
 from urllib.parse import urlparse
