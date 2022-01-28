@@ -110,7 +110,9 @@ async function cloneFork(owner, repo) {
 
 async function isPublishingUpdate(branch) {
   try {
-    console.log(await execPromise(`git show-ref --quiet refs/heads/${branch}`));
+    await execPromise(`git show-ref --quiet refs/heads/${branch}`, {
+      cwd: forkPath,
+    });
     return true;
   } catch (err) {
     return false;
@@ -228,8 +230,6 @@ ${existingPR}`);
     process.exit(0);
   }
 
-  console.log("here");
-
   const PRBody = `## Description
 
 Add the ${packageJSON.name} extension.
@@ -250,10 +250,15 @@ TODO
 `;
 
   const prURL = (
-    await execPromise(`gh pr create --base main --head ${owner}:${branch} --title "${PRBody}"`, {
-      env: { ...process.env },
-      cwd: forkPath,
-    })
+    await execPromise(
+      `gh pr create --base main --head ${owner}:${branch} --title "${isUpdate ? "Update" : "Add"} ${
+        packageJSON.name
+      } extension" --body "${PRBody}"`,
+      {
+        env: { ...process.env },
+        cwd: forkPath,
+      }
+    )
   ).stdout.trim();
 
   console.log(`\n\n🚀 Your extension has been submitted!
