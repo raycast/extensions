@@ -96,8 +96,12 @@ export const Sections: React.FC<BaseProps> = ({ back = false, details = false, i
           <CopyToClipboardAction content={imageUrl} title="Copy Image URL to Clipboard" icon={Icon.Clipboard} />
         )}
 
-        {item.links?.html && (
-          <CopyToClipboardAction content={item.links.html} title="Copy Author URL to Clipboard" icon={Icon.Clipboard} />
+        {item.user?.links?.html && (
+          <CopyToClipboardAction
+            content={item.user.links.html}
+            title="Copy Author URL to Clipboard"
+            icon={Icon.Clipboard}
+          />
         )}
       </ActionPanel.Section>
     </>
