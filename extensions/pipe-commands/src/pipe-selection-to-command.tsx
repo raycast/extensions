@@ -1,6 +1,7 @@
 import {
   ActionPanel,
   closeMainWindow,
+  copyTextToClipboard,
   environment,
   getSelectedFinderItems,
   getSelectedText,
@@ -77,29 +78,23 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
   const { path: scriptPath, metadatas } = props.command;
   const isCustom = scriptPath.startsWith(environment.supportPath);
 
-  async function runCommand() {
-    closeMainWindow();
-    popToRoot();
-
-    chmodSync(scriptPath, 0o755);
-    execa(
-      scriptPath,
-      metadatas.selection.percentEncoded ? props.selection.content.map(encodeURIComponent) : props.selection.content,
-      {
-        encoding: "utf-8",
-      }
-    )
-      .catch(async (e) => {
-        showHUD(e.shortMessage);
-      })
-      .then(async (res) => {
-        if (!res) return;
-        if (res.stdout) {
-          pasteText(res.stdout);
-        } else if (res.stderr) {
-          showHUD(res.stderr);
+  function handleCommand(outputHandler: (output: string) => void) {
+    return async () => {
+      chmodSync(scriptPath, 0o755);
+      const res = await execa(
+        scriptPath,
+        metadatas.selection.percentEncoded ? props.selection.content.map(encodeURIComponent) : props.selection.content,
+        {
+          encoding: "utf-8",
         }
-      });
+      );
+      if (res.stdout) {
+        await outputHandler(res.stdout);
+        await closeMainWindow();
+      } else if (res.stderr) {
+        await showHUD(res.stderr);
+      }
+    };
   }
 
   return (
@@ -111,16 +106,21 @@ function TextAction(props: { command: ScriptCommand; selection: Selection }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <ActionPanel.Item title="Run" icon={Icon.Terminal} onAction={runCommand} />
+            <ActionPanel.Item
+              title="Run (Paste Output)"
+              icon={Icon.Terminal}
+              onAction={handleCommand(pasteText)}
+            />
+            <ActionPanel.Item title="Run (Copy Output)" icon={Icon.Terminal} onAction={handleCommand(copyTextToClipboard)} />
           </ActionPanel.Section>
-          {isCustom ? (
+          { isCustom ?
             <ActionPanel.Section>
               <OpenAction icon={Icon.Upload} title="Open Pipe Command" target={scriptPath} />
               <OpenWithAction path={scriptPath} />
               <ShowInFinderAction path={scriptPath} />
               <TrashAction paths={scriptPath} />
             </ActionPanel.Section>
-          ) : null}
+           : null}
           <ActionPanel.Section>
             <PushAction icon={Icon.Plus} title="New Pipe Command" target={<PipeCommandForm />} />
           </ActionPanel.Section>
