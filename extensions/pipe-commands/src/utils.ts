@@ -1,19 +1,8 @@
 import { ScriptCommand, ScriptMetadatas } from "./types";
 import { chmod, copyFile, readdir, readFile, stat } from "fs/promises";
-import { URL } from "url";
 import { readdirSync } from "fs";
 import { resolve } from "path";
 import { environment } from "@raycast/api";
-
-export function isValidUrl(text: string) {
-  let url;
-  try {
-    url = new URL(text);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
 
 const metadataRegex = /@raycast\.(\w+)\s+(.+)$/gm;
 
