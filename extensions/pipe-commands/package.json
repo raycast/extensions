@@ -8,10 +8,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "pipe-selection-to-command",
-      "title": "Pipe Selection to Command",
+      "name": "pipe-to-command",
+      "title": "Pipe to Command",
       "subtitle": "Pipe command",
-      "description": "Take action on your current selection.",
+      "description": "Take Action on the Selection or Clipboard.",
       "mode": "view"
     },
     {
