@@ -25,10 +25,13 @@ export default function Main() {
       }
     >
       <Form.TextField id="name" title="Connection name" />
-      <Form.TextField id="address" title="Server Address" placeholder={'A resolvable DNS name or IP'} />
-      <Form.TextField id="user" title="Username" placeholder={'A username to authenticate with'} />
-      <Form.TextField id="key" title="SSH Key location (optional)" placeholder={'An optional key path to authenticate with'} />
+      <Form.TextField id="address" title="Server Address" placeholder={"A resolvable DNS name or IP"} />
+      <Form.TextField id="user" title="Username" placeholder={"A username to authenticate with"} />
+      <Form.TextField
+        id="key"
+        title="SSH Key location (optional)"
+        placeholder={"An optional key path to authenticate with"}
+      />
     </Form>
   );
 }
-
