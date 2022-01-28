@@ -77,7 +77,7 @@ function TextAction(props: { command: ScriptCommand; selection: Selection; reloa
           encoding: "utf-8",
         }
       );
-      toast.hide()
+      toast.hide();
       if (res.stdout) {
         await outputHandler(res.stdout);
         await closeMainWindow();
@@ -132,10 +132,10 @@ async function getSelection(): Promise<Selection> {
     return { type: "file", content: files.map((file) => file.path) };
   } catch {
     try {
-    const text = await getSelectedText();
-    return { type: "text", content: [text] };
+      const text = await getSelectedText();
+      return { type: "text", content: [text] };
     } catch {
-      const {stdout: clipboard} = await execa("pbpaste");
+      const { stdout: clipboard } = await execa("pbpaste");
       return { type: "text", content: [clipboard] };
     }
   }
