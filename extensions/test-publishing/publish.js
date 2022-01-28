@@ -155,16 +155,16 @@ async function assertSomethingToPublish() {
 }
 
 async function isPRAlreadyOpen(branch) {
-  const prs = (
-    await execPromise(
-      `gh pr list --repo raycast/extensions --author mathieudutour --state open --json headRefName,url`,
-      {
-        cwd: forkPath,
-      }
-    )
-  ).stdout.trim();
-
-  console.log(prs);
+  const prs = JSON.parse(
+    (
+      await execPromise(
+        `gh pr list --repo raycast/extensions --author mathieudutour --state open --json headRefName,url`,
+        {
+          cwd: forkPath,
+        }
+      )
+    ).stdout.trim()
+  );
 
   return prs.find((x) => x.headRefName === branch)?.url;
 }
