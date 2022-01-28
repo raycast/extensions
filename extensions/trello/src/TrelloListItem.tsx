@@ -14,11 +14,15 @@ export const TodoListItem = ({
   result,
 }: TodoListItemProps): JSX.Element => {
   const todo = result
+  let dueDate = ''
+  if (todo.due) {
+    dueDate = new Date(todo.due).toLocaleDateString()
+  }
   return (
     <List.Item
       id={todo.id}
       title={todo.name}
-      // accessoryTitle={todo.due?.toLocaleDateString ?? ''}
+      accessoryTitle={dueDate ?? ''}
       subtitle={todo.desc}
       icon={Icon.Checkmark}
       keywords={todo.labels?.map(label => label.name)}

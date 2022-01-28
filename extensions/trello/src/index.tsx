@@ -11,7 +11,7 @@ export default function PackageList() {
   const onSearchTextChange = async (text: string) => {
     setLoading(true)
     const response = await searchTodos(text.replace(/\s/g, '+'))
-    setTodos(response)
+    setTodos(response.cards)
     setLoading(false)
   }
 
@@ -25,7 +25,7 @@ export default function PackageList() {
 
         setTodos(response)
       } catch (error) {
-  showToast(ToastStyle.Failure, "Failed loading to dos");
+        showToast(ToastStyle.Failure, "Failed loading to dos");
       }
     }
 

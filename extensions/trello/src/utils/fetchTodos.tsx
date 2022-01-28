@@ -25,14 +25,14 @@ export const fetchTodos = async (
 }
 
 export const searchTodos = async (
-  searchTerm = '',
+  searchTerm: string,
 ): Promise<TrelloFetchResponse> => {
   try {
     const response = await fetch(
       `https://api.trello.com/1/search?filter=visible&key=${apitoken}&token=${token}&modelTypes=cards&query=${searchTerm}`,
     )
     const json = await response.json()
-    return json.cards as TrelloFetchResponse
+    return json as TrelloFetchResponse
   } catch (error) {
     showToast(ToastStyle.Failure, 'Could not fetch ToDos')
     return Promise.resolve([])

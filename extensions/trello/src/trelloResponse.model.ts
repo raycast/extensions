@@ -6,7 +6,7 @@ export interface TrelloResultModel {
   labels?: Label[];
   name: string;
   url: string;
-  due?: Date;
+  due?: string;
 }
 
 export interface Label {
