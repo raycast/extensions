@@ -50,7 +50,7 @@ export const storage: TogglStorage = {
         startDate: dayjs().subtract(1, "week").toDate(),
         endDate: dayjs().toDate(),
       }),
-    expirySeconds: 60 * 5,
+    expirySeconds: 30,
   }),
 };
 

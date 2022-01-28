@@ -48,4 +48,18 @@ export const authenticatedFetch = (token: string, baseUrl: string) => ({
     }
     return (await response.json()) as T;
   },
+  delete: async <T>(endpoint: string, body: unknown): Promise<T> => {
+    const response = await fetch(baseUrl + endpoint, {
+      method: "DELETE",
+      headers: {
+        ...getAuthHeader(token),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}, ${await response.text()}`);
+    }
+    return (await response.json()) as T;
+  },
 });

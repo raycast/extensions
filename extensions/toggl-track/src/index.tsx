@@ -11,31 +11,40 @@ import {
   showToast,
   SubmitFormAction,
   ToastStyle,
+  getPreferenceValues,
 } from "@raycast/api";
 import { TimeEntry } from "./toggl/types";
 import toggl from "./toggl";
 import { storage } from "./storage";
 import ProjectListItem from "./components/ProjectListItem";
+import StartTimeEntryForm from "./components/StartTimeEntryForm";
 import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
+import EditTimeEntryForm from "./components/EditTimeEntryForm";
+
+interface Preferences {
+  allowDelete: boolean;
+}
+
+const preferences: Preferences = getPreferenceValues();
 
 dayjs.extend(duration);
 
 function ListView() {
   const { isLoading, isValidToken, projectGroups, runningTimeEntry, timeEntries, projects } = useAppContext();
   const getProjectById = (id: number) => projects.find((p) => p.id === id);
-
   const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce((acc, timeEntry) => {
-    const existing = acc.find((t) => t.description === timeEntry.description && t.pid === timeEntry.pid);
+    const existing = acc.find((t) => (t.description === timeEntry.description && t.pid === timeEntry.pid) || !timeEntry.stop);
     if (!existing) {
       acc.push(timeEntry);
     }
     return acc;
   }, [] as TimeEntry[]);
+  timeEntriesWithUniqueProjectAndDescription.reverse()
 
   async function resumeTimeEntry(timeEntry: TimeEntry) {
     await showToast(ToastStyle.Animated, "Starting timer...");
     try {
-      await toggl.createTimeEntry({
+      await toggl.startTimeEntry({
         projectId: timeEntry.pid,
         description: timeEntry.description,
         tags: timeEntry.tags,
@@ -48,6 +57,20 @@ function ListView() {
     }
   }
 
+  async function deleteTimeEntry(timeEntry: TimeEntry) {
+    await showToast(ToastStyle.Animated, "Deleting time entry...");
+    try {
+      await toggl.deleteTimeEntry({
+        id: timeEntry.id,
+      });
+      await storage.timeEntries.refresh();
+      await showToast(ToastStyle.Success, "Time entry deleted");
+      await clearSearchBar({ forceScrollToTop: true });
+    } catch (e) {
+      await showToast(ToastStyle.Failure, "Failed to delete time entry");
+    }
+  }
+
   return (
     <List isLoading={isLoading} throttle>
       {isValidToken ? (
@@ -56,10 +79,19 @@ function ListView() {
             {runningTimeEntry && <RunningTimeEntry runningTimeEntry={runningTimeEntry} />}
             <List.Section title="Actions">
               <List.Item
-                title="Create a new time entry"
+                title="Start a time entry"
                 icon={"command-icon.png"}
                 actions={
                   <ActionPanel>
+                    <PushAction
+                      title="Start Time Entry"
+                      icon={{ source: Icon.Clock }}
+                      target={
+                        <AppContextProvider>
+                          <StartTimeEntryForm />
+                        </AppContextProvider>
+                      }
+                    />
                     <PushAction
                       title="Create Time Entry"
                       icon={{ source: Icon.Clock }}
@@ -90,6 +122,22 @@ function ListView() {
                           onSubmit={() => resumeTimeEntry(timeEntry)}
                           icon={{ source: Icon.Clock }}
                         />
+                        <PushAction
+                          title="Edit Time Entry"
+                          icon={{ source: Icon.Clock }}
+                          target={
+                            <AppContextProvider>
+                              <EditTimeEntryForm entry={timeEntry}/>
+                            </AppContextProvider>
+                          }
+                        />
+                        { preferences.allowDelete ?
+                          <ActionPanel.Item
+                            title="Delete Time Entry"
+                            onAction={() => deleteTimeEntry(timeEntry)}
+                            icon={{ source: Icon.Clock }}
+                          /> : undefined
+                        }
                       </ActionPanel>
                     }
                   />

@@ -30,7 +30,7 @@ const TogglAPI = function (apiToken: string) {
       });
       return projects;
     },
-    createTimeEntry: ({
+    startTimeEntry: ({
       projectId,
       description,
       tags,
@@ -48,6 +48,56 @@ const TogglAPI = function (apiToken: string) {
         },
       });
     },
+    createTimeEntry: ({
+      projectId,
+      description,
+      tags,
+      start,
+      duration
+    }: {
+      projectId?: number;
+      description: string;
+      tags: string[];
+      start: string;
+      duration: string;
+    }) => {
+      return api.post<{ data: TimeEntry }>(`/time_entries`, {
+        time_entry: {
+          description,
+          pid: projectId !== -1 ? projectId : undefined,
+          tags,
+          start,
+          duration,
+          created_with: "raycast-toggl-track",
+        },
+      });
+    },
+    editTimeEntry: ({
+      id,
+      projectId,
+      description,
+      tags,
+      start,
+      duration
+    }: {
+      id: number;
+      projectId?: number;
+      description: string;
+      tags: string[];
+      start: string;
+      duration?: string;
+    }) => {
+      return api.post<{ data: TimeEntry }>(`/time_entries/${id}`, {
+        time_entry: {
+          description,
+          pid: projectId !== -1 ? projectId : undefined,
+          tags,
+          start: start !== null ? start : undefined,
+          duration: duration !== -1 ? duration : undefined,
+          created_with: "raycast-toggl-track",
+        },
+      });
+    },
     getRunningTimeEntry: async (): Promise<TimeEntry | null> => {
       const { data } = await api.get<{ data: TimeEntry }>("/time_entries/current");
       return data;
@@ -60,6 +110,9 @@ const TogglAPI = function (apiToken: string) {
     },
     stopTimeEntry: ({ id }: { id: number }) => {
       return api.put<{ data: TimeEntry }>(`/time_entries/${id}/stop`, {});
+    },
+    deleteTimeEntry: ({ id }: { id: number }) => {
+      return api.delete<{ data: TimeEntry }>(`/time_entries/${id}`, {});
     },
     getTimeEntries: ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
       return api.get<TimeEntry[]>(

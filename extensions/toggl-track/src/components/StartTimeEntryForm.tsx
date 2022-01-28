@@ -21,7 +21,7 @@ interface Preferences {
 
 const preferences: Preferences = getPreferenceValues();
 
-function CreateTimeEntryForm({ project, description }: { project?: Project; description?: string }) {
+function StartTimeEntryForm({ project, description }: { project?: Project; description?: string}) {
   const navigation = useNavigation();
   const { projects, tags, isLoading, projectGroups } = useAppContext();
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(project);
@@ -29,20 +29,18 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
 
   async function handleSubmit(values: { description: string }) {
     try {
-      await toggl.createTimeEntry({
+      await toggl.startTimeEntry({
         projectId: selectedProject?.id,
         description: values.description,
         tags: selectedTags,
-        start: values.start,
-        duration: Math.trunc((new Date(values.end) - new Date(values.start)) / 1000)
       });
-      await showToast(ToastStyle.Animated, "Creating time entry...");
-      await storage.timeEntries.refresh();
-      await showToast(ToastStyle.Success, "Created time entry");
+      await showToast(ToastStyle.Animated, "Starting time entry...");
+      await storage.runningTimeEntry.refresh();
+      await showToast(ToastStyle.Success, "Started time entry");
       navigation.pop();
       await clearSearchBar();
     } catch (e) {
-      await showToast(ToastStyle.Failure, "Failed to create time entry");
+      await showToast(ToastStyle.Failure, "Failed to start time entry");
     }
   }
 
@@ -66,13 +64,11 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create Time Entry" onSubmit={handleSubmit} />
+          <SubmitFormAction title="Start Time Entry" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextArea id="description" title="Description" defaultValue={description} />
-      <Form.DatePicker id="start" title="Start Time" />
-      <Form.DatePicker id="end" title="End Time" />
       <Form.Dropdown
         id="project"
         title="Project"
@@ -104,4 +100,4 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
   );
 }
 
-export default CreateTimeEntryForm;
+export default StartTimeEntryForm;

@@ -7,42 +7,38 @@ import {
   showToast,
   ToastStyle,
   clearSearchBar,
-  getPreferenceValues,
 } from "@raycast/api";
 import toggl from "../toggl";
 import { storage } from "../storage";
 import { Project } from "../toggl/types";
 import { useAppContext } from "../context";
 import { useMemo, useState } from "react";
+import { TimeEntry } from "./toggl/types";
 
-interface Preferences {
-  defaultProject: string;
-}
-
-const preferences: Preferences = getPreferenceValues();
-
-function CreateTimeEntryForm({ project, description }: { project?: Project; description?: string }) {
+function EditTimeEntryForm({ project, entry }: { project: Project; timeEntry: TimeEntry }) {
   const navigation = useNavigation();
   const { projects, tags, isLoading, projectGroups } = useAppContext();
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(project);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  async function handleSubmit(values: { description: string }) {
+  async function handleSubmit(values: { description: string; tags: string[]; start: string; end?: string}) {
     try {
-      await toggl.createTimeEntry({
+      await toggl.editTimeEntry({
+        id: entry.id,
         projectId: selectedProject?.id,
         description: values.description,
-        tags: selectedTags,
+        tags: values.tags,
         start: values.start,
-        duration: Math.trunc((new Date(values.end) - new Date(values.start)) / 1000)
+        duration: (entry.stop ? Math.trunc((new Date(values.end) - new Date(values.start)) / 1000) : -1)
       });
-      await showToast(ToastStyle.Animated, "Creating time entry...");
-      await storage.timeEntries.refresh();
-      await showToast(ToastStyle.Success, "Created time entry");
+      await showToast(ToastStyle.Animated, "Updating time entry...");
+      entry.stop ? await storage.timeEntries.refresh() : await storage.runningTimeEntry.refresh();;
+      await showToast(ToastStyle.Success, "Updated time entry");
       navigation.pop();
       await clearSearchBar();
     } catch (e) {
-      await showToast(ToastStyle.Failure, "Failed to create time entry");
+      console.log(e)
+      await showToast(ToastStyle.Failure, "Failed to update time entry");
     }
   }
 
@@ -60,23 +56,25 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
   const onTagsChange = (tags: string[]) => {
     setSelectedTags(tags);
   };
-
-  return (
+  
+  return(
     <Form
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create Time Entry" onSubmit={handleSubmit} />
+          <SubmitFormAction title="Update Time Entry" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextArea id="description" title="Description" defaultValue={description} />
-      <Form.DatePicker id="start" title="Start Time" />
-      <Form.DatePicker id="end" title="End Time" />
+      <Form.TextArea id="description" title="Description" defaultValue={entry.description} />
+      <Form.DatePicker id="start" title="Start Time" defaultValue={new Date(entry.start).toISOString().replace("T", " ").substring(0, 16) + " UTC" } />
+      {entry.stop ?
+        <Form.DatePicker id="end" title="End Time" defaultValue={ new Date(entry.stop).toISOString().replace("T", " ").substring(0, 16) + " UTC" } /> : undefined
+      }
       <Form.Dropdown
         id="project"
         title="Project"
-        defaultValue={selectedProject ? selectedProject.id.toString() : preferences.defaultProject}
+        defaultValue={entry.pid.toString()}
         onChange={onProjectChange}
       >
         {projectGroups.map((group) => (
@@ -95,7 +93,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
           </Form.Dropdown.Section>
         ))}
       </Form.Dropdown>
-      <Form.TagPicker id="tags" title="Tags" onChange={onTagsChange}>
+      <Form.TagPicker id="tags" title="Tags" onChange={onTagsChange} defaultValue={entry.tags}>
         {projectTags.map((tag) => (
           <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />
         ))}
@@ -104,4 +102,4 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
   );
 }
 
-export default CreateTimeEntryForm;
+export default EditTimeEntryForm;

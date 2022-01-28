@@ -1,10 +1,11 @@
-import { List, Icon, ActionPanel, SubmitFormAction, showToast, ToastStyle } from "@raycast/api";
+import { List, Icon, ActionPanel, SubmitFormAction, showToast, ToastStyle, PushAction} from "@raycast/api";
 import dayjs from "dayjs";
 import { TimeEntry } from "../toggl/types";
 import useCurrentTime from "../hooks/useCurrentTime";
 import { storage } from "../storage";
 import toggl from "../toggl";
-import { useAppContext } from "../context";
+import { AppContextProvider, useAppContext } from "../context";
+import EditTimeEntryForm from "./EditTimeEntryForm";
 
 function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry }) {
   const currentTime = useCurrentTime();
@@ -33,6 +34,15 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry })
         actions={
           <ActionPanel>
             <SubmitFormAction icon={{ source: Icon.Clock }} onSubmit={stopTimeEntry} title="Stop Time Entry" />
+            <PushAction
+              title="Edit Time Entry"
+              icon={{ source: Icon.Clock }}
+              target={
+                <AppContextProvider>
+                  <EditTimeEntryForm entry={runningTimeEntry}/>
+                </AppContextProvider>
+              }
+            />
           </ActionPanel>
         }
       />

@@ -23,6 +23,21 @@
       "title": "Toggl API Token",
       "placeholder": "Can be found at https://track.toggl.com/profile",
       "description": "The API token for your Toggl account."
+    },
+    {
+      "name": "defaultProject",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Project ID",
+      "placeholder": "Can be found in the URL when viewing a project. projects/{projectID}/tasks",
+      "description": "The default project when starting/creating a time entry."
+    },
+    {
+      "name": "allowDelete",
+      "type": "checkbox",
+      "required": false,
+      "title": "Allow Deletes",
+      "description": "Whether or not to show delete action on existing time entries."
     }
   ],
   "keywords": [

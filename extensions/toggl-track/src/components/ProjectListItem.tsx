@@ -1,7 +1,7 @@
 import { List, Icon, ActionPanel, PushAction } from "@raycast/api";
 import { AppContextProvider } from "../context";
 import { Project } from "../toggl/types";
-import CreateTimeEntryForm from "./CreateTimeEntryForm";
+import StartTimeEntryForm from "./StartTimeEntryForm";
 
 export default function ProjectListItem({
   project,
@@ -25,7 +25,7 @@ export default function ProjectListItem({
             icon={Icon.Clock}
             target={
               <AppContextProvider>
-                <CreateTimeEntryForm project={project} />
+                <StartTimeEntryForm project={project} />
               </AppContextProvider>
             }
           />
