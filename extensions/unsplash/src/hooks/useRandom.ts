@@ -30,7 +30,7 @@ export const useRandom = async () => {
         Authorization: `Client-ID ${accessKey}`,
       },
     }
-  ).then((res) => res.json() as Promise<SearchResult>);
+  ).then(async (res) => (await res.json()) as SearchResult);
 
   if (response.errors) {
     showHUD(response.errors[0]);
