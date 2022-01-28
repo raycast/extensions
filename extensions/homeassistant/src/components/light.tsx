@@ -3,7 +3,7 @@ import { KtoColorLike, miredToK, RGB, RGBtoColorLike } from "../color";
 import { ha } from "../common";
 import { State } from "../haapi";
 import { ensureMinMax } from "../utils";
-import { lightRGBColors } from "../constants"
+import { lightRGBColors } from "../constants";
 
 function ceilRound50(value: number): number {
   return Math.ceil(value / 50) * 50;
@@ -233,7 +233,10 @@ export function ColorRgbControlAction(props: { state: State }): JSX.Element | nu
   const modes = state.attributes.supported_color_modes;
 
   const handle = async (color_rgb: RGB) => {
-    await ha.callService("light", "turn_on", { entity_id: state.entity_id, rgb_color: [color_rgb.r, color_rgb.g, color_rgb.b] });
+    await ha.callService("light", "turn_on", {
+      entity_id: state.entity_id,
+      rgb_color: [color_rgb.r, color_rgb.g, color_rgb.b],
+    });
   };
 
   if (modes && Array.isArray(modes) && modes.includes("rgb")) {
@@ -246,7 +249,7 @@ export function ColorRgbControlAction(props: { state: State }): JSX.Element | nu
         {lightRGBColors.map((color) => (
           <ActionPanel.Item
             key={`${color.name}`}
-            title={`${color.name.charAt(0).toUpperCase()}${color.name.slice(1)}`} 
+            title={`${color.name.charAt(0).toUpperCase()}${color.name.slice(1)}`}
             icon={{ source: "lightbulb.png", tintColor: RGBtoColorLike(color.value) }}
             onAction={() => handle(color.value)}
           />
