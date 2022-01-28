@@ -37,9 +37,9 @@ export interface SearchHandlers {
 }
 
 export async function performSearch(
-  query: string,
+  abort: AbortSignal,
   src: Sourcegraph,
-  signal: AbortSignal,
+  query: string,
   handlers: SearchHandlers
 ): Promise<void> {
   if (query.length === 0) {
@@ -63,7 +63,7 @@ export async function performSearch(
 
   return new Promise((resolve, reject) => {
     // signal cancelling
-    signal.addEventListener("abort", () => {
+    abort.addEventListener("abort", () => {
       stream.close();
       resolve();
     });

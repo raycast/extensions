@@ -67,6 +67,37 @@ export default async () => {
 
 The default [Application](#application) that would open the file. Throws an error if no application was found.
 
+### open
+
+Opens a target with the default application or specified application.
+
+#### Signature
+
+```typescript
+async function open(target: string, application: string | Application): Promise<void>
+```
+
+#### Example
+
+```typescript
+import { open } from "@raycast/api";
+
+export default async () => {
+  await open("https://www.raycast.com", "com.google.Chrome");
+};
+```
+
+#### Parameters
+
+| Name | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| target | <code>string</code> | Yes | The file, folder or URL to open. |
+| application | <code>string</code> or <code>[Application](#application)</code> | No | The application name to use for opening the file. If no application is specified, the default application as determined by the system is used to open the specified file. Note that you can use the application name, app identifier, or absolute path to the app. |
+
+#### Return
+
+A promise that resolves when the target has been opened.
+
 ### randomId
 
 Generate secure URL-friendly unique ID.

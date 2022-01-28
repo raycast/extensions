@@ -44,7 +44,7 @@ const loopThroughPlaylists = (type: "subscription" | "user") => {
     end repeat`;
 };
 
-export const seachForTrack = (search: string) =>
+export const searchForTrack = (search: string) =>
   tellCustom(`set output to ""
   tell application "Music"
   set results to (every track whose name contains "${search}" or artist contains "${search}")
@@ -61,7 +61,7 @@ export const seachForTrack = (search: string) =>
 
 export const playTrack = (track: string) => tell("Music", `play track "${track}" of playlist 1`);
 
-export const seachForAlbum = (search: string) =>
+export const searchForAlbum = (search: string) =>
   tellCustom(`set output to ""
   set albumList to {}
   tell application "Music"

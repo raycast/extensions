@@ -20,6 +20,7 @@
 /extensions/bitwarden                                @pomdtr
 /extensions/brew                                     @nhojb
 /extensions/brew-services                            @es183923
+/extensions/bttv-emote                               @Aayush9029
 /extensions/bugmenot                                 @Yukaii
 /extensions/buildkite                                @mskelton
 /extensions/calendar                                 @fuksman
@@ -73,6 +74,7 @@
 /extensions/github-stars                             @mrmartineau
 /extensions/gitlab                                   @tonka3000
 /extensions/gitmoji                                  @ricoberger
+/extensions/google-books                             @Ali-Parandeh
 /extensions/google-chrome                            @rgomezcasas @bromanko
 /extensions/google-chrome-profiles                   @frouo
 /extensions/google-maps-search                       @ratoru
@@ -80,8 +82,10 @@
 /extensions/google-translate                         @ospfranco
 /extensions/google-trends                            @kkange
 /extensions/grafana                                  @Lp-Francois
+/extensions/graphcdn                                 @mathieudutour
 /extensions/hacker-news                              @thomaspaulmann
 /extensions/harvest                                  @eluce2
+/extensions/hashnode                                 @dpnick
 /extensions/hazeover                                 @ratoru
 /extensions/hexlify                                  @gkpln3
 /extensions/homeassistant                            @tonka3000
@@ -140,7 +144,7 @@
 /extensions/ricescore                                @tonka3000
 /extensions/rss-reader                               @fuksman
 /extensions/sabnzbd                                  @jesse-c
-/extensions/safari                                   @loris
+/extensions/safari                                   @loris @thomaspaulmann
 /extensions/script-commands                          @unnamedd
 /extensions/script-kit                               @pomdtr
 /extensions/search-mdn                               @krzysztofzuraw
@@ -168,9 +172,11 @@
 /extensions/terminalfinder                           @yedongze
 /extensions/things                                   @loris
 /extensions/ticktick                                 @viduycheung
+/extensions/timeular                                 @kudrykv
 /extensions/tldr                                     @pomdtr
 /extensions/todo-list                                @maggie-j-liu
 /extensions/todoist                                  @thomaslombart
+/extensions/toggl-track                              @franzwilhelm
 /extensions/toolbox                                  @kkange
 /extensions/tower                                    @tdwesten
 /extensions/transmission                             @FezVrasta
@@ -192,6 +198,7 @@
 /extensions/whatsapp                                 @vimtor
 /extensions/wikipedia                                @vimtor
 /extensions/wistia                                   @ddoria921
+/extensions/wolfram-alpha                            @mathieudutour
 /extensions/xcode                                    @SvenTiigi
 /extensions/xkcd                                     @maggie-j-liu
 /extensions/youdao-translate                         @tiancheng92

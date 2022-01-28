@@ -12,7 +12,8 @@ import { Todo, User } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
-import { ShowTodoDetailsAction, TodoItemActions } from "./todo_actions";
+import { CloseAllTodoAction, CloseTodoAction, ShowTodoDetailsAction } from "./todo_actions";
+import { now } from "../utils";
 
 function userToIcon(user?: User): ImageLike {
   let result = "";
@@ -27,7 +28,7 @@ function userToIcon(user?: User): ImageLike {
 
 export function TodoList() {
   const [searchText, setSearchText] = useState<string>();
-  const { todos, error, isLoading } = useSearch(searchText);
+  const { todos, error, isLoading, refresh } = useSearch(searchText);
 
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search Merge Requests", error);
@@ -45,13 +46,13 @@ export function TodoList() {
       throttle={true}
     >
       {todos?.map((todo) => (
-        <TodoListItem key={todo.id} todo={todo} />
+        <TodoListItem key={todo.id} todo={todo} refreshData={refresh} />
       ))}
     </List>
   );
 }
 
-export function TodoListItem(props: { todo: Todo }) {
+export function TodoListItem(props: { todo: Todo; refreshData: () => void }) {
   const todo = props.todo;
   const subtitle = todo.group ? todo.group.full_path : todo.project_with_namespace || "";
   return (
@@ -64,9 +65,14 @@ export function TodoListItem(props: { todo: Todo }) {
       icon={{ source: GitLabIcons.todo, tintColor: Color.Green }}
       actions={
         <ActionPanel>
-          <ShowTodoDetailsAction todo={todo} />
-          <OpenInBrowserAction url={todo.target_url} />
-          <TodoItemActions todo={todo} />
+          <ActionPanel.Section>
+            <ShowTodoDetailsAction todo={todo} />
+            <OpenInBrowserAction url={todo.target_url} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <CloseTodoAction todo={todo} finished={props.refreshData} />
+            <CloseAllTodoAction finished={props.refreshData} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -77,10 +83,16 @@ export function useSearch(query: string | undefined): {
   todos?: Todo[];
   error?: string;
   isLoading: boolean;
+  refresh: () => void;
 } {
   const [todos, setTodos] = useState<Todo[]>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [timestamp, setTimestamp] = useState<Date>(now());
+
+  const refresh = () => {
+    setTimestamp(now());
+  };
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -117,7 +129,7 @@ export function useSearch(query: string | undefined): {
     return () => {
       didUnmount = true;
     };
-  }, [query]);
+  }, [query, timestamp]);
 
-  return { todos, error, isLoading };
+  return { todos, error, isLoading, refresh };
 }

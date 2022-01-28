@@ -8,7 +8,7 @@ export interface Sourcegraph {
 
 const cloudURL = "https://sourcegraph.com";
 
-function isCloud(instance: string) {
+export function isCloud(instance: string) {
   return instance === cloudURL;
 }
 
@@ -34,7 +34,7 @@ export function sourcegraphCloud(): Sourcegraph {
   };
 }
 
-export function customSourcegraph(): Sourcegraph | null {
+export function sourcegraphSelfHosted(): Sourcegraph | null {
   const prefs: Preferences = getPreferenceValues();
   if (prefs.customInstance) {
     return {

@@ -1,7 +1,10 @@
 import { ActionPanel, closeMainWindow, List, showToast, ToastStyle, useNavigation } from "@raycast/api";
 import { isLeft } from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+import * as O from "fp-ts/Option";
+import * as TE from "fp-ts/TaskEither";
 import React, { useState } from "react";
-import { playAlbum, seachForAlbum } from "./util/controls";
+import { playAlbum, searchForAlbum } from "./util/controls";
 import { Album } from "./util/models";
 import { parseResult } from "./util/parser";
 
@@ -15,15 +18,26 @@ export default function PlayLibraryAlbum() {
       setAlbums([]);
       return;
     }
-    const raw = await seachForAlbum(next)();
-    if (isLeft(raw)) {
-      showToast(ToastStyle.Failure, "Could not get albums");
-      return;
-    }
-    let result: Album[] = [];
-    if (raw.right?.length > 0) {
-      result = parseResult<Album>(raw.right);
-    }
+
+    const result = await pipe(
+      next,
+      searchForAlbum,
+      TE.matchW(
+        () => {
+          showToast(ToastStyle.Failure, "Could not get albums");
+          return [];
+        },
+        (albums) =>
+          pipe(
+            albums,
+            O.fromNullable,
+            O.matchW(
+              () => [],
+              (res) => (res ? parseResult<Album>(res) : [])
+            )
+          )
+      )
+    )();
     setAlbums(result);
   };
 
