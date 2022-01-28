@@ -20,7 +20,6 @@ import {
 } from "@raycast/api";
 import { execa } from "execa";
 import { readdirSync } from "fs";
-import { chmod } from "fs/promises";
 import { useEffect, useState } from "react";
 import PipeCommandForm from "./create-pipe-command";
 import { ArgumentType, ScriptCommand } from "./types";
@@ -71,7 +70,6 @@ function TextAction(props: { command: ScriptCommand; selection: Selection; reloa
   function handleCommand(outputHandler: (output: string) => void) {
     return async () => {
       const toast = await showToast(ToastStyle.Animated, "Running...");
-      await chmod(scriptPath, 0o755);
       const res = await execa(
         scriptPath,
         metadatas.selection.percentEncoded ? props.selection.content.map(encodeURIComponent) : props.selection.content,

@@ -1,5 +1,5 @@
 import { ScriptCommand, ScriptMetadatas } from "./types";
-import fs, { copyFile } from "fs/promises";
+import { chmod, copyFile, readdir, readFile } from "fs/promises";
 import { URL } from "url";
 import { readdirSync } from "fs";
 import { resolve } from "path";
@@ -26,15 +26,15 @@ export function parseMetadatas(script: string): ScriptMetadatas {
     metadatas[metadataTitle] = metatataValue;
   }
 
-  return (metadatas as unknown) as ScriptMetadatas;
+  return metadatas as unknown as ScriptMetadatas;
 }
 
 export async function parseScriptCommands(scriptFolder: string): Promise<ScriptCommand[]> {
-  const paths = await fs.readdir(scriptFolder);
+  const paths = await readdir(scriptFolder);
   const commands = await Promise.all(
     paths.map(async (path) => {
       const scriptPath = `${scriptFolder}/${path}`;
-      const script = await fs.readFile(scriptPath, "utf8");
+      const script = await readFile(scriptPath, "utf8");
       const metadatas = parseMetadatas(script);
       return { path: scriptPath, metadatas };
     })
@@ -43,6 +43,11 @@ export async function parseScriptCommands(scriptFolder: string): Promise<ScriptC
 }
 
 export async function copyAssetsCommands() {
-    const assetsDir = resolve(environment.assetsPath, "commands");
-    await Promise.all(readdirSync(assetsDir).map(scriptName => copyFile(resolve(assetsDir, scriptName), resolve(environment.supportPath, scriptName))));
+  const assetsDir = resolve(environment.assetsPath, "commands");
+  await Promise.all(
+    readdirSync(assetsDir).map(async (scriptName) => {
+      await copyFile(resolve(assetsDir, scriptName), resolve(environment.supportPath, scriptName));
+      await chmod(resolve(environment.supportPath, scriptName), 0o755);
+    })
+  );
 }
