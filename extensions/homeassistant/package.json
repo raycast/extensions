@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "homeassistant",
   "title": "Home Assistant",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "author": "tonka3000",
   "license": "MIT",
   "description": "Home Assistant remote control. Control your house with Raycast 🚀",
