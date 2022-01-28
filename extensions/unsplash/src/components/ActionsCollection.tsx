@@ -28,11 +28,7 @@ export const Sections: React.FC<BaseProps> = ({ back = false, details = false, i
     <>
       <ActionPanel.Section>
         {details && (
-          <ActionPanel.Item
-            title="Show Details"
-            icon={Icon.List}
-            onAction={() => push(<Details result={{ ...item }} />)}
-          />
+          <ActionPanel.Item title="Show Details" icon={Icon.List} onAction={() => push(<Details result={item} />)} />
         )}
 
         {back && <ActionPanel.Item icon={Icon.Window} title="Go Back" onAction={pop} />}
