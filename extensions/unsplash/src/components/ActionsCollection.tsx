@@ -35,7 +35,7 @@ export const Sections: React.FC<BaseProps> = ({ back = false, details = false, i
           />
         )}
 
-        {back && <ActionPanel.Item icon={Icon.Window} title="Go Back" onAction={() => pop()} />}
+        {back && <ActionPanel.Item icon={Icon.Window} title="Go Back" onAction={pop} />}
 
         {item.links?.html && <OpenInBrowserAction url={item.links.html} title="Open Collection" />}
 
