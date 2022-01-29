@@ -17,12 +17,13 @@ You will need some additional steps to install this plugin.
 - Install the extension from [Raycast Store](https://www.raycast.com/eggsy/unsplash)
 - Type `Unsplash` to display all available options
 - Choose one and fill in the blanks with the details
-  - Access Key: Your Unsplash API key (**required**)
-  - Username: Username of the person you want to list likes of.
-  - Orientation: The orientation of the images on results. (Default: `all`)
-  - Download Size: The sizes when downloading, copying, and saving image to disk. (Default: `full`)
-  - Collections: The collection IDs you want to get random images out of while setting a random wallpaper. The list should be comma & space seperated as in `ID1, ID2, ID3, etc.`. (Default: [`4324303`](https://unsplash.com/collections/4324303), [`8647859`](https://unsplash.com/collections/8647859), [`298137`](https://unsplash.com/collections/298137), [`2476111`](https://unsplash.com/collections/2476111), [`1065976`](https://unsplash.com/collections/1065976), [`3430431`](https://unsplash.com/collections/3430431), [`1114848`](https://unsplash.com/collections/1114848), [`2063295`](https://unsplash.com/collections/2063295), [`9389477`](https://unsplash.com/collections/9389477), [`932210`](https://unsplash.com/collections/932210))
-  - Path: The path to save the images to. Must be an existing folder. (Default: `YOUR_APPLICATIONS_SUPPORT_DIR/com.raycast.macos/unsplash`)
+  - **Access Key**: Your Unsplash API key (**required**)
+  - **Username**: Username of the person you want to list likes of.
+  - **Orientation**: The orientation of the images on results. (Default: `all`)
+  - **Download Size**: The sizes when downloading, copying, and saving image to disk. (Default: `full`)
+  - **Custom Collections**: The collection IDs you want to get random images out of while setting a random wallpaper. The list should be comma & space seperated as in `ID1, ID2, ID3, etc.`. (Default: [`4324303`](https://unsplash.com/collections/4324303), [`8647859`](https://unsplash.com/collections/8647859), [`298137`](https://unsplash.com/collections/298137), [`2476111`](https://unsplash.com/collections/2476111), [`1065976`](https://unsplash.com/collections/1065976), [`3430431`](https://unsplash.com/collections/3430431), [`1114848`](https://unsplash.com/collections/1114848), [`2063295`](https://unsplash.com/collections/2063295), [`9389477`](https://unsplash.com/collections/9389477), [`932210`](https://unsplash.com/collections/932210))
+  - **Include Default Collections**: When you set custom collections, you can choose to include the default collections as well. (Default: `no`)
+  - **Path**: The path to save the images to. Must be an existing folder. (Default: `YOUR_APPLICATIONS_SUPPORT_DIR/com.raycast.macos/unsplash`)
 
 ### FAQ
 
