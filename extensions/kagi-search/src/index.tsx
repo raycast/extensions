@@ -36,12 +36,11 @@ export default function Command() {
       searchBarPlaceholder="Search Kagi or type a URL..."
       throttle
     >
-      <List.Section title="Results" subtitle={listItems.length + ""}>
+      <List.Section title="Search Kagi for..." subtitle={listItems.length + ""}>
         {listItems.map((item) => (
           <List.Item
             key={item.id}
             title={item.query}
-            subtitle={item.description}
             icon={getIcon(item)}
             actions={
               <ActionPanel>

@@ -39,7 +39,7 @@ export async function getSearchResults(
     {
       id: randomId(),
       query: searchText,
-      description: `Search Kagi for '${searchText}'`,
+      description: searchText,
       url: `https://kagi.com/search?token=${token}&q=${encodeURIComponent(searchText)}`,
     },
   ];
@@ -48,7 +48,7 @@ export async function getSearchResults(
     results[i + 1] = {
       id: randomId(),
       query: item,
-      description: `Search Kagi for '${item}'`,
+      description: item,
       url: `https://kagi.com/search?token=${token}&q=${encodeURIComponent(item)}`,
     };
   });
