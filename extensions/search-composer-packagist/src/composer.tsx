@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, Icon, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import algoliaSearch from "algoliasearch/lite";
 
@@ -54,6 +54,7 @@ export default function SearchDocumentation() {
 
   const search = async (query = "") => {
     if (query === "") {
+      setIsLoading(false);
       return [];
     }
     setIsLoading(true);
@@ -79,7 +80,10 @@ export default function SearchDocumentation() {
     <List
       throttle={true}
       isLoading={isLoading}
-      onSearchTextChange={async (query) => setSearchResults(await search(query))}
+      onSearchTextChange={async (query) => {
+        setIsLoading(true)
+        setSearchResults(await search(query))
+      }}
     >
       {searchResults?.map((hit: PackagistHit) => {
         return (
@@ -88,6 +92,8 @@ export default function SearchDocumentation() {
             title={hit.name}
             subtitle={hit.description}
             icon="composer-icon.png"
+            accessoryIcon={Icon.Star}
+            accessoryTitle={hit.meta?.favers_formatted}
             actions={
               <ActionPanel title={hit.name}>
                 <CopyToClipboardAction

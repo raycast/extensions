@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "composer",
-      "title": "Search Composer Packagist",
+      "title": "Search Packages",
       "subtitle": "Composer Packagist",
       "description": "Searches Composer Packagist for PHP Packages",
       "mode": "view"
