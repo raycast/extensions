@@ -25,18 +25,8 @@ const init = {
 };
 
 export default function Command() {
-  const [results, setResults] = useState<SearchResult[]>([
-    {
-      id: "",
-      name: "",
-      url: "",
-      type: "",
-      author: "",
-      icon: "",
-    },
-  ]);
+  const [results, setResults] = useState<SearchResult[]>([]);
 
-  const [status, setStatus] = useState<Status>(Status.Failure);
   const [loadingState, setLoadingState] = useState(true);
 
   useEffect(() => {
@@ -44,35 +34,22 @@ export default function Command() {
       setLoadingState(false);
       if (!response.ok) {
         const failureMessage = response.message ? response.message : response.statusText;
-        setStatus(Status.Failure);
         showToast(ToastStyle.Failure, "API request failed", failureMessage);
       } else {
         parseResponse(response).then((response: SearchResult[]) => {
-          setStatus(Status.Success);
           setResults(response);
         });
       }
     });
   }, []);
 
-  //const loadingState = results[0].id.length > 0 ? false : true;
-  if (status) {
-    return (
-      <List isLoading={loadingState} searchBarPlaceholder="Search by name..." throttle>
-        <List.Section title="Results">
-          {results.map((searchResult) => (
-            <SearchListItem key={searchResult.id} searchResult={searchResult} />
-          ))}
-        </List.Section>
-      </List>
-    );
-  } else {
-    return (
-      <List>
-        <List.Section></List.Section>
-      </List>
-    );
-  }
+  return (
+    <List isLoading={loadingState} searchBarPlaceholder="Search by name..." throttle>
+      <List.Section title="Results">
+        {results && results.map((searchResult) => <SearchListItem key={searchResult.id} searchResult={searchResult} />)}
+      </List.Section>
+    </List>
+  );
 }
 
 async function searchConfluence() {
