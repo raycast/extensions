@@ -7,7 +7,7 @@ import {
   showToast,
   ToastStyle,
 } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import algoliaSearch from "algoliasearch/lite";
 
 const APPID = "M58222SH95";
@@ -61,38 +61,27 @@ export default function SearchDocumentation() {
   const [isLoading, setIsLoading] = useState(false);
 
   const search = async (query = "") => {
-    if (query === "") {
-      setIsLoading(false);
-      return [];
-    }
     setIsLoading(true);
+    if (query == "") {
+      setSearchResults([]);
+      setIsLoading(false);
+      return;
+    }
     try {
       const res = await algoliaIndex.search<PackagistHit>(query, {
         hitsPerPage: 30,
         facets: ["tags", "type", "type"],
       });
+      setSearchResults(res.hits);
       setIsLoading(false);
-      return res.hits;
     } catch (err: any) {
-      setIsLoading(false);
+      setSearchResults([]);
       await showToast(ToastStyle.Failure, "Error Searching Composer Packagist.", err.message);
-      return [];
+      setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    (async () => setSearchResults(await search()))();
-  }, []);
-
   return (
-    <List
-      throttle={true}
-      isLoading={isLoading}
-      onSearchTextChange={async (query) => {
-        setIsLoading(true);
-        setSearchResults(await search(query));
-      }}
-    >
+    <List throttle={true} isLoading={isLoading} onSearchTextChange={search}>
       {searchResults?.map((hit: PackagistHit) => {
         return (
           <List.Item
