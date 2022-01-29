@@ -111,12 +111,30 @@
     },
     {
       "name": "collections",
-      "title": "Collections",
+      "title": "Custom Collections",
       "placeholder": "Collection IDs, comma & space separated",
       "description": "Leave blank for pre-selected ones - Collections to search for images on Set Random Wallpaper. Comma & space separated list of collection IDs.",
       "type": "textfield",
       "required": false,
       "default": ""
+    },
+    {
+      "name": "includeDefaults",
+      "title": "Include Default Collections",
+      "type": "dropdown",
+      "description": "If you're using custom collections, select whether to include the default ones or not.",
+      "data": [
+        {
+          "title": "Yes",
+          "value": "yes"
+        },
+        {
+          "title": "No",
+          "value": "no"
+        }
+      ],
+      "required": false,
+      "default": "no"
     },
     {
       "name": "path",
