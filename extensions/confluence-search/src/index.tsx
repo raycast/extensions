@@ -109,11 +109,6 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   );
 }
 
-enum Status {
-  Failure,
-  Success,
-}
-
 interface SearchResult {
   id: string;
   name: string;
