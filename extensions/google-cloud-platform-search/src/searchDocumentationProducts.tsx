@@ -1,12 +1,5 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
-import { DocumentationProduct, Project } from "./types";
+import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { DocumentationProduct } from "./types";
 import { SWRConfig } from "swr";
 import { cacheConfig } from "./swrCache";
 import { useDocumentationProducts } from "./documentationProducts";
@@ -36,7 +29,7 @@ export function DocumentationProductsList() {
         <DocumentationProductListItem key={product.id} product={product} />
       ))}
     </List>
-  )
+  );
 }
 
 function DocumentationProductListItem(props: { product: DocumentationProduct }) {
