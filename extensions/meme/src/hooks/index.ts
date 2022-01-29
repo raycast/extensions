@@ -1,0 +1,1 @@
+export {useMemeSearch} from './useMemeSearch';

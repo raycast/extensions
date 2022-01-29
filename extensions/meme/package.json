@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "meme",
+  "title": "Meme Generator",
+  "description": "Generate memes using the Imgflip API",
+  "icon": "command-icon.png",
+  "author": "mattrose",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "meme",
+      "title": "Generate meme",
+      "description": "Find a meme template and generate an image with your own text",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.0",
+    "fuse.js": "^6.5.3",
+    "jimp": "^0.16.1",
+    "node-fetch": "^3.2.0",
+    "use-debounce": "^7.0.1"
+  },
+  "devDependencies": {
+    "@giphy/js-types": "^4.1.0",
+    "@types/child-process-promise": "^2.2.2",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
