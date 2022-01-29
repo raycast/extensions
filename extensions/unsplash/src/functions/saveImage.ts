@@ -9,7 +9,7 @@ interface SaveImageProps {
 export const saveImage = async ({ url, id }: SaveImageProps) => {
   const toast = await showToast(ToastStyle.Animated, "Saving image...");
 
-  const { downloadSize }: { path: string; downloadSize: DownloadSize } = getPreferenceValues();
+  const { downloadSize } = getPreferenceValues<UnsplashPreferences>();
 
   try {
     await runAppleScript(`

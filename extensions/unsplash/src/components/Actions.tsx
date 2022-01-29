@@ -30,7 +30,7 @@ export const Actions: React.FC<BaseProps> = ({ back = false, details = false, it
 
 export const Sections: React.FC<BaseProps> = ({ back = false, details = false, item }) => {
   const { pop, push } = useNavigation();
-  const { downloadSize }: { downloadSize: DownloadSize } = getPreferenceValues();
+  const { downloadSize } = getPreferenceValues<UnsplashPreferences>();
 
   const imageUrl = item.urls?.raw || item.urls?.full || item.urls?.regular || item.urls?.small;
 

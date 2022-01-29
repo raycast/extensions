@@ -124,4 +124,12 @@ interface LikesResult {
 }
 
 // Options
-type DownloadSize = "raw" | "full" | "regular" | "small" | "thumb";
+interface UnsplashPreferences {
+  accessKey: string;
+  username: string;
+  orientation: "all" | "landscape" | "portrait" | "squarish";
+  downloadSize: "raw" | "full" | "regular" | "small" | "thumb";
+  collections: string;
+  includeDefaults: "yes" | "no";
+  path: string;
+}

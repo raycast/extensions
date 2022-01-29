@@ -5,9 +5,9 @@ import fetch from "node-fetch";
 import setWallpaper from "@/functions/setWallpaper";
 
 export const useRandom = async () => {
-  const { accessKey, collections } = getPreferenceValues();
+  const { accessKey, collections, includeDefaults } = getPreferenceValues();
 
-  const customCollections = collections?.split(", ")?.join(",");
+  const customCollections = collections?.split(", ");
   const defaultCollections = [
     "4324303", // Vinyl and Covers
     "8647859", // Programming
@@ -19,12 +19,17 @@ export const useRandom = async () => {
     "2063295", // Surfing
     "9389477", //Tokyo
     "932210", // Snow
-  ].join(",");
+  ];
+
+  const whichCollections =
+    includeDefaults === "yes" && customCollections
+      ? [...defaultCollections, ...customCollections]
+      : customCollections || defaultCollections;
 
   const response = await fetch(
-    `https://api.unsplash.com/photos/random?orientation=landscape&collections=${
-      customCollections || defaultCollections
-    }`,
+    `https://api.unsplash.com/photos/random?orientation=landscape&collections=${encodeURIComponent(
+      whichCollections.join(",")
+    )}`,
     {
       headers: {
         Authorization: `Client-ID ${accessKey}`,
