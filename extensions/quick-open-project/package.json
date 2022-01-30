@@ -22,6 +22,22 @@
           "description": "Comma-separated list of paths to index. Example: '~/work,~/projects'. Wildcards allowed, e.g. '~/go/src/*/*'",
           "placeholder": "~/work,~/projects",
           "default": ""
+        },
+        {
+          "name": "editorApp",
+          "type": "appPicker",
+          "required": true,
+          "title": "Editor",
+          "description": "The editor app to use when opening a project folder",
+          "default": "/Applications/Visual Studio Code.app"
+        },
+        {
+          "name": "terminalApp",
+          "type": "appPicker",
+          "required": true,
+          "title": "Terminal",
+          "description": "The terminal app to use when opening a project folder",
+          "default": "/System/Applications/Utilities/Terminal.app"
         }
       ]
     }

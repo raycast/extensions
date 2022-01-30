@@ -12,6 +12,7 @@ import {
   environment,
   preferences,
   render,
+  Application,
 } from "@raycast/api";
 import Frecency from "frecency";
 import { mkdirSync, statSync, readFileSync, writeFileSync } from "fs";
@@ -143,6 +144,8 @@ function updateFrecency(searchQuery: string | undefined, project: Project) {
 function Command() {
   const [searchQuery, setSearchQuery] = useState<string>();
   const { projects } = searchProjects(searchQuery);
+  const editorApp = preferences.editorApp.value as Application;
+  const terminalApp = preferences.terminalApp.value as Application;
 
   return (
     <List onSearchTextChange={setSearchQuery} selectedItemId={projects[0] ? projects[0].fullPath : ""}>
@@ -156,34 +159,36 @@ function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Item
-                title="Open in VSCode"
+                title={"Open in " + editorApp.name}
                 key="editor"
                 onAction={() => {
                   updateFrecency(searchQuery, project);
-                  open(project.fullPath, { app: { name: "/Applications/Visual Studio Code.app" } });
+                  open(project.fullPath, { app: { name: editorApp.path } });
                   closeMainWindow();
                 }}
-                icon={{ fileIcon: "/Applications/Visual Studio Code.app" }}
+                icon={{ fileIcon: editorApp.path }}
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
               />
               <ActionPanel.Item
-                title="Open in Terminal"
+                title={"Open in " + terminalApp.name}
                 key="terminal"
                 onAction={() => {
                   updateFrecency(searchQuery, project);
-                  open(project.fullPath, { app: { name: "/Applications/iTerm.app", arguments: [project.fullPath] } });
+                  open(project.fullPath, {
+                    app: { name: terminalApp.path, arguments: [project.fullPath] },
+                  });
                   closeMainWindow();
                 }}
-                icon={{ fileIcon: "/Applications/iTerm.app" }}
+                icon={{ fileIcon: terminalApp.path }}
                 shortcut={{ modifiers: ["cmd"], key: "t" }}
               />
               <ActionPanel.Item
-                title="Open in VSCode and Terminal"
+                title={"Open in both " + editorApp.name + " and " + terminalApp.name}
                 key="both"
                 onAction={() => {
                   updateFrecency(searchQuery, project);
-                  open(project.fullPath, { app: { name: "/Applications/iTerm.app", arguments: [project.fullPath] } });
-                  open(project.fullPath, { app: { name: "/Applications/Visual Studio Code.app" } });
+                  open(project.fullPath, { app: { name: terminalApp.path, arguments: [project.fullPath] } });
+                  open(project.fullPath, { app: { name: editorApp.path } });
                   closeMainWindow();
                 }}
                 icon={Icon.Window}
