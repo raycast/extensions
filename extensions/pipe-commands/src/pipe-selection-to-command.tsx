@@ -1,15 +1,7 @@
-import {
-  environment,
-  getSelectedFinderItems,
-  getSelectedText,
-  render,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { environment, getSelectedFinderItems, getSelectedText, render, showToast, ToastStyle } from "@raycast/api";
 import { readdirSync } from "fs";
 import { PipeCommands, PipeInput } from "./pipe-to-command";
 import { copyAssetsCommands } from "./utils";
-
 
 async function getSelection(): Promise<PipeInput> {
   try {

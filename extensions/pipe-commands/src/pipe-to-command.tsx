@@ -71,7 +71,7 @@ function TextAction(props: { command: ScriptCommand; input: PipeInput; reload: (
     return async () => {
       const toast = await showToast(ToastStyle.Animated, "Running...");
       const input = metadatas.input.percentEncoded ? encodeURIComponent(props.input.content) : props.input.content;
-      const res = spawnSync(scriptPath, {encoding: "utf-8", input, maxBuffer: 10 * 1024 * 1024})
+      const res = spawnSync(scriptPath, { encoding: "utf-8", input, maxBuffer: 10 * 1024 * 1024 });
       toast.hide();
       if (res.stdout) {
         await outputHandler(res.stdout);
