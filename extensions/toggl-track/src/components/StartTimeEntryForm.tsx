@@ -68,7 +68,7 @@ function StartTimeEntryForm({ project, description }: { project?: Project; descr
         </ActionPanel>
       }
     >
-      <Form.TextArea id="description" title="Description" defaultValue={description} />
+      <Form.TextField id="description" title="Description" defaultValue={description} />
       <Form.Dropdown
         id="project"
         title="Project"

@@ -64,7 +64,7 @@ function EditTimeEntryForm({ project, entry }: { project?: Project; entry: TimeE
         </ActionPanel>
       }
     >
-      <Form.TextArea id="description" title="Description" defaultValue={entry.description} />
+      <Form.TextField id="description" title="Description" defaultValue={entry.description} />
       <Form.DatePicker id="start" title="Start Time" defaultValue={new Date(entry.start).toISOString().replace("T", " ").substring(0, 16) + " UTC" } />
       {"stop" in entry ?
         <Form.DatePicker id="end" title="End Time" defaultValue={ new Date(entry.stop).toISOString().replace("T", " ").substring(0, 16) + " UTC" } /> : undefined

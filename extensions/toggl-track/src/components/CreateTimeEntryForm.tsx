@@ -70,7 +70,7 @@ function CreateTimeEntryForm({ project, description }: { project?: Project; desc
         </ActionPanel>
       }
     >
-      <Form.TextArea id="description" title="Description" defaultValue={description} />
+      <Form.TextField id="description" title="Description" defaultValue={description} />
       <Form.DatePicker id="start" title="Start Time" />
       <Form.DatePicker id="end" title="End Time" />
       <Form.Dropdown
