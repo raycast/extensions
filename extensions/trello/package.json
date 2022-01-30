@@ -17,6 +17,15 @@
   ],
   "preferences": [
     {
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "title": "Trello username",
+      "description": "Trello username",
+      "link": "https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/",
+      "placeholder": "Trello username"
+    },
+    {
       "name": "token",
       "type": "password",
       "required": true,

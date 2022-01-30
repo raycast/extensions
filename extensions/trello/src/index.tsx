@@ -1,6 +1,6 @@
 import { List, showToast, ToastStyle } from '@raycast/api'
 import { useEffect, useState } from 'react'
-import { fetchTodos, searchTodos } from './utils/fetchTodos'
+import { returnTodos } from './utils/fetchTodos'
 import { TrelloFetchResponse } from './trelloResponse.model'
 import { TodoListItem } from './TrelloListItem'
 
@@ -10,7 +10,7 @@ export default function PackageList() {
 
   const onSearchTextChange = async (text: string) => {
     setLoading(true)
-    const response = await searchTodos(text.replace(/\s/g, '+'))
+    const response = await returnTodos(text.replace(/\s/g, '+'))
     setTodos(response.cards)
     setLoading(false)
   }
@@ -20,7 +20,7 @@ export default function PackageList() {
       try {
         setLoading(true)
 
-        const response = await fetchTodos()
+        const response = await returnTodos('')
         setLoading(false)
 
         setTodos(response)
@@ -41,7 +41,7 @@ export default function PackageList() {
     >
       {results?.length
         ? results.map((result) => {
-          return <TodoListItem key={result.name} result={result} />
+          return <TodoListItem key={result.id} result={result} />
         })
         : null}
     </List>
