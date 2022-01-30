@@ -6,6 +6,7 @@ export interface ScriptCommand {
 export interface ScriptMetadatas {
   title: string;
   input: ScriptInput;
+  packageName?: string;
 }
 
 export type ArgumentType = "text" | "file";

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # @raycast.title Extract Domain from URL
+# @raycast.packageName Developer Utils
 # @raycast.input {"type": "text"}
 
 from urllib.parse import urlparse

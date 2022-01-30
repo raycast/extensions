@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # @raycast.title Google Search
+# @raycast.packageName Web Searches
 # @raycast.input {"type": "text", "percentEncoded": true}
 
 read -r query

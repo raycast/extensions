@@ -89,6 +89,7 @@ function TextAction(props: { command: ScriptCommand; input: PipeInput; reload: (
       key={scriptPath}
       icon={{ text: Icon.Text, file: Icon.Document, url: Icon.Globe }[metadatas.input.type]}
       title={metadatas.title}
+      subtitle={metadatas.packageName}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # @raycast.title Prettify JSON
+# @raycast.packageName Developer Utils
 # @raycast.input {"type": "text"}
 
 import json
