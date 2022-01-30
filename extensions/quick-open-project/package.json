@@ -20,6 +20,7 @@
           "required": true,
           "title": "Paths to index",
           "description": "Comma-separated list of paths to index. Example: '~/work,~/projects'",
+          "placeholder": "~/work,~/projects",
           "default": ""
         }
       ]
