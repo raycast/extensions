@@ -3,37 +3,37 @@ import {
   closeMainWindow,
   copyTextToClipboard,
   environment,
-  getSelectedFinderItems,
-  getSelectedText,
   Icon,
   List,
   OpenAction,
   OpenWithAction,
   pasteText,
   PushAction,
-  render,
   showHUD,
   ShowInFinderAction,
   showToast,
   ToastStyle,
   TrashAction,
 } from "@raycast/api";
-import { execa } from "execa";
+import { spawnSync } from "child_process";
 import { readdirSync } from "fs";
 import { useEffect, useState } from "react";
 import PipeCommandForm from "./create-pipe-command";
 import { ArgumentType, ScriptCommand } from "./types";
 import { copyAssetsCommands, parseScriptCommands, sortByAccessTime } from "./utils";
 
-interface Selection {
+export interface PipeInput {
   type: ArgumentType;
-  content: string[];
+  content: string;
 }
 
-function PipeCommands(props: { selection: Selection }): JSX.Element {
+export function PipeCommands(props: { input: PipeInput }): JSX.Element {
   const [commands, setCommands] = useState<ScriptCommand[]>();
 
   const loadCommands = async () => {
+    if (readdirSync(environment.supportPath).length == 0) {
+      await copyAssetsCommands();
+    }
     const commands = await parseScriptCommands(environment.supportPath);
     setCommands(await sortByAccessTime(commands));
   };
@@ -43,54 +43,51 @@ function PipeCommands(props: { selection: Selection }): JSX.Element {
   }, []);
 
   return (
-    <List isLoading={typeof commands == "undefined"} searchBarPlaceholder="Pipe selection to...">
-      {props.selection.type == "file" && props.selection.content.length == 1 ? (
+    <List isLoading={typeof commands == "undefined"} searchBarPlaceholder="Pipe Input to...">
+      {props.input.type == "file" ? (
         <List.Item
           icon={Icon.Document}
           title="Open With"
           actions={
             <ActionPanel>
-              <OpenWithAction path={props.selection.content[0]} />
+              <OpenWithAction path={props.input.content} />
             </ActionPanel>
           }
         />
       ) : null}
       {commands
-        ?.filter((command) => command.metadatas.selection.type == props.selection.type)
+        ?.filter((command) => command.metadatas.input.type == props.input.type)
         .map((command) => (
-          <TextAction key={command.path} command={command} selection={props.selection} reload={loadCommands} />
+          <TextAction key={command.path} command={command} input={props.input} reload={loadCommands} />
         ))}
     </List>
   );
 }
 
-function TextAction(props: { command: ScriptCommand; selection: Selection; reload: () => void }) {
+function TextAction(props: { command: ScriptCommand; input: PipeInput; reload: () => void }) {
   const { path: scriptPath, metadatas } = props.command;
 
   function handleCommand(outputHandler: (output: string) => void) {
     return async () => {
       const toast = await showToast(ToastStyle.Animated, "Running...");
-      const res = await execa(
-        scriptPath,
-        metadatas.selection.percentEncoded ? props.selection.content.map(encodeURIComponent) : props.selection.content,
-        {
-          encoding: "utf-8",
-        }
-      );
+      const input = metadatas.input.percentEncoded ? encodeURIComponent(props.input.content) : props.input.content;
+      const res = spawnSync(scriptPath, {encoding: "utf-8", input, maxBuffer: 10 * 1024 * 1024})
       toast.hide();
       if (res.stdout) {
         await outputHandler(res.stdout);
-      } else if (res.stderr) {
-        await showHUD(res.stderr);
       }
-      await closeMainWindow();
+      if (res.stderr) {
+        showHUD(res.stderr);
+      } else {
+        await closeMainWindow();
+      }
     };
   }
 
   return (
     <List.Item
       key={scriptPath}
-      icon={{ text: Icon.Text, file: Icon.Document, url: Icon.Globe }[metadatas.selection.type]}
+      icon={{ text: Icon.Text, file: Icon.Document, url: Icon.Globe }[metadatas.input.type]}
       title={metadatas.title}
       actions={
         <ActionPanel>
@@ -124,34 +121,3 @@ function TextAction(props: { command: ScriptCommand; selection: Selection; reloa
     />
   );
 }
-
-async function getSelection(): Promise<Selection> {
-  try {
-    const files = await getSelectedFinderItems();
-    if (files.length == 0) throw new Error("No file selected!");
-    return { type: "file", content: files.map((file) => file.path) };
-  } catch {
-    try {
-      const text = await getSelectedText();
-      return { type: "text", content: [text] };
-    } catch {
-      const { stdout: clipboard } = await execa("pbpaste");
-      return { type: "text", content: [clipboard] };
-    }
-  }
-}
-
-async function main() {
-  if (readdirSync(environment.supportPath).length == 0) {
-    await copyAssetsCommands();
-  }
-
-  try {
-    const selection = await getSelection();
-    render(<PipeCommands selection={selection} />);
-  } catch (e: unknown) {
-    showToast(ToastStyle.Failure, (e as Error).message);
-  }
-}
-
-main();

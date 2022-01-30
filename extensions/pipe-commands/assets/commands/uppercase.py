@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 # @raycast.title Switch to Uppercase
-# @raycast.selection {"type": "text"}
+# @raycast.input {"type": "text"}
 
 import sys
 
-sys.stdout.write(sys.argv[1].upper())
+selection = sys.stdin.read()
+sys.stdout.write(selection.upper())

@@ -5,12 +5,12 @@ export interface ScriptCommand {
 
 export interface ScriptMetadatas {
   title: string;
-  selection: ScriptSelection;
+  input: ScriptInput;
 }
 
 export type ArgumentType = "text" | "file";
 
-export interface ScriptSelection {
+export interface ScriptInput {
   type: ArgumentType;
   percentEncoded?: boolean;
 }

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # @raycast.title URL Encode
-# @raycast.selection {"type": "text", "percentEncoded": true}
+# @raycast.input {"type": "text", "percentEncoded": true}
 
-echo "$1"
+read -r url_encoded_string
+echo "$url_encoded_string"

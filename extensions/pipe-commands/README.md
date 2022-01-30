@@ -2,9 +2,9 @@
 
 ## Using Pipe commands
 
-Select a some text, an url or a file and use the `Send Selection to Pipe command` command.
+Select a some text, an url or a file and use the `Send [Selection, Clipboard] to Pipe command` command.
 
-Depending on the user selection type, different commands will be shown.
+Depending on the user input type, different commands will be shown.
 
 ## Adding additional Actions
 
@@ -13,20 +13,18 @@ Use the `Create Pipe command` command to generate a new pipe command template.
 The Pipe command syntax is very similar to the script command syntax, with some caveats:
 
 - Only the `title` field is parsed (the other fields are ignored)
-- A new field is introduced: `@raycast.selection`. It is similar to the script command arguments, but support other types.
+- A new field is introduced: `@raycast.input`. It is similar to the script command arguments, but support other types.
 
   | field          | description                                    | values            | required |
   | -------------- | ---------------------------------------------- | ----------------- | -------- |
-  | type           | What type of selection the pipe command handle | text, url or file | ✅        |
+  | type           | What type of input the pipe command handle | text, url or file | ✅        |
   | percentEncoded | useful for query strings                       | boolean           | ❌        |
 
 ## Pipe Commands logic
 
-The user selection will be passed to the script as the first argument.
-If the selection of the user is composed of multiple items, multiple args will be provided to the script.
-
-The output of the script will replace the current selection.
-If you want to provide a message to the user, use stderr.
+The user input (selection or clipboard) will be passed to the script through the standard input stream (stdin).
+The standard output stream (stdout) of the script will replace the current selection, or replace the clipboard depending on the user choice.
+If you want to provide a message to the user, use the standard error stream (stderr).
 
 ## Example scripts
 
@@ -36,9 +34,10 @@ If you want to provide a message to the user, use stderr.
 #!/bin/bash
 
 # @raycast.title Google Search
-# @raycast.selection {"type": "text", "percentEncoded": true}
+# @raycast.input {"type": "text", "percentEncoded": true}
 
-open "https://www.google.com/search?q=$1"
+read -r query
+open "https://www.google.com/search?q=$query"
 ```
 
 ### Switch to Uppercase
@@ -47,10 +46,10 @@ open "https://www.google.com/search?q=$1"
 #!/usr/bin/env python3
 
 # @raycast.title Switch to Uppercase
-# @raycast.selection {"type": "text"}
+# @raycast.input {"type": "text"}
 
 import sys
 
-selection = sys.argv[1]
+selection = sys.stdin.read()
 sys.stdout.write(selection.upper())
 ```

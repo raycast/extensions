@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # @raycast.title Generate Markdown Link
-# @raycast.selection {"type": "text"}
+# @raycast.input {"type": "text"}
 
-echo "[$1]($(pbpaste))"
+read -r selection
+echo "[$selection]($(pbpaste))"

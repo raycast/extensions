@@ -60,7 +60,7 @@ export default function PipeCommandForm(): JSX.Element {
 
     const metadataLines = [
       `${languageProperties.comments} @raycast.title ${values.title}`,
-      `${languageProperties.comments} @raycast.selection {"type": "${
+      `${languageProperties.comments} @raycast.input {"type": "${
         values.type
       }", "percentEncoded": ${!!values.percentEncoded}}`,
     ];
@@ -95,7 +95,7 @@ export default function PipeCommandForm(): JSX.Element {
         defaultValue={false}
         title="Percent Encoded"
         id="percentEncoded"
-        label="Perform percent encoding on the selection value."
+        label="Perform percent encoding on the input value."
       />
     </Form>
   );

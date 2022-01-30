@@ -11,7 +11,7 @@ export function parseMetadatas(script: string): ScriptMetadatas {
   const matches = [...script.matchAll(metadataRegex)];
   for (const match of matches) {
     const metadataTitle = match[1];
-    const metatataValue = metadataTitle == "selection" ? JSON.parse(match[2]) : match[2];
+    const metatataValue = metadataTitle == "input" ? JSON.parse(match[2]) : match[2];
     metadatas[metadataTitle] = metatataValue;
   }
 
@@ -28,7 +28,7 @@ export async function parseScriptCommands(scriptFolder: string): Promise<ScriptC
       return { path: scriptPath, metadatas };
     })
   );
-  return commands.filter((command) => command.metadatas.title && command.metadatas.selection);
+  return commands.filter((command) => command.metadatas.title && command.metadatas.input);
 }
 
 export async function copyAssetsCommands() {

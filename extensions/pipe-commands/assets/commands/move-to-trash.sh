@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # @raycast.title Move to Trash
-# @raycast.selection {"type": "file"}
+# @raycast.input {"type": "file"}
 
-mv "$1" "$HOME/.Trash"
+read -r input_file_path
+mv "$input_file_path" "$HOME/.Trash"

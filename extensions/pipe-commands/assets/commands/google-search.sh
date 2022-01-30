@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # @raycast.title Google Search
-# @raycast.selection {"type": "text", "percentEncoded": true}
+# @raycast.input {"type": "text", "percentEncoded": true}
 
-open "https://www.google.com/search?q=$1"
+read -r query
+open "https://www.google.com/search?q=$query"

@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# @raycast.title Copy File Content
-# @raycast.selection {"type": "file"}
+# @raycast.title Extract File Content
+# @raycast.input {"type": "file"}
 
-cat "$1"
+read -r input_file_path
+cat "$input_file_path"

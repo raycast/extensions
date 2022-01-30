@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# @raycast.title Copy File Path to Clipboard
-# @raycast.selection {"type": "file"}
+# @raycast.title Extract File Path
+# @raycast.input {"type": "file"}
 
-echo "$1"
+read -r input_file_path
+echo "$input_file_path"
