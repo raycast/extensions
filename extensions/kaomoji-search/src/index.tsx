@@ -83,7 +83,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 
   console.log("searching for", searchText);
 
-  const findPromise: Promise<AsciiLibEntry[]> = find(searchText).toArray().toPromise();
+  const findPromise: Promise<AsciiLibEntry[]> = find(searchText.toLowerCase()).toArray().toPromise();
 
   const results = (await findPromise) as AsciiLibEntry[];
 
