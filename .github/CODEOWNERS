@@ -148,6 +148,7 @@
 /extensions/safari                                   @loris @thomaspaulmann
 /extensions/script-commands                          @unnamedd
 /extensions/script-kit                               @pomdtr
+/extensions/search-composer-packagist                @danyelkeddah
 /extensions/search-mdn                               @krzysztofzuraw
 /extensions/search-notion                            @sadanand-singh
 /extensions/search-npm                               @mrmartineau
