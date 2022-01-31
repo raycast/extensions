@@ -17,6 +17,14 @@ function allWorkspacesFetch<T>(workSpaceFunction: (workspaceId: number) => Promi
   };
 }
 
+async function getTimeEntries<T>() {
+  const tmp = await api.getTimeEntries({
+        startDate: dayjs().subtract(1, "week").toDate(),
+        endDate: dayjs().toDate(),
+      })
+  return tmp.reverse()
+}
+
 export const storage: TogglStorage = {
   projects: persistedStorage({
     key: "projects",
@@ -45,11 +53,7 @@ export const storage: TogglStorage = {
   }),
   timeEntries: persistedStorage({
     key: "timeEntries",
-    fetch: () =>
-      api.getTimeEntries({
-        startDate: dayjs().subtract(1, "week").toDate(),
-        endDate: dayjs().toDate(),
-      }),
+    fetch: () => getTimeEntries(),
     expirySeconds: 30,
   }),
 };

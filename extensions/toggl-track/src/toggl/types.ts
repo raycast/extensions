@@ -36,6 +36,7 @@ export interface TimeEntry {
   wid: number;
   billable: boolean;
   start: Date;
+  stop: Date;
   duration: number;
   description: string;
   tags: string[];

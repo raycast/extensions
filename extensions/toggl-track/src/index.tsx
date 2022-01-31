@@ -39,7 +39,6 @@ function ListView() {
     }
     return acc;
   }, [] as TimeEntry[]);
-  timeEntriesWithUniqueProjectAndDescription.reverse()
 
   async function resumeTimeEntry(timeEntry: TimeEntry) {
     await showToast(ToastStyle.Animated, "Starting timer...");
