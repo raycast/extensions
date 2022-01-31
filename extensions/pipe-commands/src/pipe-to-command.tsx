@@ -63,13 +63,19 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
           <PipeCommand key={command.path} command={command} input={props.input} reload={loadCommands} />
         ))}
       {parsed?.invalid.map((path) => (
-        <List.Item key={path} icon={Icon.ExclamationMark} title="Invalid Pipe Command" subtitle={basename(path)} actions={
-          <ActionPanel>
-            <OpenAction title="Open Script" target={path} />
-            <OpenWithAction path={path} />
-            <ShowInFinderAction path={path} />
-          </ActionPanel>
-        }/>
+        <List.Item
+          key={path}
+          icon={Icon.ExclamationMark}
+          title="Invalid Pipe Command"
+          subtitle={basename(path)}
+          actions={
+            <ActionPanel>
+              <OpenAction title="Open Script" target={path} />
+              <OpenWithAction path={path} />
+              <ShowInFinderAction path={path} />
+            </ActionPanel>
+          }
+        />
       ))}
     </List>
   );

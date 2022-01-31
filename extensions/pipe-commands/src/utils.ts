@@ -18,7 +18,9 @@ export function parseMetadatas(script: string): ScriptMetadatas {
   return (metadatas as unknown) as ScriptMetadatas;
 }
 
-export async function parseScriptCommands(scriptFolder: string): Promise<{commands: ScriptCommand[], invalid: string[]}> {
+export async function parseScriptCommands(
+  scriptFolder: string
+): Promise<{ commands: ScriptCommand[]; invalid: string[] }> {
   const paths = await readdir(scriptFolder);
   const commands = await Promise.all(
     paths.map(async (path) => {
@@ -28,7 +30,7 @@ export async function parseScriptCommands(scriptFolder: string): Promise<{comman
       return { path: scriptPath, metadatas };
     })
   );
-  const res = {commands: [] as ScriptCommand[], invalid: [] as string[]};
+  const res = { commands: [] as ScriptCommand[], invalid: [] as string[] };
   for (const command of commands) {
     if (command.metadatas.title && command.metadatas.input) {
       res.commands.push(command);
@@ -36,7 +38,7 @@ export async function parseScriptCommands(scriptFolder: string): Promise<{comman
       res.invalid.push(command.path);
     }
   }
-  return res
+  return res;
 }
 
 export async function copyAssetsCommands() {
