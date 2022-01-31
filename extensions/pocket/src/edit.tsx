@@ -12,7 +12,7 @@ import {
   SubmitFormAction,
   Toast,
   ToastStyle,
-  useNavigation,
+  useNavigation
 } from "@raycast/api";
 import { useAvailableTags } from "./utils/hooks";
 import { createBookmark } from "./utils/api";
@@ -39,7 +39,7 @@ export default function Edit({ bookmark, onArchive, onDelete, onFavorite }: Edit
     const toast = new Toast({
       title: "Updating bookmark",
       message: values.url,
-      style: ToastStyle.Animated,
+      style: ToastStyle.Animated
     });
 
     try {
@@ -82,7 +82,7 @@ export default function Edit({ bookmark, onArchive, onDelete, onFavorite }: Edit
             <ActionPanelItem
               icon={{ source: Icon.Trash, tintColor: Color.Red }}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
-              title="Delete"
+              title="Delete Bookmark"
               onAction={onDelete}
             />
             <ActionPanelItem

@@ -79,8 +79,7 @@
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3",
     "swr": "^1.2.0",
-    "got": "^12.0.1",
-    "run-applescript": "^6.0.0"
+    "got": "^12.0.1"
   },
   "scripts": {
     "build": "ray build -e dist",
