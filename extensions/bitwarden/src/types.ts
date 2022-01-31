@@ -82,3 +82,18 @@ export interface PasswordHistory {
 export interface SecureNote {
   type: number;
 }
+
+export interface PasswordOptions {
+  len: number,
+  uppercase: boolean,
+  lowercase: boolean,
+  numeric: boolean,
+  special: boolean
+}
+
+export interface PassphraseOptions {
+  wordsLen: number,
+  separator: string,
+  capitalize: boolean,
+  numbers: boolean
+}

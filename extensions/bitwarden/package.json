@@ -26,6 +26,13 @@
       "subtitle": "Bitwarden",
       "description": "Lock the vault.",
       "mode": "no-view"
+    },
+    {
+      "name": "create-record",
+      "title": "Create Record",
+      "subtitle": "Bitwarden",
+      "description": "Search all items in the authenticated Bitwarden vault.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -64,7 +71,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.27.1",
     "execa": "^5.1.1",
     "treeify": "^1.1.0"
   },
