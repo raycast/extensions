@@ -14,6 +14,7 @@ import {
   showToast,
   ToastStyle,
   TrashAction,
+  useNavigation,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { readdirSync } from "fs";
@@ -66,20 +67,19 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
 
 function TextAction(props: { command: ScriptCommand; input: PipeInput; reload: () => void }) {
   const { path: scriptPath, metadatas } = props.command;
+  const navigation = useNavigation();
 
   function handleCommand(outputHandler: (output: string) => void) {
     return async () => {
       const toast = await showToast(ToastStyle.Animated, "Running...");
       const input = metadatas.input.percentEncoded ? encodeURIComponent(props.input.content) : props.input.content;
-      const res = spawnSync(scriptPath, { encoding: "utf-8", input, maxBuffer: 10 * 1024 * 1024 });
+      const {stdout, stderr, status} = spawnSync(scriptPath, { encoding: "utf-8", input, maxBuffer: 10 * 1024 * 1024 });
       toast.hide();
-      if (res.stdout) {
-        await outputHandler(res.stdout);
+      if (status == 0 && stdout) {
+        await outputHandler(stdout);
       }
-      if (res.stderr) {
-        showHUD(res.stderr);
-      } else {
-        await closeMainWindow();
+      if (stderr) {
+        showHUD(stderr);
       }
     };
   }
@@ -94,11 +94,24 @@ function TextAction(props: { command: ScriptCommand; input: PipeInput; reload: (
         <ActionPanel>
           <ActionPanel.Section>
             <ActionPanel.Item
-              title="Run (Copy Output)"
-              icon={Icon.Terminal}
-              onAction={handleCommand(copyTextToClipboard)}
+              title="Copy Output"
+              icon={Icon.Clipboard}
+              onAction={handleCommand((output) => {
+                copyTextToClipboard(output);
+                closeMainWindow()
+              })}
             />
-            <ActionPanel.Item title="Run (Paste Output)" icon={Icon.Terminal} onAction={handleCommand(pasteText)} />
+            <ActionPanel.Item title="Paste Output" icon={Icon.Pencil} onAction={handleCommand((output) => {
+              pasteText(output);
+              closeMainWindow();
+            })} />
+            <ActionPanel.Item
+              title="Pipe Output"
+              icon={Icon.ArrowRight}
+              onAction={handleCommand((output) => {
+                navigation.push(<PipeCommands input={{ type: "text", content: output }} />);
+              })}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <OpenAction icon={Icon.Upload} title="Open Pipe Command" target={scriptPath} />
