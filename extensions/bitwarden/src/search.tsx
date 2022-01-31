@@ -10,16 +10,17 @@ import {
   getPreferenceValues,
   copyTextToClipboard,
   closeMainWindow,
+  PasteAction,
 } from "@raycast/api";
 import { Item, Folder, VaultStatus } from "./types";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import treeify from "treeify";
 import { filterNullishPropertiesFromObject, codeBlock, titleCase, faviconUrl } from "./utils";
 import { useBitwarden } from "./hooks";
 import { TroubleshootingGuide, UnlockForm } from "./components";
 import { Bitwarden } from "./api";
 
-const { fetchFavicons } = getPreferenceValues();
+const { fetchFavicons, primaryAction } = getPreferenceValues();
 
 export default function Search(): JSX.Element {
   try {
@@ -144,10 +145,7 @@ function ItemListItem(props: {
 }) {
   const { item, folder, refreshItems, sessionToken, copyTotp } = props;
   const { name, notes, identity, login, secureNote, fields, passwordHistory, card } = item;
-  const accessoryIcons = [];
 
-  if (folder) accessoryIcons.push(`📂 ${folder.name}`);
-  if (item.favorite) accessoryIcons.push(`⭐️`);
   const fieldMap = Object.fromEntries(fields?.map((field) => [field.name, field.value]) || []);
   const uriMap = Object.fromEntries(
     login?.uris?.filter((uri) => uri.uri).map((uri, index) => [`uri${index + 1}`, uri.uri]) || []
@@ -172,12 +170,13 @@ function ItemListItem(props: {
       id={item.id}
       title={item.name}
       keywords={item.name.split(/\W/)}
-      accessoryTitle={accessoryIcons ? accessoryIcons.join("  ") : undefined}
+      accessoryTitle={folder ? folder.name : undefined}
+      accessoryIcon={item.favorite ? Icon.Star : undefined}
       icon={getIcon(item)}
       subtitle={item.login?.username || undefined}
       actions={
         <ActionPanel>
-          {item.login?.password ? <CopyToClipboardAction title="Copy Password" content={item.login.password} /> : null}
+          {item.login?.password ? <PasswordActions password={item.login.password} /> : null }
           {item.login?.totp ? (
             <ActionPanel.Item
               title="Copy TOTP"
@@ -245,4 +244,13 @@ function ItemListItem(props: {
       }
     />
   );
+}
+
+function PasswordActions(props: {password: string}) {
+  const copyAction = <CopyToClipboardAction key="copy" title="Copy Password" content={props.password} />
+  const pasteAction = <PasteAction key="paste" title="Paste Password" content={props.password} />
+
+  return <React.Fragment>
+    {primaryAction == 'copy' ? [copyAction, pasteAction] : [pasteAction, copyAction] }
+  </React.Fragment>
 }
