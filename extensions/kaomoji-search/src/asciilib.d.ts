@@ -1,1 +1,1 @@
-declare module "asciilib/find";
+declare module "asciilib";

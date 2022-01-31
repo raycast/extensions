@@ -1,7 +1,7 @@
 import { ActionPanel, CopyToClipboardAction, List, showToast, ToastStyle, randomId } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { AbortError } from "node-fetch";
-import find from "asciilib/find";
+import { lib } from "asciilib";
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -74,18 +74,9 @@ function useSearch() {
 }
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-  interface AsciiLibEntry {
-    name: string;
-    entry: string;
-    keywords: string[];
-    category: string;
-  }
-
   console.log("searching for", searchText);
 
-  const findPromise: Promise<AsciiLibEntry[]> = find(searchText.toLowerCase()).toArray().toPromise();
-
-  const results = (await findPromise) as AsciiLibEntry[];
+  const results = await searchForResults(searchText);
 
   if (signal.aborted) {
     return Promise.reject(new AbortError());
@@ -100,6 +91,28 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
       description: entry.name as string,
     };
   });
+}
+
+interface AsciiLibEntry {
+  name: string;
+  entry: string;
+  keywords: string[];
+  category: string;
+}
+
+function searchForResults(keyword: string): Promise<AsciiLibEntry[]> {
+  const lowercaseKeyword = keyword.toLowerCase();
+  const database = Object.entries(lib).map((e) => e[1]) as AsciiLibEntry[];
+
+  const filteredResults = database.filter((entry: AsciiLibEntry) => {
+    return (
+      entry.name.toLowerCase().includes(lowercaseKeyword) ||
+      entry.keywords.some((keyword) => keyword.toLowerCase().includes(lowercaseKeyword)) ||
+      entry.category.toLowerCase().includes(lowercaseKeyword)
+    );
+  });
+
+  return Promise.resolve(filteredResults);
 }
 
 interface SearchState {
