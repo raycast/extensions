@@ -32,17 +32,12 @@ const languageToProperties: Record<
   Ruby: { extension: ".rb", comments: "#", shebang: "#!/usr/bin/env ruby", helloWorld: "puts 'Hello World!'" },
   Swift: { extension: ".swift", comments: "//", shebang: "#!/usr/bin/swift", helloWorld: "print('Hello World!')" },
   PHP: { extension: ".php", comments: "//", shebang: "#!/usr/bin/env php", helloWorld: "<?php echo 'Hello World!' ?>" },
-  Applescript: {
-    extension: ".applescript",
-    comments: "#",
-    shebang: "#!/usr/bin/osascript",
-    helloWorld: 'say "Hello World!"',
-  },
 };
 
 interface FormValues {
   template: string;
   title: string;
+  packageName?: string;
   percentEncoded: boolean;
   type: ArgumentType;
 }
@@ -65,6 +60,10 @@ export default function PipeCommandForm(): JSX.Element {
       }", "percentEncoded": ${!!values.percentEncoded}}`,
     ];
 
+    if (values.packageName) {
+      metadataLines.push(`${languageProperties.comments} @raycast.packageName ${values.packageName}`);
+    }
+
     const content = [languageProperties.shebang, "", ...metadataLines, "", languageProperties.helloWorld].join("\n");
 
     writeFileSync(filepath, content, { mode: 0o755 });
@@ -86,6 +85,7 @@ export default function PipeCommandForm(): JSX.Element {
         ))}
       </Form.Dropdown>
       <Form.TextField title="Title" placeholder="Command Title" id="title" />
+      <Form.TextField title="Package Name" placeholder="E. g., Developer Utils" id="packageName" />
       <Form.Dropdown title="Accept" id="type">
         {["text", "file"].map((type) => (
           <Form.Dropdown.Item key={type} title={type} value={type} />
