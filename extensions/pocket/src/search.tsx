@@ -1,28 +1,131 @@
-import { ActionPanel, CopyToClipboardAction, Icon, List, OpenInBrowserAction } from "@raycast/api";
+import {
+  ActionPanel,
+  ActionPanelItem,
+  Color,
+  CopyToClipboardAction,
+  getPreferenceValues,
+  Icon,
+  List,
+  OpenInBrowserAction,
+  PushAction,
+  useNavigation,
+} from "@raycast/api";
 import { useBookmarks } from "./utils/hooks";
 import { useState } from "react";
+import Edit from "./edit";
 
-export default function Command() {
+const preferences = getPreferenceValues();
+
+export default function Search() {
   const [search, setSearch] = useState("");
-  const { bookmarks, loading } = useBookmarks({ search });
+  const { pop } = useNavigation();
+
+  const { bookmarks, loading, toggleFavorite, refreshBookmarks, archiveBookmark, deleteBookmark } = useBookmarks({
+    name: search.replace(/(#\w+)/, "").trim(),
+    tag: search.match(/#(\w+)/)?.[1],
+  });
 
   return (
-    <List isLoading={loading} onSearchTextChange={setSearch} throttle searchBarPlaceholder="Filter by title...">
+    <List
+      throttle
+      isLoading={loading}
+      onSearchTextChange={setSearch}
+      searchBarPlaceholder="Filter bookmarks by title..."
+    >
       {bookmarks.map((bookmark) => (
         <List.Item
           key={bookmark.id}
-          icon={bookmark.type === "article" ? Icon.TextDocument : Icon.Video}
-          subtitle={bookmark.tags.length > 0 ? `#${bookmark.tags.join(" #")}` : ""}
           title={bookmark.title}
+          icon={bookmark.type === "article" ? Icon.TextDocument : Icon.Video}
+          subtitle={bookmark.author}
+          accessoryTitle={bookmark.updatedAt.toDateString().replace(/^\w+\s/, "")}
+          accessoryIcon={bookmark.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined}
           actions={
-            <ActionPanel>
+            <ActionPanel title={bookmark.title}>
+              {preferences.defaultOpen === "pocket" ? (
+                <ActionPanel.Section>
+                  <OpenInBrowserAction title="Open in Pocket" icon="pocket-logo.png" url={bookmark.pocketUrl} />
+                  <OpenInBrowserAction title="Open in Browser" url={bookmark.originalUrl} />
+                </ActionPanel.Section>
+              ) : (
+                <ActionPanel.Section>
+                  <OpenInBrowserAction title="Open in Browser" url={bookmark.originalUrl} />
+                  <OpenInBrowserAction title="Open in Pocket" icon="pocket-logo.png" url={bookmark.pocketUrl} />
+                </ActionPanel.Section>
+              )}
               <ActionPanel.Section>
-                <OpenInBrowserAction title="Open in Browser" url={bookmark.url} />
-                <OpenInBrowserAction title="Open in Pocket" url={`https://getpocket.com/read/${bookmark.id}`} />
+                <ActionPanelItem
+                  title="Archive Bookmark"
+                  shortcut={{ modifiers: ["cmd"], key: "a" }}
+                  icon={Icon.Checkmark}
+                  onAction={() => archiveBookmark(bookmark.id)}
+                />
+                <ActionPanelItem
+                  title="Delete Bookmark"
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                  onAction={() => deleteBookmark(bookmark.id)}
+                />
+                <ActionPanelItem
+                  title={`${bookmark.favorite ? "Unmark" : "Mark"} as Favorite`}
+                  shortcut={{ modifiers: ["cmd"], key: "f" }}
+                  icon={Icon.Star}
+                  onAction={() => toggleFavorite(bookmark.id)}
+                />
+                <PushAction
+                  title="Edit Bookmark"
+                  shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  icon={Icon.Pencil}
+                  target={
+                    <Edit
+                      bookmark={bookmark}
+                      onArchive={async () => {
+                        await archiveBookmark(bookmark.id);
+                        pop();
+                      }}
+                      onDelete={async () => {
+                        await deleteBookmark(bookmark.id);
+                        pop();
+                      }}
+                      onFavorite={async () => {
+                        await toggleFavorite(bookmark.id);
+                        pop();
+                      }}
+                    />
+                  }
+                />
               </ActionPanel.Section>
               <ActionPanel.Section>
-                <CopyToClipboardAction title="Copy Bookmark URL" content={bookmark.url} />
-                <CopyToClipboardAction title="Copy Bookmark Title" content={bookmark.title} />
+                <CopyToClipboardAction
+                  title="Copy Bookmark Title"
+                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                  content={bookmark.title}
+                />
+                <CopyToClipboardAction
+                  title="Copy Bookmark URL"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                  content={bookmark.originalUrl}
+                />
+                <CopyToClipboardAction
+                  title="Copy Pocket Bookmark URL"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                  content={bookmark.pocketUrl}
+                />
+                {bookmark.author ? (
+                  <CopyToClipboardAction
+                    title="Copy Bookmark Author"
+                    shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
+                    content={bookmark.author}
+                  />
+                ) : null}
+              </ActionPanel.Section>
+              <ActionPanel.Section>
+                <ActionPanelItem
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  onAction={() => refreshBookmarks()}
+                />
               </ActionPanel.Section>
             </ActionPanel>
           }

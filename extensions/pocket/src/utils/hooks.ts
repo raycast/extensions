@@ -1,67 +1,77 @@
 import useSWR from "swr";
-import { getPreferenceValues } from "@raycast/api";
-import got from "got";
-
-const preferences = getPreferenceValues();
-const consumerKey = preferences.consumerKey;
-const accessToken = preferences.accessToken;
-
-const api = got.extend({
-  prefixUrl: "https://getpocket.com"
-});
-
-interface RawBookmark {
-  item_id: string;
-  resolved_title: string;
-  resolved_url: string;
-  given_title: string;
-  given_url: string;
-  is_article: "0" | "1";
-  has_video: "0" | "1" | "2";
-  favorite: "0" | "1";
-  tags?: Record<string, unknown>;
-  time_updated: string;
-}
-
-interface GetResponse {
-  list: Record<string, RawBookmark>;
-}
-
-interface Bookmark {
-  id: string;
-  title: string;
-  url: string;
-  type: "article" | "video";
-  favorite: boolean;
-  tags: Array<string>;
-  updatedAt: Date;
-}
+import { fetchBookmarks, sendAction } from "./api";
+import { Bookmark } from "./types";
+import { Toast, ToastStyle } from "@raycast/api";
 
 interface UseBookmarksOptions {
-  search?: string;
+  name?: string;
+  tag?: string;
 }
 
-export function useBookmarks({ search }: UseBookmarksOptions) {
-  const { data, error } = useSWR<Array<Bookmark>>(["v3/get", search], async (url, search) => {
-    const response = await api.post(url, {
-      json: {
-        consumer_key: consumerKey,
-        access_token: accessToken,
-        detailType: "complete",
-        search
-      }
-    });
-    const result: GetResponse = JSON.parse(response.body);
-    return Object.values(result.list).map(bookmark => ({
-      id: bookmark.item_id,
-      title: bookmark.resolved_title || bookmark.given_title,
-      url: bookmark.resolved_url || bookmark.given_url,
-      type: bookmark.is_article === "0" ? "video" : "article",
-      favorite: bookmark.favorite === "1",
-      tags: bookmark.tags ? Object.keys(bookmark.tags) : [],
-      updatedAt: new Date(parseInt(`${bookmark.time_updated}000`))
-    }));
-  });
+export function useBookmarks({ name, tag }: UseBookmarksOptions) {
+  const { data, error, isValidating, mutate } = useSWR<Array<Bookmark>>(
+    ["v3/get", name, tag],
+    async (url, name, tag) => {
+      return fetchBookmarks({ name, tag });
+    }
+  );
 
-  return { bookmarks: data || [], loading: !data && !error };
+  async function toggleFavorite(id: string) {
+    const bookmark = data?.find((bookmark) => bookmark.id === id);
+    const toast = new Toast({
+      title: bookmark?.favorite ? "Removing from favorites" : "Adding to favorites",
+      style: ToastStyle.Animated,
+    });
+    toast.show();
+    await sendAction({ id, action: bookmark?.favorite ? "unfavorite" : "favorite" });
+    await mutate();
+    toast.title = bookmark?.favorite ? "Added to favorites" : "Removed from favorites";
+    toast.style = ToastStyle.Success;
+    toast.message = bookmark?.title;
+  }
+
+  async function deleteBookmark(id: string) {
+    const bookmark = data?.find((bookmark) => bookmark.id === id);
+    const toast = new Toast({
+      title: "Deleting bookmark",
+      style: ToastStyle.Animated,
+    });
+    toast.show();
+    await sendAction({ id, action: "delete" });
+    await mutate();
+    toast.title = "Deleted successfully";
+    toast.style = ToastStyle.Success;
+    toast.message = bookmark?.title;
+  }
+
+  async function archiveBookmark(id: string) {
+    const bookmark = data?.find((bookmark) => bookmark.id === id);
+    const toast = new Toast({
+      title: "Archiving bookmark",
+      style: ToastStyle.Animated,
+    });
+    toast.show();
+    await sendAction({ id, action: "archive" });
+    await mutate();
+    toast.title = "Archived successfully";
+    toast.style = ToastStyle.Success;
+    toast.message = bookmark?.title;
+  }
+
+  return {
+    bookmarks: data || [],
+    loading: (!data && !error) || isValidating,
+    refreshBookmarks: mutate,
+    toggleFavorite,
+    deleteBookmark,
+    archiveBookmark,
+  };
+}
+
+export function useAvailableTags() {
+  const { bookmarks, loading } = useBookmarks({});
+  return {
+    tags: [...new Set(bookmarks.map((bookmark) => bookmark.tags).flat())],
+    loading,
+  };
 }

@@ -3,7 +3,7 @@
   "name": "pocket",
   "title": "Pocket",
   "description": "Search and edit Pocket bookmarks",
-  "icon": "command-icon.png",
+  "icon": "pocket-logo.png",
   "author": "vimtor",
   "license": "MIT",
   "preferences": [
@@ -22,6 +22,24 @@
       "required": true,
       "description": "Token from the OAuth flow",
       "placeholder": "5678defg-5678-defg-5678-defg56"
+    },
+    {
+      "name": "defaultOpen",
+      "title": "Default App",
+      "type": "dropdown",
+      "description": "What should be the primary action",
+      "default": "pocket",
+      "required": false,
+      "data": [
+        {
+          "title": "Browser",
+          "value": "browser"
+        },
+        {
+          "title": "Pocket",
+          "value": "pocket"
+        }
+      ]
     }
   ],
   "commands": [
@@ -31,6 +49,20 @@
       "subtitle": "Pocket",
       "description": "Search and edit Pocket bookmarks",
       "mode": "view"
+    },
+    {
+      "name": "create",
+      "title": "Create Bookmark",
+      "subtitle": "Pocket",
+      "description": "Add a new bookmark to Pocket",
+      "mode": "view"
+    },
+    {
+      "name": "random",
+      "title": "Random Bookmark",
+      "subtitle": "Pocket",
+      "description": "Opens a random bookmark if you don't know what watch next",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
@@ -47,7 +79,8 @@
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3",
     "swr": "^1.2.0",
-    "got": "^12.0.1"
+    "got": "^12.0.1",
+    "run-applescript": "^6.0.0"
   },
   "scripts": {
     "build": "ray build -e dist",
