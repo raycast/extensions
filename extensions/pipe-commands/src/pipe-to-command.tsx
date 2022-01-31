@@ -18,6 +18,7 @@ import {
 } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { readdirSync } from "fs";
+import { basename } from "path";
 import { useEffect, useState } from "react";
 import PipeCommandForm from "./create-pipe-command";
 import { ArgumentType, ScriptCommand } from "./types";
@@ -29,14 +30,14 @@ export interface PipeInput {
 }
 
 export function PipeCommands(props: { input: PipeInput }): JSX.Element {
-  const [commands, setCommands] = useState<ScriptCommand[]>();
+  const [parsed, setParsed] = useState<{ commands: ScriptCommand[]; invalid: string[] }>();
 
   const loadCommands = async () => {
     if (readdirSync(environment.supportPath).length == 0) {
       await copyAssetsCommands();
     }
-    const commands = await parseScriptCommands(environment.supportPath);
-    setCommands(await sortByAccessTime(commands));
+    const { commands, invalid } = await parseScriptCommands(environment.supportPath);
+    setParsed({ commands: await sortByAccessTime(commands), invalid });
   };
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
   }, []);
 
   return (
-    <List isLoading={typeof commands == "undefined"} searchBarPlaceholder="Pipe Input to...">
+    <List isLoading={typeof parsed == "undefined"} searchBarPlaceholder="Pipe Input to...">
       {props.input.type == "file" ? (
         <List.Item
           icon={Icon.Document}
@@ -56,16 +57,25 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
           }
         />
       ) : null}
-      {commands
-        ?.filter((command) => command.metadatas.input.type == props.input.type)
+      {parsed?.commands
+        .filter((command) => command.metadatas.input.type == props.input.type)
         .map((command) => (
-          <TextAction key={command.path} command={command} input={props.input} reload={loadCommands} />
+          <PipeCommand key={command.path} command={command} input={props.input} reload={loadCommands} />
         ))}
+      {parsed?.invalid.map((path) => (
+        <List.Item key={path} icon={Icon.ExclamationMark} title="Invalid Pipe Command" subtitle={basename(path)} actions={
+          <ActionPanel>
+            <OpenAction title="Open Script" target={path} />
+            <OpenWithAction path={path} />
+            <ShowInFinderAction path={path} />
+          </ActionPanel>
+        }/>
+      ))}
     </List>
   );
 }
 
-function TextAction(props: { command: ScriptCommand; input: PipeInput; reload: () => void }) {
+function PipeCommand(props: { command: ScriptCommand; input: PipeInput; reload: () => void }) {
   const { path: scriptPath, metadatas } = props.command;
   const navigation = useNavigation();
 
@@ -73,7 +83,11 @@ function TextAction(props: { command: ScriptCommand; input: PipeInput; reload: (
     return async () => {
       const toast = await showToast(ToastStyle.Animated, "Running...");
       const input = metadatas.input.percentEncoded ? encodeURIComponent(props.input.content) : props.input.content;
-      const {stdout, stderr, status} = spawnSync(scriptPath, { encoding: "utf-8", input, maxBuffer: 10 * 1024 * 1024 });
+      const { stdout, stderr, status } = spawnSync(scriptPath, {
+        encoding: "utf-8",
+        input,
+        maxBuffer: 10 * 1024 * 1024,
+      });
       toast.hide();
       if (status == 0 && stdout) {
         await outputHandler(stdout);
@@ -98,13 +112,17 @@ function TextAction(props: { command: ScriptCommand; input: PipeInput; reload: (
               icon={Icon.Clipboard}
               onAction={handleCommand((output) => {
                 copyTextToClipboard(output);
-                closeMainWindow()
+                closeMainWindow();
               })}
             />
-            <ActionPanel.Item title="Paste Output" icon={Icon.Pencil} onAction={handleCommand((output) => {
-              pasteText(output);
-              closeMainWindow();
-            })} />
+            <ActionPanel.Item
+              title="Paste Output"
+              icon={Icon.Pencil}
+              onAction={handleCommand((output) => {
+                pasteText(output);
+                closeMainWindow();
+              })}
+            />
             <ActionPanel.Item
               title="Pipe Output"
               icon={Icon.ArrowRight}
@@ -123,7 +141,7 @@ function TextAction(props: { command: ScriptCommand; input: PipeInput; reload: (
             <PushAction icon={Icon.Plus} title="New Pipe Command" target={<PipeCommandForm />} />
             <ActionPanel.Item
               icon={Icon.ArrowClockwise}
-              title="Restore Default Commands"
+              title="Reset Default Commands"
               onAction={async () => {
                 await copyAssetsCommands();
                 props.reload();
