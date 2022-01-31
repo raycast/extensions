@@ -4,6 +4,9 @@
   "title": "Home Assistant",
   "version": "1.2.3",
   "author": "tonka3000",
+  "contributors": [
+    "altrdev"
+  ],
   "license": "MIT",
   "description": "Home Assistant remote control. Control your house with Raycast 🚀",
   "icon": "home-assistant.png",
