@@ -15,7 +15,7 @@ export function parseMetadatas(script: string): ScriptMetadatas {
     metadatas[metadataTitle] = metatataValue;
   }
 
-  return (metadatas as unknown) as ScriptMetadatas;
+  return metadatas as unknown as ScriptMetadatas;
 }
 
 export async function parseScriptCommands(

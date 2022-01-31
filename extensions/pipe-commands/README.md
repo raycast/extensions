@@ -12,13 +12,13 @@ Use the `Create Pipe command` command to generate a new pipe command template.
 
 The Pipe command syntax is very similar to the script command syntax, with some caveats:
 
-- Only the `title` field is parsed (the other fields are ignored)
+- Only the `title` and `packageName` field are parsed (the other fields are ignored, you can still provide them for documentation !)
 - A new field is introduced: `@raycast.input`. It is similar to the script command arguments, but support other types.
 
-  | field          | description                                    | values            | required |
-  | -------------- | ---------------------------------------------- | ----------------- | -------- |
-  | type           | What type of input the pipe command handle | text, url or file | ✅        |
-  | percentEncoded | useful for query strings                       | boolean           | ❌        |
+  | field          | description                                | values            | required |
+  | -------------- | ------------------------------------------ | ----------------- | -------- |
+  | type           | What type of input the pipe command handle | text, url or file | ✅       |
+  | percentEncoded | useful for query strings                   | boolean           | ❌       |
 
 ## Pipe Commands logic
 
