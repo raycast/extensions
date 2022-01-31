@@ -39,6 +39,7 @@
 /extensions/coingecko                                @Destiner
 /extensions/coinmarketcap-crypto-crawler             @moojing
 /extensions/commitlint                               @lardissone
+/extensions/confluence-search                        @daviddkkim
 /extensions/consoledev                               @splash-cli
 /extensions/conventional-comments                    @krzysztofzuraw
 /extensions/copy-gcp-icons                           @pomdtr
