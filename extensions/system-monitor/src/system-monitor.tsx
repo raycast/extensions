@@ -14,12 +14,11 @@ export default function SystemMonitor() {
   });
 
   const render = () => {
-    if (!cpu) return <List.Item title="Calculating..." />;
     return (
-      <>
+      <List isLoading={!cpu}>
         <List.Item title={`🖥️ CPU Usage: ${cpu}%`} />
         <List.Item title={`📝 Free Memory: ${freeMemPercentage}% (~ ${freeMem} GB)`} />
-      </>
+      </List>
     );
   };
 
