@@ -10,6 +10,7 @@
     {
       "name": "meme",
       "title": "Generate meme",
+      "subtitle": "imgflip",
       "description": "Find a meme template and generate an image with your own text",
       "mode": "view"
     }
