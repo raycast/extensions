@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List, showToast, ToastStyle, randomId } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, PasteAction, List, showToast, ToastStyle, randomId } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { AbortError } from "node-fetch";
 import { lib } from "asciilib";
@@ -25,6 +25,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
+            <PasteAction title="Paste to Current Window" content={searchResult.name} />
             <CopyToClipboardAction title="Copy to Clipboard" content={searchResult.name} />
           </ActionPanel.Section>
         </ActionPanel>
