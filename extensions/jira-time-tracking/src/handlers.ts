@@ -7,7 +7,6 @@ export const handleJiraResponseError = (statusCode: number, body: unknown) => {
   const hasMessage = isJiraError && "message" in body;
   if (hasMessages) jiraErrorMessage = body.messages?.join("");
   if (hasMessage) jiraErrorMessage = body.message;
-  console.error(jiraErrorMessage)
 
   const readable = (() => {
     if (jiraErrorMessage?.includes("Worklog is null")) return "Worklog field does not exist on the selected issue.";
