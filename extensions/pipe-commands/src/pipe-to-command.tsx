@@ -95,9 +95,15 @@ function PipeCommand(props: { command: ScriptCommand; input: PipeInput; reload: 
         maxBuffer: 10 * 1024 * 1024,
       });
       toast.hide();
-      if (status == 0 && stdout) {
+      if (status !== 0) {
+        showHUD(stderr ? `⚠️ ${stderr}` : `⚠️ Error: Process terminated with status ${status}`);
+        return;
+      }
+
+      if (stdout) {
         await outputHandler(stdout);
       }
+
       if (stderr) {
         showHUD(stderr);
       }
