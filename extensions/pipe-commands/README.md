@@ -15,15 +15,15 @@ The Pipe command syntax is very similar to the script command syntax, with some 
 - Only the `title` and `packageName` field are parsed (the other fields are ignored, you can still provide them for documentation !)
 - A new field is introduced: `@raycast.input`. It is similar to the script command arguments, but support other types.
 
-  | field          | description                                | values            | required |
-  | -------------- | ------------------------------------------ | ----------------- | -------- |
-  | type           | What type of input the pipe command handle | text, url or file | ✅       |
-  | percentEncoded | useful for query strings                   | boolean           | ❌       |
+  | field          | description                                | values       | required |
+  | -------------- | ------------------------------------------ | ------------ | -------- |
+  | type           | What type of input the pipe command handle | text or file | ✅       |
+  | percentEncoded | useful for query strings                   | boolean      | ❌       |
 
 ## Pipe Commands logic
 
 The user input (selection or clipboard) will be passed to the script through the standard input stream (stdin).
-The standard output stream (stdout) of the script will replace the current selection, or replace the clipboard depending on the user choice.
+The standard output stream (stdout) of the script can replace the current selection, replace the clipboard or be passed to a another command depending on the user choice.
 If you want to provide a message to the user, use the standard error stream (stderr).
 
 ## Example scripts
@@ -35,8 +35,11 @@ If you want to provide a message to the user, use the standard error stream (std
 
 # @raycast.title Google Search
 # @raycast.input {"type": "text", "percentEncoded": true}
+# @raycast.description
 
+# Assign the script input to a bash variable
 read -r query
+# Open the url in the default browser
 open "https://www.google.com/search?q=$query"
 ```
 

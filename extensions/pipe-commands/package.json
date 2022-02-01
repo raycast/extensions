@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pipe-commands",
-  "title": "Pipe commands",
-  "description": "Pass your selection to any scripts.",
+  "title": "Pipe Commands",
+  "description": "Pipe your selection or clipboard to custom scripts defined in any language.",
   "icon": "command-icon.png",
   "author": "pomdtr",
   "license": "MIT",
@@ -10,22 +10,22 @@
     {
       "name": "pipe-selection-to-command",
       "title": "Pipe Selection to Command",
-      "subtitle": "Pipe command",
-      "description": "Take Action on the Selection.",
+      "subtitle": "Pipe Commands",
+      "description": "Apply a script on your selection.",
       "mode": "view"
     },
     {
       "name": "pipe-clipboard-to-command",
       "title": "Pipe Clipboard to Command",
-      "subtitle": "Pipe command",
-      "description": "Take Action on the Clipboard.",
+      "subtitle": "Pipe Commands",
+      "description": "Apply a script on your clipboard.",
       "mode": "view"
     },
     {
       "name": "create-pipe-command",
       "title": "Create Pipe command",
-      "subtitle": "Pipe command",
-      "description": "Generate a new pipe command template",
+      "subtitle": "Pipe Commands",
+      "description": "Generate a new Pipe Command using built-in templates.",
       "mode": "view"
     }
   ],
