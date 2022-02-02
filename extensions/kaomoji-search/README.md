@@ -1,4 +1,4 @@
-![Demo](assets/preview/demo.gif)
+![Demo](media/demo.gif)
 
 # Kaomoji Search
 
