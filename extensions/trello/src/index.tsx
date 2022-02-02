@@ -11,7 +11,7 @@ export default function PackageList() {
   const onSearchTextChange = async (text: string) => {
     setLoading(true)
     const response = await returnTodos(text.replace(/\s/g, '+'))
-    setTodos(response.cards)
+    setTodos(response)
     setLoading(false)
   }
 
