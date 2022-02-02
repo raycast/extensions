@@ -16,7 +16,8 @@
     },
     {
       "name": "show",
-      "title": "Show SSH Connections",
+      "title": "Show Connections",
+      "subtitle": "SSH Connection Manager",
       "description": "Quickly access pre-defined ssh connections and connect to them easily",
       "mode": "view"
     }
