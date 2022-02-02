@@ -22,7 +22,7 @@ export default function SearchPage() {
 
 function PageItem({ title }: { title: string }) {
   const { data: extract } = useWikipediaPageSummary(title);
-  const escapedTitle = title.replaceAll(" ", "_")
+  const escapedTitle = title.replaceAll(" ", "_");
   return (
     <List.Item
       icon={Icon.TextDocument}
