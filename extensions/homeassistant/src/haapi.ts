@@ -180,6 +180,18 @@ export class HomeAssistant {
     return await this.callService("climate", "set_preset_mode", { entity_id: entityID, preset_mode: v });
   }
 
+  async toggleSwitch(entityID: string): Promise<void> {
+    return await this.callService("switch", "toggle", { entity_id: entityID });
+  }
+
+  async turnOnSwitch(entityID: string): Promise<void> {
+    return await this.callService("switch", "turn_on", { entity_id: entityID });
+  }
+
+  async turnOffSwitch(entityID: string): Promise<void> {
+    return await this.callService("switch", "turn_off", { entity_id: entityID });
+  }
+
   async getStates(params: { domain: string; query: string }): Promise<State[]> {
     const items: State[] = await this.fetch("states");
     if (params) {
