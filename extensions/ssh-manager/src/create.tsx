@@ -23,12 +23,12 @@ export default function Main() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="name" title="Connection name" />
+      <Form.TextField id="name" title="Connection Name" />
       <Form.TextField id="address" title="Server Address" placeholder={"A resolvable DNS name or IP"} />
       <Form.TextField id="user" title="Username" placeholder={"A username to authenticate with"} />
       <Form.TextField
         id="key"
-        title="SSH Key location (optional)"
+        title="SSH Key Location (optional)"
         placeholder={"An optional key path to authenticate with"}
       />
     </Form>
