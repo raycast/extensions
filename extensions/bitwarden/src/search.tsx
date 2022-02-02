@@ -176,7 +176,7 @@ function ItemListItem(props: {
       subtitle={item.login?.username || undefined}
       actions={
         <ActionPanel>
-          {item.login?.password ? <PasswordActions password={item.login.password} /> : null }
+          {item.login?.password ? <PasswordActions password={item.login.password} /> : null}
           {item.login?.totp ? (
             <ActionPanel.Item
               title="Copy TOTP"
@@ -246,11 +246,11 @@ function ItemListItem(props: {
   );
 }
 
-function PasswordActions(props: {password: string}) {
-  const copyAction = <CopyToClipboardAction key="copy" title="Copy Password" content={props.password} />
-  const pasteAction = <PasteAction key="paste" title="Paste Password" content={props.password} />
+function PasswordActions(props: { password: string }) {
+  const copyAction = <CopyToClipboardAction key="copy" title="Copy Password" content={props.password} />;
+  const pasteAction = <PasteAction key="paste" title="Paste Password" content={props.password} />;
 
-  return <React.Fragment>
-    {primaryAction == 'copy' ? [copyAction, pasteAction] : [pasteAction, copyAction] }
-  </React.Fragment>
+  return (
+    <React.Fragment>{primaryAction == "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}</React.Fragment>
+  );
 }
