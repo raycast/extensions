@@ -29,7 +29,7 @@ export default function Main() {
       <Form.TextField id="user" title="Username" placeholder={"A username to authenticate with"} />
       <Form.TextField
         id="key"
-        title="SSH Key location (optional)"
+        title="SSH Key Location (optional)"
         placeholder={"An optional key path to authenticate with"}
       />
     </Form>
