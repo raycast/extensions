@@ -32,12 +32,16 @@ async function runTerminal(item: ISSHConnection) {
 
 export default function Command() {
   const [connectionsList, setConnectionsList] = useState<ISSHConnection[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     (async () => {
+      setLoading(true);
+
       const items: ISSHConnection[] = await getConnections();
 
       setConnectionsList(items);
+      setLoading(false);
     })();
   }, []);
 
@@ -50,7 +54,7 @@ export default function Command() {
   }
 
   return (
-    <List>
+    <List isLoading={loading}>
       {connectionsList.map((item) => {
         return (
           <List.Item

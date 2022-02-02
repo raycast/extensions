@@ -1,14 +1,13 @@
-import { ActionPanel, Form, showHUD, SubmitFormAction, useNavigation } from "@raycast/api";
+import { ActionPanel, Form, showHUD, SubmitFormAction, useNavigation, randomId } from "@raycast/api";
 import { ISSHConnection } from "./types";
 import { getConnections, saveConnections } from "./storage.api";
-import { createId } from "./utils";
 
 export default function Main() {
   const { pop } = useNavigation();
 
   async function saveConnection(connection: ISSHConnection) {
     const existingConnections = await getConnections();
-    existingConnections.push({ ...connection, id: createId() });
+    existingConnections.push({ ...connection, id: randomId() });
 
     await saveConnections(existingConnections);
     await showHUD("Saved connection ✅");
