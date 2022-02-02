@@ -47,21 +47,21 @@
       "name": "search",
       "title": "Search Bookmarks",
       "subtitle": "Pocket",
-      "description": "Search and edit Pocket bookmarks",
+      "description": "Search and edit Pocket unread bookmarks",
       "mode": "view"
     },
     {
       "name": "create",
       "title": "Create Bookmark",
       "subtitle": "Pocket",
-      "description": "Add a new bookmark to Pocket",
+      "description": "Create a new bookmark in Pocket",
       "mode": "view"
     },
     {
       "name": "random",
       "title": "Random Bookmark",
       "subtitle": "Pocket",
-      "description": "Opens a random bookmark if you don't know what watch next",
+      "description": "Opens a random unread bookmark",
       "mode": "no-view"
     }
   ],

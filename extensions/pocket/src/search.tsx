@@ -7,18 +7,14 @@ import {
   Icon,
   List,
   OpenInBrowserAction,
-  PushAction,
-  useNavigation,
 } from "@raycast/api";
 import { useBookmarks } from "./utils/hooks";
 import { useState } from "react";
-import Edit from "./edit";
 
 const preferences = getPreferenceValues();
 
 export default function Search() {
   const [search, setSearch] = useState("");
-  const { pop } = useNavigation();
 
   const { bookmarks, loading, toggleFavorite, refreshBookmarks, archiveBookmark, deleteBookmark } = useBookmarks({
     name: search.replace(/(#\w+)/, "").trim(),
@@ -61,38 +57,16 @@ export default function Search() {
                   onAction={() => archiveBookmark(bookmark.id)}
                 />
                 <ActionPanelItem
-                  title="Delete Bookmark"
-                  shortcut={{ modifiers: ["cmd"], key: "d" }}
-                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                  onAction={() => deleteBookmark(bookmark.id)}
-                />
-                <ActionPanelItem
                   title={`${bookmark.favorite ? "Unmark" : "Mark"} as Favorite`}
                   shortcut={{ modifiers: ["cmd"], key: "f" }}
                   icon={Icon.Star}
                   onAction={() => toggleFavorite(bookmark.id)}
                 />
-                <PushAction
-                  title="Edit Bookmark"
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  icon={Icon.Pencil}
-                  target={
-                    <Edit
-                      bookmark={bookmark}
-                      onArchive={async () => {
-                        await archiveBookmark(bookmark.id);
-                        pop();
-                      }}
-                      onDelete={async () => {
-                        await deleteBookmark(bookmark.id);
-                        pop();
-                      }}
-                      onFavorite={async () => {
-                        await toggleFavorite(bookmark.id);
-                        pop();
-                      }}
-                    />
-                  }
+                <ActionPanelItem
+                  title="Delete Bookmark"
+                  shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                  onAction={() => deleteBookmark(bookmark.id)}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>

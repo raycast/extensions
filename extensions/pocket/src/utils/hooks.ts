@@ -6,13 +6,14 @@ import { Toast, ToastStyle } from "@raycast/api";
 interface UseBookmarksOptions {
   name?: string;
   tag?: string;
+  state?: "unread" | "archive" | "all";
 }
 
-export function useBookmarks({ name, tag }: UseBookmarksOptions) {
+export function useBookmarks({ name, tag, state }: UseBookmarksOptions) {
   const { data, error, isValidating, mutate } = useSWR<Array<Bookmark>>(
-    ["v3/get", name, tag],
-    async (url, name, tag) => {
-      return fetchBookmarks({ name, tag });
+    ["v3/get", name, tag, state],
+    async (url, name, tag, state) => {
+      return fetchBookmarks({ name, tag, state });
     }
   );
 
@@ -25,7 +26,7 @@ export function useBookmarks({ name, tag }: UseBookmarksOptions) {
     toast.show();
     await sendAction({ id, action: bookmark?.favorite ? "unfavorite" : "favorite" });
     await mutate();
-    toast.title = bookmark?.favorite ? "Added to favorites" : "Removed from favorites";
+    toast.title = bookmark?.favorite ? "Removed from favorites" : "Added to favorites";
     toast.style = ToastStyle.Success;
     toast.message = bookmark?.title;
   }
@@ -69,7 +70,7 @@ export function useBookmarks({ name, tag }: UseBookmarksOptions) {
 }
 
 export function useAvailableTags() {
-  const { bookmarks, loading } = useBookmarks({});
+  const { bookmarks, loading } = useBookmarks({ state: "all" });
   return {
     tags: [...new Set(bookmarks.map((bookmark) => bookmark.tags).flat())],
     loading,
