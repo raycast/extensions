@@ -63,7 +63,7 @@ export const searchResources = async (q: string): Promise<QueryResultItem[]> => 
     },
     body: JSON.stringify({
       type: "BlocksInSpace",
-      query: `${encodeURIComponent(q)}`,
+      query: `${q}`,
       spaceId: `${preferences.spaceID}`,
       limit: 20,
       filters: {
