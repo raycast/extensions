@@ -11,8 +11,9 @@ import {
   copyTextToClipboard,
   closeMainWindow,
   PasteAction,
+  Color,
 } from "@raycast/api";
-import { Item, Folder, VaultStatus } from "./types";
+import { Item, VaultStatus } from "./types";
 import React, { useEffect, useState } from "react";
 import treeify from "treeify";
 import { filterNullishPropertiesFromObject, codeBlock, titleCase, faviconUrl } from "./utils";
@@ -42,23 +43,12 @@ function ItemList(props: {
   vaultStatus: VaultStatus | undefined;
 }) {
   const { bitwardenApi, sessionToken, vaultStatus } = props;
-  const [state, setState] = useState<{ folders: Folder[]; items: Item[] }>();
-
-  const folderMap: Record<string, Folder> = {};
-  for (const folder of state?.folders || []) {
-    if (folder.id) {
-      folderMap[folder.id] = folder;
-    }
-  }
+  const [items, setItems] = useState<Item[]>();
 
   async function loadItems(sessionToken: string) {
     try {
-      const [items, folders] = await Promise.all([
-        bitwardenApi.listItems<Item>("items", sessionToken),
-        bitwardenApi.listItems<Folder>("folders", sessionToken),
-      ]);
-
-      setState({ items, folders });
+      const items = await bitwardenApi.listItems<Item>("items", sessionToken);
+      setItems(items);
     } catch (error) {
       showToast(ToastStyle.Failure, "Failed to search vault");
     }
@@ -89,38 +79,24 @@ function ItemList(props: {
     }
   }
 
-  const favoriteItems = [];
-  const regularItems = [];
-  for (const item of state?.items || []) {
-    item.favorite ? favoriteItems.push(item) : regularItems.push(item);
-  }
-
   return (
-    <List isLoading={typeof state === "undefined"}>
-      <List.Section title="Favorites">
-        {favoriteItems.map((item) => (
-          <ItemListItem
-            key={item.id}
-            item={item}
-            folder={item.folderId ? folderMap[item.folderId] : undefined}
-            refreshItems={refreshItems}
-            sessionToken={sessionToken}
-            copyTotp={copyTotp}
-          />
-        ))}
-      </List.Section>
-      <List.Section title="Others">
-        {regularItems.map((item) => (
-          <ItemListItem
-            key={item.id}
-            item={item}
-            folder={item.folderId ? folderMap[item.folderId] : undefined}
-            refreshItems={refreshItems}
-            sessionToken={sessionToken}
-            copyTotp={copyTotp}
-          />
-        ))}
-      </List.Section>
+    <List isLoading={typeof items === "undefined"}>
+      {items
+        ? items
+            .sort((a, b) => {
+              if (a.favorite && b.favorite) return 0;
+              return a.favorite ? -1 : 1;
+            })
+            .map((item) => (
+              <ItemListItem
+                key={item.id}
+                item={item}
+                refreshItems={refreshItems}
+                sessionToken={sessionToken}
+                copyTotp={copyTotp}
+              />
+            ))
+        : null}
     </List>
   );
 }
@@ -138,12 +114,11 @@ function getIcon(item: Item) {
 
 function ItemListItem(props: {
   item: Item;
-  folder: Folder | undefined;
   refreshItems?: () => void;
   sessionToken: string | undefined;
   copyTotp: (sessionToken: string | undefined, id: string) => void;
 }) {
-  const { item, folder, refreshItems, sessionToken, copyTotp } = props;
+  const { item, refreshItems, sessionToken, copyTotp } = props;
   const { name, notes, identity, login, secureNote, fields, passwordHistory, card } = item;
 
   const fieldMap = Object.fromEntries(fields?.map((field) => [field.name, field.value]) || []);
@@ -159,7 +134,6 @@ function ItemListItem(props: {
     card: filterNullishPropertiesFromObject(card),
     secureNote,
     fields,
-    folder: folder?.name,
     passwordHistory,
   });
 
@@ -170,8 +144,7 @@ function ItemListItem(props: {
       id={item.id}
       title={item.name}
       keywords={item.name.split(/\W/)}
-      accessoryTitle={folder ? folder.name : undefined}
-      accessoryIcon={item.favorite ? Icon.Star : undefined}
+      accessoryIcon={item.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined}
       icon={getIcon(item)}
       subtitle={item.login?.username || undefined}
       actions={
@@ -207,7 +180,6 @@ function ItemListItem(props: {
           >
             {Object.entries({
               username: login?.username,
-              folder: folder?.name,
               notes,
               ...card,
               ...identity,
