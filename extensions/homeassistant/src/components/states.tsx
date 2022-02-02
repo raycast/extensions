@@ -174,6 +174,9 @@ function getIcon(state: State): ImageLike | undefined {
     return { source: "play.png", tintColor: color };
   } else if (e.startsWith("scene")) {
     return { source: "palette.png", tintColor: PrimaryIconColor };
+  } else if (e.startsWith("switch")) {
+    const wallSwitch = state.state === "on" ? { source: "on.png" } : { source: "off.png", tintColor: PrimaryIconColor };
+    return wallSwitch;
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
@@ -728,6 +731,42 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
         <ActionPanel>
           <ActionPanel.Section title="Controls">
             <SceneActivateAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "switch": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <ActionPanel.Item
+              title="Toggle"
+              onAction={async () => await ha.toggleSwitch(props.state.entity_id)}
+              icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
+            />
+            <ActionPanel.Item
+              title="Turn On"
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={async () => await ha.turnOnSwitch(props.state.entity_id)}
+              icon={{ source: "power-btn.png", tintColor: Color.Green }}
+            />
+            <ActionPanel.Item
+              title="Turn Off"
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              onAction={async () => await ha.turnOffSwitch(props.state.entity_id)}
+              icon={{ source: "power-btn.png", tintColor: Color.Red }}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
