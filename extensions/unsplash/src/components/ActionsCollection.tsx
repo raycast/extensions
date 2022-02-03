@@ -6,18 +6,17 @@ import Details from "@/views/DetailsCollections";
 // Types
 interface BaseProps {
   item: CollectionResult;
-  back?: boolean;
   details?: boolean;
 }
 
-export const Actions: React.FC<BaseProps> = ({ back = false, details = false, item }) => (
+export const Actions: React.FC<BaseProps> = ({ details = false, item }) => (
   <ActionPanel>
-    <Sections back={back} details={details} item={item} />
+    <Sections details={details} item={item} />
   </ActionPanel>
 );
 
-export const Sections: React.FC<BaseProps> = ({ back = false, details = false, item }) => {
-  const { pop, push } = useNavigation();
+export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
+  const { push } = useNavigation();
   const imageUrl =
     item.cover_photo?.urls?.raw ||
     item.cover_photo?.urls?.full ||
@@ -30,8 +29,6 @@ export const Sections: React.FC<BaseProps> = ({ back = false, details = false, i
         {details && (
           <ActionPanel.Item title="Show Details" icon={Icon.List} onAction={() => push(<Details result={item} />)} />
         )}
-
-        {back && <ActionPanel.Item icon={Icon.Window} title="Go Back" onAction={pop} />}
 
         {item.links?.html && <OpenInBrowserAction url={item.links.html} title="Open Collection" />}
 
