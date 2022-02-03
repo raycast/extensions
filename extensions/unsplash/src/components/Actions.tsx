@@ -75,7 +75,7 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
             />
 
             <ActionPanel.Item
-              title="Download to Location"
+              title="Download Image"
               icon={Icon.Desktop}
               shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
               onAction={() => saveImage({ url: imageUrl, id: String(item.id) })}
