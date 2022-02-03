@@ -3,6 +3,8 @@ import {
   ActionPanelItem,
   Color,
   CopyToClipboardAction,
+  showToast,
+  ToastStyle,
   Icon,
   List,
   OpenInBrowserAction,
@@ -190,6 +192,9 @@ export default function SearchCryptoList() {
         refreshExistingCache((err, cryptoList) => {
           if (err) {
             console.error("WriteFileError:" + err);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const message = (err as any)?.message;
+            showToast(ToastStyle.Failure, message ? `Refresh failed: ${message}` : "Refresh failed");
             return;
           }
 
