@@ -1,4 +1,4 @@
-import { showToast, ToastStyle, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 interface SaveImageProps {
@@ -7,11 +7,11 @@ interface SaveImageProps {
 }
 
 export const saveImage = async ({ url, id }: SaveImageProps) => {
-  const toast = await showToast(ToastStyle.Animated, "Saving image...");
-
   const { downloadSize } = getPreferenceValues<UnsplashPreferences>();
 
   try {
+    await showHUD("Please select a location to save the image...");
+
     await runAppleScript(`
       set outputFolder to choose folder with prompt "Please select an output folder:"
       set temp_folder to (POSIX path of outputFolder) & "${id}-${downloadSize}.jpg"
@@ -20,15 +20,9 @@ export const saveImage = async ({ url, id }: SaveImageProps) => {
       set cmd to "curl -o " & q_temp_folder & " " & "${url}"
         do shell script cmd
     `);
-
-    toast.style = ToastStyle.Success;
-    toast.title = "Image downloaded!";
   } catch (err) {
     console.error(err);
-
-    toast.style = ToastStyle.Failure;
-    toast.title = "Something went wrong.";
-    toast.message = "Try with another image or check your internet connection.";
+    await showHUD("Couldn't save the image...");
   }
 };
 
