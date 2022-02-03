@@ -51,7 +51,7 @@ jobs:
         if: steps.changed-files.outputs.any_changed == 'true' || steps.changed-files.outputs.any_deleted == 'true'
         uses: peter-evans/create-pull-request@v3
         env:
-          path: raycast-macos
+          path: ./raycast-macos
           commit-message: "API Docs: Update from the extensions repo"
           branch: docs-sync
           branch-suffix: short-commit-hash
