@@ -3,7 +3,7 @@ on:
   push:
     paths:
       - "docs/**"
-    branches: ["f/test-docs-sync"]
+    branches: ["main"]
   workflow_dispatch:
 jobs:
   sync-api-docs:
@@ -17,15 +17,18 @@ jobs:
       - name: Setup Node.js
         uses: raycast/github-actions/setup-node@master
 
-      - name: Get changed files
+      - name: Get changed files in the docs folder
         id: changed-files
         uses: tj-actions/changed-files@v14.3
         with:
           files: |
             docs/**
 
-      - name: Public Release (generate docs for raycast-extensions)
-        if: steps.changed-files-specific.outputs.any_changed == 'true' || steps.changed-files-specific.outputs.any_deleted == 'true'
+      - name: Setup git
+        uses: raycast/github-actions/setup-git@master
+
+      - name: Update the docs in the main repo
+        if: steps.changed-files.outputs.any_changed == 'true' || steps.changed-files.outputs.any_deleted == 'true'
         env:
           API_TOKEN_GITHUB: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
         run: |
@@ -40,35 +43,46 @@ jobs:
           git clone --single-branch --branch "master" "https://$API_TOKEN_GITHUB@github.com/raycast/raycast-macos.git" "raycast-macos"
 
           for file in ${{ steps.changed-files.outputs.deleted_files }}; do
+            echo "Removing raycast-macos/Commands/$file"
             rm "raycast-macos/Commands/$file"
           done
 
-          for file in ${{ steps.changed-files.outputs.changed_files }}; do
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "Updating raycast-macos/Commands/$file"
             rsync -arv "$file" "raycast-macos/Commands/$file"
           done
 
-      - name: Create Pull Request on the macos repo
-        if: steps.changed-files-specific.outputs.any_changed == 'true' || steps.changed-files-specific.outputs.any_deleted == 'true'
-        uses: peter-evans/create-pull-request@v3
-        env:
-          path: raycast-macos
-          commit-message: "API Docs: Update from the extensions repo"
-          branch: docs-sync
-          branch-suffix: short-commit-hash
-          delete-branch: true
-          title: "API Docs: Update from the extensions repo"
-          committer: "raycastbot <bot@raycast.com>"
+          cd raycast-macos
 
-      # - name: Notify Failure to Slack
-      #   if: failure()
-      #   uses: edge/simple-slack-notify@master
-      #   with:
-      #     color: "danger"
-      #     text: ":no_entry_sign: ${env.GITHUB_WORKFLOW} has failed"
-      #     fields: |
-      #       [
-      #         { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
-      #         { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
-      #       ]
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_STORE_REVIEW_CHANNEL_WEBHOOK_URL }}
+          git checkout -b docs-sync-${{ github.sha }}
+          git add .
+          git commit -m 'API Docs: Update from the extensions repo'
+          git push origin docs-sync-${{ github.sha }}
+
+      - name: Open PR on the main repo
+        uses: actions/github-script@v5
+        if: steps.changed-files.outputs.any_changed == 'true' || steps.changed-files.outputs.any_deleted == 'true'
+        with:
+          github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
+          script: |
+            github.rest.pulls.create({
+              owner: 'raycast',
+              repo: 'raycast-macos',
+              head: 'docs-sync-${{ github.sha }}',
+              base: 'master',
+              title: 'API Docs: Update from the extensions repo'
+            })
+
+      - name: Notify Failure to Slack
+        if: failure()
+        uses: edge/simple-slack-notify@master
+        with:
+          color: "danger"
+          text: ":no_entry_sign: ${env.GITHUB_WORKFLOW} has failed"
+          fields: |
+            [
+              { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
+              { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
+            ]
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_STORE_REVIEW_CHANNEL_WEBHOOK_URL }}
