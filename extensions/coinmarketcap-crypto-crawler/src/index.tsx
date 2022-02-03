@@ -194,7 +194,7 @@ export default function SearchCryptoList() {
             console.error("WriteFileError:" + err);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const message = (err as any)?.message;
-            showToast(ToastStyle.Failure, message ? `Refresh failed: ${message}` : "Refresh failed");
+            showToast(ToastStyle.Failure, "Refresh failed", message);
             return;
           }
 
