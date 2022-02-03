@@ -107,7 +107,7 @@ export default function CommonActionsCommand() {
 
 function SwitchForm() {
   function items() {
-    const brewPath = existsSync("/opt/homebrew/bin/brew") ? "/opt/homebrew" : "/user/local";
+    const brewPath = existsSync("/opt/homebrew/bin/brew") ? "/opt/homebrew" : "/usr/local";
 
     return versions.reverse().filter(function (version) {
       return existsSync(brewPath + "/opt/php@" + version);
