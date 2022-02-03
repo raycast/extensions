@@ -25,7 +25,7 @@ jobs:
             docs/**
 
       - name: Public Release (generate docs for raycast-extensions)
-        if: steps.changed-files-specific.outputs.any_changed == 'true' || steps.changed-files-specific.outputs.any_deleted == 'true'
+        if: steps.changed-files.outputs.any_changed == 'true' || steps.changed-files.outputs.any_deleted == 'true'
         env:
           API_TOKEN_GITHUB: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
         run: |
@@ -48,7 +48,7 @@ jobs:
           done
 
       - name: Create Pull Request on the macos repo
-        if: steps.changed-files-specific.outputs.any_changed == 'true' || steps.changed-files-specific.outputs.any_deleted == 'true'
+        if: steps.changed-files.outputs.any_changed == 'true' || steps.changed-files.outputs.any_deleted == 'true'
         uses: peter-evans/create-pull-request@v3
         env:
           path: raycast-macos
