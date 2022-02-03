@@ -24,7 +24,7 @@ export const Details: React.FC<{ result: SearchResult }> = ({ result }) => {
         .map((i) => i + "\n")
         .join("\n")}
       navigationTitle={result.user?.name}
-      actions={<Actions item={result} back />}
+      actions={<Actions item={result} />}
     />
   );
 };

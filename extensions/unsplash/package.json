@@ -135,15 +135,6 @@
       ],
       "required": false,
       "default": "no"
-    },
-    {
-      "name": "path",
-      "title": "Save Path",
-      "description": "Location that the downloaded images will be set",
-      "type": "textfield",
-      "placeholder": "/Pictures/Wallpapers (defaults to ApplicationSupport)",
-      "required": false,
-      "default": ""
     }
   ],
   "dependencies": {
