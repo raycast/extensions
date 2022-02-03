@@ -1,4 +1,4 @@
-import { List, Icon } from "@raycast/api";
+import { List, Icon, ImageMask } from "@raycast/api";
 
 // Hooks
 import { useSearch } from "./hooks/useSearch";
@@ -26,10 +26,11 @@ const Unsplash: React.FC = () => {
 };
 
 const SearchListItem: React.FC<SearchListItemProps> = ({ searchResult }) => {
-  const [title, description, image] = [
+  const [title, description, image, avatar] = [
     searchResult.description || searchResult.alt_description || searchResult.user.name || "No Name",
     searchResult.description ? searchResult.alt_description : undefined,
     searchResult.urls?.thumb || searchResult.urls?.small || searchResult.urls?.regular,
+    searchResult?.user?.profile_image?.small,
   ];
 
   return (
@@ -38,7 +39,7 @@ const SearchListItem: React.FC<SearchListItemProps> = ({ searchResult }) => {
       icon={image}
       subtitle={description}
       accessoryTitle={searchResult.user.name}
-      accessoryIcon={Icon.Person}
+      accessoryIcon={{ source: avatar || Icon.Person, mask: ImageMask.Circle }}
       actions={<Actions item={searchResult} details />}
     />
   );
