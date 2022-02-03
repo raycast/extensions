@@ -21,11 +21,11 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v14.3
         with:
-          since_last_remote_commit: true
           files: |
             docs/**
 
       - name: Public Release (generate docs for raycast-extensions)
+        if: steps.changed-files-specific.outputs.any_changed == 'true' || steps.changed-files-specific.outputs.any_deleted == 'true'
         env:
           API_TOKEN_GITHUB: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
         run: |
@@ -48,6 +48,7 @@ jobs:
           done
 
       - name: Create Pull Request on the macos repo
+        if: steps.changed-files-specific.outputs.any_changed == 'true' || steps.changed-files-specific.outputs.any_deleted == 'true'
         uses: peter-evans/create-pull-request@v3
         env:
           path: raycast-macos
@@ -58,16 +59,16 @@ jobs:
           title: "API Docs: Update from the extensions repo"
           committer: "raycastbot <bot@raycast.com>"
 
-      - name: Notify Failure to Slack
-        if: failure()
-        uses: edge/simple-slack-notify@master
-        with:
-          color: "danger"
-          text: ":no_entry_sign: ${env.GITHUB_WORKFLOW} has failed"
-          fields: |
-            [
-              { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
-              { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
-            ]
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_STORE_REVIEW_CHANNEL_WEBHOOK_URL }}
+      # - name: Notify Failure to Slack
+      #   if: failure()
+      #   uses: edge/simple-slack-notify@master
+      #   with:
+      #     color: "danger"
+      #     text: ":no_entry_sign: ${env.GITHUB_WORKFLOW} has failed"
+      #     fields: |
+      #       [
+      #         { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
+      #         { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
+      #       ]
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_STORE_REVIEW_CHANNEL_WEBHOOK_URL }}

@@ -2,7 +2,7 @@
 
 The Environment APIs are useful to get context about the setup in which your command runs. You can get information about the extension and command itself as well as Raycast. Furthermore, a few paths are injected that are helpful to construct file paths that are related to the command's assets.
 
-test
+test 2
 
 ## API Reference
 
