@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "homeassistant",
   "title": "Home Assistant",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "author": "tonka3000",
   "contributors": [
     "altrdev"
@@ -136,6 +136,13 @@
       "subtitle": "Home Assistant",
       "description": "Query Scenes",
       "mode": "view"
+    },
+    {
+      "name": "switches",
+      "title": "Switches",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant switches",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -197,6 +204,7 @@
   },
   "scripts": {
     "dev": "ray develop",
-    "build": "ray build -e dist"
+    "build": "ray build -e dist",
+    "lint": "ray lint"
   }
 }

@@ -7,7 +7,6 @@ export default async () => {
 
     await showToast(ToastStyle.Success, "Refreshed successfully");
   } catch (error) {
-    console.error(error);
-    await showToast(ToastStyle.Failure, "Refresh failed");
+    showToast(ToastStyle.Failure, "Refresh failed", (error as Error)?.message);
   }
 };

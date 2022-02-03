@@ -3,6 +3,8 @@ import {
   ActionPanelItem,
   Color,
   CopyToClipboardAction,
+  showToast,
+  ToastStyle,
   Icon,
   List,
   OpenInBrowserAction,
@@ -190,6 +192,7 @@ export default function SearchCryptoList() {
         refreshExistingCache((err, cryptoList) => {
           if (err) {
             console.error("WriteFileError:" + err);
+            showToast(ToastStyle.Failure, "Refresh failed", (err as Error)?.message);
             return;
           }
 

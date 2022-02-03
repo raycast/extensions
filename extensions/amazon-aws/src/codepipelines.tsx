@@ -24,7 +24,7 @@ const getExecutionState = (client: AWS.CodePipeline, pipelineName: string) =>
   });
 
 type PipelineSummary = AWS.CodePipeline.PipelineSummary & {
-  execution: AWS.CodePipeline.PipelineExecutionSummary | null;
+  execution?: AWS.CodePipeline.PipelineExecutionSummary | null;
 };
 
 export default function DescribeInstances() {
@@ -58,16 +58,24 @@ export default function DescribeInstances() {
             if (!p.name) {
               continue;
             }
-            _pipelines.push({
-              ...p,
-              execution: await getExecutionState(pipeline, p.name),
-            });
+            _pipelines.push(p);
           }
           setState({
             hasError: false,
             loaded: true,
             pipelines: _pipelines ?? [],
           });
+
+          for (const p of data?.pipelines ?? []) {
+            if (!p.name) {
+              continue;
+            }
+            const execution = await getExecutionState(pipeline, p.name);
+            setState((state) => ({
+              ...state,
+              pipelines: state.pipelines.map((el) => (el.name === p.name ? { ...p, execution } : el)),
+            }));
+          }
         }
       });
     }
