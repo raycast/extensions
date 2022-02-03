@@ -31,15 +31,32 @@
       "type": "password",
       "description": "Your Authy Backup Password",
       "placeholder": "Enter your Authy backup password"
+    },
+    {
+      "required": false,
+      "name": "preferCustomName",
+      "label": "Prefer Custom Names",
+      "type": "checkbox",
+      "description": "Use your name customisations rather than the defaults",
+      "default": true
+    },
+    {
+      "required": false,
+      "name": "primaryActionIsCopy",
+      "label": "Copy as primary action, Output as secondary",
+      "type": "checkbox",
+      "description": "Primary action copies pin to clipboard instead of outputing to front application",
+      "default": true
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.25.6",
     "hi-base32": "^0.5.1",
     "node-fetch": "^3.1.0",
-    "node-forge": "^0.10.0"
+    "node-forge": "^1.2.0"
   },
   "devDependencies": {
+    "@primer/octicons": "^16.2.0",
     "@types/node": "~16.10.0",
     "@types/node-forge": "^0.10.10",
     "@types/react": "^17.0.28",
@@ -47,11 +64,14 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
+    "fast-glob": "^3.2.7",
+    "sharp": "^0.29.3",
+    "simple-icons": "^6.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "make-assets": "./make-assets.js"
   }
 }

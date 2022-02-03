@@ -1,0 +1,36 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kaalam",
+  "title": "Kaalam",
+  "description": "Gives Current Time in all formats",
+  "icon": "command-icon.png",
+  "author": "heerthees",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Time",
+      "description": "Shows current time in list of formats",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.3",
+    "dayjs": "^1.10.7"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

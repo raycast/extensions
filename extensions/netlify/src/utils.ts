@@ -1,4 +1,4 @@
-import { getPreferenceValues } from '@raycast/api';
+import { getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
   token: string;
@@ -22,18 +22,18 @@ export function getDomainUrl(name: string) {
 }
 
 export function formatDate(date: Date) {
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 }
 
 export function formatDeployDate(date: Date) {
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   });
 }

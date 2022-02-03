@@ -3,10 +3,7 @@
   "display": "Node 16",
   "include": ["src/**/*"],
   "compilerOptions": {
-    "lib": [
-      "es2020",
-      "dom"
-    ],
+    "lib": ["es2020", "dom"],
     "module": "commonjs",
     "baseUrl": "./",
     "paths": {

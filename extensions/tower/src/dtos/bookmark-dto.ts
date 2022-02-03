@@ -27,21 +27,12 @@ export default class Bookmark {
 
   get getFolder() {
     return this.Folder
-      ? tildify(
-        this.Folder
-          .replace("file:/", "")
-          .replaceAll("&", "\\&")
-          .replaceAll("%20", "\\ "))
+      ? tildify(this.Folder.replace("file:/", "").replaceAll("&", "\\&").replaceAll("%20", "\\ "))
       : "";
   }
 
   get getPath() {
-    return this.Folder
-      ? this.Folder
-        .replace("file://", "")
-        .replaceAll("&", "\&")
-        .replaceAll("%20", "\ ")
-      : "";
+    return this.Folder ? this.Folder.replace("file://", "").replaceAll("&", "&").replaceAll("%20", " ") : "";
   }
 
   get isComplete() {

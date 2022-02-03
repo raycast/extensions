@@ -1,8 +1,8 @@
-import { checkIfBrowserIsInstalled } from '../utils/appleScriptUtils';
-import { Database } from 'sql.js';
-import { EDGE_NOT_INSTALLED_MESSAGE } from '../common/constants';
-import { NullableString, UrlDetail, UrlSearchResult } from '../schema/types';
-import { useEffect, useRef, useState } from 'react';
+import { checkIfBrowserIsInstalled } from "../utils/appleScriptUtils";
+import { Database } from "sql.js";
+import { EDGE_NOT_INSTALLED_MESSAGE } from "../common/constants";
+import { NullableString, UrlDetail, UrlSearchResult } from "../schema/types";
+import { useEffect, useRef, useState } from "react";
 
 export function useUrlSearch<SourceDataType>(
   query: NullableString,

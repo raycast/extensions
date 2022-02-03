@@ -1,4 +1,4 @@
-import { runAppleScript } from 'run-applescript';
+import { runAppleScript } from "run-applescript";
 
 export async function checkIfBrowserIsInstalled(): Promise<boolean> {
   return (

@@ -57,14 +57,14 @@ The object maps to a defined preference in the `package.json` manifest file.
 | Name | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
 | data | <code>unknown[]</code> | No | The data that is used for dropdowns. For the dropdown items, add an array of objects with `title` and `value` properties, such as: `{"title": "Foo", "value": "bar"}` |
-| default | <code>unknown</code> | No | The default value of the preference if there is no `value` specified. For dropdowns, this references the `value` property of an object in the data array. |
+| default | <code>unknown</code> | No | The default value of the preference if there is no `value` specified. For dropdowns, this references the `value` property of an object in the data array. For app pickers, this references an application name, bundleId or path." |
 | description | <code>string</code> | Yes | The description of the preference. |
 | label | <code>string</code> | No | A label that is used for checkboxes. You can create checkbox groups by setting this property and leaving the title property empty for all checkboxes except the first. |
 | name | <code>string</code> | Yes | The name of the preference. |
 | placeholder | <code>string</code> | No | A placeholder that is used for text fields and passwords. |
 | required | <code>boolean</code> | Yes | Specifies if the preference is required. |
 | title | <code>string</code> | Yes | The title of the preference. |
-| type | <code>"textfield"</code> or <code>"password"</code> or <code>"checkbox"</code> or <code>"dropdown"</code> | Yes | The type of the preference. |
+| type | <code>"appPicker"</code> or <code>"checkbox"</code> or <code>"dropdown"</code> or <code>"password"</code> or <code>"textfield"</code> | Yes | The type of the preference. |
 | value | <code>unknown</code> | No | The value of the preference. |
 
 ### PreferenceValues

@@ -45,7 +45,6 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import isToday from "dayjs/plugin/isToday";
 import isTomorrow from "dayjs/plugin/isTomorrow";
 import isYesterday from "dayjs/plugin/isYesterday";
-import { AxiosError } from "axios";
 dayjs.extend(isToday);
 dayjs.extend(isTomorrow);
 dayjs.extend(isYesterday);

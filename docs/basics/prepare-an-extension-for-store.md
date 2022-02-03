@@ -16,6 +16,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 *   Please check the terms of service of third party services that your extension uses. If your extension doesn't comply with the terms, include a warning in your extension's README. The warning should be similar to:
 
     > Warning: This extension is not compliant with the Terms of Service of \[service name]. Use at your own risk.
+* Make sure to **run a distribution build** with `npm run build` locally before submitting the extension for review. This will perform additional type checking and create an optimized build. Open the extension in Raycast to check whether everything works as expected with the distribution build. In addition, you can perform linting and code style checks by running `npm run lint`. (Those checks will later also run via automated GitHub checks.)
 
 ### Extensions and Commands Naming
 
@@ -89,8 +90,14 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 ### Binary Dependencies and Additional Configuration
 
 * Avoid asking users to perform additional downloads and try to automate as much as possible from the extension, especially if you are targeting non-developers. See the [Speedtest](https://github.com/raycast/extensions/pull/302) extension that downloads a CLI in the background and later uses it under the hood.
+* If you do end up downloading executable binaries in the background, please make sure it's done from a server that you don't have access to. Otherwise we cannot guarantee that you won't replace the binary with malicious code after the review. E.g. downloading `speedtest-cli` from [`install.speedtest.net`](http://install.speedtest.net) is acceptable, but doing this from some custom AWS server would lead to a rejection. Add additional integrity checks through hashes.
+* Don't bundle opaque binaries where sources are unavailable or where it's unclear how they have been built.
 * Don't bundle heavy binary dependencies in the extension – this would lead to increased extension download size.
-* If you do end up downloading executable binaries in the background, please make sure it's done from a server that you don't have access to. Otherwise we cannot guarantee that you won't replace the binary with malicious code after the review. E.g. downloading `speedtest-cli` from [`install.speedtest.net`](http://install.speedtest.net) is acceptable, but doing this from some custom AWS server would lead to a rejection.
+* **Examples for interacting with binaries**
+  * ✅ Calling known system binaries
+  * ✅ Binary downloaded or installed from a trusted location with additional integrity checking through hashes (that is, verify whether the downloaded binary really matches the expected binary)
+  * ✅ Binary extracted from an npm package and copied to assets, with traceable sources how the binary is built; **note**: we have yet to integrate CI actions for copying and comparing the files; meanwhile, ask a member of the Raycast team to add the binary for you
+  * ❌ Any binary with unavailable sources or unclear builds just added to the assets folder
 
 ### Keychain Access
 

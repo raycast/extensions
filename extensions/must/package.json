@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "must",
+  "title": "Must",
+  "description": "Display your Want to Watch list on Must Movie Tracking app directly on Raycast!",
+  "icon": "command-icon.png",
+  "author": "eggsy",
+  "license": "MIT",
+  "keywords": [
+    "must",
+    "movie",
+    "series",
+    "tracking"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Watch List",
+      "subtitle": "Must",
+      "description": "Your want to watch list on Must.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "textfield",
+      "name": "username",
+      "description": "Your Must username.",
+      "placeholder": "Enter your Must username",
+      "required": true,
+      "title": "Your Must username"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.3",
+    "node-fetch": "^3.1.0",
+    "swr": "^1.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

@@ -1,17 +1,22 @@
 import { Detail, useNavigation } from "@raycast/api";
 import { FormulaActionPanel } from "./actionPanels";
-import { Formula, brewIsInstalled, brewPrefix } from '../brew';
+import { Formula, brewIsInstalled, brewPrefix } from "../brew";
 
-export function FormulaInfo(props: {formula: Formula, onAction: (result: boolean) => void}) {
+export function FormulaInfo(props: { formula: Formula; onAction: (result: boolean) => void }): JSX.Element {
   const { pop } = useNavigation();
-
   return (
     <Detail
-    markdown={formatInfo(props.formula)}
-    actions={<FormulaActionPanel formula={props.formula} showDetails={false} onAction={(result) => {
-      pop();
-      props.onAction(result);
-    }} />}
+      markdown={formatInfo(props.formula)}
+      actions={
+        <FormulaActionPanel
+          formula={props.formula}
+          showDetails={false}
+          onAction={(result) => {
+            pop();
+            props.onAction(result);
+          }}
+        />
+      }
     />
   );
 }
@@ -42,17 +47,17 @@ function formatVersions(formula: Formula): string {
   const versions = formula.versions;
   const status = [];
   if (versions.bottle) {
-    status.push('bottled');
+    status.push("bottled");
   }
   if (brewIsInstalled(formula)) {
-    status.push('installed');
+    status.push("installed");
   }
   if (formula.installed.first()?.installed_as_dependency) {
-    status.push('dependency')
+    status.push("dependency");
   }
   let markdown = `
 #### Versions
-Stable: ${versions.stable} ${status ? `(${status.join(', ')})` : ''}
+Stable: ${versions.stable} ${status ? `(${status.join(", ")})` : ""}
 
 `;
   if (versions.head) {
@@ -63,17 +68,17 @@ Stable: ${versions.stable} ${status ? `(${status.join(', ')})` : ''}
 }
 
 function formatDependencies(formula: Formula): string {
-  let markdown = '';
+  let markdown = "";
 
   if (formula.dependencies.length > 0) {
     markdown += `
-Required: ${formula.dependencies.join(', ')}
+Required: ${formula.dependencies.join(", ")}
     `;
   }
 
   if (formula.build_dependencies.length > 0) {
     markdown += `
-Build: ${formula.build_dependencies.join(', ')}
+Build: ${formula.build_dependencies.join(", ")}
     `;
   }
 
@@ -82,20 +87,22 @@ Build: ${formula.build_dependencies.join(', ')}
 ${markdown}
     `;
   } else {
-    return '';
+    return "";
   }
 }
 
 function formatConflicts(formula: Formula): string {
-  if (formula.conflicts_with?.length == 0) { return ''; }
+  if (formula.conflicts_with?.length == 0) {
+    return "";
+  }
 
   return `#### Conflicts With
- ${formula.conflicts_with?.join(', ')}
+ ${formula.conflicts_with?.join(", ")}
   `;
 }
 
 function formatCaveats(formula: Formula): string {
-  let caveats = '';
+  let caveats = "";
 
   if (formula.keg_only) {
     caveats += `
@@ -112,8 +119,8 @@ ${formula.caveats}
   if (caveats) {
     return `#### Caveats
 ${caveats}
-    `
+    `;
   } else {
-    return '';
+    return "";
   }
 }

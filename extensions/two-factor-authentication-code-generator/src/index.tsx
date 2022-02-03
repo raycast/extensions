@@ -15,7 +15,7 @@ import {
   showToast,
   SubmitFormAction,
   ToastStyle,
-  useNavigation
+  useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { decode } from "hi-base32";
@@ -25,15 +25,17 @@ import { URL } from "url";
 const DEFAULT_OPTIONS: Options = {
   digits: 6,
   algorithm: "SHA1",
-  period: 30
+  period: 30,
 };
 
 export default function AppsView() {
-  const [apps, setApps] = useState<{
-    name: string;
-    key: string;
-    code: string;
-  }[]>([]);
+  const [apps, setApps] = useState<
+    {
+      name: string;
+      key: string;
+      code: string;
+    }[]
+  >([]);
 
   useEffect(() => {
     allLocalStorageItems().then((_apps) => {
@@ -41,11 +43,11 @@ export default function AppsView() {
         Object.keys(_apps)
           .sort((a, b) => a.localeCompare(b))
           .map((name) => {
-            const token: { secret: string, options: Options } = parse(_apps[name]);
+            const token: { secret: string; options: Options } = parse(_apps[name]);
             return {
               name,
               key: _apps[name].toString(),
-              code: generateTOTP(token.secret, token.options).toString().padStart(token.options.digits, "0")
+              code: generateTOTP(token.secret, token.options).toString().padStart(token.options.digits, "0"),
             };
           })
       );
@@ -66,7 +68,8 @@ export default function AppsView() {
             icon={Icon.Link}
             title="Add App By URL"
             target={<AddAppByUrlForm />}
-            shortcut={{ modifiers: ["cmd"], key: "u" }} />
+            shortcut={{ modifiers: ["cmd"], key: "u" }}
+          />
         </ActionPanel>
       }
     >
@@ -89,7 +92,8 @@ export default function AppsView() {
                   icon={Icon.Link}
                   title="Add App By URL"
                   target={<AddAppByUrlForm />}
-                  shortcut={{ modifiers: ["cmd"], key: "u" }} />
+                  shortcut={{ modifiers: ["cmd"], key: "u" }}
+                />
               </ActionPanelSection>
               <ActionPanelSection>
                 <ActionPanelItem
@@ -107,7 +111,9 @@ export default function AppsView() {
                             return {
                               name,
                               key: _apps[name].toString(),
-                              code: generateTOTP(token.secret, token.options).toString().padStart(token.options.digits, "0")
+                              code: generateTOTP(token.secret, token.options)
+                                .toString()
+                                .padStart(token.options.digits, "0"),
                             };
                           })
                       );
@@ -115,7 +121,7 @@ export default function AppsView() {
                   }}
                   shortcut={{
                     modifiers: ["ctrl"],
-                    key: "return"
+                    key: "return",
                   }}
                 />
               </ActionPanelSection>
@@ -131,8 +137,7 @@ function AddForm() {
   const { push } = useNavigation();
 
   const onSubmit = async (e: Record<string, FormValue>) => {
-
-    const values = e as { name?: string; secret?: string, digits: Digits, period: number, algorithm: Algorithm };
+    const values = e as { name?: string; secret?: string; digits: Digits; period: number; algorithm: Algorithm };
 
     if (!values.name || !values.secret) {
       showToast(ToastStyle.Failure, "Please provide both fields");
@@ -180,8 +185,12 @@ function AddForm() {
     >
       <Form.TextField id="name" title="App Name" placeholder="e.g. GitHub" />
       <Form.TextField id="secret" title="2FA Secret" placeholder="Get this from your provider" />
-      <Form.TextField id="period" title="Period" placeholder="A period that a TOTP code will be valid for"
-                      defaultValue="30" />
+      <Form.TextField
+        id="period"
+        title="Period"
+        placeholder="A period that a TOTP code will be valid for"
+        defaultValue="30"
+      />
       <Form.Dropdown id="digits" title="Digits count" defaultValue="6">
         <Form.Dropdown.Item title="6" value="6" />
         <Form.Dropdown.Item title="7" value="7" />
@@ -283,13 +292,16 @@ function AddAppByUrlForm() {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="url" title="Otpauth URL"
-                     placeholder="e.g. otpauth://totp/Example:alice@google.com?secret=JBSWY3DPEHPK3PXP&issuer=Example" />
+      <Form.TextArea
+        id="url"
+        title="Otpauth URL"
+        placeholder="e.g. otpauth://totp/Example:alice@google.com?secret=JBSWY3DPEHPK3PXP&issuer=Example"
+      />
     </Form>
   );
 }
 
-function parse(value: string): { secret: string, options: Options } {
+function parse(value: string): { secret: string; options: Options } {
   try {
     return JSON.parse(value);
   } catch (e) {

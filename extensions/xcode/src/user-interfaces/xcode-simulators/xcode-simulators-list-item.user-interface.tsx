@@ -30,24 +30,22 @@ export function xcodeSimulatorListItem(
  * Retrieve accessory icon for XcodeSimulator
  * @param xcodeSimulator The XcodeSimulator
  */
-function accessoryIcon(
-  xcodeSimulator: XcodeSimulator
-): ImageLike | undefined {
+function accessoryIcon(xcodeSimulator: XcodeSimulator): ImageLike | undefined {
   switch (xcodeSimulator.state) {
     case "Booted":
       return {
         source: Icon.Checkmark,
-        tintColor: Color.Green
+        tintColor: Color.Green,
       };
     case "Pending":
       return {
         source: Icon.Dot,
-        tintColor: Color.Yellow
+        tintColor: Color.Yellow,
       };
     case "Shutdown":
       return {
         source: Icon.Circle,
-        tintColor: Color.SecondaryText
+        tintColor: Color.SecondaryText,
       };
     default:
       return undefined;
@@ -76,40 +74,32 @@ function actions(
       <ActionPanel.Item
         key={"boot-or-shutdown"}
         title={isShutdown ? "Boot" : "Shutdown"}
-        onAction={
-          async () => {
-            // Show loading Toast
-            const loadingToast = await showToast(
-              ToastStyle.Animated,
-              "Please wait"
-            );
-            try {
-              // Check if XcodeSimulator is shutdown
-              if (isShutdown) {
-                // Boot XcodeSimulator
-                await xcodeSimulatorService.boot(xcodeSimulator);
-              } else {
-                // Shutdown XcodeSimulator
-                await xcodeSimulatorService.shutdown(xcodeSimulator);
-              }
-            } catch {
-              // Hide loading Toast
-              await loadingToast.hide();
-              // Show failure Toast
-              return showToast(
-                ToastStyle.Failure,
-                `Failed to ${isShutdown ? "boot" : "shutdown"} ${xcodeSimulator.name}`
-              );
+        onAction={async () => {
+          // Show loading Toast
+          const loadingToast = await showToast(ToastStyle.Animated, "Please wait");
+          try {
+            // Check if XcodeSimulator is shutdown
+            if (isShutdown) {
+              // Boot XcodeSimulator
+              await xcodeSimulatorService.boot(xcodeSimulator);
+            } else {
+              // Shutdown XcodeSimulator
+              await xcodeSimulatorService.shutdown(xcodeSimulator);
             }
+          } catch {
             // Hide loading Toast
             await loadingToast.hide();
-            // Show success Toast
+            // Show failure Toast
             return showToast(
-              ToastStyle.Success,
-              `${xcodeSimulator.name} ${isShutdown ? "booted" : "shutdown"}`
+              ToastStyle.Failure,
+              `Failed to ${isShutdown ? "boot" : "shutdown"} ${xcodeSimulator.name}`
             );
           }
-        }
+          // Hide loading Toast
+          await loadingToast.hide();
+          // Show success Toast
+          return showToast(ToastStyle.Success, `${xcodeSimulator.name} ${isShutdown ? "booted" : "shutdown"}`);
+        }}
       />
     </ActionPanel>
   );

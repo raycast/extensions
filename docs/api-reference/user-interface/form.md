@@ -27,12 +27,18 @@ A form item with a checkbox.
 {% tab title="Uncontrolled checkbox" %}
 
 ```typescript
-import { Form } from "@raycast/api";
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 
 export default function Command() {
   return (
-    <Form onSubmit={(values) => console.log(values)}>
-      <Form.Checkbox id="checkbox" label="Are you happy?" defaultValue={true} />
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Answer" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.Checkbox id="answer" label="Are you happy?" defaultValue={true} />
     </Form>
   );
 }
@@ -41,15 +47,21 @@ export default function Command() {
 {% tab title="Controlled checkbox" %}
 
 ```typescript
-import { Form } from "@raycast/api";
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
   const [checked, setChecked] = useState(true);
 
   return (
-    <Form onSubmit={(values) => console.log(values)}>
-      <Form.Checkbox id="checkbox" label="Do you like orange juice?" value={checked} onChange={setChecked} />
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Answer" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.Checkbox id="answer" label="Do you like orange juice?" value={checked} onChange={setChecked} />
     </Form>
   );
 }
@@ -79,11 +91,17 @@ A form item with a date picker.
 {% tab title="Uncontrolled date picker" %}
 
 ```typescript
-import { Form } from "@raycast/api";
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 
 export default function Command() {
   return (
-    <Form onSubmit={(values) => console.log(values)}>
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Form" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
       <Form.DatePicker id="dateOfBirth" title="Date of Birth" defaultValue={new Date(1955, 1, 24)} />
     </Form>
   );
@@ -93,14 +111,20 @@ export default function Command() {
 {% tab title="Controlled date picker" %}
 
 ```typescript
-import { Form } from "@raycast/api";
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
   const [date, setDate] = useState<Date>();
 
   return (
-    <Form onSubmit={(values) => console.log(values)}>
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Form" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
       <Form.DatePicker id="launchDate" title="Launch Date" value={date} onChange={setDate} />
     </Form>
   );
@@ -120,6 +144,41 @@ export default function Command() {
 | value | <code>Date</code> | No | - | The current value of the item. |
 | onChange | <code>(newValue: Value) => void</code> | No | - |  |
 
+### Form.Description
+
+A form item with a simple text label.
+
+Do *not* use this component to show validation messages for other form fields.
+
+#### Example
+
+Label
+
+```typescript
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description title="Import / Export" text="Exporting will back-up your preferences, quicklinks, snippets, floating notes, script-command folder paths, aliases, hotkeys, favorites and other data." />
+    </Form>
+  );
+}
+```
+
+#### Props
+
+| Prop | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| text | <code>string</code> | Yes | - | Text that will be displayed in the middle. |
+| title | <code>string</code> | No | - | The display title of the left side from the description item. |
+
 ### Form.Dropdown
 
 A form item with a dropdown menu.
@@ -130,11 +189,17 @@ A form item with a dropdown menu.
 {% tab title="Uncontrolled dropdown" %}
 
 ```typescript
-import { Form } from "@raycast/api";
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 
 export default function Command() {
   return (
-    <Form onSubmit={(values) => console.log(values)}>
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Favorite" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
       <Form.Dropdown id="emoji" title="Favorite Emoji" defaultValue="lol">
         <Form.Dropdown.Item value="poop" title="Pile of poop" icon="💩" />
         <Form.Dropdown.Item value="rocket" title="Rocket" icon="🚀" />
@@ -148,14 +213,20 @@ export default function Command() {
 {% tab title="Controlled dropdown" %}
 
 ```typescript
-import { Form } from "@raycast/api";
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
   const [programmingLanguage, setProgrammingLanguage] = useState<string>("typescript");
 
   return (
-    <Form onSubmit={(values) => console.log(values)}>
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Favorite" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
       <Form.Dropdown
         id="dropdown"
         title="Favorite Language"
@@ -195,11 +266,17 @@ Represents a context-specific action that can be selected in the user interface 
 #### Example
 
 ```typescript
-import { Form, Icon } from "@raycast/api";
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 
 export default function Command() {
   return (
-    <Form onSubmit={(values) => console.log(values)}>
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Icon" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
       <Form.Dropdown id="icon" title="Icon">
         <Form.Dropdown.Item value="circle" title="Cirlce" icon={Icon.Circle} />
       </Form.Dropdown>
@@ -225,11 +302,17 @@ Use sections to group related menu items together.
 #### Example
 
 ```typescript
-import { Form } from "@raycast/api";
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 
 export default function Command() {
   return (
-    <Form onSubmit={(values) => console.log(values)}>
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Favorite" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
       <Form.Dropdown id="food" title="Favorite Food">
         <Form.Dropdown.Section title="Fruits">
           <Form.Dropdown.Item value="apple" title="Apple" icon="🍎" />
@@ -252,6 +335,70 @@ export default function Command() {
 | children | <code>null</code> or <code>[Form.Dropdown.Item](#form.dropdown.item)</code> or <code>Form.Dropdown.Item[]</code> | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
 | title | <code>string</code> | No | - | Title displayed above the section |
 
+### Form.PasswordField
+
+A form item with a secure text field for password-entry in which the entered characters must be kept secret.
+
+#### Example
+
+{% tabs %}
+{% tab title="Uncontrolled password field" %}
+
+```typescript
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Password" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.PasswordField id="password" title="Enter Password" />
+    </Form>
+  );
+}
+```
+{% endtab %}
+{% tab title="Controlled password field" %}
+
+```typescript
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
+import { useState } from "react";
+
+export default function Command() {
+  const [password, setPassword] = useState<string>();
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Password" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.PasswordField id="password" value={password} onChange={setPassword} />
+    </Form>
+  );
+}
+```
+{% endtab %}
+{% endtabs %}
+
+#### Props
+
+| Prop | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| defaultValue | <code>string</code> | No | - | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
+| id | <code>string</code> | Yes | - | ID of the form item. Make sure to assign each form item a unique id. |
+| placeholder | <code>string</code> | No | - | Placeholder text shown in the password field. |
+| storeValue | <code>boolean</code> | No | - | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. |
+| title | <code>string</code> | No | - | The title displayed on the left side of the item. |
+| value | <code>string</code> | No | - | The current value of the item. |
+| onChange | <code>(newValue: Value) => void</code> | No | - |  |
+
 ### Form.Separator
 
 A form item that shows a separator line.
@@ -260,11 +407,17 @@ Use for grouping and visually separating form items.
 #### Example
 
 ```typescript
-import { Form } from "@raycast/api";
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 
 export default function Command() {
   return (
-    <Form onSubmit={(values) => console.log(values)}>
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Form" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
       <Form.TextField id="textfield" />
       <Form.Separator />
       <Form.TextArea id="textarea" />
@@ -289,11 +442,17 @@ A form item with a tag picker that allows the user to select multiple items.
 {% tab title="Uncontrolled tag picker" %}
 
 ```typescript
-import { Form } from "@raycast/api";
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 
 export default function Command() {
   return (
-    <Form onSubmit={(values) => console.log(values)}>
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Favorite" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
       <Form.TagPicker id="sports" title="Favorite Sports" defaultValue={["football"]}>
         <Form.TagPicker.Item value="basketball" title="Basketball" icon="🏀" />
         <Form.TagPicker.Item value="football" title="Football" icon="⚽️" />
@@ -307,14 +466,20 @@ export default function Command() {
 {% tab title="Controlled tag picker" %}
 
 ```typescript
-import { Form } from "@raycast/api";
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
   const [countries, setCountries] = useState<string[]>(["ger", "ned", "pol"]);
 
   return (
-    <Form onSubmit={(values) => console.log(values)}>
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Countries" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
       <Form.TagPicker id="countries" title="Visited Countries" value={countries} onChange={setCountries}>
         <Form.TagPicker.Item value="ger" title="Germany" icon="🇩🇪" />
         <Form.TagPicker.Item value="ind" title="India" icon="🇮🇳" />
@@ -351,13 +516,21 @@ A tag picker item in a [FormTagPicker](#formtagpicker).
 #### Example
 
 ```typescript
-import { Color, Form, Icon } from "@raycast/api";
+import { ActionPanel, Color, Form, Icon, SubmitFormAction } from "@raycast/api";
 
 export default function Command() {
   return (
-    <Form onSubmit={(values) => console.log(values)}>
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Color" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
       <Form.TagPicker id="color" title="Color">
-        <Form.TagPicker.Item value="ger" title="Germany" icon={{ source: Icon.Circle, tintColor: Color.Red }} />
+        <Form.TagPicker.Item value="red" title="Red" icon={{ source: Icon.Circle, tintColor: Color.Red }} />
+        <Form.TagPicker.Item value="green" title="Green" icon={{ source: Icon.Circle, tintColor: Color.Green }} />
+        <Form.TagPicker.Item value="blue" title="Blue" icon={{ source: Icon.Circle, tintColor: Color.Blue }} />
       </Form.TagPicker>
     </Form>
   );
@@ -383,14 +556,20 @@ The item supports multiline text entry.
 {% tab title="Uncontrolled text area" %}
 
 ```typescript
-import { Form } from "@raycast/api";
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 
 const DESCRIPTION =
-  "We spend too much time starring at loading indicators. The Raycast team is dedicated to make everybody interact faster with their computers.";
+  "We spend too much time staring at loading indicators. The Raycast team is dedicated to make everybody interact faster with their computers.";
 
 export default function Command() {
   return (
-    <Form onSubmit={(values) => console.log(values)}>
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Description" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
       <Form.TextArea id="description" defaultValue={DESCRIPTION} />
     </Form>
   );
@@ -400,15 +579,21 @@ export default function Command() {
 {% tab title="Controlled text area" %}
 
 ```typescript
-import { Form } from "@raycast/api";
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [text, setText] = useState<string>();
+  const [description, setDescription] = useState<string>();
 
   return (
-    <Form onSubmit={(values) => console.log(values)}>
-      <Form.TextArea id="textarea" value={text} onChange={setText} />
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Description" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextArea id="description" value={description} onChange={setDescription} />
     </Form>
   );
 }
@@ -438,11 +623,17 @@ A form item with a text field for input.
 {% tab title="Uncontrolled text field" %}
 
 ```typescript
-import { Form } from "@raycast/api";
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 
 export default function Command() {
   return (
-    <Form onSubmit={(values) => console.log(values)}>
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Name" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
       <Form.TextField id="name" defaultValue="Steve" />
     </Form>
   );
@@ -452,15 +643,21 @@ export default function Command() {
 {% tab title="Controlled text field" %}
 
 ```typescript
-import { Form } from "@raycast/api";
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 import { useState } from "react";
 
 export default function Command() {
-  const [text, setText] = useState<string>();
+  const [name, setName] = useState<string>();
 
   return (
-    <Form onSubmit={(values) => console.log(values)}>
-      <Form.TextField id="textfield" value={text} onChange={setText} />
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Name" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" value={name} onChange={setName} />
     </Form>
   );
 }

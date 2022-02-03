@@ -17,6 +17,7 @@ This is a [Raycast](https://raycast.com/) extension that enables you to quickly 
 </p>
 
 ### Author info
+
 - [Extension author](https://github.com/aleks)
 - [raycast-search-ruby on github](https://github.com/aleks/raycast-search-rubygems)
 - [Raycast Store profile](https://www.raycast.com/aleks)

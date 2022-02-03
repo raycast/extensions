@@ -50,7 +50,7 @@
       "type": "textfield",
       "required": false,
       "title": "Bitwarden CLI Installation Path",
-      "description": "Location of the local Bitwarden CLI installation. Defaults to '/usr/local/bin/bw'.",
+      "description": "Location of the local Bitwarden CLI installation. Defaults to '/usr/local/bin/bw' on Intel and '/opt/homebrew/bin/bw' on M1.",
       "placeholder": "CLI Installation Path"
     },
     {
@@ -59,7 +59,7 @@
       "required": false,
       "default": false,
       "title": "Privacy",
-      "label": "Fetch vaut items icons",
+      "label": "Fetch Vault Items Icons",
       "description": "Whether to use a Google-owned service to fetch icons for vault items. If left unchecked, built-in icons will be used."
     }
   ],
@@ -72,7 +72,6 @@
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@types/treeify": "^1.0.0",
-    "@types/which": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

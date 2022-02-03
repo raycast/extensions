@@ -1,8 +1,5 @@
-import {
-  CreateDatabaseForm,
-} from './components'
-
+import { CreateDatabaseForm } from "./components";
 
 export default function Main(): JSX.Element {
-  return <CreateDatabaseForm />
+  return <CreateDatabaseForm />;
 }

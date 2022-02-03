@@ -9,7 +9,7 @@ import {
   removeFromCache,
   REQUEST_ID,
   SECRET_SEED,
-  SERVICES_KEY
+  SERVICES_KEY,
 } from "./cache";
 import LoginForm from "./component/LoginForm";
 import { OtpList } from "./component/OtpList";

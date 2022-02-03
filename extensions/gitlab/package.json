@@ -145,17 +145,27 @@
       "description": "Your GitLab API token. `api` scope for read and write operations, `read_api` when you just want to read only commands.",
       "link": "https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html",
       "placeholder": "Enter your GitLab API token."
+    },
+    {
+      "name" : "cirefreshinterval",
+      "type" :"textfield",
+      "required": false,
+      "default": "10",
+      "title": "CI Auto Refresh Interval (sec)",
+      "description": "Refresh interval in seconds for CI Pipeline/Job lists. Values between 1-9 are not recommended. 0 mean no auto refresh at all",
+      "placeholder": "10"
     }
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
-    "@raycast/api": "^1.24.5",
+    "@raycast/api": "^1.26.0",
     "apollo-link-context": "^1.0.20",
     "fuse.js": "^6.4.6",
     "graphql": "^15.5.1",
     "javascript-time-ago": "^2.3.10",
     "node-fetch": "^2.6.1",
-    "open": "^8.2.1"
+    "open": "^8.2.1",
+    "use-interval": "^1.4.0"
   },
   "devDependencies": {
     "@types/node": "^16.4.3",
