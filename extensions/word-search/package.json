@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "word-search",
+  "title": "Word Search",
+  "description": "Search for synonyms, antonyms and rhymes",
+  "icon": "command-icon.png",
+  "author": "rishabswift",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "word-synonym-search",
+      "title": "Word Synonym Search",
+      "subtitle": "Search for synonyms",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "word-antonym-search",
+      "title": "Word Antonym Search",
+      "subtitle": "Search for antonyms",
+      "description": "",
+      "mode": "view"
+    },
+    {
+      "name": "word-rhyme-search",
+      "title": "Word Rhyme search",
+      "subtitle": "Search for rhymes",
+      "description": "",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.1",
+    "node-fetch": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
