@@ -54,6 +54,12 @@
       "title": "Quit Flow",
       "description": "Quit Flow application",
       "mode": "no-view"
+    },
+    {
+      "name": "next-session",
+      "title": "Next Session",
+      "description": "Start the next Flow session",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
