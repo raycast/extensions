@@ -192,9 +192,7 @@ export default function SearchCryptoList() {
         refreshExistingCache((err, cryptoList) => {
           if (err) {
             console.error("WriteFileError:" + err);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const message = (err as any)?.message;
-            showToast(ToastStyle.Failure, "Refresh failed", message);
+            showToast(ToastStyle.Failure, "Refresh failed", (err as Error)?.message);
             return;
           }
 

@@ -7,8 +7,6 @@ export default async () => {
 
     await showToast(ToastStyle.Success, "Refreshed successfully");
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const message = (error as any)?.message;
-    showToast(ToastStyle.Failure, "Refresh failed", message);
+    showToast(ToastStyle.Failure, "Refresh failed", (error as Error)?.message);
   }
 };
