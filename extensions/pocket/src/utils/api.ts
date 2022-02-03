@@ -21,7 +21,7 @@ interface RawBookmark {
   favorite: "0" | "1";
   tags?: Record<string, unknown>;
   authors?: Record<string, { name?: string }>;
-  time_updated: string;
+  time_added: string;
 }
 
 interface SendActionRequest {
@@ -94,7 +94,7 @@ export async function fetchBookmarks({ name, tag, state, count }: FetchBookmarks
     },
   });
   const result = JSON.parse(response.body) as FetchBookmarksResponse;
-  return Object.values(result.list).map((bookmark) => ({
+  const bookmarks: Array<Bookmark> = Object.values(result.list).map((bookmark) => ({
     id: bookmark.item_id,
     title: bookmark.resolved_title || bookmark.given_title,
     originalUrl: bookmark.resolved_url || bookmark.given_url,
@@ -103,6 +103,7 @@ export async function fetchBookmarks({ name, tag, state, count }: FetchBookmarks
     favorite: bookmark.favorite === "1",
     tags: bookmark.tags ? Object.keys(bookmark.tags) : [],
     author: bookmark.authors ? Object.values(bookmark.authors)[0]?.name : "",
-    updatedAt: new Date(parseInt(`${bookmark.time_updated}000`)),
+    updatedAt: new Date(parseInt(`${bookmark.time_added}000`)),
   }));
+  return bookmarks.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
 }
