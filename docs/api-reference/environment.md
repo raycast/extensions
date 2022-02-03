@@ -2,6 +2,8 @@
 
 The Environment APIs are useful to get context about the setup in which your command runs. You can get information about the extension and command itself as well as Raycast. Furthermore, a few paths are injected that are helpful to construct file paths that are related to the command's assets.
 
+test
+
 ## API Reference
 
 ### getSelectedFinderItems
@@ -11,13 +13,18 @@ Gets the selected items from Finder.
 #### Signature
 
 ```typescript
-async function getSelectedFinderItems(): Promise<FileSystemItem[]>
+async function getSelectedFinderItems(): Promise<FileSystemItem[]>;
 ```
 
 #### Example
 
 ```typescript
-import { getSelectedFinderItems, pasteText, showToast, ToastStyle } from "@raycast/api";
+import {
+  getSelectedFinderItems,
+  pasteText,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 
 export default async () => {
   try {
@@ -42,13 +49,18 @@ Gets the selected text of the frontmost application.
 #### Signature
 
 ```typescript
-async function getSelectedText(): Promise<string>
+async function getSelectedText(): Promise<string>;
 ```
 
 #### Example
 
 ```typescript
-import { getSelectedText, pasteText, showToast, ToastStyle } from "@raycast/api";
+import {
+  getSelectedText,
+  pasteText,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 
 export default async () => {
   try {
@@ -92,14 +104,14 @@ Holds data about the environment the command is running in. Use the global [envi
 
 #### Properties
 
-| Name | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| assetsPath | <code>string</code> | Yes | The absolute path to the assets directory of the extension. |
-| commandName | <code>string</code> | Yes | The name of the launched command, as specified in package.json |
-| extensionName | <code>string</code> | Yes | The name of the extension, as specified in package.json |
-| isDevelopment | <code>boolean</code> | Yes | Indicates whether the command is a development command (vs. an installed command from the Store). |
-| raycastVersion | <code>string</code> | Yes | The version of the main Raycast app |
-| supportPath | <code>string</code> | Yes | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. |
+| Name           | Type                 | Required | Description                                                                                                                       |
+| :------------- | :------------------- | :------- | :-------------------------------------------------------------------------------------------------------------------------------- |
+| assetsPath     | <code>string</code>  | Yes      | The absolute path to the assets directory of the extension.                                                                       |
+| commandName    | <code>string</code>  | Yes      | The name of the launched command, as specified in package.json                                                                    |
+| extensionName  | <code>string</code>  | Yes      | The name of the extension, as specified in package.json                                                                           |
+| isDevelopment  | <code>boolean</code> | Yes      | Indicates whether the command is a development command (vs. an installed command from the Store).                                 |
+| raycastVersion | <code>string</code>  | Yes      | The version of the main Raycast app                                                                                               |
+| supportPath    | <code>string</code>  | Yes      | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. |
 
 ### FileSystemItem
 
@@ -107,6 +119,6 @@ Holds data about a File System item. Use the [getSelectedFinderItems](#getselect
 
 #### Properties
 
-| Name | Type | Required | Description |
-| :--- | :--- | :--- | :--- |
-| path | <code>string</code> | Yes | The path to the item |
+| Name | Type                | Required | Description          |
+| :--- | :------------------ | :------- | :------------------- |
+| path | <code>string</code> | Yes      | The path to the item |
