@@ -1,4 +1,11 @@
-import { ActionPanel, CopyToClipboardAction, Detail, List, OpenInBrowserAction, useNavigation } from "@raycast/api";
+import {
+  ActionPanel,
+  CopyToClipboardAction,
+  Detail,
+  List,
+  OpenInBrowserAction,
+  useNavigation,
+} from "@raycast/api";
 import Parser from "rss-parser";
 import { useEffect, useState } from "react";
 import * as timeago from "timeago.js";
@@ -16,10 +23,15 @@ export default function Command() {
   useEffect(() => {
     async function fetchStories() {
       try {
-        const feed = await parser.parseURL("http://feeds.nos.nl/nosnieuwsalgemeen");
+        const feed = await parser.parseURL(
+          "http://feeds.nos.nl/nosnieuwsalgemeen"
+        );
         setState({ items: feed.items });
       } catch (error) {
-        setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
+        setState({
+          error:
+            error instanceof Error ? error : new Error("Something went wrong"),
+        });
       }
     }
 
@@ -53,9 +65,14 @@ function Actions(props: { item: Parser.Item }) {
   return (
     <ActionPanel title={props.item.title}>
       <ActionPanel.Section>
-        <ActionPanel.Item title="View item" onAction={() => push(<StoryDetail item={props.item} />)} />
+        <ActionPanel.Item
+          title="View item"
+          onAction={() => push(<StoryDetail item={props.item} />)}
+        />
       </ActionPanel.Section>
-      <ActionPanel.Section>{props.item.link && <OpenInBrowserAction url={props.item.link} />}</ActionPanel.Section>
+      <ActionPanel.Section>
+        {props.item.link && <OpenInBrowserAction url={props.item.link} />}
+      </ActionPanel.Section>
       <ActionPanel.Section>
         {props.item.link && (
           <CopyToClipboardAction
@@ -92,7 +109,9 @@ function StoryDetail(props: { item: Parser.Item }) {
       markdown={getMarkDownContent()}
       actions={
         <ActionPanel>
-          <ActionPanel.Section>{props.item.link && <OpenInBrowserAction url={props.item.link} />}</ActionPanel.Section>
+          <ActionPanel.Section>
+            {props.item.link && <OpenInBrowserAction url={props.item.link} />}
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
