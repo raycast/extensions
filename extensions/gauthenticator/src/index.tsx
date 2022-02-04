@@ -72,7 +72,7 @@ export default function AppsView() {
 
 function resolveHome(filepath: string): string {
   if (filepath[0] === "~") {
-    return path.join(process.env.HOME == undefined ? '' : process.env.HOME, filepath.slice(1));
+    return path.join(process.env.HOME == undefined ? "" : process.env.HOME, filepath.slice(1));
   }
   return filepath;
 }
