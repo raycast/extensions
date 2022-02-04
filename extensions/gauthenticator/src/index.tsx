@@ -30,7 +30,7 @@ export default function AppsView() {
         return;
       }
 
-      const config = ini.parse(buff.toString(), "utf-8");
+      const config = ini.parse(buff.toString());
 
       setApps(
         Object.keys(config)
@@ -70,9 +70,9 @@ export default function AppsView() {
   );
 }
 
-function resolveHome(filepath) {
+function resolveHome(filepath: string): string {
   if (filepath[0] === "~") {
-    return path.join(process.env.HOME, filepath.slice(1));
+    return path.join(process.env.HOME == undefined ? '' : process.env.HOME, filepath.slice(1));
   }
   return filepath;
 }
