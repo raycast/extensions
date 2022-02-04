@@ -1,4 +1,4 @@
-import { ActionPanel, closeMainWindow, List } from "@raycast/api";
+import { ActionPanel, closeMainWindow, List, showToast, ToastStyle } from "@raycast/api";
 import { loadEntries, copyAndPastePassword, copyPassword, copyUsername } from "./utils/keepassLoader";
 import { useState, useEffect } from "react";
 
@@ -8,6 +8,9 @@ export default function Command() {
   useEffect(() => {
     loadEntries()
       .then(setEntries)
+      .catch(() => {
+        showToast(ToastStyle.Failure, "Error", "Unable to load entries, please check extension preference values");
+      })
       .then(() => setIsLoading(false));
   }, []);
 

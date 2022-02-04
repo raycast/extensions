@@ -16,17 +16,15 @@ interface Preference {
 const preferences: Preference = getPreferenceValues();
 
 // this file is used to cache entries (without password) in the database
-const cacheFile = path.join("/tmp/", "jijhggkjbuylkjoiy.cache");
+const cacheFile = path.join("/tmp/", CryptoJS.enc.Utf8.parse(preferences.database).toString().slice(0, 8) + ".cache");
 // keepass database file path
 const database = preferences.database;
 // password for keepass database
 const dbPassword = preferences.dbPassword;
 // keepass-cli executable path
 const keepassxcCli = path.join(preferences.keepassxcRootPath, "Contents/MacOS/keepassxc-cli");
-
-const key = CryptoJS.enc.Utf8.parse("iusadgaksjdfglasidgj");
-const iv = CryptoJS.enc.Utf8.parse("asiudhlashdklasjhdjkljhbh");
-
+const key = CryptoJS.enc.Utf8.parse(preferences.dbPassword);
+const iv = CryptoJS.enc.Utf8.parse(preferences.database);
 const decrypt = (word: string) => {
   const encryptedHexStr = CryptoJS.enc.Hex.parse(word);
   const srcs = CryptoJS.enc.Base64.stringify(encryptedHexStr);
