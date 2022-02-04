@@ -23,7 +23,7 @@
       "title": "Path of KeepassXC.app",
       "description": "Path of KeepassXC.app",
       "placeholder": "Set the Path of KeepassXC.app",
-      "default":"/Applications/KeePassXC.app"
+      "default": "/Applications/KeePassXC.app"
     },
     {
       "name": "database",
@@ -43,7 +43,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.1"
+    "@raycast/api": "^1.27.1",
+    "@types/crypto-js": "^4.1.0",
+    "crypto-js": "^4.1.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
