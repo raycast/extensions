@@ -66,7 +66,7 @@ function Actions(props: { item: Parser.Item }) {
     <ActionPanel title={props.item.title}>
       <ActionPanel.Section>
         <ActionPanel.Item
-          title="View item"
+          title="View Item"
           onAction={() => push(<StoryDetail item={props.item} />)}
         />
       </ActionPanel.Section>
