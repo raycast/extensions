@@ -24,12 +24,21 @@ export const useSearch = <T extends "collections" | "photos">(type: T) => {
       cancelRef.current = new AbortController();
 
       try {
+        if (searchText === "") {
+          setState((oldState) => ({
+            ...oldState,
+            isLoading: false,
+          }));
+
+          return;
+        }
+
         setState((oldState) => ({
           ...oldState,
           isLoading: true,
         }));
 
-        const { results } = (await performSearch({
+        const { errors, results } = (await performSearch({
           accessKey,
           signal: cancelRef.current?.signal,
 
@@ -41,7 +50,14 @@ export const useSearch = <T extends "collections" | "photos">(type: T) => {
             orientation,
             type: type || "photos",
           },
-        })) as SearchState<T>;
+        })) as {
+          errors?: string[];
+          results: T extends "collections" ? CollectionResult[] : SearchResult[];
+        };
+
+        if (errors?.length) {
+          showToast(ToastStyle.Failure, `Failed to fetch ${type}.`, errors?.join("\n"));
+        }
 
         setState((oldState) => ({
           ...oldState,
@@ -97,7 +113,7 @@ export const performSearch = async <T extends PerformSearchProps>({
   options,
   accessKey,
   signal,
-}: PerformSearchProps): Promise<{ results: SearchOrCollectionResult<T> }> => {
+}: PerformSearchProps): Promise<{ errors?: string[]; results: SearchOrCollectionResult<T> }> => {
   const searchParams = new URLSearchParams({
     page: "1",
     query: searchText,
@@ -106,16 +122,20 @@ export const performSearch = async <T extends PerformSearchProps>({
 
   if (options.orientation !== "all") searchParams.append("orientation", options.orientation);
 
-  const { results } = await fetch(`https://api.unsplash.com/search/${options.type}?${searchParams.toString()}`, {
-    method: "GET",
-    signal,
-    headers: {
-      Authorization: `Client-ID ${accessKey}`,
-    },
-  }).then((res) => res.json() as Promise<{ errors?: string[]; results: SearchOrCollectionResult<T> }>);
+  const { errors, results } = await fetch(
+    `https://api.unsplash.com/search/${options.type}?${searchParams.toString()}`,
+    {
+      method: "GET",
+      signal,
+      headers: {
+        Authorization: `Client-ID ${accessKey}`,
+      },
+    }
+  ).then((res) => res.json() as Promise<{ errors?: string[]; results: SearchOrCollectionResult<T> }>);
 
   return {
     results,
+    errors,
   };
 };
 
