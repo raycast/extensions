@@ -11,21 +11,21 @@
       "name": "word-synonym-search",
       "title": "Word Synonym Search",
       "subtitle": "Search for synonyms",
-      "description": "",
+      "description": "Search for synonyms given a word",
       "mode": "view"
     },
     {
       "name": "word-antonym-search",
       "title": "Word Antonym Search",
       "subtitle": "Search for antonyms",
-      "description": "",
+      "description": "Search for antonyms given a word",
       "mode": "view"
     },
     {
       "name": "word-rhyme-search",
       "title": "Word Rhyme search",
       "subtitle": "Search for rhymes",
-      "description": "",
+      "description": "Search for rhymes given a word",
       "mode": "view"
     }
   ],
