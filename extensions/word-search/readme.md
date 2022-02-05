@@ -8,8 +8,8 @@ Once you've entered your text, just hit `return` on your keyboard to insert it i
 
 ## Word Search in Action
 
-![synonym 1](./assets/screenshots/synonym-1.png)
+![synonym 1](./media/synonym-1.png)
 
-![synonym 2](./assets/screenshots/synonym-2.png)
+![synonym 2](./media/synonym-2.png)
 
-![rhyme](./assets/screenshots/rhyme.png)
+![rhyme](./media/rhyme.png)
