@@ -16,7 +16,7 @@
     },
     {
       "name": "word-antonym-search",
-      "title": "Word Antonym Search",
+      "title": "Search Word Antonym",
       "subtitle": "Datamuse",
       "description": "Search for antonyms given a word",
       "mode": "view"
