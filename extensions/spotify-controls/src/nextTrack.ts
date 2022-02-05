@@ -1,5 +1,6 @@
-import { runAppleScriptSilently } from "./utils";
+import { buildScriptEnsuringSpotifyIsRunning, runAppleScriptSilently } from "./utils";
 
 export default async () => {
-  await runAppleScriptSilently('tell application "Spotify" to next track');
+  const script = buildScriptEnsuringSpotifyIsRunning(`next track`);
+  await runAppleScriptSilently(script);
 };
