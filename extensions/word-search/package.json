@@ -10,7 +10,7 @@
     {
       "name": "word-synonym-search",
       "title": "Word Synonym Search",
-      "subtitle": "Search for synonyms",
+      "subtitle": "Datamuse",
       "description": "Search for synonyms given a word",
       "mode": "view"
     },
