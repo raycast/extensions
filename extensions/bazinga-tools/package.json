@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "bazinga",
-      "title": "Bazinga",
-      "subtitle": "The all-in-one toolbox for developers",
+      "title": "Open Tools",
+      "subtitle": "Bazinga Tools",
       "description": "Command: A shortcut to open tools on Bazinga.tools",
       "mode": "view"
     }
