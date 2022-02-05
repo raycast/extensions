@@ -92,7 +92,7 @@
         {
           "name": "prefTag",
           "type": "textfield",
-          "placeholder": "untagges",
+          "placeholder": "untagged",
           "title": "Default Tag",
           "required": false,
           "description": "The default selected tag"
