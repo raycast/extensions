@@ -23,7 +23,7 @@
     },
     {
       "name": "word-rhyme-search",
-      "title": "Word Rhyme search",
+      "title": "Search Word Rhyme",
       "subtitle": "Datamuse",
       "description": "Search for rhymes given a word",
       "mode": "view"
