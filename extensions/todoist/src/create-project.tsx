@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { ActionPanel, Toast, Form, Icon, render, ToastStyle, showToast, open, SubmitFormAction } from "@raycast/api";
-import { AddProjectArgs } from "@doist/todoist-api-typescript";
+import { AddProjectArgs, colors } from "@doist/todoist-api-typescript";
 import useSWR from "swr";
 import { SWRKeys } from "./types";
 import { handleError, todoist } from "./api";
-import { defaultColor, projectColors } from "./constants";
 
 function CreateProject() {
   const [name, setName] = useState("");
   const [parentId, setParentId] = useState<string>();
   const [favorite, setFavorite] = useState<boolean>(false);
-  const [colorId, setColorId] = useState<string>(String(defaultColor));
+  const [colorId, setColorId] = useState<string>();
 
   const { data, error } = useSWR(SWRKeys.projects, () => todoist.getProjects());
 
@@ -23,7 +22,6 @@ function CreateProject() {
   function clear() {
     setName("");
     setParentId("");
-    setColorId(String(defaultColor));
     setFavorite(false);
   }
 
@@ -72,8 +70,8 @@ function CreateProject() {
     >
       <Form.TextField id="name" title="Name" placeholder="My project" value={name} onChange={setName} />
 
-      <Form.Dropdown id="color" title="Color" value={colorId} onChange={setColorId}>
-        {projectColors.map(({ name, id }) => (
+      <Form.Dropdown id="color" title="Color" value={colorId} onChange={setColorId} storeValue>
+        {colors.map(({ name, id }) => (
           <Form.Dropdown.Item value={String(id)} title={name} key={id} />
         ))}
       </Form.Dropdown>
