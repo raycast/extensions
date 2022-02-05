@@ -1,14 +1,15 @@
 import { render } from "@raycast/api";
+import useSWR from "swr";
 import { partitionTasksWithOverdue } from "./utils";
-import { getTasks, handleError } from "./api";
-
+import { todoist, handleError } from "./api";
+import { SWRKeys } from "./types";
 import TaskList from "./components/TaskList";
 
 function Today() {
-  const { data, error } = getTasks({ filter: "today|overdue" });
+  const { data, error } = useSWR(SWRKeys.tasks, () => todoist.getTasks({ filter: "today|overdue" }));
 
   if (error) {
-    handleError({ error, title: "Failed to get tasks" });
+    handleError({ error, title: "Unable to get tasks" });
   }
 
   const [overdue, today] = partitionTasksWithOverdue(data || []);

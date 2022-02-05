@@ -1,22 +1,35 @@
 import { useState } from "react";
-import { ActionPanel, Form, Icon, render, showToast, ToastStyle, useNavigation } from "@raycast/api";
+import {
+  ActionPanel,
+  Form,
+  Icon,
+  render,
+  showToast,
+  ToastStyle,
+  useNavigation,
+  SubmitFormAction,
+  open,
+  Toast,
+} from "@raycast/api";
 import { AddTaskArgs } from "@doist/todoist-api-typescript";
-import { createTask, getProjects, getLabels, handleError } from "./api";
+import useSWR from "swr";
+import { handleError, todoist } from "./api";
 import { priorities } from "./constants";
 import { getAPIDate } from "./utils";
 import Project from "./components/Project";
+import { SWRKeys } from "./types";
 
 function CreateTask() {
   const { push } = useNavigation();
-  const { data: projects, error: getProjectsError } = getProjects();
-  const { data: labels, error: getLabelsError } = getLabels();
+  const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
+  const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
 
   if (getProjectsError) {
-    handleError({ error: getProjectsError, title: "Failed to get projects" });
+    handleError({ error: getProjectsError, title: "Unable to get projects" });
   }
 
   if (getLabelsError) {
-    handleError({ error: getLabelsError, title: "Failed to get labels" });
+    handleError({ error: getLabelsError, title: "Unable to get labels" });
   }
 
   const isLoading = !projects || !labels;
@@ -33,22 +46,6 @@ function CreateTask() {
     setDescription("");
     setDueDate(undefined);
     setPriority(String(priorities[0].value));
-
-    if (projects) {
-      setProjectId(String(projects[0].id));
-    }
-
-    if (labelIds) {
-      setLabelIds([]);
-    }
-  }
-
-  async function submitAndGoToProject() {
-    await submit();
-
-    if (projectId) {
-      push(<Project projectId={parseInt(projectId)} />);
-    }
   }
 
   async function submit() {
@@ -75,8 +72,27 @@ function CreateTask() {
       body.labelIds = labelIds.map((id) => parseInt(id));
     }
 
-    await createTask(body);
-    clear();
+    const toast = new Toast({ style: ToastStyle.Animated, title: "Creating task" });
+    await toast.show();
+
+    try {
+      const { projectId, url } = await todoist.addTask(body);
+      toast.style = ToastStyle.Success;
+      toast.title = "Task created";
+      toast.primaryAction = {
+        title: "Go to project",
+        shortcut: { modifiers: ["cmd"], key: "g" },
+        onAction: () => push(<Project projectId={projectId} />),
+      };
+      toast.secondaryAction = {
+        title: "Open in browser",
+        shortcut: { modifiers: ["cmd"], key: "o" },
+        onAction: () => open(url),
+      };
+      clear();
+    } catch (error) {
+      handleError({ error, title: "Unable to create task" });
+    }
   }
 
   return (
@@ -84,12 +100,7 @@ function CreateTask() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <ActionPanel.Item title="Create task" onAction={submit} icon={Icon.Plus} />
-          <ActionPanel.Item
-            title="Create task and go to project"
-            onAction={submitAndGoToProject}
-            icon={Icon.ArrowRight}
-          />
+          <SubmitFormAction title="Create task" onSubmit={submit} icon={Icon.Plus} />
         </ActionPanel>
       }
     >
@@ -114,7 +125,7 @@ function CreateTask() {
       </Form.Dropdown>
 
       {projects && projects.length > 0 ? (
-        <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId}>
+        <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId} storeValue>
           {projects.map(({ id, name }) => (
             <Form.Dropdown.Item value={String(id)} title={name} key={id} />
           ))}
@@ -122,7 +133,7 @@ function CreateTask() {
       ) : null}
 
       {labels && labels.length > 0 ? (
-        <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds}>
+        <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds} storeValue>
           {labels.map(({ id, name }) => (
             <Form.TagPicker.Item value={String(id)} title={name} key={id} />
           ))}

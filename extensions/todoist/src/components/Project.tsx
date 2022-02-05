@@ -1,14 +1,15 @@
 import TaskList from "./TaskList";
-import { getTasks, getSections } from "../api";
-import { ViewMode } from "../types";
+import useSWR from "swr";
+import { ViewMode, SWRKeys } from "../types";
+import { todoist } from "../api";
 
 interface ProjectProps {
   projectId: number;
 }
 
 function Project({ projectId }: ProjectProps): JSX.Element {
-  const { data: rawTasks } = getTasks({ projectId: projectId });
-  const { data: allSections } = getSections(projectId);
+  const { data: rawTasks } = useSWR(SWRKeys.tasks, () => todoist.getTasks({ projectId }));
+  const { data: allSections } = useSWR(SWRKeys.sections, () => todoist.getSections(projectId));
 
   const tasks = rawTasks?.filter((task) => !task.parentId);
 

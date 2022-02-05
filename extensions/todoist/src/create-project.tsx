@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { ActionPanel, Form, Icon, render, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Toast, Form, Icon, render, ToastStyle, showToast, open, SubmitFormAction } from "@raycast/api";
 import { AddProjectArgs } from "@doist/todoist-api-typescript";
-import { createProject, getProjects, handleError } from "./api";
+import useSWR from "swr";
+import { SWRKeys } from "./types";
+import { handleError, todoist } from "./api";
 import { defaultColor, projectColors } from "./constants";
 
 function CreateProject() {
@@ -10,10 +12,10 @@ function CreateProject() {
   const [favorite, setFavorite] = useState<boolean>(false);
   const [colorId, setColorId] = useState<string>(String(defaultColor));
 
-  const { data, error } = getProjects();
+  const { data, error } = useSWR(SWRKeys.projects, () => todoist.getProjects());
 
   if (error) {
-    handleError({ error, title: "Failed to get projects" });
+    handleError({ error, title: "Unable to get projects" });
   }
 
   const projects = data?.filter((project) => !project.inboxProject);
@@ -41,15 +43,29 @@ function CreateProject() {
       body.color = parseInt(colorId);
     }
 
-    await createProject(body);
-    clear();
+    const toast = new Toast({ style: ToastStyle.Animated, title: "Creating project..." });
+    await toast.show();
+
+    try {
+      const { url } = await todoist.addProject(body);
+      toast.style = ToastStyle.Success;
+      toast.title = "Project created";
+      toast.primaryAction = {
+        title: "Open in browser",
+        shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+        onAction: () => open(url),
+      };
+      clear();
+    } catch (error) {
+      handleError({ error, title: "Unable to create task" });
+    }
   }
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <ActionPanel.Item title="Create Project" onAction={submit} icon={Icon.Plus} />
+          <SubmitFormAction title="Create Project" onSubmit={submit} icon={Icon.Plus} />
         </ActionPanel>
       }
       isLoading={!data && !error}

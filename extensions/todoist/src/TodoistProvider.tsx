@@ -1,9 +1,9 @@
 import React from "react";
 import { mutate } from "swr";
-import { confirmAlert } from "@raycast/api";
-import * as api from "./api";
+import { confirmAlert, showToast, ToastStyle } from "@raycast/api";
 import { Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
 import { SWRKeys } from "./types";
+import { todoist, handleError } from "./api";
 
 interface TodoistContextProps {
   completeTask: (task: Task) => void;
@@ -17,20 +17,41 @@ interface TodoistProviderProps {
 
 export function TodoistProvider({ children }: TodoistProviderProps): JSX.Element {
   async function completeTask(task: Task) {
-    await api.completeTask(task.id);
-    mutate(SWRKeys.tasks);
+    await showToast(ToastStyle.Animated, "Completing task");
+
+    try {
+      await todoist.closeTask(task.id);
+      await showToast(ToastStyle.Success, "Task updated");
+      mutate(SWRKeys.tasks);
+    } catch (error) {
+      handleError({ error, title: "Unable to complete task" });
+    }
   }
 
   async function deleteTask(task: Task) {
     if (await confirmAlert({ title: "Are you sure you want to delete this task?" })) {
-      await api.deleteTask(task.id);
-      mutate(SWRKeys.tasks);
+      await showToast(ToastStyle.Animated, "Deleting task");
+
+      try {
+        await todoist.deleteTask(task.id);
+        await showToast(ToastStyle.Success, "Task deleted");
+        mutate(SWRKeys.tasks);
+      } catch (error) {
+        handleError({ error, title: "Unable to delete task" });
+      }
     }
   }
 
-  async function updateTask(updatedTask: Task, payload: UpdateTaskArgs) {
-    await api.updateTask(updatedTask.id, payload);
-    mutate(SWRKeys.tasks);
+  async function updateTask(task: Task, payload: UpdateTaskArgs) {
+    await showToast(ToastStyle.Animated, "Updating task");
+
+    try {
+      await todoist.updateTask(task.id, payload);
+      await showToast(ToastStyle.Success, "Task updated");
+      mutate(SWRKeys.tasks);
+    } catch (error) {
+      handleError({ error, title: "Unable to update task" });
+    }
   }
 
   return <TodoistContext.Provider value={{ completeTask, deleteTask, updateTask }}>{children}</TodoistContext.Provider>;
