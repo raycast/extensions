@@ -1,11 +1,20 @@
 # Keepass Extension for Raycast
 
-This is a raycast extension to access keepass database .
+This is a raycast extension to access keepass database.
 
 ## Requirements
 
-- [KeepassXC.app](https://keepassxc.org "前往安装KeepassXC") installed.(`keepassxc-cli` in `KeepassXC.app` is required to access keepass database
+- [KeePassXC.app](https://keepassxc.org") installed.(`keepassxc-cli` in `KeepassXC.app` is required to access keepass database
 
+## Setup
+
+There are 3 parameters required for this extension to work:
+
+- path of `KeePassXC.app` (default `/Applications/KeePassXC.app`)
+- a keepass database file
+- password to access database
+
+![preference](preferences.png)
 ## Usage
 
 ![example](example.gif)
