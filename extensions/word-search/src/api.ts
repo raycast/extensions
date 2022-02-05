@@ -33,6 +33,7 @@ export async function searchWords(wordToSearch: string, type: SearchType): Promi
             definition = word.defs[i].replace(/\t/g, "~");
             word.defs[i] = definition.split("~")[1];
         }
+
     });
 
     return words;

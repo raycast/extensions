@@ -1,7 +1,7 @@
 export interface Word {
     word: string;
     score: number;
-    defs: []
+    defs: string[]
 }
 
 export enum SearchType {
