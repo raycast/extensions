@@ -1,7 +1,10 @@
+import { getPreferenceValues } from "@raycast/api";
 import TaskList from "./TaskList";
 import useSWR from "swr";
-import { ViewMode, SWRKeys } from "../types";
+import { partition } from "lodash";
+import { ViewMode, SWRKeys, ProjectGroupBy, SectionWithTasks } from "../types";
 import { todoist } from "../api";
+import { getSectionsWithPriorities, getSectionsWithDueDates } from "../utils";
 
 interface ProjectProps {
   projectId: number;
@@ -11,27 +14,45 @@ function Project({ projectId }: ProjectProps): JSX.Element {
   const { data: rawTasks } = useSWR(SWRKeys.tasks, () => todoist.getTasks({ projectId }));
   const { data: allSections } = useSWR(SWRKeys.sections, () => todoist.getSections(projectId));
 
-  const tasks = rawTasks?.filter((task) => !task.parentId);
+  const preferences = getPreferenceValues();
 
-  const sections = [
-    {
-      name: "No section",
-      order: 0,
-      tasks: tasks?.filter((task) => task.sectionId === 0) || [],
-    },
-  ];
+  // Don't display sub-tasks
+  const tasks = rawTasks?.filter((task) => !task.parentId) || [];
 
-  if (allSections && allSections.length > 0) {
-    sections.push(
-      ...allSections.map((section) => ({
-        name: section.name,
-        order: section.order,
-        tasks: tasks?.filter((task) => task.sectionId === section.id) || [],
-      }))
-    );
+  let sections: SectionWithTasks[] = [];
+
+  if (preferences.projectGroupBy === ProjectGroupBy.default) {
+    sections = [
+      {
+        name: "No section",
+        tasks: tasks?.filter((task) => task.sectionId === 0) || [],
+      },
+    ];
+
+    if (allSections && allSections.length > 0) {
+      sections.push(
+        ...allSections.map((section) => ({
+          name: section.name,
+          tasks: tasks?.filter((task) => task.sectionId === section.id) || [],
+        }))
+      );
+    }
   }
 
-  sections.sort((a, b) => a.order - b.order);
+  if (preferences.projectGroupBy === ProjectGroupBy.priority) {
+    sections = getSectionsWithPriorities(tasks);
+  }
+
+  if (preferences.projectGroupBy === ProjectGroupBy.date) {
+    const [upcomingTasks, noDueDatesTasks] = partition(tasks, (task) => task.due);
+
+    sections = getSectionsWithDueDates(upcomingTasks);
+
+    sections.push({
+      name: "No due date",
+      tasks: noDueDatesTasks,
+    });
+  }
 
   return <TaskList mode={ViewMode.project} sections={sections} isLoading={!rawTasks || !allSections} />;
 }

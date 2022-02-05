@@ -72,7 +72,29 @@
       "default": "default",
       "required": false,
       "title": "Today's Group By Options",
-      "description": "Indicates how you want to group your tasks in the Today view. Can be 'prioriy' or 'project'."
+      "description": "Indicates how you want to group your tasks in the Today view. Can be 'Prioriy' or 'Project'."
+    },
+    {
+      "name": "projectGroupBy",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Default",
+          "value": "default"
+        },
+        {
+          "title": "Priority",
+          "value": "priority"
+        },
+        {
+          "title": "Date",
+          "value": "date"
+        }
+      ],
+      "default": "default",
+      "required": false,
+      "title": "Project's Group By Options",
+      "description": "Indicates how you want to group your tasks in the Project view. Can be 'Prioriy' or 'Date'."
     }
   ],
   "dependencies": {

@@ -7,7 +7,6 @@ export enum ViewMode {
 
 export interface SectionWithTasks {
   name: string;
-  order?: number;
   tasks: Task[];
 }
 
@@ -22,4 +21,10 @@ export enum TodayGroupBy {
   default = "default",
   priority = "priority",
   project = "project",
+}
+
+export enum ProjectGroupBy {
+  default = "default",
+  priority = "priority",
+  date = "date",
 }

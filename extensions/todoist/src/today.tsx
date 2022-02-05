@@ -1,10 +1,9 @@
 import { render, getPreferenceValues } from "@raycast/api";
 import useSWR from "swr";
-import { partitionTasksWithOverdue } from "./utils";
+import { partitionTasksWithOverdue, getSectionsWithPriorities } from "./utils";
 import { todoist, handleError } from "./api";
 import { SectionWithTasks, SWRKeys, TodayGroupBy } from "./types";
 import TaskList from "./components/TaskList";
-import { priorities } from "./constants";
 
 function Today() {
   const { data: tasks, error: getTasksError } = useSWR(SWRKeys.tasks, () =>
@@ -38,10 +37,7 @@ function Today() {
   }
 
   if (preferences.todayGroupBy === TodayGroupBy.priority) {
-    sections = priorities.map(({ name, value }) => ({
-      name,
-      tasks: tasks?.filter((task) => task.priority === value) || [],
-    }));
+    sections = getSectionsWithPriorities(tasks || []);
   }
 
   if (preferences.todayGroupBy === TodayGroupBy.project) {
