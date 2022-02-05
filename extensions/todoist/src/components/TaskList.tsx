@@ -2,7 +2,6 @@ import { List } from "@raycast/api";
 import { Project } from "@doist/todoist-api-typescript";
 import { SectionWithTasks, ViewMode } from "../types";
 import TaskListItem from "./TaskListItem";
-import { TodoistProvider } from "../TodoistProvider";
 
 interface TaskListProps {
   sections: SectionWithTasks[];
@@ -21,17 +20,15 @@ function TaskList({ isLoading, sections, mode = ViewMode.date, projects }: TaskL
   }`;
 
   return (
-    <TodoistProvider>
-      <List searchBarPlaceholder={placeholder} isLoading={isLoading}>
-        {sections.map((section, index) => (
-          <List.Section title={section.name} subtitle={`${section.tasks.length} tasks`} key={index}>
-            {section.tasks.map((task) => (
-              <TaskListItem key={task.id} task={task} mode={mode} {...(projects ? { projects } : {})} />
-            ))}
-          </List.Section>
-        ))}
-      </List>
-    </TodoistProvider>
+    <List searchBarPlaceholder={placeholder} isLoading={isLoading}>
+      {sections.map((section, index) => (
+        <List.Section title={section.name} subtitle={`${section.tasks.length} tasks`} key={index}>
+          {section.tasks.map((task) => (
+            <TaskListItem key={task.id} task={task} mode={mode} {...(projects ? { projects } : {})} />
+          ))}
+        </List.Section>
+      ))}
+    </List>
   );
 }
 
