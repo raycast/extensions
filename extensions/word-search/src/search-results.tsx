@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { SearchType, Word } from "./types";
 import { searchWords } from "./api";
-import {ActionPanel, CopyToClipboardAction, Detail, List, PasteAction } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, Detail, List, PasteAction } from "@raycast/api";
 
 export default function SearchResults(type: SearchType) {
   const [words, setWords] = useState<Word[]>([]);
@@ -18,17 +18,24 @@ export default function SearchResults(type: SearchType) {
   return (
     <List isLoading={loading} throttle={true} onSearchTextChange={onSearch}>
       {words.map((word) => (
-        <List.Item icon={ 'command-icon.png' } key={word.word} title={word.word} subtitle={word.defs !== undefined ? word.defs[0] : ''} actions={
-          <ActionPanel>
-            <PasteAction
+        <List.Item
+          icon={"command-icon.png"}
+          key={word.word}
+          title={word.word}
+          subtitle={word.defs !== undefined ? word.defs[0] : ""}
+          actions={
+            <ActionPanel>
+              <PasteAction
                 content={word.word}
                 title="Copy & Insert Word"
                 shortcut={{
                   modifiers: ["cmd"],
                   key: "return",
                 }}
-            />
-        </ActionPanel>} />
+              />
+            </ActionPanel>
+          }
+        />
       ))}
     </List>
   );
