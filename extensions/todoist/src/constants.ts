@@ -1,6 +1,6 @@
-// Todoist priorities are reversed
 import { Color } from "@raycast/api";
 
+// Todoist priorities are reversed
 export const priorities = [
   { name: "Low", value: 1, searchKeyword: "p4" },
   { name: "Medium", value: 2, color: Color.Blue, searchKeyword: "p3" },

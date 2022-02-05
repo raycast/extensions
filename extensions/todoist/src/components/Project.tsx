@@ -1,23 +1,22 @@
 import TaskList from "./TaskList";
-import { Section, Task, ViewMode } from "../types";
-import { useFetch } from "../api";
+import { getTasks, getSections } from "../api";
+import { ViewMode } from "../types";
 
 interface ProjectProps {
   projectId: number;
 }
 
 function Project({ projectId }: ProjectProps): JSX.Element {
-  const path = `/tasks?project_id=${projectId}`;
-  const { data: rawTasks, isLoading: isLoadingTasks } = useFetch<Task[]>(path);
-  const { data: allSections, isLoading: isLoadingSections } = useFetch<Section[]>(`/sections?project_id=${projectId}`);
+  const { data: rawTasks } = getTasks({ projectId: projectId });
+  const { data: allSections } = getSections(projectId);
 
-  const tasks = rawTasks?.filter((task) => !task.parent_id);
+  const tasks = rawTasks?.filter((task) => !task.parentId);
 
   const sections = [
     {
       name: "No section",
       order: 0,
-      tasks: tasks?.filter((task) => task.section_id === 0) || [],
+      tasks: tasks?.filter((task) => task.sectionId === 0) || [],
     },
   ];
 
@@ -26,16 +25,14 @@ function Project({ projectId }: ProjectProps): JSX.Element {
       ...allSections.map((section) => ({
         name: section.name,
         order: section.order,
-        tasks: tasks?.filter((task) => task.section_id === section.id) || [],
+        tasks: tasks?.filter((task) => task.sectionId === section.id) || [],
       }))
     );
   }
 
   sections.sort((a, b) => a.order - b.order);
 
-  return (
-    <TaskList path={path} mode={ViewMode.project} sections={sections} isLoading={isLoadingTasks || isLoadingSections} />
-  );
+  return <TaskList mode={ViewMode.project} sections={sections} isLoading={!rawTasks || !allSections} />;
 }
 
 export default Project;

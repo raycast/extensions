@@ -1,19 +1,17 @@
 import { render } from "@raycast/api";
-import { useFetch } from "./api";
-import { Task } from "./types";
-import { partitionTasksWithOverdue, showApiToastError } from "./utils";
+import { partitionTasksWithOverdue } from "./utils";
+import { getTasks, handleError } from "./api";
 
 import TaskList from "./components/TaskList";
 
 function Today() {
-  const path = "/tasks?filter=today|overdue";
-  const { data: tasks, isLoading: isLoadingTasks, error } = useFetch<Task[]>(path);
+  const { data, error } = getTasks({ filter: "today|overdue" });
 
   if (error) {
-    showApiToastError({ error, title: "Failed to get tasks", message: error.message });
+    handleError({ error, title: "Failed to get tasks" });
   }
 
-  const [overdue, today] = partitionTasksWithOverdue(tasks || []);
+  const [overdue, today] = partitionTasksWithOverdue(data || []);
 
   const sections = [{ name: "Today", tasks: today }];
 
@@ -24,7 +22,7 @@ function Today() {
     });
   }
 
-  return <TaskList path={path} sections={sections} isLoading={isLoadingTasks} />;
+  return <TaskList sections={sections} isLoading={!data && !error} />;
 }
 
 render(<Today />);

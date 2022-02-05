@@ -1,82 +1,99 @@
 import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
-import axios, { AxiosError } from "axios";
+import {
+  TodoistApi,
+  TodoistRequestError,
+  AddTaskArgs,
+  UpdateTaskArgs,
+  AddProjectArgs,
+  GetTasksArgs,
+} from "@doist/todoist-api-typescript";
 import useSWR from "swr";
-import { ProjectPayload, TaskPayload } from "./types";
-import { showApiToastError } from "./utils";
+
+import { SWRKeys } from "./types";
 
 const preferences = getPreferenceValues();
 
-export const axiosInstance = axios.create({
-  baseURL: "https://api.todoist.com/rest/v1",
-  headers: { Authorization: `Bearer ${preferences.token}` },
-});
+export const api = new TodoistApi(preferences.token);
 
-export async function createTask(body: TaskPayload) {
+interface HandleErrorArgs {
+  error: TodoistRequestError | Error;
+  title: string;
+}
+
+export function handleError({ error, title }: HandleErrorArgs) {
+  if (error instanceof TodoistRequestError && error.isAuthenticationError()) {
+    return showToast(ToastStyle.Failure, title, "Please, make sure your Todoist token is correct.");
+  }
+
+  return showToast(ToastStyle.Failure, title, error.message);
+}
+
+export async function createTask(body: AddTaskArgs) {
   await showToast(ToastStyle.Animated, "Creating task");
 
-  return axiosInstance
-    .post("/tasks", body)
+  return api
+    .addTask(body)
     .then(() => showToast(ToastStyle.Success, "Task created"))
-    .catch((error) => showApiToastError({ error, title: "Failed to create task", message: error.message }));
+    .catch((error) => handleError({ error, title: "Failed to get tasks" }));
 }
 
 export async function completeTask(id: number) {
   await showToast(ToastStyle.Animated, "Completing task");
 
-  return axiosInstance
-    .post(`/tasks/${id}/close`)
+  return api
+    .closeTask(id)
     .then(() => showToast(ToastStyle.Success, "Task achieved. Well done! 🙌"))
-    .catch((error) => showApiToastError({ error, title: "Failed to complete task", message: error.message }));
+    .catch((error) => handleError({ error, title: "Failed to complete tasks" }));
 }
 
-export async function updateTask(id: number, body: TaskPayload) {
+export async function updateTask(id: number, body: UpdateTaskArgs) {
   await showToast(ToastStyle.Animated, "Updating task");
 
-  return axiosInstance
-    .post(`tasks/${id}`, body)
+  return api
+    .updateTask(id, body)
     .then(() => showToast(ToastStyle.Success, "Task updated"))
-    .catch((error) => showApiToastError({ error, title: "Failed to update task", message: error.message }));
+    .catch((error) => handleError({ error, title: "Failed to update tasks" }));
 }
 
 export async function deleteTask(id: number) {
   await showToast(ToastStyle.Animated, "Deleting task");
 
-  return axiosInstance
-    .delete(`tasks/${id}`)
+  return api
+    .deleteTask(id)
     .then(() => showToast(ToastStyle.Success, "Task deleted"))
-    .catch((error) => showApiToastError({ error, title: "Failed to delete task", message: error.message }));
+    .catch((error) => handleError({ error, title: "Failed to delete task" }));
 }
 
-export async function createProject(body: ProjectPayload) {
+export async function createProject(body: AddProjectArgs) {
   await showToast(ToastStyle.Animated, "Creating project");
 
-  return axiosInstance
-    .post("/projects", body)
+  return api
+    .addProject(body)
     .then(() => showToast(ToastStyle.Success, "Project created"))
-    .catch((error) => showApiToastError({ error, title: "Failed to create project", message: error.message }));
+    .catch((error) => handleError({ error, title: "Failed to create project" }));
 }
 
 export async function deleteProject(id: number) {
   await showToast(ToastStyle.Animated, "Deleting project");
 
-  return axiosInstance
-    .delete(`projects/${id}`)
+  return api
+    .deleteProject(id)
     .then(() => showToast(ToastStyle.Success, "Project deleted"))
-    .catch((error) => showApiToastError({ error, title: "Failed to delete project", message: error.message }));
+    .catch((error) => handleError({ error, title: "Failed to delete project" }));
 }
 
-interface FetchResult<T> {
-  data: T | undefined;
-  isLoading: boolean;
-  error: AxiosError | undefined;
+export function getProjects() {
+  return useSWR(SWRKeys.projects, () => api.getProjects());
 }
 
-const fetcher = (path: string) => axiosInstance.get(path).then((res) => res.data);
+export function getTasks(params: GetTasksArgs) {
+  return useSWR(SWRKeys.tasks, () => api.getTasks(params));
+}
 
-export function useFetch<T>(path: string): FetchResult<T> {
-  const { data, error } = useSWR<T, AxiosError>(path, fetcher);
+export function getLabels() {
+  return useSWR(SWRKeys.labels, () => api.getLabels());
+}
 
-  const isLoading = !error && !data;
-
-  return { data, isLoading, error: isLoading ? undefined : error };
+export function getSections(id: number) {
+  return useSWR(SWRKeys.sections, () => api.getSections(id));
 }

@@ -2,36 +2,35 @@ import React from "react";
 import { mutate } from "swr";
 import { confirmAlert } from "@raycast/api";
 import * as api from "./api";
-
-import { Task, TaskPayload } from "./types";
+import { Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
+import { SWRKeys } from "./types";
 
 interface TodoistContextProps {
   completeTask: (task: Task) => void;
   deleteTask: (task: Task) => void;
-  updateTask: (task: Task, payload: TaskPayload) => void;
+  updateTask: (task: Task, payload: UpdateTaskArgs) => void;
 }
 
 interface TodoistProviderProps {
   children: React.ReactNode;
-  path: string;
 }
 
-export function TodoistProvider({ children, path }: TodoistProviderProps): JSX.Element {
+export function TodoistProvider({ children }: TodoistProviderProps): JSX.Element {
   async function completeTask(task: Task) {
     await api.completeTask(task.id);
-    mutate(path);
+    mutate(SWRKeys.tasks);
   }
 
   async function deleteTask(task: Task) {
     if (await confirmAlert({ title: "Are you sure you want to delete this task?" })) {
       await api.deleteTask(task.id);
-      mutate(path);
+      mutate(SWRKeys.tasks);
     }
   }
 
-  async function updateTask(updatedTask: Task, payload: TaskPayload) {
+  async function updateTask(updatedTask: Task, payload: UpdateTaskArgs) {
     await api.updateTask(updatedTask.id, payload);
-    mutate(path);
+    mutate(SWRKeys.tasks);
   }
 
   return <TodoistContext.Provider value={{ completeTask, deleteTask, updateTask }}>{children}</TodoistContext.Provider>;

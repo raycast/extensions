@@ -1,16 +1,25 @@
 import { useState } from "react";
 import { ActionPanel, Form, Icon, render, showToast, ToastStyle, useNavigation } from "@raycast/api";
-import { Project as TProject, Label, TaskPayload } from "./types";
-import { createTask, useFetch } from "./api";
+import { AddTaskArgs } from "@doist/todoist-api-typescript";
+import { createTask, getProjects, getLabels, handleError } from "./api";
 import { priorities } from "./constants";
 import { getAPIDate } from "./utils";
 import Project from "./components/Project";
 
 function CreateTask() {
   const { push } = useNavigation();
-  const { data: projects, isLoading: isLoadingProjects } = useFetch<TProject[]>("/projects");
-  const { data: labels, isLoading: isLoadingLabels } = useFetch<Label[]>("/labels");
-  const isLoading = isLoadingLabels || isLoadingProjects;
+  const { data: projects, error: getProjectsError } = getProjects();
+  const { data: labels, error: getLabelsError } = getLabels();
+
+  if (getProjectsError) {
+    handleError({ error: getProjectsError, title: "Failed to get projects" });
+  }
+
+  if (getLabelsError) {
+    handleError({ error: getLabelsError, title: "Failed to get labels" });
+  }
+
+  const isLoading = !projects || !labels;
 
   const [content, setContent] = useState("");
   const [description, setDescription] = useState("");
@@ -43,7 +52,7 @@ function CreateTask() {
   }
 
   async function submit() {
-    const body: TaskPayload = { content, description };
+    const body: AddTaskArgs = { content, description };
 
     if (!body.content) {
       await showToast(ToastStyle.Failure, "The title is required");
@@ -51,7 +60,7 @@ function CreateTask() {
     }
 
     if (dueDate) {
-      body.due_date = getAPIDate(dueDate);
+      body.dueDate = getAPIDate(dueDate);
     }
 
     if (priority) {
@@ -59,11 +68,11 @@ function CreateTask() {
     }
 
     if (projectId) {
-      body.project_id = parseInt(projectId);
+      body.projectId = parseInt(projectId);
     }
 
     if (labelIds && labelIds.length > 0) {
-      body.label_ids = labelIds.map((id) => parseInt(id));
+      body.labelIds = labelIds.map((id) => parseInt(id));
     }
 
     await createTask(body);
@@ -93,6 +102,8 @@ function CreateTask() {
         value={description}
         onChange={setDescription}
       />
+
+      <Form.Separator />
 
       <Form.DatePicker id="due_date" title="Due date" value={dueDate} onChange={setDueDate} />
 

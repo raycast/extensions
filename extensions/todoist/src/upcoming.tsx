@@ -1,16 +1,14 @@
 import { render } from "@raycast/api";
-import TaskList from "./components/TaskList";
-import { Task } from "./types";
-import { useFetch } from "./api";
 import { compareAsc } from "date-fns";
-import { displayDueDate, partitionTasksWithOverdue, showApiToastError } from "./utils";
+import TaskList from "./components/TaskList";
+import { displayDueDate, partitionTasksWithOverdue } from "./utils";
+import { getTasks, handleError } from "./api";
 
 function Upcoming(): JSX.Element {
-  const path = "/tasks?filter=view all";
-  const { data, isLoading, error } = useFetch<Task[]>(path);
+  const { data, error } = getTasks({ filter: "view all" });
 
   if (error) {
-    showApiToastError({ error, title: "Failed to get tasks", message: error.message });
+    handleError({ error, title: "Failed to get tasks" });
   }
 
   const tasks = data?.filter((task) => task.due?.date) || [];
@@ -32,7 +30,7 @@ function Upcoming(): JSX.Element {
     });
   }
 
-  return <TaskList path={path} sections={sections} isLoading={isLoading} />;
+  return <TaskList sections={sections} isLoading={!data && !error} />;
 }
 
 render(<Upcoming />);

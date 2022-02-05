@@ -9,10 +9,9 @@ interface TaskListProps {
   sections: SectionWithTasks[];
   isLoading: boolean;
   mode?: ViewMode;
-  path: string;
 }
 
-function TaskList({ isLoading, sections, path, mode = ViewMode.date }: TaskListProps): JSX.Element {
+function TaskList({ isLoading, sections, mode = ViewMode.date }: TaskListProps): JSX.Element {
   sections.forEach((section) => {
     section.tasks.sort((a, b) => a.order - b.order);
   });
@@ -22,7 +21,7 @@ function TaskList({ isLoading, sections, path, mode = ViewMode.date }: TaskListP
   }`;
 
   return (
-    <TodoistProvider path={path}>
+    <TodoistProvider>
       <List searchBarPlaceholder={placeholder} isLoading={isLoading}>
         {sections.map((section, index) => (
           <List.Section title={section.name} subtitle={`${section.tasks.length} tasks`} key={index}>

@@ -1,18 +1,22 @@
 import { useState } from "react";
 import { ActionPanel, Form, Icon, render, showToast, ToastStyle } from "@raycast/api";
-import { Project as TProject, ProjectPayload } from "./types";
-import { createProject, useFetch } from "./api";
+import { AddProjectArgs } from "@doist/todoist-api-typescript";
+import { createProject, getProjects, handleError } from "./api";
 import { defaultColor, projectColors } from "./constants";
 
 function CreateProject() {
-  const { data, isLoading } = useFetch<TProject[]>("/projects");
-
-  const projects = data?.filter((project) => !project.inbox_project);
-
   const [name, setName] = useState("");
   const [parentId, setParentId] = useState<string>();
   const [favorite, setFavorite] = useState<boolean>(false);
   const [colorId, setColorId] = useState<string>(String(defaultColor));
+
+  const { data, error } = getProjects();
+
+  if (error) {
+    handleError({ error, title: "Failed to get projects" });
+  }
+
+  const projects = data?.filter((project) => !project.inboxProject);
 
   function clear() {
     setName("");
@@ -22,7 +26,7 @@ function CreateProject() {
   }
 
   async function submit() {
-    const body: ProjectPayload = { name, favorite };
+    const body: AddProjectArgs = { name, favorite };
 
     if (!body.name) {
       await showToast(ToastStyle.Failure, "The project's name is required");
@@ -30,7 +34,7 @@ function CreateProject() {
     }
 
     if (parentId) {
-      body.parent_id = parseInt(parentId);
+      body.parentId = parseInt(parentId);
     }
 
     if (colorId) {
@@ -43,12 +47,12 @@ function CreateProject() {
 
   return (
     <Form
-      isLoading={isLoading}
       actions={
         <ActionPanel>
           <ActionPanel.Item title="Create Project" onAction={submit} icon={Icon.Plus} />
         </ActionPanel>
       }
+      isLoading={!data && !error}
     >
       <Form.TextField id="name" title="Name" placeholder="My project" value={name} onChange={setName} />
 
