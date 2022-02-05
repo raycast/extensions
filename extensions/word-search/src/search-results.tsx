@@ -27,7 +27,7 @@ export default function SearchResults(type: SearchType) {
             <ActionPanel>
               <PasteAction
                 content={word.word}
-                title="Copy & Insert Word"
+                title="Paste Word"
                 shortcut={{
                   modifiers: ["cmd"],
                   key: "return",

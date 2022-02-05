@@ -9,22 +9,22 @@
   "commands": [
     {
       "name": "word-synonym-search",
-      "title": "Word Synonym Search",
-      "subtitle": "Search for synonyms",
+      "title": "Search Word Synonym",
+      "subtitle": "Datamuse",
       "description": "Search for synonyms given a word",
       "mode": "view"
     },
     {
       "name": "word-antonym-search",
-      "title": "Word Antonym Search",
-      "subtitle": "Search for antonyms",
+      "title": "Search Word Antonym",
+      "subtitle": "Datamuse",
       "description": "Search for antonyms given a word",
       "mode": "view"
     },
     {
       "name": "word-rhyme-search",
-      "title": "Word Rhyme search",
-      "subtitle": "Search for rhymes",
+      "title": "Search Word Rhyme",
+      "subtitle": "Datamuse",
       "description": "Search for rhymes given a word",
       "mode": "view"
     }
