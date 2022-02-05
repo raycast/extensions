@@ -24,7 +24,7 @@
     {
       "name": "word-rhyme-search",
       "title": "Word Rhyme search",
-      "subtitle": "Search for rhymes",
+      "subtitle": "Datamuse",
       "description": "Search for rhymes given a word",
       "mode": "view"
     }
