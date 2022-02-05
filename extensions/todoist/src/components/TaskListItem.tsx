@@ -1,9 +1,7 @@
 import { ActionPanel, Icon, List, ListItemProps, OpenInBrowserAction } from "@raycast/api";
 import { addDays } from "date-fns";
-import { Task } from "@doist/todoist-api-typescript";
-import useSWR from "swr";
-import { ViewMode, SWRKeys } from "../types";
-import { todoist } from "../api";
+import { Project, Task } from "@doist/todoist-api-typescript";
+import { ViewMode } from "../types";
 import { isRecurring, displayDueDate, getAPIDate } from "../utils";
 import { priorities } from "../constants";
 
@@ -17,11 +15,11 @@ const schedules = [
 interface TaskListItemProps {
   task: Task;
   mode: ViewMode;
+  projects?: Project[];
 }
 
-export default function TaskListItem({ task, mode }: TaskListItemProps): JSX.Element {
+export default function TaskListItem({ task, mode, projects }: TaskListItemProps): JSX.Element {
   const { completeTask, deleteTask, updateTask } = useTodoist();
-  const { data: projects } = useSWR(SWRKeys.projects, () => todoist.getProjects());
 
   const additionalListItemProps: Partial<ListItemProps> & { keywords: string[] } = { keywords: [] };
 

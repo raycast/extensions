@@ -51,6 +51,28 @@
       "title": "Todoist Token",
       "description": "Your Todoist Token. Find it in Todoist integration settings view.",
       "placeholder": "Enter your Todoist token"
+    },
+    {
+      "name": "todayGroupBy",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Default",
+          "value": "default"
+        },
+        {
+          "title": "Priority",
+          "value": "priority"
+        },
+        {
+          "title": "Project",
+          "value": "project"
+        }
+      ],
+      "default": "default",
+      "required": false,
+      "title": "Today's Group By Options",
+      "description": "Indicates how you want to group your tasks in the Today view. Can be 'prioriy' or 'project'."
     }
   ],
   "dependencies": {

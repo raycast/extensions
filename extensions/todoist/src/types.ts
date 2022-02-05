@@ -17,3 +17,9 @@ export enum SWRKeys {
   labels = "labels",
   sections = "sections",
 }
+
+export enum TodayGroupBy {
+  default = "default",
+  priority = "priority",
+  project = "project",
+}

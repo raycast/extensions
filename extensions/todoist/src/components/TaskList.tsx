@@ -1,7 +1,6 @@
 import { List } from "@raycast/api";
-
+import { Project } from "@doist/todoist-api-typescript";
 import { SectionWithTasks, ViewMode } from "../types";
-
 import TaskListItem from "./TaskListItem";
 import { TodoistProvider } from "../TodoistProvider";
 
@@ -9,9 +8,10 @@ interface TaskListProps {
   sections: SectionWithTasks[];
   isLoading: boolean;
   mode?: ViewMode;
+  projects?: Project[];
 }
 
-function TaskList({ isLoading, sections, mode = ViewMode.date }: TaskListProps): JSX.Element {
+function TaskList({ isLoading, sections, mode = ViewMode.date, projects }: TaskListProps): JSX.Element {
   sections.forEach((section) => {
     section.tasks.sort((a, b) => a.order - b.order);
   });
@@ -26,7 +26,7 @@ function TaskList({ isLoading, sections, mode = ViewMode.date }: TaskListProps):
         {sections.map((section, index) => (
           <List.Section title={section.name} subtitle={`${section.tasks.length} tasks`} key={index}>
             {section.tasks.map((task) => (
-              <TaskListItem key={task.id} task={task} mode={mode} />
+              <TaskListItem key={task.id} task={task} mode={mode} {...(projects ? { projects } : {})} />
             ))}
           </List.Section>
         ))}
