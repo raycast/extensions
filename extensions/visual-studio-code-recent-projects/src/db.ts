@@ -6,6 +6,7 @@ import initSqlJs from "sql.js";
 import { EntryLike } from "./types";
 
 const DB_PATH = `${homedir()}/Library/Application Support/Code/User/globalStorage/state.vscdb`;
+const LEGACY_STORAGE_PATH = `${homedir()}/Library/Application Support/Code/storage.json`;
 
 async function loadDB() {
   const fileBuffer = await readFile(DB_PATH);
@@ -21,6 +22,12 @@ type QueryResult = {
 }[];
 
 export async function getRecentEntries(): Promise<EntryLike[]> {
+  // VS Code version < 1.64.0
+  const json = JSON.parse(await readFile(LEGACY_STORAGE_PATH, "utf8"));
+  if (json.openedPathsList) {
+    return json.openedPathsList.entries;
+  }
+
   const db = await loadDB();
   const res = db.exec(
     "SELECT value FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList'",
