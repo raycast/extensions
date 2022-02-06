@@ -7,33 +7,44 @@ import {
   showToast,
   ToastStyle,
 } from "@raycast/api";
-import { useProjects } from "./projects";
+import { fetchProjects } from "./projects";
 import { Project } from "./types";
 import { ProductList } from "./searchConsoleProducts";
-import { SWRConfig } from "swr";
-import { cacheConfig } from "./swrCache";
+import { useFetchWithCache } from "./useFetchWithCache";
+import { Detail } from "@raycast/api";
+
+const FAILURE_MESSAGE = `
+# Google Cloud Platform CLI Not Configured 😞
+
+To search projects in your organization and browse the available products, you need to:
+- Install \`gcloud\` locally: https://cloud.google.com/sdk
+- Save the authentication locally: \`gcloud auth application-default login\`
+
+Your organization's project will be queried using the [Resource Manager API](https://cloud.google.com/resource-manager/docs), 
+which is free and has no quota limits.
+`;
 
 export default function Command() {
-  return (
-    <SWRConfig value={cacheConfig}>
-      <ProjectList />
-    </SWRConfig>
-  );
+  return <ProjectList />;
 }
 
 export function ProjectList() {
-  const { data, error, isValidating } = useProjects();
+  const { data, error, isLoading, failureMessage } = useFetchWithCache<Project[]>("projects", fetchProjects);
 
   if (error) {
     showToast(
       ToastStyle.Failure,
-      "Could not fetch updated projects, make sure to follow the instructions!",
+      "Could not fetch updated projects, check your internet and setup the GCloud CLI!",
       error.message
     );
   }
 
+  if (failureMessage) {
+    return <Detail markdown={FAILURE_MESSAGE} />;
+  }
+
   return (
-    <List isLoading={isValidating} searchBarPlaceholder="Search projects by name...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search projects by name...">
       {data?.map((project) => (
         <ProjectListItem key={project.projectId} project={project} />
       ))}

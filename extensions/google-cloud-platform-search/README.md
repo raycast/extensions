@@ -7,7 +7,7 @@ Search projects in your GPC organization, and open the Dashboard overview in the
 Moreover, you can browse the available products in the Console and open them in the browser.
 
 Note that the projects are queried using the [Resource Manager API](https://cloud.google.com/resource-manager/docs), 
-is free and has no quota limits.
+which is free and has no quota limits.
 
 ### Search Documentation Products
 Search the available products in Google Cloud, and open the documentation link.

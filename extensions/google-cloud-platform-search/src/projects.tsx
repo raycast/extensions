@@ -1,10 +1,9 @@
-import useSWR from "swr";
 import { ProjectsClient } from "@google-cloud/resource-manager";
 import { Project } from "./types";
 
 const client = new ProjectsClient();
 
-async function fetchProjects() {
+export async function fetchProjects() {
   const projects = [];
 
   for await (const project of client.searchProjectsAsync()) {
@@ -14,8 +13,4 @@ async function fetchProjects() {
   }
 
   return projects as Project[];
-}
-
-export function useProjects() {
-  return useSWR("projects", fetchProjects);
 }

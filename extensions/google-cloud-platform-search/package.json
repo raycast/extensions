@@ -25,9 +25,7 @@
   "dependencies": {
     "@google-cloud/resource-manager": "^3.0.0",
     "@raycast/api": "^1.27.0",
-    "node-fetch": "^3.2.0",
-    "node-localstorage": "^2.2.1",
-    "swr": "^1.0.1"
+    "node-fetch": "^3.2.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
