@@ -16,7 +16,9 @@ secret=xxxxxxxxxxxxxxxxxx
 secret=yyyyyyyyyyyyyyyyyy
 ```
 
-⚠️ Note:  Please **DO NOT** add `.` in the section name, because that will create a [subsction](https://en.wikipedia.org/wiki/INI_file#Hierarchy_(section_nesting)) which is not suppported by this extsion. 
+⚠️ Note:
+- Please **DO NOT** add `.` in the section name, because that will create a [subsction](https://en.wikipedia.org/wiki/INI_file#Hierarchy_(section_nesting)) which is not suppported by this extsion. 
+- Store your 2fa secret in a plain text on the file system might be a bit insecure. Please use with caution.
 
 ## Thanks
 
