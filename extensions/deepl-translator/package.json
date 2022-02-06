@@ -9,6 +9,7 @@
   "preferences": [
     {
       "name": "deeplApiKey",
+      "label": "DeepL API Key",
       "type": "password",
       "required": true,
       "title": "DeepL API Key",
