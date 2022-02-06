@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deepl",
   "title": "DeepL Translator",
-  "description": "translate",
+  "description": "translate japanese or english by deepl",
   "icon": "deepl_icon.png",
   "author": "sugayutokyo",
   "license": "MIT",
