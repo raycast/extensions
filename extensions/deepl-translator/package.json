@@ -9,7 +9,6 @@
   "preferences": [
     {
       "name": "deeplApiKey",
-      "label": "DeepL API Key",
       "type": "password",
       "required": true,
       "title": "DeepL API Key",
@@ -21,6 +20,7 @@
       "type": "checkbox",
       "default": false,
       "required": false,
+      "label": "Pro",
       "title": "DeepL Pro",
       "description": "If you are a DeepL Pro account, please check the box.",
       "placeholder": "If you are a DeepL Pro account, please check the box."
