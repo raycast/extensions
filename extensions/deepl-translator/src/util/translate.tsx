@@ -1,9 +1,10 @@
 import { Detail, render, getSelectedText } from '@raycast/api';
-const translate = require('deepl');
+import translate from 'deepl';
 import { getPreferenceValues } from '@raycast/api';
+import { DeeplLanguages } from 'deepl';
 
 const preferences = getPreferenceValues();
-export const translateByDeepl = async (targetLang: string) => {
+export const translateByDeepl = async (targetLang: DeeplLanguages) => {
   const deeplApiKey = preferences.deeplApiKey as string | undefined;
   let resultTsx = <Detail markdown="# Failed Translate" />;
 
@@ -26,5 +27,5 @@ export const translateByDeepl = async (targetLang: string) => {
       resultTsx = <Detail markdown="# Failed DeepL Translate" />;
     }
   }
-  render(resultTsx); //　rerender
+  render(resultTsx); // rerender
 };
