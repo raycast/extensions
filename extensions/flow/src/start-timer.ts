@@ -4,7 +4,7 @@ import { isFlowInstalled } from "./utils";
 
 export default async function startTimer() {
   if (!(await isFlowInstalled())) {
-    await showToast(ToastStyle.Failure, "Flow is not installed", "https://flowapp.info/");
+    await showToast(ToastStyle.Failure, "Flow is not installed", "Install it from: https://flowapp.info/download");
     return;
   }
   await runAppleScript('tell application "Flow" to start');

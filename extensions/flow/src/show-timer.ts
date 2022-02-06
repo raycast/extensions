@@ -4,7 +4,7 @@ import { showToast, ToastStyle } from "@raycast/api";
 
 export default async function showTimer() {
   if (!(await isFlowInstalled())) {
-    await showToast(ToastStyle.Failure, "Flow is not installed", "https://flowapp.info/");
+    await showToast(ToastStyle.Failure, "Flow is not installed", "Install it from: https://flowapp.info/download");
     return;
   }
   await runAppleScript('tell application "Flow" to show');
