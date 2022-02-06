@@ -28,7 +28,7 @@
       "title": "Default App",
       "type": "dropdown",
       "description": "What should be the primary action",
-      "default": "pocket",
+      "default": "pocket-website",
       "required": false,
       "data": [
         {
@@ -36,8 +36,8 @@
           "value": "browser"
         },
         {
-          "title": "Pocket",
-          "value": "pocket"
+          "title": "Pocket Website",
+          "value": "pocket-website"
         }
       ]
     }
@@ -47,14 +47,7 @@
       "name": "search",
       "title": "Search Bookmarks",
       "subtitle": "Pocket",
-      "description": "Search and edit Pocket unread bookmarks",
-      "mode": "view"
-    },
-    {
-      "name": "create",
-      "title": "Create Bookmark",
-      "subtitle": "Pocket",
-      "description": "Create a new bookmark in Pocket",
+      "description": "Search Pocket unread bookmarks",
       "mode": "view"
     },
     {

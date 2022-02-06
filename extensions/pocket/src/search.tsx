@@ -17,8 +17,7 @@ export default function Search() {
   const [search, setSearch] = useState("");
 
   const { bookmarks, loading, toggleFavorite, refreshBookmarks, archiveBookmark, deleteBookmark } = useBookmarks({
-    name: search.replace(/(#\w+)/, "").trim(),
-    tag: search.match(/#(\w+)/)?.[1],
+    name: search,
   });
 
   return (
