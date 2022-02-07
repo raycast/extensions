@@ -41,8 +41,15 @@ export const setWallpaper = async ({ url, id, useHud = false }: SetWallpaperProp
             return "ok"
           end tell
         end tell
-      on error errormsg
-        display dialog "Please make sure you have given Raycast the permission to send Automation commands to System Events. Try:\n\nSystem Preferences > Security & Privacy > Automation, find Raycast and enable System Events option." with title "Raycast: Error Setting Wallpaper"
+      on error
+        set dialogTitle to "Error Setting Wallpaper"
+        set dialogText to "Please make sure you have given Raycast the required permission. To make sure, click the button below and grant Raycast the 'System Events' permission."
+
+        display alert dialogTitle message dialogText buttons {"Cancel", "Open Preferences"} default button 2 as informational
+          if button returned of result is "Open Preferences" then
+            do shell script "open 'x-apple.systempreferences:com.apple.preference.security?Privacy_Automation'"
+          end if
+
         return "error"
       end try
     `);
