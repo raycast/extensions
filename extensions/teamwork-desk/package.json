@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "teamwork-desk",
+  "title": "Teamwork Desk",
+  "description": "List all tickets and quickly access from Raycast.",
+  "icon": "teamwork-desk-icon.png",
+  "author": "barisdemirhan",
+  "version": "1.0.0",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Teamwork Desk",
+      "description": "List all tickets and quickly access from Raycast.",
+      "mode": "view",
+      "keywords": [
+        "teamwork",
+        "desk",
+        "tickets"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "domain",
+      "type": "textfield",
+      "title": "Teamwork Domain",
+      "required": true,
+      "default": "",
+      "description": "Example: https://mycompany.teamwork.com/desk -> mycompany"
+    },
+    {
+      "name": "apikey",
+      "type": "textfield",
+      "title": "API Key",
+      "default": "",
+      "required": true,
+      "description": "Teamwork Desk API Key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.1",
+    "axios": "^0.25.0",
+    "javascript-time-ago": "^2.3.11"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
