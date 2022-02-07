@@ -45,7 +45,7 @@ export const useRandom = async () => {
   const { urls, id } = response;
 
   const image = urls?.raw || urls?.full || urls?.regular;
-  await setWallpaper({ url: image, id: String(id) });
+  await setWallpaper({ url: image, id: String(id), useHud: true });
 };
 
 export default useRandom;
