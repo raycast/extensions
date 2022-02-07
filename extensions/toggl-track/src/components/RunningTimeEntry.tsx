@@ -5,7 +5,7 @@ import useCurrentTime from "../hooks/useCurrentTime";
 import { storage } from "../storage";
 import toggl from "../toggl";
 import { AppContextProvider, useAppContext } from "../context";
-import EditTimeEntryForm from "./EditTimeEntryForm";
+import TimeEntryForm from "./TimeEntryForm";
 
 function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry }) {
   const currentTime = useCurrentTime();
@@ -40,7 +40,7 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry })
               icon={{ source: Icon.Clock }}
               target={
                 <AppContextProvider>
-                  <EditTimeEntryForm entry={runningTimeEntry}/>
+                  <TimeEntryForm entry={runningTimeEntry}/>
                 </AppContextProvider>
               }
             />

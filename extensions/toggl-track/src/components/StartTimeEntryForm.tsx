@@ -27,12 +27,13 @@ function StartTimeEntryForm({ project, description }: { project?: Project; descr
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(project);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  async function handleSubmit(values: { description: string }) {
+  async function handleSubmit(values: { description: string, billable: boolean }) {
     try {
       await toggl.startTimeEntry({
         projectId: selectedProject?.id,
         description: values.description,
         tags: selectedTags,
+        billable: Boolean(values.billable),
       });
       await showToast(ToastStyle.Animated, "Starting time entry...");
       await storage.runningTimeEntry.refresh();
@@ -40,6 +41,7 @@ function StartTimeEntryForm({ project, description }: { project?: Project; descr
       navigation.pop();
       await clearSearchBar();
     } catch (e) {
+      console.log(e)
       await showToast(ToastStyle.Failure, "Failed to start time entry");
     }
   }
@@ -96,6 +98,7 @@ function StartTimeEntryForm({ project, description }: { project?: Project; descr
           <Form.TagPicker.Item key={tag.id} value={tag.name.toString()} title={tag.name} />
         ))}
       </Form.TagPicker>
+      <Form.Checkbox id="billable" label="Billable" defaultValue={true} />
     </Form>
   );
 }

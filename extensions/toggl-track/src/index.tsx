@@ -12,6 +12,7 @@ import {
   SubmitFormAction,
   ToastStyle,
   getPreferenceValues,
+  Detail
 } from "@raycast/api";
 import { TimeEntry } from "./toggl/types";
 import toggl from "./toggl";
@@ -19,7 +20,7 @@ import { storage } from "./storage";
 import ProjectListItem from "./components/ProjectListItem";
 import StartTimeEntryForm from "./components/StartTimeEntryForm";
 import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
-import EditTimeEntryForm from "./components/EditTimeEntryForm";
+import TimeEntryForm from "./components/TimeEntryForm";
 
 interface Preferences {
   allowDelete: boolean;
@@ -32,8 +33,8 @@ dayjs.extend(duration);
 function ListView() {
   const { isLoading, isValidToken, projectGroups, runningTimeEntry, timeEntries, projects } = useAppContext();
   const getProjectById = (id: number) => projects.find((p) => p.id === id);
-  const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduce((acc, timeEntry) => {
-    const existing = acc.find((t) => (t.description === timeEntry.description && t.pid === timeEntry.pid) || !("stop" in timeEntry));
+  const timeEntriesWithUniqueProjectAndDescription = timeEntries.reduceRight((acc, timeEntry) => {
+    const existing = acc.find((t) => (t.description === timeEntry.description && t.pid === timeEntry.pid) || timeEntry.stop == null );
     if (!existing) {
       acc.push(timeEntry);
     }
@@ -47,6 +48,7 @@ function ListView() {
         projectId: timeEntry.pid,
         description: timeEntry.description,
         tags: timeEntry.tags,
+        billable: timeEntry.billable
       });
       await storage.runningTimeEntry.refresh();
       await showToast(ToastStyle.Success, "Time entry resumed");
@@ -71,101 +73,101 @@ function ListView() {
   }
 
   return (
-    <List isLoading={isLoading} throttle>
-      {isValidToken ? (
-        !isLoading && (
-          <>
-            {runningTimeEntry && <RunningTimeEntry runningTimeEntry={runningTimeEntry} />}
-            <List.Section title="Actions">
-              <List.Item
-                title="Start a time entry"
-                icon={"command-icon.png"}
-                actions={
-                  <ActionPanel>
-                    <PushAction
-                      title="Start Time Entry"
-                      icon={{ source: Icon.Clock }}
-                      target={
-                        <AppContextProvider>
-                          <StartTimeEntryForm />
-                        </AppContextProvider>
-                      }
-                    />
-                    <PushAction
-                      title="Create Time Entry"
-                      icon={{ source: Icon.Clock }}
-                      target={
-                        <AppContextProvider>
-                          <CreateTimeEntryForm />
-                        </AppContextProvider>
-                      }
-                    />
-                  </ActionPanel>
-                }
-              />
-            </List.Section>
-            {timeEntriesWithUniqueProjectAndDescription.length > 0 && (
-              <List.Section title="Resume recent time entry">
-                {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
-                  <List.Item
-                    key={timeEntry.id}
-                    keywords={[timeEntry.description, getProjectById(timeEntry.pid)?.name || ""]}
-                    title={timeEntry.description || "No description"}
-                    accessoryTitle={getProjectById(timeEntry?.pid)?.name}
-                    accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}
-                    icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}
-                    actions={
-                      <ActionPanel>
-                        <SubmitFormAction
-                          title="Resume Time Entry"
-                          onSubmit={() => resumeTimeEntry(timeEntry)}
-                          icon={{ source: Icon.Clock }}
-                        />
-                        <PushAction
-                          title="Edit Time Entry"
-                          icon={{ source: Icon.Clock }}
-                          target={
-                            <AppContextProvider>
-                              <EditTimeEntryForm entry={timeEntry}/>
-                            </AppContextProvider>
-                          }
-                        />
-                        { preferences.allowDelete ?
-                          <ActionPanel.Item
-                            title="Delete Time Entry"
-                            onAction={() => deleteTimeEntry(timeEntry)}
-                            icon={{ source: Icon.Clock }}
-                          /> : undefined
+      <List isLoading={isLoading} throttle>
+        {isValidToken ? (
+          !isLoading && (
+            <>
+              {runningTimeEntry && <RunningTimeEntry runningTimeEntry={runningTimeEntry} />}
+              <List.Section title="Actions">
+                <List.Item
+                  title="Start a time entry"
+                  icon={"command-icon.png"}
+                  actions={
+                    <ActionPanel>
+                      <PushAction
+                        title="Start Time Entry"
+                        icon={{ source: Icon.Clock }}
+                        target={
+                          <AppContextProvider>
+                            <StartTimeEntryForm />
+                          </AppContextProvider>
                         }
-                      </ActionPanel>
-                    }
-                  />
-                ))}
+                      />
+                      <PushAction
+                        title="Create Time Entry"
+                        icon={{ source: Icon.Clock }}
+                        target={
+                          <AppContextProvider>
+                            <TimeEntryForm />
+                          </AppContextProvider>
+                        }
+                      />
+                    </ActionPanel>
+                  }
+                />
               </List.Section>
-            )}
-            <List.Section title="Projects">
-              {projectGroups &&
-                projectGroups.map((group) =>
-                  group.projects.map((project) => (
-                    <ProjectListItem
-                      key={project.id}
-                      project={project}
-                      subtitle={group.client?.name}
-                      accessoryTitle={group.workspace.name}
+              {timeEntriesWithUniqueProjectAndDescription.length > 0 && (
+                <List.Section title="Resume recent time entry">
+                  {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
+                    <List.Item
+                      key={timeEntry.id}
+                      keywords={[timeEntry.description, getProjectById(timeEntry.pid)?.name || ""]}
+                      title={timeEntry.description || "No description"}
+                      accessoryTitle={timeEntry.billable ? "$ " : "" & getProjectById(timeEntry?.pid)?.name}
+                      accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}
+                      icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}
+                      actions={
+                        <ActionPanel>
+                          <SubmitFormAction
+                            title="Resume Time Entry"
+                            onSubmit={() => resumeTimeEntry(timeEntry)}
+                            icon={{ source: Icon.Clock }}
+                          />
+                          <PushAction
+                            title="Edit Time Entry"
+                            icon={{ source: Icon.Clock }}
+                            target={
+                              <AppContextProvider>
+                                <TimeEntryForm entry={timeEntry}/>
+                              </AppContextProvider>
+                            }
+                          />
+                          { preferences.allowDelete ?
+                            <ActionPanel.Item
+                              title="Delete Time Entry"
+                              onAction={() => deleteTimeEntry(timeEntry)}
+                              icon={{ source: Icon.Clock }}
+                            /> : undefined
+                          }
+                        </ActionPanel>
+                      }
                     />
-                  ))
-                )}
-            </List.Section>
-          </>
-        )
-      ) : (
-        <List.Item
-          icon={Icon.ExclamationMark}
-          title="Invalid API Key Detected"
-          accessoryTitle={`Go to Extensions → Toggl Track`}
-        />
-      )}
-    </List>
+                  ))}
+                </List.Section>
+              )}
+              <List.Section title="Projects">
+                {projectGroups &&
+                  projectGroups.map((group) =>
+                    group.projects.map((project) => (
+                      <ProjectListItem
+                        key={project.id}
+                        project={project}
+                        subtitle={group.client?.name}
+                        accessoryTitle={group.workspace.name}
+                      />
+                    ))
+                  )}
+              </List.Section>
+            </>
+          )
+        ) : (
+          <List.Item
+            icon={Icon.ExclamationMark}
+            title="Invalid API Key Detected"
+            accessoryTitle={`Go to Extensions → Toggl Track`}
+          />
+        )}
+      </List>
   );
 }
 

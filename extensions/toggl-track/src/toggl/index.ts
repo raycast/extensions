@@ -34,51 +34,31 @@ const TogglAPI = function (apiToken: string) {
       projectId,
       description,
       tags,
+      billable,
     }: {
       projectId?: number;
       description: string;
       tags: string[];
+      billable: boolean;
     }) => {
       return api.post<{ data: TimeEntry }>(`/time_entries/start`, {
         time_entry: {
           description,
           pid: projectId !== -1 ? projectId : undefined,
+          billable: billable,
           tags,
           created_with: "raycast-toggl-track",
         },
       });
     },
-    createTimeEntry: ({
-      projectId,
-      description,
-      tags,
-      start,
-      duration
-    }: {
-      projectId?: number;
-      description: string;
-      tags: string[];
-      start: string;
-      duration: number;
-    }) => {
-      return api.post<{ data: TimeEntry }>(`/time_entries`, {
-        time_entry: {
-          description,
-          pid: projectId !== -1 ? projectId : undefined,
-          tags,
-          start,
-          duration,
-          created_with: "raycast-toggl-track",
-        },
-      });
-    },
-    editTimeEntry: ({
+    timeEntry: ({
       id,
       projectId,
       description,
       tags,
       start,
-      duration
+      duration,
+      billable,
     }: {
       id: number;
       projectId?: number;
@@ -86,14 +66,16 @@ const TogglAPI = function (apiToken: string) {
       tags: string[];
       start: string;
       duration?: number;
+      billable;
     }) => {
-      return api.post<{ data: TimeEntry }>(`/time_entries/${id}`, {
+      return api.post<{ data: TimeEntry }>(`/time_entries${ id ? `/${id}` : ``}`, {
         time_entry: {
           description,
           pid: projectId !== -1 ? projectId : undefined,
           tags,
           start: start !== null ? start : undefined,
           duration: duration !== -1 ? duration : undefined,
+          billable,
           created_with: "raycast-toggl-track",
         },
       });

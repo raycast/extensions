@@ -36,6 +36,7 @@
       "name": "allowDelete",
       "type": "checkbox",
       "required": false,
+      "label": "Allow Deletes",
       "title": "Allow Deletes",
       "description": "Whether or not to show delete action on existing time entries."
     }
