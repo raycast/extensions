@@ -19,7 +19,7 @@ There are 3 parameters required for this extension to work:
 
 ![example](example.gif)
 
-### Short Cuts
+### Shortcuts
 
 - `Enter` : Copy and Paste Password
 - `Cmd`+`Enter` : Copy Password
