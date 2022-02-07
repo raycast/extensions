@@ -46,4 +46,10 @@ You will need some additional steps to install this plugin.
 
 ---
 
+**Q:** Couldn't set the wallpaper using "Set Random Wallpaper" because I rejected the permission request!
+
+**A:** If you accidentally rejected the initial permission request window, or didn't realize it was from this extension, you'll have to go to your **System Preferences > Security & Privacy > Privacy > Automation** and grant/tick the **System Events** permission to Raycast.
+
+---
+
 More? Feel free to create an **issue**!
