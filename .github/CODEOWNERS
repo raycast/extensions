@@ -10,6 +10,7 @@
 /extensions/atomic                                   @joepio
 /extensions/audio-device                             @benvp @mathieudutour
 /extensions/authy                                    @guga4ka
+/extensions/banca-d-italia-currency-converter        @FezVrasta
 /extensions/base64                                   @DanielSinclair
 /extensions/bazinga-tools                            @luin
 /extensions/bear                                     @hmarr
