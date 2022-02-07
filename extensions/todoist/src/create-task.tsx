@@ -34,10 +34,12 @@ function CreateTask() {
 
   const isLoading = !projects || !labels;
 
+  const lowestPriority = priorities[priorities.length - 1];
+
   const [content, setContent] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState<Date | undefined>();
-  const [priority, setPriority] = useState<string>();
+  const [priority, setPriority] = useState<string>(String(lowestPriority.value));
   const [projectId, setProjectId] = useState<string>();
   const [labelIds, setLabelIds] = useState<string[]>();
 
