@@ -12,7 +12,6 @@ export default async () => {
     const result = await runAppleScript(script);
     await showToast(ToastStyle.Success, result === "true" ? "Shuffle On" : "Shuffle Off");
   } catch (_) {
-    console.log(_)
     await showToast(ToastStyle.Failure, "Failed toggling shuffle");
   }
 };
