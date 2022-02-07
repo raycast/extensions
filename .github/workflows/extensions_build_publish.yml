@@ -36,7 +36,6 @@ jobs:
         uses: raycast/github-actions/ray@v1.6.0
         with:
           access_token: "${{ secrets.RAYCAST_CLI_ACCESS_TOKEN }}"
-          api_url: "${{ secrets.RAYCAST_CLI_API_URL }}"
           command: "${{ github.event.inputs.command }}"
           paths: "${{ github.event.inputs.paths }}"
           cli_version: "${{ github.event.inputs.cli_version }}"
