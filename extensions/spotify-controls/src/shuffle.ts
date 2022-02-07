@@ -4,7 +4,6 @@ import { buildScriptEnsuringSpotifyIsRunning } from "./utils";
 
 export default async () => {
   const script = buildScriptEnsuringSpotifyIsRunning(`
-    property shuffleEnabled : false
     set shuffleEnabled to shuffling
     set shuffling to not shuffleEnabled
     return not shuffleEnabled

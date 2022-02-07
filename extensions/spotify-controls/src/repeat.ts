@@ -4,7 +4,6 @@ import { buildScriptEnsuringSpotifyIsRunning } from "./utils";
 
 export default async () => {
   const script = buildScriptEnsuringSpotifyIsRunning(`
-    property repeatEnabled : false
     set repeatEnabled to repeating
     set repeating to not repeatEnabled
     return not repeatEnabled
