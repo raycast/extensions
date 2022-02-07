@@ -50,7 +50,7 @@ function CreateProject() {
       toast.title = "Project created";
       toast.primaryAction = {
         title: "Open in browser",
-        shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+        shortcut: { modifiers: ["cmd"], key: "o" },
         onAction: () => open(url),
       };
       clear();
