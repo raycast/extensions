@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "KeepassXC",
-      "subtitle": "Search Password in KeepassXC",
+      "title": "Search Passwords",
+      "subtitle": "KeepassXC",
       "description": "Search Password in KeepassXC",
       "mode": "view"
     }
