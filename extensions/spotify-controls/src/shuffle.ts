@@ -4,7 +4,6 @@ import { buildScriptEnsuringSpotifyIsRunning } from "./utils";
 
 export default async () => {
   const script = buildScriptEnsuringSpotifyIsRunning(`
-    property shuffleEnabled : false
     set shuffleEnabled to shuffling
     set shuffling to not shuffleEnabled
     return not shuffleEnabled
@@ -13,6 +12,7 @@ export default async () => {
     const result = await runAppleScript(script);
     await showToast(ToastStyle.Success, result === "true" ? "Shuffle On" : "Shuffle Off");
   } catch (_) {
+    console.log(_)
     await showToast(ToastStyle.Failure, "Failed toggling shuffle");
   }
 };
