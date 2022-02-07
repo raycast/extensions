@@ -1,6 +1,6 @@
 # KeepassXC Extension for Raycast
 
-This is a raycast extension to access keepass database.
+This is a Raycast extension to access keepass database.
 
 ## Requirements
 
