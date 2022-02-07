@@ -46,7 +46,10 @@ const encrypt = (word: string) => {
 const loadEntries = async () => {
   // a cache file is used to boost response speed of loading entries by avoid calling keepassxc-cli every time (which may take 2 ~ 3 seconds)
   if (!fs.existsSync(cacheFile)) {
-    const { stdout } = await exec(`echo "${dbPassword}" | "${keepassxcCli}" locate "${database}" / -q`);
+    const { stdout, stderr } = await exec(`echo "${dbPassword}" | "${keepassxcCli}" locate "${database}" /`);
+    if (stderr.includes("Error")) {
+      throw new Error(stderr.toString());
+    }
     fs.writeFileSync(cacheFile, encrypt(stdout.toString()));
   }
   const lastModifiedTime = (await stat(cacheFile)).mtime.getTime();
@@ -57,7 +60,10 @@ const loadEntries = async () => {
     data = decrypt(fs.readFileSync(cacheFile, "utf8"));
   } else {
     // call keepassxc-cli to refresh cache file if it is more than 1 minute since last modified
-    const { stdout } = await exec(`echo "${dbPassword}" | "${keepassxcCli}" locate "${database}" / -q`);
+    const { stdout, stderr } = await exec(`echo "${dbPassword}" | "${keepassxcCli}" locate "${database}" /`);
+    if (stderr.includes("Error")) {
+      throw new Error(stderr.toString());
+    }
     fs.writeFileSync(cacheFile, encrypt(stdout.toString()));
     data = stdout.toString();
   }

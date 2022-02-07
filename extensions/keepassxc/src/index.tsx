@@ -2,15 +2,34 @@ import { ActionPanel, closeMainWindow, List, showToast, ToastStyle } from "@rayc
 import { loadEntries, copyAndPastePassword, copyPassword, copyUsername } from "./utils/keepassLoader";
 import { useState, useEffect } from "react";
 
+const errorHandler = (e: { message: string }) => {
+  let invalidPreference = "";
+  if (e.message.includes("Invalid credentials were provided")) {
+    invalidPreference = "Password";
+  } else if (e.message.includes("keepassxc-cli: No such file or directory")) {
+    invalidPreference = "Path of KeepassXC.app";
+  } else if (
+    e.message.includes("Failed to open database file") ||
+    e.message.includes("Error while reading the database: Not a KeePass database")
+  ) {
+    invalidPreference = "Keepass Database File";
+  }
+  let toastTitle = "Error";
+  let toastMessage = e.message.trim();
+  if (invalidPreference !== "") {
+    toastTitle = `Invalid Preference: ${invalidPreference}`;
+    toastMessage = "Please Check Extension Preference.";
+  }
+  showToast(ToastStyle.Failure, toastTitle, toastMessage);
+};
+
 export default function Command() {
   const [entries, setEntries] = useState<string[]>();
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     loadEntries()
       .then(setEntries)
-      .catch(() => {
-        showToast(ToastStyle.Failure, "Error", "Unable to load entries, please check extension preference values");
-      })
+      .catch(errorHandler)
       .then(() => setIsLoading(false));
   }, []);
 
