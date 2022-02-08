@@ -37,7 +37,7 @@
       "name": "random",
       "title": "Set Random Wallpaper",
       "subtitle": "Unsplash",
-      "description": "Set a random wallpaper from Unsplash and set as your desktop wallpaper.",
+      "description": "Set a random wallpaper from Unsplash.",
       "mode": "no-view"
     }
   ],
