@@ -1,40 +1,44 @@
-import { ActionPanel, List, OpenInBrowserAction, getPreferenceValues, Color, Icon } from "@raycast/api";
-import { formatDate } from "./utils";
-interface Preferences {
-  domain: string;
-  apikey: string;
-}
-const preferences: Preferences = getPreferenceValues();
+import { ActionPanel, List, OpenInBrowserAction, Color, Icon } from "@raycast/api";
+import { formatDate, getUrl } from "./utils";
 
-export default function TicketItem(props: { item: any; inbox: any; index: number }) {
+interface ItemData {
+  id: number;
+  isRead: boolean;
+  subject: string;
+  updatedAt: string;
+  tasks: [] | null;
+  inbox: { id: number } | [];
+}
+
+export default function TicketItem(props: {
+  item: ItemData;
+  inbox: { id: string | number; publicIconImage: string; name: string };
+  index: number;
+}) {
   return (
     <List.Item
-      key={props.item.id}
+      key={props.index}
       icon={
-        props.inbox.publicIconImage != ""
-          ? props.item.isRead
-            ? { source: Icon.Dot, tintColor: Color.SecondaryText }
-            : { source: Icon.Dot, tintColor: Color.Green }
-          : "list-icon.png"
+        props.item.isRead
+          ? { source: Icon.Dot, tintColor: Color.SecondaryText }
+          : { source: Icon.Dot, tintColor: Color.Green }
       }
       title={props.item.subject}
-      subtitle={props.inbox.name}
+      subtitle={props.inbox.name ? props.inbox.name : ""}
       accessoryTitle={formatDate(props.item.updatedAt)}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Ticket">
-            <OpenInBrowserAction
-              url={"https://" + preferences.domain + ".teamwork.com/desk/tickets/" + props.item.id}
-            />
+            <OpenInBrowserAction url={getUrl() + "/desk/tickets/" + props.item.id} />
           </ActionPanel.Section>
           {props.item.tasks ? (
             <ActionPanel.Section title="Tasks">
-              {props.item.tasks?.map((task: any, index: number) => (
+              {props.item.tasks?.map((task: { id: number }) => (
                 <OpenInBrowserAction
                   key={task.id}
                   icon={Icon.Pin}
                   title={"#" + task.id}
-                  url={"https://" + preferences.domain + ".teamwork.com/#/tasks/" + task.id}
+                  url={getUrl() + "/#/tasks/" + task.id}
                 />
               ))}
             </ActionPanel.Section>

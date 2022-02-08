@@ -1,70 +1,134 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  List,
-  showToast,
-  ToastStyle,
-  getLocalStorageItem,
-  setLocalStorageItem,
-  getPreferenceValues,
-} from "@raycast/api";
+import { List, showToast, ToastStyle, getLocalStorageItem, setLocalStorageItem } from "@raycast/api";
 import TicketItem from "./TicketItem";
-
-interface Preferences {
-  domain: string;
-  apikey: string;
+import { getIndex, getllTicketsUrl, getHeaders } from "./utils";
+interface StatesData {
+  tickets: [] | null;
+  inboxes: [] | null;
+  ticketpriorities: [] | null;
+  customers: [] | null;
+  companies: [] | null;
+  messages: [] | null;
+  error: Error | null;
+  loading: boolean;
 }
-const preferences: Preferences = getPreferenceValues();
-
-interface State {
-  tickets?: any;
-  inboxes?: any;
-  ticketpriorities?: any;
-  customers?: any;
-  companies?: any;
-  messages?: any;
-  error?: Error;
-}
-
-function getIndex(arr: any[], id: any) {
-  return arr.findIndex((obj: { id: any }) => obj.id == id);
+interface ItemData {
+  id: number;
+  isRead: boolean;
+  subject: string;
+  updatedAt: string;
+  tasks: [] | null;
+  inbox: { id: number };
 }
 
 export default function Command() {
-  const [state, setState] = useState<State>({});
+  const [state, setState] = useState<StatesData>({
+    tickets: null,
+    inboxes: null,
+    ticketpriorities: null,
+    customers: null,
+    companies: null,
+    messages: null,
+    error: null,
+    loading: false,
+  });
 
-  useEffect(() => {
-    async function fetchTickets() {
-      try {
-        axios
-          .get(
-            "https://" +
-              preferences.domain +
-              '.teamwork.com/desk/api/v2/tickets.json?includes=all&filter={"status": {"$in": [1,3,244,245]}}&orderBy=updatedAt&orderMode=DESC',
-            {
-              headers: {
-                "Content-type": "application/json",
-                Authorization: "Bearer " + preferences.apikey,
-              },
-            }
-          )
-          .then((res) => {
-            setLocalStorageItem("all-tickets-data", JSON.stringify(res.data));
+  async function fetchTickets() {
+    const allData: string | undefined = await getLocalStorageItem("all-data");
+    try {
+      axios.interceptors.request.use(
+        (config) => {
+          if (allData) {
+            setState({ ...JSON.parse(allData), loading: true });
+            showToast(ToastStyle.Animated, "Loading..");
+          } else {
+            setState({
+              tickets: null,
+              inboxes: null,
+              ticketpriorities: null,
+              customers: null,
+              companies: null,
+              messages: null,
+              error: null,
+              loading: true,
+            });
+          }
+          return config;
+        },
+        (error) => {
+          setState({
+            tickets: null,
+            inboxes: null,
+            ticketpriorities: null,
+            customers: null,
+            companies: null,
+            messages: null,
+            error: error instanceof Error ? error : new Error("Something went wrong"),
+            loading: false,
+          });
+          return Promise.reject(error);
+        }
+      );
+      axios
+        .get(getllTicketsUrl(), getHeaders())
+        .then((res) => {
+          if (res.data.length == 0) {
+            showToast(ToastStyle.Failure, "No tickets..");
+          } else {
+            setLocalStorageItem(
+              "all-data",
+              JSON.stringify({
+                tickets: res.data.tickets,
+                inboxes: res.data.included.inboxes,
+                ticketpriorities: res.data.included.ticketpriorities,
+                customers: res.data.included.customers,
+                companies: res.data.included.companies,
+                messages: res.data.included.messages,
+                error: null,
+                loading: false,
+              })
+            );
             setState({
               tickets: res.data.tickets,
               inboxes: res.data.included.inboxes,
               ticketpriorities: res.data.included.ticketpriorities,
               customers: res.data.included.customers,
               companies: res.data.included.companies,
+              messages: res.data.included.messages,
+              error: null,
+              loading: false,
             });
-          })
-          .catch((error) => {
-            setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
+            showToast(ToastStyle.Success, "Updated.");
+          }
+        })
+        .catch((error) => {
+          setState({
+            tickets: null,
+            inboxes: null,
+            ticketpriorities: null,
+            customers: null,
+            companies: null,
+            messages: null,
+            error: error instanceof Error ? error : new Error("Something went wrong"),
+            loading: false,
           });
-      } catch (error) {
-        setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
-      }
+        });
+    } catch (error) {
+      setState({
+        tickets: null,
+        inboxes: null,
+        ticketpriorities: null,
+        customers: null,
+        companies: null,
+        messages: null,
+        error: error instanceof Error ? error : new Error("Something went wrong"),
+        loading: false,
+      });
     }
+  }
+
+  useEffect(() => {
     fetchTickets();
   }, []);
 
@@ -75,14 +139,26 @@ export default function Command() {
   return (
     <List
       navigationTitle="Tickets"
-      isLoading={!state.tickets && !state.error}
+      isLoading={state.loading && !state.error}
       searchBarPlaceholder={"Search for tickets"}
     >
-      {state.tickets?.map((item: any, index: number) => (
+      {state.tickets?.map((item: ItemData, index: number) => (
         <TicketItem
-          key={item.id}
+          key={index}
           item={item}
-          inbox={state.inboxes[getIndex(state.inboxes, item.inbox.id)]}
+          inbox={
+            state.inboxes
+              ? {
+                  id: getIndex(state.inboxes, item.inbox.id),
+                  publicIconImage: "",
+                  name: "",
+                }
+              : {
+                  id: "",
+                  publicIconImage: "",
+                  name: "",
+                }
+          }
           index={index}
         />
       ))}

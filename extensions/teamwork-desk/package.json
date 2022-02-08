@@ -5,7 +5,7 @@
   "description": "List all tickets and quickly access from Raycast.",
   "icon": "teamwork-desk-icon.png",
   "author": "barisdemirhan",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "commands": [
     {
@@ -51,7 +51,7 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
+    "react-devtools": "^4.21.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
