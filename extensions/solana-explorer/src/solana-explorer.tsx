@@ -7,29 +7,23 @@ import {
   BlockSearchResult,
   EpochSearchResult,
   SearchResult,
-  TokenSearchResult,
+  TokenSearchResult
 } from "./blockchain/model/search-result";
 
 export default function Command() {
-  const [repository, setRepository] = useState<Repository>(new Repository(BlockchainConfig.mainnet()));
+  const [lastQuery, setLastQuery] = useState<string>("");
+  const [repository] = useState<Repository>(new Repository(BlockchainConfig.mainnet()));
   const [isReady, setIsReady] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchItems, setSearchItems] = useState<SearchResult[]>([]);
 
-  useEffect(() => {
-    setIsLoading(true);
-    repository
-      .connect()
-      .then(() => setIsReady(true))
-      .catch((error) => showToast(ToastStyle.Failure, "Failed initializing", error.message))
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, []);
-
   const queryOnChange = async (query: string) => {
+    setLastQuery(query);
     if (!isReady) return;
     try {
+      // Remove special characters
+      query = query.replace(new RegExp("\"", "g"), "");
+
       setIsLoading(true);
       const result = await repository.search(query);
       setSearchItems(result);
@@ -40,11 +34,25 @@ export default function Command() {
     }
   };
 
+  useEffect(() => {
+    setIsLoading(true);
+    repository
+      .connect()
+      .then(() => {
+        setIsReady(true);
+        return queryOnChange(lastQuery)
+      })
+      .catch((error) => showToast(ToastStyle.Failure, "Failed initializing", error.message))
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
+
   return (
-    <List isLoading={isLoading || !isReady} onSearchTextChange={queryOnChange}>
+    <List isLoading={isLoading || !isReady} onSearchTextChange={queryOnChange} throttle={true}>
       {/*Account*/}
       {searchItems.find((item) => item.constructor == AccountSearchResult) != null && (
-        <List.Section title="Tokens">
+        <List.Section title="Transaction">
           {searchItems
             .filter((item) => item.constructor == AccountSearchResult)
             .map((item) => {

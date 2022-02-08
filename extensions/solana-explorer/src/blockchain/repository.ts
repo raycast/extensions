@@ -1,6 +1,4 @@
-import * as web3 from "@solana/web3.js";
 import * as splTokensRegister from "@solana/spl-token-registry";
-import { Account } from "./model/account";
 import {
   AccountSearchResult,
   BlockSearchResult,
@@ -25,18 +23,9 @@ export class Repository {
     this.tokenRegister = await new splTokensRegister.TokenListProvider().resolve(splTokensRegister.Strategy.CDN);
   }
 
-  // async getAccount(address: string): Promise<Account> {
-  //   const result = await this.connection.getAccountInfo(new web3.PublicKey(address));
-  //   return new Account(
-  //     address,
-  //     result?.executable,
-  //     result?.lamports,
-  //     result?.owner.toBase58()
-  //   );
-  // }
-
   async search(query: string): Promise<SearchResult[]> {
     const result: SearchResult[] = [];
+    if (query == "") return result;
 
     // AccountSearchResult
     if (query.length == 44) {
@@ -45,7 +34,7 @@ export class Repository {
 
     // Token
     const tokens = this.tokenRegister.filterByClusterSlug(this.config.network).getList();
-    const filteredTokens = tokens.filter((token) => token.name.indexOf(query) > -1);
+    const filteredTokens = tokens.filter((token) => token.name.indexOf(query) > -1).slice(0, 10);
     result.push(
       ...filteredTokens.map(
         (token) => new TokenSearchResult(token.address, token.name, token.logoURI, this.config.solanaExplorerUrl)

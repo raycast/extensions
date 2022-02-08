@@ -10,7 +10,6 @@
     {
       "name": "solana-explorer",
       "title": "Solana Explorer",
-      "subtitle": "Look up transactions and accounts on the Solana clusters.",
       "description": "Look up transactions and accounts on the various Solana clusters.",
       "mode": "view"
     }

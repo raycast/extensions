@@ -1,5 +1,3 @@
-import { BlockchainConfig } from "../config";
-
 export abstract class SearchResult {}
 
 export class BlockSearchResult extends SearchResult {
