@@ -7,7 +7,7 @@ import {
   BlockSearchResult,
   EpochSearchResult,
   SearchResult,
-  TokenSearchResult
+  TokenSearchResult,
 } from "./blockchain/model/search-result";
 
 export default function Command() {
@@ -22,7 +22,7 @@ export default function Command() {
     if (!isReady) return;
     try {
       // Remove special characters
-      query = query.replace(new RegExp("\"", "g"), "");
+      query = query.replace(new RegExp('"', "g"), "");
 
       setIsLoading(true);
       const result = await repository.search(query);
@@ -40,7 +40,7 @@ export default function Command() {
       .connect()
       .then(() => {
         setIsReady(true);
-        return queryOnChange(lastQuery)
+        return queryOnChange(lastQuery);
       })
       .catch((error) => showToast(ToastStyle.Failure, "Failed initializing", error.message))
       .finally(() => {
