@@ -1,5 +1,4 @@
 import { ActionPanel, Form, open, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
-import { writeFile } from "fs/promises";
 import { homedir } from "os";
 import QRCode from "qrcode";
 
@@ -18,12 +17,6 @@ const getQRCodePath = (qrcodeUrl: string) => {
   return `${homedir()}/Downloads/qrcode-${filename}.png`;
 };
 
-const createQRCodeFile = (url: string, path: string) => {
-  const encodedUrl = url.replace(/^data:image\/[a-z]+;base64,/, "");
-
-  return writeFile(path, encodedUrl, "base64");
-};
-
 export default function Command() {
   function handleSubmit({ url }: CommandForm) {
     if (url.length === 0) {
@@ -33,8 +26,7 @@ export default function Command() {
 
     const path = getQRCodePath(url);
 
-    QRCode.toDataURL(url)
-      .then((url) => createQRCodeFile(url, path))
+    QRCode.toFile(path, url)
       .then(() => {
         showToast(ToastStyle.Success, "QRCode saved", `You can find it here: ${path}`);
         open(path);
