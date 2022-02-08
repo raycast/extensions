@@ -1,4 +1,4 @@
-import { ActionPanel, copyTextToClipboard, Form, open, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import { ActionPanel, Form, open, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
 import { writeFile } from "fs/promises";
 import { homedir } from "os";
 import QRCode from "qrcode";
@@ -8,43 +8,40 @@ interface CommandForm {
   open: boolean;
 }
 
-const onQRCodeReady = (url: string, filename: string) => {
-  copyTextToClipboard(url);
+const getQRCodePath = (qrcodeUrl: string) => {
+  // `https://www.example.com/foo?bar=foo` -> `www.example.com`
+  const filename = String(qrcodeUrl.match(/^(?:https?:\/\/)?(?:[^@/\n]+@)?(?:www\.)?([^:/\n]+)/gm)).replace(
+    /^(?:https?:\/\/)?/gm,
+    ""
+  );
 
-  const path = `${homedir()}/Downloads/qrcode-${filename}.png`;
+  return `${homedir()}/Downloads/qrcode-${filename}.png`;
+};
 
+const createQRCodeFile = (url: string, path: string) => {
   const encodedUrl = url.replace(/^data:image\/[a-z]+;base64,/, "");
-  writeFile(path, encodedUrl, "base64")
-    .then(() => {
-      showToast(ToastStyle.Success, "QRCode saved!", `You can find it here: ${path}`);
-      open(path);
-    })
-    .catch((err) => {
-      showToast(ToastStyle.Failure, "Error during saving", err.message);
-    });
+
+  return writeFile(path, encodedUrl, "base64");
 };
 
 export default function Command() {
-  function handleSubmit(values: CommandForm) {
-    // `https://www.example.com/foo?bar=foo` -> `www.example.com`
-    const domainName = String(values.url.match(/^(?:https?:\/\/)?(?:[^@/\n]+@)?(?:www\.)?([^:/\n]+)/gm)).replace(
-      /^(?:https?:\/\/)?/gm,
-      ""
-    );
-
-    if (values.url.length === 0) {
+  function handleSubmit({ url }: CommandForm) {
+    if (url.length === 0) {
       showToast(ToastStyle.Failure, "Please enter a URL");
       return;
     }
 
-    QRCode.toDataURL(values.url, function (err, url) {
-      if (err) {
-        showToast(ToastStyle.Failure, "Error generating QR code");
-        return;
-      }
+    const path = getQRCodePath(url);
 
-      onQRCodeReady(url, domainName);
-    });
+    QRCode.toDataURL(url)
+      .then((url) => createQRCodeFile(url, path))
+      .then(() => {
+        showToast(ToastStyle.Success, "QRCode saved", `You can find it here: ${path}`);
+        open(path);
+      })
+      .catch((error: Error) => {
+        showToast(ToastStyle.Failure, "Error generating QR code", error.message);
+      });
   }
 
   return (
