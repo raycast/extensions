@@ -20,7 +20,7 @@ const onQRCodeReady = (url: string, filename: string) => {
       open(path);
     })
     .catch((err) => {
-      showToast(ToastStyle.Failure, "Error", err.message);
+      showToast(ToastStyle.Failure, "Error during saving", err.message);
     });
 };
 
