@@ -84,6 +84,24 @@
       "default": "all"
     },
     {
+      "name": "applyTo",
+      "title": "Apply Wallpaper To",
+      "description": "Set the wallpaper on all screens.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Current Desktop",
+          "value": "current"
+        },
+        {
+          "title": "Every Desktop",
+          "value": "every"
+        }
+      ],
+      "required": false,
+      "default": "current"
+    },
+    {
       "name": "downloadSize",
       "title": "Default Download Size",
       "description": "The default size of the image to download. This might not be effective on every image, it will be applied where possible.",
