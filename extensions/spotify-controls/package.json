@@ -5,6 +5,10 @@
   "description": "Control the Spotify app for macOS with your keyboard.",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "altrdev",
+    "ron-myers"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -55,6 +59,27 @@
       "subtitle": "Spotify",
       "description": "Currently playing song's URL in Spotify.",
       "mode": "no-view"
+    },
+    {
+      "name": "shuffle",
+      "title": "Toggle Shuffle",
+      "subtitle": "Spotify",
+      "description": "Toggles shuffle mode in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "shufflePlay",
+      "title": "Shuffle Play",
+      "subtitle": "Spotify",
+      "description": "Plays current track with shuffle enabled.",
+      "mode": "no-view"
+    },
+    {
+      "name": "repeat",
+      "title": "Toggle Repeat",
+      "subtitle": "Spotify",
+      "description": "Toggles repeat mode in Spotify.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
@@ -74,6 +99,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }

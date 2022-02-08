@@ -144,6 +144,41 @@ export default function Command() {
 | value | <code>Date</code> | No | - | The current value of the item. |
 | onChange | <code>(newValue: Value) => void</code> | No | - |  |
 
+### Form.Description
+
+A form item with a simple text label.
+
+Do *not* use this component to show validation messages for other form fields.
+
+#### Example
+
+Label
+
+```typescript
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description title="Import / Export" text="Exporting will back-up your preferences, quicklinks, snippets, floating notes, script-command folder paths, aliases, hotkeys, favorites and other data." />
+    </Form>
+  );
+}
+```
+
+#### Props
+
+| Prop | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| text | <code>string</code> | Yes | - | Text that will be displayed in the middle. |
+| title | <code>string</code> | No | - | The display title of the left side from the description item. |
+
 ### Form.Dropdown
 
 A form item with a dropdown menu.
@@ -299,6 +334,70 @@ export default function Command() {
 | :--- | :--- | :--- | :--- | :--- |
 | children | <code>null</code> or <code>[Form.Dropdown.Item](#form.dropdown.item)</code> or <code>Form.Dropdown.Item[]</code> | No | - | The item elements of the section. When used for the action panel, the first item in the list is the *primary* action that will be triggered by the default shortcut (ENTER), while the second item is the *secondary* action triggered by CMD + ENTER. |
 | title | <code>string</code> | No | - | Title displayed above the section |
+
+### Form.PasswordField
+
+A form item with a secure text field for password-entry in which the entered characters must be kept secret.
+
+#### Example
+
+{% tabs %}
+{% tab title="Uncontrolled password field" %}
+
+```typescript
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Password" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.PasswordField id="password" title="Enter Password" />
+    </Form>
+  );
+}
+```
+{% endtab %}
+{% tab title="Controlled password field" %}
+
+```typescript
+import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
+import { useState } from "react";
+
+export default function Command() {
+  const [password, setPassword] = useState<string>();
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <SubmitFormAction title="Submit Password" onSubmit={(values) => console.log(values)} />
+        </ActionPanel>
+      }
+    >
+      <Form.PasswordField id="password" value={password} onChange={setPassword} />
+    </Form>
+  );
+}
+```
+{% endtab %}
+{% endtabs %}
+
+#### Props
+
+| Prop | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| defaultValue | <code>string</code> | No | - | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
+| id | <code>string</code> | Yes | - | ID of the form item. Make sure to assign each form item a unique id. |
+| placeholder | <code>string</code> | No | - | Placeholder text shown in the password field. |
+| storeValue | <code>boolean</code> | No | - | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered. |
+| title | <code>string</code> | No | - | The title displayed on the left side of the item. |
+| value | <code>string</code> | No | - | The current value of the item. |
+| onChange | <code>(newValue: Value) => void</code> | No | - |  |
 
 ### Form.Separator
 
@@ -460,7 +559,7 @@ The item supports multiline text entry.
 import { ActionPanel, Form, SubmitFormAction } from "@raycast/api";
 
 const DESCRIPTION =
-  "We spend too much time starring at loading indicators. The Raycast team is dedicated to make everybody interact faster with their computers.";
+  "We spend too much time staring at loading indicators. The Raycast team is dedicated to make everybody interact faster with their computers.";
 
 export default function Command() {
   return (

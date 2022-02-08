@@ -1,8 +1,9 @@
 import { ActionPanel, Color, Icon, KeyboardShortcut } from "@raycast/api";
-import { KtoColorLike, miredToK, RGB } from "../color";
+import { KtoColorLike, miredToK, RGB, RGBtoColorLike } from "../color";
 import { ha } from "../common";
 import { State } from "../haapi";
 import { ensureMinMax } from "../utils";
+import { lightRGBColors } from "../constants";
 
 function ceilRound50(value: number): number {
   return Math.ceil(value / 50) * 50;
@@ -225,4 +226,36 @@ export function ColorTempControlDownAction(props: { state: State }): JSX.Element
   return (
     <ColorTempControlAddAction state={props.state} add={-50} shortcut={{ modifiers: ["cmd", "shift"], key: "-" }} />
   );
+}
+
+export function ColorRgbControlAction(props: { state: State }): JSX.Element | null {
+  const state = props.state;
+  const modes = state.attributes.supported_color_modes;
+
+  const handle = async (color_rgb: RGB) => {
+    await ha.callService("light", "turn_on", {
+      entity_id: state.entity_id,
+      rgb_color: [color_rgb.r, color_rgb.g, color_rgb.b],
+    });
+  };
+
+  if (modes && Array.isArray(modes) && modes.includes("rgb")) {
+    return (
+      <ActionPanel.Submenu
+        title="Color RGB"
+        icon={{ source: "lightbulb.png", tintColor: Color.PrimaryText }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+      >
+        {lightRGBColors.map((color) => (
+          <ActionPanel.Item
+            key={`${color.name}`}
+            title={`${color.name.charAt(0).toUpperCase()}${color.name.slice(1)}`}
+            icon={{ source: "lightbulb.png", tintColor: RGBtoColorLike(color.value) }}
+            onAction={() => handle(color.value)}
+          />
+        ))}
+      </ActionPanel.Submenu>
+    );
+  }
+  return null;
 }

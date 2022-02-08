@@ -1,15 +1,20 @@
 import { List } from "@raycast/api";
 
 import FileListItem from "./components/FileListItem";
+import { ErrorView } from "./components/ErrorView";
 import { useVisitedFiles } from "./hooks/useVisitedFiles";
 import { useProjectFiles } from "./hooks/useProjectFiles";
 
 export default function Command() {
-  const { projectFiles, isLoading: isLoadingProjectFiles } = useProjectFiles();
+  const { projectFiles, isLoading: isLoadingProjectFiles, hasError } = useProjectFiles();
 
   const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
 
   const isLoading = isLoadingProjectFiles || isLoadingVisitedFiles;
+
+  if (hasError) {
+    return <ErrorView />;
+  }
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter files by name...">

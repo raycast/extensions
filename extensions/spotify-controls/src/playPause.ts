@@ -1,5 +1,6 @@
-import { runAppleScriptSilently } from "./utils";
+import { buildScriptEnsuringSpotifyIsRunning, runAppleScriptSilently } from "./utils";
 
 export default async () => {
-  await runAppleScriptSilently('tell application "Spotify" to playpause');
+  const script = buildScriptEnsuringSpotifyIsRunning("playpause");
+  await runAppleScriptSilently(script);
 };
