@@ -47,8 +47,13 @@ function stripFrontmatter(markdown: string): string {
   * {%endraw%}
 */
 function stripTemplateTags(markdown: string): string {
-  // TODO
-  return markdown;
+  return markdown
+    .split('\n')
+    .filter((line) => {
+      const isTag = (line[0] === '{' && line[1] === ':') || (line[1] === '%' && line[line.length - 1] === '}');
+      return !isTag;
+    })
+    .join('\n');
 }
 
 export { getSheets, stripFrontmatter, stripTemplateTags };
