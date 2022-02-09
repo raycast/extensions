@@ -16,6 +16,7 @@ function Command() {
         <ActionPanel>
           <SubmitFormAction
             title="Find Difference"
+            icon={Icon.Eye}
             onSubmit={(values: FormValues) => push(<DiffView original={values.original} changed={values.changed} />)}
           />
         </ActionPanel>
