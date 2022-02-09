@@ -67,6 +67,7 @@ export default function Command() {
               />
               <ActionPanel.Item
                 title="Copy Username"
+                icon={Icon.Clipboard}
                 shortcut={{ modifiers: ["cmd"], key: "b" }}
                 onAction={() => {
                   copyUsername(entry).then(() => closeMainWindow());
