@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "unsplash",
   "title": "Unsplash",
-  "description": "Search images or collections on Unsplash, download, copy or set them as background without leaving Raycast!",
+  "description": "Search images or collections on Unsplash, download, copy or set them as wallpaper without leaving Raycast!",
   "icon": "command-icon.png",
   "author": "eggsy",
   "license": "MIT",
@@ -37,7 +37,7 @@
       "name": "random",
       "title": "Set Random Wallpaper",
       "subtitle": "Unsplash",
-      "description": "Set a random wallpaper from Unsplash and set as your desktop wallpaper.",
+      "description": "Set a random wallpaper from Unsplash.",
       "mode": "no-view"
     }
   ],
@@ -82,6 +82,24 @@
       ],
       "required": false,
       "default": "all"
+    },
+    {
+      "name": "applyTo",
+      "title": "Apply Wallpaper To",
+      "description": "Set the wallpaper on all screens.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Current Desktop",
+          "value": "current"
+        },
+        {
+          "title": "Every Desktop",
+          "value": "every"
+        }
+      ],
+      "required": false,
+      "default": "current"
     },
     {
       "name": "downloadSize",

@@ -9,9 +9,10 @@ interface SetWallpaperProps {
 }
 
 export const setWallpaper = async ({ url, id, useHud = false }: SetWallpaperProps) => {
-  const toast = useHud && (await showToast(ToastStyle.Animated, "Downloading and setting wallpaper..."));
+  let toast;
+  if (!useHud) toast = await showToast(ToastStyle.Animated, "Downloading and setting wallpaper...");
 
-  const { downloadSize } = getPreferenceValues<UnsplashPreferences>();
+  const { downloadSize, applyTo } = getPreferenceValues<UnsplashPreferences>();
   const selectedPath = environment.supportPath;
 
   const fixedPathName = selectedPath.endsWith("/")
@@ -36,7 +37,7 @@ export const setWallpaper = async ({ url, id, useHud = false }: SetWallpaperProp
 
       try
         tell application "System Events"
-          tell current desktop
+          tell ${applyTo} desktop
             set picture to (x as text)
             return "ok"
           end tell

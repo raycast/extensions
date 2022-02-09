@@ -130,6 +130,6 @@ interface UnsplashPreferences {
   orientation: "all" | "landscape" | "portrait" | "squarish";
   downloadSize: "raw" | "full" | "regular" | "small" | "thumb";
   collections: string;
+  applyTo: "current" | "every";
   includeDefaults: "yes" | "no";
-  path: string;
 }
