@@ -59,6 +59,7 @@ export default function Command() {
               />
               <ActionPanel.Item
                 title="Copy Password"
+                icon={Icon.Clipboard}
                 shortcut={{ modifiers: ["cmd"], key: "enter" }}
                 onAction={() => {
                   copyPassword(entry).then(() => closeMainWindow());
