@@ -1,4 +1,4 @@
-import { ActionPanel, closeMainWindow, List, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, closeMainWindow, Icon, List, showToast, ToastStyle } from "@raycast/api";
 import { loadEntries, copyAndPastePassword, copyPassword, copyUsername } from "./utils/keepassLoader";
 import { useState, useEffect } from "react";
 
