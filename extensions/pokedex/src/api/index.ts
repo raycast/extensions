@@ -2,10 +2,12 @@ import axios, { AxiosRequestConfig } from "axios";
 import { showToast, ToastStyle } from "@raycast/api";
 import type { PokemonV2Pokemon } from "../types";
 
-export const getPokemon = async (nameOrId: string): Promise<PokemonV2Pokemon[]> => {
+export const getPokemon = async (
+  nameOrId: string
+): Promise<PokemonV2Pokemon[]> => {
   const condition = Number.isNaN(Number(nameOrId))
     ? `{name: {_eq: ${nameOrId}}}`
-    : `{id: {_eq: ${nameOrId}}}`
+    : `{id: {_eq: ${nameOrId}}}`;
 
   const data = JSON.stringify({
     query: `query pokeAPI {
@@ -53,31 +55,31 @@ export const getPokemon = async (nameOrId: string): Promise<PokemonV2Pokemon[]> 
       }
     }
   }`,
-    variables: {}
+    variables: {},
   });
 
   const config: AxiosRequestConfig = {
-    method: 'post',
-    url: 'https://beta.pokeapi.co/graphql/v1beta',
-    headers: { 
-      'Content-Type': 'application/json'
+    method: "post",
+    url: "https://beta.pokeapi.co/graphql/v1beta",
+    headers: {
+      "Content-Type": "application/json",
     },
-    data
+    data,
   };
 
   try {
-    const { data } = await axios(config)
+    const { data } = await axios(config);
 
     if (Array.isArray(data.errors) && data.errors.length) {
-      showToast(ToastStyle.Failure, data.errors[0].message)
+      showToast(ToastStyle.Failure, data.errors[0].message);
 
-      return []
+      return [];
     }
 
     return data.data.pokemon_v2_pokemon;
   } catch (error) {
-    showToast(ToastStyle.Failure, "Could not get results")
+    showToast(ToastStyle.Failure, "Could not get results");
 
-    return []
+    return [];
   }
-}
+};

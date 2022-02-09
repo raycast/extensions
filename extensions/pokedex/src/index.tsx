@@ -11,14 +11,14 @@ export default function SearchPokemon() {
   useEffect(() => {
     async function fetch() {
       await getPokemon(nameOrId)
-        .then(data => {
-          setPokemons(data)
+        .then((data) => {
+          setPokemons(data);
         })
         .catch(() => {
-          setPokemons([])
+          setPokemons([]);
         });
 
-      setLoading(false)
+      setLoading(false);
     }
 
     if (nameOrId.length > 0) {
@@ -30,21 +30,24 @@ export default function SearchPokemon() {
   const onSearchChange = (newSearch: string) => {
     // backspace
     if (newSearch.length < nameOrId.length) {
-      setPokemons([])
+      setPokemons([]);
     }
     setNameOrId(newSearch);
   };
 
-  const abilities = (pkm: PokemonV2Pokemon) => pkm.pokemon_v2_pokemonabilities_aggregate.nodes.map(a => {
-    if (a.is_hidden) {
-      return `${a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name} (hidden)`
-    }
+  const abilities = (pkm: PokemonV2Pokemon) =>
+    pkm.pokemon_v2_pokemonabilities_aggregate.nodes
+      .map((a) => {
+        if (a.is_hidden) {
+          return `${a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name} (hidden)`;
+        }
 
-    return a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name
-  }).join(', ');
+        return a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name;
+      })
+      .join(", ");
 
   const pkmNumber = (id: number) => {
-    return id.toString().padStart(3, '0')
+    return id.toString().padStart(3, "0");
   };
 
   return (
@@ -54,18 +57,27 @@ export default function SearchPokemon() {
       onSearchTextChange={onSearchChange}
       searchBarPlaceholder="Search Pokémon by name or number..."
     >
-      {pokemons.map(pokemon => {
+      {pokemons.map((pokemon) => {
         return (
           <>
             <List.Section>
               <List.Item
                 key={pokemon.id}
-                title={pokemon.pokemon_v2_pokemonspecy.pokemon_v2_pokemonspeciesnames[0].name}
+                title={
+                  pokemon.pokemon_v2_pokemonspecy
+                    .pokemon_v2_pokemonspeciesnames[0].name
+                }
                 subtitle={`#${pkmNumber(pokemon.id)}`}
-                icon={{ source: `https://assets.pokemon.com/assets/cms2/img/pokedex/full/${pkmNumber(pokemon.id)}.png` }}
+                icon={{
+                  source: `https://assets.pokemon.com/assets/cms2/img/pokedex/full/${pkmNumber(
+                    pokemon.id
+                  )}.png`,
+                }}
                 actions={
                   <ActionPanel>
-                    <OpenInBrowserAction url={`https://www.pokemon.com/us/pokedex/` + pokemon.name} />
+                    <OpenInBrowserAction
+                      url={`https://www.pokemon.com/us/pokedex/` + pokemon.name}
+                    />
                   </ActionPanel>
                 }
               />
@@ -74,7 +86,9 @@ export default function SearchPokemon() {
               <List.Item
                 key="type"
                 title="Type"
-                subtitle={pokemon.pokemon_v2_pokemontypes_aggregate.nodes.map(n => n.pokemon_v2_type.pokemon_v2_typenames[0].name).join(', ')}
+                subtitle={pokemon.pokemon_v2_pokemontypes_aggregate.nodes
+                  .map((n) => n.pokemon_v2_type.pokemon_v2_typenames[0].name)
+                  .join(", ")}
               />
               <List.Item
                 key="height"
@@ -94,19 +108,24 @@ export default function SearchPokemon() {
             </List.Section>
             <List.Section title="Pokédex entries">
               {pokemon.pokemon_v2_pokemonspecy.pokemon_v2_pokemonspeciesflavortexts
-                .filter(f => f.pokemon_v2_version.pokemon_v2_versionnames.length)
-                .map(flavor => {
+                .filter(
+                  (f) => f.pokemon_v2_version.pokemon_v2_versionnames.length
+                )
+                .map((flavor) => {
                   return (
                     <List.Item
                       key={flavor.pokemon_v2_version.name}
-                      title={flavor.pokemon_v2_version.pokemon_v2_versionnames[0].name}
-                      subtitle={flavor.flavor_text.split('\n').join(' ')}
+                      title={
+                        flavor.pokemon_v2_version.pokemon_v2_versionnames[0]
+                          .name
+                      }
+                      subtitle={flavor.flavor_text.split("\n").join(" ")}
                     />
-                  )
+                  );
                 })}
             </List.Section>
           </>
-        )
+        );
       })}
     </List>
   );
