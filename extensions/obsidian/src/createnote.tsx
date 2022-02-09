@@ -129,7 +129,7 @@ function NoteForm(props: { vaultPath: string }) {
       try {
         fs.writeFileSync(path.join(notePath, name + ".md"), content);
       } catch {
-        showToast(ToastStyle.Failure, "Couldnt write the file: " + notePath + "/" + name + ".md");
+        showToast(ToastStyle.Failure, "Couldn't write the file: " + notePath + "/" + name + ".md");
         return;
       }
       showToast(ToastStyle.Success, "Created new note");
