@@ -23,6 +23,7 @@ export type PokemonV2Pokemon = {
   height: number;
   weight: number;
   pokemon_v2_pokemonabilities_aggregate: PokemonV2PokemonabilitiesAggregate;
+  pokemon_v2_pokemonstats_aggregate: PokemonV2PokemonstatsAggregate;
   pokemon_v2_pokemontypes_aggregate: PokemonV2PokemontypesAggregate;
   pokemon_v2_pokemonspecy: PokemonV2Pokemonspecy;
 };
@@ -61,6 +62,29 @@ type PokemonV2Version = {
   id: number;
   name: string;
   pokemon_v2_versionnames: PokemonV2Name[];
+};
+
+type PokemonV2PokemonstatsAggregate = {
+  nodes: PokemonV2PokemonstatsAggregateNode[];
+  aggregate: Aggregate;
+};
+
+type Aggregate = {
+  sum: Sum;
+};
+
+type Sum = {
+  base_stat: number;
+};
+
+type PokemonV2PokemonstatsAggregateNode = {
+  base_stat: number;
+  pokemon_v2_stat: PokemonV2Stat;
+};
+
+type PokemonV2Stat = {
+  name: string;
+  pokemon_v2_statnames: PokemonV2Name[];
 };
 
 type PokemonV2PokemontypesAggregate = {

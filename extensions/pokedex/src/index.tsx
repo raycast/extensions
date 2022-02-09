@@ -106,6 +106,20 @@ export default function SearchPokemon() {
                 subtitle={abilities(pokemon)}
               />
             </List.Section>
+            <List.Section
+              title="Base stats"
+              subtitle={pokemon.pokemon_v2_pokemonstats_aggregate.aggregate.sum.base_stat.toString()}
+            >
+              {pokemon.pokemon_v2_pokemonstats_aggregate.nodes.map((n) => {
+                return (
+                  <List.Item
+                    key={n.pokemon_v2_stat.name}
+                    title={n.pokemon_v2_stat.pokemon_v2_statnames[0].name}
+                    subtitle={n.base_stat.toString()}
+                  />
+                );
+              })}
+            </List.Section>
             <List.Section title="Pokédex entries">
               {pokemon.pokemon_v2_pokemonspecy.pokemon_v2_pokemonspeciesflavortexts
                 .filter(
