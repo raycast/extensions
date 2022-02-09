@@ -60,7 +60,7 @@ function CreateTodoForm(props: { onCreate: (todo: Todo) => void }) {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create Todo" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Todo" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -68,10 +68,9 @@ function CreateTodoForm(props: { onCreate: (todo: Todo) => void }) {
     </Form>
   );
 }
-
 ```
 
-The `<CreateTodoForm>` shows a single text field for the title. When the form is submitted, it calls the `onCreate` callback and closes itself.&#x20;
+The `<CreateTodoForm>` shows a single text field for the title. When the form is submitted, it calls the `onCreate` callback and closes itself.
 
 ![Create todo form](../.gitbook/assets/example-create-todo.png)
 
@@ -95,10 +94,7 @@ export default function Command() {
       }
     >
       {todos.map((todo, index) => (
-        <List.Item
-          key={index}
-          title={todo.title}
-        />
+        <List.Item key={index} title={todo.title} />
       ))}
     </List>
   );
@@ -137,7 +133,10 @@ export default function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <ToggleTodoAction todo={todo} onToggle={() => handleToggle(index)} />
+                <ToggleTodoAction
+                  todo={todo}
+                  onToggle={() => handleToggle(index)}
+                />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -149,17 +148,16 @@ export default function Command() {
 
 function ToggleTodoAction(props: { todo: Todo; onToggle: () => void }) {
   return (
-    <ActionPanel.Item
+    <Action
       icon={props.todo.isCompleted ? Icon.Circle : Icon.Checkmark}
       title={props.todo.isCompleted ? "Uncomplete Todo" : "Complete Todo"}
       onAction={props.onToggle}
     />
   );
 }
-
 ```
 
-In this case we added the  `<ToggleTodoAction>` to the list item. By doing this we can use the `index` to toggle the appropriate todo. We also added an icon to our todo that reflects the `isCompleted` state.&#x20;
+In this case we added the `<ToggleTodoAction>` to the list item. By doing this we can use the `index` to toggle the appropriate todo. We also added an icon to our todo that reflects the `isCompleted` state.
 
 ### Delete a todo
 
@@ -193,7 +191,10 @@ export default function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <ToggleTodoAction todo={todo} onToggle={() => handleToggle(index)} />
+                <ToggleTodoAction
+                  todo={todo}
+                  onToggle={() => handleToggle(index)}
+                />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <CreateTodoAction onCreate={handleCreate} />
@@ -211,7 +212,7 @@ export default function Command() {
 
 function DeleteTodoAction(props: { onDelete: () => void }) {
   return (
-    <ActionPanel.Item
+    <Action
       icon={Icon.Trash}
       title="Delete Todo"
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
