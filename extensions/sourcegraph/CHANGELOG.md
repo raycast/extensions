@@ -2,7 +2,7 @@
 
 ## [Feb 7, 2022](https://github.com/raycast/extensions/pull/833)
 
-- **search**: Fix off-by-one issue when opening to `content` match results.
+- **search**: Fix off-by-one issue when opening `content` match results.
 - **search**: Migrate away from the [deprecated `/search/stream` endpoint](https://about.sourcegraph.com/blog/release/3.36/) in favour of `/.api/search/stream`.
 
 ## [Jan 22nd, 2022](https://github.com/raycast/extensions/pull/729)

@@ -123,8 +123,6 @@
     "@raycast/api": "^1.27.1",
     "luxon": "^2.3.0",
     "node-fetch": "^3.2.0",
-    "react": "^17.0.2",
-    "react-reconciler": "^0.26.2",
     "remark": "^14.0.2",
     "strip-markdown": "^5.0.0"
   },
