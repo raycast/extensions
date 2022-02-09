@@ -34,8 +34,16 @@
     },
     {
       "required": false,
+      "name": "excludeNames",
+      "title": "Exclude Names",
+      "type": "textfield",
+      "description": "Names to exclude, separated by commas",
+      "placeholder": "account1, otherAccount, ..."
+    },
+    {
+      "required": false,
       "name": "preferCustomName",
-      "label": "Prefer Custom Names",
+      "label": "Prefer custom names",
       "type": "checkbox",
       "description": "Use your name customisations rather than the defaults",
       "default": true
@@ -46,6 +54,14 @@
       "label": "Copy as primary action, Output as secondary",
       "type": "checkbox",
       "description": "Primary action copies pin to clipboard instead of outputing to front application",
+      "default": true
+    },
+    {
+      "required": false,
+      "name": "separateAccounts",
+      "label": "Separate apps and services",
+      "type": "checkbox",
+      "description": "Separate accounts in to apps and services",
       "default": true
     }
   ],

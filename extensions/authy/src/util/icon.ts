@@ -1,18 +1,26 @@
 import { environment } from "@raycast/api";
-import { Otp } from "../component/OtpList";
-import { genericColors, icondir, logos } from "../constants";
+import { Otp } from "../component/OtpListItem";
+import { genericColors, icondir, logos, logoAliases } from "../constants";
+import { toId } from "./compare";
+
+const iconLookupKeys = ["logo", "accountType", "name"] as (keyof Otp)[];
 
 const colors = genericColors.map((color) => `authenticator_${color.name}`);
 
-function getIcon(name: string) {
-  const icon = name.toLowerCase();
-  if (colors.includes(icon)) {
+function getIcon(name: Otp[keyof Otp]) {
+  if (typeof name !== "string") {
+    return;
+  }
+
+  const iconId = toId(name);
+  if (colors.includes(iconId)) {
     return `${environment.assetsPath}/${icondir}/${icon}.png`;
-  } else if (logos.includes(icon)) {
+  } else if (logos.includes(iconId)) {
+    const logoIcon = (logoAliases as Record<string, string>)[iconId] || iconId;
     return {
       source: {
-        light: `${environment.assetsPath}/${icondir}/light/brand/${icon}.png`,
-        dark: `${environment.assetsPath}/${icondir}/dark/brand/${icon}.png`,
+        light: `${environment.assetsPath}/${icondir}/light/brand/${logoIcon}.png`,
+        dark: `${environment.assetsPath}/${icondir}/dark/brand/${logoIcon}.png`,
       },
     };
   }
@@ -22,16 +30,13 @@ export function icon(otp: Otp) {
   if (otp === undefined) {
     return `${environment.assetsPath}/${icondir}/authenticator_blue.png`;
   }
-  for (const [, val] of Object.entries(otp)
-    .filter(([prop]) => prop === "logo" || prop === "accountType")
-    .sort(([prop]) => (prop === "logo" ? -1 : 1))) {
-    if (typeof val !== "string") {
-      continue;
-    }
-    const icon = getIcon(val);
-    if (icon !== undefined) {
+
+  for (const key of iconLookupKeys) {
+    const icon = getIcon(otp[key]);
+    if (icon) {
       return icon;
     }
   }
+
   return `${environment.assetsPath}/${icondir}/authenticator_blue.png`;
 }
