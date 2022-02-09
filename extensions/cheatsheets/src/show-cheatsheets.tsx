@@ -2,7 +2,7 @@ import { ActionPanel, Detail, List, ListItem, PushAction } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
 import Service from './service';
-import { getSheets, stripFrontmatter, stripTemplateTags } from './utils';
+import { getSheets, stripFrontmatter, stripTemplateTags, formatTables } from './utils';
 
 function Action() {
   const [sheets, setSheets] = useState<string[]>([]);
@@ -47,7 +47,7 @@ function SheetView(props: SheetProps) {
   useEffect(() => {
     async function fetchSheet() {
       const sheetMarkdown = await Service.getSheet(props.slug);
-      const sheet = stripTemplateTags(stripFrontmatter(sheetMarkdown));
+      const sheet = formatTables(stripTemplateTags(stripFrontmatter(sheetMarkdown)));
 
       setSheet(sheet);
       setLoading(false);

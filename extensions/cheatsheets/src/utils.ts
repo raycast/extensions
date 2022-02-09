@@ -56,4 +56,32 @@ function stripTemplateTags(markdown: string): string {
     .join('\n');
 }
 
-export { getSheets, stripFrontmatter, stripTemplateTags };
+/*
+  Tables in Markdown are not yet supported by Raycast.
+
+  Wraps table content into code tags (```) to render them verbatim.
+*/
+function formatTables(markdown: string): string {
+  const lines = markdown.split('\n');
+  return lines
+    .map((line, index) => {
+      const prevLine = index > 0 ? lines[index - 1] : '';
+      const nextLine = index < lines.length - 1 ? lines[index + 1] : '';
+      const isPrevLineEmpty = prevLine.trim().length === 0;
+      const isNextLineEmpty = nextLine.trim().length === 0;
+      const isLineTable = line[0] === '|' && line[line.length - 1] === '|';
+      if (isLineTable && isPrevLineEmpty && isNextLineEmpty) {
+        return `\`\`\`\n${line}\n\`\`\``;
+      }
+      if (isLineTable && isPrevLineEmpty) {
+        return `\`\`\`\n${line}`;
+      }
+      if (isLineTable && isNextLineEmpty) {
+        return `${line}\n\`\`\``;
+      }
+      return line;
+    })
+    .join('\n');
+}
+
+export { getSheets, stripFrontmatter, stripTemplateTags, formatTables };
