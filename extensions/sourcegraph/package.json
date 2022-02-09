@@ -120,7 +120,7 @@
   ],
   "dependencies": {
     "@bobheadxi/node-eventsource-http2": "^1.1.1",
-    "@raycast/api": "^1.27.1",
+    "@raycast/api": "^1.28.0",
     "luxon": "^2.3.0",
     "node-fetch": "^3.2.0",
     "remark": "^14.0.2",
