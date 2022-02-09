@@ -9,7 +9,8 @@ interface SetWallpaperProps {
 }
 
 export const setWallpaper = async ({ url, id, useHud = false }: SetWallpaperProps) => {
-  const toast = useHud && (await showToast(ToastStyle.Animated, "Downloading and setting wallpaper..."));
+  let toast;
+  if (!useHud) toast = await showToast(ToastStyle.Animated, "Downloading and setting wallpaper...");
 
   const { downloadSize, applyTo } = getPreferenceValues<UnsplashPreferences>();
   const selectedPath = environment.supportPath;
