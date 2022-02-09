@@ -21,6 +21,7 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v14.3
         with:
+          separator: ","
           files: |
             docs/**
 
@@ -42,6 +43,8 @@ jobs:
 
           git clone --single-branch --branch "master" "https://$API_TOKEN_GITHUB@github.com/raycast/raycast-macos.git" "raycast-macos"
 
+          IFS=$','
+
           for file in ${{ steps.changed-files.outputs.deleted_files }}; do
             echo "Removing raycast-macos/Commands/$file"
             rm "raycast-macos/Commands/$file"
@@ -51,6 +54,8 @@ jobs:
             echo "Updating raycast-macos/Commands/$file"
             rsync -arv "$file" "raycast-macos/Commands/$file"
           done
+
+          IFS=$' '
 
           cd raycast-macos
 
