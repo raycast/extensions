@@ -67,15 +67,15 @@ function ShareSecretAction() {
     expireDays: number;
   }) {
     if (!values.secret) {
-      Feedback.toast({
-        style: Feedback.Toast.Style.Failure,
+      showToast({
+        style: Toast.Style.Failure,
         title: "Secret is required",
       });
       return;
     }
 
-    const toast = await Feedback.toast({
-      style: ToastStyle.Animated,
+    const toast = await showToast({
+      style: Toast.Style.Animated,
       title: "Sharing secret",
     });
 
@@ -92,7 +92,7 @@ function ShareSecretAction() {
         }
       );
 
-      await copyTextToClipboard((body as any).authenticated_url);
+      await Clipboard.copy((body as any).authenticated_url);
 
       toast.style = Feedback.Toast.Style.Success;
       toast.title = "Shared secret";

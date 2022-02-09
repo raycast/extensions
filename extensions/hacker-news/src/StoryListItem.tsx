@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 import Parser from "rss-parser";
 
 export function StoryListItem(props: { item: Parser.Item; index: number }) {
@@ -21,12 +21,12 @@ function Actions(props: { item: Parser.Item }) {
   return (
     <ActionPanel title={props.item.title}>
       <ActionPanel.Section>
-        {props.item.link && <OpenInBrowserAction url={props.item.link} />}
-        {props.item.guid && <OpenInBrowserAction url={props.item.guid} title="Open Comments in Browser" />}
+        {props.item.link && <Action.OpenInBrowser url={props.item.link} />}
+        {props.item.guid && <Action.OpenInBrowser url={props.item.guid} title="Open Comments in Browser" />}
       </ActionPanel.Section>
       <ActionPanel.Section>
         {props.item.link && (
-          <CopyToClipboardAction
+          <Action.CopyToClipboard
             content={props.item.link}
             title="Copy Link"
             shortcut={{ modifiers: ["cmd"], key: "." }}

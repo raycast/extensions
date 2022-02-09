@@ -181,7 +181,7 @@ function StoryListItem(props: { item: Parser.Item; index: number }) {
 
 ### Handle errors
 
-Lastly, we want to be a good citizen and also handle errors appropriately to a gurantee a smooth experience. We'll show a toast whenever our network request fails:
+Lastly, we want to be a good citizen and also handle errors appropriately to guarantee a smooth experience. We'll show a toast whenever our network request fails:
 
 ```typescript
 export default function Command() {
@@ -190,8 +190,8 @@ export default function Command() {
   // ...
 
   if (state.error) {
-    Feedback.toast({
-      style: Feedback.Toast.Style.Failure,
+    showToast({
+      style: Toast.Style.Failure,
       title: "Failed loading stories",
       message: state.error.message,
     });
