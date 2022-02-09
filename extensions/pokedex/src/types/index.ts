@@ -45,10 +45,11 @@ type PokemonV2Name = {
   name: string;
 };
 
-type PokemonV2Pokemonspecy = {
+export type PokemonV2Pokemonspecy = {
   is_mythical: boolean;
   is_legendary: boolean;
   is_baby: boolean;
+  name: string;
   pokemon_v2_pokemonspeciesnames: PokemonV2Name[];
   pokemon_v2_pokemonspeciesflavortexts: PokemonV2Pokemonspeciesflavortext[];
 };

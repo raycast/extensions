@@ -1,7 +1,7 @@
 import { List, ActionPanel, OpenInBrowserAction } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getPokemon } from "./api";
-import type { PokemonV2Pokemon } from "./types";
+import type { PokemonV2Pokemon, PokemonV2Pokemonspecy } from "./types";
 
 export default function SearchPokemon() {
   const [nameOrId, setNameOrId] = useState<string>("");
@@ -33,6 +33,14 @@ export default function SearchPokemon() {
       setPokemons([]);
     }
     setNameOrId(newSearch);
+  };
+
+  const accessoryTitle = (specy: PokemonV2Pokemonspecy): string => {
+    if (specy.is_baby) return "Baby";
+    if (specy.is_legendary) return "Legendary";
+    if (specy.is_mythical) return "Mythical";
+
+    return "";
   };
 
   const abilities = (pkm: PokemonV2Pokemon) =>
@@ -68,6 +76,7 @@ export default function SearchPokemon() {
                     .pokemon_v2_pokemonspeciesnames[0].name
                 }
                 subtitle={`#${pkmNumber(pokemon.id)}`}
+                accessoryTitle={accessoryTitle(pokemon.pokemon_v2_pokemonspecy)}
                 icon={{
                   source: `https://assets.pokemon.com/assets/cms2/img/pokedex/full/${pkmNumber(
                     pokemon.id
@@ -76,7 +85,7 @@ export default function SearchPokemon() {
                 actions={
                   <ActionPanel>
                     <OpenInBrowserAction
-                      url={`https://www.pokemon.com/us/pokedex/` + pokemon.name}
+                      url={`https://www.pokemon.com/us/pokedex/${pokemon.pokemon_v2_pokemonspecy.name}`}
                     />
                   </ActionPanel>
                 }
