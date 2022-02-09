@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, Form, SubmitFormAction, useNavigation } from '@raycast/api';
+import { ActionPanel, Detail, Icon, Form, SubmitFormAction, useNavigation } from '@raycast/api';
 
 import { getDiffText } from './utils';
 
