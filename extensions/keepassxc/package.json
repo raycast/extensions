@@ -29,7 +29,7 @@
       "name": "database",
       "type": "textfield",
       "required": true,
-      "title": "Keepass Database File",
+      "title": "Path of Keepass Database File",
       "description": "Set the Path of Keepass Database File",
       "placeholder": "Set the Path of KeePass Database File"
     },
