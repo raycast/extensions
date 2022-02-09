@@ -51,7 +51,8 @@ export default function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Item
-                title="Copy and Paste Password"
+                title="Paste"
+                icon={Icon.TextDocument}
                 onAction={() => {
                   copyAndPastePassword(entry).then(() => closeMainWindow());
                 }}
