@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "diff-checker",
   "title": "Diff Checker",
-  "description": "Compare the content of two files",
+  "description": "Compare content of two texts",
   "icon": "icon.png",
   "author": "destiner",
   "license": "MIT",
