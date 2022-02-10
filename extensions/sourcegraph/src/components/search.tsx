@@ -24,7 +24,7 @@ import { copyShortcut, secondaryActionShortcut, tertiaryActionShortcut } from ".
 
 import { Sourcegraph, instanceName } from "../sourcegraph";
 import { performSearch, SearchResult, Suggestion } from "../sourcegraph/stream-search";
-import { ContentMatch, SearchMatch, SymbolMatch } from "../sourcegraph/stream-search/stream";
+import { ContentMatch, SymbolMatch } from "../sourcegraph/stream-search/stream";
 import { ColorDefault, ColorPrivate } from "./colors";
 
 export default function SearchCommand(src: Sourcegraph) {

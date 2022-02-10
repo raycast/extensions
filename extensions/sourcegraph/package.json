@@ -120,11 +120,10 @@
   ],
   "dependencies": {
     "@bobheadxi/node-eventsource-http2": "^1.1.1",
-    "@raycast/api": "^1.27.0",
+    "@raycast/api": "^1.28.0",
     "luxon": "^2.3.0",
-    "node-fetch": "^3.0.0",
+    "node-fetch": "^3.2.0",
     "remark": "^14.0.2",
-    "sourcegraph": "^25.4.0",
     "strip-markdown": "^5.0.0"
   },
   "devDependencies": {
@@ -143,7 +142,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "fmt": "prettier --config .prettierrc -w ./src",
+    "fmt": "ray lint --fix",
     "raycast-publish": ".scripts/raycast-publish.sh"
   }
 }
