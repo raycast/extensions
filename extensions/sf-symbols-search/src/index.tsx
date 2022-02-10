@@ -22,19 +22,21 @@ export default function Command() {
           keywords={symbol.categories.concat([symbol.name])} // Add symbol name to categories so it can be searched, since the title is only the symbol
           actions={
             <ActionPanel>
-              if (prefs.primaryAction == "paste") {
-              <PasteAction title="Paste Symbol" content={symbol.symbol}/>
-              <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol} />
-              <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
-            } else if (prefs.primaryAction == "copy") {
-              <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol}/>
-              <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
-              <PasteAction title="Paste Symbol" content={symbol.symbol}/>
-            } else if (prefs.primaryAction == "copyName") {
-              <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
-              <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol}/>
-              <PasteAction title="Paste Symbol" content={symbol.symbol}/>
-            }
+              {
+                if (prefs.primaryAction == "paste") {
+                <PasteAction title="Paste Symbol" content={symbol.symbol}/>
+                <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol} />
+                <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
+              } else if (prefs.primaryAction == "copy") {
+                <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol}/>
+                <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
+                <PasteAction title="Paste Symbol" content={symbol.symbol}/>
+              } else if (prefs.primaryAction == "copyName") {
+                <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
+                <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol}/>
+                <PasteAction title="Paste Symbol" content={symbol.symbol}/>
+              }
+              }
             </ActionPanel>
           }
         />
