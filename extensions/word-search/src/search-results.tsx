@@ -30,7 +30,7 @@ export default function SearchResults(type: SearchType) {
   );
 }
 
-function Actions(props: { word: Word }): any {
+function Actions(props: { word: Word }) {
   return (
     <ActionPanel>
       <PasteAction content={props.word.word} title="Paste Word in Active App" />
