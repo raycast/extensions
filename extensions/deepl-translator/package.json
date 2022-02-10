@@ -1,0 +1,172 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "deepl",
+  "title": "DeepL Translator",
+  "description": "translate japanese or english by deepl",
+  "icon": "deepl_icon.png",
+  "author": "sugayutokyo",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "deeplApiKey",
+      "type": "password",
+      "required": true,
+      "title": "DeepL API Key",
+      "description": "Input DeepL API key",
+      "placeholder": "Visit https://www.deepl.com/ja/pro-account/summary to obtain one"
+    },
+    {
+      "name": "isPro",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Pro",
+      "title": "DeepL Pro",
+      "description": "If you are a DeepL Pro account, please check the box.",
+      "placeholder": "If you are a DeepL Pro account, please check the box."
+    },
+    {
+      "name": "firstLanguage",
+      "type": "dropdown",
+      "title": "First Language",
+      "required": false,
+      "default": "EN",
+      "data": [
+        {
+          "title": "Chinese",
+          "value": "ZH"
+        },
+        {
+          "title": "Dutch",
+          "value": "NL"
+        },
+        {
+          "title": "English",
+          "value": "EN"
+        },
+        {
+          "title": "French",
+          "value": "FR"
+        },
+        {
+          "title": "German",
+          "value": "DE"
+        },
+        {
+          "title": "Italian",
+          "value": "IT"
+        },
+        {
+          "title": "Japanese",
+          "value": "JA"
+        },
+        {
+          "title": "Polish",
+          "value": "PL"
+        },
+        {
+          "title": "Portuguese",
+          "value": "PT"
+        },
+        {
+          "title": "Russian",
+          "value": "RU"
+        },
+        {
+          "title": "Spanish",
+          "value": "ES"
+        }
+      ],
+      "description": "Set the first language"
+    },
+    {
+      "name": "secondLanguage",
+      "type": "dropdown",
+      "title": "Second Language",
+      "required": false,
+      "default": "JA",
+      "data": [
+        {
+          "title": "Chinese",
+          "value": "ZH"
+        },
+        {
+          "title": "Dutch",
+          "value": "NL"
+        },
+        {
+          "title": "English",
+          "value": "EN"
+        },
+        {
+          "title": "French",
+          "value": "FR"
+        },
+        {
+          "title": "German",
+          "value": "DE"
+        },
+        {
+          "title": "Italian",
+          "value": "IT"
+        },
+        {
+          "title": "Japanese",
+          "value": "JA"
+        },
+        {
+          "title": "Polish",
+          "value": "PL"
+        },
+        {
+          "title": "Portuguese",
+          "value": "PT"
+        },
+        {
+          "title": "Russian",
+          "value": "RU"
+        },
+        {
+          "title": "Spanish",
+          "value": "ES"
+        }
+      ],
+      "description": "Set the first language"
+    }
+  ],
+  "commands": [
+    {
+      "name": "firstLanguage",
+      "title": "Translate To First Language",
+      "description": "Translate By DeepL",
+      "mode": "view"
+    },
+    {
+      "name": "secondLanguage",
+      "title": "Translate To Second Language",
+      "description": "Translate By DeepL",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.1",
+    "deepl": "^1.0.13"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.21.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
