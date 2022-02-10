@@ -8,8 +8,9 @@ import {
   UNKNOWN,
   WARN,
 } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/MonitorOverallStates";
-import { ActionPanel, getPreferenceValues, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
 import { useMonitors } from "./useMonitors";
+import { linkDomain } from "./util";
 
 const statusIcon = (status: MonitorOverallStates | undefined) => {
   const icon = (name: string, themable = false) => {
@@ -44,8 +45,6 @@ const statusIcon = (status: MonitorOverallStates | undefined) => {
 export default function CommandListMonitors() {
   const { monitors, monitorsAreLoading } = useMonitors();
 
-  const SERVER = getPreferenceValues()["server"];
-
   return (
     <List isLoading={monitorsAreLoading}>
       {monitors.map(monitor => (
@@ -58,7 +57,7 @@ export default function CommandListMonitors() {
           accessoryIcon={{ source: statusIcon(monitor.overallState) }}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={`https://app.${SERVER}/monitors/${monitor.id}`} />
+              <OpenInBrowserAction url={`https://${linkDomain()}/monitors/${monitor.id}`} />
             </ActionPanel>
           }
         />

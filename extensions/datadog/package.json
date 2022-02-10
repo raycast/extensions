@@ -74,6 +74,13 @@
       "required": true
     },
     {
+      "type": "textfield",
+      "name": "domain",
+      "title": "Domain",
+      "description": "Custom domain for Datadog URLs",
+      "required": false
+    },
+    {
       "type": "dropdown",
       "name": "server",
       "title": "Server",

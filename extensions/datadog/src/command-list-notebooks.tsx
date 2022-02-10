@@ -1,11 +1,10 @@
-import { ActionPanel, getPreferenceValues, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
 import { useNotebooks } from "./useNotebooks";
+import { linkDomain } from "./util";
 
 // noinspection JSUnusedGlobalSymbols
 export default function CommandListNotebooks() {
   const { notebooks, notebooksAreLoading } = useNotebooks();
-
-  const SERVER = getPreferenceValues()["server"];
 
   return (
     <List isLoading={notebooksAreLoading}>
@@ -18,7 +17,7 @@ export default function CommandListNotebooks() {
           accessoryTitle={notebook.attributes.author?.email}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={`https://app.${SERVER}/notebook/${notebook.id}`} />
+              <OpenInBrowserAction url={`https://${linkDomain()}/notebook/${notebook.id}`} />
             </ActionPanel>
           }
         />
