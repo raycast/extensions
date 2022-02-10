@@ -20,14 +20,14 @@ export default function Command() {
           subtitle={symbol.name}
           accessoryTitle={symbol.categories.join(", ")}
           keywords={symbol.categories.concat([symbol.name])} // Add symbol name to categories so it can be searched, since the title is only the symbol
-          actions={getActions()}
+          actions={getActions(prefs, symbol)}
         />
       ))}
     </List>
   );
 }
 
-function getActions() {
+function getActions(prefs: Preferences, symbol: Symbol) {
   if (prefs.primaryAction == "paste") {
     return (
       <ActionPanel>
