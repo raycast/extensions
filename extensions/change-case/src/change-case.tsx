@@ -80,7 +80,7 @@ export default function changeChase() {
             subtitle={modified}
             actions={
               <ActionPanel>
-                <CopyToClipboardAction title="Copy to Clipboard" content={modified} />
+                <CopyToClipboardAction content={modified} />
                 <PasteAction title="Paste in Frontmost App" content={modified} />
               </ActionPanel>
             }
