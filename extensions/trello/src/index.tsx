@@ -26,7 +26,7 @@ export default function PackageList() {
 
         setTodos(response);
       } catch (error) {
-        showToast(ToastStyle.Failure, "Failed loading to dos");
+        showToast(ToastStyle.Failure, "Failed loading todos");
       }
     }
 
