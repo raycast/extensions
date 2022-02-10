@@ -11,7 +11,8 @@ import {
   Profile,
 } from "./util/types";
 import getPrefs from "./util/preferences";
-import { createBookmarkListItem, matchSearchText } from "./util/util";
+import { createBookmarkListItem, matchSearchText, isValidUrl } from "./util/util";
+import { getClipboardText } from "./util/clipboard";
 
 export default function Command() {
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
@@ -130,6 +131,7 @@ function ListBookmarks(props: { profile: Profile }) {
   const [bookmarkFile, setBookmarkFile] = useState<GoogleChromeBookmarkFile>();
   const [error, setError] = useState<Error>();
   const [searchText, setSearchText] = useState("");
+  const [clipboard, setClipboard] = useState<string>();
 
   useEffect(() => {
     async function listBookmarks() {
@@ -143,7 +145,15 @@ function ListBookmarks(props: { profile: Profile }) {
       }
     }
 
+    async function copyFromClipboard() {
+      try {
+        const clipboardText = await getClipboardText();
+        setClipboard(clipboardText);
+      } catch (error) {}
+    }
+
     listBookmarks();
+    copyFromClipboard();
   }, []);
 
   const onSearchTextChange = (text: string) => {
@@ -156,8 +166,20 @@ function ListBookmarks(props: { profile: Profile }) {
     .map((b) => createBookmarkListItem(b.url, b.name))
     .filter((b) => !searchText || matchSearchText(searchText, b.url, b.title));
 
-  const newTabURL = getPrefs().newTabURL.replace("%query%", encodeURIComponent(searchText));
-  const newTabOnTop = getPrefs().shouldShowNewTabInBookmarks ? createBookmarkListItem(newTabURL, "New Tab") : undefined;
+  const newTabURL = newTabUrlWithQuery(searchText);
+
+  const tabsOnTop = (
+    getPrefs().shouldShowNewTabInBookmarks ? [createBookmarkListItem(newTabURL, "New Tab")] : []
+  ).concat(
+    clipboard
+      ? [
+          createBookmarkListItem(
+            isValidUrl(clipboard) ? clipboard : newTabUrlWithQuery(clipboard),
+            "New Tab from Clipboard"
+          ),
+        ]
+      : []
+  );
 
   if (error && (bookmarks?.length ?? 0) == 0) {
     showToast(ToastStyle.Failure, error.message);
@@ -169,14 +191,16 @@ function ListBookmarks(props: { profile: Profile }) {
       searchBarPlaceholder="Search Bookmark"
       onSearchTextChange={onSearchTextChange}
     >
-      {newTabOnTop && (
+      {tabsOnTop.length > 0 && (
         <List.Section title="New Tab">
-          <List.Item
-            title={newTabOnTop.title}
-            subtitle={newTabOnTop.subtitle}
-            icon={newTabOnTop.iconURL}
-            actions={<BookmarksActionPanel profileDirectory={props.profile.directory} url={newTabOnTop.url} />}
-          />
+          {tabsOnTop.map((tab) => (
+            <List.Item
+              title={tab.title}
+              subtitle={tab.subtitle}
+              icon={tab.iconURL}
+              actions={<BookmarksActionPanel profileDirectory={props.profile.directory} url={tab.url} />}
+            />
+          ))}
         </List.Section>
       )}
       {bookmarks && (
@@ -194,6 +218,10 @@ function ListBookmarks(props: { profile: Profile }) {
       )}
     </List>
   );
+}
+
+function newTabUrlWithQuery(searchText: string) {
+  return getPrefs().newTabURL.replace("%query%", encodeURIComponent(searchText));
 }
 
 function BookmarksActionPanel(props: { profileDirectory: string; url: string }) {
