@@ -1,0 +1,179 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "unsplash",
+  "title": "Unsplash",
+  "description": "Search images or collections on Unsplash, download, copy or set them as wallpaper without leaving Raycast!",
+  "icon": "command-icon.png",
+  "author": "eggsy",
+  "license": "MIT",
+  "keywords": [
+    "wallpaper",
+    "photo",
+    "desktop"
+  ],
+  "commands": [
+    {
+      "name": "images",
+      "title": "Search Images",
+      "subtitle": "Unsplash",
+      "description": "Search images on Unsplash.",
+      "mode": "view"
+    },
+    {
+      "name": "collections",
+      "title": "Search Collections",
+      "subtitle": "Unsplash",
+      "description": "Search collections on Unsplash.",
+      "mode": "view"
+    },
+    {
+      "name": "likes",
+      "title": "Liked Images",
+      "subtitle": "Unsplash",
+      "description": "View your liked images on Unsplash.",
+      "mode": "view"
+    },
+    {
+      "name": "random",
+      "title": "Set Random Wallpaper",
+      "subtitle": "Unsplash",
+      "description": "Set a random wallpaper from Unsplash.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "accessKey",
+      "title": "Access Key",
+      "description": "Get your API key from https://unsplash.com/app/api",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "username",
+      "title": "Username",
+      "placeholder": "Your Unsplash username",
+      "description": "Your username on Unsplash. Needed to list your lists.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "orientation",
+      "title": "Image Orientation",
+      "description": "The orientation of images that will be displayed as result.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "All",
+          "value": "all"
+        },
+        {
+          "title": "Landscape",
+          "value": "landscape"
+        },
+        {
+          "title": "Portrait",
+          "value": "portrait"
+        },
+        {
+          "title": "Squarish",
+          "value": "squarish"
+        }
+      ],
+      "required": false,
+      "default": "all"
+    },
+    {
+      "name": "applyTo",
+      "title": "Apply Wallpaper To",
+      "description": "Set the wallpaper on all screens.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Current Desktop",
+          "value": "current"
+        },
+        {
+          "title": "Every Desktop",
+          "value": "every"
+        }
+      ],
+      "required": false,
+      "default": "current"
+    },
+    {
+      "name": "downloadSize",
+      "title": "Default Download Size",
+      "description": "The default size of the image to download. This might not be effective on every image, it will be applied where possible.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Original",
+          "value": "raw"
+        },
+        {
+          "title": "Full",
+          "value": "full"
+        },
+        {
+          "title": "Regular",
+          "value": "regular"
+        },
+        {
+          "title": "Small",
+          "value": "small"
+        }
+      ],
+      "required": false,
+      "default": "full"
+    },
+    {
+      "name": "collections",
+      "title": "Custom Collections",
+      "placeholder": "Collection IDs, comma & space separated",
+      "description": "Leave blank for pre-selected ones - Collections to search for images on Set Random Wallpaper. Comma & space separated list of collection IDs.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "includeDefaults",
+      "title": "Include Default Collections",
+      "type": "dropdown",
+      "description": "If you're using custom collections, select whether to include the default ones or not.",
+      "data": [
+        {
+          "title": "Yes",
+          "value": "yes"
+        },
+        {
+          "title": "No",
+          "value": "no"
+        }
+      ],
+      "required": false,
+      "default": "no"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.0",
+    "node-fetch": "^3.0.0",
+    "run-applescript": "^6.0.0",
+    "swr": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

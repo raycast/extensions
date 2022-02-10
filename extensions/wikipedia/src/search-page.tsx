@@ -22,6 +22,7 @@ export default function SearchPage() {
 
 function PageItem({ title }: { title: string }) {
   const { data: extract } = useWikipediaPageSummary(title);
+  const escapedTitle = title.replaceAll(" ", "_");
   return (
     <List.Item
       icon={Icon.TextDocument}
@@ -31,11 +32,11 @@ function PageItem({ title }: { title: string }) {
       subtitle={extract}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={`https://wikipedia.org/wiki/${title}`} />
+          <OpenInBrowserAction url={`https://wikipedia.org/wiki/${escapedTitle}`} />
           <CopyToClipboardAction
             title="Copy URL"
             shortcut={{ modifiers: ["cmd"], key: "." }}
-            content={`https://wikipedia.org/wiki/${title}`}
+            content={`https://wikipedia.org/wiki/${escapedTitle}`}
           />
         </ActionPanel>
       }

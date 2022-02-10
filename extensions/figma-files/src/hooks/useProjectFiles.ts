@@ -9,9 +9,11 @@ export function useProjectFiles() {
   const [state, setState] = useState<{
     projectFiles?: ProjectFiles[];
     isLoading: boolean;
+    hasError: boolean;
   }>({
     projectFiles: undefined,
     isLoading: true,
+    hasError: false,
   });
 
   useEffect(() => {
@@ -21,15 +23,27 @@ export function useProjectFiles() {
         setState((oldState) => ({ ...oldState, projectFiles: cachedFiles }));
       }
 
-      const newFiles = await fetchFiles();
+      try {
+        const newFiles = await fetchFiles();
 
-      setState((oldState) => ({
-        ...oldState,
-        projectFiles: newFiles,
-        isLoading: false,
-      }));
+        setState((oldState) => ({
+          ...oldState,
+          projectFiles: newFiles,
+          isLoading: false,
+          hasError: false,
+        }));
 
-      await storeFiles(newFiles);
+        await storeFiles(newFiles);
+      } catch (error) {
+        console.error("error fetching files", error);
+        if ((error as Response)?.status >= 400) {
+          setState((oldState) => ({
+            ...oldState,
+            isLoading: false,
+            hasError: true,
+          }));
+        }
+      }
     }
     fetch();
   }, []);
@@ -47,6 +61,10 @@ async function fetchTeamProjects(): Promise<TeamProjects> {
         "X-Figma-Token": PERSONAL_ACCESS_TOKEN,
       },
     });
+
+    if (!response.ok) {
+      return Promise.reject(response);
+    }
 
     const json = (await response.json()) as TeamProjects;
     return json;

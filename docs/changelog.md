@@ -1,5 +1,43 @@
 # Changelog
 
+## 1.28.0 - 2022-02-09
+
+### 💎 Improvements
+
+* Completely **revised (backwards-compatible) API** – new namespaces, better organisation, more consistency, updated templates, revamped docs. Check out the full [migration guide](https://developers.raycast.com/migration/v1.28.0) and get rid of those deprecation warnings. (At the same time, don’t worry, your extension is going to work as before, even if you don’t take immediate action.)
+* We’ve **prettified the CLI output** 💅: all output is now more colourful, cleaner and easier to parse. Update the npm package to v1.28.0 to get the latest CLI for development.
+* **Fallback images**: You can now specify local asset files or built-in icons that are displayed when image loading fails, for example when a remote file is missing (![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=12\&userId=\&cache=v2)[Issue #108](https://github.com/raycast/extensions/issues/108)); [see the docs](https://developers.raycast.com/api-reference/user-interface/icons-and-images)
+* **Toasts** are now passed as argument to their action callback, so you can directly act on them in the handler function (for example, hiding them)
+* **Extensions feedback:** We’ve added **better bug report and feature request actions** both to the store details page of an extension and to the error screen; the actions prefill some data already in the templates so that reporting issues and feature requests becomes easier for end users.
+
+### 🐞 Bugfixes
+
+* Fixed tag picker images and emojis not being properly displayed (​​![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=12\&userId=\&cache=v2)[Issue #493](https://github.com/raycast/extensions/issues/493))
+
+## 1.27.1 - 2022-01-28
+
+### 💎 Improvements
+
+* **Preferences:** Added a new app picker preference type – useful if you want to let users customize their apps to use for opening files, folders and URLs [![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=12\&userId=\&cache=v2)Issue #98](https://github.com/raycast/extensions/issues/98)
+* **Forms:** Added new `Form.PasswordField` that allows you to show secure text fields ([Issue #319](https://github.com/raycast/extensions/issues/319) and [![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=12\&userId=\&cache=v2)Issue #44](https://github.com/raycast/extensions/issues/44))
+* **Forms:** Added new `Form.Description` component that allows you to show a simple label
+* Added a new top-level `open` method that gives you more flexibility for opening files, folders, and URLs with default apps or specified apps, often making using an external npm package unnecessary (the built-in open action use our method under the hood)
+* **Node:** added security enhancements for the managed Node runtime such as verification of the executable, configuring executable permissions, and removing unnecessary files
+* **CLI:** Added more error info output to build errors
+* **CLI:** Added a new `—fix` flag to the `lint` command (applies ESLint and prettier fixes)
+* **Create Extension Command:** Updated the templates to include a `fix-lint` script; added prettier to devDependencies
+
+### 🐞 Bugfixes
+
+* **Forms:** Fixed `onChange` callback behaviour to be consistent across all components
+* **Forms:** Fixed generic updates of titles for all components ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=12\&userId=\&cache=v2)Issue #687](https://github.com/raycast/extensions/issues/687))
+* **Preferences:** Fixed a bug in dropdown preferences returning the defined default value, even if the default is not part of the list values
+* **Preferences:** Fixed the `data` property not being treated as required for the dropdown
+* **Preferences:** Fixed defined initial values not being ignored (use default only)
+* **List:** Fixed same-rank items with identical names being non-deterministically ordered
+* Fixed a bug with open actions causing double opening via the default and specified app
+* **CLI:** Removed auto-installation of npm dependencies through the downloaded npm
+
 ## 1.27.0 - 2022-01-12
 
 ### 💎 Improvements
@@ -7,32 +45,32 @@
 * **Developer Tools:** Added `Open Support Directory` action to local dev extensions
 * **Developer Tools**: Removed auto-injecting of globals for enabling React Developer Tools in dev mode
 * **Developer Tools**: Added `prettier` checks to CLI `lint` command
-* **Documentation**: Updates and fixes
+* **Documentation:** Updates and fixes
 
 ### 🐞 Bugfixes
 
 * **Forms:** Fixed controlled updates for the `Form.TagPicker`
-* **Navigation**: Fixed a bug where a programmatic pop, followed by a manual pop (e.g. ESC) could lead to wrong state (![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)[Issue #571](https://github.com/raycast/extensions/issues/571))
+* **Navigation**: Fixed a bug where a programmatic pop, followed by a manual pop (e.g. ESC) could lead to wrong state (![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=12\&userId=\&cache=v2)[Issue #571](https://github.com/raycast/extensions/issues/571))
 
 ## 1.26.3 - 2021-12-16
 
 ### ✨ New
 
 * New API for **Alert** views: Alerts are useful for destructive actions or actions that require user confirmation; new methods let you display our beautiful native Alert component\
-  ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)Issue #48](https://github.com/raycast/extensions/issues/48))
-* New API for **interactive Toasts**: you can now add buttons to Toasts, e.g. to give the user options for created items, to open the browser, or for any other relevant context ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)Issue #438](https://github.com/raycast/extensions/issues/438))
-* New API for retrieving the current **Finder selection**: unlocks a couple of use cases for extensions that perform actions on selected files and folders ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)Issue #153](https://github.com/raycast/extensions/issues/153))
+  ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=12\&userId=\&cache=v2)Issue #48](https://github.com/raycast/extensions/issues/48))
+* New API for **interactive Toasts**: you can now add buttons to Toasts, e.g. to give the user options for created items, to open the browser, or for any other relevant context ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=12\&userId=\&cache=v2)Issue #438](https://github.com/raycast/extensions/issues/438))
+* New API for retrieving the current **Finder selection**: unlocks a couple of use cases for extensions that perform actions on selected files and folders ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=12\&userId=\&cache=v2)Issue #153](https://github.com/raycast/extensions/issues/153))
 
 ### 💎 Improvements
 
 * Improved ranking for fuzzy search in lists with sections and keywords
 * The icon of the `OpenWithAction` can now be customised
 * The env var NODE\_EXTRA\_CA\_CERTS is now being propagated so that custom certificates can be configured
-* Improved the CLI error message when an entry point file from the manifest is missing ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)Issue #495](https://github.com/raycast/extensions/issues/495))
+* Improved the CLI error message when an entry point file from the manifest is missing ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=12\&userId=\&cache=v2)Issue #495](https://github.com/raycast/extensions/issues/495))
 
 ### 🐞 Bugfixes
 
-* Textfields do not auto-transform certain characters such as dashes any more ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)Issue #491](https://github.com/raycast/extensions/issues/491) and [![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=200\&userId=\&cache=v2)Issue #360](https://github.com/raycast/extensions/issues/360))
+* Textfields do not auto-transform certain characters such as dashes any more ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=12\&userId=\&cache=v2)Issue #491](https://github.com/raycast/extensions/issues/491) and [![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal\_integrations%2Fgithub-icon.png?width=12\&userId=\&cache=v2)Issue #360](https://github.com/raycast/extensions/issues/360))
 
 ### ⚙️ Build Updates
 

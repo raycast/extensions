@@ -1,4 +1,5 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
+import { useEffect } from "react";
 
 import { StoryListItem } from "./StoryListItem";
 import useHNRss from "./useHNRss";
@@ -6,9 +7,15 @@ import useHNRss from "./useHNRss";
 export default function Command() {
   const state = useHNRss("frontpage");
 
-  if (state.error) {
-    showToast(ToastStyle.Failure, "Failed loading stories", state.error.message);
-  }
+  useEffect(() => {
+    if (state.error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed loading stories",
+        message: state.error.message,
+      });
+    }
+  }, [state.error]);
 
   return (
     <List isLoading={!state.items && !state.error}>

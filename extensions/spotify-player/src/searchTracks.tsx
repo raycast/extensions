@@ -1,16 +1,7 @@
 import { useEffect, useState } from "react";
 import { authorize, spotifyApi } from "./client/client";
 import { PlayAction } from "./client/actions";
-import {
-  showToast,
-  ToastStyle,
-  List,
-  ActionPanel,
-  OpenInBrowserAction,
-  CopyToClipboardAction,
-  ImageLike,
-  ImageMask,
-} from "@raycast/api";
+import { showToast, List, ActionPanel, Action, Toast, Image } from "@raycast/api";
 import { Response } from "./client/interfaces";
 
 export default function SpotifyList() {
@@ -18,7 +9,7 @@ export default function SpotifyList() {
   const response = useTrackSearch(searchText);
 
   if (response.error) {
-    showToast(ToastStyle.Failure, "Search has failed", response.error);
+    showToast(Toast.Style.Failure, "Search has failed", response.error);
   }
 
   return (
@@ -39,9 +30,9 @@ export default function SpotifyList() {
 
 function TrackListItem(props: { track: SpotifyApi.TrackObjectFull }) {
   const track = props.track;
-  const icon: ImageLike = {
+  const icon: Image.ImageLike = {
     source: track.album.images[track.album.images.length - 1].url,
-    mask: ImageMask.Circle,
+    mask: Image.Mask.Circle,
   };
   const title = `${track.artists[0].name} – ${track.name}`;
   return (
@@ -52,14 +43,14 @@ function TrackListItem(props: { track: SpotifyApi.TrackObjectFull }) {
       actions={
         <ActionPanel title={title}>
           <PlayAction itemURI={track.uri} />
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             title={`Show Album (${track.album.name.trim()})`}
             url={track.album.external_urls.spotify}
             icon={icon}
             shortcut={{ modifiers: ["cmd"], key: "a" }}
           />
-          <OpenInBrowserAction title="Show Artist" url={track.artists[0].external_urls.spotify} />
-          <CopyToClipboardAction
+          <Action.OpenInBrowser title="Show Artist" url={track.artists[0].external_urls.spotify} />
+          <Action.CopyToClipboard
             title="Copy URL"
             content={track.external_urls.spotify}
             shortcut={{ modifiers: ["cmd"], key: "." }}

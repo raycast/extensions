@@ -1,4 +1,4 @@
-import { ActionPanel, Form, Icon, List, PushAction, SubmitFormAction, useNavigation } from "@raycast/api";
+import { ActionPanel, Form, Icon, List, useNavigation, Action } from "@raycast/api";
 import { useState } from "react";
 
 interface Todo {
@@ -58,7 +58,7 @@ export default function Command() {
 
 function CreateTodoAction(props: { onCreate: (todo: Todo) => void }) {
   return (
-    <PushAction
+    <Action.Push
       icon={Icon.Pencil}
       title="Create Todo"
       shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -69,7 +69,7 @@ function CreateTodoAction(props: { onCreate: (todo: Todo) => void }) {
 
 function ToggleTodoAction(props: { todo: Todo; onToggle: () => void }) {
   return (
-    <ActionPanel.Item
+    <Action
       icon={props.todo.isCompleted ? Icon.Circle : Icon.Checkmark}
       title={props.todo.isCompleted ? "Uncomplete Todo" : "Complete Todo"}
       onAction={props.onToggle}
@@ -79,7 +79,7 @@ function ToggleTodoAction(props: { todo: Todo; onToggle: () => void }) {
 
 function DeleteTodoAction(props: { onDelete: () => void }) {
   return (
-    <ActionPanel.Item
+    <Action
       icon={Icon.Trash}
       title="Delete Todo"
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
@@ -100,7 +100,7 @@ function CreateTodoForm(props: { onCreate: (todo: Todo) => void }) {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create Todo" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Todo" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
