@@ -6,7 +6,8 @@
   "icon": "icon@light.png",
   "author": "bgnfu7re",
   "contributors": [
-    "rcruzper"
+    "rcruzper",
+    "aexvir"
   ],
   "license": "MIT",
   "commands": [
@@ -15,6 +16,13 @@
       "title": "List Dashboards",
       "subtitle": "Datadog",
       "description": "List Dashboards",
+      "mode": "view"
+    },
+    {
+      "name": "command-list-notebooks",
+      "title": "List Notebooks",
+      "subtitle": "Datadog",
+      "description": "List notebooks",
       "mode": "view"
     },
     {
