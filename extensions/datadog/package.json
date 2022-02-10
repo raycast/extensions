@@ -26,6 +26,22 @@
       "mode": "view"
     },
     {
+      "name": "command-list-monitors",
+      "title": "List Monitors",
+      "subtitle": "Datadog",
+      "description": "List monitors",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "tags",
+          "title": "Tags",
+          "description": "Comma separated list indicating what service and/or custom tags, if any, should be used to filter the list of monitors.",
+          "type": "textfield",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "command-list-apm",
       "title": "List APM",
       "subtitle": "Datadog",
