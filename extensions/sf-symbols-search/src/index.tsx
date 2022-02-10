@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List, PasteAction, environment, getPreferenceValues } from "@raycast/api";
+import {ActionPanel, CopyToClipboardAction, List, PasteAction, environment, getPreferenceValues} from "@raycast/api";
 import fs from "node:fs";
 
 interface Preferences {
@@ -8,7 +8,7 @@ interface Preferences {
 export default function Command() {
   const prefs: Preferences = getPreferenceValues();
   const symbols: { name: string; symbol: string; categories: string[] }[] = JSON.parse(
-    fs.readFileSync(`${environment.assetsPath}/symbols.json`, { encoding: "utf8" })
+      fs.readFileSync(`${environment.assetsPath}/symbols.json`, {encoding: "utf8"})
   );
 
   return (
@@ -21,23 +21,25 @@ export default function Command() {
           accessoryTitle={symbol.categories.join(", ")}
           keywords={symbol.categories.concat([symbol.name])} // Add symbol name to categories so it can be searched, since the title is only the symbol
           actions={
+            if(prefs.primaryAction == "paste") {
             <ActionPanel>
-              {
-                if (prefs.primaryAction == "paste") {
-                <PasteAction title="Paste Symbol" content={symbol.symbol}/>
-                <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol} />
-                <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
-              } else if (prefs.primaryAction == "copy") {
-                <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol}/>
-                <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
-                <PasteAction title="Paste Symbol" content={symbol.symbol}/>
-              } else if (prefs.primaryAction == "copyName") {
-                <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
-                <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol}/>
-                <PasteAction title="Paste Symbol" content={symbol.symbol}/>
-              }
-              }
+              <PasteAction title="Paste Symbol" content={symbol.symbol}/>
+              <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol} />
+              <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
             </ActionPanel>
+          } else if (prefs.primaryAction == "copy") {
+            <ActionPanel>
+              <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol}/>
+              <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
+              <PasteAction title="Paste Symbol" content={symbol.symbol}/>
+            </ActionPanel>
+          } else if (prefs.primaryAction == "copyName") {
+            <ActionPanel>
+              <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
+              <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol}/>
+              <PasteAction title="Paste Symbol" content={symbol.symbol}/>
+            </ActionPanel>
+          }
           }
         />
       ))}
