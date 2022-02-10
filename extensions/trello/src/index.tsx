@@ -10,22 +10,22 @@ export default function PackageList() {
 
   const onSearchTextChange = async (text: string) => {
     setLoading(true);
-    const response = await returnTodos(text.replace(/\s/g, "+"));
-    setTodos(response);
-    setLoading(false);
+    await returnTodos(text.replace(/\s/g, "+")).then((response) => {
+      setTodos(response);
+      setLoading(false);
+    });
   };
 
   useEffect(() => {
     async function fetchAllTodos() {
       try {
         setLoading(true);
-
-        const response = await returnTodos("");
-        setLoading(false);
-
-        setTodos(response);
+        await returnTodos("").then((response) => {
+          setTodos(response);
+          setLoading(false);
+        });
       } catch (error) {
-        showToast(ToastStyle.Failure, "Failed loading to dos");
+        showToast(ToastStyle.Failure, "Failed loading todos");
       }
     }
 
