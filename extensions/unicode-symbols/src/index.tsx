@@ -69,7 +69,7 @@ export default function Command() {
                 <ActionPanel>
                   <ActionPanel.Section>
                     <PasteAction
-                      title="Paste Character to Active App"
+                      title="Paste Character in Active App"
                       content={item.value}
                       onPaste={() => addToRecentlyUsedItems(item)}
                     />
