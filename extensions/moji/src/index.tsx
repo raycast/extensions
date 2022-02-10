@@ -32,7 +32,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction title="Open in Browser" url={searchResult.url} />
+            <OpenInBrowserAction url={searchResult.url} />
             <CopyToClipboardAction
               title="Copy"
               content={searchResult.title}
