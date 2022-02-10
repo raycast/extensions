@@ -55,6 +55,7 @@
 /extensions/debank                                   @Yukaii
 /extensions/deepcast                                 @mooxl
 /extensions/devdocs                                  @pomdtr
+/extensions/diff-checker                             @Destiner
 /extensions/displayplacer                            @eluce2
 /extensions/docker                                   @priithaamer
 /extensions/dockerhub                                @k8scat
