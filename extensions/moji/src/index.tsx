@@ -88,6 +88,10 @@ function useSearch() {
 }
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
+  if (searchText.length === 0) {
+    return [];
+  }
+
   let response = await fetch("https://api.mojidict.com/parse/functions/search_v3", {
     method: "POST",
     signal: signal,
