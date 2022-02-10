@@ -1,4 +1,4 @@
-import { environment, preferences, showToast, ToastStyle } from "@raycast/api";
+import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 
 import { useEffect, useState } from "react";
 import { homedir } from "os";
@@ -66,10 +66,21 @@ export interface RepoSearchResponse {
   repos: GitRepo[];
 }
 
-export interface Settings {
-  reposDir: string;
-  maxDepth: number;
-  includeSubmodules: boolean;
+export interface OpenWith {
+  name: string;
+  path: string;
+  bundleId: string;
+}
+
+export interface Preferences {
+  repoScanPath: string;
+  repoScanDepth?: number;
+  includeSubmodules?: boolean;
+  openWith1: OpenWith;
+  openWith2: OpenWith;
+  openWith3?: OpenWith;
+  openWith4?: OpenWith;
+  openWith5?: OpenWith;
 }
 
 export function resolvePath(filepath: string): string {
@@ -93,12 +104,8 @@ function makeSupportPath() {
   fs.mkdirSync(environment.supportPath, { recursive: true });
 }
 
-export async function loadSettings(): Promise<Settings> {
-  return {
-    reposDir: preferences.repoScanPath?.value as string,
-    maxDepth: (preferences.repoScanDepth?.value as number) ?? 3,
-    includeSubmodules: preferences.includeSubmodules?.value as boolean,
-  };
+export async function loadPreferences(): Promise<Preferences> {
+  return getPreferenceValues<Preferences>();
 }
 
 export function gitRemotes(path: string): RemoteRepo[] {
@@ -166,7 +173,7 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
       const findCmd = `find -L ${path} -maxdepth ${maxDepth} -name .git -type d`;
       const { stdout, stderr } = await execp(findCmd);
       if (stderr) {
-        showToast(ToastStyle.Failure, "Find Failed", stderr);
+        showToast(Toast.Style.Failure, "Find Failed", stderr);
         console.error(`error: ${stderr}`);
         return [];
       }
@@ -265,16 +272,20 @@ export function useRepoCache(query: string | undefined): {
       setError(undefined);
 
       try {
-        const settings = await loadSettings();
-        if (settings.reposDir.length == 0) {
+        const preferences = await loadPreferences();
+        if (preferences.repoScanPath.length == 0) {
           setError("Directories to scan has not been defined in settings");
           return;
         }
-        const [repoPaths, unresolvedPaths] = parsePath(settings.reposDir);
+        const [repoPaths, unresolvedPaths] = parsePath(preferences.repoScanPath);
         if (unresolvedPaths.length > 0) {
           setError(`Director${unresolvedPaths.length === 1 ? "y" : "ies"} not found: ${unresolvedPaths}`);
         }
-        const repos = await findRepos(repoPaths, settings.maxDepth, settings.includeSubmodules);
+        const repos = await findRepos(
+          repoPaths,
+          preferences.repoScanDepth ?? 3,
+          preferences.includeSubmodules ?? false
+        );
 
         if (!cancel) {
           let filteredRepos = repos;
