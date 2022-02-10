@@ -28,7 +28,7 @@ export default function Command() {
 }
 
 function getActions() {
-  if(prefs.primaryAction == "paste") {
+  if (prefs.primaryAction == "paste") {
     return (
         <ActionPanel>
           <PasteAction title="Paste Symbol" content={symbol.symbol}/>
