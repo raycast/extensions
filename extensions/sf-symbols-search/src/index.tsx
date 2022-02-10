@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List, PasteAction, environment, getPreferenceValues} from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, List, PasteAction, environment, getPreferenceValues } from "@raycast/api";
 import fs from "node:fs";
 
 interface Preferences {
@@ -8,7 +8,7 @@ interface Preferences {
 export default function Command() {
   const prefs: Preferences = getPreferenceValues();
   const symbols: { name: string; symbol: string; categories: string[] }[] = JSON.parse(
-    fs.readFileSync(`${environment.assetsPath}/symbols.json`, {encoding: "utf8"})
+    fs.readFileSync(`${environment.assetsPath}/symbols.json`, { encoding: "utf8" })
   );
 
   return (
@@ -33,7 +33,7 @@ export default function Command() {
                 <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
                 <PasteAction title="Paste Symbol" content={symbol.symbol}/>
               </ActionPanel>)
-            } else if (prefs.primaryAction == "copyName") {
+            } else {
               return (<ActionPanel>
                 <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
                 <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol}/>
@@ -45,4 +45,25 @@ export default function Command() {
       ))}
     </List>
   );
+}
+
+
+function getActions() {
+  if (!build.pull_request_view_url) {
+    return (
+        <ActionPanel>
+          <OpenInBrowserAction title="Open Build" url={buildUrl}/>
+          <CopyToClipboardAction title="Copy build URL" content={buildUrl}/>
+        </ActionPanel>
+    );
+  } else {
+    return (
+        <ActionPanel>
+          <OpenInBrowserAction title="Open Build" url={buildUrl}/>
+          <CopyToClipboardAction title="Copy Build URL" content={buildUrl}/>
+          <OpenInBrowserAction title="Open PR" url={build.pull_request_view_url}/>
+          <CopyToClipboardAction title="Copy PR URL" content={build.pull_request_view_url}/>
+        </ActionPanel>
+    );
+  }
 }
