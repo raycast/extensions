@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, ImageMask, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Repository } from "./blockchain/repository";
 import { BlockchainConfig } from "./blockchain/config";
@@ -9,6 +9,7 @@ import {
   SearchResult,
   TokenSearchResult,
 } from "./blockchain/model/search-result";
+import { Action } from "@raycast/api";
 
 export default function Command() {
   const [lastQuery, setLastQuery] = useState<string>("");
@@ -28,7 +29,7 @@ export default function Command() {
       const result = await repository.search(query);
       setSearchItems(result);
     } catch (error) {
-      if (error instanceof Error) showToast(ToastStyle.Failure, "Failed initializing", error.message);
+      if (error instanceof Error) showToast(Toast.Style.Failure, "Failed initializing", error.message);
     } finally {
       setIsLoading(false);
     }
@@ -42,7 +43,7 @@ export default function Command() {
         setIsReady(true);
         return queryOnChange(lastQuery);
       })
-      .catch((error) => showToast(ToastStyle.Failure, "Failed initializing", error.message))
+      .catch((error) => showToast(Toast.Style.Failure, "Failed initializing", error.message))
       .finally(() => {
         setIsLoading(false);
       });
@@ -62,7 +63,7 @@ export default function Command() {
                   title={`${_item.pubKey}`}
                   actions={
                     <ActionPanel>
-                      <OpenInBrowserAction url={_item.actionUrl} />
+                      <Action.OpenInBrowser url={_item.actionUrl} />
                     </ActionPanel>
                   }
                 />
@@ -81,10 +82,10 @@ export default function Command() {
               return (
                 <List.Item
                   title={`${_item.name}`}
-                  icon={{ source: _item.icon ?? Icon.Circle, mask: ImageMask.Circle }}
+                  icon={{ source: _item.icon ?? Icon.Circle, mask: Image.Mask.Circle, fallback: "command-icon.png" }}
                   actions={
                     <ActionPanel>
-                      <OpenInBrowserAction url={_item.actionUrl} />
+                      <Action.OpenInBrowser url={_item.actionUrl} />
                     </ActionPanel>
                   }
                 />
@@ -105,7 +106,7 @@ export default function Command() {
                   title={`Slot #${_item.index}`}
                   actions={
                     <ActionPanel>
-                      <OpenInBrowserAction url={_item.actionUrl} />
+                      <Action.OpenInBrowser url={_item.actionUrl} />
                     </ActionPanel>
                   }
                 />
@@ -126,7 +127,7 @@ export default function Command() {
                   title={`Epoch #${_item.index}`}
                   actions={
                     <ActionPanel>
-                      <OpenInBrowserAction url={_item.actionUrl} />
+                      <Action.OpenInBrowser url={_item.actionUrl} />
                     </ActionPanel>
                   }
                 />
