@@ -21,13 +21,13 @@ const Versions: { [key: string]: { [key: string]: DocLink[] } } = {
 export default function main() {
   const preferences = getPreferenceValues();
   const currentDocs = Versions[preferences.version];
-  const currentEnv = ENV[preferences.version];
+  const env = ENV[preferences.version];
 
   const algolia = useMemo(() => {
-    const { ALGOLIA_APP_ID, ALGOLIA_API_KEY, ALGOLIA_INDEX } = currentEnv;
+    const { ALGOLIA_APP_ID, ALGOLIA_API_KEY, ALGOLIA_INDEX } = env;
 
     return algoliasearch(ALGOLIA_APP_ID, ALGOLIA_API_KEY).initIndex(ALGOLIA_INDEX);
-  }, [currentEnv, ENV]);
+  }, [env, ENV]);
 
   const [searchResults, setSearchResults] = useState<any[] | undefined>();
   const [isLoading, setIsLoading] = useState(false);
