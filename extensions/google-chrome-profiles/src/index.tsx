@@ -193,8 +193,9 @@ function ListBookmarks(props: { profile: Profile }) {
     >
       {tabsOnTop.length > 0 && (
         <List.Section title="New Tab">
-          {tabsOnTop.map((tab) => (
+          {tabsOnTop.map((tab, index) => (
             <List.Item
+              key={index}
               title={tab.title}
               subtitle={tab.subtitle}
               icon={{ source: tab.iconURL, fallback: Icon.Globe }}
