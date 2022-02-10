@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { SearchType, Word } from "./types";
 import { searchWords } from "./api";
-import { ActionPanel, CopyToClipboardAction, Detail, List, PasteAction } from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, List, PasteAction } from "@raycast/api";
 
 export default function SearchResults(type: SearchType) {
   const [words, setWords] = useState<Word[]>([]);
@@ -23,20 +23,18 @@ export default function SearchResults(type: SearchType) {
           key={word.word}
           title={word.word}
           subtitle={word.defs !== undefined ? word.defs[0] : ""}
-          actions={
-            <ActionPanel>
-              <PasteAction
-                content={word.word}
-                title="Paste Word"
-                shortcut={{
-                  modifiers: ["cmd"],
-                  key: "return",
-                }}
-              />
-            </ActionPanel>
-          }
+          actions={<Actions word={word} />}
         />
       ))}
     </List>
+  );
+}
+
+function Actions(props: { word: Word }) {
+  return (
+    <ActionPanel>
+      <PasteAction content={props.word.word} title="Paste Word in Active App" />
+      <CopyToClipboardAction content={props.word.word} title={"Copy Word to Clipboard"} />
+    </ActionPanel>
   );
 }
