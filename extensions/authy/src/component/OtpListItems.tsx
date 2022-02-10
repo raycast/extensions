@@ -1,5 +1,4 @@
-import { List } from "@raycast/api";
-import { useEffect, useState, Fragment, createElement } from "react";
+import { useEffect, useState, Fragment } from "react";
 import OtpListItem, { Otp } from "./OtpListItem";
 import { compare } from "../util/compare";
 
@@ -14,11 +13,10 @@ interface TimeState {
 
 interface OtpListItemsProps {
   items: Otp[];
-  title?: string;
   refresh: () => Promise<void>;
 }
 
-export default function OtpListItems({ items, title, refresh }: OtpListItemsProps) {
+export default function OtpListItems({ items, refresh }: OtpListItemsProps) {
   const [{ timeLeft10, timeLeft30 }, setTimes] = useState<TimeState>({
     timeLeft10: calculateTimeLeft(10),
     timeLeft30: calculateTimeLeft(30),
@@ -39,19 +37,19 @@ export default function OtpListItems({ items, title, refresh }: OtpListItemsProp
     return () => clearInterval(id);
   }, []);
 
-  return createElement(
-    title ? List.Section : Fragment,
-    title ? { title } : {},
-    items
-      .sort((a: Otp, b: Otp) => compare(a.name, b.name))
-      .map((item, index) => (
-        <OtpListItem
-          key={index}
-          item={item}
-          basis={item.type === "service" ? 30 : 10}
-          timeLeft={item.type === "service" ? timeLeft30 : timeLeft10}
-          refresh={refresh}
-        />
-      ))
+  return (
+    <Fragment>
+      {items
+        .sort((a: Otp, b: Otp) => compare(a.name, b.name))
+        .map((item, index) => (
+          <OtpListItem
+            key={index}
+            item={item}
+            basis={item.type === "service" ? 30 : 10}
+            timeLeft={item.type === "service" ? timeLeft30 : timeLeft10}
+            refresh={refresh}
+          />
+        ))}
+    </Fragment>
   );
 }

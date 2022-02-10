@@ -1,5 +1,5 @@
 import { getPreferenceValues, List, popToRoot, showToast, ToastStyle } from "@raycast/api";
-import { useEffect, useState, Fragment } from "react";
+import { useEffect, useState } from "react";
 import { addToCache, APPS_KEY, DEVICE_ID, getFromCache, SECRET_SEED, SERVICES_KEY } from "../cache";
 import { AuthyApp, Services } from "../client/dto";
 import { decryptSeed, genTOTP } from "../util/utils";
@@ -104,19 +104,11 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
   }, [props.isLogin]);
 
   const allItems = [...apps, ...services];
-  const isLoading = allItems.length == 0;
-  const { separateAccounts } = getPreferenceValues<{ separateAccounts: boolean }>();
+  const isLoading = allItems.length === 0;
 
   return (
     <List searchBarPlaceholder="Search" isLoading={isLoading}>
-      {separateAccounts ? (
-        <Fragment>
-          <OtpListItems refresh={refresh} title="Apps" items={apps} />
-          <OtpListItems refresh={refresh} title="Services" items={services} />
-        </Fragment>
-      ) : (
-        <OtpListItems refresh={refresh} items={allItems} />
-      )}
+      <OtpListItems refresh={refresh} items={allItems} />
     </List>
   );
 }

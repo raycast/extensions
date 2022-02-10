@@ -55,14 +55,6 @@
       "type": "checkbox",
       "description": "Primary action copies pin to clipboard instead of outputing to front application",
       "default": true
-    },
-    {
-      "required": false,
-      "name": "separateAccounts",
-      "label": "Separate apps and services",
-      "type": "checkbox",
-      "description": "Separate accounts in to apps and services",
-      "default": true
     }
   ],
   "dependencies": {
