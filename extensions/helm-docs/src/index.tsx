@@ -2,15 +2,17 @@ import { useMemo, useState } from "react";
 import { ActionPanel, getPreferenceValues, List, showToast, Action, Toast } from "@raycast/api";
 import algoliasearch from "algoliasearch/lite";
 import striptags from "striptags";
+import { ENV } from "./env";
+import { Hit, KeyValueHierarchy } from "./types/algolia";
 
-const ENV: { [key: string]: string } = {
-  ALGOLIA_APP_ID: "BH4D9OD16A",
-  ALGOLIA_API_KEY: "8bca76b0664b04581dc9f9854e844a90",
-  ALGOLIA_INDEX: "helm",
-  ICON: "helm.png",
+const ICON = "helm.png";
+
+type DocLink = {
+  url: string;
+  title: string;
 };
 
-const Versions: { [key: string]: DocSection } = {
+const Versions: { [key: string]: { [key: string]: DocLink[] } } = {
   "v3.8.0": require("./documentation/v3.8.0.json"),
   "v2.16.7": require("./documentation/v2.16.7.json"),
   "v2.14.0": require("./documentation/v2.14.0.json"),
@@ -19,12 +21,13 @@ const Versions: { [key: string]: DocSection } = {
 export default function main() {
   const preferences = getPreferenceValues();
   const currentDocs = Versions[preferences.version];
+  const currentEnv = ENV[preferences.version];
 
   const algolia = useMemo(() => {
-    const { ALGOLIA_APP_ID, ALGOLIA_API_KEY, ALGOLIA_INDEX } = ENV;
+    const { ALGOLIA_APP_ID, ALGOLIA_API_KEY, ALGOLIA_INDEX } = currentEnv;
 
     return algoliasearch(ALGOLIA_APP_ID, ALGOLIA_API_KEY).initIndex(ALGOLIA_INDEX);
-  }, [ENV]);
+  }, [currentEnv, ENV]);
 
   const [searchResults, setSearchResults] = useState<any[] | undefined>();
   const [isLoading, setIsLoading] = useState(false);
@@ -86,7 +89,7 @@ export default function main() {
               key={hit.objectID}
               title={getTitle(hit)}
               subtitle={getSubTitle(hit)}
-              icon={ENV.ICON}
+              icon={ICON}
               actions={
                 <ActionPanel title={hit.url}>
                   <Action.OpenInBrowser url={hit.url} title="Open in Browser" />
@@ -102,7 +105,7 @@ export default function main() {
                   <List.Item
                     key={item.url}
                     title={item.title}
-                    icon={ENV.ICON}
+                    icon={ICON}
                     actions={
                       <ActionPanel title={item.url}>
                         <Action.OpenInBrowser url={item.url} title="Open in Browser" />
@@ -117,39 +120,3 @@ export default function main() {
     </List>
   );
 }
-
-type DocLink = {
-  url: string;
-  title: string;
-};
-
-type DocSection = {
-  [key: string]: DocLink[];
-};
-
-type KeyValueHierarchy = {
-  [key: string]: string;
-};
-
-type Hit = {
-  url: string;
-  hierarchy: KeyValueHierarchy;
-  objectID: string;
-  _highlightResult: {
-    content:
-      | {
-          value: string;
-          matchlevel: string;
-          fullyHighlighted: boolean;
-          matchedWords: string[];
-        }
-      | undefined;
-    hierarchy: {
-      [key: string]: {
-        value: string;
-        matchLevel: string;
-        matchedWords: string[];
-      };
-    };
-  };
-};
