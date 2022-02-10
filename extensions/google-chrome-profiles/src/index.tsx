@@ -197,7 +197,7 @@ function ListBookmarks(props: { profile: Profile }) {
             <List.Item
               title={tab.title}
               subtitle={tab.subtitle}
-              icon={tab.iconURL}
+              icon={{ source: tab.iconURL, fallback: Icon.Globe }}
               actions={<BookmarksActionPanel profileDirectory={props.profile.directory} url={tab.url} />}
             />
           ))}
@@ -210,7 +210,7 @@ function ListBookmarks(props: { profile: Profile }) {
               key={index}
               title={b.title}
               subtitle={b.subtitle}
-              icon={{ source: b.iconURL }}
+              icon={{ source: b.iconURL, fallback: Icon.Globe }}
               actions={<BookmarksActionPanel profileDirectory={props.profile.directory} url={b.url} />}
             />
           ))}
