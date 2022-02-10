@@ -33,7 +33,7 @@ export default function SearchResults(type: SearchType) {
 function Actions(props: { word: Word }): any {
   return (
     <ActionPanel>
-      <PasteAction content={props.word.word} title="Paste Word" />
+      <PasteAction content={props.word.word} title="Paste Word in Active App" />
       <CopyToClipboardAction content={props.word.word} title={"Copy Word to Clipboard"} />
     </ActionPanel>
   );
