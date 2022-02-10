@@ -149,7 +149,9 @@ function ListBookmarks(props: { profile: Profile }) {
       try {
         const clipboardText = await getClipboardText();
         setClipboard(clipboardText);
-      } catch (error) {}
+      } catch (error) {
+        setClipboard(undefined);
+      }
     }
 
     listBookmarks();
