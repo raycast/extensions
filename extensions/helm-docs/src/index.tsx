@@ -3,11 +3,11 @@ import { ActionPanel, getPreferenceValues, List, showToast, Action, Toast } from
 import algoliasearch from "algoliasearch/lite";
 import striptags from "striptags";
 
-const ENV: { [key: string]: string}= {
+const ENV: { [key: string]: string } = {
   ALGOLIA_APP_ID: "BH4D9OD16A",
   ALGOLIA_API_KEY: "8bca76b0664b04581dc9f9854e844a90",
   ALGOLIA_INDEX: "helm",
-  ICON: 'helm.png'
+  ICON: "helm.png",
 };
 
 const Versions: { [key: string]: DocSection } = {
@@ -30,8 +30,7 @@ export default function main() {
   const [isLoading, setIsLoading] = useState(false);
 
   const hierarchyToArray = (hierarchy: KeyValueHierarchy) => {
-    return Object.values(hierarchy)
-      .filter((hierarchyEntry: string | unknown) => hierarchyEntry);
+    return Object.values(hierarchy).filter((hierarchyEntry: string | unknown) => hierarchyEntry);
   };
 
   const getTitle = (hit: Hit): string => {
@@ -118,7 +117,6 @@ export default function main() {
     </List>
   );
 }
-
 
 type DocLink = {
   url: string;
