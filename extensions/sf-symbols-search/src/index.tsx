@@ -30,27 +30,27 @@ export default function Command() {
 function getActions() {
   if (prefs.primaryAction == "paste") {
     return (
-        <ActionPanel>
-          <PasteAction title="Paste Symbol" content={symbol.symbol}/>
-          <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol} />
-          <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
-        </ActionPanel>
+      <ActionPanel>
+        <PasteAction title="Paste Symbol" content={symbol.symbol} />
+        <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol} />
+        <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{ modifiers: ["opt"], key: "c" }} />
+      </ActionPanel>
     );
   } else if (prefs.primaryAction == "copy") {
     return (
-        <ActionPanel>
-          <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol}/>
-          <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
-          <PasteAction title="Paste Symbol" content={symbol.symbol}/>
-        </ActionPanel>
+      <ActionPanel>
+        <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol} />
+        <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{ modifiers: ["opt"], key: "c" }} />
+        <PasteAction title="Paste Symbol" content={symbol.symbol} />
+      </ActionPanel>
     );
   } else if (prefs.primaryAction == "copyName") {
     return (
-        <ActionPanel>
-          <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{modifiers: ["opt"], key: "c"}}/>
-          <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol}/>
-          <PasteAction title="Paste Symbol" content={symbol.symbol}/>
-        </ActionPanel>
+      <ActionPanel>
+        <CopyToClipboardAction title="Copy Name" content={symbol.name} shortcut={{ modifiers: ["opt"], key: "c" }} />
+        <CopyToClipboardAction title="Copy Symbol" content={symbol.symbol} />
+        <PasteAction title="Paste Symbol" content={symbol.symbol} />
+      </ActionPanel>
     );
   }
 }
