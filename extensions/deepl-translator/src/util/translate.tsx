@@ -1,4 +1,9 @@
-import { Detail, render, getSelectedText, getPreferenceValues } from '@raycast/api';
+import {
+  Detail,
+  render,
+  getSelectedText,
+  getPreferenceValues,
+} from '@raycast/api';
 import translate from 'deepl';
 import { DeeplLanguages } from 'deepl';
 
