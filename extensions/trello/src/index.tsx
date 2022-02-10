@@ -10,9 +10,10 @@ export default function PackageList() {
 
   const onSearchTextChange = async (text: string) => {
     setLoading(true);
-    const response = await returnTodos(text.replace(/\s/g, "+"));
-    setTodos(response);
-    setLoading(false);
+    await returnTodos(text.replace(/\s/g, "+")).then((response) => {
+      setTodos(response);
+      setLoading(false);
+    });
   };
 
   useEffect(() => {
