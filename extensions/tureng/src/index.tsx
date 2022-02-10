@@ -23,7 +23,7 @@ export default function Command() {
   const { state, search } = useSearch();
 
   return (
-    <List onSearchTextChange={search} searchBarPlaceholder="Search Turkish or English word" throttle>
+    <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search Turkish or English word" throttle>
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((searchResult) => (
           <SearchListItem key={searchResult.id} searchResult={searchResult} />
@@ -104,16 +104,22 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
   }
 
 
-
-  const json = (await response.json()) as Json;
-  const jsonResults = (json?.meanings as Json) ?? [];
-  return jsonResults.map((jsonResult) => {
-    const definition = jsonResult as Json;
+  // type Json = Record<string, string, boolean,me>;
+  // type Json = {
+  //   id: string
+  //   word: string;
+  //   success: boolean;
+  //   meanings: unknown;
+  // };
+  const json: any = (await response.json());
+  const jsonResults = (json?.meanings) ?? [];
+  return jsonResults.map((jsonResult: any) => {
+    const definition = jsonResult;
     return {
       id: randomId(),
       word: json?.word as string,
       success: true as boolean,
-      meaning: definition as string,
+      meaning: definition as unknown, 
       url: theURL as string
     };
   });
