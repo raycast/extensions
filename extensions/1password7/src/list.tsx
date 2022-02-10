@@ -149,6 +149,14 @@ function PasswordListCategory(props: { onePasswordMetaItemsCategory: OnePassword
   );
 }
 
+function getItemAccessoryTitle(item: OnePasswordMetaItem) {
+  const vaultName = `🗄 ${item.vaultName}`;
+  if (item.accountName) {
+    return `👤 ${item.accountName} ${vaultName}`;
+  }
+  return vaultName;
+}
+
 function PasswordListItem(props: { onePasswordMetaItem: OnePasswordMetaItem }) {
   const onePasswordMetaItem = props.onePasswordMetaItem;
 
@@ -157,7 +165,7 @@ function PasswordListItem(props: { onePasswordMetaItem: OnePasswordMetaItem }) {
       title={onePasswordMetaItem.itemTitle}
       subtitle={onePasswordMetaItem.categorySingularName}
       icon={getIconForCategory(onePasswordMetaItem.categoryUUID)}
-      accessoryTitle={`👤 ${onePasswordMetaItem.accountName}  🗄 ${onePasswordMetaItem.vaultName}`}
+      accessoryTitle={getItemAccessoryTitle(onePasswordMetaItem)}
       actions={
         <ActionPanel>
           {onePasswordMetaItem.categoryUUID === "001" && (

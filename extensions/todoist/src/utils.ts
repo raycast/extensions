@@ -1,8 +1,7 @@
-import { showToast, ToastStyle } from "@raycast/api";
-import { AxiosError } from "axios";
-import { addDays, format, formatISO, isToday, isThisYear, isTomorrow, isBefore } from "date-fns";
+import { Task } from "@doist/todoist-api-typescript";
+import { addDays, format, formatISO, isToday, isThisYear, isTomorrow, isBefore, compareAsc } from "date-fns";
 import { partition } from "lodash";
-import { Task } from "./types";
+import { priorities } from "./constants";
 
 export function isRecurring(task: Task): boolean {
   return task.due?.recurring || false;
@@ -50,19 +49,30 @@ export function partitionTasksWithOverdue(tasks: Task[]) {
   return partition(tasks, (task: Task) => task.due?.date && isBeforeToday(new Date(task.due.date)));
 }
 
-export async function showApiToastError({
-  error,
-  title,
-  message,
-}: {
-  error: AxiosError;
-  title: string;
-  message: string;
-}) {
-  if (error.response?.status === 401 || error.response?.status === 403) {
-    await showToast(ToastStyle.Failure, "Unauthorized", "Please check your Todoist token");
-    return;
+export function getSectionsWithDueDates(tasks: Task[]) {
+  const [overdue, upcoming] = partitionTasksWithOverdue(tasks);
+
+  const allDueDates = [...new Set(tasks.map((task) => task.due?.date))] as string[];
+  allDueDates.sort((dateA, dateB) => compareAsc(new Date(dateA), new Date(dateB)));
+
+  const sections = allDueDates.map((date) => ({
+    name: displayDueDate(date),
+    tasks: upcoming?.filter((task) => task.due?.date === date) || [],
+  }));
+
+  if (overdue.length > 0) {
+    sections.unshift({
+      name: "Overdue",
+      tasks: overdue,
+    });
   }
 
-  await showToast(ToastStyle.Failure, title, message);
+  return sections;
+}
+
+export function getSectionsWithPriorities(tasks: Task[]) {
+  return priorities.map(({ name, value }) => ({
+    name,
+    tasks: tasks?.filter((task) => task.priority === value) || [],
+  }));
 }

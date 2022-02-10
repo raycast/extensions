@@ -10,16 +10,18 @@ import {
   getPreferenceValues,
   copyTextToClipboard,
   closeMainWindow,
+  PasteAction,
+  Color,
 } from "@raycast/api";
-import { Item, Folder, VaultStatus } from "./types";
-import { useEffect, useState } from "react";
+import { Item, VaultStatus } from "./types";
+import React, { useEffect, useState } from "react";
 import treeify from "treeify";
 import { filterNullishPropertiesFromObject, codeBlock, titleCase, faviconUrl } from "./utils";
 import { useBitwarden } from "./hooks";
 import { TroubleshootingGuide, UnlockForm } from "./components";
 import { Bitwarden } from "./api";
 
-const { fetchFavicons } = getPreferenceValues();
+const { fetchFavicons, primaryAction } = getPreferenceValues();
 
 export default function Search(): JSX.Element {
   try {
@@ -41,23 +43,12 @@ function ItemList(props: {
   vaultStatus: VaultStatus | undefined;
 }) {
   const { bitwardenApi, sessionToken, vaultStatus } = props;
-  const [state, setState] = useState<{ folders: Folder[]; items: Item[] }>();
-
-  const folderMap: Record<string, Folder> = {};
-  for (const folder of state?.folders || []) {
-    if (folder.id) {
-      folderMap[folder.id] = folder;
-    }
-  }
+  const [items, setItems] = useState<Item[]>();
 
   async function loadItems(sessionToken: string) {
     try {
-      const [items, folders] = await Promise.all([
-        bitwardenApi.listItems<Item>("items", sessionToken),
-        bitwardenApi.listItems<Folder>("folders", sessionToken),
-      ]);
-
-      setState({ items, folders });
+      const items = await bitwardenApi.listItems<Item>("items", sessionToken);
+      setItems(items);
     } catch (error) {
       showToast(ToastStyle.Failure, "Failed to search vault");
     }
@@ -88,38 +79,24 @@ function ItemList(props: {
     }
   }
 
-  const favoriteItems = [];
-  const regularItems = [];
-  for (const item of state?.items || []) {
-    item.favorite ? favoriteItems.push(item) : regularItems.push(item);
-  }
-
   return (
-    <List isLoading={typeof state === "undefined"}>
-      <List.Section title="Favorites">
-        {favoriteItems.map((item) => (
-          <ItemListItem
-            key={item.id}
-            item={item}
-            folder={item.folderId ? folderMap[item.folderId] : undefined}
-            refreshItems={refreshItems}
-            sessionToken={sessionToken}
-            copyTotp={copyTotp}
-          />
-        ))}
-      </List.Section>
-      <List.Section title="Others">
-        {regularItems.map((item) => (
-          <ItemListItem
-            key={item.id}
-            item={item}
-            folder={item.folderId ? folderMap[item.folderId] : undefined}
-            refreshItems={refreshItems}
-            sessionToken={sessionToken}
-            copyTotp={copyTotp}
-          />
-        ))}
-      </List.Section>
+    <List isLoading={typeof items === "undefined"}>
+      {items
+        ? items
+            .sort((a, b) => {
+              if (a.favorite && b.favorite) return 0;
+              return a.favorite ? -1 : 1;
+            })
+            .map((item) => (
+              <ItemListItem
+                key={item.id}
+                item={item}
+                refreshItems={refreshItems}
+                sessionToken={sessionToken}
+                copyTotp={copyTotp}
+              />
+            ))
+        : null}
     </List>
   );
 }
@@ -137,17 +114,13 @@ function getIcon(item: Item) {
 
 function ItemListItem(props: {
   item: Item;
-  folder: Folder | undefined;
   refreshItems?: () => void;
   sessionToken: string | undefined;
   copyTotp: (sessionToken: string | undefined, id: string) => void;
 }) {
-  const { item, folder, refreshItems, sessionToken, copyTotp } = props;
+  const { item, refreshItems, sessionToken, copyTotp } = props;
   const { name, notes, identity, login, secureNote, fields, passwordHistory, card } = item;
-  const accessoryIcons = [];
 
-  if (folder) accessoryIcons.push(`📂 ${folder.name}`);
-  if (item.favorite) accessoryIcons.push(`⭐️`);
   const fieldMap = Object.fromEntries(fields?.map((field) => [field.name, field.value]) || []);
   const uriMap = Object.fromEntries(
     login?.uris?.filter((uri) => uri.uri).map((uri, index) => [`uri${index + 1}`, uri.uri]) || []
@@ -161,7 +134,6 @@ function ItemListItem(props: {
     card: filterNullishPropertiesFromObject(card),
     secureNote,
     fields,
-    folder: folder?.name,
     passwordHistory,
   });
 
@@ -172,12 +144,12 @@ function ItemListItem(props: {
       id={item.id}
       title={item.name}
       keywords={item.name.split(/\W/)}
-      accessoryTitle={accessoryIcons ? accessoryIcons.join("  ") : undefined}
+      accessoryIcon={item.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined}
       icon={getIcon(item)}
       subtitle={item.login?.username || undefined}
       actions={
         <ActionPanel>
-          {item.login?.password ? <CopyToClipboardAction title="Copy Password" content={item.login.password} /> : null}
+          {item.login?.password ? <PasswordActions password={item.login.password} /> : null}
           {item.login?.totp ? (
             <ActionPanel.Item
               title="Copy TOTP"
@@ -208,7 +180,6 @@ function ItemListItem(props: {
           >
             {Object.entries({
               username: login?.username,
-              folder: folder?.name,
               notes,
               ...card,
               ...identity,
@@ -244,5 +215,14 @@ function ItemListItem(props: {
         </ActionPanel>
       }
     />
+  );
+}
+
+function PasswordActions(props: { password: string }) {
+  const copyAction = <CopyToClipboardAction key="copy" title="Copy Password" content={props.password} />;
+  const pasteAction = <PasteAction key="paste" title="Paste Password" content={props.password} />;
+
+  return (
+    <React.Fragment>{primaryAction == "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}</React.Fragment>
   );
 }

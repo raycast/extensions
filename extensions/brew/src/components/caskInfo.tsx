@@ -2,9 +2,8 @@ import { Detail, useNavigation } from "@raycast/api";
 import { CaskActionPanel } from "./actionPanels";
 import { Cask, brewName } from "../brew";
 
-export function CaskInfo(props: { cask: Cask; onAction: (result: boolean) => void }) {
+export function CaskInfo(props: { cask: Cask; onAction: (result: boolean) => void }): JSX.Element {
   const { pop } = useNavigation();
-
   return (
     <Detail
       markdown={formatInfo(props.cask)}
@@ -31,6 +30,8 @@ ${cask.desc}
 
 [${cask.homepage}](${cask.homepage})
 
+${formatTokenAndTap(cask)}
+
 ${formatVersion(cask)}
 
 ${formatDependencies(cask)}
@@ -38,6 +39,15 @@ ${formatDependencies(cask)}
 ${formatConflicts(cask)}
 
 ${formatCaveats(cask)}
+  `;
+}
+
+function formatTokenAndTap(cask: Cask): string {
+  return `
+#### Cask
+${cask.token}
+
+Tap: ${cask.tap}
   `;
 }
 

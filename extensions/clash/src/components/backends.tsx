@@ -14,6 +14,7 @@ import {
   showToast,
   SubmitFormAction,
   ToastStyle,
+  useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCurrentBackend, setCurrentBackend } from "../utils";
@@ -34,7 +35,7 @@ async function removeBackend(url: string) {
 
 export default function Backends(): JSX.Element {
   const [refreshKey, setRefreshKey] = useState(0);
-  // const { pop: popNavigation } = useNavigation();
+  const { pop: popNavigation } = useNavigation();
   const [backends, setBackends] = useState({} as BackendsT);
   const [current, setCurrent] = useState("");
 
@@ -114,8 +115,9 @@ export default function Backends(): JSX.Element {
                             setCurrent(values.url);
                             setRefreshKey((oldKey) => oldKey + 1);
                             showToast(ToastStyle.Success, "Add Success", values.url);
-                            // TODO: how to use pop without effect
-                            // popNavigation();
+                            // ref: https://github.com/raycast/extensions/issues/571
+                            // no problem with(@raycast/api>=1.27.0)
+                            popNavigation();
                           } else {
                             await showToast(ToastStyle.Failure, "invalid url");
                           }

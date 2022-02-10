@@ -27,6 +27,7 @@ interface Note {
 interface Vault {
   name: string;
   key: string;
+  path: string;
 }
 
 interface Preferences {
@@ -60,7 +61,7 @@ const getFilesHelp = function (dirPath: string, exFolders: Array<string>, arrayO
   arrayOfFiles = arrayOfFiles || [];
   files.forEach(function (file: string) {
     const next = fs.statSync(dirPath + "/" + file);
-    if (next.isDirectory()) {
+    if (next.isDirectory() && !file.includes(".obsidian")) {
       arrayOfFiles = getFilesHelp(dirPath + "/" + file, exFolders, arrayOfFiles);
     } else {
       if (file.endsWith(".md") && file !== ".md" && !dirPath.includes(".obsidian") && isValidFile(dirPath, exFolders)) {
@@ -77,12 +78,28 @@ function getFiles(vaultPath: string) {
   return files;
 }
 
-function prefVaults() {
+function getVaultNameFromPath(vaultPath: string): string {
+  const name = vaultPath
+    .split(path.sep)
+    .filter((i) => {
+      if (i != "") {
+        return i;
+      }
+    })
+    .pop();
+  if (name) {
+    return name;
+  } else {
+    return "Default Vault Name (check your path preferences)";
+  }
+}
+
+function parseVaults() {
   const pref: Preferences = getPreferenceValues();
   const vaultString = pref.vaultPath;
   return vaultString
     .split(",")
-    .map((vault) => ({ name: vault.trim(), key: vault.trim() }))
+    .map((vault) => ({ name: getVaultNameFromPath(vault.trim()), key: vault.trim(), path: vault.trim() }))
     .filter((vault) => !!vault);
 }
 
@@ -183,6 +200,18 @@ function NoteActions(props: { note: Note }) {
         content={getNoteContent(note)}
         shortcut={{ modifiers: ["opt"], key: "v" }}
       />
+
+      <CopyToClipboardAction
+        title="Copy markdown link"
+        content={`[${note.title}](obsidian://open?path=${encodeURIComponent(note.path)})`}
+        shortcut={{ modifiers: ["opt"], key: "l" }}
+      />
+
+      <CopyToClipboardAction
+        title="Copy obsidian URI"
+        content={`obsidian://open?path=${encodeURIComponent(note.path)}`}
+        shortcut={{ modifiers: ["opt"], key: "u" }}
+      />
     </React.Fragment>
   );
 }
@@ -253,7 +282,12 @@ function OpenNoteActions(props: { note: Note }) {
       </React.Fragment>
     );
   } else {
-    return <React.Fragment></React.Fragment>;
+    return (
+      <React.Fragment>
+        {quicklook}
+        {obsidian}
+      </React.Fragment>
+    );
   }
 }
 
@@ -302,7 +336,7 @@ function VaultSelection(props: { vaults: Vault[] }) {
           key={vault.key}
           actions={
             <ActionPanel>
-              <PushAction title="Select Vault" target={<NoteList vaultPath={vault.name} />} />
+              <PushAction title="Select Vault" target={<NoteList vaultPath={vault.path} />} />
             </ActionPanel>
           }
         />
@@ -312,11 +346,11 @@ function VaultSelection(props: { vaults: Vault[] }) {
 }
 
 export default function Command() {
-  const vaults = prefVaults();
+  const vaults = parseVaults();
   if (vaults.length > 1) {
     return <VaultSelection vaults={vaults} />;
   } else if (vaults.length == 1) {
-    return <NoteList vaultPath={vaults[0].name} />;
+    return <NoteList vaultPath={vaults[0].path} />;
   } else {
     showToast(ToastStyle.Failure, "Path Error", "Something went wrong with your vault path.");
   }

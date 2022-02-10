@@ -12,10 +12,9 @@ export interface FormulaListProps {
   onAction: () => void;
 }
 
-export function FormulaList(props: FormulaListProps) {
+export function FormulaList(props: FormulaListProps): JSX.Element {
   const formulae = props.formulae;
   const casks = props.casks;
-
   return (
     <List
       searchBarPlaceholder={props.searchBarPlaceholder}
@@ -38,7 +37,7 @@ export function FormulaList(props: FormulaListProps) {
   );
 }
 
-export function FormulaListItem(props: { formula: Formula; onAction: () => void }) {
+export function FormulaListItem(props: { formula: Formula; onAction: () => void }): JSX.Element {
   const formula = props.formula;
   let version = formula.versions.stable;
   let tintColor = Color.SecondaryText;
@@ -59,7 +58,7 @@ export function FormulaListItem(props: { formula: Formula; onAction: () => void 
   );
 }
 
-export function CaskListItem(props: { cask: Cask; onAction: () => void }) {
+export function CaskListItem(props: { cask: Cask; onAction: () => void }): JSX.Element {
   const cask = props.cask;
   let version = cask.version;
   let tintColor = Color.SecondaryText;
@@ -80,6 +79,6 @@ export function CaskListItem(props: { cask: Cask; onAction: () => void }) {
   );
 }
 
-export function MoreListItem() {
+export function MoreListItem(): JSX.Element {
   return <List.Item title="" icon={Icon.Dot} />;
 }

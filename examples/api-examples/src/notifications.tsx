@@ -1,11 +1,11 @@
-import { ActionPanel, Detail, showHUD, showToast, Toast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Detail, showHUD, showToast, Toast, Action } from "@raycast/api";
 import { setTimeout } from "timers/promises";
 
 const description = `
 # Notifications
 
 In Raycast, users perform actions to create or update content. It's best to confirm these actions
-with visual elements. For this, you can show toasts or HUDs. 
+with visual elements. For this, you can show toasts or HUDs.
 
 ## Toasts
 
@@ -14,7 +14,7 @@ them for confirming network requests, e.g. updating a Linear issue.
 
 ## HUDs
 
-HUDs are perfect to show when you confirm a small action. Showing a HUD closes the main window. 
+HUDs are perfect to show when you confirm a small action. Showing a HUD closes the main window.
 We use them when you copy something to the clipboard, e.g. in the Clipboard History.
 `;
 
@@ -25,20 +25,29 @@ export default function Command() {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <ActionPanel.Item
+            <Action
               title="Show Success Toast"
-              onAction={() => showToast(ToastStyle.Success, "Showed success toast")}
+              onAction={() =>
+                showToast({
+                  style: Toast.Style.Success,
+                  title: "Showed success toast",
+                })
+              }
             />
-            <ActionPanel.Item
+            <Action
               title="Show Failure Toast with Message"
               onAction={() =>
-                showToast(ToastStyle.Failure, "Showed failure toast", "Message with additional information")
+                showToast({
+                  style: Toast.Style.Failure,
+                  title: "Showed failure toast",
+                  message: "Message with additional information",
+                })
               }
             />
             <AnimatedToast />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <ActionPanel.Item title="Show HUD" onAction={() => showHUD("Showed HUD")} />
+            <Action title="Show HUD" onAction={() => showHUD("Showed HUD")} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -48,14 +57,13 @@ export default function Command() {
 
 function AnimatedToast() {
   async function showAnimatedToast() {
-    const toast = new Toast({ style: ToastStyle.Animated, title: "Updating something" });
-    toast.show();
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Updating something" });
 
     await setTimeout(1000);
 
-    toast.style = ToastStyle.Success;
+    toast.style = Toast.Style.Success;
     toast.title = "Updated something";
   }
 
-  return <ActionPanel.Item title="Show Animated Toast" onAction={showAnimatedToast} />;
+  return <Action title="Show Animated Toast" onAction={showAnimatedToast} />;
 }

@@ -1,4 +1,4 @@
-import { List, ActionPanel, OpenInBrowserAction, CopyToClipboardAction } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
 import { Bookmark } from "./api";
 
 export function BookmarkListItem(props: { bookmark: Bookmark }) {
@@ -12,8 +12,8 @@ export function BookmarkListItem(props: { bookmark: Bookmark }) {
       accessoryTitle={bookmark.tags}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={bookmark.url} />
-          <CopyToClipboardAction title="Copy URL" content={bookmark.url} />
+          <Action.OpenInBrowser url={bookmark.url} />
+          <Action.CopyToClipboard title="Copy URL" content={bookmark.url} />
         </ActionPanel>
       }
     />
