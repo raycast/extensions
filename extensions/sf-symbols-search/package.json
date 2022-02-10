@@ -29,6 +29,10 @@
         {
           "title": "Copy to Clipboard",
           "value": "copy"
+        },
+        {
+          "title": "Copy Name to Clipboard",
+          "value": "copyName"
         }
       ],
       "default": "paste"
