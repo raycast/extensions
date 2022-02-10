@@ -20,11 +20,10 @@ export default function PackageList() {
     async function fetchAllTodos() {
       try {
         setLoading(true);
-
-        const response = await returnTodos("");
-        setLoading(false);
-
-        setTodos(response);
+        await returnTodos("").then((response) => {
+          setTodos(response);
+          setLoading(false);
+        });
       } catch (error) {
         showToast(ToastStyle.Failure, "Failed loading todos");
       }
