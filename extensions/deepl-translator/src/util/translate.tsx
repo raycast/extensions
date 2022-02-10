@@ -1,6 +1,5 @@
-import { Detail, render, getSelectedText } from '@raycast/api';
+import { Detail, render, getSelectedText, getPreferenceValues } from '@raycast/api';
 import translate from 'deepl';
-import { getPreferenceValues } from '@raycast/api';
 import { DeeplLanguages } from 'deepl';
 
 const preferences = getPreferenceValues();

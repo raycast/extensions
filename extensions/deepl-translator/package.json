@@ -24,18 +24,126 @@
       "title": "DeepL Pro",
       "description": "If you are a DeepL Pro account, please check the box.",
       "placeholder": "If you are a DeepL Pro account, please check the box."
+    },
+    {
+      "name": "firstLanguage",
+      "type": "dropdown",
+      "title": "First Language",
+      "required": false,
+      "default": "EN",
+      "data": [
+        {
+          "title": "Chinese",
+          "value": "ZH"
+        },
+        {
+          "title": "Dutch",
+          "value": "NL"
+        },
+        {
+          "title": "English",
+          "value": "EN"
+        },
+        {
+          "title": "French",
+          "value": "FR"
+        },
+        {
+          "title": "German",
+          "value": "DE"
+        },
+        {
+          "title": "Italian",
+          "value": "IT"
+        },
+        {
+          "title": "Japanese",
+          "value": "JA"
+        },
+        {
+          "title": "Polish",
+          "value": "PL"
+        },
+        {
+          "title": "Portuguese",
+          "value": "PT"
+        },
+        {
+          "title": "Russian",
+          "value": "RU"
+        },
+        {
+          "title": "Spanish",
+          "value": "ES"
+        }
+      ],
+      "description": "Set the first language"
+    },
+    {
+      "name": "secondLanguage",
+      "type": "dropdown",
+      "title": "Second Language",
+      "required": false,
+      "default": "JA",
+      "data": [
+        {
+          "title": "Chinese",
+          "value": "ZH"
+        },
+        {
+          "title": "Dutch",
+          "value": "NL"
+        },
+        {
+          "title": "English",
+          "value": "EN"
+        },
+        {
+          "title": "French",
+          "value": "FR"
+        },
+        {
+          "title": "German",
+          "value": "DE"
+        },
+        {
+          "title": "Italian",
+          "value": "IT"
+        },
+        {
+          "title": "Japanese",
+          "value": "JA"
+        },
+        {
+          "title": "Polish",
+          "value": "PL"
+        },
+        {
+          "title": "Portuguese",
+          "value": "PT"
+        },
+        {
+          "title": "Russian",
+          "value": "RU"
+        },
+        {
+          "title": "Spanish",
+          "value": "ES"
+        }
+      ],
+      "description": "Set the first language"
     }
   ],
   "commands": [
     {
-      "name": "toEnglish",
-      "title": "Translate To English",
+      "name": "firstLanguage",
+      "title": "Translate To First Language",
       "description": "Translate By DeepL",
       "mode": "view"
     },
     {
-      "name": "toJapanese",
-      "title": "Translate To Japanese",
+      "name": "secondLanguage",
+      "title": "Translate To Second Language",
       "description": "Translate By DeepL",
       "mode": "view"
     }
