@@ -5,6 +5,9 @@
   "description": "Search, sync and use your Authy 2fa tokens with Raycast",
   "icon": "command-icon.png",
   "author": "guga4ka",
+  "contributors": [
+    "lukekarrys"
+  ],
   "license": "MIT",
   "commands": [
     {
