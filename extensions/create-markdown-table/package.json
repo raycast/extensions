@@ -10,7 +10,7 @@
     {
       "name": "create-markdown-table",
       "title": "Create Markdown Table",
-      "description": "",
+      "description": "create markdown table from clipboard text",
       "mode": "no-view"
     }
   ],
