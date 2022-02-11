@@ -25,7 +25,7 @@ jobs:
         with:
           github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
           script: |
-            const script = require('../scripts/notify-contributors-on-pr.js')
+            const script = require('./scripts/notify-contributors-on-pr')
             await script({
               github,
               context,
