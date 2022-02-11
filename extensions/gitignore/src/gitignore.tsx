@@ -9,11 +9,11 @@ import { GitignoreFile } from "./types";
  */
 function GitignoreList({
   gitignoreFiles,
-  icon,
+  selected,
   toggleSelection,
 }: {
   gitignoreFiles: GitignoreFile[];
-  icon: Image.ImageLike;
+  selected: boolean;
   toggleSelection: (gitignoreFile: GitignoreFile) => void;
 }) {
   return (
@@ -24,20 +24,25 @@ function GitignoreList({
           <List.Item
             key={gitignore.path}
             id={gitignore.path}
-            icon={icon}
+            icon={selected ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle}
             title={gitignore.name}
             keywords={keywords}
             accessoryTitle={gitignore.folder}
             actions={
               <ActionPanel>
                 <Action
-                  title="Select"
+                  title={selected ? "Deselect" : "Select"}
+                  icon={selected ? Icon.Circle : Icon.Checkmark}
                   onAction={() => {
                     clearSearchBar();
                     toggleSelection(gitignore);
                   }}
                 />
-                <Action title="Copy Contents to Clipboard" onAction={() => exportClipboard([gitignore])} />
+                <Action
+                  title="Copy Contents to Clipboard"
+                  icon={Icon.Clipboard}
+                  onAction={() => exportClipboard([gitignore])}
+                />
               </ActionPanel>
             }
           />
@@ -62,7 +67,11 @@ export default function Gitignore() {
             title="Generate and Copy to Clipboard"
             actions={
               <ActionPanel>
-                <Action title="Generate and Copy to Clipboard" onAction={() => exportClipboard(selected)} />
+                <Action
+                  title="Generate and Copy to Clipboard"
+                  icon={Icon.Clipboard}
+                  onAction={() => exportClipboard(selected)}
+                />
               </ActionPanel>
             }
           />
@@ -84,17 +93,13 @@ export default function Gitignore() {
       {/* Render selected files */}
       {selected && (
         <List.Section title="Selected">
-          <GitignoreList
-            gitignoreFiles={selected}
-            icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
-            toggleSelection={toggleSelection}
-          />
+          <GitignoreList gitignoreFiles={selected} selected={true} toggleSelection={toggleSelection} />
         </List.Section>
       )}
       {/* Render unselected files */}
       {unselected && (
         <List.Section title="Available">
-          <GitignoreList gitignoreFiles={unselected} icon={Icon.Circle} toggleSelection={toggleSelection} />
+          <GitignoreList gitignoreFiles={unselected} selected={false} toggleSelection={toggleSelection} />
         </List.Section>
       )}
     </List>
