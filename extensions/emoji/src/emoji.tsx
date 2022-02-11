@@ -5,6 +5,8 @@ import {
   List,
   getLocalStorageItem,
   setLocalStorageItem,
+  closeMainWindow,
+  popToRoot,
   preferences,
 } from "@raycast/api";
 
@@ -112,12 +114,24 @@ export default function Main(): ReactElement {
                         <PasteAction
                           title="Paste Emoji in Active App"
                           content={emoji.emoji}
-                          onPaste={() => addToRecentlyUsed(emoji)}
+                          onPaste={
+                            () => {
+                              closeMainWindow();
+                              popToRoot();
+                              addToRecentlyUsed(emoji);
+                            }
+                          }
                         />
                         <CopyToClipboardAction
                           title="Copy Emoji to Clipboard"
                           content={emoji.emoji}
-                          onCopy={() => addToRecentlyUsed(emoji)}
+                          onCopy={
+                            () => {
+                              closeMainWindow();
+                              popToRoot();
+                              addToRecentlyUsed(emoji);
+                            }
+                          }
                         />
                       </ActionPanel.Section>
                     </ActionPanel>
