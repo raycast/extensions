@@ -1,58 +1,49 @@
-import { List, ActionPanel, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getPokemon } from "./api";
-import type { PokemonV2Pokemon, PokemonV2Pokemonspecy } from "./types";
+import groupBy from "lodash.groupby";
+import PokemonDetail from "./components/detail";
+
+import pokemon from "./pokemon.json";
+
+const listing = groupBy(pokemon, "generation");
+
+type Generation = {
+  [geneartion: string]: Pokemon[];
+};
+
+type Pokemon = {
+  id: number;
+  name: string;
+  types: string[];
+  artwork: string;
+  generation: string;
+};
 
 export default function SearchPokemon() {
+  const { push } = useNavigation();
+
   const [nameOrId, setNameOrId] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [pokemons, setPokemons] = useState<PokemonV2Pokemon[]>([]);
+  const [generation, setGeneration] = useState<Generation>(listing);
 
   useEffect(() => {
-    async function fetch() {
-      await getPokemon(nameOrId)
-        .then((data) => {
-          setPokemons(data);
-        })
-        .catch(() => {
-          setPokemons([]);
-        });
-
-      setLoading(false);
-    }
-
     if (nameOrId.length > 0) {
-      setLoading(true);
-      fetch();
+      const filtered = pokemon.filter(
+        (p: Pokemon) =>
+          p.name.toLowerCase().includes(nameOrId.toLowerCase()) ||
+          p.id === Number(nameOrId)
+      );
+      const grouped = groupBy(filtered, "generation");
+      setGeneration(grouped);
     }
   }, [nameOrId]);
 
   const onSearchChange = (newSearch: string) => {
     // backspace
     if (newSearch.length < nameOrId.length) {
-      setPokemons([]);
+      setGeneration(listing);
     }
     setNameOrId(newSearch);
   };
-
-  const accessoryTitle = (specy: PokemonV2Pokemonspecy): string => {
-    if (specy.is_baby) return "Baby";
-    if (specy.is_legendary) return "Legendary";
-    if (specy.is_mythical) return "Mythical";
-
-    return "";
-  };
-
-  const abilities = (pkm: PokemonV2Pokemon) =>
-    pkm.pokemon_v2_pokemonabilities_aggregate.nodes
-      .map((a) => {
-        if (a.is_hidden) {
-          return `${a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name} (hidden)`;
-        }
-
-        return a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name;
-      })
-      .join(", ");
 
   const pkmNumber = (id: number) => {
     return id.toString().padStart(3, "0");
@@ -61,93 +52,39 @@ export default function SearchPokemon() {
   return (
     <List
       throttle
-      isLoading={loading}
       onSearchTextChange={onSearchChange}
       searchBarPlaceholder="Search Pokémon by name or number..."
     >
-      {pokemons.map((pokemon) => {
+      {Object.entries(generation).map(([generation, pokemons]) => {
         return (
-          <>
-            <List.Section>
+          <List.Section
+            title={generation}
+            subtitle={pokemons.length.toString()}
+          >
+            {pokemons.map((pokemon) => (
               <List.Item
                 key={pokemon.id}
-                title={
-                  pokemon.pokemon_v2_pokemonspecy
-                    .pokemon_v2_pokemonspeciesnames[0].name
-                }
-                subtitle={`#${pkmNumber(pokemon.id)}`}
-                accessoryTitle={accessoryTitle(pokemon.pokemon_v2_pokemonspecy)}
+                title={`#${pkmNumber(pokemon.id)}`}
+                subtitle={pokemon.name}
+                accessoryTitle={pokemon.types.join(", ")}
                 icon={{
-                  source: `https://assets.pokemon.com/assets/cms2/img/pokedex/full/${pkmNumber(
-                    pokemon.id
-                  )}.png`,
+                  source: pokemon.artwork,
                 }}
                 actions={
                   <ActionPanel>
-                    <OpenInBrowserAction
-                      url={`https://www.pokemon.com/us/pokedex/${pokemon.pokemon_v2_pokemonspecy.name}`}
+                    <ActionPanel.Item
+                      title="See more details"
+                      onAction={() =>
+                        push(
+                          <PokemonDetail id={pokemon.id} name={pokemon.name} />
+                        )
+                      }
                     />
                   </ActionPanel>
                 }
               />
-            </List.Section>
-            <List.Section title="Pokédex data">
-              <List.Item
-                key="type"
-                title="Type"
-                subtitle={pokemon.pokemon_v2_pokemontypes_aggregate.nodes
-                  .map((n) => n.pokemon_v2_type.pokemon_v2_typenames[0].name)
-                  .join(", ")}
-              />
-              <List.Item
-                key="height"
-                title="Height"
-                subtitle={`${pokemon.height / 10}m`}
-              />
-              <List.Item
-                key="weight"
-                title="Weight"
-                subtitle={`${pokemon.weight / 10}kg`}
-              />
-              <List.Item
-                key="abilities"
-                title="Abilities"
-                subtitle={abilities(pokemon)}
-              />
-            </List.Section>
-            <List.Section
-              title="Base stats"
-              subtitle={pokemon.pokemon_v2_pokemonstats_aggregate.aggregate.sum.base_stat.toString()}
-            >
-              {pokemon.pokemon_v2_pokemonstats_aggregate.nodes.map((n) => {
-                return (
-                  <List.Item
-                    key={n.pokemon_v2_stat.name}
-                    title={n.pokemon_v2_stat.pokemon_v2_statnames[0].name}
-                    subtitle={n.base_stat.toString()}
-                  />
-                );
-              })}
-            </List.Section>
-            <List.Section title="Pokédex entries">
-              {pokemon.pokemon_v2_pokemonspecy.pokemon_v2_pokemonspeciesflavortexts
-                .filter(
-                  (f) => f.pokemon_v2_version.pokemon_v2_versionnames.length
-                )
-                .map((flavor) => {
-                  return (
-                    <List.Item
-                      key={flavor.pokemon_v2_version.name}
-                      title={
-                        flavor.pokemon_v2_version.pokemon_v2_versionnames[0]
-                          .name
-                      }
-                      subtitle={flavor.flavor_text.split("\n").join(" ")}
-                    />
-                  );
-                })}
-            </List.Section>
-          </>
+            ))}
+          </List.Section>
         );
       })}
     </List>

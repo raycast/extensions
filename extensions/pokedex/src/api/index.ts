@@ -2,16 +2,10 @@ import axios, { AxiosRequestConfig } from "axios";
 import { showToast, ToastStyle } from "@raycast/api";
 import type { PokemonV2Pokemon } from "../types";
 
-export const getPokemon = async (
-  nameOrId: string
-): Promise<PokemonV2Pokemon[]> => {
-  const condition = Number.isNaN(Number(nameOrId))
-    ? `{name: {_eq: "${nameOrId.toLowerCase()}"}}`
-    : `{id: {_eq: ${nameOrId}}}`;
-
+export const getPokemon = async (id: number): Promise<PokemonV2Pokemon[]> => {
   const query = JSON.stringify({
-    query: `query pokeAPI($language_id: Int) {
-      pokemon_v2_pokemon(where: ${condition}) {
+    query: `query pokeAPI($language_id: Int, $pokemon_id: Int) {
+      pokemon_v2_pokemon(where: {id: {_eq: $pokemon_id}}) {
         id
         name
         height
@@ -74,6 +68,7 @@ export const getPokemon = async (
     }`,
     variables: {
       language_id: 9, // en
+      pokemon_id: id,
     },
   });
 
