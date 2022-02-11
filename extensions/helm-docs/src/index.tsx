@@ -5,7 +5,12 @@ import striptags from "striptags";
 import { ENV } from "./env";
 import { Hit, KeyValueHierarchy } from "./types/algolia";
 
-const ICON = "helm.png";
+const ICON = {
+  source: {
+    light: "helm.png",
+    dark: "helm@dark.png",
+  },
+};
 
 type DocLink = {
   url: string;
