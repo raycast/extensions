@@ -57,7 +57,7 @@ const useStateFromLocalStorage = <T, _ = void>(
       setLocalStorageItem(key, JSON.stringify(newValue));
       return newValue;
     });
-  }, []);
+  }, [setState]);
 
   return [state, setStateAndLocalStorage, loading];
 };
@@ -91,7 +91,7 @@ export default function Main(): ReactElement {
     setRecentlyUsed((list) =>
       list.find((x) => x.description === emoji.description) ? list : [emoji, ...list].slice(0, 10)
     );
-  }, []);
+  }, [setRecentlyUsed]);
 
   const isLoading = list.length === 0 || loadingRecentlyUsed;
 
