@@ -5,10 +5,12 @@ module.exports = async ({ github, context, core, changedFiles }) => {
   const codeowners = getCodeOwners();
 
   const touchedExtensions = new Set(
-    changedFiles.map((x) => {
-      const parts = x.split("/");
-      return `/extensions/${parts[1]}`;
-    })
+    changedFiles
+      .filter((x) => x.startsWith("extensions"))
+      .map((x) => {
+        const parts = x.split("/");
+        return `/extensions/${parts[1]}`;
+      })
   );
 
   if (touchedExtensions.size > 1) {
@@ -99,9 +101,9 @@ function getCodeOwners() {
 }
 
 // Create a new comment or update the existing one
-function comment({ github, context, comment }) {
+async function comment({ github, context, comment }) {
   // Get the existing comments on the PR
-  const { data: comments } = await github.issues.listComments({
+  const { data: comments } = await github.rest.issues.listComments({
     owner: context.repo.owner,
     repo: context.repo.repo,
     issue_number: context.issue.number,
@@ -111,14 +113,14 @@ function comment({ github, context, comment }) {
   const botComment = comments.find((comment) => comment.user.login === "raycastbot");
 
   if (botComment) {
-    await github.issues.updateComment({
+    await github.rest.issues.updateComment({
       owner: context.repo.owner,
       repo: context.repo.repo,
       comment_id: botComment.id,
       body: comment,
     });
   } else {
-    await github.issues.createComment({
+    await github.rest.issues.createComment({
       owner: context.repo.owner,
       repo: context.repo.repo,
       issue_number: context.issue.number,
