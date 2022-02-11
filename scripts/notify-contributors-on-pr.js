@@ -5,10 +5,12 @@ module.exports = async ({ github, context, core, changedFiles }) => {
   const codeowners = getCodeOwners();
 
   const touchedExtensions = new Set(
-    changedFiles.map((x) => {
-      const parts = x.split("/");
-      return `/extensions/${parts[1]}`;
-    })
+    changedFiles
+      .filter((x) => x.startsWith("extensions"))
+      .map((x) => {
+        const parts = x.split("/");
+        return `/extensions/${parts[1]}`;
+      })
   );
 
   if (touchedExtensions.size > 1) {
