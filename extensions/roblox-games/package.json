@@ -10,7 +10,6 @@
     {
       "name": "index",
       "title": "Launch Roblox",
-      "subtile": "Search for and join a Roblox place",
       "description": "Searches for & launches Roblox places",
       "keywords": ["roblox","game","play","join","experience","place"],
       "mode": "view"
