@@ -5,7 +5,10 @@ import { Bookmark, addBookmark } from "./api";
 import he from "he";
 
 export default function Command() {
-  const [state, setState] = useState<{ url: string; title: string }>({ url: "", title: "" });
+  const [state, setState] = useState<{ url: string; title: string }>({
+    url: "",
+    title: "it's a test for the bot, don't mind me",
+  });
 
   useEffect(() => {
     (async () => {
