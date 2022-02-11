@@ -53,7 +53,7 @@ function useStateFromLocalStorage<T>(key: string, initialValue: T): [T, Dispatch
       setLocalStorageItem(key, JSON.stringify(newValue));
       return newValue;
     });
-  }, [setState]);
+  }, []);
 
   return [state, setStateAndLocalStorage, loading];
 }
