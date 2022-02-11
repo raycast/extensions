@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "keepassxc",
-  "title": "KeepassXC",
-  "description": "Access Keepass Database with KeepassXC-cli. Please Make Sure KeepassXC is Installed",
+  "title": "KeePassXC",
+  "description": "Access the KeePass database with the KeepassXC-cli. Please make sure KeePassXC is installed.",
   "icon": "keepassxc.png",
   "author": "zkytech",
   "license": "MIT",
