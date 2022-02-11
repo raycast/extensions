@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "helm-docs",
   "title": "Helm Documentation",
-  "description": "Helm documentation",
+  "description": "Quickly search through the Helm docs directly from Raycast.",
   "icon": "helm.png",
   "author": "tiagomichaelsousa",
   "license": "MIT",
