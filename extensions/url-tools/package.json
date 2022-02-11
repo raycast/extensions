@@ -4,7 +4,7 @@
   "title": "URL Tools",
   "description": "Quickly encode or decode URL from the clipboard",
   "icon": "command-icon.png",
-  "author": "joshuah46",
+  "author": "joshua46",
   "license": "MIT",
   "commands": [
     {
