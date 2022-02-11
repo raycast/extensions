@@ -7,7 +7,7 @@ export const getPokemon = async (
 ): Promise<PokemonV2Pokemon[]> => {
   const condition = Number.isNaN(Number(nameOrId))
     ? `{name: {_eq: ${nameOrId}}}`
-    : `{id: {_eq: ${nameOrId}}}`;
+    : `{id: {_eq: ${nameOrId.toLowerCase()}}}`;
 
   const data = JSON.stringify({
     query: `query pokeAPI($language_id: Int, $pokemon_id: String) {
