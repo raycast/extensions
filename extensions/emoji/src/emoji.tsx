@@ -114,24 +114,20 @@ export default function Main(): ReactElement {
                         <PasteAction
                           title="Paste Emoji in Active App"
                           content={emoji.emoji}
-                          onPaste={
-                            () => {
-                              closeMainWindow();
-                              popToRoot();
-                              addToRecentlyUsed(emoji);
-                            }
-                          }
+                          onPaste={() => {
+                            closeMainWindow();
+                            popToRoot();
+                            addToRecentlyUsed(emoji);
+                          }}
                         />
                         <CopyToClipboardAction
                           title="Copy Emoji to Clipboard"
                           content={emoji.emoji}
-                          onCopy={
-                            () => {
-                              closeMainWindow();
-                              popToRoot();
-                              addToRecentlyUsed(emoji);
-                            }
-                          }
+                          onCopy={() => {
+                            closeMainWindow();
+                            popToRoot();
+                            addToRecentlyUsed(emoji);
+                          }}
                         />
                       </ActionPanel.Section>
                     </ActionPanel>
