@@ -1,6 +1,6 @@
 name: Notify Contributors
 on:
-  pull_request:
+  pull_request_target:
     paths:
       - "extensions/**"
     branches: [main, master]
@@ -12,6 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 2
 
       - name: Setup Node.js
