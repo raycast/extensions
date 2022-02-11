@@ -4,4 +4,4 @@ KeePassXC is an open source password manager (Just like offline version of 1Pass
 
 If you are not familier with keepassxc, follow thease steps to create a basic test environment.
 
-![img](createDatabase.png)
+![img](media/createDatabase.png)

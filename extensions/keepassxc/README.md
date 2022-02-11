@@ -4,7 +4,7 @@ This is a Raycast extension to access keepass database.
 
 ## Requirements
 
-- [KeePassXC.app](https://keepassxc.org") installed.(`keepassxc-cli` in `KeepassXC.app` is required to access keepass database
+- [KeePassXC.app](https://keepassxc.org) installed.(`keepassxc-cli` in `KeepassXC.app` is required to access keepass database
 
 ## Setup
 
@@ -14,10 +14,11 @@ There are 3 parameters required for this extension to work:
 - a keepass database file
 - password to access database
 
-![preference](preferences.png)
+![preference](media/preferences.png)
+
 ## Usage
 
-![example](example.gif)
+![example](media/example.gif)
 
 ### Shortcuts
 
