@@ -25,7 +25,7 @@ jobs:
         with:
           github-token: ${{ secrets.RAYCAST_BOT_API_ACCESS_TOKEN }}
           script: |
-            const script = require('../../scripts/notify-contributors.js')
+            const script = require('../scripts/notify-contributors.js')
             await script({
               github,
               context,
@@ -33,16 +33,16 @@ jobs:
               changedFiles: "${{ steps.changed-files.outputs.all_changed_files }}".split(' ')
             })
 
-      - name: Notify Failure to Slack
-        if: failure()
-        uses: edge/simple-slack-notify@master
-        with:
-          color: "danger"
-          text: ":no_entry_sign: ${env.GITHUB_WORKFLOW} has failed"
-          fields: |
-            [
-              { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
-              { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
-            ]
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
+      # - name: Notify Failure to Slack
+      #   if: failure()
+      #   uses: edge/simple-slack-notify@master
+      #   with:
+      #     color: "danger"
+      #     text: ":no_entry_sign: ${env.GITHUB_WORKFLOW} has failed"
+      #     fields: |
+      #       [
+      #         { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
+      #         { "title": "Commit:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/commit/${ env.GITHUB_SHA }"}
+      #       ]
+      #   env:
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_CHANNEL_WEBHOOK_URL }}
