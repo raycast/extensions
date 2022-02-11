@@ -2,7 +2,7 @@
   "Introduction": [
     {
       "title": "Quickstart Guide",
-      "url": "https://helm.sh/docs/intro/quickstart"
+      "url": "https://helm.sh/docs/intro/quickstart/"
     },
     {
       "title": "Installing Helm",
