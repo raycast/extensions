@@ -52,7 +52,7 @@ export default function Gitignore() {
   const [{ gitignoreFiles, lastUpdated, loading }, selectedIds, toggleSelection, refresh] = useGitignore();
 
   useEffect(() => {
-    clearSearchBar({ forceScrollToTop: false })
+    clearSearchBar({ forceScrollToTop: false });
   }, [selectedIds]);
 
   const selected = gitignoreFiles.filter((gitignoreFile) => selectedIds.has(gitignoreFile.id));
