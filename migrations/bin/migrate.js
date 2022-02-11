@@ -44,7 +44,7 @@ if (!currentVersion) {
 }
 
 console.log(
-  `💡 Found the current version of @raycast/cli: ${currentVersion.version}`
+  `💡 Found the current version of @raycast/api: ${currentVersion.version}`
 );
 
 const migrationsToApply = migrations.filter((x) =>
@@ -67,7 +67,7 @@ migrationsToApply.forEach((x) => console.log(`  - ${x}`));
 console.log("");
 console.log("-----------------------");
 console.log("");
-console.log("🎭 Updating the @raycast/cli version in the package.json...");
+console.log("🎭 Updating the @raycast/api version in the package.json...");
 console.log("");
 
 packageJSON.dependencies["@raycast/api"] = `^${
