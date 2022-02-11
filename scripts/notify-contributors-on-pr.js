@@ -103,7 +103,7 @@ function getCodeOwners() {
 // Create a new comment or update the existing one
 async function comment({ github, context, comment }) {
   // Get the existing comments on the PR
-  const { data: comments } = await github.issues.listComments({
+  const { data: comments } = await github.rest.issues.listComments({
     owner: context.repo.owner,
     repo: context.repo.repo,
     issue_number: context.issue.number,
