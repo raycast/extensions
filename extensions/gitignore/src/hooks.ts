@@ -121,7 +121,7 @@ export function useGitignore(): [
             title: "Successfully downloaded gitignore files",
           });
         }
-        // Generate list of Gitignore files
+        // Create list of Gitignore files
         const gitignoreFiles = await loadGitignoreFiles(LATEST_PATH);
         const lastUpdated = new Date((await LocalStorage.getItem("last-updated")) as number);
         // Update state

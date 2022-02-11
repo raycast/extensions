@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gitignore",
   "title": "Gitignore",
-  "description": "Quickly generate a gitignore file for your project.",
+  "description": "Quickly create a gitignore file for your project.",
   "icon": "command-icon.png",
   "author": "daniel-stoneuk",
   "license": "MIT",
@@ -10,7 +10,7 @@
     {
       "name": "gitignore",
       "title": "Gitignore",
-      "description": "Generate a gitignore file for selected project types.",
+      "description": "Create a gitignore file for selected project types.",
       "mode": "view"
     }
   ],

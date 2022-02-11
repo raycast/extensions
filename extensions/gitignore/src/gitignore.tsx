@@ -1,12 +1,9 @@
-import { Action, ActionPanel, clearSearchBar, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, clearSearchBar, Color, Icon, List } from "@raycast/api";
 import React from "react";
-import { exportClipboard } from "./clipboard";
+import { exportClipboard, exportPaste } from "./clipboard";
 import { useGitignore } from "./hooks";
 import { GitignoreFile } from "./types";
 
-/**
- * Generate list of Gitignore files with provided icon
- */
 function GitignoreList({
   gitignoreFiles,
   selected,
@@ -34,7 +31,6 @@ function GitignoreList({
                   title={selected ? "Deselect" : "Select"}
                   icon={selected ? Icon.Circle : Icon.Checkmark}
                   onAction={() => {
-                    clearSearchBar();
                     toggleSelection(gitignore);
                   }}
                 />
@@ -63,15 +59,12 @@ export default function Gitignore() {
       <List.Section>
         {selected.length > 0 ? (
           <List.Item
-            icon={Icon.Clipboard}
-            title="Generate and Copy to Clipboard"
+            icon={Icon.Document}
+            title="Create .gitignore From Selection"
             actions={
               <ActionPanel>
-                <Action
-                  title="Generate and Copy to Clipboard"
-                  icon={Icon.Clipboard}
-                  onAction={() => exportClipboard(selected)}
-                />
+                <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => exportClipboard(selected)} />
+                <Action title="Paste to App" icon={Icon.TextDocument} onAction={() => exportPaste(selected)} />
               </ActionPanel>
             }
           />
