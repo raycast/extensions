@@ -22,7 +22,7 @@ interface Preferences {
 export default function Command() {
   const preferences: Preferences = getPreferenceValues();
   const [loading, setLoading] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState("try");
   const { push } = useNavigation();
 
   // @ts-expect-error theme isn't there yet
