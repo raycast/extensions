@@ -113,14 +113,14 @@ async function comment({ github, context, comment }) {
   const botComment = comments.find((comment) => comment.user.login === "raycastbot");
 
   if (botComment) {
-    await github.issues.updateComment({
+    await github.rest.issues.updateComment({
       owner: context.repo.owner,
       repo: context.repo.repo,
       comment_id: botComment.id,
       body: comment,
     });
   } else {
-    await github.issues.createComment({
+    await github.rest.issues.createComment({
       owner: context.repo.owner,
       repo: context.repo.repo,
       issue_number: context.issue.number,
