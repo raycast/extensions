@@ -1,10 +1,10 @@
 ## Description
 
-<!-- A short summary of your change. If you add a new extension or command, explain what it does. -->
+<!-- A summary of your change. If you add a new extension or command, explain what it does. -->
 
 ## Screencast
 
-<!-- If you add a new extension or command, include a screencast (or screenshot for a small change). Good screencast will make the review much faster, especially your extension requires registration in other services.  -->
+<!-- If you add a new extension or command, include a screencast (or screenshot for straightforward changes). A good screencast will make the review much faster - especially if your extension requires registration in other services.  -->
 
 ## Checklist
 
