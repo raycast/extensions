@@ -1,5 +1,5 @@
 import { Action, ActionPanel, clearSearchBar, Color, Icon, List } from "@raycast/api";
-import React from "react";
+import React, { useEffect } from "react";
 import { exportClipboard, exportPaste } from "./clipboard";
 import { useGitignore } from "./hooks";
 import { GitignoreFile } from "./types";
@@ -50,6 +50,10 @@ function GitignoreList({
 
 export default function Gitignore() {
   const [{ gitignoreFiles, lastUpdated, loading }, selectedIds, toggleSelection, refresh] = useGitignore();
+
+  useEffect(() => {
+    clearSearchBar({ forceScrollToTop: false })
+  }, [selectedIds]);
 
   const selected = gitignoreFiles.filter((gitignoreFile) => selectedIds.has(gitignoreFile.id));
   const unselected = gitignoreFiles.filter((gitignoreFile) => !selectedIds.has(gitignoreFile.id));
