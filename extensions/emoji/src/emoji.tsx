@@ -22,11 +22,7 @@ type Emoji = {
   shortCode?: string[];
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const useStateFromLocalStorage = <T, _ = void>(
-  key: string,
-  initialValue: T
-): [T, Dispatch<SetStateAction<T>>, boolean] => {
+function useStateFromLocalStorage<T>(key: string, initialValue: T): [T, Dispatch<SetStateAction<T>>, boolean] {
   const [loading, setLoading] = useState(true);
   const [state, setState] = useState<T>(initialValue);
 
@@ -60,7 +56,7 @@ const useStateFromLocalStorage = <T, _ = void>(
   }, [setState]);
 
   return [state, setStateAndLocalStorage, loading];
-};
+}
 
 export default function Main(): ReactElement {
   const [list, setList] = useStateFromLocalStorage<Category[]>("emoji-list", []);
