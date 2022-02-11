@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "create-markdown-table",
   "title": "Create Markdown Table",
-  "description": "",
+  "description": "create markdown table from clipboard text",
   "icon": "command-icon.png",
   "author": "chyroc",
   "license": "MIT",
