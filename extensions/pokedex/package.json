@@ -18,9 +18,11 @@
   "dependencies": {
     "@raycast/api": "^1.27.1",
     "axios": "^0.25.0",
+    "json2md": "^1.12.0",
     "lodash.groupby": "^4.6.0"
   },
   "devDependencies": {
+    "@types/json2md": "^1.5.1",
     "@types/lodash.groupby": "^4.6.6",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",

@@ -9,6 +9,10 @@ This extension is made by [Anh Thang Bui](https://github.com/anhthang) and uses 
 
 ![Example](./media/example.png)
 
+## Issue Tracker
+
+https://github.com/anhthang/raycast-pokedex/issues
+
 ## Notes
 
 Icon downloaded from [Iconfinder](https://www.iconfinder.com/icons/1337536/game_go_play_pokedex_pokemon_tool_icon)
