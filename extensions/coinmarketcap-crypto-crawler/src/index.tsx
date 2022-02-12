@@ -17,6 +17,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 import { getListFromFile, CRYPTO_LIST_PATH, refreshExistingCache } from "./utils";
+import refreshCryptoList from './utils/refreshCryptoList'
 import useFavoriteCoins from "./utils/useFavoriteCoins";
 import { CryptoCurrency, PriceData } from "./types";
 import useCoinPriceStore from "./utils/useCoinPriceStore";
@@ -98,6 +99,7 @@ function CoinListItem({
             }}
           />
           <ActionPanelItem title="Refresh Price" onAction={() => refreshCoinPrice()} icon={Icon.ArrowClockwise} />
+          <ActionPanelItem title="Refresh Crypto List" onAction={() => refreshCryptoList()} icon={Icon.ArrowClockwise} />
         </ActionPanel>
       }
     />
