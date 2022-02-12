@@ -220,12 +220,11 @@ export default function SearchCryptoList() {
 
   const onSearchChange = (search: string) => {
     setIsLoading(true);
-
+    const MAX_SEARCH_RESULT = 500;
     const fuzzyResult = fuzzysort.go(search, cryptoList, { keys: ["symbol", "name"] });
-    const transformedFuzzyResult = fuzzyResult.map((result) => result.obj);
-
+    const transformedFuzzyResult = fuzzyResult.slice(0,MAX_SEARCH_RESULT-1).map((result) => result.obj);
+    
     setSearchResult(transformedFuzzyResult);
-
     setIsLoading(false);
   };
 
