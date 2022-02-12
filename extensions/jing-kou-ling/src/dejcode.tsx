@@ -17,16 +17,17 @@ export default function DeCode() {
                 title="解析结果"
             >
                 {
-                    Object.keys(state.result).map(key => (
-                        < DecodeItem key={key} title={key} value={state.result[key]} />
-                    ))
+                    (Object.keys(state.result) as Array<keyof IDcodeResult>)
+                        .map(<K extends keyof IDcodeResult>(key: K) => (
+                            < DecodeItem key={key} title={key} value={state.result[key]} />
+                        ))
                 }
             </List.Section>
         </List>
     )
 }
 
-function DecodeItem({ title, value }: { title: string, value: string | number }) {
+function DecodeItem({ title, value }: { title: string, value: string | number | undefined }) {
     return (
         <List.Item
             title={title}
