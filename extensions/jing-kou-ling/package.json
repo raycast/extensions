@@ -3,7 +3,7 @@
   "name": "jing-kou-ling",
   "title": "京口令",
   "description": "generate and parse JD code ｜ 用于生成和解析京东口令",
-  "icon": "jdCodeIcon.jpeg",
+  "icon": "jdCodeIcon.png",
   "author": "zooPanda",
   "license": "MIT",
   "commands": [
