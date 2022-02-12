@@ -134,7 +134,7 @@ export default function PokemonDetail(props: PropsType) {
   return (
     <Detail
       isLoading={loading}
-      navigationTitle={props.name}
+      navigationTitle={`Pokémon - ${props.name}`}
       markdown={markdown(pokemons[0])}
       actions={
         <ActionPanel>

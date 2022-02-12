@@ -1,4 +1,4 @@
-import { ActionPanel, List, useNavigation } from "@raycast/api";
+import { ActionPanel, List, Icon, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import groupBy from "lodash.groupby";
 import PokemonDetail from "./components/detail";
@@ -45,15 +45,42 @@ export default function SearchPokemon() {
     setNameOrId(newSearch);
   };
 
+  const random = (lower: number, upper: number) => {
+    return lower + Math.floor(Math.random() * (upper - lower + 1));
+  };
+
   return (
     <List
       throttle
       onSearchTextChange={onSearchChange}
       searchBarPlaceholder="Search Pokémon by name or number..."
     >
+      {!nameOrId && (
+        <List.Section>
+          <List.Item
+            key="surprise"
+            title="Surprise Me!"
+            accessoryTitle="Random Pokémon selector"
+            icon={Icon.MagnifyingGlass}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Item
+                  title="Surprise Me!"
+                  icon={Icon.MagnifyingGlass}
+                  onAction={() => {
+                    const id = random(1, 898);
+                    setNameOrId(id.toString());
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
       {Object.entries(generation).map(([generation, pokemons]) => {
         return (
           <List.Section
+            key={generation}
             title={generation}
             subtitle={pokemons.length.toString()}
           >
