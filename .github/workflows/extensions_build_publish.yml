@@ -28,9 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+        uses: raycast/github-actions/git-checkout@v1.6.0
       - name: Run Ray CLI
         id: ray_cli
         uses: raycast/github-actions/ray@v1.6.0
