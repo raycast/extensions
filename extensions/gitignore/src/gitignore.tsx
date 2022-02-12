@@ -1,7 +1,8 @@
-import { Action, ActionPanel, clearSearchBar, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, clearSearchBar, Color, Icon, List, useNavigation } from "@raycast/api";
 import React, { useEffect } from "react";
 import { exportClipboard, exportPaste } from "./clipboard";
 import { useGitignore } from "./hooks";
+import GitignorePreview from "./preview";
 import { GitignoreFile } from "./types";
 
 function GitignoreList({
@@ -13,6 +14,8 @@ function GitignoreList({
   selected: boolean;
   toggleSelection: (gitignoreFile: GitignoreFile) => void;
 }) {
+  const { push } = useNavigation();
+
   return (
     <React.Fragment>
       {gitignoreFiles.map((gitignore) => {
@@ -38,6 +41,12 @@ function GitignoreList({
                   title="Copy Contents to Clipboard"
                   icon={Icon.Clipboard}
                   onAction={() => exportClipboard([gitignore])}
+                />
+                <Action
+                  title="Preview"
+                  icon={Icon.Eye}
+                  shortcut={{ modifiers: ["cmd"], key: "p" }}
+                  onAction={() => push(<GitignorePreview gitignoreFile={gitignore} />)}
                 />
               </ActionPanel>
             }
