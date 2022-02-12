@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Clipboard } from "@raycast/api";
 import axios from "axios";
 import { useState } from "react";
 
@@ -17,6 +17,7 @@ export default function Command() {
     console.log(data);
     if (data.code === 200) {
       setFormLoading(false);
+      Clipboard.copy(data.data)
       showToast({ title: "生成成功", message: "口令已复制到剪贴板", style: Toast.Style.Success });
     } else {
       setFormLoading(false);
