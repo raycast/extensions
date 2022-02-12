@@ -10,7 +10,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Teamwork Desk",
+      "title": "List Tickets",
+       "subtitle": "Teamwork Desk",
       "description": "List all tickets and quickly access from Raycast.",
       "mode": "view",
       "keywords": [
