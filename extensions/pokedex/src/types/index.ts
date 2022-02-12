@@ -50,8 +50,19 @@ export type PokemonV2Pokemonspecy = {
   is_legendary: boolean;
   is_baby: boolean;
   name: string;
+  pokemon_v2_evolutionchain: PokemonV2Evolutionchain;
   pokemon_v2_pokemonspeciesnames: PokemonV2Name[];
   pokemon_v2_pokemonspeciesflavortexts: PokemonV2Pokemonspeciesflavortext[];
+};
+
+type PokemonV2Evolutionchain = {
+  pokemon_v2_pokemonspecies: PokemonV2PokemonspecyElement[];
+};
+
+type PokemonV2PokemonspecyElement = {
+  id: number;
+  name: string;
+  pokemon_v2_pokemonspeciesnames: PokemonV2Name[];
 };
 
 type PokemonV2Pokemonspeciesflavortext = {

@@ -45,10 +45,6 @@ export default function SearchPokemon() {
     setNameOrId(newSearch);
   };
 
-  const pkmNumber = (id: number) => {
-    return id.toString().padStart(3, "0");
-  };
-
   return (
     <List
       throttle
@@ -64,7 +60,7 @@ export default function SearchPokemon() {
             {pokemons.map((pokemon) => (
               <List.Item
                 key={pokemon.id}
-                title={`#${pkmNumber(pokemon.id)}`}
+                title={`#${pokemon.id.toString().padStart(3, "0")}`}
                 subtitle={pokemon.name}
                 accessoryTitle={pokemon.types.join(", ")}
                 icon={{
@@ -73,7 +69,7 @@ export default function SearchPokemon() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Item
-                      title="Sow Details"
+                      title="Show Details"
                       onAction={() =>
                         push(
                           <PokemonDetail id={pokemon.id} name={pokemon.name} />

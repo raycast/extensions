@@ -4,7 +4,7 @@ import type { PokemonV2Pokemon } from "../types";
 
 export const getPokemon = async (id: number): Promise<PokemonV2Pokemon[]> => {
   const query = JSON.stringify({
-    query: `query pokeAPI($language_id: Int, $pokemon_id: Int) {
+    query: `query pokemon($language_id: Int, $pokemon_id: Int) {
       pokemon_v2_pokemon(where: {id: {_eq: $pokemon_id}}) {
         id
         name
@@ -50,6 +50,15 @@ export const getPokemon = async (id: number): Promise<PokemonV2Pokemon[]> => {
           is_legendary
           is_baby
           name
+          pokemon_v2_evolutionchain {
+            pokemon_v2_pokemonspecies(order_by: {is_baby: desc}) {
+              id
+              name
+              pokemon_v2_pokemonspeciesnames(where: {language_id: {_eq: $language_id}}) {
+                name
+              }
+            }
+          }
           pokemon_v2_pokemonspeciesnames(where: {language_id: {_eq: $language_id}}) {
             name
           }

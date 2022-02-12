@@ -45,10 +45,6 @@ export default function PokemonDetail(props: PropsType) {
       })
       .join(", ");
 
-  const pkmNumber = (id: number) => {
-    return id.toString().padStart(3, "0");
-  };
-
   const markdown = (pokemon: PokemonV2Pokemon): string | null => {
     if (!pokemon) return null;
 
@@ -57,6 +53,9 @@ export default function PokemonDetail(props: PropsType) {
       pokemon_v2_pokemontypes_aggregate,
       pokemon_v2_pokemonstats_aggregate,
     } = pokemon;
+
+    const pkmNumber = pokemon.id.toString().padStart(3, "0");
+
     const data = [
       {
         h1: pokemon_v2_pokemonspecy.pokemon_v2_pokemonspeciesnames[0].name,
@@ -69,14 +68,15 @@ export default function PokemonDetail(props: PropsType) {
           {
             title:
               pokemon_v2_pokemonspecy.pokemon_v2_pokemonspeciesnames[0].name,
-            source: `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${pkmNumber(
-              pokemon.id
-            )}.png`,
+            source: `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${pkmNumber}.png`,
           },
         ],
       },
       {
         h2: "Pokédex data",
+      },
+      {
+        p: `_National №:_ ${pkmNumber}`,
       },
       {
         p:
@@ -98,6 +98,21 @@ export default function PokemonDetail(props: PropsType) {
       }),
       {
         p: `Total: **${pokemon_v2_pokemonstats_aggregate.aggregate.sum.base_stat}**`,
+      },
+      {
+        h2: "Evolution chart",
+      },
+      {
+        img: pokemon_v2_pokemonspecy.pokemon_v2_evolutionchain.pokemon_v2_pokemonspecies.map(
+          (specy) => {
+            return {
+              title: specy.pokemon_v2_pokemonspeciesnames[0].name,
+              source: `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${specy.id
+                .toString()
+                .padStart(3, "0")}.png`,
+            };
+          }
+        ),
       },
       {
         h2: "Pokédex entries",
