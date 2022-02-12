@@ -124,7 +124,9 @@ export default function PokemonDetail(props: PropsType) {
       actions={
         <ActionPanel>
           <OpenInBrowserAction
-            url={`https://www.pokemon.com/us/pokedex/${props.name.toLowerCase()}`}
+            url={`https://www.pokemon.com/us/pokedex/${
+              pokemons[0] && pokemons[0].pokemon_v2_pokemonspecy.name
+            }`}
           />
         </ActionPanel>
       }

@@ -73,7 +73,7 @@ export default function SearchPokemon() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Item
-                      title="See more details"
+                      title="Sow Details"
                       onAction={() =>
                         push(
                           <PokemonDetail id={pokemon.id} name={pokemon.name} />
