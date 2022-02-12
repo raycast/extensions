@@ -1,7 +1,9 @@
 import useSWR from "swr";
 import { fetchBookmarks, sendAction } from "./api";
 import { Bookmark } from "./types";
-import { Toast, ToastStyle } from "@raycast/api";
+import { showToast, Toast, ToastStyle } from "@raycast/api";
+import { useEffect } from "react";
+import { HTTPError } from "got";
 
 interface UseBookmarksOptions {
   name?: string;
@@ -9,12 +11,20 @@ interface UseBookmarksOptions {
 }
 
 export function useBookmarks({ name, state }: UseBookmarksOptions) {
-  const { data, error, isValidating, mutate } = useSWR<Array<Bookmark>>(
+  const { data, error, isValidating, mutate } = useSWR<Array<Bookmark>, HTTPError>(
     ["v3/get", name, state],
     async (url, name, state) => {
       return fetchBookmarks({ name, state });
     }
   );
+
+  useEffect(() => {
+    if (error) {
+      if (error.response.statusCode === 401) {
+        showToast(ToastStyle.Failure, "Invalid Credentials", "Check you Pocket extension preferences");
+      }
+    }
+  }, [error])
 
   async function toggleFavorite(id: string) {
     const bookmark = data?.find((bookmark) => bookmark.id === id);
