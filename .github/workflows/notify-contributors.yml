@@ -17,7 +17,7 @@ jobs:
 
       - name: Get changed files in the docs folder
         id: changed-files
-        uses: Ana06/get-changed-files@v1.1
+        uses: Ana06/get-changed-files@v2.1
         with:
           format: "json"
 
