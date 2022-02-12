@@ -14,10 +14,9 @@ export default function Command() {
     }
     setFormLoading(true);
     const { data } = await axios.post("https://api.jds.codes/jd/gencode", { ...values });
-    console.log(data);
     if (data.code === 200) {
       setFormLoading(false);
-      Clipboard.copy(data.data)
+      Clipboard.copy(data.data.code)
       showToast({ title: "生成成功", message: "口令已复制到剪贴板", style: Toast.Style.Success });
     } else {
       setFormLoading(false);
