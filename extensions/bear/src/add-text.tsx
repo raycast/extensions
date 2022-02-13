@@ -1,4 +1,13 @@
-import { ActionPanel, closeMainWindow, Form, Icon, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  closeMainWindow,
+  Form,
+  Icon,
+  showToast,
+  SubmitFormAction,
+  ToastStyle,
+  popToRoot,
+} from "@raycast/api";
 import open from "open";
 import { useEffect, useState } from "react";
 import { Note } from "./bear-db";
@@ -58,7 +67,9 @@ export default function AddText({ note }: { note: Note }) {
         }&timestamp=${values.timestamp ? "yes" : "no"}&text=${encodeURIComponent(values.text)}`,
         { background: values.openNote === "no" ? true : false }
       );
+
       await closeMainWindow();
+      await popToRoot({ clearSearchBar: true });
     };
     return <SubmitFormAction icon={Icon.Plus} title="Append Text" onSubmit={handleSubmit} />;
   };
