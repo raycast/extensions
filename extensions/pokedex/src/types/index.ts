@@ -42,6 +42,7 @@ type PokemonV2Ability = {
 };
 
 type PokemonV2Name = {
+  genus: string;
   name: string;
 };
 

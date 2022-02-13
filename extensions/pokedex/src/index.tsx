@@ -45,10 +45,6 @@ export default function SearchPokemon() {
     setNameOrId(newSearch);
   };
 
-  const random = (lower: number, upper: number) => {
-    return lower + Math.floor(Math.random() * (upper - lower + 1));
-  };
-
   return (
     <List
       throttle
@@ -68,8 +64,9 @@ export default function SearchPokemon() {
                   title="Surprise Me!"
                   icon={Icon.MagnifyingGlass}
                   onAction={() => {
-                    const id = random(1, 898);
-                    setNameOrId(id.toString());
+                    const total = pokemon.length;
+                    const pkm = pokemon[Math.floor(Math.random() * total)];
+                    push(<PokemonDetail id={pkm.id} name={pkm.name} />);
                   }}
                 />
               </ActionPanel>

@@ -54,11 +54,17 @@ export default function PokemonDetail(props: PropsType) {
       pokemon_v2_pokemonstats_aggregate,
     } = pokemon;
 
+    const {
+      pokemon_v2_evolutionchain,
+      pokemon_v2_pokemonspeciesnames,
+      pokemon_v2_pokemonspeciesflavortexts,
+    } = pokemon_v2_pokemonspecy;
+
     const pkmNumber = pokemon.id.toString().padStart(3, "0");
 
     const data = [
       {
-        h1: pokemon_v2_pokemonspecy.pokemon_v2_pokemonspeciesnames[0].name,
+        h1: pokemon_v2_pokemonspeciesnames[0].name,
       },
       {
         blockquote: accessoryTitle(pokemon_v2_pokemonspecy),
@@ -66,8 +72,7 @@ export default function PokemonDetail(props: PropsType) {
       {
         img: [
           {
-            title:
-              pokemon_v2_pokemonspecy.pokemon_v2_pokemonspeciesnames[0].name,
+            title: pokemon_v2_pokemonspeciesnames[0].name,
             source: `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${pkmNumber}.png`,
           },
         ],
@@ -85,6 +90,7 @@ export default function PokemonDetail(props: PropsType) {
             .map((n) => n.pokemon_v2_type.pokemon_v2_typenames[0].name)
             .join(", "),
       },
+      { p: `_Species:_ ${pokemon_v2_pokemonspeciesnames[0].genus}` },
       { p: `_Height:_ ${pokemon.height / 10}m` },
       { p: `_Weight:_ ${pokemon.weight / 10}kg` },
       { p: `_Abilities:_ ${abilities(pokemon)}` },
@@ -100,10 +106,16 @@ export default function PokemonDetail(props: PropsType) {
         p: `Total: **${pokemon_v2_pokemonstats_aggregate.aggregate.sum.base_stat}**`,
       },
       {
-        h2: "Evolution chart",
+        h2: "Evolutions",
       },
       {
-        img: pokemon_v2_pokemonspecy.pokemon_v2_evolutionchain.pokemon_v2_pokemonspecies.map(
+        p:
+          pokemon_v2_evolutionchain.pokemon_v2_pokemonspecies.length < 2
+            ? "_This Pokémon does not evolve._"
+            : "",
+      },
+      {
+        img: pokemon_v2_evolutionchain.pokemon_v2_pokemonspecies.map(
           (specy) => {
             return {
               title: specy.pokemon_v2_pokemonspeciesnames[0].name,
@@ -117,7 +129,7 @@ export default function PokemonDetail(props: PropsType) {
       {
         h2: "Pokédex entries",
       },
-      ...pokemon_v2_pokemonspecy.pokemon_v2_pokemonspeciesflavortexts
+      ...pokemon_v2_pokemonspeciesflavortexts
         .filter((f) => f.pokemon_v2_version.pokemon_v2_versionnames.length)
         .map((flavor) => {
           return {

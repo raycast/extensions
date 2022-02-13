@@ -55,11 +55,13 @@ export const getPokemon = async (id: number): Promise<PokemonV2Pokemon[]> => {
               id
               name
               pokemon_v2_pokemonspeciesnames(where: {language_id: {_eq: $language_id}}) {
+                genus
                 name
               }
             }
           }
           pokemon_v2_pokemonspeciesnames(where: {language_id: {_eq: $language_id}}) {
+            genus
             name
           }
           pokemon_v2_pokemonspeciesflavortexts(where: {language_id: {_eq: $language_id}}) {
