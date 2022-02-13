@@ -53,7 +53,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
 }
 
 function useSearch() {
-  const [state, setState] = useState<SearchState>({ results: [], isLoading: false });
+  const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
   const cancelRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
