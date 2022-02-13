@@ -1,14 +1,6 @@
-import fs from "fs/promises";
 import { Clipboard, popToRoot, showHUD } from "@raycast/api";
 import { GitignoreFile } from "./types";
-
-async function generateContents(selected: GitignoreFile[]): Promise<string> {
-  const contents = [];
-  for (const gitignore of selected) {
-    contents.push(`# ---- ${gitignore.name} ----\n${await (await fs.readFile(gitignore.path)).toString()}`);
-  }
-  return contents.join("\n");
-}
+import { generateContents } from "./utils";
 
 export async function exportClipboard(selected: GitignoreFile[]) {
   await showHUD("Copied to Clipboard");

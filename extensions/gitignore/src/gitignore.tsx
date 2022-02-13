@@ -37,17 +37,9 @@ function GitignoreList({
                     toggleSelection(gitignore);
                   }}
                 />
-                <Action
-                  title="Copy Contents to Clipboard"
-                  icon={Icon.Clipboard}
-                  onAction={() => exportClipboard([gitignore])}
-                />
-                <Action
-                  title="Preview"
-                  icon={Icon.Eye}
-                  shortcut={{ modifiers: ["cmd"], key: "p" }}
-                  onAction={() => push(<GitignorePreview gitignoreFile={gitignore} />)}
-                />
+                {CopyToClipboardAction([gitignore])}
+                {PasteAction([gitignore])}
+                {PreviewAction(push, [gitignore])}
               </ActionPanel>
             }
           />
@@ -58,6 +50,8 @@ function GitignoreList({
 }
 
 export default function Gitignore() {
+  const { push } = useNavigation();
+
   const [{ gitignoreFiles, lastUpdated, loading }, selectedIds, toggleSelection, refresh] = useGitignore();
 
   useEffect(() => {
@@ -76,8 +70,9 @@ export default function Gitignore() {
             title="Create .gitignore From Selection"
             actions={
               <ActionPanel>
-                <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => exportClipboard(selected)} />
-                <Action title="Paste to App" icon={Icon.TextDocument} onAction={() => exportPaste(selected)} />
+                {CopyToClipboardAction(selected)}
+                {PasteAction(selected)}
+                {PreviewAction(push, selected)}
               </ActionPanel>
             }
           />
@@ -110,4 +105,23 @@ export default function Gitignore() {
       )}
     </List>
   );
+}
+
+function PreviewAction(push: (component: React.ReactNode) => void, selected: GitignoreFile[]) {
+  return (
+    <Action
+      title="Preview"
+      icon={Icon.Eye}
+      shortcut={{ modifiers: ["cmd"], key: "p" }}
+      onAction={() => push(<GitignorePreview gitignoreFiles={selected} />)}
+    />
+  );
+}
+
+function PasteAction(selected: GitignoreFile[]) {
+  return <Action title="Paste to App" icon={Icon.TextDocument} onAction={() => exportPaste(selected)} />;
+}
+
+function CopyToClipboardAction(selected: GitignoreFile[]) {
+  return <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => exportClipboard(selected)} />;
 }
