@@ -1,6 +1,5 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
   List,
   OpenInBrowserAction,
   showToast,
