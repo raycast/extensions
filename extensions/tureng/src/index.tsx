@@ -21,7 +21,7 @@ export default function Command() {
 
   return (
     <List
-      isLoading={state.isLoading}
+      // isLoading={state.isLoading}
       onSearchTextChange={search}
       searchBarPlaceholder="Search Turkish or English word"
       throttle
@@ -102,9 +102,9 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
     console.log("Fetching succesful");
     return Promise.reject(response.statusText);
   }
-
+ 
   // type Json = Record<string, string, boolean,me>;
-  // type Json = {
+  // type Json = { 
   //   id: string
   //   word: string;
   //   success: boolean;
