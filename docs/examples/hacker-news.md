@@ -5,7 +5,7 @@ description: This example shows how to show an RSS feed as a List.
 # Hacker News
 
 {% hint style="info" %}
-The source code of the example can be found [here](../../examples/hacker-news). You can install it [here](https://www.raycast.com/thomas/hacker-news).
+The source code of the example can be found [here](https://github.com/raycast/extensions/tree/main/extensions/hacker-news#readme). You can install it [here](https://www.raycast.com/thomas/hacker-news).
 {% endhint %}
 
 Who doesn't like a good morning read on [Hacker News](https://news.ycombinator.com) with a warm coffee?! In this example, we create a simple list with the top stories on the frontpage.

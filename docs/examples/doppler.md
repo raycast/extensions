@@ -5,7 +5,7 @@ description: This example uses a simple form to collect data.
 # Doppler Share Secrets
 
 {% hint style="info" %}
-The full source code of the example can be found [here](../../examples/doppler-share-secrets). You can install the extension [here](https://www.raycast.com/thomas/doppler-share-secrets).
+The full source code of the example can be found [here](https://github.com/raycast/extensions/tree/main/extensions/doppler-share-secrets#readme). You can install the extension [here](https://www.raycast.com/thomas/doppler-share-secrets).
 {% endhint %}
 
 In this example we use a form to collect inputs from a user. To make it interesting, we use [Doppler](http://share.doppler.com) which is a service to make it easy to securely share sensitive information such as API keys or passwords.
