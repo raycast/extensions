@@ -1,10 +1,13 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
   List,
-  PasteAction,
   getPreferenceValues,
   getSelectedText,
+  Action,
+  Icon,
+  Clipboard,
+  showHUD,
+  closeMainWindow,
 } from "@raycast/api";
 import * as changeCase from "change-case-all";
 import { execa } from "execa";
@@ -91,8 +94,8 @@ export default function changeChase() {
             subtitle={modified}
             actions={
               <ActionPanel>
-                <CopyToClipboardAction content={modified} />
-                <PasteAction title="Paste in Frontmost App" content={modified} />
+                <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copyToClipboard(modified)} />
+                <Action title="Paste in Frontmost App" icon={Icon.TextDocument} onAction={() => paste(modified)} />
               </ActionPanel>
             }
           />
@@ -100,4 +103,16 @@ export default function changeChase() {
       })}
     </List>
   );
+}
+
+export async function copyToClipboard(content: string) {
+  await showHUD("Copied to Clipboard");
+  await Clipboard.copy(content);
+  await closeMainWindow();
+}
+
+export async function paste(content: string) {
+  await showHUD("Pasted in Frontmost App");
+  await Clipboard.paste(content);
+  await closeMainWindow();
 }
