@@ -5,7 +5,7 @@ description: This example shows how to bundle multiple scripts into a single ext
 # Spotify Controls
 
 {% hint style="info" %}
-The source code of the example can be found [here](../../examples/spotify-controls). You can install it [here](https://www.raycast.com/thomas/spotify-controls).
+The source code of the example can be found [here](https://github.com/raycast/extensions/tree/main/extensions/spotify-controls#readme). You can install it [here](https://www.raycast.com/thomas/spotify-controls).
 {% endhint %}
 
 This example shows how to build commands that don't show a UI in Raycast. This type of command is useful for interactions with other apps such as skipping songs in Spotify or just simply running some scripts that don't need visual confirmation.
