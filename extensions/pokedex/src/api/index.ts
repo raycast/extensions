@@ -51,7 +51,7 @@ export const getPokemon = async (id: number): Promise<PokemonV2Pokemon[]> => {
           is_baby
           name
           pokemon_v2_evolutionchain {
-            pokemon_v2_pokemonspecies(order_by: {is_baby: desc}) {
+            pokemon_v2_pokemonspecies(order_by: {order: asc}) {
               id
               name
               pokemon_v2_pokemonspeciesnames(where: {language_id: {_eq: $language_id}}) {
