@@ -1,10 +1,14 @@
 import { exec } from "child_process";
-import { promises as fs } from "fs";
+import { existsSync, promises as fs } from "fs";
 import fetch from "node-fetch";
 import { homedir } from "os";
 
 const configPath = homedir() + "/Library/Preferences/com.roblox.RobloxStudioBrowser.plist";
 let cookie: Promise<string> | undefined;
+
+export function studioConfigExists(): boolean {
+	return existsSync(configPath);
+}
 
 export async function getRobloxCookie(): Promise<string> {
 	if (cookie)

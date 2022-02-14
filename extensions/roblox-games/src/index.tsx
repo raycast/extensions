@@ -1,17 +1,20 @@
 import {
 	ActionPanel,
+	Detail,
 	getPreferenceValues,
 	Icon,
 	List,
+	OpenAction,
 	OpenInBrowserAction,
 	showToast,
 	SubmitFormAction,
 	ToastStyle
 } from "@raycast/api";
 import { spawnSync } from "child_process";
+import { existsSync } from "fs";
 import { AbortError } from "node-fetch";
 import { useEffect, useRef, useState } from "react";
-import { getGameLaunchTicket } from "./auth";
+import { getGameLaunchTicket, studioConfigExists } from "./auth";
 import { getIcon } from "./icons";
 import performSearch from "./search";
 
@@ -35,6 +38,43 @@ async function launchGame(gameId: number) {
 }
 
 export default function Command() {
+	if (!studioConfigExists()) {
+		if (existsSync("/Applications/RobloxStudio.app/Contents/MacOS/RobloxStudio")) {
+			return (
+				<Detail
+					markdown={`# No account found.
+
+In order to use this extension, you must be logged in to Roblox Studio.
+
+Click below to open RobloxStudio.`}
+					actions={
+						<ActionPanel title={`Open application`}>
+							<OpenAction title={`Open RobloxStudio`} target="/Applications/RobloxStudio.app" />
+						</ActionPanel>
+					}
+				></Detail>
+			);
+		} else {
+			return (
+				<Detail
+					markdown={`# Roblox Studio not installed.
+
+In order to use this extension, you must be logged in to Roblox Studio.
+
+Click below to download`}
+					actions={
+						<ActionPanel title="Download RobloxStudio">
+							<OpenInBrowserAction
+								title={`Open in browser`}
+								url="https://setup.rbxcdn.com/mac/RobloxStudio.dmg"
+							/>
+						</ActionPanel>
+					}
+				></Detail>
+			);
+		}
+	}
+
 	const { state, search } = useSearch();
 	return (
 		<List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search by name..." throttle>
