@@ -54,10 +54,16 @@
       "title": "Quit Flow",
       "description": "Quit Flow application",
       "mode": "no-view"
+    },
+    {
+      "name": "next-session",
+      "title": "Next Session",
+      "description": "Start the next Flow session",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.1",
+    "@raycast/api": "^1.27.0",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
@@ -72,6 +78,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }
