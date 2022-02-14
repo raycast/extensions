@@ -1,4 +1,4 @@
-import { render, showToast, ToastStyle } from "@raycast/api";
+import { render, showToast, Toast } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { PipeCommands } from "./pipe-to-command";
 
@@ -11,7 +11,7 @@ async function main() {
     const content = getClipboardContent();
     render(<PipeCommands input={{ type: "text", content }} />);
   } catch (e: unknown) {
-    showToast(ToastStyle.Failure, (e as Error).message);
+    showToast(Toast.Style.Failure, (e as Error).message);
   }
 }
 

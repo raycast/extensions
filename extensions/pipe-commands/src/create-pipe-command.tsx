@@ -5,8 +5,8 @@ import {
   popToRoot,
   showInFinder,
   showToast,
-  SubmitFormAction,
-  ToastStyle,
+  Action,
+  Toast,
 } from "@raycast/api";
 import { writeFileSync } from "fs";
 import { resolve } from "path/posix";
@@ -46,7 +46,7 @@ export default function PipeCommandForm(): JSX.Element {
   function onSubmit(values: FormValues) {
     console.debug(values);
     if (!values.title) {
-      showToast(ToastStyle.Failure, "Title is required!");
+      showToast(Toast.Style.Failure, "Title is required!");
       return;
     }
     const languageProperties = languageToProperties[values.template];
@@ -75,7 +75,7 @@ export default function PipeCommandForm(): JSX.Element {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={onSubmit} />
+          <Action.SubmitForm onSubmit={onSubmit} />
         </ActionPanel>
       }
     >

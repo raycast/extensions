@@ -1,7 +1,7 @@
 import { ScriptCommand, ScriptMetadatas } from "./types";
 import { chmod, copyFile, readdir, readFile, stat } from "fs/promises";
-import { readdirSync } from "fs";
-import { resolve } from "path";
+import { basename, resolve } from "path";
+import {globbySync} from "globby"
 import { environment } from "@raycast/api";
 
 const metadataRegex = /@raycast\.(\w+)\s+(.+)$/gm;
@@ -42,13 +42,16 @@ export async function parseScriptCommands(
 }
 
 export async function copyAssetsCommands() {
+  console.debug("Copying assets...");
   const assetsDir = resolve(environment.assetsPath, "commands");
   await Promise.all(
-    readdirSync(assetsDir).map(async (scriptName) => {
-      await copyFile(resolve(assetsDir, scriptName), resolve(environment.supportPath, scriptName));
-      await chmod(resolve(environment.supportPath, scriptName), 0o755);
+    globbySync(`${assetsDir}/**/*`).map(async (assetPath) => {
+      await copyFile(resolve(assetsDir, assetPath), resolve(environment.supportPath, basename(assetPath)));
+      await chmod(resolve(environment.supportPath, assetPath), 0o755);
+      console.debug(`Copied ${assetPath}`);
     })
   );
+  console.debug("Copying of assets done!");
 }
 
 export async function sortByAccessTime(commands: ScriptCommand[]): Promise<ScriptCommand[]> {

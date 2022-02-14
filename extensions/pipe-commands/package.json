@@ -27,10 +27,18 @@
       "subtitle": "Pipe Commands",
       "description": "Generate a new Pipe Command using built-in templates.",
       "mode": "view"
+    },
+    {
+      "name": "manage-pipe-commands",
+      "title": "Manage Pipe Commands",
+      "subtitle": "Pipe Commands",
+      "description": "Edit your pipe commands.",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.1"
+    "@raycast/api": "^1.27.1",
+    "globby": "^13.1.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

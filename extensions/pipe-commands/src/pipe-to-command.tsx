@@ -1,24 +1,18 @@
 import {
   ActionPanel,
   closeMainWindow,
-  copyTextToClipboard,
   environment,
   Icon,
   List,
-  OpenAction,
-  OpenWithAction,
-  pasteText,
-  PushAction,
+  Clipboard,
+  Toast,
+  Action,
   showHUD,
-  ShowInFinderAction,
   showToast,
-  ToastStyle,
-  TrashAction,
   useNavigation,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { readdirSync } from "fs";
-import { basename } from "path";
 import { useEffect, useState } from "react";
 import PipeCommandForm from "./create-pipe-command";
 import { ArgumentType, ScriptCommand } from "./types";
@@ -30,14 +24,14 @@ export interface PipeInput {
 }
 
 export function PipeCommands(props: { input: PipeInput }): JSX.Element {
-  const [parsed, setParsed] = useState<{ commands: ScriptCommand[]; invalid: string[] }>();
+  const [parsed, setParsed] = useState<{ commands: ScriptCommand[] }>();
 
   const loadCommands = async () => {
     if (readdirSync(environment.supportPath).length == 0) {
       await copyAssetsCommands();
     }
-    const { commands, invalid } = await parseScriptCommands(environment.supportPath);
-    setParsed({ commands: await sortByAccessTime(commands), invalid });
+    const { commands } = await parseScriptCommands(environment.supportPath);
+    setParsed({ commands: await sortByAccessTime(commands) });
   };
 
   useEffect(() => {
@@ -52,7 +46,7 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
           title="Open With"
           actions={
             <ActionPanel>
-              <OpenWithAction path={props.input.content} />
+              <Action.OpenWith path={props.input.content} />
             </ActionPanel>
           }
         />
@@ -60,55 +54,48 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
       {parsed?.commands
         .filter((command) => command.metadatas.input.type == props.input.type)
         .map((command) => (
-          <PipeCommand key={command.path} command={command} input={props.input} reload={loadCommands} />
+          <PipeCommand
+            key={command.path}
+            command={command}
+            runCommand={async () => {
+              const toast = await showToast(Toast.Style.Animated, "Running...");
+              const input = command.metadatas.input.percentEncoded
+                ? encodeURIComponent(props.input.content)
+                : props.input.content;
+              const { stdout, stderr, status } = spawnSync(command.path, {
+                encoding: "utf-8",
+                input,
+                maxBuffer: 10 * 1024 * 1024,
+              });
+              toast.hide();
+              if (status !== 0) {
+                showHUD(stderr ? `⚠️ ${stderr}` : `⚠️ Error: Process terminated with status ${status}`);
+                return;
+              }
+
+              if (stdout) {
+                return stdout;
+              }
+
+              if (stderr) {
+                showHUD(stderr);
+              }
+            }}
+            reload={loadCommands}
+          />
         ))}
-      {parsed?.invalid.map((path) => (
-        <List.Item
-          key={path}
-          icon={Icon.ExclamationMark}
-          title="Invalid Pipe Command"
-          subtitle={basename(path)}
-          actions={
-            <ActionPanel>
-              <OpenAction title="Open Script" target={path} />
-              <OpenWithAction path={path} />
-              <ShowInFinderAction path={path} />
-            </ActionPanel>
-          }
-        />
-      ))}
     </List>
   );
 }
 
-function PipeCommand(props: { command: ScriptCommand; input: PipeInput; reload: () => void }) {
+export function PipeCommand(props: {
+  command: ScriptCommand;
+  runCommand?: () => Promise<string | undefined>;
+  reload: () => void;
+}) {
   const { path: scriptPath, metadatas } = props.command;
   const navigation = useNavigation();
-
-  function handleCommand(outputHandler: (output: string) => void) {
-    return async () => {
-      const toast = await showToast(ToastStyle.Animated, "Running...");
-      const input = metadatas.input.percentEncoded ? encodeURIComponent(props.input.content) : props.input.content;
-      const { stdout, stderr, status } = spawnSync(scriptPath, {
-        encoding: "utf-8",
-        input,
-        maxBuffer: 10 * 1024 * 1024,
-      });
-      toast.hide();
-      if (status !== 0) {
-        showHUD(stderr ? `⚠️ ${stderr}` : `⚠️ Error: Process terminated with status ${status}`);
-        return;
-      }
-
-      if (stdout) {
-        await outputHandler(stdout);
-      }
-
-      if (stderr) {
-        showHUD(stderr);
-      }
-    };
-  }
+  const runCommand = props.runCommand;
 
   return (
     <List.Item
@@ -118,40 +105,51 @@ function PipeCommand(props: { command: ScriptCommand; input: PipeInput; reload: 
       subtitle={metadatas.packageName}
       actions={
         <ActionPanel>
+          {typeof runCommand != "undefined" ? (
+            <ActionPanel.Section>
+              <Action
+                title="Copy Output"
+                icon={Icon.Clipboard}
+                onAction={async () => {
+                  const stdout = await runCommand();
+                  if (stdout) {
+                    await Clipboard.copy(stdout);
+                  }
+                  closeMainWindow();
+                }}
+              />
+              <Action
+                title="Paste Output"
+                icon={Icon.Pencil}
+                onAction={async () => {
+                  const stdout = await runCommand();
+                  if (stdout) {
+                    await Clipboard.paste(stdout);
+                  }
+                  closeMainWindow();
+                }}
+              />
+              <Action
+                title="Pipe Output"
+                icon={Icon.ArrowRight}
+                onAction={async () => {
+                  const stdout = await runCommand();
+                  if (stdout) {
+                    navigation.push(<PipeCommands input={{ type: "text", content: stdout }} />);
+                  }
+                }}
+              />
+            </ActionPanel.Section>
+          ) : null}
           <ActionPanel.Section>
-            <ActionPanel.Item
-              title="Copy Output"
-              icon={Icon.Clipboard}
-              onAction={handleCommand((output) => {
-                copyTextToClipboard(output);
-                closeMainWindow();
-              })}
-            />
-            <ActionPanel.Item
-              title="Paste Output"
-              icon={Icon.Pencil}
-              onAction={handleCommand((output) => {
-                pasteText(output);
-                closeMainWindow();
-              })}
-            />
-            <ActionPanel.Item
-              title="Pipe Output"
-              icon={Icon.ArrowRight}
-              onAction={handleCommand((output) => {
-                navigation.push(<PipeCommands input={{ type: "text", content: output }} />);
-              })}
-            />
+            <Action.Open icon={Icon.Upload} title="Open Pipe Command" target={scriptPath} />
+            <Action.OpenWith path={scriptPath} />
+            <Action.ShowInFinder path={scriptPath} />
+            <Action.Trash paths={scriptPath} onTrash={props.reload} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <OpenAction icon={Icon.Upload} title="Open Pipe Command" target={scriptPath} />
-            <OpenWithAction path={scriptPath} />
-            <ShowInFinderAction path={scriptPath} />
-            <TrashAction paths={scriptPath} onTrash={props.reload} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <PushAction icon={Icon.Plus} title="New Pipe Command" target={<PipeCommandForm />} />
-            <ActionPanel.Item
+            <Action.Push icon={Icon.Plus} title="New Pipe Command" target={<PipeCommandForm />} />
+            <Action
               icon={Icon.ArrowClockwise}
               title="Reset Default Commands"
               onAction={async () => {

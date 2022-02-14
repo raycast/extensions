@@ -1,4 +1,4 @@
-import { environment, getSelectedFinderItems, getSelectedText, render, showToast, ToastStyle } from "@raycast/api";
+import { environment, getSelectedFinderItems, getSelectedText, render, showToast, Toast } from "@raycast/api";
 import { readdirSync } from "fs";
 import { PipeCommands, PipeInput } from "./pipe-to-command";
 import { copyAssetsCommands } from "./utils";
@@ -23,7 +23,7 @@ async function main() {
     const selection = await getSelection();
     render(<PipeCommands input={selection} />);
   } catch (e: unknown) {
-    showToast(ToastStyle.Failure, (e as Error).message);
+    showToast(Toast.Style.Failure, (e as Error).message);
   }
 }
 
