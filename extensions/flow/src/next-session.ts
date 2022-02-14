@@ -3,16 +3,16 @@ import { runAppleScript } from "run-applescript";
 import { isFlowInstalled } from "./utils";
 
 export default async function nextSession() {
-    const toast = new Toast({
+  const toast = new Toast({
     title: "Starting next session",
-    style: ToastStyle.Animated
+    style: ToastStyle.Animated,
   });
-  
+
   toast.show();
-  
+
   if (!(await isFlowInstalled())) {
     toast.title = "Flow not installed";
-    toast.message = "Install it from: https://flowapp.info/download"
+    toast.message = "Install it from: https://flowapp.info/download";
     toast.style = ToastStyle.Failure;
     return;
   }
