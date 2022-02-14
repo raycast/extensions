@@ -27,7 +27,7 @@ export type PreferencesType = {
 
 export function isImage(fileData: FileDataType): boolean {
   const filePath = `${fileData.path}/${fileData.name}`;
-  const extension = fileData.name.split(".").pop();
+  const extension = fileData.name.split(".").pop() as any;
   if (["gdoc", "gsheets", "gslides"].includes(extension)) return false;
   const type = imageType(extension);
   if (type && ["png", "jpg", "ico", "webp", "gif"].includes(type.ext)) {
