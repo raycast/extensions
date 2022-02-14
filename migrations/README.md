@@ -1,8 +1,4 @@
-# Migration
-
-This section contains guides to help migrate your extension to a newer version of the API.
-
-## How to automatically migrate your extensions
+# Automated migrations
 
 Whenever possible, we provide tools to automate the migration to a newer version of the API using [codemods](https://github.com/facebook/jscodeshift).
 
