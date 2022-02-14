@@ -14,13 +14,11 @@ async function getSelection(): Promise<PipeInput> {
 }
 
 export default function PipeSelectionToPipeCommand() {
-  try {
-    const [selection, setSelection] = useState<PipeInput>();
-    useEffect(() => {
-      getSelection().then(setSelection);
-    }, [])
-    return selection ? <PipeCommands input={selection} /> : <List isLoading />;
-  } catch (e: unknown) {
-    showToast(Toast.Style.Failure, (e as Error).message);
-  }
+  const [selection, setSelection] = useState<PipeInput>();
+  useEffect(() => {
+    getSelection().then(setSelection).catch((e) => {
+      showToast(Toast.Style.Failure, (e as Error).message);
+    });
+  }, [])
+  return selection ? <PipeCommands input={selection} /> : <List isLoading />;
 }
