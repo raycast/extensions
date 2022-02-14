@@ -3,7 +3,6 @@ import { SearchType } from "./types";
 import { showToast, Toast } from "@raycast/api";
 
 export async function searchWords(wordToSearch: string, type: SearchType): Promise<string[][][]> {
-  
   let url;
   if (type == SearchType.ENEN) {
     url = `https://ac.dict.naver.com/enendict/ac?q_enc='utf-8'&q=${wordToSearch}&st=100&r_lt=100`;
@@ -12,7 +11,7 @@ export async function searchWords(wordToSearch: string, type: SearchType): Promi
   } else {
     url = ``;
   }
-  
+
   const response = await fetch(url, { method: "GET" });
   console.log(url);
 
@@ -24,9 +23,9 @@ export async function searchWords(wordToSearch: string, type: SearchType): Promi
     );
     return [];
   }
-  
-  const results = (await response.json()) as {"query": string[], "items": string[][][][]};
-  const words = results['items'][0];
+
+  const results = (await response.json()) as { query: string[]; items: string[][][][] };
+  const words = results["items"][0];
   console.log(words);
   words.forEach((word: string[][]) => {
     console.log(word[0][0]);

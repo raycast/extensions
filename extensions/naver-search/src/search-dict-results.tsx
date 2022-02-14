@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { SearchType } from "./types";
 import { searchWords } from "./dict-api";
-import { ActionPanel, Action, List} from "@raycast/api";
+import { ActionPanel, Action, List } from "@raycast/api";
 
 export default function SearchResults(type: SearchType) {
   const [words, setWords] = useState<string[][][]>([]);
@@ -23,7 +23,7 @@ export default function SearchResults(type: SearchType) {
   } else {
     baseurl = ``;
   }
-  
+
   return (
     <List isLoading={loading} throttle={true} onSearchTextChange={onSearch}>
       {words.map((word) => (
@@ -39,7 +39,7 @@ export default function SearchResults(type: SearchType) {
   );
 }
 
-function Actions(props: { word: string[][], baseurl: string }) {
+function Actions(props: { word: string[][]; baseurl: string }) {
   console.log(encodeURI(props.baseurl + props.word[0][0]));
   return (
     <ActionPanel>

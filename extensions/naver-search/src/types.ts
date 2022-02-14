@@ -1,6 +1,6 @@
 export enum SearchType {
-    KOKO = "koko",
-    ENEN = "enen",
-    SHOPPING = "shopping",
-    GENERAL = "general"
+  KOKO = "koko",
+  ENEN = "enen",
+  SHOPPING = "shopping",
+  GENERAL = "general",
 }
