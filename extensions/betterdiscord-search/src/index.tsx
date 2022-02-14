@@ -1,4 +1,4 @@
-import { Detail, showToast, Toast, Image, Icon, useNavigation, Action, ActionPanel, List } from "@raycast/api";
+import { Detail, showToast, Toast, Icon, useNavigation, Action, ActionPanel, List } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import fetch, { AbortError } from "node-fetch";
 import { RateLimit } from "async-sema";
@@ -79,8 +79,8 @@ function useSearch() {
 }
 
 export default function Command() {
-  const { push, pop } = useNavigation();
-  const { state, search } = useSearch();
+  const { push } = useNavigation();
+  const { state } = useSearch();
   return (
     <List isLoading={state.isLoading} searchBarPlaceholder="Search for a BetterDiscord Addon..." throttle>
       <List.Section title="Addons" subtitle={state.results.length + ""}>
@@ -141,7 +141,6 @@ ${searchResult.description}
 }
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-  const params = new URLSearchParams();
 
   await limit();
   const response = await fetch("https://api.betterdiscord.app/v1/store/addons", {
