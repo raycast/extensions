@@ -6,7 +6,7 @@ async function getSelection(): Promise<PipeInput> {
   try {
     const files = await getSelectedFinderItems();
     if (files.length == 0) throw new Error("No file selected!");
-    return { type: "file", content: files.map((file) => file.path).join("\n") };
+    return { type: "file", content: files[0].path };
   } catch {
     const text = await getSelectedText();
     return { type: "text", content: text };
