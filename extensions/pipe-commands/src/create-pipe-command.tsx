@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  environment,
-  Form,
-  popToRoot,
-  showInFinder,
-  showToast,
-  Action,
-  Toast,
-} from "@raycast/api";
+import { ActionPanel, environment, Form, popToRoot, showInFinder, showToast, Action, Toast } from "@raycast/api";
 import { writeFileSync } from "fs";
 import { resolve } from "path/posix";
 import { ArgumentType } from "./types";

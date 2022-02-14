@@ -132,7 +132,7 @@ export function PipeCommand(props: {
               <Action
                 title="Pipe Output"
                 icon={Icon.ArrowRight}
-                shortcut={{modifiers: ["cmd", "shift"], key: "\\"}}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "\\" }}
                 onAction={async () => {
                   const stdout = await runCommand();
                   if (stdout) {

@@ -8,10 +8,9 @@ function getClipboardContent(): string {
 
 export default function PipeClipboardToCommand() {
   try {
-  const content = getClipboardContent()
-  return <PipeCommands input={{ type: "text", content }} />;
+    const content = getClipboardContent();
+    return <PipeCommands input={{ type: "text", content }} />;
   } catch (e: unknown) {
     showToast(Toast.Style.Failure, (e as Error).message);
   }
 }
-

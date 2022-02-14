@@ -23,7 +23,7 @@ export async function parseScriptCommands(): Promise<{ commands: ScriptCommand[]
   if (readdirSync(environment.supportPath).length == 0) {
     await copyAssetsCommands();
   }
-  const scriptPaths = globbySync(`${environment.supportPath}/**/*`).filter(path => !path.startsWith("."));
+  const scriptPaths = globbySync(`${environment.supportPath}/**/*`).filter((path) => !path.startsWith("."));
   const commands = await Promise.all(
     scriptPaths.map(async (scriptPath) => {
       const script = await readFile(scriptPath, "utf8");

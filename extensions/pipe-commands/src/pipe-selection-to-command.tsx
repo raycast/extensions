@@ -16,9 +16,11 @@ async function getSelection(): Promise<PipeInput> {
 export default function PipeSelectionToPipeCommand() {
   const [selection, setSelection] = useState<PipeInput>();
   useEffect(() => {
-    getSelection().then(setSelection).catch((e) => {
-      showToast(Toast.Style.Failure, (e as Error).message);
-    });
-  }, [])
+    getSelection()
+      .then(setSelection)
+      .catch((e) => {
+        showToast(Toast.Style.Failure, (e as Error).message);
+      });
+  }, []);
   return selection ? <PipeCommands input={selection} /> : <List isLoading />;
 }
