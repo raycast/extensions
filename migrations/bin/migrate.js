@@ -5,6 +5,10 @@ const path = require("path");
 const semver = require("semver");
 const { exec } = require("child_process");
 
+const jscodeshift = require
+  .resolve("jscodeshift")
+  .replace(/index\.js$/, "bin/jscodeshift.js");
+
 // Get all the migration folders and sort them
 const migrations = fs
   .readdirSync(path.dirname(__dirname))
@@ -106,7 +110,7 @@ new Promise((resolve, reject) => {
 
         return new Promise((resolve, reject) => {
           let stream = exec(
-            `find "${extensionPath}" \\( -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' \\) -not -path "*/node_modules/*" | xargs ./node_modules/.bin/jscodeshift --verbose=2 --extensions=tsx,ts,jsx,js --parser=tsx -t ./${migration}/index.ts`,
+            `find "${extensionPath}" \\( -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' \\) -not -path "*/node_modules/*" | xargs "${jscodeshift}" --verbose=2 --extensions=tsx,ts,jsx,js --parser=tsx -t ./${migration}/index.ts`,
             { cwd: path.dirname(__dirname) },
             (err, stdout, stderr) => {
               if (err) {
