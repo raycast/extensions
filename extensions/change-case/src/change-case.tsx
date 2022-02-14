@@ -95,7 +95,7 @@ export default function changeChase() {
             actions={
               <ActionPanel>
                 <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copyToClipboard(modified)} />
-                <Action title="Paste in Frontmost App" icon={Icon.TextDocument} onAction={() => paste(modified)} />
+                <Action title="Paste in Active App" icon={Icon.TextDocument} onAction={() => paste(modified)} />
               </ActionPanel>
             }
           />
@@ -112,7 +112,7 @@ export async function copyToClipboard(content: string) {
 }
 
 export async function paste(content: string) {
-  await showHUD("Pasted in Frontmost App");
+  await showHUD("Pasted in Active App");
   await Clipboard.paste(content);
   await closeMainWindow();
 }
