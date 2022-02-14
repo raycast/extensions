@@ -2,9 +2,9 @@ import { showHUD, Toast, ToastStyle } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { isFlowInstalled } from "./utils";
 
-export default async function stopTimer() {
+export default async function nextSession() {
   const toast = new Toast({
-    title: "Stopping timer",
+    title: "Starting next session",
     style: ToastStyle.Animated,
   });
 
@@ -17,6 +17,11 @@ export default async function stopTimer() {
     return;
   }
 
-  await runAppleScript('tell application "Flow" to stop');
-  await showHUD("Timer stopped");
+  const phase = await runAppleScript('tell application "Flow" to getPhase');
+  await runAppleScript('tell application "Flow" to skip');
+  if (phase === "Flow") {
+    await runAppleScript('tell application "Flow" to skip');
+  }
+  await runAppleScript('tell application "Flow" to start');
+  await showHUD("Next session started");
 }
