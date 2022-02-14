@@ -94,6 +94,7 @@
 /extensions/harvest                                  @eluce2
 /extensions/hashnode                                 @dpnick
 /extensions/hazeover                                 @ratoru
+/extensions/helm-docs                                @tiagomichaelsousa
 /extensions/hexlify                                  @gkpln3
 /extensions/homeassistant                            @tonka3000 @altrdev
 /extensions/huggingcast                              @ragnorc
