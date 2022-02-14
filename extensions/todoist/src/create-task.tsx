@@ -1,16 +1,5 @@
 import { useState } from "react";
-import {
-  ActionPanel,
-  Form,
-  Icon,
-  render,
-  showToast,
-  ToastStyle,
-  useNavigation,
-  SubmitFormAction,
-  open,
-  Toast,
-} from "@raycast/api";
+import { ActionPanel, Form, Icon, showToast, ToastStyle, useNavigation, open, Toast, Action } from "@raycast/api";
 import { AddTaskArgs } from "@doist/todoist-api-typescript";
 import useSWR from "swr";
 import { handleError, todoist } from "./api";
@@ -19,7 +8,7 @@ import { getAPIDate } from "./utils";
 import Project from "./components/Project";
 import { SWRKeys } from "./types";
 
-function CreateTask() {
+export default function CreateTask() {
   const { push } = useNavigation();
   const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
   const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
@@ -102,7 +91,7 @@ function CreateTask() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create task" onSubmit={submit} icon={Icon.Plus} />
+          <Action.SubmitForm title="Create task" onSubmit={submit} icon={Icon.Plus} />
         </ActionPanel>
       }
     >
@@ -144,5 +133,3 @@ function CreateTask() {
     </Form>
   );
 }
-
-render(<CreateTask />);
