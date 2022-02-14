@@ -48,7 +48,7 @@
     },
     {
       "name": "accessory",
-      "title": "Accessory displays",
+      "title": "Accessory Displays",
       "description": "The accessory can display either the player count or the place's author.",
       "type": "dropdown",
       "required": true,
