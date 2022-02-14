@@ -197,7 +197,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.28.0",
     "change-case-all": "^1.0.14",
     "execa": "^6.0.0"
   },
@@ -213,6 +213,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

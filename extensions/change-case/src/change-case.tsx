@@ -1,4 +1,11 @@
-import { ActionPanel, CopyToClipboardAction, List, PasteAction, getPreferenceValues } from "@raycast/api";
+import {
+  ActionPanel,
+  CopyToClipboardAction,
+  List,
+  PasteAction,
+  getPreferenceValues,
+  getSelectedText,
+} from "@raycast/api";
 import * as changeCase from "change-case-all";
 import { execa } from "execa";
 import { useEffect, useState } from "react";
@@ -32,8 +39,12 @@ async function runShellScript(command: string) {
   return stdout;
 }
 
-async function readClipboard() {
-  return await runShellScript("pbpaste");
+async function readContent() {
+  try {
+    return await getSelectedText();
+  } catch (error) {
+    return await runShellScript("pbpaste");
+  }
 }
 
 export default function changeChase() {
@@ -62,7 +73,7 @@ export default function changeChase() {
 
   const [clipboard, setClipboard] = useState<string>("");
   useEffect(() => {
-    readClipboard().then((c) => setClipboard(c));
+    readContent().then((c) => setClipboard(c));
   });
 
   const preferences = getPreferenceValues();
