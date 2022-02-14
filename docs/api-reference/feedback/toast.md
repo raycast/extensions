@@ -97,7 +97,7 @@ The options to create a [Toast](#toast).
 #### Example
 
 ```typescript
-import { showToast, ToastOptions } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 
 export default async () => {
   const options: Toast.Options = {
