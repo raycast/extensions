@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Coin } from "./service";
 
 interface Preferences {
   currency: Currency;
@@ -40,23 +39,6 @@ export function formatDate(date: Date) {
     month: "long",
     day: "numeric",
   });
-}
-
-export function filterCoins(coins: Coin[], input: string): Coin[] {
-  if (input.length === 0) {
-    return coins;
-  }
-  return coins
-    .filter((coin) => {
-      return (
-        coin.symbol.toLowerCase().includes(input.toLowerCase()) || coin.name.toLowerCase().includes(input.toLowerCase())
-      );
-    })
-    .sort((a, b) => {
-      const aName = a.name;
-      const bName = b.name;
-      return aName.length - bName.length;
-    });
 }
 
 function getPreferences() {
