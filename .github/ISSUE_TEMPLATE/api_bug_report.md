@@ -1,9 +1,8 @@
 ---
 name: "🧬 🐞 API Bug Report"
 about: Report a reproducible bug or regression related to extensions API
-title: '[API Bug] '
-labels: 'api, bug'
-
+title: ""
+labels: "api, bug"
 ---
 
 <!--
@@ -26,6 +25,5 @@ Raycast version:
 -->
 
 ## The current behavior
-
 
 ## The expected behavior

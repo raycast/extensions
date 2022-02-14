@@ -1,11 +1,11 @@
 import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 
-var he = require("he");
+import he from "he";
 
 interface Preferences {
-  api_token: string,
-  user_id: string,
+  api_token: string;
+  user_id: string;
 }
 
 export type QueryResultItem = {
@@ -20,37 +20,34 @@ export type QueryResultItem = {
   icon: string;
 };
 
-function removeTags(str:string) {
-  if ((str===null) || (str===''))
-  return false;
-  else
-  str = he.decode(str.toString());
-  return str.replace( /(<([^>]+)>)/ig, '');
-};
+function removeTags(str: string) {
+  if (str === null || str === "") return false;
+  else str = he.decode(str.toString());
+  return str.replace(/(<([^>]+)>)/gi, "");
+}
 
-const parseQuery = (q:string) => {
+const parseQuery = (q: string) => {
   const queryItems = q.split(" ");
-  const qs = queryItems.filter((c) => !c.startsWith("."))
-  const ts = queryItems.filter((c) => c.startsWith("."))
+  const qs = queryItems.filter((c) => !c.startsWith("."));
+  const ts = queryItems.filter((c) => c.startsWith("."));
 
-  let qss = ''
+  let qss = "";
   if (qs.length) {
-    qss = qs.join(' ')
+    qss = qs.join(" ");
   }
 
-  let tss = ''
+  let tss = "";
   if (ts.length) {
-    tss = ts.map(x => encodeURIComponent(x.substring(1))).join('%20||%20')
+    tss = ts.map((x) => encodeURIComponent(x.substring(1))).join("%20||%20");
   }
 
-  return {qss, tss};
-
+  return { qss, tss };
 };
 
 const parseResponse = (item) => {
-  let name = ''
+  let name = "";
   if (item.data.publicationTitle) {
-    name = name + item.data.publicationTitle.split(':')[0]
+    name = name + item.data.publicationTitle.split(":")[0];
   }
   const date = new Date(item.data.date);
 
@@ -62,30 +59,26 @@ const parseResponse = (item) => {
     raw_link: `${item.links.alternate.href}`,
     link: `${item.data.url}`,
     url: `zotero://select/items/0_${item.key}`,
-    accessoryTitle: `${name} ${!isNaN(date.getFullYear()) ? date.getFullYear():''}`,
+    accessoryTitle: `${name} ${!isNaN(date.getFullYear()) ? date.getFullYear() : ""}`,
     icon: `paper.png`,
-  }
+  };
 };
 
-
-export const searchResources = async (
-  q: string
-): Promise<QueryResultItem[]> => {
+export const searchResources = async (q: string): Promise<QueryResultItem[]> => {
   const preferences: Preferences = getPreferenceValues();
   const requestOptions = {
-    method: 'GET',
+    method: "GET",
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${preferences.api_token}`
-    }
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${preferences.api_token}`,
+    },
   };
-  const {qss, tss} = parseQuery(q);
-  const query = `https://api.zotero.org/users/${preferences.user_id}/items?v=3&include=bib,data&q=${encodeURIComponent(qss)}&itemType=-attachment%20||%20note&sort=dateAdded&start=0&limit=20&tag=${tss}`
+  const { qss, tss } = parseQuery(q);
+  const query = `https://api.zotero.org/users/${preferences.user_id}/items?v=3&include=bib,data&q=${encodeURIComponent(
+    qss
+  )}&itemType=-attachment%20||%20note&sort=dateAdded&start=0&limit=20&tag=${tss}`;
 
-  const response = await fetch(
-    query,
-    requestOptions
-  );
+  const response = await fetch(query, requestOptions);
   if (response.status !== 200) {
     const data = (await response.json()) as { message?: unknown } | undefined;
     throw new Error(`${data?.message || "Not OK"}`);

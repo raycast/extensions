@@ -20,18 +20,20 @@ interface State {
   query?: string;
 }
 
-export default function Main() {
-  const [state, setState] = useState<State>({isLoading: true});
+export default function Main(): JSX.Element {
+  const [state, setState] = useState<State>({ isLoading: true });
 
   useEffect(() => {
-    if (!state.isLoading) { return; }
+    if (!state.isLoading) {
+      return;
+    }
 
     if (state.installed == undefined) {
       listInstalled()
         .then((installed: Installed) => {
-          setState((oldState) => ({ ...oldState, installed: installed}));
+          setState((oldState) => ({ ...oldState, installed: installed }));
         })
-        .catch (err => {
+        .catch((err) => {
           console.log("listInstalled error:", err);
           showFailureToast("Brew search failed", err);
         });
@@ -40,14 +42,13 @@ export default function Main() {
 
     const query = state.query?.trim() ?? "";
     brewSearch(query, 200)
-      .then(results => {
+      .then((results) => {
         updateInstalled(results, state.installed);
-        setState((oldState) => ({...oldState, results: results, isLoading: false}));
+        setState((oldState) => ({ ...oldState, results: results, isLoading: false }));
       })
-      .catch (err => {
-        console.log("brewSearch error:", err);
+      .catch((err) => {
         showFailureToast("Brew search failed", err);
-        setState((oldState) => ({...oldState, results: undefined, isLoading: false}));
+        setState((oldState) => ({ ...oldState, results: undefined, isLoading: false }));
       });
   }, [state]);
 
@@ -55,17 +56,18 @@ export default function Main() {
   const casks = state.results?.casks ?? [];
 
   return (
-    <FormulaList formulae={formulae}
-                 casks={casks}
-                 searchBarPlaceholder={"Search formulae by name" + String.ellipsis}
-                 isLoading={state.isLoading}
-                 onSearchTextChange={(query: string) => {
-                   // Perhaps query should be another useState??
-                   setState((oldState) => ({ ...oldState, query: query, isLoading: true}));
-                 }}
-                 onAction={() => {
-                   setState((oldState) => ({ ...oldState, installed: undefined, isLoading: true}));
-                 }}
+    <FormulaList
+      formulae={formulae}
+      casks={casks}
+      searchBarPlaceholder={"Search formulae by name" + String.ellipsis}
+      isLoading={state.isLoading}
+      onSearchTextChange={(query: string) => {
+        // Perhaps query should be another useState??
+        setState((oldState) => ({ ...oldState, query: query, isLoading: true }));
+      }}
+      onAction={() => {
+        setState((oldState) => ({ ...oldState, installed: undefined, isLoading: true }));
+      }}
     />
   );
 }
@@ -85,11 +87,13 @@ async function listInstalled(): Promise<Installed> {
     casks.set(cask.token, cask);
   }
 
-  return {formulae: formulae, casks: casks};
+  return { formulae: formulae, casks: casks };
 }
 
 function updateInstalled(results?: InstallableResults, installed?: Installed) {
-  if (!results || !installed) { return; }
+  if (!results || !installed) {
+    return;
+  }
 
   for (const formula of results.formulae) {
     const info = installed.formulae.get(formula.name);

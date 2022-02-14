@@ -11,7 +11,7 @@ type FetchParameters = {
 
 export const fetchAllCrypto = ({ limit, start }: FetchParameters) =>
   axios.get<ResultData>("https://api.coinmarketcap.com/data-api/v3/map/all", {
-    data: {
+    params: {
       cryptoAux: "is_active,status",
       exchangeAux: "is_active,status",
       limit,
@@ -20,7 +20,7 @@ export const fetchAllCrypto = ({ limit, start }: FetchParameters) =>
   });
 
 export const BASE_URL = "https://coinmarketcap.com/currencies/";
-  
+
 export async function fetchPrice(slug: string): Promise<PriceData | null> {
   return fetch(`${BASE_URL}${slug}/`)
     .then((r) => r.text())

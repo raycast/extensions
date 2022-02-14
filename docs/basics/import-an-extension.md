@@ -8,7 +8,7 @@ All published extensions are open source and can be found in [this repository](h
 
 ### Get source code
 
-First, you need to find the source code of the extension. The easiest way to do this, is to open the store, search for the extension you want and perform the View Source Code action to show the code in your browser.
+First, you need to find the source code of the extension. The easiest way to do this, is to open the store, search for the extension you want, and perform the "View Source Code" action to show the code in your browser.
 
 ![View source code of an extension](../.gitbook/assets/basics-view-source-code.png)
 
@@ -22,8 +22,8 @@ After you cloned the repository, open the Import Extension command and select th
 
 ### Develop the extension
 
-Continue to the Manage Extensions command, select the imported extension and press `↵` to open it in your default text editor. Then run `npm install && npm run dev` from the extension folder in your Terminal to start developing the extension.&#x20;
+Continue to the Manage Extensions command, select the imported extension, and press `↵` to open it in your default text editor. Then run `npm install && npm run dev` from the extension folder in your Terminal to start developing the extension.
 
 ![Open imported extension](../.gitbook/assets/basics-open-command.png) ![Icon list command](../.gitbook/assets/basics-icon-list.png)
 
-You should see your imported extension at the top of your root search and can open it's commands. When you're done remixing the extension, submit a pull request to [publish your changes to the store](publish-an-extension.md).
+You should see your imported extension at the top of your root search and can open its commands. When you're done remixing the extension, submit a pull request to [publish your changes to the store](publish-an-extension.md).

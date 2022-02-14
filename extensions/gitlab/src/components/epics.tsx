@@ -36,10 +36,16 @@ export function EpicListItem(props: { epic: any }) {
       icon={icon}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={epic.web_url} />
-          <CreateEpicTodoAction epic={epic} shortcut={{ modifiers: ["cmd"], key: "t" }} />
-          <CopyToClipboardAction title="Copy Epic ID" content={epic.id} />
-          <ClearLocalCacheAction />
+          <ActionPanel.Section>
+            <OpenInBrowserAction url={epic.web_url} />
+            <CreateEpicTodoAction epic={epic} shortcut={{ modifiers: ["cmd"], key: "t" }} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <CopyToClipboardAction title="Copy Epic ID" content={epic.id} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <ClearLocalCacheAction />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

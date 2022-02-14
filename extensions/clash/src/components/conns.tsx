@@ -5,8 +5,9 @@ import { GetConnections } from "./client/ws";
 import { ConnectionT } from "./types";
 
 function renderTitle(mode: boolean, connection: ConnectionT): string {
-  return `${connection.metadata.host ? connection.metadata.host : connection.metadata.destinationIP}:${connection.metadata.destinationPort
-    }`;
+  return `${connection.metadata.host ? connection.metadata.host : connection.metadata.destinationIP}:${
+    connection.metadata.destinationPort
+  }`;
 }
 
 function renderSubTitle(mode: boolean, connection: ConnectionT): string {
@@ -30,23 +31,24 @@ export default function Conns(): JSX.Element {
   const [mode, setMode] = useState(true);
   return (
     <List>
-      {
-        connectionsUrl ? <><List.Item
-          key={-1}
-          title={"Host"}
-          subtitle={mode ? "Chains" : "Rules"}
-          accessoryTitle={`${mode ? "Overview" : "Detail"} Mode`}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Item
-                title="Switch Mode"
-                onAction={() => {
-                  setMode((oldMode) => !oldMode);
-                }}
-              />
-            </ActionPanel>
-          }
-        />
+      {connectionsUrl ? (
+        <>
+          <List.Item
+            key={-1}
+            title={"Host"}
+            subtitle={mode ? "Chains" : "Rules"}
+            accessoryTitle={`${mode ? "Overview" : "Detail"} Mode`}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Item
+                  title="Switch Mode"
+                  onAction={() => {
+                    setMode((oldMode) => !oldMode);
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
           {connections.connections.map((connection: ConnectionT, index) => {
             return (
               <List.Item
@@ -57,8 +59,10 @@ export default function Conns(): JSX.Element {
               />
             );
           })}
-        </> : <></>
-      }
+        </>
+      ) : (
+        <></>
+      )}
     </List>
   );
 }

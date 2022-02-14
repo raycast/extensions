@@ -8,9 +8,9 @@ import {
   SubmitFormAction,
   Form,
   ToastStyle,
-} from '@raycast/api';
+} from "@raycast/api";
 
-type IndentType = 'tab' | '2' | '4' | '8';
+type IndentType = "tab" | "2" | "4" | "8";
 
 interface FormInput {
   input: string;
@@ -41,20 +41,20 @@ function FormatAction() {
   async function handleSubmit(values: FormInput) {
     const { indent, input } = values;
     if (input.length === 0) {
-      showToast(ToastStyle.Failure, 'Empty input');
+      showToast(ToastStyle.Failure, "Empty input");
       return;
     }
-    const space = indent === 'tab' ? '\t' : parseInt(indent);
+    const space = indent === "tab" ? "\t" : parseInt(indent);
     let json;
     try {
       json = JSON.parse(input);
     } catch (e) {
-      showToast(ToastStyle.Failure, 'Invalid JSON');
+      showToast(ToastStyle.Failure, "Invalid JSON");
       return;
     }
     const output = JSON.stringify(json, null, space);
     copyTextToClipboard(output);
-    showHUD('Copied to clipboard');
+    showHUD("Copied to clipboard");
     popToRoot();
   }
 

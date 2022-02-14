@@ -1,36 +1,49 @@
-import { ActionPanel, PushAction, Icon, List, OpenInBrowserAction, confirmAlert, render } from "@raycast/api";
-import { mutate } from "swr";
-
-import { showApiToastError } from "./utils";
-
-import { Project as TProject } from "./types";
-import { deleteProject as apiDeleteProject, useFetch } from "./api";
-
+import {
+  ActionPanel,
+  PushAction,
+  Icon,
+  showToast,
+  ToastStyle,
+  List,
+  OpenInBrowserAction,
+  confirmAlert,
+  render,
+} from "@raycast/api";
+import useSWR, { mutate } from "swr";
+import { todoist, handleError } from "./api";
 import Project from "./components/Project";
+import { SWRKeys } from "./types";
 
 function Projects() {
-  const path = "/projects";
-  const { data, isLoading, error } = useFetch<TProject[]>(path);
+  const { data, error } = useSWR(SWRKeys.projects, () => todoist.getProjects());
 
   if (error) {
-    showApiToastError({ error, title: "Failed to get projects", message: error.message });
+    handleError({ error, title: "Unable to get projects" });
   }
 
   const projects = data || [];
 
   async function deleteProject(id: number) {
     if (await confirmAlert({ title: "Are you sure you want to delete this project?" })) {
-      await apiDeleteProject(id);
-      mutate(path);
+      await showToast(ToastStyle.Animated, "Deleting project");
+
+      try {
+        await todoist.deleteProject(id);
+        await showToast(ToastStyle.Success, "Project deleted");
+        mutate(SWRKeys.projects);
+      } catch (error) {
+        handleError({ error, title: "Unable to delete project" });
+      }
+      mutate(SWRKeys.projects);
     }
   }
 
   return (
-    <List searchBarPlaceholder="Filter projects by name..." isLoading={isLoading}>
+    <List searchBarPlaceholder="Filter projects by name..." isLoading={!data && !error}>
       {projects.map((project) => (
         <List.Item
           key={project.id}
-          icon={project.inbox_project ? Icon.Envelope : Icon.List}
+          icon={project.inboxProject ? Icon.Envelope : Icon.List}
           title={project.name}
           {...(project.favorite ? { accessoryIcon: Icon.Star } : {})}
           actions={
@@ -40,7 +53,7 @@ function Projects() {
               <ActionPanel.Item
                 title="Delete Project"
                 icon={Icon.Trash}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+                shortcut={{ modifiers: ["ctrl"], key: "x" }}
                 onAction={() => deleteProject(project.id)}
               />
             </ActionPanel>

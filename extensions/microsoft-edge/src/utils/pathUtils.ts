@@ -1,4 +1,4 @@
-import path from 'path';
+import path from "path";
 
 export const userDataDirectoryPath = () => {
   if (!process.env.HOME) {

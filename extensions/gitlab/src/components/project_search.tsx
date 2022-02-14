@@ -43,7 +43,11 @@ export function ProjectListItem(props: { project: Project }) {
               icon={{ source: GitLabIcons.explorer, tintColor: Color.PrimaryText }}
               target={<ProjectNavMenusList project={project} />}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <CopyToClipboardAction title="Copy Project ID" content={project.id} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <PushAction
               title="Issues"
               shortcut={{ modifiers: ["cmd"], key: "i" }}

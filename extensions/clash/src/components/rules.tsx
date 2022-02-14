@@ -16,7 +16,7 @@ export default function Rules(): JSX.Element {
         const data = await GetRules();
         setRules(data);
       } catch (e) {
-        ErrorHandler(e)
+        ErrorHandler(e);
       } finally {
         setLoading(false);
       }

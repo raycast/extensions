@@ -1,10 +1,4 @@
-export type VaultStatus = "unauthenticated" | "locked" | "unlocked"
-
-export interface Folder {
-  object: "folder";
-  id: string | null;
-  name: string;
-}
+export type VaultStatus = "unauthenticated" | "locked" | "unlocked";
 
 export interface Item {
   object: "item";

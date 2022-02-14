@@ -1,7 +1,10 @@
-daysUntilStale: 30
-daysUntilClose: 7
+daysUntilStale: 50
+daysUntilClose: 10
 exemptLabels:
-  - feature request
+  - api
+  - documentation
+  - dev tools
+  - app
 staleLabel: wontfix
 markComment: >
   This issue/pull request has been automatically marked as stale because it has not had

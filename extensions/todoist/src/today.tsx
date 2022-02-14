@@ -1,30 +1,60 @@
-import { render } from "@raycast/api";
-import { useFetch } from "./api";
-import { Task } from "./types";
-import { partitionTasksWithOverdue, showApiToastError } from "./utils";
-
+import { render, getPreferenceValues } from "@raycast/api";
+import useSWR from "swr";
+import { partitionTasksWithOverdue, getSectionsWithPriorities } from "./utils";
+import { todoist, handleError } from "./api";
+import { SectionWithTasks, SWRKeys, TodayGroupBy } from "./types";
 import TaskList from "./components/TaskList";
 
 function Today() {
-  const path = "/tasks?filter=today|overdue";
-  const { data: tasks, isLoading: isLoadingTasks, error } = useFetch<Task[]>(path);
+  const { data: tasks, error: getTasksError } = useSWR(SWRKeys.tasks, () =>
+    todoist.getTasks({ filter: "today|overdue" })
+  );
+  const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
 
-  if (error) {
-    showApiToastError({ error, title: "Failed to get tasks", message: error.message });
+  const preferences = getPreferenceValues();
+
+  if (getTasksError) {
+    handleError({ error: getTasksError, title: "Unable to get tasks" });
   }
 
-  const [overdue, today] = partitionTasksWithOverdue(tasks || []);
-
-  const sections = [{ name: "Today", tasks: today }];
-
-  if (overdue.length > 0) {
-    sections.unshift({
-      name: "Overdue",
-      tasks: overdue,
-    });
+  if (getProjectsError) {
+    handleError({ error: getProjectsError, title: "Unable to get tasks" });
   }
 
-  return <TaskList path={path} sections={sections} isLoading={isLoadingTasks} />;
+  let sections: SectionWithTasks[] = [];
+
+  if (preferences.todayGroupBy === TodayGroupBy.default) {
+    const [overdue, today] = partitionTasksWithOverdue(tasks || []);
+
+    sections = [{ name: "Today", tasks: today }];
+
+    if (overdue.length > 0) {
+      sections.unshift({
+        name: "Overdue",
+        tasks: overdue,
+      });
+    }
+  }
+
+  if (preferences.todayGroupBy === TodayGroupBy.priority) {
+    sections = getSectionsWithPriorities(tasks || []);
+  }
+
+  if (preferences.todayGroupBy === TodayGroupBy.project) {
+    sections =
+      projects?.map((project) => ({
+        name: project.name,
+        tasks: tasks?.filter((task) => task.projectId === project.id) || [],
+      })) || [];
+  }
+
+  return (
+    <TaskList
+      sections={sections}
+      isLoading={(!tasks && !getTasksError) || (!projects && !getProjectsError)}
+      projects={projects}
+    />
+  );
 }
 
 render(<Today />);

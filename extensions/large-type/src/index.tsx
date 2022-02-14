@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, ActionPanel, SubmitFormAction, Detail } from "@raycast/api";
+import { ActionPanel, closeMainWindow, Detail, Form, popToRoot, SubmitFormAction } from "@raycast/api";
 
 interface CommandForm {
   message: string;
@@ -18,7 +18,6 @@ export default function Command() {
   }
 
   function messageStyleClass() {
-    console.log(messageStyle);
     switch (messageStyle) {
       case "italic":
         return `*${message}*`;
@@ -26,6 +25,11 @@ export default function Command() {
       default:
         return message;
     }
+  }
+
+  async function closeWindow() {
+    await closeMainWindow();
+    await popToRoot({ clearSearchBar: true });
   }
 
   if (message !== "") {
@@ -40,7 +44,13 @@ export default function Command() {
                 shortcut={{ modifiers: ["cmd"], key: "enter" }}
                 onAction={() => setMessage("")}
               />
-            </ActionPanel>}
+              <ActionPanel.Item
+                title="Close Window"
+                shortcut={{ modifiers: ["cmd"], key: "escape" }}
+                onAction={() => closeWindow()}
+              />
+            </ActionPanel>
+          }
         />
       </>
     );

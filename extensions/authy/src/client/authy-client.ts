@@ -18,13 +18,13 @@ export async function requestRegistration(authyId: number): Promise<Registration
   formData.set("signature", SIGNATURE);
   const resp = await fetch(`${baseUrl}/users/${authyId}/devices/registration/start`, {
     method: "POST",
-    body: formData
+    body: formData,
   });
 
   if (resp.ok) {
-    return await resp.json() as Registration;
+    return (await resp.json()) as Registration;
   } else {
-    throw new Error((await resp.json() as ApiError).message);
+    throw new Error(((await resp.json()) as ApiError).message);
   }
 }
 
@@ -34,12 +34,12 @@ export async function checkRequestStatus(authyId: number, requestId: string): Pr
   formData.set("signature", SIGNATURE);
   formData.set("locale", "en-GB");
   const resp = await fetch(`${baseUrl}/users/${authyId}/devices/registration/${requestId}/status?` + formData, {
-    method: "GET"
+    method: "GET",
   });
   if (resp.ok) {
-    return await resp.json() as RegistrationStatus;
+    return (await resp.json()) as RegistrationStatus;
   } else {
-    const apiError = await resp.json() as ApiError;
+    const apiError = (await resp.json()) as ApiError;
     throw new Error(apiError.message);
   }
 }
@@ -53,12 +53,12 @@ export async function completeRegistration(authyId: number, pin: string): Promis
   formData.set("device_name", `Raycast Authy Extension on ${os.hostname()}`);
   const resp = await fetch(`${baseUrl}/users/${authyId}/devices/registration/complete`, {
     method: "POST",
-    body: formData
+    body: formData,
   });
   if (resp.ok) {
-    return await resp.json() as Device;
+    return (await resp.json()) as Device;
   } else {
-    throw new Error((await resp.json() as ApiError).message);
+    throw new Error(((await resp.json()) as ApiError).message);
   }
 }
 
@@ -73,12 +73,12 @@ export async function getAuthyApps(authyId: number, deviceId: number, otps: stri
   formData.set("otp3", `${otps[2]}`);
   const resp = await fetch(`${baseUrl}/users/${authyId}/devices/${deviceId}/apps/sync`, {
     method: "POST",
-    body: formData
+    body: formData,
   });
   if (resp.ok) {
-    return await resp.json() as AuthyApp;
+    return (await resp.json()) as AuthyApp;
   } else {
-    throw new Error((await resp.json() as ApiError).message);
+    throw new Error(((await resp.json()) as ApiError).message);
   }
 }
 
@@ -93,8 +93,8 @@ export async function getServices(authyId: number, deviceId: number, otps: strin
   formData.set("otp3", `${otps[2]}`);
   const resp = await fetch(`${baseUrl}/users/${authyId}/authenticator_tokens?` + formData);
   if (resp.ok) {
-    return await resp.json() as Services;
+    return (await resp.json()) as Services;
   } else {
-    throw new Error((await resp.json() as ApiError).message);
+    throw new Error(((await resp.json()) as ApiError).message);
   }
 }

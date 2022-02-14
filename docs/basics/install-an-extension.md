@@ -14,7 +14,7 @@ The easiest way to discover extensions is the in-app store. Open the Store comma
 
 ### Web Store
 
-Alternatively, you can use our [web store](https://raycast.com/store). Press `⌘` `K` to open the command palette, search for an extension and open it. 
+Alternatively, you can use our [web store](https://raycast.com/store). Press `⌘` `K` to open the command palette, search for an extension and open it.
 
 ![Web Store](../.gitbook/assets/basics-web-store.png)
 

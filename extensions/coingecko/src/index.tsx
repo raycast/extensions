@@ -1,18 +1,9 @@
-import {
-  ActionPanel,
-  Detail,
-  Icon,
-  List,
-  OpenInBrowserAction,
-  PushAction,
-  ToastStyle,
-  showToast,
-} from '@raycast/api';
-import { useEffect, useState, useMemo } from 'react';
+import { ActionPanel, Detail, Icon, List, OpenInBrowserAction, PushAction, ToastStyle, showToast } from "@raycast/api";
+import { useEffect, useState, useMemo } from "react";
 
-import Service, { Coin } from './service';
-import { addFavorite, getFavorites, removeFavorite } from './storage';
-import { filterCoins, formatDate, formatPrice } from './utils';
+import Service, { Coin } from "./service";
+import { addFavorite, getFavorites, removeFavorite } from "./storage";
+import { filterCoins, formatDate, formatPrice } from "./utils";
 
 interface IdProps {
   id: string;
@@ -38,7 +29,7 @@ export default function Command() {
   const service = new Service();
   const [coins, setCoins] = useState<Coin[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
-  const [input, setInput] = useState<string>('');
+  const [input, setInput] = useState<string>("");
   const [favorites, setFavorites] = useState<string[]>([]);
 
   const list = useMemo(() => filterCoins(coins, input), [coins, input]);
@@ -70,22 +61,13 @@ export default function Command() {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      onSearchTextChange={setInput}
-      searchBarPlaceholder="Search by coin name or symbol"
-    >
+    <List isLoading={isLoading} onSearchTextChange={setInput} searchBarPlaceholder="Search by coin name or symbol">
       <List.Section title="Favorites">
         {favorites.map((id) => {
           const coin = list.find((coin) => coin.id === id);
           if (!coin) return;
           return (
-            <ListItemCoin
-              key={id}
-              coin={coin}
-              isFavorite={true}
-              onFavoriteToggle={() => toggleFavorite(id, true)}
-            />
+            <ListItemCoin key={id} coin={coin} isFavorite={true} onFavoriteToggle={() => toggleFavorite(id, true)} />
           );
         })}
       </List.Section>
@@ -123,19 +105,19 @@ function ListItemCoin({ coin, isFavorite, onFavoriteToggle }: ListItemProps) {
           <ActionPanel.Item
             icon={Icon.Text}
             title="Get Price"
-            shortcut={{ modifiers: ['cmd'], key: 'p' }}
+            shortcut={{ modifiers: ["cmd"], key: "p" }}
             onAction={() => showPrice(id)}
           />
           <PushAction
             icon={Icon.Clock}
             title="Get Historical Price"
-            shortcut={{ modifiers: ['cmd'], key: 'h' }}
+            shortcut={{ modifiers: ["cmd"], key: "h" }}
             target={<HistoricalPrice id={id} />}
           />
           <PushAction
             icon={Icon.List}
             title="Get Info"
-            shortcut={{ modifiers: ['cmd'], key: 'i' }}
+            shortcut={{ modifiers: ["cmd"], key: "i" }}
             target={<Info id={id} />}
           />
         </ActionPanel>
@@ -146,17 +128,15 @@ function ListItemCoin({ coin, isFavorite, onFavoriteToggle }: ListItemProps) {
 
 function FavoriteAction(props: FavoriteProps) {
   const { isFavorite, onToggle } = props;
-  const title = isFavorite ? 'Remove from Favorites' : 'Add to Favorites';
-  return (
-    <ActionPanel.Item icon={Icon.Star} title={title} onAction={onToggle} />
-  );
+  const title = isFavorite ? "Remove from Favorites" : "Add to Favorites";
+  return <ActionPanel.Item icon={Icon.Star} title={title} onAction={onToggle} />;
 }
 
 async function showPrice(id: string) {
-  showToast(ToastStyle.Animated, 'Fetching price…');
+  showToast(ToastStyle.Animated, "Fetching price…");
   const price = await service.getPrice(id);
   if (!price) {
-    showToast(ToastStyle.Failure, 'Failed to fetch the price');
+    showToast(ToastStyle.Failure, "Failed to fetch the price");
     return;
   }
   const priceString = formatPrice(price);
@@ -164,7 +144,7 @@ async function showPrice(id: string) {
 }
 
 function HistoricalPrice(props: IdProps) {
-  const [markdown, setMarkdown] = useState<string>('');
+  const [markdown, setMarkdown] = useState<string>("");
   const [isLoading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -178,7 +158,7 @@ function HistoricalPrice(props: IdProps) {
           const priceString = formatPrice(price);
           return `**${dateString}:** ${priceString}`;
         })
-        .join('\n\n');
+        .join("\n\n");
       setMarkdown(markdown);
     }
 
@@ -189,13 +169,12 @@ function HistoricalPrice(props: IdProps) {
 }
 
 function Info(props: IdProps) {
-  const [markdown, setMarkdown] = useState<string>('');
+  const [markdown, setMarkdown] = useState<string>("");
   const [isLoading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     async function fetchList() {
-      const { name, symbol, market_cap_rank, links } =
-        await service.getCoinInfo(props.id);
+      const { name, symbol, market_cap_rank, links } = await service.getCoinInfo(props.id);
       setLoading(false);
       const markdown = `
   **Name**: ${name}

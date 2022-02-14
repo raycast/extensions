@@ -1,7 +1,7 @@
-import { ResultList } from './components/ResultList'
+import { ResultList } from "./components/ResultList";
 
 const App = () => {
-  return <ResultList languagePairKey="english-french" />
-}
+  return <ResultList languagePairKey="english-french" />;
+};
 
-export default App
+export default App;

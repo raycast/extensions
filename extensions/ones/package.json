@@ -1,0 +1,168 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ones",
+  "title": "ONES",
+  "description": "Raycast Extensions for ones.ai",
+  "icon": "command-icon-black.png",
+  "author": "k8scat",
+  "license": "MIT",
+  "keywords": [
+    "ones",
+    "ones.ai",
+    "raycast",
+    "extension",
+    "search",
+    "manhour",
+    "task",
+    "project",
+    "wiki"
+  ],
+  "commands": [
+    {
+      "name": "search-project-task",
+      "title": "Search Tasks",
+      "subtitle": "ONES Project",
+      "description": "Search tasks in ONES Project, open task in browser, record manhour in task",
+      "mode": "view"
+    },
+    {
+      "name": "search-project-project",
+      "title": "Search Projects",
+      "subtitle": "ONES Project",
+      "description": "Search projects in ONES Project, open project in browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-project-resource",
+      "title": "Search Project Resources",
+      "subtitle": "ONES Project",
+      "description": "Search resources in ONES Project, open resource in browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-project-sprint",
+      "title": "Search Sprints",
+      "subtitle": "ONES Project",
+      "description": "Search sprints in ONES Project, open sprint in browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-wiki-space",
+      "title": "Search Spaces",
+      "subtitle": "ONES Wiki",
+      "description": "Search spaces in ONES Wiki, open space in browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-wiki-page",
+      "title": "Search Pages",
+      "subtitle": "ONES Wiki",
+      "description": "Search pages in ONES Wiki, open page in browser",
+      "mode": "view"
+    },
+    {
+      "name": "search-wiki-resource",
+      "title": "Search Wiki Resources",
+      "subtitle": "ONES Wiki",
+      "description": "Search resources in ONES Wiki, open resource in browser",
+      "mode": "view"
+    },
+    {
+      "name": "manage-manhour",
+      "title": "Manage Manhour",
+      "subtitle": "ONES Project",
+      "description": "Query manhour, record manhour, modify manhour and delete manhour in ONES Project",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "url",
+      "type": "textfield",
+      "required": true,
+      "title": "URL",
+      "description": "URL for ONES",
+      "default": "https://ones.ai"
+    },
+    {
+      "name": "email",
+      "type": "textfield",
+      "required": true,
+      "title": "Email",
+      "description": "Email for ONES"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "title": "Password",
+      "description": "Password for ONES"
+    },
+    {
+      "name": "teamUUID",
+      "type": "textfield",
+      "required": false,
+      "title": "Team UUID",
+      "description": "Team UUID for ONES"
+    },
+    {
+      "name": "manhourUser",
+      "type": "textfield",
+      "required": false,
+      "title": "Manhour Owner",
+      "description": "Manhour owner name or uuid, set to ONES API - UserUUID while empty"
+    },
+    {
+      "name": "manhourDays",
+      "type": "textfield",
+      "required": false,
+      "title": "Manhour Days",
+      "description": "Query Manhours in n days, default set to 7",
+      "default": "7"
+    },
+    {
+      "name": "manhourTaskUUID",
+      "type": "textfield",
+      "required": false,
+      "title": "Manhour Task",
+      "description": "UUID of the task where manhour record"
+    },
+    {
+      "name": "manhourMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Manhour Mode",
+      "description": "Manhour mode for ONES",
+      "default": "simple",
+      "data": [
+        {
+          "value": "detailed",
+          "title": "Detailed"
+        },
+        {
+          "value": "simple",
+          "title": "Simple"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.6",
+    "axios": "^0.24.0",
+    "moment": "^2.29.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
