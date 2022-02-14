@@ -89,11 +89,13 @@ export default function SearchPokemon() {
                 accessoryTitle={pokemon.types.join(", ")}
                 icon={{
                   source: pokemon.artwork,
+                  fallback: "icon.png",
                 }}
                 actions={
                   <ActionPanel>
                     <ActionPanel.Item
                       title="Show Details"
+                      icon={Icon.MagnifyingGlass}
                       onAction={() =>
                         push(
                           <PokemonDetail id={pokemon.id} name={pokemon.name} />
