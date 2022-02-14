@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 import {parseScriptCommands} from "./utils";
-import {environment, List, Icon, ActionPanel, Action} from "@raycast/api";
+import {List, Icon, ActionPanel, Action} from "@raycast/api";
 import { basename } from 'path';
 import { ScriptCommand } from './types';
 import { PipeCommand } from "./pipe-to-command";
@@ -9,14 +9,14 @@ export default function managePipeCommands() {
     const [state, setState] = useState<{invalid: string[], commands: ScriptCommand[]}>();
 
     const loadCommands = () => {
-        parseScriptCommands(environment.supportPath).then(setState);
+        parseScriptCommands().then(setState);
     }
 
     useEffect(loadCommands, []);
     const textCommands = state?.commands.filter(command => command.metadatas.input.type === 'text');
     const fileCommands = state?.commands.filter(command => command.metadatas.input.type === 'file');
 
-    return <List>
+    return <List isLoading={typeof state == 'undefined'}>
         <List.Section title='text' >{textCommands?.map(cmd => <PipeCommand key={cmd.path} command={cmd} reload={loadCommands} />)}</List.Section>
         <List.Section title='file' >{fileCommands?.map(cmd => <PipeCommand key={cmd.path} command={cmd} reload={loadCommands} />)}</List.Section>
         <List.Section title='invalid' >

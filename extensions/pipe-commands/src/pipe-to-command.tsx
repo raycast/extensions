@@ -30,7 +30,7 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
     if (readdirSync(environment.supportPath).length == 0) {
       await copyAssetsCommands();
     }
-    const { commands } = await parseScriptCommands(environment.supportPath);
+    const { commands } = await parseScriptCommands();
     setParsed({ commands: await sortByAccessTime(commands) });
   };
 

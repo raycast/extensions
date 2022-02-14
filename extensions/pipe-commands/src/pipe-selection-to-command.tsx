@@ -1,7 +1,6 @@
-import { environment, getSelectedFinderItems, getSelectedText, render, showToast, Toast } from "@raycast/api";
-import { readdirSync } from "fs";
+import { List, getSelectedFinderItems, getSelectedText, showToast, Toast } from "@raycast/api";
 import { PipeCommands, PipeInput } from "./pipe-to-command";
-import { copyAssetsCommands } from "./utils";
+import { useState, useEffect } from "react";
 
 async function getSelection(): Promise<PipeInput> {
   try {
@@ -14,17 +13,14 @@ async function getSelection(): Promise<PipeInput> {
   }
 }
 
-async function main() {
-  if (readdirSync(environment.supportPath).length == 0) {
-    await copyAssetsCommands();
-  }
-
+export default function PipeSelectionToPipeCommand() {
   try {
-    const selection = await getSelection();
-    render(<PipeCommands input={selection} />);
+    const [selection, setSelection] = useState<PipeInput>();
+    useEffect(() => {
+      getSelection().then(setSelection);
+    }, [])
+    return selection ? <PipeCommands input={selection} /> : <List isLoading />;
   } catch (e: unknown) {
     showToast(Toast.Style.Failure, (e as Error).message);
   }
 }
-
-main();

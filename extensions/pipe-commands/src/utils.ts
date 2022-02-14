@@ -1,8 +1,9 @@
 import { ScriptCommand, ScriptMetadatas } from "./types";
 import { chmod, copyFile, readdir, readFile, stat } from "fs/promises";
 import { basename, resolve } from "path";
-import {globbySync} from "globby"
+import { globbySync } from "globby";
 import { environment } from "@raycast/api";
+import { readdirSync } from "fs";
 
 const metadataRegex = /@raycast\.(\w+)\s+(.+)$/gm;
 
@@ -15,16 +16,17 @@ export function parseMetadatas(script: string): ScriptMetadatas {
     metadatas[metadataTitle] = metatataValue;
   }
 
-  return (metadatas as unknown) as ScriptMetadatas;
+  return metadatas as unknown as ScriptMetadatas;
 }
 
-export async function parseScriptCommands(
-  scriptFolder: string
-): Promise<{ commands: ScriptCommand[]; invalid: string[] }> {
-  const paths = await readdir(scriptFolder);
+export async function parseScriptCommands(): Promise<{ commands: ScriptCommand[]; invalid: string[] }> {
+  if (readdirSync(environment.supportPath).length == 0) {
+    await copyAssetsCommands();
+  }
+  const paths = await readdir(environment.supportPath);
   const commands = await Promise.all(
     paths.map(async (path) => {
-      const scriptPath = `${scriptFolder}/${path}`;
+      const scriptPath = `${environment.supportPath}/${path}`;
       const script = await readFile(scriptPath, "utf8");
       const metadatas = parseMetadatas(script);
       return { path: scriptPath, metadatas };
