@@ -2,17 +2,32 @@ import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getConnections } from "./db";
 import { ConnectionEntry, isBookmarkEntry, isHistoryEntry } from "./types";
+import { IsCyberduckInstalled } from "./utils";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
   const [connections, setConnections] = useState<ConnectionEntry[]>([]);
 
-  useEffect(() => {
+  async function init() {
+    const is_cyberduck_installed = await IsCyberduckInstalled();
+    if (!is_cyberduck_installed) {
+      setIsLoading(false);
+      showToast({
+        title: "Cyberduck is not installed",
+        message: "Install it from: https://cyberduck.io",
+        style: Toast.Style.Failure,
+      });
+      return;
+    }
     getConnections()
       .then((connections) => setConnections(connections))
       .catch((e) => setError(e.message))
       .finally(() => setIsLoading(false));
+  }
+
+  useEffect(() => {
+    init();
   }, []);
 
   if (error) {
