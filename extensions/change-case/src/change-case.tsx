@@ -8,6 +8,8 @@ import {
   Clipboard,
   showHUD,
   closeMainWindow,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import * as changeCase from "change-case-all";
 import { execa } from "execa";
@@ -42,11 +44,35 @@ async function runShellScript(command: string) {
   return stdout;
 }
 
-async function readContent() {
+class NoTextError extends Error {
+  constructor() {
+    super("No text");
+
+    Object.setPrototypeOf(this, NoTextError.prototype);
+  }
+}
+
+async function getSelection() {
   try {
     return await getSelectedText();
   } catch (error) {
-    return await runShellScript("pbpaste");
+    return "";
+  }
+}
+
+async function readContent(preferredSource: string) {
+  if (preferredSource === "clipboard") {
+    const clipboard = await runShellScript("pbpaste");
+    if (clipboard.length > 0) return clipboard;
+    const selection = await getSelection();
+    if (selection.length > 0) return selection;
+    throw new NoTextError();
+  } else {
+    const selection = await getSelection();
+    if (selection.length > 0) return selection;
+    const clipboard = await runShellScript("pbpaste");
+    if (clipboard.length > 0) return clipboard;
+    throw new NoTextError();
   }
 }
 
@@ -75,11 +101,23 @@ export default function changeChase() {
   ];
 
   const [clipboard, setClipboard] = useState<string>("");
-  useEffect(() => {
-    readContent().then((c) => setClipboard(c));
-  });
 
   const preferences = getPreferenceValues();
+  const preferredSource = preferences["source"];
+
+  useEffect(() => {
+    readContent(preferredSource)
+      .then((c) => setClipboard(c))
+      .catch((error) => {
+        if (error instanceof NoTextError) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Nothing to convert",
+            message: "Please ensure that text is either selected or copied",
+          });
+        }
+      });
+  }, [preferredSource]);
 
   return (
     <List>
