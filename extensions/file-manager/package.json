@@ -43,7 +43,7 @@
       "label": "Directories First"
     },
     {
-      "name": "showDotfiles",
+      "name": "showDots",
       "type": "checkbox",
       "default": false,
       "required": true,

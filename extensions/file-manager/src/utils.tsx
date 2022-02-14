@@ -16,7 +16,7 @@ export type FileDataType = {
 };
 
 export type PreferencesType = {
-  showDotfiles: boolean;
+  showDots: boolean;
   directoriesFirst: boolean;
   caseSensitive: boolean;
   showFilePermissions: boolean;
@@ -58,7 +58,7 @@ export function createItem(fileData: FileDataType) {
 export function getDirectoryData(path: string): FileDataType[] {
   const preferences: PreferencesType = getPreferenceValues();
   let files: string[] = readdirSync(path);
-  if (!preferences.showDotfiles) {
+  if (!preferences.showDots) {
     files = files.filter((file) => !file.startsWith("."));
   }
 
