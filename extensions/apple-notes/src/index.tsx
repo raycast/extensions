@@ -9,11 +9,11 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
-import { parse } from "date-format-parse";
+import moment = require("moment");
 
 interface Note {
   name: string;
-  date: Date | null;
+  date: moment.Moment | null;
   folder: string;
   account: string;
 }
@@ -34,6 +34,7 @@ export default function Command() {
     notes: [],
     loading: true,
   });
+
   function parseNotes(result: string) {
     const lines = result.split("\n");
 
@@ -61,7 +62,7 @@ export default function Command() {
           break;
         case "date":
           if (lastNote) {
-            lastNote.date = parse(value, "dddd, D MMMM YYYY at HH:mm:ss");
+            lastNote.date = moment(value, "LLLL");
             lastNote.folder = lastFolder;
             lastNote.account = lastAccount;
             notes.push(lastNote);
@@ -73,12 +74,14 @@ export default function Command() {
     notes.sort((a, b) => (a.date && b.date && a.date < b.date ? 1 : -1));
     setState({ notes: notes, loading: false });
   }
+
   async function checkCachedNotes() {
     const cachedNotes = (await getLocalStorageItem("notes")) as string;
     if (cachedNotes) {
       parseNotes(cachedNotes);
     }
   }
+
   async function fetchItems() {
     const result = await runAppleScript(
       'set output to ""\n' +
@@ -125,6 +128,7 @@ export default function Command() {
           key={i}
           icon="notes-icon.png"
           title={note.name}
+          subtitle={note.date?.fromNow()}
           accessoryTitle={
             preferences.accounts
               ? preferences.folders
