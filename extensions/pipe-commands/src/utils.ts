@@ -1,5 +1,5 @@
 import { ScriptCommand, ScriptMetadatas } from "./types";
-import { chmod, copyFile, readdir, readFile, stat } from "fs/promises";
+import { chmod, copyFile, readFile, stat } from "fs/promises";
 import { basename, resolve } from "path";
 import { globbySync } from "globby";
 import { environment } from "@raycast/api";
@@ -23,10 +23,9 @@ export async function parseScriptCommands(): Promise<{ commands: ScriptCommand[]
   if (readdirSync(environment.supportPath).length == 0) {
     await copyAssetsCommands();
   }
-  const paths = await readdir(environment.supportPath);
+  const scriptPaths = globbySync(`${environment.supportPath}/**/*`).filter(path => !path.startsWith("."));
   const commands = await Promise.all(
-    paths.map(async (path) => {
-      const scriptPath = `${environment.supportPath}/${path}`;
+    scriptPaths.map(async (scriptPath) => {
       const script = await readFile(scriptPath, "utf8");
       const metadatas = parseMetadatas(script);
       return { path: scriptPath, metadatas };
@@ -48,8 +47,9 @@ export async function copyAssetsCommands() {
   const assetsDir = resolve(environment.assetsPath, "commands");
   await Promise.all(
     globbySync(`${assetsDir}/**/*`).map(async (assetPath) => {
-      await copyFile(resolve(assetsDir, assetPath), resolve(environment.supportPath, basename(assetPath)));
-      await chmod(resolve(environment.supportPath, assetPath), 0o755);
+      const target = resolve(environment.supportPath, basename(assetPath));
+      await copyFile(resolve(assetsDir, assetPath), target);
+      await chmod(target, "755");
       console.debug(`Copied ${assetPath}`);
     })
   );
