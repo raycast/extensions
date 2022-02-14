@@ -24,11 +24,6 @@ export default function Command() {
 
   const listItems: SearchResult[] = searchText.length === 0 ? history : results;
 
-  if (!token) {
-    showToast(ToastStyle.Failure, "Please add your Kagi token to this extension's preferences");
-    return <List>{null}</List>;
-  }
-
   return (
     <List
       isLoading={isLoading}
