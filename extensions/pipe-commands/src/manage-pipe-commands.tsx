@@ -18,16 +18,6 @@ export default function managePipeCommands() {
 
   return (
     <List isLoading={typeof state == "undefined"}>
-      <List.Section title="Text Commands">
-        {textCommands?.map((cmd) => (
-          <PipeCommand key={cmd.path} command={cmd} reload={loadCommands} />
-        ))}
-      </List.Section>
-      <List.Section title="File Commands">
-        {fileCommands?.map((cmd) => (
-          <PipeCommand key={cmd.path} command={cmd} reload={loadCommands} />
-        ))}
-      </List.Section>
       <List.Section title="Invalid Commands">
         {state?.invalid.map((path) => (
           <List.Item
@@ -43,6 +33,16 @@ export default function managePipeCommands() {
               </ActionPanel>
             }
           />
+        ))}
+      </List.Section>
+      <List.Section title="File Commands">
+        {fileCommands?.map((cmd) => (
+          <PipeCommand key={cmd.path} command={cmd} reload={loadCommands} />
+        ))}
+      </List.Section>
+      <List.Section title="Text Commands">
+        {textCommands?.map((cmd) => (
+          <PipeCommand key={cmd.path} command={cmd} reload={loadCommands} />
         ))}
       </List.Section>
     </List>
