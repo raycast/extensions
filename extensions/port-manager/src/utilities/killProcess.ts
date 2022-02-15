@@ -47,8 +47,9 @@ export async function kill(
   useSudo: boolean = getPreferenceValues().sudo ?? false
 ) {
   const pidString = pid instanceof Array ? pid.join(" ") : pid;
-  const cmd = `${useSudo ? "/usr/bin/sudo /bin/kill" : "kill"} -${signal} ${pidString}`;
-  console.log(cmd);
+  const cmd = `${
+    useSudo ? "/usr/bin/sudo /bin/kill" : "kill"
+  } -${signal} ${pidString}`;
   const { stderr } = await exec(cmd);
   if (stderr) throw new Error(stderr);
 }
@@ -59,9 +60,12 @@ export async function killall(
   useSudo: boolean = getPreferenceValues().sudo ?? false
 ) {
   const processnameString =
-    processname instanceof Array ? processname.map((n) => `'${n}'`).join(" ") : `'${processname}'`;
-  const cmd = `${useSudo ? "/usr/bin/sudo " : ""}/usr/bin/killall -${signal} ${processnameString}`;
-  console.log(cmd);
+    processname instanceof Array
+      ? processname.map((n) => `'${n}'`).join(" ")
+      : `'${processname}'`;
+  const cmd = `${
+    useSudo ? "/usr/bin/sudo " : ""
+  }/usr/bin/killall -${signal} ${processnameString}`;
   const { stderr } = await exec(cmd);
   if (stderr) throw new Error(stderr);
 }

@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, List, ListItem, PushAction } from "@raycast/api";
+import { ActionPanel, Icon, List, Action } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { CopyCommandsActionsMenu } from "./actions/CopyCommandsActionMenu";
 import CopyInfoActionsMenu from "./actions/CopyInfoActionsMenu";
@@ -8,7 +8,8 @@ import ProcessInfo from "./models/ProcessInfo";
 
 export default function Command() {
   const [processes, setProcesses] = useState<ProcessInfo[]>([]);
-  const reloadProcesses = async () => setProcesses(await ProcessInfo.getCurrent());
+  const reloadProcesses = async () =>
+    setProcesses(await ProcessInfo.getCurrent());
 
   useEffect(() => {
     (async () => {
@@ -16,21 +17,36 @@ export default function Command() {
     })();
   }, []);
   return (
-    <List isLoading={processes.length === 0} navigationTitle="Open Ports" searchBarPlaceholder="Search Open Ports">
+    <List
+      isLoading={processes.length === 0}
+      navigationTitle="Open Ports"
+      searchBarPlaceholder="Search Open Ports"
+    >
       {processes.map((p) => (
-        <ListItem
+        <List.Item
           key={p.pid}
           title={p.name ?? "Untitled Process"}
           subtitle={p.user ?? ""}
-          accessoryTitle={[...(new Set(p.portInfo?.map((i) => `${i.port}`)))].join(', ')}
-          keywords={p.portInfo?.map((i) => `${i.port}`).concat(p.portInfo?.map((i) => `${i.host}`))}
+          accessoryTitle={[
+            ...new Set(p.portInfo?.map((i) => `${i.port}`)),
+          ].join(", ")}
+          keywords={p.portInfo
+            ?.map((i) => `${i.port}`)
+            .concat(p.portInfo?.map((i) => `${i.host}`))}
           actions={
             <ActionPanel>
               <KillActionsMenu process={p} reloadCallback={reloadProcesses} />
-              <KillallActionsMenu process={p} reloadCallback={reloadProcesses} />
+              <KillallActionsMenu
+                process={p}
+                reloadCallback={reloadProcesses}
+              />
               <CopyInfoActionsMenu process={p} />
               <CopyCommandsActionsMenu process={p} />
-              <ActionPanel.Item title="Reload" onAction={reloadProcesses} icon={Icon.ArrowClockwise} />
+              <Action
+                title="Reload"
+                onAction={reloadProcesses}
+                icon={Icon.ArrowClockwise}
+              />
             </ActionPanel>
           }
         />

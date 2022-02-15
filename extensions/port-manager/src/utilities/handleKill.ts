@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { IProcessInfo } from "../models/interfaces";
 
 export async function handleKill(
@@ -8,9 +8,16 @@ export async function handleKill(
 ) {
   try {
     await killCallback();
-    await showToast(ToastStyle.Success, "Killed Process", `${process.name} (${process.pid})`);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Killed Process",
+      message: `${process.name} (${process.pid})`,
+    });
     if (reloadCallback !== undefined) await reloadCallback();
   } catch (e) {
-    await showToast(ToastStyle.Failure, `${(e as Error).message ?? e}`);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `${(e as Error).message ?? e}`,
+    });
   }
 }

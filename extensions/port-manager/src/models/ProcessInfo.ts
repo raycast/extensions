@@ -3,7 +3,13 @@ import { LsofPrefix, readmeURL } from "./constants";
 import { exec as cExec } from "child_process";
 import { IProcessInfo, PortInfo } from "./interfaces";
 import isDigit from "../utilities/isDigit";
-import { AlertOptions, closeMainWindow, confirmAlert, getPreferenceValues, open } from "@raycast/api";
+import {
+  closeMainWindow,
+  confirmAlert,
+  getPreferenceValues,
+  open,
+  Alert,
+} from "@raycast/api";
 
 const exec = promisify(cExec);
 
@@ -22,7 +28,9 @@ export default class ProcessInfo implements IProcessInfo {
   ) {}
 
   public static async getCurrent() {
-    const cmd = `${ProcessInfo.useSudo ? "/usr/bin/sudo " : ""}/usr/sbin/lsof +c0 -iTCP -sTCP:LISTEN -P -FpcRuLPn`;
+    const cmd = `${
+      ProcessInfo.useSudo ? "/usr/bin/sudo " : ""
+    }/usr/sbin/lsof +c0 -iTCP -sTCP:LISTEN -P -FpcRuLPn`;
     try {
       const { stdout, stderr } = await exec(cmd);
       if (stderr) throw new Error(stderr);
@@ -58,8 +66,16 @@ export default class ProcessInfo implements IProcessInfo {
               break;
             case LsofPrefix.PORTS:
               values.portInfo
-                ? values.portInfo.push({ host: value.split(":")[0], port: Number(value.split(":")[1]) })
-                : (values.portInfo = [{ host: value.split(":")[0], port: Number(value.split(":")[1]) }]);
+                ? values.portInfo.push({
+                    host: value.split(":")[0],
+                    port: Number(value.split(":")[1]),
+                  })
+                : (values.portInfo = [
+                    {
+                      host: value.split(":")[0],
+                      port: Number(value.split(":")[1]),
+                    },
+                  ]);
               break;
             case LsofPrefix.INTERNET_PROTOCOLL:
               values.internetProtocol = value;
@@ -84,8 +100,12 @@ export default class ProcessInfo implements IProcessInfo {
       return instances;
     } catch (e) {
       if (e instanceof Error) {
-        if (e.message.includes("sudo: a terminal is required to read the password")) {
-          const alertOptions: AlertOptions = {
+        if (
+          e.message.includes(
+            "sudo: a terminal is required to read the password"
+          )
+        ) {
+          const alertOptions: Alert.Options = {
             title: "Can't Use Sudo",
             message:
               "It seems your user can't use sudo without a password. Please turn off using sudo in the extension preferences or change your sudo configuration.",
