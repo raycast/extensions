@@ -9,7 +9,7 @@ Whenever possible, we provide tools to automate the migration to a newer version
 To run the codemods, run the following command in your extension directory:
 
 ```bash
-npx @raycast/migrate .
+npx @raycast/migration .
 ```
 
 It will detect the version of the API you were previously using and apply all the migrations that have been available since.
