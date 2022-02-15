@@ -1,4 +1,4 @@
-import { getLocalStorageItem, getPreferenceValues, setLocalStorageItem } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import _ from "lodash";
 
@@ -79,20 +79,20 @@ async function getEventTypes() {
 
 export async function refreshData() {
   const user = await getCurrentUser();
-  setLocalStorageItem("user", JSON.stringify(user));
+  LocalStorage.setItem("user", JSON.stringify(user));
   const eventTypes = await getEventTypes();
-  setLocalStorageItem("eventTypes", JSON.stringify(eventTypes));
-  setLocalStorageItem("updated_ts", new Date().toISOString());
+  LocalStorage.setItem("eventTypes", JSON.stringify(eventTypes));
+  LocalStorage.setItem("updated_ts", new Date().toISOString());
 }
 
 export async function getUserFromCache(): Promise<CalendlyUser> {
-  const cache = await getLocalStorageItem("user");
+  const cache = await LocalStorage.getItem("user");
   if (!cache) throw new Error("User not found in Cache");
   return JSON.parse(cache.toString());
 }
 
 export async function getEventTypesFromCache(): Promise<CalendlyEventType[]> {
-  const cache = await getLocalStorageItem("eventTypes");
+  const cache = await LocalStorage.getItem("eventTypes");
   if (!cache) throw new Error("Event Types not found in Cache");
   return JSON.parse(cache.toString());
 }

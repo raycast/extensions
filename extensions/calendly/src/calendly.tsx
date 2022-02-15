@@ -1,18 +1,16 @@
 import {
   List,
-  CopyToClipboardAction,
   ActionPanel,
   Icon,
-  ToastStyle,
   Toast,
-  copyTextToClipboard,
   showHUD,
-  OpenInBrowserAction,
   Detail,
   showToast,
   getPreferenceValues,
-  ImageMask,
-  getLocalStorageItem,
+  Action,
+  Clipboard,
+  Image,
+  LocalStorage,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
@@ -46,7 +44,7 @@ export default function Calendly() {
   const { defaultAction }: Preferences = getPreferenceValues();
 
   async function init() {
-    const updated_ts = await getLocalStorageItem("updated_ts");
+    const updated_ts = await LocalStorage.getItem("updated_ts");
     console.log("init running...", { updated_ts });
     if (updated_ts === undefined || moment(updated_ts.toString()).isBefore(moment().subtract(24, "hours"))) {
       // either no cache, or cache is 24+ hours old
@@ -63,12 +61,12 @@ export default function Calendly() {
 
   function RefreshAction() {
     return (
-      <ActionPanel.Item
+      <Action
         title="Refresh Data"
         icon={Icon.ArrowClockwise}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
         onAction={async () => {
-          const toast = new Toast({ style: ToastStyle.Animated, title: "Refreshing..." });
+          const toast = await showToast({ style: Toast.Style.Animated, title: "Refreshing..." });
           await toast.show();
           setIsLoading(true);
           await refreshData();
@@ -86,7 +84,10 @@ export default function Calendly() {
         if (error.response.status === 401) {
           setShowError(true);
         } else {
-          showToast(ToastStyle.Failure, "Sorry, something went wrong");
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Sorry, something went wrong",
+          });
         }
       });
   }, []);
@@ -97,7 +98,7 @@ export default function Calendly() {
         markdown={error}
         actions={
           <ActionPanel>
-            <OpenInBrowserAction url={tokenURL} title="Open Calendly Integrations Page" />
+            <Action.OpenInBrowser url={tokenURL} title="Open Calendly Integrations Page" />
           </ActionPanel>
         }
       />
@@ -112,7 +113,7 @@ export default function Calendly() {
         }}
         actions={
           <ActionPanel>
-            <OpenInBrowserAction url="https://calendly.com/dashboard" />
+            <Action.OpenInBrowser url="https://calendly.com/dashboard" />
             <RefreshAction />
           </ActionPanel>
         }
@@ -121,11 +122,11 @@ export default function Calendly() {
         <List.Item
           title="Copy My Link"
           subtitle={"/" + user.slug}
-          icon={{ source: user.avatar_url, mask: ImageMask.Circle }}
+          icon={{ source: user.avatar_url, mask: Image.Mask.Circle }}
           actions={
             <ActionPanel>
-              <CopyToClipboardAction title="Copy My Link" icon={Icon.Calendar} content={user.scheduling_url} />
-              <OpenInBrowserAction url={user.scheduling_url} />
+              <Action.CopyToClipboard title="Copy My Link" icon={Icon.Calendar} content={user.scheduling_url} />
+              <Action.OpenInBrowser url={user.scheduling_url} />
               <RefreshAction />
             </ActionPanel>
           }
@@ -174,19 +175,19 @@ export default function Calendly() {
 }
 
 function CopyMeetingLinkAction({ event }: { event: CalendlyEventType }) {
-  return <CopyToClipboardAction title="Copy Meeting URL" icon={Icon.Calendar} content={event.scheduling_url} />;
+  return <Action.CopyToClipboard title="Copy Meeting URL" icon={Icon.Calendar} content={event.scheduling_url} />;
 }
 
 function CopyOneTimeLinkAction({ event }: { event: CalendlyEventType }) {
   return (
-    <ActionPanel.Item
+    <Action
       title="Copy Single Use Link"
       icon={Icon.Calendar}
       onAction={async () => {
-        const toast = new Toast({ style: ToastStyle.Animated, title: "Generating Link..." });
+        const toast = await showToast({ style: Toast.Style.Animated, title: "Generating Link..." });
         await toast.show();
         const data = await createSingleUseLink(event);
-        await copyTextToClipboard(data.booking_url);
+        await Clipboard.copy(data.booking_url);
         await toast.hide();
         await showHUD("Single-use Link Copied to Clipboard 📋");
       }}
