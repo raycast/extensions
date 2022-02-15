@@ -10,6 +10,7 @@
     {
       "name": "index",
       "title": "Browse Components",
+      "subtitle": "Chakra UI",
       "description": "Show all Chakra UI Components",
       "mode": "view",
       "icon": "chakra.png"
