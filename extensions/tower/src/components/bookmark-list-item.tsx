@@ -1,12 +1,4 @@
-import {
-  ActionPanel,
-  Color,
-  CopyToClipboardAction,
-  List,
-  OpenAction,
-  OpenWithAction,
-  ShowInFinderAction,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, List } from "@raycast/api";
 import Bookmark from "../dtos/bookmark-dto";
 import OpenBookMarkAction from "./open-bookmark-action";
 
@@ -24,16 +16,16 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
         <ActionPanel>
           <ActionPanel.Section>
             <OpenBookMarkAction bookmark={bookmark} />
-            <ShowInFinderAction path={bookmark.getPath} />
-            <OpenWithAction path={bookmark.getPath} shortcut={{ modifiers: ["cmd", "shift"], key: "return" }} />
-            <OpenAction
+            <Action.ShowInFinder path={bookmark.getPath} />
+            <Action.OpenWith path={bookmark.getPath} shortcut={{ modifiers: ["cmd", "shift"], key: "return" }} />
+            <Action.Open
               title="Open in Code"
               icon="icon-vscode.png"
               target={bookmark.getPath}
               application="Visual Studio Code"
               shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
             />
-            <OpenAction
+            <Action.Open
               title="Open in iTerm"
               icon="icon-iterm.png"
               target={bookmark.getPath}
@@ -42,12 +34,12 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               title="Copy Name"
               content={bookmark.Name}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               title="Copy Path"
               content={bookmark.getPath}
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
