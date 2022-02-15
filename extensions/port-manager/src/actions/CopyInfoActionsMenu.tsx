@@ -33,16 +33,6 @@ export default function CopyInfoActionsMenu(props: { process: IProcessInfo }) {
           icon=""
         />
       ) : null}
-      <Action.CopyToClipboard
-        content={`sudo kill -9 ${props.process.pid}`}
-        title="Kill Command"
-        icon=""
-      />
-      <Action.CopyToClipboard
-        content={`sudo killall -9 ${props.process.name?.replace(" ", " ")}`}
-        title="Killall Command"
-        icon=""
-      />
     </ActionPanel.Submenu>
   );
 }
