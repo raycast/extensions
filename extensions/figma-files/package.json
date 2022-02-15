@@ -27,7 +27,7 @@
           "type": "password",
           "required": true,
           "title": "Team ID",
-          "description": "Find this in the url after navigating to your team page."
+          "description": "Find this in the url after navigating to your team page"
         }
       ]
     }

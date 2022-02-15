@@ -1,20 +1,10 @@
 ## Description
 
-<!-- A short summary of your change. If you add a new extension or command, explain what it does. -->
-
-## Type of change
-
-<!-- Please choose one option and delete others that are not relevant. -->
-
-- New extension
-- Bug fix / improvement for my extension
-- Bug fix / improvement for somebody else's extension. Extension author: @GH-handle
-- Documentation update
-- Other (Specify)
+<!-- A summary of your change. If you add a new extension or command, explain what it does. -->
 
 ## Screencast
 
-<!-- If you add a new extension or command, include a screencast (or screenshot for a small change). Good screencast will make the review much faster, especially your extension requires registration in other services.  -->
+<!-- If you add a new extension or command, include a screencast (or screenshot for straightforward changes). A good screencast will make the review much faster - especially if your extension requires registration in other services.  -->
 
 ## Checklist
 

@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, List, showToast, Action, Toast } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 
@@ -25,10 +25,10 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction title="Open in Browser" url={searchResult.url} />
+            <Action.OpenInBrowser title="Open in Browser" url={searchResult.url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CopyToClipboardAction
+            <Action.CopyToClipboard
               title="Copy Install Command"
               content={`npm install ${searchResult.name}`}
               shortcut={{ modifiers: ["cmd"], key: "." }}
@@ -58,7 +58,11 @@ function useSearch() {
           return;
         }
         console.error("search error", error);
-        showToast(ToastStyle.Failure, "Could not perform search", String(error));
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Could not perform search",
+          message: String(error),
+        });
       } finally {
         setIsLoading(false);
       }

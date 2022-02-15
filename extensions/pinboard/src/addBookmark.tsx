@@ -1,13 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  SubmitFormAction,
-  showToast,
-  ToastStyle,
-  OpenInBrowserAction,
-  Icon,
-  getSelectedText,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Icon, getSelectedText, Toast, showHUD, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { Bookmark, addBookmark } from "./api";
@@ -43,16 +34,18 @@ export default function Command() {
     const url = values.url.trim();
     const title = values.title.trim();
     if (!isValidURL(url) || title.length === 0) {
-      showToast(ToastStyle.Failure, "Enter a valid URL and title for the bookmark");
+      showToast({ title: "Enter a valid URL and title for the bookmark", style: Toast.Style.Failure });
       return;
     }
-    showToast(ToastStyle.Animated, "Pinning bookmark...");
+    const toast = await showToast({ title: "Pinning bookmark...", style: Toast.Style.Animated });
     try {
       await addBookmark(values);
-      showToast(ToastStyle.Success, "Bookmark pinned!");
+      toast.hide();
+      showHUD("Bookmark pinned!");
+      popToRoot();
     } catch (error) {
       console.error("addBookmark error", error);
-      showToast(ToastStyle.Failure, "Could not pin bookmark", String(error));
+      showToast({ title: "Could not pin bookmark", message: String(error), style: Toast.Style.Failure });
     }
   }
 
@@ -68,8 +61,8 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Add Bookmark" icon={{ source: Icon.Plus }} onSubmit={handleSubmit} />
-          <OpenInBrowserAction title="Open Pinboard" url="https://pinboard.in" />
+          <Action.SubmitForm title="Add Bookmark" icon={{ source: Icon.Plus }} onSubmit={handleSubmit} />
+          <Action.OpenInBrowser title="Open Pinboard" url="https://pinboard.in" />
         </ActionPanel>
       }
     >

@@ -1,4 +1,4 @@
-import { getLocalStorageItem, preferences, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import SpotifyWebApi from "spotify-web-api-node";
 import { Response } from "./interfaces";
 import { AuthResponseCredentials } from "./spoti";
@@ -7,14 +7,13 @@ const debugMode = false;
 
 export const spotifyApi = new SpotifyWebApi();
 
-export function authorize(): void {
-  const clientId = preferences.clientId?.value as string;
-  const secret = preferences.secret?.value as string;
+const { clientId, secret } = getPreferenceValues();
 
+export function authorize(): void {
   if (clientId?.length != 0 && secret?.length != 0) {
     spotifyApi.setClientId(clientId);
     spotifyApi.setClientSecret(secret);
-    getLocalStorageItem("authData").then((item) => {
+    LocalStorage.getItem("authData").then((item) => {
       if (!item) {
         debugLog("Getting new token");
         authenticate();
@@ -49,10 +48,10 @@ async function authenticate(): Promise<void> {
       date.setSeconds(date.getSeconds() + authResponse.result.expires_in);
       const exp = date.getTime();
       debugLog(`token: ${token}, expires in: ${exp}`);
-      setLocalStorageItem("authData", JSON.stringify({ token: token, expires_in: exp }));
+      LocalStorage.setItem("authData", JSON.stringify({ token: token, expires_in: exp }));
     }
   } else if (authResponse.error) {
-    showToast(ToastStyle.Failure, authResponse.error);
+    showToast(Toast.Style.Failure, authResponse.error);
   }
 }
 
