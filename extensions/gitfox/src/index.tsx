@@ -1,4 +1,4 @@
-import { Detail } from "@raycast/api";
+import { Detail, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import Bookmark from "./dtos/bookmark-dto";
 import BookmarkList from "./components/bookmark-list";
@@ -6,7 +6,6 @@ import { fetchBookmarks, isGitfoxCliInstalled, gitfoxCliRequiredMessage } from "
 
 interface State {
   items?: Bookmark[];
-  error?: Error;
 }
 
 export default function Command() {
@@ -18,9 +17,8 @@ export default function Command() {
         const bookmarks = await fetchBookmarks();
         setState({ items: bookmarks });
       } catch (error) {
-        setState({
-          error: error instanceof Error ? error : new Error("Something went wrong"),
-        });
+        const err = error instanceof Error ? error : new Error("Something went wrong");
+        showToast(Toast.Style.Failure, err.name, err.message);
       }
     }
 
@@ -30,7 +28,7 @@ export default function Command() {
   return (
     <>
       {isGitfoxCliInstalled() ? (
-        <BookmarkList bookmarks={state.items} />
+        <BookmarkList bookmarks={state.items} isLoading={!state.items} />
       ) : (
         <Detail navigationTitle="GitFox CLI not installed" markdown={gitfoxCliRequiredMessage()} />
       )}
