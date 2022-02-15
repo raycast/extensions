@@ -15,7 +15,7 @@ To render a user interface, you need to do the following:
 - Set the `mode` to `view` in the [`package.json` manifest file](../../information/manifest.md#command-properties)
 - Export a React component from your command entry file
 
-As a general rule of thumb, you should render something as quickly as possible. This guarantees that your command feels responsive. If you don't have data available to show, you can set the `isLoading` prop to `true` on top-level components such as `<Detail>`, [`<Form>`](form.md), or [`<List>`](list.md). It shows a loading indicator at the top of Raycast.
+As a general rule of thumb, you should render something as quickly as possible. This guarantees that your command feels responsive. If you don't have data available to show, you can set the `isLoading` prop to `true` on top-level components such as [`<Detail>`](detail.md), [`<Form>`](form.md), or [`<List>`](list.md). It shows a loading indicator at the top of Raycast.
 
 Here is an example which shows a loading indicator for 2 seconds after the command got launched:
 
