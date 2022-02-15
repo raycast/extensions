@@ -1,4 +1,12 @@
-import { ActionPanel, Color, CopyToClipboardAction, List, OpenAction, ShowInFinderAction } from "@raycast/api";
+import {
+  ActionPanel,
+  Color,
+  CopyToClipboardAction,
+  List,
+  OpenAction,
+  OpenWithAction,
+  ShowInFinderAction,
+} from "@raycast/api";
 import Bookmark from "../dtos/bookmark-dto";
 import OpenBookMarkAction from "./open-bookmark-action";
 
@@ -17,6 +25,7 @@ export default function BookmarkListItem(props: { bookmark: Bookmark }) {
           <ActionPanel.Section>
             <OpenBookMarkAction bookmark={bookmark} />
             <ShowInFinderAction path={bookmark.getPath} />
+            <OpenWithAction path={bookmark.getPath} shortcut={{ modifiers: ["cmd", "shift"], key: "return" }} />
             <OpenAction
               title="Open in Code"
               icon="icon-vscode.png"
