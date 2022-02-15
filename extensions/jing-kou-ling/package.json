@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jing-kou-ling",
   "title": "JD code",
-  "description": "generate and parse JD code ",
+  "description": "generate and parse JD code",
   "icon": "jdCodeIcon.png",
   "author": "zooPanda",
   "license": "MIT",

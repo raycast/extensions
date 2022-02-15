@@ -7,7 +7,11 @@ export default function Command() {
 
   async function handleSubmit(values: { title: string; url: string }) {
     if (!values.url) {
-      return showToast({ title: "Incomplete parameters", message: "Please enter the link that needs to generate code to submit", style: Toast.Style.Failure });
+      return showToast({
+        title: "Incomplete parameters",
+        message: "Please enter the link that needs to generate code to submit",
+        style: Toast.Style.Failure,
+      });
     }
     if (!values.title) {
       values.title = "Welcome to the zoo";
