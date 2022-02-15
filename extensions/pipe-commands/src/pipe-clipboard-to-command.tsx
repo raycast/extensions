@@ -4,10 +4,13 @@ import { existsSync } from "fs";
 import { PipeCommands, PipeInput } from "./pipe-to-command";
 
 const applescript = `
-if ((clipboard info) as string) contains "«class furl»" then
+set clipboardType to (item 1 of (item 1 of (clipboard info)) as string)
+if (clipboardType = "«class furl»") then
     set output to (POSIX path of (the clipboard as «class furl»))
-else
+else if (clipboardType = "«class utf8»") then
     set output to the clipboard
+else
+    tell me to error "Unsupported clipboard type: " & clipboardType
 end if
 `;
 
