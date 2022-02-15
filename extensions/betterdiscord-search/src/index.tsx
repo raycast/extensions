@@ -104,16 +104,18 @@ ${searchResult.description}
     return (
       <List.Item
         title={searchResult.name}
+        subtitle={searchResult.author}
         icon={{
           source: searchResult.thumb || Icon.QuestionMark,
           tintColor: "white",
         }}
-        accessoryTitle={searchResult.author}
+        accessoryTitle={"↓" + searchResult.downloads}
         actions={
           <ActionPanel>
             <Action.OpenInBrowser url={searchResult.url} />
             <Action
               title="Details"
+              icon={Icon.Text}
               onAction={() => {
                 push(<Details searchResult={searchResult} description={details} />);
               }}
@@ -141,7 +143,6 @@ ${searchResult.description}
 }
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
-
   await limit();
   const response = await fetch("https://api.betterdiscord.app/v1/store/addons", {
     method: "get",
