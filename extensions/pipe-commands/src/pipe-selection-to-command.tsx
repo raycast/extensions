@@ -1,6 +1,7 @@
 import { List, getSelectedFinderItems, getSelectedText, showToast, Toast } from "@raycast/api";
 import { PipeCommands, PipeInput } from "./pipe-to-command";
 import { useState, useEffect } from "react";
+import { existsSync } from "fs";
 
 async function getSelection(): Promise<PipeInput> {
   try {
@@ -8,8 +9,9 @@ async function getSelection(): Promise<PipeInput> {
     if (files.length == 0) throw new Error("No file selected!");
     return { type: "file", content: files[0].path };
   } catch {
-    const text = await getSelectedText();
-    return { type: "text", content: text };
+    const content = await getSelectedText();
+    const type = existsSync(content) ? "file" : "text";
+    return { type, content };
   }
 }
 
