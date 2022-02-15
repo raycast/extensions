@@ -19,7 +19,7 @@ export function useBookmarksSearch(query: string | undefined): {
 } {
   const [response, setResponse] = useState<BookmarksResponse>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   let cancel = false;
 
@@ -89,7 +89,7 @@ export function useLatestBookmarks(): {
 } {
   const [response, setResponse] = useState<BookmarksResponse>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   let cancel = false;
 
