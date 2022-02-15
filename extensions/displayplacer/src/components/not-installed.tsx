@@ -1,4 +1,4 @@
-import { ActionPanel, ActionPanelItem, Detail, showToast, Toast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Detail, showToast, Toast, Action } from "@raycast/api";
 import { execSync } from "child_process";
 import { useState } from "react";
 
@@ -13,14 +13,14 @@ export default function NotInstalled({
       actions={
         <ActionPanel>
           {!isLoading && (
-            <ActionPanelItem
+            <Action
               title="Install with Homebrew"
               onAction={async () => {
                 if (isLoading) return;
 
                 setIsLoading(true);
 
-                const toast = new Toast({ style: ToastStyle.Animated, title: "Installing..." });
+                const toast = await showToast({ style: Toast.Style.Animated, title: "Installing..." });
                 await toast.show();
 
                 try {
@@ -29,7 +29,11 @@ export default function NotInstalled({
                   onRefresh();
                 } catch {
                   await toast.hide();
-                  await showToast(ToastStyle.Failure, "Error", "An unknown error occured while trying to install");
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Error",
+                    message: "An unknown error occured while trying to install",
+                  });
                 }
                 setIsLoading(false);
               }}

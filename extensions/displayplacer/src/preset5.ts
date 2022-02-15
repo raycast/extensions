@@ -1,11 +1,11 @@
-import { closeMainWindow, Toast, ToastStyle } from "@raycast/api";
+import { closeMainWindow, Toast, showToast } from "@raycast/api";
 import path from "path";
 import loadPresetByIndex from "./utils/loadPresetByIndex";
 
 export default async function main() {
   const index = parseInt(path.basename(__filename).replace("preset", "").replace(".js", "")) - 1;
-  const toast = new Toast({
-    style: ToastStyle.Animated,
+  const toast = await showToast({
+    style: Toast.Style.Animated,
     title: "Switching Display Settings...",
   });
   await toast.show();
