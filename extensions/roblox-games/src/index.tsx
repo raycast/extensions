@@ -64,7 +64,7 @@ In order to use this extension, you must be logged in to Roblox Studio.
 Click below to download`}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction title={`Open in browser`} url="https://setup.rbxcdn.com/mac/RobloxStudio.dmg" />
+              <OpenInBrowserAction title={`Download Roblox Studio`} url="https://setup.rbxcdn.com/mac/RobloxStudio.dmg" />
             </ActionPanel>
           }
         ></Detail>
