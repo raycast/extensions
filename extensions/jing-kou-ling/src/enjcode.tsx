@@ -7,20 +7,20 @@ export default function Command() {
 
   async function handleSubmit(values: { title: string; url: string }) {
     if (!values.url) {
-      return showToast({ title: "参数不完整", message: "请输入需要生成口令的链接提交", style: Toast.Style.Failure });
+      return showToast({ title: "Incomplete parameters", message: "Please enter the link that needs to generate code to submit", style: Toast.Style.Failure });
     }
     if (!values.title) {
-      values.title = "动物园欢迎您";
+      values.title = "Welcome to the zoo";
     }
     setFormLoading(true);
     const { data } = await axios.post("https://api.jds.codes/jd/gencode", { ...values });
     if (data.code === 200) {
       setFormLoading(false);
       Clipboard.copy(data.data.code);
-      showToast({ title: "生成成功", message: "口令已复制到剪贴板", style: Toast.Style.Success });
+      showToast({ title: "generated", message: "code copied to clipboard", style: Toast.Style.Success });
     } else {
       setFormLoading(false);
-      showToast({ title: "生成失败", message: data.msg, style: Toast.Style.Failure });
+      showToast({ title: "generate failed", message: data.msg, style: Toast.Style.Failure });
     }
   }
 
@@ -34,9 +34,9 @@ export default function Command() {
         }
         isLoading={formLoading}
       >
-        <Form.Description title="生成京口令" text="生成自己的京口令" />
-        <Form.TextField id="title" title="口令标题" placeholder="请输入你需要生成的口令的标题" />
-        <Form.TextField id="url" title="口令链接" placeholder="请输入你需要生成的口令的的链接" />
+        <Form.Description title="Generate JD code" text="Generate your own JD code" />
+        <Form.TextField id="title" title="title" placeholder="please enter your title " />
+        <Form.TextField id="url" title="link" placeholder="please enter your link for generate JD code" />
       </Form>
     </>
   );

@@ -1,24 +1,24 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jing-kou-ling",
-  "title": "京口令",
-  "description": "generate and parse JD code ｜ 用于生成和解析京东口令",
+  "title": "JD code",
+  "description": "generate and parse JD code ",
   "icon": "jdCodeIcon.png",
   "author": "zooPanda",
   "license": "MIT",
   "commands": [
     {
       "name": "enjcode",
-      "title": "生成口令",
-      "subtitle": "生成京口令",
-      "description": "generate JD code | 生成京东口令",
+      "title": "generate JD code",
+      "subtitle": "generate JD code",
+      "description": "generate JD code",
       "mode": "view"
     },
     {
       "name": "dejcode",
-      "title": "解析口令",
-      "subtitle": "解析京东口令",
-      "description": "parse JD code | 解析京东口令",
+      "title": "parse JD code",
+      "subtitle": "parse JD code",
+      "description": "parse JD code",
       "mode": "view"
     }
   ],

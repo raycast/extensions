@@ -14,10 +14,10 @@ export default function DeCode() {
     <List
       isLoading={state.isLoading}
       onSearchTextChange={decode}
-      searchBarPlaceholder="粘贴需要解析的京东口令"
+      searchBarPlaceholder="Paste the JD code that needs to be parse"
       throttle
     >
-      <List.Section title="解析结果">
+      <List.Section title="parsed">
         {(Object.keys(state.result) as Array<keyof IDcodeResult>).map(<K extends keyof IDcodeResult>(key: K) => (
           <DecodeItem key={key} title={key} value={state.result[key]} />
         ))}
@@ -62,7 +62,7 @@ function useDecode() {
     } catch (error) {
       console.log(error);
       setState({ result: {}, isLoading: false });
-      return showToast({ style: Toast.Style.Failure, title: "发生错误" });
+      return showToast({ style: Toast.Style.Failure, title: "something wrong was happend" });
     }
   }
   useEffect(() => {
