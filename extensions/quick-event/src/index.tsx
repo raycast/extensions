@@ -43,8 +43,8 @@ export default function Command() {
         {results.map((item) => (
           <List.Item
             key={item.id}
-            title={item.eventTitle}
-            subtitle={formatDate(item)}
+            title={item.eventTitle || 'Untitled event'}
+            subtitle={formatDate(item) || 'No date'}
             icon={Icon.Calendar}
             actions={
               <ActionPanel>
