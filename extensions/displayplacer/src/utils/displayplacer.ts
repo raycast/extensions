@@ -9,13 +9,14 @@ export function listScreenInfo() {
       (data, line) => {
         const lineAsArray = line.split(": ");
         const value = lineAsArray[1];
-        const screenIndex = data.screens.findIndex((s: DisplayPlacerScreen) => s.persistentId === data.currentId);
+        const _index = data.screens.findIndex((s: DisplayPlacerScreen) => s.persistentId === data.currentId);
+        const screenIndex = _index;
+        if (lineAsArray[0].includes("Persistent screen id")) {
+          data.currentId = value;
+          data.screens.push({ persistentId: value, resolutions: [] });
+          return data;
+        }
         switch (lineAsArray[0]) {
-          case "Persistent screen id": {
-            data.currentId = value;
-            data.screens.push({ persistentId: value, resolutions: [] });
-            break;
-          }
           case "Contextual screen id": {
             data.screens[screenIndex].contextualId = value;
             break;

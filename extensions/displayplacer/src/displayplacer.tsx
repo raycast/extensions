@@ -27,7 +27,6 @@ export default function DisplayPlacer() {
 
   async function init() {
     const myFavs = await LocalStorage.getItem("favorites");
-    myFavs;
     if (myFavs) {
       setFavorites(JSON.parse(myFavs.toString()));
     } else {
