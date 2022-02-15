@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "chakra-ui-docs",
-  "title": "Chakra UI Docs",
+  "title": "Chakra UI Documentation",
   "description": "Provide quick links to the Chakra UI component documentation.",
   "icon": "chakra.png",
   "author": "pgvr",
