@@ -3,7 +3,7 @@ import { IProcessInfo } from "../models/interfaces";
 
 export default function CopyInfoActionsMenu(props: { process: IProcessInfo }) {
   return (
-    <ActionPanel.Submenu title="Copy Info" icon={Icon.Clipboard}>
+    <ActionPanel.Submenu title="Copy Info" icon={Icon.Clipboard} shortcut={{modifiers:['cmd'], key:"c"}}>
       <Action.CopyToClipboard content={props.process.pid} title="PID" icon="" />
       {props.process.name ? (
         <Action.CopyToClipboard
