@@ -17,6 +17,7 @@ import { useEffect, useRef, useState } from "react";
 import { getGameLaunchTicket, studioConfigExists } from "./auth";
 import { getIcon } from "./icons";
 import performSearch from "./search";
+import { Game, SearchState } from "./types";
 
 async function launchGame(gameId: number) {
   const toast = await showToast(ToastStyle.Animated, "Launching game...", "Requesting ticket...");
@@ -64,7 +65,10 @@ In order to use this extension, you must be logged in to Roblox Studio.
 Click below to download`}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction title={`Download Roblox Studio`} url="https://setup.rbxcdn.com/mac/RobloxStudio.dmg" />
+              <OpenInBrowserAction
+                title={`Download Roblox Studio`}
+                url="https://setup.rbxcdn.com/mac/RobloxStudio.dmg"
+              />
             </ActionPanel>
           }
         ></Detail>
@@ -76,8 +80,8 @@ Click below to download`}
   return (
     <List isLoading={state.isLoading} onSearchTextChange={search} searchBarPlaceholder="Search by name..." throttle>
       <List.Section title="Results" subtitle={state.results.length + ""}>
-        {state.results.map((searchResult) => (
-          <SearchListItem key={searchResult.id} searchResult={searchResult} />
+        {state.results.map((searchResult: Game) => (
+          <SearchListItem key={searchResult.placeId} searchResult={searchResult} />
         ))}
       </List.Section>
     </List>

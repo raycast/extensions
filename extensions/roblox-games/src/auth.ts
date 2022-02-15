@@ -28,7 +28,9 @@ export async function getRobloxCookie(): Promise<string> {
           return reject(err || new Error(stderr));
         }
         const json = JSON.parse(stdout);
-        const robloxSecurity = Object.entries(json).find(([key]) => key.includes("ROBLOSECURITY"))![1] as string;
+        const robloxSecurity = (
+          Object.entries(json).find(([key]) => key.includes("ROBLOSECURITY")) as string[]
+        )[1] as string;
         if (!robloxSecurity) {
           cookie = undefined;
           return reject(new Error("Roblox Studio config file is invalid, please start Roblox Studio & log in."));

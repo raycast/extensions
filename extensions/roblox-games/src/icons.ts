@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import { Game, Thumbnail } from "./types";
 
 export const iconCache: Map<string, string> = new Map();
 const iconQueue: string[] = [];
@@ -23,7 +24,7 @@ export async function processQueue(): Promise<void> {
     },
     body: JSON.stringify(request),
   });
-  const data = (await response.json()) as any;
+  const data = (await response.json()) as { data: Thumbnail[] };
   for (const image of data.data) iconCache.set(image.requestId, image.imageUrl);
   return processQueue();
 }
