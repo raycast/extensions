@@ -3,7 +3,7 @@ import { IProcessInfo } from "../models/interfaces";
 
 export default function CopyInfoActionsMenu(props: { process: IProcessInfo }) {
   return (
-    <ActionPanel.Submenu title="Copy Info" icon={Icon.Clipboard}>
+    <ActionPanel.Submenu title="Copy Info" icon={Icon.Clipboard} shortcut={{modifiers:['cmd'], key:"c"}}>
       <Action.CopyToClipboard content={props.process.pid} title="PID" icon="" />
       {props.process.name ? (
         <Action.CopyToClipboard
@@ -33,16 +33,6 @@ export default function CopyInfoActionsMenu(props: { process: IProcessInfo }) {
           icon=""
         />
       ) : null}
-      <Action.CopyToClipboard
-        content={`sudo kill -9 ${props.process.pid}`}
-        title="Kill Command"
-        icon=""
-      />
-      <Action.CopyToClipboard
-        content={`sudo killall -9 ${props.process.name?.replace(" ", " ")}`}
-        title="Killall Command"
-        icon=""
-      />
     </ActionPanel.Submenu>
   );
 }
