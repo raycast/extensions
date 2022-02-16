@@ -80,7 +80,8 @@ jobs:
               repo: 'raycast-macos',
               head: 'docs-sync-${{ github.sha }}',
               base: 'master',
-              title: 'API Docs: Update from the extensions repo'
+              title: 'API Docs: Update from the extensions repo',
+              body: ${{ join(github.event.commits.*.message, '\\n') }}
             })
 
       - name: Notify Failure to Slack
