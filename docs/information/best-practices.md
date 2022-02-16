@@ -11,7 +11,7 @@ Network requests can fail, permissions to files can be missing… More generally
 Here is an example on how to show a toast for an error:
 
 ```typescript
-import { Detail, showToast, ToastStyle } from "@raycast/api";
+import { Detail, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 export default function Command() {
@@ -24,7 +24,7 @@ export default function Command() {
   }, []);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Something went wrong", error.message);
+    showToast(Toast.Style.Failure, "Something went wrong", error.message);
   }
 
   return <Detail markdown="Example for proper error handling" />;
