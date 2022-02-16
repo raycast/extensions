@@ -4,7 +4,7 @@ The storage APIs can be used to store non-sensitive data that is persisted acros
 
 All commands in an extension have shared access to the stored data. Extensions can _not_ access the storage of other extensions.
 
-Values can be managed through functions such as [`LocalStorage.getItem`](storage.md#getItem), [`LocalStorage.setItem`](storage.md#setItem), or [`LocalStorage.removeItem`](storage.md#removeItem). A typical use case is storing user-related data, for example entered todos.
+Values can be managed through functions such as [`LocalStorage.getItem`](storage.md#getitem), [`LocalStorage.setItem`](storage.md#setitem), or [`LocalStorage.removeItem`](storage.md#removeitem). A typical use case is storing user-related data, for example entered todos.
 
 {% hint style="info" %}
 The API is not meant to store large amounts of data. For this, use [Node's built-in APIs to write files](https://nodejs.dev/learn/writing-files-with-nodejs), e.g. to the extension's [support directory](environment.md#environment).
