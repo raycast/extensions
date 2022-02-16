@@ -9,8 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Kagi Search",
-      "description": "Kagi search with autosuggestions",
+      "title": "Search Kagi",
+      "description": "Search Kagi with autosuggestions",
       "mode": "view"
     }
   ],
