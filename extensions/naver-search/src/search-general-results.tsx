@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
 import { SearchType } from "./types";
-import { searchGeneralWords } from "./search-api";
+import { searchGeneralWords } from "./search-general-api";
 import { ActionPanel, Action, List } from "@raycast/api";
 
-export default function SearchResults(type: SearchType) {
+export default function SearchResults(type: string) {
   const [words, setWords] = useState<string[][]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -15,14 +15,8 @@ export default function SearchResults(type: SearchType) {
     });
   }, []);
 
-  let baseurl: string;
-  if (type == SearchType.GENERAL) {
-    baseurl = `https://search.naver.com/search.naver?ie=utf8&amp;sm=stp_hty&amp;where=se&amp&query=`;
-  } else if (type == SearchType.SHOPPING) {
-    baseurl = `https://search.shopping.naver.com/search/all?query=`;
-  } else {
-    baseurl = ``;
-  }
+  const baseurl = SearchType[type].baseURL;
+
   return (
     <List isLoading={loading} throttle={true} onSearchTextChange={onSearch}>
       {words.map((word) => (

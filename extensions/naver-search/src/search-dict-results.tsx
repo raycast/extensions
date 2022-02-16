@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
 import { SearchType } from "./types";
-import { searchWords } from "./dict-api";
+import { searchWords } from "./search-dict-api";
 import { ActionPanel, Action, List } from "@raycast/api";
 
-export default function SearchResults(type: SearchType) {
+export default function SearchResults(type: string) {
   const [words, setWords] = useState<string[][][]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -15,14 +15,7 @@ export default function SearchResults(type: SearchType) {
     });
   }, []);
 
-  let baseurl: string;
-  if (type == SearchType.ENEN) {
-    baseurl = `https://endic.naver.com/search.nhn?ie=utf8&query=`;
-  } else if (type == SearchType.KOKO) {
-    baseurl = `https://krdic.naver.com/search.nhn?kind=all&query=`;
-  } else {
-    baseurl = ``;
-  }
+  const baseurl = SearchType[type].baseURL;
 
   return (
     <List isLoading={loading} throttle={true} onSearchTextChange={onSearch}>
@@ -31,7 +24,7 @@ export default function SearchResults(type: SearchType) {
           icon={"command-icon.png"}
           key={word[0][0]}
           title={word[0][0]}
-          subtitle={word[1][0]}
+          subtitle={type == "CCKO" ? word[1][0] + "; " + word[3][0] : word[1][0]}
           actions={<Actions word={word} baseurl={baseurl} />}
         />
       ))}

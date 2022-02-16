@@ -2,15 +2,8 @@ import fetch from "node-fetch";
 import { SearchType } from "./types";
 import { showToast, Toast } from "@raycast/api";
 
-export async function searchGeneralWords(wordToSearch: string, type: SearchType): Promise<string[][]> {
-  let url;
-  if (type == SearchType.GENERAL) {
-    url = `https://ac.search.naver.com/nx/ac?q_enc='utf-8'&q=${wordToSearch}&st=100&r_lt=100`;
-  } else if (type == SearchType.SHOPPING) {
-    url = `https://ac.shopping.naver.com/ac?frm='shopping'&q_enc='UTF-8'&q=${wordToSearch}&st=111111&r_lt=111111`;
-  } else {
-    url = ``;
-  }
+export async function searchGeneralWords(wordToSearch: string, type: string): Promise<string[][]> {
+  const url = SearchType[type].searchURL + wordToSearch;
 
   const response = await fetch(url, { method: "GET" });
   console.log(url);
@@ -25,7 +18,7 @@ export async function searchGeneralWords(wordToSearch: string, type: SearchType)
   }
 
   let words;
-  if (type == SearchType.SHOPPING) {
+  if (type == "SHOPPING") {
     const results = (await response.json()) as { query: string[]; items: string[][][][] };
     words = results["items"][1].map((element) => element[0]);
   } else {

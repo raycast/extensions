@@ -34,6 +34,13 @@
       "subtitle": "Naver",
       "description": "Search Naver Korean dictionary for",
       "mode": "view"
+    },
+    {
+      "name": "nah-search",
+      "title": "Handic Search",
+      "subtitle": "Naver",
+      "description": "Search Naver Hanjs dictionary for",
+      "mode": "view"
     }
   ],
   "dependencies": {
