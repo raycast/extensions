@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, Detail, Action } from "@raycast/api";
 import { ReactElement } from "react";
 import { sourcegraphSelfHosted, Sourcegraph, isCloud } from "../sourcegraph";
 
@@ -7,7 +7,7 @@ export default function SelfHostedCommand({ command }: { command: (src: Sourcegr
 
   const helpActions = (
     <ActionPanel>
-      <OpenInBrowserAction
+      <Action.OpenInBrowser
         title="Open Setup Guide"
         url="https://github.com/raycast/extensions/tree/main/extensions/sourcegraph#setup"
       />

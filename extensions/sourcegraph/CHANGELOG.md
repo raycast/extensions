@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **search**: Fix URL opened by `symbol` match results. ([#7](https://github.com/bobheadxi/raycast-sourcegraph/pull/7))
+
 ## [Feb 7, 2022](https://github.com/raycast/extensions/pull/833)
 
 - **search**: Fix off-by-one issue when opening `content` match results.
