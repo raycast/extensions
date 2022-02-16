@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dark-mode",
   "title": "Dark Mode",
-  "description": "",
+  "description": "Switch between Dark Mode and Light Mode on your Mac with a simple command",
   "icon": "command-icon.png",
   "author": "min",
   "license": "MIT",
@@ -10,7 +10,7 @@
     {
       "name": "index",
       "title": "Switch Dark Mode",
-      "description": "Switch between Dark Mode and Light Mode on your Mac with a simple command",
+      "description": "Switch between Dark Mode and Light Mode",
       "mode": "no-view"
     }
   ],
