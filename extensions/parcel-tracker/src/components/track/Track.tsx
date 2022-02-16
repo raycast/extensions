@@ -43,7 +43,7 @@ export default function Track({ vendorKey }: IProps) {
   };
 
   return (
-    <List onSearchTextChange={handleTextChange} isLoading={loading}>
+    <List onSearchTextChange={handleTextChange} searchBarPlaceholder="운송장 번호를 입력하세요.." isLoading={loading}>
       {trackData && !hasError && trackData.trackingDetails.length > 0 ? (
         <List.Section title="최종 배송상태">
           <List.Item
