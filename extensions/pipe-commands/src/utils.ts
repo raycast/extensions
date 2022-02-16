@@ -12,8 +12,7 @@ export function parseMetadatas(script: string): ScriptMetadatas {
   const matches = [...script.matchAll(metadataRegex)];
   for (const match of matches) {
     const metadataTitle = match[1];
-    const metatataValue = metadataTitle == "input" ? JSON.parse(match[2]) : match[2];
-    metadatas[metadataTitle] = metatataValue;
+    metadatas[metadataTitle] = metadataTitle == "input" ? JSON.parse(match[2]) : match[2];
   }
 
   return metadatas as unknown as ScriptMetadatas;

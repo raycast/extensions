@@ -5,6 +5,7 @@ export interface ScriptCommand {
 
 export interface ScriptMetadatas {
   title: string;
+  icon?: string;
   input: ScriptInput;
   packageName?: string;
 }

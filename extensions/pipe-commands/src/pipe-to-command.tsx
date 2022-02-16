@@ -10,6 +10,7 @@ import {
   showHUD,
   showToast,
   useNavigation,
+  Image,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { readdirSync } from "fs";
@@ -88,6 +89,17 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
   );
 }
 
+export function getRaycastIcon(scriptIcon: string): Image.ImageLike {
+  if (scriptIcon.startsWith("http") || scriptIcon.startsWith("https")) {
+    return { source: scriptIcon };
+  }
+
+  const icon = Icon[scriptIcon as keyof typeof Icon];
+  if (!icon) return Icon.Dot;
+
+  return icon;
+}
+
 export function PipeCommand(props: {
   command: ScriptCommand;
   runCommand?: () => Promise<string | undefined>;
@@ -100,7 +112,7 @@ export function PipeCommand(props: {
   return (
     <List.Item
       key={scriptPath}
-      icon={{ text: Icon.Text, file: Icon.Document, url: Icon.Globe }[metadatas.input.type]}
+      icon={metadatas.icon ? getRaycastIcon(metadatas.icon) : Icon.Dot}
       title={metadatas.title}
       subtitle={metadatas.packageName}
       actions={
