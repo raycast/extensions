@@ -146,6 +146,7 @@
 /extensions/producthunt                              @ragnorc
 /extensions/qr-code-scanner                          @StevenRCE0
 /extensions/qrcode-generator                         @Melvynx
+/extensions/quick-event                              @mblode
 /extensions/quick-open-project                       @zerowidth
 /extensions/quick-search                             @iwfan
 /extensions/radix                                    @peduarte
