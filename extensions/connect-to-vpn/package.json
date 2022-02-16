@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Show network services",
+      "title": "Show Network Services",
+      "subtitle": "VPN",
       "description": "Shortcut to your Network Preferences",
       "mode": "view"
     }
