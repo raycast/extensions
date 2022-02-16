@@ -9,25 +9,29 @@
   "commands": [
     {
       "name": "na-search",
-      "title": "Naver Search",
+      "title": "Search",
+      "subtitle": "Naver",
       "description": "Search Naver for",
       "mode": "view"
     },
     {
       "name": "ns-search",
-      "title": "Naver Shopping",
+      "title": "Shopping",
+      "subtitle": "Naver",
       "description": "Search Naver Shopping for",
       "mode": "view"
     },
     {
       "name": "nae-search",
-      "title": "Naver Endic Search",
+      "title": "Endic Search",
+      "subtitle": "Naver",
       "description": "Search Naver English dictionary for",
       "mode": "view"
     },
     {
       "name": "nak-search",
-      "title": "Naver Krdic Search",
+      "title": "Krdic Search",
+      "subtitle": "Naver",
       "description": "Search Naver Korean dictionary for",
       "mode": "view"
     }

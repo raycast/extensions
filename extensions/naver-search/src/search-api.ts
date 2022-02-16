@@ -5,7 +5,7 @@ import { showToast, Toast } from "@raycast/api";
 export async function searchGeneralWords(wordToSearch: string, type: SearchType): Promise<string[][]> {
   let url;
   if (type == SearchType.GENERAL) {
-    url = `http://ac.search.naver.com/nx/ac?q_enc='utf-8'&q=${wordToSearch}&st=100&r_lt=100`;
+    url = `https://ac.search.naver.com/nx/ac?q_enc='utf-8'&q=${wordToSearch}&st=100&r_lt=100`;
   } else if (type == SearchType.SHOPPING) {
     url = `https://ac.shopping.naver.com/ac?frm='shopping'&q_enc='UTF-8'&q=${wordToSearch}&st=111111&r_lt=111111`;
   } else {

@@ -7,13 +7,13 @@ This extension is inspired by [alfnaversearch : Naver Search Workflow for Alfred
 ## Supported Features
 
 * Searching
-![](assets/search.png)
+![](media/search.png)
 * Shopping
-![](assets/shopping.png)
+![](media/shopping.png)
 * English dictionary
-![](assets/endic.png)
+![](media/endic.png)
 * Korean dictionary
-![](assets/krdic.png)
+![](media/krdic.png)
 
 ## Author
 

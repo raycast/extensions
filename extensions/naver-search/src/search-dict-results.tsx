@@ -17,9 +17,9 @@ export default function SearchResults(type: SearchType) {
 
   let baseurl: string;
   if (type == SearchType.ENEN) {
-    baseurl = `http://endic.naver.com/search.nhn?ie=utf8&query=`;
+    baseurl = `https://endic.naver.com/search.nhn?ie=utf8&query=`;
   } else if (type == SearchType.KOKO) {
-    baseurl = `http://krdic.naver.com/search.nhn?kind=all&query=`;
+    baseurl = `https://krdic.naver.com/search.nhn?kind=all&query=`;
   } else {
     baseurl = ``;
   }
