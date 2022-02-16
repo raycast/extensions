@@ -4,7 +4,7 @@
   "title": "Parcel Tracker",
   "description": "for track packages (only available for South Korea)",
   "icon": "command-icon-parcel.png",
-  "author": "jjhok",
+  "author": "junhyuk.jin",
   "license": "MIT",
   "commands": [
     {
