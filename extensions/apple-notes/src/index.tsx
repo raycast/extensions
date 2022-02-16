@@ -9,11 +9,11 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
-import moment = require("moment");
+import { Date } from "sugar";
 
 interface Note {
   name: string;
-  date: moment.Moment | null;
+  date: Date | null;
   folder: string;
   account: string;
 }
@@ -27,6 +27,7 @@ interface State {
 interface Preferences {
   accounts: boolean;
   folders: boolean;
+  modificationDate: boolean;
 }
 
 export default function Command() {
@@ -62,7 +63,7 @@ export default function Command() {
           break;
         case "date":
           if (lastNote) {
-            lastNote.date = moment(value, "LLLL");
+            lastNote.date = Date.create(value);
             lastNote.folder = lastFolder;
             lastNote.account = lastAccount;
             notes.push(lastNote);
@@ -128,7 +129,7 @@ export default function Command() {
           key={i}
           icon="notes-icon.png"
           title={note.name}
-          subtitle={note.date?.fromNow()}
+          subtitle={note.date && preferences.modificationDate ? Date(note.date).relative().raw : ""}
           accessoryTitle={
             preferences.accounts
               ? preferences.folders

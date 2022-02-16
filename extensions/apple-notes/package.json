@@ -49,12 +49,21 @@
       "label": "Show folder name next to each note",
       "description": "Show the folder name next to a note",
       "required": false
+    },
+    {
+      "name": "modificationDate",
+      "title": "Date modified",
+      "type": "checkbox",
+      "default": false,
+      "label": "Show the modification date next to each note",
+      "description": "Show the modification date next to each note",
+      "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.26.3",
-    "moment": "^2.29.1",
-    "run-applescript": "^6.0.0"
+    "run-applescript": "^6.0.0",
+    "sugar": "^2.0.6"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
