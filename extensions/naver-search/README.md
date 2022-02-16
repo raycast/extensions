@@ -14,6 +14,8 @@ This extension is inspired by [alfnaversearch : Naver Search Workflow for Alfred
 ![](media/endic.png)
 * Korean dictionary
 ![](media/krdic.png)
+* Hanja (Chinese character) dictionary
+![](media/handic.png)
 
 ## Author
 
