@@ -24,7 +24,7 @@
 ![enjcode](./media/enjcode.png)
 
 ## Dejcode
-> For parsing the JD code to get their params.
+> For parsing the JD code and getting their params.
 
  - To paste your JD code to the input label.
    > Exp: `20:/！29KUN73nQllwi！`
