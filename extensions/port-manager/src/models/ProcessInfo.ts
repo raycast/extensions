@@ -3,13 +3,7 @@ import { LsofPrefix, readmeURL } from "./constants";
 import { exec as cExec } from "child_process";
 import { IProcessInfo, PortInfo } from "./interfaces";
 import isDigit from "../utilities/isDigit";
-import {
-  closeMainWindow,
-  confirmAlert,
-  getPreferenceValues,
-  open,
-  Alert,
-} from "@raycast/api";
+import { closeMainWindow, confirmAlert, getPreferenceValues, open, Alert } from "@raycast/api";
 
 const exec = promisify(cExec);
 
@@ -28,9 +22,7 @@ export default class ProcessInfo implements IProcessInfo {
   ) {}
 
   public static async getCurrent() {
-    const cmd = `${
-      ProcessInfo.useSudo ? "/usr/bin/sudo " : ""
-    }/usr/sbin/lsof +c0 -iTCP -sTCP:LISTEN -P -FpcRuLPn`;
+    const cmd = `${ProcessInfo.useSudo ? "/usr/bin/sudo " : ""}/usr/sbin/lsof +c0 -iTCP -sTCP:LISTEN -P -FpcRuLPn`;
     try {
       const { stdout, stderr } = await exec(cmd);
       if (stderr) throw new Error(stderr);
@@ -100,11 +92,7 @@ export default class ProcessInfo implements IProcessInfo {
       return instances;
     } catch (e) {
       if (e instanceof Error) {
-        if (
-          e.message.includes(
-            "sudo: a terminal is required to read the password"
-          )
-        ) {
+        if (e.message.includes("sudo: a terminal is required to read the password")) {
           const alertOptions: Alert.Options = {
             title: "Can't Use Sudo",
             message:

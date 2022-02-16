@@ -8,8 +8,7 @@ import ProcessInfo from "./models/ProcessInfo";
 
 export default function Command() {
   const [processes, setProcesses] = useState<ProcessInfo[]>([]);
-  const reloadProcesses = async () =>
-    setProcesses(await ProcessInfo.getCurrent());
+  const reloadProcesses = async () => setProcesses(await ProcessInfo.getCurrent());
 
   useEffect(() => {
     (async () => {
@@ -17,36 +16,21 @@ export default function Command() {
     })();
   }, []);
   return (
-    <List
-      isLoading={processes.length === 0}
-      navigationTitle="Open Ports"
-      searchBarPlaceholder="Search Open Ports"
-    >
+    <List isLoading={processes.length === 0} navigationTitle="Open Ports" searchBarPlaceholder="Search Open Ports">
       {processes.map((p) => (
         <List.Item
           key={p.pid}
           title={p.name ?? "Untitled Process"}
           subtitle={p.user ?? ""}
-          accessoryTitle={[
-            ...new Set(p.portInfo?.map((i) => `${i.port}`)),
-          ].join(", ")}
-          keywords={p.portInfo
-            ?.map((i) => `${i.port}`)
-            .concat(p.portInfo?.map((i) => `${i.host}`))}
+          accessoryTitle={[...new Set(p.portInfo?.map((i) => `${i.port}`))].join(", ")}
+          keywords={p.portInfo?.map((i) => `${i.port}`).concat(p.portInfo?.map((i) => `${i.host}`))}
           actions={
             <ActionPanel>
               <KillActionsMenu process={p} reloadCallback={reloadProcesses} />
-              <KillallActionsMenu
-                process={p}
-                reloadCallback={reloadProcesses}
-              />
+              <KillallActionsMenu process={p} reloadCallback={reloadProcesses} />
               <CopyInfoActionsMenu process={p} />
               <CopyCommandsActionsMenu process={p} />
-              <Action
-                title="Reload"
-                onAction={reloadProcesses}
-                icon={Icon.ArrowClockwise}
-              />
+              <Action title="Reload" onAction={reloadProcesses} icon={Icon.ArrowClockwise} />
             </ActionPanel>
           }
         />
