@@ -61,7 +61,7 @@ export async function fetchBookmarks(): Promise<Bookmark[]> {
       ? preferencesPlistLocation
       : preferencesPlistLocationSetapp;
 
-    const obj = (await bplist.parseFile(preferencesPlist))[0];
+    const obj = (await bplist.parseFile(fs.readFileSync(preferencesPlist)))[0];
     const repos = (
       await bplist.parseFile(obj.repositoryManagerRepositoriesRootNode)
     )[0] as unknown as GitfoxRepositories;
