@@ -7,8 +7,15 @@ import Bookmark from "./dtos/bookmark-dto";
 import GitfoxRepositories, { GitfoxRepository } from "./interfaces/imported-gitfox-bookmark";
 import GitfoxPreferences from "./interfaces/gitfox-preferences";
 
-const preferencesPlistLocationSetapp = `${os.homedir()}/Library/Preferences/com.bytieful.Gitfox-setapp.plist`;
-const preferencesPlistLocation = `${os.homedir()}/Library/Preferences/com.bytieful.Gitfox.plist`;
+const plistLocations = [
+  `${os.homedir()}/Library/Preferences/com.bytieful.Gitfox.plist`,
+  `${os.homedir()}/Library/Preferences/com.bytieful.Gitfox-setapp.plist`,
+  `${os.homedir()}/Library/Preferences/com.bytieful.Gitfox-retail.plist`,
+]
+  .filter((file) => fs.existsSync(file))
+  .map((file) => ({ file, mtime: fs.lstatSync(file).mtime }))
+  .sort((a, b) => b.mtime.getTime() - a.mtime.getTime())
+  .map((element) => element.file);
 
 export function isGitfoxCliInstalled(): boolean {
   try {
@@ -57,10 +64,11 @@ async function extractBookmarks(obj: GitfoxRepository[], parents?: string): Prom
 
 export async function fetchBookmarks(): Promise<Bookmark[]> {
   try {
-    const preferencesPlist = fs.existsSync(preferencesPlistLocation)
-      ? preferencesPlistLocation
-      : preferencesPlistLocationSetapp;
+    if (plistLocations.length === 0) {
+      throw new Error();
+    }
 
+    const preferencesPlist = plistLocations[0];
     const obj = (await bplist.parseFile(fs.readFileSync(preferencesPlist)))[0];
     const repos = (
       await bplist.parseFile(obj.repositoryManagerRepositoriesRootNode)
