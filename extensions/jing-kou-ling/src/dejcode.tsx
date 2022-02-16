@@ -1,5 +1,5 @@
-import { ActionPanel, Action, List, showToast, Toast, Detail } from "@raycast/api";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { ActionPanel, Action, List, showToast, Toast } from "@raycast/api";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
 export default function DeCode() {
@@ -8,8 +8,6 @@ export default function DeCode() {
     decode,
   }: { state: { result: IDcodeResult; isLoading: boolean }; decode: (encodeText: string) => Promise<Toast | void> } =
     useDecode();
-  console.log(state);
-
   return (
     <List
       isLoading={state.isLoading}
@@ -33,7 +31,7 @@ function DecodeItem({ title, value }: { title: string; value: string | number | 
       subtitle={`${value}`}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="复制到剪贴板" content={`${value}`} />
+          <Action.CopyToClipboard title="Copy to clipboard" content={`${value}`} />
         </ActionPanel>
       }
     />
@@ -52,7 +50,6 @@ function useDecode() {
     }));
     try {
       const { data } = await axios.post("https://api.jds.codes/jd/jcommand", { code: encodeText });
-      console.log(data);
       if (data.code === 200 && data.data) {
         setState({ result: data.data, isLoading: false });
       } else {
@@ -60,7 +57,6 @@ function useDecode() {
         return showToast({ style: Toast.Style.Failure, title: data.msg });
       }
     } catch (error) {
-      console.log(error);
       setState({ result: {}, isLoading: false });
       return showToast({ style: Toast.Style.Failure, title: "something wrong was happend" });
     }

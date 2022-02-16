@@ -3,22 +3,20 @@
   "name": "jing-kou-ling",
   "title": "JD code",
   "description": "generate and parse JD code",
-  "icon": "jdCodeIcon.png",
+  "icon": "jing-kou-ling-icon.png",
   "author": "zooPanda",
   "license": "MIT",
   "commands": [
     {
       "name": "enjcode",
       "title": "generate JD code",
-      "subtitle": "generate JD code",
-      "description": "generate JD code",
+      "description": "use your custom title and url to generate JD code",
       "mode": "view"
     },
     {
       "name": "dejcode",
       "title": "parse JD code",
-      "subtitle": "parse JD code",
-      "description": "parse JD code",
+      "description": "parse JD code to params",
       "mode": "view"
     }
   ],

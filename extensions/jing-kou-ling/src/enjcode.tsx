@@ -33,7 +33,7 @@ export default function Command() {
       <Form
         actions={
           <ActionPanel>
-            <Action.SubmitForm onSubmit={handleSubmit} title="生成" />
+            <Action.SubmitForm onSubmit={handleSubmit} title="generate" />
           </ActionPanel>
         }
         isLoading={formLoading}
