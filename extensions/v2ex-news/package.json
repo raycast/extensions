@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "v2ex-news",
+  "title": "v2ex-news",
+  "description": "",
+  "icon": "v2ex.png",
+  "author": "chyroc",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "plane",
+      "title": "Plane | 位面列表",
+      "description": "show plane data",
+      "mode": "view"
+    },
+    {
+      "name": "profile",
+      "title": "Profile | 个人主页",
+      "description": "show your profile",
+      "mode": "view"
+    },
+    {
+      "name": "notification",
+      "title": "Notification | 通知",
+      "description": "show your notification",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "required": true,
+      "title": "V2EX Token",
+      "placeholder": "input your v2ex token",
+      "description": "V2EX Token",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@chyroc/v2ex-api": "^0.6.0",
+    "@raycast/api": "^1.28.0",
+    "node-html-markdown": "^1.1.3",
+    "string-strip-html": "^9.1.6"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
