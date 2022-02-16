@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # @raycast.title Extract File Content
+# @raycast.icon Document
 # @raycast.packageName File Actions
 # @raycast.input {"type": "file"}
 

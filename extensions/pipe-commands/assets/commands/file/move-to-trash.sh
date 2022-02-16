@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # @raycast.title Move to Trash
+# @raycast.icon Trash
 # @raycast.packageName File Actions
 # @raycast.input {"type": "file"}
 

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # @raycast.title URL Encode
+# @raycast.icon Link
 # @raycast.packageName Developer Utils
 # @raycast.input {"type": "text", "percentEncoded": true}
 

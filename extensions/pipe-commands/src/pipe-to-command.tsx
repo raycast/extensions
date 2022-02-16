@@ -91,7 +91,7 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
 
 export function getRaycastIcon(scriptIcon: string): Image.ImageLike {
   if (scriptIcon.startsWith("http") || scriptIcon.startsWith("https")) {
-    return { source: scriptIcon };
+    return { source: scriptIcon, fallback: Icon.Globe };
   }
 
   const icon = Icon[scriptIcon as keyof typeof Icon];
