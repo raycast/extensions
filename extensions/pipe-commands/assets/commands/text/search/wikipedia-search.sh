@@ -2,7 +2,7 @@
 
 # @raycast.title Wikipedia Search
 # @raycast.packageName Web Searches
-# @raycast.icon https://en.wikipedia.org/favicon.ico
+# @raycast.icon Globe
 # @raycast.input {"type": "text", "percentEncode": true}
 
 read -r query

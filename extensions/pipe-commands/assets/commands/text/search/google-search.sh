@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # @raycast.title Google Search
-# @raycast.icon https://www.google.com/favicon.ico
 # @raycast.packageName Web Searches
+# @raycast.icon Globe
 # @raycast.input {"type": "text", "percentEncoded": true}
 
 read -r query

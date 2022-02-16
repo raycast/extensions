@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
-# @raycast.title Switch to Lowercase
-# @raycast.icon Text
+# @raycast.title Switch to Uppercase
 # @raycast.packageName Text Actions
 # @raycast.input {"type": "text"}
 
 import sys
 
 selection = sys.stdin.read()
-sys.stdout.write(selection.lower())
+sys.stdout.write(selection.upper())

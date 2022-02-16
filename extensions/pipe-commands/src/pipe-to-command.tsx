@@ -89,15 +89,9 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
   );
 }
 
-export function getRaycastIcon(scriptIcon: string): Image.ImageLike {
-  if (scriptIcon.startsWith("http") || scriptIcon.startsWith("https")) {
-    return { source: scriptIcon, fallback: Icon.Globe };
-  }
-
+export function getRaycastIcon(scriptIcon: string | undefined, defaultIcon: Image.ImageLike): Image.ImageLike {
   const icon = Icon[scriptIcon as keyof typeof Icon];
-  if (!icon) return Icon.Dot;
-
-  return icon;
+  return icon ? icon : defaultIcon;
 }
 
 export function PipeCommand(props: {
@@ -108,11 +102,12 @@ export function PipeCommand(props: {
   const { path: scriptPath, metadatas } = props.command;
   const navigation = useNavigation();
   const runCommand = props.runCommand;
+  const defaultIcon = metadatas.input.type == "file" ? Icon.Document : Icon.Text;
 
   return (
     <List.Item
       key={scriptPath}
-      icon={metadatas.icon ? getRaycastIcon(metadatas.icon) : Icon.Dot}
+      icon={getRaycastIcon(metadatas.icon, defaultIcon)}
       title={metadatas.title}
       subtitle={metadatas.packageName}
       actions={
