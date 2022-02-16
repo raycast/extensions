@@ -243,8 +243,7 @@ export default function Command() {
 Image.Fallback: Asset | Icon | { light: Asset; dark: Asset }
 ```
 
-A fallback [Image](#image) that will be displayed in case the source image cannot be loaded. Can be either a local file resource, a built-in [Icon](#icon), a single emoji or a
-a theme-aware asset. Any specified `mask` or `tintColor` will be applied to the fallback image.
+A fallback [Image](#image) that will be displayed in case the source image cannot be loaded. Can be either a local file resource, a built-in [Icon](#icon), a single emoji, or a theme-aware asset. Any specified `mask` or `tintColor` will also apply to the fallback image.
 
 #### Example
 
@@ -256,7 +255,10 @@ export default function Command() {
     <List>
       <List.Item
         title="URL Source With Asset Fallback"
-        icon={{ source: "https://raycast.com/uploads/avatar.png", fallback: "default-avatar.png" }}
+        icon={{
+          source: "https://raycast.com/uploads/avatar.png",
+          fallback: "default-avatar.png",
+        }}
       />
     </List>
   );
