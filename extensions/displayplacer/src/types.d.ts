@@ -21,7 +21,7 @@ type DisplayPlacerScreen = {
 };
 type DisplayPlacerList = {
   currentId?: string;
-  screens: DisplayPlacerScreen[];
+  // screens: DisplayPlacerScreen[];
   currentCommand: string | null;
 };
 
