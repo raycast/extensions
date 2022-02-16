@@ -9,6 +9,10 @@
   },
   "author": "mathieudutour",
   "license": "MIT",
+  "repository": {
+    "url": "https://github.com/raycast/extensions",
+    "directory": "migrations"
+  },
   "devDependencies": {
     "@types/jscodeshift": "^0.11.3"
   },
