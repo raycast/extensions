@@ -10,13 +10,18 @@
 
 ![](screenshots/setting.png)
 
-## 获取个人信息
-
 ## 获取我的通知
+
+![](screenshots/notification.png)
+![](screenshots/del-notification.png)
 
 ## 获取节点和主题
 
-## 扩展错误提示
+![](screenshots/plane.png)
+![](screenshots/plane-topic.png)
+![](screenshots/topic.png)
+
+## 错误提示
 
 ![](screenshots/error.png)
 
