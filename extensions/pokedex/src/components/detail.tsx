@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, OpenInBrowserAction } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import { useEffect, useState } from "react";
 import json2md from "json2md";
 import { getPokemon } from "../api";
@@ -45,8 +45,8 @@ export default function PokemonDetail(props: PropsType) {
       })
       .join(", ");
 
-  const markdown = (pokemon: PokemonV2Pokemon): string | null => {
-    if (!pokemon) return null;
+  const markdown = (pokemon: PokemonV2Pokemon): json2md.DataObject => {
+    if (!pokemon) return [];
 
     const {
       pokemon_v2_pokemonspecy,
@@ -140,17 +140,17 @@ export default function PokemonDetail(props: PropsType) {
         }),
     ];
 
-    return json2md(data);
+    return data;
   };
 
   return (
     <Detail
       isLoading={loading}
       navigationTitle={`Pokémon - ${props.name}`}
-      markdown={markdown(pokemons[0])}
+      markdown={json2md(markdown(pokemons[0]))}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction
+          <Action.OpenInBrowser
             url={`https://www.pokemon.com/us/pokedex/${
               pokemons[0] && pokemons[0].pokemon_v2_pokemonspecy.name
             }`}

@@ -1,6 +1,14 @@
 import axios, { AxiosRequestConfig } from "axios";
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import type { PokemonV2Pokemon } from "../types";
+
+function showFailureToast() {
+  showToast(
+    Toast.Style.Failure,
+    "Something went wrong",
+    "Please try again later"
+  );
+}
 
 export const getPokemon = async (id: number): Promise<PokemonV2Pokemon[]> => {
   const query = JSON.stringify({
@@ -90,20 +98,21 @@ export const getPokemon = async (id: number): Promise<PokemonV2Pokemon[]> => {
       "Content-Type": "application/json",
     },
     data: query,
+    timeout: 5000,
   };
 
   try {
     const { data } = await axios(config);
 
     if (Array.isArray(data.errors) && data.errors.length) {
-      showToast(ToastStyle.Failure, data.errors[0].message);
+      showFailureToast();
 
       return [];
     }
 
     return data.data.pokemon_v2_pokemon;
   } catch (error) {
-    showToast(ToastStyle.Failure, "Could not get results");
+    showFailureToast();
 
     return [];
   }
