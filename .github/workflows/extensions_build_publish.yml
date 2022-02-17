@@ -60,7 +60,7 @@ jobs:
         uses: edge/simple-slack-notify@master
         with:
           color: "danger"
-          text: ":no_entry_sign: ${env.GITHUB_WORKFLOW} has succeeded"
+          text: ":white_check_mark: ${env.GITHUB_WORKFLOW} has succeeded"
           fields: |
             [
               { "title": "Action logs:", "value": "${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}"},
