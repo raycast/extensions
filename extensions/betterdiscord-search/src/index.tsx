@@ -126,19 +126,7 @@ ${searchResult.description}
     );
   }
   function Details(props: { description: string; searchResult: SearchResult }) {
-    const { pop } = useNavigation();
-
-    return (
-      <Detail
-        navigationTitle="Details"
-        markdown={props.description}
-        actions={
-          <ActionPanel title="Detail">
-            <Action title="Back" onAction={pop} />
-          </ActionPanel>
-        }
-      />
-    );
+    return <Detail navigationTitle="Details" markdown={props.description} />;
   }
 }
 
