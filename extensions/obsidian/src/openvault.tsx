@@ -1,21 +1,39 @@
-import { List, ActionPanel, OpenAction, getPreferenceValues } from "@raycast/api";
+import { List, ActionPanel, OpenAction, getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
+import path from "path";
 
 interface Preferences {
-  vaults: string;
+  vaultPath: string;
 }
 
 interface Vault {
   name: string;
   key: string;
+  path: string;
+}
+
+function getVaultNameFromPath(vaultPath: string): string {
+  const name = vaultPath
+    .split(path.sep)
+    .filter((i) => {
+      if (i != "") {
+        return i;
+      }
+    })
+    .pop();
+  if (name) {
+    return name;
+  } else {
+    return "Default Vault Name (check your path preferences)";
+  }
 }
 
 function parseVaults() {
   const pref: Preferences = getPreferenceValues();
-  const vaultString = pref.vaults;
+  const vaultString = pref.vaultPath;
   return vaultString
     .split(",")
-    .map((vault) => ({ name: vault.trim(), key: vault.trim() }))
+    .map((vault) => ({ name: getVaultNameFromPath(vault.trim()), key: vault.trim(), path: vault.trim() }))
     .filter((vault) => !!vault);
 }
 

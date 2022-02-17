@@ -1,12 +1,20 @@
-import { ActionPanel, Icon, List, ListItemProps, OpenInBrowserAction } from "@raycast/api";
+import {
+  ActionPanel,
+  Icon,
+  List,
+  ListItemProps,
+  OpenInBrowserAction,
+  confirmAlert,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 import { addDays } from "date-fns";
-
-import { Project, Task, ViewMode } from "../types";
-import { useFetch } from "../api";
+import { Project, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
+import { mutate } from "swr";
+import { ViewMode, SWRKeys } from "../types";
 import { isRecurring, displayDueDate, getAPIDate } from "../utils";
 import { priorities } from "../constants";
-
-import { useTodoist } from "../TodoistProvider";
+import { todoist, handleError } from "../api";
 
 const schedules = [
   { name: "Today", amount: 0 },
@@ -16,11 +24,48 @@ const schedules = [
 interface TaskListItemProps {
   task: Task;
   mode: ViewMode;
+  projects?: Project[];
 }
 
-export default function TaskListItem({ task, mode }: TaskListItemProps): JSX.Element {
-  const { completeTask, deleteTask, updateTask } = useTodoist();
-  const { data: projects } = useFetch<Project[]>("/projects");
+export default function TaskListItem({ task, mode, projects }: TaskListItemProps): JSX.Element {
+  async function completeTask(task: Task) {
+    await showToast(ToastStyle.Animated, "Completing task");
+
+    try {
+      await todoist.closeTask(task.id);
+      await showToast(ToastStyle.Success, "Task updated");
+      mutate(SWRKeys.tasks);
+    } catch (error) {
+      handleError({ error, title: "Unable to complete task" });
+    }
+  }
+
+  async function updateTask(task: Task, payload: UpdateTaskArgs) {
+    await showToast(ToastStyle.Animated, "Updating task");
+
+    try {
+      await todoist.updateTask(task.id, payload);
+      await showToast(ToastStyle.Success, "Task updated");
+      mutate(SWRKeys.tasks);
+    } catch (error) {
+      handleError({ error, title: "Unable to update task" });
+    }
+  }
+
+  async function deleteTask(task: Task) {
+    if (await confirmAlert({ title: "Are you sure you want to delete this task?" })) {
+      await showToast(ToastStyle.Animated, "Deleting task");
+
+      try {
+        await todoist.deleteTask(task.id);
+        await showToast(ToastStyle.Success, "Task deleted");
+        mutate(SWRKeys.tasks);
+      } catch (error) {
+        handleError({ error, title: "Unable to delete task" });
+      }
+    }
+  }
+
   const additionalListItemProps: Partial<ListItemProps> & { keywords: string[] } = { keywords: [] };
 
   switch (mode) {
@@ -31,7 +76,7 @@ export default function TaskListItem({ task, mode }: TaskListItemProps): JSX.Ele
       break;
     case ViewMode.date:
       if (projects && projects.length > 0) {
-        const project = projects.find((project) => project.id === task.project_id);
+        const project = projects.find((project) => project.id === task.projectId);
 
         if (project) {
           additionalListItemProps.accessoryTitle = project.name;
@@ -80,7 +125,7 @@ export default function TaskListItem({ task, mode }: TaskListItemProps): JSX.Ele
                 key={name}
                 id={name}
                 title={name}
-                onAction={() => updateTask(task, { due_date: getAPIDate(addDays(new Date(), amount)) })}
+                onAction={() => updateTask(task, { dueDate: getAPIDate(addDays(new Date(), amount)) })}
               />
             ))}
           </ActionPanel.Submenu>
@@ -105,7 +150,7 @@ export default function TaskListItem({ task, mode }: TaskListItemProps): JSX.Ele
             id="deleteTask"
             title="Delete Task"
             icon={Icon.Trash}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
             onAction={() => deleteTask(task)}
           />
         </ActionPanel>

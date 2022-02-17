@@ -53,7 +53,7 @@ export function UnlockForm(props: {
         </ActionPanel>
       }
     >
-      <Form.TextField id="password" title="Master Password" />
+      <Form.PasswordField id="password" title="Master Password" />
     </Form>
   );
 }

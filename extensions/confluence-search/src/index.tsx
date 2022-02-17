@@ -153,7 +153,7 @@ interface Content {
   status: string;
   title: string;
   version: Version;
-  macroRenderedOutput: MacroRenderedOutput;
+  macroRenderedOutput: Record<string, unknown>;
   extensions: Extensions;
   _expandable: _expandable;
   _links: _links;
@@ -165,8 +165,8 @@ interface Version {
   message: string;
   number: number;
   minorEdit: boolean;
-  syncRev: string;
-  syncRevSource: string;
+  syncRev?: string;
+  syncRevSource?: string;
   confRev: string;
   contentTypeModified: boolean;
   _expandable: _expandable;
@@ -192,7 +192,7 @@ interface ProfilePicture {
   isDefault: boolean;
 }
 interface _expandable {
-  operations: string;
+  operations?: string;
   personalSpace?: string;
   collaborators?: string;
   content?: string;

@@ -10,11 +10,13 @@ import {
   ListSection,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { gitlabgql } from "../common";
+import { getCIRefreshInterval, gitlabgql } from "../common";
 import { gql } from "@apollo/client";
-import { getIdFromGqlId } from "../utils";
+import { getIdFromGqlId, now } from "../utils";
+import { RefreshJobsAction } from "./job_actions";
+import useInterval from "use-interval";
 
-interface Job {
+export interface Job {
   id: string;
   name: string;
   status: string;
@@ -87,7 +89,7 @@ function getStatusText(status: string) {
   }
 }
 
-export function JobListItem(props: { job: Job; projectFullPath: string }) {
+export function JobListItem(props: { job: Job; projectFullPath: string; onRefreshJobs: () => void }) {
   const job = props.job;
   const icon = getIcon(job.status);
   const subtitle = "#" + getIdFromGqlId(job.id);
@@ -101,7 +103,12 @@ export function JobListItem(props: { job: Job; projectFullPath: string }) {
       accessoryTitle={status}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={gitlabgql.urlJoin(`${props.projectFullPath}/-/jobs/${getIdFromGqlId(job.id)}`)} />
+          <ActionPanel.Section>
+            <OpenInBrowserAction url={gitlabgql.urlJoin(`${props.projectFullPath}/-/jobs/${getIdFromGqlId(job.id)}`)} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <RefreshJobsAction onRefreshJobs={props.onRefreshJobs} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -109,7 +116,10 @@ export function JobListItem(props: { job: Job; projectFullPath: string }) {
 }
 
 export function JobList(props: { projectFullPath: string; pipelineIID: string }) {
-  const { stages, error, isLoading } = useSearch("", props.projectFullPath, props.pipelineIID);
+  const { stages, error, isLoading, refresh } = useSearch("", props.projectFullPath, props.pipelineIID);
+  useInterval(() => {
+    refresh();
+  }, getCIRefreshInterval());
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search Pipelines", error);
   }
@@ -118,7 +128,7 @@ export function JobList(props: { projectFullPath: string; pipelineIID: string })
       {Object.keys(stages).map((stagekey) => (
         <ListSection key={stagekey} title={stagekey}>
           {stages[stagekey].map((job) => (
-            <JobListItem job={job} projectFullPath={props.projectFullPath} />
+            <JobListItem job={job} projectFullPath={props.projectFullPath} onRefreshJobs={refresh} />
           ))}
         </ListSection>
       ))}
@@ -134,10 +144,16 @@ export function useSearch(
   stages: Record<string, Job[]>;
   error?: string;
   isLoading: boolean;
+  refresh: () => void;
 } {
   const [stages, setStages] = useState<Record<string, Job[]>>({});
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [timestamp, setTimestamp] = useState<Date>(now());
+
+  const refresh = () => {
+    setTimestamp(now());
+  };
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -153,15 +169,13 @@ export function useSearch(
       setError(undefined);
 
       try {
-        console.log(projectFullPath);
-        console.log(pipelineIID);
         const data = await gitlabgql.client.query({
           query: GET_PIPELINE_JOBS,
           variables: { fullPath: projectFullPath, pipelineIID: pipelineIID },
+          fetchPolicy: "network-only",
         });
         const stages: Record<string, Job[]> = {};
         for (const stage of data.data.project.pipeline.stages.nodes) {
-          console.log(stage.name);
           if (!stages[stage.name]) {
             stages[stage.name] = [];
           }
@@ -188,7 +202,7 @@ export function useSearch(
     return () => {
       didUnmount = true;
     };
-  }, [query, projectFullPath, pipelineIID]);
+  }, [query, projectFullPath, pipelineIID, timestamp]);
 
-  return { stages, error, isLoading };
+  return { stages, error, isLoading, refresh };
 }
