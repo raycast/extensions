@@ -3,7 +3,7 @@
   "name": "json-to-go",
   "title": "json-to-go",
   "description": "Translate JSON into a Go type definition",
-  "icon": "command-icon.png",
+  "icon": "json-to-go.png",
   "author": "chyroc",
   "license": "MIT",
   "commands": [

@@ -1,4 +1,4 @@
-import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, showHUD } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -21,13 +21,13 @@ export default async () => {
   try {
     jsonString = await copy();
   } catch (e) {
-    await showToast(Toast.Style.Failure, `${e}`);
+    await showHUD(`${e}`);
     return;
   }
 
   const got = jsonToGo(jsonString, null, null, false);
   if (got.error) {
-    await showToast(Toast.Style.Failure, got.error);
+    await showHUD(got.error);
     return;
   } else {
     await parse(got.go);
