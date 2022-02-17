@@ -16,7 +16,7 @@ export default function ManageMain() {
 
   const handleRemove = (itemKey: string) => {
     LocalStorage.removeItem(itemKey).then(() => {
-      showToast({ style: Toast.Style.Success, title: "삭제되었습니다." });
+      showToast({ style: Toast.Style.Success, title: "Removed." });
       const newPackages = { ...packages };
       delete newPackages[itemKey];
       setPackages(newPackages);
@@ -37,7 +37,7 @@ export default function ManageMain() {
 
   return (
     <List>
-      <List.Section title="배송중" key="notCompleted">
+      <List.Section title="Delivery NOT completed" key="notCompleted">
         {packages &&
           filterByComplete(false).map((itemKey) => {
             return (
@@ -51,7 +51,7 @@ export default function ManageMain() {
             );
           })}
       </List.Section>
-      <List.Section title="배송완료" key="completed">
+      <List.Section title="Delivery completed" key="completed">
         {packages &&
           filterByComplete(true).map((itemKey) => {
             return (
