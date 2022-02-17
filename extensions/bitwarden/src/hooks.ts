@@ -2,7 +2,8 @@ import { getLocalStorageItem, showToast, ToastStyle, removeLocalStorageItem, set
 import { useState, useEffect } from "react";
 import { Bitwarden } from "./api";
 import { SESSION_KEY } from "./const";
-import { VaultStatus } from "./types";
+import { PasswordOptions, VaultStatus } from "./types";
+import { getPasswordGeneratingArgs } from "./utils";
 
 async function login(api: Bitwarden) {
   try {
@@ -52,4 +53,25 @@ export function useBitwarden(
       }
     },
   ];
+}
+
+export function usePasswordGenerator(bitwardenApi: Bitwarden) {
+  const [isGenerating, setGenerating] = useState(false);
+  const [password, setPassword] = useState<string>();
+
+  const generatePassword = async (options?: PasswordOptions) => {
+    try {
+      setGenerating(true);
+      const password = await bitwardenApi.generatePassword(options);
+      setPassword(password)
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  useEffect(() => {
+    generatePassword();
+  }, []);
+
+  return { password, isGenerating, regeneratePassword: generatePassword };
 }

@@ -46,6 +46,13 @@
       "subtitle": "Bitwarden",
       "description": "Lock the vault.",
       "mode": "no-view"
+    },
+    {
+      "name": "generate-password",
+      "title": "Generate Password",
+      "subtitle": "Bitwarden",
+      "description": "Generate a password.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -84,7 +91,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.28.0",
     "execa": "^5.1.1",
     "treeify": "^1.1.0"
   },

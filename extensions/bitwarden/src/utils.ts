@@ -1,5 +1,6 @@
 import { Icon } from "@raycast/api";
 import { URL } from "url";
+import { PasswordOptions } from "./types";
 
 export function codeBlock(content: string): string {
   return "```\n" + content + "\n```";
@@ -29,4 +30,10 @@ export function faviconUrl(size: number, url: string): string {
 
 export function titleCase(word: string) {
   return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
+
+
+export function getPasswordGeneratingArgs(options: PasswordOptions): string[] {
+  return Object.entries(options).flat()
 }
