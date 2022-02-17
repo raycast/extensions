@@ -1,5 +1,5 @@
-import Main from "./components/track/Main";
+import ManageMain from "./components/my/ManageMain";
 
 export default function main() {
-  return <Main></Main>;
+  return <ManageMain></ManageMain>;
 }

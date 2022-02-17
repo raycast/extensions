@@ -13,6 +13,13 @@
       "subtitle": "Parcel Tracker",
       "description": "tracking packages by tracking number",
       "mode": "view"
+    },
+    {
+      "name": "myPackages",
+      "title": "Manage Packages",
+      "subtitle": "Parcel Tracker",
+      "description": "manage my packages",
+      "mode": "view"
     }
   ],
   "dependencies": {

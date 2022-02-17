@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { logistics } from "../../metadata/logistics";
 import Track from "./Track";
 
-export default function Main() {
+export default function TrackMain() {
   const vendors = logistics;
 
   return (
@@ -16,7 +16,7 @@ export default function Main() {
             title={vendor.name}
             actions={
               <ActionPanel>
-                <Action.Push title="운송장번호" target={<Track vendorKey={vendor.code} />} />
+                <Action.Push title="운송장번호" target={<Track vendorKey={vendor.code} vendorName={vendor.name} />} />
               </ActionPanel>
             }
           />
