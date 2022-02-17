@@ -11,7 +11,6 @@ export default function ManageMain() {
   useEffect(() => {
     LocalStorage.allItems().then((response) => {
       setPackages(response);
-      console.log(response);
     });
   }, []);
 
