@@ -1,9 +1,8 @@
-import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast, ToastStyle } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { getSearchPage, getTrackData } from "../../api/api";
 import { ITrackData } from "../../model/trackData";
-import { icon } from "../../../../authy/src/util/icon";
 
 interface IProps {
   vendorKey: string;
