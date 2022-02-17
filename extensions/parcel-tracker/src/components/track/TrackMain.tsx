@@ -7,7 +7,7 @@ export default function TrackMain() {
   const vendors = logistics;
 
   return (
-    <List searchBarPlaceholder="택배사를 골라주세요">
+    <List searchBarPlaceholder="Choose delivery vendor">
       {vendors &&
         vendors.map((vendor) => (
           <List.Item
@@ -16,7 +16,7 @@ export default function TrackMain() {
             title={vendor.name}
             actions={
               <ActionPanel>
-                <Action.Push title="운송장번호" target={<Track vendorKey={vendor.code} vendorName={vendor.name} />} />
+                <Action.Push title="Next" target={<Track vendorKey={vendor.code} vendorName={vendor.name} />} />
               </ActionPanel>
             }
           />
