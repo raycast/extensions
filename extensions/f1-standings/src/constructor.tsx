@@ -27,10 +27,15 @@ export default function Command() {
       try {
         const res = await axios.get("https://ergast.com/api/f1/current/constructorStandings.json");
         const data = await res.data;
-        setState({ items: data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings, season: data.MRData.StandingsTable.season });
+        setState({
+          items: data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings,
+          season: data.MRData.StandingsTable.season,
+        });
       } catch (error) {
         console.log(error);
-        setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
+        setState({
+          error: error instanceof Error ? error : new Error("Something went wrong"),
+        });
       }
     }
 
@@ -40,19 +45,22 @@ export default function Command() {
   return (
     <List isLoading={!state.items && !state.error}>
       <List.Section title={String(state.season) ?? ""}>
-      {state.items?.map((item) => (
-        <List.Item
-          key={item.Constructor.constructorId}
-          icon={{ source: item.position + ".png", tintColor: Color.PrimaryText }}
-          title={item.Constructor.name}
-          accessoryTitle={String(item.points)}
-          actions={
-            <ActionPanel title={item.Constructor.name}>
-              <Action.OpenInBrowser url={item.Constructor.url} title="Open in Browser" />
-            </ActionPanel>
-          }
-        />
-      ))}
+        {state.items?.map((item) => (
+          <List.Item
+            key={item.Constructor.constructorId}
+            icon={{
+              source: item.position + ".png",
+              tintColor: Color.PrimaryText,
+            }}
+            title={item.Constructor.name}
+            accessoryTitle={String(item.points)}
+            actions={
+              <ActionPanel title={item.Constructor.name}>
+                <Action.OpenInBrowser url={item.Constructor.url} title="Open in Browser" />
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
     </List>
   );
