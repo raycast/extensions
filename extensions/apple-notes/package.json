@@ -21,7 +21,7 @@
       "name": "new",
       "title": "New Note",
       "subtitle": "Notes",
-      "description": "Add a new note in the Apple Notes app",
+      "description": "Create a new note in the Apple Notes app",
       "mode": "no-view",
       "keywords": [
         "write note",
