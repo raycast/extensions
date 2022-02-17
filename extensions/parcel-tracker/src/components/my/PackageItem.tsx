@@ -24,10 +24,10 @@ const PackageItem = ({ itemKey, itemName, isComplete, handleRemove }: IProps) =>
       actions={
         <ActionPanel>
           <Action.Push
-            title="배송추적"
+            title="Tracking"
             target={<Track vendorKey={vendor.code} vendorName={vendor.name} defaultTrackNumber={trackNumber} />}
           />
-          <Action title="삭제하기" onAction={() => handleRemove(itemKey)} />
+          <Action title="Remove Item" onAction={() => handleRemove(itemKey)} />
         </ActionPanel>
       }
     />

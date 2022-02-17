@@ -1,9 +1,8 @@
-import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast, ToastStyle } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { getSearchPage, getTrackData } from "../../api/api";
 import { ITrackData } from "../../model/trackData";
-import { icon } from "../../../../authy/src/util/icon";
 
 interface IProps {
   vendorKey: string;
@@ -40,7 +39,7 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
       })
       .catch((error) => {
         setHasError(true);
-        showToast({ style: Toast.Style.Failure, title: "배송정보 조회를 실패했습니다." });
+        showToast({ style: Toast.Style.Failure, title: "Couldn't find your package information" });
       })
       .finally(() => setLoading(false));
   };
@@ -53,9 +52,9 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
   };
 
   const handleSave = (data: ITrackData) => {
-    const value = `${data.itemName || "택배사 미입력"}//${data.complete}`;
+    const value = `${data.itemName || "UNKNOWN"}//${data.complete}`;
     LocalStorage.setItem(`${vendorKey}-${trackNumber}`, value).then(() =>
-      showToast({ style: Toast.Style.Success, title: "저장되었습니다." })
+      showToast({ style: Toast.Style.Success, title: "Saved." })
     );
   };
   const convertDate = (dateString: string) => {
@@ -63,27 +62,27 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
   };
 
   return (
-    <List onSearchTextChange={handleTextChange} searchBarPlaceholder="운송장 번호를 입력하세요.." isLoading={loading}>
+    <List onSearchTextChange={handleTextChange} searchBarPlaceholder="Type your invoice number.." isLoading={loading}>
       {trackData && !hasError && trackData.trackingDetails.length > 0 ? (
-        <List.Section title={trackData?.complete ? "배송완료" : "배송미완료"}>
+        <List.Section title={trackData?.complete ? "Delivery completed" : "Delivery NOT completed"}>
           <List.Item
-            title={"제품명 : " + (trackData.itemName || "택배사 미입력")}
+            title={"Item : " + (trackData.itemName || "UNKNOWN")}
             icon={trackData?.complete ? Icon.Checkmark : Icon.XmarkCircle}
             accessoryTitle={vendorName}
             actions={
               !defaultTrackNumber && (
                 <ActionPanel>
-                  <Action title="저장하기" onAction={() => handleSave(trackData)} />
+                  <Action title="Save" onAction={() => handleSave(trackData)} />
                 </ActionPanel>
               )
             }
           />
         </List.Section>
       ) : (
-        <List.Item title="배송정보를 찾을 수 없습니다." />
+        <List.Item title="Couldn't find your package information" />
       )}
       {trackData && !hasError && trackData.trackingDetails.length > 0 && (
-        <List.Section title="배송 이력">
+        <List.Section title="Delivery history">
           {trackData.trackingDetails
             .sort((prev, next) => next.time - prev.time)
             .map((tracking, index) => (
