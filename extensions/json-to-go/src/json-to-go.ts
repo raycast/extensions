@@ -21,16 +21,16 @@ export default async () => {
   try {
     jsonString = await copy();
   } catch (e) {
-    await showHUD(`${e}`);
+    await showHUD(`❌ ${e}`);
     return;
   }
 
   const got = jsonToGo(jsonString, null, null, false);
   if (got.error) {
-    await showHUD(got.error);
+    await showHUD(`❌ ${got.error}`);
     return;
   } else {
     await parse(got.go);
-    await showHUD("Copied to clipboard");
+    await showHUD("✅ Copied to clipboard");
   }
 };

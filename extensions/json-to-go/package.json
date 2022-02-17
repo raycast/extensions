@@ -2,15 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "json-to-go",
   "title": "json-to-go",
-  "description": "Translate JSON into a Go type definition",
-  "icon": "json-to-go.png",
+  "description": "Translate JSON from clipboard into a Go type definition",
+  "icon": "json.png",
   "author": "chyroc",
   "license": "MIT",
   "commands": [
     {
       "name": "json-to-go",
-      "title": "JSON to Go type",
-      "description": "Translate JSON into a Go type definition",
+      "title": "Convert JSON to Go Type",
+      "description": "Translate JSON from clipboard into a Go type definition",
       "mode": "no-view"
     }
   ],
