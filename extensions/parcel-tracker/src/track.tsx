@@ -1,5 +1,5 @@
-import Main from "./components/track/Main";
+import TrackMain from "./components/track/TrackMain";
 
 export default function main() {
-  return <Main></Main>;
+  return <TrackMain></TrackMain>;
 }

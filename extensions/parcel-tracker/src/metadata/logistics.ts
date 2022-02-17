@@ -1,3 +1,12 @@
+export const findVendorByCode = (code: string): IVendor => {
+  return logistics.find((l) => l.code === code) || { code: "", name: "" };
+};
+
+export interface IVendor {
+  code: string;
+  name: string;
+}
+
 export const logistics = [
   { code: "04", name: "CJ대한통운" },
   { code: "01", name: "우체국택배" },
