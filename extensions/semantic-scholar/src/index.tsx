@@ -1,4 +1,11 @@
-import { ActionPanel, Action, List, showToast, Toast, useNavigation, Detail } from "@raycast/api";
+import {
+    ActionPanel,
+    Action,
+    List,
+    showToast,
+    Toast,
+    Detail,
+} from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 
@@ -22,7 +29,8 @@ export default function Command() {
 }
 
 function SearchListItem({ paper }: { paper: Paper }) {
-    let authorText = paper.authors && paper.authors.length > 1 ? paper.authors[0].name : "";
+    let authorText =
+        paper.authors && paper.authors.length > 1 ? paper.authors[0].name : "";
     if (paper.authors && paper.authors.length > 1) {
         authorText += ", et al.";
     }
@@ -35,7 +43,10 @@ function SearchListItem({ paper }: { paper: Paper }) {
             actions={
                 <ActionPanel>
                     <ActionPanel.Section>
-                        <Action.Push title="Show Details" target={<PaperDetails paper={paper} />} />
+                        <Action.Push
+                            title="Show Details"
+                            target={<PaperDetails paper={paper} />}
+                        />
                     </ActionPanel.Section>
                     <ActionPanel.Section>
                         <Action.OpenInBrowser title="Open in Browser" url={paper.url} />
@@ -55,13 +66,12 @@ function SearchListItem({ paper }: { paper: Paper }) {
 function PaperDetails({ paper }: { paper: Paper }) {
     let md = `# ${paper.title}\n`;
     md += `**Publication Year**: ${paper.year}\n\n`;
-    md += `**Citations**: ${paper.citationCount}\n\n`
+    md += `**Citations**: ${paper.citationCount}\n\n`;
     md += `**Venue**: *${paper.venue}*\n`;
     md += `## Authors\n`;
     md += `${paper.authors?.map((a) => a.name).join(", ")}\n`;
     md += `## Abstract\n`;
     md += `${paper.abstract}\n`;
-
 
     return (
         <Detail
@@ -72,19 +82,19 @@ function PaperDetails({ paper }: { paper: Paper }) {
                         <Action.OpenInBrowser title="Open in Browser" url={paper.url} />
                     </ActionPanel.Section>
                     <ActionPanel.Section>
-                        <Action.CopyToClipboard
-                            title="Copy DOI"
-                            content={`${paper.DOI}`}
-                        />
+                        <Action.CopyToClipboard title="Copy DOI" content={`${paper.DOI}`} />
                     </ActionPanel.Section>
                 </ActionPanel>
             }
         />
-    )
+    );
 }
 
 function useSearch() {
-    const [state, setState] = useState<SearchState>({ results: [], isLoading: true });
+    const [state, setState] = useState<SearchState>({
+        results: [],
+        isLoading: true,
+    });
     const cancelRef = useRef<AbortController | null>(null);
 
     const search = useCallback(
@@ -96,7 +106,10 @@ function useSearch() {
                 isLoading: true,
             }));
             try {
-                const results = await performSearch(searchText, cancelRef.current.signal);
+                const results = await performSearch(
+                    searchText,
+                    cancelRef.current.signal
+                );
                 setState((oldState) => ({
                     ...oldState,
                     results: results,
@@ -113,7 +126,11 @@ function useSearch() {
                 }
 
                 console.error("search error", error);
-                showToast({ style: Toast.Style.Failure, title: "Could not perform search", message: String(error) });
+                showToast({
+                    style: Toast.Style.Failure,
+                    title: "Could not perform search",
+                    message: String(error),
+                });
             }
         },
         [cancelRef, setState]
@@ -132,40 +149,51 @@ function useSearch() {
     };
 }
 
-async function performSearch(searchText: string, signal: AbortSignal): Promise<Paper[]> {
-
+async function performSearch(
+    searchText: string,
+    signal: AbortSignal
+): Promise<Paper[]> {
     const params = new URLSearchParams();
     params.append("query", searchText.length === 0 ? "@raycast/api" : searchText);
-    params.append("fields", "url,abstract,authors,url,title,citationCount,externalIds,venue,year,referenceCount");
+    params.append(
+        "fields",
+        "url,abstract,authors,url,title,citationCount,externalIds,venue,year,referenceCount"
+    );
     params.append("limit", "10");
 
-    const response = await fetch("https://api.semanticscholar.org/graph/v1/paper/search" + "?" + params.toString(), {
-        method: "get",
-        signal: signal,
-    });
+    const response = await fetch(
+        "https://api.semanticscholar.org/graph/v1/paper/search" +
+        "?" +
+        params.toString(),
+        {
+            method: "get",
+            signal: signal,
+        }
+    );
 
     const json = (await response.json()) as
         | {
-            total: number,
-            offset: number,
+            total: number;
+            offset: number;
             data: {
-                paperId: string,
-                title: string,
-                venue: string,
-                year: number,
-                referenceCount: number,
-                citationCount: number,
+                paperId: string;
+                title: string;
+                venue: string;
+                year: number;
+                referenceCount: number;
+                citationCount: number;
                 externalIds: {
-                    DOI?: string
-                }
-                url: string,
-                abstract: string,
+                    DOI?: string;
+                };
+                url: string;
+                abstract: string;
                 authors: {
-                    authorId: string,
-                    name: string
-                }[]
-            }[]
-        } | { code: string, message: string };
+                    authorId: string;
+                    name: string;
+                }[];
+            }[];
+        }
+        | { code: string; message: string };
 
     if (!response.ok || "message" in json) {
         throw new Error("message" in json ? json.message : response.statusText);
@@ -182,7 +210,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<P
             year: paper.year,
             referenceCount: paper.referenceCount,
             citationCount: paper.citationCount,
-            DOI: paper.externalIds.DOI ? paper.externalIds.DOI : "unknown"
+            DOI: paper.externalIds.DOI ? paper.externalIds.DOI : "unknown",
         };
     });
 }
@@ -197,7 +225,7 @@ interface Author {
 }
 
 interface Paper {
-    id: string,
+    id: string;
     title: string;
     abstract?: string;
     authors?: Author[];
