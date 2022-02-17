@@ -26,11 +26,10 @@ const init = {
 
 export default function Command() {
   const [results, setResults] = useState<SearchResult[]>([]);
-
+  const [searchText, setSearchText] = useState("");
   const [loadingState, setLoadingState] = useState(true);
-
   useEffect(() => {
-    searchConfluence().then((response) => {
+    searchConfluence(searchText).then((response) => {
       setLoadingState(false);
       if (!response.ok) {
         const failureMessage = response.message ? response.message : response.statusText;
@@ -41,10 +40,20 @@ export default function Command() {
         });
       }
     });
-  }, []);
+  }, [searchText]);
+
+  const handleSearchTextChange = (text: string) => {
+    setLoadingState(true);
+    setSearchText(text);
+  };
 
   return (
-    <List isLoading={loadingState} searchBarPlaceholder="Search by name..." throttle>
+    <List
+      isLoading={loadingState}
+      searchBarPlaceholder="Search by name..."
+      onSearchTextChange={(text) => handleSearchTextChange(text)}
+      throttle
+    >
       <List.Section title="Results">
         {results && results.map((searchResult) => <SearchListItem key={searchResult.id} searchResult={searchResult} />)}
       </List.Section>
@@ -52,8 +61,8 @@ export default function Command() {
   );
 }
 
-async function searchConfluence() {
-  const apiUrl = `${confluenceUrl}/wiki/rest/api/content?expand=version`;
+async function searchConfluence(searchText: string) {
+  const apiUrl = `${confluenceUrl}/wiki/rest/api/search?cql=title~"${searchText}*"&expand=content.version`;
   const response = await fetch(apiUrl, init)
     .then((response) => {
       return response;
@@ -70,16 +79,18 @@ async function searchConfluence() {
 async function parseResponse(response: Response) {
   const json = (await response.json()) as APIResponse;
   const jsonResults = (json?.results as ResultsItem[]) ?? [];
-  return jsonResults.map((jsonResult: ResultsItem) => {
-    return {
-      id: jsonResult.id as string,
-      name: jsonResult.title as string,
-      type: jsonResult.type as string,
-      url: jsonResult._links.webui as string,
-      author: jsonResult.version.by.displayName as string,
-      icon: jsonResult.version.by.profilePicture.path as string,
-    };
-  });
+  return jsonResults
+    .filter((jsonResult: ResultsItem) => jsonResult.content)
+    .map((jsonResult: ResultsItem) => {
+      return {
+        id: jsonResult.content.id as string,
+        name: jsonResult.content.title as string,
+        type: jsonResult.content.type as string,
+        url: jsonResult.content._links.webui as string,
+        author: jsonResult.content.version.by.displayName as string,
+        icon: jsonResult.content.version.by.profilePicture.path as string,
+      };
+    });
 }
 
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
@@ -109,11 +120,6 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   );
 }
 
-enum Status {
-  Failure,
-  Success,
-}
-
 interface SearchResult {
   id: string;
   name: string;
@@ -131,12 +137,25 @@ interface APIResponse {
   _links: _links;
 }
 interface ResultsItem {
+  content: Content;
+  title: string;
+  excerpt: string;
+  url: string;
+  resultGlobalContainer: ResultGlobalContainer;
+  breadcrumbs: string[];
+  entityType: string;
+  iconCssClass: string;
+  lastModified: string;
+  friendlyLastModified: string;
+  score: number;
+}
+interface Content {
   id: string;
   type: string;
   status: string;
   title: string;
   version: Version;
-  macroRenderedOutput: Record<string, unknown>;
+  macroRenderedOutput: MacroRenderedOutput;
   extensions: Extensions;
   _expandable: _expandable;
   _links: _links;
@@ -148,8 +167,8 @@ interface Version {
   message: string;
   number: number;
   minorEdit: boolean;
-  syncRev?: string;
-  syncRevSource?: string;
+  syncRev: string;
+  syncRevSource: string;
   confRev: string;
   contentTypeModified: boolean;
   _expandable: _expandable;
@@ -175,7 +194,7 @@ interface ProfilePicture {
   isDefault: boolean;
 }
 interface _expandable {
-  operations?: string;
+  operations: string;
   personalSpace?: string;
   collaborators?: string;
   content?: string;
@@ -199,7 +218,10 @@ interface _links {
   base?: string;
   context?: string;
 }
-
 interface Extensions {
   position: number;
+}
+interface ResultGlobalContainer {
+  title: string;
+  displayUrl: string;
 }
