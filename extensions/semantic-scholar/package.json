@@ -10,8 +10,8 @@
     {
       "name": "index",
       "title": "Search Papers",
-      "subtitle": "by keywords",
-      "description": "Search Papers by Keywords on Semantic Scholar",
+      "subtitle": "Semantic Scholar",
+      "description": "Search Papers on Semantic Scholar",
       "mode": "view"
     }
   ],
