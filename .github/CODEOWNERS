@@ -105,6 +105,7 @@
 /extensions/jira-search                              @svenwiegand
 /extensions/jisho                                    @dmacdermott
 /extensions/json-format                              @Destiner
+/extensions/json-to-go                               @chyroc
 /extensions/json2ts                                  @gon250
 /extensions/kaalam                                   @heertheeswaran
 /extensions/kaomoji-search                           @allexks
