@@ -106,8 +106,6 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
         <ActionPanel>
           <ActionPanel.Section>
             <OpenInBrowserAction title="Open in Browser" url={confluenceUrl + "/wiki" + searchResult.url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <CopyToClipboardAction
               title="Copy URL"
               content={confluenceUrl + "/wiki" + searchResult.url}
