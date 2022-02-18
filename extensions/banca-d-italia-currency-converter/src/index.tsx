@@ -77,7 +77,7 @@ export default function Command() {
 
   const [fromCurrency, setFromCurrency] = useStateFromLocalStorage<string>("fromCurrency", "Euro");
   const [toCurrency, setToCurrency] = useStateFromLocalStorage<string>("toCurrency", "U.S. Dollar");
-  const [fromAmount, setFromAmount] = useState((1).toFixed(decimals));
+  const [fromAmount, setFromAmount] = useState("1");
   const [toAmount, setToAmount] = useState((1).toFixed(decimals));
 
   useEffect(() => {
