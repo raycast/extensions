@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Icon, List, Color } from "@raycast/api";
-import axios from "axios";
+import { ActionPanel, Action, Icon, List, Color, showToast, Toast, popToRoot } from "@raycast/api";
+import fetch from "node-fetch";
 
 interface DriverStanding {
   position: number;
@@ -35,16 +35,21 @@ export default function Command() {
   useEffect(() => {
     async function fetchDrivers() {
       try {
-        const res = await axios.get("https://ergast.com/api/f1/current/driverStandings.json");
-        const data = await res.data;
+        const res = await fetch("https://ergast.com/api/f1/current/driverStandings.json");
+        const data = await res.json() as any;
         setState({
           items: data.MRData.StandingsTable.StandingsLists[0].DriverStandings,
           season: data.MRData.StandingsTable.season,
         });
       } catch (error) {
-        console.log(error);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: "Could not load driver standings",
+        });
+        await popToRoot({ clearSearchBar: true });
         setState({
-          error: error instanceof Error ? error : new Error("Something went wrong"),
+          error: error instanceof Error ? error : new Error("Could not load standings"),
         });
       }
     }
