@@ -63,7 +63,7 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
 
   return (
     <List onSearchTextChange={handleTextChange} searchBarPlaceholder="Type your invoice number.." isLoading={loading}>
-      {trackData && !hasError && trackData.trackingDetails.length > 0 ? (
+      {!hasError && trackData && trackData.trackingDetails?.length > 0 ? (
         <List.Section title={trackData?.complete ? "Delivery completed" : "Delivery NOT completed"}>
           <List.Item
             title={"Item : " + (trackData.itemName || "UNKNOWN")}
@@ -81,7 +81,7 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
       ) : (
         <List.Item title="Couldn't find your package information" />
       )}
-      {trackData && !hasError && trackData.trackingDetails.length > 0 && (
+      {!hasError && trackData && trackData.trackingDetails?.length > 0 && (
         <List.Section title="Delivery history">
           {trackData.trackingDetails
             .sort((prev, next) => next.time - prev.time)
