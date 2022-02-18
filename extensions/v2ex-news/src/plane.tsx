@@ -20,7 +20,7 @@ export default () => {
       } catch (e) {
         setLoading(false);
         console.error(e);
-        await showToast(Toast.Style.Failure, "请求失败", `${e}`);
+        await showToast(Toast.Style.Failure, "request fail", `${e}`);
       }
     };
     f();

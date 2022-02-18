@@ -13,13 +13,13 @@ export default () => {
         console.log(res);
       } catch (e) {
         console.error(e);
-        await showToast(Toast.Style.Failure, "请求失败", `${e}`);
+        await showToast(Toast.Style.Failure, "request fail", `${e}`);
       }
     };
     f();
   }, []);
 
-  return <Detail isLoading={!profile} markdown={profile ? generateProfileMarkdown(profile) : "加载中"} />;
+  return <Detail isLoading={!profile} markdown={profile ? generateProfileMarkdown(profile) : "Loading"} />;
 };
 
 const generateProfileMarkdown = (profile: Profile) => {

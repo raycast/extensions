@@ -1,27 +1,25 @@
 # v2ex-news
 
-![](screenshots/feature-list.png)
+![](media/feature-list.png)
 
-## 设置 Token
+## Config Token
 
-点击 [token](https://www.v2ex.com/settings/tokens) 获取一个类型为 everything 的 token
-
-进入任意一个命令，会自动进入 token 设置，填入刚刚获取的 token 即可。
+Click [token](https://www.v2ex.com/settings/tokens), and generate token with type everything
 
 ![](screenshots/setting.png)
 
-## 获取我的通知
+## Notification
 
-![](screenshots/notification.png)
-![](screenshots/del-notification.png)
+![](media/notification.png)
+![](media/del-notification.png)
 
-## 获取节点和主题
+## Topic
 
-![](screenshots/plane.png)
-![](screenshots/plane-topic.png)
-![](screenshots/topic.png)
+![](media/plane.png)
+![](media/plane-topic.png)
+![](media/topic.png)
 
-## 错误提示
+## Error
 
-![](screenshots/error.png)
+![](media/error.png)
 

@@ -24,7 +24,7 @@ export default () => {
       } catch (e) {
         setLoading(false);
         console.error(e);
-        await showToast(Toast.Style.Failure, "请求失败", `${e}`);
+        await showToast(Toast.Style.Failure, "request fail", `${e}`);
       }
     };
     f();
@@ -33,7 +33,7 @@ export default () => {
   return (
     <List throttle={true} isLoading={loading}>
       {notifications && notifications.length > 0 && (
-        <List.Section title={`通知 | 第 ${page} 页 | 共 ${total} 条`}>
+        <List.Section title={`Notification | Page ${page} | Total ${total}`}>
           {notifications.map((v) => {
             return (
               <List.Item
@@ -49,7 +49,7 @@ export default () => {
                       shortcut={cmdD.key}
                       onAction={async () => {
                         const confirm = await confirmAlert({
-                          title: "确认删除这条通知?",
+                          title: "Delete?",
                           message: stripHtml(v.text).result,
                         });
                         if (confirm) {
@@ -57,7 +57,7 @@ export default () => {
                             await v2exCli.deleteNotification({ notificationID: v.id });
                           } catch (e) {
                             console.error(e);
-                            await showToast(Toast.Style.Failure, "请求失败", `${e}`);
+                            await showToast(Toast.Style.Failure, "request fail", `${e}`);
                           }
                         }
                       }}

@@ -8,36 +8,36 @@ export interface Shortcut {
 
 export const cmdLeft: Shortcut = {
   icon: "prev_page.png",
-  title: "Previous Page | 上一页",
+  title: "Previous Page",
   key: { modifiers: ["cmd"], key: "arrowLeft" },
 };
 
 export const cmdRight: Shortcut = {
   icon: "next_page.png",
-  title: "Next Page | 下一页",
+  title: "Next Page",
   key: { modifiers: ["cmd"], key: "arrowRight" },
 };
 
 export const cmdO: Shortcut = {
   icon: Icon.Globe,
-  title: "Open in Browser | 打开浏览器",
+  title: "Open in Browser",
   key: { modifiers: ["cmd"], key: "o" },
 };
 
 export const cmdD: Shortcut = {
   icon: Icon.Trash,
-  title: "Delete | 删除",
+  title: "Delete",
   key: { modifiers: ["cmd"], key: "d" },
 };
 
 export const cmdE: Shortcut = {
   icon: Icon.Text,
-  title: "Detail | 详情",
+  title: "Detail",
   key: { modifiers: ["cmd"], key: "e" },
 };
 
 export const cmdEnter: Shortcut = {
   icon: "enter.png",
-  title: "Submit | 提交",
+  title: "Submit",
   key: { modifiers: ["cmd"], key: "enter" },
 };

@@ -24,7 +24,7 @@ export default (props: { nodeTitle: string; nodeName: string }) => {
       } catch (e) {
         setLoading(false);
         console.error(e);
-        await showToast(Toast.Style.Failure, "请求失败", `${e}`);
+        await showToast(Toast.Style.Failure, "request fail", `${e}`);
       }
     };
     f();
@@ -33,14 +33,14 @@ export default (props: { nodeTitle: string; nodeName: string }) => {
   return (
     <List throttle={true} isLoading={loading}>
       {topics && topics.length > 0 && (
-        <List.Section title={`主题 | ${nodeTitle} | 第 ${page} 页`}>
+        <List.Section title={`Topic | ${nodeTitle} | Page ${page}`}>
           {topics.map((v) => {
             return (
               <List.Item
                 title={v.title}
                 subtitle={v.content}
                 key={v.id}
-                accessoryTitle={`${v.replies} 回复 | ${formatUnix(v.last_modified)}`}
+                accessoryTitle={`${v.replies} Replies | ${formatUnix(v.last_modified)}`}
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser title={cmdO.title} icon={cmdO.icon} shortcut={cmdO.key} url={v.url} />

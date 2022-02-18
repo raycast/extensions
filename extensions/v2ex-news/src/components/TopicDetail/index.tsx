@@ -24,7 +24,7 @@ export default (props: { topic: Topic }) => {
           }
         } catch (e) {
           console.error(e);
-          await showToast(Toast.Style.Failure, "请求失败", `${e}`);
+          await showToast(Toast.Style.Failure, "request fail", `${e}`);
           break;
         }
         setReplies(tmp);
