@@ -1,15 +1,8 @@
-import {
-  ActionPanel,
-  Action,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from '@raycast/api';
-import { runAppleScript } from 'run-applescript';
-import { useAsync } from 'react-use';
-import { useEffect, useState } from 'react';
-import { getOutputDevices, setOutputDevice } from './utils';
+import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
+import { runAppleScript } from "run-applescript";
+import { useAsync } from "react-use";
+import { useEffect, useState } from "react";
+import { getOutputDevices, setOutputDevice } from "./utils";
 
 export default function Command() {
   const { value: items, loading } = useAsync(getOutputDevices, []);

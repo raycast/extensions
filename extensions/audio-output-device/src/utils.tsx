@@ -1,9 +1,6 @@
-import { runAppleScript } from 'run-applescript';
+import { runAppleScript } from "run-applescript";
 
-function sliceIntoChunks(
-  arr: Array<string>,
-  chunkSize: number
-): Array<Array<string>> {
+function sliceIntoChunks(arr: Array<string>, chunkSize: number): Array<Array<string>> {
   const res = [];
   for (let i = 0; i < arr.length; i += chunkSize) {
     const chunk = arr.slice(i, i + chunkSize);
@@ -48,18 +45,16 @@ export async function getOutputDevices() {
     return [ devices, "currentOutput", currentOutput ]
   `);
 
-  const list = stringList.split(', ');
+  const list = stringList.split(", ");
 
-  const currentOutputSeparator = list.indexOf('currentOutput');
+  const currentOutputSeparator = list.indexOf("currentOutput");
   const currentOutput = list[currentOutputSeparator + 1];
 
-  return sliceIntoChunks(list.slice(0, currentOutputSeparator), 2).map(
-    ([name, type]) => ({
-      name,
-      type,
-      selected: name === currentOutput,
-    })
-  );
+  return sliceIntoChunks(list.slice(0, currentOutputSeparator), 2).map(([name, type]) => ({
+    name,
+    type,
+    selected: name === currentOutput,
+  }));
 }
 
 export async function setOutputDevice(item: string) {

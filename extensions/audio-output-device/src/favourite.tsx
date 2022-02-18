@@ -1,5 +1,5 @@
-import { getPreferenceValues, popToRoot, showToast, Toast } from '@raycast/api';
-import { setOutputDevice } from './utils';
+import { getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
+import { setOutputDevice } from "./utils";
 
 const preferences = getPreferenceValues();
 setOutputDevice(preferences.favourite).then(() => {
