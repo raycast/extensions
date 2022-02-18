@@ -93,7 +93,7 @@ export default function Command() {
       parsedDate = Date.create();
 
       if (preferences.modificationDate) {
-        showToast(ToastStyle.Failure, `Invalid date format`, "Date " + date + " could not be parsed.");
+        showToast(ToastStyle.Failure, "Invalid date format", `Date ${date} could not be parsed.`);
       }
     }
 
@@ -103,18 +103,18 @@ export default function Command() {
   async function fetchItems() {
     const result = await runAppleScript(
       'set output to ""\n' +
-        'tell application "Notes"\n' +
+        "tell application \"Notes\"\n" +
         "repeat with theAccount in every account\n" +
         "set theAccountName to the name of theAccount\n" +
-        'set output to output & "account: " & theAccountName & "\n"\n' +
+        "set output to output & \"account: \" & theAccountName & \"\n\"\n" +
         "repeat with theFolder in every folder in theAccount\n" +
         "set theFolderName to the name of theFolder\n" +
-        'set output to output & "folder: " & theFolderName & "\n"\n' +
+        "set output to output & \"folder: \" & theFolderName & \"\n\"\n" +
         "repeat with theNote in every note in theFolder\n" +
         "set theNoteName to the name of theNote\n" +
         "set theNoteDate to the modification date of theNote\n" +
-        'set output to output & "note: " & theNoteName & "\n"\n' +
-        'set output to output & "date: " & theNoteDate & "\n"\n' +
+        "set output to output & \"note: \" & theNoteName & \"\n\"\n" +
+        "set output to output & \"date: \" & theNoteDate & \"\n\"\n" +
         "end repeat\n" +
         "end repeat\n" +
         "end repeat\n" +
@@ -128,7 +128,7 @@ export default function Command() {
   async function openNote(number: number) {
     await closeMainWindow();
     await runAppleScript(
-      'tell application "Notes" \n' + 'show note "' + state.notes[number].name + '" \n' + "end tell"
+      `tell application "Notes" \nshow note "${state.notes[number].name}" \nend tell`
     );
   }
 
