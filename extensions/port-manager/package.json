@@ -9,8 +9,7 @@
   "commands": [
     {
       "name": "open-ports",
-      "title": "Port Manager",
-      "subtitle": "Close Ports",
+      "title": "Kill Port",
       "description": "Show and Close Opened Ports",
       "mode": "view"
     }
