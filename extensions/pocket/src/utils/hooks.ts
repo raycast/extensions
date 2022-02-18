@@ -20,8 +20,10 @@ export function useBookmarks({ name, state }: UseBookmarksOptions) {
 
   useEffect(() => {
     if (error) {
-      if (error.response.statusCode === 401) {
+      if (error.response.statusCode === 401 || error.response.statusCode === 403) {
         showToast(ToastStyle.Failure, "Invalid Credentials", "Check you Pocket extension preferences");
+      } else {
+        throw error;
       }
     }
   }, [error])
