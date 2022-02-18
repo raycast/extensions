@@ -26,7 +26,7 @@ export default function Command() {
     async function fetchDrivers() {
       try {
         const res = await fetch("https://ergast.com/api/f1/current/constructorStandings.json");
-        const data = await res.json() as any;
+        const data = (await res.json()) as any;
         setState({
           items: data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings,
           season: data.MRData.StandingsTable.season,
