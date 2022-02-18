@@ -3,7 +3,7 @@ import { addDays } from "date-fns";
 import { Project, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
 import { mutate } from "swr";
 import { ViewMode, SWRKeys } from "../types";
-import { isRecurring, displayDueDate, getAPIDate } from "../utils";
+import { isRecurring, displayDueDate, getAPIDate, getToday } from "../utils";
 import { priorities } from "../constants";
 import { todoist, handleError } from "../api";
 
@@ -116,7 +116,7 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
                 key={name}
                 id={name}
                 title={name}
-                onAction={() => updateTask(task, { dueDate: getAPIDate(addDays(new Date(), amount)) })}
+                onAction={() => updateTask(task, { dueDate: getAPIDate(addDays(getToday(), amount)) })}
               />
             ))}
           </ActionPanel.Submenu>

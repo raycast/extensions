@@ -1,10 +1,23 @@
 import { Task } from "@doist/todoist-api-typescript";
-import { addDays, format, formatISO, isToday, isThisYear, isTomorrow, isBefore, compareAsc } from "date-fns";
+import { addDays, format, formatISO, isThisYear, isBefore, compareAsc, isSameDay } from "date-fns";
+import { utcToZonedTime } from "date-fns-tz";
 import { partition } from "lodash";
 import { priorities } from "./constants";
 
 export function isRecurring(task: Task): boolean {
   return task.due?.recurring || false;
+}
+
+/**
+ * Returns today's date in user's timezone using the following format: YYYY-MM-DD
+ */
+export function getToday() {
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return new Date(format(utcToZonedTime(Date.now(), timeZone), "yyyy-MM-dd"));
+}
+
+function isBeforeToday(date: Date) {
+  return isBefore(date, getToday());
 }
 
 export function displayDueDate(dateString: string): string {
@@ -14,15 +27,17 @@ export function displayDueDate(dateString: string): string {
     return isThisYear(date) ? format(date, "dd MMMM") : format(date, "dd MMMM yyy");
   }
 
-  if (isToday(date)) {
+  const today = getToday();
+
+  if (isSameDay(date, today)) {
     return "Today";
   }
 
-  if (isTomorrow(date)) {
+  if (isSameDay(date, addDays(today, 1))) {
     return "Tomorrow";
   }
 
-  const nextWeek = addDays(new Date(), 7);
+  const nextWeek = addDays(today, 7);
 
   if (isBefore(date, nextWeek)) {
     return format(date, "eeee");
@@ -37,12 +52,6 @@ export function displayDueDate(dateString: string): string {
 
 export function getAPIDate(date: Date): string {
   return formatISO(date, { representation: "date" });
-}
-
-export function isBeforeToday(date: Date) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return isBefore(date, today);
 }
 
 export function partitionTasksWithOverdue(tasks: Task[]) {

@@ -36,7 +36,7 @@ export default function CreateTask() {
     setContent("");
     setDescription("");
     setDueDate(undefined);
-    setPriority(String(priorities[0].value));
+    setPriority(String(lowestPriority.value));
   }
 
   async function submit() {
