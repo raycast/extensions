@@ -6,6 +6,8 @@ import {
   closeMainWindow,
   getPreferenceValues,
   Icon,
+  showToast,
+  ToastStyle,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runAppleScript } from "run-applescript";
@@ -84,8 +86,18 @@ export default function Command() {
   }
 
   function parseDateString(date: string): Date {
-    date = date.replace(/([0-9]+).([0-9]+).([0-9]+)$/, '$1:$2:$3'); // fix for time format
-    return Date.create(date);
+    date = date.replace(/([0-9]+).([0-9]+).([0-9]+)$/, "$1:$2:$3"); // fix for time format
+
+    let parsedDate = Date.create(date);
+    if (!Date.isValid(parsedDate)) {
+      parsedDate = Date.create();
+
+      if (preferences.modificationDate) {
+        showToast(ToastStyle.Failure, `Invalid date format`, "Date " + date + " could not be parsed.");
+      }
+    }
+
+    return parsedDate;
   }
 
   async function fetchItems() {
@@ -141,8 +153,8 @@ export default function Command() {
                 ? note.account + " -> " + note.folder
                 : note.account
               : preferences.folders
-                ? note.folder
-                : ""
+              ? note.folder
+              : ""
           }
           actions={
             <ActionPanel title="Actions">
