@@ -67,7 +67,7 @@ export default (props: { onFinish?: (success: boolean) => Promise<void> }) => {
             console.log("[login] get qrcode image: ", url);
             setQrcodeImage(url!);
             setLoading(false);
-            setNotice("请用阿里云盘 App 扫码");
+            setNotice("Please Use AliyunDrive App Scan");
             console.log(`[login] get qrcode success, please scan it`);
           } catch (e) {
             console.log(`[login] get qrcode fail: ${e}`);
@@ -103,10 +103,10 @@ export default (props: { onFinish?: (success: boolean) => Promise<void> }) => {
           props.onFinish && (await props.onFinish(false));
         } else if (resp.scaned) {
           setLoginState(4);
-          setNotice("扫描成功, 请在手机上根据提示确认登录");
+          setNotice("Scan Success, Please Confirm");
         } else {
           setLoginState(3);
-          setNotice("请在手机上扫描二维码");
+          setNotice("Please Scan");
         }
       } catch (e) {
         // setLoginState(2)
