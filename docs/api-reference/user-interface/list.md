@@ -6,14 +6,14 @@ description: >-
 
 # List
 
-## Features
-
 Our `List` component provides great user experience out of the box:
 
 - Use built-in filtering for best performance.
 - Group-related items in sections with titles and subtitles.
 - Show loading indicator for longer operations.
 - Use the search query for typeahead experiences.
+
+![](../../.gitbook/assets/list.png)
 
 ## Examples
 
