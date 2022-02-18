@@ -72,7 +72,7 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
             actions={
               !defaultTrackNumber && (
                 <ActionPanel>
-                  <Action title="저장하기" onAction={() => handleSave(trackData)} />
+                  <Action title="Save" onAction={() => handleSave(trackData)} />
                 </ActionPanel>
               )
             }
