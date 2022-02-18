@@ -20,11 +20,11 @@ interface TaskListItemProps {
 
 export default function TaskListItem({ task, mode, projects }: TaskListItemProps): JSX.Element {
   async function completeTask(task: Task) {
-    await showToast(Toast.Style.Animated, "Completing task");
+    await showToast({ style: Toast.Style.Animated, title: "Completing task" });
 
     try {
       await todoist.closeTask(task.id);
-      await showToast(Toast.Style.Success, "Task updated");
+      await showToast({ style: Toast.Style.Success, title: "Task updated" });
       mutate(SWRKeys.tasks);
     } catch (error) {
       handleError({ error, title: "Unable to complete task" });
@@ -32,11 +32,11 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
   }
 
   async function updateTask(task: Task, payload: UpdateTaskArgs) {
-    await showToast(Toast.Style.Animated, "Updating task");
+    await showToast({ style: Toast.Style.Animated, title: "Updating task" });
 
     try {
       await todoist.updateTask(task.id, payload);
-      await showToast(Toast.Style.Success, "Task updated");
+      await showToast({ style: Toast.Style.Success, title: "Task updated" });
       mutate(SWRKeys.tasks);
     } catch (error) {
       handleError({ error, title: "Unable to update task" });
@@ -45,11 +45,11 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
 
   async function deleteTask(task: Task) {
     if (await confirmAlert({ title: "Are you sure you want to delete this task?" })) {
-      await showToast(Toast.Style.Animated, "Deleting task");
+      await showToast({ style: Toast.Style.Animated, title: "Deleting task" });
 
       try {
         await todoist.deleteTask(task.id);
-        await showToast(Toast.Style.Success, "Task deleted");
+        await showToast({ style: Toast.Style.Success, title: "Task deleted" });
         mutate(SWRKeys.tasks);
       } catch (error) {
         handleError({ error, title: "Unable to delete task" });

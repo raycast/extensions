@@ -43,7 +43,7 @@ export default function CreateTask() {
     const body: AddTaskArgs = { content, description };
 
     if (!body.content) {
-      await showToast(ToastStyle.Failure, "The title is required");
+      await showToast({ style: Toast.Style.Failure, title: "The title is required" });
       return;
     }
 

@@ -15,11 +15,11 @@ export default function Projects() {
 
   async function deleteProject(id: number) {
     if (await confirmAlert({ title: "Are you sure you want to delete this project?" })) {
-      await showToast(Toast.Style.Animated, "Deleting project");
+      await showToast({ style: Toast.Style.Animated, title: "Deleting project" });
 
       try {
         await todoist.deleteProject(id);
-        await showToast(Toast.Style.Success, "Project deleted");
+        await showToast({ style: Toast.Style.Success, title: "Project deleted" });
         mutate(SWRKeys.projects);
       } catch (error) {
         handleError({ error, title: "Unable to delete project" });

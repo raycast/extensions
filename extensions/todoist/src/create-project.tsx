@@ -29,7 +29,7 @@ export default function CreateProject() {
     const body: AddProjectArgs = { name, favorite };
 
     if (!body.name) {
-      await showToast(Toast.Style.Failure, "The project's name is required");
+      await showToast({ style: Toast.Style.Failure, title: "The project's name is required" });
       return;
     }
 

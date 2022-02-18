@@ -12,8 +12,16 @@ interface HandleErrorArgs {
 
 export function handleError({ error, title }: HandleErrorArgs) {
   if (error instanceof TodoistRequestError && error.isAuthenticationError()) {
-    return showToast(Toast.Style.Failure, title, "Please, make sure your Todoist token is correct.");
+    return showToast({
+      style: Toast.Style.Failure,
+      title: title,
+      message: "Please, make sure your Todoist token is correct.",
+    });
   }
 
-  return showToast(Toast.Style.Failure, title, error instanceof Error ? error.message : "");
+  return showToast({
+    style: Toast.Style.Failure,
+    title: title,
+    message: error instanceof Error ? error.message : "",
+  });
 }
