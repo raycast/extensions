@@ -26,7 +26,7 @@ export function useBookmarks({ name, state }: UseBookmarksOptions) {
         throw error;
       }
     }
-  }, [error])
+  }, [error]);
 
   async function toggleFavorite(id: string) {
     const bookmark = data?.find((bookmark) => bookmark.id === id);

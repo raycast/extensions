@@ -1,11 +1,11 @@
-import { open, showToast, Toast, ToastStyle } from "@raycast/api";
+import { open, Toast, ToastStyle } from "@raycast/api";
 import { fetchBookmarks } from "./utils/api";
 import { HTTPError } from "got";
 
-export default async function() {
+export default async function () {
   const toast = new Toast({
     title: "Searching bookmarks",
-    style: ToastStyle.Animated
+    style: ToastStyle.Animated,
   });
 
   toast.show();
