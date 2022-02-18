@@ -63,7 +63,7 @@ export default function Command() {
           break;
         case "date":
           if (lastNote) {
-            lastNote.date = Date.create(value);
+            lastNote.date = parseDateString(value);
             lastNote.folder = lastFolder;
             lastNote.account = lastAccount;
             notes.push(lastNote);
@@ -81,6 +81,11 @@ export default function Command() {
     if (cachedNotes) {
       parseNotes(cachedNotes);
     }
+  }
+
+  function parseDateString(date: string): Date {
+    date = date.replace(/([0-9]+).([0-9]+).([0-9]+)$/, '$1:$2:$3'); // fix for time format
+    return Date.create(date);
   }
 
   async function fetchItems() {
@@ -136,8 +141,8 @@ export default function Command() {
                 ? note.account + " -> " + note.folder
                 : note.account
               : preferences.folders
-              ? note.folder
-              : ""
+                ? note.folder
+                : ""
           }
           actions={
             <ActionPanel title="Actions">
