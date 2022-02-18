@@ -10,7 +10,6 @@
     {
       "name": "cpf",
       "title": "Generate CPF",
-      "subtitle": "CPF/CNPJ Generator",
       "description": "Generate CPF data for developers",
       "mode": "no-view",
       "keywords": [
@@ -20,7 +19,6 @@
     {
       "name": "cnpj",
       "title": "Generate CNPJ",
-      "subtitle": "CPF/CNPJ Generator",
       "description": "Generate CNPJ data for developers",
       "mode": "no-view",
       "keywords": [
