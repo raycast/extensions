@@ -30,9 +30,14 @@ export function isGitfoxCliInstalled(): boolean {
 
 export function gitfoxCliRequiredMessage(): string {
   return `
-  # Gitfox CLI integration not installed
+  # Missing or broken Gitfox CLI integration
 
-  Please enable the Gitfox CLI integration in the GitFox app Settings > Intergration > Command Line Utility
+
+  Ensure that CLI integration is enabled in the Gitfox app:
+  
+  > Settings > Intergration > Command Line Utility
+  
+  Then check if the path is the same as the one configured in the extension settings.
   `;
 }
 

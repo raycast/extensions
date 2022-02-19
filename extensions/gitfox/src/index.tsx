@@ -30,7 +30,7 @@ export default function Command() {
       {isGitfoxCliInstalled() ? (
         <BookmarkList bookmarks={state.items} isLoading={!state.items} />
       ) : (
-        <Detail navigationTitle="GitFox CLI not installed" markdown={gitfoxCliRequiredMessage()} />
+        <Detail navigationTitle="GitFox CLI not configured" markdown={gitfoxCliRequiredMessage()} />
       )}
     </>
   );
