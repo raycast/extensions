@@ -37,6 +37,13 @@
       "subtitle": "Amazon AWS",
       "description": "Launch AWS console links",
       "mode": "view"
+    },
+    {
+      "name": "cloudformation",
+      "title": "CloudFormation Stacks",
+      "subtitle": "Amazon AWS",
+      "description": "List All your CloudFormation Stacks",
+      "mode": "view"
     }
   ],
   "preferences": [
