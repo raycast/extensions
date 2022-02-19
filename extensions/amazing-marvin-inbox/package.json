@@ -1,0 +1,48 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "amazing-marvin-inbox",
+  "title": "Amazing Marvin inbox",
+  "description": "Creates a task in Amazing Marvin's inbox",
+  "icon": "command-icon.png",
+  "author": "SirStoke",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Create a task",
+      "subtitle": "Creates a task in Amazing Marvin's inbox",
+      "description": "Creates a task in Amazing Marvin's inbox",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.1",
+    "got": "^12.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API key",
+      "description": "Your API key"
+    }
+  ]
+}
