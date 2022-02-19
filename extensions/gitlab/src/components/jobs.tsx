@@ -23,7 +23,7 @@ export interface Job {
 }
 
 const GET_PIPELINE_JOBS = gql`
-  query GetProjectPipeplines($fullPath: ID!, $pipelineIID: ID!) {
+  query GetProjectPipelines($fullPath: ID!, $pipelineIID: ID!) {
     project(fullPath: $fullPath) {
       pipeline(iid: $pipelineIID) {
         stages {
@@ -128,7 +128,7 @@ export function JobList(props: { projectFullPath: string; pipelineIID: string })
       {Object.keys(stages).map((stagekey) => (
         <ListSection key={stagekey} title={stagekey}>
           {stages[stagekey].map((job) => (
-            <JobListItem job={job} projectFullPath={props.projectFullPath} onRefreshJobs={refresh} />
+            <JobListItem job={job} projectFullPath={props.projectFullPath} onRefreshJobs={refresh} key={job.id} />
           ))}
         </ListSection>
       ))}

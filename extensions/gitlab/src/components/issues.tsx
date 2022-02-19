@@ -161,7 +161,7 @@ function navTitle(project?: Project, group?: Group): string | undefined {
     return `Group Issues ${group.full_path}`;
   }
   if (project) {
-    return `Issue ${project.fullPath}`;
+    return `Issues ${project.fullPath}`;
   }
   return undefined;
 }

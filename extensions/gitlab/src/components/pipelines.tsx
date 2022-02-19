@@ -69,7 +69,7 @@ export function PipelineListItem(props: { pipeline: any; projectFullPath: string
   const icon = getIcon(pipeline.status);
   return (
     <List.Item
-      id={pipeline.id}
+      id={`${pipeline.id}`}
       title={pipeline.id.toString()}
       icon={icon}
       subtitle={pipeline.ref || ""}
