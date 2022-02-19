@@ -108,7 +108,7 @@ export function EventListItem(props: { event: Event }) {
             iconSource = GitLabIcons.branches;
           } else if (pd.ref_type === "tag") {
             title = `${an} tag ${pd.ref}`;
-            iconSource = Icon.Pin; // todo: use gitlab tag icon
+            iconSource = GitLabIcons.tag;
           }
           icon = iconSource && { source: iconSource, tintColor: iconColor };
         }
