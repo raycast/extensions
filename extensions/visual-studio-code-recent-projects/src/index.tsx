@@ -102,7 +102,7 @@ function LocalListItem(props: { uri: string }) {
               title="Open in Code"
               icon="action-icon.png"
               target={props.uri}
-              application="Visual Studio Code"
+              application="com.microsoft.VSCode"
             />
             <ShowInFinderAction path={path} />
             <OpenWithAction path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />

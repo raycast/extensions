@@ -6,7 +6,7 @@
 /extensions/algolia                                  @valentindotxyz
 /extensions/amazon-aws                               @victor-falcon @Hodglim
 /extensions/api-icon-list                            @PitNikola
-/extensions/apple-notes                              @tumispro
+/extensions/apple-notes                              @tumispro @ron-myers
 /extensions/atomic                                   @joepio
 /extensions/audio-device                             @benvp @mathieudutour
 /extensions/authy                                    @guga4ka @lukekarrys
@@ -44,6 +44,7 @@
 /extensions/coinmarketcap-crypto-crawler             @moojing
 /extensions/commitlint                               @lardissone
 /extensions/confluence-search                        @daviddkkim
+/extensions/connect-to-vpn                           @sato11
 /extensions/consoledev                               @splash-cli
 /extensions/conventional-comments                    @krzysztofzuraw
 /extensions/copy-gcp-icons                           @pomdtr
@@ -109,6 +110,7 @@
 /extensions/json-to-go                               @chyroc
 /extensions/json2ts                                  @gon250
 /extensions/kaalam                                   @heertheeswaran
+/extensions/kagi-search                              @fearoffish
 /extensions/kaomoji-search                           @allexks
 /extensions/keepassxc                                @zkytech
 /extensions/kill-process                             @rolandleth
@@ -143,6 +145,7 @@
 /extensions/pinboard                                 @fe9lix
 /extensions/pipedrive                                @stephendolan
 /extensions/ploi                                     @Cannonb4ll
+/extensions/pokedex                                  @anhthang
 /extensions/polished                                 @LekoArts
 /extensions/productboard                             @honzatmn
 /extensions/producthunt                              @ragnorc
@@ -161,6 +164,7 @@
 /extensions/remove-background                        @maantje
 /extensions/render                                   @Destiner
 /extensions/ricescore                                @tonka3000
+/extensions/roblox-games                             @TayIorRobinson
 /extensions/rss-reader                               @fuksman
 /extensions/sabnzbd                                  @jesse-c
 /extensions/safari                                   @loris @thomaspaulmann
