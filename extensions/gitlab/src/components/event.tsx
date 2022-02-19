@@ -1,4 +1,14 @@
-import { ActionPanel, Color, Icon, ImageLike, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  Color, ColorLike,
+  CopyToClipboardAction,
+  Icon,
+  ImageLike, ImageSource,
+  List,
+  OpenInBrowserAction,
+  showToast,
+  ToastStyle
+} from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
@@ -72,32 +82,41 @@ export function EventListItem(props: { event: Event }) {
         const an = capitalizeFirstLetter(ev.action_name);
         const pd = ev.push_data;
         if (pd) {
+          let iconColor: ColorLike | undefined
+          switch (ev.action_name) {
+            case "pushed new":
+            {
+              iconColor = Color.Purple
+            }
+              break;
+            case "pushed to":
+            {
+              iconColor = Color.Green
+            }
+              break;
+            case "deleted":
+            {
+              iconColor = Color.Red
+            }
+              break;
+          }
+          let iconSource: ImageSource | undefined
           if (pd.ref_type === "branch") {
             title = `${an} branch ${pd.ref}`;
-            switch (ev.action_name) {
-              case "pushed new":
-                {
-                  icon = { source: GitLabIcons.branches, tintColor: Color.Purple };
-                }
-                break;
-              case "pushed to":
-                {
-                  icon = { source: GitLabIcons.branches, tintColor: Color.Green };
-                }
-                break;
-              case "deleted":
-                {
-                  icon = { source: GitLabIcons.branches, tintColor: Color.Red };
-                }
-                break;
-            }
+            iconSource = GitLabIcons.branches
+          } else if (pd.ref_type === "tag") {
+            title = `${an} tag ${pd.ref}`;
+            iconSource = Icon.Pin // todo: use gitlab tag icon
           }
+          icon = iconSource && { source: iconSource, tintColor: iconColor }
         }
       }
       break;
     case "created":
+    case "joined":
       {
-        title = "Created project";
+        const an = capitalizeFirstLetter(ev.action_name);
+        title = `${an} project`;
         icon = { source: Icon.Circle, tintColor: Color.Green };
         if (project && !error) {
           title += ` ${project.fullPath}`;
@@ -230,6 +249,11 @@ export function EventListItem(props: { event: Event }) {
         console.log(ev);
       }
       break;
+  }
+  if (!title && !icon && !actionElement) {
+    title = `Unknown event: ${action_name}`
+    icon = { source: Icon.QuestionMark, tintColor: Color.SecondaryText }
+    actionElement = <CopyToClipboardAction content={JSON.stringify(ev, null, 2)} title="Copy event details"/>
   }
   const accessoryTitle = project && !error ? project.fullPath : undefined;
 
