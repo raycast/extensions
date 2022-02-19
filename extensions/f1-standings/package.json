@@ -9,16 +9,16 @@
   "commands": [
     {
       "name": "driver",
-      "title": "F1 Driver Standings",
-      "subtitle": "Current F1 Driver's Championship Standings",
+      "title": "Driver Standings",
+      "subtitle": "F1",
       "description": "Current F1 Driver's Championship Standings",
       "mode": "view",
       "keywords": ["formula"]
     },
     {
       "name": "constructor",
-      "title": "F1 Constructor Standings",
-      "subtitle": "Current F1 Constructor's Championship Standings",
+      "title": "Constructor Standings",
+      "subtitle": "F1",
       "description": "Current F1 Constructor's Championship Standings",
       "mode": "view",
       "keywords": ["formula"]

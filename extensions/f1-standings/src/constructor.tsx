@@ -61,7 +61,7 @@ export default function Command() {
             accessoryTitle={String(item.points)}
             actions={
               <ActionPanel title={item.Constructor.name}>
-                <Action.OpenInBrowser url={item.Constructor.url} title="Open in Browser" />
+                <Action.OpenInBrowser url={item.Constructor.url} />
               </ActionPanel>
             }
           />

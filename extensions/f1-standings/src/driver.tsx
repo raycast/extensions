@@ -72,7 +72,7 @@ export default function Command() {
             accessoryTitle={String(item.points)}
             actions={
               <ActionPanel title={item.Driver.givenName + " " + item.Driver.familyName}>
-                <Action.OpenInBrowser url={item.Driver.url} title="Open in Browser" />
+                <Action.OpenInBrowser url={item.Driver.url} />
               </ActionPanel>
             }
           />
