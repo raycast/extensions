@@ -1,13 +1,15 @@
 import {
   ActionPanel,
-  Color, ColorLike,
+  Color,
+  ColorLike,
   CopyToClipboardAction,
   Icon,
-  ImageLike, ImageSource,
+  ImageLike,
+  ImageSource,
   List,
   OpenInBrowserAction,
   showToast,
-  ToastStyle
+  ToastStyle,
 } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
@@ -82,33 +84,33 @@ export function EventListItem(props: { event: Event }) {
         const an = capitalizeFirstLetter(ev.action_name);
         const pd = ev.push_data;
         if (pd) {
-          let iconColor: ColorLike | undefined
+          let iconColor: ColorLike | undefined;
           switch (ev.action_name) {
             case "pushed new":
-            {
-              iconColor = Color.Purple
-            }
+              {
+                iconColor = Color.Purple;
+              }
               break;
             case "pushed to":
-            {
-              iconColor = Color.Green
-            }
+              {
+                iconColor = Color.Green;
+              }
               break;
             case "deleted":
-            {
-              iconColor = Color.Red
-            }
+              {
+                iconColor = Color.Red;
+              }
               break;
           }
-          let iconSource: ImageSource | undefined
+          let iconSource: ImageSource | undefined;
           if (pd.ref_type === "branch") {
             title = `${an} branch ${pd.ref}`;
-            iconSource = GitLabIcons.branches
+            iconSource = GitLabIcons.branches;
           } else if (pd.ref_type === "tag") {
             title = `${an} tag ${pd.ref}`;
-            iconSource = Icon.Pin // todo: use gitlab tag icon
+            iconSource = Icon.Pin; // todo: use gitlab tag icon
           }
-          icon = iconSource && { source: iconSource, tintColor: iconColor }
+          icon = iconSource && { source: iconSource, tintColor: iconColor };
         }
       }
       break;
@@ -251,9 +253,9 @@ export function EventListItem(props: { event: Event }) {
       break;
   }
   if (!title && !icon && !actionElement) {
-    title = `Unknown event: ${action_name}`
-    icon = { source: Icon.QuestionMark, tintColor: Color.SecondaryText }
-    actionElement = <CopyToClipboardAction content={JSON.stringify(ev, null, 2)} title="Copy event details"/>
+    title = `Unknown event: ${action_name}`;
+    icon = { source: Icon.QuestionMark, tintColor: Color.SecondaryText };
+    actionElement = <CopyToClipboardAction content={JSON.stringify(ev, null, 2)} title="Copy event details" />;
   }
   const accessoryTitle = project && !error ? project.fullPath : undefined;
 

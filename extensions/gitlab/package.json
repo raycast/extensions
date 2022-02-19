@@ -147,8 +147,8 @@
       "placeholder": "Enter your GitLab API token."
     },
     {
-      "name" : "cirefreshinterval",
-      "type" :"textfield",
+      "name": "cirefreshinterval",
+      "type": "textfield",
       "required": false,
       "default": "10",
       "title": "CI Auto Refresh Interval (sec)",
