@@ -3,14 +3,14 @@
   "name": "amazing-marvin-inbox",
   "title": "Amazing Marvin Inbox",
   "description": "Creates a task in Amazing Marvin's inbox",
-  "icon": "command-icon.png",
+  "icon": "marvin.png",
   "author": "SirStoke",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Create a task",
-      "subtitle": "Creates a task in Amazing Marvin's inbox",
+      "title": "Create task",
+      "subtitle": "Amazing Marvin inbox",
       "description": "Creates a task in Amazing Marvin's inbox",
       "mode": "view"
     }
