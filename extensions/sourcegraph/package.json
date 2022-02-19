@@ -122,6 +122,7 @@
     "@bobheadxi/node-eventsource-http2": "^1.1.1",
     "@raycast/api": "^1.28.0",
     "luxon": "^2.3.0",
+    "nanoid": "^3.2.0",
     "node-fetch": "^3.2.0",
     "remark": "^14.0.2",
     "strip-markdown": "^5.0.0"
