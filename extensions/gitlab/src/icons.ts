@@ -58,7 +58,7 @@ export function useImage(
       const imgFilepath = path.join(imgDir, hashString(url)) + ".png"; // TODO get the extension correctly
       return await gitlab.downloadFile(url, { localFilepath: imgFilepath });
     },
-    { deps: [url], secondsToRefetch: 600 }
+    { deps: [url], secondsToRefetch: 600, secondsToInvalid: 7 * 24 * 60 * 60 }
   );
 
   useEffect(() => {
