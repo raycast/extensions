@@ -4,6 +4,8 @@
 
 - List your EC2 Instances.
 - List your SQS Queues.
+- List your CodePipelines.
+- Access your AWS Console.
 
 ## Configuration
 
