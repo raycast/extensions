@@ -3,6 +3,7 @@ import {
   ActionPanelItem,
   closeMainWindow,
   Color,
+  Icon,
   KeyboardShortcut,
   List,
   ListItem,
@@ -13,10 +14,13 @@ import {
   ToastStyle,
 } from "@raycast/api";
 import * as open from "open";
+import React from "react";
+import { getProjectPrimaryActionPreference, ProjectPrimaryAction } from "../common";
 import { Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { getVSCodeAppPath } from "../vscode";
 import { ProjectLabelList } from "./project_label";
+import { ProjectNavMenusList } from "./project_nav";
 
 function CloneURLInVSCodeListItem(props: { url?: string }) {
   const clone = async (url: string) => {
@@ -102,4 +106,36 @@ export function ShowProjectLabels(props: { project: Project; shortcut?: Keyboard
       icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
     />
   );
+}
+
+export function OpenProjectAction(props: { project: Project }): JSX.Element {
+  return (
+    <PushAction
+      title="Open Project"
+      icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
+      target={<ProjectNavMenusList project={props.project} />}
+    />
+  );
+}
+
+export function OpenProjectInBrowserAction(props: { project: Project }): JSX.Element {
+  return <OpenInBrowserAction url={props.project.web_url} />;
+}
+
+export function ProjectDefaultActions(props: { project: Project }): JSX.Element {
+  if (getProjectPrimaryActionPreference() === ProjectPrimaryAction.Detail) {
+    return (
+      <React.Fragment>
+        <OpenProjectAction project={props.project} />
+        <OpenProjectInBrowserAction project={props.project} />
+      </React.Fragment>
+    );
+  } else {
+    return (
+      <React.Fragment>
+        <OpenProjectInBrowserAction project={props.project} />
+        <OpenProjectAction project={props.project} />
+      </React.Fragment>
+    );
+  }
 }

@@ -70,3 +70,18 @@ export function getCIRefreshInterval(): number | null {
     return sec * 1000; // ms
   }
 }
+
+export enum ProjectPrimaryAction {
+  Detail = "detail",
+  Browser = "browser",
+}
+
+export function getProjectPrimaryActionPreference(): ProjectPrimaryAction {
+  const pref = getPreferenceValues();
+  const val = (pref.projectprimaryaction as string) || undefined;
+  if (val !== ProjectPrimaryAction.Detail && val !== ProjectPrimaryAction.Browser) {
+    return ProjectPrimaryAction.Browser;
+  }
+  const result: ProjectPrimaryAction = val;
+  return result;
+}

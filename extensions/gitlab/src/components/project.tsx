@@ -17,7 +17,12 @@ import { BranchList } from "./branch";
 import { MilestoneList } from "./milestones";
 import { MRList, MRScope } from "./mr";
 import { IssueList, IssueScope } from "./issues";
-import { CloneProjectInGitPod, CloneProjectInVSCodeAction, ShowProjectLabels } from "./project_actions";
+import {
+  CloneProjectInGitPod,
+  CloneProjectInVSCodeAction,
+  ProjectDefaultActions,
+  ShowProjectLabels,
+} from "./project_actions";
 import { GitLabIcons, useImage } from "../icons";
 import { useCache } from "../cache";
 import { ClearLocalCacheAction } from "./cache_actions";
@@ -43,10 +48,10 @@ export function ProjectListItem(props: { project: Project }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section title={project.name_with_namespace}>
-            <OpenInBrowserAction url={project.web_url} />
-            <CopyToClipboardAction title="Copy Project ID" content={project.id} />
+            <ProjectDefaultActions project={project} />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            <CopyToClipboardAction title="Copy Project ID" content={project.id} />
             <PushAction
               title="Issues"
               shortcut={{ modifiers: ["cmd"], key: "i" }}
