@@ -1,4 +1,4 @@
-import { refreshExistingCacheAsync } from "./utils";
+import { refreshExistingCacheAsync } from ".";
 import { showToast, ToastStyle } from "@raycast/api";
 
 export default async () => {

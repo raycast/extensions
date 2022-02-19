@@ -50,7 +50,7 @@ export default function Command() {
 | title    | <code>string</code>                                       | Yes      | -       | The title displayed for the item.   |
 | onAction | <code>() => void</code>                                   | No       | -       |                                     |
 
-### CopyToClipboard
+### Action.CopyToClipboard
 
 Action that copies the content to the clipboard.
 
@@ -88,7 +88,7 @@ export default function Command() {
 | title    | <code>string</code>                                       | No       | -                                            | An optional title for the action.                             |
 | onCopy   | <code>(content: string \| number) => void</code>          | No       | -                                            |                                                               |
 
-### Open
+### Action.Open
 
 An action to open a file or folder with a specific application, just as if you had double-clicked the
 file's icon.
@@ -125,7 +125,7 @@ export default function Command() {
 | title       | <code>string</code>                                                            | Yes      | -                                         | The title for the action.                         |
 | onOpen      | <code>(target: string) => void</code>                                          | No       | -                                         |                                                   |
 
-### OpenInBrowser
+### Action.OpenInBrowser
 
 Action that opens a URL in the default browser.
 
@@ -160,7 +160,7 @@ export default function Command() {
 | url      | <code>string</code>                                       | Yes      | -                                        | The URL to open.                                 |
 | onOpen   | <code>(url: string) => void</code>                        | No       | -                                        |                                                  |
 
-### OpenWith
+### Action.OpenWith
 
 Action that opens a file or folder with a specific application.
 
@@ -199,7 +199,7 @@ export default function Command() {
 | title    | <code>string</code>                                       | No       | Open With                                 | The title for the action.             |
 | onOpen   | <code>(path: string) => void</code>                       | No       | -                                         |                                       |
 
-### Paste
+### Action.Paste
 
 Action that pastes the content to the front-most applications.
 
@@ -234,7 +234,7 @@ export default function Command() {
 | title    | <code>string</code>                                       | No       | -                                            | An optional title for the action.                             |
 | onPaste  | <code>(content: string \| number) => void</code>          | No       | -                                            |                                                               |
 
-### Push
+### Action.Push
 
 Action that pushes a new view to the navigation stack.
 
@@ -275,7 +275,7 @@ export default function Command() {
 | title    | <code>string</code>                                       | Yes      | -       | The title displayed for the item.                            |
 | onPush   | <code>() => void</code>                                   | No       | -       |                                                              |
 
-### ShowInFinder
+### Action.ShowInFinder
 
 Action that shows a file or folder in the Finder.
 
@@ -313,7 +313,7 @@ export default function Command() {
 | title    | <code>string</code>                                       | No       | Show in Finder                            | An optional title for the action.       |
 | onShow   | <code>(path: PathLike) => void</code>                     | No       | -                                         |                                         |
 
-### SubmitForm
+### Action.SubmitForm
 
 Action that adds a submit handler for capturing form values.
 
@@ -349,7 +349,7 @@ export default function Command() {
 | title    | <code>string</code>                                       | No       | -       | The title displayed for the item.     |
 | onSubmit | <code>(input: [Values](./form.md#values)) => void</code>  | No       | -       |                                       |
 
-### Trash
+### Action.Trash
 
 Action that moves a file or folder to the Trash.
 

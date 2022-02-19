@@ -6,7 +6,7 @@
 /extensions/algolia                                  @valentindotxyz
 /extensions/amazon-aws                               @victor-falcon @Hodglim
 /extensions/api-icon-list                            @PitNikola
-/extensions/apple-notes                              @tumispro
+/extensions/apple-notes                              @tumispro @ron-myers
 /extensions/atomic                                   @joepio
 /extensions/audio-device                             @benvp @mathieudutour
 /extensions/authy                                    @guga4ka @lukekarrys
@@ -29,6 +29,7 @@
 /extensions/calendly                                 @eluce2
 /extensions/can-i-use                                @thomaslombart
 /extensions/canvascast                               @YodaLightsabr
+/extensions/chakra-ui-docs                           @pgvr
 /extensions/change-case                              @es183923
 /extensions/change-scroll-direction                  @gregoralbrecht
 /extensions/cheatsheets                              @Destiner
@@ -43,12 +44,14 @@
 /extensions/coinmarketcap-crypto-crawler             @moojing
 /extensions/commitlint                               @lardissone
 /extensions/confluence-search                        @daviddkkim
+/extensions/connect-to-vpn                           @sato11
 /extensions/consoledev                               @splash-cli
 /extensions/conventional-comments                    @krzysztofzuraw
 /extensions/copy-gcp-icons                           @pomdtr
 /extensions/cratecast                                @gleich
 /extensions/cricketcast                              @sampoder
 /extensions/css-gg                                   @astrit
+/extensions/cyberduck                                @scottaglia
 /extensions/dash                                     @RSO @sxn
 /extensions/datadog                                  @kudrykv @rcruzper
 /extensions/days-until-christmas                     @MEGApixel23
@@ -94,6 +97,7 @@
 /extensions/harvest                                  @eluce2
 /extensions/hashnode                                 @dpnick
 /extensions/hazeover                                 @ratoru
+/extensions/helm-docs                                @tiagomichaelsousa
 /extensions/hexlify                                  @gkpln3
 /extensions/homeassistant                            @tonka3000 @altrdev
 /extensions/huggingcast                              @ragnorc
@@ -103,8 +107,10 @@
 /extensions/jira-search                              @svenwiegand
 /extensions/jisho                                    @dmacdermott
 /extensions/json-format                              @Destiner
+/extensions/json-to-go                               @chyroc
 /extensions/json2ts                                  @gon250
 /extensions/kaalam                                   @heertheeswaran
+/extensions/kagi-search                              @fearoffish
 /extensions/kaomoji-search                           @allexks
 /extensions/keepassxc                                @zkytech
 /extensions/kill-process                             @rolandleth
@@ -139,11 +145,13 @@
 /extensions/pinboard                                 @fe9lix
 /extensions/pipedrive                                @stephendolan
 /extensions/ploi                                     @Cannonb4ll
+/extensions/pokedex                                  @anhthang
 /extensions/polished                                 @LekoArts
 /extensions/productboard                             @honzatmn
 /extensions/producthunt                              @ragnorc
 /extensions/qr-code-scanner                          @StevenRCE0
 /extensions/qrcode-generator                         @Melvynx
+/extensions/quick-event                              @mblode
 /extensions/quick-open-project                       @zerowidth
 /extensions/quick-search                             @iwfan
 /extensions/radix                                    @peduarte
@@ -156,6 +164,7 @@
 /extensions/remove-background                        @maantje
 /extensions/render                                   @Destiner
 /extensions/ricescore                                @tonka3000
+/extensions/roblox-games                             @TayIorRobinson
 /extensions/rss-reader                               @fuksman
 /extensions/sabnzbd                                  @jesse-c
 /extensions/safari                                   @loris @thomaspaulmann
@@ -206,6 +215,7 @@
 /extensions/unicode-symbols                          @mmazzarolo
 /extensions/unix-timestamp                           @Destiner
 /extensions/unsplash                                 @eggsy
+/extensions/url-tools                                @joshauh46
 /extensions/uuid-generator                           @jmaeso
 /extensions/v2ex                                     @mopig
 /extensions/vault                                    @ricoberger

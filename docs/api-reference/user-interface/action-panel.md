@@ -1,13 +1,15 @@
 # Action Panel
 
+![](../../.gitbook/assets/action-panel.png)
+
 ## API Reference
 
 ### ActionPanel
 
 Exposes a list of [actions](./actions.md) that can be performed by the user.
 
-Often items are context-aware, e.g. based on the selected list item. Actions can be grouped into semantic
-section and can have keyboard shortcuts assigned.
+Often items are context-aware, e.g., based on the selected list item. Actions can be grouped into semantic
+sections and can have keyboard shortcuts assigned.
 
 The first and second action become the primary and secondary action. They automatically get the default keyboard shortcuts assigned.
 In [List](./list.md) and [Detail](./detail.md), this is `↵` for the primary and `⌘` `↵` for the secondary action. In [Form](./form.md) it's `⌘` `↵` for the primary and `⌘` `⇧` `↵` for the secondary.
@@ -49,7 +51,7 @@ export default function Command() {
 
 A group of visually separated items.
 
-Use sections if the [ActionPanel](#actionpanel) contains a lot of actions to help guide the user to related actions.
+Use sections when the [ActionPanel](#actionpanel) contains a lot of actions to help guide the user to related actions.
 For example, create a section for all copy actions.
 
 #### Example

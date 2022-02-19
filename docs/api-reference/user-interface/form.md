@@ -1,5 +1,7 @@
 # Form
 
+![](../../.gitbook/assets/form.png)
+
 ## API Reference
 
 ### Form
@@ -15,9 +17,85 @@ Shows a list of form items such as [Form.TextField](#form.textfield), [Form.Chec
 | isLoading       | <code>boolean</code>                                                                                                                                             | No       | false         | Indicates whether a loading bar should be shown or hidden below the search bar |
 | navigationTitle | <code>string</code>                                                                                                                                              | No       | Command title | The main title for that view displayed in Raycast                              |
 
+### Form.TextField
+
+A form item with a text field for input.
+
+![](../../.gitbook/assets/form-textfield.png)
+
+#### Example
+
+{% tabs %}
+{% tab title="Uncontrolled text field" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Submit Name"
+            onSubmit={(values) => console.log(values)}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" defaultValue="Steve" />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+{% tab title="Controlled text field" %}
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+import { useState } from "react";
+
+export default function Command() {
+  const [name, setName] = useState<string>();
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Submit Name"
+            onSubmit={(values) => console.log(values)}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="name" value={name} onChange={setName} />
+    </Form>
+  );
+}
+```
+
+{% endtab %}
+{% endtabs %}
+
+#### Props
+
+| Prop         | Type                                    | Required | Default | Description                                                                                                                                                                                                       |
+| :----------- | :-------------------------------------- | :------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| defaultValue | <code>string</code>                     | No       | -       | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
+| id           | <code>string</code>                     | Yes      | -       | ID of the form item. Make sure to assign each form item a unique id. When using <code>Action.SubmitForm</code>, your can access the value with this id.                                                           |
+| placeholder  | <code>string</code>                     | No       | -       | Placeholder text shown in the text field.                                                                                                                                                                         |
+| storeValue   | <code>boolean</code>                    | No       | -       | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
+| title        | <code>string</code>                     | No       | -       | The title displayed on the left side of the item.                                                                                                                                                                 |
+| value        | <code>string</code>                     | No       | -       | The current value of the item.                                                                                                                                                                                    |
+| onChange     | <code>(newValue: string) => void</code> | No       | -       |                                                                                                                                                                                                                   |
+
 ### Form.Checkbox
 
 A form item with a checkbox.
+
+![](../../.gitbook/assets/form-checkbox.png)
 
 #### Example
 
@@ -95,6 +173,8 @@ export default function Command() {
 ### Form.DatePicker
 
 A form item with a date picker.
+
+![](../../.gitbook/assets/form-datepicker.png)
 
 #### Example
 
@@ -175,6 +255,8 @@ export default function Command() {
 ### Form.Dropdown
 
 A form item with a dropdown menu.
+
+![](../../.gitbook/assets/form-dropdown.png)
 
 #### Example
 
@@ -347,39 +429,11 @@ export default function Command() {
 | children | <code>null</code> or <code>[Form.Dropdown.Item](#form.dropdown.item)</code> or <code>[Form.Dropdown.Item](#form.dropdown.item)[]</code> | No       | -       | The item elements of the section. |
 | title    | <code>string</code>                                                                                                                     | No       | -       | Title displayed above the section |
 
-### Form.Separator
-
-A form item that shows a separator line.
-Use for grouping and visually separating form items.
-
-#### Example
-
-```typescript
-import { ActionPanel, Form, Action } from "@raycast/api";
-
-export default function Command() {
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Form"
-            onSubmit={(values) => console.log(values)}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="textfield" />
-      <Form.Separator />
-      <Form.TextArea id="textarea" />
-    </Form>
-  );
-}
-```
-
 ### Form.TagPicker
 
 A form item with a tag picker that allows the user to select multiple items.
+
+![](../../.gitbook/assets/form-tagpicker.png)
 
 #### Example
 
@@ -527,6 +581,8 @@ export default function Command() {
 A form item with a text area for input.
 The item supports multiline text entry.
 
+![](../../.gitbook/assets/form-textarea.png)
+
 #### Example
 
 {% tabs %}
@@ -602,81 +658,11 @@ export default function Command() {
 | value        | <code>string</code>                     | No       | -       | The current value of the item.                                                                                                                                                                                    |
 | onChange     | <code>(newValue: string) => void</code> | No       | -       |                                                                                                                                                                                                                   |
 
-### Form.TextField
-
-A form item with a text field for input.
-
-#### Example
-
-{% tabs %}
-{% tab title="Uncontrolled text field" %}
-
-```typescript
-import { ActionPanel, Form, Action } from "@raycast/api";
-
-export default function Command() {
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Name"
-            onSubmit={(values) => console.log(values)}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="name" defaultValue="Steve" />
-    </Form>
-  );
-}
-```
-
-{% endtab %}
-{% tab title="Controlled text field" %}
-
-```typescript
-import { ActionPanel, Form, Action } from "@raycast/api";
-import { useState } from "react";
-
-export default function Command() {
-  const [name, setName] = useState<string>();
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Submit Name"
-            onSubmit={(values) => console.log(values)}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="name" value={name} onChange={setName} />
-    </Form>
-  );
-}
-```
-
-{% endtab %}
-{% endtabs %}
-
-#### Props
-
-| Prop         | Type                                    | Required | Default | Description                                                                                                                                                                                                       |
-| :----------- | :-------------------------------------- | :------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| defaultValue | <code>string</code>                     | No       | -       | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | <code>string</code>                     | Yes      | -       | ID of the form item. Make sure to assign each form item a unique id. When using <code>Action.SubmitForm</code>, your can access the value with this id.                                                           |
-| placeholder  | <code>string</code>                     | No       | -       | Placeholder text shown in the text field.                                                                                                                                                                         |
-| storeValue   | <code>boolean</code>                    | No       | -       | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| title        | <code>string</code>                     | No       | -       | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | <code>string</code>                     | No       | -       | The current value of the item.                                                                                                                                                                                    |
-| onChange     | <code>(newValue: string) => void</code> | No       | -       |                                                                                                                                                                                                                   |
-
 ### Form.PasswordField
 
 A form item with a secure text field for password-entry in which the entered characters must be kept secret.
+
+![](../../.gitbook/assets/form-password.png)
 
 #### Example
 
@@ -750,11 +736,45 @@ export default function Command() {
 | value        | <code>string</code>                     | No       | -       | The current value of the item.                                                                                                                                                                                    |
 | onChange     | <code>(newValue: string) => void</code> | No       | -       |                                                                                                                                                                                                                   |
 
+### Form.Separator
+
+A form item that shows a separator line.
+Use for grouping and visually separating form items.
+
+![](../../.gitbook/assets/form-separator.png)
+
+#### Example
+
+```typescript
+import { ActionPanel, Form, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Submit Form"
+            onSubmit={(values) => console.log(values)}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="textfield" />
+      <Form.Separator />
+      <Form.TextArea id="textarea" />
+    </Form>
+  );
+}
+```
+
 ### Form.Description
 
 A form item with a simple text label.
 
 Do _not_ use this component to show validation messages for other form fields.
+
+![](../../.gitbook/assets/form-description.png)
 
 #### Example
 
