@@ -11,7 +11,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "ec2",
       "title": "EC2 Instances",
       "subtitle": "Amazon AWS",
       "description": "List and Filter All your EC2 Instances",
