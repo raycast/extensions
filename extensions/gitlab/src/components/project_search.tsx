@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
 import { Project } from "../gitlabapi";
-import { projectIcon } from "../utils";
+import { getErrorMessage, projectIcon } from "../utils";
 import { PipelineList } from "./pipelines";
 import { BranchList } from "./branch";
 import { MilestoneList } from "./milestones";
@@ -26,7 +26,7 @@ function webUrl(project: Project, partial: string) {
   return gitlabgql.urlJoin(`${project.fullPath}/${partial}`);
 }
 
-export function ProjectListItem(props: { project: Project }) {
+export function ProjectListItem(props: { project: Project }): JSX.Element {
   const project = props.project;
   return (
     <List.Item
@@ -110,7 +110,7 @@ export function ProjectListItem(props: { project: Project }) {
   );
 }
 
-export function ProjectSearchList() {
+export function ProjectSearchList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { projects, error, isLoading } = useSearch(searchText);
 
@@ -164,9 +164,9 @@ export function useSearch(query: string | undefined): {
         if (!didUnmount) {
           setProjects(glProjects);
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {

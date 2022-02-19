@@ -6,7 +6,7 @@ import { Epic, EpicScope, EpicState, searchData } from "../gitlabapi";
 import { hashRecord } from "../utils";
 import { EpicListItem } from "./epics";
 
-export function MyEpicList(props: { scope: EpicScope; state: EpicState }) {
+export function MyEpicList(props: { scope: EpicScope; state: EpicState }): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { data, error, isLoading } = useCache<Epic[]>(
     hashRecord(props, "myepiclist"),

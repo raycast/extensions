@@ -2,7 +2,7 @@ import { Icon, PushAction } from "@raycast/api";
 import { Branch, Project } from "../gitlabapi";
 import { MRCreateForm } from "./mr_create";
 
-export function CreateMRAction(props: { project: Project; branch: Branch }) {
+export function CreateMRAction(props: { project: Project; branch: Branch }): JSX.Element | null {
   if (props.project.default_branch !== props.branch.name) {
     return (
       <PushAction

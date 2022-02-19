@@ -13,7 +13,7 @@ import { GitLabIcons } from "../icons";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
 import { CloseAllTodoAction, CloseTodoAction, ShowTodoDetailsAction } from "./todo_actions";
-import { now } from "../utils";
+import { getErrorMessage, now } from "../utils";
 
 function userToIcon(user?: User): ImageLike {
   let result = "";
@@ -26,7 +26,7 @@ function userToIcon(user?: User): ImageLike {
   return { source: result, mask: ImageMask.Circle };
 }
 
-export function TodoList() {
+export function TodoList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { todos, error, isLoading, refresh } = useSearch(searchText);
 
@@ -52,7 +52,7 @@ export function TodoList() {
   );
 }
 
-export function TodoListItem(props: { todo: Todo; refreshData: () => void }) {
+export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JSX.Element {
   const todo = props.todo;
   const subtitle = todo.group ? todo.group.full_path : todo.project_with_namespace || "";
   return (
@@ -113,9 +113,9 @@ export function useSearch(query: string | undefined): {
         if (!didUnmount) {
           setTodos(glTodos);
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {

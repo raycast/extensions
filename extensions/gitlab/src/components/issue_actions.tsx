@@ -1,6 +1,5 @@
 import {
   ActionPanel,
-  closeMainWindow,
   Color,
   CopyToClipboardAction,
   Icon,
@@ -13,10 +12,11 @@ import React from "react";
 import { gitlab } from "../common";
 import { Issue, Label } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
+import { getErrorMessage } from "../utils";
 import { LabelList } from "./label";
 import { IssueMRCreateForm } from "./mr_create";
 
-export function CloseIssueAction(props: { issue: Issue; finished?: () => void }) {
+export function CloseIssueAction(props: { issue: Issue; finished?: () => void }): JSX.Element {
   const issue = props.issue;
   async function handleAction() {
     try {
@@ -24,8 +24,8 @@ export function CloseIssueAction(props: { issue: Issue; finished?: () => void })
       if (props.finished) {
         props.finished();
       }
-    } catch (error: any) {
-      showToast(ToastStyle.Failure, "Failed to close issue", error instanceof Error ? error.message : error.toString());
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Failed to close issue", getErrorMessage(error));
     }
   }
   return (
@@ -48,7 +48,7 @@ export function CreateMRAction({ issue }: { issue: Issue }): JSX.Element {
   );
 }
 
-export function ReopenIssueAction(props: { issue: Issue; finished?: () => void }) {
+export function ReopenIssueAction(props: { issue: Issue; finished?: () => void }): JSX.Element {
   const issue = props.issue;
   async function handleAction() {
     try {
@@ -56,12 +56,8 @@ export function ReopenIssueAction(props: { issue: Issue; finished?: () => void }
       if (props.finished) {
         props.finished();
       }
-    } catch (error: any) {
-      showToast(
-        ToastStyle.Failure,
-        "Failed to reopen issue",
-        error instanceof Error ? error.message : error.toString()
-      );
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Failed to reopen issue", getErrorMessage(error));
     }
   }
   return <ActionPanel.Item title="Reopen Issue" icon={{ source: Icon.ExclamationMark }} onAction={handleAction} />;
@@ -81,18 +77,14 @@ function ShowIssueLabelsAction(props: { labels: Label[] }) {
   );
 }
 
-export function CreateIssueTodoAction(props: { issue: Issue; shortcut?: KeyboardShortcut }) {
+export function CreateIssueTodoAction(props: { issue: Issue; shortcut?: KeyboardShortcut }): JSX.Element | null {
   const issue = props.issue;
   async function handleAction() {
     try {
       await gitlab.post(`projects/${issue.project_id}/issues/${issue.iid}/todo`);
       showToast(ToastStyle.Success, "To do created");
-    } catch (error: any) {
-      showToast(
-        ToastStyle.Failure,
-        "Failed to add as to do",
-        error instanceof Error ? error.message : error.toString()
-      );
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Failed to add as to do", getErrorMessage(error));
     }
   }
   if (issue.state === "opened") {
@@ -109,7 +101,7 @@ export function CreateIssueTodoAction(props: { issue: Issue; shortcut?: Keyboard
   }
 }
 
-export function IssueItemActions(props: { issue: Issue; onDataChange?: () => void }) {
+export function IssueItemActions(props: { issue: Issue; onDataChange?: () => void }): JSX.Element {
   const issue = props.issue;
   return (
     <React.Fragment>

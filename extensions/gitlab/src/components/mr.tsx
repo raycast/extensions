@@ -4,7 +4,6 @@ import {
   OpenInBrowserAction,
   showToast,
   ToastStyle,
-  Image,
   Color,
   Detail,
   PushAction,
@@ -15,9 +14,11 @@ import { Group, MergeRequest, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab, gitlabgql } from "../common";
 import { useState, useEffect } from "react";
-import { now, optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
+import { getErrorMessage, now, optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
 import { gql } from "@apollo/client";
 import { MRItemActions } from "./mr_actions";
+
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
 export enum MRScope {
   created_by_me = "created_by_me",
@@ -41,7 +42,7 @@ const GET_MR_DETAIL = gql`
   }
 `;
 
-export function MRDetail(props: { mr: MergeRequest }) {
+export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   const { description, error, isLoading } = useDetail(props.mr.id);
   if (error) {
     showToast(ToastStyle.Failure, "Could not get merge request details", error);
@@ -101,9 +102,9 @@ export function useDetail(issueID: number): {
         if (!didUnmount) {
           setDescription(desc);
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {
@@ -144,7 +145,7 @@ export function MRList({
   state = MRState.all,
   project = undefined,
   group = undefined,
-}: MRListProps) {
+}: MRListProps): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { mrs, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
 
@@ -175,7 +176,7 @@ export function MRList({
   );
 }
 
-export function MRListItem(props: { mr: MergeRequest; refreshData: () => void }) {
+export function MRListItem(props: { mr: MergeRequest; refreshData: () => void }): JSX.Element {
   const mr = props.mr;
 
   const getIcon = (): ImageLike => {
@@ -333,9 +334,9 @@ export function useSearch(
             setMRs(glMRs);
           }
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {

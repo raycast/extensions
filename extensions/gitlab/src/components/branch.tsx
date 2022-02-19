@@ -5,6 +5,8 @@ import { gitlab } from "../common";
 import { GitLabIcons } from "../icons";
 import { CreateMRAction } from "./branch_actions";
 
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+
 function getIcon(merged: boolean): Image {
   if (merged) {
     return { source: GitLabIcons.merged, tintColor: Color.Purple };

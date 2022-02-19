@@ -3,8 +3,9 @@ import { MergeRequest } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
+import { getErrorMessage } from "../utils";
 
-export function ReviewList() {
+export function ReviewList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { mrs, error, isLoading } = useSearch(searchText);
 
@@ -82,9 +83,9 @@ export function useSearch(query: string | undefined): {
         if (!didUnmount) {
           setMRs(glMRs);
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {

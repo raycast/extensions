@@ -14,8 +14,10 @@ import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
 import { Group, Issue, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { now, optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
+import { getErrorMessage, now, optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
 import { IssueItemActions } from "./issue_actions";
+
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
 export enum IssueScope {
   created_by_me = "created_by_me",
@@ -37,7 +39,7 @@ const GET_ISSUE_DETAIL = gql`
   }
 `;
 
-export function IssueDetail(props: { issue: Issue }) {
+export function IssueDetail(props: { issue: Issue }): JSX.Element {
   const { description, error, isLoading } = useDetail(props.issue.id);
   if (error) {
     showToast(ToastStyle.Failure, "Could not get issue details", error);
@@ -97,9 +99,9 @@ export function useDetail(issueID: number): {
         if (!didUnmount) {
           setDescription(desc);
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {
@@ -118,7 +120,7 @@ export function useDetail(issueID: number): {
   return { description, error, isLoading };
 }
 
-export function IssueListItem(props: { issue: Issue; refreshData: () => void }) {
+export function IssueListItem(props: { issue: Issue; refreshData: () => void }): JSX.Element {
   const issue = props.issue;
   const tintColor = issue.state === "opened" ? Color.Green : Color.Red;
   const extraSubtitle = issue.milestone ? `${issue.milestone.title}  |  ` : "";
@@ -171,7 +173,7 @@ export function IssueList({
   state = IssueState.all,
   project = undefined,
   group = undefined,
-}: IssueListProps) {
+}: IssueListProps): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { issues, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
 
@@ -305,9 +307,9 @@ export function useSearch(
             setIssues(glIssues);
           }
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {

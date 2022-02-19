@@ -7,6 +7,8 @@ import fs from "fs";
 import { pipeline } from "stream";
 const streamPipeline = util.promisify(pipeline);
 
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+
 function userFromJson(data: any): User | undefined {
   if (!data) {
     // e.g. owners can be null, it seems that when there are multiple owners, then this field is null
@@ -326,7 +328,7 @@ export class GitLab {
     return params.localFilepath;
   }
 
-  public async post(url: string, params: { [key: string]: any } = {}) {
+  public async post(url: string, params: { [key: string]: any } = {}): Promise<any> {
     const fullUrl = this.url + "/api/v4/" + url;
     console.log(`send POST request: ${fullUrl}`);
     console.log(params);
@@ -378,7 +380,7 @@ export class GitLab {
     }
   }
 
-  public async put(url: string, params: { [key: string]: any } = {}) {
+  public async put(url: string, params: { [key: string]: any } = {}): Promise<void> {
     const fullUrl = this.url + "/api/v4/" + url;
     console.log(`send PUT request: ${fullUrl}`);
     console.log(params);
@@ -404,7 +406,7 @@ export class GitLab {
       params.with_labels_details = "true";
     }
     const issueItems: Issue[] = await this.fetch(`${projectPrefix}issues`, params).then((issues) => {
-      return issues.map((issue: any, index: number) => jsonDataToIssue(issue));
+      return issues.map((issue: any) => jsonDataToIssue(issue));
     });
     return issueItems;
   }
@@ -414,22 +416,22 @@ export class GitLab {
       params.with_labels_details = "true";
     }
     const issueItems: Issue[] = await this.fetch(`groups/${groupID}/issues`, params).then((issues) => {
-      return issues.map((issue: any, index: number) => jsonDataToIssue(issue));
+      return issues.map((issue: any) => jsonDataToIssue(issue));
     });
     return issueItems;
   }
 
-  async createIssue(projectID: number, data: { [key: string]: any }) {
+  async createIssue(projectID: number, data: { [key: string]: any }): Promise<void> {
     await this.post(`projects/${projectID}/issues`, data);
   }
 
-  async createMR(projectID: number, data: { [key: string]: any }) {
+  async createMR(projectID: number, data: { [key: string]: any }): Promise<void> {
     await this.post(`projects/${projectID}/merge_requests`, data);
   }
 
   async getProjectMember(projectId: number): Promise<User[]> {
     const userItems: User[] = await this.fetch(`projects/${projectId}/users`).then((users) => {
-      return users.map((userdata: any, index: number) => ({
+      return users.map((userdata: any) => ({
         id: userdata.id,
         name: userdata.name,
         username: userdata.username,
@@ -443,7 +445,7 @@ export class GitLab {
 
   async getProjectLabels(projectId: number): Promise<Label[]> {
     const items: Label[] = await this.fetch(`projects/${projectId}/labels`, {}, true).then((labels) => {
-      return labels.map((data: any, index: number) => ({
+      return labels.map((data: any) => ({
         id: data.id,
         name: data.name,
         color: data.color,
@@ -457,7 +459,7 @@ export class GitLab {
 
   async getProjectMilestones(projectId: number): Promise<Milestone[]> {
     const items: Milestone[] = await this.fetch(`projects/${projectId}/milestones`).then((labels) => {
-      return labels.map((data: any, index: number) => ({
+      return labels.map((data: any) => ({
         id: data.id,
         title: data.title,
       }));
@@ -467,7 +469,7 @@ export class GitLab {
 
   async getGroupMilestones(group: Group): Promise<Milestone[]> {
     const items: Milestone[] = await this.fetch(`groups/${group.id}/milestones`).then((labels) => {
-      return labels.map((data: any, index: number) => ({
+      return labels.map((data: any) => ({
         id: data.id,
         title: data.title,
       }));
@@ -491,7 +493,7 @@ export class GitLab {
       params.in = args.searchIn || "title";
     }
     const issueItems: Project[] = await this.fetch("projects", params).then((projects) => {
-      return projects.map((project: any, index: number) => dataToProject(project));
+      return projects.map((project: any) => dataToProject(project));
     });
     return issueItems;
   }
@@ -527,7 +529,7 @@ export class GitLab {
       params.in = args.searchIn || "title";
     }
     const userItems: User[] = await this.fetch("users", params).then((users) => {
-      return users.map((userdata: any, index: number) => ({
+      return users.map((userdata: any) => ({
         id: userdata.id,
         name: userdata.name,
         username: userdata.username,
@@ -545,7 +547,7 @@ export class GitLab {
     }
     const projectPrefix = project ? `projects/${project.id}/` : "";
     const issueItems: MergeRequest[] = await this.fetch(`${projectPrefix}merge_requests`, params).then((issues) => {
-      return issues.map((issue: any, _: number) => jsonDataToMergeRequest(issue));
+      return issues.map((issue: any) => jsonDataToMergeRequest(issue));
     });
     return issueItems;
   }
@@ -555,14 +557,14 @@ export class GitLab {
       params.with_labels_details = "true";
     }
     const issueItems: MergeRequest[] = await this.fetch(`groups/${group.id}/merge_requests`, params).then((issues) => {
-      return issues.map((issue: any, _: number) => jsonDataToMergeRequest(issue));
+      return issues.map((issue: any) => jsonDataToMergeRequest(issue));
     });
     return issueItems;
   }
 
   async getTodos(params: Record<string, any>): Promise<Todo[]> {
     const issueItems: Todo[] = await this.fetch("todos", params).then((issues) => {
-      return issues.map((issue: any, _: number) => ({
+      return issues.map((issue: any) => ({
         title: issue.target.title,
         action_name: issue.action_name,
         target_url: issue.target_url,
@@ -684,7 +686,7 @@ export class GitLab {
 export async function searchData<Type>(
   data: any,
   params: { search: string; keys: string[]; limit: number; threshold?: number; ignoreLocation?: boolean }
-) {
+): Promise<any> {
   const options = {
     includeScore: true,
     threshold: params.threshold || 0.2,

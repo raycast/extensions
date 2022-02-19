@@ -3,10 +3,11 @@ import React from "react";
 import { gitlab } from "../common";
 import { jsonDataToIssue, jsonDataToMergeRequest as jsonDataToMergeRequest, Todo } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
+import { getErrorMessage } from "../utils";
 import { IssueDetail } from "./issues";
 import { MRDetail } from "./mr";
 
-export function ShowTodoDetailsAction(props: { todo: Todo }) {
+export function ShowTodoDetailsAction(props: { todo: Todo }): JSX.Element | null {
   const todo = props.todo;
   const icon = { source: GitLabIcons.show_details, tintColor: Color.PrimaryText };
   if (todo.target_type === "MergeRequest") {
@@ -20,7 +21,7 @@ export function ShowTodoDetailsAction(props: { todo: Todo }) {
   }
 }
 
-export function CloseTodoAction(props: { todo: Todo; finished?: () => void }) {
+export function CloseTodoAction(props: { todo: Todo; finished?: () => void }): JSX.Element {
   const todo = props.todo;
   async function handleAction() {
     try {
@@ -29,12 +30,8 @@ export function CloseTodoAction(props: { todo: Todo; finished?: () => void }) {
       if (props.finished) {
         props.finished();
       }
-    } catch (error: any) {
-      showToast(
-        ToastStyle.Failure,
-        "Failed to mark Todo as done",
-        error instanceof Error ? error.message : error.toString()
-      );
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Failed to mark Todo as done", getErrorMessage(error));
     }
   }
   return (
@@ -47,7 +44,7 @@ export function CloseTodoAction(props: { todo: Todo; finished?: () => void }) {
   );
 }
 
-export function CloseAllTodoAction(props: { finished?: () => void }) {
+export function CloseAllTodoAction(props: { finished?: () => void }): JSX.Element {
   async function handleAction() {
     try {
       await gitlab.post(`todos/mark_as_done`);
@@ -55,12 +52,8 @@ export function CloseAllTodoAction(props: { finished?: () => void }) {
       if (props.finished) {
         props.finished();
       }
-    } catch (error: any) {
-      showToast(
-        ToastStyle.Failure,
-        "Failed to Close All to do's",
-        error instanceof Error ? error.message : error.toString()
-      );
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Failed to Close All to do's", getErrorMessage(error));
     }
   }
   return (

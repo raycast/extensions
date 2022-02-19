@@ -31,13 +31,9 @@ function webUrl(project: Project, partial: string) {
   return gitlabgql.urlJoin(`${project.fullPath}/${partial}`);
 }
 
-export function ProjectListItem(props: { project: Project }) {
+export function ProjectListItem(props: { project: Project }): JSX.Element {
   const project = props.project;
-  const {
-    localFilepath: localImageFilepath,
-    error,
-    isLoading,
-  } = useImage(projectIconUrl(project), GitLabIcons.project);
+  const { localFilepath: localImageFilepath } = useImage(projectIconUrl(project), GitLabIcons.project);
 
   return (
     <List.Item
@@ -119,7 +115,7 @@ interface ProjectListProps {
   starred?: boolean;
 }
 
-export function ProjectList({ membership = true, starred = false }: ProjectListProps) {
+export function ProjectList({ membership = true, starred = false }: ProjectListProps): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { data, error, isLoading } = useCache<Project[]>(
     hashRecord({ membership: membership, starred: starred }, "projects"),

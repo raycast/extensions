@@ -2,7 +2,7 @@ import { ActionPanel, Color, CopyToClipboardAction, Detail, Icon, List, PushActi
 import { Label } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 
-export function LabelDetail(props: { label: Label }) {
+export function LabelDetail(props: { label: Label }): JSX.Element {
   const l = props.label;
   let md = `## Color\n${l.color}`;
   if (l.description) {
@@ -11,7 +11,7 @@ export function LabelDetail(props: { label: Label }) {
   return <Detail markdown={md} />;
 }
 
-export function LabelListItem(props: { label: Label }) {
+export function LabelListItem(props: { label: Label }): JSX.Element {
   const l = props.label;
   const accessoryTitle = Object.keys(l).includes("subscribed") && l.subscribed ? "subscribed" : undefined;
   return (
@@ -40,7 +40,7 @@ export function LabelList(props: {
   onSearchTextChange?: ((text: string) => void) | undefined;
   isLoading?: boolean | undefined;
   throttle?: boolean | undefined;
-}) {
+}): JSX.Element {
   return (
     <List
       searchBarPlaceholder="Search labels by name"

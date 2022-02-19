@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import { GitLab } from "./gitlabapi";
 
-export function createGitLabClient() {
+export function createGitLabClient(): GitLab {
   const preferences = getPreferenceValues();
   const instance = (preferences.instance as string) || "https://gitlab.com";
   const token = preferences.token as string;
@@ -24,7 +24,7 @@ export class GitLabGQL {
   }
 }
 
-export function createGitLabGQLClient() {
+export function createGitLabGQLClient(): GitLabGQL {
   const preferences = getPreferenceValues();
   const instance = (preferences.instance as string) || "https://gitlab.com";
   const token = preferences.token as string;

@@ -5,7 +5,7 @@ import { getErrorMessage } from "../../utils";
 
 const presetsStoreKey = "presets";
 
-export async function wipePresets() {
+export async function wipePresets(): Promise<void> {
   await removeLocalStorageItem(presetsStoreKey);
 }
 

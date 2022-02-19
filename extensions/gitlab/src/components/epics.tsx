@@ -17,6 +17,8 @@ import { GitLabIcons } from "../icons";
 import { ClearLocalCacheAction } from "./cache_actions";
 import { CreateEpicTodoAction } from "./epic_actions";
 
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+
 function getIcon(state: string): Image {
   if (state == "opened") {
     return { source: GitLabIcons.mropen, tintColor: Color.Green };

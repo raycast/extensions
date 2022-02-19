@@ -12,13 +12,16 @@ import React from "react";
 import { gitlab } from "../common";
 import { Label, MergeRequest } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
+import { getErrorMessage } from "../utils";
 import { LabelList } from "./label";
+
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
 async function createNote(mr: MergeRequest, body: string): Promise<any> {
   return await gitlab.post(`projects/${mr.project_id}/merge_requests/${mr.iid}/notes`, { body: body });
 }
 
-export function CloseMRAction(props: { mr: MergeRequest; finished?: () => void }) {
+export function CloseMRAction(props: { mr: MergeRequest; finished?: () => void }): JSX.Element {
   const mr = props.mr;
   async function handleAction() {
     try {
@@ -27,12 +30,8 @@ export function CloseMRAction(props: { mr: MergeRequest; finished?: () => void }
       if (props.finished) {
         props.finished();
       }
-    } catch (error: any) {
-      showToast(
-        ToastStyle.Failure,
-        "Failed to close merge request",
-        error instanceof Error ? error.message : error.toString()
-      );
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Failed to close merge request", getErrorMessage(error));
     }
   }
   return (
@@ -44,7 +43,7 @@ export function CloseMRAction(props: { mr: MergeRequest; finished?: () => void }
   );
 }
 
-export function ReopenMRAction(props: { mr: MergeRequest; finished?: () => void }) {
+export function ReopenMRAction(props: { mr: MergeRequest; finished?: () => void }): JSX.Element {
   const mr = props.mr;
   async function handleAction() {
     try {
@@ -53,29 +52,21 @@ export function ReopenMRAction(props: { mr: MergeRequest; finished?: () => void 
       if (props.finished) {
         props.finished();
       }
-    } catch (error: any) {
-      showToast(
-        ToastStyle.Failure,
-        "Failed to reopen merge request",
-        error instanceof Error ? error.message : error.toString()
-      );
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Failed to reopen merge request", getErrorMessage(error));
     }
   }
   return <ActionPanel.Item title="Reopen MR" icon={{ source: Icon.ExclamationMark }} onAction={handleAction} />;
 }
 
-export function RebaseMRAction(props: { mr: MergeRequest; shortcut?: KeyboardShortcut }) {
+export function RebaseMRAction(props: { mr: MergeRequest; shortcut?: KeyboardShortcut }): JSX.Element {
   const mr = props.mr;
   async function handleAction() {
     try {
       await createNote(mr, "/rebase");
       showToast(ToastStyle.Success, "Rebased");
-    } catch (error: any) {
-      showToast(
-        ToastStyle.Failure,
-        "Failed to rebase merge request",
-        error instanceof Error ? error.message : error.toString()
-      );
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Failed to rebase merge request", getErrorMessage(error));
     }
   }
   return (
@@ -88,7 +79,11 @@ export function RebaseMRAction(props: { mr: MergeRequest; shortcut?: KeyboardSho
   );
 }
 
-export function MergeMRAction(props: { mr: MergeRequest; shortcut?: KeyboardShortcut; finished?: () => void }) {
+export function MergeMRAction(props: {
+  mr: MergeRequest;
+  shortcut?: KeyboardShortcut;
+  finished?: () => void;
+}): JSX.Element | null {
   const mr = props.mr;
   async function handleAction() {
     try {
@@ -97,8 +92,8 @@ export function MergeMRAction(props: { mr: MergeRequest; shortcut?: KeyboardShor
       if (props.finished) {
         props.finished();
       }
-    } catch (error: any) {
-      showToast(ToastStyle.Failure, "Failed to merge", error instanceof Error ? error.message : error.toString());
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Failed to merge", getErrorMessage(error));
     }
   }
   if (mr.state === "opened") {
@@ -115,14 +110,14 @@ export function MergeMRAction(props: { mr: MergeRequest; shortcut?: KeyboardShor
   }
 }
 
-export function CreateTodoMRAction(props: { mr: MergeRequest; shortcut?: KeyboardShortcut }) {
+export function CreateTodoMRAction(props: { mr: MergeRequest; shortcut?: KeyboardShortcut }): JSX.Element | null {
   const mr = props.mr;
   async function handleAction() {
     try {
       await gitlab.post(`projects/${mr.project_id}/merge_requests/${mr.iid}/todo`);
       showToast(ToastStyle.Success, "To do created");
-    } catch (error: any) {
-      showToast(ToastStyle.Failure, "Failed to add to do", error instanceof Error ? error.message : error.toString());
+    } catch (error) {
+      showToast(ToastStyle.Failure, "Failed to add to do", getErrorMessage(error));
     }
   }
   if (mr.state === "opened") {
@@ -153,7 +148,7 @@ function ShowMRLabelsAction(props: { labels: Label[] }) {
   );
 }
 
-export function MRItemActions(props: { mr: MergeRequest; onDataChange?: () => void }) {
+export function MRItemActions(props: { mr: MergeRequest; onDataChange?: () => void }): JSX.Element {
   const mr = props.mr;
   return (
     <React.Fragment>

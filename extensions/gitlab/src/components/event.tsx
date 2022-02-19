@@ -6,6 +6,8 @@ import { Project, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { capitalizeFirstLetter } from "../utils";
 
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+
 export interface PushData {
   commit_count: number;
   action: string;
@@ -28,13 +30,9 @@ export interface Event {
   push_data?: PushData;
 }
 
-export function EventListItem(props: { event: Event }) {
+export function EventListItem(props: { event: Event }): JSX.Element {
   const ev = props.event;
-  const {
-    data: project,
-    error,
-    isLoading,
-  } = useCache<Project | undefined>(
+  const { data: project, error } = useCache<Project | undefined>(
     `event_project_${ev.project_id}`,
     async (): Promise<Project | undefined> => {
       const pro = await gitlab.getProject(ev.project_id);
@@ -243,7 +241,7 @@ export function EventListItem(props: { event: Event }) {
   );
 }
 
-export function EventList() {
+export function EventList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { data, error, isLoading } = useCache<Event[]>(
     "events",

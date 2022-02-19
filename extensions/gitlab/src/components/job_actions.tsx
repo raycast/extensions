@@ -1,5 +1,4 @@
 import { ActionPanel, Color, Icon } from "@raycast/api";
-import { Job } from "./jobs";
 
 export function RefreshJobsAction(props: { onRefreshJobs?: () => void }): JSX.Element {
   const handle = () => {

@@ -14,7 +14,7 @@ import {
 import { Project, User, Label, Milestone } from "./gitlabapi";
 import { gitlab } from "./common";
 import { useState, useEffect } from "react";
-import { projectIcon, toFormValues } from "./utils";
+import { getErrorMessage, projectIcon, toFormValues } from "./utils";
 import { useCache } from "./cache";
 
 interface IssueFormValues {
@@ -42,8 +42,8 @@ async function submit(values: IssueFormValues) {
     await gitlab.createIssue(values.project_id, val);
     await showToast(ToastStyle.Success, "Issue created", "Issue creation successful");
     popToRoot();
-  } catch (error: any) {
-    await showToast(ToastStyle.Failure, "Error", error.message);
+  } catch (error) {
+    await showToast(ToastStyle.Failure, "Error", getErrorMessage(error));
   }
 }
 
@@ -179,9 +179,9 @@ export function useProject(query?: string): {
         } else {
           console.log("no project selected");
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.toString());
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {

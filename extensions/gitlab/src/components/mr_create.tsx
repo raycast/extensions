@@ -13,7 +13,7 @@ import {
 import { Project, User, Label, Milestone, Branch, Issue } from "../gitlabapi";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
-import { projectIcon, stringToSlug, toFormValues } from "../utils";
+import { getErrorMessage, projectIcon, stringToSlug, toFormValues } from "../utils";
 import { useCache } from "../cache";
 
 interface MRFormValues {
@@ -41,8 +41,8 @@ async function submit(values: MRFormValues) {
     await gitlab.createMR(values.project_id, val);
     await showToast(ToastStyle.Success, "Merge Request created", "Merge Request creation successful");
     popToRoot();
-  } catch (error: any) {
-    await showToast(ToastStyle.Failure, "Error", error.message);
+  } catch (error) {
+    await showToast(ToastStyle.Failure, "Error", getErrorMessage(error));
   }
 }
 
@@ -108,7 +108,7 @@ export function IssueMRCreateForm({
   );
 }
 
-export function MRCreateForm(props: { project?: Project | undefined; branch?: string | undefined }) {
+export function MRCreateForm(props: { project?: Project | undefined; branch?: string | undefined }): JSX.Element {
   const [selectedProject, setSelectedProject] = useState<string | undefined>(
     props.project ? props.project.id.toString() : undefined
   );
@@ -316,9 +316,9 @@ export function useProject(query?: string): {
         } else {
           console.log("no project selected");
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.toString());
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {

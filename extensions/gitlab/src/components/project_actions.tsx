@@ -18,6 +18,7 @@ import React from "react";
 import { getProjectPrimaryActionPreference, ProjectPrimaryAction } from "../common";
 import { Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
+import { getErrorMessage } from "../utils";
 import { getVSCodeAppPath } from "../vscode";
 import { ProjectLabelList } from "./project_label";
 import { ProjectNavMenusList } from "./project_nav";
@@ -33,8 +34,8 @@ function CloneURLInVSCodeListItem(props: { url?: string }) {
         popToRoot();
         await open.default(vscodeurl);
       }
-    } catch (e: any) {
-      showToast(ToastStyle.Failure, "Could not clone in VSCode", e);
+    } catch (e) {
+      showToast(ToastStyle.Failure, "Could not clone in VSCode", getErrorMessage(e));
     }
   };
   if (props.url && props.url.length > 0) {
@@ -54,7 +55,7 @@ function CloneURLInVSCodeListItem(props: { url?: string }) {
   }
 }
 
-function CloneInVSCodeList(props: { project: Project }) {
+function CloneInVSCodeList(props: { project: Project }): JSX.Element {
   return (
     <List navigationTitle="Clone in VSCode">
       <CloneURLInVSCodeListItem url={props.project.ssh_url_to_repo} />
@@ -63,7 +64,10 @@ function CloneInVSCodeList(props: { project: Project }) {
   );
 }
 
-export function CloneProjectInVSCodeAction(props: { shortcut?: KeyboardShortcut; project: Project }) {
+export function CloneProjectInVSCodeAction(props: {
+  shortcut?: KeyboardShortcut;
+  project: Project;
+}): JSX.Element | null {
   const pro = props.project;
   const code = getVSCodeAppPath();
   if (code && (pro.http_url_to_repo || pro.ssh_url_to_repo)) {
@@ -80,7 +84,7 @@ export function CloneProjectInVSCodeAction(props: { shortcut?: KeyboardShortcut;
   }
 }
 
-export function CloneProjectInGitPod(props: { shortcut?: KeyboardShortcut; project: Project }) {
+export function CloneProjectInGitPod(props: { shortcut?: KeyboardShortcut; project: Project }): JSX.Element | null {
   const pro = props.project;
   const url = `https://gitpod.io#${pro.web_url}`;
   if (pro.http_url_to_repo || pro.ssh_url_to_repo) {
@@ -97,7 +101,7 @@ export function CloneProjectInGitPod(props: { shortcut?: KeyboardShortcut; proje
   }
 }
 
-export function ShowProjectLabels(props: { project: Project; shortcut?: KeyboardShortcut }) {
+export function ShowProjectLabels(props: { project: Project; shortcut?: KeyboardShortcut }): JSX.Element {
   return (
     <PushAction
       title="Labels"

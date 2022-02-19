@@ -11,6 +11,8 @@ import en from "javascript-time-ago/locale/en.json";
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+
 export function projectIconUrl(project: Project): string | undefined {
   let result: string | undefined;
   // TODO check also namespace for icon
@@ -33,13 +35,13 @@ export function projectIcon(project: Project): ImageLike {
   return { source: result, mask: ImageMask.Circle };
 }
 
-export function toDateString(d: Date) {
+export function toDateString(d: Date): string {
   const mo = new Intl.DateTimeFormat("en", { month: "short" }).format(d);
   const da = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(d);
   return `${da}. ${mo}`;
 }
 
-export function getIdFromGqlId(id: string) {
+export function getIdFromGqlId(id: string): number {
   const splits = id.split("/");
   return parseInt(splits.pop() || "");
 }
@@ -66,7 +68,7 @@ export async function getCacheObject(key: string, seconds: number): Promise<any>
   return undefined;
 }
 
-export async function setCacheObject(key: string, payload: any) {
+export async function setCacheObject(key: string, payload: any): Promise<void> {
   const cache_data = {
     timestamp: currentSeconds(),
     payload: payload,
@@ -94,7 +96,7 @@ export function fileExistsSync(filename: string): boolean {
   }
 }
 
-export function replaceAll(str: string, find: RegExp, replace: string) {
+export function replaceAll(str: string, find: RegExp, replace: string): string {
   return str.replace(find, replace);
 }
 
@@ -133,7 +135,7 @@ export function hashRecord(rec: Record<string, any>, prefix?: string | undefined
   }
 }
 
-export function capitalizeFirstLetter(name: string) {
+export function capitalizeFirstLetter(name: string): string {
   return name.replace(/^./, name[0].toUpperCase());
 }
 
@@ -222,7 +224,7 @@ export function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "unknown error";
 }
 
-export function formatDate(input: Date | string) {
+export function formatDate(input: Date | string): string {
   const date = typeof input === "string" ? new Date(input) : input;
   return timeAgo.format(date) as string;
 }

@@ -10,8 +10,9 @@ import {
 import { User } from "../gitlabapi";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
+import { getErrorMessage } from "../utils";
 
-export function UserList() {
+export function UserList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { users, error, isLoading } = useSearch(searchText);
 
@@ -32,7 +33,7 @@ export function UserList() {
   );
 }
 
-export function UserListItem(props: { user: User }) {
+export function UserListItem(props: { user: User }): JSX.Element {
   const user = props.user;
   return (
     <List.Item
@@ -80,9 +81,9 @@ export function useSearch(query: string | undefined): {
         if (!didUnmount) {
           setUsers(glUsers);
         }
-      } catch (e: any) {
+      } catch (e) {
         if (!didUnmount) {
-          setError(e.message);
+          setError(getErrorMessage(e));
         }
       } finally {
         if (!didUnmount) {

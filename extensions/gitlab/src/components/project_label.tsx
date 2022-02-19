@@ -5,7 +5,7 @@ import { Label, Project, searchData } from "../gitlabapi";
 import { useCache } from "../cache";
 import { LabelList } from "./label";
 
-export function ProjectLabelList(props: { project: Project }) {
+export function ProjectLabelList(props: { project: Project }): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { data, error, isLoading } = useCache<Label[]>(
     `project_${props.project.id}_labels`,

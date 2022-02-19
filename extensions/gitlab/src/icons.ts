@@ -48,11 +48,7 @@ export function useImage(
   const [localFilepath, setLocalFilepath] = useState<string | undefined>(defaultIcon);
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const {
-    data,
-    error: cacheError,
-    isLoading: cacheIsLoading,
-  } = useCache<string | undefined>(
+  const { data } = useCache<string | undefined>(
     "img_" + hashString(url || ""),
     async (): Promise<string | undefined> => {
       if (!url) {
