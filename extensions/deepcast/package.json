@@ -13,6 +13,188 @@
       "subtitle": "Deepcast",
       "description": "Translate text using DeepL",
       "mode": "view"
+    },
+    {
+      "name": "bulgarian",
+      "title": "Translate into Bulgarian",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Bulgarian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "chinese",
+      "title": "Translate into Chinese",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Chinese using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "czech",
+      "title": "Translate into Czech",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Czech using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "danish",
+      "title": "Translate into Danish",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Danish using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "dutch",
+      "title": "Translate into Dutch",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Dutch using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "englishUK",
+      "title": "Translate into English (UK)",
+      "subtitle": "Deepcast",
+      "description": "Translate text into English (UK) using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "englishUS",
+      "title": "Translate into English (US)",
+      "subtitle": "Deepcast",
+      "description": "Translate text into English (US) using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "estonian",
+      "title": "Translate into Estonian",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Estonian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "finnish",
+      "title": "Translate into Finnish",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Finnish using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "french",
+      "title": "Translate into French",
+      "subtitle": "Deepcast",
+      "description": "Translate text into French using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "german",
+      "title": "Translate into German",
+      "subtitle": "Deepcast",
+      "description": "Translate text into German using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "greek",
+      "title": "Translate into Greek",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Greek using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "hungarian",
+      "title": "Translate into Hungarian",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Hungarian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "italian",
+      "title": "Translate into Italian",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Italian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "japanese",
+      "title": "Translate into Japanese",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Japanese using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "latvian",
+      "title": "Translate into Latvian",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Latvian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "lithuanian",
+      "title": "Translate into Lithuanian",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Lithuanian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "polish",
+      "title": "Translate into Polish",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Polish using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "portuguese",
+      "title": "Translate into Portuguese",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Portuguese using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "portugueseBrazil",
+      "title": "Translate into Portuguese (Brazil)",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Portuguese (Brazil) using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "romanian",
+      "title": "Translate into Romanian",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Romanian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "russian",
+      "title": "Translate into Russian",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Russian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "slovak",
+      "title": "Translate into Slovak",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Slovak using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "slovenian",
+      "title": "Translate into Slovenian",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Slovenian using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "spanish",
+      "title": "Translate into Spanish",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Spanish using DeepL",
+      "mode": "no-view"
+    },
+    {
+      "name": "swedish",
+      "title": "Translate into Swedish",
+      "subtitle": "Deepcast",
+      "description": "Translate text into Swedish using DeepL",
+      "mode": "no-view"
     }
   ],
   "preferences": [
