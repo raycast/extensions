@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "amazing-marvin-inbox",
-  "title": "Amazing Marvin inbox",
+  "title": "Amazing Marvin Inbox",
   "description": "Creates a task in Amazing Marvin's inbox",
   "icon": "command-icon.png",
   "author": "SirStoke",

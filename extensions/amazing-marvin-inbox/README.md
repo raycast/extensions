@@ -1,4 +1,4 @@
-# Amazing Marvin inbox
+# Amazing Marvin Inbox
 
 A Raycast extension which creates a new task in [Amazing Marvin](https://amazingmarvin.com)'s inbox
 
