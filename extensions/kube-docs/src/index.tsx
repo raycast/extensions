@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Icon, List } from '@raycast/api'
-import { useCallback, useState } from 'react';
-import { debounce } from 'throttle-debounce';
-import { DocsItem, DocsResponse } from './types'
-import useFetcher from './hooks/useFetcher'
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useCallback, useState } from "react";
+import { debounce } from "throttle-debounce";
+import { DocsItem, DocsResponse } from "./types";
+import useFetcher from "./hooks/useFetcher";
 
 const DEBOUNCE_DELAY = 300;
-const ICON = 'command-icon.png';
+const ICON = "command-icon.png";
 
 export default function main() {
   const { loading, fetcher } = useFetcher();
@@ -17,21 +17,20 @@ export default function main() {
       return;
     }
 
-    const { data: { webPages } } = await fetcher<DocsResponse>({ query });
+    const {
+      data: { webPages },
+    } = await fetcher<DocsResponse>({ query });
 
     if (!webPages || !webPages.value) return;
 
     setItems(webPages.value);
-  }
+  };
 
   const debounceCallback = useCallback(debounce(DEBOUNCE_DELAY, onQueryChange), []);
 
   return (
-    <List
-      isLoading={loading}
-      onSearchTextChange={debounceCallback}
-    >
-      {items.map(item => (
+    <List isLoading={loading} onSearchTextChange={debounceCallback}>
+      {items.map((item) => (
         <List.Item
           key={item.id}
           title={item.name}
@@ -40,7 +39,7 @@ export default function main() {
           actions={
             <ActionPanel title={item.url}>
               <Action.OpenInBrowser url={item.url} />
-              <Action.CopyToClipboard title='Copy URL' content={item.url} />
+              <Action.CopyToClipboard title="Copy URL" content={item.url} />
             </ActionPanel>
           }
         />

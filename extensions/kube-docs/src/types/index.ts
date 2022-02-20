@@ -1,7 +1,7 @@
 export type FetcherArgs = {
   query: string;
   offset?: number;
-}
+};
 
 export type DocsResponse = {
   __type: string;
@@ -26,10 +26,10 @@ export type DocsResponse = {
         resultIndex: number;
         value: {
           id: string;
-        }
-      }
-    }
-  }
+        };
+      };
+    };
+  };
 };
 
 export type DocsItem = {
