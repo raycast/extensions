@@ -1,6 +1,5 @@
 import { Task } from "@doist/todoist-api-typescript";
 import { addDays, format, formatISO, isThisYear, isBefore, compareAsc, isSameDay } from "date-fns";
-import { utcToZonedTime } from "date-fns-tz";
 import { partition } from "lodash";
 import { priorities } from "./constants";
 
@@ -10,20 +9,24 @@ export function isRecurring(task: Task): boolean {
 
 /**
  * Returns today's date in user's timezone using the following format: YYYY-MM-DD
+ *
+ * Note that `format` from date-fns returns the date formatted to local time.
+ * If it's 20th February at 6 AM UTC:
+ * - This function will return 19th February at midnight UTC for Los Angeles timezone (GMT-8)
+ * - This function will return 20th February at midnight UTC for Paris timezone (GMT+1)
  */
 export function getToday() {
-  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  return new Date(format(utcToZonedTime(Date.now(), timeZone), "yyyy-MM-dd"));
+  return new Date(format(Date.now(), "yyyy-MM-dd"));
 }
 
-function isBeforeToday(date: Date) {
+function isOverdue(date: Date) {
   return isBefore(date, getToday());
 }
 
 export function displayDueDate(dateString: string): string {
   const date = new Date(dateString);
 
-  if (isBeforeToday(date)) {
+  if (isOverdue(date)) {
     return isThisYear(date) ? format(date, "dd MMMM") : format(date, "dd MMMM yyy");
   }
 
@@ -55,7 +58,7 @@ export function getAPIDate(date: Date): string {
 }
 
 export function partitionTasksWithOverdue(tasks: Task[]) {
-  return partition(tasks, (task: Task) => task.due?.date && isBeforeToday(new Date(task.due.date)));
+  return partition(tasks, (task: Task) => task.due?.date && isOverdue(new Date(task.due.date)));
 }
 
 export function getSectionsWithDueDates(tasks: Task[]) {
