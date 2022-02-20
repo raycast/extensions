@@ -2,15 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "urban-dictionary",
   "title": "Urban Dictionary",
-  "description": "Search urban dictionary for a term",
+  "description": "Search Urban Dictionary for a term",
   "icon": "icon.png",
   "author": "naman",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Urban Dictionary",
-      "description": "Search Urban Dictionary",
+      "title": "Search Term",
+      "description": "Search Urban Dictionary for a term",
       "mode": "view"
     }
   ],
