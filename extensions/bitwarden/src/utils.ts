@@ -32,8 +32,12 @@ export function titleCase(word: string) {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
-
+/* Object.entries that preserves the type of the object keys */
+export const objectEntries = <T>(obj: T): { [K in keyof T]: [K, T[K]] }[keyof T][] => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return Object.entries(obj) as any;
+}
 
 export function getPasswordGeneratingArgs(options: PasswordOptions): string[] {
-  return Object.entries(options).flat()
+  return Object.entries(options).flatMap(([arg, value]) => value ? [`--${arg}`, value] : []);
 }

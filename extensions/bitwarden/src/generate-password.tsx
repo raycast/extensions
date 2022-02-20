@@ -5,18 +5,20 @@ import {
   Color,
   Clipboard,
   Action,
-  showHUD
+  showHUD,
+  useNavigation,
+  Form,
 } from "@raycast/api";
-import { PasswordOptions } from "./types";
-import { useState } from "react";
-import { useBitwarden, usePasswordGenerator } from "./hooks";
+import { useBitwarden, usePasswordGenerator, usePasswordOptions } from "./hooks";
 import { UnlockForm } from "./components";
 import { Bitwarden } from "./api";
+import { PASSWORD_OPTIONS_MAP } from "./const";
+import { objectEntries } from "./utils";
 
 const GeneratePassword = () => {
+  const { push } = useNavigation();
   const bitwardenApi = new Bitwarden();
   const [state, setSessionToken] = useBitwarden(bitwardenApi);
-  const [options, setOptions] = useState<PasswordOptions>();
   const { password, regeneratePassword, isGenerating } = usePasswordGenerator(bitwardenApi);
 
   if (state.vaultStatus === "locked") {
@@ -29,26 +31,27 @@ const GeneratePassword = () => {
     showHUD('Copied to clipboard')
   }
 
-  const regenerate = () => regeneratePassword(options)
-  
+  const regenerate = () => regeneratePassword()
+  const openOptionsMenu = () => push(<Options />);
+
   return (
-    <List>
+    <List isLoading={isGenerating} searchBarPlaceholder="" onSearchTextChange={() => { /* ignore search */ }} throttle>
       <List.Section title="Password" subtitle={isGenerating && password ? 'generating...' : undefined}>
-      <List.Item 
-        key="password" 
-        id="password" 
-        title={password ?? 'Generating password...'} 
-        icon={{ source: Icon.Dot, tintColor: isGenerating ? Color.Orange : Color.Green }}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Copy to clipboard"
-              icon={Icon.Clipboard}
-              onAction={copyToClipboard}
-            />
-          </ActionPanel>
-        }
-      />
+        <List.Item
+          key="password" 
+          id="password"
+          title={password ?? 'Generating password...'} 
+          icon={{ source: Icon.Dot, tintColor: isGenerating ? Color.Orange : Color.Green }}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Copy to clipboard"
+                icon={Icon.Clipboard}
+                onAction={copyToClipboard}
+              />
+            </ActionPanel>
+          }
+        />
       </List.Section>
       <List.Section title="Actions">
         <List.Item key="copy" id="copy" title="Copy password" icon={Icon.Clipboard} actions={
@@ -69,10 +72,69 @@ const GeneratePassword = () => {
             />
           </ActionPanel>
         } />
-        <List.Item key="options" id="options" title="Password options" icon={Icon.Gear} />
+        <List.Item 
+          key="options" 
+          id="options" 
+          title="Options"
+          subtitle="Password length, characters, and others"
+          icon={Icon.Gear} actions={
+            <ActionPanel>
+              <Action
+                title="Change password options"
+                icon={Icon.Gear}
+                onAction={openOptionsMenu}
+              />
+            </ActionPanel>
+          } 
+        />
       </List.Section>
     </List>
   )
 };
+
+const Options = () => {
+  const { options, handleFieldChange, clearStorage } = usePasswordOptions();
+
+  if (!options) return null;
+
+  return (
+    <Form actions={
+      process.env.NODE_ENV === "development" ? (
+        <ActionPanel>
+          <Action 
+            title="Clear storage"
+            icon={Icon.Trash}
+            onAction={clearStorage}
+          />
+        </ActionPanel>
+      ) : undefined
+    }>
+      {objectEntries(PASSWORD_OPTIONS_MAP).map(([option, { hint, label, type }]) => {
+        if (type === 'boolean') {
+          return (
+            <Form.Checkbox 
+              key={option}
+              id={option}
+              title={label}
+              label={hint ?? ''}
+              value={Boolean((options?.[option] ?? false))}
+              onChange={handleFieldChange(option)}
+            />
+          )
+        }
+
+        return (
+          <Form.TextField 
+            key={option}
+            id={option}
+            title={label}
+            value={String(options?.[option] ?? '')}
+            onChange={handleFieldChange(option)}
+          />
+        )
+      })}
+    </Form>
+  )
+}
 
 export default GeneratePassword;
