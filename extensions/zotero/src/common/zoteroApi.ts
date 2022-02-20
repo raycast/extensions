@@ -111,13 +111,13 @@ export const searchResources = async (q: string): Promise<QueryResultItem[]> => 
     throw new Error(`${data?.message || "Not OK"}`);
   }
   const data = (await response.json()) as Array<any>;
-  let res = data.map(parseResponse);
+  const res = data.map(parseResponse);
 
-  let item_keys = res.map(item => item.id);
+  const item_keys = res.map(item => item.id);
   const pdf_key_map_list = await map(item_keys, async (v) => {
     const pdf_key = await get_pdf_key(v);
     return {'key' : v, 'value': pdf_key}
   })
-  var pdf_key_map = pdf_key_map_list.reduce((obj, item) => (obj[item.key] = item.value, obj) ,{});
+  const pdf_key_map = pdf_key_map_list.reduce((obj, item) => (obj[item.key] = item.value, obj) ,{});
   return res.map(combine_results, pdf_key_map);
 };
