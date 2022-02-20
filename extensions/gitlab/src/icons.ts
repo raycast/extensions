@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getLargeCacheDirectory, useCache } from "./cache";
 import { gitlab } from "./common";
-import { hashString } from "./utils";
+import { daysInSeconds, hashString } from "./utils";
 import path from "path/posix";
 import * as fs from "fs/promises";
 
@@ -58,7 +58,7 @@ export function useImage(
       const imgFilepath = path.join(imgDir, hashString(url)) + ".png"; // TODO get the extension correctly
       return await gitlab.downloadFile(url, { localFilepath: imgFilepath });
     },
-    { deps: [url], secondsToRefetch: 600, secondsToInvalid: 7 * 24 * 60 * 60 }
+    { deps: [url], secondsToRefetch: 600, secondsToInvalid: daysInSeconds(7) }
   );
 
   useEffect(() => {

@@ -2,7 +2,7 @@ import { ActionPanel, CopyToClipboardAction, List, showToast, ToastStyle, PushAc
 import { useState } from "react";
 import { gitlab, gitlabgql } from "../common";
 import { Project, searchData } from "../gitlabapi";
-import { hashRecord, projectIconUrl } from "../utils";
+import { daysInSeconds, hashRecord, projectIconUrl } from "../utils";
 import { PipelineList } from "./pipelines";
 import { BranchList } from "./branch";
 import { MilestoneList } from "./milestones";
@@ -131,7 +131,7 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
           limit: 50,
         });
       },
-      secondsToInvalid: 7 * 24 * 60 * 60, // 7 days
+      secondsToInvalid: daysInSeconds(7),
     }
   );
 

@@ -232,3 +232,7 @@ export function formatDate(input: Date | string): string {
 export function now(): Date {
   return new Date();
 }
+
+export function daysInSeconds(days: number): number {
+  return days * 24 * 60 * 60;
+}
