@@ -156,9 +156,9 @@
       "placeholder": "10"
     },
     {
-      "name": "projectprimaryaction",
+      "name": "primaryaction",
       "type": "dropdown",
-      "title": "Project Primary Action",
+      "title": "Primary Action",
       "required": false,
       "default": "browser",
       "data": [
@@ -167,7 +167,7 @@
           "value": "browser"
         },
         {
-          "title": "Open Project",
+          "title": "Open in Raycast",
           "value": "detail"
         }
       ],

@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import * as open from "open";
 import React from "react";
-import { getProjectPrimaryActionPreference, ProjectPrimaryAction } from "../common";
+import { getPrimaryActionPreference, PrimaryAction } from "../common";
 import { Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { getErrorMessage } from "../utils";
@@ -127,7 +127,7 @@ export function OpenProjectInBrowserAction(props: { project: Project }): JSX.Ele
 }
 
 export function ProjectDefaultActions(props: { project: Project }): JSX.Element {
-  if (getProjectPrimaryActionPreference() === ProjectPrimaryAction.Detail) {
+  if (getPrimaryActionPreference() === PrimaryAction.Detail) {
     return (
       <React.Fragment>
         <OpenProjectAction project={props.project} />

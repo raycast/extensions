@@ -1,7 +1,7 @@
 import { ActionPanel, Color, Icon, ImageLike, List, PushAction, showToast, ToastStyle } from "@raycast/api";
 import React, { useState } from "react";
 import { useCache } from "../cache";
-import { getProjectPrimaryActionPreference, gitlab, ProjectPrimaryAction } from "../common";
+import { getPrimaryActionPreference, gitlab, PrimaryAction } from "../common";
 import { Project, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { capitalizeFirstLetter } from "../utils";
@@ -47,7 +47,7 @@ function DefaultActions(props: {
   const action = props.action;
   const webAction = props.webAction;
   if (action || webAction) {
-    if (getProjectPrimaryActionPreference() === ProjectPrimaryAction.Detail) {
+    if (getPrimaryActionPreference() === PrimaryAction.Detail) {
       return (
         <React.Fragment>
           {action}
@@ -128,7 +128,14 @@ export function EventListItem(props: { event: Event }): JSX.Element {
             }
             if (project && !error && ev.action_name !== "deleted") {
               actionElement = (
-                <DefaultActions webAction={<GitLabOpenInBrowserAction url={`${project.web_url}/-/tree/${ref}`} />} />
+                <DefaultActions
+                  webAction={
+                    <GitLabOpenInBrowserAction
+                      url={`${project.web_url}/-/tree/${ref}`}
+                      title="Open Branch in Browser"
+                    />
+                  }
+                />
               );
             }
           }
@@ -143,7 +150,11 @@ export function EventListItem(props: { event: Event }): JSX.Element {
           title += ` ${project.fullPath}`;
         }
         if (project && !error && ev.action_name !== "deleted") {
-          actionElement = <DefaultActions webAction={<GitLabOpenInBrowserAction url={`${project.web_url}`} />} />;
+          actionElement = (
+            <DefaultActions
+              webAction={<GitLabOpenInBrowserAction url={`${project.web_url}`} title="Open Project in Browser" />}
+            />
+          );
         }
       }
       break;
@@ -184,7 +195,12 @@ export function EventListItem(props: { event: Event }): JSX.Element {
                       target={<IssueDetailFetch project={project} issueId={ev.target_iid} />}
                     />
                   }
-                  webAction={<GitLabOpenInBrowserAction url={`${project.web_url}/-/issues/${ev.target_iid}`} />}
+                  webAction={
+                    <GitLabOpenInBrowserAction
+                      url={`${project.web_url}/-/issues/${ev.target_iid}`}
+                      title="Open Issue in Browser"
+                    />
+                  }
                 />
               );
             }
@@ -225,7 +241,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
                   webAction={
                     <GitLabOpenInBrowserAction
                       url={`${project.web_url}/-/merge_requests/${ev.target_iid}`}
-                      title="Open MR in Browser"
+                      title="Open Merge Request in Browser"
                     />
                   }
                 />
@@ -248,7 +264,12 @@ export function EventListItem(props: { event: Event }): JSX.Element {
             if (project && !error) {
               actionElement = (
                 <DefaultActions
-                  webAction={<GitLabOpenInBrowserAction url={`${project.web_url}/-/milestones/${ev.target_iid}`} />}
+                  webAction={
+                    <GitLabOpenInBrowserAction
+                      url={`${project.web_url}/-/milestones/${ev.target_iid}`}
+                      title="Open Milestone in Browser"
+                    />
+                  }
                 />
               );
             }
@@ -281,7 +302,11 @@ export function EventListItem(props: { event: Event }): JSX.Element {
               }
               if (slug) {
                 actionElement = (
-                  <DefaultActions webAction={<GitLabOpenInBrowserAction url={`${project.web_url}${slug}`} />} />
+                  <DefaultActions
+                    webAction={
+                      <GitLabOpenInBrowserAction url={`${project.web_url}${slug}`} title="Open Comment in Browser" />
+                    }
+                  />
                 );
               }
             }
@@ -314,7 +339,11 @@ export function EventListItem(props: { event: Event }): JSX.Element {
               }
               if (slug) {
                 actionElement = (
-                  <DefaultActions webAction={<GitLabOpenInBrowserAction url={`${project.web_url}${slug}`} />} />
+                  <DefaultActions
+                    webAction={
+                      <GitLabOpenInBrowserAction url={`${project.web_url}${slug}`} title="Open Comment in Browser" />
+                    }
+                  />
                 );
               }
             }
