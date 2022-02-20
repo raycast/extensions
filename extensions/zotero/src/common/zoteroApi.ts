@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
-import { map } from 'modern-async'
+import { map } from "modern-async";
 import he from "he";
 
 interface Preferences {
@@ -66,12 +66,12 @@ const parseResponse = (item) => {
   };
 };
 
-function combine_results(val, index, arr){
-  val['pdf_url'] = this[val.id] ? `zotero://open-pdf/library/items/${this[val.id]}` : ``;
-  return val
+function combine_results(val, index, arr) {
+  val["pdf_url"] = this[val.id] ? `zotero://open-pdf/library/items/${this[val.id]}` : ``;
+  return val;
 }
 
-async function get_pdf_key(key:string) {
+async function get_pdf_key(key: string) {
   const preferences: Preferences = getPreferenceValues();
   const requestOptions = {
     method: "GET",
@@ -87,7 +87,7 @@ async function get_pdf_key(key:string) {
     throw new Error(`${data?.message || "Not OK"}`);
   }
   const data = (await response.json()) as Array<any>;
-  const pdf_data = data.filter(d => d.data.contentType === 'application/pdf');
+  const pdf_data = data.filter((d) => d.data.contentType === "application/pdf");
   return pdf_data.length > 0 ? `${pdf_data[0].key}` : ``;
 }
 
@@ -113,11 +113,11 @@ export const searchResources = async (q: string): Promise<QueryResultItem[]> => 
   const data = (await response.json()) as Array<any>;
   const res = data.map(parseResponse);
 
-  const item_keys = res.map(item => item.id);
+  const item_keys = res.map((item) => item.id);
   const pdf_key_map_list = await map(item_keys, async (v) => {
     const pdf_key = await get_pdf_key(v);
-    return {'key' : v, 'value': pdf_key}
-  })
-  const pdf_key_map = pdf_key_map_list.reduce((obj, item) => (obj[item.key] = item.value, obj) ,{});
+    return { key: v, value: pdf_key };
+  });
+  const pdf_key_map = pdf_key_map_list.reduce((obj, item) => ((obj[item.key] = item.value), obj), {});
   return res.map(combine_results, pdf_key_map);
 };
