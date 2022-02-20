@@ -90,8 +90,8 @@ export interface PasswordOptions {
   includeNumber?: boolean;
 }
 
-export interface PasswordOptionField { 
-  label: string, 
-  hint?: string, 
-  type: 'boolean' | 'number' | 'string'
-};
+export interface PasswordOptionField {
+  label: string;
+  hint?: string;
+  type: "boolean" | "number" | "string";
+}

@@ -96,13 +96,14 @@
     "treeify": "^1.1.0"
   },
   "devDependencies": {
-    "@types/treeify": "^1.0.0",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
+    "@types/treeify": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
     "prettier": "^2.5.1",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"

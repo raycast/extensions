@@ -1,8 +1,15 @@
-import { getLocalStorageItem, showToast, ToastStyle, removeLocalStorageItem, setLocalStorageItem, LocalStorage } from "@raycast/api";
+import {
+  getLocalStorageItem,
+  showToast,
+  ToastStyle,
+  removeLocalStorageItem,
+  setLocalStorageItem,
+  LocalStorage,
+} from "@raycast/api";
 import { useState, useEffect, useReducer } from "react";
 import { Bitwarden } from "./api";
 import { LOCAL_STORAGE_KEY, PASSWORD_OPTIONS_MAP, SESSION_KEY } from "./const";
-import { PasswordOptionField, PasswordOptions, VaultStatus } from "./types";
+import { PasswordOptions, VaultStatus } from "./types";
 
 async function login(api: Bitwarden) {
   try {
@@ -57,24 +64,28 @@ export function useBitwarden(
 const initialState = {
   password: undefined as string | undefined,
   isGenerating: false,
-}
+};
 
 type State = typeof initialState;
 
 type Action =
- | { type: 'generate' }
- | { type: 'setPassword', password: string }
- | { type: 'failure' }
- | { type: 'clear', password: string };
+  | { type: "generate" }
+  | { type: "setPassword"; password: string }
+  | { type: "failure" }
+  | { type: "clear"; password: string };
 
 const passwordReducer = (state: State, action: Action): State => {
   switch (action.type) {
-    case 'generate': return { ...state, isGenerating: true };
-    case 'setPassword': return { password: action.password, isGenerating: false };
-    case 'failure': return { ...state, isGenerating: false };
-    case 'clear': return { isGenerating: false, password: undefined };
+    case "generate":
+      return { ...state, isGenerating: true };
+    case "setPassword":
+      return { password: action.password, isGenerating: false };
+    case "failure":
+      return { ...state, isGenerating: false };
+    case "clear":
+      return { isGenerating: false, password: undefined };
   }
-}
+};
 
 export function usePasswordGenerator(bitwardenApi: Bitwarden) {
   const { getUpdatedOptions } = usePasswordOptions();
@@ -82,15 +93,15 @@ export function usePasswordGenerator(bitwardenApi: Bitwarden) {
 
   const generatePassword = async () => {
     try {
-      dispatch({ type: 'generate' });
+      dispatch({ type: "generate" });
       const options = await getUpdatedOptions();
-      console.log({options})
+      console.log({ options });
       const password = await bitwardenApi.generatePassword(options);
-      dispatch({ type: 'setPassword', password });
-    } catch(error) {
-      dispatch({ type: 'failure' });;
+      dispatch({ type: "setPassword", password });
+    } catch (error) {
+      dispatch({ type: "failure" });
     }
-  }
+  };
 
   useEffect(() => {
     generatePassword();
@@ -103,7 +114,7 @@ const defaultOptions: PasswordOptions = {
   length: 14,
   uppercase: true,
   lowercase: true,
-}
+};
 
 export const usePasswordOptions = () => {
   const [options, setOptions] = useState<PasswordOptions>();
@@ -111,35 +122,35 @@ export const usePasswordOptions = () => {
   const setOption = async <Option extends keyof PasswordOptions>(option: Option, value: PasswordOptions[Option]) => {
     const newOptions = { ...options, [option]: value };
     setOptions(newOptions);
-    await LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS, JSON.stringify(newOptions))
-  }
+    await LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS, JSON.stringify(newOptions));
+  };
 
-  const handleFieldChange = <Option extends keyof PasswordOptions>(option: Option) => 
+  const handleFieldChange =
+    <Option extends keyof PasswordOptions>(option: Option) =>
     (value: PasswordOptions[Option]) => {
       const type = PASSWORD_OPTIONS_MAP[option]?.type;
-      const newValue = (type === 'number' ? Number(value) : value) as PasswordOptions[Option];
-      setOption(option, newValue)
-    }
+      const newValue = (type === "number" ? Number(value) : value) as PasswordOptions[Option];
+      setOption(option, newValue);
+    };
 
   const getUpdatedOptions = async () => {
     const storedOptions = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS);
-    const newOptions = { ...defaultOptions, ...(storedOptions ? JSON.parse(storedOptions): {}) };
-    return newOptions
-  }
+    const newOptions = { ...defaultOptions, ...(storedOptions ? JSON.parse(storedOptions) : {}) };
+    return newOptions;
+  };
 
   const restoreStoredOptions = async () => {
-    setOptions(await getUpdatedOptions())
-  }
+    setOptions(await getUpdatedOptions());
+  };
 
   const clearStorage = async () => {
     await LocalStorage.removeItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS);
     restoreStoredOptions();
-  }
+  };
 
   useEffect(() => {
     restoreStoredOptions();
-  }, [])
+  }, []);
 
   return { options, setOption, handleFieldChange, clearStorage, getUpdatedOptions };
-
-}
+};

@@ -36,8 +36,8 @@ export function titleCase(word: string) {
 export const objectEntries = <T>(obj: T): { [K in keyof T]: [K, T[K]] }[keyof T][] => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return Object.entries(obj) as any;
-}
+};
 
 export function getPasswordGeneratingArgs(options: PasswordOptions): string[] {
-  return Object.entries(options).flatMap(([arg, value]) => value ? [`--${arg}`, value] : []);
+  return Object.entries(options).flatMap(([arg, value]) => (value ? [`--${arg}`, value] : []));
 }
