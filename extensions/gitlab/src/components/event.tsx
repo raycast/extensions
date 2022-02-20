@@ -22,6 +22,12 @@ export interface PushData {
   ref_count?: null;
 }
 
+export interface Note {
+  noteable_iid?: number;
+  noteable_id?: number;
+  noteable_type?: string;
+}
+
 export interface Event {
   id: number;
   project_id: number;
@@ -31,6 +37,7 @@ export interface Event {
   target_type: string;
   target_title: string;
   push_data?: PushData;
+  note?: Note;
 }
 
 function DefaultActions(props: {
@@ -134,6 +141,9 @@ export function EventListItem(props: { event: Event }): JSX.Element {
         icon = { source: Icon.Circle, tintColor: Color.Green };
         if (project && !error) {
           title += ` ${project.fullPath}`;
+        }
+        if (project && !error && ev.action_name !== "deleted") {
+          actionElement = <DefaultActions webAction={<GitLabOpenInBrowserAction url={`${project.web_url}`} />} />;
         }
       }
       break;
@@ -261,6 +271,20 @@ export function EventListItem(props: { event: Event }): JSX.Element {
                 break;
             }
             title = `${an} discussion note`;
+            if (!error && project && ev.target_iid && ev.note && ev.note.noteable_id && ev.note.noteable_type) {
+              let slug = "";
+              const nt = ev.note.noteable_type.toLowerCase();
+              if (nt === "mergerequest" && ev.note && ev.note.noteable_iid) {
+                slug = `/-/merge_requests/${ev.note.noteable_iid}#note_${ev.target_iid}`;
+              } else if (nt === "issue" && ev.note && ev.note.noteable_iid) {
+                slug = `/-/issues/${ev.note.noteable_iid}#note_${ev.target_iid}`;
+              }
+              if (slug) {
+                actionElement = (
+                  <DefaultActions webAction={<GitLabOpenInBrowserAction url={`${project.web_url}${slug}`} />} />
+                );
+              }
+            }
           } else if (tt === "note") {
             switch (ev.action_name) {
               case "opened":
@@ -280,6 +304,20 @@ export function EventListItem(props: { event: Event }): JSX.Element {
                 break;
             }
             title = `${an} note`;
+            if (!error && project && ev.target_iid && ev.note && ev.note.noteable_id && ev.note.noteable_type) {
+              let slug = "";
+              const nt = ev.note.noteable_type.toLowerCase();
+              if (nt === "mergerequest" && ev.note && ev.note.noteable_iid) {
+                slug = `/-/merge_requests/${ev.note.noteable_iid}#note_${ev.target_iid}`;
+              } else if (nt === "issue" && ev.note && ev.note.noteable_iid) {
+                slug = `/-/issues/${ev.note.noteable_iid}#note_${ev.target_iid}`;
+              }
+              if (slug) {
+                actionElement = (
+                  <DefaultActions webAction={<GitLabOpenInBrowserAction url={`${project.web_url}${slug}`} />} />
+                );
+              }
+            }
           } else {
             console.log(ev);
           }
