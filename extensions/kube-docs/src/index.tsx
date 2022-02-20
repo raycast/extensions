@@ -1,10 +1,11 @@
-import { Action, ActionPanel, List } from '@raycast/api'
+import { Action, ActionPanel, Icon, List } from '@raycast/api'
 import { useCallback, useState } from 'react';
 import { debounce } from 'throttle-debounce';
 import { DocsItem, DocsResponse } from './types'
 import useFetcher from './hooks/useFetcher'
 
 const DEBOUNCE_DELAY = 300;
+const ICON = 'command-icon.png';
 
 export default function main() {
   const { loading, fetcher } = useFetcher();
@@ -35,6 +36,7 @@ export default function main() {
           key={item.id}
           title={item.name}
           subtitle={item.snippet}
+          icon={ICON}
           actions={
             <ActionPanel title={item.url}>
               <Action.OpenInBrowser url={item.url} />
