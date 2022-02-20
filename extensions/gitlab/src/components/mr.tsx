@@ -1,7 +1,6 @@
 import {
   ActionPanel,
   List,
-  OpenInBrowserAction,
   showToast,
   ToastStyle,
   Color,
@@ -17,6 +16,7 @@ import { useState, useEffect } from "react";
 import { getErrorMessage, now, optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
 import { gql } from "@apollo/client";
 import { MRItemActions } from "./mr_actions";
+import { GitLabOpenInBrowserAction } from "./actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -63,7 +63,7 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
       navigationTitle={`${props.mr.reference_full}`}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={props.mr.web_url} />
+          <GitLabOpenInBrowserAction url={props.mr.web_url} />
           <MRItemActions mr={props.mr} />
         </ActionPanel>
       }
@@ -205,7 +205,7 @@ export function MRListItem(props: { mr: MergeRequest; refreshData: () => void })
               target={<MRDetail mr={mr} />}
               icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
             />
-            <OpenInBrowserAction url={mr.web_url} />
+            <GitLabOpenInBrowserAction url={mr.web_url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <MRItemActions mr={mr} onDataChange={props.refreshData} />

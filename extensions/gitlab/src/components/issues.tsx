@@ -1,14 +1,4 @@
-import {
-  ActionPanel,
-  List,
-  OpenInBrowserAction,
-  Color,
-  showToast,
-  ToastStyle,
-  Detail,
-  PushAction,
-  ImageMask,
-} from "@raycast/api";
+import { ActionPanel, List, Color, showToast, ToastStyle, Detail, PushAction, ImageMask } from "@raycast/api";
 import { gql } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
@@ -16,6 +6,7 @@ import { Group, Issue, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { getErrorMessage, now, optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
 import { IssueItemActions } from "./issue_actions";
+import { GitLabOpenInBrowserAction } from "./actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -60,7 +51,7 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
       navigationTitle={`${props.issue.reference_full}`}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={props.issue.web_url} />
+          <GitLabOpenInBrowserAction url={props.issue.web_url} />
           <IssueItemActions issue={props.issue} />
         </ActionPanel>
       }
@@ -140,7 +131,7 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }):
               target={<IssueDetail issue={issue} />}
               icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
             />
-            <OpenInBrowserAction url={issue.web_url} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
+            <GitLabOpenInBrowserAction url={issue.web_url} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <IssueItemActions issue={issue} onDataChange={props.refreshData} />

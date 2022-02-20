@@ -85,3 +85,12 @@ export function getProjectPrimaryActionPreference(): ProjectPrimaryAction {
   const result: ProjectPrimaryAction = val;
   return result;
 }
+
+export function getPreferPopToRootPreference(): boolean {
+  const pref = getPreferenceValues();
+  const val = (pref.poptoroot as boolean) || false;
+  if (val === true) {
+    return true;
+  }
+  return false;
+}

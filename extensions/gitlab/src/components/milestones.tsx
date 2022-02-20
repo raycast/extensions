@@ -1,9 +1,10 @@
 import { gql } from "@apollo/client";
-import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, List, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { gitlabgql } from "../common";
 import { Group, Project } from "../gitlabapi";
 import { getErrorMessage, getIdFromGqlId } from "../utils";
+import { GitLabOpenInBrowserAction } from "./actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -64,7 +65,7 @@ export function MilestoneListItem(props: { milestone: any }): JSX.Element {
       accessoryTitle={issueCounter}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={milestone.webUrl} />
+          <GitLabOpenInBrowserAction url={milestone.webUrl} />
         </ActionPanel>
       }
     />

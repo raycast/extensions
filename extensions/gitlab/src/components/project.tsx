@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-  PushAction,
-  Color,
-} from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, List, showToast, ToastStyle, PushAction, Color } from "@raycast/api";
 import { useState } from "react";
 import { gitlab, gitlabgql } from "../common";
 import { Project, searchData } from "../gitlabapi";
@@ -26,6 +17,7 @@ import {
 import { GitLabIcons, useImage } from "../icons";
 import { useCache } from "../cache";
 import { ClearLocalCacheAction } from "./cache_actions";
+import { GitLabOpenInBrowserAction } from "./actions";
 
 function webUrl(project: Project, partial: string) {
   return gitlabgql.urlJoin(`${project.fullPath}/${partial}`);
@@ -81,17 +73,17 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
             <ShowProjectLabels project={props.project} shortcut={{ modifiers: ["cmd"], key: "l" }} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Open in Browser">
-            <OpenInBrowserAction
+            <GitLabOpenInBrowserAction
               title="Labels"
               icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
               url={webUrl(props.project, "-/labels")}
             />
-            <OpenInBrowserAction
+            <GitLabOpenInBrowserAction
               title="Security & Compliance"
               icon={{ source: GitLabIcons.security, tintColor: Color.PrimaryText }}
               url={webUrl(props.project, "-/security/discover")}
             />
-            <OpenInBrowserAction
+            <GitLabOpenInBrowserAction
               title="Settings"
               icon={{ source: GitLabIcons.settings, tintColor: Color.PrimaryText }}
               url={webUrl(props.project, "edit")}

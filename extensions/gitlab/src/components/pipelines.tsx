@@ -1,14 +1,4 @@
-import {
-  ActionPanel,
-  List,
-  OpenInBrowserAction,
-  Icon,
-  Image,
-  Color,
-  showToast,
-  ToastStyle,
-  PushAction,
-} from "@raycast/api";
+import { ActionPanel, List, Icon, Image, Color, showToast, ToastStyle, PushAction } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCIRefreshInterval, gitlabgql } from "../common";
 import { gql } from "@apollo/client";
@@ -16,6 +6,7 @@ import { getErrorMessage, getIdFromGqlId, now } from "../utils";
 import { JobList } from "./jobs";
 import { RefreshPipelinesAction } from "./pipeline_actions";
 import useInterval from "use-interval";
+import { GitLabOpenInBrowserAction } from "./actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -88,7 +79,7 @@ export function PipelineListItem(props: {
               target={<JobList projectFullPath={props.projectFullPath} pipelineIID={pipeline.iid} />}
               icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
             />
-            <OpenInBrowserAction url={pipeline.webUrl} />
+            <GitLabOpenInBrowserAction url={pipeline.webUrl} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <RefreshPipelinesAction onRefreshPipelines={props.onRefreshPipelines} />

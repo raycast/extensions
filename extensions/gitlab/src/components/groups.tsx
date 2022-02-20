@@ -1,18 +1,9 @@
-import {
-  ActionPanel,
-  Color,
-  CopyToClipboardAction,
-  Icon,
-  List,
-  OpenInBrowserAction,
-  PushAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, Color, CopyToClipboardAction, Icon, List, PushAction, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
 import { dataToProject, Group, Project } from "../gitlabapi";
 import { GitLabIcons, useImage } from "../icons";
+import { GitLabOpenInBrowserAction } from "./actions";
 import { EpicList } from "./epics";
 import { IssueList, IssueScope, IssueState } from "./issues";
 import { MilestoneList } from "./milestones";
@@ -53,7 +44,7 @@ export function GroupListItem(props: { group: any }): JSX.Element {
               target={<GroupList parentGroup={props.group} />}
               icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
             />
-            <OpenInBrowserAction url={group.web_url} />
+            <GitLabOpenInBrowserAction url={group.web_url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CopyToClipboardAction title="Copy Group ID" content={group.id} />
@@ -83,17 +74,17 @@ export function GroupListItem(props: { group: any }): JSX.Element {
               icon={{ source: GitLabIcons.milestone, tintColor: Color.PrimaryText }}
               target={<MilestoneList group={group} />}
             />
-            <OpenInBrowserAction
+            <GitLabOpenInBrowserAction
               title="Labels"
               icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
               url={webUrl(props.group, "-/labels")}
             />
-            <OpenInBrowserAction
+            <GitLabOpenInBrowserAction
               title="Security & Compliance"
               icon={{ source: GitLabIcons.security, tintColor: Color.PrimaryText }}
               url={webUrl(props.group, "-/security/dashboard")}
             />
-            <OpenInBrowserAction
+            <GitLabOpenInBrowserAction
               title="Settings"
               icon={{ source: GitLabIcons.settings, tintColor: Color.PrimaryText }}
               url={webUrl(props.group, "-/edit")}

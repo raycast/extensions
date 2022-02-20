@@ -1,20 +1,11 @@
-import {
-  ActionPanel,
-  List,
-  OpenInBrowserAction,
-  Icon,
-  Image,
-  Color,
-  showToast,
-  ToastStyle,
-  ListSection,
-} from "@raycast/api";
+import { ActionPanel, List, Icon, Image, Color, showToast, ToastStyle, ListSection } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCIRefreshInterval, gitlabgql } from "../common";
 import { gql } from "@apollo/client";
 import { getErrorMessage, getIdFromGqlId, now } from "../utils";
 import { RefreshJobsAction } from "./job_actions";
 import useInterval from "use-interval";
+import { GitLabOpenInBrowserAction } from "./actions";
 
 export interface Job {
   id: string;
@@ -104,7 +95,9 @@ export function JobListItem(props: { job: Job; projectFullPath: string; onRefres
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction url={gitlabgql.urlJoin(`${props.projectFullPath}/-/jobs/${getIdFromGqlId(job.id)}`)} />
+            <GitLabOpenInBrowserAction
+              url={gitlabgql.urlJoin(`${props.projectFullPath}/-/jobs/${getIdFromGqlId(job.id)}`)}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <RefreshJobsAction onRefreshJobs={props.onRefreshJobs} />

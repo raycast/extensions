@@ -7,7 +7,6 @@ import {
   KeyboardShortcut,
   List,
   ListItem,
-  OpenInBrowserAction,
   popToRoot,
   PushAction,
   showToast,
@@ -20,6 +19,7 @@ import { Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { getErrorMessage } from "../utils";
 import { getVSCodeAppPath } from "../vscode";
+import { GitLabOpenInBrowserAction } from "./actions";
 import { ProjectLabelList } from "./project_label";
 import { ProjectNavMenusList } from "./project_nav";
 
@@ -89,7 +89,7 @@ export function CloneProjectInGitPod(props: { shortcut?: KeyboardShortcut; proje
   const url = `https://gitpod.io#${pro.web_url}`;
   if (pro.http_url_to_repo || pro.ssh_url_to_repo) {
     return (
-      <OpenInBrowserAction
+      <GitLabOpenInBrowserAction
         title="Clone in Gitpod"
         shortcut={props.shortcut}
         icon={{ source: "gitpod.png" }}
@@ -123,7 +123,7 @@ export function OpenProjectAction(props: { project: Project }): JSX.Element {
 }
 
 export function OpenProjectInBrowserAction(props: { project: Project }): JSX.Element {
-  return <OpenInBrowserAction url={props.project.web_url} />;
+  return <GitLabOpenInBrowserAction url={props.project.web_url} />;
 }
 
 export function ProjectDefaultActions(props: { project: Project }): JSX.Element {

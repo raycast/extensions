@@ -172,6 +172,15 @@
         }
       ],
       "description": "Set the default action for Projects"
+    },
+    {
+      "name": "poptoroot",
+      "type": "checkbox",
+      "label": "Pop to Root after external action",
+      "required": false,
+      "default": false,
+      "title": "Behavior",
+      "description": "Pop to root after e.g. open the browser"
     }
   ],
   "dependencies": {

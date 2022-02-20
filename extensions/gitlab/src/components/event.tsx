@@ -1,10 +1,11 @@
-import { ActionPanel, Color, Icon, ImageLike, List, OpenInBrowserAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Color, Icon, ImageLike, List, showToast, ToastStyle } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { capitalizeFirstLetter } from "../utils";
+import { GitLabOpenInBrowserAction } from "./actions";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -130,7 +131,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
                 break;
             }
             if (project && !error) {
-              actionElement = <OpenInBrowserAction url={`${project.web_url}/-/issues/${ev.target_iid}`} />;
+              actionElement = <GitLabOpenInBrowserAction url={`${project.web_url}/-/issues/${ev.target_iid}`} />;
             }
           } else if (tt == "mergerequest") {
             switch (ev.action_name) {
@@ -157,7 +158,9 @@ export function EventListItem(props: { event: Event }): JSX.Element {
             }
             title = `${an} merge request !${ev.target_iid}`;
             if (project && !error) {
-              actionElement = <OpenInBrowserAction url={`${project.web_url}/-/merge_requests/${ev.target_iid}`} />;
+              actionElement = (
+                <GitLabOpenInBrowserAction url={`${project.web_url}/-/merge_requests/${ev.target_iid}`} />
+              );
             }
           } else if (tt === "milestone") {
             switch (ev.action_name) {
@@ -174,7 +177,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
             }
             title = `${an} milestone ${ev.target_title}`;
             if (project && !error) {
-              actionElement = <OpenInBrowserAction url={`${project.web_url}/-/milestones/${ev.target_iid}`} />;
+              actionElement = <GitLabOpenInBrowserAction url={`${project.web_url}/-/milestones/${ev.target_iid}`} />;
             }
           } else if (tt === "discussionnote") {
             switch (ev.action_name) {

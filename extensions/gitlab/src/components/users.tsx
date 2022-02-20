@@ -1,16 +1,9 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  ImageMask,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, ImageMask, List, showToast, ToastStyle } from "@raycast/api";
 import { User } from "../gitlabapi";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
 import { getErrorMessage } from "../utils";
+import { GitLabOpenInBrowserAction } from "./actions";
 
 export function UserList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
@@ -43,7 +36,7 @@ export function UserListItem(props: { user: User }): JSX.Element {
       icon={{ source: user.avatar_url, mask: ImageMask.Circle }}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={user.web_url} />
+          <GitLabOpenInBrowserAction url={user.web_url} />
           <CopyToClipboardAction title="Copy User ID" content={user.id} />
           <CopyToClipboardAction title="Copy Username" content={user.username} />
           <CopyToClipboardAction title="Copy Name" content={user.name} />

@@ -1,9 +1,10 @@
-import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle, Color } from "@raycast/api";
+import { ActionPanel, List, showToast, ToastStyle, Color } from "@raycast/api";
 import { MergeRequest } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
 import { getErrorMessage } from "../utils";
+import { GitLabOpenInBrowserAction } from "./actions";
 
 export function ReviewList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
@@ -41,7 +42,7 @@ function ReviewListItem(props: { mr: MergeRequest }) {
       icon={{ source: GitLabIcons.mropen, tintColor: Color.Green }}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={mr.web_url} />
+          <GitLabOpenInBrowserAction url={mr.web_url} />
         </ActionPanel>
       }
     />

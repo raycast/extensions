@@ -1,19 +1,11 @@
-import {
-  ActionPanel,
-  Color,
-  ImageLike,
-  ImageMask,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, Color, ImageLike, ImageMask, List, showToast, ToastStyle } from "@raycast/api";
 import { Todo, User } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
 import { CloseAllTodoAction, CloseTodoAction, ShowTodoDetailsAction } from "./todo_actions";
 import { getErrorMessage, now } from "../utils";
+import { GitLabOpenInBrowserAction } from "./actions";
 
 function userToIcon(user?: User): ImageLike {
   let result = "";
@@ -67,7 +59,7 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JS
         <ActionPanel>
           <ActionPanel.Section>
             <ShowTodoDetailsAction todo={todo} />
-            <OpenInBrowserAction url={todo.target_url} />
+            <GitLabOpenInBrowserAction url={todo.target_url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <CloseTodoAction todo={todo} finished={props.refreshData} />
