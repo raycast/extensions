@@ -43,7 +43,10 @@ const GET_MR_DETAIL = gql`
 `;
 
 export function MRDetailFetch(props: { project: Project; mrId: number }): JSX.Element {
-  const { mr, isLoading } = useMR(props.project.id, props.mrId);
+  const { mr, isLoading, error } = useMR(props.project.id, props.mrId);
+  if (error) {
+    showToast(ToastStyle.Failure, "Could not fetch Merge Request Details", error);
+  }
   if (isLoading || !mr) {
     return <List isLoading={isLoading} searchBarPlaceholder={!mr ? "Loading" : ""} />;
   } else {

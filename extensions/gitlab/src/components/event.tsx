@@ -6,6 +6,7 @@ import { Project, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { capitalizeFirstLetter } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
+import { IssueDetailFetch } from "./issues";
 import { MRDetailFetch } from "./mr";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
@@ -166,6 +167,13 @@ export function EventListItem(props: { event: Event }): JSX.Element {
             if (project && !error) {
               actionElement = (
                 <DefaultActions
+                  action={
+                    <PushAction
+                      title="Open Issue"
+                      icon={{ source: GitLabIcons.issue, tintColor: Color.PrimaryText }}
+                      target={<IssueDetailFetch project={project} issueId={ev.target_iid} />}
+                    />
+                  }
                   webAction={<GitLabOpenInBrowserAction url={`${project.web_url}/-/issues/${ev.target_iid}`} />}
                 />
               );
@@ -200,6 +208,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
                   action={
                     <PushAction
                       title="Open Merge Request"
+                      icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
                       target={<MRDetailFetch project={project} mrId={ev.target_iid} />}
                     />
                   }

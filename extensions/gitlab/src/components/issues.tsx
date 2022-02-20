@@ -30,6 +30,18 @@ const GET_ISSUE_DETAIL = gql`
   }
 `;
 
+export function IssueDetailFetch(props: { project: Project; issueId: number }): JSX.Element {
+  const { issue, isLoading, error } = useIssue(props.project.id, props.issueId);
+  if (error) {
+    showToast(ToastStyle.Failure, "Could not fetch Issue Details", error);
+  }
+  if (isLoading || !issue) {
+    return <List isLoading={isLoading} searchBarPlaceholder={!issue ? "Loading" : ""} />;
+  } else {
+    return <IssueDetail issue={issue} />;
+  }
+}
+
 export function IssueDetail(props: { issue: Issue }): JSX.Element {
   const { description, error, isLoading } = useDetail(props.issue.id);
   if (error) {
@@ -317,4 +329,55 @@ export function useSearch(
   }, [query, timestamp]);
 
   return { issues, error, isLoading, refresh };
+}
+
+export function useIssue(
+  projectID: number,
+  issueID: number
+): {
+  issue?: Issue;
+  error?: string;
+  isLoading: boolean;
+} {
+  const [issue, setIssue] = useState<Issue>();
+  const [error, setError] = useState<string>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
+    async function fetchData() {
+      if (didUnmount) {
+        return;
+      }
+
+      setIsLoading(true);
+      setError(undefined);
+
+      try {
+        const glIssue = await gitlab.getIssue(projectID, issueID, {});
+        if (!didUnmount) {
+          setIssue(glIssue);
+        }
+      } catch (e) {
+        if (!didUnmount) {
+          setError(getErrorMessage(e));
+        }
+      } finally {
+        if (!didUnmount) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      didUnmount = true;
+    };
+  }, [projectID, issueID]);
+
+  return { issue, error, isLoading };
 }

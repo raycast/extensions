@@ -411,6 +411,17 @@ export class GitLab {
     return issueItems;
   }
 
+  async getIssue(projectID: number, issueID: number, params: Record<string, any>): Promise<Issue> {
+    if (!params.with_labels_details) {
+      params.with_labels_details = "true";
+    }
+    const projectPrefix = `projects/${projectID}/issues/${issueID}`;
+    const result: Issue = await this.fetch(`${projectPrefix}`, params).then((issue) => {
+      return jsonDataToIssue(issue);
+    });
+    return result;
+  }
+
   async getGroupIssues(params: Record<string, any>, groupID: number): Promise<Issue[]> {
     if (!params.with_labels_details) {
       params.with_labels_details = "true";
