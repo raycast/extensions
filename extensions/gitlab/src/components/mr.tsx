@@ -42,6 +42,15 @@ const GET_MR_DETAIL = gql`
   }
 `;
 
+export function MRDetailFetch(props: { project: Project; mrId: number }): JSX.Element {
+  const { mr, isLoading } = useMR(props.project.id, props.mrId);
+  if (isLoading || !mr) {
+    return <List isLoading={isLoading} searchBarPlaceholder={!mr ? "Loading" : ""} />;
+  } else {
+    return <MRDetail mr={mr} />;
+  }
+}
+
 export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   const { description, error, isLoading } = useDetail(props.mr.id);
   if (error) {
@@ -353,4 +362,55 @@ export function useSearch(
   }, [query, project, timestamp]);
 
   return { mrs, error, isLoading, refresh };
+}
+
+export function useMR(
+  projectID: number,
+  mrID: number
+): {
+  mr?: MergeRequest;
+  error?: string;
+  isLoading: boolean;
+} {
+  const [mr, setMR] = useState<MergeRequest>();
+  const [error, setError] = useState<string>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
+    async function fetchData() {
+      if (didUnmount) {
+        return;
+      }
+
+      setIsLoading(true);
+      setError(undefined);
+
+      try {
+        const glMr = await gitlab.getMergeRequest(projectID, mrID, {});
+        if (!didUnmount) {
+          setMR(glMr);
+        }
+      } catch (e) {
+        if (!didUnmount) {
+          setError(getErrorMessage(e));
+        }
+      } finally {
+        if (!didUnmount) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      didUnmount = true;
+    };
+  }, [projectID, mrID]);
+
+  return { mr, error, isLoading };
 }

@@ -552,6 +552,17 @@ export class GitLab {
     return issueItems;
   }
 
+  async getMergeRequest(projectID: number, mrID: number, params: Record<string, any>): Promise<MergeRequest> {
+    if (!params.with_labels_details) {
+      params.with_labels_details = "true";
+    }
+    const projectPrefix = `projects/${projectID}/merge_requests/${mrID}`;
+    const result: MergeRequest = await this.fetch(`${projectPrefix}`, params).then((mr) => {
+      return jsonDataToMergeRequest(mr);
+    });
+    return result;
+  }
+
   async getGroupMergeRequests(params: Record<string, any>, group: Group): Promise<MergeRequest[]> {
     if (!params.with_labels_details) {
       params.with_labels_details = "true";

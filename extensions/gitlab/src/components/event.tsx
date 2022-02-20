@@ -1,11 +1,12 @@
-import { ActionPanel, Color, Icon, ImageLike, List, showToast, ToastStyle } from "@raycast/api";
-import { useState } from "react";
+import { ActionPanel, Color, Icon, ImageLike, List, PushAction, showToast, ToastStyle } from "@raycast/api";
+import React, { useState } from "react";
 import { useCache } from "../cache";
-import { gitlab } from "../common";
+import { getProjectPrimaryActionPreference, gitlab, ProjectPrimaryAction } from "../common";
 import { Project, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { capitalizeFirstLetter } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
+import { MRDetailFetch } from "./mr";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -29,6 +30,32 @@ export interface Event {
   target_type: string;
   target_title: string;
   push_data?: PushData;
+}
+
+function DefaultActions(props: {
+  action?: JSX.Element | undefined | null;
+  webAction?: JSX.Element | undefined | null;
+}): JSX.Element | null {
+  const action = props.action;
+  const webAction = props.webAction;
+  if (action || webAction) {
+    if (getProjectPrimaryActionPreference() === ProjectPrimaryAction.Detail) {
+      return (
+        <React.Fragment>
+          {action}
+          {webAction}
+        </React.Fragment>
+      );
+    } else {
+      return (
+        <React.Fragment>
+          {webAction}
+          {action}
+        </React.Fragment>
+      );
+    }
+  }
+  return null;
 }
 
 export function EventListItem(props: { event: Event }): JSX.Element {
@@ -72,7 +99,8 @@ export function EventListItem(props: { event: Event }): JSX.Element {
         const pd = ev.push_data;
         if (pd) {
           if (pd.ref_type === "branch") {
-            title = `${an} branch ${pd.ref}`;
+            const ref = pd.ref;
+            title = `${an} branch ${ref}`;
             switch (ev.action_name) {
               case "pushed new":
                 {
@@ -89,6 +117,11 @@ export function EventListItem(props: { event: Event }): JSX.Element {
                   icon = { source: GitLabIcons.branches, tintColor: Color.Red };
                 }
                 break;
+            }
+            if (project && !error && ev.action_name !== "deleted") {
+              actionElement = (
+                <DefaultActions webAction={<GitLabOpenInBrowserAction url={`${project.web_url}/-/tree/${ref}`} />} />
+              );
             }
           }
         }
@@ -131,7 +164,11 @@ export function EventListItem(props: { event: Event }): JSX.Element {
                 break;
             }
             if (project && !error) {
-              actionElement = <GitLabOpenInBrowserAction url={`${project.web_url}/-/issues/${ev.target_iid}`} />;
+              actionElement = (
+                <DefaultActions
+                  webAction={<GitLabOpenInBrowserAction url={`${project.web_url}/-/issues/${ev.target_iid}`} />}
+                />
+              );
             }
           } else if (tt == "mergerequest") {
             switch (ev.action_name) {
@@ -159,7 +196,20 @@ export function EventListItem(props: { event: Event }): JSX.Element {
             title = `${an} merge request !${ev.target_iid}`;
             if (project && !error) {
               actionElement = (
-                <GitLabOpenInBrowserAction url={`${project.web_url}/-/merge_requests/${ev.target_iid}`} />
+                <DefaultActions
+                  action={
+                    <PushAction
+                      title="Open Merge Request"
+                      target={<MRDetailFetch project={project} mrId={ev.target_iid} />}
+                    />
+                  }
+                  webAction={
+                    <GitLabOpenInBrowserAction
+                      url={`${project.web_url}/-/merge_requests/${ev.target_iid}`}
+                      title="Open MR in Browser"
+                    />
+                  }
+                />
               );
             }
           } else if (tt === "milestone") {
@@ -177,7 +227,11 @@ export function EventListItem(props: { event: Event }): JSX.Element {
             }
             title = `${an} milestone ${ev.target_title}`;
             if (project && !error) {
-              actionElement = <GitLabOpenInBrowserAction url={`${project.web_url}/-/milestones/${ev.target_iid}`} />;
+              actionElement = (
+                <DefaultActions
+                  webAction={<GitLabOpenInBrowserAction url={`${project.web_url}/-/milestones/${ev.target_iid}`} />}
+                />
+              );
             }
           } else if (tt === "discussionnote") {
             switch (ev.action_name) {
