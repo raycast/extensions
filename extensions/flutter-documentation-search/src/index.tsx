@@ -113,10 +113,10 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<D
       method: "get",
       signal: signal,
     });
-    
+
     const matches = response.headers.get("cache-control")?.match(/max-age=(\d+)/);
     const maxAge = matches ? parseInt(matches[1], 10) : CACHE_DEFAULT_TTL_IN_SECONDS;
-    
+
     if (!response.ok) {
       throw new Error("Error fetching doc");
     }
