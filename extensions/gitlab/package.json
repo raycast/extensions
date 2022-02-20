@@ -126,6 +126,13 @@
       "subtitle": "GitLab",
       "description": "Managed My GitLab Status",
       "mode": "view"
+    },
+    {
+      "name": "commits_my",
+      "title": "My Recent Commits",
+      "subtitle": "GitLab",
+      "description": "Managed My Recent Commits",
+      "mode": "view"
     }
   ],
   "preferences": [
