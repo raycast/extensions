@@ -11,6 +11,8 @@ v1.setServerVariables(configuration, {
 });
 
 export const dashboardsApi = new v1.DashboardsApi(configuration);
+export const notebooksApi = new v1.NotebooksApi(configuration);
+export const monitorsApi = new v1.MonitorsApi(configuration);
 
 export const apiAPM = ({ env }: { env: string }): Promise<APM[]> =>
   fetch(`https://api.${SERVER}/api/v1/service_dependencies?env=${env}`, params)
