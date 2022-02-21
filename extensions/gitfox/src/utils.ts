@@ -91,8 +91,8 @@ export async function fetchBookmarks(): Promise<Bookmark[]> {
   } catch (error) {
     await showToast(
       Toast.Style.Failure,
-      "Something whent wrong",
-      "Something whent wrong loading the Gitfox bookmarks."
+      "Something went wrong",
+      "Could not load the Gitfox bookmarks."
     );
     return Promise.resolve([]);
   }
