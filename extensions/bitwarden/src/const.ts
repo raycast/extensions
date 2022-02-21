@@ -34,16 +34,19 @@ export const PASSWORD_OPTIONS_MAP: Record<keyof PasswordOptions, PasswordOptionF
     label: "Length of the password",
     hint: "5 - 128",
     type: "number",
+    errorMessage: "Field must be a number between 5 and 128",
   },
   words: {
     label: "Number of words",
     hint: "3 - 20",
     type: "number",
+    errorMessage: "Field must be a number between 3 and 20",
   },
   separator: {
     label: "Word separator",
     hint: "this-is-a-passphrase",
     type: "string",
+    errorMessage: "Field must be a single character",
   },
   capitalize: {
     label: "Capitalise passphrase",

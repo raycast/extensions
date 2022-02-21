@@ -78,15 +78,25 @@ export interface SecureNote {
 }
 
 export interface PasswordOptions {
+  /** Include uppercase characters */
   lowercase?: boolean;
+  /** Include lowercase characters */
   uppercase?: boolean;
+  /** Include numeric characters */
   number?: boolean;
+  /** Include special characters */
   special?: boolean;
+  /** Generate a passphrase */
   passphrase?: boolean;
+  /** Length of the password */
   length?: number;
+  /** Number of words */
   words?: number;
+  /** Word separator */
   separator?: string;
+  /** Title case passphrase */
   capitalize?: boolean;
+  /** Passphrase includes number */
   includeNumber?: boolean;
 }
 
@@ -94,4 +104,5 @@ export interface PasswordOptionField {
   label: string;
   hint?: string;
   type: "boolean" | "number" | "string";
+  errorMessage?: string;
 }

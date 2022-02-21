@@ -1,9 +1,22 @@
-import { ActionPanel, List, Icon, Color, Clipboard, Action, showHUD, useNavigation, Form } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Icon,
+  Color,
+  Clipboard,
+  Action,
+  showHUD,
+  useNavigation,
+  Form,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useBitwarden, usePasswordGenerator, usePasswordOptions } from "./hooks";
 import { UnlockForm } from "./components";
 import { Bitwarden } from "./api";
 import { PASSWORD_OPTIONS_MAP } from "./const";
 import { objectEntries } from "./utils";
+import { PasswordOptions } from "./types";
 
 const GeneratePassword = () => {
   const { push } = useNavigation();
@@ -86,10 +99,27 @@ const GeneratePassword = () => {
   );
 };
 
+const isValidField = <O extends keyof PasswordOptions>(option: O, value: PasswordOptions[O]) => {
+  if (option === "length") return !isNaN(Number(value)) && Number(value) >= 5 && Number(value) <= 128;
+  if (option === "separator") return (value as string).length === 1;
+  if (option === "words") return !isNaN(Number(value)) && Number(value) >= 3 && Number(value) <= 20;
+  return true;
+};
+
 const Options = () => {
-  const { options, handleFieldChange, clearStorage } = usePasswordOptions();
+  const { options, setOption, clearStorage } = usePasswordOptions();
 
   if (!options) return null;
+
+  const handleFieldChange =
+    <O extends keyof PasswordOptions>(option: O, errorMessage?: string) =>
+    async (value: PasswordOptions[O]) => {
+      if (!isValidField(option, value)) {
+        if (errorMessage) await showToast(Toast.Style.Failure, errorMessage);
+        return;
+      }
+      setOption(option, value);
+    };
 
   return (
     <Form
@@ -101,7 +131,7 @@ const Options = () => {
         ) : undefined
       }
     >
-      {objectEntries(PASSWORD_OPTIONS_MAP).map(([option, { hint, label, type }]) => {
+      {objectEntries(PASSWORD_OPTIONS_MAP).map(([option, { hint, label, type, errorMessage }]) => {
         if (type === "boolean") {
           return (
             <Form.Checkbox
@@ -110,7 +140,7 @@ const Options = () => {
               title={label}
               label={hint ?? ""}
               value={Boolean(options?.[option] ?? false)}
-              onChange={handleFieldChange(option)}
+              onChange={handleFieldChange(option, errorMessage)}
             />
           );
         }
@@ -121,7 +151,7 @@ const Options = () => {
             id={option}
             title={label}
             value={String(options?.[option] ?? "")}
-            onChange={handleFieldChange(option)}
+            onChange={handleFieldChange(option, errorMessage)}
           />
         );
       })}
