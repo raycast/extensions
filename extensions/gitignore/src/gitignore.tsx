@@ -14,7 +14,6 @@ function GitignoreList({
   selected: boolean;
   toggleSelection: (gitignoreFile: GitignoreFile) => void;
 }) {
-
   return (
     <React.Fragment>
       {gitignoreFiles.map((gitignore) => {
@@ -49,7 +48,6 @@ function GitignoreList({
 }
 
 export default function Gitignore() {
-
   const [{ gitignoreFiles, lastUpdated, loading }, selectedIds, toggleSelection, refresh] = useGitignore();
 
   useEffect(() => {
@@ -105,25 +103,21 @@ export default function Gitignore() {
   );
 }
 
-function PreviewAction({ selected }: {
-  selected: GitignoreFile[];
-}) {
+function PreviewAction({ selected }: { selected: GitignoreFile[] }) {
   return (
-    <Action.Push title="Preview"
+    <Action.Push
+      title="Preview"
       icon={Icon.Eye}
       shortcut={{ modifiers: ["cmd"], key: "p" }}
-      target={<GitignorePreview gitignoreFiles={selected} />} />
+      target={<GitignorePreview gitignoreFiles={selected} />}
+    />
   );
 }
 
-function PasteAction({ selected }: {
-  selected: GitignoreFile[];
-}) {
+function PasteAction({ selected }: { selected: GitignoreFile[] }) {
   return <Action title="Paste to App" icon={Icon.TextDocument} onAction={() => exportPaste(selected)} />;
 }
 
-function CopyToClipboardAction({ selected }: {
-  selected: GitignoreFile[];
-}) {
+function CopyToClipboardAction({ selected }: { selected: GitignoreFile[] }) {
   return <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => exportClipboard(selected)} />;
 }
