@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "v2ex-news",
-  "title": "v2ex-news",
+  "title": "V2EX",
   "description": "show v2ex notifications, planes, topics and replies.",
   "icon": "v2ex.png",
   "author": "chyroc",
@@ -9,20 +9,23 @@
   "commands": [
     {
       "name": "plane",
-      "title": "Plane | 位面列表",
-      "description": "show plane data",
+      "title": "Plane Planes",
+      "subtitle": "V2EX",
+      "description": "Show plane data",
       "mode": "view"
     },
     {
       "name": "profile",
-      "title": "Profile | 个人主页",
-      "description": "show your profile",
+      "title": "Show Profile",
+      "subtitle": "V2EX",
+      "description": "Show your profile",
       "mode": "view"
     },
     {
       "name": "notification",
-      "title": "Notification | 通知",
-      "description": "show your notification",
+      "title": "Show Notification",
+      "subtitle": "V2EX",
+      "description": "Show your notification",
       "mode": "view"
     }
   ],
@@ -31,7 +34,7 @@
       "name": "token",
       "required": true,
       "title": "V2EX Token",
-      "placeholder": "input your v2ex token",
+      "placeholder": "input your V2EX token",
       "description": "V2EX Token",
       "type": "textfield"
     }
