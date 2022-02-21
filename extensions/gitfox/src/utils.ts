@@ -34,25 +34,25 @@ export function gitfoxCliRequiredMessage(): string {
 
 
   Ensure that CLI integration is enabled in the Gitfox app:
-  
+
   > Settings > Intergration > Command Line Utility
-  
+
   Then check if the path is the same as the one configured in the extension settings.
   `;
 }
 
-async function extractBookmarks(obj: GitfoxRepository[], parents?: string): Promise<Bookmark[]> {
+function extractBookmarks(obj: GitfoxRepository[], parents?: string): Bookmark[] {
   const bookmarks: Bookmark[] = [];
 
   if (!obj || obj.length === 0) {
-    return Promise.resolve(bookmarks);
+    return bookmarks;
   }
 
-  obj.forEach(async (bookmark: GitfoxRepository) => {
+  obj.forEach((bookmark: GitfoxRepository) => {
     const name = parents ? `${parents} / ${bookmark.title}` : bookmark.title;
 
     if (bookmark.children && bookmark.children.length > 0) {
-      const childBookmarks = await extractBookmarks(bookmark.children, name);
+      const childBookmarks = extractBookmarks(bookmark.children, name);
 
       childBookmarks.forEach((bookmark) => bookmarks.push(bookmark));
     }
@@ -64,7 +64,7 @@ async function extractBookmarks(obj: GitfoxRepository[], parents?: string): Prom
     }
   });
 
-  return Promise.resolve(bookmarks);
+  return bookmarks;
 }
 
 export async function fetchBookmarks(): Promise<Bookmark[]> {
@@ -85,7 +85,7 @@ export async function fetchBookmarks(): Promise<Bookmark[]> {
       return Promise.resolve([]);
     }
 
-    const bookmarks = await extractBookmarks(repos.children);
+    const bookmarks = extractBookmarks(repos.children);
 
     return Promise.resolve(bookmarks);
   } catch (error) {
