@@ -55,7 +55,7 @@ export async function sendAction({ id, action }: SendActionRequest) {
   });
 }
 
-export async function fetchBookmarks({ name, state, count }: FetchBookmarksRequest): Promise<Array<Bookmark>> {
+export async function fetchBookmarks({ name, state, count }: FetchBookmarksRequest = {}): Promise<Array<Bookmark>> {
   const response = await api.post("v3/get", {
     json: {
       consumer_key: consumerKey,

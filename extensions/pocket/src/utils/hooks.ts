@@ -5,18 +5,8 @@ import { showToast, Toast, ToastStyle } from "@raycast/api";
 import { useEffect } from "react";
 import { HTTPError } from "got";
 
-interface UseBookmarksOptions {
-  name?: string;
-  state?: "unread" | "archive" | "all";
-}
-
-export function useBookmarks({ name, state }: UseBookmarksOptions) {
-  const { data, error, isValidating, mutate } = useSWR<Array<Bookmark>, HTTPError>(
-    ["v3/get", name, state],
-    async (url, name, state) => {
-      return fetchBookmarks({ name, state });
-    }
-  );
+export function useBookmarks() {
+  const { data, error, isValidating, mutate } = useSWR<Array<Bookmark>, HTTPError>("v3/get", fetchBookmarks);
 
   useEffect(() => {
     if (error) {

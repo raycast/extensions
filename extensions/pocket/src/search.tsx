@@ -9,24 +9,14 @@ import {
   OpenInBrowserAction,
 } from "@raycast/api";
 import { useBookmarks } from "./utils/hooks";
-import { useState } from "react";
 
 const preferences = getPreferenceValues();
 
 export default function Search() {
-  const [search, setSearch] = useState("");
-
-  const { bookmarks, loading, toggleFavorite, refreshBookmarks, archiveBookmark, deleteBookmark } = useBookmarks({
-    name: search,
-  });
+  const { bookmarks, loading, toggleFavorite, refreshBookmarks, archiveBookmark, deleteBookmark } = useBookmarks();
 
   return (
-    <List
-      throttle
-      isLoading={loading}
-      onSearchTextChange={setSearch}
-      searchBarPlaceholder="Filter bookmarks by title..."
-    >
+    <List throttle isLoading={loading} searchBarPlaceholder="Filter bookmarks by title...">
       {bookmarks.map((bookmark) => (
         <List.Item
           key={bookmark.id}
