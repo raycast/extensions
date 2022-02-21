@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Icon, List, preferences, getPreferenceValues, ActionPanel, OpenAction, Application } from "@raycast/api";
+import { Icon, List, getPreferenceValues, ActionPanel, Application, Action } from "@raycast/api";
 
 interface OpenWithAppActionProps {
   link: string;
@@ -7,12 +7,11 @@ interface OpenWithAppActionProps {
 }
 
 function OpenWithApplicationAction({ link, application }: OpenWithAppActionProps) {
-  return <OpenAction target={link} title="Open Link" icon={Icon.Globe} application={application} />;
+  return <Action.Open target={link} title="Open Link" icon={Icon.Globe} application={application} />;
 }
 
 export default function AppPicker() {
   const preferenceValues = getPreferenceValues();
-  console.log(preferences, preferenceValues);
   const { link, openWithOptional, openWithRequired } = preferenceValues;
   const [query, setQuery] = useState("raycast");
   const [linkToOpen, setLinkToOpen] = useState("");

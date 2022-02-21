@@ -1,9 +1,8 @@
 ---
 name: "🛠 🐞 Dev Tools Bug Report"
-about: Report a reproducible bug or regression related to dev tools (CLI, publishing, commands like Manage Extension or Create Extension, etc)
-title: ''
-labels: 'dev tools, bug'
-
+about: Report a reproducible bug or regression related to dev tools (CLI, publishing, commands like Manage Extension or Create Extension, etc.)
+title: ""
+labels: "dev tools, bug"
 ---
 
 <!--
@@ -25,6 +24,5 @@ Raycast version:
 -->
 
 ## The current behavior
-
 
 ## The expected behavior

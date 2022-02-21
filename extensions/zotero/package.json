@@ -35,9 +35,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.28.0",
     "he": "^1.2.0",
-    "node-fetch": "^3.0.0"
+    "node-fetch": "^3.0.0",
+    "modern-async": "^1.1.2"
   },
   "devDependencies": {
     "@types/he": "^1.1.2",

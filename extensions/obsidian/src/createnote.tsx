@@ -84,13 +84,18 @@ function tags() {
   const tagsString = pref.tags;
   const prefTag = pref.prefTag;
   if (!tagsString) {
-    return [{ name: prefTag, key: prefTag }];
+    if (prefTag) {
+      return [{ name: prefTag, key: prefTag }];
+    }
+    return [];
   }
   const tags = tagsString
     .split(",")
     .map((tag) => ({ name: tag.trim(), key: tag.trim() }))
     .filter((tag) => !!tag);
-  tags.push({ name: prefTag, key: prefTag });
+  if (prefTag) {
+    tags.push({ name: prefTag, key: prefTag });
+  }
   return tags;
 }
 
@@ -115,8 +120,18 @@ function NoteForm(props: { vaultPath: string }) {
 
   function saveMDFile(notePath: string, name: string, content: string) {
     try {
-      fs.mkdirSync(notePath, { recursive: true });
-      fs.writeFileSync(path.join(notePath, name + ".md"), content);
+      try {
+        fs.mkdirSync(notePath, { recursive: true });
+      } catch {
+        showToast(ToastStyle.Failure, "Couldn't create folder structure for the given path.");
+        return;
+      }
+      try {
+        fs.writeFileSync(path.join(notePath, name + ".md"), content);
+      } catch {
+        showToast(ToastStyle.Failure, "Couldn't write the file: " + notePath + "/" + name + ".md");
+        return;
+      }
       showToast(ToastStyle.Success, "Created new note");
       pop();
     } catch {
@@ -193,6 +208,10 @@ export default function Command() {
   } else if (vaults.length == 1) {
     return <NoteForm vaultPath={vaults[0].path} />;
   } else {
-    showToast(ToastStyle.Failure, "Path Error", "Something went wrong with your vault path.");
+    showToast(
+      ToastStyle.Failure,
+      "Path Error",
+      "Something went wrong with your vault path. There are no paths to select from."
+    );
   }
 }

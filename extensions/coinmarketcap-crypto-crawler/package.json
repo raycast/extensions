@@ -13,13 +13,6 @@
       "subtitle": "CoinMarketCap",
       "description": "Search for Coin Prices",
       "mode": "view"
-    },
-    {
-      "name": "refresh",
-      "title": "Refresh Crypto List",
-      "subtitle": "CoinMarketCap",
-      "description": "Refresh existing Crypto List cache",
-      "mode": "no-view"
     }
   ],
   "dependencies": {

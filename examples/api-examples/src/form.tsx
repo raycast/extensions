@@ -1,4 +1,4 @@
-import { ActionPanel, SubmitFormAction, Form, Icon, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Form, Icon, showToast, Action, Toast } from "@raycast/api";
 import { useState } from "react";
 
 interface FormValues {
@@ -15,7 +15,11 @@ export default function Command() {
 
   function handleSubmit(values: FormValues) {
     console.log(values);
-    showToast(ToastStyle.Success, "Submitted form", "See logs for submitted values");
+    showToast({
+      style: Toast.Style.Success,
+      title: "Submitted form",
+      message: "See logs for submitted values",
+    });
   }
 
   function genderChanged(genderValue: string) {
@@ -26,7 +30,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Submit" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Submit" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

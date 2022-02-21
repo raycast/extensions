@@ -59,3 +59,12 @@ const hasMatch = (search: string[], words: string[]) => {
   }
   return false;
 };
+
+export const isValidUrl = (urlString: string) => {
+  try {
+    new URL(urlString);
+    return true;
+  } catch (err) {
+    return false;
+  }
+};

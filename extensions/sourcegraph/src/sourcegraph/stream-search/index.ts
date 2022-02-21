@@ -56,7 +56,7 @@ export async function performSearch(
     ["display", "1500"],
   ];
   const parameterEncoded = parameters.map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
-  const requestURL = `${src.instance}/search/stream?${parameterEncoded}`;
+  const requestURL = `${src.instance}/.api/search/stream?${parameterEncoded}`;
   const stream = src.token
     ? new EventSource(requestURL, { headers: { Authorization: `token ${src.token}` } })
     : new EventSource(requestURL);
@@ -82,13 +82,31 @@ export async function performSearch(
 
       handlers.onResults(
         event.data.map((match): SearchResult => {
-          const url = `${src.instance}${getMatchUrl(match)}`;
-          if (match.type === "commit") {
-            // Commit stuff comes already markdown-formatted?? so strip formatting
-            match.label = stripMarkdown.processSync(match.label)?.value.toString().split(`› `).pop() || "";
-            match.detail = stripMarkdown.processSync(match.detail)?.value.toString();
+          const matchURL = `${src.instance}${getMatchUrl(match)}`;
+          // Do some pre-processing of results, since some of the API outputs are a bit
+          // confusing, to make it easier later on.
+          switch (match.type) {
+            case "commit":
+              // Commit stuff comes already markdown-formatted?? so strip formatting
+              match.label = stripMarkdown.processSync(match.label)?.value.toString().split(`› `).pop() || "";
+              match.detail = stripMarkdown.processSync(match.detail)?.value.toString();
+              break;
+            case "content":
+              // Line number appears 0-indexed, for ease of use increment it so links
+              // aren't off by 1.
+              match.lineMatches.forEach((l) => {
+                l.lineNumber += 1;
+              });
+              break;
+            case "symbol":
+              match.symbols.forEach((s) => {
+                // Trim out the path that we already have in matchURL so that we can just
+                // append it, similar to other match types where we append the line number
+                // of the match.
+                s.url = s.url.split("#").pop() || "";
+              });
           }
-          return { url, match };
+          return { url: matchURL, match };
         })
       );
     });

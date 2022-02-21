@@ -13,7 +13,7 @@ function getInstance(): string {
 }
 
 export function createHomeAssistantClient(): HomeAssistant {
-  const instance = preferences.instance?.value as string;
+  const instance = getInstance();
   const token = preferences.token?.value as string;
   const hac = new HomeAssistant(instance, token);
   return hac;
