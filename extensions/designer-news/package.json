@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Designer News",
+      "title": "Read Top News",
+      "subtitle": "Designer News",
       "description": "See the current top stories from Designer News",
       "mode": "view"
     }
