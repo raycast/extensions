@@ -1,29 +1,7 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Icon, List, Color, showToast, Toast, popToRoot } from "@raycast/api";
+import { ActionPanel, Action, List, Color, showToast, Toast, popToRoot } from "@raycast/api";
 import fetch from "node-fetch";
-
-interface DriverStanding {
-  position: number;
-  points: number;
-  wins: number;
-  Driver: {
-    driverId: string;
-    permanentNumber: string;
-    code: string;
-    url: string;
-    givenName: string;
-    familyName: string;
-    dateOfBirth: string;
-    nationality: string;
-  };
-  Constructors: {
-    constructorId: string;
-    url: string;
-    name: string;
-    nationality: string;
-  }[];
-}
-
+import { DriverStanding } from "./types";
 interface State {
   season?: number;
   items?: DriverStanding[];
