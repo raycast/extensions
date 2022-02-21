@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cpf-cnpj-generator",
   "title": "CPF/CNPJ Generator",
-  "description": "Generate CPF or CNPJ data for developers",
+  "description": "Generate CPF (Cadastro de Pessoa Físca) number or CNPJ (Cadastro Nacional de Pessoa Jurídica) number data for developers",
   "icon": "icon.png",
   "author": "gstvds",
   "license": "MIT",
@@ -10,7 +10,7 @@
     {
       "name": "cpf",
       "title": "Generate CPF",
-      "description": "Generate CPF data for developers",
+      "description": "Generate CPF (Cadastro de Pessoa Física) data for developers",
       "mode": "no-view",
       "keywords": [
         "cpf"
@@ -19,7 +19,7 @@
     {
       "name": "cnpj",
       "title": "Generate CNPJ",
-      "description": "Generate CNPJ data for developers",
+      "description": "Generate CNPJ (Cadastro Nacional de Pessoa Jurídica) data for developers",
       "mode": "no-view",
       "keywords": [
         "cnpj"
