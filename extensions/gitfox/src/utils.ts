@@ -89,11 +89,11 @@ export async function fetchBookmarks(): Promise<Bookmark[]> {
 
     return Promise.resolve(bookmarks);
   } catch (error) {
-    await showToast(
-      Toast.Style.Failure,
-      "Something went wrong",
-      "Could not load the Gitfox bookmarks."
-    );
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Something went wrong",
+      message: "Could not load the Gitfox bookmarks."
+    });
     return Promise.resolve([]);
   }
 }
