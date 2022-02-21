@@ -8,4 +8,4 @@ It also offers the ability to copy information about the process (PID, Name, Par
 
 The settings provide the option to *run `Isof` and `kill` commands with sudo (as root)*, which is deactivated by default. Before activating the option, make sure your user is set up for [passwordless use of the sudo command](https://osxdaily.com/2014/02/06/add-user-sudoers-file-mac/). However, if you don't already know what this means or how to do it, you **probably shouldn't do it**. Doing it poses an considerable security risk and (if done wrongly) might break your macOS installation. If you still wanna do it, make sure to use `visudo`. **You have been warned**.
 
-Despite the aforementioned risks, I included the option beacause it adds an essential functionality: To see processes which are not owned by your own user.
+Despite the aforementioned risks, I included the option because it adds an essential functionality: To see processes which are not owned by your own user.
