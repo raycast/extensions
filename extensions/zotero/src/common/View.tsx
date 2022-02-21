@@ -37,7 +37,9 @@ export const View = ({ sectionNames, queryResults, isLoading, onSearchTextChange
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser title="Open in Zotero" url={item.url} onOpen={onOpen} />
-                  {item.pdf_url !== `` && <Action.OpenInBrowser title="Open PDF" url={item.pdf_url} onOpen={onOpen} />}
+                  {item.pdf_url !== `` && (
+                    <Action.OpenInBrowser icon={Icon.Document} title="Open PDF" url={item.pdf_url} onOpen={onOpen} />
+                  )}
                   <Action.CopyToClipboard title="Copy URL" content={item.link} shortcut={copyToClipboardShortcut} />
                   <Action.CopyToClipboard
                     title="Copy As Reference"
