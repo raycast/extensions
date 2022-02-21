@@ -88,6 +88,8 @@ async function get_pdf_key(key: string) {
   }
   const data = (await response.json()) as Array<any>;
   const pdf_data = data.filter((d) => d.data.contentType === "application/pdf");
+  // NOTE: In case multiple pdf files are found, just first one is picked up to open.
+  // Its not clear to me what should be the correct logic to find the primary PDF
   return pdf_data.length > 0 ? `${pdf_data[0].key}` : ``;
 }
 
