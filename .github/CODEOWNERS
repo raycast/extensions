@@ -80,6 +80,7 @@
 /extensions/fork-repositories                        @sxn
 /extensions/geohash-encode-decode                    @alrico88
 /extensions/git-repos                                @moored
+/extensions/gitfox                                   @L3K0V
 /extensions/github-for-enterprise                    @Kinbaum
 /extensions/github-repository-search                 @thomaspaulmann
 /extensions/github-stars                             @mrmartineau
