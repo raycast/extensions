@@ -1,6 +1,12 @@
-import { ActionPanel, Toast, showToast, Detail, List, Action, Icon } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 import { useRef, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
+import RedditPost from "./RedditPost";
+import RedditPostList from "./RedditPostList";
+
+const redditUrl = "https://www.reddit.com/";
+const searchUrl = "https://www.reddit.com/search";
+const apiUrl = "https://www.reddit.com/search.json";
 
 export default function Command() {
   const [results, setResults] = useState<RedditPost[]>([]);
@@ -13,16 +19,17 @@ export default function Command() {
     abortControllerRef.current = new AbortController();
 
     setSearching(true);
+    setResults([]);
 
     const params = new URLSearchParams();
     params.append("q", query);
 
-    setSearchRedditUrl("https://www.reddit.com/search?" + params.toString());
+    setSearchRedditUrl(searchUrl + "?" + params.toString());
 
     params.append("limit", "10");
 
     try {
-      const response = await fetch("https://www.reddit.com/search.json?" + params.toString(), {
+      const response = await fetch(apiUrl + "?" + params.toString(), {
         method: "get",
         signal: abortControllerRef.current.signal,
       });
@@ -39,10 +46,13 @@ export default function Command() {
                 id: string;
                 title: string;
                 url: string;
+                permalink: string;
                 selftext?: string;
                 created_utc: number;
                 thumbnail: string;
                 subreddit: string;
+                url_overridden_by_dest?: string;
+                is_video: boolean;
               };
             }
           ];
@@ -54,8 +64,16 @@ export default function Command() {
           ({
             id: x.data.id,
             title: x.data.title,
-            url: x.data.url,
+            url: redditUrl + x.data.permalink,
             description: x.data.selftext,
+            imageUrl:
+              x.data.is_video ||
+              (x.data.url_overridden_by_dest &&
+                !x.data.url_overridden_by_dest.endsWith(".jpg") &&
+                !x.data.url_overridden_by_dest.endsWith(".gif") &&
+                !x.data.url_overridden_by_dest.endsWith(".png"))
+                ? ""
+                : x.data.url_overridden_by_dest,
             created: new Date(x.data.created_utc * 1000).toLocaleString(),
             thumbnail: x.data.thumbnail,
             subreddit: x.data.subreddit,
@@ -78,63 +96,5 @@ export default function Command() {
     }
   };
 
-  return (
-    <List isLoading={searching} onSearchTextChange={doSearch} throttle searchBarPlaceholder="Search Reddit...">
-      {results.map((x) => (
-        <List.Item
-          key={x.id}
-          icon={x.thumbnail ? { source: x.thumbnail } : Icon.Text}
-          title={x.title}
-          accessoryTitle={`Posted ${x.created} r/${x.subreddit}`}
-          actions={
-            x.description ? (
-              <ActionPanel>
-                <Action.Push
-                  title="Show Details"
-                  target={
-                    <Detail
-                      navigationTitle={x.title}
-                      markdown={x.description ? x.description : "No description"}
-                      actions={
-                        <ActionPanel>
-                          <Action.OpenInBrowser url={x.url} />
-                        </ActionPanel>
-                      }
-                    />
-                  }
-                />
-                <Action.OpenInBrowser url={x.url} icon={Icon.Text} />
-              </ActionPanel>
-            ) : (
-              <ActionPanel>
-                <Action.OpenInBrowser url={x.url} icon={Icon.Text} />
-              </ActionPanel>
-            )
-          }
-        />
-      ))}
-      {results.length > 0 && (
-        <List.Item
-          key="searchOnReddit"
-          icon={Icon.MagnifyingGlass}
-          title="Show all results on Reddit..."
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser url={searchRedditUrl} icon={Icon.Globe} />
-            </ActionPanel>
-          }
-        />
-      )}
-    </List>
-  );
-}
-
-interface RedditPost {
-  id: string;
-  title: string;
-  url: string;
-  description: string;
-  created: string;
-  thumbnail: string;
-  subreddit: string;
+  return <RedditPostList posts={results} searching={searching} doSearch={doSearch} searchRedditUrl={searchRedditUrl} />;
 }
