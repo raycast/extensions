@@ -1,22 +1,93 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "php-monitor-integration",
-  "title": "PHP Monitor Integration",
-  "description": "Control PHP Monitor, a utility application for the Mac. \n\nhttps://phpmon.app",
+  "name": "php-monitor",
+  "title": "PHP Monitor",
+  "description": "Control PHP Monitor, a utility application for the Mac. Requires the integration with third-party options not to be disabled. (This option is enabled by default in PHP Monitor.) \n\nhttps://phpmon.app",
   "icon": "command-icon.png",
   "author": "nicoverbruggen",
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "PHP Monitor",
-      "subtitle": "Interact with PHP Monitor, provided it is running.",
-      "description": "You can order PHP Monitor to perform various actions. Requires the integration with third-party options not to be disabled. (This option is enabled by default in PHP Monitor.)",
+      "name": "switch",
+      "title": "Switch PHP Version",
+      "subtitle": "Allows you to switch to a different PHP version.",
+      "description": "PHP Monitor",
       "mode": "view"
+    },
+    {
+      "name": "list",
+      "title": "Show Linked & Parked Domains",
+      "subtitle": "Opens a list of domains registered with Valet.",
+      "description": "PHP Monitor",
+      "mode": "no-view"
+    },
+    {
+      "name": "locate-config",
+      "title": "Locate PHP Configuration File (php.ini)",
+      "subtitle": "Locates the PHP Configuration File in Finder.",
+      "description": "PHP Monitor",
+      "mode": "no-view"
+    },
+    {
+      "name": "locate-composer",
+      "title": "Locate Global Composer File (.composer)",
+      "subtitle": "Locates the Global Composer file in Finder.",
+      "description": "PHP Monitor",
+      "mode": "no-view"
+    },
+    {
+      "name": "locate-valet",
+      "title": "Locate Valet Folder (.config/valet)",
+      "subtitle": "Locates the Valet folder in Finder.",
+      "description": "PHP Monitor",
+      "mode": "no-view"
+    },
+    {
+      "name": "phpinfo",
+      "title": "Show Current Configuration (phpinfo)",
+      "subtitle": "Opens a temporary file with the output of `phpinfo()`.",
+      "description": "PHP Monitor",
+      "mode": "no-view"
+    },
+    {
+      "name": "services-restart-all",
+      "title": "Restart All Services",
+      "subtitle": "Attempts to restart all Valet services (php, nginx and dnsmasq).",
+      "description": "PHP Monitor",
+      "mode": "no-view"
+    },
+    {
+      "name": "services-restart-nginx",
+      "title": "Restart Service: nginx",
+      "subtitle": "Attempts to restart the following service: nginx.",
+      "description": "PHP Monitor",
+      "mode": "no-view"
+    },
+    {
+      "name": "services-restart-dnsmasq",
+      "title": "Restart Service: dnsmasq",
+      "subtitle": "Attempts to restart the following service: dnsmasq.",
+      "description": "PHP Monitor",
+      "mode": "no-view"
+    },
+    {
+      "name": "services-restart-php",
+      "title": "Restart Service: php",
+      "subtitle": "Attempts to restart the following service: php.",
+      "description": "PHP Monitor",
+      "mode": "no-view"
+    },
+    {
+      "name": "services-stop-all",
+      "title": "Stop All Services",
+      "subtitle": "Attempts to stop all Valet services (php, nginx and dnsmasq).",
+      "description": "PHP Monitor",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.1"
+    "@raycast/api": "^1.27.1",
+    "open": "^8.4.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
