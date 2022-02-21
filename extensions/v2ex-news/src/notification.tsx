@@ -1,14 +1,15 @@
 import { ActionPanel, confirmAlert, List, showToast, Toast } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { v2exCli } from "@/api";
+import { invalidTokenHelper, isInvalidToken, v2exCli } from "@/api";
 import { Notification } from "@chyroc/v2ex-api";
 import { stripHtml } from "string-strip-html";
-import { NextPageAction, PreviousPageAction } from "@/components";
+import { InvalidToken, NextPageAction, PreviousPageAction } from "@/components";
 import { cmdD } from "@/shortcut";
 
 export default () => {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [invalidToken, setInvalidToken] = useState(false);
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
@@ -24,11 +25,19 @@ export default () => {
       } catch (e) {
         setLoading(false);
         console.error(e);
+        if (isInvalidToken(e)) {
+          setInvalidToken(true);
+          await showToast(Toast.Style.Failure, "request fail", invalidTokenHelper);
+        }
         await showToast(Toast.Style.Failure, "request fail", `${e}`);
       }
     };
     f();
   }, [page]);
+
+  if (invalidToken) {
+    return <InvalidToken />;
+  }
 
   return (
     <List throttle={true} isLoading={loading}>

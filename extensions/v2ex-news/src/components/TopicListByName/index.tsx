@@ -1,8 +1,8 @@
 import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { v2exCli } from "@/api";
+import { invalidTokenHelper, isInvalidToken, v2exCli } from "@/api";
 import { Topic } from "@chyroc/v2ex-api";
-import { NextPageAction, PreviousPageAction, TopicDetail } from "@/components";
+import { InvalidToken, NextPageAction, PreviousPageAction, TopicDetail } from "@/components";
 import { cmdE, cmdO } from "@/shortcut";
 
 const formatUnix = (unix: number) => new Date(unix * 1000).toLocaleString();
@@ -11,6 +11,7 @@ export default (props: { nodeTitle: string; nodeName: string }) => {
   const { nodeTitle, nodeName } = props;
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [invalidToken, setInvalidToken] = useState(false);
   const [topics, setTopics] = useState<Topic[]>([]);
 
   useEffect(() => {
@@ -24,11 +25,19 @@ export default (props: { nodeTitle: string; nodeName: string }) => {
       } catch (e) {
         setLoading(false);
         console.error(e);
+        if (isInvalidToken(e)) {
+          setInvalidToken(true);
+          await showToast(Toast.Style.Failure, "request fail", invalidTokenHelper);
+        }
         await showToast(Toast.Style.Failure, "request fail", `${e}`);
       }
     };
     f();
   }, [page]);
+
+  if (invalidToken) {
+    return <InvalidToken />;
+  }
 
   return (
     <List throttle={true} isLoading={loading}>
