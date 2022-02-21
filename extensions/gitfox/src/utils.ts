@@ -4,9 +4,7 @@ import os from "os";
 import path from "path";
 import bplist from "bplist-parser";
 import Bookmark from "./dtos/bookmark-dto";
-import GitfoxRepositories, {
-  GitfoxRepository,
-} from "./interfaces/imported-gitfox-bookmark";
+import GitfoxRepositories, { GitfoxRepository } from "./interfaces/imported-gitfox-bookmark";
 import GitfoxPreferences from "./interfaces/gitfox-preferences";
 
 const plistLocations = [
@@ -43,10 +41,7 @@ export function gitfoxCliRequiredMessage(): string {
   `;
 }
 
-function extractBookmarks(
-  obj: GitfoxRepository[],
-  parents?: string
-): Bookmark[] {
+function extractBookmarks(obj: GitfoxRepository[], parents?: string): Bookmark[] {
   const bookmarks: Bookmark[] = [];
 
   if (!obj || obj.length === 0) {
@@ -62,11 +57,7 @@ function extractBookmarks(
       childBookmarks.forEach((bookmark) => bookmarks.push(bookmark));
     }
 
-    const item = new Bookmark(
-      bookmark.url?.relative,
-      name,
-      bookmark.uniqueIdentifier
-    );
+    const item = new Bookmark(bookmark.url?.relative, name, bookmark.uniqueIdentifier);
 
     if (fs.existsSync(item.getPath)) {
       bookmarks.push(item);
@@ -89,11 +80,11 @@ export async function fetchBookmarks(): Promise<Bookmark[]> {
     )[0] as unknown as GitfoxRepositories;
 
     if (repos.children && repos.children.length === 0) {
-      await showToast(
-        Toast.Style.Failure,
-        "No Bookmarks found",
-        "Now is the time to start bookmarking!"
-      );
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No Bookmarks found",
+        message: "Now is the time to start bookmarking!",
+      });
 
       return Promise.resolve([]);
     }
@@ -116,12 +107,7 @@ export function getCurrentBranchName(gitRepoPath: string): string {
 
   return fs.existsSync(gitRepoPath)
     ? fs.existsSync(gitHeadPath)
-      ? fs
-          .readFileSync(gitHeadPath, "utf-8")
-          .trim()
-          .split("/")
-          .slice(2)
-          .join("/")
+      ? fs.readFileSync(gitHeadPath, "utf-8").trim().split("/").slice(2).join("/")
       : getCurrentBranchName(path.resolve(gitRepoPath, ".."))
     : "";
 }
