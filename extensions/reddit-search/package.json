@@ -3,7 +3,7 @@
   "name": "reddit-search",
   "title": "Reddit Search",
   "description": "Searches reddit and displays the first 10 results",
-  "icon": "Reddit_Mark_OnWhite.png",
+  "icon": "reddit_icon_512.png",
   "author": "ewlcheng",
   "license": "MIT",
   "commands": [
