@@ -20,7 +20,7 @@
       "type": "checkbox",
       "required": false,
       "title": "Use Sudo",
-      "description": "See tinyurl.com/raycast-port-manger",
+      "description": "See https://github.com/raycast/extensions/tree/main/extensions/port-manager#readme",
       "default": false,
       "label": "Run lsof and kill commands as sudo"
     }
