@@ -1,28 +1,28 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dropbox",
-  "title": "dropbox",
-  "description": "dropbox extensions",
+  "title": "Dropbox",
+  "description": "Dropbox Extensions",
   "icon": "dropbox.png",
   "author": "chyroc",
   "license": "MIT",
   "commands": [
     {
       "name": "save-url",
-      "title": "save-url",
-      "subtitle": "Save URL",
-      "description": "save url to dropbox",
+      "title": "Save URL",
+      "subtitle": "Dropbox",
+      "description": "Save url to Dropbox",
       "mode": "view"
     }
   ],
   "preferences": [
     {
       "name": "token",
-      "title": "Token",
+      "title": "Dropbox Token",
       "required": true,
       "type": "textfield",
       "description": "dropbox access token",
-      "placeholder": "input dropbox access token"
+      "placeholder": "Input Dropbox access token"
     }
   ],
   "dependencies": {

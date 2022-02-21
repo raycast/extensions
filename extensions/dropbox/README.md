@@ -8,6 +8,10 @@
   - select scope: App folder
   - input your app name
   - and click [create app]
+  - and add some permissions:
+    - files.content.write
+    - files.content.read
 - go to app info page:
+  - change Access token expiration to [No expiration]
   - click: [Generated access token]
   - and copy the generated token
