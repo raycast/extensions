@@ -17,6 +17,7 @@ import { Bitwarden } from "./api";
 import { PASSWORD_OPTIONS_MAP } from "./const";
 import { capitalise, objectEntries } from "./utils";
 import { PasswordGeneratorOptions, PasswordOptionsToFieldEntries, PasswordType } from "./types";
+import { useEffect } from "react";
 
 const GeneratePassword = () => {
   const { push } = useNavigation();
@@ -35,7 +36,7 @@ const GeneratePassword = () => {
   };
 
   const regenerate = () => regeneratePassword();
-  const openOptionsMenu = () => push(<Options />);
+  const openOptionsMenu = () => push(<Options regeneratePassword={regeneratePassword} />);
 
   return (
     <List
@@ -106,9 +107,16 @@ const isValidField = <O extends keyof PasswordGeneratorOptions>(option: O, value
   return true;
 };
 
-const Options = () => {
+const Options = ({ regeneratePassword }: { regeneratePassword: () => Promise<void> }) => {
   const { pop } = useNavigation();
   const { options, setOption, clearStorage } = usePasswordOptions();
+
+  useEffect(() => {
+    return () => {
+      /* start regenerating the password on unmount */
+      regeneratePassword();
+    };
+  }, []);
 
   if (!options) return null;
 
@@ -118,6 +126,7 @@ const Options = () => {
     <O extends keyof PasswordGeneratorOptions>(option: O, errorMessage?: string) =>
     async (value: PasswordGeneratorOptions[O]) => {
       if (!isValidField(option, value)) {
+        // TODO: Add debounce to reduce the change of showing a toast when typing
         if (errorMessage) await showToast(Toast.Style.Failure, errorMessage);
         return;
       }

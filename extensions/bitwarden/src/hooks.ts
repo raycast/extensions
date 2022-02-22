@@ -95,7 +95,6 @@ export function usePasswordGenerator(bitwardenApi: Bitwarden) {
     try {
       dispatch({ type: "generate" });
       const options = await getUpdatedOptions();
-      console.log({ options });
       const password = await bitwardenApi.generatePassword(options);
       dispatch({ type: "setPassword", password });
     } catch (error) {
@@ -117,6 +116,7 @@ export const usePasswordOptions = () => {
     option: Option,
     value: PasswordGeneratorOptions[Option]
   ) => {
+    if (!options || options[option] === value) return;
     const newOptions = { ...options, [option]: value };
     setOptions(newOptions);
     await LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS, JSON.stringify(newOptions));
