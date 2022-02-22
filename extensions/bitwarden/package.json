@@ -5,6 +5,7 @@
   "description": "Access a Bitwarden account. Requires installing the Bitwarden CLI.",
   "icon": "bitwarden.png",
   "author": "pomdtr",
+  "contributors": ["jomifepe"],
   "license": "MIT",
   "keywords": [
     "bitwarden",
