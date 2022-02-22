@@ -15,8 +15,8 @@ import { useBitwarden, usePasswordGenerator, usePasswordOptions } from "./hooks"
 import { UnlockForm } from "./components";
 import { Bitwarden } from "./api";
 import { PASSWORD_OPTIONS_MAP } from "./const";
-import { objectEntries } from "./utils";
-import { PasswordOptions } from "./types";
+import { capitalise, objectEntries } from "./utils";
+import { PasswordGeneratorOptions, PasswordOptionsToFieldEntries, PasswordType } from "./types";
 
 const GeneratePassword = () => {
   const { push } = useNavigation();
@@ -99,7 +99,7 @@ const GeneratePassword = () => {
   );
 };
 
-const isValidField = <O extends keyof PasswordOptions>(option: O, value: PasswordOptions[O]) => {
+const isValidField = <O extends keyof PasswordGeneratorOptions>(option: O, value: PasswordGeneratorOptions[O]) => {
   if (option === "length") return !isNaN(Number(value)) && Number(value) >= 5 && Number(value) <= 128;
   if (option === "separator") return (value as string).length === 1;
   if (option === "words") return !isNaN(Number(value)) && Number(value) >= 3 && Number(value) <= 20;
@@ -107,13 +107,16 @@ const isValidField = <O extends keyof PasswordOptions>(option: O, value: Passwor
 };
 
 const Options = () => {
+  const { pop } = useNavigation();
   const { options, setOption, clearStorage } = usePasswordOptions();
 
   if (!options) return null;
 
+  const handlePasswordTypeChange = (type: string) => setOption("passphrase", type === "passphrase");
+
   const handleFieldChange =
-    <O extends keyof PasswordOptions>(option: O, errorMessage?: string) =>
-    async (value: PasswordOptions[O]) => {
+    <O extends keyof PasswordGeneratorOptions>(option: O, errorMessage?: string) =>
+    async (value: PasswordGeneratorOptions[O]) => {
       if (!isValidField(option, value)) {
         if (errorMessage) await showToast(Toast.Style.Failure, errorMessage);
         return;
@@ -121,40 +124,57 @@ const Options = () => {
       setOption(option, value);
     };
 
+  const passwordType: PasswordType = options.passphrase ? "passphrase" : "password";
+
   return (
     <Form
       actions={
-        process.env.NODE_ENV === "development" ? (
-          <ActionPanel>
-            <Action title="Clear storage" icon={Icon.Trash} onAction={clearStorage} />
-          </ActionPanel>
-        ) : undefined
+        <ActionPanel>
+          <Action title="Go back" icon={Icon.ArrowClockwise} onAction={pop} />
+          {process.env.NODE_ENV === "development" && (
+            <Action title="Restore to default" icon={Icon.Trash} onAction={clearStorage} />
+          )}
+        </ActionPanel>
       }
     >
-      {objectEntries(PASSWORD_OPTIONS_MAP).map(([option, { hint, label, type, errorMessage }]) => {
-        if (type === "boolean") {
+      <Form.Dropdown
+        id="type"
+        title="Type"
+        value={passwordType}
+        onChange={handlePasswordTypeChange}
+        defaultValue={"password" as PasswordType}
+      >
+        {objectEntries(PASSWORD_OPTIONS_MAP).map(([key]) => (
+          <Form.Dropdown.Item value={key} title={capitalise(key)} key={key} />
+        ))}
+      </Form.Dropdown>
+      <Form.Separator />
+      {objectEntries(PASSWORD_OPTIONS_MAP[passwordType]).map(
+        ([option, { hint = "", label, type, errorMessage }]: PasswordOptionsToFieldEntries) => {
+          if (type === "boolean") {
+            return (
+              <Form.Checkbox
+                key={option}
+                id={option}
+                title={label}
+                label={hint}
+                value={Boolean(options?.[option] ?? false)}
+                onChange={handleFieldChange(option, errorMessage)}
+              />
+            );
+          }
+
           return (
-            <Form.Checkbox
+            <Form.TextField
               key={option}
               id={option}
               title={label}
-              label={hint ?? ""}
-              value={Boolean(options?.[option] ?? false)}
+              value={String(options?.[option] ?? "")}
               onChange={handleFieldChange(option, errorMessage)}
             />
           );
         }
-
-        return (
-          <Form.TextField
-            key={option}
-            id={option}
-            title={label}
-            value={String(options?.[option] ?? "")}
-            onChange={handleFieldChange(option, errorMessage)}
-          />
-        );
-      })}
+      )}
     </Form>
   );
 };

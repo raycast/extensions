@@ -1,6 +1,6 @@
 import { Icon } from "@raycast/api";
 import { URL } from "url";
-import { PasswordOptions } from "./types";
+import { PasswordGeneratorOptions } from "./types";
 
 export function codeBlock(content: string): string {
   return "```\n" + content + "\n```";
@@ -38,6 +38,8 @@ export const objectEntries = <T>(obj: T): { [K in keyof T]: [K, T[K]] }[keyof T]
   return Object.entries(obj) as any;
 };
 
-export function getPasswordGeneratingArgs(options: PasswordOptions): string[] {
+export function getPasswordGeneratingArgs(options: PasswordGeneratorOptions): string[] {
   return Object.entries(options).flatMap(([arg, value]) => (value ? [`--${arg}`, value] : []));
 }
+
+export const capitalise = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);

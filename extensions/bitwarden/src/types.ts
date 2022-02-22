@@ -77,6 +77,8 @@ export interface SecureNote {
   type: number;
 }
 
+export type PasswordType = "password" | "passphrase";
+
 export interface PasswordOptions {
   /** Include uppercase characters */
   lowercase?: boolean;
@@ -86,10 +88,11 @@ export interface PasswordOptions {
   number?: boolean;
   /** Include special characters */
   special?: boolean;
-  /** Generate a passphrase */
-  passphrase?: boolean;
   /** Length of the password */
   length?: number;
+}
+
+export interface PassphraseOptions {
   /** Number of words */
   words?: number;
   /** Word separator */
@@ -99,6 +102,11 @@ export interface PasswordOptions {
   /** Passphrase includes number */
   includeNumber?: boolean;
 }
+export type PasswordGeneratorOptions = {
+  /** Generate a passphrase */
+  passphrase?: boolean;
+} & PasswordOptions &
+  PassphraseOptions;
 
 export interface PasswordOptionField {
   label: string;
@@ -106,3 +114,5 @@ export interface PasswordOptionField {
   type: "boolean" | "number" | "string";
   errorMessage?: string;
 }
+
+export type PasswordOptionsToFieldEntries = [keyof PasswordGeneratorOptions, PasswordOptionField];

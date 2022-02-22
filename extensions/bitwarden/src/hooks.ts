@@ -8,8 +8,8 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useReducer } from "react";
 import { Bitwarden } from "./api";
-import { LOCAL_STORAGE_KEY, PASSWORD_OPTIONS_MAP, SESSION_KEY } from "./const";
-import { PasswordOptions, VaultStatus } from "./types";
+import { DEFAULT_PASSWORD_OPTIONS, LOCAL_STORAGE_KEY, SESSION_KEY } from "./const";
+import { PasswordGeneratorOptions, VaultStatus } from "./types";
 
 async function login(api: Bitwarden) {
   try {
@@ -110,32 +110,21 @@ export function usePasswordGenerator(bitwardenApi: Bitwarden) {
   return { ...state, regeneratePassword: generatePassword };
 }
 
-const defaultOptions: PasswordOptions = {
-  length: 14,
-  uppercase: true,
-  lowercase: true,
-};
-
 export const usePasswordOptions = () => {
-  const [options, setOptions] = useState<PasswordOptions>();
+  const [options, setOptions] = useState<PasswordGeneratorOptions>();
 
-  const setOption = async <Option extends keyof PasswordOptions>(option: Option, value: PasswordOptions[Option]) => {
+  const setOption = async <Option extends keyof PasswordGeneratorOptions>(
+    option: Option,
+    value: PasswordGeneratorOptions[Option]
+  ) => {
     const newOptions = { ...options, [option]: value };
     setOptions(newOptions);
     await LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS, JSON.stringify(newOptions));
   };
 
-  const handleFieldChange =
-    <Option extends keyof PasswordOptions>(option: Option) =>
-    (value: PasswordOptions[Option]) => {
-      const type = PASSWORD_OPTIONS_MAP[option]?.type;
-      const newValue = (type === "number" ? Number(value) : value) as PasswordOptions[Option];
-      setOption(option, newValue);
-    };
-
   const getUpdatedOptions = async () => {
     const storedOptions = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS);
-    const newOptions = { ...defaultOptions, ...(storedOptions ? JSON.parse(storedOptions) : {}) };
+    const newOptions = { ...DEFAULT_PASSWORD_OPTIONS, ...(storedOptions ? JSON.parse(storedOptions) : {}) };
     return newOptions;
   };
 
@@ -152,5 +141,5 @@ export const usePasswordOptions = () => {
     restoreStoredOptions();
   }, []);
 
-  return { options, setOption, handleFieldChange, clearStorage, getUpdatedOptions };
+  return { options, setOption, clearStorage, getUpdatedOptions };
 };

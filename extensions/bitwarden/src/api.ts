@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import execa from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
-import { PasswordOptions, VaultStatus } from "./types";
+import { PasswordGeneratorOptions, VaultStatus } from "./types";
 import { getPasswordGeneratingArgs } from "./utils";
 
 export class Bitwarden {
@@ -58,7 +58,7 @@ export class Bitwarden {
     return JSON.parse(stdout).status;
   }
 
-  async generatePassword(options?: PasswordOptions): Promise<string> {
+  async generatePassword(options?: PasswordGeneratorOptions): Promise<string> {
     const args = options ? getPasswordGeneratingArgs(options) : [];
     const { stdout } = await this.exec(["generate", ...args]);
     return stdout;
