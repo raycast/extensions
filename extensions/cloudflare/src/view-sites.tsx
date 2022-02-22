@@ -85,9 +85,14 @@ function SiteView(props: SiteProps) {
 
   useEffect(() => {
     async function fetchSite() {
-      const site = await service.getZone(id);
-      setSite(site);
-      setLoading(false);
+      try {
+        const site = await service.getZone(id);
+        setSite(site);
+        setLoading(false);
+      } catch (e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchSite();
@@ -146,10 +151,14 @@ function DnsRecordView(props: DnsRecordProps) {
 
   useEffect(() => {
     async function fetchRecords() {
-      const records = await service.listDnsRecords(siteId);
-
-      setRecords(records);
-      setLoading(false);
+      try {
+        const records = await service.listDnsRecords(siteId);
+        setRecords(records);
+        setLoading(false);
+      } catch(e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchRecords();

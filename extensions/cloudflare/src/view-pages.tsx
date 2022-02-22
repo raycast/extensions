@@ -114,9 +114,14 @@ function PageView(props: PageProps) {
 
   useEffect(() => {
     async function fetchPages() {
-      const page = await service.getPage(accountId, name);
-      setPage(page);
-      setLoading(false);
+      try {
+        const page = await service.getPage(accountId, name);
+        setPage(page);
+        setLoading(false);
+      } catch (e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchPages();
@@ -200,9 +205,14 @@ function DeploymentListView(props: DeploymentListProps) {
 
   useEffect(() => {
     async function fetchDeployments() {
-      const deployments = await service.listDeployments(accountId, pageName);
-      setDeployments(deployments);
-      setLoading(false);
+      try {
+        const deployments = await service.listDeployments(accountId, pageName);
+        setDeployments(deployments);
+        setLoading(false);
+      } catch (e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchDeployments();
@@ -265,9 +275,14 @@ function DeploymentView(props: DeploymentProps) {
 
   useEffect(() => {
     async function fetchDeployment() {
-      const deployment = await service.getDeployment(accountId, pageName, id);
-      setDeployment(deployment);
-      setLoading(false);
+      try {
+        const deployment = await service.getDeployment(accountId, pageName, id);
+        setDeployment(deployment);
+        setLoading(false);
+      } catch (e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchDeployment();
@@ -329,9 +344,14 @@ function DomainListView(props: DomainListProps) {
 
   useEffect(() => {
     async function fetchDomains() {
-      const domains = await service.listDomains(accountId, pageName);
-      setDomains(domains);
-      setLoading(false);
+      try {
+        const domains = await service.listDomains(accountId, pageName);
+        setDomains(domains);
+        setLoading(false);
+      } catch (e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchDomains();
