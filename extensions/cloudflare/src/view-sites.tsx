@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Icon, List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
-import Service, { DnsRecord, Zone } from './service';
+import Service, { Account, DnsRecord, Zone } from './service';
 import {
   getEmail,
   getKey,
@@ -13,22 +13,22 @@ import {
 const service = new Service(getEmail(), getKey());
 
 function Command() {
-  const [sites, setSites] = useState<Zone[]>([]);
-  const [accountId, setAccountId] = useState<string>('');
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [sites, setSites] = useState<Record<string, Zone[]>>({});
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchSites() {
       try {
         const accounts = await service.listAccounts();
-        if (accounts.length === 0) {
-          setSites([]);
-          setLoading(false);
-        }
-        const account = accounts[0];
-        setAccountId(account.id);
+        setAccounts(accounts);
 
-        const sites = await service.listZones(account);
+        const sites: Record<string, Zone[]> = {};
+        for (let i = 0; i < accounts.length; i++) {
+          const account = accounts[i];
+          const accountSites = await service.listZones(account);
+          sites[account.id] = accountSites;
+        }
         setSites(sites);
         setLoading(false);
       } catch (e) {
@@ -42,32 +42,43 @@ function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {sites.map((site) => (
-        <List.Item
-          actions={
-            <ActionPanel>
-              <Action.Push
-                icon={Icon.TextDocument}
-                title="Show Details"
-                target={<SiteView accountId={accountId} id={site.id} />}
-              />
-              <Action.Push
-                icon={Icon.List}
-                title="Show DNS Records"
-                target={<DnsRecordView siteId={site.id} />}
-              />
-              <Action.OpenInBrowser
-                title="Open on Cloudflare"
-                url={getSiteUrl(accountId, site.name)}
-                shortcut={{ modifiers: ['cmd'], key: 'f' }}
-              />
-            </ActionPanel>
-          }
-          icon={getSiteStatusIcon(site.status)}
-          key={site.id}
-          title={site.name}
-        />
-      ))}
+      {Object.entries(sites)
+        .filter((entry) => entry[1].length > 0)
+        .map((entry) => {
+          const [accountId, accountSites] = entry;
+          const account = accounts.find((account) => account.id === accountId);
+          const name = account?.name || '';
+          return (
+            <List.Section title={name}>
+              {accountSites.map((site) => (
+                <List.Item
+                  actions={
+                    <ActionPanel>
+                      <Action.Push
+                        icon={Icon.TextDocument}
+                        title="Show Details"
+                        target={<SiteView accountId={accountId} id={site.id} />}
+                      />
+                      <Action.Push
+                        icon={Icon.List}
+                        title="Show DNS Records"
+                        target={<DnsRecordView siteId={site.id} />}
+                      />
+                      <Action.OpenInBrowser
+                        title="Open on Cloudflare"
+                        url={getSiteUrl(accountId, site.name)}
+                        shortcut={{ modifiers: ['cmd'], key: 'f' }}
+                      />
+                    </ActionPanel>
+                  }
+                  icon={getSiteStatusIcon(site.status)}
+                  key={site.id}
+                  title={site.name}
+                />
+              ))}
+            </List.Section>
+          );
+        })}
     </List>
   );
 }
@@ -155,7 +166,7 @@ function DnsRecordView(props: DnsRecordProps) {
         const records = await service.listDnsRecords(siteId);
         setRecords(records);
         setLoading(false);
-      } catch(e) {
+      } catch (e) {
         setLoading(false);
         handleNetworkError(e);
       }

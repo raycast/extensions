@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Icon, List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
-import Service, { Deployment, Domain, Page } from './service';
+import Service, { Account, Deployment, Domain, Page } from './service';
 import {
   getCommitUrl,
   getDeploymentStatusIcon,
@@ -18,22 +18,22 @@ import {
 const service = new Service(getEmail(), getKey());
 
 function Command() {
-  const [pages, setPages] = useState<Page[]>([]);
-  const [accountId, setAccountId] = useState<string>('');
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [pages, setPages] = useState<Record<string, Page[]>>({});
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchPages() {
       try {
         const accounts = await service.listAccounts();
-        if (accounts.length === 0) {
-          setPages([]);
-          setLoading(false);
-        }
-        const account = accounts[0];
-        setAccountId(account.id);
+        setAccounts(accounts);
 
-        const pages = await service.listPages(account.id);
+        const pages: Record<string, Page[]> = {};
+        for (let i = 0; i < accounts.length; i++) {
+          const account = accounts[i];
+          const accountPages = await service.listPages(account.id);
+          pages[account.id] = accountPages;
+        }
         setPages(pages);
         setLoading(false);
       } catch (e) {
@@ -47,56 +47,72 @@ function Command() {
 
   return (
     <List isLoading={isLoading}>
-      {pages.map((page) => (
-        <List.Item
-          key={page.name}
-          icon={getDeploymentStatusIcon(page.status)}
-          title={page.name}
-          accessoryTitle={page.subdomain}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                icon={Icon.TextDocument}
-                title="Show Details"
-                target={<PageView accountId={accountId} name={page.name} />}
-              />
-              <Action.Push
-                icon={Icon.List}
-                title="Show Deployments"
-                target={
-                  <DeploymentListView
-                    accountId={accountId}
-                    pageName={page.name}
-                  />
-                }
-              />
-              <Action.Push
-                icon={Icon.List}
-                title="Show Domains"
-                target={
-                  <DomainListView accountId={accountId} pageName={page.name} />
-                }
-                shortcut={{ modifiers: ['cmd'], key: 'd' }}
-              />
-              <Action.OpenInBrowser
-                title="Open Page"
-                url={toUrl(page.subdomain)}
-                shortcut={{ modifiers: ['cmd'], key: 'p' }}
-              />
-              <Action.OpenInBrowser
-                title="Open Repo"
-                url={getRepoUrl(page.source)}
-                shortcut={{ modifiers: ['cmd'], key: 'r' }}
-              />
-              <Action.OpenInBrowser
-                title="Open on Cloudflare"
-                url={getPageUrl(accountId, page.name)}
-                shortcut={{ modifiers: ['cmd'], key: 'f' }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {Object.entries(pages)
+        .filter((entry) => entry[1].length > 0)
+        .map((entry) => {
+          const [accountId, accountPages] = entry;
+          const account = accounts.find((account) => account.id === accountId);
+          const name = account?.name || '';
+          return (
+            <List.Section title={name}>
+              {accountPages.map((page) => (
+                <List.Item
+                  key={page.name}
+                  icon={getDeploymentStatusIcon(page.status)}
+                  title={page.name}
+                  accessoryTitle={page.subdomain}
+                  actions={
+                    <ActionPanel>
+                      <Action.Push
+                        icon={Icon.TextDocument}
+                        title="Show Details"
+                        target={
+                          <PageView accountId={accountId} name={page.name} />
+                        }
+                      />
+                      <Action.Push
+                        icon={Icon.List}
+                        title="Show Deployments"
+                        target={
+                          <DeploymentListView
+                            accountId={accountId}
+                            pageName={page.name}
+                          />
+                        }
+                      />
+                      <Action.Push
+                        icon={Icon.List}
+                        title="Show Domains"
+                        target={
+                          <DomainListView
+                            accountId={accountId}
+                            pageName={page.name}
+                          />
+                        }
+                        shortcut={{ modifiers: ['cmd'], key: 'd' }}
+                      />
+                      <Action.OpenInBrowser
+                        title="Open Page"
+                        url={toUrl(page.subdomain)}
+                        shortcut={{ modifiers: ['cmd'], key: 'p' }}
+                      />
+                      <Action.OpenInBrowser
+                        title="Open Repo"
+                        url={getRepoUrl(page.source)}
+                        shortcut={{ modifiers: ['cmd'], key: 'r' }}
+                      />
+                      <Action.OpenInBrowser
+                        title="Open on Cloudflare"
+                        url={getPageUrl(accountId, page.name)}
+                        shortcut={{ modifiers: ['cmd'], key: 'f' }}
+                      />
+                    </ActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          );
+        })}
     </List>
   );
 }
