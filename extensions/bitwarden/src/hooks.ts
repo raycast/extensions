@@ -5,6 +5,9 @@ import {
   removeLocalStorageItem,
   setLocalStorageItem,
   LocalStorage,
+  confirmAlert,
+  Icon,
+  popToRoot,
 } from "@raycast/api";
 import { useState, useEffect, useReducer } from "react";
 import { Bitwarden } from "./api";
@@ -132,14 +135,38 @@ export const usePasswordOptions = () => {
     setOptions(await getUpdatedOptions());
   };
 
-  const clearStorage = async () => {
-    await LocalStorage.removeItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS);
-    restoreStoredOptions();
-  };
-
   useEffect(() => {
     restoreStoredOptions();
   }, []);
 
-  return { options, setOption, clearStorage, getUpdatedOptions };
+  return { options, setOption, getUpdatedOptions };
+};
+
+export const useOneTimePasswordHistoryWarning = async () => {
+  const handleDismissAction = () => popToRoot({ clearSearchBar: false });
+
+  const handlePrimaryAction = () => LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_ONE_TIME_WARNING, true);
+
+  const displayWarning = async () => {
+    const alertWasShown = await LocalStorage.getItem<boolean>(LOCAL_STORAGE_KEY.PASSWORD_ONE_TIME_WARNING);
+    if (alertWasShown) return;
+
+    await confirmAlert({
+      title: "Warning",
+      message: "Password history is not available yet, so make sure to store the password after generating it!",
+      icon: Icon.ExclamationMark,
+      dismissAction: {
+        title: "Go back",
+        onAction: handleDismissAction,
+      },
+      primaryAction: {
+        title: "I understand",
+        onAction: handlePrimaryAction,
+      },
+    });
+  };
+
+  useEffect(() => {
+    displayWarning();
+  }, []);
 };

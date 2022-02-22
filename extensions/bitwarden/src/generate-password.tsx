@@ -10,20 +10,23 @@ import {
   Form,
   showToast,
   Toast,
+  LocalStorage,
 } from "@raycast/api";
-import { useBitwarden, usePasswordGenerator, usePasswordOptions } from "./hooks";
+import { useBitwarden, useOneTimePasswordHistoryWarning, usePasswordGenerator, usePasswordOptions } from "./hooks";
 import { UnlockForm } from "./components";
 import { Bitwarden } from "./api";
-import { PASSWORD_OPTIONS_MAP } from "./const";
+import { LOCAL_STORAGE_KEY, PASSWORD_OPTIONS_MAP } from "./const";
 import { capitalise, objectEntries } from "./utils";
-import { PasswordGeneratorOptions, PasswordOptionsToFieldEntries, PasswordType } from "./types";
+import { PasswordGeneratorOptions, PasswordOptionField, PasswordOptionsToFieldEntries, PasswordType } from "./types";
 import { useEffect } from "react";
 
 const GeneratePassword = () => {
-  const { push } = useNavigation();
   const bitwardenApi = new Bitwarden();
+  const { push } = useNavigation();
   const [state, setSessionToken] = useBitwarden(bitwardenApi);
   const { password, regeneratePassword, isGenerating } = usePasswordGenerator(bitwardenApi);
+
+  useOneTimePasswordHistoryWarning();
 
   if (state.vaultStatus === "locked") {
     return <UnlockForm setSessionToken={setSessionToken} bitwardenApi={bitwardenApi} />;
@@ -42,8 +45,9 @@ const GeneratePassword = () => {
     <List
       isLoading={isGenerating}
       searchBarPlaceholder=""
+      selectedItemId="copy"
       onSearchTextChange={() => {
-        /* ignore search */
+        /* ignore search because it hides the password item */
       }}
       throttle
     >
@@ -100,6 +104,12 @@ const GeneratePassword = () => {
   );
 };
 
+const clearStorage = async () => {
+  for (const key of Object.values(LOCAL_STORAGE_KEY)) {
+    await LocalStorage.removeItem(key);
+  }
+};
+
 const isValidField = <O extends keyof PasswordGeneratorOptions>(option: O, value: PasswordGeneratorOptions[O]) => {
   if (option === "length") return !isNaN(Number(value)) && Number(value) >= 5 && Number(value) <= 128;
   if (option === "separator") return (value as string).length === 1;
@@ -107,9 +117,44 @@ const isValidField = <O extends keyof PasswordGeneratorOptions>(option: O, value
   return true;
 };
 
+type OptionFieldProps = {
+  field: PasswordOptionField;
+  option: keyof PasswordGeneratorOptions;
+  currentOptions: PasswordGeneratorOptions;
+  handleFieldChange: (value: PasswordGeneratorOptions[keyof PasswordGeneratorOptions]) => Promise<void>;
+};
+
+const OptionField = ({ option, currentOptions, handleFieldChange, field }: OptionFieldProps) => {
+  const { hint = "", label, type } = field;
+
+  if (type === "boolean") {
+    return (
+      <Form.Checkbox
+        key={option}
+        id={option}
+        title={label}
+        label={hint}
+        value={Boolean(currentOptions?.[option] ?? false)}
+        onChange={handleFieldChange}
+      />
+    );
+  }
+
+  return (
+    <Form.TextField
+      key={option}
+      id={option}
+      title={label}
+      placeholder={hint}
+      value={String(currentOptions?.[option] ?? "")}
+      onChange={handleFieldChange}
+    />
+  );
+};
+
 const Options = ({ regeneratePassword }: { regeneratePassword: () => Promise<void> }) => {
   const { pop } = useNavigation();
-  const { options, setOption, clearStorage } = usePasswordOptions();
+  const { options, setOption } = usePasswordOptions();
 
   useEffect(() => {
     return () => {
@@ -141,7 +186,7 @@ const Options = ({ regeneratePassword }: { regeneratePassword: () => Promise<voi
         <ActionPanel>
           <Action title="Go back" icon={Icon.ArrowClockwise} onAction={pop} />
           {process.env.NODE_ENV === "development" && (
-            <Action title="Restore to default" icon={Icon.Trash} onAction={clearStorage} />
+            <Action title="Clear storage" icon={Icon.Trash} onAction={clearStorage} />
           )}
         </ActionPanel>
       }
@@ -154,36 +199,19 @@ const Options = ({ regeneratePassword }: { regeneratePassword: () => Promise<voi
         defaultValue={"password" as PasswordType}
       >
         {objectEntries(PASSWORD_OPTIONS_MAP).map(([key]) => (
-          <Form.Dropdown.Item value={key} title={capitalise(key)} key={key} />
+          <Form.Dropdown.Item key={key} value={key} title={capitalise(key)} />
         ))}
       </Form.Dropdown>
       <Form.Separator />
-      {objectEntries(PASSWORD_OPTIONS_MAP[passwordType]).map(
-        ([option, { hint = "", label, type, errorMessage }]: PasswordOptionsToFieldEntries) => {
-          if (type === "boolean") {
-            return (
-              <Form.Checkbox
-                key={option}
-                id={option}
-                title={label}
-                label={hint}
-                value={Boolean(options?.[option] ?? false)}
-                onChange={handleFieldChange(option, errorMessage)}
-              />
-            );
-          }
-
-          return (
-            <Form.TextField
-              key={option}
-              id={option}
-              title={label}
-              value={String(options?.[option] ?? "")}
-              onChange={handleFieldChange(option, errorMessage)}
-            />
-          );
-        }
-      )}
+      {objectEntries(PASSWORD_OPTIONS_MAP[passwordType]).map(([option, optionField]: PasswordOptionsToFieldEntries) => (
+        <OptionField
+          key={option}
+          option={option}
+          field={optionField}
+          currentOptions={options}
+          handleFieldChange={handleFieldChange(option, optionField.errorMessage)}
+        />
+      ))}
     </Form>
   );
 };

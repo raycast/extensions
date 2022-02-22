@@ -16,7 +16,8 @@ export const DEFAULT_PASSWORD_OPTIONS: PasswordGeneratorOptions = {
 };
 
 export const LOCAL_STORAGE_KEY = {
-  PASSWORD_OPTIONS: "bw-password-options",
+  PASSWORD_OPTIONS: "bw-generate-password-options",
+  PASSWORD_ONE_TIME_WARNING: "bw-generate-password-warning-accepted",
 };
 
 export const PASSWORD_OPTIONS_MAP: {
