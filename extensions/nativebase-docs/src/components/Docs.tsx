@@ -44,7 +44,7 @@ export const Docs = (props: IDocsProps) => {
             {item?.pages
               ?.filter((p) => !p.notVisibleInSidebar)
               .map((page, idx) => {
-                const url = `https://docs.nativebase.io/${props.version}/${page.id}`
+                const url = `https://docs.nativebase.io/${props?.version}/${page?.id}`
 
                 return (
                   <List.Item
