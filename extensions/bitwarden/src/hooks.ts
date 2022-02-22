@@ -1,14 +1,4 @@
-import {
-  getLocalStorageItem,
-  showToast,
-  ToastStyle,
-  removeLocalStorageItem,
-  setLocalStorageItem,
-  LocalStorage,
-  confirmAlert,
-  Icon,
-  popToRoot,
-} from "@raycast/api";
+import { showToast, LocalStorage, confirmAlert, Icon, popToRoot, Toast } from "@raycast/api";
 import { useState, useEffect, useReducer } from "react";
 import { Bitwarden } from "./api";
 import { DEFAULT_PASSWORD_OPTIONS, LOCAL_STORAGE_KEY, SESSION_KEY } from "./const";
@@ -16,11 +6,11 @@ import { PasswordGeneratorOptions, VaultStatus } from "./types";
 
 async function login(api: Bitwarden) {
   try {
-    const toast = await showToast(ToastStyle.Animated, "Logging in...", "It may take some time");
+    const toast = await showToast(Toast.Style.Animated, "Logging in...", "It may take some time");
     await api.login();
     toast.hide();
   } catch (error) {
-    showToast(ToastStyle.Failure, "An error occurred during login!", "Please check your credentials");
+    showToast(Toast.Style.Failure, "An error occurred during login!", "Please check your credentials");
   }
 }
 
@@ -31,7 +21,7 @@ export function useBitwarden(
 
   useEffect(() => {
     async function getSessionToken() {
-      const sessionToken = await getLocalStorageItem<string>(SESSION_KEY);
+      const sessionToken = await LocalStorage.getItem<string>(SESSION_KEY);
 
       const status = await bitwardenApi.status(sessionToken);
 
@@ -54,10 +44,10 @@ export function useBitwarden(
     state,
     async (sessionToken: string | null) => {
       if (sessionToken) {
-        setLocalStorageItem(SESSION_KEY, sessionToken);
+        await LocalStorage.setItem(SESSION_KEY, sessionToken);
         setState({ sessionToken, vaultStatus: "unlocked" });
       } else {
-        removeLocalStorageItem(SESSION_KEY);
+        await LocalStorage.removeItem(SESSION_KEY);
         setState({ vaultStatus: "locked" });
       }
     },
