@@ -1,4 +1,4 @@
-export default interface RedditPost {
+export default interface RedditResultItem {
   id: string;
   title: string;
   url: string;
