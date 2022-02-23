@@ -2,7 +2,7 @@
 
 ## Using Pipe commands
 
-Select a some text, an url or a file and use the `Send [Selection, Clipboard] to Pipe command` command.
+Select / Copy a some text, an url or a file and use the `Send [Selection, Clipboard] to Pipe command` command.
 
 Depending on the user input type, different commands will be shown.
 
@@ -23,9 +23,11 @@ The Pipe command syntax is very similar to the script command syntax, with some 
 
 ## Pipe Commands logic
 
-The user input (selection or clipboard) will be passed to the script through the standard input stream (stdin).
-The standard output stream (stdout) of the script can replace the current selection, copied to the clipboard or be passed to a another pipe command depending on the user choice.
-If you want to provide a message to the user, use the standard error stream (stderr). It will trigger a notification on the user end.
+The user input (selection or clipboard) will be passed to the script through the standard input stream (`stdin`).
+
+The standard output stream (`stdout`) of the script will replace the current selection, be copied to the clipboard or be passed to a another pipe command depending on the user choice. If the command does not return any output, the selection will be preserved.
+
+If you want to provide a message to the user, use the standard error stream (`stderr`). It will trigger a notification on the user end.
 
 ## Example scripts
 
