@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "native-base-docs",
+  "name": "nativebase-docs",
   "title": "NativeBase Documention",
   "description": "Search Nativebase documentation",
   "icon": "nativebase-logo.png",
@@ -10,9 +10,14 @@
     {
       "name": "index",
       "title": "NativeBase Documention",
-      "description": "Search Nativebase documentation",
+      "description": "Search NativeBase documentation",
       "mode": "view",
-      "icon": "nativebase-logo.png"
+      "icon": "nativebase-logo.png",
+      "keywords": [
+        "nativebase",
+        "search nativebase",
+        "search nativebase docs"
+      ]
     }
   ],
   "preferences": [
@@ -22,6 +27,7 @@
       "title": "GitHub Personal Access Token",
       "description": "GitHub Personal Access Token",
       "label": "GitHub PAT",
+      "placeholder": "GitHub Personal Access Token",
       "required": false
     }
   ],
