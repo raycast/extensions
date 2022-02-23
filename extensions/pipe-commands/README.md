@@ -12,7 +12,8 @@ Use the `Create Pipe command` command to generate a new pipe command template.
 
 The Pipe command syntax is very similar to the script command syntax, with some caveats:
 
-- Only the `title` and `packageName` field are parsed (the other fields are ignored, you can still provide them for documentation !)
+- Only the `title`, `icon` and `packageName` fields are parsed (the other fields are ignored, you can still provide them for documentation !)
+  - The icon field only accepts Raycast API Icons (ex: `Globe`, `Trash`...) instead of emoji and images paths.
 - A new field is introduced: `@raycast.input`. It is similar to the script command arguments, but support other types.
 
   | field          | description                                | values       | required |
@@ -23,8 +24,8 @@ The Pipe command syntax is very similar to the script command syntax, with some 
 ## Pipe Commands logic
 
 The user input (selection or clipboard) will be passed to the script through the standard input stream (stdin).
-The standard output stream (stdout) of the script can replace the current selection, replace the clipboard or be passed to a another command depending on the user choice.
-If you want to provide a message to the user, use the standard error stream (stderr).
+The standard output stream (stdout) of the script can replace the current selection, copied to the clipboard or be passed to a another pipe command depending on the user choice.
+If you want to provide a message to the user, use the standard error stream (stderr). It will trigger a notification on the user end.
 
 ## Example scripts
 
@@ -34,8 +35,9 @@ If you want to provide a message to the user, use the standard error stream (std
 #!/bin/bash
 
 # @raycast.title Google Search
+# @raycast.packageName Web Searches
+# @raycast.icon Globe
 # @raycast.input {"type": "text", "percentEncoded": true}
-# @raycast.description
 
 # Assign the script input to a bash variable
 read -r query
@@ -49,6 +51,8 @@ open "https://www.google.com/search?q=$query"
 #!/usr/bin/env python3
 
 # @raycast.title Switch to Uppercase
+# @raycast.packageName Text Actions
+# @raycast.icon Text
 # @raycast.input {"type": "text"}
 
 import sys
