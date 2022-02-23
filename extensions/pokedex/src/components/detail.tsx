@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import json2md from "json2md";
 import { getPokemon } from "../api";
 import {
   PokemonV2Pokemon,
-  PokemonV2Pokemonspecy,
   PokemonV2Pokemonspeciesname,
+  PokemonV2Pokemonspecy,
 } from "../types";
 
 const { language } = getPreferenceValues();
@@ -32,25 +32,11 @@ export default function PokemonDetail(props: { id?: number }) {
   const [pokemon, setPokemon] = useState<PokemonV2Pokemon | undefined>(
     undefined
   );
-  const [nameByLang, setNameByLang] = useState<SpeciesNameByLanguage>({});
 
   useEffect(() => {
     setLoading(true);
     getPokemon(props.id || random(1, 898), Number(language))
       .then((data) => {
-        if (data[0]) {
-          const nameMap =
-            data[0].pokemon_v2_pokemonspecy.pokemon_v2_pokemonspeciesnames.reduce(
-              (prev, curr) => {
-                prev[curr.language_id] = curr;
-
-                return prev;
-              },
-              nameByLang
-            );
-
-          setNameByLang(nameMap);
-        }
         setPokemon(data[0]);
         setLoading(false);
       })
@@ -60,24 +46,25 @@ export default function PokemonDetail(props: { id?: number }) {
       });
   }, [props.id]);
 
-  const accessoryTitle = (specy: PokemonV2Pokemonspecy): string => {
+  const nameByLang = useMemo(() => {
+    if (!pokemon) return {};
+
+    return pokemon.pokemon_v2_pokemonspecy.pokemon_v2_pokemonspeciesnames.reduce(
+      (prev: SpeciesNameByLanguage, curr) => {
+        prev[curr.language_id] = curr;
+        return prev;
+      },
+      {}
+    );
+  }, [pokemon]);
+
+  const accessoryTitle = (specy: PokemonV2Pokemonspecy) => {
     if (specy.is_baby) return "Baby";
     if (specy.is_legendary) return "Legendary";
     if (specy.is_mythical) return "Mythical";
 
     return "";
   };
-
-  const abilities = (pkm: PokemonV2Pokemon) =>
-    pkm.pokemon_v2_pokemonabilities
-      .map((a) => {
-        if (a.is_hidden) {
-          return `${a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name} (hidden)`;
-        }
-
-        return a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name;
-      })
-      .join(", ");
 
   const formImg = (id: number, formId: number) => {
     const name = formId
@@ -86,12 +73,11 @@ export default function PokemonDetail(props: { id?: number }) {
     return `https://assets.pokemon.com/assets/cms2/img/pokedex/detail/${name}.png`;
   };
 
-  const dataObject = (
-    pokemon: PokemonV2Pokemon | undefined
-  ): json2md.DataObject => {
+  const dataObject: json2md.DataObject = useMemo(() => {
     if (!pokemon) return [];
 
     const {
+      pokemon_v2_pokemonabilities,
       pokemon_v2_pokemonspecy,
       pokemon_v2_pokemontypes,
       pokemon_v2_pokemonstats,
@@ -107,10 +93,13 @@ export default function PokemonDetail(props: { id?: number }) {
 
     const data = [
       {
-        h1: nameByLang[language].name,
+        h1: `#${pkmNumber} ${nameByLang[language].name}`,
       },
       {
-        blockquote: accessoryTitle(pokemon_v2_pokemonspecy),
+        h3: nameByLang[language].genus,
+      },
+      {
+        p: accessoryTitle(pokemon_v2_pokemonspecy),
       },
       {
         img: [
@@ -124,19 +113,25 @@ export default function PokemonDetail(props: { id?: number }) {
         h2: "Pokédex data",
       },
       {
-        p: `_National №:_ ${pkmNumber}`,
-      },
-      {
         p:
           "_Type:_ " +
           pokemon_v2_pokemontypes
             .map((n) => n.pokemon_v2_type.pokemon_v2_typenames[0].name)
             .join(", "),
       },
-      { p: `_Species:_ ${nameByLang[language].genus}` },
       { p: `_Height:_ ${pokemon.height / 10}m` },
       { p: `_Weight:_ ${pokemon.weight / 10}kg` },
-      { p: `_Abilities:_ ${abilities(pokemon)}` },
+      {
+        p: `_Abilities:_ ${pokemon_v2_pokemonabilities
+          .map((a) => {
+            if (a.is_hidden) {
+              return `${a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name} (hidden)`;
+            }
+
+            return a.pokemon_v2_ability.pokemon_v2_abilitynames[0].name;
+          })
+          .join(", ")}`,
+      },
       {
         h2: "Base stats",
       },
@@ -250,7 +245,7 @@ export default function PokemonDetail(props: { id?: number }) {
     ];
 
     return data;
-  };
+  }, [pokemon]);
 
   const englishName = () => {
     // 9 is language_id for English
@@ -263,7 +258,7 @@ export default function PokemonDetail(props: { id?: number }) {
       navigationTitle={
         pokemon ? `${nameByLang[language].name} | Pokédex` : "Pokédex"
       }
-      markdown={json2md(dataObject(pokemon))}
+      markdown={json2md(dataObject)}
       actions={
         pokemon && (
           <ActionPanel>
