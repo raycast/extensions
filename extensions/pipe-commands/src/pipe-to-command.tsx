@@ -45,6 +45,7 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
         <List.Item
           icon={Icon.Document}
           title="Open With..."
+          subtitle="File Actions"
           actions={
             <ActionPanel>
               <Action.OpenWith path={props.input.content} />
