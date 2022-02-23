@@ -40,7 +40,7 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
   }, []);
 
   return (
-    <List isLoading={typeof parsed == "undefined"} searchBarPlaceholder="Pipe Input to...">
+    <List isLoading={typeof parsed == "undefined"} searchBarPlaceholder={`Pipe ${props.input.type} to`}>
       {props.input.type == "file" ? (
         <List.Item
           icon={Icon.Document}
