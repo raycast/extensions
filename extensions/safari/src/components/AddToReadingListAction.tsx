@@ -13,16 +13,16 @@ safari.addReadingListItem("${url}")
 const AddToReadingListAction = () => {
   const handleSubmit = async (values: { url: string }) => {
     if (!values.url) {
-      await showToast(Toast.Style.Failure, "URL is required");
+      await showToast({ style: Toast.Style.Failure, title: "URL is required" });
       return;
     }
 
     try {
       const parsedUrl = new URL(values.url);
       await addToReadingList(parsedUrl.href);
-      await showToast(Toast.Style.Success, "Added to Reading List");
+      await showToast({ style: Toast.Style.Success, title: "Added to Reading List" });
     } catch (err) {
-      await showToast(Toast.Style.Failure, "Invalid URL", "URL must start with http[s]://");
+      await showToast({ style: Toast.Style.Failure, title: "Invalid URL", message: "URL must start with http[s]://" });
     }
   };
 
