@@ -1,7 +1,7 @@
 import { Action, ActionPanel, getPreferenceValues, List } from '@raycast/api'
 import fetch from 'node-fetch'
 import React, { useEffect } from 'react'
-import { Sidebar, SidebarResponse } from '../types'
+import { PagePage, Sidebar, SidebarResponse } from '../types'
 
 interface IDocsProps {
   version: string
@@ -51,9 +51,30 @@ export const Docs = (props: IDocsProps) => {
                     title={page?.title}
                     key={idx}
                     icon="../assets/nativebase-logo.png"
+                    keywords={[item?.title, page?.title]}
                     actions={
                       <ActionPanel>
-                        <Action.OpenInBrowser url={url} />
+                        {page?.isCollapsed && page.pages?.length && (
+                          <Action.Push
+                            title={`Open ${page?.title}`}
+                            icon="../assets/nativebase-logo.png"
+                            shortcut={{
+                              modifiers: ['cmd', 'shift'],
+                              key: 'enter'
+                            }}
+                            target={
+                              <SubList
+                                navTitle={item?.title}
+                                title={page?.title}
+                                pages={page.pages}
+                                version={props.version}
+                              />
+                            }
+                          />
+                        )}
+                        {!page?.isCollapsed && (
+                          <Action.OpenInBrowser url={url} />
+                        )}
                         <Action.CopyToClipboard content={url} />
                       </ActionPanel>
                     }
@@ -63,6 +84,39 @@ export const Docs = (props: IDocsProps) => {
           </List.Section>
         )
       })}
+    </List>
+  )
+}
+
+interface ISubList {
+  pages: Array<PagePage>
+  title: string
+  navTitle: string
+  version: string
+}
+
+const SubList = (props: ISubList) => {
+  return (
+    <List navigationTitle={props?.navTitle}>
+      <List.Section title={props?.title}>
+        {props?.pages.map((page) => {
+          const url = `https://docs.nativebase.io/${props.version}/${page?.id}`
+
+          return (
+            <List.Item
+              title={page?.title}
+              key={page?.id}
+              icon="../assets/nativebase-logo.png"
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={url} />
+                  <Action.CopyToClipboard content={url} />
+                </ActionPanel>
+              }
+            />
+          )
+        })}
+      </List.Section>
     </List>
   )
 }
