@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, Action } from "@raycast/api";
+import { Icon, Action } from "@raycast/api";
 
 import { LocalTab, Tab } from "../types";
 import { executeJxa } from "../utils";

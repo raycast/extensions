@@ -18,6 +18,12 @@ const Actions = (props: { entry: HistoryItem; searchText?: string }) => {
         <CopyTitleAction title={props.entry.title} />
         <CopyMarkdownLinkAction title={props.entry.title} url={props.entry.url} />
       </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action.CreateQuicklink
+          quicklink={{ link: props.entry.url, name: props.entry.title }}
+          shortcut={{ modifiers: ["cmd"], key: "s" }}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 };

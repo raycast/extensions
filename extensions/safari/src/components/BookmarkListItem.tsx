@@ -16,6 +16,12 @@ const Actions = (props: { bookmark: ReadingListBookmark }) => (
       <CopyTitleAction title={props.bookmark.title} />
       <CopyMarkdownLinkAction title={props.bookmark.title} url={props.bookmark.url} />
     </ActionPanel.Section>
+    <ActionPanel.Section>
+      <Action.CreateQuicklink
+        quicklink={{ link: props.bookmark.url, name: props.bookmark.title }}
+        shortcut={{ modifiers: ["cmd"], key: "s" }}
+      />
+    </ActionPanel.Section>
   </ActionPanel>
 );
 
