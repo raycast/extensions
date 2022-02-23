@@ -1,4 +1,13 @@
-import { ActionPanel, closeMainWindow, Form, Icon, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  closeMainWindow,
+  Form,
+  Icon,
+  showToast,
+  SubmitFormAction,
+  ToastStyle,
+  popToRoot,
+} from "@raycast/api";
 import open from "open";
 
 interface FormValues {
@@ -27,6 +36,7 @@ function CreateNoteAction() {
       { background: values.openNote === "no" ? true : false }
     );
     await closeMainWindow();
+    await popToRoot({ clearSearchBar: true });
   }
   return <SubmitFormAction icon={Icon.Document} title="Create Note" onSubmit={handleSubmit} />;
 }

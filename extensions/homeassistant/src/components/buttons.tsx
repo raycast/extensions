@@ -7,8 +7,6 @@ export function ButtonPressAction(props: { state: State }): JSX.Element | null {
   if (!s.entity_id.startsWith("button")) {
     return null;
   }
-  const name = s.entity_id.substring(7);
-  console.log(name);
   const handle = async () => {
     await ha.callService("button", "press", { entity_id: s.entity_id });
   };
