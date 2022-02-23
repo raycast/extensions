@@ -8,7 +8,7 @@ import {
   UNKNOWN,
   WARN,
 } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/MonitorOverallStates";
-import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { useMonitors } from "./useMonitors";
 import { linkDomain } from "./util";
 
@@ -57,7 +57,7 @@ export default function CommandListMonitors() {
           accessoryIcon={{ source: statusIcon(monitor.overallState) }}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={`https://${linkDomain()}/monitors/${monitor.id}`} />
+              <Action.OpenInBrowser url={`https://${linkDomain()}/monitors/${monitor.id}`} />
             </ActionPanel>
           }
         />

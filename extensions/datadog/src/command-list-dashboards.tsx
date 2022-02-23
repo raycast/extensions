@@ -1,4 +1,4 @@
-import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { useDashboards } from "./useDashboards";
 import { linkDomain } from "./util";
 
@@ -17,7 +17,7 @@ export default function CommandListDashboards() {
           accessoryTitle={dashboard.authorHandle}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={`https://${linkDomain()}${dashboard.url}`} />
+              <Action.OpenInBrowser url={`https://${linkDomain()}${dashboard.url}`} />
             </ActionPanel>
           }
         />
