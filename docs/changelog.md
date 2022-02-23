@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.29.0 - 2022-02-23
+
+### ✨ New
+
+- Add 2 new Actions: `Action.CreateSnippet` and `Action.CreateQuicklink`. Use them in your extensions to provide users an option to integrate deeper with Raycast, for example, by creating a Quicklink from a frequently visited website.
+
+### 💎 Improvements
+
+- Various documentation fixes and improvements such as new media for UI components.
+- Synchronous React state update calls are now batched, leading to less re-rendering.
+- Markdown comments will now be hidden in the `Detail` view
+
+### 🐞 Fixes
+
+- Fixed a crash that could happen when switching between a development and store version of an extension or restarting the Node connection.
+- Fixed an issue with React Developer Tools sometimes not getting opened.
+- Limit the width that the `ActionPanel` can take.
+
 ## 1.28.0 - 2022-02-09
 
 ### 💎 Improvements
