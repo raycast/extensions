@@ -1,12 +1,12 @@
-# Raycast Pipe commands
+# Raycast Pipe Commands
 
-## Using Pipe commands
+## Using Pipe Commands
 
 Select / Copy a some text, an url or a file and use the `Send [Selection, Clipboard] to Pipe command` command.
 
 Depending on the user input type, different commands will be shown.
 
-## Adding additional Actions
+## Adding Additional Pipe Commands
 
 Use the `Create Pipe command` command to generate a new pipe command template.
 
@@ -21,7 +21,7 @@ The Pipe command syntax is very similar to the script command syntax, with some 
   | type           | What type of input the pipe command handle | text or file | ✅       |
   | percentEncoded | useful for query strings                   | boolean      | ❌       |
 
-## Pipe Commands logic
+## Pipe Commands Logic
 
 The user input (selection or clipboard) will be passed to the script through the standard input stream (`stdin`).
 
@@ -29,7 +29,7 @@ The standard output stream (`stdout`) of the script will replace the current sel
 
 If you want to provide a message to the user, use the standard error stream (`stderr`). It will trigger a notification on the user end.
 
-## Example scripts
+## Example Commands
 
 ### Google Search
 
