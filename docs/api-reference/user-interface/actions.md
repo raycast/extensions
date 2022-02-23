@@ -384,3 +384,89 @@ export default function Command() {
 | shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code> | No       | -                                        | The optional keyboard shortcut for the action. |
 | title    | <code>string</code>                                       | No       | Move to Trash                            | An optional title for the action.              |
 | onTrash  | <code>(paths: PathLike \| PathLike[]) => void</code>      | No       | -                                        |                                                |
+
+### Action.CreateSnippet
+
+Action that navigates to the the Create Snippet command with some or all of the fields prefilled.
+
+#### Example
+
+```typescript
+import { ActionPanel, Detail, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Detail
+      markdown="Test out snippet creation"
+      actions={
+        <ActionPanel>
+          <Action.CreateSnippet snippet={{ text: "DE75512108001245126199" }} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+#### Props
+
+| Prop     | Type                                                      | Required | Default                                  | Description                                    |
+| :------- | :-------------------------------------------------------- | :------- | :--------------------------------------- | :--------------------------------------------- |
+| snippet  | <code>[Snippet](#snippet)</code>                          | yes      | -                                        | The Snippet to create.                         |
+| icon     | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | [Icon.Link](./icons-and-images.md#icon)  | A optional icon displayed for the action.      |
+| shortcut | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code> | No       | -                                        | The optional keyboard shortcut for the action. |
+| title    | <code>string</code>                                       | No       | Move to Trash                            | An optional title for the action.              |
+
+### Action.CreateQuicklink
+
+Action that navigates to the the Create Quicklink command with some or all of the fields prefilled.
+
+#### Example
+
+```typescript
+import { ActionPanel, Detail, Action } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <Detail
+      markdown="Test out quicklink creation"
+      actions={
+        <ActionPanel>
+          <Action.CreateQuicklink quicklink={{ link: "https://duckduckgo.com/?q={Query}" }} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+```
+
+#### Props
+
+| Prop      | Type                                                      | Required | Default                                         | Description                                    |
+| :-------- | :-------------------------------------------------------- | :------- | ----------------------------------------------- | :--------------------------------------------- |
+| quicklink | <code>[Quicklink](#quicklink)</code>                      | Yes      | -                                               | The Quicklink to create.                       |
+| icon      | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | [Icon.TextDocument](./icons-and-images.md#icon) | A optional icon displayed for the action.      |
+| shortcut  | <code>[Keyboard.Shortcut](../keyboard.md#shortcut)</code> | No       | -                                               | The optional keyboard shortcut for the action. |
+| title     | <code>string</code>                                       | No       | Move to Trash                                   | An optional title for the action.              |
+
+## Types
+
+### Snippet
+
+#### Properties
+
+| Property  | Type                 | Required | Default  | Description                         |
+| :-------- | :------------------- | :------- | :------- | :---------------------------------- |
+| text      | <code>string</code>  | Yes      | -        | The snippet contents.               |
+| name      | <code>string</code>  | No       | -        | The snippet name.                   |
+| keyword   | <code>string</code>  | No       | -        | The keyword to trigger the snippet. |
+
+### Quicklink
+
+#### Properties
+
+| Property    | Type                                                                           | Required | Default  | Description                                                                                              |
+| :---------- | ------------------------------------------------------------------------------ | :------- | :------- | -------------------------------------------------------------------------------------------------------- |
+| link        | <code>string</code>                                                            | Yes      | -        | The URL or file path, optionally including placeholders such as in "https://google.com/search?q={Query}" |
+| name        | <code>string</code>                                                            | No       | -        | The quicklink name.                                                                                      |
+| application | <code>string</code> or <code>[Application](../utilities.md#application)</code> | No       | -        | The application that the quicklink should be opened in.                                                  |
