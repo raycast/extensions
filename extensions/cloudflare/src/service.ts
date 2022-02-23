@@ -188,13 +188,10 @@ class Service {
   }
 
   async listZones(account: Account): Promise<Zone[]> {
-    const { id, name } = account;
+    const { id } = account;
     const response = await this.client.get<Response<ZoneItem[]>>('zones', {
       params: {
-        account: {
-          id,
-          name,
-        },
+        'account.id': id,
       },
     });
     return response.data.result.map((item) => formatZone(item));
