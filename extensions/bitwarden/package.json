@@ -52,7 +52,7 @@
       "name": "generate-password",
       "title": "Generate Password",
       "subtitle": "Bitwarden",
-      "description": "Generate a password.",
+      "description": "Generate a password using Bitwarden.",
       "mode": "view"
     }
   ],
