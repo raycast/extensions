@@ -9,7 +9,34 @@ This extension is made by [Anh Thang Bui](https://github.com/anhthang) and uses 
 
 ![Example](./media/example.png)
 
-## Issue Tracker
+## Features
+
+898 Pokémon Species with all alternate forms including Regional forms (Alolan, Galarian), Mega Evolution, Gigantamax
+
+- [x] 🔍 Pokédex
+  - Search for a Pokémon by name or using its National Pokédex number.
+    - Pokédex data
+    - Base stats
+    - Training
+    - Breeding
+    - Forms
+    - Evolutions
+    - Pokédex entries
+  - Surprise Me!
+  - Open in the Official Pokémon Website, Open in Bulbapedia.
+- [x] ⚙️ Preference
+  - Pokémon details by prefered language. Supported: English (default), French, German, Italian, Japanese, Korean, Spanish.
+
+## TODO
+
+- [ ] Egg moves
+- [ ] Moves learnt by level up
+- [ ] Moves learnt by TM
+- [ ] Name in other languages
+- [ ] Sprites
+- [ ] Where to find
+
+## Issue tracker
 
 https://github.com/anhthang/raycast-pokedex/issues
 
