@@ -209,14 +209,14 @@ function CachePurgeView(props: SiteProps) {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="urls" title="List of URL(s)" placeholder="Separate URL(s) one per line"/>
+      <Form.TextArea id="urls" title="List of URL(s)" placeholder="Separate URL(s) one per line" />
     </Form>
   );
 }
 
 async function clearUrlsFromCache(zoneId: string, urls: string) {
   if (!await confirmAlert({
-    title: "Do you really want to purge the files from cache?", 
+    title: "Do you really want to purge the files from cache?",
     primaryAction: { title: "Purge", style: Alert.ActionStyle.Destructive }
   })) {
     return;

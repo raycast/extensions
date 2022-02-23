@@ -220,7 +220,7 @@ class Service {
       },
     );
     const { success, errors, messages, result } = response.data;
-    return { success, errors, messages, result};
+    return { success, errors, messages, result };
   }
 
   async listPages(accountId: string): Promise<Page[]> {
