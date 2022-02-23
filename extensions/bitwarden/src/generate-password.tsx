@@ -43,6 +43,7 @@ const GeneratePassword = () => {
 
   return (
     <List
+      navigationTitle="Generate Password"
       isLoading={isGenerating}
       searchBarPlaceholder=""
       selectedItemId="copy"
@@ -182,6 +183,7 @@ const Options = ({ regeneratePassword }: { regeneratePassword: () => Promise<voi
 
   return (
     <Form
+      navigationTitle="Generate Password - Options"
       actions={
         <ActionPanel>
           <Action title="Go back" icon={Icon.ArrowClockwise} onAction={pop} />
