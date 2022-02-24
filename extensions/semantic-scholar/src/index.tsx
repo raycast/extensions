@@ -21,14 +21,24 @@ export default function Command() {
     >
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((paper) => (
-          <SearchListItem key={paper.title} paper={paper} />
+          <SearchListItem
+            key={paper.title}
+            paper={paper}
+            searchUrl={state.searchUrl}
+          />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function SearchListItem({ paper }: { paper: Paper }) {
+function SearchListItem({
+  paper,
+  searchUrl,
+}: {
+  paper: Paper;
+  searchUrl: string;
+}) {
   let authorText =
     paper.authors && paper.authors.length > 1 ? paper.authors[0].name : "";
   if (paper.authors && paper.authors.length > 1) {
@@ -47,15 +57,18 @@ function SearchListItem({ paper }: { paper: Paper }) {
               title="Show Details"
               target={<PaperDetails paper={paper} />}
             />
+            <Action.OpenInBrowser title="Open Search" url={searchUrl} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={paper.url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
-              title="Copy DOI"
-              content={`npm install ${paper.DOI}`}
+              title="Copy Title"
+              content={`${paper.title}`}
             />
+            <Action.CopyToClipboard title="Copy DOI" content={`${paper.DOI}`} />
+            <Action.CopyToClipboard title="Copy URL" content={`${paper.url}`} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -93,6 +106,7 @@ function PaperDetails({ paper }: { paper: Paper }) {
 function useSearch() {
   const [state, setState] = useState<SearchState>({
     results: [],
+    searchUrl: "",
     isLoading: true,
   });
   const cancelRef = useRef<AbortController | null>(null);
@@ -113,6 +127,7 @@ function useSearch() {
         setState((oldState) => ({
           ...oldState,
           results: results,
+          searchUrl: constructSearchUrl(searchText),
           isLoading: false,
         }));
       } catch (error) {
@@ -149,6 +164,13 @@ function useSearch() {
   };
 }
 
+function constructSearchUrl(searchText: string): string {
+  const params = new URLSearchParams();
+  params.append("q", searchText);
+  params.append("sort", "relevance");
+  return "https://www.semanticscholar.org/search" + "?" + params.toString();
+}
+
 async function performSearch(
   searchText: string,
   signal: AbortSignal
@@ -159,7 +181,8 @@ async function performSearch(
     "fields",
     "url,abstract,authors,url,title,citationCount,externalIds,venue,year,referenceCount"
   );
-  params.append("limit", "10");
+  params.append("limit", "25");
+  params.append("sort", "relevance");
 
   const response = await fetch(
     "https://api.semanticscholar.org/graph/v1/paper/search" +
@@ -217,6 +240,7 @@ async function performSearch(
 
 interface SearchState {
   results: Paper[];
+  searchUrl: string;
   isLoading: boolean;
 }
 
