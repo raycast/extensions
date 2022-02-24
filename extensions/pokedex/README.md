@@ -36,9 +36,9 @@ This extension is made by [Anh Thang Bui](https://github.com/anhthang) and uses 
 - [ ] Sprites
 - [ ] Where to find
 
-## Issue tracker
+## Issues
 
-https://github.com/anhthang/raycast-pokedex/issues
+[Track here](https://github.com/anhthang/raycast-pokedex/issues) or create an issue.
 
 ## Notes
 

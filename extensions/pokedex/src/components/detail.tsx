@@ -2,11 +2,7 @@ import { Action, ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import json2md from "json2md";
 import { getPokemon } from "../api";
-import {
-  PokemonV2Pokemon,
-  PokemonV2Pokemonspeciesname,
-  PokemonV2Pokemonspecy,
-} from "../types";
+import { PokemonV2Pokemon, PokemonV2Pokemonspeciesname } from "../types";
 
 const { language } = getPreferenceValues();
 
@@ -58,14 +54,6 @@ export default function PokemonDetail(props: { id?: number }) {
     );
   }, [pokemon]);
 
-  const accessoryTitle = (specy: PokemonV2Pokemonspecy) => {
-    if (specy.is_baby) return "Baby";
-    if (specy.is_legendary) return "Legendary";
-    if (specy.is_mythical) return "Mythical";
-
-    return "";
-  };
-
   const formImg = (id: number, formId: number) => {
     const name = formId
       ? `${id.toString().padStart(3, "0")}_f${formId + 1}`
@@ -99,7 +87,10 @@ export default function PokemonDetail(props: { id?: number }) {
         h3: nameByLang[language].genus,
       },
       {
-        p: accessoryTitle(pokemon_v2_pokemonspecy),
+        p: pokemon_v2_pokemonspeciesflavortexts
+          .reverse()[0]
+          .flavor_text.split("\n")
+          .join(" "),
       },
       {
         img: [
