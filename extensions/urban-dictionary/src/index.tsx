@@ -52,7 +52,7 @@ export default function UrbanDictionarySearch() {
     <List
       onSearchTextChange={(text) => setQuery(text)}
       throttle
-      searchBarPlaceholder="Enter term to search..."
+      searchBarPlaceholder="Enter word to search..."
       isLoading={isLoading}
     >
       {terms
