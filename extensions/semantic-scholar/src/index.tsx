@@ -2,6 +2,7 @@ import {
   ActionPanel,
   Action,
   List,
+  Icon,
   showToast,
   Toast,
   Detail,
