@@ -48,11 +48,7 @@ function SearchListItem({ paper }: { paper: Paper }) {
               title="Show Details"
               target={<PaperDetails paper={paper} />}
             />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={paper.url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy DOI"
               content={`npm install ${paper.DOI}`}
