@@ -24,14 +24,14 @@ export default function SwitchCommand() {
 
   function items() {
     return versions.reverse().filter(function (version) {
-      return existsSync(brewPath + "/opt/php@" + version);
+      return existsSync(`${brewPath}/opt/php@${version}`);
     });
   }
 
   let current: string | null = null;
 
-  if (existsSync(brewPath + "/bin/php-config")) {
-    current = String(execSync("/opt/homebrew/bin/php-config --version")).slice(
+  if (existsSync(`${brewPath}/bin/php-config`)) {
+    current = String(execSync(`${brewPath}/bin/php-config --version`)).slice(
       0,
       3
     );
