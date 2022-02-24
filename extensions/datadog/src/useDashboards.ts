@@ -1,27 +1,20 @@
-import { useEffect, useState } from "react";
 import { DashboardSummaryDefinition } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/DashboardSummaryDefinition";
 import { dashboardsApi } from "./datadog-api";
-import { showError } from "./util";
+import { useLocalState } from "./cache";
 
 type State = {
-  dashboardsAreLoading: boolean;
   dashboards: DashboardSummaryDefinition[];
 };
 
 export const useDashboards = () => {
-  const [{ dashboardsAreLoading, dashboards }, setState] = useState<State>({
-    dashboards: [],
-    dashboardsAreLoading: true,
-  });
-
-  useEffect(() => {
-    dashboardsApi
+  const loader = () => {
+    return dashboardsApi
       .listDashboards()
       .then(summary => summary.dashboards || [])
-      .then(dashboards => setState(prev => ({ ...prev, dashboards })))
-      .catch(showError)
-      .finally(() => setState(prev => ({ ...prev, dashboardsAreLoading: false })));
-  }, []);
+      .then(data => ({ dashboards: data } as State));
+  };
 
-  return { dashboards, dashboardsAreLoading };
+  const [state, dashboardsAreLoading] = useLocalState<State>("dashboards", { dashboards: [] }, loader);
+
+  return { state, dashboardsAreLoading };
 };

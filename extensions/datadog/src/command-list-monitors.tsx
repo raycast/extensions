@@ -8,9 +8,10 @@ import {
   UNKNOWN,
   WARN,
 } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/MonitorOverallStates";
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useMonitors } from "./useMonitors";
 import { linkDomain } from "./util";
+import { clearLocalState } from "./cache";
 
 const statusIcon = (status: MonitorOverallStates | undefined) => {
   const icon = (name: string, themable = false) => {
@@ -43,11 +44,11 @@ const statusIcon = (status: MonitorOverallStates | undefined) => {
 
 // noinspection JSUnusedGlobalSymbols
 export default function CommandListMonitors() {
-  const { monitors, monitorsAreLoading } = useMonitors();
+  const { state, monitorsAreLoading } = useMonitors();
 
   return (
     <List isLoading={monitorsAreLoading}>
-      {monitors.map(monitor => (
+      {state.monitors.map(monitor => (
         <List.Item
           key={monitor.id}
           icon={{ source: { light: "icon@light.png", dark: "icon@dark.png" } }}
@@ -58,6 +59,7 @@ export default function CommandListMonitors() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`https://${linkDomain()}/monitors/${monitor.id}`} />
+              <Action icon={Icon.Trash} title="Clear monitors cache" onAction={() => clearLocalState("monitors")} />
             </ActionPanel>
           }
         />

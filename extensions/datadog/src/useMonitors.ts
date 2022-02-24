@@ -1,29 +1,20 @@
-import { useEffect, useState } from "react";
 import { Monitor } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/Monitor";
-import { monitorsApi } from "./datadog-api";
-import { showError } from "./util";
 import { getPreferenceValues } from "@raycast/api";
+import { monitorsApi } from "./datadog-api";
+import { useLocalState } from "./cache";
 
 type State = {
-  monitorsAreLoading: boolean;
   monitors: Monitor[];
 };
 
 const tags: string = getPreferenceValues()["tags"];
 
 export const useMonitors = () => {
-  const [{ monitorsAreLoading, monitors }, setState] = useState<State>({
-    monitors: [],
-    monitorsAreLoading: true,
-  });
+  const loader = () => {
+    return monitorsApi.listMonitors({ monitorTags: tags }).then(monitors => ({ monitors: monitors } as State));
+  };
 
-  useEffect(() => {
-    monitorsApi
-      .listMonitors({ monitorTags: tags })
-      .then(monitors => setState(prev => ({ ...prev, monitors })))
-      .catch(showError)
-      .finally(() => setState(prev => ({ ...prev, monitorsAreLoading: false })));
-  }, []);
+  const [state, monitorsAreLoading] = useLocalState<State>("monitors", { monitors: [] }, loader);
 
-  return { monitors, monitorsAreLoading };
+  return { state, monitorsAreLoading };
 };
