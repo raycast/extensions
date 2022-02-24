@@ -2,6 +2,7 @@ import {
   ActionPanel,
   Action,
   List,
+  Icon,
   showToast,
   Toast,
   Detail,
@@ -56,19 +57,21 @@ function SearchListItem({
             <Action.Push
               title="Show Details"
               target={<PaperDetails paper={paper} />}
+              icon={Icon.ArrowRight}
             />
-            <Action.OpenInBrowser title="Open Search" url={searchUrl} />
+            <Action.OpenInBrowser
+              title="Open Search in Browser"
+              url={searchUrl}
+            />
+            <Action.OpenInBrowser
+              title="Open Paper in Browser"
+              url={paper.url}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={paper.url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Title"
-              content={`${paper.title}`}
-            />
-            <Action.CopyToClipboard title="Copy DOI" content={`${paper.DOI}`} />
-            <Action.CopyToClipboard title="Copy URL" content={`${paper.url}`} />
+            <Action.CopyToClipboard title="Copy Title" content={paper.title} />
+            <Action.CopyToClipboard title="Copy DOI" content={paper.DOI} />
+            <Action.CopyToClipboard title="Copy URL" content={paper.url} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -93,9 +96,7 @@ function PaperDetails({ paper }: { paper: Paper }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={paper.url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard title="Copy DOI" content={`${paper.DOI}`} />
+            <Action.CopyToClipboard title="Copy DOI" content={paper.DOI} />
           </ActionPanel.Section>
         </ActionPanel>
       }
