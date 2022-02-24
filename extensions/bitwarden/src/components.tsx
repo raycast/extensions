@@ -29,12 +29,11 @@ export function UnlockForm(props: {
   async function onSubmit(values: { password: string }) {
     try {
       const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
-      const sessionToken = await props.bitwardenApi.unlock(values.password.trim());
+      const sessionToken = await props.bitwardenApi.unlock(values.password);
       toast.hide();
 
       props.setSessionToken(sessionToken);
     } catch (error) {
-      console.log({error})
       showToast(Toast.Style.Failure, "Failed to unlock vault", "Invalid credentials");
     }
   }
