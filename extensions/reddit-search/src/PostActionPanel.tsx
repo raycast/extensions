@@ -10,16 +10,18 @@ export default function PostActionPanel({ data }: { data: RedditResultItem }) {
           target={
             <Detail
               navigationTitle={data.title}
-              markdown={data.description ? data.description : "No description"}
+              markdown={`# ${data.title}
+              
+${data.description}`}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser url={data.url} />
+                  <Action.OpenInBrowser url={data.url} icon={Icon.Globe} />
                 </ActionPanel>
               }
             />
           }
         />
-        <Action.OpenInBrowser url={data.url} icon={Icon.Text} />
+        <Action.OpenInBrowser url={data.url} icon={Icon.Globe} />
       </ActionPanel>
     );
   } else if (data.imageUrl) {
@@ -30,22 +32,63 @@ export default function PostActionPanel({ data }: { data: RedditResultItem }) {
           target={
             <Detail
               navigationTitle={data.title}
-              markdown={`![${data.title}](${data.imageUrl} "${data.title}}")`}
+              markdown={`# ${data.title}
+              
+![${data.title}](${data.imageUrl} "${data.title}}")`}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser url={data.url} />
+                  <Action.OpenInBrowser url={data.url} icon={Icon.Globe} />
                 </ActionPanel>
               }
             />
           }
         />
-        <Action.OpenInBrowser url={data.url} icon={Icon.Text} />
+        <Action.OpenInBrowser url={data.url} icon={Icon.Globe} />
+      </ActionPanel>
+    );
+  } else if (data.contentUrl) {
+    return (
+      <ActionPanel>
+        <Action.Push
+          title="Show Details"
+          target={
+            <Detail
+              navigationTitle={data.title}
+              markdown={`# ${data.title}
+              
+${data.contentUrl}`}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={data.contentUrl} icon={Icon.Globe} />
+                  <Action.OpenInBrowser title="Open reddit post" url={data.contentUrl} icon={Icon.Globe} />
+                </ActionPanel>
+              }
+            />
+          }
+        />
+        <Action.OpenInBrowser url={data.url} icon={Icon.Globe} />
       </ActionPanel>
     );
   } else {
     return (
       <ActionPanel>
-        <Action.OpenInBrowser url={data.url} icon={Icon.Text} />
+        <Action.Push
+          title="Show Details"
+          target={
+            <Detail
+              navigationTitle={data.title}
+              markdown={`# ${data.title}
+              
+${data.url}`}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={data.url} icon={Icon.Globe} />
+                </ActionPanel>
+              }
+            />
+          }
+        />
+        <Action.OpenInBrowser url={data.url} icon={Icon.Globe} />
       </ActionPanel>
     );
   }

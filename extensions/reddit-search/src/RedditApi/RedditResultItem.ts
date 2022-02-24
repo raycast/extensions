@@ -7,4 +7,5 @@ export default interface RedditResultItem {
   created: string;
   thumbnail: string;
   subreddit: string;
+  contentUrl: string;
 }

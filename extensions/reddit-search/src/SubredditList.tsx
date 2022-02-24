@@ -60,65 +60,67 @@ export default function SubredditPostList({
 
   return (
     <List isLoading={searching} onSearchTextChange={doSearch} throttle searchBarPlaceholder="Search Subreddits...">
-      {results.map((x) => (
-        <List.Item
-          key={x.id}
-          icon={Icon.Text}
-          title={x.title}
-          accessoryTitle={`Posted ${x.created} r/${x.subredditName}${x.isFavorite ? " ⭐" : ""}`}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Search Reddit..."
-                target={<FilterBySubredditPostList subredditName={x.subredditName} subreddit={x.subreddit} />}
-              />
-              <Action.OpenInBrowser url={x.url} icon={Icon.Globe} />
-              {!x.isFavorite && (
-                <Action
-                  title="Favorite"
-                  icon={Icon.Star}
-                  onAction={async () => {
-                    await addFavoriteSubreddit(x.subreddit);
-                    const index = results.findIndex((y) => y.id === x.id);
-                    setResults([
-                      ...results.slice(0, index),
-                      { ...results[index], isFavorite: !results[index].isFavorite },
-                      ...results.slice(index + 1),
-                    ]);
-                  }}
+      <List.Section title="Subreddits">
+        {results.map((x) => (
+          <List.Item
+            key={x.id}
+            icon={Icon.Text}
+            title={x.title}
+            accessoryTitle={`Posted ${x.created} r/${x.subredditName}${x.isFavorite ? " ⭐" : ""}`}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title={`Search in r/${x.subredditName}`}
+                  target={<FilterBySubredditPostList subredditName={x.subredditName} subreddit={x.subreddit} />}
                 />
-              )}
-              {x.isFavorite && (
-                <Action
-                  title="Remove from Favorites"
-                  icon={Icon.Trash}
-                  onAction={async () => {
-                    await removeFavoriteSubreddit(x.subreddit);
-                    const index = results.findIndex((y) => y.id === x.id);
-                    setResults([
-                      ...results.slice(0, index),
-                      { ...results[index], isFavorite: !results[index].isFavorite },
-                      ...results.slice(index + 1),
-                    ]);
-                  }}
-                />
-              )}
-            </ActionPanel>
-          }
-        />
-      ))}
-      {results.length > 0 && (
-        <List.Item
-          key="searchOnReddit"
-          icon={Icon.MagnifyingGlass}
-          title="Show all results on Reddit..."
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser url={searchRedditUrl} icon={Icon.Globe} />
-            </ActionPanel>
-          }
-        />
-      )}
+                <Action.OpenInBrowser url={x.url} icon={Icon.Globe} />
+                {!x.isFavorite && (
+                  <Action
+                    title="Favorite"
+                    icon={Icon.Star}
+                    onAction={async () => {
+                      await addFavoriteSubreddit(x.subreddit);
+                      const index = results.findIndex((y) => y.id === x.id);
+                      setResults([
+                        ...results.slice(0, index),
+                        { ...results[index], isFavorite: !results[index].isFavorite },
+                        ...results.slice(index + 1),
+                      ]);
+                    }}
+                  />
+                )}
+                {x.isFavorite && (
+                  <Action
+                    title="Remove from Favorites"
+                    icon={Icon.Trash}
+                    onAction={async () => {
+                      await removeFavoriteSubreddit(x.subreddit);
+                      const index = results.findIndex((y) => y.id === x.id);
+                      setResults([
+                        ...results.slice(0, index),
+                        { ...results[index], isFavorite: !results[index].isFavorite },
+                        ...results.slice(index + 1),
+                      ]);
+                    }}
+                  />
+                )}
+              </ActionPanel>
+            }
+          />
+        ))}
+        {results.length > 0 && (
+          <List.Item
+            key="searchOnReddit"
+            icon={Icon.MagnifyingGlass}
+            title="Show all results on Reddit..."
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={searchRedditUrl} icon={Icon.Globe} />
+              </ActionPanel>
+            }
+          />
+        )}
+      </List.Section>
     </List>
   );
 }

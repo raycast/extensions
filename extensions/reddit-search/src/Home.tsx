@@ -93,11 +93,11 @@ export default function Home({
             {favorites.map((x) => (
               <List.Item
                 key={x}
-                title={x}
+                title={x.substring(1, x.length - 1)}
                 actions={
                   <ActionPanel>
                     <Action.Push
-                      title="Search subreddit"
+                      title={`Search in ${x.substring(1, x.length - 1)}`}
                       target={<FilterBySubredditPostList subreddit={x} subredditName={x.substring(3, x.length - 1)} />}
                     />
                     <Action.OpenInBrowser url={joinWithBaseUrl(x)} icon={Icon.Globe} />

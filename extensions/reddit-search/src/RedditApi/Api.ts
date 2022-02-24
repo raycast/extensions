@@ -45,6 +45,7 @@ export const searchAll = async (subreddit: string, query: string, sort: string, 
                 id: x.data.id,
                 title: x.data.title,
                 url: joinWithBaseUrl(x.data.permalink),
+                contentUrl: x.data.url.indexOf(x.data.permalink) > -1 ? "" : x.data.url,
                 description: x.data.selftext,
                 imageUrl:
                   x.data.is_video ||
