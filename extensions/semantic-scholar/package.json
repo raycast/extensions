@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "semantic-scholar",
   "title": "Semantic Scholar",
-  "description": "Search Research Papers on Semantic Scholar (semanticscholar.org)",
+  "description": "Search research papers on semantic scholar (semanticscholar.org)",
   "icon": "command-icon.png",
   "author": "blainerothrock",
   "license": "MIT",
