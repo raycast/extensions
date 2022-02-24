@@ -77,8 +77,6 @@ function PaperDetails({ paper }: { paper: Paper }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={paper.url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy DOI" content={`${paper.DOI}`} />
           </ActionPanel.Section>
         </ActionPanel>
