@@ -4,7 +4,7 @@
   "title": "Raynab — Manage Your Budgets",
   "description": "View and manage your YNAB Budgets directly from Raycast",
   "icon": "command-icon.png",
-  "author": "CodetaroMiura",
+  "author": "gogocharli",
   "license": "MIT",
   "commands": [
     {
