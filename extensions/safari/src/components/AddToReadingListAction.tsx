@@ -1,6 +1,6 @@
 import { URL } from "url";
 
-import { showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import { Action, showToast, Toast } from "@raycast/api";
 
 import { executeJxa } from "../utils";
 
@@ -13,20 +13,20 @@ safari.addReadingListItem("${url}")
 const AddToReadingListAction = () => {
   const handleSubmit = async (values: { url: string }) => {
     if (!values.url) {
-      await showToast(ToastStyle.Failure, "URL is required");
+      await showToast({ style: Toast.Style.Failure, title: "URL is required" });
       return;
     }
 
     try {
       const parsedUrl = new URL(values.url);
       await addToReadingList(parsedUrl.href);
-      await showToast(ToastStyle.Success, "Added to Reading List");
+      await showToast({ style: Toast.Style.Success, title: "Added to Reading List" });
     } catch (err) {
-      await showToast(ToastStyle.Failure, "Invalid URL", "URL must start with http[s]://");
+      await showToast({ style: Toast.Style.Failure, title: "Invalid URL", message: "URL must start with http[s]://" });
     }
   };
 
-  return <SubmitFormAction title="Add to Reading List" onSubmit={handleSubmit} />;
+  return <Action.SubmitForm title="Add to Reading List" onSubmit={handleSubmit} />;
 };
 
 export default AddToReadingListAction;

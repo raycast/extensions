@@ -46,10 +46,6 @@ npm install --save-dev react-devtools@4.21.0
 
 Then re-build your extension with `npm run dev`, open the command you want to debug in Raycast, and launch the React Developer Tools with `⌘` `⌥` `D`. Now select one of the React components, change a prop in the right sidebar, and hit enter. You'll notice the change immediately in Raycast.
 
-{% hint style="info" %}
-You notice a few React components prefixed with `Internal` which we add automatically. Generally, you shouldn't need to worry about them.
-{% endhint %}
-
 #### Alternative: Global installation of React Developer Tools
 
 If you prefer to install the `react-devtools` globally, you can do the following:
