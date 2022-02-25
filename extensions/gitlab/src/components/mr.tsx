@@ -48,7 +48,7 @@ export function MRDetailFetch(props: { project: Project; mrId: number }): JSX.El
     showToast(ToastStyle.Failure, "Could not fetch Merge Request Details", error);
   }
   if (isLoading || !mr) {
-    return <List isLoading={isLoading} searchBarPlaceholder={!mr ? "Loading" : ""} />;
+    return <Detail isLoading={isLoading} />;
   } else {
     return <MRDetail mr={mr} />;
   }

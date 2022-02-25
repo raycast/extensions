@@ -36,7 +36,7 @@ export function IssueDetailFetch(props: { project: Project; issueId: number }): 
     showToast(ToastStyle.Failure, "Could not fetch Issue Details", error);
   }
   if (isLoading || !issue) {
-    return <List isLoading={isLoading} searchBarPlaceholder={!issue ? "Loading" : ""} />;
+    return <Detail isLoading={isLoading} />;
   } else {
     return <IssueDetail issue={issue} />;
   }
