@@ -77,10 +77,10 @@
       "name": "fetchFavicons",
       "type": "checkbox",
       "required": false,
-      "default": false,
+      "default": true,
       "title": "Privacy",
       "label": "Fetch Vault Items Icons",
-      "description": "Whether to use a Google-owned service to fetch icons for vault items. If left unchecked, built-in icons will be used."
+      "description": "Whether to use a remote service owned by Bitwarden to fetch icons for vault items. If unchecked, built-in icons will be used."
     }
   ],
   "dependencies": {
