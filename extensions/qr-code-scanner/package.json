@@ -17,8 +17,8 @@
   "dependencies": {
     "@raycast/api": "^1.26.3",
     "jimp": "^0.16.1",
-    "open": "^8.4.0",
-    "qrcode-reader": "^1.0.4"
+    "jsqr": "^1.4.0",
+    "open": "^8.4.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
