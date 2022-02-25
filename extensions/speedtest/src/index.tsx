@@ -167,7 +167,7 @@ export default function SpeedtestList() {
   );
 }
 
-const ResultListItem = (props: { result: Result; isLoading: boolean; summary: JSX.Element }): JSX.Element => {
+function ResultListItem(props: { result: Result; isLoading: boolean; summary: JSX.Element }): JSX.Element {
   return (
     <List.Item
       title="Result Link"
@@ -181,7 +181,7 @@ const ResultListItem = (props: { result: Result; isLoading: boolean; summary: JS
       }
     />
   );
-};
+}
 
 function useSpeedtest(): {
   result: Result;
