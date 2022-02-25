@@ -18,10 +18,10 @@ export function filterNullishPropertiesFromObject(obj: any): any {
   return noNullish;
 }
 
-export function faviconUrl(size: number, url: string): string {
+export function faviconUrl(url: string): string {
   try {
     const domain = new URL(url).hostname;
-    return `https://www.google.com/s2/favicons?sz=${size}&domain=${domain}`;
+    return `https://icons.bitwarden.net/${domain}/icon.png`;
   } catch (err) {
     return Icon.Globe;
   }
