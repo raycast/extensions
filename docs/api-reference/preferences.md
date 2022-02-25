@@ -43,12 +43,10 @@ An object with the preference names as property key and the typed value as prope
 
 Depending on the type of the preference, the type of its value will be different.
 
-`"textfield"` and `"password"` (for secure entry), `"checkbox"`, `"dropdown"` and `"appPicker"`
-
-| Preference type        | Value type                                              |
-| :--------------------- | :------------------------------------------------------ |
-| <code>textfield</code> | <code>string</code>                                     |
-| <code>password</code>  | <code>string</code>                                     |
-| <code>checkbox</code>  | <code>boolean</code>                                    |
-| <code>dropdown</code>  | <code>string</code>                                     |
-| <code>appPicker</code> | <code>[Application](../utilities.md#application)</code> |
+| Preference type        | Value type                                             |
+| :--------------------- | :----------------------------------------------------- |
+| <code>textfield</code> | <code>string</code>                                    |
+| <code>password</code>  | <code>string</code>                                    |
+| <code>checkbox</code>  | <code>boolean</code>                                   |
+| <code>dropdown</code>  | <code>string</code>                                    |
+| <code>appPicker</code> | <code>[Application](./utilities.md#application)</code> |
