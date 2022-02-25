@@ -13,7 +13,8 @@
 /extensions/banca-d-italia-currency-converter        @FezVrasta
 /extensions/base64                                   @DanielSinclair
 /extensions/bazinga-tools                            @luin
-/extensions/bear                                     @hmarr
+/extensions/bear                                     @hmarr @ron-myers
+/extensions/betterdiscord-search                     @TheCommieAxolotl
 /extensions/biaodian                                 @gasolin
 /extensions/binance                                  @grzegorzkrukowski
 /extensions/bitbucket                                @Lp-Francois
@@ -38,6 +39,7 @@
 /extensions/cleanshotx                               @Aayush9029
 /extensions/clickup                                  @Ali-Parandeh
 /extensions/clockify                                 @ismamz @sxn
+/extensions/cloudflare                               @Destiner
 /extensions/coffee                                   @mooxl
 /extensions/coinbase-pro                             @farisaziz12
 /extensions/coingecko                                @Destiner
@@ -48,15 +50,17 @@
 /extensions/consoledev                               @splash-cli
 /extensions/conventional-comments                    @krzysztofzuraw
 /extensions/copy-gcp-icons                           @pomdtr
+/extensions/cpf-cnpj-generator                       @gstvds
 /extensions/cratecast                                @gleich
 /extensions/cricketcast                              @sampoder
 /extensions/css-gg                                   @astrit
 /extensions/cyberduck                                @scottaglia
 /extensions/dash                                     @RSO @sxn
-/extensions/datadog                                  @kudrykv @rcruzper
+/extensions/datadog                                  @kudrykv @rcruzper @aexvir
 /extensions/days-until-christmas                     @MEGApixel23
 /extensions/debank                                   @Yukaii
 /extensions/deepcast                                 @mooxl
+/extensions/designer-news                            @itsnwa
 /extensions/devdocs                                  @pomdtr
 /extensions/diff-checker                             @Destiner
 /extensions/displayplacer                            @eluce2
@@ -71,6 +75,8 @@
 /extensions/envato                                   @Slllava
 /extensions/ethereum-utils                           @Destiner
 /extensions/everhour                                 @farisaziz12
+/extensions/f1-standings                             @csigritz
+/extensions/facetime                                 @ron-myers
 /extensions/figma-files                              @michaelwschultz
 /extensions/file-manager                             @es183923
 /extensions/flow                                     @vimtor
@@ -78,10 +84,11 @@
 /extensions/fork-repositories                        @sxn
 /extensions/geohash-encode-decode                    @alrico88
 /extensions/git-repos                                @moored
+/extensions/gitfox                                   @L3K0V
 /extensions/github-for-enterprise                    @Kinbaum
 /extensions/github-repository-search                 @thomaspaulmann
 /extensions/github-stars                             @mrmartineau
-/extensions/gitlab                                   @tonka3000
+/extensions/gitlab                                   @tonka3000 @Loskir
 /extensions/gitmoji                                  @ricoberger
 /extensions/google-books                             @Ali-Parandeh
 /extensions/google-chrome                            @rgomezcasas @bromanko
@@ -142,11 +149,13 @@
 /extensions/opsgenie                                 @ricoberger
 /extensions/party-parrot                             @thomaspaulmann
 /extensions/pestphp-documentation                    @danyelkeddah
+/extensions/phpmon                                   @nicoverbruggen
 /extensions/pinboard                                 @fe9lix
 /extensions/pipedrive                                @stephendolan
 /extensions/ploi                                     @Cannonb4ll
 /extensions/pokedex                                  @anhthang
 /extensions/polished                                 @LekoArts
+/extensions/port-manager                             @lucaschultz
 /extensions/productboard                             @honzatmn
 /extensions/producthunt                              @ragnorc
 /extensions/qr-code-scanner                          @StevenRCE0
