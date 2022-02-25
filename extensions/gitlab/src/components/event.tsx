@@ -376,6 +376,39 @@ export function EventListItem(props: { event: Event }): JSX.Element {
         }
       }
       break;
+    case "approved":
+      {
+        if (ev.target_type) {
+          const tt = ev.target_type.toLowerCase();
+          if (tt === "mergerequest") {
+            const target_title = ev.target_title;
+            const mrIId = ev.target_iid;
+            title = `Approved Merge Request !${mrIId} "${target_title}"`;
+            icon = { source: "approved.png", tintColor: Color.Green };
+            if (project) {
+              const slug = `/-/merge_requests/${mrIId}`;
+              actionElement = (
+                <DefaultActions
+                  action={
+                    <PushAction
+                      title="Open Merge Request"
+                      icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
+                      target={<MRDetailFetch project={project} mrId={mrIId} />}
+                    />
+                  }
+                  webAction={
+                    <GitLabOpenInBrowserAction
+                      url={`${project.web_url}${slug}`}
+                      title="Open Merge Request in Browser"
+                    />
+                  }
+                />
+              );
+            }
+          }
+        }
+      }
+      break;
     default:
       {
         console.log("unknown action_name");
