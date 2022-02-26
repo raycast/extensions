@@ -1,4 +1,4 @@
-import { ActionPanel, allLocalStorageItems, Color, Icon, List, setLocalStorageItem } from "@raycast/api";
+import { ActionPanel, allLocalStorageItems, Color, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { maxNum } from "./xkcd";
 import { OpenComic, OpenRandomComic, OpenRandomUnreadComic } from "./open_comic";

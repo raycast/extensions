@@ -57,7 +57,7 @@ export const getToday = async () => {
     const result = (await runAppleScript(`
     set result to ""
     tell application "TickTick"
-	    set result to (today tasks)
+	    set result to today tasks from "raycast"
     end tell
     return result
   `)) as string;
@@ -93,7 +93,7 @@ export const getNext7Days = async () => {
     const result = (await runAppleScript(`
     set result to ""
     tell application "TickTick"
-	    set result to (next7days tasks)
+	    set result to next7days tasks from "raycast"
     end tell
     return result
   `)) as string;
@@ -129,7 +129,7 @@ export const getSearchByKeyword = async (keyword: string) => {
     const result = (await runAppleScript(`
     set result to ""
     tell application "TickTick"
-      set result to search tasks "${keyword}"
+      set result to search tasks "${keyword}" from "raycast"
     end tell
     return result
   `)) as string;
@@ -151,7 +151,7 @@ export const getProjectId2Project = async () => {
     const result = (await runAppleScript(`
     set result to ""
     tell application "TickTick"
-      set result to (projects)
+      set result to projects from "raycast"
     end tell
     return result
   `)) as string;

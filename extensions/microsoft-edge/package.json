@@ -6,8 +6,7 @@
   "icon": "microsoft-edge-icon.png",
   "author": "KartikKumarSahoo",
   "contributors": [
-    "bromanko",
-    "kartikkumarsahoo"
+    "bromanko"
   ],
   "license": "MIT",
   "commands": [

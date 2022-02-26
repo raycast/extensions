@@ -1,52 +1,66 @@
-import { getPreferenceValues, ActionPanel, CopyToClipboardAction, List, OpenInBrowserAction, showToast, ToastStyle, Detail } from "@raycast/api";
+import {
+  getPreferenceValues,
+  ActionPanel,
+  CopyToClipboardAction,
+  List,
+  OpenInBrowserAction,
+  Detail,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
-var AWS = require('aws-sdk');
+import AWS from "aws-sdk";
 
 interface Preferences {
   region: string;
 }
 
 const preferences: Preferences = getPreferenceValues();
-AWS.config.update({region: preferences.region});
-var sqs = new AWS.SQS({apiVersion: '2012-11-05'});
+AWS.config.update({ region: preferences.region });
+const sqs = new AWS.SQS({ apiVersion: "2012-11-05" });
 
 export default function ListSQSQueues() {
-  const [state, setState] = useState<{ loaded: boolean, queues: string[], showingQueues: string[], attributes: QueueAttributes[],  hasError: boolean }>({ loaded: false, queues: [], showingQueues: [], attributes: [], hasError: false });
+  const [state, setState] = useState<{
+    loaded: boolean;
+    queues: string[];
+    showingQueues: string[];
+    attributes: QueueAttributes[];
+    hasError: boolean;
+  }>({ loaded: false, queues: [], showingQueues: [], attributes: [], hasError: false });
 
-  let loadItems = async function(q: string[]) {
-    let att: any[] = [];
+  const loadItems = async function (q: string[]) {
+    const att: ReturnType<typeof getQueue>[] = [];
 
     for (let i = 0; i < q.length; i++) {
       att.push(getQueue(q[i]));
     }
 
+    const attributes: QueueAttributes[] = [];
+
     for (let i = 0; i < att.length; i++) {
-      let result = await att[i];
-      att[i] = {...result.Attributes, Name: q[i]};
+      const result = await att[i];
+      attributes.push({ ...result.Attributes, Name: q[i] } as QueueAttributes);
     }
 
-    setState(o => {
-      o.attributes = att;
-      return {...o};
+    setState((o) => {
+      return { ...o, attributes };
     });
   };
 
   useEffect(() => {
     async function fetch() {
-      await sqs.listQueues({}, function(err: { stack: any; }, data: any) {
+      await sqs.listQueues({}, function (err, data) {
         if (err) {
-          setState(o => ({
+          setState((o) => ({
             ...o,
-            hasError: true
+            hasError: true,
           }));
         } else {
-          setState(o => ({
-            ...o, 
+          setState((o) => ({
+            ...o,
             loaded: true,
-            queues: data.QueueUrls,
-            showingQueues: data.QueueUrls,
+            queues: data.QueueUrls || [],
+            showingQueues: data.QueueUrls || [],
           }));
-          loadItems(data.QueueUrls);
+          loadItems(data.QueueUrls || []);
         }
       });
     }
@@ -54,42 +68,48 @@ export default function ListSQSQueues() {
   }, []);
 
   if (state.hasError) {
-    return (<Detail markdown="No valid [configuration and credential file] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />)
+    return (
+      <Detail markdown="No valid [configuration and credential file] (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) found in your machine." />
+    );
   }
-  
+
   return (
-    <List isLoading={!state.loaded} searchBarPlaceholder="Filter queues by name..." >
+    <List isLoading={!state.loaded} searchBarPlaceholder="Filter queues by name...">
       {state.showingQueues.map((i, k) => {
-        let attr = state.attributes.find((a: QueueAttributes) => i === a.Name);
-          return (
-            <QueueListItem key={k} queue={i} attributes={attr} />
-          )
-        })}
+        const attr = state.attributes.find((a: QueueAttributes) => i === a.Name);
+        return <QueueListItem key={k} queue={i} attributes={attr} />;
+      })}
     </List>
   );
 }
 
-function QueueListItem(props: { queue: string, attributes: QueueAttributes|undefined }) {
+function QueueListItem(props: { queue: string; attributes: QueueAttributes | undefined }) {
   const queue = props.queue;
   const attr = props.attributes;
-  let displayName = (queue.split('/').at(-1) ?? "").replace(/-/g, ' ').replace(/\./g, ' ');
+  const displayName = (queue.split("/").at(-1) ?? "").replace(/-/g, " ").replace(/\./g, " ");
 
-  let subtitle = attr !== undefined ?
-    "📨 " + attr.ApproximateNumberOfMessages + "  ✈️ " + attr.ApproximateNumberOfMessagesNotVisible :
-    '';
+  const subtitle =
+    attr !== undefined
+      ? "📨 " + attr.ApproximateNumberOfMessages + "  ✈️ " + attr.ApproximateNumberOfMessagesNotVisible
+      : "";
 
-  let accessoryTitle = attr !== undefined ?
-    new Date(Number.parseInt(attr.CreatedTimestamp) * 1000).toLocaleDateString() :
-    '';
+  const accessoryTitle =
+    attr !== undefined ? new Date(Number.parseInt(attr.CreatedTimestamp) * 1000).toLocaleDateString() : "";
 
-    let path = "https://" + preferences.region + ".console.aws.amazon.com/sqs/v2/home?region=" + preferences.region + "#/queues/" + encodeURIComponent(queue);
+  const path =
+    "https://" +
+    preferences.region +
+    ".console.aws.amazon.com/sqs/v2/home?region=" +
+    preferences.region +
+    "#/queues/" +
+    encodeURIComponent(queue);
 
   return (
     <List.Item
       id={queue}
       key={queue}
       title={displayName ?? ""}
-      subtitle={subtitle} 
+      subtitle={subtitle}
       icon="sqs-list-icon.png"
       accessoryTitle={accessoryTitle}
       actions={
@@ -109,6 +129,11 @@ type QueueAttributes = {
   CreatedTimestamp: string;
 };
 
-function getQueue(q:string) {
-    return sqs.getQueueAttributes({QueueUrl: q, AttributeNames: ['ApproximateNumberOfMessages', 'ApproximateNumberOfMessagesNotVisible', 'CreatedTimestamp']}).promise();
+function getQueue(q: string) {
+  return sqs
+    .getQueueAttributes({
+      QueueUrl: q,
+      AttributeNames: ["ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible", "CreatedTimestamp"],
+    })
+    .promise();
 }

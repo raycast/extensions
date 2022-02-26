@@ -20,7 +20,7 @@ export default async function LockVault() {
     }
     case "unlocked": {
       await bw.lock();
-      await removeLocalStorageItem(SESSION_KEY)
+      await removeLocalStorageItem(SESSION_KEY);
       showToast(ToastStyle.Success, "Vault Locked!");
       break;
     }

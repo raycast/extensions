@@ -20,4 +20,4 @@ export default function NumpyView() {
       throttle
     />
   );
-};
+}

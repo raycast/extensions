@@ -1,19 +1,20 @@
 import { List } from "@raycast/api";
 
 import FileListItem from "./components/FileListItem";
+import { ErrorView } from "./components/ErrorView";
 import { useVisitedFiles } from "./hooks/useVisitedFiles";
 import { useProjectFiles } from "./hooks/useProjectFiles";
 
 export default function Command() {
-  const { projectFiles, isLoading: isLoadingProjectFiles } = useProjectFiles();
+  const { projectFiles, isLoading: isLoadingProjectFiles, hasError } = useProjectFiles();
 
-  const {
-    files: visitedFiles,
-    visitFile,
-    isLoading: isLoadingVisitedFiles,
-  } = useVisitedFiles();
+  const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
 
   const isLoading = isLoadingProjectFiles || isLoadingVisitedFiles;
+
+  if (hasError) {
+    return <ErrorView />;
+  }
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter files by name...">
@@ -33,18 +34,9 @@ export default function Command() {
         projectFiles?.map((project) => (
           <List.Section key={project.name + "-project"} title={project.name}>
             {project.files
-              .filter(
-                (file) =>
-                  visitedFiles?.find(
-                    (visitedFile) => file.key === visitedFile.key
-                  ) === undefined
-              )
+              .filter((file) => visitedFiles?.find((visitedFile) => file.key === visitedFile.key) === undefined)
               .map((file) => (
-                <FileListItem
-                  key={file.key + "-file"}
-                  file={file}
-                  onVisit={visitFile}
-                />
+                <FileListItem key={file.key + "-file"} file={file} onVisit={visitFile} />
               ))}
           </List.Section>
         ))}

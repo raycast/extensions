@@ -83,7 +83,7 @@ function FakerListItem(props: { item: Item; pin?: Pin; unpin?: Pin }) {
       actions={
         <ActionPanel>
           <CopyToClipboardAction title="Copy to Clipboard" content={value} />
-          <PasteAction title="Paste in Frontmost App" content={value} />
+          <PasteAction title="Paste in Active App" content={value} />
           {isUrl(value) && <OpenInBrowserAction url={value} shortcut={{ modifiers: ['cmd'], key: 'o' }} />}
           {pin && (
             <ActionPanel.Item

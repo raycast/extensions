@@ -49,7 +49,7 @@ function StoryListItem(props: { item: Parser.Item; index: number }) {
     <List.Item
       icon={icon}
       title={props.item.title ?? "No title"}
-      //@ts-ignore
+      // @ts-expect-error there is actually an author property
       subtitle={props.item.author ?? "No author"}
       actions={<Actions item={props.item} />}
     />

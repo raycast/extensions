@@ -33,12 +33,9 @@ $ npm run dev
 Inside the `/src` directory you will find the source files for this extension.
 
 | Directory           | Description                                                 |
-|---------------------|-------------------------------------------------------------|
+| ------------------- | ----------------------------------------------------------- |
 | src/                | The Raycast commands                                        |
 | src/models          | The model definition files                                  |
 | src/services        | The services providing the core functionality for a command |
 | src/shared          | Shared constants/functions                                  |
 | src/user-interfaces | The user interface files such as Lists and List.Items       |
-
-
-

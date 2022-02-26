@@ -1,35 +1,32 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  getPreferenceValues,
-  Icon,
-  List,
-  popToRoot,
-  showToast,
-  ToastStyle
-} from "@raycast/api";
+import { getPreferenceValues, List, popToRoot, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { addToCache, APPS_KEY, DEVICE_ID, getFromCache, SECRET_SEED, SERVICES_KEY } from "../cache";
 import { AuthyApp, Services } from "../client/dto";
 import { decryptSeed, genTOTP } from "../util/utils";
 import { encode } from "hi-base32";
 import { generateTOTP } from "../util/totp";
+import { toId } from "../util/compare";
 import { getAuthyApps, getServices } from "../client/authy-client";
+import { Otp } from "./OtpListItem";
+import OtpListItems from "./OtpListItems";
 
-interface Otp {
-  name: string,
-  digits: number,
-  seed: string,
-  otp: string
+const { preferCustomName } = getPreferenceValues<{ preferCustomName: boolean }>();
+
+interface OtpListState {
+  apps: Otp[];
+  services: Otp[];
 }
 
-export function OtpList(props: { isLogin: boolean | undefined, setLogin: (login: boolean) => void }) {
-  const [state, setState] = useState<Otp[]>([]);
+export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login: boolean) => void }) {
+  const [{ apps, services }, setState] = useState<OtpListState>({
+    apps: [],
+    services: [],
+  });
 
   async function refresh(): Promise<void> {
     const toast = await showToast(ToastStyle.Animated, "Authy", "Refreshing");
     await toast.show();
-    setState([]);
+    setState({ apps: [], services: [] });
     try {
       const { authyId } = getPreferenceValues<{ authyId: number }>();
       const deviceId: number = await getFromCache(DEVICE_ID);
@@ -60,25 +57,39 @@ export function OtpList(props: { isLogin: boolean | undefined, setLogin: (login:
       }
       const servicesResponse: Services = await getFromCache(SERVICES_KEY);
       const appsResponse: AuthyApp = await getFromCache(APPS_KEY);
-      const { authyPassword } = getPreferenceValues<{ authyPassword: string }>();
-      const services: Otp[] = servicesResponse.authenticator_tokens.map(i => {
+      const { authyPassword, excludeNames: excludeNamesCsv = "" } =
+        getPreferenceValues<{ authyPassword: string; excludeNames: string }>();
+      let services: Otp[] = servicesResponse.authenticator_tokens.map((i) => {
         const seed = decryptSeed(i.encrypted_seed, i.salt, authyPassword);
         return {
-          name: i.original_name ? i.original_name : i.name,
+          type: "service",
+          name: preferCustomName ? i.name || i.original_name : i.original_name || i.name,
+          accountType: i.account_type,
+          issuer: i.issuer,
+          logo: i.logo,
           digits: i.digits,
-          seed: seed,
-          otp: generateTOTP(seed, { digits: i.digits, period: 30 })
+          generate: () => generateTOTP(seed, { digits: i.digits, period: 30 }),
         };
       });
-      const apps: Otp[] = appsResponse.apps.map(i => {
+      let apps: Otp[] = appsResponse.apps.map((i) => {
         return {
+          type: "app",
           name: i.name,
           digits: i.digits,
-          seed: i.secret_seed,
-          otp: generateTOTP(encode(Buffer.from(i.secret_seed, "hex")), { digits: i.digits, period: 10 })
+          generate: () => generateTOTP(encode(Buffer.from(i.secret_seed, "hex")), { digits: i.digits, period: 10 }),
         };
       });
-      setState([...services, ...apps]);
+
+      if (excludeNamesCsv) {
+        const excludeNames = excludeNamesCsv.split(",").map(toId).filter(Boolean);
+        const filterByName = ({ name }: { name: string }) => !excludeNames.includes(toId(name));
+        services = services.filter(filterByName);
+        apps = apps.filter(filterByName);
+      }
+      setState({
+        apps,
+        services,
+      });
     } catch (error) {
       if (error instanceof Error) {
         await showToast(ToastStyle.Failure, "Authy", error.message);
@@ -92,22 +103,12 @@ export function OtpList(props: { isLogin: boolean | undefined, setLogin: (login:
     loadData();
   }, [props.isLogin]);
 
-  const isLoading = (state.length == 0);
+  const allItems = [...apps, ...services];
+  const isLoading = allItems.length === 0;
 
   return (
-    <List searchBarPlaceholder="Search"
-          isLoading={isLoading}>
-      {
-        state.map((item, index) =>
-          <List.Item key={index} title={item.name} subtitle={`${item.otp}`} actions={
-            <ActionPanel>
-              <CopyToClipboardAction title="Copy OTP" content={item.otp} />
-              <ActionPanel.Item title={"Sync"} icon={Icon.ArrowClockwise}
-                                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                                onAction={() => refresh()} />
-            </ActionPanel>
-          } />)
-      }
+    <List searchBarPlaceholder="Search" isLoading={isLoading}>
+      <OtpListItems refresh={refresh} items={allItems} />
     </List>
   );
 }

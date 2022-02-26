@@ -18,11 +18,9 @@ export function appleDeveloperDocumentationList(
       isLoading={isLoading}
       searchBarPlaceholder="Search in Apple Developer Documentation"
       onSearchTextChange={onSearchTextChange}
-      throttle={true}>
-      {
-        appleDeveloperDocumentationEntries
-          ?.map(appleDeveloperDocumentationListItem)
-      }
+      throttle={true}
+    >
+      {appleDeveloperDocumentationEntries?.map(appleDeveloperDocumentationListItem)}
     </List>
   );
 }

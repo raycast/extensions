@@ -1,8 +1,8 @@
-import fs from 'fs';
-import initSqlJs, { Database } from 'sql.js';
-import path from 'path';
-import util, { TextDecoder } from 'util';
-import { environment } from '@raycast/api';
+import fs from "fs";
+import initSqlJs, { Database } from "sql.js";
+import path from "path";
+import util, { TextDecoder } from "util";
+import { environment } from "@raycast/api";
 
 export const termsAsParamNames = (terms: string[]): string[] => {
   const p = [];

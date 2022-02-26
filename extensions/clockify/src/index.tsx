@@ -39,7 +39,7 @@ function ItemInProgress({ entry, updateTimeEntries }: { entry: TimeEntry; update
       subtitle={`${entry.description || "No Description"}`}
       accessoryTitle={`${time}  -  ${entry.project?.name}`}
       icon={{ source: Icon.Clock, tintColor: entry.project?.color }}
-      keywords={[...(entry.description.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
+      keywords={[...(entry.description?.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
       accessoryIcon={{ source: Icon.Dot, tintColor: entry.project?.color }}
       actions={
         <ActionPanel>
@@ -132,7 +132,7 @@ export default function Main() {
                   subtitle={entry.description || "No Description"}
                   accessoryTitle={entry.project?.name}
                   icon={{ source: Icon.Circle, tintColor: entry.project?.color }}
-                  keywords={[...(entry.description.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
+                  keywords={[...(entry.description?.split(" ") ?? []), ...(entry.project?.name.split(" ") ?? [])]}
                   accessoryIcon={{ source: Icon.Dot, tintColor: entry.project?.color }}
                   actions={
                     <ActionPanel>

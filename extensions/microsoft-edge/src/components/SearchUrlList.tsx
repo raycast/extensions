@@ -1,9 +1,9 @@
-import { DEFAULT_ERROR_TITLE, EDGE_NOT_INSTALLED_MESSAGE } from '../common/constants';
-import { List, showToast, ToastStyle } from '@raycast/api';
-import { NotInstalled } from './NotInstalled';
-import { NullableString, UrlSearchResult } from '../schema/types';
-import { ReactElement, useState } from 'react';
-import { UrlListItem } from './UrlListItem';
+import { DEFAULT_ERROR_TITLE, EDGE_NOT_INSTALLED_MESSAGE } from "../common/constants";
+import { List, showToast, ToastStyle } from "@raycast/api";
+import { NotInstalled } from "./NotInstalled";
+import { NullableString, UrlSearchResult } from "../schema/types";
+import { ReactElement, useState } from "react";
+import { UrlListItem } from "./UrlListItem";
 
 export function SearchUrlList(useUrlSearchHook: (query: NullableString) => UrlSearchResult): ReactElement {
   const [searchText, setSearchText] = useState<string>();

@@ -1,3 +1,1 @@
-export {
-  ScriptCommandsList 
-} from "./ScriptCommandsList"
+export { ScriptCommandsList } from "./ScriptCommandsList";

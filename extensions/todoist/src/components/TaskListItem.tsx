@@ -1,12 +1,11 @@
-import { ActionPanel, Icon, List, ListItemProps, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, Icon, List, confirmAlert, showToast, Toast, Action } from "@raycast/api";
 import { addDays } from "date-fns";
-
-import { Project, Task, ViewMode } from "../types";
-import { useFetch } from "../api";
-import { isRecurring, displayDueDate, getAPIDate } from "../utils";
+import { Project, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
+import { mutate } from "swr";
+import { ViewMode, SWRKeys } from "../types";
+import { isRecurring, displayDueDate, getAPIDate, getToday } from "../utils";
 import { priorities } from "../constants";
-
-import { useTodoist } from "../TodoistProvider";
+import { todoist, handleError } from "../api";
 
 const schedules = [
   { name: "Today", amount: 0 },
@@ -16,12 +15,49 @@ const schedules = [
 interface TaskListItemProps {
   task: Task;
   mode: ViewMode;
+  projects?: Project[];
 }
 
-export default function TaskListItem({ task, mode }: TaskListItemProps): JSX.Element {
-  const { completeTask, deleteTask, updateTask } = useTodoist();
-  const { data: projects } = useFetch<Project[]>("/projects");
-  const additionalListItemProps: Partial<ListItemProps> & { keywords: string[] } = { keywords: [] };
+export default function TaskListItem({ task, mode, projects }: TaskListItemProps): JSX.Element {
+  async function completeTask(task: Task) {
+    await showToast({ style: Toast.Style.Animated, title: "Completing task" });
+
+    try {
+      await todoist.closeTask(task.id);
+      await showToast({ style: Toast.Style.Success, title: "Task updated" });
+      mutate(SWRKeys.tasks);
+    } catch (error) {
+      handleError({ error, title: "Unable to complete task" });
+    }
+  }
+
+  async function updateTask(task: Task, payload: UpdateTaskArgs) {
+    await showToast({ style: Toast.Style.Animated, title: "Updating task" });
+
+    try {
+      await todoist.updateTask(task.id, payload);
+      await showToast({ style: Toast.Style.Success, title: "Task updated" });
+      mutate(SWRKeys.tasks);
+    } catch (error) {
+      handleError({ error, title: "Unable to update task" });
+    }
+  }
+
+  async function deleteTask(task: Task) {
+    if (await confirmAlert({ title: "Are you sure you want to delete this task?" })) {
+      await showToast({ style: Toast.Style.Animated, title: "Deleting task" });
+
+      try {
+        await todoist.deleteTask(task.id);
+        await showToast({ style: Toast.Style.Success, title: "Task deleted" });
+        mutate(SWRKeys.tasks);
+      } catch (error) {
+        handleError({ error, title: "Unable to delete task" });
+      }
+    }
+  }
+
+  const additionalListItemProps: Partial<List.Item.Props> & { keywords: string[] } = { keywords: [] };
 
   switch (mode) {
     case ViewMode.project:
@@ -31,7 +67,7 @@ export default function TaskListItem({ task, mode }: TaskListItemProps): JSX.Ele
       break;
     case ViewMode.date:
       if (projects && projects.length > 0) {
-        const project = projects.find((project) => project.id === task.project_id);
+        const project = projects.find((project) => project.id === task.projectId);
 
         if (project) {
           additionalListItemProps.accessoryTitle = project.name;
@@ -60,9 +96,9 @@ export default function TaskListItem({ task, mode }: TaskListItemProps): JSX.Ele
       {...additionalListItemProps}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={task.url} />
+          <Action.OpenInBrowser url={task.url} />
 
-          <ActionPanel.Item
+          <Action
             id="completeTask"
             title="Complete Task"
             icon={Icon.Checkmark}
@@ -76,11 +112,11 @@ export default function TaskListItem({ task, mode }: TaskListItemProps): JSX.Ele
             shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           >
             {schedules.map(({ name, amount }) => (
-              <ActionPanel.Item
+              <Action
                 key={name}
                 id={name}
                 title={name}
-                onAction={() => updateTask(task, { due_date: getAPIDate(addDays(new Date(), amount)) })}
+                onAction={() => updateTask(task, { dueDate: getAPIDate(addDays(getToday(), amount)) })}
               />
             ))}
           </ActionPanel.Submenu>
@@ -91,7 +127,7 @@ export default function TaskListItem({ task, mode }: TaskListItemProps): JSX.Ele
             title="Change priority..."
           >
             {priorities.map(({ value, name, color }) => (
-              <ActionPanel.Item
+              <Action
                 key={name}
                 id={name}
                 title={name}
@@ -101,11 +137,11 @@ export default function TaskListItem({ task, mode }: TaskListItemProps): JSX.Ele
             ))}
           </ActionPanel.Submenu>
 
-          <ActionPanel.Item
+          <Action
             id="deleteTask"
             title="Delete Task"
             icon={Icon.Trash}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+            shortcut={{ modifiers: ["ctrl"], key: "x" }}
             onAction={() => deleteTask(task)}
           />
         </ActionPanel>

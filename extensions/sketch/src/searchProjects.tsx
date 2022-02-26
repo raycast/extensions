@@ -1,7 +1,6 @@
 import {
   ActionPanel,
   Icon,
-  Color,
   List,
   showToast,
   ToastStyle,
@@ -206,7 +205,7 @@ function ShareListItem(props: {
       id={project.identifier}
       key={project.identifier}
       title={project.name}
-      icon={{ source: { dark: "folder-icon@dark.png", light: "folder-icon.png" }}}
+      icon={{ source: { dark: "folder-icon@dark.png", light: "folder-icon.png" } }}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

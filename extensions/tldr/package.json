@@ -3,7 +3,7 @@
   "name": "tldr",
   "title": "tldr",
   "author": "pomdtr",
-  "license":"MIT",
+  "license": "MIT",
   "description": "Search tldr Pages - Command Cheatsheet",
   "icon": "tldr.png",
   "commands": [

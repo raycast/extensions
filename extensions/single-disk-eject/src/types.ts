@@ -1,3 +1,3 @@
 export interface Volume {
-  name: string
+  name: string;
 }

@@ -13,9 +13,9 @@ export interface XcodeSwiftPackageMetadata {
   /**
    * The amount of stars
    */
-  starsCount?: number
+  starsCount?: number;
   /**
    * The license
    */
-  license?: string
+  license?: string;
 }

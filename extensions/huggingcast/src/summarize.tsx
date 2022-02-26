@@ -9,7 +9,7 @@ import {
   PasteAction,
   getSelectedText,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { summarize } from "./huggingface";
 
 interface Preferences {
