@@ -1,8 +1,10 @@
-import { Color, List, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, ActionPanelSection, Color, List, showToast, ToastStyle } from "@raycast/api";
+import urljoin from "url-join";
 import { useCache } from "../../cache";
 import { gitlab } from "../../common";
 import { Project } from "../../gitlabapi";
 import { GitLabIcons } from "../../icons";
+import { DefaultActions, GitLabOpenInBrowserAction } from "../actions";
 import { Event } from "../event";
 
 function CommitListItem(props: { event: Event }): JSX.Element {
@@ -21,12 +23,30 @@ function CommitListItem(props: { event: Event }): JSX.Element {
       secondsToRefetch: 15 * 60,
     }
   );
+  const webAction = (): JSX.Element | undefined => {
+    if (project) {
+      const proUrl = project.web_url;
+      if (proUrl && commit) {
+        const url = urljoin(proUrl, `-/commit/${commit}`);
+        return <GitLabOpenInBrowserAction url={url} />;
+      }
+    }
+    return undefined;
+  };
+
   return (
     <List.Item
       title={title}
       subtitle={ref || commit}
       accessoryTitle={project?.name_with_namespace}
       icon={{ source: GitLabIcons.branches, tintColor: Color.Green }}
+      actions={
+        <ActionPanel>
+          <ActionPanelSection>
+            <DefaultActions webAction={webAction()} />
+          </ActionPanelSection>
+        </ActionPanel>
+      }
     />
   );
 }

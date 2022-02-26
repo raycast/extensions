@@ -11,13 +11,13 @@ import {
   showToast,
   ToastStyle,
 } from "@raycast/api";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useCache } from "../cache";
-import { getPrimaryActionPreference, gitlab, PrimaryAction } from "../common";
+import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { capitalizeFirstLetter } from "../utils";
-import { GitLabOpenInBrowserAction } from "./actions";
+import { capitalizeFirstLetter, daysInSeconds } from "../utils";
+import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
 import { IssueDetailFetch } from "./issues";
 import { MRDetailFetch } from "./mr";
 
@@ -52,32 +52,6 @@ export interface Event {
   note?: Note;
 }
 
-function DefaultActions(props: {
-  action?: JSX.Element | undefined | null;
-  webAction?: JSX.Element | undefined | null;
-}): JSX.Element | null {
-  const action = props.action;
-  const webAction = props.webAction;
-  if (action || webAction) {
-    if (getPrimaryActionPreference() === PrimaryAction.Detail) {
-      return (
-        <React.Fragment>
-          {action}
-          {webAction}
-        </React.Fragment>
-      );
-    } else {
-      return (
-        <React.Fragment>
-          {webAction}
-          {action}
-        </React.Fragment>
-      );
-    }
-  }
-  return null;
-}
-
 export function EventListItem(props: { event: Event }): JSX.Element {
   const ev = props.event;
   const { data: project, error } = useCache<Project | undefined>(
@@ -89,6 +63,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
     {
       deps: [ev.project_id],
       secondsToRefetch: 15 * 60,
+      secondsToInvalid: daysInSeconds(7),
     }
   );
   let title = "";
