@@ -30,7 +30,7 @@ const entryFilter = (entryStr: string) => {
  */
 const loadEntries = () =>
   new Promise<string[]>((resolve, reject) => {
-    const cli = spawn(`${keepassxcCli}`, ["locate", "-q" ,`${database}`, "/"]);
+    const cli = spawn(`${keepassxcCli}`, ["locate", "-q", `${database}`, "/"]);
     cli.stdin.write(`${dbPassword}\n`);
     cli.stdin.end();
     cli.on("error", reject);
