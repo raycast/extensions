@@ -103,7 +103,7 @@ function ItemList(props: {
 
 function getIcon(item: Item) {
   const iconUri = item.login?.uris?.[0]?.uri;
-  if (fetchFavicons && iconUri) return faviconUrl(64, iconUri);
+  if (fetchFavicons && iconUri) return faviconUrl(iconUri);
   return {
     1: Icon.Globe,
     2: Icon.TextDocument,
