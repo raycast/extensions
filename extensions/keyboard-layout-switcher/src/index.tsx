@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Icon, List, showToast, Toast, Color, showHUD, popToRoot, closeMainWindow, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Help } from "./Help";
-import { LayoutManager } from "./model/inputs";
+import { LayoutManager } from "./model/LayoutManager";
 import { ILayout } from "./model/interfaces";
 
 async function handleLayoutSwitch(source: ILayout) {
