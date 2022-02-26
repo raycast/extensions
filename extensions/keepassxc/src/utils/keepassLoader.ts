@@ -1,11 +1,11 @@
-import { copyTextToClipboard, pasteText, getPreferenceValues } from "@raycast/api";
+import { copyTextToClipboard, pasteText, getPreferenceValues, showHUD } from "@raycast/api";
 import { promisify } from "util";
 import fs from "fs";
 import path from "path";
 import child_process from "child_process";
 import CryptoJS from "crypto-js";
 const stat = promisify(fs.stat);
-const exec = promisify(child_process.exec);
+const spawn = child_process.spawn;
 
 interface Preference {
   keepassxcRootPath: string;
@@ -39,53 +39,84 @@ const encrypt = (word: string) => {
   return encrypted.ciphertext.toString().toUpperCase();
 };
 
-/**
- * load entries from database with keepassxc-cli
- * @returns all entries in keepass database
- */
-const loadEntries = async () => {
-  // a cache file is used to boost response speed of loading entries by avoid calling keepassxc-cli every time (which may take 2 ~ 3 seconds)
-  if (!fs.existsSync(cacheFile)) {
-    const { stdout, stderr } = await exec(`echo "${dbPassword}" | "${keepassxcCli}" locate "${database}" /`);
-    if (stderr.includes("Error")) {
-      throw new Error(stderr.toString());
-    }
-    fs.writeFileSync(cacheFile, encrypt(stdout.toString()));
-  }
-  const lastModifiedTime = (await stat(cacheFile)).mtime.getTime();
-  const currTime = new Date().getTime();
-  let data = "";
-  if (currTime - lastModifiedTime <= 1000 * 60 && fs.existsSync(cacheFile)) {
-    // load entries from cache
-    data = decrypt(fs.readFileSync(cacheFile, "utf8"));
-  } else {
-    // call keepassxc-cli to refresh cache file if it is more than 1 minute since last modified
-    const { stdout, stderr } = await exec(`echo "${dbPassword}" | "${keepassxcCli}" locate "${database}" /`);
-    if (stderr.includes("Error")) {
-      throw new Error(stderr.toString());
-    }
-    fs.writeFileSync(cacheFile, encrypt(stdout.toString()));
-    data = stdout.toString();
-  }
-  return data
+const entryFilter = (entryStr: string) => {
+  return entryStr
     .split("\n")
     .map((f: string) => f.trim())
     .filter((f: string) => f !== undefined && !f.startsWith("/回收站") && !f.startsWith("/Trash") && f.length > 0);
 };
 
-const getPassword = async (entry: string) => {
-  const { stdout } = await exec(
-    `echo "${dbPassword}"  | "${keepassxcCli}"  show -q  -a Password "${database}" "${entry}"`
-  );
-  return stdout.toString().trim();
+const loadEntriesFromDb = () =>
+  new Promise<string[]>((resolve, reject) => {
+    const cli = spawn(`${keepassxcCli}`, ["locate", `${database}`, "/"]);
+    cli.stdin.write(`${dbPassword}\n`);
+    cli.stdin.end();
+    cli.on("error", reject);
+    cli.stderr.on("data", cliStdOnErr(reject));
+    cli.stdout.on("data", (data) => {
+      fs.writeFileSync(cacheFile, encrypt(data.toString()));
+      resolve(entryFilter(data.toString()));
+    });
+  });
+
+const cliStdOnErr = (reject: (reason: Error) => void) => (data: Buffer) => {
+  if (data.toString().indexOf("Enter password to unlock") != -1) {
+    return;
+  }
+  reject(new Error(data.toString()));
 };
 
-const getUsername = async (entry: string) => {
-  const { stdout } = await exec(
-    `echo "${dbPassword}"  | "${keepassxcCli}"  show -q  -a Username "${database}" "${entry}"`
-  );
-  return stdout.toString().trim();
+/**
+ * load entries from database with keepassxc-cli
+ * @returns all entries in keepass database
+ */
+const loadEntries = () => {
+  // a cache file is used to boost response speed of loading entries by avoid calling keepassxc-cli every time (which may take 2 ~ 3 seconds)
+  if (!fs.existsSync(cacheFile)) {
+    return loadEntriesFromDb();
+  }
+
+  return stat(cacheFile).then((st) => {
+    const lastModifiedTime = st.mtime.getTime();
+    const currTime = new Date().getTime();
+    if (currTime - lastModifiedTime <= 1000 * 60 && fs.existsSync(cacheFile)) {
+      // load entries from cache
+      const data = decrypt(fs.readFileSync(cacheFile, "utf8"));
+      return entryFilter(data);
+    } else {
+      // call keepassxc-cli to refresh cache file if it is more than 1 minute since last modified
+      return loadEntriesFromDb();
+    }
+  });
 };
+
+const getPassword = (entry: string) =>
+  new Promise<string>((resolve, reject) => {
+    const cli = spawn(`${keepassxcCli}`, ["show", "-q", "-a", "Password", `${database}`, `${entry}`]);
+    cli.stdin.write(`${dbPassword}\n`);
+    cli.stdin.end();
+    cli.on("error", reject);
+    cli.stderr.on("data", cliStdOnErr(reject));
+    cli.stdout.on("data", (data) => {
+      const password = data.toString();
+      // remove \n in the end
+      resolve(password.slice(0, password.length - 1));
+    });
+  });
+
+const getUsername = (entry: string) =>
+  new Promise<string>((resolve, reject) => {
+    const cli = spawn(`${keepassxcCli}`, ["show", "-q", "-a", "Username", `${database}`, `${entry}`]);
+    cli.stdin.write(`${dbPassword}\n`);
+    cli.stdin.end();
+    cli.on("error", reject);
+    cli.stderr.on("data", cliStdOnErr(reject));
+    cli.stdout.on("data", (data) => {
+      const password = data.toString();
+      // remove \n in the end
+      resolve(password.slice(0, password.length - 1));
+    });
+  });
 
 const copyAndPastePassword = async (entry: string) => {
   return copyPassword(entry).then((password) => {
@@ -94,7 +125,10 @@ const copyAndPastePassword = async (entry: string) => {
 };
 
 const copyPassword = async (entry: string) =>
-  getPassword(entry).then((password) => copyTextToClipboard(password).then(() => password));
+  getPassword(entry).then((password) => {
+    showHUD("Password has been Copied to Clipboard");
+    return copyTextToClipboard(password).then(() => password);
+  });
 
 const copyAndPasteUsername = async (entry: string) => {
   return copyUsername(entry).then((username) => {
