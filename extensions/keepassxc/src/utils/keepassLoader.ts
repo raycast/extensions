@@ -137,6 +137,9 @@ const copyAndPasteUsername = async (entry: string) => {
 };
 
 const copyUsername = async (entry: string) =>
-  getUsername(entry).then((username) => copyTextToClipboard(username).then(() => username));
+  getUsername(entry).then((username) => {
+    showHUD("Username has been Copied to Clipboard");
+    return copyTextToClipboard(username).then(() => username);
+  });
 
 export { loadEntries, copyAndPastePassword, getPassword, copyPassword, copyUsername, copyAndPasteUsername };
