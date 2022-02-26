@@ -39,7 +39,3 @@ This extension is made by [Anh Thang Bui](https://github.com/anhthang) and uses 
 ## Issues
 
 [Track here](https://github.com/anhthang/raycast-pokedex/issues) or create an issue.
-
-## Notes
-
-Icon downloaded from [Iconfinder](https://www.iconfinder.com/icons/1337536/game_go_play_pokedex_pokemon_tool_icon)

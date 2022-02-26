@@ -1,4 +1,4 @@
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { showToast, Toast } from "@raycast/api";
 import { PokeAPI, PokemonV2Pokemon } from "../types";
 
@@ -63,6 +63,7 @@ export const getPokemon = async (
               pokemon_v2_pokemonspeciesnames(where: {language_id: {_eq: $language_id}}) {
                 genus
                 name
+                language_id
               }
             }
           }
@@ -74,7 +75,7 @@ export const getPokemon = async (
               name
             }
           }
-          pokemon_v2_pokemons(order_by: {id: asc}) {
+          pokemon_v2_pokemons(order_by: {id: asc}, where: {pokemon_v2_pokemonforms: {form_name: {_nin: ["totem", "starter"]}}}) {
             name
             pokemon_v2_pokemonforms {
               form_name
@@ -82,6 +83,13 @@ export const getPokemon = async (
               pokemon_v2_pokemonformnames(where: {language_id: {_eq: $language_id}}) {
                 name
                 pokemon_name
+              }
+            }
+            pokemon_v2_pokemontypes {
+              pokemon_v2_type {
+                pokemon_v2_typenames(where: {language_id: {_eq: $language_id}}) {
+                  name
+                }
               }
             }
           }
@@ -120,7 +128,7 @@ export const getPokemon = async (
   };
 
   try {
-    const { data }: { data: PokeAPI } = await axios(config);
+    const { data }: AxiosResponse<PokeAPI> = await axios(config);
 
     if (Array.isArray(data.errors) && data.errors.length) {
       showFailureToast();
