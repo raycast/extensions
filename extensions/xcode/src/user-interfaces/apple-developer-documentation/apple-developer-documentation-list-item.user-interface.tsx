@@ -17,14 +17,8 @@ export function appleDeveloperDocumentationListItem(
       accessoryTitle={appleDeveloperDocumentationEntry.platform.at(0)}
       actions={
         <ActionPanel>
-          <OpenAction
-            title="Open in Browser"
-            icon={Icon.Globe}
-            target={appleDeveloperDocumentationEntry.url}
-          />
-          <CopyToClipboardAction
-            content={appleDeveloperDocumentationEntry.url}
-          />
+          <OpenAction title="Open in Browser" icon={Icon.Globe} target={appleDeveloperDocumentationEntry.url} />
+          <CopyToClipboardAction content={appleDeveloperDocumentationEntry.url} />
         </ActionPanel>
       }
     />
@@ -35,9 +29,7 @@ export function appleDeveloperDocumentationListItem(
  * Retrieve icon for AppleDeveloperDocumentationEntry
  * @param appleDeveloperDocumentationEntry The AppleDeveloperDocumentationEntry
  */
-function icon(
-  appleDeveloperDocumentationEntry: AppleDeveloperDocumentationEntry
-): ImageLike | undefined {
+function icon(appleDeveloperDocumentationEntry: AppleDeveloperDocumentationEntry): ImageLike | undefined {
   switch (appleDeveloperDocumentationEntry.type) {
     case "General":
       return Icon.Window;

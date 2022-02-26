@@ -60,12 +60,13 @@ Raycast extension to search or send tweets on [twitter.com](https://twitter.com)
 - Create an app (this will be displayed next to your tweets)
 - Store the App-Key and the App-Secret in a secure(!) box
 - Then adjust the required permissions
-  
+
   Per default it is `read-only`. This is fine if you only want to read tweets.
 
   If you want to e.g. like, retweet or send tweets, you should have at least `read + write`.
 
   <b style="color:red">Make sure that you change the permission before creating user access tokens. You can only change permission for an existing user access token by revoking/regenerate the tokens. Clients which use the old tokens would not work anymore!</b>
+
 - Create User access tokens
 
 After all these steps you should have all required 4 tokens.
@@ -80,6 +81,7 @@ Store them in a secure box, twitter want display that again for you.
 ## Showcases
 
 ### Tweets from your timelime
+
 ![timeline-tweets](https://user-images.githubusercontent.com/3163807/138548798-c0dc86fb-65b8-4ac5-8c14-09511a499a93.png)
 
 ### Tweets from a specific user
@@ -95,4 +97,5 @@ Store them in a secure box, twitter want display that again for you.
 ![single-tweet-no-img](https://user-images.githubusercontent.com/3163807/138596420-596a3986-0fd1-4ffe-8bd3-11ece0ccc1eb.png)
 
 ### Display your own tweets
+
 ![own-tweets](https://user-images.githubusercontent.com/3163807/138596461-e843065e-9f10-4ecf-9e9f-4487fe023595.png)

@@ -39,18 +39,21 @@ export function useRepositoryReleases(repository: Repository) {
 
     const [owner, name] = repository.nameWithOwner.split("/");
 
-    octokit.graphql<RepositoryReleasesResponse>(REPOSITORY_RELEASES_QUERY, {
-      name,
-      owner
-    }).then(({ repository }) => {
-      
-      setReleases(repository.releases.nodes);
-    }).catch(setError).finally(() => setLoading(false));
+    octokit
+      .graphql<RepositoryReleasesResponse>(REPOSITORY_RELEASES_QUERY, {
+        name,
+        owner,
+      })
+      .then(({ repository }) => {
+        setReleases(repository.releases.nodes);
+      })
+      .catch(setError)
+      .finally(() => setLoading(false));
   }, [repository]);
 
   return {
     releases,
     loading,
-    error
+    error,
   };
 }

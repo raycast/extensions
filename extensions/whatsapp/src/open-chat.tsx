@@ -10,11 +10,11 @@ export default function ChatList() {
   const { chats, isLoading, updateChats } = useWhatsAppChats();
   const [selectedItemId, setSelectedItemId] = useState<string>();
 
-  const pinnedChats = chats.filter(chat => chat.pinned).sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0));
-  const unpinnedChats = chats.filter(chat => !chat.pinned).sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0));
+  const pinnedChats = chats.filter((chat) => chat.pinned).sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0));
+  const unpinnedChats = chats.filter((chat) => !chat.pinned).sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0));
 
   async function handlePin(chat: WhatsAppChat) {
-    const newChats = chats.map(c => {
+    const newChats = chats.map((c) => {
       if (c.id === chat.id) {
         return { ...c, pinned: !c.pinned };
       }
@@ -25,12 +25,12 @@ export default function ChatList() {
   }
 
   async function handleDelete(chat: WhatsAppChat) {
-    const newChats = chats.filter(c => c.id !== chat.id);
+    const newChats = chats.filter((c) => c.id !== chat.id);
     await updateChats(newChats);
   }
 
   async function handleOpen(chat: WhatsAppChat) {
-    const newChats = chats.map(c => {
+    const newChats = chats.map((c) => {
       if (c.id === chat.id) {
         return { ...c, lastOpened: Date.now() };
       }
@@ -43,7 +43,7 @@ export default function ChatList() {
     <List isLoading={isLoading} selectedItemId={selectedItemId} searchBarPlaceholder="Filter chats by name...">
       {pinnedChats.length > 0 ? (
         <List.Section title="Pinned Chats">
-          {pinnedChats.map(chat => (
+          {pinnedChats.map((chat) => (
             <ChatListItem
               key={chat.id}
               chat={chat}
@@ -56,7 +56,7 @@ export default function ChatList() {
       ) : null}
       {pinnedChats.length === 0 ? (
         <>
-          {unpinnedChats.map(chat => (
+          {unpinnedChats.map((chat) => (
             <ChatListItem
               key={chat.id}
               chat={chat}
@@ -68,7 +68,7 @@ export default function ChatList() {
         </>
       ) : (
         <List.Section title="Other Chats">
-          {unpinnedChats.map(chat => (
+          {unpinnedChats.map((chat) => (
             <ChatListItem
               key={chat.id}
               chat={chat}
@@ -102,7 +102,7 @@ function getChatItemProps(chat: WhatsAppChat) {
       webUrl: `https://web.whatsapp.com/send?phone=${phone}&text=`,
       icon: Icon.Person,
       keywords: [chat.phone, phone],
-      form: <WhatsAppPhoneChatForm defaultValue={chat} />
+      form: <WhatsAppPhoneChatForm defaultValue={chat} />,
     };
   } else {
     return {
@@ -113,7 +113,7 @@ function getChatItemProps(chat: WhatsAppChat) {
       webUrl: null,
       icon: Icon.Circle,
       keywords: [chat.groupCode, "group"],
-      form: <WhatsAppGroupChatForm defaultValue={chat} />
+      form: <WhatsAppGroupChatForm defaultValue={chat} />,
     };
   }
 }
@@ -139,12 +139,7 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
               onOpen={() => onOpenChat(chat)}
             />
             {webUrl ? (
-              <OpenInBrowserAction
-                title="Open in Web"
-                icon={Icon.Globe}
-                url={webUrl}
-                onOpen={() => onOpenChat(chat)}
-              />
+              <OpenInBrowserAction title="Open in Web" icon={Icon.Globe} url={webUrl} onOpen={() => onOpenChat(chat)} />
             ) : null}
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -154,11 +149,7 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
               icon={Icon.Pin}
               onAction={() => onPinAction(chat)}
             />
-            <PushAction
-              title="Edit Chat"
-              icon={Icon.Pencil}
-              target={form}
-            />
+            <PushAction title="Edit Chat" icon={Icon.Pencil} target={form} />
             <ActionPanel.Item
               title="Delete Chat"
               icon={{ source: Icon.Trash, tintColor: Color.Red }}

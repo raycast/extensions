@@ -18,28 +18,31 @@ export const getSecretEngines = async (): Promise<SecretEngine[]> => {
       return Object.keys((json as SecretEngines).data).map((key) => {
         return {
           name: key,
-        }
+        };
       });
     } else {
-      if ((json as Record<string, unknown>).errors && ((json as Record<string, unknown>).errors as string[]).length > 0) {
+      if (
+        (json as Record<string, unknown>).errors &&
+        ((json as Record<string, unknown>).errors as string[]).length > 0
+      ) {
         throw new Error(((json as Record<string, unknown>).errors as string[])[0]);
       } else {
-        throw new Error('An unknown error occured');
+        throw new Error("An unknown error occured");
       }
     }
   } catch (err) {
     showToast(ToastStyle.Failure, `Could not load secret engines: ${err.message}`);
     return Promise.resolve([]);
   }
-}
+};
 
 type SecretEngines = {
   data: SecretEngineData;
-}
+};
 
 type SecretEngineData = {
   [key: string]: unknown;
-}
+};
 
 export type SecretEngine = {
   name: string;

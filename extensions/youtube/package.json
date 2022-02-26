@@ -46,8 +46,8 @@
       "default": "detail",
       "data": [
         {
-        "title": "Show Details",
-        "value": "detail"
+          "title": "Show Details",
+          "value": "detail"
         },
         {
           "title": "Open in Browser",
@@ -55,7 +55,6 @@
         }
       ],
       "description": "Set the default action"
-
     }
   ],
   "dependencies": {

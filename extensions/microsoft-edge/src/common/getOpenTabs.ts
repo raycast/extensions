@@ -1,5 +1,5 @@
-import { runAppleScript } from 'run-applescript';
-import { Tab } from '../lib/Tab';
+import { runAppleScript } from "run-applescript";
+import { Tab } from "../lib/Tab";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   const faviconFormula = useOriginalFavicon

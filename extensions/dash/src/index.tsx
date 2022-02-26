@@ -18,7 +18,7 @@ export default function MultiDocsetSearch() {
     >
       <List.Section title="Docsets">
         {docsets.map((docset) => (
-          <DocsetListItem key={docset.docsetKeyword} docset={docset} />
+          <DocsetListItem key={docset.docsetPath} docset={docset} />
         ))}
       </List.Section>
       <List.Section title="Search Results">

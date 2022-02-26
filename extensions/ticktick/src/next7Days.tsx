@@ -6,7 +6,7 @@ import useStartApp from "./hooks/useStartApp";
 import useSearchTasks from "./hooks/useSearchTasks";
 import TaskItem from "./components/taskItem";
 
-const TickTickNext7Days: React.FC<{}> = () => {
+const TickTickNext7Days: React.FC<Record<string, never>> = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sections, setSections] = useState<Section[] | null>(null);
   const { isInitCompleted } = useStartApp();

@@ -17,7 +17,7 @@ export default () => {
     // Retrieve cached XcodeProjects
     xcodeProjectService
       .cachedXcodeProjects()
-      .then(cachedXcodeProjects => {
+      .then((cachedXcodeProjects) => {
         // Check if no XcodeProjects have been set
         if (!xcodeProjects) {
           // Set cached XcodeProjects
@@ -29,7 +29,7 @@ export default () => {
     xcodeProjectService
       .xcodeProjects()
       .then(setXcodeProjects)
-      .catch(error => {
+      .catch((error) => {
         // Check if no XcodeProjects have been set
         if (!xcodeProjects) {
           // Set empty XcodeProjects
@@ -38,11 +38,7 @@ export default () => {
         // Log Error
         console.error(error);
         // Show Toast
-        return showToast(
-          ToastStyle.Failure,
-          "An error occurred while finding Xcode Projects",
-          error
-        );
+        return showToast(ToastStyle.Failure, "An error occurred while finding Xcode Projects", error);
       });
   }, []);
   // Return XcodeProject List

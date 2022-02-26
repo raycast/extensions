@@ -5,6 +5,9 @@
   "description": "Interface with the Dash application, allowing users to quickly search through documentation sets.",
   "icon": "command-icon.png",
   "author": "RSO",
+  "contributors": [
+    "sxn"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -16,7 +19,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.27.0",
     "fast-xml-parser": "^3.20.3",
     "html-entities": "^2.3.2",
     "node-fetch": "^3.0.0",

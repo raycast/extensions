@@ -244,6 +244,7 @@ const computeRedirectedUrl = (objEntity: ObjEntity) => {
     .replace(/\/space\/doc\//, '/docs/')
     .replace(/\/space\/sheet\//, '/sheets/')
     .replace(/\/space\/bitable\//, '/base/')
+    .replace(/\/space\/mindnote\//, '/mindnotes/')
     .replace(/\/space\//, '/');
 };
 

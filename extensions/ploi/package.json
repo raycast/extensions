@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ploi",
+  "title": "Ploi",
+  "description": "View and manage your ploi.io servers and sites",
+  "icon": "ploi-icon.png",
+  "author": "Cannonball",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage Servers and Sites",
+      "subtitle": "Ploi",
+      "icon": "ploi-icon.png",
+      "description": "Search and manage your Ploi servers or sites",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ploi_api_key",
+      "type": "password",
+      "required": true,
+      "title": "Ploi API Key",
+      "description": "Generate from your Ploi profile",
+      "placeholder": "API Key"
+    },
+    {
+      "name": "ploi_ssh_user",
+      "type": "textfield",
+      "required": false,
+      "title": "Ploi SSH User",
+      "default": "ploi",
+      "description": "Change the SSH user to login with",
+      "placeholder": "SSH User"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.0",
+    "axios": "^0.24.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.178",
+    "@types/node": "~17.0.1",
+    "@types/react": "^17.0.37",
+    "@typescript-eslint/eslint-plugin": "^5.9.0",
+    "@typescript-eslint/parser": "^5.9.0",
+    "eslint": "^8.5.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.22.1",
+    "typescript": "^4.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}

@@ -23,14 +23,7 @@ export function xcodeSimulatorApplicationListItem(
           <ActionPanel.Item
             icon={Icon.Finder}
             title="View Directories"
-            onAction={
-              () => navigation.push(
-                xcodeSimulatorApplicationDetail(
-                  xcodeSimulatorApplication,
-                  navigation
-                )
-              )
-            }
+            onAction={() => navigation.push(xcodeSimulatorApplicationDetail(xcodeSimulatorApplication, navigation))}
           />
           <ShowInFinderAction
             title={"Open Documents directory"}
@@ -46,26 +39,19 @@ export function xcodeSimulatorApplicationListItem(
  * Retrieve key from XcodeSimulatorApplication
  * @param xcodeSimulatorApplication The XcodeSimulatorApplication
  */
-function key(
-  xcodeSimulatorApplication: XcodeSimulatorApplication
-): string {
-  return [
-    xcodeSimulatorApplication.simulator.udid,
-    xcodeSimulatorApplication.bundleIdentifier
-  ].join("/");
+function key(xcodeSimulatorApplication: XcodeSimulatorApplication): string {
+  return [xcodeSimulatorApplication.simulator.udid, xcodeSimulatorApplication.bundleIdentifier].join("/");
 }
 
 /**
  * Retrieve icon from XcodeSimulatorApplication
  * @param xcodeSimulatorApplication The XcodeSimulatorApplication
  */
-function icon(
-  xcodeSimulatorApplication: XcodeSimulatorApplication
-): ImageLike {
+function icon(xcodeSimulatorApplication: XcodeSimulatorApplication): ImageLike {
   // Use rounded appIconPath image otherwise use placeholder icon
   return {
     source: xcodeSimulatorApplication.appIconPath ?? "app-icon-placeholder.png",
-    mask: ImageMask.RoundedRectangle
+    mask: ImageMask.RoundedRectangle,
   };
 }
 
@@ -73,13 +59,9 @@ function icon(
  * Retrieve subtitle from XcodeSimulatorApplication
  * @param xcodeSimulatorApplication The XcodeSimulatorApplication
  */
-function subtitle(
-  xcodeSimulatorApplication: XcodeSimulatorApplication
-): string {
+function subtitle(xcodeSimulatorApplication: XcodeSimulatorApplication): string {
   // Initialize subtitle component with the application bundle identifier
-  const subtitleComponents: string[] = [
-    xcodeSimulatorApplication.bundleIdentifier
-  ];
+  const subtitleComponents: string[] = [xcodeSimulatorApplication.bundleIdentifier];
   // Check if a version is available
   if (xcodeSimulatorApplication.version) {
     // Push version
@@ -98,11 +80,6 @@ function subtitle(
  * Retrieve accessory title from XcodeSimulatorApplication
  * @param xcodeSimulatorApplication The XcodeSimulatorApplication
  */
-function accessoryTitle(
-  xcodeSimulatorApplication: XcodeSimulatorApplication
-): string {
-  return [
-    xcodeSimulatorApplication.simulator.name,
-    `(${xcodeSimulatorApplication.simulator.runtime})`
-  ].join(" ");
+function accessoryTitle(xcodeSimulatorApplication: XcodeSimulatorApplication): string {
+  return [xcodeSimulatorApplication.simulator.name, `(${xcodeSimulatorApplication.simulator.runtime})`].join(" ");
 }

@@ -1,7 +1,7 @@
 import { ActionPanel, clearSearchBar, environment, List, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fs from "fs/promises";
-import { searchModeAtom, todoAtom, TodoSections } from "./atoms";
+import { searchModeAtom, todoAtom } from "./atoms";
 import { useAtom } from "jotai";
 import { DEFAULT_SECTIONS, TODO_FILE } from "./config";
 import _ from "lodash";

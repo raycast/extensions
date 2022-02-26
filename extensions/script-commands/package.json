@@ -3,14 +3,14 @@
   "name": "script-commands",
   "title": "Script Commands Store – Find and manage your Raycast Script Commands",
   "description": "Your new way to manage Script Commands without having to deal with GitHub.",
-  "icon": "extension-icon.png",
+  "icon": "store-icon.png",
   "author": "tholanda",
   "license": "MIT",
   "commands": [
     {
       "name": "list",
       "title": "Search Script Command",
-      "subtitle": "Script Command Store",
+      "subtitle": "Script Commands Store",
       "description": "List all and search for Script Commands available in the Raycast Script Commands repository on GitHub",
       "mode": "view"
     }

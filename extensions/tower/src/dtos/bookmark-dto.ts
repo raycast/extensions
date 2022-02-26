@@ -25,19 +25,21 @@ export default class Bookmark {
     this.Children = Children;
   }
 
-  get getFolder() {
-    return this.Folder ? tildify(this.Folder.replace("file:/", "")) : "";
+  get getFolder(): string {
+    return this.Folder
+      ? tildify(this.Folder.replace("file:/", "").replaceAll("&", "\\&").replaceAll("%20", "\\ "))
+      : "";
   }
 
-  get getPath() {
-    return this.Folder ? this.Folder.replace("file://", "") : "";
+  get getPath(): string {
+    return this.Folder ? this.Folder.replace("file://", "").replaceAll("&", "&").replaceAll("%20", " ") : "";
   }
 
-  get isComplete() {
+  get isComplete(): boolean {
     return this.RepositoryIdentifier !== "";
   }
 
-  get getBranch() {
+  get getBranch(): string {
     const branch = getCurrentBranchName(this.getPath);
 
     return branch.length > 50 ? `${branch.slice(0, 50)}...` : branch;

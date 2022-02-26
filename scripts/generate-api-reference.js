@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require("fs").promises;
+const path = require("path");
 
 const START_CODE_BLOCK = "```typescript";
 const END_CODE_BLOCK = "```";
@@ -10,7 +11,7 @@ function getFilename(title) {
 }
 
 async function readDocsJson() {
-  const data = await fs.readFile("../docs/api-reference.json", { encoding: "utf8" });
+  const data = await fs.readFile(path.join(__dirname, "../docs/api-reference.json"), { encoding: "utf8" });
   return JSON.parse(data);
 }
 
@@ -53,50 +54,50 @@ function getCommentReturns(item) {
 }
 
 function getLinkName(name) {
-  name = name.replace(/\W/g, "-");
-  name = name.toLowerCase();
-  return name;
+  return name.toLowerCase().replace(/[^-a-z0-9.+_]/g, "-");
 }
 
-const BASE_URL = 'https://developers.raycast.com/api-reference/';
+const BASE_URL = "../docs/api-reference/";
 
-function generateLinkDestination(docs, name) {
-  const found =
+function generateLinkDestination(docs, name, location) {
+  let found =
     docs.children.find((x) => x.name === name && x.kindString !== "Namespace") ||
     // FIXME this replaceAll is a real hack based on naming convention
     docs.children.find((x) => x.name === name.replaceAll(".", "") && x.kindString !== "Namespace");
-  if (found) {
+
+  function getLink(found, name) {
     const category = docs.categories.find((category) => category.children.includes(found.id));
     if (!category) {
       throw new Error(`no category found for: ${name}`);
     }
+    // TODO: relative link to avoid opening in new tabs
     const subcategory = getSubcategory(found);
-    if (!subcategory) {
-      return `${BASE_URL}${getFilename(category.title)}#${getLinkName(name)}`;
+    const pagePath = `${BASE_URL}${getFilename(category.title)}${subcategory ? `/${getFilename(subcategory)}` : ""}.md`;
+
+    if (pagePath === location) {
+      return `#${getLinkName(name)}`;
     }
-    return `${BASE_URL}${getFilename(category.title)}/${getFilename(subcategory)}#${getLinkName(name)}`;
+
+    const relativePath = path.relative(path.dirname(location), `${pagePath}#${getLinkName(name)}`);
+    return relativePath.startsWith(".") ? relativePath : `./${relativePath}`;
+  }
+
+  if (found) {
+    return getLink(found, name);
   }
   const foundParent =
     // FIXME another hack to link to parent item based on naming convention
     docs.children.find((x) => x.name === name.split(".")[0] && x.kindString !== "Namespace");
   if (foundParent) {
-    const category = docs.categories.find((category) => category.children.includes(foundParent.id));
-    if (!category) {
-      throw new Error(`no category found for: ${name}`);
-    }
-    const subcategory = getSubcategory(foundParent);
-    if (!subcategory) {
-      return `${BASE_URL}${getFilename(category.title)}#${getLinkName(name.split(".")[0])}`;
-    }
-    return `${BASE_URL}${getFilename(category.title)}/${getFilename(subcategory)}#${getLinkName(name.split(".")[0])}`;
+    return getLink(foundParent, name.split(".")[0]);
   }
   console.warn("generateLinkDestination not found for", name);
   return null;
 }
 
-function replaceLinksInDescription(docs, desc) {
+function replaceLinksInDescription(docs, desc, location) {
   return desc.replaceAll(/{@link ([^}]+)}/g, (match, p1) => {
-    const link = generateLinkDestination(docs, p1);
+    const link = generateLinkDestination(docs, p1, location);
     if (!link) {
       return p1;
     }
@@ -104,9 +105,9 @@ function replaceLinksInDescription(docs, desc) {
   });
 }
 
-function replaceTypeLikeStringsInType(docs, type) {
+function replaceTypeLikeStringsInType(docs, type, location) {
   return type.replaceAll(/\b([A-Z][.A-Za-z]+)(\s|$)/g, (match, p1, p2) => {
-    const link = generateLinkDestination(docs, p1);
+    const link = generateLinkDestination(docs, p1, location);
     if (!link) {
       return `${p1}${p2}`;
     }
@@ -303,9 +304,9 @@ function getExampleCode(item) {
   return null;
 }
 
-function formatTypeString(docs, type) {
+function formatTypeString(docs, type, location) {
   // FIXME there should be better way like doing it while constructing type string
-  type = replaceTypeLikeStringsInType(docs, type);
+  type = replaceTypeLikeStringsInType(docs, type, location);
   // escape "<" because of <code>
   type = type.replaceAll("<", "&lt;");
   // FIXME this replaceAll might be too hacky
@@ -316,7 +317,7 @@ function formatTypeString(docs, type) {
   return "<code>" + type.replaceAll(" | ", "</code>" + " or " + "<code>") + "</code>";
 }
 
-function generateFunctionSignatureMarkdown(docs, signature) {
+function generateFunctionSignatureMarkdown(docs, signature, location) {
   const parameters = getParameterList(docs, signature);
   const returnType = getReturnType(docs, signature);
   const signatureText = `${returnType.startsWith("Promise") ? "async " : ""}function ${signature.name}(${parameters
@@ -325,12 +326,12 @@ function generateFunctionSignatureMarkdown(docs, signature) {
   let text = `
 ### ${signature.name}
 
-${replaceLinksInDescription(docs, getCommentText(signature))}
+${replaceLinksInDescription(docs, getCommentText(signature), location)}
 `;
   const remark = getRemarkValue(signature);
   if (remark) {
     text += `
-${replaceLinksInDescription(docs, remark)}
+${replaceLinksInDescription(docs, remark, location)}
 `;
   }
   text += `
@@ -359,9 +360,10 @@ ${exampleCode}
 ${parameters
   .map(
     ([name, type, required, desc]) =>
-      `| ${name} | ${formatTypeString(docs, type)} | ${required ? "Yes" : "No"} | ${replaceLinksInDescription(
+      `| ${name} | ${formatTypeString(docs, type, location)} | ${required ? "Yes" : "No"} | ${replaceLinksInDescription(
         docs,
-        desc
+        desc,
+        location
       )} |`
   )
   .join("\n")}
@@ -371,24 +373,24 @@ ${parameters
     text += `
 #### Return
 
-${replaceLinksInDescription(docs, getCommentReturns(signature))}
+${replaceLinksInDescription(docs, getCommentReturns(signature), location)}
 `;
   }
   return text;
 }
 
-function generateReactComponentSignatureMarkdown(docs, signature, item) {
+function generateReactComponentSignatureMarkdown(docs, signature, item, location) {
   const name = getNamespacedName(docs, item);
   const props = getPropList(docs, signature);
   let text = `
 ### ${name}
 
-${replaceLinksInDescription(docs, getCommentText(signature))}
+${replaceLinksInDescription(docs, getCommentText(signature), location)}
 `;
   const remark = getRemarkValue(signature);
   if (remark) {
     text += `
-${replaceLinksInDescription(docs, remark)}
+${replaceLinksInDescription(docs, remark, location)}
 `;
   }
   const exampleCode = getExampleCode(signature);
@@ -409,17 +411,18 @@ ${exampleCode}
 ${props
   .map(
     ([name, type, required, def, desc]) =>
-      `| ${name} | ${formatTypeString(docs, type)} | ${required ? "Yes" : "No"} | ${replaceLinksInDescription(
+      `| ${name} | ${formatTypeString(docs, type, location)} | ${required ? "Yes" : "No"} | ${replaceLinksInDescription(
         docs,
-        def || "-"
-      )} | ${replaceLinksInDescription(docs, desc)} |`
+        def || "-",
+        location
+      )} | ${replaceLinksInDescription(docs, desc, location)} |`
   )
   .join("\n")}
 `;
   return text;
 }
 
-function generateInterfaceMarkdown(docs, item) {
+function generateInterfaceMarkdown(docs, item, location) {
   let properties = [];
   if (item.children) {
     properties = [
@@ -447,12 +450,12 @@ function generateInterfaceMarkdown(docs, item) {
   let text = `
 ### ${item.name}
 
-${replaceLinksInDescription(docs, getCommentText(item))}
+${replaceLinksInDescription(docs, getCommentText(item), location)}
 `;
   const remark = getRemarkValue(item);
   if (remark) {
     text += `
-${replaceLinksInDescription(docs, remark)}
+${replaceLinksInDescription(docs, remark, location)}
 `;
   }
   const exampleCode = getExampleCode(item);
@@ -474,9 +477,10 @@ ${exampleCode}
 ${properties
   .map(
     ([name, type, required, desc]) =>
-      `| ${name} | ${formatTypeString(docs, type)} | ${required ? "Yes" : "No"} | ${replaceLinksInDescription(
+      `| ${name} | ${formatTypeString(docs, type, location)} | ${required ? "Yes" : "No"} | ${replaceLinksInDescription(
         docs,
-        desc
+        desc,
+        location
       )} |`
   )
   .join("\n")}
@@ -485,7 +489,7 @@ ${properties
   return text;
 }
 
-function generateTypeAliasMarkdown(docs, item) {
+function generateTypeAliasMarkdown(docs, item, location) {
   const signature = `${item.name}: ${getTypeString(docs, item.type)}`;
   let text = `
 ### ${item.name}
@@ -494,12 +498,12 @@ ${START_CODE_BLOCK}
 ${signature}
 ${END_CODE_BLOCK}
 
-${replaceLinksInDescription(docs, getCommentText(item))}
+${replaceLinksInDescription(docs, getCommentText(item), location)}
 `;
   const remark = getRemarkValue(item);
   if (remark) {
     text += `
-${replaceLinksInDescription(docs, remark)}
+${replaceLinksInDescription(docs, remark, location)}
 `;
   }
   const exampleCode = getExampleCode(item);
@@ -515,7 +519,7 @@ ${exampleCode}
   return text;
 }
 
-function generateClassMarkdown(docs, item) {
+function generateClassMarkdown(docs, item, location) {
   const constructors = item.children
     .filter((child) => child.kindString === "Constructor")
     .map((prop) => [prop.name, getPropTypeString(docs, prop), getCommentText(prop).replace(/\s/g, " ")]);
@@ -528,12 +532,12 @@ function generateClassMarkdown(docs, item) {
   let text = `
 ### ${item.name}
 
-${replaceLinksInDescription(docs, getCommentText(item))}
+${replaceLinksInDescription(docs, getCommentText(item), location)}
 `;
   const remark = getRemarkValue(item);
   if (remark) {
     text += `
-${replaceLinksInDescription(docs, remark)}
+${replaceLinksInDescription(docs, remark, location)}
 `;
   }
   const exampleCode = getExampleCode(item);
@@ -553,7 +557,8 @@ ${exampleCode}
 | :--- | :--- | :--- |
 ${constructors
   .map(
-    ([name, type, desc]) => `| ${name} | ${formatTypeString(docs, type)} | ${replaceLinksInDescription(docs, desc)} |`
+    ([name, type, desc]) =>
+      `| ${name} | ${formatTypeString(docs, type, location)} | ${replaceLinksInDescription(docs, desc, location)} |`
   )
   .join("\n")}
 `;
@@ -565,7 +570,8 @@ ${constructors
 | :--- | :--- | :--- |
 ${accessors
   .map(
-    ([name, type, desc]) => `| ${name} | ${formatTypeString(docs, type)} | ${replaceLinksInDescription(docs, desc)} |`
+    ([name, type, desc]) =>
+      `| ${name} | ${formatTypeString(docs, type, location)} | ${replaceLinksInDescription(docs, desc, location)} |`
   )
   .join("\n")}
 `;
@@ -578,7 +584,8 @@ ${accessors
 | :--- | :--- | :--- |
 ${methods
   .map(
-    ([name, type, desc]) => `| ${name} | ${formatTypeString(docs, type)} | ${replaceLinksInDescription(docs, desc)} |`
+    ([name, type, desc]) =>
+      `| ${name} | ${formatTypeString(docs, type, location)} | ${replaceLinksInDescription(docs, desc, location)} |`
   )
   .join("\n")}
 `;
@@ -586,17 +593,17 @@ ${methods
   return text;
 }
 
-function generateEnumerationMarkdown(docs, item) {
+function generateEnumerationMarkdown(docs, item, location) {
   const members = item.children.map((child) => [child.name, child.defaultValue]);
   let text = `
 ### ${item.name}
 
-${replaceLinksInDescription(docs, getCommentText(item))}
+${replaceLinksInDescription(docs, getCommentText(item), location)}
 `;
   const remark = getRemarkValue(item);
   if (remark) {
     text += `
-${replaceLinksInDescription(docs, remark)}
+${replaceLinksInDescription(docs, remark, location)}
 `;
   }
   const exampleCode = getExampleCode(item);
@@ -619,7 +626,7 @@ ${members.map(([name, value]) => `| ${name} | ${value} |`).join("\n")}
   return text;
 }
 
-function generateVariableMarkdown(docs, item) {
+function generateVariableMarkdown(docs, item, location) {
   const signature = `${item.name}: ${getTypeString(docs, item.type)} = ${item.defaultValue}`;
   let text = `
 ### ${item.name}
@@ -628,12 +635,12 @@ ${START_CODE_BLOCK}
 ${signature}
 ${END_CODE_BLOCK}
 
-${replaceLinksInDescription(docs, getCommentText(item))}
+${replaceLinksInDescription(docs, getCommentText(item), location)}
 `;
   const remark = getRemarkValue(item);
   if (remark) {
     text += `
-${replaceLinksInDescription(docs, remark)}
+${replaceLinksInDescription(docs, remark, location)}
 `;
   }
   const exampleCode = getExampleCode(item);
@@ -650,6 +657,10 @@ ${exampleCode}
 }
 
 async function applyToTemplateFile(docs, title, subcategory, items) {
+  const location = subcategory
+    ? `../docs/api-reference/${getFilename(title)}/${getFilename(subcategory)}.md`
+    : `../docs/api-reference/${getFilename(title)}.md`;
+
   let text = "";
   const kinds = ["Function", "Variable", "Class", "Interface", "Enumeration", "Type alias"];
   for (const kind of kinds) {
@@ -657,34 +668,42 @@ async function applyToTemplateFile(docs, title, subcategory, items) {
       if (item.kindString === "Function") {
         for (const signature of item.signatures || []) {
           if (signature.type.name === "ReactElement") {
-            text += generateReactComponentSignatureMarkdown(docs, signature, item);
+            text += generateReactComponentSignatureMarkdown(docs, signature, item, location);
           } else {
-            text += generateFunctionSignatureMarkdown(docs, signature);
+            text += generateFunctionSignatureMarkdown(docs, signature, location);
           }
         }
       } else if (item.kindString === "Interface") {
         if (item.name.endsWith("Props")) {
           // ignore
         } else {
-          text += generateInterfaceMarkdown(docs, item);
+          text += generateInterfaceMarkdown(docs, item, location);
         }
       } else if (item.kindString === "Type alias") {
-        text += generateTypeAliasMarkdown(docs, item);
+        text += generateTypeAliasMarkdown(docs, item, location);
       } else if (item.kindString === "Class") {
-        text += generateClassMarkdown(docs, item);
+        text += generateClassMarkdown(docs, item, location);
       } else if (item.kindString === "Enumeration") {
-        text += generateEnumerationMarkdown(docs, item);
+        text += generateEnumerationMarkdown(docs, item, location);
       } else if (item.kindString === "Variable") {
         text += generateVariableMarkdown(docs, item);
       }
     }
   }
-  const filepath = subcategory
-    ? `../docs/api-reference/${getFilename(title)}/${getFilename(subcategory)}.md`
-    : `../docs/api-reference/${getFilename(title)}.md`;
+  const filepath = path.join(__dirname, location);
   const startMarker = `
 ## API Reference
 `;
+
+  //Generate .md file if it doesn't exist
+  try {
+    await fs.access(filepath);
+  } catch (error) {
+    const content = `# ${subcategory}
+${startMarker}`;
+    await fs.writeFile(filepath, content);
+  }
+
   let markdown = await fs.readFile(filepath, { encoding: "utf8" });
   const re = new RegExp(`${startMarker}(.|\n)*`);
   if (markdown.match(re)) {
@@ -693,6 +712,11 @@ async function applyToTemplateFile(docs, title, subcategory, items) {
   } else {
     console.warn("template marker not available for", title, subcategory);
   }
+
+  if (subcategory) {
+    return `  * [${subcategory}](api-reference/${getFilename(title)}/${getFilename(subcategory)}.md)\n`;
+  }
+  return "";
 }
 
 async function parseCategory(docs, title, children) {
@@ -705,8 +729,36 @@ async function parseCategory(docs, title, children) {
     }
   }
 
-  for (const [subcategory, items] of subCategoryMap) {
-    await applyToTemplateFile(docs, title, subcategory, items);
+  // sort subcategories alphabetically
+  const subCategories = Array.from(subCategoryMap, ([subcategory, items]) => ({ subcategory, items })).sort((a, b) =>
+    a.subcategory > b.subcategory ? 1 : -1
+  );
+
+  let tableOfContent = `* [${title}](api-reference/${getFilename(title)}${
+    subCategories.length > 1 ? "/README" : ""
+  }.md)\n`;
+
+  for (const { subcategory, items } of subCategories) {
+    tableOfContent += await applyToTemplateFile(docs, title, subcategory, items);
+  }
+
+  return tableOfContent;
+}
+
+async function updateTableOfContent(tableOfContent) {
+  const startMarker = `
+## API Reference
+`;
+  const endMarker = `\\*\\*\\*`;
+  const filepath = path.join(__dirname, `../docs/SUMMARY.md`);
+
+  let markdown = await fs.readFile(filepath, { encoding: "utf8" });
+  const re = new RegExp(`${startMarker}(.|\n)*\\*\\*\\*`);
+  if (markdown.match(re)) {
+    markdown = markdown.replace(re, `${startMarker}\n${tableOfContent}\n***`);
+    await fs.writeFile(filepath, markdown);
+  } else {
+    console.warn("template marker not available for SUMMARY.md");
   }
 }
 
@@ -714,11 +766,15 @@ const SKIP_CATEGORIES = ["Other"];
 
 async function main() {
   const docs = await readDocsJson();
-  for (const category of docs.categories) {
+  let tableOfContent = "";
+
+  for (const category of docs.categories.sort((a, b) => (a.title > b.title ? 1 : -1))) {
     if (!SKIP_CATEGORIES.includes(category.title)) {
-      await parseCategory(docs, category.title, category.children);
+      tableOfContent += await parseCategory(docs, category.title, category.children);
     }
   }
+
+  await updateTableOfContent(tableOfContent);
 }
 
 main();

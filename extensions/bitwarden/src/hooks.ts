@@ -6,7 +6,7 @@ import { VaultStatus } from "./types";
 
 async function login(api: Bitwarden) {
   try {
-    const toast = await showToast(ToastStyle.Animated, "Logging in...", "It may takes some time");
+    const toast = await showToast(ToastStyle.Animated, "Logging in...", "It may take some time");
     await api.login();
     toast.hide();
   } catch (error) {

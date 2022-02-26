@@ -1,4 +1,4 @@
-import { ActionPanel, List, OpenInBrowserAction, render, showToast, ToastStyle, Color } from "@raycast/api";
+import { ActionPanel, List, OpenInBrowserAction, showToast, ToastStyle, Color } from "@raycast/api";
 import { MergeRequest } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab } from "../common";

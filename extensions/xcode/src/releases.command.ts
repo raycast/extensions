@@ -16,7 +16,7 @@ export default () => {
   useEffect(() => {
     xcodeReleaseService
       .cachedXcodeReleases()
-      .then(cachedXcodeReleases => {
+      .then((cachedXcodeReleases) => {
         // Check if no XcodeReleases have been set
         if (!xcodeReleases) {
           // Set cached XcodeReleases
@@ -28,7 +28,7 @@ export default () => {
     xcodeReleaseService
       .xcodeReleases()
       .then(setXcodeReleases)
-      .catch(error => {
+      .catch((error) => {
         // Check if no XcodeReleases have been set
         if (!xcodeReleases) {
           // Set empty XcodeReleases
@@ -37,11 +37,7 @@ export default () => {
         // Log Error
         console.error(error);
         // Show Toast
-        return showToast(
-          ToastStyle.Failure,
-          "An error occurred while fetching Xcode Releases",
-          error
-        );
+        return showToast(ToastStyle.Failure, "An error occurred while fetching Xcode Releases", error);
       });
   }, []);
   // Return XcodeRelease List

@@ -10,7 +10,7 @@ import {
   PushAction,
   showHUD,
   showToast,
-  ToastStyle
+  ToastStyle,
 } from "@raycast/api";
 import { existsSync, mkdirSync } from "fs";
 import { readFile, writeFile } from "fs/promises";

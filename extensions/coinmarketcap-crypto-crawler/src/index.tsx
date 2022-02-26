@@ -1,181 +1,290 @@
-import { ActionPanel, Icon, List, OpenInBrowserAction } from "@raycast/api";
-import { useState, useEffect } from "react";
-import $ from "cheerio";
-import fetch from "node-fetch";
-import { fetchAllCrypto } from './api';
-import { writeListInToFile, getListFromFile, CRYPTO_LIST_PATH } from './utils';
-import fuzzysort from 'fuzzysort';
-import fs from 'fs';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
+import {
+  ActionPanel,
+  ActionPanelItem,
+  Color,
+  CopyToClipboardAction,
+  showToast,
+  ToastStyle,
+  Icon,
+  List,
+  OpenInBrowserAction,
+  useNavigation,
+} from "@raycast/api";
+import { useState, useEffect, useMemo } from "react";
+import fuzzysort from "fuzzysort";
+import fs from "fs";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+import { getListFromFile, CRYPTO_LIST_PATH, refreshExistingCache } from "./utils";
+import refreshCryptoList from "./utils/refreshCryptoList";
+import useFavoriteCoins from "./utils/useFavoriteCoins";
+import { CryptoCurrency, PriceData } from "./types";
+import useCoinPriceStore from "./utils/useCoinPriceStore";
+
 dayjs.extend(relativeTime);
 
+const BASE_URL = "https://coinmarketcap.com/currencies/";
 
-const BASE_URL = 'https://coinmarketcap.com/currencies/'
-import { CryptoList, SearchResult } from './types'
+type CoinListItemProps = {
+  name: string;
+  slug: string;
+  symbol: string;
+  coinPriceStore: { [key: string]: PriceData };
+  addFavoriteCoin: (coin: CryptoCurrency) => void;
+  removeFavoriteCoin: (coin: CryptoCurrency) => void;
+  refreshCoinPrice: () => void;
+  isFavorite: boolean;
+};
 
+function CoinListItem({
+  name,
+  slug,
+  symbol,
+  coinPriceStore,
+  addFavoriteCoin,
+  refreshCoinPrice,
+  isFavorite,
+  removeFavoriteCoin,
+}: CoinListItemProps) {
+  const coinPrice = coinPriceStore[slug];
+  const { push } = useNavigation();
 
-export default function CryptoList() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [cryptoList, setCryptoList] = useState<CryptoList[]>([])
-  const [searchResult, setSearchResult] = useState<SearchResult[]>([])
+  let accessoryTitle;
+  if (coinPrice) {
+    const symbol = coinPrice.isUp ? "+" : "-";
+    accessoryTitle = `${coinPrice.currencyPrice}, ${symbol}${coinPrice.priceDiff}`;
+  }
+
+  const price = useMemo(() => {
+    if (coinPrice?.currencyPrice) {
+      return parseFloat(coinPrice.currencyPrice.replace(/[$,]/g, ""));
+    }
+  }, [coinPrice]);
+
+  return (
+    <List.Item
+      id={`${slug}_${symbol}`}
+      title={name}
+      icon={{
+        source: Icon.Star,
+        tintColor: isFavorite ? Color.Yellow : Color.PrimaryText,
+      }}
+      subtitle={`$${symbol.toUpperCase()}`}
+      accessoryTitle={accessoryTitle}
+      actions={
+        <ActionPanel>
+          <OpenInBrowserAction url={`${BASE_URL}${slug}`} />
+
+          {!!price && (
+            <ActionPanelItem
+              title="Convert Currency"
+              icon={Icon.QuestionMark}
+              onAction={() => {
+                push(<CurrencyConverter coinPrice={price} symbol={symbol} name={name} />);
+              }}
+            />
+          )}
+
+          <ActionPanelItem
+            title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+            icon={Icon.Star}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+            onAction={() => {
+              if (isFavorite) {
+                removeFavoriteCoin({ name, slug, symbol });
+              } else {
+                addFavoriteCoin({ name, slug, symbol });
+              }
+            }}
+          />
+          <ActionPanelItem title="Refresh Price" onAction={() => refreshCoinPrice()} icon={Icon.ArrowClockwise} />
+          <ActionPanelItem
+            title="Refresh Crypto List"
+            onAction={() => refreshCryptoList()}
+            icon={Icon.ArrowClockwise}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+type CurrencyConverterProps = {
+  coinPrice: number;
+  name: string;
+  symbol: string;
+};
+
+function CurrencyConverter({ coinPrice, name, symbol }: CurrencyConverterProps) {
+  const [inputText, setInputText] = useState("");
+  const inputNumber = useMemo(() => {
+    if (inputText !== "") {
+      return parseFloat(inputText.replace(/[$,]/g, ""));
+    } else {
+      return 1;
+    }
+  }, [inputText]);
+
+  const usdPrice = useMemo(() => {
+    if (inputNumber) {
+      return inputNumber * coinPrice;
+    }
+  }, [inputNumber, coinPrice]);
+
+  const currencyPrice = useMemo(() => {
+    if (inputNumber && inputNumber > 0) {
+      return inputNumber / coinPrice;
+    }
+  }, [inputNumber, coinPrice]);
+
+  return (
+    <List onSearchTextChange={(text) => setInputText(text)}>
+      <List.Section title={`Convert ${name} with USD`}>
+        {usdPrice && (
+          <List.Item
+            title={`${inputNumber} ${symbol.toUpperCase()}`}
+            accessoryTitle={`${usdPrice} USD`}
+            actions={
+              <ActionPanel>
+                <CopyToClipboardAction content={usdPrice.toString()} />
+              </ActionPanel>
+            }
+          />
+        )}
+
+        {currencyPrice && (
+          <List.Item
+            title={`${inputNumber} USD`}
+            accessoryTitle={`${currencyPrice} ${symbol.toUpperCase()}`}
+            actions={
+              <ActionPanel>
+                <CopyToClipboardAction content={currencyPrice.toString()} />
+              </ActionPanel>
+            }
+          />
+        )}
+      </List.Section>
+    </List>
+  );
+}
+
+export default function SearchCryptoList() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [cryptoList, setCryptoList] = useState<CryptoCurrency[]>([]);
+  const [searchResult, setSearchResult] = useState<CryptoCurrency[]>([]);
+
+  const [selectedSlug, setSelectedSlug] = useState<string>("");
+
+  const { store: coinPriceStore, refresh: refreshCoinPrice } = useCoinPriceStore(selectedSlug);
+
+  const { favoriteCoins, addFavoriteCoin, removeFavoriteCoin, loading: favoriteLoading } = useFavoriteCoins();
+
+  const favoriteCoinSlugs = useMemo(() => favoriteCoins.map(({ slug }) => slug), [favoriteCoins]);
+  const displayedSearchResult = useMemo<CryptoCurrency[]>(() => {
+    return searchResult.filter(({ slug }) => !favoriteCoinSlugs.includes(slug));
+  }, [favoriteCoins, searchResult]);
 
   useEffect(() => {
-
     getListFromFile((err, data) => {
-
       if (err) {
-        console.error('ReadListError:' + err)
-        return
+        console.error("ReadListError:" + err);
+        return;
       }
 
       if (!data) {
         // fetch crypto list mapping if there's no data exist in the local file
-        // the api has an limit num per request. 
-        fetchAllCrypto({ limit: 10000, start: 1 }).then(({ data: resultData }) => {
-          const { data, status } = resultData
+        // the api has an limit num per request.
+        refreshExistingCache((err, cryptoList) => {
+          if (err) {
+            console.error("WriteFileError:" + err);
+            showToast(ToastStyle.Failure, "Refresh failed", (err as Error)?.message);
+            return;
+          }
 
-          const cryptoList = data.cryptoCurrencyMap.map(({ slug, name, symbol }) => ({ slug, name, symbol: symbol.toLowerCase() }))
-
-          writeListInToFile({
-            timestamp: status.timestamp,
-            cryptoList: cryptoList
-          }, (writeFileError) => {
-            if (writeFileError) {
-              console.error('WriteFileError:' + writeFileError)
-              return
-            }
-
-            setCryptoList(cryptoList)
-          })
-        })
-
+          setCryptoList(cryptoList);
+        });
       } else {
         const now = dayjs();
-        const { cryptoList: cryptoListFromFile, timestamp } = JSON.parse(data)
-        const fileCachedTimeDiff = now.diff(dayjs(timestamp), 'day')
+        const { cryptoList: cryptoListFromFile, timestamp } = JSON.parse(data);
+        const fileCachedTimeDiff = now.diff(dayjs(timestamp), "day");
 
         //Remove cache file if it has been more than 15 days since last time saved.
         if (fileCachedTimeDiff >= 15) {
           fs.unlink(CRYPTO_LIST_PATH, (err) => {
             if (err) throw err;
-            console.log('Crypto list cache has been cleared.');
+            console.log("Crypto list cache has been cleared.");
           });
         }
 
-
         if (cryptoListFromFile) {
-          setCryptoList(cryptoListFromFile)
+          setCryptoList(cryptoListFromFile);
         }
       }
-
-
-    })
-  }, [])
-
-  const onSelectCrypto = async (searchText: string) => {
-    setIsLoading(true)
-    const priceInfo = await fetchPrice(searchText)
-
-    // prevent react to batch setting the loading status.
-    setTimeout(() => setIsLoading(false),0)
-    
-    return priceInfo
-  }
+    });
+  }, []);
 
   const onSearchChange = (search: string) => {
-    setIsLoading(true)
+    setIsLoading(true);
+    const MAX_SEARCH_RESULT = 500;
+    const fuzzyResult = fuzzysort.go(search, cryptoList, { keys: ["symbol", "name"] });
+    const transformedFuzzyResult = fuzzyResult.slice(0, MAX_SEARCH_RESULT - 1).map((result) => result.obj);
 
-    const fuzzyResult = fuzzysort.go(search, cryptoList, { keys: ['symbol', 'name'] })
-    const transformedFuzzyResult = fuzzyResult.map(result => ({ obj: result.obj }))
+    setSearchResult(transformedFuzzyResult);
+    setIsLoading(false);
+  };
 
-    if(!transformedFuzzyResult.length){
-      setIsLoading(false);  
-    }
-
-    setSearchResult(transformedFuzzyResult)
-  }
   const onSelectChange = (id?: string) => {
     if (!id) return;
 
-    const [slug] = id.split('_')
-    const targetCryptoIndex = searchResult.findIndex(({ obj }) => obj.slug === slug)
-    const targetCrypto = searchResult.find(({ obj }) => obj.slug === slug)
+    const [slug] = id.split("_");
 
-    if (targetCrypto && !!targetCrypto.currencyPrice) return
-
-    onSelectCrypto(slug).then(({ currencyPrice = '', priceDiff = '' }) => {
-      setSearchResult(prev => {
-        const temp = [...prev]
-
-        if (!targetCrypto) return prev
-
-        temp.splice(targetCryptoIndex, 1, { ...targetCrypto, currencyPrice, priceDiff })
-        return temp
-      })
-    })
-
-
-  }
-
+    setSelectedSlug(slug);
+  };
 
   return (
-    <List isLoading={isLoading}
+    <List
+      isLoading={isLoading}
       throttle
       searchBarPlaceholder="Enter the crypto name"
       onSearchTextChange={onSearchChange}
-      onSelectionChange={onSelectChange}>
+      onSelectionChange={onSelectChange}
+    >
+      {!favoriteLoading && favoriteCoins.length > 0 && (
+        <List.Section title="Favorite Coins">
+          {favoriteCoins.map(({ name, symbol, slug }) => (
+            <CoinListItem
+              key={`FAV_${name}`}
+              name={name}
+              slug={slug}
+              symbol={symbol}
+              coinPriceStore={coinPriceStore}
+              addFavoriteCoin={addFavoriteCoin}
+              removeFavoriteCoin={removeFavoriteCoin}
+              isFavorite
+              refreshCoinPrice={refreshCoinPrice}
+            />
+          ))}
+        </List.Section>
+      )}
 
-      {
-        searchResult.length === 0 ?
-          null :
-          searchResult.map((result, index: number) => {
-            const { currencyPrice = '', priceDiff = '' } = result
-            const { name, slug, symbol } = result.obj
-
-            return (
-              <List.Item
-                id={`${slug}_${symbol}_${index}`}
-                key={`${name}_${index}`}
-                title={name}
-                subtitle={currencyPrice}
-                icon={Icon.Star}
-                accessoryTitle={priceDiff}
-                actions={
-                  <ActionPanel>
-                    <OpenInBrowserAction url={`${BASE_URL}${slug}`} />
-                  </ActionPanel>
-                }
-              />
-            )
-          })
-      }
-
+      {displayedSearchResult.length === 0 ? null : (
+        <List.Section title="Search results">
+          {displayedSearchResult.map(({ name, symbol, slug }) => (
+            <CoinListItem
+              key={slug}
+              name={name}
+              slug={slug}
+              symbol={symbol}
+              coinPriceStore={coinPriceStore}
+              addFavoriteCoin={addFavoriteCoin}
+              removeFavoriteCoin={removeFavoriteCoin}
+              isFavorite={false}
+              refreshCoinPrice={refreshCoinPrice}
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
-}
-
-async function fetchPrice(slug: string) {
-  return fetch(`${BASE_URL}${slug}/`)
-    .then((r) => r.text())
-    .then((html) => {
-      const $html = $.load(html);
-
-      const priceValue = $html(".priceValue")
-
-      // get price diff element className 
-      const priceDirectionClassName = $html(".priceValue + span > span[class^=icon-Caret]").attr('class');
-      const priceDirection = priceDirectionClassName && priceDirectionClassName.split('-').includes('up') ? '+' : '-'
-      const priceDiffValue = priceValue.next("span").text()
-
-      const priceDiffText = `${priceDirection} ${priceDiffValue}`
-
-      const priceValueText = priceValue.text()
-      if (!priceValueText) return { priceValueText: '', priceDiffText: '', coinName: '' };
-
-
-
-      return { currencyPrice: priceValueText, priceDiff: priceDiffText, slug }
-    });
-
 }

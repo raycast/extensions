@@ -16,17 +16,13 @@ export default () => {
   // Use Effect
   useEffect(() => {
     // Subscribe to XcodeSimulators Observable
-    const subscription = xcodeSimulatorService
-      .xcodeSimulators
+    const subscription = xcodeSimulatorService.xcodeSimulators
       .pipe(
-        map(xcodeSimulators => {
+        map((xcodeSimulators) => {
           // Check if XcodeSimulators are available
           if (xcodeSimulators) {
             // Return grouped XcodeSimulators by runtime
-            return groupBy(
-              xcodeSimulators,
-              (xcodeSimulator) => xcodeSimulator.runtime
-            );
+            return groupBy(xcodeSimulators, (xcodeSimulator) => xcodeSimulator.runtime);
           } else {
             // Otherwise return undefined
             return undefined;

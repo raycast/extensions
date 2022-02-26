@@ -1,10 +1,10 @@
-import { DEFAULT_ERROR_TITLE, EDGE_NOT_INSTALLED_MESSAGE } from './common/constants';
-import { List, showToast, ToastStyle } from '@raycast/api';
-import { NotInstalled } from './components/NotInstalled';
-import { ReactElement, useState } from 'react';
-import { UrlDetail } from './schema/types';
-import { UrlListItem } from './components/UrlListItem';
-import { useHistorySearch } from './hooks/useHistorySearch';
+import { DEFAULT_ERROR_TITLE, EDGE_NOT_INSTALLED_MESSAGE } from "./common/constants";
+import { List, showToast, ToastStyle } from "@raycast/api";
+import { NotInstalled } from "./components/NotInstalled";
+import { ReactElement, useState } from "react";
+import { UrlDetail } from "./schema/types";
+import { UrlListItem } from "./components/UrlListItem";
+import { useHistorySearch } from "./hooks/useHistorySearch";
 
 type GroupedEntries = Map<string, UrlDetail[]>;
 

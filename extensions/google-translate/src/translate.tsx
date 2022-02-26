@@ -1,11 +1,4 @@
-import {
-  List,
-  getPreferenceValues,
-  ActionPanel,
-  CopyToClipboardAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { List, getPreferenceValues, ActionPanel, CopyToClipboardAction, showToast, ToastStyle } from "@raycast/api";
 import { ReactElement, useEffect, useState } from "react";
 import translate from "@vitalets/google-translate-api";
 import supportedLanguagesByCode from "./supportedLanguagesByCode.json";
@@ -15,9 +8,7 @@ let count = 0;
 export default function Command(): ReactElement {
   const [isLoading, setIsLoading] = useState(false);
   const [toTranslate, setToTranslate] = useState("");
-  const [results, setResults] = useState<{ text: string; languages: string }[]>(
-    []
-  );
+  const [results, setResults] = useState<{ text: string; languages: string }[]>([]);
 
   useEffect(() => {
     if (toTranslate === "") {

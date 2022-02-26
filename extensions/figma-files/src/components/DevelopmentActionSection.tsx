@@ -1,10 +1,4 @@
-import {
-  ActionPanel,
-  showToast,
-  ToastStyle,
-  environment,
-  Icon,
-} from "@raycast/api";
+import { ActionPanel, showToast, ToastStyle, environment, Icon } from "@raycast/api";
 import { clearFiles } from "../cache";
 import { clearVisitedFiles } from "../hooks/useVisitedFiles";
 
@@ -24,10 +18,7 @@ export default function DevelopmentActionSection() {
   }
 
   async function handleClearVisited() {
-    const toast = await showToast(
-      ToastStyle.Animated,
-      "Clearing visited files"
-    );
+    const toast = await showToast(ToastStyle.Animated, "Clearing visited files");
 
     try {
       await clearVisitedFiles();
@@ -43,20 +34,12 @@ export default function DevelopmentActionSection() {
   return (
     <>
       <ActionPanel.Section title="Advanced">
-        <ActionPanel.Item
-          icon={Icon.Trash}
-          title="Clear Visited"
-          onAction={handleClearVisited}
-        />
+        <ActionPanel.Item icon={Icon.Trash} title="Clear Visited" onAction={handleClearVisited} />
       </ActionPanel.Section>
 
       {environment.isDevelopment && (
         <ActionPanel.Section title="Development">
-          <ActionPanel.Item
-            icon={Icon.Trash}
-            title="Clear Cache"
-            onAction={handleClearCache}
-          />
+          <ActionPanel.Item icon={Icon.Trash} title="Clear Cache" onAction={handleClearCache} />
         </ActionPanel.Section>
       )}
     </>

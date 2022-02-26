@@ -82,29 +82,31 @@ export default function Command() {
 }
 
 function PasswordList({ onePasswordMetaItems }: { onePasswordMetaItems: OnePasswordMetaItem[] | undefined }) {
-
   interface OnePasswordMetaItemCategories {
-    [key: string]: OnePasswordMetaItemsCategory
+    [key: string]: OnePasswordMetaItemsCategory;
   }
 
   const categories: OnePasswordMetaItemCategories = {};
 
-  onePasswordMetaItems?.forEach(onePasswordMetaItem => {
-    if(!categories[onePasswordMetaItem.categoryPluralName]){
+  onePasswordMetaItems?.forEach((onePasswordMetaItem) => {
+    if (!categories[onePasswordMetaItem.categoryPluralName]) {
       categories[onePasswordMetaItem.categoryPluralName] = {
         categoryPluralName: onePasswordMetaItem.categoryPluralName,
         categoryUUID: onePasswordMetaItem.categoryUUID,
-        metaItems: []
-      }
+        metaItems: [],
+      };
     }
     categories[onePasswordMetaItem.categoryPluralName].metaItems.push(onePasswordMetaItem);
   });
 
-  const sortedCategories = Object.values(categories).sort((a, b) => b.metaItems.length - a .metaItems.length);
+  const sortedCategories = Object.values(categories).sort((a, b) => b.metaItems.length - a.metaItems.length);
   return (
     <List searchBarPlaceholder="Filter items by name..." isLoading={onePasswordMetaItems === undefined}>
-      {sortedCategories?.map(onePasswordMetaItemsCategory => (
-          <PasswordListCategory onePasswordMetaItemsCategory={onePasswordMetaItemsCategory} key={onePasswordMetaItemsCategory.categoryUUID}/>
+      {sortedCategories?.map((onePasswordMetaItemsCategory) => (
+        <PasswordListCategory
+          onePasswordMetaItemsCategory={onePasswordMetaItemsCategory}
+          key={onePasswordMetaItemsCategory.categoryUUID}
+        />
       ))}
     </List>
   );
@@ -131,20 +133,28 @@ function getIconForCategory(categoryUUID: string) {
 
 function PasswordListCategory(props: { onePasswordMetaItemsCategory: OnePasswordMetaItemsCategory }) {
   const onePasswordMetaItemsCategory = props.onePasswordMetaItemsCategory;
-  return(
-      <List.Section
-          id={onePasswordMetaItemsCategory.categoryUUID + onePasswordMetaItemsCategory.categoryPluralName}
-          title={onePasswordMetaItemsCategory.categoryPluralName}
-          subtitle={`${onePasswordMetaItemsCategory.metaItems.length} Items`}
-      >
-        {onePasswordMetaItemsCategory.metaItems?.map((onePasswordMetaItem, index) => (
-            <PasswordListItem
-                key={onePasswordMetaItem.uuid + onePasswordMetaItem.vaultUUID + index + Math.random()}
-                onePasswordMetaItem={onePasswordMetaItem}
-            />
-        ))}
-      </List.Section>
-  )
+  return (
+    <List.Section
+      id={onePasswordMetaItemsCategory.categoryUUID + onePasswordMetaItemsCategory.categoryPluralName}
+      title={onePasswordMetaItemsCategory.categoryPluralName}
+      subtitle={`${onePasswordMetaItemsCategory.metaItems.length} Items`}
+    >
+      {onePasswordMetaItemsCategory.metaItems?.map((onePasswordMetaItem, index) => (
+        <PasswordListItem
+          key={onePasswordMetaItem.uuid + onePasswordMetaItem.vaultUUID + index + Math.random()}
+          onePasswordMetaItem={onePasswordMetaItem}
+        />
+      ))}
+    </List.Section>
+  );
+}
+
+function getItemAccessoryTitle(item: OnePasswordMetaItem) {
+  const vaultName = `🗄 ${item.vaultName}`;
+  if (item.accountName) {
+    return `👤 ${item.accountName} ${vaultName}`;
+  }
+  return vaultName;
 }
 
 function PasswordListItem(props: { onePasswordMetaItem: OnePasswordMetaItem }) {
@@ -155,10 +165,12 @@ function PasswordListItem(props: { onePasswordMetaItem: OnePasswordMetaItem }) {
       title={onePasswordMetaItem.itemTitle}
       subtitle={onePasswordMetaItem.categorySingularName}
       icon={getIconForCategory(onePasswordMetaItem.categoryUUID)}
-      accessoryTitle={`👤 ${onePasswordMetaItem.accountName}  🗄 ${onePasswordMetaItem.vaultName}`}
+      accessoryTitle={getItemAccessoryTitle(onePasswordMetaItem)}
       actions={
         <ActionPanel>
-          {onePasswordMetaItem.categoryUUID === "001" && <OpenAndFillAction onePasswordMetaItem={onePasswordMetaItem} />}
+          {onePasswordMetaItem.categoryUUID === "001" && (
+            <OpenAndFillAction onePasswordMetaItem={onePasswordMetaItem} />
+          )}
           <ViewAction onePasswordMetaItem={onePasswordMetaItem} />
           <EditAction onePasswordMetaItem={onePasswordMetaItem} />
         </ActionPanel>

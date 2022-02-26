@@ -1,7 +1,6 @@
-import { ActionPanel, ActionPanelItem, Detail, showToast, Toast, ToastStyle, useNavigation } from "@raycast/api";
+import { ActionPanel, Detail, showToast, Toast, Action } from "@raycast/api";
 import { execSync } from "child_process";
 import { useState } from "react";
-import { promisify } from "util";
 
 export default function NotInstalled({
   onRefresh = () => {
@@ -14,14 +13,14 @@ export default function NotInstalled({
       actions={
         <ActionPanel>
           {!isLoading && (
-            <ActionPanelItem
+            <Action
               title="Install with Homebrew"
               onAction={async () => {
                 if (isLoading) return;
 
                 setIsLoading(true);
 
-                const toast = new Toast({ style: ToastStyle.Animated, title: "Installing..." });
+                const toast = await showToast({ style: Toast.Style.Animated, title: "Installing..." });
                 await toast.show();
 
                 try {
@@ -30,7 +29,11 @@ export default function NotInstalled({
                   onRefresh();
                 } catch {
                   await toast.hide();
-                  await showToast(ToastStyle.Failure, "Error", "An unknown error occured while trying to install");
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Error",
+                    message: "An unknown error occured while trying to install",
+                  });
                 }
                 setIsLoading(false);
               }}
@@ -39,14 +42,14 @@ export default function NotInstalled({
         </ActionPanel>
       }
       markdown={`
-  # 🚨 Error: Displayplacer Utility is not installed
-  This extension depends on a command-line utilty that is not detected on your system. You must install it continue.
+# 🚨 Error: Displayplacer Utility is not installed
+This extension depends on a command-line utilty that is not detected on your system. You must install it continue.
 
-  If you have homebrew installed, simply press **⏎** to have this extension install it for you.
+If you have homebrew installed, simply press **⏎** to have this extension install it for you.
 
-  To install homebrew, visit [this link](https://brew.sh)
+To install homebrew, visit [this link](https://brew.sh)
 
-  Or, to install displayplacer manually, [click here](https://github.com/jakehilborn/displayplacer).
+Or, to install displayplacer manually, [click here](https://github.com/jakehilborn/displayplacer).
   `}
     />
   );

@@ -8,7 +8,7 @@ export const SECRET_SEED = "secretSeed";
 export const AUTHY_ID = "authyId";
 
 export async function checkIfCached(key: string): Promise<boolean> {
-  return await getLocalStorageItem(key) != undefined;
+  return (await getLocalStorageItem(key)) != undefined;
 }
 
 export async function getFromCache<T>(key: string): Promise<T> {

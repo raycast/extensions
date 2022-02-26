@@ -21,7 +21,7 @@ export default function Command() {
 
 function ChangeCompleteActionAction() {
   async function handleSubmit(values: any) {
-    let client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
+    const client = new Client(preferences.url.value as string, preferences.apiToken.value as string);
 
     try {
       const results = (await client.changeCompleteAction(values.action)) as Results;

@@ -1,7 +1,7 @@
 import Fuse from "fuse.js";
 import { searchResultLimit } from "./consants";
 import { environment } from "@raycast/api";
-import fs from 'fs';
+import fs from "fs";
 
 export interface Dataset {
   blocks: Block[];
@@ -20,7 +20,7 @@ export interface Block {
   endCode: number;
 }
 
-const dataset = JSON.parse(fs.readFileSync(`${environment.assetsPath}/dataset.json`, 'utf-8')) as Dataset;
+const dataset = JSON.parse(fs.readFileSync(`${environment.assetsPath}/dataset.json`, "utf-8")) as Dataset;
 
 // We use Fuse.js (https://fusejs.io/) to speed-up the unicode characters search.
 const fuse = new Fuse(dataset.characters, { keys: ["name"], useExtendedSearch: true });
