@@ -1,11 +1,12 @@
-import { ActionPanel, List, Icon, Image, Color, showToast, ToastStyle, ListSection } from "@raycast/api";
+import { ActionPanel, List, Icon, Image, Color, showToast, ToastStyle, ListSection, ListItem } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getCIRefreshInterval, gitlabgql } from "../common";
+import { getCIRefreshInterval, gitlab, gitlabgql } from "../common";
 import { gql } from "@apollo/client";
 import { getErrorMessage, getIdFromGqlId, now } from "../utils";
 import { RefreshJobsAction } from "./job_actions";
 import useInterval from "use-interval";
 import { GitLabOpenInBrowserAction } from "./actions";
+import { Project } from "../gitlabapi";
 
 export interface Job {
   id: string;
@@ -198,4 +199,99 @@ export function useSearch(
   }, [query, projectFullPath, pipelineIID, timestamp]);
 
   return { stages, error, isLoading, refresh };
+}
+
+interface Pipeline {
+  id: number;
+  iid: number;
+  project_id: number;
+  sha: string;
+  ref: string;
+  status: string;
+  source: string;
+}
+
+interface Commit {
+  id: string;
+  short_id: string;
+  title: string;
+  message: string;
+  author_name: string;
+  author_email: string;
+  status?: string;
+  project_id: number;
+  last_pipeline?: Pipeline;
+}
+
+export function PipelineJobsListByCommit(props: { project: Project; sha: string }): JSX.Element {
+  const { commit, isLoading, error } = useCommit(props.project.id, props.sha);
+  if (error) {
+    showToast(ToastStyle.Failure, "Could not fetch Commit Details", error);
+  }
+  if (isLoading || !commit) {
+    return <List isLoading={isLoading} searchBarPlaceholder="Loading" />;
+  } else {
+    if (commit.last_pipeline) {
+      return <JobList projectFullPath={props.project.fullPath} pipelineIID={`${commit.last_pipeline.iid}`} />;
+    } else {
+      return (
+        <List>
+          <ListItem title="No piplelines attached" />
+        </List>
+      );
+    }
+  }
+}
+
+function useCommit(
+  projectID: number,
+  sha: string
+): {
+  commit?: Commit;
+  error?: string;
+  isLoading: boolean;
+} {
+  const [commit, setCommit] = useState<Commit>();
+  const [error, setError] = useState<string>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    // FIXME In the future version, we don't need didUnmount checking
+    // https://github.com/facebook/react/pull/22114
+    let didUnmount = false;
+
+    async function fetchData() {
+      if (didUnmount) {
+        return;
+      }
+
+      setIsLoading(true);
+      setError(undefined);
+
+      try {
+        const glCommit = await gitlab.fetch(`projects/${projectID}/repository/commits/${sha}`).then((data) => {
+          return data as Commit;
+        });
+        if (!didUnmount) {
+          setCommit(glCommit);
+        }
+      } catch (e) {
+        if (!didUnmount) {
+          setError(getErrorMessage(e));
+        }
+      } finally {
+        if (!didUnmount) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchData();
+
+    return () => {
+      didUnmount = true;
+    };
+  }, [projectID, sha]);
+
+  return { commit, error, isLoading };
 }

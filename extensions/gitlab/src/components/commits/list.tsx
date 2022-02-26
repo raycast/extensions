@@ -1,11 +1,12 @@
-import { ActionPanel, ActionPanelSection, Color, List, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, ActionPanelSection, Color, List, PushAction, showToast, ToastStyle } from "@raycast/api";
 import urljoin from "url-join";
 import { useCache } from "../../cache";
 import { gitlab } from "../../common";
 import { Project } from "../../gitlabapi";
 import { GitLabIcons } from "../../icons";
-import { DefaultActions, GitLabOpenInBrowserAction } from "../actions";
+import { GitLabOpenInBrowserAction } from "../actions";
 import { Event } from "../event";
+import { PipelineJobsListByCommit } from "../jobs";
 
 function CommitListItem(props: { event: Event }): JSX.Element {
   const e = props.event;
@@ -34,16 +35,30 @@ function CommitListItem(props: { event: Event }): JSX.Element {
     return undefined;
   };
 
+  const action = (): JSX.Element | undefined | null => {
+    if (project && commit) {
+      return (
+        <PushAction
+          title="Open Pipeline"
+          icon={{ source: GitLabIcons.ci, tintColor: Color.PrimaryText }}
+          target={<PipelineJobsListByCommit project={project} sha={commit} />}
+        />
+      );
+    }
+    return null;
+  };
+
   return (
     <List.Item
       title={title}
       subtitle={ref || commit}
       accessoryTitle={project?.name_with_namespace}
-      icon={{ source: GitLabIcons.branches, tintColor: Color.Green }}
+      icon={{ source: GitLabIcons.commit, tintColor: Color.Green }}
       actions={
         <ActionPanel>
           <ActionPanelSection>
-            <DefaultActions webAction={webAction()} />
+            {action()}
+            {webAction()}
           </ActionPanelSection>
         </ActionPanel>
       }
