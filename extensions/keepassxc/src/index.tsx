@@ -3,6 +3,8 @@ import { loadEntries, copyAndPastePassword, copyPassword, copyUsername } from ".
 import { useState, useEffect } from "react";
 
 const errorHandler = (e: { message: string }) => {
+  console.log(e.message);
+  console.log(e);
   let invalidPreference = "";
   if (e.message.includes("Invalid credentials were provided")) {
     invalidPreference = "Password";
