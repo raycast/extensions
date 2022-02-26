@@ -8,16 +8,6 @@ import ShowList from './show-list';
 
 const asyncExec = promisify(exec);
 
-interface FormValues {
-  title: string;
-  notes: string;
-  tags: string[];
-  list: string | undefined;
-  when: Date | undefined;
-  'checklist-items': string;
-  deadline: Date | undefined;
-}
-
 const getTags = () =>
   executeJxa(`
   const things = Application('Things');
@@ -74,7 +64,7 @@ export default function AddNewTodo(props: { title?: string; listName?: string })
     deadline: undefined,
   };
 
-  const [values, setValues] = useState<FormValues>(defaultValues);
+  const [values, setValues] = useState<Form.Values>(defaultValues);
   // const [projects, setProjects] = useState();
   const [tags, setTags] = useState([]);
   const [thingsNotRunning, setThingsNotRunning] = useState(false);
