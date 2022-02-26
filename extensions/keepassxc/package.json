@@ -38,8 +38,8 @@
       "type": "password",
       "required": true,
       "title": "Password",
-      "description": "Password of Keepass Database",
-      "placeholder": "Please Input Password of Keepass Database"
+      "description": "Password of Keepass Database. For More Information about Security, Please Visit README on Github",
+      "placeholder": "Please Input Password of Keepass Database."
     }
   ],
   "dependencies": {
