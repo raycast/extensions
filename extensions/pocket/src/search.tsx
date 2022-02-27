@@ -27,7 +27,7 @@ export default function Search() {
           accessoryIcon={bookmark.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined}
           actions={
             <ActionPanel title={bookmark.title}>
-              {preferences.defaultOpen === "pocket" ? (
+              {preferences.defaultOpen === "pocket-website" ? (
                 <ActionPanel.Section>
                   <OpenInBrowserAction title="Open in Pocket" icon="pocket-logo.png" url={bookmark.pocketUrl} />
                   <OpenInBrowserAction title="Open in Browser" url={bookmark.originalUrl} />
