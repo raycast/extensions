@@ -42,3 +42,7 @@ export function isRemoteEntry(entry: EntryLike): entry is RemoteEntry {
 }
 
 export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry;
+
+export interface Preferences {
+  isInsiders: boolean;
+}

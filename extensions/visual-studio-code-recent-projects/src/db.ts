@@ -1,12 +1,15 @@
-import { environment } from "@raycast/api";
+import { environment, getPreferenceValues } from "@raycast/api";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import path from "path";
 import initSqlJs from "sql.js";
-import { EntryLike } from "./types";
+import { EntryLike, Preferences } from "./types";
 
-const DB_PATH = `${homedir()}/Library/Application Support/Code/User/globalStorage/state.vscdb`;
-const LEGACY_STORAGE_PATH = `${homedir()}/Library/Application Support/Code/storage.json`;
+const preferences: Preferences = getPreferenceValues();
+export const appName: string = preferences.isInsiders ? "Code - Insiders" : "Code";
+
+const DB_PATH = `${homedir()}/Library/Application Support/${appName}/User/globalStorage/state.vscdb`;
+const LEGACY_STORAGE_PATH = `${homedir()}/Library/Application Support/${appName}/storage.json`;
 
 async function loadDB() {
   const fileBuffer = await readFile(DB_PATH);

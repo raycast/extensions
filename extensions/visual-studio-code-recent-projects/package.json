@@ -5,6 +5,9 @@
   "description": "Search and open recent projects from Visual Studio Code.",
   "icon": "icon.png",
   "author": "thomas",
+  "contributors": [
+    "iainsimmons"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -13,6 +16,17 @@
       "subtitle": "Visual Studio Code",
       "description": "Search and open recent projects from Visual Studio Code.",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "isInsiders",
+      "type": "checkbox",
+      "required": false,
+      "title": "VS Code - Insiders",
+      "default": false,
+      "label": "Insiders",
+      "description": "Search recent projects from the Insiders version of Visual Studio Code?"
     }
   ],
   "dependencies": {

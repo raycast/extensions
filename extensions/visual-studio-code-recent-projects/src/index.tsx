@@ -1,6 +1,7 @@
 import {
   ActionPanel,
   CopyToClipboardAction,
+  getPreferenceValues,
   Icon,
   List,
   OpenAction,
@@ -15,8 +16,19 @@ import { basename, dirname } from "path";
 import { useEffect, useState } from "react";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
-import { getRecentEntries } from "./db";
-import { EntryLike, isFileEntry, isFolderEntry, isRemoteEntry, isWorkspaceEntry, RemoteEntry } from "./types";
+import { appName, getRecentEntries } from "./db";
+import {
+  EntryLike,
+  isFileEntry,
+  isFolderEntry,
+  isRemoteEntry,
+  isWorkspaceEntry,
+  Preferences,
+  RemoteEntry,
+} from "./types";
+
+const preferences: Preferences = getPreferenceValues();
+const appKey: string = preferences.isInsiders ? "com.microsoft.VSCodeInsiders" : "com.microsoft.VSCode";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
@@ -75,7 +87,7 @@ function RemoteListItem(props: { entry: RemoteEntry }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction title="Open in Code" icon="action-icon.png" url={uri} />
+            <OpenInBrowserAction title={`Open in ${appName}`} icon="action-icon.png" url={uri} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -98,12 +110,7 @@ function LocalListItem(props: { uri: string }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenAction
-              title="Open in Code"
-              icon="action-icon.png"
-              target={props.uri}
-              application="com.microsoft.VSCode"
-            />
+            <OpenAction title={`Open in ${appName}`} icon="action-icon.png" target={props.uri} application={appKey} />
             <ShowInFinderAction path={path} />
             <OpenWithAction path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           </ActionPanel.Section>
