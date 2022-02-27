@@ -1,12 +1,19 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from '@raycast/api';
 
 interface Preferences {
   currency: Currency;
 }
 
-export type Currency = "usd" | "eur" | "gbp" | "jpy" | "cny" | "rub";
+export type Currency = 'usd' | 'eur' | 'gbp' | 'jpy' | 'cny' | 'rub';
 
-export const currencies: Currency[] = ["usd", "eur", "gbp", "jpy", "cny", "rub"];
+export const currencies: Currency[] = [
+  'usd',
+  'eur',
+  'gbp',
+  'jpy',
+  'cny',
+  'rub',
+];
 
 export function getCurrency(): Currency {
   const { currency } = getPreferences();
@@ -15,17 +22,17 @@ export function getCurrency(): Currency {
 
 export function formatPrice(price: number) {
   const currencyMap: Record<Currency, string> = {
-    usd: "USD",
-    eur: "EUR",
-    gbp: "GBP",
-    jpy: "JPY",
-    cny: "CNY",
-    rub: "RUB",
+    usd: 'USD',
+    eur: 'EUR',
+    gbp: 'GBP',
+    jpy: 'JPY',
+    cny: 'CNY',
+    rub: 'RUB',
   };
   const currency = getCurrency();
   const currencyString = currencyMap[currency];
-  const currencyFormatter = new Intl.NumberFormat("en-US", {
-    style: "currency",
+  const currencyFormatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
     currency: currencyString,
     maximumFractionDigits: 6,
   });
@@ -34,10 +41,10 @@ export function formatPrice(price: number) {
 }
 
 export function formatDate(date: Date) {
-  return date.toLocaleString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
   });
 }
 
