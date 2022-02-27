@@ -1,7 +1,7 @@
-import { List, ListItem, ListSection } from "@raycast/api";
-import { useEffect, useState } from "react";
-import Service, { Member, Team } from "./service";
-import { getToken } from "./utils";
+import { List } from '@raycast/api';
+import { useEffect, useState } from 'react';
+import Service, { Member, Team } from './service';
+import { getToken } from './utils';
 
 const service = new Service(getToken());
 
@@ -31,11 +31,15 @@ export default function Command() {
   return (
     <List isLoading={isLoading}>
       {teams.map((team) => (
-        <ListSection key={team.id} title={team.name}>
+        <List.Section key={team.id} title={team.name}>
           {members[team.id].map((member) => (
-            <ListItem key={member.id} title={member.name} subtitle={member.role}></ListItem>
+            <List.Item
+              key={member.id}
+              title={member.name}
+              subtitle={member.role}
+            />
           ))}
-        </ListSection>
+        </List.Section>
       ))}
     </List>
   );
