@@ -1,9 +1,9 @@
 import {
+  Action,
   ActionPanel,
   Detail,
   Icon,
   Form,
-  SubmitFormAction,
   useNavigation,
 } from '@raycast/api';
 
@@ -21,7 +21,7 @@ function Command() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction
+          <Action.SubmitForm
             title="Find Difference"
             icon={Icon.Eye}
             onSubmit={(values: FormValues) =>
