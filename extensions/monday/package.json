@@ -23,9 +23,9 @@
     },
     {
       "name": "open",
-      "title": "Go to my monday.com account",
+      "title": "Go to My Account",
       "subtitle": "monday.com",
-      "description": "Open your monday.com account in your default browser",
+      "description": "Open your account in your default browser",
       "mode": "no-view",
       "keywords": [
         "monday",

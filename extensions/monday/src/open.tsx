@@ -10,18 +10,22 @@ export default async () => {
   if (cachedUser) {
     openMonday(cachedUser);
   } else {
-    // If this is the first time the user is using this command,
-    // they won't have a cached user, and no slug to construct
-    // their monday URL from. So, we fetch and cache.
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Just a moment...",
-    });
+    try {
+      // If this is the first time the user is using this command,
+      // they won't have a cached user, and no slug to construct
+      // their monday URL from. So, we fetch and cache.
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Just a moment...",
+      });
 
-    const user = await getUser();
-    cacheUser(user);
-    toast.hide();
-    openMonday(user);
+      const user = await getUser();
+      cacheUser(user);
+      toast.hide();
+      openMonday(user);
+    } catch (error) {
+      showToast(Toast.Style.Failure, error as string);
+    }
   }
 
   async function openMonday(user: Me) {

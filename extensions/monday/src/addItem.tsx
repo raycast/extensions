@@ -3,7 +3,6 @@ import {
   ActionPanel,
   Action,
   Icon,
-  getPreferenceValues,
   showToast,
   Toast,
   useNavigation,
@@ -15,12 +14,14 @@ import { useState, useEffect } from "react";
 import fetch from "node-fetch";
 import { addItem, getGroups } from "./lib/api";
 import { getCachedUser } from "./lib/persistence";
+import { ErrorView } from "./lib/helpers";
 
 export default function AddItem({ board }: { board: Board }) {
   const [state, setState] = useState<{
     isLoading: boolean;
     board: Board;
     groups: Group[];
+    error?: string;
   }>({ isLoading: true, board: board, groups: [] });
   const { pop } = useNavigation();
 
@@ -43,49 +44,56 @@ export default function AddItem({ board }: { board: Board }) {
       parseFloat(g1.position) < parseFloat(g2.position) ? -1 : 1
     );
 
-  return (
-    <Form
-      isLoading={state.isLoading}
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Add item"
-            icon={Icon.Plus}
-            onSubmit={(values) => storeItem(board.id, values)}
-          />
-        </ActionPanel>
-      }
-      navigationTitle={`Add a new item to ${board.name}`}
-    >
-      <Form.Description
-        title="Add a new item"
-        text={`You can use this form to add a new item directly to a specific group in "${board.name}"`}
-      />
+  if (state.error) {
+    return <ErrorView error={state.error} />;
+  } else {
+    return (
+      <Form
+        isLoading={state.isLoading}
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm
+              title="Add item"
+              icon={Icon.Plus}
+              onSubmit={(values) => storeItem(board.id, values)}
+            />
+          </ActionPanel>
+        }
+        navigationTitle={`Add a new item to ${board.name}`}
+      >
+        <Form.Description
+          title="Add a new item"
+          text={`You can use this form to add a new item directly to a specific group in "${board.name}"`}
+        />
 
-      <Form.TextField
-        id="name"
-        title="Item name"
-        placeholder="New item's name"
-      />
+        <Form.TextField
+          id="name"
+          title="Item name"
+          placeholder="New item's name"
+        />
 
-      <Form.Dropdown id="group" title="Group">
-        {sortedGroups.map((group) => (
-          <Form.Dropdown.Item
-            value={group.id}
-            key={group.id}
-            title={group.title}
-            icon={{ source: Icon.Dot, tintColor: group.color }}
-          />
-        ))}
-      </Form.Dropdown>
-    </Form>
-  );
+        <Form.Dropdown id="group" title="Group">
+          {sortedGroups.map((group) => (
+            <Form.Dropdown.Item
+              value={group.id}
+              key={group.id}
+              title={group.title}
+              icon={{ source: Icon.Dot, tintColor: group.color }}
+            />
+          ))}
+        </Form.Dropdown>
+      </Form>
+    );
+  }
 
   async function fetchGroups(boardId: number): Promise<Group[]> {
     try {
       return await getGroups(boardId);
     } catch (error) {
-      console.error(error);
+      setState((oldState) => ({
+        ...oldState,
+        error: error as string,
+      }));
       showToast(Toast.Style.Failure, `Could not load groups due to ${error}`);
       return Promise.reject();
     }
@@ -110,7 +118,7 @@ export default function AddItem({ board }: { board: Board }) {
       const groupId = formValues["group"];
 
       if (name == undefined || groupId == undefined) {
-        throw "Missin required parameters!";
+        throw "Missing required parameters!";
       }
 
       const itemId = await addItem(boardId, groupId, name);

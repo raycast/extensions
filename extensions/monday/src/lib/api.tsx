@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 import { BoardsResponse, Group, Me, User } from "./models";
+import { resetAllCaches } from "./persistence";
 
 export async function runGraphQLQuery(query: string): Promise<any> {
   const apiKey = getPreferenceValues().apiKey;
@@ -12,8 +13,21 @@ export async function runGraphQLQuery(query: string): Promise<any> {
     },
     body: JSON.stringify({ query: query }),
   });
+
   const json = await response.json();
-  return (json as Record<string, unknown>).data as any;
+  const record = json as Record<string, unknown>;
+  const status = response.status;
+
+  if (status >= 200 && status <= 299) {
+    return record.data as any;
+  } else if (status == 401 || status == 403) {
+    await resetAllCaches();
+    throw "Your credentials seem invalid. Check your API token in the extension's preferences.";
+  } else if (status >= 400 && status <= 499) {
+    throw "There's something funky in your request.\nIf the problem persists, please contact the developer.";
+  } else if (status >= 500 && status <= 599) {
+    throw "We're experiencing some technical difficulties, please try again later.\nIf the problem persists, please contact the developer.";
+  }
 }
 
 export async function getBoardsAndUser(): Promise<BoardsResponse> {

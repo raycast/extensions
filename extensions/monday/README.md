@@ -1,9 +1,9 @@
 ## monday.com Raycast Extension
 
-<p align="center"><img src="assets/header.png" width="25%" /></p>
+<p align="center"><img src="media/header.png" width="25%" /></p>
 To get started, you'll need to generate a personal monday.com API Token.
 
-<p align="center"><img src="assets/doc1.png" width="65%" /></p>
+<p align="center"><img src="media/doc1.png" width="65%" /></p>
 
 You can get a token by either:
 

@@ -1,9 +1,13 @@
 import { LocalStorage } from "@raycast/api";
+import { Board, Me, User } from "./models";
 
-import { Board, BoardsResponse, Me, User } from "./models";
 const BoardsCacheKey = "boards";
 const UserCacheKey = "user";
 const TeamCacheKey = "team";
+
+export async function resetAllCaches(): Promise<void> {
+  return await LocalStorage.clear();
+}
 
 // Boards
 export async function getCachedBoards(): Promise<Board[] | undefined> {

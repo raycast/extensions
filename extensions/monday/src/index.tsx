@@ -9,15 +9,15 @@ import {
   cacheUser,
 } from "./lib/persistence";
 import { getBoardsAndUser } from "./lib/api";
-const BoardsCacheKey = "boards-response";
+import { ErrorView } from "./lib/helpers";
 
 export default function BoardsList() {
   const [state, setState] = useState<{
     isLoading: boolean;
     boards: Board[];
     me?: Me;
+    error?: string;
   }>({ isLoading: true, boards: [] });
-
   useEffect(() => {
     async function fetch() {
       // Fetch from cache first
@@ -33,22 +33,34 @@ export default function BoardsList() {
         }));
       }
 
-      // In any case, fetch remote and re-fill cache and state
-      const response = await getBoardsAndUser();
-      await Promise.all([cacheUser(response.me), cacheBoards(response.boards)]);
+      try {
+        // In any case, fetch remote and re-fill cache and state
+        const response = await getBoardsAndUser();
+        await Promise.all([
+          cacheUser(response.me),
+          cacheBoards(response.boards),
+        ]);
 
-      setState((oldState) => ({
-        ...oldState,
-        boards: response.boards || [],
-        me: response.me,
-        isLoading: false,
-      }));
+        setState((oldState) => ({
+          ...oldState,
+          boards: response.boards || [],
+          me: response.me,
+          isLoading: false,
+        }));
+      } catch (error) {
+        setState((oldState) => ({
+          ...oldState,
+          error: error as string,
+        }));
+      }
     }
     fetch();
   }, []);
 
   const account = state.me?.account;
-  if (account) {
+  if (state.error) {
+    return <ErrorView error={state.error} />;
+  } else if (account) {
     return (
       <List
         isLoading={state.isLoading}
