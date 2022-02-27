@@ -58,7 +58,7 @@ export default function Command() {
     if (type === 'event') {
       const validTopic0 = !!topic0 && isEventTopic(topic0);
       const validTopics = topics.every(
-        (topic) => !!topic && (topic.length === 0 || isEventTopic(topic))
+        (topic) => !!topic && (topic.length === 0 || isEventTopic(topic)),
       );
       if (!validTopic0 || !validTopics) {
         showToast(ToastStyle.Failure, 'Invalid event topics');

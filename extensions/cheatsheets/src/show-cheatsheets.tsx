@@ -2,7 +2,12 @@ import { ActionPanel, Detail, List, ListItem, PushAction } from '@raycast/api';
 import { useEffect, useState } from 'react';
 
 import Service from './service';
-import { getSheets, stripFrontmatter, stripTemplateTags, formatTables } from './utils';
+import {
+  getSheets,
+  stripFrontmatter,
+  stripTemplateTags,
+  formatTables,
+} from './utils';
 
 function Action() {
   const [sheets, setSheets] = useState<string[]>([]);
@@ -25,7 +30,10 @@ function Action() {
         <ListItem
           actions={
             <ActionPanel>
-              <PushAction title="Open Cheatsheet" target={<SheetView slug={sheet} />} />
+              <PushAction
+                title="Open Cheatsheet"
+                target={<SheetView slug={sheet} />}
+              />
             </ActionPanel>
           }
           key={sheet}
@@ -47,7 +55,9 @@ function SheetView(props: SheetProps) {
   useEffect(() => {
     async function fetchSheet() {
       const sheetMarkdown = await Service.getSheet(props.slug);
-      const sheet = formatTables(stripTemplateTags(stripFrontmatter(sheetMarkdown)));
+      const sheet = formatTables(
+        stripTemplateTags(stripFrontmatter(sheetMarkdown)),
+      );
 
       setSheet(sheet);
       setLoading(false);

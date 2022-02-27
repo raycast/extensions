@@ -397,7 +397,7 @@ function handleError(e: unknown) {
     showToast(
       ToastStyle.Failure,
       'Failed to authorize',
-      'Please make sure that your API key is valid.'
+      'Please make sure that your API key is valid.',
     );
   } else if (e instanceof NetworkError) {
     showToast(ToastStyle.Failure, 'Network error', 'Please try again later.');

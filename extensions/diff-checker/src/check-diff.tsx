@@ -1,4 +1,11 @@
-import { ActionPanel, Detail, Icon, Form, SubmitFormAction, useNavigation } from '@raycast/api';
+import {
+  ActionPanel,
+  Detail,
+  Icon,
+  Form,
+  SubmitFormAction,
+  useNavigation,
+} from '@raycast/api';
 
 import { getDiffText } from './utils';
 
@@ -17,7 +24,14 @@ function Command() {
           <SubmitFormAction
             title="Find Difference"
             icon={Icon.Eye}
-            onSubmit={(values: FormValues) => push(<DiffView original={values.original} changed={values.changed} />)}
+            onSubmit={(values: FormValues) =>
+              push(
+                <DiffView
+                  original={values.original}
+                  changed={values.changed}
+                />,
+              )
+            }
           />
         </ActionPanel>
       }

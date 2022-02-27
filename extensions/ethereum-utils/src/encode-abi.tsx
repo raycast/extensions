@@ -71,7 +71,7 @@ export default function Command() {
   function encode(
     coder: Coder,
     selectedItem: JsonFragment | null,
-    formValues: Values
+    formValues: Values,
   ): string | null {
     if (!selectedItem) {
       return null;

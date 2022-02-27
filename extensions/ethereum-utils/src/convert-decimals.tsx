@@ -26,7 +26,7 @@ export default function Command() {
       showToast(
         ToastStyle.Failure,
         'Invalid input',
-        '"Input" should be a number'
+        '"Input" should be a number',
       );
       return;
     }
@@ -34,7 +34,7 @@ export default function Command() {
       showToast(
         ToastStyle.Failure,
         'Invalid input',
-        '"Input decimals" should be a decimal'
+        '"Input decimals" should be a decimal',
       );
       return;
     }
@@ -42,7 +42,7 @@ export default function Command() {
       showToast(
         ToastStyle.Failure,
         'Invalid input',
-        '"Output decimals" should be a decimals'
+        '"Output decimals" should be a decimals',
       );
       return;
     }
@@ -60,13 +60,13 @@ export default function Command() {
           output={output}
           inputDecimals={inputDecimalsNumber}
           outputDecimals={outputDecimalsNumber}
-        />
+        />,
       );
     } catch {
       showToast(
         ToastStyle.Failure,
         'Failed to convert',
-        'Please make sure that decimals are in the correct order'
+        'Please make sure that decimals are in the correct order',
       );
     }
   }
