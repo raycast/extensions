@@ -12,9 +12,9 @@ Use the `Create Pipe command` command to generate a new pipe command template.
 
 The Pipe command syntax is very similar to the script command syntax, with some caveats:
 
-- Only the `title`, `icon`, `argument1` and `packageName` fields are parsed (the other fields are ignored, you can still provide them for documentation !)
+- Only the `title`, `icon`, currentDirectoryPath, `argument1` and `packageName` fields are parsed (the other fields are ignored, you can still provide them for documentation !). Some fields slight differ:
   - The icon field only accepts Raycast API Icons (ex: `Globe`, `Trash`...) instead of emoji and images paths.
-  - The argument1 field slightly differ from script commands:
+  - The argument1 object only accept some fields:
 
   | field          | description                                | values       | required |
   | -------------- | ------------------------------------------ | ------------ | -------- |

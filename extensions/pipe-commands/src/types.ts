@@ -8,6 +8,7 @@ export interface ScriptMetadatas {
   icon?: string;
   argument1: ScriptInput;
   packageName?: string;
+  currentDirectoryPath?: string;
 }
 
 export type ArgumentType = "text" | "file";

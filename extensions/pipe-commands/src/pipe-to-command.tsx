@@ -15,6 +15,7 @@ import {
 } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { readdirSync } from "fs";
+import { dirname } from "path";
 import { useEffect, useState } from "react";
 import PipeCommandForm from "./create-pipe-command";
 import { ArgumentType, ScriptCommand } from "./types";
@@ -69,6 +70,7 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
               const { stdout, stderr, status } = spawnSync(command.path, [input], {
                 encoding: "utf-8",
                 input,
+                cwd: command.metadatas.currentDirectoryPath ? command.metadatas.currentDirectoryPath : dirname(command.path),
                 maxBuffer: 10 * 1024 * 1024,
               });
               toast.hide();
