@@ -3,7 +3,6 @@
 # @raycast.title Wikipedia Search
 # @raycast.packageName Web Searches
 # @raycast.icon Globe
-# @raycast.input {"type": "text", "percentEncode": true}
+# @raycast.argument1 {"type": "text", "percentEncoded": true}
 
-read -r query
-open "https://en.wikipedia.org/wiki/Special:Search/$query"
+open "https://en.wikipedia.org/wiki/Special:Search/$1"

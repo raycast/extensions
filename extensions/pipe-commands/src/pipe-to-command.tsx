@@ -55,17 +55,18 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
         />
       ) : null}
       {parsed?.commands
-        .filter((command) => command.metadatas.input.type == props.input.type)
+        .filter((command) => command.metadatas.argument1.type == props.input.type)
         .map((command) => (
           <PipeCommand
             key={command.path}
             command={command}
             runCommand={async () => {
               const toast = await showToast(Toast.Style.Animated, "Running...");
-              const input = command.metadatas.input.percentEncoded
+              const input = command.metadatas.argument1.percentEncoded
                 ? encodeURIComponent(props.input.content)
                 : props.input.content;
-              const { stdout, stderr, status } = spawnSync(command.path, {
+              // Pass the input both to the command stdin and as command fist argument
+              const { stdout, stderr, status } = spawnSync(command.path, [input], {
                 encoding: "utf-8",
                 input,
                 maxBuffer: 10 * 1024 * 1024,
@@ -104,7 +105,7 @@ export function PipeCommand(props: {
   const { path: scriptPath, metadatas } = props.command;
   const navigation = useNavigation();
   const runCommand = props.runCommand;
-  const defaultIcon = metadatas.input.type == "file" ? Icon.Document : Icon.Text;
+  const defaultIcon = metadatas.argument1.type == "file" ? Icon.Document : Icon.Text;
 
   return (
     <List.Item

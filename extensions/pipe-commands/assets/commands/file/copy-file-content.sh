@@ -2,7 +2,6 @@
 
 # @raycast.title Extract File Content
 # @raycast.packageName File Actions
-# @raycast.input {"type": "file"}
+# @raycast.argument1 {"type": "file"}
 
-read -r input_file_path
-cat "$input_file_path"
+cat "$1"

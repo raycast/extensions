@@ -2,9 +2,8 @@
 
 # @raycast.title Switch to Lowercase
 # @raycast.packageName Text Actions
-# @raycast.input {"type": "text"}
+# @raycast.argument1 {"type": "text"}
 
 import sys
 
-selection = sys.stdin.read()
-sys.stdout.write(selection.lower())
+sys.stdout.write(sys.argv[1].lower())

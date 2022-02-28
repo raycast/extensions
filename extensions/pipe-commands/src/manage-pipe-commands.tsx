@@ -13,8 +13,8 @@ export default function managePipeCommands() {
   };
 
   useEffect(loadCommands, []);
-  const textCommands = state?.commands.filter((command) => command.metadatas.input.type === "text");
-  const fileCommands = state?.commands.filter((command) => command.metadatas.input.type === "file");
+  const textCommands = state?.commands.filter((command) => command.metadatas.argument1.type === "text");
+  const fileCommands = state?.commands.filter((command) => command.metadatas.argument1.type === "file");
 
   return (
     <List isLoading={typeof state == "undefined"}>
@@ -37,12 +37,12 @@ export default function managePipeCommands() {
       </List.Section>
       <List.Section title="File Commands">
         {fileCommands?.map((cmd) => (
-          <PipeCommand key={cmd.path} command={cmd} reload={loadCommands} />
+          <PipeCommand key={cmd.path} command={cmd} onTrash={loadCommands} />
         ))}
       </List.Section>
       <List.Section title="Text Commands">
         {textCommands?.map((cmd) => (
-          <PipeCommand key={cmd.path} command={cmd} reload={loadCommands} />
+          <PipeCommand key={cmd.path} command={cmd} onTrash={loadCommands} />
         ))}
       </List.Section>
     </List>

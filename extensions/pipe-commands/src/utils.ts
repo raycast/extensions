@@ -12,7 +12,7 @@ export function parseMetadatas(script: string): ScriptMetadatas {
   const matches = [...script.matchAll(metadataRegex)];
   for (const match of matches) {
     const metadataTitle = match[1];
-    metadatas[metadataTitle] = metadataTitle == "input" ? JSON.parse(match[2]) : match[2];
+    metadatas[metadataTitle] = metadataTitle == "argument1" ? JSON.parse(match[2]) : match[2];
   }
 
   return metadatas as unknown as ScriptMetadatas;
@@ -32,7 +32,7 @@ export async function parseScriptCommands(): Promise<{ commands: ScriptCommand[]
   );
   const res = { commands: [] as ScriptCommand[], invalid: [] as string[] };
   for (const command of commands) {
-    if (command.metadatas.title && command.metadatas.input) {
+    if (command.metadatas.title && command.metadatas.argument1) {
       res.commands.push(command);
     } else {
       res.invalid.push(command.path);

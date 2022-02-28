@@ -12,9 +12,9 @@ Use the `Create Pipe command` command to generate a new pipe command template.
 
 The Pipe command syntax is very similar to the script command syntax, with some caveats:
 
-- Only the `title`, `icon` and `packageName` fields are parsed (the other fields are ignored, you can still provide them for documentation !)
+- Only the `title`, `icon`, `argument1` and `packageName` fields are parsed (the other fields are ignored, you can still provide them for documentation !)
   - The icon field only accepts Raycast API Icons (ex: `Globe`, `Trash`...) instead of emoji and images paths.
-- A new field is introduced: `@raycast.input`. It is similar to the script command arguments, but support other types.
+  - The argument1 field slightly differ from script commands:
 
   | field          | description                                | values       | required |
   | -------------- | ------------------------------------------ | ------------ | -------- |
@@ -23,7 +23,7 @@ The Pipe command syntax is very similar to the script command syntax, with some 
 
 ## Pipe Commands Logic
 
-The user input (selection or clipboard) will be passed to the script through the standard input stream (`stdin`).
+The user input (selection or clipboard) will be passed as the script first argument. It will also be passed as the script stdin for convenience.
 
 The standard output stream (`stdout`) of the script will replace the current selection, be copied to the clipboard or be passed to a another pipe command depending on the user choice. If the command does not return any output, the selection will be preserved.
 
@@ -39,26 +39,22 @@ If you want to provide a message to the user, use the standard error stream (`st
 # @raycast.title Google Search
 # @raycast.packageName Web Searches
 # @raycast.icon Globe
-# @raycast.input {"type": "text", "percentEncoded": true}
+# @raycast.argument1 {"type": "text", "percentEncoded": true}
 
-# Assign the script input to a bash variable
-read -r query
 # Open the url in the default browser
-open "https://www.google.com/search?q=$query"
+open "https://www.google.com/search?q=$1"
 ```
 
-### Switch to Uppercase
+### Format JSON
 
 ```python
-#!/usr/bin/env python3
+#!/bin/bash
 
-# @raycast.title Switch to Uppercase
-# @raycast.packageName Text Actions
-# @raycast.icon Text
-# @raycast.input {"type": "text"}
+# @raycast.title Prettify JSON
+# @raycast.packageName Developer Utils
+# @raycast.icon Hammer
+# @raycast.argument1 {"type": "text"}
 
-import sys
-
-selection = sys.stdin.read()
-sys.stdout.write(selection.upper())
+# This script get the input from stdin
+python3 -m json.tool --indent 2
 ```
