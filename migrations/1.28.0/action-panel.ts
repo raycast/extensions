@@ -28,6 +28,20 @@ export default function ActionPanelTransform(
       });
 
     root
+      .find(j.JSXClosingElement, {
+        name: { name: name[0] },
+      })
+      .replaceWith((p) => {
+        needToAddImport = true;
+        return j.jsxClosingElement(
+          j.jsxMemberExpression(
+            j.jsxIdentifier("ActionPanel"),
+            j.jsxIdentifier(name[1])
+          )
+        );
+      });
+
+    root
       .find(j.TSTypeReference, {
         typeName: {
           name: name[0] + "Props",
