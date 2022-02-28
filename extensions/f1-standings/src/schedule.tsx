@@ -23,6 +23,9 @@ export default function Command() {
         today.setHours(0, 0, 0, 0);
         const allRaces: Race[] = data.MRData.RaceTable.Races;
         const upcomingRaces: Race[] = allRaces.filter((race) => new Date(race.date) >= today);
+        if (allRaces.length == 0) {
+          throw new Error("No races found");
+        }
         setState({
           items: allRaces,
           season,
@@ -61,7 +64,7 @@ export default function Command() {
             }}
             title={item.raceName + " " + item.season}
             subtitle={item.Circuit.Location.locality + ", " + item.Circuit.Location.country}
-            accessoryTitle={new Date(item.date).toLocaleDateString()}
+            accessoryTitle={item.date}
             actions={
               <ActionPanel title={item.raceName}>
                 {parseInt(item.round) < state.selectedRound! && (
