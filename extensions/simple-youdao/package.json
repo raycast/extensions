@@ -4,7 +4,7 @@
   "title": "Simple Youdao Translate",
   "description": "This is a youdao translation extension with simple interaction",
   "icon": "command-icon.png",
-  "author": "Xeric Wei",
+  "author": "xeric",
   "license": "MIT",
   "commands": [
     {
