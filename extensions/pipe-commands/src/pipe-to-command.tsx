@@ -11,6 +11,7 @@ import {
   showToast,
   useNavigation,
   Image,
+  Detail,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { readdirSync } from "fs";
@@ -83,7 +84,7 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
                 showHUD(stderr);
               }
             }}
-            reload={loadCommands}
+            onTrash={loadCommands}
           />
         ))}
     </List>
@@ -98,7 +99,7 @@ export function getRaycastIcon(scriptIcon: string | undefined, defaultIcon: Imag
 export function PipeCommand(props: {
   command: ScriptCommand;
   runCommand?: () => Promise<string | undefined>;
-  reload: () => void;
+  onTrash: () => void;
 }) {
   const { path: scriptPath, metadatas } = props.command;
   const navigation = useNavigation();
@@ -148,13 +149,27 @@ export function PipeCommand(props: {
                   }
                 }}
               />
+              <Action
+                title="Preview Output"
+                icon={Icon.ArrowRight}
+                shortcut={{ modifiers: ["cmd"], key: "p" }}
+                onAction={async () => {
+                  const stdout = await runCommand();
+                  if (stdout) {
+                    navigation.push(<Detail markdown={"```\n" + stdout + "\n```"} actions={<ActionPanel>
+                      <Action.CopyToClipboard content={stdout}/>
+                      <Action.Paste content={stdout}/>
+                    </ActionPanel>}/>);
+                  }
+                }}
+              />
             </ActionPanel.Section>
           ) : null}
           <ActionPanel.Section>
             <Action.Open icon={Icon.Upload} title="Open Pipe Command" target={scriptPath} />
             <Action.OpenWith path={scriptPath} />
             <Action.ShowInFinder path={scriptPath} />
-            <Action.Trash paths={scriptPath} onTrash={props.reload} />
+            <Action.Trash paths={scriptPath} onTrash={props.onTrash} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.Push icon={Icon.Plus} title="New Pipe Command" target={<PipeCommandForm />} />
@@ -163,7 +178,7 @@ export function PipeCommand(props: {
               title="Reset Default Commands"
               onAction={async () => {
                 await copyAssetsCommands();
-                props.reload();
+                props.onTrash();
               }}
             />
           </ActionPanel.Section>
