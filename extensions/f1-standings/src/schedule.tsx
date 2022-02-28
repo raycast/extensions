@@ -35,7 +35,7 @@ export default function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Error",
-          message: `Could not load ${season} race schedule`,
+          message: `Could not load ${season} race schedule. Please try later again.`,
         });
         await popToRoot({ clearSearchBar: true });
         setState({
