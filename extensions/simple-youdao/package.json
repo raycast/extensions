@@ -951,8 +951,9 @@
     {
       "name": "is_search_clipboard",
       "type": "checkbox",
+      "label": "Search Clipboard Content by default",
       "required": false,
-      "title": "Search Clipboard Content by default",
+      "title": "Clipboard Support",
       "description": "by default search with content copied in Clipboard if there's no selection or input"
     }
   ],
