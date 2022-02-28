@@ -22,17 +22,17 @@ If you want to specify the language, you need to define them in `Command Configu
 
 ## Some enhancements
 
-#### the content to translate supports with below order:
+* the content to translate supports with below order:
+  
+  * Selection content in your most front window
+  
+  * Clipboard content
+  
+  * User input
 
-1. Selection content in your most front window
+* show phonetic on translated content
 
-2. Clipboard content
-
-3. User input
-
-4. Use `ctrl+Return` to pronounce the words
-
-#### show phonetic on translated content
+* Use `ctrl+Return` to pronounce the words
 
 ## Future plan
 
@@ -41,7 +41,5 @@ If you want to specify the language, you need to define them in `Command Configu
 # Special Thanks
 
 This project is based on and inspired by Raycast extension [Youdao Translate](https://github.com/raycast/extensions/tree/main/extensions/youdao-translate)
-
-
 
 Xeric Wei
