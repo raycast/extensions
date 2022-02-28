@@ -118,7 +118,7 @@ export function PipeCommand(props: {
           {typeof runCommand != "undefined" ? (
             <ActionPanel.Section>
               <Action
-                title="Copy Output"
+                title="Copy to Clipboard"
                 icon={Icon.Clipboard}
                 onAction={async () => {
                   const stdout = await runCommand();
@@ -129,8 +129,8 @@ export function PipeCommand(props: {
                 }}
               />
               <Action
-                title="Paste Output"
-                icon={Icon.Pencil}
+                title="Paste in Active App"
+                icon={Icon.Clipboard}
                 onAction={async () => {
                   const stdout = await runCommand();
                   if (stdout) {
@@ -140,7 +140,7 @@ export function PipeCommand(props: {
                 }}
               />
               <Action
-                title="Pipe Output"
+                title="Pipe to Command"
                 icon={Icon.ArrowRight}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "\\" }}
                 onAction={async () => {
@@ -151,8 +151,8 @@ export function PipeCommand(props: {
                 }}
               />
               <Action
-                title="Preview Output"
-                icon={Icon.ArrowRight}
+                title="Preview"
+                icon={Icon.Text}
                 shortcut={{ modifiers: ["cmd"], key: "p" }}
                 onAction={async () => {
                   const stdout = await runCommand();
