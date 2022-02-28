@@ -70,7 +70,9 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
               const { stdout, stderr, status } = spawnSync(command.path, [input], {
                 encoding: "utf-8",
                 input,
-                cwd: command.metadatas.currentDirectoryPath ? command.metadatas.currentDirectoryPath : dirname(command.path),
+                cwd: command.metadatas.currentDirectoryPath
+                  ? command.metadatas.currentDirectoryPath
+                  : dirname(command.path),
                 maxBuffer: 10 * 1024 * 1024,
               });
               toast.hide();
@@ -159,10 +161,17 @@ export function PipeCommand(props: {
                 onAction={async () => {
                   const stdout = await runCommand();
                   if (stdout) {
-                    navigation.push(<Detail markdown={"```\n" + stdout + "\n```"} actions={<ActionPanel>
-                      <Action.CopyToClipboard content={stdout}/>
-                      <Action.Paste content={stdout}/>
-                    </ActionPanel>}/>);
+                    navigation.push(
+                      <Detail
+                        markdown={"```\n" + stdout + "\n```"}
+                        actions={
+                          <ActionPanel>
+                            <Action.CopyToClipboard content={stdout} />
+                            <Action.Paste content={stdout} />
+                          </ActionPanel>
+                        }
+                      />
+                    );
                   }
                 }}
               />
