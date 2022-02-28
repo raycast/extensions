@@ -166,8 +166,8 @@ export function PipeCommand(props: {
                         markdown={"```\n" + stdout + "\n```"}
                         actions={
                           <ActionPanel>
-                            <Action.CopyToClipboard content={stdout} />
-                            <Action.Paste content={stdout} />
+                            <Action.CopyToClipboard content={stdout} onCopy={() => closeMainWindow()} />
+                            <Action.Paste content={stdout} onPaste={() => closeMainWindow()} />
                           </ActionPanel>
                         }
                       />
