@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showHUD, closeMainWindow, popToRoot } from "@raycast/api";
 import { useAsync } from "react-use";
 import { useEffect, useState } from "react";
 import { getOutputDevices, setOutputDevice } from "./utils";
@@ -30,13 +30,12 @@ export function AirPlaySelector() {
               <Action
                 onAction={async () => {
                   await setOutputDevice(item.name);
-                  showToast({
-                    style: Toast.Style.Success,
-                    title: `Switched to ${item.name}`,
-                  });
+                  closeMainWindow({ clearRootSearch: true });
+                  popToRoot({ clearSearchBar: true });
+                  showHUD(`Active audio device set to ${item.name}`);
                   setActive(item.name);
                 }}
-                title={item.name}
+                title={`Select ${item.name}`}
               />
             </ActionPanel>
           }

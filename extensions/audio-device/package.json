@@ -36,6 +36,7 @@
       "required": false,
       "title": "Enable AirPlay Support",
       "description": "Enable AirPlay speakers detection on the output devices list.",
+      "label": "Include AirPlay devices",
       "type": "checkbox",
       "default": false
     },
