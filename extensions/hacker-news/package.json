@@ -23,7 +23,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.28.0",
     "got": "^11.8.2",
     "rss-parser": "^3.12.0"
   },

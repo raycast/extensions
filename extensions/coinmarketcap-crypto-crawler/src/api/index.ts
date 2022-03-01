@@ -11,7 +11,7 @@ type FetchParameters = {
 
 export const fetchAllCrypto = ({ limit, start }: FetchParameters) =>
   axios.get<ResultData>("https://api.coinmarketcap.com/data-api/v3/map/all", {
-    data: {
+    params: {
       cryptoAux: "is_active,status",
       exchangeAux: "is_active,status",
       limit,

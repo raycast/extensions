@@ -1,9 +1,10 @@
 import { ActionPanel, Detail, Icon, List, OpenInBrowserAction, PushAction, ToastStyle, showToast } from "@raycast/api";
 import { useEffect, useState, useMemo } from "react";
+import Fuse from "fuse.js";
 
 import Service, { Coin } from "./service";
 import { addFavorite, getFavorites, removeFavorite } from "./storage";
-import { filterCoins, formatDate, formatPrice } from "./utils";
+import { formatDate, formatPrice } from "./utils";
 
 interface IdProps {
   id: string;
@@ -21,9 +22,14 @@ interface FavoriteProps {
 }
 
 // Limit the number of list items rendered for performance
-const ITEM_LIMIT = 1000;
+const ITEM_LIMIT = 100;
 
 const service = new Service();
+const fuseSearch = new Fuse<Coin>([], {
+  keys: ["name", "symbol"],
+  includeScore: true,
+  threshold: 0.3,
+});
 
 export default function Command() {
   const service = new Service();
@@ -32,7 +38,9 @@ export default function Command() {
   const [input, setInput] = useState<string>("");
   const [favorites, setFavorites] = useState<string[]>([]);
 
-  const list = useMemo(() => filterCoins(coins, input), [coins, input]);
+  useEffect(() => fuseSearch.setCollection(coins), [coins]);
+
+  const filteredList = useMemo(() => fuseSearch.search(input, { limit: ITEM_LIMIT }).map((s) => s.item), [input]);
 
   useEffect(() => {
     async function fetchList() {
@@ -64,7 +72,7 @@ export default function Command() {
     <List isLoading={isLoading} onSearchTextChange={setInput} searchBarPlaceholder="Search by coin name or symbol">
       <List.Section title="Favorites">
         {favorites.map((id) => {
-          const coin = list.find((coin) => coin.id === id);
+          const coin = (input ? filteredList : coins).find((coin) => coin.id === id);
           if (!coin) return;
           return (
             <ListItemCoin key={id} coin={coin} isFavorite={true} onFavoriteToggle={() => toggleFavorite(id, true)} />
@@ -72,7 +80,7 @@ export default function Command() {
         })}
       </List.Section>
       <List.Section title="All">
-        {list.slice(0, ITEM_LIMIT).map((item) => {
+        {filteredList.map((item) => {
           const { id } = item;
           const isFavorite = favorites.includes(id);
           return (

@@ -4,7 +4,7 @@ import * as AWS from "aws-sdk";
 import { Preferences } from "./types";
 
 const getExecutionState = (client: AWS.CodePipeline, pipelineName: string) =>
-  new Promise<AWS.CodePipeline.PipelineExecutionSummary>((resolve, reject) => {
+  new Promise<AWS.CodePipeline.PipelineExecutionSummary | null>((resolve, reject) => {
     return client.listPipelineExecutions(
       {
         pipelineName: pipelineName,
@@ -15,6 +15,8 @@ const getExecutionState = (client: AWS.CodePipeline, pipelineName: string) =>
         } else {
           if (data.pipelineExecutionSummaries?.[0]) {
             resolve(data.pipelineExecutionSummaries[0]);
+          } else {
+            resolve(null);
           }
         }
       }
@@ -22,7 +24,7 @@ const getExecutionState = (client: AWS.CodePipeline, pipelineName: string) =>
   });
 
 type PipelineSummary = AWS.CodePipeline.PipelineSummary & {
-  execution: AWS.CodePipeline.PipelineExecutionSummary;
+  execution?: AWS.CodePipeline.PipelineExecutionSummary | null;
 };
 
 export default function DescribeInstances() {
@@ -56,16 +58,24 @@ export default function DescribeInstances() {
             if (!p.name) {
               continue;
             }
-            _pipelines.push({
-              ...p,
-              execution: await getExecutionState(pipeline, p.name),
-            });
+            _pipelines.push(p);
           }
           setState({
             hasError: false,
             loaded: true,
             pipelines: _pipelines ?? [],
           });
+
+          for (const p of data?.pipelines ?? []) {
+            if (!p.name) {
+              continue;
+            }
+            const execution = await getExecutionState(pipeline, p.name);
+            setState((state) => ({
+              ...state,
+              pipelines: state.pipelines.map((el) => (el.name === p.name ? { ...p, execution } : el)),
+            }));
+          }
         }
       });
     }
@@ -90,13 +100,15 @@ export default function DescribeInstances() {
 function CodePipelineListItem({ pipeline }: { pipeline: PipelineSummary }) {
   const preferences: Preferences = getPreferenceValues();
 
+  const status = pipeline?.execution?.status || "Idle";
+
   return (
     <List.Item
       id={pipeline.name}
       key={pipeline.name}
       title={pipeline.name || "Unknown pipeline name"}
-      subtitle={pipeline?.execution.status}
-      icon={pipeline?.execution?.status && `codepipeline/${pipeline?.execution.status}.png`}
+      subtitle={status}
+      icon={`codepipeline/${status}.png`}
       accessoryTitle={pipeline.created ? new Date(pipeline.created).toLocaleString() : undefined}
       actions={
         <ActionPanel>

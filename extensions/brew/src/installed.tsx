@@ -8,7 +8,7 @@ interface State {
   isLoading: boolean;
 }
 
-export default function Main() {
+export default function Main(): JSX.Element {
   const [state, setState] = useState<State>({ isLoading: true });
 
   useEffect(() => {
@@ -21,7 +21,6 @@ export default function Main() {
         setState({ results: results, isLoading: false });
       })
       .catch((err) => {
-        console.log("brewFetchInstalled error:", err);
         showFailureToast("Brew list failed", err);
         setState({ isLoading: false });
       });

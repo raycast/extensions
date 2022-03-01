@@ -12,10 +12,11 @@ Before using the command, you need to retrieve your Todoist token located in the
 
 ## Features
 
-- See your tasks due today
+- See your tasks due today, grouped by default, by priority, or by project
 - See your upcoming tasks grouped by dates
-- See all your projects, tasks by project and if your project is starred
+- See all your projects and the associated tasks grouped by default, by priority or by date
 - Create a task
+- Create a project
 
 For each task, you can:
 

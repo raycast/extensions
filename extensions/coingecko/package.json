@@ -54,6 +54,7 @@
   "dependencies": {
     "@raycast/api": "^1.26.2",
     "axios": "^0.24.0",
+    "fuse.js": "^6.5.3",
     "rss-parser": "^3.12.0"
   },
   "devDependencies": {

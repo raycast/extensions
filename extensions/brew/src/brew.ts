@@ -7,8 +7,13 @@ import * as utils from "./utils";
 
 const execp = promisify(exec);
 
-interface ExecError extends Error {
+export interface ExecError extends Error {
   code: number;
+  stdout: string;
+  stderr: string;
+}
+
+export interface ExecResult {
   stdout: string;
   stderr: string;
 }
@@ -121,7 +126,7 @@ export async function brewDoctorCommand(): Promise<string> {
   }
 }
 
-export async function brewUpgradeCommand(greedy: boolean, dryRun = false): Promise<string> {
+export async function brewUpgradeCommand(greedy: boolean, dryRun: boolean, cancel?: AbortController): Promise<string> {
   let cmd = `${brewExecutable} upgrade`;
   if (greedy) {
     cmd += " --greedy";
@@ -129,8 +134,12 @@ export async function brewUpgradeCommand(greedy: boolean, dryRun = false): Promi
   if (dryRun) {
     cmd += " --dry-run";
   }
-  const output = await execp(cmd);
+  const output = await execSignal(cmd, cancel);
   return output.stdout;
+}
+
+export async function brewUpdateCommand(cancel?: AbortController): Promise<void> {
+  await execSignal(`${brewExecutable} update`, cancel);
 }
 
 /// Fetching
@@ -139,9 +148,9 @@ const installedCachePath = utils.cachePath("installedv2.json");
 const formulaCachePath = utils.cachePath("formula.json");
 const caskCachePath = utils.cachePath("cask.json");
 
-export async function brewFetchInstalled(useCache: boolean): Promise<InstallableResults> {
+export async function brewFetchInstalled(useCache: boolean, cancel?: AbortController): Promise<InstallableResults> {
   async function installed(): Promise<string> {
-    return (await execp(`${brewExecutable} info --json=v2 --installed`)).stdout;
+    return (await execSignal(`${brewExecutable} info --json=v2 --installed`, cancel)).stdout;
   }
 
   if (!useCache) {
@@ -194,13 +203,15 @@ export async function brewFetchInstalled(useCache: boolean): Promise<Installable
   }
 }
 
-export async function brewFetchOutdated(greedy: boolean): Promise<OutdatedResults> {
+export async function brewFetchOutdated(greedy: boolean, cancel?: AbortController): Promise<OutdatedResults> {
   let cmd = `${brewExecutable} outdated --json=v2`;
   if (greedy) {
     cmd += " --greedy"; // include auto_update casks
   }
-  const output = (await execp(cmd)).stdout;
-  return JSON.parse(output);
+  // 'outdated' is only reliable after performing a 'brew update'
+  await brewUpdateCommand(cancel);
+  const output = await execSignal(cmd, cancel);
+  return JSON.parse(output.stdout);
 }
 
 /// Search
@@ -249,9 +260,9 @@ export async function brewSearch(searchText: string, limit?: number): Promise<In
 
 /// Actions
 
-export async function brewInstall(installable: Cask | Formula): Promise<void> {
+export async function brewInstall(installable: Cask | Formula, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(installable);
-  await execp(`${brewExecutable} install ${identifier}`);
+  await execSignal(`${brewExecutable} install ${identifier}`, cancel);
   if (isCask(installable)) {
     installable.installed = installable.version;
   } else {
@@ -261,18 +272,18 @@ export async function brewInstall(installable: Cask | Formula): Promise<void> {
   }
 }
 
-export async function brewUninstall(installable: Cask | Nameable): Promise<void> {
+export async function brewUninstall(installable: Cask | Nameable, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(installable);
-  await execp(`${brewExecutable} rm ${identifier}`);
+  await execSignal(`${brewExecutable} rm ${identifier}`, cancel);
 }
 
-export async function brewUpgrade(upgradable: Cask | Nameable): Promise<void> {
+export async function brewUpgrade(upgradable: Cask | Nameable, cancel?: AbortController): Promise<void> {
   const identifier = brewIdentifier(upgradable);
-  await execp(`${brewExecutable} upgrade ${identifier}`);
+  await execSignal(`${brewExecutable} upgrade ${identifier}`, cancel);
 }
 
-export async function brewUpgradeAll(): Promise<void> {
-  await execp(`${brewExecutable} upgrade`);
+export async function brewUpgradeAll(cancel?: AbortController): Promise<void> {
+  await execSignal(`${brewExecutable} upgrade`, cancel);
 }
 
 export async function brewPinFormula(formula: Formula | OutdatedFormula): Promise<void> {
@@ -392,4 +403,8 @@ function brewIdentifier(item: Cask | Nameable): string {
 
 function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {
   return (maybeCask as Cask).token != undefined;
+}
+
+async function execSignal(cmd: string, cancel?: AbortController): Promise<ExecResult> {
+  return await execp(cmd, { signal: cancel?.signal });
 }

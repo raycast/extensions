@@ -1,6 +1,5 @@
 import useSWR from "swr";
 import got from "got";
-import markdownWikipediaPage from "./markdown";
 
 interface WikipediaPageExtractResponse {
   title: string;
@@ -18,14 +17,6 @@ interface WikipediaSearchResponse {
     prefixsearch: Array<{
       title: string;
     }>;
-  };
-}
-
-interface WikipediaPageContentResponse {
-  parse: {
-    text: {
-      "*": string;
-    };
   };
 }
 
@@ -73,23 +64,6 @@ async function getPageExtract(title: string) {
   return response.extract;
 }
 
-async function getPageContent(title: string) {
-  const response = await client
-    .get(`w/api.php`, {
-      searchParams: {
-        action: "parse",
-        disabletoc: true,
-        disableeditsection: true,
-        format: "json",
-        mobileformat: true,
-        page: title,
-        disablestylededuplication: true,
-      },
-    })
-    .json<WikipediaPageContentResponse>();
-  return markdownWikipediaPage(response.parse.text["*"]);
-}
-
 export function useWikipediaSearch(search: string) {
   return useSWR(["pages", search], () => findPagesByTitle(search));
 }
@@ -98,15 +72,6 @@ export function useWikipediaPageSummary(title?: string) {
   return useSWR(title ? ["page/summary", title] : null, () => {
     if (title) {
       return getPageExtract(title);
-    }
-  });
-}
-
-export function useWikipediaPageContent(title?: string) {
-  return useSWR(title ? ["page/content", title] : null, () => {
-    if (title) {
-      console.log(title);
-      return getPageContent(title);
     }
   });
 }

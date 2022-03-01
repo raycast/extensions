@@ -1,21 +1,45 @@
 import { useState } from "react";
-import { ActionPanel, Form, Icon, render, showToast, ToastStyle, useNavigation } from "@raycast/api";
-import { Project as TProject, Label, TaskPayload } from "./types";
-import { createTask, useFetch } from "./api";
+import {
+  ActionPanel,
+  Form,
+  Icon,
+  render,
+  showToast,
+  ToastStyle,
+  useNavigation,
+  SubmitFormAction,
+  open,
+  Toast,
+} from "@raycast/api";
+import { AddTaskArgs } from "@doist/todoist-api-typescript";
+import useSWR from "swr";
+import { handleError, todoist } from "./api";
 import { priorities } from "./constants";
 import { getAPIDate } from "./utils";
 import Project from "./components/Project";
+import { SWRKeys } from "./types";
 
 function CreateTask() {
   const { push } = useNavigation();
-  const { data: projects, isLoading: isLoadingProjects } = useFetch<TProject[]>("/projects");
-  const { data: labels, isLoading: isLoadingLabels } = useFetch<Label[]>("/labels");
-  const isLoading = isLoadingLabels || isLoadingProjects;
+  const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
+  const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
+
+  if (getProjectsError) {
+    handleError({ error: getProjectsError, title: "Unable to get projects" });
+  }
+
+  if (getLabelsError) {
+    handleError({ error: getLabelsError, title: "Unable to get labels" });
+  }
+
+  const isLoading = !projects || !labels;
+
+  const lowestPriority = priorities[priorities.length - 1];
 
   const [content, setContent] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState<Date | undefined>();
-  const [priority, setPriority] = useState<string>();
+  const [priority, setPriority] = useState<string>(String(lowestPriority.value));
   const [projectId, setProjectId] = useState<string>();
   const [labelIds, setLabelIds] = useState<string[]>();
 
@@ -24,26 +48,10 @@ function CreateTask() {
     setDescription("");
     setDueDate(undefined);
     setPriority(String(priorities[0].value));
-
-    if (projects) {
-      setProjectId(String(projects[0].id));
-    }
-
-    if (labelIds) {
-      setLabelIds([]);
-    }
-  }
-
-  async function submitAndGoToProject() {
-    await submit();
-
-    if (projectId) {
-      push(<Project projectId={parseInt(projectId)} />);
-    }
   }
 
   async function submit() {
-    const body: TaskPayload = { content, description };
+    const body: AddTaskArgs = { content, description };
 
     if (!body.content) {
       await showToast(ToastStyle.Failure, "The title is required");
@@ -51,7 +59,7 @@ function CreateTask() {
     }
 
     if (dueDate) {
-      body.due_date = getAPIDate(dueDate);
+      body.dueDate = getAPIDate(dueDate);
     }
 
     if (priority) {
@@ -59,15 +67,34 @@ function CreateTask() {
     }
 
     if (projectId) {
-      body.project_id = parseInt(projectId);
+      body.projectId = parseInt(projectId);
     }
 
     if (labelIds && labelIds.length > 0) {
-      body.label_ids = labelIds.map((id) => parseInt(id));
+      body.labelIds = labelIds.map((id) => parseInt(id));
     }
 
-    await createTask(body);
-    clear();
+    const toast = new Toast({ style: ToastStyle.Animated, title: "Creating task" });
+    await toast.show();
+
+    try {
+      const { projectId, url } = await todoist.addTask(body);
+      toast.style = ToastStyle.Success;
+      toast.title = "Task created";
+      toast.primaryAction = {
+        title: "Go to project",
+        shortcut: { modifiers: ["cmd"], key: "g" },
+        onAction: () => push(<Project projectId={projectId} />),
+      };
+      toast.secondaryAction = {
+        title: "Open in browser",
+        shortcut: { modifiers: ["cmd"], key: "o" },
+        onAction: () => open(url),
+      };
+      clear();
+    } catch (error) {
+      handleError({ error, title: "Unable to create task" });
+    }
   }
 
   return (
@@ -75,12 +102,7 @@ function CreateTask() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <ActionPanel.Item title="Create task" onAction={submit} icon={Icon.Plus} />
-          <ActionPanel.Item
-            title="Create task and go to project"
-            onAction={submitAndGoToProject}
-            icon={Icon.ArrowRight}
-          />
+          <SubmitFormAction title="Create task" onSubmit={submit} icon={Icon.Plus} />
         </ActionPanel>
       }
     >
@@ -94,6 +116,8 @@ function CreateTask() {
         onChange={setDescription}
       />
 
+      <Form.Separator />
+
       <Form.DatePicker id="due_date" title="Due date" value={dueDate} onChange={setDueDate} />
 
       <Form.Dropdown id="priority" title="Priority" value={priority} onChange={setPriority}>
@@ -103,7 +127,7 @@ function CreateTask() {
       </Form.Dropdown>
 
       {projects && projects.length > 0 ? (
-        <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId}>
+        <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId} storeValue>
           {projects.map(({ id, name }) => (
             <Form.Dropdown.Item value={String(id)} title={name} key={id} />
           ))}
@@ -111,7 +135,7 @@ function CreateTask() {
       ) : null}
 
       {labels && labels.length > 0 ? (
-        <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds}>
+        <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds} storeValue>
           {labels.map(({ id, name }) => (
             <Form.TagPicker.Item value={String(id)} title={name} key={id} />
           ))}

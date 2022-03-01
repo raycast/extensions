@@ -21,28 +21,32 @@ export function getListFromFile(callback: (err: NodeJS.ErrnoException | null, da
 }
 
 export function refreshExistingCache(callback: (err: NodeJS.ErrnoException | null, list: CryptoCurrency[]) => any) {
-  fetchAllCrypto({ limit: 10000, start: 1 }).then(({ data: resultData }) => {
-    const { data, status } = resultData;
+  fetchAllCrypto({ limit: 10000, start: 1 })
+    .then(({ data: resultData }) => {
+      const { data, status } = resultData;
 
-    const cryptoList: CryptoCurrency[] = data.cryptoCurrencyMap.map(({ slug, name, symbol }) => ({
-      slug,
-      name,
-      symbol: symbol.toLowerCase(),
-    }));
+      const cryptoList: CryptoCurrency[] = data.cryptoCurrencyMap.map(({ slug, name, symbol }) => ({
+        slug,
+        name,
+        symbol: symbol.toLowerCase(),
+      }));
 
-    writeListInToFile(
-      {
-        timestamp: status.timestamp,
-        cryptoList: cryptoList,
-      },
-      (writeFileError) => {
-        callback(writeFileError, cryptoList);
-      }
-    );
-  });
+      writeListInToFile(
+        {
+          timestamp: status.timestamp,
+          cryptoList: cryptoList,
+        },
+        (writeFileError) => {
+          callback(writeFileError, cryptoList);
+        }
+      );
+    })
+    .catch((error) => {
+      callback(error, []);
+    });
 }
 
-export function refreshExistingCacheAsync() {
+export function refreshExistingCacheAsync(): Promise<CryptoCurrency[]> {
   return new Promise((resolve, reject) => {
     refreshExistingCache((err, list) => {
       if (err) {

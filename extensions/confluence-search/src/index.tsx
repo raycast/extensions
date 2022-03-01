@@ -179,8 +179,8 @@ interface Version {
   message: string;
   number: number;
   minorEdit: boolean;
-  syncRev: string;
-  syncRevSource: string;
+  syncRev?: string;
+  syncRevSource?: string;
   confRev: string;
   contentTypeModified: boolean;
   _expandable: _expandable;
@@ -206,7 +206,7 @@ interface ProfilePicture {
   isDefault: boolean;
 }
 interface _expandable {
-  operations: string;
+  operations?: string;
   personalSpace?: string;
   collaborators?: string;
   content?: string;
