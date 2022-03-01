@@ -3,6 +3,6 @@ import { closeMainWindow, open } from "@raycast/api";
 
 export default async function () {
   const pageTitle = await getRandomPageTitle();
-  await open(`https://wikipedia.org/wiki/${pageTitle.replaceAll(" ", "_")}`);
+  await open(`https://wikipedia.org/wiki/${encodeURIComponent(pageTitle)}`);
   await closeMainWindow({ clearRootSearch: true });
 }
