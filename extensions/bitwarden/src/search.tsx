@@ -152,6 +152,7 @@ function ItemListItem(props: {
           {item.login?.password ? <PasswordActions password={item.login.password} /> : null}
           {item.login?.totp ? (
             <ActionPanel.Item
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
               title="Copy TOTP"
               icon={Icon.Clipboard}
               onAction={() => copyTotp(sessionToken, item.id)}

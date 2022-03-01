@@ -1,18 +1,7 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Icon, List, Color, showToast, Toast, popToRoot } from "@raycast/api";
+import { ActionPanel, Action, List, Color, showToast, Toast, popToRoot } from "@raycast/api";
 import fetch from "node-fetch";
-
-interface ConstructorStanding {
-  position: number;
-  points: number;
-  wins: number;
-  Constructor: {
-    constructorId: string;
-    url: string;
-    name: string;
-    nationality: string;
-  };
-}
+import { ConstructorStanding } from "./types";
 
 interface State {
   season?: number;
@@ -23,7 +12,7 @@ interface State {
 export default function Command() {
   const [state, setState] = useState<State>({});
   useEffect(() => {
-    async function fetchDrivers() {
+    async function fetchConstructors() {
       try {
         const res = await fetch("https://ergast.com/api/f1/current/constructorStandings.json");
         const data = (await res.json()) as any;
@@ -44,7 +33,7 @@ export default function Command() {
       }
     }
 
-    fetchDrivers();
+    fetchConstructors();
   }, []);
 
   return (

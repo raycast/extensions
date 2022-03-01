@@ -88,6 +88,7 @@
 /extensions/github-for-enterprise                    @Kinbaum
 /extensions/github-repository-search                 @thomaspaulmann
 /extensions/github-stars                             @mrmartineau
+/extensions/gitignore                                @daniel-stoneuk
 /extensions/gitlab                                   @tonka3000 @Loskir
 /extensions/gitmoji                                  @ricoberger
 /extensions/google-books                             @Ali-Parandeh
@@ -136,6 +137,7 @@
 /extensions/microsoft-edge                           @KartikKumarSahoo @bromanko
 /extensions/mldocs                                   @sadanand-singh
 /extensions/moji                                     @Kasper4649
+/extensions/monday                                   @freak4pc
 /extensions/music                                    @splash-cli
 /extensions/must                                     @eggsy
 /extensions/myip                                     @kkange
@@ -151,6 +153,7 @@
 /extensions/pestphp-documentation                    @danyelkeddah
 /extensions/phpmon                                   @nicoverbruggen
 /extensions/pinboard                                 @fe9lix
+/extensions/pipe-commands                            @pomdtr
 /extensions/pipedrive                                @stephendolan
 /extensions/ploi                                     @Cannonb4ll
 /extensions/pokedex                                  @anhthang

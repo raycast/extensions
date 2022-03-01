@@ -26,6 +26,19 @@ export default function ActionPanelTransform(
           p.node.selfClosing
         );
       });
+    root
+      .find(j.JSXClosingElement, {
+        name: { name: name[0] },
+      })
+      .replaceWith((p) => {
+        needToAddImport = true;
+        return j.jsxClosingElement(
+          j.jsxMemberExpression(
+            j.jsxIdentifier("List"),
+            j.jsxIdentifier(name[1])
+          )
+        );
+      });
 
     root
       .find(j.TSTypeReference, {
