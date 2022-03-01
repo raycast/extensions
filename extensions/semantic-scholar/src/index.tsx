@@ -96,6 +96,10 @@ function PaperDetails({ paper }: { paper: Paper }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={paper.url} />
+            <Action.OpenInBrowser
+              title="Open in Connect Papers"
+              url={connectPapersURL(paper)}
+            />
             <Action.CopyToClipboard title="Copy DOI" content={paper.DOI} />
           </ActionPanel.Section>
         </ActionPanel>
@@ -170,6 +174,10 @@ function constructSearchUrl(searchText: string): string {
   params.append("q", searchText);
   params.append("sort", "relevance");
   return "https://www.semanticscholar.org/search" + "?" + params.toString();
+}
+
+function connectPapersURL(paper: Paper): string {
+  return "https://www.connectedpapers.com/main/" + paper.id;
 }
 
 async function performSearch(
