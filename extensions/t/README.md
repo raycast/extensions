@@ -3,7 +3,7 @@
 # T
 Translate texts
 
-![](assets/demo.png)
+![](media/screenshot_00.png)
 
 ## Available service
 - google
