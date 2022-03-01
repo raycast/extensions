@@ -176,6 +176,10 @@ async function performSearch(
   searchText: string,
   signal: AbortSignal
 ): Promise<Paper[]> {
+  if (!searchText) {
+    return [];
+  }
+
   const params = new URLSearchParams();
   params.append("query", searchText.length === 0 ? "@raycast/api" : searchText);
   params.append(
