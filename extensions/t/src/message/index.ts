@@ -2,22 +2,22 @@ export * from "./ko";
 export * from "./en";
 
 export enum Message {
-  originalText,
-  translatedText,
-  savedSearchResults,
-  history,
-  setting,
-  registerApiKey,
-  view,
-  copy,
-  delete,
-  save,
-  google,
-  papago,
-  issuingPapagoToken,
-  issueATokenFromTheBottomMenu,
-  itDoesNotHaveTraslatedText,
-  disabled,
+  OriginalText,
+  TranslatedText,
+  SavedSearchResults,
+  History,
+  Setting,
+  RegisterApiKey,
+  View,
+  Copy,
+  Delete,
+  Save,
+  Google,
+  Papago,
+  IssuingPapagoToken,
+  IssueATokenFromTheBottomMenu,
+  ItDoesNotHaveTraslatedText,
+  Disabled,
 }
 
 export type MessageMap = { [key in Message]: string };

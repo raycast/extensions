@@ -20,28 +20,28 @@ export const T: FunctionComponent = () => {
       navigationTitle="T"
       isLoading={isLoading}
       onSearchTextChange={setText}
-      searchBarPlaceholder={m((l) => l.originalText)}
+      searchBarPlaceholder={m((l) => l.OriginalText)}
       throttle
     >
-      <List.Section title={text} subtitle={m((l) => l.translatedText)}>
+      <List.Section title={text} subtitle={m((l) => l.TranslatedText)}>
         {itemList.map((item) => (
           <TranslateListItem key={item.key} item={item} onSave={onSave} />
         ))}
       </List.Section>
-      <List.Section title={m((l) => l.savedSearchResults)} subtitle={`${m((l) => l.history)}(${histories.length})`}>
+      <List.Section title={m((l) => l.SavedSearchResults)} subtitle={`${m((l) => l.History)}(${histories.length})`}>
         <HistoryList items={histories} onSelect={setText} onDelete={onDelete} />
       </List.Section>
-      <List.Section title={m((l) => l.history)}>
+      <List.Section title={m((l) => l.History)}>
         <List.Item
-          title={m((l) => l.setting)}
+          title={m((l) => l.Setting)}
           accessoryIcon={Icon.Gear}
           icon={Icon.Gear}
-          accessoryTitle={m((l) => l.registerApiKey)}
+          accessoryTitle={m((l) => l.RegisterApiKey)}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
                 <Action
-                  title={m((l) => l.view)}
+                  title={m((l) => l.View)}
                   onAction={() => {
                     push(<Configure />);
                   }}

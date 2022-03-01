@@ -17,7 +17,7 @@ export const TranslateListItem: FunctionComponent<Props> = (props) => {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action.CopyToClipboard title={m(l => l.copy)} content={item.text} shortcut={{ modifiers: ["cmd"], key: "." }} />
+                <Action.CopyToClipboard title={m(l => l.Copy)} content={item.text} shortcut={{ modifiers: ["cmd"], key: "." }} />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -27,7 +27,7 @@ export const TranslateListItem: FunctionComponent<Props> = (props) => {
 
     return showToast({
       style: Toast.Style.Failure,
-      title: m(l => l.itDoesNotHaveTraslatedText),
+      title: m(l => l.ItDoesNotHaveTraslatedText),
     });
   }, [item]);
 
@@ -39,9 +39,9 @@ export const TranslateListItem: FunctionComponent<Props> = (props) => {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title={m(l => l.view)} onAction={onAction} />
-            <Action title={m(l => l.save)} onAction={onSave} />
-            <Action.CopyToClipboard title={m(l => l.copy)} content={item.text} shortcut={{ modifiers: ["cmd"], key: "." }} />
+            <Action title={m(l => l.View)} onAction={onAction} />
+            <Action title={m(l => l.Save)} onAction={onSave} />
+            <Action.CopyToClipboard title={m(l => l.Copy)} content={item.text} shortcut={{ modifiers: ["cmd"], key: "." }} />
           </ActionPanel.Section>
         </ActionPanel>
       }

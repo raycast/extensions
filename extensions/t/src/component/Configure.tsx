@@ -12,18 +12,18 @@ export const Configure: FunctionComponent = () => {
   }
   return (
     <Form
-      navigationTitle={m((l) => l.setting)}
+      navigationTitle={m((l) => l.Setting)}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={m((l) => l.save)} onSubmit={onSubmit} />
+          <Action.SubmitForm title={m((l) => l.Save)} onSubmit={onSubmit} />
           <Action.OpenInBrowser
-            title={m((l) => l.issuingPapagoToken)}
+            title={m((l) => l.IssuingPapagoToken)}
             url="https://developers.naver.com/apps/#/register"
           />
         </ActionPanel>
       }
     >
-      <Form.Description title={m(l => l.papago)} text={m(l => l.issueATokenFromTheBottomMenu)} />
+      <Form.Description title={m(l => l.Papago)} text={m(l => l.IssueATokenFromTheBottomMenu)} />
       {Object.entries(ID_PALCEHOLDER_PAIR).map(([id, placeholder]) => (
         <Form.TextField key={id} id={id} title={id} placeholder={placeholder} defaultValue={state[id]} />
       ))}
