@@ -14,7 +14,7 @@ export enum Message {
   Save,
   Google,
   Papago,
-  IssuingPapagoToken,
+  IssuePapagoToken,
   IssueATokenFromTheBottomMenu,
   ItDoesNotHaveTraslatedText,
   Disabled,

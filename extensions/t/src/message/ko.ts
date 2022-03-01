@@ -13,7 +13,7 @@ export const ko: MessageMap = {
   [Message.Delete]: "삭제",
   [Message.Google]: "구글",
   [Message.Papago]: "파파고",
-  [Message.IssuingPapagoToken]: "파파고 토큰 발급",
+  [Message.IssuePapagoToken]: "파파고 토큰 발급",
   [Message.IssueATokenFromTheBottomMenu]: "하단 메뉴에서 토큰 발급",
   [Message.ItDoesNotHaveTraslatedText]: "번역문이 없습니다.",
   [Message.Disabled]: "비활성화",

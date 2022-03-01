@@ -17,7 +17,7 @@ export const Configure: FunctionComponent = () => {
         <ActionPanel>
           <Action.SubmitForm title={m((l) => l.Save)} onSubmit={onSubmit} />
           <Action.OpenInBrowser
-            title={m((l) => l.IssuingPapagoToken)}
+            title={m((l) => l.IssuePapagoToken)}
             url="https://developers.naver.com/apps/#/register"
           />
         </ActionPanel>

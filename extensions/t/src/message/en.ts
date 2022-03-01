@@ -13,7 +13,7 @@ export const en: MessageMap = {
   [Message.Delete]: "Delete",
   [Message.Google]: "Google",
   [Message.Papago]: "Papago",
-  [Message.IssuingPapagoToken]: "Issuing Papago token",
+  [Message.IssuePapagoToken]: "Issue Papago token",
   [Message.IssueATokenFromTheBottomMenu]: "Issue a token from the bottom menu",
   [Message.ItDoesNotHaveTraslatedText]: "It doesn't have translated text",
   [Message.Disabled]: "Disabled",
