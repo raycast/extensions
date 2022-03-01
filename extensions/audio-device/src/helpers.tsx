@@ -101,5 +101,5 @@ function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
 }
 
 export function deviceIcon(device: AudioDevice) {
-  return device.isInput ? "🎙" : "🔈";
+  return device.isInput ? "mic.png" : "speaker.png";
 }
