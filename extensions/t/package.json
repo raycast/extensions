@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "raycast-t",
-  "title": "translator",
-  "description": "translate text",
+  "name": "t",
+  "title": "T",
+  "description": "Translate texts via multiple providers",
   "icon": "command-icon.png",
   "author": "Bonggyun Lee <deptno@gmail.com>",
   "license": "MIT",
@@ -10,8 +10,8 @@
     {
       "name": "index",
       "title": "T",
-      "subtitle": "Translate texts",
-      "description": "description",
+      "subtitle": "Translator",
+      "description": "Translate texts via multiple providers",
       "mode": "view"
     }
   ],
