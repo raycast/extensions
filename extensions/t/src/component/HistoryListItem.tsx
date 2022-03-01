@@ -12,9 +12,13 @@ export const HistoryListItem: FunctionComponent<Props> = (props) => {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title={m(l => l.View)} onAction={() => onSelect(item)} />
-            <Action title={m(l => l.Delete)} onAction={() => onDelete(item)} />
-            <Action.CopyToClipboard title={m(l => l.Copy)} content={item} shortcut={{ modifiers: ["cmd"], key: "." }} />
+            <Action title={m((l) => l.View)} onAction={() => onSelect(item)} />
+            <Action title={m((l) => l.Delete)} onAction={() => onDelete(item)} />
+            <Action.CopyToClipboard
+              title={m((l) => l.Copy)}
+              content={item}
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }

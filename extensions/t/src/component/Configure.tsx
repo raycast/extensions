@@ -23,7 +23,7 @@ export const Configure: FunctionComponent = () => {
         </ActionPanel>
       }
     >
-      <Form.Description title={m(l => l.Papago)} text={m(l => l.IssueATokenFromTheBottomMenu)} />
+      <Form.Description title={m((l) => l.Papago)} text={m((l) => l.IssueATokenFromTheBottomMenu)} />
       {Object.entries(ID_PALCEHOLDER_PAIR).map(([id, placeholder]) => (
         <Form.TextField key={id} id={id} title={id} placeholder={placeholder} defaultValue={state[id]} />
       ))}

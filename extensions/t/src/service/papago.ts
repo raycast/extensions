@@ -38,7 +38,7 @@ export const search = async (options: TranslateOption, m: Messanger): Promise<st
     .then((response) => {
       if ("errorCode" in response) {
         if (response.errorCode === ErrorCode.AuthorizationError) {
-          throw new Error(`${m(l => l.Setting)} -> ${Object.values(PapagoKey).join(", ")}`);
+          throw new Error(`${m((l) => l.Setting)} -> ${Object.values(PapagoKey).join(", ")}`);
         }
         throw new Error(`[${response.errorCode}] ${response.errorMessage}`);
       }

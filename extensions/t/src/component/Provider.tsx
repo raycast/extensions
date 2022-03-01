@@ -7,7 +7,6 @@ import { Preference, PreferenceContext } from "../context/PreferenceContext";
 export const Provider: FunctionComponent = (props) => {
   const preferenceValues = getPreferenceValues<Preference>();
   const { target } = preferenceValues;
-  console.log(target)
   const map: MessageMap = all[target as keyof typeof all] ?? all["en"];
   const m = useCallback<Messanger>((m) => map[m(Message)], [map, target]);
 
