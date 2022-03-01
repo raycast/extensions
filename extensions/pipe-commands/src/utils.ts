@@ -1,4 +1,4 @@
-import { ScriptCommand, ScriptMetadatas } from "./types";
+import { ScriptCommand, ScriptMetadatas, scriptModes } from "./types";
 import { chmod, copyFile, readFile, stat } from "fs/promises";
 import { basename, resolve } from "path";
 import { globbySync } from "globby";
@@ -31,31 +31,13 @@ export async function parseScriptCommands(): Promise<{ commands: ScriptCommand[]
   );
   const res = { commands: [] as ScriptCommand[], invalid: [] as string[] };
   for (const command of commands) {
-    if (
-      command.metadatas.title &&
-      command.metadatas.argument1 &&
-      ["fullOutput", "silent", "copy", "replace"].includes(command.metadatas.mode)
-    ) {
+    if (command.metadatas.title && command.metadatas.argument1 && scriptModes.includes(command.metadatas.mode)) {
       res.commands.push({ ...command, user: command.path.startsWith(environment.supportPath) });
     } else {
       res.invalid.push(command.path);
     }
   }
   return res;
-}
-
-export async function copyAssetsCommands() {
-  console.debug("Copying assets...");
-  const assetsDir = resolve(environment.assetsPath, "commands");
-  await Promise.all(
-    globbySync(`${assetsDir}/**/*`).map(async (assetPath) => {
-      const target = resolve(environment.supportPath, basename(assetPath));
-      await copyFile(resolve(assetsDir, assetPath), target);
-      await chmod(target, "755");
-      console.debug(`Copied ${assetPath}`);
-    })
-  );
-  console.debug("Copying of assets done!");
 }
 
 export async function sortByAccessTime(commands: ScriptCommand[]): Promise<ScriptCommand[]> {

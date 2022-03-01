@@ -1,6 +1,5 @@
 import {
   ActionPanel,
-  environment,
   Icon,
   List,
   Clipboard,
@@ -14,11 +13,11 @@ import {
   closeMainWindow,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
-import { chmodSync, readdirSync } from "fs";
+import { chmodSync } from "fs";
 import { dirname } from "path";
 import { useEffect, useState } from "react";
 import { ArgumentType, ScriptCommand, ScriptMode } from "./types";
-import { codeblock, copyAssetsCommands, parseScriptCommands, sortByAccessTime } from "./utils";
+import { codeblock, parseScriptCommands, sortByAccessTime } from "./utils";
 
 export interface PipeInput {
   type: ArgumentType;
@@ -30,9 +29,6 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
   const [parsed, setParsed] = useState<{ commands: ScriptCommand[] }>();
 
   const loadCommands = async () => {
-    if (readdirSync(environment.supportPath).length == 0) {
-      await copyAssetsCommands();
-    }
     const { commands } = await parseScriptCommands();
     setParsed({ commands: await sortByAccessTime(commands) });
   };

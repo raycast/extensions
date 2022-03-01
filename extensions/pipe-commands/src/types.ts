@@ -14,9 +14,11 @@ export interface ScriptMetadatas {
   currentDirectoryPath?: string;
 }
 
-export type ArgumentType = "text" | "file";
+export const argumentTypes = ["text", "file"] as const;
+export type ArgumentType = typeof argumentTypes[number];
 
-export type ScriptMode = "silent" | "fullOutput" | "copy" | "replace";
+export const scriptModes = ["silent", "fullOutput", "copy", "replace"] as const;
+export type ScriptMode = typeof scriptModes[number];
 
 export interface ScriptArgument {
   type: ArgumentType;
