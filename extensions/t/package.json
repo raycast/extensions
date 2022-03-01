@@ -4,7 +4,7 @@
   "title": "T",
   "description": "Translate texts via multiple providers",
   "icon": "command-icon.png",
-  "author": "Bonggyun Lee <deptno@gmail.com>",
+  "author": "deptno",
   "license": "MIT",
   "commands": [
     {
