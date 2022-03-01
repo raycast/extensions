@@ -26,7 +26,8 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search by name..." onSearchTextChange={search} throttle>
       <List.Section title="Results">
-        {results && results.map((searchResult) => <SearchListItem key={searchResult.id} searchResult={searchResult} />)}
+        {results.length > 0 &&
+          results.map((searchResult) => <SearchListItem key={searchResult.id} searchResult={searchResult} />)}
       </List.Section>
     </List>
   );
@@ -44,14 +45,11 @@ function useSearch() {
       setIsLoading(true);
       try {
         const response = await searchConfluence(searchText, cancelRef.current.signal);
-        parseResponse(response).then((results: SearchResult[]) => {
-          setResults(results);
-        });
+        setResults(response);
       } catch (error) {
         if (error instanceof AbortError) {
           return;
         }
-        console.error("search error", error);
         showToast(ToastStyle.Failure, "Could not perform search", String(error));
       } finally {
         setIsLoading(false);
@@ -77,17 +75,9 @@ async function searchConfluence(searchText: string, signal: AbortSignal) {
     signal: signal,
   };
   const apiUrl = `${confluenceUrl}/wiki/rest/api/search?cql=title~"${searchText}*"&expand=content.version`;
-  const response = await fetch(apiUrl, init)
-    .then((response) => {
-      return response;
-    })
-    .catch((error) => {
-      {
-        return error;
-      }
-    });
-
-  return response;
+  return fetch(apiUrl, init).then((response) => {
+    return parseResponse(response);
+  });
 }
 
 async function parseResponse(response: Response) {
