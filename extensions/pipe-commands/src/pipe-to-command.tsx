@@ -167,7 +167,7 @@ function CommandAction(props: {
           icon={Icon.Clipboard}
           onAction={async () => {
             const output = await runCommand();
-            await Clipboard.copy(output);
+            if (output) Clipboard.copy(output);
             await closeMainWindow();
           }}
         />
@@ -181,7 +181,7 @@ function CommandAction(props: {
           icon={Icon.Clipboard}
           onAction={async () => {
             const output = await runCommand();
-            Clipboard.paste(output);
+            if (output) Clipboard.paste(output);
             await closeMainWindow();
           }}
         />
