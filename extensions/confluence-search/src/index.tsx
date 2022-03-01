@@ -9,8 +9,8 @@ import {
   showToast,
   ToastStyle,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
-import fetch, { Response } from "node-fetch";
+import { useState, useEffect, useRef, useCallback } from "react";
+import fetch, { AbortError, RequestInit, Response } from "node-fetch";
 
 const prefs: { instance: string; user: string; token: string } = getPreferenceValues();
 export const confluenceUrl = `https://${prefs.instance}`;
@@ -20,40 +20,11 @@ const headers = {
   Authorization: "Basic " + Buffer.from(`${prefs.user}:${prefs.token}`).toString("base64"),
 };
 
-const init = {
-  headers,
-};
-
 export default function Command() {
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [searchText, setSearchText] = useState("");
-  const [loadingState, setLoadingState] = useState(true);
-  useEffect(() => {
-    searchConfluence(searchText).then((response) => {
-      setLoadingState(false);
-      if (!response.ok) {
-        const failureMessage = response.message ? response.message : response.statusText;
-        showToast(ToastStyle.Failure, "API request failed", failureMessage);
-      } else {
-        parseResponse(response).then((response: SearchResult[]) => {
-          setResults(response);
-        });
-      }
-    });
-  }, [searchText]);
-
-  const handleSearchTextChange = (text: string) => {
-    setLoadingState(true);
-    setSearchText(text);
-  };
+  const [results, isLoading, search] = useSearch();
 
   return (
-    <List
-      isLoading={loadingState}
-      searchBarPlaceholder="Search by name..."
-      onSearchTextChange={(text) => handleSearchTextChange(text)}
-      throttle
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search by name..." onSearchTextChange={search} throttle>
       <List.Section title="Results">
         {results && results.map((searchResult) => <SearchListItem key={searchResult.id} searchResult={searchResult} />)}
       </List.Section>
@@ -61,7 +32,50 @@ export default function Command() {
   );
 }
 
-async function searchConfluence(searchText: string) {
+function useSearch() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const cancelRef = useRef<AbortController | null>(null);
+
+  const search = useCallback(
+    async function search(searchText: string) {
+      cancelRef.current?.abort();
+      cancelRef.current = new AbortController();
+      setIsLoading(true);
+      try {
+        const response = await searchConfluence(searchText, cancelRef.current.signal);
+        parseResponse(response).then((results: SearchResult[]) => {
+          setResults(results);
+        });
+      } catch (error) {
+        if (error instanceof AbortError) {
+          return;
+        }
+        console.error("search error", error);
+        showToast(ToastStyle.Failure, "Could not perform search", String(error));
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [cancelRef, setIsLoading, setResults]
+  );
+
+  useEffect(() => {
+    search("");
+    return () => {
+      cancelRef.current?.abort();
+    };
+  }, []);
+
+  return [results, isLoading, search] as const;
+}
+
+async function searchConfluence(searchText: string, signal: AbortSignal) {
+  const init: RequestInit = {
+    headers,
+    method: "get",
+    signal: signal,
+  };
   const apiUrl = `${confluenceUrl}/wiki/rest/api/search?cql=title~"${searchText}*"&expand=content.version`;
   const response = await fetch(apiUrl, init)
     .then((response) => {
@@ -153,7 +167,7 @@ interface Content {
   status: string;
   title: string;
   version: Version;
-  macroRenderedOutput: MacroRenderedOutput;
+  macroRenderedOutput: Record<string, unknown>;
   extensions: Extensions;
   _expandable: _expandable;
   _links: _links;
