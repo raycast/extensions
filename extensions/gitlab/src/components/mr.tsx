@@ -13,7 +13,15 @@ import { Group, MergeRequest, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab, gitlabgql } from "../common";
 import { useState, useEffect } from "react";
-import { getErrorMessage, now, optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
+import {
+  capitalizeFirstLetter,
+  getErrorMessage,
+  now,
+  optimizeMarkdownText,
+  Query,
+  toDateString,
+  tokenizeQueryText,
+} from "../utils";
 import { gql } from "@apollo/client";
 import { MRItemActions } from "./mr_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
@@ -73,6 +81,7 @@ export function MRDetailFetch(props: { project: Project; mrId: number }): JSX.El
 }
 
 export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
+  const mr = props.mr;
   const { description, error, isLoading } = useDetail(props.mr.id);
   if (error) {
     showToast(ToastStyle.Failure, "Could not get merge request details", error);
@@ -80,11 +89,20 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
 
   const desc = (description ? description : props.mr.description) || "";
 
-  let md = "";
-  if (props.mr) {
-    md = props.mr.labels.map((i) => `\`${i.name || i}\``).join(" ") + "  \n";
+  const lines: string[] = [];
+  if (mr) {
+    lines.push(`# ${mr.title}`);
+    lines.push(`Merge \`${mr.source_branch}\` into \`${mr.target_branch}\``);
+    if (mr.author) {
+      lines.push(`Author: ${mr.author.name} \`${mr.author.username}\``);
+    }
+    lines.push(`Status: \`${capitalizeFirstLetter(mr.state)}\``);
+    const labels = mr.labels.map((i) => `\`${i.name || i}\``).join(" ");
+    lines.push(`Labels: ${labels || "<no label>"}`);
+    lines.push("## Description\n" + optimizeMarkdownText(desc));
   }
-  md += "## Description\n" + optimizeMarkdownText(desc);
+
+  const md = lines.join("  \n");
 
   return (
     <Detail
