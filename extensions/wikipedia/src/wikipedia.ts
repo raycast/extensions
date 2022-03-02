@@ -65,7 +65,9 @@ async function getPageExtract(title: string) {
 }
 
 export function encodeTitle(title: string) {
-  return encodeURIComponent(title.replaceAll(" ", "_"));
+  const replacedSpaces = title.replaceAll(" ", "_");
+  const withoutHTMLTags = replacedSpaces.replaceAll(/(<([^>]+)>)/ig, "");
+  return encodeURIComponent(withoutHTMLTags);
 }
 
 export function useWikipediaSearch(search: string) {
