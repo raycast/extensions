@@ -23,7 +23,11 @@ export const createSearchUrl = (
     url = joinUrl(url, subreddit);
   }
 
-  url = joinUrl(url, json ? "search.json" : "search");
+  if (query) {
+    url = joinUrl(url, json ? "search.json" : "search");
+  } else {
+    url = url + (json ? ".json" : "");
+  }
 
   if (subreddit || query || type || limit || sort) {
     const params = new URLSearchParams();

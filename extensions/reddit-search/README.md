@@ -9,4 +9,5 @@ You can...
 * Favorite subreddits for quick access
 * Search within subreddits
 
-![Example](https://user-images.githubusercontent.com/25830486/156440748-d1c028c5-03b9-4c99-834d-4a7ae10f31e3.gif)
+![Example](https://user-images.githubusercontent.com/25830486/156466751-4566cbce-70e2-4872-938c-b8208121ebed.gif)
+

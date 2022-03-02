@@ -34,7 +34,7 @@ export default function PostList({
 
     setSort(sort);
 
-    if (!query) {
+    if (!query && !subreddit) {
       setSearching(false);
       return;
     }
@@ -84,9 +84,11 @@ export default function PostList({
     return null;
   }
 
+  const resultsTitle = subreddit ? `Results in ${subreddit.substring(1, subreddit.length - 1)}` : "Results";
+
   return (
     <>
-      <List.Section title={sort ? `Results (Sorted by ${sort.name})` : "Results"}>
+      <List.Section title={sort ? `${resultsTitle} (Sorted by ${sort.name})` : resultsTitle}>
         {results.map((x) => (
           <List.Item
             key={x.id}
