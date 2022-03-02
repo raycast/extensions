@@ -52,7 +52,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.2",
+    "@raycast/api": "^1.28.0",
     "axios": "^0.24.0",
     "fuse.js": "^6.5.3",
     "rss-parser": "^3.12.0"
@@ -70,6 +70,7 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "lint": "ray lint"
   }
 }
