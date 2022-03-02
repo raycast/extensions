@@ -6,4 +6,5 @@ export default interface RedditResultSubreddit {
   subredditName: string;
   created: string;
   isFavorite: boolean;
+  afterId: string;
 }

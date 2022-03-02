@@ -8,4 +8,5 @@ export default interface RedditResultItem {
   thumbnail: string;
   subreddit: string;
   contentUrl: string;
+  afterId: string;
 }

@@ -4,8 +4,15 @@ import RedditResultItem from "./RedditResultItem";
 import RedditResultSubreddit from "./RedditResultSubreddit";
 import { createSearchUrl, joinWithBaseUrl } from "./UrlBuilder";
 
-export const searchAll = async (subreddit: string, query: string, sort: string, abort?: AbortController) => {
-  const response = await fetch(createSearchUrl(subreddit, true, query, "", 10, sort), {
+export const searchAll = async (
+  subreddit: string,
+  query: string,
+  limit: number,
+  sort: string,
+  after: string,
+  abort?: AbortController
+) => {
+  const response = await fetch(createSearchUrl(subreddit, true, query, "", limit, sort, after), {
     method: "get",
     signal: abort?.signal,
   });
@@ -18,6 +25,7 @@ export const searchAll = async (subreddit: string, query: string, sort: string, 
     data: {
       children: [
         {
+          kind: string;
           data: {
             id: string;
             title: string;
@@ -58,14 +66,15 @@ export const searchAll = async (subreddit: string, query: string, sort: string, 
                 created: new Date(x.data.created_utc * 1000).toLocaleString(),
                 thumbnail: x.data.thumbnail,
                 subreddit: x.data.subreddit,
+                afterId: `${x.kind}_${x.data.id}`,
               } as RedditResultItem)
           )
         : [],
   } as RedditResult;
 };
 
-export const searchSubreddits = async (query: string, abort?: AbortController) => {
-  const response = await fetch(createSearchUrl("", true, query, "sr", 10), {
+export const searchSubreddits = async (query: string, limit: number, after: string, abort?: AbortController) => {
+  const response = await fetch(createSearchUrl("", true, query, "sr", limit, "", after), {
     method: "get",
     signal: abort?.signal,
   });
@@ -78,6 +87,7 @@ export const searchSubreddits = async (query: string, abort?: AbortController) =
     data: {
       children: [
         {
+          kind: string;
           data: {
             id: string;
             title: string;
@@ -103,6 +113,7 @@ export const searchSubreddits = async (query: string, abort?: AbortController) =
                 subreddit: x.data.url,
                 created: new Date(x.data.created_utc * 1000).toLocaleString(),
                 subredditName: x.data.display_name_prefixed.substring(2),
+                afterId: `${x.kind}_${x.data.id}`,
               } as RedditResultSubreddit)
           )
         : [],

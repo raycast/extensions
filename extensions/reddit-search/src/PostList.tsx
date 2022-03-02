@@ -1,28 +1,93 @@
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
 import RedditResultItem from "./RedditApi/RedditResultItem";
 import PostActionPanel from "./PostActionPanel";
-import Sort from "./Sort";
 import redditSort from "./RedditSort";
+import SortListItem from "./SortListItem";
+import RedditSort from "./RedditSort";
+import { useEffect, useRef, useState } from "react";
+import getPreferences from "./Preferences";
+import { searchAll } from "./RedditApi/Api";
+import { AbortError } from "node-fetch";
 
 export default function PostList({
-  posts,
-  sort,
-  searchRedditUrl,
-  doSearch,
+  setSearching,
+  subreddit = "",
+  query,
 }: {
-  posts: RedditResultItem[];
-  sort: string;
-  searchRedditUrl: string;
-  doSearch: (sort: Sort) => void;
+  setSearching: (searching: boolean) => void;
+  subreddit?: string;
+  query: string;
 }) {
-  if (!posts.length) {
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const [results, setResults] = useState<RedditResultItem[]>([]);
+  const [sort, setSort] = useState(RedditSort.relevance);
+  const [searchRedditUrl, setSearchRedditUrl] = useState("");
+
+  const doSearch = async (sort = RedditSort.relevance, after = "") => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = new AbortController();
+
+    setSearching(true);
+    if (!after) {
+      setResults([]);
+    }
+
+    setSort(sort);
+
+    if (!query) {
+      setSearching(false);
+      return;
+    }
+
+    try {
+      const preferences = getPreferences();
+      const apiResults = await searchAll(
+        subreddit,
+        query,
+        preferences.resultLimit,
+        sort?.sortValue ?? "",
+        after,
+        abortControllerRef.current
+      );
+      setSearchRedditUrl(apiResults.url);
+
+      if (after) {
+        setResults([...results, ...apiResults.items]);
+      } else {
+        setResults(apiResults.items);
+      }
+    } catch (error) {
+      if (error instanceof AbortError) {
+        return;
+      }
+
+      console.log(error);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Something went wrong :(",
+        message: String(error),
+      });
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  useEffect(() => {
+    doSearch();
+
+    return () => {
+      abortControllerRef?.current?.abort();
+    };
+  }, [query]);
+
+  if (!results.length) {
     return null;
   }
 
   return (
     <>
-      <List.Section title={sort ? `Results (sorted by ${sort})` : "Results"}>
-        {posts.map((x) => (
+      <List.Section title={sort ? `Results (Sorted by ${sort.name})` : "Results"}>
+        {results.map((x) => (
           <List.Item
             key={x.id}
             icon={
@@ -35,65 +100,32 @@ export default function PostList({
             actions={<PostActionPanel data={x} />}
           />
         ))}
+        <List.Item
+          key="showMore"
+          icon={Icon.MagnifyingGlass}
+          title="Show more..."
+          actions={
+            <ActionPanel>
+              <Action title="Show more..." onAction={() => doSearch(sort, results[results.length - 1].afterId)} />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
+      <List.Section title="Sort">
+        <SortListItem sort={redditSort.relevance} currentSort={sort} doSearch={doSearch} />
+        <SortListItem sort={redditSort.hot} currentSort={sort} doSearch={doSearch} />
+        <SortListItem sort={redditSort.top} currentSort={sort} doSearch={doSearch} />
+        <SortListItem sort={redditSort.latest} currentSort={sort} doSearch={doSearch} />
+        <SortListItem sort={redditSort.comments} currentSort={sort} doSearch={doSearch} />
       </List.Section>
       <List.Section title="Didn't find what you're looking for?">
         <List.Item
           key="searchOnReddit"
-          icon={Icon.MagnifyingGlass}
+          icon={Icon.Globe}
           title="Show all results on Reddit..."
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={searchRedditUrl} icon={Icon.Globe} />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          key="sortByRelevance"
-          icon={Icon.MagnifyingGlass}
-          title="Sort by relevance"
-          actions={
-            <ActionPanel>
-              <Action title="Sort by relevance" onAction={() => doSearch(redditSort.relevance)} />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          key="sortByHot"
-          icon={Icon.MagnifyingGlass}
-          title="Sort by hot"
-          actions={
-            <ActionPanel>
-              <Action title="Sort by hot" onAction={() => doSearch(redditSort.hot)} />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          key="sortByTop"
-          icon={Icon.MagnifyingGlass}
-          title="Sort by top"
-          actions={
-            <ActionPanel>
-              <Action title="Sort by top" onAction={() => doSearch(redditSort.top)} />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          key="sortByLatest"
-          icon={Icon.MagnifyingGlass}
-          title="Sort by latest"
-          actions={
-            <ActionPanel>
-              <Action title="Sort by latest" onAction={() => doSearch(redditSort.latest)} />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          key="sortByComments"
-          icon={Icon.MagnifyingGlass}
-          title="Sort by comments"
-          actions={
-            <ActionPanel>
-              <Action title="Sort by comments" onAction={() => doSearch(redditSort.comments)} />
             </ActionPanel>
           }
         />

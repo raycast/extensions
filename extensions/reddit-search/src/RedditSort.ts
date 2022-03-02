@@ -2,23 +2,23 @@ import Sort from "./Sort";
 
 export const relevance = {
   sortValue: "relevance",
-  name: "relevance",
+  name: "Relevance",
 } as Sort;
 export const hot = {
   sortValue: "hot",
-  name: "hot",
+  name: "Hot",
 } as Sort;
 export const top = {
   sortValue: "top",
-  name: "top",
+  name: "Top",
 } as Sort;
 export const latest = {
   sortValue: "new",
-  name: "latest",
+  name: "Latest",
 } as Sort;
 export const comments = {
   sortValue: "comments",
-  name: "comments",
+  name: "Comments",
 } as Sort;
 
 export default { relevance, hot, top, latest, comments };

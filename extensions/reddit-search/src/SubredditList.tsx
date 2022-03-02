@@ -1,9 +1,10 @@
 import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
 import { AbortError } from "node-fetch";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { searchSubreddits } from "./RedditApi/Api";
 import RedditResultSubreddit from "./RedditApi/RedditResultSubreddit";
 import FilterBySubredditPostList from "./FilterBySubredditPostList";
+import getPreferences from "./Preferences";
 
 export default function SubredditPostList({
   favorites,
@@ -20,12 +21,15 @@ export default function SubredditPostList({
   const abortControllerRef = useRef<AbortController | null>(null);
   const queryRef = useRef<string>("");
 
-  const doSearch = async (query: string) => {
+  const doSubredditSearch = async (query: string, after = "") => {
     abortControllerRef.current?.abort();
     abortControllerRef.current = new AbortController();
 
     setSearching(true);
-    setResults([]);
+    if (!after) {
+      setResults([]);
+    }
+
     queryRef.current = query;
 
     if (!query) {
@@ -34,14 +38,19 @@ export default function SubredditPostList({
     }
 
     try {
-      const apiResults = await searchSubreddits(query, abortControllerRef.current);
+      const preferences = getPreferences();
+      const apiResults = await searchSubreddits(query, preferences.resultLimit, after, abortControllerRef.current);
       for (let i = 0; i < apiResults.subreddits.length; i++) {
         const apiResult = apiResults.subreddits[i];
         apiResult.isFavorite = favorites.some((y) => y === apiResult.subreddit);
       }
 
       setSearchRedditUrl(apiResults.url);
-      setResults(apiResults.subreddits);
+      if (after) {
+        setResults([...results, ...apiResults.subreddits]);
+      } else {
+        setResults(apiResults.subreddits);
+      }
     } catch (error) {
       if (error instanceof AbortError) {
         return;
@@ -58,8 +67,19 @@ export default function SubredditPostList({
     }
   };
 
+  useEffect(() => {
+    return () => {
+      abortControllerRef?.current?.abort();
+    };
+  }, []);
+
   return (
-    <List isLoading={searching} onSearchTextChange={doSearch} throttle searchBarPlaceholder="Search Subreddits...">
+    <List
+      isLoading={searching}
+      onSearchTextChange={doSubredditSearch}
+      throttle
+      searchBarPlaceholder="Search Subreddits..."
+    >
       <List.Section title="Subreddits">
         {results.map((x) => (
           <List.Item
@@ -76,7 +96,7 @@ export default function SubredditPostList({
                 <Action.OpenInBrowser url={x.url} icon={Icon.Globe} />
                 {!x.isFavorite && (
                   <Action
-                    title="Favorite"
+                    title="Add to Favorites"
                     icon={Icon.Star}
                     onAction={async () => {
                       await addFavoriteSubreddit(x.subreddit);
@@ -110,8 +130,25 @@ export default function SubredditPostList({
         ))}
         {results.length > 0 && (
           <List.Item
-            key="searchOnReddit"
+            key="showMore"
             icon={Icon.MagnifyingGlass}
+            title="Show more..."
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Show more..."
+                  onAction={() => doSubredditSearch(queryRef.current, results[results.length - 1].afterId)}
+                />
+              </ActionPanel>
+            }
+          />
+        )}
+      </List.Section>
+      {results.length > 0 && (
+        <List.Section title="Didn't find what you're looking for?">
+          <List.Item
+            key="searchOnReddit"
+            icon={Icon.Globe}
             title="Show all results on Reddit..."
             actions={
               <ActionPanel>
@@ -119,8 +156,8 @@ export default function SubredditPostList({
               </ActionPanel>
             }
           />
-        )}
-      </List.Section>
+        </List.Section>
+      )}
     </List>
   );
 }

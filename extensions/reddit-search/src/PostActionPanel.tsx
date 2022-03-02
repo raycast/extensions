@@ -11,6 +11,7 @@ export default function PostActionPanel({ data }: { data: RedditResultItem }) {
             <Detail
               navigationTitle={data.title}
               markdown={`# ${data.title}
+*Posted ${data.created}, r/${data.subreddit}*
               
 ${data.description}`}
               actions={
@@ -33,6 +34,7 @@ ${data.description}`}
             <Detail
               navigationTitle={data.title}
               markdown={`# ${data.title}
+*Posted ${data.created}, r/${data.subreddit}*
               
 ![${data.title}](${data.imageUrl} "${data.title}}")`}
               actions={
@@ -55,6 +57,7 @@ ${data.description}`}
             <Detail
               navigationTitle={data.title}
               markdown={`# ${data.title}
+*Posted ${data.created}, r/${data.subreddit}*
               
 ${data.contentUrl}`}
               actions={
@@ -78,6 +81,7 @@ ${data.contentUrl}`}
             <Detail
               navigationTitle={data.title}
               markdown={`# ${data.title}
+*Posted ${data.created}, r/${data.subreddit}*
               
 ${data.url}`}
               actions={
