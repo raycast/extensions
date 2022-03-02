@@ -42,6 +42,24 @@ const GET_MR_DETAIL = gql`
   }
 `;
 
+function NoMRListItem(props: {
+  isLoading: boolean | undefined;
+  mrs: MergeRequest[] | undefined;
+  selectProjectAction: JSX.Element | undefined;
+}): JSX.Element | null {
+  const mrs = props.mrs;
+  const selectProjectAction = props.selectProjectAction;
+  if (props.isLoading) {
+    return null;
+  }
+  if (mrs && mrs.length <= 0) {
+    if (selectProjectAction !== undefined) {
+      return <List.Item title="No Merge Requests found" actions={<ActionPanel>{selectProjectAction}</ActionPanel>} />;
+    }
+  }
+  return null;
+}
+
 export function MRDetailFetch(props: { project: Project; mrId: number }): JSX.Element {
   const { mr, isLoading, error } = useMR(props.project.id, props.mrId);
   if (error) {
@@ -140,6 +158,7 @@ interface MRListProps {
   state?: MRState;
   project?: Project;
   group?: Group;
+  selectProjectAction?: JSX.Element;
 }
 
 function navTitle(project?: Project, group?: Group): string | undefined {
@@ -157,6 +176,7 @@ export function MRList({
   state = MRState.all,
   project = undefined,
   group = undefined,
+  selectProjectAction = undefined,
 }: MRListProps): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { mrs, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
@@ -181,14 +201,17 @@ export function MRList({
     >
       <List.Section title={title} subtitle={mrs?.length.toString() || "0"}>
         {mrs?.map((mr) => (
-          <MRListItem key={mr.id} mr={mr} refreshData={refresh} />
+          <MRListItem key={mr.id} mr={mr} refreshData={refresh} action={selectProjectAction} />
         ))}
+      </List.Section>
+      <List.Section>
+        <NoMRListItem isLoading={isLoading} mrs={mrs} selectProjectAction={selectProjectAction} />
       </List.Section>
     </List>
   );
 }
 
-export function MRListItem(props: { mr: MergeRequest; refreshData: () => void }): JSX.Element {
+export function MRListItem(props: { mr: MergeRequest; refreshData: () => void; action?: JSX.Element }): JSX.Element {
   const mr = props.mr;
 
   const getIcon = (): ImageLike => {
@@ -222,6 +245,7 @@ export function MRListItem(props: { mr: MergeRequest; refreshData: () => void })
           <ActionPanel.Section>
             <MRItemActions mr={mr} onDataChange={props.refreshData} />
           </ActionPanel.Section>
+          <ActionPanel.Section>{props.action ?? props.action}</ActionPanel.Section>
         </ActionPanel>
       }
     />

@@ -156,3 +156,32 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
     </List>
   );
 }
+
+export function useMyProjects(): { projects: Project[] | undefined; error?: string; isLoading?: boolean } {
+  const membership = true;
+  const starred = false;
+
+  const {
+    data: projects,
+    error,
+    isLoading,
+  } = useCache<Project[]>(
+    hashRecord({ membership: membership, starred: starred }, "projects"),
+    async () => {
+      let glProjects: Project[] = [];
+      if (starred) {
+        glProjects = await gitlab.getStarredProjects({ searchText: "", searchIn: "name" }, true);
+      } else {
+        if (membership) {
+          glProjects = await gitlab.getUserProjects({ search: "" }, true);
+        }
+      }
+      return glProjects;
+    },
+    {
+      deps: [],
+      secondsToInvalid: daysInSeconds(7),
+    }
+  );
+  return { projects, error, isLoading };
+}
