@@ -32,7 +32,6 @@ This extension is made by [Anh Thang Bui](https://github.com/anhthang) and uses 
 - [ ] Egg moves
 - [ ] Moves learnt by level up
 - [ ] Moves learnt by TM
-- [ ] Name in other languages
 - [ ] Sprites
 - [ ] Where to find
 

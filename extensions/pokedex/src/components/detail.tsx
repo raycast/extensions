@@ -79,9 +79,31 @@ export default function PokemonDetail(props: { id?: number }) {
 
     const pkmNumber = pokemon.id.toString().padStart(3, "0");
 
+    // excluding forms that unavailable in pokemon.com
+    let forms = pokemon_v2_pokemonspecy.pokemon_v2_pokemons;
+    switch (pokemon.id) {
+      case 25: {
+        const formNames = ["pikachu", "pikachu-gmax"];
+        forms = forms.filter((f) => formNames.includes(f.name));
+        break;
+      }
+      case 774: {
+        const formNames = ["minior-red-meteor", "minior-red"];
+        forms = forms.filter((f) => formNames.includes(f.name));
+        break;
+      }
+      default:
+        break;
+    }
+
     const data = [
       {
         h1: `#${pkmNumber} ${nameByLang[language].name}`,
+      },
+      {
+        p: nameByLang["2"]
+          ? `${nameByLang["1"].name} (${nameByLang["2"].name})`
+          : nameByLang["1"].name,
       },
       {
         h3: nameByLang[language].genus,
@@ -174,11 +196,10 @@ export default function PokemonDetail(props: { id?: number }) {
         p: `_Egg cycles:_ ${pokemon_v2_pokemonspecy.hatch_counter}`,
       },
       {
-        h2:
-          pokemon_v2_pokemonspecy.pokemon_v2_pokemons.length > 1 ? "Forms" : "",
+        h2: forms.length > 1 ? "Forms" : "",
       },
-      ...(pokemon_v2_pokemonspecy.pokemon_v2_pokemons.length > 1
-        ? pokemon_v2_pokemonspecy.pokemon_v2_pokemons.map((p, idx) => {
+      ...(forms.length > 1
+        ? forms.map((p, idx) => {
             return [
               {
                 h3:
@@ -235,7 +256,11 @@ export default function PokemonDetail(props: { id?: number }) {
           return {
             p: `**${
               flavor.pokemon_v2_version.pokemon_v2_versionnames[0].name
-            }:** ${flavor.flavor_text.split("\n").join(" ")}`,
+            }:** ${flavor.flavor_text
+              .split("\n")
+              .join(" ")
+              .split("")
+              .join(" ")}`,
           };
         }),
     ];

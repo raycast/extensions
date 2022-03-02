@@ -24,29 +24,22 @@ export default function SearchPokemon() {
   const [generation, setGeneration] = useState<Generation>(listing);
 
   useEffect(() => {
+    let filtered = pokemon;
     if (nameOrId.length > 0) {
-      const filtered = pokemon.filter(
+      filtered = pokemon.filter(
         (p: Pokemon) =>
           p.name.toLowerCase().includes(nameOrId.toLowerCase()) ||
           p.id === Number(nameOrId)
       );
-      const grouped = groupBy(filtered, "generation");
-      setGeneration(grouped);
     }
+    const grouped = groupBy(filtered, "generation");
+    setGeneration(grouped);
   }, [nameOrId]);
-
-  const onSearchChange = (newSearch: string) => {
-    // backspace
-    if (newSearch.length < nameOrId.length) {
-      setGeneration(listing);
-    }
-    setNameOrId(newSearch);
-  };
 
   return (
     <List
       throttle
-      onSearchTextChange={onSearchChange}
+      onSearchTextChange={(text) => setNameOrId(text)}
       searchBarPlaceholder="Search Pokémon by name or number..."
     >
       {!nameOrId && (
