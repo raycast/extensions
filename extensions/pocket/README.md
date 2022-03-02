@@ -10,7 +10,7 @@ First you will need to create a Pocket app [here](https://getpocket.com/develope
 
 After that you will need to copy the consumer key:
 
-![](./assets/tutorial/app-creation.png)
+![](./media/app-creation.png)
 
 Then run the following code in your terminal replacing `YOUR_APP_CONSUMER_KEY` with the value you got in the previous
 step.
@@ -38,7 +38,7 @@ https://getpocket.com/auth/authorize?request_token=YOUR_REQUEST_TOKEN&redirect_u
 
 This will open an authorization screen, simply press the `Authorize`.
 
-![](./assets/tutorial/authorize-screen.png)
+![](./media/authorize-screen.png)
 
 Finally, you just need to run the following code in your terminal to get the access token:
 
