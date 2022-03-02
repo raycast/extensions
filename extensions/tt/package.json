@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "t",
-  "title": "T",
+  "name": "tt",
+  "title": "TT",
   "description": "Translate texts via multiple providers",
   "icon": "command-icon.png",
   "author": "deptno",
@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "T",
+      "title": "TT",
       "subtitle": "Translator",
       "description": "Translate texts via multiple providers",
       "mode": "view"
