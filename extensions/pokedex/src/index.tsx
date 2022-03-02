@@ -1,4 +1,4 @@
-import { ActionPanel, List, Icon, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, List, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import groupBy from "lodash.groupby";
 import PokemonDetail from "./components/detail";
@@ -20,35 +20,26 @@ type Pokemon = {
 };
 
 export default function SearchPokemon() {
-  const { push } = useNavigation();
-
   const [nameOrId, setNameOrId] = useState<string>("");
   const [generation, setGeneration] = useState<Generation>(listing);
 
   useEffect(() => {
+    let filtered = pokemon;
     if (nameOrId.length > 0) {
-      const filtered = pokemon.filter(
+      filtered = pokemon.filter(
         (p: Pokemon) =>
           p.name.toLowerCase().includes(nameOrId.toLowerCase()) ||
           p.id === Number(nameOrId)
       );
-      const grouped = groupBy(filtered, "generation");
-      setGeneration(grouped);
     }
+    const grouped = groupBy(filtered, "generation");
+    setGeneration(grouped);
   }, [nameOrId]);
-
-  const onSearchChange = (newSearch: string) => {
-    // backspace
-    if (newSearch.length < nameOrId.length) {
-      setGeneration(listing);
-    }
-    setNameOrId(newSearch);
-  };
 
   return (
     <List
       throttle
-      onSearchTextChange={onSearchChange}
+      onSearchTextChange={(text) => setNameOrId(text)}
       searchBarPlaceholder="Search Pokémon by name or number..."
     >
       {!nameOrId && (
@@ -60,14 +51,10 @@ export default function SearchPokemon() {
             icon={Icon.MagnifyingGlass}
             actions={
               <ActionPanel>
-                <ActionPanel.Item
+                <Action.Push
                   title="Surprise Me!"
                   icon={Icon.MagnifyingGlass}
-                  onAction={() => {
-                    const total = pokemon.length;
-                    const pkm = pokemon[Math.floor(Math.random() * total)];
-                    push(<PokemonDetail id={pkm.id} name={pkm.name} />);
-                  }}
+                  target={<PokemonDetail />}
                 />
               </ActionPanel>
             }
@@ -87,20 +74,17 @@ export default function SearchPokemon() {
                 title={`#${pokemon.id.toString().padStart(3, "0")}`}
                 subtitle={pokemon.name}
                 accessoryTitle={pokemon.types.join(", ")}
+                accessoryIcon={`types/${pokemon.types[0]}.png`}
                 icon={{
                   source: pokemon.artwork,
                   fallback: "icon.png",
                 }}
                 actions={
                   <ActionPanel>
-                    <ActionPanel.Item
+                    <Action.Push
                       title="Show Details"
                       icon={Icon.MagnifyingGlass}
-                      onAction={() =>
-                        push(
-                          <PokemonDetail id={pokemon.id} name={pokemon.name} />
-                        )
-                      }
+                      target={<PokemonDetail id={pokemon.id} />}
                     />
                   </ActionPanel>
                 }
