@@ -4,7 +4,15 @@ import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
 import { Group, Issue, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { getErrorMessage, now, optimizeMarkdownText, Query, toDateString, tokenizeQueryText } from "../utils";
+import {
+  capitalizeFirstLetter,
+  getErrorMessage,
+  now,
+  optimizeMarkdownText,
+  Query,
+  toDateString,
+  tokenizeQueryText,
+} from "../utils";
 import { IssueItemActions } from "./issue_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
 
@@ -43,6 +51,7 @@ export function IssueDetailFetch(props: { project: Project; issueId: number }): 
 }
 
 export function IssueDetail(props: { issue: Issue }): JSX.Element {
+  const issue = props.issue;
   const { description, error, isLoading } = useDetail(props.issue.id);
   if (error) {
     showToast(ToastStyle.Failure, "Could not get issue details", error);
@@ -50,11 +59,19 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
 
   const desc = (description ? description : props.issue.description) || "";
 
-  let md = "";
-  if (props.issue) {
-    md = props.issue.labels.map((i) => `\`${i.name || i}\``).join(" ") + "  \n";
+  const lines: string[] = [];
+  if (issue) {
+    lines.push(`# ${issue.title}`);
+    lines.push(`Milestone: ${issue.milestone?.title || "<no milestone>"}`);
+    if (issue.author) {
+      lines.push(`Author: ${issue.author.name} [@${issue.author.username}](${issue.author.web_url})`);
+    }
+    lines.push(`Status: \`${capitalizeFirstLetter(issue.state)}\``);
+    const labels = issue.labels.map((i) => `\`${i.name || i}\``).join(" ") + "  \n";
+    lines.push(`Labels: ${labels || "<No Label>"}`);
+    lines.push("## Description\n" + optimizeMarkdownText(desc));
   }
-  md += "## Description\n" + optimizeMarkdownText(desc);
+  const md = lines.join("  \n");
 
   return (
     <Detail

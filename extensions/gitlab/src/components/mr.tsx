@@ -94,11 +94,11 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
     lines.push(`# ${mr.title}`);
     lines.push(`Merge \`${mr.source_branch}\` into \`${mr.target_branch}\``);
     if (mr.author) {
-      lines.push(`Author: ${mr.author.name} \`${mr.author.username}\``);
+      lines.push(`Author: ${mr.author.name} [@${mr.author.username}](${mr.author.web_url})`);
     }
     lines.push(`Status: \`${capitalizeFirstLetter(mr.state)}\``);
     const labels = mr.labels.map((i) => `\`${i.name || i}\``).join(" ");
-    lines.push(`Labels: ${labels || "<no label>"}`);
+    lines.push(`Labels: ${labels || "<No Label>"}`);
     lines.push("## Description\n" + optimizeMarkdownText(desc));
   }
 
