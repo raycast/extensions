@@ -66,7 +66,7 @@ async function getPageExtract(title: string) {
 
 export function encodeTitle(title: string) {
   const replacedSpaces = title.replaceAll(" ", "_");
-  const withoutHTMLTags = replacedSpaces.replaceAll(/(<([^>]+)>)/ig, "");
+  const withoutHTMLTags = replacedSpaces.replaceAll(/(<([^>]+)>)/gi, "");
   return encodeURIComponent(withoutHTMLTags);
 }
 
