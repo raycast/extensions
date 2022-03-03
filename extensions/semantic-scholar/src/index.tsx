@@ -249,7 +249,6 @@ async function performSearch(
   }
 
   return json.data.map((paper) => {
-    console.log(paper.externalIds);
     return {
       id: paper.paperId,
       title: paper.title,
