@@ -11,7 +11,6 @@ export async function isKarabinerCliAvailable(): Promise<boolean> {
     await exec(`/bin/test -f ${karabinerCliPath}`);
     return true;
   } catch (e) {
-    console.log(e);
     return false;
   }
 }
