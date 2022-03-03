@@ -2,7 +2,7 @@
 
 ![upload-success screenshots](./media/upload-success.png)
 
-![demo screenshots](./media/demo.mov)
+<video src="./media/demo.mov"></video>
 
 ## Introduce
 
