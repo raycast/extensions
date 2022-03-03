@@ -64,7 +64,7 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={profiles.length === 0} searchBarPlaceholder="Search available layout...">
+    <List isLoading={profiles.length === 0} searchBarPlaceholder="Search available layouts...">
       {profiles.map((source) => (
         <List.Item
           key={source.id}
