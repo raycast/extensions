@@ -14,6 +14,16 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "resultLimit",
+      "description": "Indicate the number of results to display from your queries. Minimum of 1 and maximum of 100.",
+      "type": "textfield",
+      "required": false,
+      "title": "Number of results to display (1–100)",
+      "default": "10"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.28.0",
     "node-fetch": "^3.2.0"

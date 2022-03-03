@@ -1,86 +1,24 @@
-import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
+import { ActionPanel, Action, Icon, List } from "@raycast/api";
 import RedditResultItem from "./RedditApi/RedditResultItem";
 import PostActionPanel from "./PostActionPanel";
 import redditSort from "./RedditSort";
 import SortListItem from "./SortListItem";
-import RedditSort from "./RedditSort";
-import { useEffect, useRef, useState } from "react";
-import getPreferences from "./Preferences";
-import { searchAll } from "./RedditApi/Api";
-import { AbortError } from "node-fetch";
+import Sort from "./Sort";
 
 export default function PostList({
-  setSearching,
+  posts,
   subreddit = "",
-  query,
+  sort,
+  doSearch,
+  searchRedditUrl,
 }: {
-  setSearching: (searching: boolean) => void;
+  posts: RedditResultItem[];
   subreddit?: string;
-  query: string;
+  sort: Sort;
+  doSearch: (sort: Sort, after?: string) => void;
+  searchRedditUrl: string;
 }) {
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const [results, setResults] = useState<RedditResultItem[]>([]);
-  const [sort, setSort] = useState(RedditSort.relevance);
-  const [searchRedditUrl, setSearchRedditUrl] = useState("");
-
-  const doSearch = async (sort = RedditSort.relevance, after = "") => {
-    abortControllerRef.current?.abort();
-    abortControllerRef.current = new AbortController();
-
-    setSearching(true);
-    if (!after) {
-      setResults([]);
-    }
-
-    setSort(sort);
-
-    if (!query && !subreddit) {
-      setSearching(false);
-      return;
-    }
-
-    try {
-      const preferences = getPreferences();
-      const apiResults = await searchAll(
-        subreddit,
-        query,
-        preferences.resultLimit,
-        sort?.sortValue ?? "",
-        after,
-        abortControllerRef.current
-      );
-      setSearchRedditUrl(apiResults.url);
-
-      if (after) {
-        setResults([...results, ...apiResults.items]);
-      } else {
-        setResults(apiResults.items);
-      }
-    } catch (error) {
-      if (error instanceof AbortError) {
-        return;
-      }
-
-      console.log(error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Something went wrong :(",
-        message: String(error),
-      });
-    } finally {
-      setSearching(false);
-    }
-  };
-
-  useEffect(() => {
-    doSearch();
-
-    return () => {
-      abortControllerRef?.current?.abort();
-    };
-  }, [query]);
-
-  if (!results.length) {
+  if (!posts.length) {
     return null;
   }
 
@@ -89,7 +27,7 @@ export default function PostList({
   return (
     <>
       <List.Section title={sort ? `${resultsTitle} (Sorted by ${sort.name})` : resultsTitle}>
-        {results.map((x) => (
+        {posts.map((x) => (
           <List.Item
             key={x.id}
             icon={
@@ -98,7 +36,7 @@ export default function PostList({
                 : Icon.Text
             }
             title={x.title}
-            accessoryTitle={`Posted ${x.created} r/${x.subreddit}`}
+            accessoryTitle={subreddit ? `Posted ${x.created}` : `Posted ${x.created} r/${x.subreddit}`}
             actions={<PostActionPanel data={x} />}
           />
         ))}
@@ -108,7 +46,7 @@ export default function PostList({
           title="Show more..."
           actions={
             <ActionPanel>
-              <Action title="Show more..." onAction={() => doSearch(sort, results[results.length - 1].afterId)} />
+              <Action title="Show more..." onAction={() => doSearch(sort, posts[posts.length - 1].afterId)} />
             </ActionPanel>
           }
         />

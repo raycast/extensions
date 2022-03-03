@@ -26,11 +26,10 @@ export default function SubredditPostList({
     abortControllerRef.current = new AbortController();
 
     setSearching(true);
+    queryRef.current = query;
     if (!after) {
       setResults([]);
     }
-
-    queryRef.current = query;
 
     if (!query) {
       setSearching(false);
@@ -98,6 +97,7 @@ export default function SubredditPostList({
                   <Action
                     title="Add to Favorites"
                     icon={Icon.Star}
+                    shortcut={{ modifiers: ["cmd"], key: "f" }}
                     onAction={async () => {
                       await addFavoriteSubreddit(x.subreddit);
                       const index = results.findIndex((y) => y.id === x.id);
@@ -113,6 +113,7 @@ export default function SubredditPostList({
                   <Action
                     title="Remove from Favorites"
                     icon={Icon.Trash}
+                    shortcut={{ modifiers: ["cmd"], key: "f" }}
                     onAction={async () => {
                       await removeFavoriteSubreddit(x.subreddit);
                       const index = results.findIndex((y) => y.id === x.id);
