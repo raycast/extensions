@@ -57,7 +57,7 @@ export default function Command() {
           };
           await showToast(options);
         } else {
-          await showToast(toastErrorOptions("Couldn't Get Profiles", `${e}`));
+          await showToast(toastErrorOptions("Couldn't get profiles", `${e}`));
         }
       }
     })();
