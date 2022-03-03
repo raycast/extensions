@@ -26,7 +26,7 @@ export default function Command() {
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((paper) => (
           <SearchListItem
-            key={paper.title}
+            key={paper.id}
             paper={paper}
             searchUrl={state.searchUrl}
           />
