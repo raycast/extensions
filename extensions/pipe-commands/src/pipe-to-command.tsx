@@ -11,6 +11,7 @@ import {
   Image,
   Detail,
   closeMainWindow,
+  popToRoot,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { chmodSync } from "fs";
@@ -153,6 +154,7 @@ function CommandAction(props: {
         const output = await runCommand();
         if (output) Clipboard.copy(output);
         await closeMainWindow();
+        await popToRoot();
       }}
     />
   );
@@ -166,6 +168,7 @@ function CommandAction(props: {
             const output = await runCommand();
             if (output) showHUD(output);
             await closeMainWindow();
+            await popToRoot();
           }}
         />
       );
@@ -186,6 +189,7 @@ function CommandAction(props: {
             const output = await runCommand();
             if (output) Clipboard.paste(output);
             await closeMainWindow();
+            await popToRoot();
           }}
         />
       );
