@@ -189,7 +189,7 @@ async function performSearch(
   }
 
   const params = new URLSearchParams();
-  params.append("query", searchText.length === 0 ? "@raycast/api" : searchText);
+  params.append("query", searchText);
   params.append(
     "fields",
     "url,abstract,authors,url,title,citationCount,externalIds,venue,year,referenceCount"
