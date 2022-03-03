@@ -2,15 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "oss",
   "title": "OSS",
-  "description": "Publish the picture in your clipboard to aliyun oss, and return url.",
+  "description": "Publish the picture in your clipboard to Aliyun oss, and return the URL.",
   "icon": "command-icon.png",
   "author": "yangxy",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Pic Upload",
-      "description": "Upload the most top picture in your clipboard.",
+      "title": "Upload Picture",
+      "subtitle": "Aliyun OSS",
+      "description": "Upload picture from the clipboard.",
       "mode": "view"
     }
   ],

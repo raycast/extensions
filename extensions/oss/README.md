@@ -1,6 +1,8 @@
 # Upload your pictures to OSS
 
-![upload-success screenshots](./images/upload-success.png)
+![upload-success screenshots](./media/upload-success.png)
+
+![demo screenshots](./media/demo.mov)
 
 ## Introduce
 
