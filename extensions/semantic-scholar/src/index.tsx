@@ -10,7 +10,7 @@ import {
   popToRoot,
   Clipboard,
 } from "@raycast/api";
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 
 export default function Command() {
@@ -73,9 +73,13 @@ function SearchListItem({
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Title" content={paper.title} />
-            <Action.CopyToClipboard title="Copy DOI" content={paper.DOI} />
-            <ActionCopyBibTeX DOI={paper.DOI} />
             <Action.CopyToClipboard title="Copy URL" content={paper.url} />
+            {paper.DOI && (
+              <React.Fragment>
+                <Action.CopyToClipboard title="Copy DOI" content={paper.DOI} />
+                <ActionCopyBibTeX DOI={paper.DOI} />
+              </React.Fragment>
+            )}
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -104,8 +108,12 @@ function PaperDetails({ paper }: { paper: Paper }) {
               title="Open in Connect Papers"
               url={connectPapersURL(paper)}
             />
-            <Action.CopyToClipboard title="Copy DOI" content={paper.DOI} />
-            <ActionCopyBibTeX DOI={paper.DOI} />
+            {paper.DOI && (
+              <React.Fragment>
+                <Action.CopyToClipboard title="Copy DOI" content={paper.DOI} />
+                <ActionCopyBibTeX DOI={paper.DOI} />
+              </React.Fragment>
+            )}
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -241,6 +249,7 @@ async function performSearch(
   }
 
   return json.data.map((paper) => {
+    console.log(paper.externalIds);
     return {
       id: paper.paperId,
       title: paper.title,
@@ -251,7 +260,7 @@ async function performSearch(
       year: paper.year,
       referenceCount: paper.referenceCount,
       citationCount: paper.citationCount,
-      DOI: paper.externalIds.DOI ? paper.externalIds.DOI : "unknown",
+      DOI: paper.externalIds.DOI,
     };
   });
 }
@@ -322,5 +331,5 @@ interface Paper {
   year: number;
   referenceCount: number;
   citationCount: number;
-  DOI: string;
+  DOI: string | undefined;
 }
