@@ -33,8 +33,11 @@ export const useSearch = (searchText: string | undefined) => {
   useEffect(() => {
     async function fetch() {
       setLoading(true);
+
+      const baseQuery = "is:open is:pr review-requested:@me";
+      const query = searchText ? `${baseQuery} ${searchText}` : baseQuery;
       try {
-        const result = await api.SearchReviewRequest();
+        const result = await api.SearchReviewRequest({ query });
 
         const mapped: PullRequest[] =
           result.search.edges

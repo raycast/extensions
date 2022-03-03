@@ -3,7 +3,9 @@ import * as Types from "../schema.generated";
 import { GraphQLClient } from "graphql-request";
 import * as Dom from "graphql-request/dist/types.dom";
 import gql from "graphql-tag";
-export type SearchReviewRequestQueryVariables = Types.Exact<{ [key: string]: never }>;
+export type SearchReviewRequestQueryVariables = Types.Exact<{
+  query: Types.Scalars["String"];
+}>;
 
 export type SearchReviewRequestQuery = {
   __typename?: "Query";
@@ -52,8 +54,8 @@ export type SearchReviewRequestQuery = {
 };
 
 export const SearchReviewRequestDocument = gql`
-  query SearchReviewRequest {
-    search(query: "is:open is:pr review-requested:@me", type: ISSUE, first: 30) {
+  query SearchReviewRequest($query: String!) {
+    search(query: $query, type: ISSUE, first: 30) {
       edges {
         node {
           __typename
@@ -95,7 +97,7 @@ const defaultWrapper: SdkFunctionWrapper = (action, _operationName) => action();
 export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = defaultWrapper) {
   return {
     SearchReviewRequest(
-      variables?: SearchReviewRequestQueryVariables,
+      variables: SearchReviewRequestQueryVariables,
       requestHeaders?: Dom.RequestInit["headers"]
     ): Promise<SearchReviewRequestQuery> {
       return withWrapper(

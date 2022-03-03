@@ -1,5 +1,5 @@
-query SearchReviewRequest {
-  search(query: "is:open is:pr review-requested:@me", type: ISSUE, first: 30) {
+query SearchReviewRequest($query: String!) {
+  search(query: $query, type: ISSUE, first: 30) {
     edges {
       node {
         __typename
