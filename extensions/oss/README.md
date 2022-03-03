@@ -1,8 +1,8 @@
 # Upload your pictures to OSS
 
-![upload-success screenshots](./media/upload-success.png)
+<img src="./media/upload-success.png" alt="upload-success screenshots" width="500">
 
-<video src="./media/demo.mov"></video>
+https://user-images.githubusercontent.com/32320149/156487976-94ec9ec1-cb5f-4c90-af60-792314daecd0.mov
 
 ## Introduce
 
