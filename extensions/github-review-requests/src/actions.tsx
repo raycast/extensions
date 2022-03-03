@@ -6,8 +6,6 @@ export function Actions(props: { pr: PullRequest }) {
     <ActionPanel title={props.pr.title}>
       <ActionPanel.Section>
         <Action.OpenInBrowser url={props.pr.url} />
-      </ActionPanel.Section>
-      <ActionPanel.Section>
         <Action.CopyToClipboard
           title="Copy Pull Request URL"
           content={props.pr.url}
