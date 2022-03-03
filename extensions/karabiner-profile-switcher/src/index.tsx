@@ -48,7 +48,7 @@ export default function Command() {
       } catch (e) {
         if (!(await isKarabinerCliAvailable())) {
           const options: Toast.Options = {
-            ...toastErrorOptions("Karabiner Elements CLI Not Available", `${e}`),
+            ...toastErrorOptions("Karabiner Elements CLI not available", `${e}`),
             secondaryAction: {
               title: "Get Karabiner",
               onAction: () => open("https://karabiner-elements.pqrs.org"),
