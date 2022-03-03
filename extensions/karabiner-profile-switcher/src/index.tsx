@@ -18,7 +18,7 @@ import { isKarabinerCliAvailable, KarabinerManager } from "./model/KarabinerMana
 
 function toastErrorOptions(message: string, error: string): Toast.Options {
   return {
-    title: "An Error Occured",
+    title: "An error occurred",
     message,
     style: Toast.Style.Failure,
     primaryAction: {
