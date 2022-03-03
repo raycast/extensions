@@ -40,6 +40,7 @@ async function handleLayoutSwitch(profile: ILayout) {
 
 export default function Command() {
   const [profiles, setProfiles] = useState<ILayout[]>([]);
+  const [loadingErr, setLoadingErr] = useState<boolean>(false);
 
   useEffect(() => {
     (async () => {
@@ -47,6 +48,7 @@ export default function Command() {
         setProfiles(await KarabinerManager.getAll());
       } catch (e) {
         if (!(await isKarabinerCliAvailable())) {
+          setLoadingErr(true);
           const options: Toast.Options = {
             ...toastErrorOptions("Karabiner Elements CLI not available", `${e}`),
             secondaryAction: {
@@ -64,7 +66,7 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={profiles.length === 0} searchBarPlaceholder="Search available layouts...">
+    <List isLoading={profiles.length === 0 && !loadingErr} searchBarPlaceholder="Search available layouts...">
       {profiles.map((source) => (
         <List.Item
           key={source.id}
