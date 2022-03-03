@@ -1,7 +1,7 @@
 import { ActionPanel, Action, List, Image } from "@raycast/api";
 
 class TwitterTrend {
-  constructor(public id: String, public image:Image.ImageLike, public name: string, public url: string) {
+  constructor(public id: string, public image:Image.ImageLike, public name: string, public url: string) {
     this.id = id;
     this.image = image;
     this.name = name;
