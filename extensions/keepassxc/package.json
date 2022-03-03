@@ -38,7 +38,7 @@
       "type": "password",
       "required": true,
       "title": "Password",
-      "description": "Password of Keepass Database. For More Information about Security, Please Visit README on Github",
+      "description": "Password of Keepass database. For more information about security, please visit README on GitHub",
       "placeholder": "Please Input Password of Keepass Database."
     }
   ],
