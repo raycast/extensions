@@ -29,7 +29,7 @@ export const KarabinerManager: ILayoutManager = class KarabinerProfile implement
     const result = await exec(`${karabinerCliPath} --select-profile '${this.id}'`);
     const status = result.stdout.split("\n")[0];
     if (status.startsWith("[error]")) {
-      throw new Error(`Karabiner Profile "${this.title}" Not Found`);
+      throw new Error(`Karabiner Profile "${this.title}" not found`);
     } else {
       return;
     }
