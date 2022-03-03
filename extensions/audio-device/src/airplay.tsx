@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List, showHUD, closeMainWindow, popToRoot } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showHUD, closeMainWindow, popToRoot, Color } from "@raycast/api";
 import { useAsync } from "react-use";
 import { useEffect, useState } from "react";
 import { getOutputDevices, setOutputDevice } from "./utils";
@@ -19,7 +19,10 @@ export function AirPlaySelector() {
       {items?.map((item, index) => (
         <List.Item
           key={index}
-          icon="speaker.png"
+          icon={{
+            source: "speaker.png",
+            tintColor: Color.SecondaryText,
+          }}
           title={item.name}
           subtitle={item.type}
           accessoryIcon={{

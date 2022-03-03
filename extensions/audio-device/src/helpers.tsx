@@ -1,4 +1,14 @@
-import { ActionPanel, closeMainWindow, Icon, List, popToRoot, showHUD, showToast, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  closeMainWindow,
+  Color,
+  Icon,
+  List,
+  popToRoot,
+  showHUD,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   AudioDevice,
@@ -101,5 +111,8 @@ function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
 }
 
 export function deviceIcon(device: AudioDevice) {
-  return device.isInput ? "mic.png" : "speaker.png";
+  return {
+    source: device.isInput ? "mic.png" : "speaker.png",
+    tintColor: Color.SecondaryText,
+  };
 }
