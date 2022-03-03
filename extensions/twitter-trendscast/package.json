@@ -1,16 +1,16 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "twitter-test",
-  "title": "Twitter Test",
-  "description": "",
+  "name": "twitter-trendscast",
+  "title": "Twitter Trendscast",
+  "description": "With these simple shortcuts, you can keep up with the latest trends from people you follow or any other trends on Twitter.",
   "icon": "ext-icon.png",
   "author": "pradeepb28",
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Twitter Test",
-      "description": "Test.",
+      "name": "twitter-trendscast",
+      "title": "Twitter Trendscast",
+      "description": "With these simple shortcuts, you can keep up with the latest trends from people you follow or any other trends on Twitter.",
       "mode": "view"
     }
   ],
