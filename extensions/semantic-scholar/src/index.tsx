@@ -2,10 +2,13 @@ import {
   ActionPanel,
   Action,
   List,
-  Icon,
   showToast,
   Toast,
   Detail,
+  Icon,
+  showHUD,
+  popToRoot,
+  Clipboard,
 } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
@@ -71,6 +74,7 @@ function SearchListItem({
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Title" content={paper.title} />
             <Action.CopyToClipboard title="Copy DOI" content={paper.DOI} />
+            <ActionCopyBibTeX DOI={paper.DOI} />
             <Action.CopyToClipboard title="Copy URL" content={paper.url} />
           </ActionPanel.Section>
         </ActionPanel>
@@ -101,6 +105,7 @@ function PaperDetails({ paper }: { paper: Paper }) {
               url={connectPapersURL(paper)}
             />
             <Action.CopyToClipboard title="Copy DOI" content={paper.DOI} />
+            <ActionCopyBibTeX DOI={paper.DOI} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -249,6 +254,52 @@ async function performSearch(
       DOI: paper.externalIds.DOI ? paper.externalIds.DOI : "unknown",
     };
   });
+}
+
+function ActionCopyBibTeX({ DOI }: { DOI: string }) {
+  const cancelRef = useRef<AbortController | null>(null);
+
+  const copyBibTex = useCallback(async () => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Fetching BibTeX from doi.org",
+    });
+
+    try {
+      cancelRef.current?.abort();
+      cancelRef.current = new AbortController();
+
+      // Get BibTeX from doi.org
+      const url = new URL(DOI, "https://doi.org");
+
+      const response = await fetch(url.toString(), {
+        method: "get",
+        headers: {
+          Accept: "application/x-bibtex",
+        },
+        signal: cancelRef.current.signal,
+      });
+
+      const bibTeX = await response.text();
+
+      if (!response.ok || bibTeX === undefined) {
+        throw new Error("BibTeX was not found");
+      }
+
+      // Copy the response to the clipboard
+      await showHUD("Copied to Clipboard");
+      await Clipboard.copy(bibTeX);
+      await popToRoot();
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Unable to fetch BibTeX";
+      toast.message = String(error);
+    }
+  }, [cancelRef]);
+
+  return (
+    <Action title="Copy BibTeX" icon={Icon.Clipboard} onAction={copyBibTex} />
+  );
 }
 
 interface SearchState {
