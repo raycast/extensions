@@ -104,6 +104,7 @@ export function PipeCommand(props: { command: ScriptCommand; input?: PipeInput; 
               {command.metadatas.mode != "silent" ? (
                 <Action
                   title="Pipe Script Output"
+                  icon={Icon.ArrowRight}
                   onAction={async () => {
                     const output = await runCommand(input);
                     navigation.push(<PipeCommands input={{ type: "text", content: output, origin: input.origin }} />);
@@ -144,6 +145,17 @@ function CommandAction(props: {
   origin: "clipboard" | "selection";
 }) {
   const { mode, runCommand, origin } = props;
+  const copyAction = (
+    <Action
+      title="Copy Script Output"
+      icon={Icon.Clipboard}
+      onAction={async () => {
+        const output = await runCommand();
+        if (output) Clipboard.copy(output);
+        await closeMainWindow();
+      }}
+    />
+  );
   switch (mode) {
     case "silent":
       return (
@@ -151,7 +163,8 @@ function CommandAction(props: {
           icon={Icon.Terminal}
           title="Run Script"
           onAction={async () => {
-            await runCommand();
+            const output = await runCommand();
+            if (output) showHUD(output);
             await closeMainWindow();
           }}
         />
@@ -161,20 +174,10 @@ function CommandAction(props: {
         <Action.Push icon={Icon.Text} title="Show Script Output" target={<PipeDetails runCommand={runCommand} />} />
       );
     case "copy":
-      return (
-        <Action
-          title="Copy Script Output"
-          icon={Icon.Clipboard}
-          onAction={async () => {
-            const output = await runCommand();
-            if (output) Clipboard.copy(output);
-            await closeMainWindow();
-          }}
-        />
-      );
+      return copyAction;
     case "replace":
       return origin == "clipboard" ? (
-        <CommandAction mode="copy" runCommand={runCommand} origin={origin} />
+        copyAction
       ) : (
         <Action
           title="Paste Script Output"
@@ -198,7 +201,7 @@ function PipeDetails(props: { runCommand: () => Promise<string> }) {
   return (
     <Detail
       isLoading={typeof content == "undefined"}
-      markdown={content}
+      markdown={content ? codeblock(content) : undefined}
       actions={<ActionPanel>{content ? <Action.CopyToClipboard content={content} /> : null}</ActionPanel>}
     />
   );
