@@ -10,30 +10,35 @@
     {
       "name": "activeBudget",
       "title": "Select Active Budget",
+      "subtitle": "YNAB",
       "description": "Select an active budget to use across Raynab.",
       "mode": "view"
     },
     {
       "name": "transactions",
       "title": "List Transactions",
+      "subtitle": "YNAB",
       "description": "List transactions for the selected budget.",
       "mode": "view"
     },
     {
       "name": "transaction",
       "title": "Create Transaction",
+      "subtitle": "YNAB",
       "description": "Create a new transaction in the selected budget.",
       "mode": "view"
     },
     {
       "name": "accounts",
       "title": "List Accounts",
+      "subtitle": "YNAB",
       "description": "List accounts for the selected budget.",
       "mode": "view"
     },
     {
       "name": "budget",
       "title": "View Active Budget",
+      "subtitle": "YNAB",
       "description": "View and Edit Active Budget Information for the current month.",
       "mode": "view"
     }
