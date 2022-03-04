@@ -3,10 +3,12 @@ import { loadEntries, copyAndPastePassword, copyPassword, copyUsername } from ".
 import { useState, useEffect } from "react";
 
 const errorHandler = (e: { message: string }) => {
+  console.log(e.message);
+  console.log(e);
   let invalidPreference = "";
   if (e.message.includes("Invalid credentials were provided")) {
     invalidPreference = "Password";
-  } else if (e.message.includes("keepassxc-cli: No such file or directory")) {
+  } else if (e.message.includes("keepassxc-cli: No such file or directory") || e.message.includes("ENOENT")) {
     invalidPreference = "Path of KeepassXC.app";
   } else if (
     e.message.includes("Failed to open database file") ||

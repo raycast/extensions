@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "monday.com",
+  "name": "monday-com",
   "title": "monday.com",
   "description": "Quickly navigate to your latest monday.com boards and create items",
   "icon": "command-icon.png",

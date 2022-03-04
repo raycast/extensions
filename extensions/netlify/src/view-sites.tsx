@@ -1,17 +1,19 @@
+import { ActionPanel, Detail, Icon, List, Action } from '@raycast/api';
+import { useEffect, useMemo, useState } from 'react';
+import Service, {
+  Deploy,
+  DeployItem,
+  DeployStatus,
+  Site,
+  SiteItem,
+} from './service';
 import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Detail,
-  Icon,
-  List,
-  ListItem,
-  ListSection,
-  OpenInBrowserAction,
-  PushAction,
-} from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
-import Service, { Deploy, DeployItem, DeployStatus, Site, SiteItem } from "./service";
-import { formatDate, formatDeployDate, getDeployUrl, getSiteUrl, getToken } from "./utils";
+  formatDate,
+  formatDeployDate,
+  getDeployUrl,
+  getSiteUrl,
+  getToken,
+} from './utils';
 
 const service = new Service(getToken());
 
@@ -56,28 +58,40 @@ export default function Command() {
   return (
     <List isLoading={isLoading}>
       {Object.keys(siteMap).map((team) => (
-        <ListSection key={team} title={teams[team]}>
+        <List.Section key={team} title={teams[team]}>
           {siteMap[team].map((site) => (
-            <ListItem
+            <List.Item
               key={site.id}
               title={site.name}
               subtitle={site.siteUrl}
               actions={
                 <ActionPanel>
-                  <PushAction icon={Icon.TextDocument} title="Show Details" target={<SiteView id={site.id} />} />
-                  <PushAction
+                  <Action.Push
+                    icon={Icon.TextDocument}
+                    title="Show Details"
+                    target={<SiteView id={site.id} />}
+                  />
+                  <Action.Push
                     icon={Icon.Hammer}
                     title="Show Deploys"
-                    target={<DeployListView siteId={site.id} siteName={site.name} />}
+                    target={
+                      <DeployListView siteId={site.id} siteName={site.name} />
+                    }
                   />
-                  <OpenInBrowserAction title="Open in Netlify" url={getSiteUrl(site.name)} />
-                  <OpenInBrowserAction title="Open Site" url={site.siteUrl} />
-                  <OpenInBrowserAction title="Open Repository" url={site.repositoryUrl} />
+                  <Action.OpenInBrowser
+                    title="Open in Netlify"
+                    url={getSiteUrl(site.name)}
+                  />
+                  <Action.OpenInBrowser title="Open Site" url={site.siteUrl} />
+                  <Action.OpenInBrowser
+                    title="Open Repository"
+                    url={site.repositoryUrl}
+                  />
                 </ActionPanel>
               }
             />
           ))}
-        </ListSection>
+        </List.Section>
       ))}
     </List>
   );
@@ -121,12 +135,18 @@ function SiteView(props: SiteProps) {
   if (!site) {
     return <Detail isLoading={isLoading} />;
   }
-  const { name, publishDate, createDate, isAutoPublishEnabled, environmentVariables } = site;
+  const {
+    name,
+    publishDate,
+    createDate,
+    isAutoPublishEnabled,
+    environmentVariables,
+  } = site;
 
   const markdown = `
   # ${name}
 
-  Autopublish **${isAutoPublishEnabled ? "enabled" : "disabled"}**.
+  Autopublish **${isAutoPublishEnabled ? 'enabled' : 'disabled'}**.
 
   Last published on ${formatDate(publishDate)}.
   
@@ -140,15 +160,27 @@ function SiteView(props: SiteProps) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <PushAction icon={Icon.Hammer} title="Show Deploys" target={<DeployListView siteId={id} siteName={name} />} />
-          <PushAction
+          <Action.Push
+            icon={Icon.Hammer}
+            title="Show Deploys"
+            target={<DeployListView siteId={id} siteName={name} />}
+          />
+          <Action.Push
             icon={Icon.Text}
             title="Show Environment Variables"
-            target={<EnvVariableView value={environmentVariables} siteName={name} />}
+            target={
+              <EnvVariableView value={environmentVariables} siteName={name} />
+            }
           />
-          <OpenInBrowserAction title="Open in Netlify" url={getSiteUrl(site.name)} />
-          <OpenInBrowserAction title="Open Site" url={site.siteUrl} />
-          <OpenInBrowserAction title="Open Repository" url={site.repositoryUrl} />
+          <Action.OpenInBrowser
+            title="Open in Netlify"
+            url={getSiteUrl(site.name)}
+          />
+          <Action.OpenInBrowser title="Open Site" url={site.siteUrl} />
+          <Action.OpenInBrowser
+            title="Open Repository"
+            url={site.repositoryUrl}
+          />
         </ActionPanel>
       }
     />
@@ -173,11 +205,11 @@ function DeployListView(props: DeployListProps) {
 
   function getStatusIcon(status: DeployStatus): Icon {
     switch (status) {
-      case "ok":
+      case 'ok':
         return Icon.Checkmark;
-      case "error":
+      case 'error':
         return Icon.XmarkCircle;
-      case "skipped":
+      case 'skipped':
         return Icon.Circle;
     }
   }
@@ -185,18 +217,21 @@ function DeployListView(props: DeployListProps) {
   return (
     <List isLoading={isLoading} navigationTitle={`Deploys: ${siteName}`}>
       {deploys.map((deploy) => (
-        <ListItem
+        <List.Item
           key={deploy.id}
           icon={getStatusIcon(deploy.status)}
           title={deploy.name}
           actions={
             <ActionPanel>
-              <PushAction
+              <Action.Push
                 icon={Icon.TextDocument}
                 title="Show Details"
                 target={<DeployView siteId={siteId} id={deploy.id} />}
               />
-              <OpenInBrowserAction title="Open in Netlify" url={getDeployUrl(siteName, deploy.id)} />
+              <Action.OpenInBrowser
+                title="Open in Netlify"
+                url={getDeployUrl(siteName, deploy.id)}
+              />
             </ActionPanel>
           }
         />
@@ -226,7 +261,7 @@ function DeployView(props: DeployProps) {
   }
   const { name, site, siteUrl, author, publishDate, commitUrl } = deploy;
 
-  const authorMessage = author ? ` by ${author}` : "";
+  const authorMessage = author ? ` by ${author}` : '';
 
   const markdown = `
   # ${name}
@@ -241,9 +276,12 @@ function DeployView(props: DeployProps) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction title="Open in Netlify" url={getDeployUrl(site.name, id)} />
-          <OpenInBrowserAction title="Open Site" url={siteUrl} />
-          <OpenInBrowserAction title="Open Commit" url={commitUrl} />
+          <Action.OpenInBrowser
+            title="Open in Netlify"
+            url={getDeployUrl(site.name, id)}
+          />
+          <Action.OpenInBrowser title="Open Site" url={siteUrl} />
+          <Action.OpenInBrowser title="Open Commit" url={commitUrl} />
         </ActionPanel>
       }
     />
@@ -256,13 +294,13 @@ function EnvVariableView(props: EnvVariableProps) {
   return (
     <List navigationTitle={`Variables: ${siteName}`}>
       {Object.entries(value).map(([key, value]) => (
-        <ListItem
+        <List.Item
           key={key}
           title={key}
           subtitle={value}
           actions={
             <ActionPanel>
-              <CopyToClipboardAction content={`${key}=${value}`} />
+              <Action.CopyToClipboard content={`${key}=${value}`} />
             </ActionPanel>
           }
         />

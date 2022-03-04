@@ -58,7 +58,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0",
+    "@raycast/api": "^1.28.0",
     "abi-coder": "^2.0.3",
     "axios": "^0.24.0",
     "ethers": "^5.5.2"
