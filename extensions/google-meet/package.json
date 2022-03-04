@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "New meeting room",
+      "title": "Create Meet",
+      "subtitle": "Google Meet",
       "description": "Creates a new meeting room with your default browser",
       "mode": "no-view"
     }
