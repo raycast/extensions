@@ -30,6 +30,7 @@ const preferences = getPreferenceValues<Preferences>();
 
 export default function main() {
   const [pic, setPic] = useState<Pic>({ url: "", picName: "" });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const picName = getPicDataAndPicName();
@@ -72,11 +73,14 @@ export default function main() {
       region: preferences.region,
     });
     try {
+      setLoading(true);
       const { url } = await store.put(`${dayjs().format("YYYY-MM")}/${picName}`, "/tmp/upload-to-oss");
       if (url) {
+        setLoading(false);
         return { url, picName };
       }
     } catch (err: unknown) {
+      setLoading(false);
       handleShowToast(err, "Upload Image Failed");
     }
     return null;
@@ -96,7 +100,7 @@ export default function main() {
   }
 
   return (
-    <List isLoading={!pic.url}>
+    <List isLoading={loading}>
       {pic.url ? (
         <>
           <List.Item
