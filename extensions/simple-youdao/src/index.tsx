@@ -32,7 +32,7 @@ export default function Command() {
       throttle
     >
       {state.translateResult ? (
-        <Translate searchText={state.searchText} translate_result={state.translateResult} setState={setState}/>
+        <Translate searchText={state.searchText} translate_result={state.translateResult} setState={setState} />
       ) : null}
     </List>
   );
@@ -45,7 +45,7 @@ function Translate({
 }: {
   searchText: string | undefined;
   translate_result: TranslateResult;
-  setState: React.Dispatch<React.SetStateAction<TranslateState>>
+  setState: React.Dispatch<React.SetStateAction<TranslateState>>;
 }) {
   if (translate_result && translate_result.errorCode && translate_result.errorCode !== "0") {
     const errorMessage = `
@@ -54,7 +54,7 @@ function Translate({
     showToast({
       style: Toast.Style.Failure,
       title: "Translation Error",
-      message: errorMessage
+      message: errorMessage,
     });
   }
   return (
@@ -137,33 +137,35 @@ function TranslateResultActionPanel(props: {
     <ActionPanel>
       <Action.CopyToClipboard content={copy_content} />
       {url ? <Action.OpenInBrowser url={url} /> : null}
-      {speak_url ? <Action
-        icon={Icon.Message}
-        onAction={() => {
-          if (speak_url && setState) {
-            setState((oldState) => ({
-              ...oldState,
-              isLoading: true,
-            }));
-            try {
-              fetch(`http://dict.youdao.com/dictvoice?audio=${text}`).then((res) => {
-                const fileStream = fs.createWriteStream("/tmp/tmp_raycast_simpleyd.mp3");
-                res?.body?.pipe(fileStream);
-                sound.play("/tmp/tmp_raycast_simpleyd.mp3");
-              });
-            } catch (error) {
-              console.log(error);
-            } finally {
+      {speak_url ? (
+        <Action
+          icon={Icon.Message}
+          onAction={() => {
+            if (speak_url && setState) {
               setState((oldState) => ({
                 ...oldState,
-                isLoading: false,
+                isLoading: true,
               }));
+              try {
+                fetch(`http://dict.youdao.com/dictvoice?audio=${text}`).then((res) => {
+                  const fileStream = fs.createWriteStream("/tmp/tmp_raycast_simpleyd.mp3");
+                  res?.body?.pipe(fileStream);
+                  sound.play("/tmp/tmp_raycast_simpleyd.mp3");
+                });
+              } catch (error) {
+                console.log(error);
+              } finally {
+                setState((oldState) => ({
+                  ...oldState,
+                  isLoading: false,
+                }));
+              }
             }
-          }
-        }}
-        shortcut={{ modifiers: ["ctrl"], key: "return" }}
-        title={"Read It"}
-      /> : null}
+          }}
+          shortcut={{ modifiers: ["ctrl"], key: "return" }}
+          title={"Read It"}
+        />
+      ) : null}
     </ActionPanel>
   );
 }
