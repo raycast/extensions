@@ -43,6 +43,10 @@
       "mode": "view"
     }
   ],
+  "keywords": [
+    "ynab",
+    "budget"
+  ],
   "dependencies": {
     "@raycast/api": "^1.29.1",
     "dayjs": "^1.10.7",
