@@ -21,13 +21,17 @@ function TaskList({ isLoading, sections, mode = ViewMode.date, projects }: TaskL
 
   return (
     <List searchBarPlaceholder={placeholder} isLoading={isLoading}>
-      {sections.map((section, index) => (
-        <List.Section title={section.name} subtitle={`${section.tasks.length} tasks`} key={index}>
-          {section.tasks.map((task) => (
-            <TaskListItem key={task.id} task={task} mode={mode} {...(projects ? { projects } : {})} />
-          ))}
-        </List.Section>
-      ))}
+      {sections.map((section, index) => {
+        const subtitle = `${section.tasks.length} ${section.tasks.length === 1 ? "task" : "tasks"}`;
+
+        return (
+          <List.Section title={section.name} subtitle={subtitle} key={index}>
+            {section.tasks.map((task) => (
+              <TaskListItem key={task.id} task={task} mode={mode} {...(projects ? { projects } : {})} />
+            ))}
+          </List.Section>
+        );
+      })}
     </List>
   );
 }
