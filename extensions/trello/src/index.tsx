@@ -8,14 +8,6 @@ export default function PackageList() {
   const [results, setTodos] = useState<TrelloFetchResponse>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const onSearchTextChange = async (text: string) => {
-    setLoading(true);
-    await returnTodos(text.replace(/\s/g, "+")).then((response) => {
-      setTodos(response);
-      setLoading(false);
-    });
-  };
-
   useEffect(() => {
     async function fetchAllTodos() {
       try {
@@ -33,11 +25,11 @@ export default function PackageList() {
   }, []);
 
   return (
-    <List isLoading={loading} searchBarPlaceholder={`Search todos`} onSearchTextChange={onSearchTextChange} throttle>
+    <List isLoading={loading} searchBarPlaceholder={`Filter todos`} throttle>
       {results?.length
         ? results.map((result) => {
-            return <TodoListItem key={result.id} result={result} />;
-          })
+          return <TodoListItem key={result.id} result={result} />;
+        })
         : null}
     </List>
   );
