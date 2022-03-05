@@ -1,4 +1,4 @@
-import { StorageKey } from "../../constnat";
+import { StorageKey } from "../../constant";
 import { LocalStorage } from "@raycast/api";
 
 export const get = <T = any>(key: StorageKey, defaultValue: T): Promise<T> => {

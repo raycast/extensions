@@ -1,5 +1,5 @@
 import { Value } from "@raycast/api/types/api/app/localStorage";
-import { StorageKey } from "../../constnat";
+import { StorageKey } from "../../constant";
 import { LocalStorage } from "@raycast/api";
 
 export const set = <T = any>(key: StorageKey, value: T) => {

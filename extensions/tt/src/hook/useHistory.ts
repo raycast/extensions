@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { get, set } from "../util/storage";
-import { StorageKey } from "../constnat";
+import { StorageKey } from "../constant";
 import { showToast, Toast } from "@raycast/api";
 
 export const useHistory = (text: string) => {
