@@ -1,5 +1,5 @@
 # Laracasts
 
-![Raycast Laracasts Search](./assets/raycast-laracasts.png)
+![Raycast Laracasts Search](media/raycast-laracasts.png)
 
 [Laracasts](https://laracasts.com) search

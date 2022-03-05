@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "laracasts",
-      "title": "Search Laracasts",
+      "title": "Search Course",
       "subtitle": "Laracasts",
       "description": "Searches Laracasts",
       "mode": "view"
