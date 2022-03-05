@@ -75,7 +75,7 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
         defaultValue={transaction.memo ?? ''}
         placeholder="Enter additional information…"
       />
-      <Form.Dropdown id="flag_color" title="Flag Color" defaultValue="">
+      <Form.Dropdown id="flag_color" title="Flag Color" defaultValue={transaction.flag_color?.toString()}>
         <Form.Dropdown.Item value="" title="No Flag" icon={{ source: Icon.Dot }} />
         <Form.Dropdown.Item value="red" title="Red" icon={{ source: Icon.Dot, tintColor: Color.Red }} />
         <Form.Dropdown.Item value="orange" title="Orange" icon={{ source: Icon.Dot, tintColor: Color.Orange }} />
