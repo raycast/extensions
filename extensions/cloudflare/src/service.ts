@@ -70,7 +70,7 @@ interface CachePurgeResult {
   errors: CloudflareError[];
   messages: string[];
   result: {
-    id: string
+    id: string;
   };
 }
 
@@ -212,11 +212,14 @@ class Service {
     });
   }
 
-  async purgeFilesbyURL(zoneId: string, urls: string[]): Promise<CachePurgeResult> {
+  async purgeFilesbyURL(
+    zoneId: string,
+    urls: string[],
+  ): Promise<CachePurgeResult> {
     const response = await this.client.post<CachePurgeResult>(
       `zones/${zoneId}/purge_cache`,
       {
-        files: urls
+        files: urls,
       },
     );
     const { success, errors, messages, result } = response.data;
