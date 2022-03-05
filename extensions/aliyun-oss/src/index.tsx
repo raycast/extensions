@@ -43,7 +43,7 @@ export default function main() {
               const url = new URL(pic.url);
               pic.url = pic.url.replace(url.origin, preferences.domain);
             } catch {
-              handleShowToast("Convert URL Failed.");
+              handleShowToast("Convert URL failed.");
             }
           }
           setPic(pic);
@@ -62,11 +62,11 @@ export default function main() {
           picName = iconv.decode(Buffer.from(name), "cp936") || `${new Date().getTime()}.png`;
         }
       } catch {
-        handleShowToast("Copy Image Failed.");
+        handleShowToast("Copy image failed.");
       }
       return picName;
     } else {
-      handleShowToast("The Path Of Pngpaste Is Wrong.");
+      handleShowToast("The path of pngpaste is wrong.");
     }
   }
 
@@ -86,16 +86,16 @@ export default function main() {
       }
     } catch {
       setLoading(false);
-      handleShowToast("Upload Image Failed.");
+      handleShowToast("Upload image failed.");
     }
     return null;
   }
 
-  function handleShowToast(title: string) {
+  function handleShowToast(message: string) {
     showToast({
       style: Toast.Style.Failure,
-      title: title,
-      message: title,
+      title: "An error occurred",
+      message: message,
     });
   }
 

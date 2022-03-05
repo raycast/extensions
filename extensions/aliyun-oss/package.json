@@ -58,7 +58,7 @@
       "title": "Custom Domain Name",
       "type": "textfield",
       "required": false,
-      "placeholder": "http://raycast.com",
+      "placeholder": "https://raycast.com",
       "description": "Your custom domain name"
     }
   ],
