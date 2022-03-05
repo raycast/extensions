@@ -11,7 +11,7 @@
       "name": "index",
       "title": "Linux Command",
       "subtitle": "搜索 Linux 命令",
-      "description": "Linux 命令列表",
+      "description": "Search Linux command Chinese documentation.",
       "mode": "view"
     }
   ],
