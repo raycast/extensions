@@ -5,25 +5,24 @@ import { MessageContext } from "../context/MessageContext";
 
 export const Configure: FunctionComponent = () => {
   const { state, isLoading, onSubmit } = useConfigure();
-  const m = useContext(MessageContext);
-
+  
   if (isLoading) {
     return null;
   }
   return (
     <Form
-      navigationTitle={m((l) => l.Setting)}
+      navigationTitle={L.Setting}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={m((l) => l.Save)} onSubmit={onSubmit} />
+          <Action.SubmitForm title={L.Save} onSubmit={onSubmit} />
           <Action.OpenInBrowser
-            title={m((l) => l.IssuePapagoToken)}
+            title={L.Issue_Papago_token}
             url="https://developers.naver.com/apps/#/register"
           />
         </ActionPanel>
       }
     >
-      <Form.Description title={m((l) => l.Papago)} text={m((l) => l.IssueATokenFromTheBottomMenu)} />
+      <Form.Description title={L.Papago} text={L.Issue_a_token_from_the_bottom_menu} />
       {Object.entries(ID_PALCEHOLDER_PAIR).map(([id, placeholder]) => (
         <Form.TextField key={id} id={id} title={id} placeholder={placeholder} defaultValue={state[id]} />
       ))}

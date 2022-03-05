@@ -1,20 +1,20 @@
 import { Message, MessageMap } from "./index";
 
 export const en: MessageMap = {
-  [Message.OriginalText]: "Original text",
-  [Message.TranslatedText]: "Translated text",
-  [Message.SavedSearchResults]: "Saved search results",
+  [Message.Original_Text]: "Original text",
+  [Message.Translated_text]: "Translated text",
+  [Message.Saved_search_results]: "Saved search results",
   [Message.History]: "History",
   [Message.Setting]: "Settings",
-  [Message.RegisterApiKey]: "Register API Key",
+  [Message.Register_API_Key]: "Register API Key",
   [Message.View]: "View",
   [Message.Save]: "Save",
   [Message.Copy]: "Copy",
   [Message.Delete]: "Delete",
   [Message.Google]: "Google",
   [Message.Papago]: "Papago",
-  [Message.IssuePapagoToken]: "Issue Papago token",
-  [Message.IssueATokenFromTheBottomMenu]: "Issue a token from the bottom menu",
-  [Message.ItDoesNotHaveTraslatedText]: "It doesn't have translated text",
+  [Message.Issue_Papago_token]: "Issue Papago token",
+  [Message.Issue_a_token_from_the_bottom_menu]: "Issue a token from the bottom menu",
+  [Message.It_does_not_have_traslated_text]: "It does not have translated text",
   [Message.Disabled]: "Disabled",
 };

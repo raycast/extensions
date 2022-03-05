@@ -14,10 +14,10 @@ export const search = async (options: TranslateOption, m: Messanger): Promise<st
   const xNaverClientSecret = (await LocalStorage.getItem<string>(PapagoKey["X-Naver-Client-Secret"])) ?? "";
 
   if (!xNaverClientId) {
-    throw new Error(m((l) => l.Disabled));
+    throw new Error(L.Disabled);
   }
   if (!xNaverClientSecret) {
-    throw new Error(m((l) => l.Disabled));
+    throw new Error(L.Disabled);
   }
   const headers = {
     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -38,7 +38,7 @@ export const search = async (options: TranslateOption, m: Messanger): Promise<st
     .then((response) => {
       if ("errorCode" in response) {
         if (response.errorCode === ErrorCode.AuthorizationError) {
-          throw new Error(`${m((l) => l.Setting)} -> ${Object.values(PapagoKey).join(", ")}`);
+          throw new Error(`${L.Setting} -> ${Object.values(PapagoKey).join(", ")}`);
         }
         throw new Error(`[${response.errorCode}] ${response.errorMessage}`);
       }

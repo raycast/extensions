@@ -9,8 +9,7 @@ export const useSearch = (source: string, target: string) => {
   const [itemList, setItemList] = useState<TranslateListItemData[]>(DEFAULT_ITEM_LIST);
   const [text, setText] = useState("");
   const options: TranslateOption = useMemo(() => ({ source, target, text }), [text, source, target]);
-  const m = useContext(MessageContext);
-  const getSiteTranslationUrl = (serviceName: string) => {
+    const getSiteTranslationUrl = (serviceName: string) => {
     const service = [google, papago].find((service) => serviceName === service.id);
 
     return service?.getSiteTranslationUrl(options, serviceName);

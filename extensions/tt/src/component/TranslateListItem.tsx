@@ -6,8 +6,7 @@ import { MessageContext } from "../context/MessageContext";
 export const TranslateListItem: FunctionComponent<Props> = (props) => {
   const { item, onSave } = props;
   const { push } = useNavigation();
-  const m = useContext(MessageContext);
-  const onAction = useCallback(() => {
+    const onAction = useCallback(() => {
     if (item.text) {
       // todo: support URL
       return push(
@@ -18,7 +17,7 @@ export const TranslateListItem: FunctionComponent<Props> = (props) => {
             <ActionPanel>
               <ActionPanel.Section>
                 <Action.CopyToClipboard
-                  title={m((l) => l.Copy)}
+                  title={L.Copy}
                   content={item.text}
                   shortcut={{ modifiers: ["cmd"], key: "." }}
                 />
@@ -31,7 +30,7 @@ export const TranslateListItem: FunctionComponent<Props> = (props) => {
 
     return showToast({
       style: Toast.Style.Failure,
-      title: m((l) => l.ItDoesNotHaveTraslatedText),
+      title: L.It_does_not_have_traslated_text,
     });
   }, [item]);
 
@@ -43,10 +42,10 @@ export const TranslateListItem: FunctionComponent<Props> = (props) => {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title={m((l) => l.View)} onAction={onAction} />
-            <Action title={m((l) => l.Save)} onAction={onSave} />
+            <Action title={L.View} onAction={onAction} />
+            <Action title={L.Save} onAction={onSave} />
             <Action.CopyToClipboard
-              title={m((l) => l.Copy)}
+              title={L.Copy}
               content={item.text}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />

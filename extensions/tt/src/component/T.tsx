@@ -13,35 +13,34 @@ export const T: FunctionComponent = () => {
   const { isLoading, text, setText, itemList } = useSearch(source, target);
   const { histories, onSave, onDelete } = useHistory(text);
   const { push } = useNavigation();
-  const m = useContext(MessageContext);
-
+  
   return (
     <List
       navigationTitle="T"
       isLoading={isLoading}
       onSearchTextChange={setText}
-      searchBarPlaceholder={m((l) => l.OriginalText)}
+      searchBarPlaceholder={L.Original_Text}
       throttle
     >
-      <List.Section title={text} subtitle={m((l) => l.TranslatedText)}>
+      <List.Section title={text} subtitle={L.Translated_text}>
         {itemList.map((item) => (
           <TranslateListItem key={item.key} item={item} onSave={onSave} />
         ))}
       </List.Section>
-      <List.Section title={m((l) => l.SavedSearchResults)} subtitle={`${m((l) => l.History)}(${histories.length})`}>
+      <List.Section title={L.Saved_search_results} subtitle={`${L.History}(${histories.length})`}>
         <HistoryList items={histories} onSelect={setText} onDelete={onDelete} />
       </List.Section>
-      <List.Section title={m((l) => l.History)}>
+      <List.Section title={L.History}>
         <List.Item
-          title={m((l) => l.Setting)}
+          title={L.Setting}
           accessoryIcon={Icon.Gear}
           icon={Icon.Gear}
-          accessoryTitle={m((l) => l.RegisterApiKey)}
+          accessoryTitle={L.Register_API_Key}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
                 <Action
-                  title={m((l) => l.View)}
+                  title={L.View}
                   onAction={() => {
                     push(<Configure />);
                   }}

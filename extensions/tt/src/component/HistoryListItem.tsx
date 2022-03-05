@@ -4,18 +4,17 @@ import { MessageContext } from "../context/MessageContext";
 
 export const HistoryListItem: FunctionComponent<Props> = (props) => {
   const { item, onSelect, onDelete } = props;
-  const m = useContext(MessageContext);
-
+  
   return (
     <List.Item
       title={item}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action title={m((l) => l.View)} onAction={() => onSelect(item)} />
-            <Action title={m((l) => l.Delete)} onAction={() => onDelete(item)} />
+            <Action title={L.View} onAction={() => onSelect(item)} />
+            <Action title={L.Delete} onAction={() => onDelete(item)} />
             <Action.CopyToClipboard
-              title={m((l) => l.Copy)}
+              title={L.Copy}
               content={item}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
