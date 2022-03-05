@@ -26,7 +26,7 @@ export const Configure: FunctionComponent = () => {
         title={L.Papago}
         text={L.Issue_a_token_from_the_bottom_menu}
       />
-      {Object.entries(ID_PALCEHOLDER_PAIR).map(([id, placeholder]) => (
+      {Object.entries(ID_PLACEHOLDER_PAIR).map(([id, placeholder]) => (
         <Form.TextField
           key={id}
           id={id}
@@ -40,7 +40,7 @@ export const Configure: FunctionComponent = () => {
   )
 }
 
-const ID_PALCEHOLDER_PAIR = {
+const ID_PLACEHOLDER_PAIR = {
   'X-Naver-Client-Id': 'xxxxxxxxxxxxxxxxxxxx',
   'X-Naver-Client-Secret': 'xxxxxxxxxx',
 }
