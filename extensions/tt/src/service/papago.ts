@@ -1,12 +1,11 @@
-import fetch from "node-fetch";
-import { base64 } from "../util/base64";
-import { TranslateListItemData, TranslateOption } from "./type";
-import { LocalStorage } from "@raycast/api";
-import { URLSearchParams } from "url";
-import { Messanger } from "../context/MessageContext";
-import { Message } from "../message";
+import fetch from 'node-fetch';
+import { base64 } from '../util/base64';
+import { TranslateListItemData, TranslateOption } from './type';
+import { LocalStorage } from '@raycast/api';
+import { URLSearchParams } from 'url';
+import { L } from '../constant';
 
-export const search = async (options: TranslateOption, m: Messanger): Promise<string> => {
+export const search = async (options: TranslateOption): Promise<string> => {
   const { source, target, text } = options;
   const url = "https://openapi.naver.com/v1/papago/n2mt";
   const form = new URLSearchParams();

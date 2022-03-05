@@ -1,5 +1,3 @@
-import { Messanger } from "../../context/MessageContext";
-
 export type TranslateListItemData = {
   key: string;
   text: string;
@@ -15,7 +13,7 @@ export type TranslateOption = {
 
 export type TranslateService = {
   id: string;
-  search(options: TranslateOption, m: Messanger): Promise<string>;
+  search(options: TranslateOption): Promise<string>;
   createListItem(text: string): TranslateListItemData;
   getSiteTranslationUrl(options: TranslateOption, url: string): string;
 };

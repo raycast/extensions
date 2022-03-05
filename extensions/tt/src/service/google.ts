@@ -1,9 +1,8 @@
 import { base64 } from "../util/base64";
 import { TranslateListItemData, TranslateOption } from "./type";
 import translate from "@vitalets/google-translate-api";
-import { Messanger } from "../context/MessageContext";
 
-export const search = async (options: TranslateOption, m: Messanger): Promise<string> => {
+export const search = async (options: TranslateOption): Promise<string> => {
   const { source: from, target: to, text } = options;
 
   return translate(text, { from, to }).then((response) => response.text);
