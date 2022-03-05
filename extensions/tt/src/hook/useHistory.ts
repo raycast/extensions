@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
-import { get, set } from "../util/storage";
-import { L, StorageKey } from "../constant";
-import { showToast, Toast } from "@raycast/api";
+import { useCallback, useEffect, useState } from 'react'
+import { get, set } from '../util/storage'
+import { L, StorageKey } from '../constant'
+import { showToast, Toast } from '@raycast/api'
 
 export const useHistory = (text: string) => {
-  const [histories, setHistories] = useState<string[]>([]);
+  const [histories, setHistories] = useState<string[]>([])
   const onSave = useCallback(() => {
     get<string[]>(StorageKey.words, [])
       .then((words) => [text, ...words])
@@ -15,31 +15,34 @@ export const useHistory = (text: string) => {
         return showToast({
           style: Toast.Style.Failure,
           title: L.Fail_to_save,
-        });
-      });
-  }, [text]);
+        })
+      })
+  }, [text])
   const onDelete = useCallback((text) => {
     get<string[]>(StorageKey.words, [])
       .then((words) => {
-        const index = words.indexOf(text);
+        const index = words.indexOf(text)
         if (index !== -1) {
-          return [...words.splice(0, index), ...words.splice(index + 1, words.length - 1)];
+          return [
+            ...words.splice(0, index),
+            ...words.splice(index + 1, words.length - 1),
+          ]
         }
 
-        return words;
+        return words
       })
       .then((words) => set(StorageKey.words, words))
       .then(() => get<string[]>(StorageKey.words, []))
-      .then(setHistories);
-  }, []);
+      .then(setHistories)
+  }, [])
 
   useEffect(() => {
-    get(StorageKey.words, []).then(setHistories);
-  }, [setHistories]);
+    get(StorageKey.words, []).then(setHistories)
+  }, [setHistories])
 
   return {
     histories,
     onSave,
     onDelete,
-  };
-};
+  }
+}

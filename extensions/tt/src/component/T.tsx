@@ -1,19 +1,25 @@
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
-import { useSearch } from "../hook/useSearch";
-import { useHistory } from "../hook/useHistory";
-import { TranslateListItem } from "./TranslateListItem";
-import { Configure } from "./Configure";
-import { HistoryList } from "./HistoryList";
-import { FunctionComponent, useContext } from "react";
-import { PreferenceContext } from "../context/PreferenceContext";
-import { L } from "../constant"
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  useNavigation,
+} from '@raycast/api'
+import { useSearch } from '../hook/useSearch'
+import { useHistory } from '../hook/useHistory'
+import { TranslateListItem } from './TranslateListItem'
+import { Configure } from './Configure'
+import { HistoryList } from './HistoryList'
+import { FunctionComponent, useContext } from 'react'
+import { PreferenceContext } from '../context/PreferenceContext'
+import { L } from '../constant'
 
 export const T: FunctionComponent = () => {
-  const { source, target } = useContext(PreferenceContext);
-  const { isLoading, text, setText, itemList } = useSearch(source, target);
-  const { histories, onSave, onDelete } = useHistory(text);
-  const { push } = useNavigation();
-  
+  const { source, target } = useContext(PreferenceContext)
+  const { isLoading, text, setText, itemList } = useSearch(source, target)
+  const { histories, onSave, onDelete } = useHistory(text)
+  const { push } = useNavigation()
+
   return (
     <List
       navigationTitle="T"
@@ -27,8 +33,15 @@ export const T: FunctionComponent = () => {
           <TranslateListItem key={item.key} item={item} onSave={onSave} />
         ))}
       </List.Section>
-      <List.Section title={L.Saved_search_results} subtitle={`${L.History}(${histories.length})`}>
-        <HistoryList items={histories} onSelect={setText} onDelete={onDelete} />
+      <List.Section
+        title={L.Saved_search_results}
+        subtitle={`${L.History}(${histories.length})`}
+      >
+        <HistoryList
+          items={histories}
+          onSelect={setText}
+          onDelete={onDelete}
+        />
       </List.Section>
       <List.Section title={L.History}>
         <List.Item
@@ -42,7 +55,7 @@ export const T: FunctionComponent = () => {
                 <Action
                   title={L.View}
                   onAction={() => {
-                    push(<Configure />);
+                    push(<Configure />)
                   }}
                 />
               </ActionPanel.Section>
@@ -51,5 +64,5 @@ export const T: FunctionComponent = () => {
         />
       </List.Section>
     </List>
-  );
-};
+  )
+}

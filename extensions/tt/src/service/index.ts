@@ -1,2 +1,2 @@
-export { google } from "./google";
-export { papago } from "./papago";
+export { google } from './google'
+export { papago } from './papago'

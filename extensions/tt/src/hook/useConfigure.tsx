@@ -1,79 +1,85 @@
-import { useCallback, useEffect, useState } from "react";
-import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { L } from "../constant";
+import { useCallback, useEffect, useState } from 'react'
+import { LocalStorage, showToast, Toast } from '@raycast/api'
+import { L } from '../constant'
 
 export const useConfigure = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [state, setState] = useState({} as State);
+  const [isLoading, setIsLoading] = useState(true)
+  const [state, setState] = useState({} as State)
   const onSubmit = useCallback((values: typeof ID_PALCEHOLDER_PAIR) => {
-    const entries = Object.entries(values);
+    const entries = Object.entries(values)
     const invalidIdList = entries
       .filter(([id, value]) => {
         if (value.length === 0) {
-          return false;
+          return false
         }
-        return value.length !== ID_PALCEHOLDER_PAIR[id as keyof typeof ID_PALCEHOLDER_PAIR].length;
+        return (
+          value.length !==
+          ID_PALCEHOLDER_PAIR[id as keyof typeof ID_PALCEHOLDER_PAIR]
+            .length
+        )
       })
       .map(([id]) => {
-        return id;
-      });
+        return id
+      })
     if (invalidIdList.length > 0) {
       return showToast({
         style: Toast.Style.Failure,
         title: L.Invalid_input,
-        message: invalidIdList.join("\n"),
-      });
+        message: invalidIdList.join('\n'),
+      })
     }
 
     return Promise.all(
       entries.map(([id, value]) => {
-        LocalStorage.setItem(id, value);
-      })
+        LocalStorage.setItem(id, value)
+      }),
     )
       .then(() => {
         return showToast({
           style: Toast.Style.Success,
           title: L.Saved,
-        });
+        })
       })
       .catch((e) => {
         return showToast({
           style: Toast.Style.Failure,
           title: L.Fail,
           message: e.message,
-        });
-      });
-  }, []);
+        })
+      })
+  }, [])
 
   useEffect(() => {
-    const entries = Object.keys(ID_PALCEHOLDER_PAIR);
+    const entries = Object.keys(ID_PALCEHOLDER_PAIR)
 
     Promise.all(
       entries.map((id) => {
-        return LocalStorage.getItem(id).then((value) => [id, value]);
-      })
+        return LocalStorage.getItem(id).then((value) => [id, value])
+      }),
     )
       .then((pairs) => {
         const initialState = pairs.reduce((acc, [id, value]) => {
-          acc[id as keyof typeof ID_PALCEHOLDER_PAIR] = value as string;
-          return acc;
-        }, {} as State);
+          acc[id as keyof typeof ID_PALCEHOLDER_PAIR] = value as string
+          return acc
+        }, {} as State)
 
-        setState(initialState);
+        setState(initialState)
       })
-      .finally(() => setIsLoading(false));
-  }, []);
+      .finally(() => setIsLoading(false))
+  }, [])
 
   return {
     isLoading,
     state,
     onSubmit,
-  };
-};
+  }
+}
 
 const ID_PALCEHOLDER_PAIR = {
-  "X-Naver-Client-Id": "xxxxxxxxxxxxxxxxxxxx",
-  "X-Naver-Client-Secret": "xxxxxxxxxx",
-};
+  'X-Naver-Client-Id': 'xxxxxxxxxxxxxxxxxxxx',
+  'X-Naver-Client-Secret': 'xxxxxxxxxx',
+}
 
-type State = { [key in keyof typeof ID_PALCEHOLDER_PAIR | string]?: string };
+type State = {
+  [key in keyof typeof ID_PALCEHOLDER_PAIR | string]?: string
+}

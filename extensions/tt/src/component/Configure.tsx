@@ -1,13 +1,13 @@
-import { Action, ActionPanel, Form } from '@raycast/api';
-import { FunctionComponent } from 'react';
-import { useConfigure } from '../hook/useConfigure';
-import { L } from '../constant';
+import { Action, ActionPanel, Form } from '@raycast/api'
+import { FunctionComponent } from 'react'
+import { useConfigure } from '../hook/useConfigure'
+import { L } from '../constant'
 
 export const Configure: FunctionComponent = () => {
-  const { state, isLoading, onSubmit } = useConfigure();
-  
+  const { state, isLoading, onSubmit } = useConfigure()
+
   if (isLoading) {
-    return null;
+    return null
   }
   return (
     <Form
@@ -22,16 +22,25 @@ export const Configure: FunctionComponent = () => {
         </ActionPanel>
       }
     >
-      <Form.Description title={L.Papago} text={L.Issue_a_token_from_the_bottom_menu} />
+      <Form.Description
+        title={L.Papago}
+        text={L.Issue_a_token_from_the_bottom_menu}
+      />
       {Object.entries(ID_PALCEHOLDER_PAIR).map(([id, placeholder]) => (
-        <Form.TextField key={id} id={id} title={id} placeholder={placeholder} defaultValue={state[id]} />
+        <Form.TextField
+          key={id}
+          id={id}
+          title={id}
+          placeholder={placeholder}
+          defaultValue={state[id]}
+        />
       ))}
       <Form.Separator />
     </Form>
-  );
-};
+  )
+}
 
 const ID_PALCEHOLDER_PAIR = {
-  "X-Naver-Client-Id": "xxxxxxxxxxxxxxxxxxxx",
-  "X-Naver-Client-Secret": "xxxxxxxxxx",
-};
+  'X-Naver-Client-Id': 'xxxxxxxxxxxxxxxxxxxx',
+  'X-Naver-Client-Secret': 'xxxxxxxxxx',
+}

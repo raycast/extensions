@@ -1,3 +1,3 @@
 export enum StorageKey {
-  words = "words",
+  words = 'words',
 }

@@ -1,10 +1,10 @@
-import { Action, ActionPanel, List } from '@raycast/api';
-import { FunctionComponent } from 'react';
-import { L } from '../constant';
+import { Action, ActionPanel, List } from '@raycast/api'
+import { FunctionComponent } from 'react'
+import { L } from '../constant'
 
 export const HistoryListItem: FunctionComponent<Props> = (props) => {
-  const { item, onSelect, onDelete } = props;
-  
+  const { item, onSelect, onDelete } = props
+
   return (
     <List.Item
       title={item}
@@ -16,17 +16,17 @@ export const HistoryListItem: FunctionComponent<Props> = (props) => {
             <Action.CopyToClipboard
               title={L.Copy}
               content={item}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+              shortcut={{ modifiers: ['cmd'], key: '.' }}
             />
           </ActionPanel.Section>
         </ActionPanel>
       }
     />
-  );
-};
+  )
+}
 
 type Props = {
-  item: string;
-  onSelect(text: string): void;
-  onDelete(text: string): void;
-};
+  item: string
+  onSelect(text: string): void
+  onDelete(text: string): void
+}
