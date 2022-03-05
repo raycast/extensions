@@ -16,11 +16,11 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "DefaultSearchEngine",
+          "name": "SurfEngine",
           "type": "dropdown",
           "required": false,
           "title": "Surf Engine",
-          "description": "Search Engine for SelectedText(default: Google)",
+          "description": "Search Engine for SelectedText(default: Google).",
           "default": "Google",
           "data": [
             {
@@ -40,14 +40,36 @@
               "value": "DuckDuckGo"
             }
           ]
+        },
+        {
+          "name": "SortBy",
+          "type": "dropdown",
+          "required": false,
+          "title": "Sort by",
+          "description": "Surf browser sorting method, effective after one search.",
+          "default": "Rank",
+          "data": [
+            {
+              "title": "Rank Search",
+              "value": "Rank"
+            },
+            {
+              "title": "Name Ascend",
+              "value": "Name+"
+            },
+            {
+              "title": "Name Descend",
+              "value": "Name-"
+            }
+          ]
         }
       ]
     }
-   
   ],
   "dependencies": {
     "@raycast/api": "^1.29.1",
     "react-devtools-core": "^4.23.0",
+    "run-applescript": "^6.0.0",
     "yarn": "^1.22.17"
   },
   "resolutions": {
