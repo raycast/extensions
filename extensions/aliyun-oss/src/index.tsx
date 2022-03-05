@@ -1,6 +1,7 @@
 import { List, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { execaSync } from "execa";
+import fs from "fs";
 import dayjs from "dayjs";
 import OSS from "ali-oss";
 import iconv from "iconv-lite";
@@ -42,7 +43,7 @@ export default function main() {
               const url = new URL(pic.url);
               pic.url = pic.url.replace(url.origin, preferences.domain);
             } catch (err: unknown) {
-              handleShowToast(err, "Convert URL Failed");
+              handleShowToast(err, "Convert URL Failed.");
             }
           }
           setPic(pic);
@@ -52,17 +53,22 @@ export default function main() {
   }, []);
 
   function getPicDataAndPicName() {
-    let picName = "";
-    try {
-      const { failed } = execaSync(preferences.pngpasteFullPath, ["/tmp/upload-to-oss"]);
-      if (!failed) {
-        const { stdout: name } = execaSync("pbpaste", [], { encoding: null });
-        picName = iconv.decode(Buffer.from(name), "cp936") || `${new Date().getTime()}.png`;
+      if (fs.existsSync(preferences.pngpasteFullPath)) {
+        let picName = "";
+        try {
+          const { failed } = execaSync(preferences.pngpasteFullPath, ["/tmp/upload-to-oss"]);
+          if (!failed) {
+            const { stdout: name } = execaSync("pbpaste", [], { encoding: null });
+            picName = iconv.decode(Buffer.from(name), "cp936") || `${new Date().getTime()}.png`;
+          }
+        } catch {
+          handleShowToast("Copy Image Failed.");
+        }
+        return picName;
+      } else {
+        handleShowToast("The Path Of Pngpaste Is Wrong.");
       }
-    } catch (err: unknown) {
-      handleShowToast(err, "Copy Image Failed");
     }
-    return picName;
   }
 
   async function picUpload(picName: string) {
@@ -79,23 +85,18 @@ export default function main() {
         setLoading(false);
         return { url, picName };
       }
-    } catch (err: unknown) {
+    } catch {
       setLoading(false);
-      handleShowToast(err, "Upload Image Failed");
+      handleShowToast("Upload Image Failed.");
     }
     return null;
   }
 
-  function handleShowToast(err: unknown, title: string) {
-    let message = "";
-    if (typeof err === "object" && err !== null && "message" in err) {
-      const error = err as { message: string };
-      message = error.message;
-    }
+  function handleShowToast(title: string) {
     showToast({
       style: Toast.Style.Failure,
       title: title,
-      message: message || "Upload Image Failed",
+      message: title,
     });
   }
 
