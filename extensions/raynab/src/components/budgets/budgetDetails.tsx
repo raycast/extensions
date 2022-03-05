@@ -5,18 +5,30 @@ import { formatToReadablePrice, getCurrentMonth } from '@lib/utils';
 
 export function BudgetDetails({ budget }: { budget: BudgetDetailSummary | undefined }) {
   const currentMonthBudget = budget?.months?.at(0);
-  const currencySymbol = budget?.currency_format?.currency_symbol ?? '';
+  const currency = budget?.currency_format;
 
   if (!currentMonthBudget) return null;
 
   const markdown = `
   # ${getCurrentMonth()}
 
-  - **Budgeted**: ${currencySymbol}${formatToReadablePrice(currentMonthBudget?.budgeted ?? 0)}
-  - **Activity this month**: ${formatToReadablePrice(currentMonthBudget.activity)}
+  - **Budgeted**: ${formatToReadablePrice({
+    amount: currentMonthBudget?.budgeted ?? 0,
+    currency,
+  })}
+  - **Activity this month**: ${formatToReadablePrice({
+    amount: currentMonthBudget.activity,
+    currency,
+  })}
   - **Age of Money**: ${currentMonthBudget.age_of_money ?? 0} days
-  - **To be Budgeted**: ${currencySymbol}${formatToReadablePrice(currentMonthBudget.to_be_budgeted)}
-  - **Income**: ${currencySymbol}${formatToReadablePrice(currentMonthBudget.income)}
+  - **To be Budgeted**: ${formatToReadablePrice({
+    amount: currentMonthBudget.to_be_budgeted,
+    currency,
+  })}
+  - **Income**: ${formatToReadablePrice({
+    amount: currentMonthBudget.income,
+    currency,
+  })}
   `;
   return (
     <Detail

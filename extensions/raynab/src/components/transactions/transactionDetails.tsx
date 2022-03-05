@@ -15,7 +15,10 @@ export function TransactionDetails({ transaction }: { transaction: TransactionDe
   const markdown = `
   # ${transaction.amount > 0 ? 'Inflow to' : 'Outflow from'} ${transaction.account_name}
 
-  - **Amount**: ${activeBudgetCurrency?.currency_symbol ?? ''}${formatToReadablePrice(transaction.amount)}
+  - **Amount**: ${formatToReadablePrice({
+    amount: transaction.amount,
+    currency: activeBudgetCurrency,
+  })}
   - **Payee**: ${transaction.payee_name ?? 'Not Specified'}
   - **Date**: ${dayjs(transaction.date).format('LL')}
   - **Category**: ${transaction.category_name ?? 'Not Specified'}
@@ -26,7 +29,10 @@ export function TransactionDetails({ transaction }: { transaction: TransactionDe
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Transaction Amount" content={formatToReadablePrice(transaction.amount)} />
+          <Action.CopyToClipboard
+            title="Copy Transaction Amount"
+            content={formatToReadablePrice({ amount: transaction.amount, currency: activeBudgetCurrency })}
+          />
           <OpenInYnabAction />
         </ActionPanel>
       }

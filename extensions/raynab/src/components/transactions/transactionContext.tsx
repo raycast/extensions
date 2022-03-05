@@ -1,4 +1,6 @@
+import { useLocalStorage } from '@hooks/useLocalStorage';
 import {
+  CurrencyFormat,
   Filter,
   GroupNames,
   onFilterType,
@@ -19,6 +21,7 @@ type TransactionContextReturnValues = {
   onTimelineChange: onTimelineType;
   state: Omit<TransactionState, 'search'>;
   flags: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
+  currency: CurrencyFormat;
 };
 const TransactionContext = createContext<TransactionContextReturnValues | null>(null);
 
@@ -38,10 +41,11 @@ export function TransactionProvider({
   const onSort = (sortType: SortNames) => () => dispatch({ type: 'sort', sortBy: sortType });
 
   const flags = useState(false);
+  const [activeBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
 
   return (
     <TransactionContext.Provider
-      value={{ onFilter, onGroup, onSort, onTimelineChange, state, flags }}
+      value={{ onFilter, onGroup, onSort, onTimelineChange, state, flags, currency: activeBudgetCurrency }}
       children={children}
     />
   );

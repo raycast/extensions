@@ -17,13 +17,11 @@ interface Values {
 }
 
 export function TransactionEditForm({ transaction }: { transaction: TransactionDetail }) {
-  const [amount, setAmount] = useState(formatToReadablePrice(transaction.amount, false));
+  const [activeBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const [amount, setAmount] = useState(formatToReadablePrice({ amount: transaction.amount, locale: false }));
   const [activeBudgetId] = useLocalStorage('activeBudgetId', '');
 
   const { data: payees, isValidating } = usePayees(activeBudgetId);
-
-  const [activeBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
-  const currencySymbol = activeBudgetCurrency?.currency_symbol;
 
   async function handleSubmit(values: Values) {
     if (!isValidFormSubmission(values)) return;
@@ -44,6 +42,7 @@ export function TransactionEditForm({ transaction }: { transaction: TransactionD
     });
   }
 
+  const currencySymbol = activeBudgetCurrency?.currency_symbol;
   return (
     <Form
       navigationTitle="Edit Transaction"

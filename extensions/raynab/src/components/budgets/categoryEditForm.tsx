@@ -31,7 +31,10 @@ export function CategoryEditForm({ category }: { category: Category }) {
     if (
       await confirmAlert({
         title: `Are you sure you want to update ${category.name}?`,
-        message: `Change from ${formatToReadablePrice(category.budgeted)} to ${values.budgeted}`,
+        message: `Change from ${formatToReadablePrice({
+          amount: category.budgeted,
+          currency: activeBudgetCurrency,
+        })} to ${formatToReadablePrice({ amount: +values.budgeted, currency: activeBudgetCurrency })}`,
         icon: { source: Icon.ExclamationMark, tintColor: Color.Red },
       })
     ) {
@@ -57,7 +60,7 @@ export function CategoryEditForm({ category }: { category: Category }) {
       <Form.TextField
         id="budgeted"
         title={`Budgeted Amount ${currencySymbol ? `(${currencySymbol})` : ''}`}
-        defaultValue={formatToReadablePrice(category.budgeted)}
+        defaultValue={formatToReadablePrice({ amount: category.budgeted, locale: false })}
       />
     </Form>
   );

@@ -29,6 +29,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
     onTimelineChange,
     state,
     flags: [showFlags, setShowFlags],
+    currency,
   } = useTransaction();
 
   const mainIcon = transaction.amount > 0 ? INFLOW_ICON : OUTFLOW_ICON;
@@ -38,7 +39,7 @@ export function TransactionItem({ transaction }: { transaction: TransactionDetai
       icon={mainIcon}
       id={transaction.id}
       title={transaction.payee_name ?? transaction.id}
-      subtitle={formatToReadablePrice(transaction.amount)}
+      subtitle={formatToReadablePrice({ amount: transaction.amount, currency })}
       accessoryIcon={showFlags ? { source: Icon.Dot, tintColor: getFlagColor(transaction.flag_color) } : undefined}
       accessoryTitle={dayjs(transaction.date).fromNow()}
       actions={

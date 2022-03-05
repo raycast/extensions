@@ -39,7 +39,7 @@ export function CategoryGroupSection({
                 accessoryTitle={
                   showProgress
                     ? renderProgressTitle(category)
-                    : renderDefaultTitle(category, activeBudgetCurrency?.currency_symbol)
+                    : formatToReadablePrice({ amount: category.balance, currency: activeBudgetCurrency })
                 }
                 actions={
                   <ActionPanel>
@@ -101,8 +101,4 @@ function renderProgressTitle(category: Category) {
   return `${FULL_SYMBOL.repeat(fullSymbolsCount)}${EMPTY_SYMBOL.repeat(emptySymbolsCount)} ${percentage
     ?.toString()
     .padStart(3, ' ')}%`;
-}
-
-function renderDefaultTitle(category: Category, currencySymbol: string | undefined) {
-  return `${currencySymbol ?? '$'}${formatToReadablePrice(category.balance)}`;
 }
