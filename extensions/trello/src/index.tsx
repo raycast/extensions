@@ -6,7 +6,7 @@ import { TodoListItem } from "./TrelloListItem";
 
 export default function PackageList() {
   const [results, setTodos] = useState<TrelloFetchResponse>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     async function fetchAllTodos() {

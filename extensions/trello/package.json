@@ -27,8 +27,8 @@
       "name": "username",
       "type": "textfield",
       "required": true,
-      "title": "Trello username",
-      "description": "Trello username",
+      "title": "Trello Username",
+      "description": "Trello Username",
       "link": "https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/",
       "placeholder": "Trello username"
     },
