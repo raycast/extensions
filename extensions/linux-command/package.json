@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "linux-command",
+  "title": "Linux Command",
+  "description": "Linux命令大全搜索工具，内容包含Linux命令手册、详解、学习、搜集。",
+  "icon": "command-icon.png",
+  "author": "jaywcjlove",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Linux Command",
+      "subtitle": "搜索 Linux 命令",
+      "description": "Linux 命令列表",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "linux-command": "^1.8.2",
+    "follow-redirects": "~1.14.9",
+    "@raycast/api": "^1.29.1"
+  },
+  "devDependencies": {
+    "@types/follow-redirects": "^1.14.1",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
