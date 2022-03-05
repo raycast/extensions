@@ -1,11 +1,11 @@
 import fetch from 'node-fetch';
 import { base64 } from '../util/base64';
-import { TranslateListItemData, TranslateOption } from './type';
+import { TranslateListItemData, TranslateOption, TranslateService } from "./type";
 import { LocalStorage } from '@raycast/api';
 import { URLSearchParams } from 'url';
 import { L } from '../constant';
 
-export const search = async (options: TranslateOption): Promise<string> => {
+const search = async (options: TranslateOption): Promise<string> => {
   const { source, target, text } = options;
   const url = "https://openapi.naver.com/v1/papago/n2mt";
   const form = new URLSearchParams();
@@ -45,7 +45,7 @@ export const search = async (options: TranslateOption): Promise<string> => {
     })
     .then((response) => response.message.result.translatedText);
 };
-export const createListItem = (text: string): TranslateListItemData => {
+const createListItem = (text: string): TranslateListItemData => {
   return {
     text,
     service: "파파고",
@@ -53,8 +53,8 @@ export const createListItem = (text: string): TranslateListItemData => {
     icon: ICON,
   };
 };
-export const id = "papago";
-export const getSiteTranslationUrl = (options: TranslateOption, url: string) => {
+const id = "papago";
+const getSiteTranslationUrl = (options: TranslateOption, url: string) => {
   const params = new URLSearchParams();
   params.append("source", options.source);
   params.append("locale", options.target);
@@ -63,14 +63,19 @@ export const getSiteTranslationUrl = (options: TranslateOption, url: string) => 
 
   return `https://papago.naver.net/website${params.toString()}`;
 };
-
 const ICON = "https://papago.naver.com/static/img/icon_72x72.png";
+
+export const papago: TranslateService = {
+  id,
+  search,
+  createListItem,
+  getSiteTranslationUrl,
+}
 
 enum PapagoKey {
   "X-Naver-Client-Id" = "X-Naver-Client-Id",
   "X-Naver-Client-Secret" = "X-Naver-Client-Secret",
 }
-
 enum ErrorCode {
   AuthorizationError = "024",
 }
