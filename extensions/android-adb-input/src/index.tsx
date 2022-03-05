@@ -34,7 +34,7 @@ function existsAdb(): boolean {
   return fs.existsSync(`${getAdbDir()}/adb`);
 }
 
-async function getDeives(): Promise<string[]> {
+async function getDevices(): Promise<string[]> {
   const adbDir = getAdbDir();
   const { stdout } = await execaCommand(`${adbDir}/adb devices`, { cwd: adbDir });
 
@@ -113,7 +113,7 @@ export default function Command() {
       });
 
       try {
-        const devices = await getDeives();
+        const devices = await getDevices();
         setDevices(devices);
 
         if (devices.length == 0) {
