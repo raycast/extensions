@@ -42,8 +42,8 @@ export default function main() {
             try {
               const url = new URL(pic.url);
               pic.url = pic.url.replace(url.origin, preferences.domain);
-            } catch (err: unknown) {
-              handleShowToast(err, "Convert URL Failed.");
+            } catch {
+              handleShowToast("Convert URL Failed.");
             }
           }
           setPic(pic);
@@ -53,21 +53,20 @@ export default function main() {
   }, []);
 
   function getPicDataAndPicName() {
-      if (fs.existsSync(preferences.pngpasteFullPath)) {
-        let picName = "";
-        try {
-          const { failed } = execaSync(preferences.pngpasteFullPath, ["/tmp/upload-to-oss"]);
-          if (!failed) {
-            const { stdout: name } = execaSync("pbpaste", [], { encoding: null });
-            picName = iconv.decode(Buffer.from(name), "cp936") || `${new Date().getTime()}.png`;
-          }
-        } catch {
-          handleShowToast("Copy Image Failed.");
+    if (fs.existsSync(preferences.pngpasteFullPath)) {
+      let picName = "";
+      try {
+        const { failed } = execaSync(preferences.pngpasteFullPath, ["/tmp/upload-to-oss"]);
+        if (!failed) {
+          const { stdout: name } = execaSync("pbpaste", [], { encoding: null });
+          picName = iconv.decode(Buffer.from(name), "cp936") || `${new Date().getTime()}.png`;
         }
-        return picName;
-      } else {
-        handleShowToast("The Path Of Pngpaste Is Wrong.");
+      } catch {
+        handleShowToast("Copy Image Failed.");
       }
+      return picName;
+    } else {
+      handleShowToast("The Path Of Pngpaste Is Wrong.");
     }
   }
 
