@@ -9,9 +9,10 @@
   "commands": [
     {
       "name": "index",
-      "title": "TT",
-      "subtitle": "Translator",
-      "description": "Translate texts via multiple providers",
+      "title": "Transator",
+      "subtitle": "Translate texts",
+      "description": "Text translator",
+      "keywords": ["t"],
       "mode": "view"
     }
   ],
