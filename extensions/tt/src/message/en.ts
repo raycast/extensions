@@ -15,6 +15,6 @@ export const en: MessageMap = {
   [Message.Papago]: "Papago",
   [Message.Issue_Papago_token]: "Issue Papago token",
   [Message.Issue_a_token_from_the_bottom_menu]: "Issue a token from the bottom menu",
-  [Message.It_does_not_have_traslated_text]: "It does not have translated text",
+  [Message.It_does_not_have_translated_text]: "It does not have translated text",
   [Message.Disabled]: "Disabled",
 };

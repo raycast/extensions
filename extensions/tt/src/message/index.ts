@@ -16,7 +16,7 @@ export enum Message {
   Papago,
   Issue_Papago_token,
   Issue_a_token_from_the_bottom_menu,
-  It_does_not_have_traslated_text,
+  It_does_not_have_translated_text,
   Disabled,
 }
 

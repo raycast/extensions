@@ -6,7 +6,7 @@ import { Configure } from "./Configure";
 import { HistoryList } from "./HistoryList";
 import { FunctionComponent, useContext } from "react";
 import { PreferenceContext } from "../context/PreferenceContext";
-import { MessageContext } from "../context/MessageContext";
+import { L } from "../constant"
 
 export const T: FunctionComponent = () => {
   const { source, target } = useContext(PreferenceContext);

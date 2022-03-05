@@ -1,6 +1,6 @@
-import { Action, ActionPanel, List } from "@raycast/api";
-import { FunctionComponent, useContext } from "react";
-import { MessageContext } from "../context/MessageContext";
+import { Action, ActionPanel, List } from '@raycast/api';
+import { FunctionComponent } from 'react';
+import { L } from '../constant';
 
 export const HistoryListItem: FunctionComponent<Props> = (props) => {
   const { item, onSelect, onDelete } = props;

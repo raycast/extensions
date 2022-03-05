@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Form } from "@raycast/api";
-import { FunctionComponent, useContext } from "react";
-import { useConfigure } from "../hook/useConfigure";
-import { MessageContext } from "../context/MessageContext";
+import { Action, ActionPanel, Form } from '@raycast/api';
+import { FunctionComponent } from 'react';
+import { useConfigure } from '../hook/useConfigure';
+import { L } from '../constant';
 
 export const Configure: FunctionComponent = () => {
   const { state, isLoading, onSubmit } = useConfigure();

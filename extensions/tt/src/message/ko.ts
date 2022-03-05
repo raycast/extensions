@@ -15,6 +15,6 @@ export const ko: MessageMap = {
   [Message.Papago]: "파파고",
   [Message.Issue_Papago_token]: "파파고 토큰 발급",
   [Message.Issue_a_token_from_the_bottom_menu]: "하단 메뉴에서 토큰 발급",
-  [Message.It_does_not_have_traslated_text]: "번역문이 없습니다.",
+  [Message.It_does_not_have_translated_text]: "번역문이 없습니다.",
   [Message.Disabled]: "비활성화",
 };
