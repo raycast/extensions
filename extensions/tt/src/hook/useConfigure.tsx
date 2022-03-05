@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
+import { L } from "../constant";
 
 export const useConfigure = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -19,7 +20,7 @@ export const useConfigure = () => {
     if (invalidIdList.length > 0) {
       return showToast({
         style: Toast.Style.Failure,
-        title: "잘못된 입력",
+        title: L.Invalid_input,
         message: invalidIdList.join("\n"),
       });
     }
@@ -32,13 +33,13 @@ export const useConfigure = () => {
       .then(() => {
         return showToast({
           style: Toast.Style.Success,
-          title: "저장됨",
+          title: L.Saved,
         });
       })
       .catch((e) => {
         return showToast({
           style: Toast.Style.Failure,
-          title: "실패",
+          title: L.Fail,
           message: e.message,
         });
       });

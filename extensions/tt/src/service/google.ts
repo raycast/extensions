@@ -1,6 +1,7 @@
 import { base64 } from "../util/base64";
 import { TranslateListItemData, TranslateOption, TranslateService } from "./type";
 import translate from "@vitalets/google-translate-api";
+import { L } from "../constant";
 
 const search = async (options: TranslateOption): Promise<string> => {
   const { source: from, target: to, text } = options;
@@ -10,7 +11,7 @@ const search = async (options: TranslateOption): Promise<string> => {
 const createListItem = (text: string): TranslateListItemData => {
   return {
     text,
-    service: "구글",
+    service: L.Google,
     key: base64(text) || "id",
     icon: ICON,
   };

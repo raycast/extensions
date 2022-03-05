@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { get, set } from "../util/storage";
-import { StorageKey } from "../constant";
+import { L, StorageKey } from "../constant";
 import { showToast, Toast } from "@raycast/api";
 
 export const useHistory = (text: string) => {
@@ -14,7 +14,7 @@ export const useHistory = (text: string) => {
       .catch(() => {
         return showToast({
           style: Toast.Style.Failure,
-          title: "저장 실패",
+          title: L.Fail_to_save,
         });
       });
   }, [text]);

@@ -15,4 +15,8 @@ export enum L {
   Issue_a_token_from_the_bottom_menu = "Issue a token from the bottom menu",
   It_does_not_have_translated_text = "It does not have translated text",
   Disabled = "Disabled",
+  Invalid_input = "Invalid input",
+  Fail_to_save = "Fail to save",
+  Fail = "Fail",
+  Saved = "Saved",
 };

@@ -48,7 +48,7 @@ const search = async (options: TranslateOption): Promise<string> => {
 const createListItem = (text: string): TranslateListItemData => {
   return {
     text,
-    service: "파파고",
+    service: L.Papago,
     key: base64(text) || id,
     icon: ICON,
   };
