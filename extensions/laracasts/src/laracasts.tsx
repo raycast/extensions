@@ -59,7 +59,7 @@ export default function SearchLaracastsLessons() {
   }, [algoliaClient, INDEX]);
 
   const [searchResults, setSearchResults] = useState<any[] | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const search = async (query = "") => {
     setIsLoading(true);
