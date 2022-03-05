@@ -5,6 +5,9 @@
   "description": "Get crypto data from Coingecko (price, ticker, ranking)",
   "icon": "icon.png",
   "author": "destiner",
+  "contributors": [
+    "mike182uk"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -12,6 +15,13 @@
       "title": "Search Coins",
       "subtitle": "Coingecko",
       "description": "Searches the list of Coingecko coins by name or symbol",
+      "mode": "view"
+    },
+    {
+      "name": "calculate",
+      "title": "Calculate",
+      "subtitle": "Coingecko",
+      "description": "Calculates the value of an amount of coins",
       "mode": "view"
     }
   ],
