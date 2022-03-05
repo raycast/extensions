@@ -1,17 +1,16 @@
 import { useState } from "react";
 import { State } from "./types";
 import { ActionPanel, Detail, List, PushAction } from "@raycast/api";
-import { inferType } from "./util";
+import { doEval } from "./util";
 import { Actions } from "./actions";
 
 export function SlowEval() {
-  const [state, setState] = useState<State>({ isLoading: false });
+  const [state, setState] = useState<State>({ query: "", result: "", type: "" });
   return (
     <List
       searchBarPlaceholder="Type some Javascript to Evaluate and press return"
-      isLoading={false}
       onSearchTextChange={(query: string) => {
-        setState((oldState) => ({ ...oldState, query: query, isLoading: false }));
+        setState((oldState) => ({ ...oldState, query: query }));
       }}
     >
       {(state?.query?.length ?? 0) === 0 ? null : (
@@ -31,33 +30,24 @@ export function SlowEval() {
 }
 
 function EvalResult(props: { state: State }): JSX.Element {
-  const { state } = props;
-  let result;
-  let error;
-  try {
-    result = eval(state.query?.trim() ?? "");
-  } catch (err) {
-    if (err instanceof Error) {
-      error = err.message;
-    } else if (typeof err === "string") {
-      error = err;
-    }
-  }
+  const newState = doEval(props.state, true);
 
-  return (
-    <Detail
-      markdown={`### Code:
-\`\`\`
-${state.query}
-\`\`\`
+  const markdown = `
+  ### Code:
+  \`\`\`
+  ${newState.query}
+  \`\`\`
+  
+  ### Evaluation:
+  \`\`\`
+  ${newState?.result ?? "undefined"}
+  \`\`\`
+  
+  ### Type:
+  \`\`\`
+  ${newState?.type ?? "undefined"}
+  \`\`\`
+  `;
 
-${error ? "Evaluation Error:" : `Evaluation result (\`${inferType(result)}\`):`}
-
-\`\`\`
-${error ?? JSON.stringify(result, null, 2)}
-\`\`\`
-            `}
-      actions={<Actions state={state} />}
-    />
-  );
+  return <Detail markdown={markdown} actions={<Actions state={newState} />} />;
 }
