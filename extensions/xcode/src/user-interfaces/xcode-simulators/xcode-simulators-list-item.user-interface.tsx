@@ -1,7 +1,7 @@
-import { ActionPanel, ActionPanelProps, Color, Icon, ImageLike, List, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { XcodeSimulator } from "../../models/simulator/xcode-simulator.model";
 import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
-import { ReactElement } from "react";
+import { ReactElement, ReactNode } from "react";
 
 /**
  * XcodeSimulator List Item
@@ -30,7 +30,7 @@ export function xcodeSimulatorListItem(
  * Retrieve accessory icon for XcodeSimulator
  * @param xcodeSimulator The XcodeSimulator
  */
-function accessoryIcon(xcodeSimulator: XcodeSimulator): ImageLike | undefined {
+function accessoryIcon(xcodeSimulator: XcodeSimulator): Image | undefined {
   switch (xcodeSimulator.state) {
     case "Booted":
       return {
@@ -60,7 +60,7 @@ function accessoryIcon(xcodeSimulator: XcodeSimulator): ImageLike | undefined {
 function actions(
   xcodeSimulator: XcodeSimulator,
   xcodeSimulatorService: XcodeSimulatorService
-): ReactElement<ActionPanelProps> | undefined {
+): ReactElement<ReactNode> | undefined {
   // Check if XcodeSimulator state is pending
   if (xcodeSimulator.state === "Pending") {
     // Return no actions
@@ -76,7 +76,10 @@ function actions(
         title={isShutdown ? "Boot" : "Shutdown"}
         onAction={async () => {
           // Show loading Toast
-          const loadingToast = await showToast(ToastStyle.Animated, "Please wait");
+          const loadingToast = await showToast({
+            style: Toast.Style.Animated,
+            title: "Please wait",
+          });
           try {
             // Check if XcodeSimulator is shutdown
             if (isShutdown) {
@@ -90,15 +93,18 @@ function actions(
             // Hide loading Toast
             await loadingToast.hide();
             // Show failure Toast
-            return showToast(
-              ToastStyle.Failure,
-              `Failed to ${isShutdown ? "boot" : "shutdown"} ${xcodeSimulator.name}`
-            );
+            return showToast({
+              style: Toast.Style.Failure,
+              title: `Failed to ${isShutdown ? "boot" : "shutdown"} ${xcodeSimulator.name}`,
+            });
           }
           // Hide loading Toast
           await loadingToast.hide();
           // Show success Toast
-          return showToast(ToastStyle.Success, `${xcodeSimulator.name} ${isShutdown ? "booted" : "shutdown"}`);
+          return showToast({
+            style: Toast.Style.Success,
+            title: `${xcodeSimulator.name} ${isShutdown ? "booted" : "shutdown"}`,
+          });
         }}
       />
     </ActionPanel>

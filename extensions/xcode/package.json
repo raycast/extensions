@@ -99,7 +99,7 @@
     "Apple Developer"
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
+    "@raycast/api": "^1.29.1",
     "dedent": "^0.7.0",
     "node-fetch": "^3.0.0",
     "rxjs": "^7.4.0",
@@ -120,6 +120,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

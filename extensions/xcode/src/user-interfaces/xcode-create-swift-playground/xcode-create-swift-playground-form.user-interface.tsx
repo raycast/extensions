@@ -1,4 +1,4 @@
-import { ActionPanel, Form, Navigation, showHUD, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import { Action, ActionPanel, Form, Navigation, showHUD, showToast, Toast } from "@raycast/api";
 import { XcodeSwiftPlaygroundService } from "../../services/xcode-swift-playground.service";
 import { XcodeSwiftPlaygroundPlatform } from "../../models/swift-playground/xcode-swift-playground-platform.model";
 import { XcodeSwiftPlayground } from "../../models/swift-playground/xcode-swift-playground.model";
@@ -19,10 +19,10 @@ export function xcodeCreateSwiftPlaygroundForm(
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction
+          <Action.SubmitForm
             title={"Create Swift Playground"}
-            onSubmit={(formValues) => {
-              onFormSubmit(formValues, xcodeSwiftPlaygroundService, navigation);
+            onSubmit={async (formValues) => {
+              await onFormSubmit(formValues, xcodeSwiftPlaygroundService, navigation);
             }}
           />
         </ActionPanel>
@@ -75,14 +75,20 @@ async function onFormSubmit(
     // Log error
     console.log(error);
     // Show failure Toast
-    await showToast(ToastStyle.Failure, "An error occurred while creating the Swift Playground");
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "An error occurred while creating the Swift Playground",
+    });
     // Return out of function
     return;
   }
   // Check if Swift Playground already exists and should not be opened
   if (swiftPlayground.alreadyExists && !formValues.open) {
     // Inform user that the Playground already exists
-    return showToast(ToastStyle.Failure, "Swift Playground already exists");
+    return showToast({
+      style: Toast.Style.Failure,
+      title: "Swift Playground already exists",
+    });
   }
   // Initialize success message title
   const successMessageTitle = [
@@ -91,7 +97,7 @@ async function onFormSubmit(
     "at",
     tildify(swiftPlayground.path),
   ].join(" ");
-  // Check if should open Swift Playground after creation
+  // Check if Swift Playground should be opened after creation
   if (formValues.open) {
     try {
       // Open Swift Playground
@@ -100,11 +106,17 @@ async function onFormSubmit(
       await showHUD(successMessageTitle);
     } catch {
       // Show failure Toast
-      await showToast(ToastStyle.Failure, "Swift Playground could not be opened");
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Swift Playground could not be opened",
+      });
     }
   } else {
     // Show success Toast
-    await showToast(ToastStyle.Success, successMessageTitle);
+    await showToast({
+      style: Toast.Style.Success,
+      title: successMessageTitle,
+    });
   }
   // Pop to root
   navigation.pop();

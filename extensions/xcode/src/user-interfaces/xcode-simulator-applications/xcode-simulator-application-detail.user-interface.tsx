@@ -1,5 +1,5 @@
 import { XcodeSimulatorApplication } from "../../models/simulator/xcode-simulator-application.model";
-import { ActionPanel, CopyToClipboardAction, Icon, List, Navigation, ShowInFinderAction } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Navigation } from "@raycast/api";
 
 /**
  * Xcode Simulator Application Detail
@@ -27,8 +27,8 @@ export function xcodeSimulatorApplicationDetail(
               title={directory[0]}
               actions={
                 <ActionPanel>
-                  <ShowInFinderAction path={directory[1]} />
-                  <CopyToClipboardAction content={directory[1]} />
+                  <Action.ShowInFinder path={directory[1]} />
+                  <Action.CopyToClipboard content={directory[1]} />
                 </ActionPanel>
               }
             />

@@ -1,5 +1,5 @@
 import { AppleDeveloperDocumentationEntry } from "../../models/apple-developer-documentation/apple-developer-documentation-entry.model";
-import { ActionPanel, CopyToClipboardAction, Icon, ImageLike, List, OpenAction } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
 /**
  * Apple Developer Documentation List Item
@@ -17,8 +17,8 @@ export function appleDeveloperDocumentationListItem(
       accessoryTitle={appleDeveloperDocumentationEntry.platform.at(0)}
       actions={
         <ActionPanel>
-          <OpenAction title="Open in Browser" icon={Icon.Globe} target={appleDeveloperDocumentationEntry.url} />
-          <CopyToClipboardAction content={appleDeveloperDocumentationEntry.url} />
+          <Action.OpenInBrowser title="Open in Browser" icon={Icon.Globe} url={appleDeveloperDocumentationEntry.url} />
+          <Action.CopyToClipboard content={appleDeveloperDocumentationEntry.url} />
         </ActionPanel>
       }
     />
@@ -29,7 +29,7 @@ export function appleDeveloperDocumentationListItem(
  * Retrieve icon for AppleDeveloperDocumentationEntry
  * @param appleDeveloperDocumentationEntry The AppleDeveloperDocumentationEntry
  */
-function icon(appleDeveloperDocumentationEntry: AppleDeveloperDocumentationEntry): ImageLike | undefined {
+function icon(appleDeveloperDocumentationEntry: AppleDeveloperDocumentationEntry): Icon | undefined {
   switch (appleDeveloperDocumentationEntry.type) {
     case "General":
       return Icon.Window;
