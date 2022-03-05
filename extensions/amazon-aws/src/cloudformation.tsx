@@ -50,7 +50,7 @@ export default function ListStacks() {
   return (
     <List isLoading={!state.loaded} searchBarPlaceholder="Filter stacks by name...">
       {state.stacks.map((s) => (
-        <CloudFormationStack key={s.StackName} stack={s} />
+        <CloudFormationStack key={s.StackId} stack={s} />
       ))}
     </List>
   );
@@ -62,7 +62,7 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
   return (
     <List.Item
       id={stack.StackName}
-      key={stack.StackName}
+      key={stack.StackId}
       title={stack.StackName}
       accessoryTitle={stack.LastUpdatedTime ? new Date(stack.LastUpdatedTime).toLocaleString() : undefined}
       actions={
