@@ -69,25 +69,29 @@ export default function SearchLaracastsLessons() {
         hitsPerPage: 15,
       })
       .then((res) => {
-        setIsLoading(false);
         return Object.entries(_.groupBy(res.hits, "type")) || [];
       })
       .catch((err) => {
-        setIsLoading(false);
         showToast(Toast.Style.Failure, "Error searching laracasts lessons", err.message);
         return [];
       });
   };
 
   useEffect(() => {
-    (async () => setSearchResults(await search()))();
+    (async () => {
+      setSearchResults(await search());
+      setIsLoading(false);
+    })();
   }, []);
   return (
     <List
       throttle={true}
       isLoading={isLoading}
       searchBarPlaceholder={"Search Laracasts"}
-      onSearchTextChange={async (query) => setSearchResults(await search(query))}
+      onSearchTextChange={async (query) => {
+        setSearchResults(await search(query));
+        setIsLoading(false);
+      }}
     >
       {searchResults?.map(([hitType, hitTypeResults]) => (
         <List.Section title={hitType.toUpperCase()} key={hitType}>
