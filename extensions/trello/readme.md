@@ -12,7 +12,7 @@ You need three values for the extension to work:
 
 ## Commands
 
-There are two commands in the extension:
+The extension has two commands:
 
 1. _Fetch ToDos_: Fetches all todos assigned to you on Trello.
 2. _Search ToDos_: Text search on all todos on all boards you are a member of.
