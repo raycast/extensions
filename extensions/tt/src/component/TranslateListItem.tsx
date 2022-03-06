@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  Detail,
   List,
   showToast,
   Toast,
@@ -10,30 +9,14 @@ import {
 import { TranslateListItemData } from '../service/type'
 import { FunctionComponent, useCallback } from 'react'
 import { L } from '../constant'
+import { FullText } from './FullText'
 
 export const TranslateListItem: FunctionComponent<Props> = (props) => {
-  const { item, onSave } = props
+  const { source, item, onSave } = props
   const { push } = useNavigation()
   const onAction = useCallback(() => {
     if (item.text) {
-      // todo: support URL
-      return push(
-        <Detail
-          markdown={item.text}
-          navigationTitle={item.service}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Section>
-                <Action.CopyToClipboard
-                  title={L.Copy}
-                  content={item.text}
-                  shortcut={{ modifiers: ['cmd'], key: '.' }}
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />,
-      )
+      return push(<FullText source={source} item={item} />)
     }
 
     return showToast({
@@ -65,6 +48,7 @@ export const TranslateListItem: FunctionComponent<Props> = (props) => {
 }
 
 type Props = {
+  source: string
   item: TranslateListItemData
   onSave(): void
 }
