@@ -59,8 +59,8 @@ export default function ApplicationsList(props: { setToSurfBrowser: any }) {
           allApplications[i].name,
           allApplications[i].path,
           allApplications[i].bundleId,
-          isAdded(localApp, allApplications[i].path),
-          isSuggest(suggestApp, allApplications[i].path)
+          localApp.includes(allApplications[i].path),
+          suggestApp.includes(allApplications[i].path)
         );
       }
       setActionNums(actionNums + 1);
@@ -74,8 +74,8 @@ export default function ApplicationsList(props: { setToSurfBrowser: any }) {
   return (
     <List isLoading={applications.length === 0} searchBarPlaceholder={"Search and Add"}>
       <List.Section title="Surf Browser">
-        {applications.map((application, index) => {
-          if (application.add == true) {
+        {applications.map((application) => {
+          if (application.add) {
             return (
               <ApplicationsListItem
                 key={application.bundleId}
@@ -89,7 +89,7 @@ export default function ApplicationsList(props: { setToSurfBrowser: any }) {
       </List.Section>
       <List.Section title="Suggest">
         {applications.map((application) => {
-          if (application.add == false && application.suggest == true) {
+          if (!application.add && application.suggest) {
             return (
               <ApplicationsListItem
                 key={application.bundleId}
@@ -103,7 +103,7 @@ export default function ApplicationsList(props: { setToSurfBrowser: any }) {
       </List.Section>
       <List.Section title="Application">
         {applications.map((application) => {
-          if (application.add == false && application.suggest == false) {
+          if (!application.add && !application.suggest) {
             return (
               <ApplicationsListItem
                 key={application.bundleId}
@@ -130,7 +130,7 @@ function ApplicationsListItem(props: { application: MyApplication; addApp: boole
       title={application.name}
       icon={{ fileIcon: application.path }}
       accessoryIcon={(function () {
-        if (application.add == true) {
+        if (application.add) {
           return Icon.Star;
         } else {
           return "";
@@ -140,28 +140,28 @@ function ApplicationsListItem(props: { application: MyApplication; addApp: boole
         <ActionPanel>
           <Action
             title={(function () {
-              if (application.add == true) {
+              if (application.add) {
                 return "Remove " + application.name;
               } else {
                 return "Add " + application.name;
               }
             })()}
             icon={(function () {
-              if (application.add == true) {
+              if (application.add) {
                 return Icon.Trash;
               } else {
                 return Icon.Star;
               }
             })()}
             onAction={async () => {
-              if (application.add == true) {
+              if (application.add) {
                 await LocalStorage.removeItem(application.name);
                 setAddApp(!addApp);
-                showToast(Toast.Style.Success, "Remove Success!");
+                await showToast(Toast.Style.Success, "Remove Success!");
               } else {
                 await LocalStorage.setItem(application.name, application.path);
                 setAddApp(!addApp);
-                showToast(Toast.Style.Success, "Add Success!");
+                await showToast(Toast.Style.Success, "Add Success!");
               }
             }}
           />
@@ -171,27 +171,11 @@ function ApplicationsListItem(props: { application: MyApplication; addApp: boole
             onAction={async () => {
               await LocalStorage.clear();
               setAddApp(!addApp);
-              showToast(Toast.Style.Success, "Remove Success!");
+              await showToast(Toast.Style.Success, "Remove Success!");
             }}
-          ></Action>
+          />
         </ActionPanel>
       }
     />
   );
-}
-
-function isAdded(array: string[], element: string): boolean {
-  if (array.includes(element)) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
-function isSuggest(array: string[], element: string): boolean {
-  if (array.includes(element)) {
-    return true;
-  } else {
-    return false;
-  }
 }

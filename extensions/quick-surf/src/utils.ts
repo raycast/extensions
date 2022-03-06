@@ -1,39 +1,39 @@
 import { getSelectedText } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
-export enum TextType {
+export enum ItemType {
   TEXT = "Text",
   URL = "URL",
   NULL = " ",
 }
 
-export interface SearchText {
-  type: TextType;
+export interface ItemInput {
+  type: ItemType;
   content: string;
 }
 
-const inputText = () =>
+const selectedText = () =>
   getSelectedText()
     .then((text) => (isNotEmpty(text) ? text : runAppleScript("the clipboard")))
     .catch(() => runAppleScript("the clipboard"))
     .then((text) => (isNotEmpty(text) ? text : ""))
     .catch(() => "");
 
-export async function getInputText(): Promise<SearchText> {
-  const text: string = await inputText();
-  return setInputText(text);
+export async function fetchSelectedItem(): Promise<ItemInput> {
+  const text: string = await selectedText();
+  return assembleInputItem(text);
 }
 
-export function setInputText(text: string): SearchText {
+export function assembleInputItem(text: string): ItemInput {
   const trimText = text.trim();
   if (isNotEmpty(trimText)) {
     if (isUrl(trimText)) {
-      return { type: TextType.URL, content: trimText };
+      return { type: ItemType.URL, content: trimText };
     } else {
-      return { type: TextType.TEXT, content: trimText };
+      return { type: ItemType.TEXT, content: trimText };
     }
   } else {
-    return { type: TextType.NULL, content: trimText };
+    return { type: ItemType.NULL, content: trimText };
   }
 }
 

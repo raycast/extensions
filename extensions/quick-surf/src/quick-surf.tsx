@@ -13,7 +13,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { urlBuilder, getInputText, SearchText, TextType, setInputText } from "./utils";
+import { urlBuilder, fetchSelectedItem, ItemInput, ItemType, assembleInputItem } from "./utils";
 import { GOOGLE_SEARCH, BING_SEARCH, BAIDU_SEARCH, DUCKDUCKGO_SEARCH } from "./constants";
 import ApplicationsList from "./surfbrowser";
 
@@ -22,93 +22,89 @@ interface Preferences {
 }
 
 //main view
-export default function BrowserApplicationList() {
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [text, setText] = useState<SearchText>({ type: TextType.NULL, content: "" });
+export default function SurfWithSpecificBrowser() {
+  const [browser, setBrowser] = useState<Application[]>([]);
+  const [itemInput, setItemInput] = useState<ItemInput>({ type: ItemType.NULL, content: "" });
   const [toSurfBrowser, setToSurfBrowser] = useState<number>(0);
 
   useEffect(() => {
-    async function getText() {
-      setText(await getInputText());
+    async function fetchSelectedText() {
+      setItemInput(await fetchSelectedItem());
     }
 
-    getText();
+    fetchSelectedText();
   }, []);
 
   useEffect(() => {
-    async function fetchApplications() {
-      const applicationsAdd = Object.entries(await LocalStorage.allItems());
-      const apps = [];
-      for (const [key, value] of applicationsAdd) {
-        apps.push({ bundleId: "", name: key, path: value + "" });
+    async function fetchBrowsers() {
+      const entries = Object.entries(await LocalStorage.allItems());
+      const browsers = [];
+      for (const [key, value] of entries) {
+        browsers.push({ bundleId: "", name: key, path: value + "" });
       }
-      apps.sort(function compare(a: Application, b: Application) {
+      browsers.sort(function compare(a: Application, b: Application) {
         const bandA = a.name.toUpperCase();
         const bandB = b.name.toUpperCase();
         return bandA > bandB ? 1 : -1;
       });
-      setApplications(apps);
+      setBrowser(browsers);
     }
 
-    fetchApplications();
+    fetchBrowsers();
   }, [toSurfBrowser]);
 
   return (
     <List
-      isLoading={applications.length === 0}
-      searchBarPlaceholder={"Surf any with..."}
+      isLoading={browser.length === 0}
+      searchBarPlaceholder={"Surf anything with..."}
       selectedItemId={(function () {
-        if (applications.length === 0) {
+        if (browser.length === 0) {
           return "GetBrowser";
         }
-        return applications[0].name;
+        return browser[0].name;
       })()}
       onSearchTextChange={(input) => {
-        setText(setInputText(input));
+        setItemInput(assembleInputItem(input));
       }}
     >
-      <List.Section title={"Type: " + text.type}>
+      <List.Section title={"Type: " + itemInput.type}>
         <List.Item
           id=""
-          title={text.content}
+          title={itemInput.content}
           icon={Icon.Text}
-          accessoryTitle={"WordCount  " + text.content.length}
+          accessoryTitle={"WordCount  " + itemInput.content.length}
           actions={
             <ActionPanel>
               <Action
-                title={(function (input: SearchText) {
+                title={(function (input: ItemInput) {
                   switch (input.type) {
-                    case TextType.TEXT: {
+                    case ItemType.TEXT: {
                       return "Search with Default Browser";
                     }
-                    case TextType.URL: {
+                    case ItemType.URL: {
                       return "Open with Browser";
                     }
-                    case TextType.NULL: {
+                    case ItemType.NULL: {
                       return "Detect";
                     }
                   }
-                })(text)}
-                icon={(function (input: SearchText) {
+                })(itemInput)}
+                icon={(function (input: ItemInput) {
                   switch (input.type) {
-                    case TextType.TEXT:
+                    case ItemType.TEXT:
                       return Icon.MagnifyingGlass;
-                    case TextType.URL:
+                    case ItemType.URL:
                       return Icon.Link;
-                    case TextType.NULL:
+                    case ItemType.NULL:
                       return Icon.Binoculars;
                   }
-                })(text)}
+                })(itemInput)}
                 onAction={async () => {
-                  try {
-                    if (text.type == TextType.NULL) {
-                      setText(await getInputText());
-                    } else {
-                      showHUD("Surf with default browser!");
-                      open(searchURLBuilder(text.content));
-                    }
-                  } catch (error) {
-                    console.debug("error " + error);
+                  if (itemInput.type == ItemType.NULL) {
+                    setItemInput(await fetchSelectedItem());
+                  } else {
+                    showHUD("Surf with default browser!");
+                    open(searchEngineURLBuilder(itemInput.content));
                   }
                 }}
               />
@@ -117,14 +113,19 @@ export default function BrowserApplicationList() {
         />
       </List.Section>
       <List.Section title="Surf Browser">
-        {applications.map((application, index) => {
+        {browser.map((application, index) => {
           return (
-            <ApplicationsListItem key={application.path} index={index} inputText={text} application={application} />
+            <ApplicationsListItem
+              key={application.path}
+              index={index}
+              inputText={itemInput}
+              application={application}
+            />
           );
         })}
       </List.Section>
 
-      <GetBrowser key={"GetBrowser"} applications={applications} setToSurfBrowser={setToSurfBrowser} />
+      <GetBrowser key={"GetBrowser"} applications={browser} setToSurfBrowser={setToSurfBrowser} />
     </List>
   );
 }
@@ -162,7 +163,7 @@ function GetBrowser(props: { applications: Application[]; setToSurfBrowser: any 
 }
 
 //list item
-function ApplicationsListItem(props: { index: number; inputText: SearchText; application: Application }) {
+function ApplicationsListItem(props: { index: number; inputText: ItemInput; application: Application }) {
   const index = props.index;
   const inputText = props.inputText;
   const application = props.application;
@@ -179,33 +180,33 @@ function ApplicationsListItem(props: { index: number; inputText: SearchText; app
       actions={
         <ActionPanel>
           <Action
-            title={(function (input: SearchText): string {
+            title={(function (input: ItemInput): string {
               let action = "";
               switch (input.type) {
-                case TextType.TEXT:
+                case ItemType.TEXT:
                   action = "Search with ";
                   break;
-                case TextType.URL:
+                case ItemType.URL:
                   action = "Open with ";
                   break;
-                case TextType.NULL:
+                case ItemType.NULL:
                   action = "";
                   break;
               }
               return action + application.name;
             })(inputText)}
-            icon={(function (input: SearchText) {
+            icon={(function (input: ItemInput) {
               switch (input.type) {
-                case TextType.TEXT:
+                case ItemType.TEXT:
                   return Icon.MagnifyingGlass;
-                case TextType.URL:
+                case ItemType.URL:
                   return Icon.Link;
-                case TextType.NULL:
+                case ItemType.NULL:
                   return Icon.Window;
               }
             })(inputText)}
             onAction={async () => {
-              actionApplication(inputText, application);
+              actionOnApplicationItem(inputText, application);
             }}
           />
         </ActionPanel>
@@ -214,21 +215,21 @@ function ApplicationsListItem(props: { index: number; inputText: SearchText; app
   );
 }
 
-function actionApplication(inputText: SearchText, app: Application) {
-  if (inputText.type != TextType.NULL) {
-    if (inputText.type == TextType.URL) {
+function actionOnApplicationItem(inputText: ItemInput, app: Application) {
+  if (inputText.type != ItemType.NULL) {
+    if (inputText.type == ItemType.URL) {
       showHUD("Open URL in" + app.name);
     } else {
       const preference = getPreferenceValues<Preferences>();
       showHUD("Search Text in " + Object.values(preference)[0]);
     }
-    open(searchURLBuilder(inputText.content), app.path);
+    open(searchEngineURLBuilder(inputText.content), app.path);
   } else {
     showToast(Toast.Style.Failure, "No Text or URL Detected!");
   }
 }
 
-function searchURLBuilder(content: string): string {
+function searchEngineURLBuilder(content: string): string {
   const preference = getPreferenceValues<Preferences>();
   switch (Object.values(preference)[0]) {
     case "Google": {
