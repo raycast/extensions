@@ -19,7 +19,6 @@ const inputText = () =>
     .then((text) => (isNotEmpty(text) ? text : ""))
     .catch(() => "");
 
-
 export async function getInputText(): Promise<SearchText> {
   const text: string = await inputText();
   return setInputText(text);

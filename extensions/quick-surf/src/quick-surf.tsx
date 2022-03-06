@@ -92,11 +92,11 @@ export default function BrowserApplicationList() {
                 icon={(function (input: SearchText) {
                   switch (input.type) {
                     case TextType.TEXT:
-                      return Icon.MagnifyingGlass
+                      return Icon.MagnifyingGlass;
                     case TextType.URL:
-                      return Icon.Link
+                      return Icon.Link;
                     case TextType.NULL:
-                      return Icon.Binoculars
+                      return Icon.Binoculars;
                   }
                 })(text)}
                 onAction={async () => {
@@ -105,10 +105,10 @@ export default function BrowserApplicationList() {
                       setText(await getInputText());
                     } else {
                       showHUD("Surf with default browser!");
-                      open(searchURLBuilder(text.content))
+                      open(searchURLBuilder(text.content));
                     }
                   } catch (error) {
-                    console.debug("error " + error)
+                    console.debug("error " + error);
                   }
                 }}
               />
@@ -197,11 +197,11 @@ function ApplicationsListItem(props: { index: number; inputText: SearchText; app
             icon={(function (input: SearchText) {
               switch (input.type) {
                 case TextType.TEXT:
-                  return Icon.MagnifyingGlass
+                  return Icon.MagnifyingGlass;
                 case TextType.URL:
-                  return Icon.Link
+                  return Icon.Link;
                 case TextType.NULL:
-                  return Icon.Window
+                  return Icon.Window;
               }
             })(inputText)}
             onAction={async () => {
