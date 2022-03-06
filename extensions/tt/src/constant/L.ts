@@ -1,4 +1,5 @@
 export enum L {
+  TT = 'TT',
   Original_Text = 'Original text',
   Translated_text = 'Translated text',
   Saved_search_results = 'Saved search results',

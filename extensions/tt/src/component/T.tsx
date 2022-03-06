@@ -22,7 +22,7 @@ export const T: FunctionComponent = () => {
 
   return (
     <List
-      navigationTitle="T"
+      navigationTitle={L.TT}
       isLoading={isLoading}
       onSearchTextChange={setText}
       searchBarPlaceholder={L.Original_Text}
