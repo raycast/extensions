@@ -146,6 +146,13 @@ function ApplicationsListItem(props: { application: MyApplication; addApp: boole
                 return "Add " + application.name;
               }
             })()}
+            icon={(function () {
+              if (application.add == true) {
+                return Icon.Trash;
+              } else {
+                return Icon.Star;
+              }
+            })()}
             onAction={async () => {
               if (application.add == true) {
                 await LocalStorage.removeItem(application.name);
@@ -159,7 +166,8 @@ function ApplicationsListItem(props: { application: MyApplication; addApp: boole
             }}
           />
           <Action
-            title={"Remove All Surf Browsers"}
+            title={"Remove All Browsers"}
+            icon={Icon.Trash}
             onAction={async () => {
               await LocalStorage.clear();
               setAddApp(!addApp);

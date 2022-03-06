@@ -13,7 +13,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { urlBuilder, getInputText, SearchText, TextType, wordCount, setInputText } from "./utils";
+import { urlBuilder, getInputText, SearchText, TextType, setInputText } from "./utils";
 import { GOOGLE_SEARCH, BING_SEARCH, BAIDU_SEARCH, DUCKDUCKGO_SEARCH } from "./constants";
 import ApplicationsList from "./surfbrowser";
 
@@ -30,7 +30,6 @@ export default function BrowserApplicationList() {
   useEffect(() => {
     async function getText() {
       setText(await getInputText());
-      setToSurfBrowser(0);
     }
 
     getText();
@@ -73,26 +72,44 @@ export default function BrowserApplicationList() {
           id=""
           title={text.content}
           icon={Icon.Text}
-          accessoryTitle={"WordCount  " + wordCount(text.content)}
+          accessoryTitle={"WordCount  " + text.content.length}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
+              <Action
                 title={(function (input: SearchText) {
                   switch (input.type) {
                     case TextType.TEXT: {
-                      return "Search with Browser";
+                      return "Search with Default Browser";
                     }
                     case TextType.URL: {
                       return "Open with Browser";
                     }
                     case TextType.NULL: {
-                      return "Open Browser";
+                      return "Detect";
                     }
                   }
                 })(text)}
-                url={actionInputText(text)}
-                onOpen={() => {
-                  showHUD("Search in default browser!");
+                icon={(function (input: SearchText) {
+                  switch (input.type) {
+                    case TextType.TEXT:
+                      return Icon.MagnifyingGlass
+                    case TextType.URL:
+                      return Icon.Link
+                    case TextType.NULL:
+                      return Icon.Binoculars
+                  }
+                })(text)}
+                onAction={async () => {
+                  try {
+                    if (text.type == TextType.NULL) {
+                      setText(await getInputText());
+                    } else {
+                      showHUD("Surf with default browser!");
+                      open(searchURLBuilder(text.content))
+                    }
+                  } catch (error) {
+                    console.debug("error " + error)
+                  }
                 }}
               />
             </ActionPanel>
@@ -133,6 +150,7 @@ function GetBrowser(props: { applications: Application[]; setToSurfBrowser: any 
         <ActionPanel title="Game controls">
           <Action
             title="Get More Browser"
+            icon={Icon.Gear}
             onAction={() => {
               push(<ApplicationsList setToSurfBrowser={setToSurfBrowser} />);
             }}
@@ -176,6 +194,16 @@ function ApplicationsListItem(props: { index: number; inputText: SearchText; app
               }
               return action + application.name;
             })(inputText)}
+            icon={(function (input: SearchText) {
+              switch (input.type) {
+                case TextType.TEXT:
+                  return Icon.MagnifyingGlass
+                case TextType.URL:
+                  return Icon.Link
+                case TextType.NULL:
+                  return Icon.Window
+              }
+            })(inputText)}
             onAction={async () => {
               actionApplication(inputText, application);
             }}
@@ -186,32 +214,20 @@ function ApplicationsListItem(props: { index: number; inputText: SearchText; app
   );
 }
 
-function actionInputText(inputText: SearchText) {
-  if (inputText.type != TextType.NULL) {
-    if (inputText.type == TextType.URL) {
-      return inputText.content;
-    } else {
-      return searchURLBuilder(inputText.content);
-    }
-  } else {
-    return searchURLBuilder("");
-  }
-}
-
 function actionApplication(inputText: SearchText, app: Application) {
   if (inputText.type != TextType.NULL) {
     if (inputText.type == TextType.URL) {
-      open(inputText.content, app.path);
       showHUD("Open URL in" + app.name);
     } else {
       const preference = getPreferenceValues<Preferences>();
-      open(searchURLBuilder(inputText.content), app.path);
       showHUD("Search Text in " + Object.values(preference)[0]);
     }
+    open(searchURLBuilder(inputText.content), app.path);
   } else {
     showToast(Toast.Style.Failure, "No Text or URL Detected!");
   }
 }
+
 function searchURLBuilder(content: string): string {
   const preference = getPreferenceValues<Preferences>();
   switch (Object.values(preference)[0]) {

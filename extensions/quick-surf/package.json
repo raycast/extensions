@@ -43,11 +43,11 @@
         }
       ]
     }
-   
   ],
   "dependencies": {
     "@raycast/api": "^1.29.1",
     "react-devtools-core": "^4.23.0",
+    "run-applescript": "^6.0.0",
     "yarn": "^1.22.17"
   },
   "resolutions": {
