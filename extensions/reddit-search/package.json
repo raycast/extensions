@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "reddit-search",
   "title": "Reddit Search",
-  "description": "Searches reddit and displays the first 10 results",
+  "description": "Search Reddit, Subreddits, or within Subreddits and list the results in Raycast.",
   "icon": "reddit_icon_512.png",
   "author": "ewlcheng",
   "license": "MIT",
@@ -10,7 +10,7 @@
     {
       "name": "index",
       "title": "Search Reddit",
-      "description": "Searches Reddit and displays the first 10 results with the option to show all results.",
+      "description": "Searches Reddit and lists the results with the option to sort, show more, or show the results on Reddit",
       "mode": "view"
     }
   ],
