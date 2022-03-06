@@ -30,7 +30,12 @@ export const T: FunctionComponent = () => {
     >
       <List.Section title={text} subtitle={L.Translated_text}>
         {itemList.map((item) => (
-          <TranslateListItem key={item.key} source={text} item={item} onSave={onSave} />
+          <TranslateListItem
+            key={item.key}
+            source={text}
+            item={item}
+            onSave={onSave}
+          />
         ))}
       </List.Section>
       <List.Section

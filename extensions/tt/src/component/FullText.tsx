@@ -5,7 +5,10 @@ import { TranslateListItemData } from '../service/type'
 
 export const FullText: FunctionComponent<Props> = (props) => {
   const { source, item } = props
-  const markdown = useMemo(() => [source, item.text].join('\n\n---\n\n'), [])
+  const markdown = useMemo(
+    () => [source, item.text].join('\n\n---\n\n'),
+    [],
+  )
 
   return (
     <Detail
