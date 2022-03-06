@@ -1,4 +1,4 @@
-import { Icon, List, ActionPanel, Action, Color } from '@raycast/api';
+import { Icon, List, ActionPanel, Action, Color, showToast, Toast } from '@raycast/api';
 import { SWRConfig } from 'swr';
 
 import { cacheConfig } from '@lib/cache';
@@ -20,6 +20,25 @@ function BudgetList() {
   const [activeBudgetId, setActiveBudgetId] = useLocalStorage('activeBudgetId', '');
   const [, setActiveBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
 
+  const selectActiveBudget = (budget: BudgetSummary) => () => {
+    setActiveBudgetId(budget.id ?? '');
+    setActiveBudgetCurrency(budget.currency_format ?? null);
+
+    const wasSelectedBudget = budget.id === activeBudgetId;
+
+    if (wasSelectedBudget) {
+      showToast({
+        title: `"${budget.name}" is already the active budget`,
+        message: 'Settings will be updated across Raynab.',
+      });
+    } else {
+      showToast({
+        title: `"${budget.name}" is now the active budget`,
+        message: 'It will be used across all commands in Raynab.',
+      });
+    }
+  };
+
   return (
     <List isLoading={isValidating}>
       {budgets?.map((budget) => (
@@ -27,10 +46,7 @@ function BudgetList() {
           key={budget.id}
           budget={budget}
           selectedId={activeBudgetId ?? ''}
-          onToggle={() => {
-            setActiveBudgetId(budget?.id ?? '');
-            setActiveBudgetCurrency(budget.currency_format ?? null);
-          }}
+          onToggle={selectActiveBudget(budget)}
         />
       ))}
     </List>
