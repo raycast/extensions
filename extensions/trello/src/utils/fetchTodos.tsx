@@ -29,7 +29,7 @@ export const returnTodos = async (searchTerm: string): Promise<TrelloFetchRespon
         const json = await response.json();
         return json as TrelloFetchResponse;
       } catch (error) {
-        showToast(ToastStyle.Failure, "Could not fetch ToDos");
+        showToast(ToastStyle.Failure, "An error occured", "Could not fetch todos, check your credentials");
         return Promise.resolve([]);
       }
     }
