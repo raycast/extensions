@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Fetch Todos",
+      "title": "Fetch Assigned Todos",
       "subtitle": "Trello",
       "description": "Fetch all assigned todos",
       "mode": "view"
