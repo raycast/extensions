@@ -16,19 +16,15 @@ import { basename, dirname } from "path";
 import { useEffect, useState } from "react";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
-import { appName, getRecentEntries } from "./db";
-import {
-  EntryLike,
-  isFileEntry,
-  isFolderEntry,
-  isRemoteEntry,
-  isWorkspaceEntry,
-  Preferences,
-  RemoteEntry,
-} from "./types";
+import { build, getRecentEntries } from "./db";
+import { EntryLike, isFileEntry, isFolderEntry, isRemoteEntry, isWorkspaceEntry, RemoteEntry } from "./types";
 
-const preferences: Preferences = getPreferenceValues();
-const appKey: string = preferences.isInsiders ? "com.microsoft.VSCodeInsiders" : "com.microsoft.VSCode";
+const appKeyMapping = {
+  Code: "com.microsoft.VSCode",
+  "Code - Insiders": "com.microsoft.VSCodeInsiders",
+} as const;
+
+const appKey: string = appKeyMapping[build] ?? appKeyMapping.Code;
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
@@ -87,7 +83,7 @@ function RemoteListItem(props: { entry: RemoteEntry }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction title={`Open in ${appName}`} icon="action-icon.png" url={uri} />
+            <OpenInBrowserAction title={`Open in ${build}`} icon="action-icon.png" url={uri} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -110,7 +106,7 @@ function LocalListItem(props: { uri: string }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenAction title={`Open in ${appName}`} icon="action-icon.png" target={props.uri} application={appKey} />
+            <OpenAction title={`Open in ${build}`} icon="action-icon.png" target={props.uri} application={appKey} />
             <ShowInFinderAction path={path} />
             <OpenWithAction path={path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           </ActionPanel.Section>

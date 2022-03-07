@@ -3,13 +3,13 @@ import { readFile } from "fs/promises";
 import { homedir } from "os";
 import path from "path";
 import initSqlJs from "sql.js";
-import { EntryLike, Preferences } from "./types";
+import { EntryLike, Preferences, VSCodeBuild } from "./types";
 
 const preferences: Preferences = getPreferenceValues();
-export const appName: string = preferences.isInsiders ? "Code - Insiders" : "Code";
+export const build: VSCodeBuild = preferences.build;
 
-const DB_PATH = `${homedir()}/Library/Application Support/${appName}/User/globalStorage/state.vscdb`;
-const LEGACY_STORAGE_PATH = `${homedir()}/Library/Application Support/${appName}/storage.json`;
+const DB_PATH = `${homedir()}/Library/Application Support/${build}/User/globalStorage/state.vscdb`;
+const LEGACY_STORAGE_PATH = `${homedir()}/Library/Application Support/${build}/storage.json`;
 
 async function loadDB() {
   const fileBuffer = await readFile(DB_PATH);

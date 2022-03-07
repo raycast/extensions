@@ -43,6 +43,10 @@ export function isRemoteEntry(entry: EntryLike): entry is RemoteEntry {
 
 export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry;
 
+export enum VSCodeBuild {
+  Code = "Code",
+  Insiders = "Code - Insiders",
+}
 export interface Preferences {
-  isInsiders: boolean;
+  build: VSCodeBuild;
 }
