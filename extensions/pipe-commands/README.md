@@ -46,6 +46,7 @@ If you want to provide a message to the user, use the standard error stream (`st
 
 # @raycast.title Google Search
 # @raycast.packageName Web Searches
+# @raycast.mode silent
 # @raycast.icon Globe
 # @raycast.argument1 {"type": "text", "percentEncoded": true}
 
@@ -60,9 +61,9 @@ open "https://www.google.com/search?q=$1"
 
 # @raycast.title Prettify JSON
 # @raycast.packageName Developer Utils
+# @raycast.mode replace
 # @raycast.icon Hammer
 # @raycast.argument1 {"type": "text"}
 
-# This script get the input from stdin
-python3 -m json.tool --indent 2
+python3 -m json.tool --indent 2 <<< "$1"
 ```
