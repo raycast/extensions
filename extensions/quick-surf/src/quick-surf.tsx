@@ -231,7 +231,7 @@ function ApplicationsListItem(props: {
 async function actionOnApplicationItem(inputText: ItemInput, setItemInput: any, app: SurfApplication) {
   if (inputText.type != ItemType.NULL) {
     if (inputText.type == ItemType.URL) {
-      await showHUD("Open URL with" + app.name);
+      await showHUD("Open URL with " + app.name);
     } else {
       await showHUD("Search Text by " + preferences().engine);
     }
