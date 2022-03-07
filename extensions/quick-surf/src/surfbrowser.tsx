@@ -63,7 +63,7 @@ export default function ApplicationsList(props: { setSurfBrowsers: any }) {
   }, [surfBrowsers]);
 
   return (
-    <List isLoading={allBrowsers.length === 0} searchBarPlaceholder={"Search and Add"}>
+    <List isLoading={allBrowsers.length === 0} searchBarPlaceholder={"Search browser, email client..."}>
       <List.Section title="SurfBoard">
         {allBrowsers.map((application) => {
           if (application.add) {
@@ -157,27 +157,56 @@ function ApplicationsListItem(props: {
                 });
                 await LocalStorage.setItem("boards", JSON.stringify(browsers));
                 setSurfBrowser(browsers);
-                await showToast(Toast.Style.Success, "Remove Success!");
+                await showToast(Toast.Style.Success, `${application.name} Removed!`);
               } else {
                 application.add = true;
                 browsers.push(application);
                 await LocalStorage.setItem("boards", JSON.stringify(browsers));
                 setSurfBrowser(browsers);
-                await showToast(Toast.Style.Success, "Add Success!");
+                await showToast(Toast.Style.Success, `${application.name} Added!`);
               }
+            }}
+          />
+          <Action
+            title={"Remove Invalid Boards"}
+            icon={Icon.XmarkCircle}
+            onAction={async () => {
+              const newBrowsers = await removeInvalidBoards();
+              await LocalStorage.setItem("boards", JSON.stringify(newBrowsers));
+              setSurfBrowser(newBrowsers);
+              await showToast(Toast.Style.Success, "Invalid Removed!");
             }}
           />
           <Action
             title={"Remove All Boards"}
             icon={Icon.ExclamationMark}
+            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
             onAction={async () => {
               await LocalStorage.removeItem("boards");
               setSurfBrowser([]);
-              await showToast(Toast.Style.Success, "Remove Success!");
+              await showToast(Toast.Style.Success, "All Removed!");
             }}
           />
         </ActionPanel>
       }
     />
   );
+}
+async function removeInvalidBoards(): Promise<SurfApplication[]> {
+  const allApplications = await getApplications();
+  const localBrowsers = await LocalStorage.getItem<string>("boards");
+  let _browsers: SurfApplication[] = [];
+  if (typeof localBrowsers == "string") {
+    _browsers = JSON.parse(localBrowsers);
+  }
+  _browsers.map((val: SurfApplication, index: number) => {
+    if (
+      !allApplications.some((value: Application) => {
+        return value.path == val.path;
+      })
+    ) {
+      _browsers.splice(index, 1);
+    }
+  });
+  return _browsers;
 }

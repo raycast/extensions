@@ -1,5 +1,6 @@
-import { Application, getPreferenceValues, getSelectedText } from "@raycast/api";
+import { Application, getPreferenceValues, getSelectedText, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+import { text } from "stream/consumers";
 
 export interface Preferences {
   engine: string;
@@ -13,8 +14,16 @@ export enum ItemType {
   NULL = " ",
 }
 
+export enum ItemSource {
+  SELECTED = "Selected",
+  CLIPBOARD = "Clipboard",
+  ENTER = "Enter",
+  NULL = " ",
+}
+
 export interface ItemInput {
   type: ItemType;
+  source: ItemSource;
   content: string;
 }
 
@@ -28,6 +37,7 @@ export class SurfApplication implements Application {
   rankEmail: number;
 
   bundleId?: string;
+
   constructor(
     name: string,
     path: string,
@@ -54,39 +64,80 @@ export const preferences = () => {
   return { engine: preferencesMap.get("SurfEngine"), sort: preferencesMap.get("SortBy") };
 };
 
-const selectedText = () =>
-  getSelectedText()
-    .then((text) => (isNotEmpty(text) ? text.substring(0, 8000) : runAppleScript("the clipboard")))
-    .catch(() => runAppleScript("the clipboard"))
-    .then((text) => (isNotEmpty(text) ? text.substring(0, 8000) : ""))
-    .catch(() => "");
+const detectText = () => {
+  return getSelectedText()
+    .then(async (text) =>
+      !isEmpty(text)
+        ? assembleItemSource(text.substring(0, 999), ItemSource.SELECTED)
+        : assembleItemSource(await runAppleScript("the clipboard"), ItemSource.CLIPBOARD)
+    )
+    .catch(async () => assembleItemSource(await runAppleScript("the clipboard"), ItemSource.CLIPBOARD))
+    .then((item) =>
+      !isEmpty(item.content)
+        ? assembleItemSource(item.content.substring(0, 999), ItemSource.CLIPBOARD)
+        : assembleItemSource("", ItemSource.CLIPBOARD)
+    )
+    .catch(() => assembleItemSource("", ItemSource.NULL));
+};
 
-export async function fetchSelectedItem(): Promise<ItemInput> {
-  const text: string = await selectedText();
-  return assembleInputItem(text);
+export async function fetchDetectedItem(): Promise<ItemInput> {
+  const item = await detectText();
+  return assembleItemType(item);
 }
 
-export function assembleInputItem(text: string): ItemInput {
-  const trimText = text.trim();
-  if (isNotEmpty(trimText)) {
-    if (isEmail(trimText)) {
-      return { type: ItemType.EMAIL, content: trimText };
-    } else if (isUrl(trimText)) {
-      return { type: ItemType.URL, content: trimText };
-    } else {
-      return { type: ItemType.TEXT, content: trimText };
-    }
+export function assembleItemSource(text: string, source: ItemSource): ItemInput {
+  return { type: ItemType.NULL, source: source, content: text };
+}
+export function assembleItemType(item: ItemInput): ItemInput {
+  const trimText = item.content.trim();
+  if (isEmpty(trimText)) {
+    return { type: ItemType.NULL, source: ItemSource.NULL, content: trimText };
   } else {
-    return { type: ItemType.NULL, content: trimText };
+    if (isMailTo(trimText)) {
+      return { type: ItemType.EMAIL, source: item.source, content: mailtoBuilder(trimText.slice(7)) };
+    } else if (isEmailGroup(trimText)) {
+      return { type: ItemType.EMAIL, source: item.source, content: mailtoBuilder(trimText) };
+    } else if (isUrl(trimText)) {
+      return { type: ItemType.URL, source: item.source, content: trimText };
+    } else {
+      return { type: ItemType.TEXT, source: item.source, content: trimText };
+    }
   }
 }
 
-const isNotEmpty = (string: string | null | undefined) => {
-  return string != null && String(string).length > 0;
+export const isEmpty = (string: string | null | undefined) => {
+  return !(string != null && String(string).length > 0);
 };
 
+function isMailTo(text: string): boolean {
+  return text.slice(0, 7) == "mailto:" && isEmailGroup(text.slice(7));
+}
+
 function isEmail(text: string): boolean {
-  return text.slice(0, 7) == "mailto:";
+  return /^([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/.test(text);
+}
+
+function isEmailGroup(text: string): boolean {
+  if (isEmpty(text)) {
+    return false;
+  }
+  const emails = text.split(";");
+  let _isEmailGroup = true;
+  emails.forEach((value, index) => {
+    _isEmailGroup = _isEmailGroup && ((isEmpty(value) && index == emails.length - 1) || isEmail(value));
+  });
+  return _isEmailGroup;
+}
+
+function mailtoBuilder(emailGroup: string): string {
+  const emails = emailGroup.split(";");
+  let _emailGroup = "";
+  emails.map((value) => {
+    if (isEmail(value)) {
+      _emailGroup = _emailGroup + value + ";";
+    }
+  });
+  return "mailto:" + _emailGroup;
 }
 
 function isUrl(text: string): boolean {

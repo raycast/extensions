@@ -13,9 +13,12 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
-  assembleInputItem,
-  fetchSelectedItem,
+  assembleItemSource,
+  assembleItemType,
+  fetchDetectedItem,
+  isEmpty,
   ItemInput,
+  ItemSource,
   ItemType,
   preferences,
   SurfApplication,
@@ -27,11 +30,16 @@ import ApplicationsList from "./surfbrowser";
 //main view
 export default function SurfWithSpecificBrowser() {
   const [browsers, setBrowsers] = useState<SurfApplication[]>([]);
-  const [itemInput, setItemInput] = useState<ItemInput>({ type: ItemType.NULL, content: "" });
+  const [itemInput, setItemInput] = useState<ItemInput>({ type: ItemType.NULL, source: ItemSource.NULL, content: "" });
 
   useEffect(() => {
     async function fetchSelectedText() {
-      setItemInput(await fetchSelectedItem());
+      const inputItem = await fetchDetectedItem();
+      if (inputItem.type == ItemType.NULL) {
+        await showToast(Toast.Style.Failure, "Nothing, Enter Now!");
+      } else {
+        setItemInput(inputItem);
+      }
     }
 
     fetchSelectedText().then();
@@ -53,7 +61,7 @@ export default function SurfWithSpecificBrowser() {
   return (
     <List
       isLoading={false}
-      searchBarPlaceholder={"Enter something or mailto: someone "}
+      searchBarPlaceholder={"Enter url, text or email"}
       selectedItemId={(function () {
         if (browsers.length === 0) {
           return "MoreBoards";
@@ -61,10 +69,10 @@ export default function SurfWithSpecificBrowser() {
         return browsers[0].name;
       })()}
       onSearchTextChange={(input) => {
-        setItemInput(assembleInputItem(input));
+        setItemInput(assembleItemType(assembleItemSource(input, ItemSource.ENTER)));
       }}
     >
-      <List.Section title={"Type: " + itemInput.type}>
+      <List.Section title={"Type: " + itemInput.type + "  Source: " + itemInput.source}>
         <List.Item
           id="Type"
           title={itemInput.content}
@@ -77,9 +85,9 @@ export default function SurfWithSpecificBrowser() {
                 icon={actionIcon(itemInput)}
                 onAction={async () => {
                   if (itemInput.type == ItemType.NULL) {
-                    const selectedItem = await fetchSelectedItem();
+                    const selectedItem = await fetchDetectedItem();
                     if (selectedItem.type == ItemType.NULL) {
-                      await showToast(Toast.Style.Failure, "Nothing Detected!");
+                      await showToast(Toast.Style.Failure, "Nothing, Enter Now!");
                     } else {
                       setItemInput(selectedItem);
                     }
@@ -100,6 +108,7 @@ export default function SurfWithSpecificBrowser() {
               key={browser.path}
               inputText={itemInput}
               setItemInput={setItemInput}
+              setBrowsers={setBrowsers}
               index={index}
               browsers={browsers}
             />
@@ -142,12 +151,14 @@ function MoreBoards(props: { setBrowsers: any }) {
 function ApplicationsListItem(props: {
   inputText: ItemInput;
   setItemInput: any;
+  setBrowsers: any;
   index: number;
   browsers: SurfApplication[];
 }) {
   const index = props.index;
   const setItemInput = props.setItemInput;
   const inputText = props.inputText;
+  const setBrowsers = props.setBrowsers;
   const applications = props.browsers;
   const application = applications[index];
 
@@ -174,8 +185,8 @@ function ApplicationsListItem(props: {
             title={"Reset All Rank"}
             icon={Icon.ArrowClockwise}
             onAction={async () => {
-              await clearBrowserRank(applications);
-              await showToast(Toast.Style.Success, "Reset Success!");
+              setBrowsers(await clearBrowserRank(applications));
+              await showToast(Toast.Style.Success, "Rank Reset!");
             }}
           />
         </ActionPanel>
@@ -212,20 +223,34 @@ const actionIcon = (inputText: ItemInput) => {
 
 async function actionOnApplicationItem(inputText: ItemInput, setItemInput: any, app: SurfApplication) {
   if (inputText.type != ItemType.NULL) {
-    if (inputText.type == ItemType.URL) {
-      await showHUD("Open URL with " + app.name);
-    } else {
-      await showHUD("Search Text by " + preferences().engine);
+    switch (inputText.type) {
+      case ItemType.URL:
+        await showHUD("Open URL with " + app.name);
+        break;
+      case ItemType.TEXT:
+        await showHUD("Search Text by " + preferences().engine + " with " + app.name);
+        break;
+      case ItemType.EMAIL:
+        await showHUD("Send Email with " + app.name);
+        break;
     }
-    await open(searchEngineURLBuilder(inputText), app.path);
+    await openSurfboard(searchEngineURLBuilder(inputText), app.path);
     await popToRoot({ clearSearchBar: true });
   } else {
-    const selectedItem = await fetchSelectedItem();
+    const selectedItem = await fetchDetectedItem();
     if (selectedItem.type == ItemType.NULL) {
-      await showToast(Toast.Style.Failure, "Nothing Detected!");
+      await showToast(Toast.Style.Failure, "Nothing, Enter Now!");
     } else {
       setItemInput(selectedItem);
     }
+  }
+}
+
+async function openSurfboard(url: string, path: string) {
+  try {
+    await open(url, path);
+  } catch (e) {
+    await showHUD("Unknown Error!");
   }
 }
 
@@ -244,6 +269,9 @@ function searchEngineURLBuilder(itemInput: ItemInput): string {
         }
         case "Baidu": {
           return urlBuilder(SEARCH_ENGINE.baidu, itemInput.content);
+        }
+        case "Brave": {
+          return urlBuilder(SEARCH_ENGINE.brave, itemInput.content);
         }
         case "DuckDuckGo": {
           return urlBuilder(SEARCH_ENGINE.duckduckgo, itemInput.content);
@@ -289,7 +317,7 @@ async function upBrowserRank(itemInput: ItemInput, browser: SurfApplication, bro
       }
     }
   });
-
+  boardsSort(browsers, itemInput);
   await LocalStorage.setItem("boards", JSON.stringify(browsers));
 }
 
@@ -299,26 +327,34 @@ async function clearBrowserRank(browsers: SurfApplication[]) {
     value.rankURL = 1;
     value.rankEmail = 1;
   });
+  browsers.sort(function (a, b) {
+    return b.name.toUpperCase() < a.name.toUpperCase() ? 1 : -1;
+  });
   await LocalStorage.setItem("boards", JSON.stringify(browsers));
+  return [...browsers];
 }
 
 function boardsSort(browsers: SurfApplication[], inputItem: ItemInput) {
-  return browsers.sort(function (a, b) {
-    switch (preferences().sort) {
-      case "Rank": {
+  switch (preferences().sort) {
+    case "Rank": {
+      return browsers.sort(function (a, b) {
         return sortByItemType(inputItem, a, b);
-      }
-      case "Name+": {
-        return b.name.toUpperCase() < a.name.toUpperCase() ? 1 : -1;
-      }
-      case "Name-": {
-        return b.name.toUpperCase() > a.name.toUpperCase() ? 1 : -1;
-      }
-      default: {
-        return sortByItemType(inputItem, a, b);
-      }
+      });
     }
-  });
+    case "Name+": {
+      return browsers.sort(function (a, b) {
+        return b.name.toUpperCase() < a.name.toUpperCase() ? 1 : -1;
+      });
+    }
+    case "Name-": {
+      return browsers.sort(function (a, b) {
+        return b.name.toUpperCase() > a.name.toUpperCase() ? 1 : -1;
+      });
+    }
+    default: {
+      return browsers;
+    }
+  }
 }
 
 function sortByItemType(inputItem: ItemInput, a: SurfApplication, b: SurfApplication) {
