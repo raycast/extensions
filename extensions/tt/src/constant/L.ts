@@ -3,7 +3,6 @@ export enum L {
   Original_Text = 'Original text',
   Translated_text = 'Translated text',
   Saved_search_results = 'Saved search results',
-  History = 'History',
   Setting = 'Settings',
   Register_API_Key = 'Register API Key',
   View = 'View',

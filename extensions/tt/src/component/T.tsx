@@ -39,7 +39,7 @@ export const T: FunctionComponent = () => {
       </List.Section>
       <List.Section
         title={L.Saved_search_results}
-        subtitle={`${L.History}(${histories.length})`}
+        subtitle={histories.length.toString()}
       >
         <HistoryList
           items={histories}
@@ -47,12 +47,11 @@ export const T: FunctionComponent = () => {
           onDelete={onDelete}
         />
       </List.Section>
-      <List.Section title={L.History}>
+      <List.Section title={L.Setting}>
         <List.Item
-          title={L.Setting}
+          title={L.Register_API_Key}
           accessoryIcon={Icon.Gear}
           icon={Icon.Gear}
-          accessoryTitle={L.Register_API_Key}
           actions={
             <ActionPanel>
               <ActionPanel.Section>
