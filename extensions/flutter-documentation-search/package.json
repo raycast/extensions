@@ -2,15 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "flutter-documentation-search",
   "title": "Flutter Documentation Search",
-  "description": "Search in Flutter Documentation",
+  "description": "Search in Flutter documentation",
   "icon": "command-icon.png",
   "author": "MattisBrizard",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Search Flutter Documentation",
-      "description": "Search in Flutter Documentation",
+      "title": "Search Documentation",
+      "subtitle": "Flutter",
+      "description": "Search in Flutter documentation",
       "mode": "view"
     }
   ],

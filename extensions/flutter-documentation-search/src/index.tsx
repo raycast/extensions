@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, environment, ToastStyle } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, environment } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 import fs from "fs";
