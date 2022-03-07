@@ -10,40 +10,24 @@ import {
   Icon,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { SurfApplication } from "./utils";
+import { suggestApp } from "./constants";
 
-class MyApplication implements Application {
-  name = "";
-  path = "";
-  add?: boolean = false;
-  suggest?: boolean = false;
-
-  bundleId?: string;
-  constructor(name: string, path: string, bundleId?: string, add?: boolean, suggest?: boolean) {
-    this.bundleId = bundleId;
-    this.name = name;
-    this.path = path;
-    this.add = add;
-    this.suggest = suggest;
-  }
-}
-
-export default function ApplicationsList(props: { setToSurfBrowser: any }) {
-  const setToSurfBrowser = props.setToSurfBrowser;
+export default function ApplicationsList(props: { setSurfBrowsers: any }) {
+  const _setSurfBrowsers = props.setSurfBrowsers;
   const [allApplications, setAllApplications] = useState<Application[]>([]);
-  const [applications, setApplications] = useState<MyApplication[]>([]);
-  const [actionNums, setActionNums] = useState<number>(1);
-  const [addApp, setAddApp] = useState<boolean>(false);
-
-  const suggestApp = [
-    "/Applications/Firefox.app",
-    "/Applications/Google Chrome.app",
-    "/Applications/Microsoft Edge.app",
-    "/Applications/Safari.app",
-  ];
+  const [surfBrowsers, setSurfBrowsers] = useState<SurfApplication[]>([]);
+  const [allBrowsers, setAllBrowsers] = useState<SurfApplication[]>([]);
 
   useEffect(() => {
     async function fetchApplications() {
       setAllApplications(await getApplications());
+      const localBrowsers = await LocalStorage.getItem<string>("browsers");
+      let _browsers = [];
+      if (typeof localBrowsers == "string") {
+        _browsers = JSON.parse(localBrowsers);
+      }
+      setSurfBrowsers(_browsers);
     }
 
     fetchApplications();
@@ -51,65 +35,71 @@ export default function ApplicationsList(props: { setToSurfBrowser: any }) {
 
   useEffect(() => {
     async function fetchApplications() {
-      const localStorage = await LocalStorage.allItems();
-      const localApp = Object.values(localStorage);
-      const myApps = [];
+      const localBrowsers = await LocalStorage.getItem<string>("browsers");
+      let _browsers = [];
+      if (typeof localBrowsers == "string") {
+        _browsers = JSON.parse(localBrowsers);
+      }
+      const _allBrowsers = [];
       for (let i = 0; i < allApplications.length; i++) {
-        myApps[i] = new MyApplication(
+        _allBrowsers[i] = new SurfApplication(
           allApplications[i].name,
           allApplications[i].path,
-          allApplications[i].bundleId,
-          localApp.includes(allApplications[i].path),
-          suggestApp.includes(allApplications[i].path)
+          _browsers.some((val: SurfApplication) => {
+            return val.path == allApplications[i].path;
+          }),
+          suggestApp.includes(allApplications[i].path),
+          1,
+          1,
+          allApplications[i].bundleId
         );
       }
-      setActionNums(actionNums + 1);
-      setApplications(myApps);
-      setToSurfBrowser(actionNums);
+      setAllBrowsers(_allBrowsers);
+      _setSurfBrowsers(surfBrowsers);
     }
 
     fetchApplications();
-  }, [allApplications, addApp]);
+  }, [surfBrowsers]);
 
   return (
-    <List isLoading={applications.length === 0} searchBarPlaceholder={"Search and Add"}>
+    <List isLoading={allBrowsers.length === 0} searchBarPlaceholder={"Search and Add"}>
       <List.Section title="Surf Browser">
-        {applications.map((application) => {
+        {allBrowsers.map((application) => {
           if (application.add) {
             return (
               <ApplicationsListItem
                 key={application.bundleId}
+                browsers={[...surfBrowsers]}
                 application={application}
-                addApp={addApp}
-                setAddApp={setAddApp}
+                setSurfBrowser={setSurfBrowsers}
               />
             );
           }
         })}
       </List.Section>
       <List.Section title="Suggest">
-        {applications.map((application) => {
+        {allBrowsers.map((application) => {
           if (!application.add && application.suggest) {
             return (
               <ApplicationsListItem
                 key={application.bundleId}
+                browsers={[...surfBrowsers]}
                 application={application}
-                addApp={addApp}
-                setAddApp={setAddApp}
+                setSurfBrowser={setSurfBrowsers}
               />
             );
           }
         })}
       </List.Section>
       <List.Section title="Application">
-        {applications.map((application) => {
+        {allBrowsers.map((application) => {
           if (!application.add && !application.suggest) {
             return (
               <ApplicationsListItem
                 key={application.bundleId}
+                browsers={[...surfBrowsers]}
                 application={application}
-                addApp={addApp}
-                setAddApp={setAddApp}
+                setSurfBrowser={setSurfBrowsers}
               />
             );
           }
@@ -119,10 +109,14 @@ export default function ApplicationsList(props: { setToSurfBrowser: any }) {
   );
 }
 
-function ApplicationsListItem(props: { application: MyApplication; addApp: boolean; setAddApp: any }) {
+function ApplicationsListItem(props: {
+  browsers: SurfApplication[];
+  application: SurfApplication;
+  setSurfBrowser: any;
+}) {
+  const browsers = props.browsers;
   const application = props.application;
-  const addApp = props.addApp;
-  const setAddApp = props.setAddApp;
+  const setSurfBrowser = props.setSurfBrowser;
 
   return (
     <List.Item
@@ -155,12 +149,19 @@ function ApplicationsListItem(props: { application: MyApplication; addApp: boole
             })()}
             onAction={async () => {
               if (application.add) {
-                await LocalStorage.removeItem(application.name);
-                setAddApp(!addApp);
+                browsers.map((val, index) => {
+                  if (val.name == application.name) {
+                    browsers.splice(index, 1);
+                  }
+                });
+                await LocalStorage.setItem("browsers", JSON.stringify(browsers));
+                setSurfBrowser(browsers);
                 await showToast(Toast.Style.Success, "Remove Success!");
               } else {
-                await LocalStorage.setItem(application.name, application.path);
-                setAddApp(!addApp);
+                application.add = true;
+                browsers.push(application);
+                await LocalStorage.setItem("browsers", JSON.stringify(browsers));
+                setSurfBrowser(browsers);
                 await showToast(Toast.Style.Success, "Add Success!");
               }
             }}
@@ -169,8 +170,8 @@ function ApplicationsListItem(props: { application: MyApplication; addApp: boole
             title={"Remove All Browsers"}
             icon={Icon.Trash}
             onAction={async () => {
-              await LocalStorage.clear();
-              setAddApp(!addApp);
+              await LocalStorage.removeItem("browsers");
+              setSurfBrowser([]);
               await showToast(Toast.Style.Success, "Remove Success!");
             }}
           />

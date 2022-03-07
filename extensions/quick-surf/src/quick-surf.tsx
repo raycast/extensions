@@ -1,31 +1,33 @@
 import {
-  List,
-  ActionPanel,
   Action,
-  Application,
+  ActionPanel,
+  Icon,
+  List,
+  LocalStorage,
   open,
+  popToRoot,
   showHUD,
   showToast,
   Toast,
-  getPreferenceValues,
-  LocalStorage,
-  Icon,
   useNavigation,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { urlBuilder, fetchSelectedItem, ItemInput, ItemType, assembleInputItem } from "./utils";
-import { GOOGLE_SEARCH, BING_SEARCH, BAIDU_SEARCH, DUCKDUCKGO_SEARCH } from "./constants";
+import { useEffect, useState } from "react";
+import {
+  assembleInputItem,
+  fetchSelectedItem,
+  ItemInput,
+  ItemType,
+  preferences,
+  SurfApplication,
+  urlBuilder,
+} from "./utils";
+import { SEARCH_ENGINE } from "./constants";
 import ApplicationsList from "./surfbrowser";
-
-interface Preferences {
-  engine: string;
-}
 
 //main view
 export default function SurfWithSpecificBrowser() {
-  const [browser, setBrowser] = useState<Application[]>([]);
+  const [browsers, setBrowsers] = useState<SurfApplication[]>([]);
   const [itemInput, setItemInput] = useState<ItemInput>({ type: ItemType.NULL, content: "" });
-  const [toSurfBrowser, setToSurfBrowser] = useState<number>(0);
 
   useEffect(() => {
     async function fetchSelectedText() {
@@ -36,32 +38,27 @@ export default function SurfWithSpecificBrowser() {
   }, []);
 
   useEffect(() => {
-    async function fetchBrowsers() {
-      const entries = Object.entries(await LocalStorage.allItems());
-      const browsers = [];
-      for (const [key, value] of entries) {
-        browsers.push({ bundleId: "", name: key, path: value + "" });
+    async function fetchSelectedText() {
+      const localBrowsers = await LocalStorage.getItem<string>("browsers");
+      let _browsers = [];
+      if (typeof localBrowsers == "string") {
+        _browsers = JSON.parse(localBrowsers);
+        setBrowsers(_browsers);
       }
-      browsers.sort(function compare(a: Application, b: Application) {
-        const bandA = a.name.toUpperCase();
-        const bandB = b.name.toUpperCase();
-        return bandA > bandB ? 1 : -1;
-      });
-      setBrowser(browsers);
     }
 
-    fetchBrowsers();
-  }, [toSurfBrowser]);
+    fetchSelectedText();
+  }, [itemInput]);
 
   return (
     <List
-      isLoading={browser.length === 0}
+      isLoading={false}
       searchBarPlaceholder={"Surf anything with..."}
       selectedItemId={(function () {
-        if (browser.length === 0) {
+        if (browsers.length === 0) {
           return "GetBrowser";
         }
-        return browser[0].name;
+        return browsers[0].name;
       })()}
       onSearchTextChange={(input) => {
         setItemInput(assembleInputItem(input));
@@ -82,7 +79,7 @@ export default function SurfWithSpecificBrowser() {
                       return "Search with Default Browser";
                     }
                     case ItemType.URL: {
-                      return "Open with Browser";
+                      return "Open with Default Browser";
                     }
                     case ItemType.NULL: {
                       return "Detect";
@@ -101,10 +98,15 @@ export default function SurfWithSpecificBrowser() {
                 })(itemInput)}
                 onAction={async () => {
                   if (itemInput.type == ItemType.NULL) {
-                    setItemInput(await fetchSelectedItem());
+                    const selectedItem = await fetchSelectedItem();
+                    if (selectedItem.type == ItemType.NULL) {
+                      showToast(Toast.Style.Failure, "No Text or URL Detected!");
+                    } else {
+                      setItemInput(selectedItem);
+                    }
                   } else {
-                    showHUD("Surf with default browser!");
-                    open(searchEngineURLBuilder(itemInput.content));
+                    await showHUD("Surf with default browser!");
+                    await open(searchEngineURLBuilder(itemInput.content));
                   }
                 }}
               />
@@ -113,37 +115,32 @@ export default function SurfWithSpecificBrowser() {
         />
       </List.Section>
       <List.Section title="Surf Browser">
-        {browser.map((application, index) => {
+        {browsers.map((browser, index) => {
           return (
             <ApplicationsListItem
-              key={application.path}
-              index={index}
+              key={browser.path}
               inputText={itemInput}
-              application={application}
+              setItemInput={setItemInput}
+              index={index}
+              browsers={browsers}
             />
           );
         })}
       </List.Section>
 
-      <GetBrowser key={"GetBrowser"} applications={browser} setToSurfBrowser={setToSurfBrowser} />
+      <GetBrowser key={"GetBrowser"} setBrowsers={setBrowsers} />
     </List>
   );
 }
 
-function GetBrowser(props: { applications: Application[]; setToSurfBrowser: any }) {
-  const applications = props.applications;
-  const setToSurfBrowser = props.setToSurfBrowser;
+function GetBrowser(props: { setBrowsers: any }) {
+  const setBrowsers = props.setBrowsers;
   const { push } = useNavigation();
+
   return (
     <List.Item
       id="GetBrowser"
-      title={(function (length: number) {
-        if (length == 0) {
-          return "Get Browser";
-        } else {
-          return "More Browsers";
-        }
-      })(applications.length)}
+      title={"More Browsers"}
       icon={{ source: { light: "quick-surf.png", dark: "quick-surf@dark.png" } }}
       // accessoryTitle={"❯"}
       accessoryIcon={Icon.ArrowRight}
@@ -153,7 +150,7 @@ function GetBrowser(props: { applications: Application[]; setToSurfBrowser: any 
             title="Get More Browser"
             icon={Icon.Gear}
             onAction={() => {
-              push(<ApplicationsList setToSurfBrowser={setToSurfBrowser} />);
+              push(<ApplicationsList setSurfBrowsers={setBrowsers} />);
             }}
           />
         </ActionPanel>
@@ -163,10 +160,17 @@ function GetBrowser(props: { applications: Application[]; setToSurfBrowser: any 
 }
 
 //list item
-function ApplicationsListItem(props: { index: number; inputText: ItemInput; application: Application }) {
+function ApplicationsListItem(props: {
+  inputText: ItemInput;
+  setItemInput: any;
+  index: number;
+  browsers: SurfApplication[];
+}) {
   const index = props.index;
+  const setItemInput = props.setItemInput;
   const inputText = props.inputText;
-  const application = props.application;
+  const applications = props.browsers;
+  const application = applications[index];
 
   return (
     <List.Item
@@ -184,16 +188,16 @@ function ApplicationsListItem(props: { index: number; inputText: ItemInput; appl
               let action = "";
               switch (input.type) {
                 case ItemType.TEXT:
-                  action = "Search with ";
+                  action = "Search with " + application.name;
                   break;
                 case ItemType.URL:
-                  action = "Open with ";
+                  action = "Open with " + application.name;
                   break;
                 case ItemType.NULL:
-                  action = "";
+                  action = "Detect";
                   break;
               }
-              return action + application.name;
+              return action;
             })(inputText)}
             icon={(function (input: ItemInput) {
               switch (input.type) {
@@ -206,7 +210,16 @@ function ApplicationsListItem(props: { index: number; inputText: ItemInput; appl
               }
             })(inputText)}
             onAction={async () => {
-              actionOnApplicationItem(inputText, application);
+              await upBrowserRank(inputText.type, application, applications);
+              await actionOnApplicationItem(inputText, setItemInput, application);
+            }}
+          />
+          <Action
+            title={"Clear Surf Rank"}
+            icon={Icon.ArrowClockwise}
+            onAction={async () => {
+              await clearBrowserRank(applications);
+              await showToast(Toast.Style.Success, "Clear Rank Success!");
             }}
           />
         </ActionPanel>
@@ -215,35 +228,113 @@ function ApplicationsListItem(props: { index: number; inputText: ItemInput; appl
   );
 }
 
-function actionOnApplicationItem(inputText: ItemInput, app: Application) {
+async function actionOnApplicationItem(inputText: ItemInput, setItemInput: any, app: SurfApplication) {
   if (inputText.type != ItemType.NULL) {
     if (inputText.type == ItemType.URL) {
-      showHUD("Open URL in" + app.name);
+      await showHUD("Open URL with" + app.name);
     } else {
-      const preference = getPreferenceValues<Preferences>();
-      showHUD("Search Text in " + Object.values(preference)[0]);
+      await showHUD("Search Text by " + preferences().engine);
     }
-    open(searchEngineURLBuilder(inputText.content), app.path);
+    await open(searchEngineURLBuilder(inputText.content), app.path);
+    await popToRoot({ clearSearchBar: true });
   } else {
-    showToast(Toast.Style.Failure, "No Text or URL Detected!");
+    const selectedItem = await fetchSelectedItem();
+    if (selectedItem.type == ItemType.NULL) {
+      await showToast(Toast.Style.Failure, "No Text or URL Detected!");
+    } else {
+      setItemInput(selectedItem);
+    }
   }
 }
 
 function searchEngineURLBuilder(content: string): string {
-  const preference = getPreferenceValues<Preferences>();
-  switch (Object.values(preference)[0]) {
+  switch (preferences().engine) {
     case "Google": {
-      return urlBuilder(GOOGLE_SEARCH, content);
+      return urlBuilder(SEARCH_ENGINE.google, content);
     }
     case "Bing": {
-      return urlBuilder(BING_SEARCH, content);
+      return urlBuilder(SEARCH_ENGINE.bing, content);
     }
     case "Baidu": {
-      return urlBuilder(BAIDU_SEARCH, content);
+      return urlBuilder(SEARCH_ENGINE.baidu, content);
     }
     case "DuckDuckGo": {
-      return urlBuilder(DUCKDUCKGO_SEARCH, content);
+      return urlBuilder(SEARCH_ENGINE.duckduckgo, content);
     }
   }
-  return urlBuilder(GOOGLE_SEARCH, content);
+  return urlBuilder(SEARCH_ENGINE.google, content);
+}
+
+/**
+ *
+ * Rank increase: Percentage rank
+ * The larger the rank, the smaller the increase
+ * The smaller the rank, the larger the increase
+ *
+ * Sort: Localization Principle
+ * After searching URL, use URLRank to prioritize
+ * After searching Text, use TextRank to prioritize
+ */
+async function upBrowserRank(itemType: ItemType, browser: SurfApplication, browsers: SurfApplication[]) {
+  browsers.map((val, index) => {
+    if (val.name == browser.name) {
+      switch (itemType) {
+        case ItemType.TEXT: {
+          let allTextRank = 0;
+          browsers.forEach((value) => [(allTextRank = allTextRank + value.rankText)]);
+          browsers[index].rankText =
+            Math.floor((browsers[index].rankText + 1 - browsers[index].rankText / allTextRank) * 100) / 100;
+          browsers.sort(function (a, b) {
+            switch (preferences().sort) {
+              case "Rank": {
+                return (b.rankText - a.rankText) * 0.2 + (b.rankURL - a.rankURL) * 0.8;
+              }
+              case "Name+": {
+                return b.name.toUpperCase() < a.name.toUpperCase() ? 1 : -1;
+              }
+              case "Name-": {
+                return b.name.toUpperCase() > a.name.toUpperCase() ? 1 : -1;
+              }
+              default: {
+                return (b.rankText - a.rankText) * 0.8 + (b.rankURL - a.rankURL) * 0.2;
+              }
+            }
+          });
+          break;
+        }
+        case ItemType.URL: {
+          let allURLRank = 0;
+          browsers.forEach((value) => [(allURLRank = allURLRank + value.rankURL)]);
+          browsers[index].rankURL =
+            Math.floor((browsers[index].rankURL + 1 - browsers[index].rankURL / allURLRank) * 100) / 100;
+          browsers.sort(function (a, b) {
+            switch (preferences().sort) {
+              case "Rank": {
+                return (b.rankText - a.rankText) * 0.2 + (b.rankURL - a.rankURL) * 0.8;
+              }
+              case "Name+": {
+                return b.name.toUpperCase() < a.name.toUpperCase() ? 1 : -1;
+              }
+              case "Name-": {
+                return b.name.toUpperCase() > a.name.toUpperCase() ? 1 : -1;
+              }
+              default: {
+                return (b.rankText - a.rankText) * 0.2 + (b.rankURL - a.rankURL) * 0.8;
+              }
+            }
+          });
+          break;
+        }
+      }
+    }
+  });
+  await LocalStorage.setItem("browsers", JSON.stringify(browsers));
+}
+
+async function clearBrowserRank(browsers: SurfApplication[]) {
+  browsers.forEach((value) => {
+    value.rankText = 1;
+    value.rankURL = 1;
+  });
+  await LocalStorage.setItem("browsers", JSON.stringify(browsers));
 }

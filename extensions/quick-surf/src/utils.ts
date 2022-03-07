@@ -1,5 +1,10 @@
-import { getSelectedText } from "@raycast/api";
+import { Application, getPreferenceValues, getSelectedText } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+
+export interface Preferences {
+  engine: string;
+  sort: string;
+}
 
 export enum ItemType {
   TEXT = "Text",
@@ -12,11 +17,44 @@ export interface ItemInput {
   content: string;
 }
 
+export class SurfApplication implements Application {
+  name = "";
+  path = "";
+  add: boolean;
+  suggest: boolean;
+  rankText: number;
+  rankURL: number;
+
+  bundleId?: string;
+  constructor(
+    name: string,
+    path: string,
+    add: boolean,
+    suggest: boolean,
+    rankText: number,
+    rankURL: number,
+    bundleId?: string
+  ) {
+    this.bundleId = bundleId;
+    this.name = name;
+    this.path = path;
+    this.add = add;
+    this.suggest = suggest;
+    this.rankText = rankText;
+    this.rankURL = rankURL;
+  }
+}
+
+export const preferences = () => {
+  const preferencesMap = new Map(Object.entries(getPreferenceValues<Preferences>()));
+  return { engine: preferencesMap.get("SurfEngine"), sort: preferencesMap.get("SortBy") };
+};
+
 const selectedText = () =>
   getSelectedText()
-    .then((text) => (isNotEmpty(text) ? text : runAppleScript("the clipboard")))
+    .then((text) => (isNotEmpty(text) ? text.substring(0, 8000) : runAppleScript("the clipboard")))
     .catch(() => runAppleScript("the clipboard"))
-    .then((text) => (isNotEmpty(text) ? text : ""))
+    .then((text) => (isNotEmpty(text) ? text.substring(0, 8000) : ""))
     .catch(() => "");
 
 export async function fetchSelectedItem(): Promise<ItemInput> {
