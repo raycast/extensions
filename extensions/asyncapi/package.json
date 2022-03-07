@@ -4,7 +4,7 @@
   "title": "AsyncAPI",
   "description": "AsyncAPI extension for Raycast brings some AsyncAPI tools to you.",
   "icon": "command-icon.png",
-  "author": "Sergio Moya <smoya89@gmail.com> (sergiomoya.me)",
+  "author": "smoya",
   "license": "MIT",
   "commands": [
     {
