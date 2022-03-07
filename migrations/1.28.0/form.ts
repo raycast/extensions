@@ -31,6 +31,19 @@ export default function ActionPanelTransform(
           p.node.selfClosing
         );
       });
+    root
+      .find(j.JSXClosingElement, {
+        name: { name: name[0] },
+      })
+      .replaceWith((p) => {
+        needToAddImport = true;
+        return j.jsxClosingElement(
+          j.jsxMemberExpression(
+            j.jsxIdentifier("Form"),
+            j.jsxIdentifier(name[1])
+          )
+        );
+      });
 
     root
       .find(j.TSTypeReference, {
@@ -74,6 +87,22 @@ export default function ActionPanelTransform(
           ),
           p.node.attributes,
           p.node.selfClosing
+        );
+      });
+    root
+      .find(j.JSXClosingElement, {
+        name: { name: name[0] },
+      })
+      .replaceWith((p) => {
+        needToAddImport = true;
+        return j.jsxClosingElement(
+          j.jsxMemberExpression(
+            j.jsxMemberExpression(
+              j.jsxIdentifier("Form"),
+              j.jsxIdentifier(name[1])
+            ),
+            j.jsxIdentifier(name[2])
+          )
         );
       });
 
@@ -122,6 +151,22 @@ export default function ActionPanelTransform(
           ),
           p.node.attributes,
           p.node.selfClosing
+        );
+      });
+    root
+      .find(j.JSXClosingElement, {
+        name: { object: { name: "Form" }, property: { name: name[0] } },
+      })
+      .replaceWith((p) => {
+        needToAddImport = true;
+        return j.jsxClosingElement(
+          j.jsxMemberExpression(
+            j.jsxMemberExpression(
+              j.jsxIdentifier("Form"),
+              j.jsxIdentifier(name[1])
+            ),
+            j.jsxIdentifier(name[2])
+          )
         );
       });
   }

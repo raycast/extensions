@@ -15,8 +15,48 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Your prefered language",
+      "required": false,
+      "type": "dropdown",
+      "default": "9",
+      "data": [
+        {
+          "title": "English",
+          "value": "9"
+        },
+        {
+          "title": "French",
+          "value": "5"
+        },
+        {
+          "title": "German",
+          "value": "6"
+        },
+        {
+          "title": "Italian",
+          "value": "8"
+        },
+        {
+          "title": "Japanese",
+          "value": "1"
+        },
+        {
+          "title": "Korean",
+          "value": "3"
+        },
+        {
+          "title": "Spanish",
+          "value": "7"
+        }
+      ]
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.29.0",
     "axios": "^0.26.0",
     "json2md": "^1.12.0",
     "lodash.groupby": "^4.6.0"

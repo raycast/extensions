@@ -15,6 +15,7 @@ import { gql } from "@apollo/client";
 import { getIdFromGqlId, now } from "../utils";
 import { RefreshJobsAction } from "./job_actions";
 import useInterval from "use-interval";
+import { GitLabIcons } from "../icons";
 
 export interface Job {
   id: string;
@@ -46,28 +47,28 @@ const GET_PIPELINE_JOBS = gql`
 function getIcon(status: string): Image {
   switch (status.toLowerCase()) {
     case "success": {
-      return { source: Icon.Checkmark, tintColor: Color.Green };
+      return { source: GitLabIcons.status_success, tintColor: Color.Green };
     }
     case "created": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Yellow };
+      return { source: GitLabIcons.status_created, tintColor: Color.Yellow };
     }
     case "pending": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Yellow };
+      return { source: GitLabIcons.status_pending, tintColor: Color.Yellow };
     }
     case "running": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Blue };
+      return { source: GitLabIcons.status_running, tintColor: Color.Blue };
     }
     case "failed": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Red };
+      return { source: GitLabIcons.status_failed, tintColor: Color.Red };
     }
     case "canceled": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Red };
+      return { source: GitLabIcons.status_canceled, tintColor: Color.PrimaryText };
     }
     case "skipped": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Brown };
+      return { source: GitLabIcons.status_skipped, tintColor: "#868686" };
     }
     case "scheduled": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Blue };
+      return { source: GitLabIcons.status_scheduled, tintColor: Color.Blue };
     }
     default:
       return { source: Icon.ExclamationMark, tintColor: Color.Magenta };
