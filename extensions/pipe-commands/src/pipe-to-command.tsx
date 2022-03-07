@@ -79,6 +79,9 @@ export function PipeCommand(props: { command: ScriptCommand; input?: PipeInput; 
     const { stdout, stderr, status } = spawnSync(command.path, [argument1], {
       encoding: "utf-8",
       cwd: command.metadatas.currentDirectoryPath ? command.metadatas.currentDirectoryPath : dirname(command.path),
+      env: {
+        PATH: "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin",
+      },
       maxBuffer: 10 * 1024 * 1024,
     });
     toast.hide();
