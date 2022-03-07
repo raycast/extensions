@@ -34,7 +34,7 @@ export const returnTodos = async (searchTerm: string): Promise<TrelloFetchRespon
       }
     }
   } catch (error) {
-    showToast(ToastStyle.Failure, "Could not fetch ToDos");
+    showToast(ToastStyle.Failure, "An error occured", "Could not fetch todos, check your credentials");
     return Promise.resolve([]);
   }
 };
