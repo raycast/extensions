@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Transator",
+      "title": "Translate Text",
       "subtitle": "Translate texts",
       "description": "Text translator",
       "keywords": ["t"],
