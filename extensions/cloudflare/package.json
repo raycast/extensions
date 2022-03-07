@@ -6,6 +6,9 @@
   "icon": "icon.png",
   "author": "destiner",
   "license": "MIT",
+  "contributors": [
+    "niklaswa"
+  ],
   "commands": [
     {
       "name": "view-sites",
