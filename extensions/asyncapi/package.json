@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "AsyncAPI",
+  "name": "asyncapi",
   "title": "AsyncAPI",
   "description": "AsyncAPI extension for Raycast brings some AsyncAPI tools to you.",
   "icon": "command-icon.png",
