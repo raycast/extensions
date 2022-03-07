@@ -1,18 +1,17 @@
 import {
+  Action,
   ActionPanel,
   closeMainWindow,
-  CopyToClipboardAction,
   Detail,
   environment,
   Icon,
   List,
   popToRoot,
-  PushAction,
   showToast,
-  ToastStyle,
+  Toast,
 } from "@raycast/api";
 import degit from "degit";
-import fs, { existsSync } from "fs";
+import fs, { existsSync, readdirSync } from "fs";
 import { rm } from "fs/promises";
 import { globby } from "globby";
 import { parse, resolve } from "path";
@@ -22,12 +21,12 @@ const CACHE_DIR = resolve(environment.supportPath, "pages");
 
 async function refreshPages() {
   await rm(resolve(CACHE_DIR), { recursive: true, force: true });
-  await showToast(ToastStyle.Animated, "Fetching TLDR Pages...");
+  await showToast(Toast.Style.Animated, "Fetching TLDR Pages...");
   try {
     await degit("tldr-pages/tldr/pages").clone(CACHE_DIR);
-    await showToast(ToastStyle.Success, "TLDR pages fetched!");
+    await showToast(Toast.Style.Success, "TLDR pages fetched!");
   } catch (error) {
-    await showToast(ToastStyle.Failure, "Download Failed!", "Please check your internet connexion.");
+    await showToast(Toast.Style.Failure, "Download Failed!", "Please check your internet connexion.");
   }
 }
 
@@ -50,7 +49,7 @@ export default function TLDRList(): JSX.Element {
   const [query, setQuery] = useState("");
   useEffect(() => {
     async function loadPages() {
-      if (!existsSync(CACHE_DIR)) {
+      if (!existsSync(CACHE_DIR) || readdirSync(CACHE_DIR).length === 0) {
         await refreshPages();
       }
 
@@ -70,21 +69,28 @@ export default function TLDRList(): JSX.Element {
       {platforms?.map((platform) => (
         <List.Section title={platform.name} key={platform.name}>
           {platform.pages
-            .filter((page) => page.title.startsWith(query))
-            .sort((a, b) => a.title.localeCompare(b.title))
+            .filter((page) => page.command.startsWith(query))
+            .sort((a, b) => a.command.localeCompare(b.command))
             .map((page) => (
               <List.Item
-                title={page.title}
+                title={page.command}
                 key={page.filename}
                 subtitle={page.subtitle}
                 accessoryTitle={page.filename}
                 actions={
                   <ActionPanel>
-                    <PushAction title="Show Commands" icon={Icon.ArrowRight} target={<CommandList page={page} />} />
-                    <PushAction title="Show Detail" icon={Icon.Text} target={<Detail markdown={page.markdown} />} />
-                    <ActionPanel.Item
+                    <Action.Push title="Show Commands" icon={Icon.ArrowRight} target={<CommandList page={page} />} />
+                    <OpenCommandWebsiteAction page={page} />
+                    <Action.Push
+                      icon={Icon.Text}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                      title="Print Markdown Page"
+                      target={<PageDetails page={page} />}
+                    />
+                    <Action
                       title="Refresh Pages"
                       icon={Icon.ArrowClockwise}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
                       onAction={async () => {
                         await refreshPages();
                         setPlatforms(await readPages());
@@ -100,10 +106,30 @@ export default function TLDRList(): JSX.Element {
   );
 }
 
+function PageDetails(props: { page: Page }) {
+  const page = props.page;
+  return (
+    <Detail
+      markdown={page.markdown}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard content={page.markdown} />
+          <OpenCommandWebsiteAction page={page} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function OpenCommandWebsiteAction(props: { page: Page }) {
+  const page = props.page;
+  return page.url ? <Action.OpenInBrowser title="Open Command Website" url={page.url} /> : null;
+}
+
 function CommandList(props: { page: Page }) {
   const page = props.page;
   return (
-    <List navigationTitle={page.title}>
+    <List navigationTitle={page.command}>
       {page.items?.map((item) => (
         <List.Section key={item.description} title={item.description}>
           <List.Item
@@ -111,13 +137,14 @@ function CommandList(props: { page: Page }) {
             key={item.command}
             actions={
               <ActionPanel>
-                <CopyToClipboardAction
+                <Action.CopyToClipboard
                   content={item.command}
                   onCopy={async () => {
                     await closeMainWindow();
                     await popToRoot();
                   }}
                 />
+                <OpenCommandWebsiteAction page={page} />
               </ActionPanel>
             }
           />
@@ -133,10 +160,11 @@ interface Platform {
 }
 
 interface Page {
-  title: string;
+  command: string;
   filename: string;
   subtitle: string;
   markdown: string;
+  url?: string;
   items: { description: string; command: string }[];
 }
 
@@ -154,11 +182,17 @@ async function parsePage(path: string): Promise<Page> {
     else if (line.startsWith("-")) descriptions.push(line.slice(2));
   }
 
+  const match = markdown.match(
+    /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/
+  );
+  const url = match ? match[0] : undefined;
+
   return {
-    title: lines[0].slice(2),
+    command: lines[0].slice(2),
     filename: parse(path).name,
     subtitle: subtitle[0],
     markdown: markdown,
+    url,
     items: zip(commands, descriptions).map(([command, description]) => ({
       command: command as string,
       description: description as string,
