@@ -10,6 +10,7 @@
     {
       "name": "index",
       "title": "Clear Now",
+      "subtitle": "Clipboard",
       "description": "Clears your clipboard right now!",
       "mode": "no-view"
     }
