@@ -1,6 +1,6 @@
-import { ReadStream } from "fs";
+import {ReadStream} from "fs";
 import gifFrames from "gif-frames";
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 
 export const DECODE_OUTPUT_TYPE = "jpeg";
 
@@ -10,12 +10,12 @@ export interface DecodedGifState {
   isDecoded: boolean;
 }
 
-export function useDecodedGif(url: string, id: string | number) {
-  const [state, setState] = useState<DecodedGifState>({ url, isDecoded: false });
+export function useGifDecoder(url: string, id: string | number) {
+  const [state, setState] = useState<DecodedGifState>({url, isDecoded: false});
 
   useEffect(() => {
     async function decode() {
-      const frames = await gifFrames({ url, frames: "all", outputType: DECODE_OUTPUT_TYPE });
+      const frames = await gifFrames({url, frames: "all", cumulative: true, quality: 50, outputType: DECODE_OUTPUT_TYPE});
       const base64Frames: string[] = [];
 
       for (const frame of frames) {
@@ -23,7 +23,7 @@ export function useDecodedGif(url: string, id: string | number) {
         base64Frames.push(`data:image/${DECODE_OUTPUT_TYPE};base64,${buff.toString("base64")}`);
       }
 
-      setState({ url, frames: base64Frames, isDecoded: true });
+      setState({url, frames: base64Frames, isDecoded: true});
     }
 
     decode();
