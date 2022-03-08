@@ -79,7 +79,7 @@ export default function Command() {
                     }
                   />
                   <Action.OpenInBrowser
-                    title="Open in Netlify"
+                    title="Open on Netlify"
                     url={getSiteUrl(site.name)}
                   />
                   <Action.OpenInBrowser title="Open Site" url={site.siteUrl} />
@@ -173,7 +173,7 @@ function SiteView(props: SiteProps) {
             }
           />
           <Action.OpenInBrowser
-            title="Open in Netlify"
+            title="Open on Netlify"
             url={getSiteUrl(site.name)}
           />
           <Action.OpenInBrowser title="Open Site" url={site.siteUrl} />
@@ -229,7 +229,7 @@ function DeployListView(props: DeployListProps) {
                 target={<DeployView siteId={siteId} id={deploy.id} />}
               />
               <Action.OpenInBrowser
-                title="Open in Netlify"
+                title="Open on Netlify"
                 url={getDeployUrl(siteName, deploy.id)}
               />
             </ActionPanel>
@@ -277,7 +277,7 @@ function DeployView(props: DeployProps) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            title="Open in Netlify"
+            title="Open on Netlify"
             url={getDeployUrl(site.name, id)}
           />
           <Action.OpenInBrowser title="Open Site" url={siteUrl} />

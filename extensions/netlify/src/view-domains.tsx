@@ -55,7 +55,7 @@ export default function Command() {
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser
-                      title="Open in Netlify"
+                      title="Open on Netlify"
                       url={getDomainUrl(domain)}
                     />
                   </ActionPanel>
