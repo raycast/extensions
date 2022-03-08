@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
 import { GifDetails } from "./GifDetails";
 import type { IGif } from "../models/gif";
@@ -17,7 +17,11 @@ export function GifResult(props: { item: IGif; index: number }) {
       actions={
         <ActionPanel title={title}>
           {showPreview && (
-            <Action.Push title="Preview GIF" target={<GifDetails item={props.item} index={props.index} />} />
+            <Action.Push
+              title="Preview GIF"
+              icon={Icon.Eye}
+              target={<GifDetails item={props.item} index={props.index} />}
+            />
           )}
           <Action.OpenInBrowser url={url} />
           <Action.CopyToClipboard content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
