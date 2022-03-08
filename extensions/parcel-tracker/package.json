@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "parcel-tracker",
   "title": "Parcel Tracker",
-  "description": "for track packages (only available for South Korea)",
+  "description": "Track packages (only available in South Korea)",
   "icon": "command-icon-parcel.png",
   "author": "junhyukjin",
   "license": "MIT",
