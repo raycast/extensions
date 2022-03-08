@@ -137,6 +137,7 @@ export default function Command() {
       if (!price) {
         toast.style = Toast.Style.Failure;
         toast.title = 'Failed to fetch price';
+        // eslint-disable-next-line no-unsafe-finally
         return;
       }
     }
