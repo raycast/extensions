@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "NativeBase Documention",
+      "title": "Search Documention",
+      "subtitle": "NativeBase",
       "description": "Search NativeBase documentation",
       "mode": "view",
       "icon": "nativebase-logo.png",

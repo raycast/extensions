@@ -70,7 +70,7 @@ export default function main() {
   }
 
   return (
-    <List navigationTitle="Select documentation version" isLoading={loading}>
+    <List navigationTitle="Select Documentation Version" isLoading={loading}>
       <List.Section title="Versions">
         {versions.map((version, index) => (
           <List.Item
@@ -82,6 +82,7 @@ export default function main() {
                 <Action.Push
                   title={`Open Docs for ${version}`}
                   target={<Docs version={version} />}
+                  icon="../assets/nativebase-logo.png"
                 />
               </ActionPanel>
             }
