@@ -81,11 +81,17 @@ export default function Command() {
                   <Action.OpenInBrowser
                     title="Open on Netlify"
                     url={getSiteUrl(site.name)}
+                    shortcut={{ key: 'n', modifiers: ['cmd'] }}
                   />
-                  <Action.OpenInBrowser title="Open Site" url={site.siteUrl} />
+                  <Action.OpenInBrowser
+                    title="Open Site"
+                    url={site.siteUrl}
+                    shortcut={{ key: 's', modifiers: ['cmd'] }}
+                  />
                   <Action.OpenInBrowser
                     title="Open Repository"
                     url={site.repositoryUrl}
+                    shortcut={{ key: 'g', modifiers: ['cmd'] }}
                   />
                 </ActionPanel>
               }
@@ -181,11 +187,17 @@ function SiteView(props: SiteProps) {
           <Action.OpenInBrowser
             title="Open on Netlify"
             url={getSiteUrl(site.name)}
+            shortcut={{ key: 'n', modifiers: ['cmd'] }}
           />
-          <Action.OpenInBrowser title="Open Site" url={site.siteUrl} />
+          <Action.OpenInBrowser
+            title="Open Site"
+            url={site.siteUrl}
+            shortcut={{ key: 's', modifiers: ['cmd'] }}
+          />
           <Action.OpenInBrowser
             title="Open Repository"
             url={site.repositoryUrl}
+            shortcut={{ key: 'g', modifiers: ['cmd'] }}
           />
         </ActionPanel>
       }
@@ -287,9 +299,18 @@ function DeployView(props: DeployProps) {
           <Action.OpenInBrowser
             title="Open on Netlify"
             url={getDeployUrl(site.name, id)}
+            shortcut={{ key: 'n', modifiers: ['cmd'] }}
           />
-          <Action.OpenInBrowser title="Open Site" url={siteUrl} />
-          <Action.OpenInBrowser title="Open Commit" url={commitUrl} />
+          <Action.OpenInBrowser
+            title="Open Site"
+            url={siteUrl}
+            shortcut={{ key: 's', modifiers: ['cmd'] }}
+          />
+          <Action.OpenInBrowser
+            title="Open Commit"
+            url={commitUrl}
+            shortcut={{ key: 'g', modifiers: ['cmd'] }}
+          />
         </ActionPanel>
       }
     />
