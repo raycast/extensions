@@ -1,4 +1,5 @@
 import { getPreferenceValues } from '@raycast/api';
+import { DeployStatus } from './service';
 
 interface Preferences {
   token: string;
@@ -36,4 +37,15 @@ export function formatDeployDate(date: Date) {
     hour: 'numeric',
     minute: '2-digit',
   });
+}
+
+export function formatDeployStatus(status: DeployStatus) {
+  switch (status) {
+    case 'ok':
+      return 'deployed';
+    case 'skipped':
+      return 'skipped';
+    case 'error':
+      return 'failed';
+  }
 }

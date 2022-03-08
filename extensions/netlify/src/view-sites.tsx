@@ -10,6 +10,7 @@ import Service, {
 import {
   formatDate,
   formatDeployDate,
+  formatDeployStatus,
   getDeployUrl,
   getSiteUrl,
   getToken,
@@ -277,16 +278,19 @@ function DeployView(props: DeployProps) {
   if (!deploy) {
     return <Detail isLoading={isLoading} navigationTitle="Deploy" />;
   }
-  const { name, site, siteUrl, author, publishDate, commitUrl } = deploy;
-
-  const authorMessage = author ? ` by ${author}` : '';
+  const { name, site, siteUrl, publishDate, commitUrl, status } =
+    deploy;
 
   const markdown = `
   # ${name}
 
-  ## Publish date
+  ## Date
 
-  ${formatDeployDate(publishDate)}${authorMessage}
+  ${formatDeployDate(publishDate)}
+
+  ## Status
+
+  ${formatDeployStatus(status)}
   `;
 
   return (
