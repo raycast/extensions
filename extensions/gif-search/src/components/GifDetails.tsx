@@ -1,14 +1,14 @@
-import {Action, ActionPanel, Detail} from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 
-import {useGifDecoder} from "../hooks/useGifDecoder";
-import {useGifFrames} from "../hooks/useGifFrames";
-import type {IGif} from "../models/gif";
+import { useGifDecoder } from "../hooks/useGifDecoder";
+import { useGifFrames } from "../hooks/useGifFrames";
+import type { IGif } from "../models/gif";
 
-export function GifDetails(props: {item: IGif; index: number}) {
-  const {gif_url, slug, title, url} = props.item;
+export function GifDetails(props: { item: IGif; index: number }) {
+  const { gif_url, slug, title, url } = props.item;
 
-  const {frames = [], isDecoded} = useGifDecoder(gif_url, slug);
-  const {currentFrame} = useGifFrames(0, frames, 60);
+  const { frames = [], isDecoded } = useGifDecoder(gif_url, slug);
+  const { currentFrame } = useGifFrames(0, frames, 60);
 
   const md = `<img src="${currentFrame}">`;
 
@@ -22,12 +22,12 @@ export function GifDetails(props: {item: IGif; index: number}) {
           <Action.CopyToClipboard
             title="Copy GIF URL to Clipboard"
             content={gif_url}
-            shortcut={{modifiers: ["cmd", "shift"], key: "c"}}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
           <Action.CopyToClipboard
             title="Copy Page URL to Clipboard"
             content={url}
-            shortcut={{modifiers: ["opt", "shift"], key: "c"}}
+            shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
           />
           <Action.OpenInBrowser url={url} />
         </ActionPanel>
