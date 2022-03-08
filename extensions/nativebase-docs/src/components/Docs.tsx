@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, List } from '@raycast/api'
+import { Action, ActionPanel, List } from '@raycast/api'
 import fetch from 'node-fetch'
 import React, { useEffect } from 'react'
 import { PagePage, Sidebar, SidebarResponse } from '../types'
@@ -9,13 +9,6 @@ interface IDocsProps {
 
 export const Docs = (props: IDocsProps) => {
   const [sidebar, setSidebar] = React.useState<Array<Sidebar>>([])
-  const headers: RequestInit['headers'] = {}
-
-  const token = getPreferenceValues()?.gh_pat
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`
-  }
 
   useEffect(() => {
     fetchSidebar()
@@ -25,8 +18,7 @@ export const Docs = (props: IDocsProps) => {
     const res = await fetch(
       `https://raw.githubusercontent.com/GeekyAnts/nativebase-docs/main/docs/${props.version}/sidebar.json`,
       {
-        method: 'GET',
-        headers
+        method: 'GET'
       }
     )
     const data = (await res.json()) as SidebarResponse

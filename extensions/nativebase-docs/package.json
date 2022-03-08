@@ -21,17 +21,6 @@
       ]
     }
   ],
-  "preferences": [
-    {
-      "name": "gh_pat",
-      "type": "password",
-      "title": "GitHub Personal Access Token",
-      "description": "GitHub Personal Access Token",
-      "label": "GitHub PAT",
-      "placeholder": "GitHub Personal Access Token",
-      "required": false
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.28.0",
     "node-fetch": "^3.2.0"
