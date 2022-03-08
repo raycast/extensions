@@ -146,11 +146,17 @@ function SiteView(props: SiteProps) {
   const markdown = `
   # ${name}
 
-  Autopublish **${isAutoPublishEnabled ? 'enabled' : 'disabled'}**.
+  ## Autopublish
 
-  Last published on ${formatDate(publishDate)}.
+  ${isAutoPublishEnabled ? 'enabled' : 'disabled'}
+
+  ## Last publish date
+
+  ${formatDate(publishDate)}
   
-  Created ${formatDate(createDate)}.
+  ## Creation date
+
+  ${formatDate(createDate)}
   `;
 
   return (
@@ -266,7 +272,9 @@ function DeployView(props: DeployProps) {
   const markdown = `
   # ${name}
 
-  Published on ${formatDeployDate(publishDate)}${authorMessage}.
+  ## Publish date
+
+  ${formatDeployDate(publishDate)}${authorMessage}
   `;
 
   return (
