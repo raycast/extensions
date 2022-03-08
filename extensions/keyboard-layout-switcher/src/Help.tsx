@@ -6,10 +6,18 @@ const helpText = `
 To **add more layouts**, open the Keyboard Pane in the System Preferences (press enter ↩︎ while reading this help text) and navigate to the *Input Sources* tab. On the left you’ll see a list of your currently available layouts. Add more by pressing the + button. In the new dialogue, select a language on the left and confirm by pressing the *Add* button.`;
 
 export function Help() {
-  return (<Detail
-    markdown={helpText}
-    actions={<ActionPanel>
-      <Action icon={Icon.Gear} title="Open Keyboard Preferences" onAction={() => open('/System/Library/PreferencePanes/Keyboard.prefPane')} />
-    </ActionPanel>}
-  />)
+  return (
+    <Detail
+      markdown={helpText}
+      actions={
+        <ActionPanel>
+          <Action
+            icon={Icon.Gear}
+            title="Open Keyboard Preferences"
+            onAction={() => open("/System/Library/PreferencePanes/Keyboard.prefPane")}
+          />
+        </ActionPanel>
+      }
+    />
+  );
 }
