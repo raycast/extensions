@@ -1,7 +1,9 @@
+import { getPreferenceValues } from "@raycast/api";
 import { execSync } from "child_process";
 
 export function listScreenInfo() {
-  const stout = execSync("zsh -l -c 'displayplacer list'");
+  const PATH = getPreferenceValues<Preferences>().path;
+  const stout = execSync(`zsh -l -c 'PATH=${PATH} displayplacer list'`);
   const result = stout
     .toString()
     .split("\n")
@@ -21,9 +23,10 @@ export function listScreenInfo() {
 }
 
 export function switchSettings(favorite: Favorite) {
+  const PATH = getPreferenceValues<Preferences>().path;
   if (!favorite.command) return;
   try {
-    execSync(`zsh -l -c '${favorite.command}'`);
+    execSync(`zsh -l -c 'PATH=${PATH}:/opt/homebrew/bin ${favorite.command}'`);
   } catch (e: any) {
     let error = true;
     const lines = e.toString().split("\n");

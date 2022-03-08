@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, showToast, Toast, Action } from "@raycast/api";
+import { ActionPanel, Detail, showToast, Toast, Action, getPreferenceValues } from "@raycast/api";
 import { execSync } from "child_process";
 import { useState } from "react";
 
@@ -8,6 +8,7 @@ export default function NotInstalled({
   },
 }) {
   const [isLoading, setIsLoading] = useState(false);
+  const PATH = getPreferenceValues<Preferences>().path;
   return (
     <Detail
       actions={
@@ -24,7 +25,7 @@ export default function NotInstalled({
                 await toast.show();
 
                 try {
-                  execSync(`zsh -l -c 'brew tap jakehilborn/jakehilborn && brew install displayplacer'`);
+                  execSync(`zsh -l -c 'PATH=${PATH} brew tap jakehilborn/jakehilborn && brew install displayplacer'`);
                   await toast.hide();
                   onRefresh();
                 } catch {
