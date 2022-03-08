@@ -33,8 +33,8 @@ versions.
 
 ## Versions
 
-![Versions](./assets/ss-versions.png)
+![Versions](./media/ss-versions.png)
 
 ## Pages
 
-![Pages](./assets/ss-pages.png)
+![Pages](./media/ss-pages.png)
