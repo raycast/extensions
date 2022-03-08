@@ -53,6 +53,7 @@ export default function main() {
       }
 
       const data = (await res.json()) as Array<ContentResponse>
+      data.reverse()
       setVersions(data?.map((d) => d?.name))
       setLoading(false)
       return data
