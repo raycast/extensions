@@ -47,8 +47,8 @@
       "name": "showGifPreview",
       "type": "checkbox",
       "required": false,
-      "label": "Show GIF Preview (Unstable)",
-      "description": "Change the default action on a GIF result to render an inline GIF preview using a custom-built GIF renderer. This preview is quite unstable and buggy, use at your own risk!"
+      "label": "Show GIF Preview (Experimental)",
+      "description": "Changes default action on a result to render an experimental animated GIF preview Detail view."
     }
   ],
   "dependencies": {
