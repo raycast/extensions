@@ -1,8 +1,8 @@
 import { List, showToast, Toast } from "@raycast/api";
 import React, { ReactElement, useEffect, useState } from "react";
 import Parser from "rss-parser";
-import addIcon from "./addIcon";
-import { Actions } from "./actions";
+import addIcon from "./helpers/addIcon";
+import { Actions } from "./Actions";
 
 const parser = new Parser();
 
@@ -15,6 +15,7 @@ type story = {
   title: any;
   link: any;
   pubDate: any;
+  content: any;
   contentSnippet: any;
   category: any;
   updateType: any;
@@ -28,8 +29,8 @@ function ListItem(props: { item: story; index: number }) {
       accessoryTitle={props.item.pubDate.toString().split(" ").slice(0, 4).join(" ")}
       actions={<Actions item={props.item} />}
       icon={icon}
-      subtitle={props.item.title}
-      title={props.item.category ?? "No title"}
+      title={props.item.title}
+      subtitle={props.item.category}
     />
   );
 }
@@ -47,6 +48,7 @@ export default function Command(): ReactElement {
             link: story.link,
             pubDate: story.pubDate,
             contentSnippet: story.contentSnippet?.toString(),
+            content: story.content?.toString(),
             category: story?.categories?.[0],
             updateType: story?.categories?.[1],
           };
