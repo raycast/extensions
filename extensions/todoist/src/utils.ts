@@ -1,10 +1,14 @@
-import { Task } from "@doist/todoist-api-typescript";
+import { Label, Task } from "@doist/todoist-api-typescript";
 import { addDays, format, formatISO, isThisYear, isBefore, compareAsc, isSameDay } from "date-fns";
 import { partition } from "lodash";
 import { priorities } from "./constants";
 
 export function isRecurring(task: Task): boolean {
   return task.due?.recurring || false;
+}
+
+export function isExactTimeTask(task: Task): boolean {
+  return !!task.due?.timezone;
 }
 
 /**
@@ -87,4 +91,25 @@ export function getSectionsWithPriorities(tasks: Task[]) {
     name,
     tasks: tasks?.filter((task) => task.priority === value) || [],
   }));
+}
+
+export function getSectionsWithLabels({ tasks, labels }: { tasks: Task[]; labels: Label[] }) {
+  const tasksWithoutLabels = tasks?.filter((task) => task.labelIds.length === 0);
+
+  const sections =
+    labels?.map((label) => {
+      return {
+        name: label.name,
+        tasks: tasks?.filter((task) => task.labelIds.includes(label.id)) || [],
+      };
+    }) || [];
+
+  if (tasksWithoutLabels) {
+    sections.push({
+      name: "No label",
+      tasks: tasksWithoutLabels,
+    });
+  }
+
+  return sections;
 }

@@ -133,7 +133,10 @@ export async function addItem(
 ): Promise<number> {
   const result = await runGraphQLQuery(`
     mutation {
-        create_item (board_id: ${boardId}, group_id: "${groupId}", item_name: "${name}") {
+        create_item (board_id: ${boardId}, group_id: "${groupId}", item_name: "${name.replace(
+    /"/g,
+    '\\"'
+  )}") {
             id
         }
     }

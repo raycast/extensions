@@ -22,12 +22,39 @@
       "subtitle": "Audio Device",
       "description": "Sets the active audio input device.",
       "mode": "view"
+    },
+    {
+      "name": "favourite",
+      "title": "Set Audio Output Device to Favourite One",
+      "description": "Set the active audio output device to the one specified in the preferences",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "airplay",
+      "required": false,
+      "title": "Enable AirPlay Support",
+      "description": "Enable AirPlay speakers detection on the output devices list.",
+      "label": "Include AirPlay devices",
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "favourite",
+      "required": false,
+      "title": "Favourite Output Device",
+      "description": "The name, as found in the output device list, of the output device to use as the favourite one",
+      "type": "textfield",
+      "default": ""
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.29.1",
     "execa": "^6.0.0",
-    "macos-audio-devices": "^1.4.0"
+    "macos-audio-devices": "^1.4.0",
+    "react-use": "^17.3.2",
+    "run-applescript": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

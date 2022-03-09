@@ -20,7 +20,7 @@ function getClipboardContent(): PipeInput {
     maxBuffer: 10 * 1024 * 1024,
   }).stdout.trim();
   const type = existsSync(content) ? "file" : "text";
-  return { type, content };
+  return { type, content, origin: "clipboard" };
 }
 
 export default function PipeClipboardToCommand() {

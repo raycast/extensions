@@ -1,7 +1,5 @@
 import {
   ActionPanel,
-  closeMainWindow,
-  environment,
   Icon,
   List,
   Clipboard,
@@ -12,27 +10,26 @@ import {
   useNavigation,
   Image,
   Detail,
+  closeMainWindow,
+  popToRoot,
 } from "@raycast/api";
 import { spawnSync } from "child_process";
-import { readdirSync } from "fs";
+import { chmodSync } from "fs";
 import { dirname } from "path";
 import { useEffect, useState } from "react";
-import PipeCommandForm from "./create-pipe-command";
-import { ArgumentType, ScriptCommand } from "./types";
-import { copyAssetsCommands, parseScriptCommands, sortByAccessTime } from "./utils";
+import { ArgumentType, ScriptCommand, ScriptMode } from "./types";
+import { codeblock, parseScriptCommands, sortByAccessTime } from "./utils";
 
 export interface PipeInput {
   type: ArgumentType;
   content: string;
+  origin: "clipboard" | "selection";
 }
 
 export function PipeCommands(props: { input: PipeInput }): JSX.Element {
   const [parsed, setParsed] = useState<{ commands: ScriptCommand[] }>();
 
   const loadCommands = async () => {
-    if (readdirSync(environment.supportPath).length == 0) {
-      await copyAssetsCommands();
-    }
     const { commands } = await parseScriptCommands();
     setParsed({ commands: await sortByAccessTime(commands) });
   };
@@ -58,39 +55,7 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
       {parsed?.commands
         .filter((command) => command.metadatas.argument1.type == props.input.type)
         .map((command) => (
-          <PipeCommand
-            key={command.path}
-            command={command}
-            runCommand={async () => {
-              const toast = await showToast(Toast.Style.Animated, "Running...");
-              const input = command.metadatas.argument1.percentEncoded
-                ? encodeURIComponent(props.input.content)
-                : props.input.content;
-              // Pass the input both to the command stdin and as command fist argument
-              const { stdout, stderr, status } = spawnSync(command.path, [input], {
-                encoding: "utf-8",
-                input,
-                cwd: command.metadatas.currentDirectoryPath
-                  ? command.metadatas.currentDirectoryPath
-                  : dirname(command.path),
-                maxBuffer: 10 * 1024 * 1024,
-              });
-              toast.hide();
-              if (status !== 0) {
-                showHUD(stderr ? `⚠️ ${stderr}` : `⚠️ Error: Process terminated with status ${status}`);
-                return;
-              }
-
-              if (stdout) {
-                return stdout;
-              }
-
-              if (stderr) {
-                showHUD(stderr);
-              }
-            }}
-            onTrash={loadCommands}
-          />
+          <PipeCommand key={command.path} command={command} input={props.input} onTrash={loadCommands} />
         ))}
     </List>
   );
@@ -101,101 +66,150 @@ export function getRaycastIcon(scriptIcon: string | undefined, defaultIcon: Imag
   return icon ? icon : defaultIcon;
 }
 
-export function PipeCommand(props: {
-  command: ScriptCommand;
-  runCommand?: () => Promise<string | undefined>;
-  onTrash: () => void;
-}) {
-  const { path: scriptPath, metadatas } = props.command;
+export function PipeCommand(props: { command: ScriptCommand; input?: PipeInput; onTrash: () => void }) {
+  const { command, input, onTrash } = props;
+  const defaultIcon = command.metadatas.argument1.type == "file" ? Icon.Document : Icon.Text;
   const navigation = useNavigation();
-  const runCommand = props.runCommand;
-  const defaultIcon = metadatas.argument1.type == "file" ? Icon.Document : Icon.Text;
+
+  async function runCommand(input: PipeInput) {
+    const toast = await showToast(Toast.Style.Animated, "Running...");
+    const argument1 = command.metadatas.argument1.percentEncoded ? encodeURIComponent(input.content) : input.content;
+    chmodSync(command.path, "755");
+    // Pass the input both to the command stdin and as command fist argument
+    const { stdout, stderr, status } = spawnSync(command.path, [argument1], {
+      encoding: "utf-8",
+      cwd: command.metadatas.currentDirectoryPath ? command.metadatas.currentDirectoryPath : dirname(command.path),
+      env: {
+        PATH: "/bin:/usr/bin:/usr/local/bin:/opt/homebrew/bin",
+      },
+      maxBuffer: 10 * 1024 * 1024,
+    });
+    toast.hide();
+    if (status !== 0) {
+      showHUD(stderr ? `⚠️ ${stderr}` : `⚠️ Error: Process terminated with status ${status}`);
+      return stdout;
+    }
+
+    return stdout;
+  }
 
   return (
     <List.Item
-      key={scriptPath}
-      icon={getRaycastIcon(metadatas.icon, defaultIcon)}
-      title={metadatas.title}
-      subtitle={metadatas.packageName}
+      key={command.path}
+      icon={getRaycastIcon(command.metadatas.icon, defaultIcon)}
+      accessoryIcon={command.user ? Icon.Person : undefined}
+      title={command.metadatas.title}
+      subtitle={command.metadatas.packageName}
       actions={
         <ActionPanel>
-          {typeof runCommand != "undefined" ? (
+          {typeof input != "undefined" ? (
             <ActionPanel.Section>
-              <Action
-                title="Copy to Clipboard"
-                icon={Icon.Clipboard}
-                onAction={async () => {
-                  const stdout = await runCommand();
-                  if (stdout) {
-                    await Clipboard.copy(stdout);
-                  }
-                  closeMainWindow();
-                }}
-              />
-              <Action
-                title="Paste in Active App"
-                icon={Icon.Clipboard}
-                onAction={async () => {
-                  const stdout = await runCommand();
-                  if (stdout) {
-                    await Clipboard.paste(stdout);
-                  }
-                  closeMainWindow();
-                }}
-              />
-              <Action
-                title="Pipe to Command"
-                icon={Icon.ArrowRight}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "\\" }}
-                onAction={async () => {
-                  const stdout = await runCommand();
-                  if (stdout) {
-                    navigation.push(<PipeCommands input={{ type: "text", content: stdout }} />);
-                  }
-                }}
-              />
-              <Action
-                title="Preview"
-                icon={Icon.Text}
-                shortcut={{ modifiers: ["cmd"], key: "p" }}
-                onAction={async () => {
-                  const stdout = await runCommand();
-                  if (stdout) {
-                    navigation.push(
-                      <Detail
-                        markdown={"```\n" + stdout + "\n```"}
-                        actions={
-                          <ActionPanel>
-                            <Action.CopyToClipboard content={stdout} onCopy={() => closeMainWindow()} />
-                            <Action.Paste content={stdout} onPaste={() => closeMainWindow()} />
-                          </ActionPanel>
-                        }
-                      />
-                    );
-                  }
-                }}
-              />
+              <CommandAction mode={command.metadatas.mode} runCommand={() => runCommand(input)} origin={input.origin} />
+              {command.metadatas.mode != "silent" ? (
+                <Action
+                  title="Pipe Script Output"
+                  icon={Icon.ArrowRight}
+                  onAction={async () => {
+                    const output = await runCommand(input);
+                    navigation.push(<PipeCommands input={{ type: "text", content: output, origin: input.origin }} />);
+                  }}
+                />
+              ) : null}
+            </ActionPanel.Section>
+          ) : null}
+          {command.user ? (
+            <ActionPanel.Section>
+              <Action.OpenWith path={command.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+              <Action.ShowInFinder path={command.path} shortcut={{ modifiers: ["cmd", "shift"], key: "o" }} />
+              <Action.Trash paths={command.path} onTrash={onTrash} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
             </ActionPanel.Section>
           ) : null}
           <ActionPanel.Section>
-            <Action.Open icon={Icon.Upload} title="Open Pipe Command" target={scriptPath} />
-            <Action.OpenWith path={scriptPath} />
-            <Action.ShowInFinder path={scriptPath} />
-            <Action.Trash paths={scriptPath} onTrash={props.onTrash} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.Push icon={Icon.Plus} title="New Pipe Command" target={<PipeCommandForm />} />
-            <Action
-              icon={Icon.ArrowClockwise}
-              title="Reset Default Commands"
-              onAction={async () => {
-                await copyAssetsCommands();
-                props.onTrash();
-              }}
+            <Action.Push
+              icon={Icon.Text}
+              title="Show Script Contents"
+              shortcut={{ modifiers: ["cmd"], key: "p" }}
+              target={<Detail markdown={codeblock(command.content)} />}
+            />
+            <Action.CopyToClipboard
+              title="Copy Script Contents"
+              shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
+              content={command.content}
             />
           </ActionPanel.Section>
         </ActionPanel>
       }
+    />
+  );
+}
+
+function CommandAction(props: {
+  mode: ScriptMode;
+  runCommand: () => Promise<string>;
+  origin: "clipboard" | "selection";
+}) {
+  const { mode, runCommand, origin } = props;
+  const copyAction = (
+    <Action
+      title="Copy Script Output"
+      icon={Icon.Clipboard}
+      onAction={async () => {
+        const output = await runCommand();
+        if (output) Clipboard.copy(output);
+        await closeMainWindow();
+        await popToRoot();
+      }}
+    />
+  );
+  switch (mode) {
+    case "silent":
+      return (
+        <Action
+          icon={Icon.Terminal}
+          title="Run Script"
+          onAction={async () => {
+            const output = await runCommand();
+            if (output) showHUD(output);
+            await closeMainWindow();
+            await popToRoot();
+          }}
+        />
+      );
+    case "fullOutput":
+      return (
+        <Action.Push icon={Icon.Text} title="Show Script Output" target={<PipeDetails runCommand={runCommand} />} />
+      );
+    case "copy":
+      return copyAction;
+    case "replace":
+      return origin == "clipboard" ? (
+        copyAction
+      ) : (
+        <Action
+          title="Paste Script Output"
+          icon={Icon.Clipboard}
+          onAction={async () => {
+            const output = await runCommand();
+            if (output) Clipboard.paste(output);
+            await closeMainWindow();
+            await popToRoot();
+          }}
+        />
+      );
+  }
+}
+
+function PipeDetails(props: { runCommand: () => Promise<string> }) {
+  const [content, setContent] = useState<string>();
+  useEffect(() => {
+    props.runCommand().then(setContent);
+  }, []);
+
+  return (
+    <Detail
+      isLoading={typeof content == "undefined"}
+      markdown={content ? codeblock(content) : undefined}
+      actions={<ActionPanel>{content ? <Action.CopyToClipboard content={content} /> : null}</ActionPanel>}
     />
   );
 }

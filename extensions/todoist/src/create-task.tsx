@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionPanel, Form, Icon, showToast, ToastStyle, useNavigation, open, Toast, Action } from "@raycast/api";
+import { ActionPanel, Form, Icon, showToast, useNavigation, open, Toast, Action } from "@raycast/api";
 import { AddTaskArgs } from "@doist/todoist-api-typescript";
 import useSWR from "swr";
 import { handleError, todoist } from "./api";
@@ -63,12 +63,12 @@ export default function CreateTask() {
       body.labelIds = labelIds.map((id) => parseInt(id));
     }
 
-    const toast = new Toast({ style: ToastStyle.Animated, title: "Creating task" });
+    const toast = new Toast({ style: Toast.Style.Animated, title: "Creating task" });
     await toast.show();
 
     try {
       const { projectId, url } = await todoist.addTask(body);
-      toast.style = ToastStyle.Success;
+      toast.style = Toast.Style.Success;
       toast.title = "Task created";
       toast.primaryAction = {
         title: "Go to project",
