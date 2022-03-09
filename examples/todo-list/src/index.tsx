@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ActionPanel, Form, Icon, List, LocalStorage, useNavigation, Action } from "@raycast/api";
 
 enum Filter {
@@ -16,20 +16,7 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [filter, setFilter] = useState<Filter>(Filter.All);
-
-  const getVisibleTodos = useCallback(() => {
-    switch (filter) {
-      case Filter.All: {
-        return todos;
-      }
-      case Filter.Open: {
-        return todos.filter((todo) => !todo.isCompleted);
-      }
-      case Filter.Completed: {
-        return todos.filter((todo) => todo.isCompleted);
-      }
-    }
-  }, [todos, filter]);
+  const [visibleTodos, setVisibleTodos] = useState<Todo[]>([]);
 
   useEffect(() => {
     LocalStorage.getItem<string>("todos").then((todoJson) => {
@@ -49,6 +36,23 @@ export default function Command() {
   useEffect(() => {
     LocalStorage.setItem("todos", JSON.stringify(todos));
   }, [todos]);
+
+  useEffect(() => {
+    switch (filter) {
+      case Filter.All: {
+        setVisibleTodos(todos);
+        return;
+      }
+      case Filter.Open: {
+        setVisibleTodos(todos.filter((todo) => !todo.isCompleted));
+        return;
+      }
+      case Filter.Completed: {
+        setVisibleTodos(todos.filter((todo) => todo.isCompleted));
+        return;
+      }
+    }
+  }, [todos, filter]);
 
   function handleCreate(todo: Todo) {
     const newTodos = [...todos, todo];
@@ -87,7 +91,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {getVisibleTodos().map((todo, index) => (
+      {visibleTodos.map((todo, index) => (
         <List.Item
           key={index}
           icon={todo.isCompleted ? Icon.Checkmark : Icon.Circle}
