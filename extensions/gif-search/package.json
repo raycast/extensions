@@ -52,9 +52,7 @@
   "dependencies": {
     "@giphy/js-fetch-api": "^4.1.2",
     "@raycast/api": "^1.30.0",
-    "gif-frames": "^1.0.1",
-    "node-fetch": "^3.2.1",
-    "usehooks-ts": "^2.4.2"
+    "node-fetch": "^3.2.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
