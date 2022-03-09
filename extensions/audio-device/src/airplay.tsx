@@ -33,7 +33,7 @@ export function AirPlaySelector() {
                   await setOutputDevice(item.name);
                   closeMainWindow({ clearRootSearch: true });
                   popToRoot({ clearSearchBar: true });
-                  showHUD(`Active audio device set to ${item.name}`);
+                  showHUD(`Active output audio device set to ${item.name}`);
                   setActive(item.name);
                 }}
                 title={`Select ${item.name}`}
