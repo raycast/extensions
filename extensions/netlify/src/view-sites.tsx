@@ -53,7 +53,7 @@ export default function Command() {
         const sites = await service.getSites();
         setSites(sites);
         setLoading(false);
-      } catch(e) {
+      } catch (e) {
         setLoading(false);
         handleNetworkError(e);
       }
@@ -141,7 +141,7 @@ function SiteView(props: SiteProps) {
         const site = await service.getSite(id);
         setSite(site);
         setLoading(false);
-      } catch(e) {
+      } catch (e) {
         setLoading(false);
         handleNetworkError(e);
       }
@@ -229,7 +229,7 @@ function DeployListView(props: DeployListProps) {
         const deploys = await service.getDeploys(siteId);
         setDeploys(deploys);
         setLoading(false);
-      } catch(e) {
+      } catch (e) {
         setLoading(false);
         handleNetworkError(e);
       }
@@ -287,7 +287,7 @@ function DeployView(props: DeployProps) {
         const deploy = await service.getDeploy(siteId, id);
         setDeploy(deploy);
         setLoading(false);
-      } catch(e) {
+      } catch (e) {
         setLoading(false);
         handleNetworkError(e);
       }
@@ -299,8 +299,7 @@ function DeployView(props: DeployProps) {
   if (!deploy) {
     return <Detail isLoading={isLoading} navigationTitle="Deploy" />;
   }
-  const { name, site, siteUrl, publishDate, commitUrl, status } =
-    deploy;
+  const { name, site, siteUrl, publishDate, commitUrl, status } = deploy;
 
   const markdown = `
   # ${name}

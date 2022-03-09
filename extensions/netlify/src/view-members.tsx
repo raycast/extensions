@@ -24,7 +24,7 @@ export default function Command() {
         setTeams(teams);
 
         setLoading(false);
-      } catch(e) {
+      } catch (e) {
         setLoading(false);
         handleNetworkError(e);
       }

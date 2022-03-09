@@ -39,7 +39,7 @@ export default function Command() {
         const domains = await service.getDomains();
         setDomains(domains);
         setLoading(false);
-      } catch(e) {
+      } catch (e) {
         setLoading(false);
         handleNetworkError(e);
       }
