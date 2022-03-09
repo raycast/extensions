@@ -10,8 +10,7 @@
     {
       "name": "giphy",
       "title": "Search Giphy",
-      "subtitle": "Search for animated gifs on Giphy",
-      "description": "Search for an animated gif",
+      "description": "Search for animated gifs on Giphy.com",
       "mode": "view",
       "preferences": [
         {
@@ -27,8 +26,7 @@
     {
       "name": "tenor",
       "title": "Search Tenor",
-      "subtitle": "Search for animated gifs on Tenor",
-      "description": "Search for an animated gif",
+      "description": "Search for animated gifs on Tenor.com",
       "mode": "view",
       "preferences": [
         {
