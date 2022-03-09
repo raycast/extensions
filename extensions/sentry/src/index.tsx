@@ -6,6 +6,7 @@ import { Project } from "./types";
 import { ProjectDropdown } from "./ProjectDropdown";
 import { SWRConfig } from "swr";
 import { cacheProvider } from "./cache";
+import { isFakeData } from "./fake";
 
 function IssueList() {
   const [project, setProject] = useState<Project>();
@@ -25,9 +26,14 @@ function IssueList() {
 }
 
 export default function Command() {
-  return (
-    <SWRConfig value={{ provider: cacheProvider }}>
-      <IssueList />
-    </SWRConfig>
-  );
+  if (isFakeData()) {
+    // Disable custom SWR caching for fake data
+    return <IssueList />;
+  } else {
+    return (
+      <SWRConfig value={{ provider: cacheProvider }}>
+        <IssueList />
+      </SWRConfig>
+    );
+  }
 }

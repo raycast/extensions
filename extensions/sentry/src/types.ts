@@ -16,15 +16,11 @@ export interface Project {
 export interface Issue {
   id: string;
   count: number;
-  culprit: string;
-  firstSeen: string;
   lastSeen: string;
   level: string;
   permalink: string;
   title: string;
-  status: string;
   shortId: string;
   userCount: number;
-  type: string;
   project: Project;
 }

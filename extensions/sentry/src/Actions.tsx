@@ -15,6 +15,7 @@ function DevelopmentActions() {
       toast.message = e instanceof Error ? e.message : undefined;
     }
   }
+
   return environment.isDevelopment ? (
     <ActionPanel.Section>
       <Action icon={Icon.Trash} title="Clear Cache" onAction={handleClearCache} />
