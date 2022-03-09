@@ -42,15 +42,6 @@
       ]
     }
   ],
-  "preferences": [
-    {
-      "name": "showGifPreview",
-      "type": "checkbox",
-      "required": false,
-      "label": "Show GIF Preview (Experimental)",
-      "description": "Changes default action on a result to render an experimental animated GIF preview Detail view."
-    }
-  ],
   "dependencies": {
     "@giphy/js-fetch-api": "^4.1.2",
     "@raycast/api": "^1.29.1",
