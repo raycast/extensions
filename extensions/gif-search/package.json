@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gif-search",
+  "title": "GIF Search",
+  "description": "Search for animated GIFs from giphy.com or tenor.com",
+  "icon": "command-icon.png",
+  "author": "josephschmitt",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "giphy",
+      "title": "Search Giphy",
+      "description": "Search for animated gifs on Giphy.com",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "giphy-apiKey",
+          "type": "textfield",
+          "required": true,
+          "title": "Giphy API Key",
+          "placeholder": "Giphy API Key",
+          "description": "API Key used to perform searches on Giphy. You can get one for free at https://developers.giphy.com"
+        }
+      ]
+    },
+    {
+      "name": "tenor",
+      "title": "Search Tenor",
+      "description": "Search for animated gifs on Tenor.com",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "tenor-apiKey",
+          "type": "textfield",
+          "required": true,
+          "title": "Tenor API Key",
+          "placeholder": "Tenor API Key",
+          "description": "API Key used to perform searches on Tenor. You can get one for free at https://tenor.com/gifapi"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@giphy/js-fetch-api": "^4.1.2",
+    "@raycast/api": "^1.29.1",
+    "gif-frames": "^1.0.1",
+    "node-fetch": "^3.2.1",
+    "usehooks-ts": "^2.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
