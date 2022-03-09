@@ -473,7 +473,7 @@ import { Icon, List } from "@raycast/api";
 
 export default function Command() {
   return (
-    <List isShowingList={true}>
+    <List isShowingDetail={true}>
       <List.Item
         title="Pikachu"
         subtitle="Electric"
