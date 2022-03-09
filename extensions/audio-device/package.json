@@ -27,7 +27,7 @@
       "name": "favourite",
       "title": "Set Audio Output Device to Favourite One",
       "description": "Set the active audio output device to the one specified in the preferences",
-      "mode": "view"
+      "mode": "no-view"
     }
   ],
   "preferences": [
