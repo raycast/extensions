@@ -30,8 +30,8 @@ export function mapTenorResponse(tenorResp: TenorGif) {
     title: tenorResp.title || tenorResp.h1_title || tenorResp.content_description,
     url: tenorResp.itemurl,
     slug: path.basename(tenorResp.itemurl),
-    preview_gif_url: mediaItem.tinygif.url,
-    gif_url: mediaItem.gif.url,
+    preview_gif_url: mediaItem.tinygif.preview,
+    gif_url: mediaItem.tinygif.url,
   };
 }
 
