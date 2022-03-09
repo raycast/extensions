@@ -5,13 +5,12 @@ import type { IGif } from "../models/gif";
 import { getShowPreview } from "../preferences";
 
 export function GifResult(props: { item: IGif; index: number }) {
-  const { id, preview_gif_url, title, url } = props.item;
+  const { preview_gif_url, title, url } = props.item;
 
   const showPreview = getShowPreview();
 
   return (
     <List.Item
-      key={id}
       title={title}
       icon={{ source: preview_gif_url }}
       actions={
