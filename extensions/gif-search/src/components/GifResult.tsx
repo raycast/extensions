@@ -1,11 +1,10 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 
-import { GifDetails } from "./GifDetails";
-import type { IGif } from "../models/gif";
+import { IGif, renderGifMarkdownDetails } from "../models/gif";
 import { getShowPreview } from "../preferences";
 
 export function GifResult(props: { item: IGif; index: number }) {
-  const { preview_gif_url, title, url } = props.item;
+  const { preview_gif_url, title, url, gif_url } = props.item;
 
   const showPreview = getShowPreview();
 
@@ -13,17 +12,20 @@ export function GifResult(props: { item: IGif; index: number }) {
     <List.Item
       title={title}
       icon={{ source: preview_gif_url }}
+      detail={showPreview && <List.Item.Detail markdown={renderGifMarkdownDetails(props.item)} />}
       actions={
         <ActionPanel title={title}>
-          {showPreview && (
-            <Action.Push
-              title="Preview GIF"
-              icon={Icon.Eye}
-              target={<GifDetails item={props.item} index={props.index} />}
-            />
-          )}
           <Action.OpenInBrowser url={url} />
-          <Action.CopyToClipboard content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+          <Action.CopyToClipboard
+            title="Copy GIF URL to Clipboard"
+            content={gif_url}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          />
+          <Action.CopyToClipboard
+            title="Copy Page URL to Clipboard"
+            content={url}
+            shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
+          />
         </ActionPanel>
       }
     />

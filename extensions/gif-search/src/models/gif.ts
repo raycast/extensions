@@ -19,7 +19,7 @@ export function mapGiphyResponse(giphyResp: GiphyGif) {
     url: giphyResp.url,
     slug: giphyResp.slug,
     preview_gif_url: giphyResp.images.preview_gif.url,
-    gif_url: giphyResp.images.downsized.url,
+    gif_url: giphyResp.images.fixed_height.url,
   };
 }
 
@@ -33,4 +33,16 @@ export function mapTenorResponse(tenorResp: TenorGif) {
     preview_gif_url: mediaItem.tinygif.url,
     gif_url: mediaItem.gif.url,
   };
+}
+
+export function renderGifMarkdownDetails(gif: IGif) {
+  return `
+  ## ${gif.title}
+
+  ![${gif.title}](${gif.gif_url})
+
+  \`\`\`
+  Static preview, animated preview coming soon!
+  \`\`\`
+  `;
 }
