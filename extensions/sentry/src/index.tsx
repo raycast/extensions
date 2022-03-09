@@ -26,14 +26,9 @@ function IssueList() {
 }
 
 export default function Command() {
-  if (isFakeData()) {
-    // Disable custom SWR caching for fake data
-    return <IssueList />;
-  } else {
-    return (
-      <SWRConfig value={{ provider: cacheProvider }}>
-        <IssueList />
-      </SWRConfig>
-    );
-  }
+  return (
+    <SWRConfig value={{ provider: isFakeData() ? undefined : cacheProvider }}>
+      <IssueList />
+    </SWRConfig>
+  );
 }
