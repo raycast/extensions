@@ -1,7 +1,6 @@
 import _supportedLanguagesByCode from "./supportedLanguagesByCode.json";
 import _supportedLanguagesByCountry from "./supportedLanguages.json";
 
-
 export type LanguagesMapByCountry = typeof _supportedLanguagesByCountry;
 export type LanguageCountries = keyof LanguagesMapByCountry;
 

@@ -1,7 +1,7 @@
 import { List, getPreferenceValues, ActionPanel, showToast, Toast, Action } from "@raycast/api";
 import { ReactElement, useEffect, useState } from "react";
 import translate from "@vitalets/google-translate-api";
-import { supportedLanguagesByCode, LanguageCode } from './languages';
+import { supportedLanguagesByCode, LanguageCode } from "./languages";
 
 let count = 0;
 
@@ -41,11 +41,9 @@ export default function Command(): ReactElement {
       .then((res) => {
         if (localCount === count) {
           const lang1Rep =
-            supportedLanguagesByCode[preferences.lang1].flag ??
-            supportedLanguagesByCode[preferences.lang1].code;
+            supportedLanguagesByCode[preferences.lang1].flag ?? supportedLanguagesByCode[preferences.lang1].code;
           const lang2Rep =
-            supportedLanguagesByCode[preferences.lang2].flag ??
-            supportedLanguagesByCode[preferences.lang2].code;
+            supportedLanguagesByCode[preferences.lang2].flag ?? supportedLanguagesByCode[preferences.lang2].code;
           setResults([
             {
               text: res[0].text,
