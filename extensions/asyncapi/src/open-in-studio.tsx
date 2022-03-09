@@ -1,4 +1,4 @@
-import { ActionPanel, Form, Action, Toast, showToast, open, Detail } from "@raycast/api";
+import { ActionPanel, Form, Action, Toast, showToast } from "@raycast/api";
 import { openStudio, AsyncAPIDocumentExample } from "./utils";
 
 interface OpenInStudioInput {
