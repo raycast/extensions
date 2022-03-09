@@ -14,6 +14,7 @@ import {
   getDeployUrl,
   getSiteUrl,
   getToken,
+  handleNetworkError,
 } from './utils';
 
 const service = new Service(getToken());
@@ -48,9 +49,14 @@ export default function Command() {
 
   useEffect(() => {
     async function fetchSites() {
-      const sites = await service.getSites();
-      setSites(sites);
-      setLoading(false);
+      try {
+        const sites = await service.getSites();
+        setSites(sites);
+        setLoading(false);
+      } catch(e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchSites();
@@ -131,9 +137,14 @@ function SiteView(props: SiteProps) {
 
   useEffect(() => {
     async function fetchSite() {
-      const site = await service.getSite(id);
-      setSite(site);
-      setLoading(false);
+      try {
+        const site = await service.getSite(id);
+        setSite(site);
+        setLoading(false);
+      } catch(e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchSite();
@@ -214,9 +225,14 @@ function DeployListView(props: DeployListProps) {
 
   useEffect(() => {
     async function fetchSite() {
-      const deploys = await service.getDeploys(siteId);
-      setDeploys(deploys);
-      setLoading(false);
+      try {
+        const deploys = await service.getDeploys(siteId);
+        setDeploys(deploys);
+        setLoading(false);
+      } catch(e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchSite();
@@ -267,9 +283,14 @@ function DeployView(props: DeployProps) {
 
   useEffect(() => {
     async function fetchSite() {
-      const deploy = await service.getDeploy(siteId, id);
-      setDeploy(deploy);
-      setLoading(false);
+      try {
+        const deploy = await service.getDeploy(siteId, id);
+        setDeploy(deploy);
+        setLoading(false);
+      } catch(e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchSite();

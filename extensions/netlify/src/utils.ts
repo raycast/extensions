@@ -1,4 +1,5 @@
-import { getPreferenceValues } from '@raycast/api';
+import { Toast, showToast, getPreferenceValues } from '@raycast/api';
+import { AxiosError } from 'axios';
 import { DeployStatus } from './service';
 
 interface Preferences {
@@ -47,5 +48,22 @@ export function formatDeployStatus(status: DeployStatus) {
       return 'skipped';
     case 'error':
       return 'failed';
+  }
+}
+
+export function handleNetworkError(e: unknown): void {
+  const error = e as AxiosError;
+  const status = error.response?.status;
+  if (!status) {
+    showToast(Toast.Style.Failure, 'Unknown error');
+  }
+  if (status === 401) {
+    showToast(
+      Toast.Style.Failure,
+      'Failed to authorize',
+      'Please make sure that your API key is valid.',
+    );
+  } else {
+    showToast(Toast.Style.Failure, 'Network error', 'Please try again later.');
   }
 }
