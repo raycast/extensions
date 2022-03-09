@@ -473,7 +473,7 @@ import { Icon, List } from "@raycast/api";
 
 export default function Command() {
   return (
-    <List>
+    <List isShowingList={true}>
       <List.Item
         title="Pikachu"
         subtitle="Electric"
@@ -488,10 +488,10 @@ export default function Command() {
 
 #### Props
 
-| Prop      | Type                 | Required    | Default            | Description                                                                |
+| Prop      | Type                 | Required    | Default            | Description                                                                |                                                                                                                               |
 | :-------- | :------------------- | :---------- | :----------------- | :------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | markdown  | <code>string         | null</code> | No                 | -                                                                          | The CommonMark string to be rendered in the right side area when the parent List is showing details and the item is selected. |
-| isLoading | <code>boolean</code> | No          | <code>false</code> | Indicates whether a loading bar should be shown or hidden above the detail |
+| isLoading | <code>boolean</code> | No          | <code>false</code> | Indicates whether a loading bar should be shown or hidden above the detail |                                                                                                                               |
 
 ### List.Section
 
