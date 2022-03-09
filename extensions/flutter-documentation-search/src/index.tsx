@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, environment } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, environment, ToastStyle } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 import fs from "fs";
@@ -11,6 +11,18 @@ const SUGGESTION_LIMIT = 10;
 const CACHE_DIR = environment.supportPath;
 const CACHE_FILE = `${CACHE_DIR}/cache.json`;
 const CACHE_DEFAULT_TTL_IN_SECONDS = 3600;
+const MORE_DOCUMENTATION_LINKS = {
+  "Flutter (main site)": "https://flutter.dev/",
+  "Install Flutter": "https://flutter.dev/docs/get-started/install",
+  "Flutter Codelabs": "https://flutter.dev/docs/codelabs",
+  "Contributing to Flutter": "https://github.com/flutter/flutter/blob/master/CONTRIBUTING.md",
+};
+const FLUTTER_ICON = {
+  source: {
+    light: "command-icon.png",
+    dark: "command-icon.png",
+  },
+};
 
 export default function Command() {
   const { state, search } = useSearch();
@@ -19,15 +31,33 @@ export default function Command() {
     <List
       isLoading={state.isLoading}
       onSearchTextChange={search}
-      searchBarPlaceholder="Search in Flutter documentation..."
+      searchBarPlaceholder="Search in ddze Flutter documentation..."
       throttle={true}
     >
-      <List.Section title="Results">
-        {state.results.map((node) => (
-          // We use href as key as it's unique.
-          <SearchListItem key={node.href} node={node} />
-        ))}
-      </List.Section>
+      {state.results ? (
+        <List.Section title="Results">
+          {state.results.map((node) => (
+            // We use href as key as it's unique.
+            <SearchListItem key={node.href} node={node} />
+          ))}
+        </List.Section>
+      ) : (
+        <List.Section title="More documentation">
+          {Object.entries(MORE_DOCUMENTATION_LINKS).map(([title, link]: Array<any>) => (
+            <List.Item
+              key={link}
+              title={title}
+              icon={FLUTTER_ICON}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={link} title="Open in Browser" />
+                  <Action.CopyToClipboard content={link} title="Copy URL" />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }
@@ -46,6 +76,7 @@ function SearchListItem({ node }: { node: DocsApiNode }) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Open in Browser" url={`${DOCS_API_BASE_URL}/${node.href}`} />
+            <Action.CopyToClipboard title="Copy URL" content={`${DOCS_API_BASE_URL}/${node.href}`} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -102,7 +133,11 @@ function useSearch() {
   };
 }
 
-async function performSearch(searchText: string, signal: AbortSignal): Promise<DocsApiNode[]> {
+async function performSearch(searchText: string, signal: AbortSignal): Promise<DocsApiNode[] | undefined> {
+  if (searchText === "") {
+    return undefined;
+  }
+
   let nodes: Array<DocsApiNode> = [];
 
   const cache = getCache();
@@ -118,13 +153,13 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<D
     const maxAge = matches ? parseInt(matches[1], 10) : CACHE_DEFAULT_TTL_IN_SECONDS;
 
     if (!response.ok) {
-      throw new Error("Error fetching doc");
+      throw new Error("Error fetching documentation");
     }
 
     nodes = (await response.json()) as DocsApiNode[];
     setCache(nodes, maxAge);
   }
-  return findMatches(nodes, searchText).slice(0, SUGGESTION_LIMIT);
+  return findMatches(nodes, searchText)?.slice(0, SUGGESTION_LIMIT);
 }
 
 const weights: { [name: string]: number } = {
@@ -143,7 +178,7 @@ const weights: { [name: string]: number } = {
 
 function findMatches(nodes: DocsApiNode[], query: string) {
   if (query === "") {
-    return [];
+    return undefined;
   }
 
   const allMatches: Array<[DocsApiNode, number]> = [];
@@ -225,7 +260,7 @@ function getCache(): DocsApiNode[] | false {
 }
 
 interface SearchState {
-  results: DocsApiNode[];
+  results: DocsApiNode[] | undefined;
   isLoading: boolean;
 }
 
