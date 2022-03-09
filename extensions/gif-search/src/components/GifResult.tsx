@@ -18,7 +18,7 @@ export function GifResult(props: { item: IGif; index: number }) {
           <Action.OpenInBrowser url={url} />
           <Action.CopyToClipboard
             title="Copy GIF URL to Clipboard"
-            content={gif_url}
+            content={stripQParams(gif_url)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
           <Action.CopyToClipboard
@@ -30,4 +30,10 @@ export function GifResult(props: { item: IGif; index: number }) {
       }
     />
   );
+}
+
+function stripQParams(url: string) {
+  const earl = new URL(url);
+  earl.search = "";
+  return earl.toString();
 }
