@@ -12,7 +12,7 @@
       "title": "Shell Path",
       "default": "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.:/opt/homebrew/bin",
       "description": "Colon-delimited list of paths to search for displayplacer and homebrew",
-      "required": true,
+      "required": false,
       "type": "textfield"
     }
   ],

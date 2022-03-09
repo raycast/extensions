@@ -33,5 +33,5 @@ type Favorite = {
 };
 
 interface Preferences {
-  path: string;
+  path?: string;
 }
