@@ -1,5 +1,6 @@
 import {
   ActionPanel,
+  Clipboard,
   closeMainWindow,
   Color,
   Icon,
@@ -78,6 +79,16 @@ export function DeviceList({ type }: DeviceListProps) {
             actions={
               <ActionPanel>
                 <SetAudioDeviceAction device={d} type={type} />
+                <ActionPanel.Item
+                  title={`Copy Device Name to Clipboard`}
+                  onAction={async () => {
+                    await Clipboard.copy(d.name);
+                    await showToast({
+                      style: ToastStyle.Success,
+                      title: "Device name copied to the clipboard",
+                    });
+                  }}
+                />
               </ActionPanel>
             }
           />

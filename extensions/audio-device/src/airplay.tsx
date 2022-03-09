@@ -1,4 +1,16 @@
-import { ActionPanel, Action, Icon, List, showHUD, closeMainWindow, popToRoot, Color } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  closeMainWindow,
+  Color,
+  Icon,
+  List,
+  popToRoot,
+  showHUD,
+  showToast,
+  Toast
+} from "@raycast/api";
 import { useAsync } from "react-use";
 import { useEffect, useState } from "react";
 import { getOutputDevices, setOutputDevice } from "./utils";
@@ -37,6 +49,16 @@ export function AirPlaySelector() {
                   setActive(item.name);
                 }}
                 title={`Select ${item.name}`}
+              />
+              <Action
+                title={`Copy Device Name to Clipboard`}
+                onAction={async () => {
+                  await Clipboard.copy(item.name);
+                  await showToast({
+                    style: Toast.Style.Success,
+                    title: "Device name copied to the clipboard",
+                  });
+                }}
               />
             </ActionPanel>
           }
