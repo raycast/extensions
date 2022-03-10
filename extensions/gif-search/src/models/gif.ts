@@ -59,19 +59,19 @@ export function mapFinerGifsResponse(finerGifsResp: FinerGif) {
 
 export function renderGifMarkdownDetails(gif: IGif) {
   let md = `
-  ## ${gif.title}
+## ${gif.title}
 
-  ![${gif.title}](${gif.gif_url})
+![${gif.title}](${gif.gif_url})
 
-  \`\`\`
-  Static preview, animated preview coming soon!
-  \`\`\`
+\`\`\`
+Static preview, animated preview coming soon!
+\`\`\`
   `;
 
   if (gif.attribution) {
     md += `
-    ![Powered by](file:${environment.assetsPath}/${gif.attribution})
-    `;
+![Powered by](file:${environment.assetsPath}/${gif.attribution})
+`;
   }
 
   return md;
