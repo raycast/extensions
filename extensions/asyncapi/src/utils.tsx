@@ -1,5 +1,4 @@
 import { open, showToast, Toast } from "@raycast/api";
-import { execa } from "execa";
 import { parse, ParserError } from "@asyncapi/parser";
 
 export const AsyncAPIDocumentExample = `asyncapi: '2.3.0'
@@ -30,13 +29,6 @@ components:
 export async function openStudio(document: string) {
   const encoded = Buffer.from(document).toString("base64");
   await open("https://studio.asyncapi.com/?base64=" + encoded);
-}
-
-export async function runShellScript(command: string) {
-  const { stdout } = await execa(command, {
-    env: { LC_CTYPE: "UTF-8" },
-  });
-  return stdout;
 }
 
 export async function validateAsyncAPIDocument(document: string) {

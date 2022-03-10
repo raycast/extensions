@@ -1,10 +1,10 @@
-import { Toast, showToast, closeMainWindow } from "@raycast/api";
-import { runShellScript, validateAsyncAPIDocument } from "./utils";
+import { Toast, showToast, Clipboard } from "@raycast/api";
+import { validateAsyncAPIDocument } from "./utils";
 
 export default async () => {
   await showToast(Toast.Style.Animated, "Validating your AsyncAPI document...");
-  const clipboard = await runShellScript("pbpaste");
-  clipboard.length > 0
-    ? await validateAsyncAPIDocument(clipboard)
+  const text = await Clipboard.readText()
+  text && text.length > 0
+    ? await validateAsyncAPIDocument(text)
     : await showToast(Toast.Style.Failure, "Your clipboard is empty");
 };

@@ -36,8 +36,7 @@
   ],
   "dependencies": {
     "@asyncapi/parser": "^1.14.1",
-    "@raycast/api": "^1.28.0",
-    "execa": "^6.1.0"
+    "@raycast/api": "^1.28.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

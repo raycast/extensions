@@ -1,7 +1,9 @@
-import { Toast, showToast } from "@raycast/api";
-import { openStudio, runShellScript } from "./utils";
+import { Toast, showToast, Clipboard } from "@raycast/api";
+import { openStudio } from "./utils";
 
 export default async () => {
-  const clipboard = await runShellScript("pbpaste");
-  clipboard.length > 0 ? await openStudio(clipboard) : await showToast(Toast.Style.Failure, "Your clipboard is empty");
+  const text = await Clipboard.readText()
+  text && text.length > 0
+    ? await openStudio(text)
+    : await showToast(Toast.Style.Failure, "Your clipboard is empty");
 };
