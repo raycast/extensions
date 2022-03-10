@@ -1,10 +1,9 @@
 import { AbortError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { mapTenorResponse } from "../models/gif";
-import { getAPIKey, GIF_SERVICE } from "../preferences";
+import { mapFinerGifsResponse } from "../models/gif";
 
-import TenorAPI, { TenorResults } from "../models/tenor";
+import FinerGifsClubAPI, { FinerGifsClubResults } from "../models/finerthingsclub";
 import type { IGif } from "../models/gif";
 
 interface FetchState {
@@ -13,9 +12,9 @@ interface FetchState {
   error?: Error;
 }
 
-const tenor = new TenorAPI(getAPIKey(GIF_SERVICE.TENOR));
+const finergifs = new FinerGifsClubAPI();
 
-export default function useTenorAPI({ offset = 0 }) {
+export default function useFinerGifsClubAPI({ offset = 0 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [results, setResults] = useState<FetchState>();
   const cancelRef = useRef<AbortController | null>(null);
@@ -26,14 +25,12 @@ export default function useTenorAPI({ offset = 0 }) {
       cancelRef.current = new AbortController();
       setIsLoading(true);
 
-      let results: TenorResults;
+      let results: FinerGifsClubResults;
       try {
         if (term) {
-          results = await tenor.search(term, { offset });
-        } else {
-          results = await tenor.trending({ offset, limit: 10 });
+          results = await finergifs.search(term, { offset });
+          setResults({ items: results.results.map(mapFinerGifsResponse), term });
         }
-        setResults({ items: results.results.map(mapTenorResponse), term });
       } catch (e) {
         const error = e as Error;
         if (e instanceof AbortError) {

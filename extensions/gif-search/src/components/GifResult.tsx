@@ -8,25 +8,25 @@ export function GifResult(props: { item: IGif; index: number }) {
 
   const showPreview = getShowPreview();
 
-  const openInBrowser = <Action.OpenInBrowser key="openInBrowser" url={url} />;
+  const openInBrowser = url ? <Action.OpenInBrowser key="openInBrowser" url={url} /> : undefined;
   const copyGif = (
     <Action.CopyToClipboard key="copyGifUrl" title="Copy GIF URL to Clipboard" content={stripQParams(gif_url)} />
   );
-  const copyUrl = (
+  const copyUrl = url ? (
     <Action.CopyToClipboard
       key="copyPageUrl"
       title="Copy Page URL to Clipboard"
       content={url}
       shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
     />
-  );
+  ) : undefined;
 
   const actions = [openInBrowser, copyGif, copyUrl];
   const defaultAction = getDefaultAction();
   for (let index = 0; index < actions.length; index++) {
     const action = actions[index];
 
-    if (action.key == defaultAction) {
+    if (action?.key == defaultAction) {
       // Move matching action to the front of the array to make it the default
       actions.splice(index, 1);
       actions.unshift(action);

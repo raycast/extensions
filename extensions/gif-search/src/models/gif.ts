@@ -4,15 +4,16 @@ import type { IGif as GiphyGif } from "@giphy/js-types";
 import { environment } from "@raycast/api";
 
 import type { TenorGif } from "./tenor";
+import { FinerGif } from "./finerthingsclub";
 
 export interface IGif {
   id: string | number;
   title: string;
-  url: string;
+  url?: string;
   slug: string;
   preview_gif_url: string;
   gif_url: string;
-  attribution:
+  attribution?:
     | {
         dark: string;
         light: string;
@@ -45,8 +46,19 @@ export function mapTenorResponse(tenorResp: TenorGif) {
   };
 }
 
+export function mapFinerGifsResponse(finerGifsResp: FinerGif) {
+  const gifUrl = new URL(finerGifsResp.fields.fileid + ".gif", "https://media.thefinergifs.club");
+  return <IGif>{
+    id: finerGifsResp.id,
+    title: finerGifsResp.fields.text,
+    slug: finerGifsResp.fields.fileid,
+    preview_gif_url: gifUrl.toString(),
+    gif_url: gifUrl.toString(),
+  };
+}
+
 export function renderGifMarkdownDetails(gif: IGif) {
-  return `
+  let md = `
   ## ${gif.title}
 
   ![${gif.title}](${gif.gif_url})
@@ -54,7 +66,13 @@ export function renderGifMarkdownDetails(gif: IGif) {
   \`\`\`
   Static preview, animated preview coming soon!
   \`\`\`
-
-  ![Powered by](file:${environment.assetsPath}/${gif.attribution})
   `;
+
+  if (gif.attribution) {
+    md += `
+    ![Powered by](file:${environment.assetsPath}/${gif.attribution})
+    `;
+  }
+
+  return md;
 }

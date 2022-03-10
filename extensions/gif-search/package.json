@@ -38,6 +38,12 @@
           "description": "API Key used to perform searches on Tenor. You can get one for free at https://tenor.com/gifapi"
         }
       ]
+    },
+    {
+      "name": "finergifsclub",
+      "title": "Search The Finer Gifs Club",
+      "description": "Search quotes from The Office on TheFinerGifs.club",
+      "mode": "view"
     }
   ],
   "preferences": [
