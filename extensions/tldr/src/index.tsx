@@ -49,7 +49,7 @@ export default function TLDRList(): JSX.Element {
 
   const selectedPlatforms = platforms ? [platforms[selectedPlatformName], platforms["common"]] : undefined;
 
-  async function loadPages(options?: {forceRefresh?: boolean}) {
+  async function loadPages(options?: { forceRefresh?: boolean }) {
     if (!existsSync(CACHE_DIR) || readdirSync(CACHE_DIR).length === 0 || options?.forceRefresh) {
       await refreshPages();
     }
@@ -93,7 +93,7 @@ export default function TLDRList(): JSX.Element {
                       icon={Icon.ArrowClockwise}
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                       onAction={async () => {
-                        await loadPages({forceRefresh: true});
+                        await loadPages({ forceRefresh: true });
                       }}
                     />
                   </ActionPanel>
