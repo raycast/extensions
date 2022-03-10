@@ -16,8 +16,12 @@ export default function GitignorePreview({ gitignoreFiles, listPreview }: { giti
 
   useEffect(() => {
     const controller = new AbortController();
-    generateContents(gitignoreFiles, controller.signal).then((contents: string) => setFileContents(contents));
-    return controller.abort;
+    generateContents(gitignoreFiles, controller.signal).then((contents: string) => setFileContents(contents)).catch((err) => {
+      if (!controller.signal.aborted) {
+        throw err;
+      }
+    });
+    return () => controller.abort();
   }, [gitignoreFiles]);
 
   const ComponentType = listPreview ? List.Item.Detail : Detail
