@@ -35,7 +35,7 @@ export function GifResult(props: { item: IGif; index: number }) {
     />
   );
 
-  const actions = [openInBrowser, copyGif, copyUrl, copyFile];
+  const actions = [openInBrowser, copyGif, copyFile, copyUrl];
   const defaultAction = getDefaultAction();
   for (let index = 0; index < actions.length; index++) {
     const action = actions[index];
