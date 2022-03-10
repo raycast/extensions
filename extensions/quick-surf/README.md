@@ -23,6 +23,14 @@ In the video, use "Opt+S" as a shortcut to invoke the Quick Surf command. Using 
 
 https://user-images.githubusercontent.com/36128970/157411385-33a83ac7-f6ae-4390-ab09-871d25c7c2d3.mp4
 
+**Suggest App:**
+
+Not all, just recommended.
+
+![SuggestApp](./media/SuggestApp.png)
+
+
+
 
 **Preference:**
 

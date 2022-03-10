@@ -10,8 +10,8 @@ import {
   Icon,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { SurfApplication } from "./utils";
-import { suggestApp } from "./constants";
+import { ItemType, SurfApplication } from "./utils";
+import { SUGGEST_APP_SUPPORT_TYPE } from "./constants";
 
 export default function ApplicationsList(props: { setSurfBrowsers: any }) {
   const _setSurfBrowsers = props.setSurfBrowsers;
@@ -42,16 +42,18 @@ export default function ApplicationsList(props: { setSurfBrowsers: any }) {
       }
       const _allBrowsers = [];
       for (let i = 0; i < allApplications.length; i++) {
+        const include = [...SUGGEST_APP_SUPPORT_TYPE.keys()].includes(allApplications[i].path);
         _allBrowsers[i] = new SurfApplication(
           allApplications[i].name,
           allApplications[i].path,
-          _browsers.some((val: SurfApplication) => {
-            return val.path == allApplications[i].path;
+          _browsers.some((value: SurfApplication) => {
+            return value.path == allApplications[i].path;
           }),
-          suggestApp.includes(allApplications[i].path),
+          include,
           1,
           1,
           1,
+          include ? (SUGGEST_APP_SUPPORT_TYPE.get(allApplications[i].path) as ItemType[]) : [],
           allApplications[i].bundleId
         );
       }
@@ -123,6 +125,7 @@ function ApplicationsListItem(props: {
     <List.Item
       key={application.bundleId}
       title={application.name}
+      accessoryTitle={application.support.toString().replace(",", " , ")}
       icon={{ fileIcon: application.path }}
       accessoryIcon={(function () {
         if (application.add) {

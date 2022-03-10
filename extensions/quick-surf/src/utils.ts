@@ -1,6 +1,5 @@
-import { Application, getPreferenceValues, getSelectedText, showToast, Toast } from "@raycast/api";
+import { Application, getPreferenceValues, getSelectedText } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { text } from "stream/consumers";
 
 export interface Preferences {
   engine: string;
@@ -11,14 +10,14 @@ export enum ItemType {
   TEXT = "Text",
   URL = "URL",
   EMAIL = "Email",
-  NULL = " ",
+  NULL = "",
 }
 
 export enum ItemSource {
   SELECTED = "Selected",
   CLIPBOARD = "Clipboard",
   ENTER = "Enter",
-  NULL = " ",
+  NULL = "",
 }
 
 export interface ItemInput {
@@ -28,15 +27,15 @@ export interface ItemInput {
 }
 
 export class SurfApplication implements Application {
-  name = "";
-  path = "";
+  bundleId?: string;
+  name: string;
+  path: string;
   add: boolean;
   suggest: boolean;
   rankText: number;
   rankURL: number;
   rankEmail: number;
-
-  bundleId?: string;
+  support: ItemType[];
 
   constructor(
     name: string,
@@ -46,6 +45,7 @@ export class SurfApplication implements Application {
     rankText: number,
     rankURL: number,
     rankEmail: number,
+    support: ItemType[],
     bundleId?: string
   ) {
     this.bundleId = bundleId;
@@ -56,6 +56,7 @@ export class SurfApplication implements Application {
     this.rankText = rankText;
     this.rankURL = rankURL;
     this.rankEmail = rankEmail;
+    this.support = support;
   }
 }
 
@@ -74,8 +75,8 @@ const detectText = () => {
     .catch(async () => assembleItemSource(await runAppleScript("the clipboard"), ItemSource.CLIPBOARD))
     .then((item) =>
       !isEmpty(item.content)
-        ? assembleItemSource(item.content.substring(0, 999), ItemSource.CLIPBOARD)
-        : assembleItemSource("", ItemSource.CLIPBOARD)
+        ? assembleItemSource(item.content.substring(0, 999), item.source)
+        : assembleItemSource("", ItemSource.NULL)
     )
     .catch(() => assembleItemSource("", ItemSource.NULL));
 };
@@ -98,7 +99,17 @@ export function assembleItemType(item: ItemInput): ItemInput {
     } else if (isEmailGroup(trimText)) {
       return { type: ItemType.EMAIL, source: item.source, content: mailtoBuilder(trimText) };
     } else if (isUrl(trimText)) {
-      return { type: ItemType.URL, source: item.source, content: trimText };
+      let url;
+      if (isIP(trimText)) {
+        if (trimText == "127.0.0.1") {
+          url = "http://www." + trimText;
+        } else {
+          url = urlIPBuilder("http://", trimText);
+        }
+      } else {
+        url = /^https?:\/\//g.test(trimText) ? trimText : "https://" + trimText;
+      }
+      return { type: ItemType.URL, source: item.source, content: url };
     } else {
       return { type: ItemType.TEXT, source: item.source, content: trimText };
     }
@@ -141,9 +152,21 @@ function mailtoBuilder(emailGroup: string): string {
 }
 
 function isUrl(text: string): boolean {
-  return /^(https?:\/\/(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+\.)+[a-zA-Z]+)(:\d+)?(\/.*)?(\?.*)?(#.*)?$/.test(text);
+  return (
+    /^((https?:\/\/)?(([a-zA-Z0-9]+-?)+[a-zA-Z0-9]+\.)+[a-zA-Z]+)(:\d+)?(\/.*)?(\?.*)?(#.*)?$/.test(text) || isIP(text)
+  );
+}
+
+function isIP(text: string): boolean {
+  return /^(http:\/\/)?(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/.test(
+    text
+  );
 }
 
 export const urlBuilder = (prefix: string, text: string) => {
   return /^https?:\/\//g.test(text) ? text : `${prefix}${encodeURIComponent(text)}`;
+};
+
+export const urlIPBuilder = (prefix: string, text: string) => {
+  return /^http:\/\//g.test(text) ? text : `${prefix}${text}`;
 };

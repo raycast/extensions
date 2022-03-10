@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Icon,
+  Image,
   List,
   LocalStorage,
   open,
@@ -16,7 +17,6 @@ import {
   assembleItemSource,
   assembleItemType,
   fetchDetectedItem,
-  isEmpty,
   ItemInput,
   ItemSource,
   ItemType,
@@ -30,23 +30,23 @@ import ApplicationsList from "./surfbrowser";
 //main view
 export default function SurfWithSpecificBrowser() {
   const [browsers, setBrowsers] = useState<SurfApplication[]>([]);
+  const [searchBarText, setSearchBarText] = useState<string>("");
   const [itemInput, setItemInput] = useState<ItemInput>({ type: ItemType.NULL, source: ItemSource.NULL, content: "" });
 
   useEffect(() => {
     async function fetchSelectedText() {
       const inputItem = await fetchDetectedItem();
       if (inputItem.type == ItemType.NULL) {
-        await showToast(Toast.Style.Failure, "Nothing, Enter Now!");
+        await showToast(Toast.Style.Failure, "Nothing is detected from Selected or Clipboard!");
       } else {
         setItemInput(inputItem);
       }
     }
-
     fetchSelectedText().then();
   }, []);
 
   useEffect(() => {
-    async function fetchSelectedText() {
+    async function fetchBrowsers() {
       const localBrowsers = await LocalStorage.getItem<string>("boards");
       let _browsers = [];
       if (typeof localBrowsers == "string") {
@@ -54,13 +54,20 @@ export default function SurfWithSpecificBrowser() {
         setBrowsers(boardsSort(_browsers, itemInput));
       }
     }
+    fetchBrowsers().then();
+  }, []);
 
+  useEffect(() => {
+    async function fetchSelectedText() {
+      setBrowsers(boardsSort([...browsers], itemInput));
+    }
     fetchSelectedText().then();
   }, [itemInput]);
 
   return (
     <List
       isLoading={false}
+      searchText={searchBarText}
       searchBarPlaceholder={"Enter url, text or email"}
       selectedItemId={(function () {
         if (browsers.length === 0) {
@@ -87,14 +94,22 @@ export default function SurfWithSpecificBrowser() {
                   if (itemInput.type == ItemType.NULL) {
                     const selectedItem = await fetchDetectedItem();
                     if (selectedItem.type == ItemType.NULL) {
-                      await showToast(Toast.Style.Failure, "Nothing, Enter Now!");
+                      await showToast(Toast.Style.Failure, "Nothing is detected from Selected or Clipboard!");
                     } else {
+                      setSearchBarText("");
                       setItemInput(selectedItem);
                     }
                   } else {
                     await showHUD("Surf with default!");
                     await open(searchEngineURLBuilder(itemInput));
                   }
+                }}
+              />
+              <Action
+                title={"Edit in Search Bar"}
+                icon={Icon.Pencil}
+                onAction={async () => {
+                  setSearchBarText(itemInput.content);
                 }}
               />
             </ActionPanel>
@@ -106,7 +121,8 @@ export default function SurfWithSpecificBrowser() {
           return (
             <ApplicationsListItem
               key={browser.path}
-              inputText={itemInput}
+              itemInput={itemInput}
+              setSearchBarText={setSearchBarText}
               setItemInput={setItemInput}
               setBrowsers={setBrowsers}
               index={index}
@@ -129,11 +145,10 @@ function MoreBoards(props: { setBrowsers: any }) {
     <List.Item
       id="MoreBoards"
       title={"More Boards"}
-      icon={{ source: { light: "quick-surf.png", dark: "quick-surf@dark.png" } }}
-      // accessoryTitle={"❯"}
+      icon={{ source: { light: "more-board.png", dark: "more-board@dark.png" }, mask: Image.Mask.RoundedRectangle }}
       accessoryIcon={Icon.ArrowRight}
       actions={
-        <ActionPanel title="Game controls">
+        <ActionPanel>
           <Action
             title="More Boards"
             icon={Icon.Gear}
@@ -149,15 +164,17 @@ function MoreBoards(props: { setBrowsers: any }) {
 
 //list item
 function ApplicationsListItem(props: {
-  inputText: ItemInput;
+  itemInput: ItemInput;
+  setSearchBarText: any;
   setItemInput: any;
   setBrowsers: any;
   index: number;
   browsers: SurfApplication[];
 }) {
   const index = props.index;
+  const setSearchBarText = props.setSearchBarText;
   const setItemInput = props.setItemInput;
-  const inputText = props.inputText;
+  const itemInput = props.itemInput;
   const setBrowsers = props.setBrowsers;
   const applications = props.browsers;
   const application = applications[index];
@@ -174,19 +191,36 @@ function ApplicationsListItem(props: {
       actions={
         <ActionPanel>
           <Action
-            title={actionTitle(inputText, application.name)}
-            icon={actionIcon(inputText)}
+            title={actionTitle(itemInput, application.name)}
+            icon={actionIcon(itemInput)}
             onAction={async () => {
-              await upBrowserRank(inputText, application, applications);
-              await actionOnApplicationItem(inputText, setItemInput, application);
+              await upBrowserRank(itemInput, application, applications);
+              await actionOnApplicationItem(itemInput, setSearchBarText, setItemInput, application);
+            }}
+          />
+          <Action
+            title={"Edit in Search Bar"}
+            icon={Icon.Pencil}
+            onAction={async () => {
+              setSearchBarText(itemInput.content);
+            }}
+          />
+          <Action
+            title={`Reset ${application.name} Rank`}
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={async () => {
+              setBrowsers(await clearRank(application, applications));
+              await showToast(Toast.Style.Success, `Rank of ${application.name} Reset!`);
             }}
           />
           <Action
             title={"Reset All Rank"}
-            icon={Icon.ArrowClockwise}
+            icon={Icon.ExclamationMark}
+            shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
             onAction={async () => {
-              setBrowsers(await clearBrowserRank(applications));
-              await showToast(Toast.Style.Success, "Rank Reset!");
+              setBrowsers(await clearALLRank(applications));
+              await showToast(Toast.Style.Success, "Rank of All Reset!");
             }}
           />
         </ActionPanel>
@@ -221,7 +255,12 @@ const actionIcon = (inputText: ItemInput) => {
   }
 };
 
-async function actionOnApplicationItem(inputText: ItemInput, setItemInput: any, app: SurfApplication) {
+async function actionOnApplicationItem(
+  inputText: ItemInput,
+  setSearchBarText: any,
+  setItemInput: any,
+  app: SurfApplication
+) {
   if (inputText.type != ItemType.NULL) {
     switch (inputText.type) {
       case ItemType.URL:
@@ -239,8 +278,9 @@ async function actionOnApplicationItem(inputText: ItemInput, setItemInput: any, 
   } else {
     const selectedItem = await fetchDetectedItem();
     if (selectedItem.type == ItemType.NULL) {
-      await showToast(Toast.Style.Failure, "Nothing, Enter Now!");
+      await showToast(Toast.Style.Failure, "Nothing is detected from Selected or Clipboard!");
     } else {
+      setSearchBarText("");
       setItemInput(selectedItem);
     }
   }
@@ -250,13 +290,16 @@ async function openSurfboard(url: string, path: string) {
   try {
     await open(url, path);
   } catch (e) {
-    await showHUD("Unknown Error!");
+    await showHUD("Error Input!");
   }
 }
 
 function searchEngineURLBuilder(itemInput: ItemInput): string {
   switch (itemInput.type) {
     case ItemType.EMAIL: {
+      return itemInput.content;
+    }
+    case ItemType.URL: {
       return itemInput.content;
     }
     default: {
@@ -321,17 +364,30 @@ async function upBrowserRank(itemInput: ItemInput, browser: SurfApplication, bro
   await LocalStorage.setItem("boards", JSON.stringify(browsers));
 }
 
-async function clearBrowserRank(browsers: SurfApplication[]) {
-  browsers.forEach((value) => {
+async function clearRank(surfApplication: SurfApplication, surfApplications: SurfApplication[]) {
+  surfApplications.map((value) => {
+    if (value.path == surfApplication.path) value.rankText = 1;
+    value.rankURL = 1;
+    value.rankEmail = 1;
+  });
+  surfApplications.sort(function (a, b) {
+    return b.name.toUpperCase() < a.name.toUpperCase() ? 1 : -1;
+  });
+  await LocalStorage.setItem("boards", JSON.stringify(surfApplications));
+  return [...surfApplications];
+}
+
+async function clearALLRank(surfApplications: SurfApplication[]) {
+  surfApplications.forEach((value) => {
     value.rankText = 1;
     value.rankURL = 1;
     value.rankEmail = 1;
   });
-  browsers.sort(function (a, b) {
+  surfApplications.sort(function (a, b) {
     return b.name.toUpperCase() < a.name.toUpperCase() ? 1 : -1;
   });
-  await LocalStorage.setItem("boards", JSON.stringify(browsers));
-  return [...browsers];
+  await LocalStorage.setItem("boards", JSON.stringify(surfApplications));
+  return [...surfApplications];
 }
 
 function boardsSort(browsers: SurfApplication[], inputItem: ItemInput) {
