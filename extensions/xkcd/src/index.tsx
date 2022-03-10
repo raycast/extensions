@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Comic, fetchComic, maxNum } from "./xkcd";
+import { fetchComic, maxNum } from "./xkcd";
 import { useAtom } from "jotai";
 import { currentComicAtom, lastViewedAtom, maxNumAtom, readStatusAtom, totalReadAtom } from "./atoms";
 import getRandomUnread from "./get_random_unread";
@@ -12,30 +12,26 @@ export default function main() {
   const [loading, setLoading] = useState(true);
   const [totalRead] = useAtom(totalReadAtom);
   const [lastViewed, setLastViewed] = useAtom(lastViewedAtom);
-  const [comicData, setComicData] = useState<Comic | null>(null);
   const [currentComic, setCurrentComic] = useAtom(currentComicAtom);
   const [selectedId, setSelectedId] = useState("");
+  const [markdownString, setMarkdownString] = useState<string | null>(null);
   useEffect(() => {
     if (currentComic === -1) return;
+    setMarkdownString(null);
     (async () => {
       const data = await fetchComic(currentComic);
-      setComicData(data);
+      setMarkdownString(`
+# ${data.title} - #${data.num}
+
+${data.alt}
+
+![${data.alt}](${data.img})`);
       await LocalStorage.setItem(`read:comic:${currentComic}`, true);
       await LocalStorage.setItem("last_viewed", currentComic);
       setReadStatus({ ...readStatus, [currentComic]: true });
       setLastViewed(currentComic);
     })();
   }, [currentComic]);
-  const markdownString =
-    comicData === null
-      ? null
-      : `
-# ${comicData.title} - #${comicData.num}
-
-![${comicData.alt}](${comicData.img})
-
-${comicData.alt}
-`;
   useEffect(() => {
     (async () => {
       const data = await maxNum();
