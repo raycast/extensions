@@ -110,7 +110,7 @@
       "required": true,
       "description": "Comma-separated list of paths where you often download your torrents (must be full-paths or tidle-prefixed ones)",
       "type": "textfield",
-      "default": ""
+      "default": "~/Downloads"
     }
   ],
   "dependencies": {
@@ -119,7 +119,8 @@
     "expand-tilde": "^2.0.2",
     "node-fetch": "^3.2.2",
     "pretty-bytes": "^6.0.0",
-    "transmission-promise": "^1.1.5"
+    "transmission-promise": "^1.1.5",
+    "ts-enum-util": "^4.0.2"
   },
   "devDependencies": {
     "@types/expand-tilde": "^2.0.0",

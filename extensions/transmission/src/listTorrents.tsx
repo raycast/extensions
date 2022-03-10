@@ -6,9 +6,10 @@
 import { List, showToast, Toast, Icon, ActionPanel, Action, Color, getPreferenceValues } from "@raycast/api";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import Transmission from "transmission-promise";
+import { $enum } from "ts-enum-util";
 import { formatDistanceToNow } from "date-fns";
 import prettyBytes from "pretty-bytes";
-import { useInterval } from "./utils/hooks";
+import { useInterval, useStateFromLocalStorage } from "./utils/hooks";
 import { capitalize, truncate } from "./utils/string";
 import { padList } from "./utils/list";
 import { createClient } from "./modules/client";
@@ -22,6 +23,16 @@ enum TorrentStatus {
   QueuedToSeed = 5,
   Seeding = 6,
 }
+
+const TorrentStatusLabel: Record<string, string> = {
+  Stopped: "Stopped",
+  QueuedToCheckFiles: "Queued to check files",
+  CheckingFiles: "Checking files",
+  QueuedToDownload: "Queued to download",
+  Downloading: "Downloading",
+  QueuedToSeed: "Queued to seed",
+  Seeding: "Seeding",
+};
 
 type Torrent = {
   id: number;
@@ -172,6 +183,9 @@ const startAllTorrents = async (transmission: Transmission) => {
 
 export default function TorrentList() {
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter, loadingStatusFilter] = useStateFromLocalStorage<
+    keyof typeof TorrentStatus | "All"
+  >("statusFilter", "All");
   const transmission = useMemo(() => createClient(), []);
   const [torrents, setTorrents] = useState<Torrent[]>([]);
   const [sessionStats, setSessionStats] = useState<SessionStats | null>(null);
@@ -211,8 +225,27 @@ export default function TorrentList() {
   );
 
   return (
-    <List isLoading={!didLoad} searchBarPlaceholder="Filter torrents by name..." onSearchTextChange={setSearch}>
+    <List
+      isLoading={!didLoad || loadingStatusFilter}
+      searchBarPlaceholder="Filter torrents by name..."
+      onSearchTextChange={setSearch}
+      searchBarAccessory={
+        <List.Dropdown
+          value={statusFilter}
+          tooltip="Filter by status"
+          onChange={(status) => setStatusFilter(status as keyof typeof TorrentStatus)}
+        >
+          <List.Dropdown.Item title="All" value="All" />
+          {$enum(TorrentStatus).map((value) => {
+            const status = TorrentStatus[value];
+            return <List.Dropdown.Item key={status} title={TorrentStatusLabel[status]} value={status} />;
+          })}
+        </List.Dropdown>
+      }
+    >
       {sortedTorrents
+        // status filter
+        .filter((x) => (statusFilter === "All" ? true : x.status === TorrentStatus[statusFilter]))
         // fuzzy search
         .filter((x) => x.name.toLowerCase().includes(search.toLowerCase()))
         .map((torrent, index) => (
@@ -315,6 +348,9 @@ function TorrentListItem({
         tintColor: statusIconColor(torrent),
       }}
       accessoryTitle={[`↓ ${rateDownload}`, " - ", `↑ ${rateUpload}`, " - ", percentDone].join(" ")}
+      detail={
+        <List.Item.Detail markdown="![Illustration](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png)" />
+      }
       actions={
         <ActionPanel>
           <ActionPanel.Section title={`Selected Torrent (${selectedTorrentTitle})`}>
