@@ -12,7 +12,7 @@ import Fuse from 'fuse.js';
 
 import Service, { Coin } from './service';
 import { addFavorite, getFavorites, removeFavorite } from './storage';
-import { formatDate, formatPrice, getCurrency } from './utils';
+import { formatDate, formatPrice, getPreferredCurrency } from './utils';
 
 interface IdProps {
   id: string;
@@ -167,8 +167,8 @@ async function showPrice(id: string) {
     style: Toast.Style.Animated,
     title: 'Fetching price…',
   });
-  const currency = getCurrency();
-  const price = await service.getPrice(id, currency);
+  const currency = getPreferredCurrency();
+  const price = await service.getPrice(id, currency.id);
   if (!price) {
     showToast({
       style: Toast.Style.Failure,

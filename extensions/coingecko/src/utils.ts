@@ -1,39 +1,38 @@
+import currencies from './currencies.json';
 import { getPreferenceValues } from '@raycast/api';
 
-interface Preferences {
-  currency: Currency;
+export interface Currency {
+  id: string;
+  name: string;
+  symbol: string;
+  category: string;
 }
 
-export type Currency = 'usd' | 'eur' | 'gbp' | 'jpy' | 'cny' | 'rub';
+interface Preferences {
+  currency: string;
+}
 
-export const currencies: Currency[] = [
-  'usd',
-  'eur',
-  'gbp',
-  'jpy',
-  'cny',
-  'rub',
-];
+export function getPreferredCurrency(): Currency {
+  const { currency: perference } = getPreferences();
 
-export function getCurrency(): Currency {
-  const { currency } = getPreferences();
+  const currency = currencies.find(({ id }) => id === perference);
+
+  if (currency === undefined) {
+    throw new Error(''); // TODO
+  }
+
   return currency;
 }
 
+export function getCurrencies(): Currency[] {
+  return currencies;
+}
+
 export function formatPrice(price: number) {
-  const currencyMap: Record<Currency, string> = {
-    usd: 'USD',
-    eur: 'EUR',
-    gbp: 'GBP',
-    jpy: 'JPY',
-    cny: 'CNY',
-    rub: 'RUB',
-  };
-  const currency = getCurrency();
-  const currencyString = currencyMap[currency];
+  const currency = getPreferredCurrency();
   const currencyFormatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: currencyString,
+    currency: currency.symbol,
     maximumFractionDigits: 6,
   });
   const priceString = currencyFormatter.format(price);

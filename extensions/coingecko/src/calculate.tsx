@@ -8,8 +8,8 @@ import {
   Toast,
 } from '@raycast/api';
 import { useEffect, useRef, useState } from 'react';
-import { getCurrency } from './utils';
 import Service, { Coin } from './service';
+import { getCurrencies, getPreferredCurrency } from './utils';
 
 enum FormFieldDataType {
   Coin,
@@ -22,14 +22,14 @@ interface FormResult {
   to: string;
 }
 
-const DEFAULT_COIN = 'bitcoin';
-
 export default function Command() {
+  const DEFAULT_COIN = 'bitcoin';
+  const { id: DEFAULT_CURRENCY } = getPreferredCurrency();
+
   const [isLoading, setLoading] = useState<boolean>(true);
   const [coins, setCoins] = useState<Coin[]>([]);
-  const [currencies, setCurrencies] = useState<string[]>([]);
   const selectedCoin = useRef<string>(DEFAULT_COIN);
-  const selectedCurrency = useRef<string>(getCurrency());
+  const selectedCurrency = useRef<string>(DEFAULT_CURRENCY);
   const [fieldOrder, setFieldOrder] = useState<FormFieldDataType[]>([
     FormFieldDataType.Coin,
     FormFieldDataType.Currency,
@@ -51,9 +51,6 @@ export default function Command() {
           selectedCurrency.current,
         );
         setCoins(coins);
-
-        const currencies = await service.getSupportedVsCurrencies();
-        setCurrencies(currencies);
       } catch (err) {
         await showToast({
           style: Toast.Style.Failure,
@@ -175,7 +172,7 @@ export default function Command() {
     .map((coin) => {
       return {
         value: coin.id,
-        title: coin.symbol.toUpperCase(),
+        title: `${coin.name} (${coin.symbol.toUpperCase()})`,
         selected: selectedCoin.current === coin.id,
       };
     })
@@ -184,12 +181,12 @@ export default function Command() {
     // it has been set
     .sort((a, b) => Number(b.selected) - Number(a.selected));
 
-  const currencyItems = currencies
+  const currencyItems = getCurrencies()
     .map((currency) => {
       return {
-        value: currency,
-        title: currency.toUpperCase(),
-        selected: selectedCurrency.current === currency,
+        value: currency.id,
+        title: `${currency.name} (${currency.symbol})`,
+        selected: selectedCurrency.current === currency.id,
       };
     })
     // Fake the defaultValue by keeping the users selected currency at the top of
