@@ -29,7 +29,7 @@ export async function generateContents(selected: GitignoreFile[], signal?: Abort
     }
     return contents.join("\n");
   } catch (err) {
-    if (signal.aborted) {
+    if (signal?.aborted) {
       return "";
     }
     throw err;
