@@ -4,14 +4,25 @@ This extension searches for animated GIFs from the internet using [giphy.com](ht
 
 You can sign up for a free developer account for Giphy at [https://developers.giphy.com](https://developers.giphy.com), or Tenor at [https://tenor.com/developer/keyregistration](https://tenor.com/developer/keyregistration).
 
-## About this extension
+## Preferences
 
-![](./media/preview.gif)
+### GIF Preview
 
-Recently, I was horrified to learn that there _still_ wasn't a gif search extension available for [Raycast](http://raycast.com) (one of my all-time favorite Mac apps). After reading through the (very good!!) [Raycast extension docs](https://developers.raycast.com), I figured this would be a breeze to implement against either the [Giphy](https://developers.giphy.com) or [Tenor](https://tenor.com/gifapi) APIs.
+If you go into the extension's settings, you can enable the GIF Preview feature (disabled by default).
 
-Turns out, I was both right and wrong: it was quite easy to build a Raycast gif search extension against Giphy, but the reason one didn't already exist is that Raycast currently can't display animated gifs... 😬.
+![Enable GIF Preview](./media/gif-preview-setting.png)
+![GIF Preview](./media/gif-preview.png)
 
-Still, I was undeterred. I figured I might be able to hack my way around this limitation by decoding the gif manually in the extension. I used the [`gif-frames`](https://www.npmjs.com/package/gif-frames) project to decode each frame of a gif into a jpeg-based byte stream. I then converted that to a buffer, which can then be turned into a base64 data-uri. Then it's just setting an `<img>` tag's `src` attribute to each frame's data-uri and setting that to a `<Detail>` view on an interval. Turns out it all works!! (sorta)
+The GIF Preview is currently limited to showing just the first frame of the GIF due to limitations in Raycast. Once Raycast is able to render animated GIFs in Detail views, this setting will become enabled by default.
 
-At this point, I've taken this extension as far as I think it can possibly go given Raycast's current limitations. There's a whole lot of blinking and gross UI that happens while the image data is loaded into memory and cache, and if you try to pop back out of the navigation while that's happening, the navigation stack crashes. However, I still think the extension is useful since you can search for gifs and either open them in your browser, or copy the URL to your clipboard. I've therefore decided to hide the inline GIF preview behind a settings checkbox, to be enabled by brave users that want to see how buggy it is. Maybe some day, when Raycast has native GIF rendering, we can enable it by
+### Changing the Default Action
+
+By default, the default action on a GIF (what happens when you hit ENTER) is to open the GIF service's webpage in the browser. This setting allows you to customize this behavior to one of three options
+
+![Default Action](./media/default-action.png)
+
+1. Open in Browser (Default)
+2. Copy GIF URL to Clipboard
+3. Copy Page URL to Clipboard
+
+Whichever setting is chosen will be moved to the top of the list, making it the default action when you hit ENTER on the GIF list item.

@@ -40,12 +40,40 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "showGifPreview",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show GIF Preview",
+      "description": "Shows a large preview of the selected gif in search results."
+    },
+    {
+      "name": "defaultAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Action",
+      "description": "Customize what happens when hitting ENTER on a Gif",
+      "data": [
+        {
+          "title": "Open in Browser",
+          "value": "openInBrowser"
+        },
+        {
+          "title": "Copy GIF URL to Clipboard",
+          "value": "copyGifUrl"
+        },
+        {
+          "title": "Copy Page URL to Clipboard",
+          "value": "copyPageUrl"
+        }
+      ]
+    }
+  ],
   "dependencies": {
     "@giphy/js-fetch-api": "^4.1.2",
-    "@raycast/api": "^1.29.1",
-    "gif-frames": "^1.0.1",
-    "node-fetch": "^3.2.1",
-    "usehooks-ts": "^2.4.2"
+    "@raycast/api": "^1.30.0",
+    "node-fetch": "^3.2.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

@@ -1,12 +1,14 @@
 import { useEffect } from "react";
 import { List, showToast, Toast } from "@raycast/api";
 
+import { getShowPreview } from "./preferences";
 import useTenorAPI from "./hooks/useTenorAPI";
 import { GifList } from "./components/GifList";
 
 import "./fetch-polyfill";
 
 export default function Command() {
+  const showPreview = getShowPreview();
   const [results, isLoading, search] = useTenorAPI({});
 
   useEffect(() => {
@@ -25,6 +27,7 @@ export default function Command() {
       throttle={true}
       searchBarPlaceholder="Search for gifs on Tenor..."
       onSearchTextChange={search}
+      isShowingDetail={showPreview && !isLoading}
     >
       <GifList term={results?.term} results={results?.items} />
     </List>
