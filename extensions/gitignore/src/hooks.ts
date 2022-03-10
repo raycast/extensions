@@ -2,7 +2,7 @@ import fetch, { FetchError } from "node-fetch";
 import fs, { readdir } from "fs/promises";
 import fsSync from "fs";
 import { resolve, parse, basename } from "path";
-import { environment, LocalStorage, showToast, Toast } from "@raycast/api";
+import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { pipeline } from "stream/promises";
 import { useCallback, useEffect, useState } from "react";
 import { GitignoreFile, State } from "./types";
@@ -179,4 +179,9 @@ export function useGitignore(): [
   }, [refresh]);
 
   return [state, selected, toggleSelection, () => refresh(true)];
+}
+
+export function useListDetailPreference(): boolean {
+  const preferences = getPreferenceValues();
+  return preferences["listdetail"];
 }

@@ -1,17 +1,17 @@
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { exportClipboard } from "./clipboard";
 import { GitignoreFile } from "./types";
 import { generateContents } from "./utils";
 
-function toMarkdown(code: string | null) {
+function toMarkdown(title: string, code: string | null) {
   if (code === null) {
     return undefined;
   }
-  return "```\n" + code + "\n```";
+  return `### ${title}\n\`\`\`\n${code}\n\`\`\``;
 }
 
-export default function GitignorePreview({ gitignoreFiles }: { gitignoreFiles: GitignoreFile[] }) {
+export default function GitignorePreview({ gitignoreFiles, listPreview }: { gitignoreFiles: GitignoreFile[], listPreview?: boolean }) {
   const [fileContents, setFileContents] = useState<string | null>(null);
 
   useEffect(() => {
@@ -20,11 +20,17 @@ export default function GitignorePreview({ gitignoreFiles }: { gitignoreFiles: G
     return controller.abort;
   }, [gitignoreFiles]);
 
+  const ComponentType = listPreview ? List.Item.Detail : Detail
+
+  const props = listPreview ? {} : {
+    navigationTitle: "Gitignore Preview"
+  }
+
   return (
-    <Detail
+    <ComponentType
       isLoading={fileContents === null}
-      navigationTitle={`Gitignore Preview`}
-      markdown={toMarkdown(fileContents)}
+      {...props}
+      markdown={toMarkdown(gitignoreFiles.map(f => f.name).join(", "), fileContents)}
       actions={
         <ActionPanel>
           <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => exportClipboard(gitignoreFiles)} />

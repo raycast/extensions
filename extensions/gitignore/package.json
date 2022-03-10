@@ -14,6 +14,17 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "listdetail",
+      "type": "checkbox",
+      "title": "Preview",
+      "description": "Disable file preview in gitignore list.",
+      "label": "Display Preview in List",
+      "default": true,
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.29.0",
     "node-fetch": "^3.2.0"
