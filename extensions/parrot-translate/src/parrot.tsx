@@ -137,11 +137,6 @@ export default function () {
             isLoading={isLoadingState}
             searchBarPlaceholder={"Translate to"}
             onSearchTextChange={(inputText) => onInputChangeEvt(inputText)}
-            navigationTitle={
-                translateFromLanguageState?.languageTitle && currentTargetLanguageState?.languageTitle
-                    ? `Parrot: ${translateFromLanguageState.languageTitle} → ${currentTargetLanguageState.languageTitle}`
-                    : "Parrot"
-            }
             actions={
                 <ListActionPanel
                     queryText={inputState}
