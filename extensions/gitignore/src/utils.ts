@@ -20,9 +20,18 @@ export function spawn(command: string, args: ReadonlyArray<string>) {
  * Generate contents from a list of GitignoreFile
  */
 export async function generateContents(selected: GitignoreFile[], signal?: AbortSignal): Promise<string> {
-  const contents = [];
-  for (const gitignore of selected) {
-    contents.push(`# ---- ${gitignore.name} ----\n${await (await fs.readFile(gitignore.path, { signal })).toString()}`);
+  try {
+    const contents = [];
+    for (const gitignore of selected) {
+      contents.push(
+        `# ---- ${gitignore.name} ----\n${await (await fs.readFile(gitignore.path, { signal })).toString()}`
+      );
+    }
+    return contents.join("\n");
+  } catch (err) {
+    if (signal?.aborted) {
+      return "";
+    }
+    throw err;
   }
-  return contents.join("\n");
 }
