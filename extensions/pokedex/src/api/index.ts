@@ -32,6 +32,7 @@ export const getPokemon = async (
         }
         pokemon_v2_pokemonstats {
           base_stat
+          effort
           pokemon_v2_stat {
             name
             pokemon_v2_statnames(where: {language_id: {_eq: $language_id}}) {
@@ -60,6 +61,7 @@ export const getPokemon = async (
             pokemon_v2_pokemonspecies(order_by: {order: asc}) {
               id
               name
+              evolves_from_species_id
               pokemon_v2_pokemonspeciesnames(where: {language_id: {_eq: $language_id}}) {
                 genus
                 name
