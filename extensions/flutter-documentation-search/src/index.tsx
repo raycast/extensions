@@ -31,7 +31,7 @@ export default function Command() {
     <List
       isLoading={state.isLoading}
       onSearchTextChange={search}
-      searchBarPlaceholder="Search in ddze Flutter documentation..."
+      searchBarPlaceholder="Search in Flutter documentation..."
       throttle={true}
     >
       {state.results ? (
