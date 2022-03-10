@@ -89,7 +89,7 @@ export default function Gitignore() {
             <List.Item
               icon={Icon.Download}
               title="Refresh"
-              subtitle={!listDetail && lastUpdatedSubtitle}
+              subtitle={!listDetail ? lastUpdatedSubtitle : undefined}
               detail={listDetail && <List.Item.Detail markdown={`### ${lastUpdatedSubtitle}`} />}
               actions={
                 <ActionPanel>
