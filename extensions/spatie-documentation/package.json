@@ -166,7 +166,7 @@
         {
           "name": "spatieBrowsershotVersion",
           "type": "dropdown",
-          "required": true,
+          "required": false,
           "title": "Spatie Browsershot Version",
           "description": "Specify the Browsershot version it will search the docs for.",
           "default": "v2",

@@ -9,86 +9,30 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import algoliaSearch from "algoliasearch/lite";
-import striptags from "striptags";
+import { DocList, SpatieDocsHit } from "./types";
+import algoliaConfig from "./config/algolia";
+import { getSubTitle, getTitle } from "./helpers";
 
-type docList = {
-  [versions: string]: {
-    title: string;
-    url: string;
-  }[];
-};
-
-const documentation: { [key: string]: docList } = {
+const documentation: { [key: string]: DocList } = {
   v7: require("./documentation/laravel-medialibrary/v7.json"),
   v8: require("./documentation/laravel-medialibrary/v8.json"),
   v9: require("./documentation/laravel-medialibrary/v9.json"),
   v10: require("./documentation/laravel-medialibrary/v10.json"),
 };
 
-const APPID = "BH4D9OD16A";
-const APIKEY = "7a1f56fb06bd42e657e82bdafe86cef3";
-const INDEX = "spatie_be";
-
-type KeyValueHierarchy = {
-  [key: string]: string;
-};
-
-type SpatieLaravelMedialibraryDocsHit = {
-  url: string;
-  hierarchy: KeyValueHierarchy;
-  objectID: string;
-  _highlightResult: {
-    content:
-      | {
-          value: string;
-          matchlevel: string;
-          fullyHighlighted: boolean;
-          matchedWords: string[];
-        }
-      | undefined;
-    hierarchy: {
-      [key: string]: {
-        value: string;
-        matchLevel: string;
-        matchedWords: string[];
-      };
-    };
-  };
-};
-
 export default function SearchDocumentation() {
   const getPreference = getPreferenceValues();
+
   const algoliaClient = useMemo(() => {
-    return algoliaSearch(APPID, APIKEY);
-  }, [APPID, APIKEY]);
+    return algoliaSearch(algoliaConfig.app_id, algoliaConfig.api_key);
+  }, [algoliaConfig.app_id, algoliaConfig.api_key]);
 
   const algoliaIndex = useMemo(() => {
-    return algoliaClient.initIndex(INDEX);
-  }, [algoliaClient, INDEX]);
+    return algoliaClient.initIndex(algoliaConfig.index);
+  }, [algoliaClient, algoliaConfig.index]);
 
   const [searchResults, setSearchResults] = useState<any[] | undefined>();
   const [isLoading, setIsLoading] = useState(false);
-
-  const hierarchyToArray = (hierarchy: KeyValueHierarchy) => {
-    return Object.values(hierarchy)
-      .filter((hierarchyEntry: string | unknown) => hierarchyEntry)
-      .map((hierarchyEntry: string) => hierarchyEntry.replace("&amp;", "&"));
-  };
-
-  const getTitle = (hit: SpatieLaravelMedialibraryDocsHit): string => {
-    return hierarchyToArray(hit.hierarchy).pop() || "";
-  };
-
-  const getSubTitle = (hit: SpatieLaravelMedialibraryDocsHit): string => {
-    const highlightResult = striptags(hit._highlightResult?.content?.value || "");
-    if (highlightResult) {
-      return highlightResult;
-    }
-
-    const hierarchy = hierarchyToArray(hit.hierarchy) || [];
-    hierarchy.pop();
-    return hierarchy.join(" > ");
-  };
 
   const search = async (query = "") => {
     if (query === "") {
@@ -123,7 +67,7 @@ export default function SearchDocumentation() {
       isLoading={isLoading}
       onSearchTextChange={async (query) => setSearchResults(await search(query))}
     >
-      {searchResults?.map((hit: SpatieLaravelMedialibraryDocsHit) => {
+      {searchResults?.map((hit: SpatieDocsHit) => {
         return (
           <List.Item
             key={hit.objectID}
