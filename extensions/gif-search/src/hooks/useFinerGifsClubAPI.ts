@@ -1,9 +1,8 @@
 import { AbortError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { mapFinerGifsResponse } from "../models/gif";
-
 import FinerGifsClubAPI, { FinerGifsClubResults } from "../models/finerthingsclub";
+import type { FinerGif } from "../models/finerthingsclub";
 import type { IGif } from "../models/gif";
 
 interface FetchState {
@@ -52,4 +51,15 @@ export default function useFinerGifsClubAPI({ offset = 0 }) {
   }, []);
 
   return [results, isLoading, search] as const;
+}
+
+export function mapFinerGifsResponse(finerGifsResp: FinerGif) {
+  const gifUrl = new URL(finerGifsResp.fields.fileid + ".gif", "https://media.thefinergifs.club");
+  return <IGif>{
+    id: finerGifsResp.id,
+    title: finerGifsResp.fields.text,
+    slug: finerGifsResp.fields.fileid,
+    preview_gif_url: gifUrl.toString(),
+    gif_url: gifUrl.toString(),
+  };
 }
