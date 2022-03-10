@@ -79,6 +79,24 @@ ${comicData.alt}
       isShowingDetail={true}
     >
       <List.Section title="Commands">
+        {lastViewed > 0 && (
+          <List.Item
+            id="last-viewed"
+            title="Last Viewed"
+            subtitle="Pick up where you left off!"
+            detail={
+              <List.Item.Detail
+                isLoading={markdownString === null}
+                markdown={markdownString === null ? undefined : markdownString}
+              />
+            }
+            actions={
+              <ActionPanel>
+                <OpenComicInBrowser />
+              </ActionPanel>
+            }
+          />
+        )}
         {totalRead < num && (
           <List.Item
             id="random-unread"
@@ -125,24 +143,6 @@ ${comicData.alt}
             />
           }
         />
-        {lastViewed > 0 && (
-          <List.Item
-            id="last-viewed"
-            title="Last Viewed"
-            subtitle="Pick up where you left off!"
-            detail={
-              <List.Item.Detail
-                isLoading={markdownString === null}
-                markdown={markdownString === null ? undefined : markdownString}
-              />
-            }
-            actions={
-              <ActionPanel>
-                <OpenComicInBrowser />
-              </ActionPanel>
-            }
-          />
-        )}
         <List.Item
           id="latest"
           title="Latest"
