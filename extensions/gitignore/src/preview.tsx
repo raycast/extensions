@@ -11,30 +11,40 @@ function toMarkdown(title: string, code: string | null) {
   return `### ${title}\n\`\`\`\n${code}\n\`\`\``;
 }
 
-export default function GitignorePreview({ gitignoreFiles, listPreview }: { gitignoreFiles: GitignoreFile[], listPreview?: boolean }) {
+export default function GitignorePreview({
+  gitignoreFiles,
+  listPreview,
+}: {
+  gitignoreFiles: GitignoreFile[];
+  listPreview?: boolean;
+}) {
   const [fileContents, setFileContents] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
-    generateContents(gitignoreFiles, controller.signal).then((contents: string) => setFileContents(contents)).catch((err) => {
-      if (!controller.signal.aborted) {
-        throw err;
-      }
-    });
+    generateContents(gitignoreFiles, controller.signal)
+      .then((contents: string) => setFileContents(contents))
+      .catch((err) => {
+        if (!controller.signal.aborted) {
+          throw err;
+        }
+      });
     return () => controller.abort();
   }, [gitignoreFiles]);
 
-  const ComponentType = listPreview ? List.Item.Detail : Detail
+  const ComponentType = listPreview ? List.Item.Detail : Detail;
 
-  const props = listPreview ? {} : {
-    navigationTitle: "Gitignore Preview"
-  }
+  const props = listPreview
+    ? {}
+    : {
+        navigationTitle: "Gitignore Preview",
+      };
 
   return (
     <ComponentType
       isLoading={fileContents === null}
       {...props}
-      markdown={toMarkdown(gitignoreFiles.map(f => f.name).join(", "), fileContents)}
+      markdown={toMarkdown(gitignoreFiles.map((f) => f.name).join(", "), fileContents)}
       actions={
         <ActionPanel>
           <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => exportClipboard(gitignoreFiles)} />

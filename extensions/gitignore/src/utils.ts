@@ -23,7 +23,9 @@ export async function generateContents(selected: GitignoreFile[], signal?: Abort
   try {
     const contents = [];
     for (const gitignore of selected) {
-      contents.push(`# ---- ${gitignore.name} ----\n${await (await fs.readFile(gitignore.path, { signal })).toString()}`);
+      contents.push(
+        `# ---- ${gitignore.name} ----\n${await (await fs.readFile(gitignore.path, { signal })).toString()}`
+      );
     }
     return contents.join("\n");
   } catch (err) {

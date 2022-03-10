@@ -28,9 +28,7 @@ function GitignoreList({
             title={gitignore.name}
             keywords={keywords}
             accessoryTitle={gitignore.folder}
-            detail={
-              listDetail && <GitignorePreview gitignoreFiles={[gitignore]} listPreview />
-            }
+            detail={listDetail && <GitignorePreview gitignoreFiles={[gitignore]} listPreview />}
             actions={
               <ActionPanel>
                 <Action
@@ -73,9 +71,7 @@ export default function Gitignore() {
           <List.Item
             icon={Icon.Document}
             title="Create .gitignore"
-            detail={
-              listDetail && <GitignorePreview gitignoreFiles={selected} listPreview />
-            }
+            detail={listDetail && <GitignorePreview gitignoreFiles={selected} listPreview />}
             actions={
               <ActionPanel>
                 <CopyToClipboardAction selected={selected} />
