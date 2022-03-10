@@ -172,6 +172,7 @@ export default function Command() {
         actions={
           <ActionPanel>
             <dAction.CopyToClipboard content="👋" />
+            <Action.CopyToClipboard content="👋" />
           </ActionPanel>
         }
       />
