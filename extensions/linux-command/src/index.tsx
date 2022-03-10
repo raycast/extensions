@@ -40,7 +40,7 @@ const CommandPanel = (props: CommandPanelProps) => {
           <Action.Push
             title="Show Details"
             shortcut={{ modifiers: ["cmd"], key: "." }}
-            target={<DetailMarkdown markdown={"加载中...."} command={props.path.replace(/^\//, "")} />}
+            target={<DetailMarkdown markdown={"Loading...."} command={props.path.replace(/^\//, "")} />}
           />
         </ActionPanel>
       }
