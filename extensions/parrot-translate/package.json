@@ -24,6 +24,10 @@
             "description": "Select you first language",
             "data": [
                 {
+                    "title": "Auto Detect",
+                    "value": "auto"
+                },
+                {
                     "title": "English",
                     "value": "en"
                 },
@@ -264,12 +268,12 @@
             "type": "checkbox",
             "label": "Automatic Paste",
             "required": false,
-            "default": false,
+            "default": true,
             "description": "When you copy automatic paste to focus"
         }
     ],
     "dependencies": {
-        "@raycast/api": "^1.28.0",
+        "@raycast/api": "^1.30.0",
         "axios": "^0.25.0"
     },
     "devDependencies": {

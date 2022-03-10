@@ -87,40 +87,44 @@ export class ListActionPanel extends Component<IListItemActionPanelItem> {
         return (
             <ActionPanel>
                 <ActionCopyListSection copyText={this.props.copyText} copyMode={this.props.copyMode} />
-                {(this.props.currentFromLanguage || this.props.currentTargetLanguage) && (
-                    <ActionPanel.Section title="Play Sound">
-                        <Action
-                            title="Play Query Text Sound"
-                            icon={playSoundIcon}
-                            onAction={() =>
-                                this.onPlaySound(this.props?.queryText, this.props.currentFromLanguage?.languageId)
-                            }
-                        />
-                        <Action
-                            title="Play Result Text Sound"
-                            icon={playSoundIcon}
-                            onAction={() =>
-                                this.onPlaySound(this.props.copyText, this.props.currentTargetLanguage?.languageId)
-                            }
-                        />
-                    </ActionPanel.Section>
-                )}
-                <ActionPanel.Section title="Language">
-                    {LANGUAGE_LIST.map((region) => {
-                        return (
+                {(this.props.currentFromLanguage || this.props.currentTargetLanguage) &&
+                    this.props.queryText &&
+                    this.props.copyText && (
+                        <ActionPanel.Section title="Play Sound">
                             <Action
-                                key={region.languageId}
-                                title={region.languageTitle}
-                                onAction={() => this.props.onLanguageUpdate(region)}
-                                icon={
-                                    this.props.currentTargetLanguage?.languageId === region.languageId
-                                        ? Icon.ArrowRight
-                                        : Icon.Globe
+                                title="Play Query Text Sound"
+                                icon={playSoundIcon}
+                                onAction={() =>
+                                    this.onPlaySound(this.props?.queryText, this.props.currentFromLanguage?.languageId)
                                 }
                             />
-                        )
-                    })}
-                </ActionPanel.Section>
+                            <Action
+                                title="Play Result Text Sound"
+                                icon={playSoundIcon}
+                                onAction={() =>
+                                    this.onPlaySound(this.props.copyText, this.props.currentTargetLanguage?.languageId)
+                                }
+                            />
+                        </ActionPanel.Section>
+                    )}
+                {this.props.queryText && this.props.copyText && (
+                    <ActionPanel.Section title="Language">
+                        {LANGUAGE_LIST.map((region) => {
+                            return (
+                                <Action
+                                    key={region.languageId}
+                                    title={region.languageTitle}
+                                    onAction={() => this.props.onLanguageUpdate(region)}
+                                    icon={
+                                        this.props.currentTargetLanguage?.languageId === region.languageId
+                                            ? Icon.ArrowRight
+                                            : Icon.Globe
+                                    }
+                                />
+                            )
+                        })}
+                    </ActionPanel.Section>
+                )}
                 <ActionPanel.Section title="Others">
                     <Action.OpenInBrowser
                         icon={Icon.QuestionMark}

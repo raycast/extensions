@@ -135,7 +135,7 @@ export default function () {
     return (
         <List
             isLoading={isLoadingState}
-            searchBarPlaceholder={"Translate to.."}
+            searchBarPlaceholder={"Translate to"}
             onSearchTextChange={(inputText) => onInputChangeEvt(inputText)}
             navigationTitle={
                 translateFromLanguageState?.languageTitle && currentTargetLanguageState?.languageTitle
