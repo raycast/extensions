@@ -5,7 +5,8 @@
   "icon": "command-icon.png",
   "author": "benvp",
   "contributors": [
-    "mathieudutour"
+    "mathieudutour",
+    "mike182uk"
   ],
   "license": "MIT",
   "commands": [
