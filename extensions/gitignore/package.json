@@ -6,6 +6,10 @@
   "icon": "command-icon.png",
   "author": "daniel-stoneuk",
   "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Communication"
+  ],
   "commands": [
     {
       "name": "gitignore",
