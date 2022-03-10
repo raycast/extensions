@@ -1,5 +1,4 @@
-import { Application, getPreferenceValues, getSelectedText } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { Application, getPreferenceValues, getSelectedText, Clipboard } from "@raycast/api";
 
 export interface Preferences {
   engine: string;
@@ -70,15 +69,20 @@ const detectText = () => {
     .then(async (text) =>
       !isEmpty(text)
         ? assembleItemSource(text.substring(0, 999), ItemSource.SELECTED)
-        : assembleItemSource(await runAppleScript("the clipboard"), ItemSource.CLIPBOARD)
+        : assembleItemSource(String(await clipboard()), ItemSource.CLIPBOARD)
     )
-    .catch(async () => assembleItemSource(await runAppleScript("the clipboard"), ItemSource.CLIPBOARD))
+    .catch(async () => assembleItemSource(String(await clipboard()), ItemSource.CLIPBOARD))
     .then((item) =>
       !isEmpty(item.content)
         ? assembleItemSource(item.content.substring(0, 999), item.source)
         : assembleItemSource("", ItemSource.NULL)
     )
     .catch(() => assembleItemSource("", ItemSource.NULL));
+};
+
+const clipboard = async () => {
+  const content = await Clipboard.readText();
+  return typeof content == "undefined" ? "" : content;
 };
 
 export async function fetchDetectedItem(): Promise<ItemInput> {
