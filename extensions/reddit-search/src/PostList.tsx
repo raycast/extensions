@@ -1,9 +1,8 @@
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
 import RedditResultItem from "./RedditApi/RedditResultItem";
 import PostActionPanel from "./PostActionPanel";
-import redditSort from "./RedditSort";
-import SortListItem from "./SortListItem";
 import Sort from "./Sort";
+import PostDetail from "./PostDetail";
 
 export default function PostList({
   posts,
@@ -11,12 +10,16 @@ export default function PostList({
   sort,
   doSearch,
   searchRedditUrl,
+  showDetail,
+  toggleShowDetail,
 }: {
   posts: RedditResultItem[];
   subreddit?: string;
   sort: Sort;
   doSearch: (sort: Sort, after?: string) => void;
   searchRedditUrl: string;
+  showDetail: boolean;
+  toggleShowDetail: () => void;
 }) {
   if (!posts.length) {
     return null;
@@ -26,21 +29,29 @@ export default function PostList({
 
   return (
     <>
-      <List.Section title={sort ? `${resultsTitle} (Sorted by ${sort.name})` : resultsTitle}>
-        {posts.map((x) => (
-          <List.Item
-            key={x.id}
-            icon={
-              x.thumbnail && (x.thumbnail.startsWith("http:") || x.thumbnail.startsWith("https:"))
-                ? { source: x.thumbnail }
-                : Icon.Text
-            }
-            title={x.title}
-            accessoryTitle={subreddit ? `Posted ${x.created}` : `Posted ${x.created} r/${x.subreddit}`}
-            actions={<PostActionPanel data={x} />}
-          />
-        ))}
+      <List.Section title={resultsTitle}>
+        {posts.map((x) => {
+          let accessoryTitle = "";
+          if (!showDetail) {
+            accessoryTitle = subreddit ? `Posted ${x.created}` : `Posted ${x.created} r/${x.subreddit}`;
+          }
+          return (
+            <List.Item
+              key={x.id}
+              icon={
+                x.thumbnail && (x.thumbnail.startsWith("http:") || x.thumbnail.startsWith("https:"))
+                  ? { source: x.thumbnail }
+                  : Icon.Text
+              }
+              title={x.title}
+              accessoryTitle={accessoryTitle}
+              actions={<PostActionPanel data={x} showDetail={showDetail} toggleDetail={toggleShowDetail} />}
+              detail={<PostDetail data={x} />}
+            />
+          );
+        })}
         <List.Item
+          id="showMore"
           key="showMore"
           icon={Icon.MagnifyingGlass}
           title="Show more..."
@@ -51,15 +62,9 @@ export default function PostList({
           }
         />
       </List.Section>
-      <List.Section title="Sort">
-        <SortListItem sort={redditSort.relevance} currentSort={sort} doSearch={doSearch} />
-        <SortListItem sort={redditSort.hot} currentSort={sort} doSearch={doSearch} />
-        <SortListItem sort={redditSort.top} currentSort={sort} doSearch={doSearch} />
-        <SortListItem sort={redditSort.latest} currentSort={sort} doSearch={doSearch} />
-        <SortListItem sort={redditSort.comments} currentSort={sort} doSearch={doSearch} />
-      </List.Section>
       <List.Section title="Didn't find what you're looking for?">
         <List.Item
+          id="searchOnReddit"
           key="searchOnReddit"
           icon={Icon.Globe}
           title="Show all results on Reddit..."
