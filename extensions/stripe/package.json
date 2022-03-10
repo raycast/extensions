@@ -4,7 +4,7 @@
   "title": "Stripe",
   "description": "This extension allows you to make an invoice, create a payment, add a new product, and start a new subscription.",
   "icon": "stripe.png",
-  "author": "https://twitter.com/pradeepb28",
+  "author": "pradeepb28",
   "license": "MIT",
   "commands": [
     {
