@@ -81,13 +81,6 @@ export default function Home({
   };
 
   useEffect(() => {
-    // const test = async () => {
-    //   const setting = await showDetailSettingStore.getShowDetailSetting();
-    //   setShowDetailSetting(setting);
-    // };
-
-    // test();
-
     return () => {
       abortControllerRef?.current?.abort();
     };
@@ -125,6 +118,7 @@ export default function Home({
                 <ActionPanel>
                   <Action.Push
                     title="Search Subreddits"
+                    icon={Icon.MagnifyingGlass}
                     target={
                       <SubredditList
                         favorites={favorites}
@@ -148,6 +142,7 @@ export default function Home({
                   <ActionPanel>
                     <Action.Push
                       title={`Search in ${x.substring(1, x.length - 1)}`}
+                      icon={Icon.MagnifyingGlass}
                       target={
                         <FilterBySubredditPostList
                           subreddit={x}

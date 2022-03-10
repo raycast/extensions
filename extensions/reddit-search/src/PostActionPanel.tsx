@@ -11,10 +11,12 @@ export default function PostActionPanel({
   toggleDetail: () => void;
 }) {
   if (data.description) {
-    const browser = <Action.OpenInBrowser url={data.url} icon={Icon.Globe} />;
+    const browser = <Action.OpenInBrowser key="browser" url={data.url} icon={Icon.Globe} />;
     const fullScreenDetail = (
       <Action.Push
-        title="Show Details"
+        key="showFullDetails"
+        title="Show Full Details"
+        icon={Icon.TextDocument}
         target={
           <Detail
             navigationTitle={data.title}
@@ -53,10 +55,12 @@ ${data.description}`}
       </ActionPanel>
     );
   } else if (data.imageUrl) {
-    const browser = <Action.OpenInBrowser url={data.url} icon={Icon.Globe} />;
+    const browser = <Action.OpenInBrowser key="browser" url={data.url} icon={Icon.Globe} />;
     const fullScreenDetail = (
       <Action.Push
-        title="Show Details"
+        key="showFullDetails"
+        title="Show Full Details"
+        icon={Icon.TextDocument}
         target={
           <Detail
             navigationTitle={data.title}
@@ -95,10 +99,12 @@ ${data.description}`}
       </ActionPanel>
     );
   } else if (data.contentUrl) {
-    const browser = <Action.OpenInBrowser url={data.url} icon={Icon.Globe} />;
+    const browser = <Action.OpenInBrowser key="browser" url={data.url} icon={Icon.Globe} />;
     const fullScreenDetail = (
       <Action.Push
-        title="Show Details"
+        key="showFullDetails"
+        title="Show Full Details"
+        icon={Icon.TextDocument}
         target={
           <Detail
             navigationTitle={data.title}
@@ -138,10 +144,12 @@ ${data.contentUrl}`}
       </ActionPanel>
     );
   } else {
-    const browser = <Action.OpenInBrowser url={data.url} icon={Icon.Globe} />;
+    const browser = <Action.OpenInBrowser key="browser" url={data.url} icon={Icon.Globe} />;
     const fullScreenDetail = (
       <Action.Push
-        title="Show Details"
+        key="showFullDetails"
+        title="Show Full Details"
+        icon={Icon.TextDocument}
         target={
           <Detail
             navigationTitle={data.title}
