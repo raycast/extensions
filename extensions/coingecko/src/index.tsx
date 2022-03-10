@@ -176,7 +176,7 @@ async function showPrice(id: string) {
     });
     return;
   }
-  const priceString = formatPrice(price);
+  const priceString = formatPrice(price, currency.id);
   showToast({
     style: Toast.Style.Success,
     title: `Price: ${priceString}`,
@@ -186,6 +186,7 @@ async function showPrice(id: string) {
 function HistoricalPrice(props: IdProps) {
   const [markdown, setMarkdown] = useState<string>('');
   const [isLoading, setLoading] = useState<boolean>(true);
+  const currency = getPreferredCurrency();
 
   useEffect(() => {
     async function fetchList() {
@@ -195,7 +196,7 @@ function HistoricalPrice(props: IdProps) {
         .map(([timestamp, price]) => {
           const date = new Date(timestamp);
           const dateString = formatDate(date);
-          const priceString = formatPrice(price);
+          const priceString = formatPrice(price, currency.id);
           return `**${dateString}:** ${priceString}`;
         })
         .join('\n\n');
