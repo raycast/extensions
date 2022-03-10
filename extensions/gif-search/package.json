@@ -72,6 +72,10 @@
         {
           "title": "Copy Page URL to Clipboard",
           "value": "copyPageUrl"
+        },
+        {
+          "title": "Copy File to Clipboard",
+          "value": "copyFile"
         }
       ]
     }
@@ -79,7 +83,9 @@
   "dependencies": {
     "@giphy/js-fetch-api": "^4.1.2",
     "@raycast/api": "^1.30.0",
-    "node-fetch": "^3.2.1"
+    "node-fetch": "^3.2.1",
+    "run-applescript": "^6.0.0",
+    "tempy": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
