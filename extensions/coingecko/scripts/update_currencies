@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * This script updates the "currency" preference in the manifest to include all
- * currencies included in src/currencies.json
+ * Update the "currency" preference in the manifest to include all currencies
+ * included in src/currencies.json
+ *
+ * Thie script should be run from this directory
  */
 
 const fs = require('fs');
@@ -41,6 +43,6 @@ pkg.preferences[preferenceIdx].data = currencies.map((currency, idx) => {
   }
 });
 
-fs.writeFileSync('../package.json', JSON.stringify(pkg, null, 2));
+fs.writeFileSync('../package.json', `${JSON.stringify(pkg, null, 2)}\n`);
 
 console.log('Currencies updated!');
