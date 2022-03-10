@@ -13,12 +13,12 @@ async function fetcher<T>(url: string) {
 }
 
 export function useProjects() {
-  return useSWR<Project[]>("https://sentry.io/api/0/projects/", isFakeData() ? fakeProjects : fetcher);
+  return useSWR<Project[]>("https://sentry.io/api/0/projects/", isFakeData ? fakeProjects : fetcher);
 }
 
 export function useIssues(project?: Project) {
   return useSWR<Issue[]>(
     project ? `https://sentry.io/api/0/projects/${project.organization.slug}/${project.slug}/issues/` : null,
-    isFakeData() ? fakeIssues : fetcher
+    isFakeData ? fakeIssues : fetcher
   );
 }

@@ -27,7 +27,7 @@ function IssueList() {
 
 export default function Command() {
   return (
-    <SWRConfig value={{ provider: isFakeData() ? undefined : cacheProvider }}>
+    <SWRConfig value={{ provider: isFakeData ? undefined : cacheProvider }}>
       <IssueList />
     </SWRConfig>
   );

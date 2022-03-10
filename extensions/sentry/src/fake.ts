@@ -57,11 +57,4 @@ export function fakeIssues(project?: Project) {
   return issues.sort((lhs, rhs) => (new Date(lhs.lastSeen) < new Date(rhs.lastSeen) ? 1 : -1));
 }
 
-export function isFakeData() {
-  if (!environment.isDevelopment) {
-    return false;
-  }
-
-  // Enable the fake data
-  return false;
-}
+export const isFakeData = false;
