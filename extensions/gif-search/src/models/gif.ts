@@ -1,6 +1,8 @@
 import path from "path";
 
 import type { IGif as GiphyGif } from "@giphy/js-types";
+import { environment } from "@raycast/api";
+
 import type { TenorGif } from "./tenor";
 
 export interface IGif {
@@ -10,6 +12,12 @@ export interface IGif {
   slug: string;
   preview_gif_url: string;
   gif_url: string;
+  attribution:
+    | {
+        dark: string;
+        light: string;
+      }
+    | string;
 }
 
 export function mapGiphyResponse(giphyResp: GiphyGif) {
@@ -20,6 +28,7 @@ export function mapGiphyResponse(giphyResp: GiphyGif) {
     slug: giphyResp.slug,
     preview_gif_url: giphyResp.images.preview_gif.url,
     gif_url: giphyResp.images.fixed_height.url,
+    attribution: "poweredby_giphy.png",
   };
 }
 
@@ -32,6 +41,7 @@ export function mapTenorResponse(tenorResp: TenorGif) {
     slug: path.basename(tenorResp.itemurl),
     preview_gif_url: mediaItem.tinygif.preview,
     gif_url: mediaItem.tinygif.url,
+    attribution: "poweredby_tenor.png",
   };
 }
 
@@ -44,5 +54,7 @@ export function renderGifMarkdownDetails(gif: IGif) {
   \`\`\`
   Static preview, animated preview coming soon!
   \`\`\`
+
+  ![Powered by](file:${environment.assetsPath}/${gif.attribution})
   `;
 }
