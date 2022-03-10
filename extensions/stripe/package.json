@@ -11,28 +11,28 @@
       "name": "create-a-new-invoice",
       "title": "Create a new invoice",
       "subtitle": "Stripe",
-      "description": "It creates an invoice for your business on your stripe account.",
+      "description": "",
       "mode": "view"
     },
     {
       "name": "create-a-new-payment",
       "title": "Create a new payment",
       "subtitle": "Stripe",
-      "description": "Send and accept payments ",
+      "description": "",
       "mode": "view"
     },
     {
       "name": "create-a-new-product",
       "title": "Create a new product",
       "subtitle": "Stripe",
-      "description": "Add a new offereing to your stripe product catalog.",
+      "description": "",
       "mode": "view"
     },
     {
       "name": "create-a-new-subscription",
       "title": "Create a new subscription",
       "subtitle": "Stripe",
-      "description": "Create new subscription accounts for your customers ",
+      "description": "",
       "mode": "view"
     }
   ],
