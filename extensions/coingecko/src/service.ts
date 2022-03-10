@@ -28,9 +28,12 @@ interface CoinInfo {
   };
 }
 
+interface MarketCapRankedCoinList {
+  [key: number]: Coin;
+}
+
 export default class Service {
-  async getPrice(id: string): Promise<number | undefined> {
-    const currency = getCurrency();
+  async getPrice(id: string, currency: string): Promise<number | undefined> {
     const response = await client.get<Price>('/simple/price', {
       params: {
         ids: id,
@@ -64,6 +67,33 @@ export default class Service {
     return response.data;
   }
 
+  async getTop2000CoinList(currency: string): Promise<Coin[]> {
+    const coins: MarketCapRankedCoinList = {};
+    const requests = [];
+    const perPage = 250;
+    const totalPages = 8;
+    let currentPage = 1;
+
+    while (currentPage < totalPages) {
+      requests.push(
+        client.get<CoinInfo[]>(
+          `/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=${perPage}&page=${currentPage}`,
+        ),
+      );
+      currentPage++;
+    }
+
+    const results = await Promise.all(requests);
+
+    results.forEach((result) => {
+      result.data.forEach(({ id, symbol, name, market_cap_rank }) => {
+        coins[market_cap_rank] = { id, symbol, name };
+      });
+    });
+
+    return Object.values(coins);
+  }
+
   async getCoinPriceHistory(id: string, days = 30) {
     const currency = getCurrency();
     const response = await client.get<PriceResponse>(
@@ -77,5 +107,12 @@ export default class Service {
       },
     );
     return response.data.prices;
+  }
+
+  async getSupportedVsCurrencies(): Promise<string[]> {
+    const response = await client.get<string[]>(
+      '/simple/supported_vs_currencies',
+    );
+    return response.data;
   }
 }

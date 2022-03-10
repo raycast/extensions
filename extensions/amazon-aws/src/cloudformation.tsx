@@ -21,24 +21,20 @@ export default function ListStacks() {
 
   useEffect(() => {
     if (!preferences.region) return;
-    async function fetch() {
-      cloudformation.listStacks({}, async (err, data) => {
-        if (err) {
-          setState({
-            hasError: true,
-            loaded: false,
-            stacks: [],
-          });
-        } else {
-          setState({
-            hasError: false,
-            loaded: true,
-            stacks: data.StackSummaries || [],
-          });
-        }
-      });
+    async function fetchStacks(token?: string, stacks?: StackSummary[]): Promise<StackSummary[]> {
+      const { NextToken, StackSummaries } = await cloudformation.listStacks({ NextToken: token }).promise();
+      const combinedStacks = [...(stacks || []), ...(StackSummaries || [])];
+
+      if (NextToken) {
+        return fetchStacks(NextToken, combinedStacks);
+      }
+
+      return combinedStacks.filter((stack) => stack.StackStatus !== "DELETE_COMPLETE");
     }
-    fetch();
+
+    fetchStacks()
+      .then((stacks) => setState({ hasError: false, loaded: true, stacks }))
+      .catch(() => setState({ hasError: true, loaded: false, stacks: [] }));
   }, []);
 
   if (state.hasError) {
@@ -50,7 +46,7 @@ export default function ListStacks() {
   return (
     <List isLoading={!state.loaded} searchBarPlaceholder="Filter stacks by name...">
       {state.stacks.map((s) => (
-        <CloudFormationStack key={s.StackName} stack={s} />
+        <CloudFormationStack key={s.StackId} stack={s} />
       ))}
     </List>
   );
@@ -62,7 +58,7 @@ function CloudFormationStack({ stack }: { stack: StackSummary }) {
   return (
     <List.Item
       id={stack.StackName}
-      key={stack.StackName}
+      key={stack.StackId}
       title={stack.StackName}
       accessoryTitle={stack.LastUpdatedTime ? new Date(stack.LastUpdatedTime).toLocaleString() : undefined}
       actions={

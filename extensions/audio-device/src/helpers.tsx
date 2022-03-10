@@ -1,4 +1,14 @@
-import { ActionPanel, closeMainWindow, Icon, List, popToRoot, showHUD, showToast, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  closeMainWindow,
+  Color,
+  Icon,
+  List,
+  popToRoot,
+  showHUD,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   AudioDevice,
@@ -84,13 +94,13 @@ type SetAudioDeviceActionProps = {
 function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
   return (
     <ActionPanel.Item
-      title="Select"
+      title={`Select ${device.name}`}
       onAction={async () => {
         try {
           await (type === "input" ? setDefaultInputDevice(device.id) : setDefaultOutputDevice(device.id));
           closeMainWindow({ clearRootSearch: true });
           popToRoot({ clearSearchBar: true });
-          showHUD(`${deviceIcon(device)} Active audio device set to ${device.name}`);
+          showHUD(`Active audio device set to ${device.name}`);
         } catch (e) {
           console.log(e);
           showToast(ToastStyle.Failure, `Error!`, `There was an error setting the audio device to ${device.name}`);
@@ -101,5 +111,8 @@ function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
 }
 
 export function deviceIcon(device: AudioDevice) {
-  return device.isInput ? "🎙" : "🔈";
+  return {
+    source: device.isInput ? "mic.png" : "speaker.png",
+    tintColor: Color.SecondaryText,
+  };
 }

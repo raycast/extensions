@@ -2,28 +2,36 @@
 
 ## Using Pipe Commands
 
-Select / Copy a some text, an url or a file and use the `Send [Selection, Clipboard] to Pipe command` command.
+Select / Copy a some text, an url or a file and use the `Pipe [Selection, Clipboard] to Command` command.
 
-Depending on the user input type, different commands will be shown.
+Depending on the input type, different actions will be shown.
 
 ## Adding Additional Pipe Commands
 
 Use the `Create Pipe command` command to generate a new pipe command template.
 
-The Pipe command syntax is very similar to the script command syntax, with some caveats:
+The Pipe command syntax is very similar to the [script command syntax](https://github.com/raycast/script-commands/blob/master/README.md), with some caveats:
 
-- Only the `title`, `icon`, currentDirectoryPath, `argument1` and `packageName` fields are parsed (the other fields are ignored, you can still provide them for documentation !). Some fields slight differ:
-  - The icon field only accepts Raycast API Icons (ex: `Globe`, `Trash`...) instead of emoji and images paths.
-  - The argument1 object only accept some fields:
+- The icon field only accepts Raycast API Icons (ex: `Globe`, `Trash`...) instead of emoji and images paths.
+- The argument1 object only accept some fields:
 
   | field          | description                                | values       | required |
   | -------------- | ------------------------------------------ | ------------ | -------- |
-  | type           | What type of input the pipe command handle | text or file | ✅       |
-  | percentEncoded | useful for query strings                   | boolean      | ❌       |
+  | type           | What type of input the pipe command handle | text or file | ✅        |
+  | percentEncoded | useful for query strings                   | boolean      | ❌        |
+
+- The mode field only accept some options:
+  | option    | description                                                         |
+  | --------- | ------------------------------------------------------------------- |
+  | silent    | The last line (if it exists) will be shown in overlaying HUD        |
+  | fullOuput | The entire output is presented on a separate view                   |
+  | copy      | The output will be copied to the clipboard                          |
+  | replace   | The output will replace the input (incompatible with file argument) |
+- The `iconDark`, `needsConfirmation`, `refreshTime`, `argument2`, `argument3` fields are not supported and will be ignored
 
 ## Pipe Commands Logic
 
-The user input (selection or clipboard) will be passed as the script first argument. It will also be passed as the script stdin for convenience.
+The user input (selection or clipboard) will be passed as the script first argument.
 
 The standard output stream (`stdout`) of the script will replace the current selection, be copied to the clipboard or be passed to a another pipe command depending on the user choice. If the command does not return any output, the selection will be preserved.
 
@@ -38,6 +46,7 @@ If you want to provide a message to the user, use the standard error stream (`st
 
 # @raycast.title Google Search
 # @raycast.packageName Web Searches
+# @raycast.mode silent
 # @raycast.icon Globe
 # @raycast.argument1 {"type": "text", "percentEncoded": true}
 
@@ -52,9 +61,9 @@ open "https://www.google.com/search?q=$1"
 
 # @raycast.title Prettify JSON
 # @raycast.packageName Developer Utils
+# @raycast.mode replace
 # @raycast.icon Hammer
 # @raycast.argument1 {"type": "text"}
 
-# This script get the input from stdin
-python3 -m json.tool --indent 2
+python3 -m json.tool --indent 2 <<< "$1"
 ```
