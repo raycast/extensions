@@ -7,7 +7,7 @@ import { renderPieces } from "./renderCells";
 const NL = "  \n";
 
 export const renderDetails = async (torrent: Torrent, downloadStats: string) => {
-  const img = await renderPieces(torrent.pieces, torrent.pieceCount);
+  const img = await renderPieces(torrent.pieces);
 
   return dedent(`
     ## Torrent Information
