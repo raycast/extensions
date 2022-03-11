@@ -1,6 +1,22 @@
 import { splitEvery } from "ramda";
+import { isDarkMode } from "./darkMode";
 
-export function renderPieces(pieces: string, pieceCount: number, width = 1000): string {
+const theme = {
+  light: {
+    primary: "#999A9A",
+    secondary: "#C8C7C9",
+  },
+  dark: {
+    primary: "#4F4F51",
+    secondary: "#39393B",
+  },
+};
+
+export async function renderPieces(pieces: string, pieceCount: number, width = 1000): Promise<string> {
+  const isDark = await isDarkMode();
+
+  const colors = theme[isDark ? "dark" : "light"];
+
   const w = Math.pow(18, 2);
 
   const ppp = pieceCount / w; // pieceCount per pixel
@@ -42,7 +58,7 @@ export function renderPieces(pieces: string, pieceCount: number, width = 1000): 
         (alpha, colIndex) =>
           `<rect fill="#007DD6" fill-opacity="${alpha}" x="${colIndex * cellSize}" y="${
             rowIndex * cellSize
-          }" width="${cellSize}" height="${cellSize}" stroke="#C8C7C9" stroke-width="${strokeWidth}" />`
+          }" width="${cellSize}" height="${cellSize}" stroke="${colors.secondary}" stroke-width="${strokeWidth}" />`
       )
     )
     .flat()
@@ -50,7 +66,7 @@ export function renderPieces(pieces: string, pieceCount: number, width = 1000): 
 
   return `<svg style="width: 100%;" viewBox="0 0 ${width} ${width}" xmlns="http://www.w3.org/2000/svg">
     ${cellsMarkup}
-    <rect x="0" y="0" width="${width}" height="${width}" stroke="#999A9A" stroke-width="${
+    <rect x="0" y="0" width="${width}" height="${width}" stroke="${colors.primary}" stroke-width="${
     strokeWidth * 1.5
   }" fill="transparent" />
   </svg>`;

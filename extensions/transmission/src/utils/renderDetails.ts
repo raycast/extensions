@@ -6,8 +6,8 @@ import { renderPieces } from "./renderCells";
 
 const NL = "  \n";
 
-export const renderDetails = (torrent: Torrent, downloadStats: string) => {
-  const img = renderPieces(torrent.pieces, torrent.pieceCount);
+export const renderDetails = async (torrent: Torrent, downloadStats: string) => {
+  const img = await renderPieces(torrent.pieces, torrent.pieceCount);
 
   return dedent(`
     ## Torrent Information

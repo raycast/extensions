@@ -14,6 +14,7 @@ import { capitalize, truncate } from "./utils/string";
 import { padList } from "./utils/list";
 import { createClient } from "./modules/client";
 import { renderDetails } from "./utils/renderDetails";
+import { useAsync } from "react-use";
 
 enum TorrentStatus {
   Stopped = 0,
@@ -367,6 +368,7 @@ function TorrentListItem({
     .join(" - ");
 
   const downloadStats = [`↓ ${rateDownload}`, " - ", `↑ ${rateUpload}`, " - ", percentDone].join(" ");
+  const details = useAsync(() => renderDetails(torrent, downloadStats), [torrent, downloadStats]);
 
   return (
     <List.Item
@@ -378,7 +380,7 @@ function TorrentListItem({
         tintColor: statusIconColor(torrent),
       }}
       accessoryTitle={!isShowingDetail ? downloadStats : undefined}
-      detail={isShowingDetail && <List.Item.Detail markdown={renderDetails(torrent, downloadStats)} />}
+      detail={isShowingDetail && <List.Item.Detail markdown={details.value} isLoading={details.loading} />}
       actions={
         <ActionPanel>
           <Action title={isShowingDetail ? "Hide details" : "Show details"} onAction={onToggleDetail} />

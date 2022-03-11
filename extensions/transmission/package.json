@@ -123,10 +123,12 @@
     "@types/ramda": "^0.28.1",
     "date-fns": "^2.28.0",
     "dedent-js": "^1.0.1",
+    "execa": "^6.1.0",
     "expand-tilde": "^2.0.2",
     "node-fetch": "^3.2.2",
     "pretty-bytes": "^6.0.0",
     "ramda": "^0.28.0",
+    "react-use": "^17.3.2",
     "transmission-promise": "^1.1.5",
     "ts-enum-util": "^4.0.2"
   },
