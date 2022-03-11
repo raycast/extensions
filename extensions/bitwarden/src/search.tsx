@@ -103,7 +103,7 @@ function ItemList(props: {
 
 function getIcon(item: Item) {
   const iconUri = item.login?.uris?.[0]?.uri;
-  if (fetchFavicons && iconUri) return faviconUrl(64, iconUri);
+  if (fetchFavicons && iconUri) return faviconUrl(iconUri);
   return {
     1: Icon.Globe,
     2: Icon.TextDocument,
@@ -152,6 +152,7 @@ function ItemListItem(props: {
           {item.login?.password ? <PasswordActions password={item.login.password} /> : null}
           {item.login?.totp ? (
             <ActionPanel.Item
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
               title="Copy TOTP"
               icon={Icon.Clipboard}
               onAction={() => copyTotp(sessionToken, item.id)}

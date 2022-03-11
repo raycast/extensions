@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { getDashAppPath } from "./dashApp";
 import { useEffect, useRef, useState } from "react";
 import { parse } from "fast-xml-parser";
@@ -15,8 +15,9 @@ async function searchDash(query: string, signal: AbortSignal): Promise<DashResul
   const dashPath = await getDashAppPath();
 
   return new Promise((resolve, reject) => {
-    exec(
-      `./dashAlfredWorkflow ${query}`,
+    execFile(
+      `./dashAlfredWorkflow`,
+      [query],
       {
         cwd: `${dashPath}/Contents/Resources`,
         signal,

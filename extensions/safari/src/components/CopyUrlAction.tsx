@@ -1,7 +1,7 @@
-import { CopyToClipboardAction } from "@raycast/api";
+import { Action } from "@raycast/api";
 
 const CopyUrlAction = (props: { url: string }) => (
-  <CopyToClipboardAction title="Copy URL" content={props.url} shortcut={{ modifiers: ["cmd"], key: "." }} />
+  <Action.CopyToClipboard title="Copy URL" content={props.url} shortcut={{ modifiers: ["cmd"], key: "." }} />
 );
 
 export default CopyUrlAction;

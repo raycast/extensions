@@ -1,4 +1,4 @@
-import { ActionPanel, List, OpenInBrowserAction } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 import { HistoryItem } from "../types";
 import { getFaviconUrl, getUrlDomain } from "../utils";
 import CopyMarkdownLinkAction from "./CopyMarkdownLinkAction";
@@ -10,13 +10,19 @@ const Actions = (props: { entry: HistoryItem; searchText?: string }) => {
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <OpenInBrowserAction url={props.entry.url} />
+        <Action.OpenInBrowser url={props.entry.url} />
         <SearchInBrowserAction searchText={props.searchText} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <CopyUrlAction url={props.entry.url} />
         <CopyTitleAction title={props.entry.title} />
         <CopyMarkdownLinkAction title={props.entry.title} url={props.entry.url} />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action.CreateQuicklink
+          quicklink={{ link: props.entry.url, name: props.entry.title }}
+          shortcut={{ modifiers: ["cmd"], key: "s" }}
+        />
       </ActionPanel.Section>
     </ActionPanel>
   );

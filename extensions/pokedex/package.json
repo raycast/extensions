@@ -2,21 +2,84 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pokedex",
   "title": "Pokédex",
-  "description": "Search for a Pokémon by name or using its National Pokédex number.",
+  "description": "The Pokédex is an invaluable tool to Trainers in the Pokémon world.",
   "icon": "icon.png",
   "author": "anhthang",
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "pokemon",
       "title": "Search Pokémon",
       "subtitle": "Pokédex",
       "description": "Search for a Pokémon by name or using its National Pokédex number.",
       "mode": "view"
+    },
+    {
+      "name": "ability",
+      "title": "Search Abilities",
+      "subtitle": "Pokédex",
+      "description": "An Ability is a game mechanic introduced in Generation III that provides a passive effect in battle or in the overworld.",
+      "mode": "view"
+    },
+    {
+      "name": "move",
+      "title": "Search Moves",
+      "subtitle": "Pokédex",
+      "description": "A move, also known as an attack or technique, is the skill Pokémon primarily use in battle.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Your prefered language",
+      "required": false,
+      "type": "dropdown",
+      "default": "9",
+      "data": [
+        {
+          "title": "English",
+          "value": "9"
+        },
+        {
+          "title": "French",
+          "value": "5"
+        },
+        {
+          "title": "German",
+          "value": "6"
+        },
+        {
+          "title": "Italian",
+          "value": "8"
+        },
+        {
+          "title": "Japanese",
+          "value": "1"
+        },
+        {
+          "title": "Korean",
+          "value": "3"
+        },
+        {
+          "title": "Spanish",
+          "value": "7"
+        }
+      ]
+    },
+    {
+      "name": "showPreview",
+      "title": "Preview",
+      "description": "Show preview in the right side of the Pokémon list",
+      "label": "Show preview",
+      "required": false,
+      "type": "checkbox",
+      "default": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.30.1",
     "axios": "^0.26.0",
     "json2md": "^1.12.0",
     "lodash.groupby": "^4.6.0"

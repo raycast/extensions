@@ -9,9 +9,11 @@ const jscodeshift = require
   .resolve("jscodeshift")
   .replace(/index\.js$/, "bin/jscodeshift.js");
 
+const migrationToolFolder = path.dirname(__dirname);
+
 // Get all the migration folders and sort them
 const migrations = fs
-  .readdirSync(path.dirname(__dirname))
+  .readdirSync(migrationToolFolder)
   .filter((x) => x.match(/^[0-9]+\.[0-9]+\.[0-9]+$/g))
   .sort((a, b) => (semver.gt(a, b) ? 1 : -1));
 
@@ -55,18 +57,22 @@ const migrationsToApply = migrations.filter((x) =>
   semver.gt(x, currentVersion.version)
 );
 
+const realMigrations = migrationsToApply.filter((x) =>
+  fs.existsSync(path.join(migrationToolFolder, x, "index.ts"))
+);
+
 if (migrationsToApply.length === 0) {
   console.log(`✅ There are no migrations to apply`);
   process.exit(0);
 }
 
 console.log(
-  `⤴️  There ${migrationsToApply.length > 1 ? "are" : "is"} ${
-    migrationsToApply.length
-  } migration${migrationsToApply.length > 1 ? "s" : ""} to apply:`
+  `⤴️  There ${realMigrations.length > 1 ? "are" : "is"} ${
+    realMigrations.length
+  } migration${realMigrations.length > 1 ? "s" : ""} to apply:`
 );
 
-migrationsToApply.forEach((x) => console.log(`  - ${x}`));
+realMigrations.forEach((x) => console.log(`  - ${x}`));
 
 console.log("");
 console.log("-----------------------");
@@ -100,7 +106,7 @@ new Promise((resolve, reject) => {
   stream.stdout.pipe(process.stdout);
 })
   .then(() => {
-    return migrationsToApply.reduce((p, migration) => {
+    return realMigrations.reduce((p, migration) => {
       return p.then(() => {
         console.log("");
         console.log("-----------------------");
@@ -111,7 +117,7 @@ new Promise((resolve, reject) => {
         return new Promise((resolve, reject) => {
           let stream = exec(
             `find "${extensionPath}" \\( -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' \\) -not -path "*/node_modules/*" | xargs "${jscodeshift}" --verbose=2 --extensions=tsx,ts,jsx,js --parser=tsx -t ./${migration}/index.ts`,
-            { cwd: path.dirname(__dirname) },
+            { cwd: migrationToolFolder },
             (err, stdout, stderr) => {
               if (err) {
                 reject(stderr);

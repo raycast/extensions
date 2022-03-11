@@ -16,6 +16,7 @@ import { getIdFromGqlId, now } from "../utils";
 import { JobList } from "./jobs";
 import { RefreshPipelinesAction } from "./pipeline_actions";
 import useInterval from "use-interval";
+import { GitLabIcons } from "../icons";
 
 const GET_PIPELINES = gql`
   query GetProjectPipeplines($fullPath: ID!) {
@@ -37,22 +38,25 @@ const GET_PIPELINES = gql`
 function getIcon(status: string): Image {
   switch (status.toLowerCase()) {
     case "success": {
-      return { source: Icon.Checkmark, tintColor: Color.Green };
+      return { source: GitLabIcons.status_success, tintColor: Color.Green };
     }
     case "created": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Yellow };
+      return { source: GitLabIcons.status_created, tintColor: Color.Yellow };
     }
     case "pending": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Yellow };
+      return { source: GitLabIcons.status_pending, tintColor: Color.Yellow };
     }
     case "running": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Blue };
+      return { source: GitLabIcons.status_running, tintColor: Color.Blue };
     }
     case "failed": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Red };
+      return { source: GitLabIcons.status_failed, tintColor: Color.Red };
+    }
+    case "canceled": {
+      return { source: GitLabIcons.status_canceled, tintColor: Color.PrimaryText };
     }
     default:
-      return { source: Icon.ExclamationMark, tintColor: Color.Magenta };
+      return { source: GitLabIcons.status_notfound, tintColor: Color.Magenta };
   }
 }
 
