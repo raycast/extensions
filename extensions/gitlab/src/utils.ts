@@ -226,3 +226,7 @@ export function formatDate(input: Date | string) {
   const date = typeof input === "string" ? new Date(input) : input;
   return timeAgo.format(date) as string;
 }
+
+export function now(): Date {
+  return new Date();
+}

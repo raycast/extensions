@@ -5,6 +5,8 @@ import {
   List,
   getLocalStorageItem,
   setLocalStorageItem,
+  closeMainWindow,
+  popToRoot,
   preferences,
 } from "@raycast/api";
 
@@ -20,11 +22,7 @@ type Emoji = {
   shortCode?: string[];
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const useStateFromLocalStorage = <T, _ = void>(
-  key: string,
-  initialValue: T
-): [T, Dispatch<SetStateAction<T>>, boolean] => {
+function useStateFromLocalStorage<T>(key: string, initialValue: T): [T, Dispatch<SetStateAction<T>>, boolean] {
   const [loading, setLoading] = useState(true);
   const [state, setState] = useState<T>(initialValue);
 
@@ -58,7 +56,7 @@ const useStateFromLocalStorage = <T, _ = void>(
   }, []);
 
   return [state, setStateAndLocalStorage, loading];
-};
+}
 
 export default function Main(): ReactElement {
   const [list, setList] = useStateFromLocalStorage<Category[]>("emoji-list", []);
@@ -85,11 +83,14 @@ export default function Main(): ReactElement {
   }, []);
 
   const [recentlyUsed, setRecentlyUsed, loadingRecentlyUsed] = useStateFromLocalStorage<Emoji[]>("recently-used", []);
-  const addToRecentlyUsed = useCallback((emoji: Emoji) => {
-    setRecentlyUsed((list) =>
-      list.find((x) => x.description === emoji.description) ? list : [emoji, ...list].slice(0, 10)
-    );
-  }, []);
+  const addToRecentlyUsed = useCallback(
+    (emoji: Emoji) => {
+      setRecentlyUsed((list) =>
+        list.find((x) => x.description === emoji.description) ? list : [emoji, ...list].slice(0, 10)
+      );
+    },
+    [setRecentlyUsed]
+  );
 
   const isLoading = list.length === 0 || loadingRecentlyUsed;
 
@@ -110,14 +111,22 @@ export default function Main(): ReactElement {
                     <ActionPanel>
                       <ActionPanel.Section>
                         <PasteAction
-                          title="Paste Emoji to Current Window"
+                          title="Paste Emoji in Active App"
                           content={emoji.emoji}
-                          onPaste={() => addToRecentlyUsed(emoji)}
+                          onPaste={() => {
+                            closeMainWindow();
+                            popToRoot();
+                            addToRecentlyUsed(emoji);
+                          }}
                         />
                         <CopyToClipboardAction
                           title="Copy Emoji to Clipboard"
                           content={emoji.emoji}
-                          onCopy={() => addToRecentlyUsed(emoji)}
+                          onCopy={() => {
+                            closeMainWindow();
+                            popToRoot();
+                            addToRecentlyUsed(emoji);
+                          }}
                         />
                       </ActionPanel.Section>
                     </ActionPanel>

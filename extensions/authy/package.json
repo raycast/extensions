@@ -5,6 +5,9 @@
   "description": "Search, sync and use your Authy 2fa tokens with Raycast",
   "icon": "command-icon.png",
   "author": "guga4ka",
+  "contributors": [
+    "lukekarrys"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -34,8 +37,16 @@
     },
     {
       "required": false,
+      "name": "excludeNames",
+      "title": "Exclude Names",
+      "type": "textfield",
+      "description": "Names to exclude, separated by commas",
+      "placeholder": "account1, otherAccount, ..."
+    },
+    {
+      "required": false,
       "name": "preferCustomName",
-      "label": "Prefer Custom Names",
+      "label": "Prefer custom names",
       "type": "checkbox",
       "description": "Use your name customisations rather than the defaults",
       "default": true

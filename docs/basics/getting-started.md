@@ -15,7 +15,7 @@ Before you can create your first extension, make sure you have the following pre
 
 ## Sign In
 
-![Opening the "Store" command in Raycast](<../.gitbook/assets/CleanShot 2021-12-02 at 11.32.09@2x.png>)
+![Opening the "Store" command in Raycast](<../.gitbook/assets/welcome (1).png>)
 
 You need to be signed in to use the following extension development commands.
 

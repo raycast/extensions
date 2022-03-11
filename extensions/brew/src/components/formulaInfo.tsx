@@ -2,9 +2,8 @@ import { Detail, useNavigation } from "@raycast/api";
 import { FormulaActionPanel } from "./actionPanels";
 import { Formula, brewIsInstalled, brewPrefix } from "../brew";
 
-export function FormulaInfo(props: { formula: Formula; onAction: (result: boolean) => void }) {
+export function FormulaInfo(props: { formula: Formula; onAction: (result: boolean) => void }): JSX.Element {
   const { pop } = useNavigation();
-
   return (
     <Detail
       markdown={formatInfo(props.formula)}
@@ -93,12 +92,12 @@ ${markdown}
 }
 
 function formatConflicts(formula: Formula): string {
-  if (formula.conflicts_with?.length == 0) {
+  if (!formula.conflicts_with) {
     return "";
   }
 
   return `#### Conflicts With
- ${formula.conflicts_with?.join(", ")}
+ ${formula.conflicts_with.join(", ")}
   `;
 }
 

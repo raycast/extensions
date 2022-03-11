@@ -10,7 +10,7 @@ import {
 } from "@raycast/api";
 import got from "got";
 import { useEffect, useState } from "react";
-import { source_languages, target_languages } from "./languages";
+import { source_languages, target_languages } from "./utils";
 
 interface Values {
   key?: string;
@@ -43,6 +43,11 @@ const Command = () => {
     if (values.text) {
       try {
         setLoading(true);
+        console.log(
+          `https://api${pro ? "" : "-free"}.deepl.com/v2/translate?auth_key=${key}&text=${values.text}&target_lang=${
+            values.to
+          }${values.from ? `&source_lang=${values.from}` : ""}`
+        );
         const response = await got(
           `https://api${pro ? "" : "-free"}.deepl.com/v2/translate?auth_key=${key}&text=${values.text}&target_lang=${
             values.to

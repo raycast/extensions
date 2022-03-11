@@ -10,7 +10,7 @@ interface State {
   isLoading: boolean;
 }
 
-export default function Main() {
+export default function Main(): JSX.Element {
   const [state, setState] = useState<State>({ isLoading: true });
 
   useEffect(() => {
@@ -22,7 +22,6 @@ export default function Main() {
         setState({ outdated: outdated, isLoading: false });
       })
       .catch((err) => {
-        console.log("brewFetchOutdated error:", err);
         showFailureToast("Brew outdated failed", err);
         setState({ isLoading: false });
       });
