@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, LocalStorage } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { fetchComic, maxNum } from "./xkcd";
+import { useCallback, useEffect, useState } from "react";
+import { useCurrentSelectedComic, maxNum } from "./xkcd";
 import { useAtom } from "jotai";
 import { currentComicAtom, lastViewedAtom, maxNumAtom, readStatusAtom, totalReadAtom } from "./atoms";
 import getRandomUnread from "./get_random_unread";
@@ -12,26 +12,19 @@ export default function main() {
   const [loading, setLoading] = useState(true);
   const [totalRead] = useAtom(totalReadAtom);
   const [lastViewed, setLastViewed] = useAtom(lastViewedAtom);
-  const [currentComic, setCurrentComic] = useAtom(currentComicAtom);
-  const [selectedId, setSelectedId] = useState("");
-  const [markdownString, setMarkdownString] = useState<string | null>(null);
+  const [currentComicNumber, setCurrentComic] = useAtom(currentComicAtom);
+  const [currentComic, loadingComic] = useCurrentSelectedComic(currentComicNumber);
+
   useEffect(() => {
-    if (currentComic === -1) return;
-    setMarkdownString(null);
-    (async () => {
-      const data = await fetchComic(currentComic);
-      setMarkdownString(`
-# ${data.title} - #${data.num}
-
-${data.alt}
-
-![${data.alt}](${data.img})`);
-      await LocalStorage.setItem(`read:comic:${currentComic}`, true);
-      await LocalStorage.setItem("last_viewed", currentComic);
-      setReadStatus({ ...readStatus, [currentComic]: true });
-      setLastViewed(currentComic);
-    })();
+    if (!currentComic) {
+      return;
+    }
+    LocalStorage.setItem(`read:comic:${currentComic.num}`, true);
+    LocalStorage.setItem("last_viewed", currentComic.num);
+    setReadStatus({ ...readStatus, [currentComic.num]: true });
+    setLastViewed(currentComic.num);
   }, [currentComic]);
+
   useEffect(() => {
     (async () => {
       const data = await maxNum();
@@ -50,42 +43,58 @@ ${data.alt}
     })();
   }, []);
 
-  if (loading) return <List isLoading />;
-  return (
-    <List
-      onSelectionChange={(id) => {
-        if (!id || id === selectedId) return;
-        setSelectedId(id);
-        if (id === "random-unread") {
-          setCurrentComic(getRandomUnread(readStatus, num));
-        } else if (id === "random") {
-          setCurrentComic(Math.floor(Math.random() * num + 1));
-        } else if (id === "last-viewed") {
-          setCurrentComic(lastViewed);
-        } else if (id === "latest") {
-          setCurrentComic(num);
-        } else {
-          const idNum = Number(id);
+  const onSelectionChange = useCallback(
+    (id: string | undefined) => {
+      if (!id) {
+        return;
+      }
 
-          if (!isNaN(idNum)) {
-            setCurrentComic(idNum);
-          }
+      if (id === "random-unread") {
+        setCurrentComic(getRandomUnread(readStatus, num));
+      } else if (id === "random") {
+        setCurrentComic(Math.floor(Math.random() * num + 1));
+      } else if (id === "last-viewed") {
+        setCurrentComic(lastViewed);
+      } else if (id === "latest") {
+        setCurrentComic(num);
+      } else {
+        const idNum = Number(id);
+
+        if (!isNaN(idNum)) {
+          setCurrentComic(idNum);
         }
-      }}
-      isShowingDetail={true}
-    >
+      }
+    },
+    [setCurrentComic, lastViewed, readStatus]
+  );
+
+  if (loading) return <List isLoading />;
+
+  const detail = (
+    <List.Item.Detail
+      isLoading={loadingComic}
+      markdown={
+        currentComic && !loadingComic
+          ? `
+# ${currentComic.title} - #${currentComic.num}
+
+${currentComic.alt}}
+
+![${currentComic.alt}](${currentComic.img})`
+          : undefined
+      }
+    />
+  );
+
+  return (
+    <List onSelectionChange={onSelectionChange} isShowingDetail>
       <List.Section title="Commands">
         {lastViewed > 0 && (
           <List.Item
             id="last-viewed"
             title="Last Viewed"
             subtitle="Pick up where you left off!"
-            detail={
-              <List.Item.Detail
-                isLoading={markdownString === null}
-                markdown={markdownString === null ? undefined : markdownString}
-              />
-            }
+            detail={detail}
             actions={
               <ActionPanel>
                 <OpenComicInBrowser />
@@ -109,12 +118,7 @@ ${data.alt}
                 <OpenComicInBrowser />
               </ActionPanel>
             }
-            detail={
-              <List.Item.Detail
-                isLoading={markdownString === null}
-                markdown={markdownString === null ? undefined : markdownString}
-              />
-            }
+            detail={detail}
           />
         )}
         <List.Item
@@ -132,23 +136,13 @@ ${data.alt}
               <OpenComicInBrowser />
             </ActionPanel>
           }
-          detail={
-            <List.Item.Detail
-              isLoading={markdownString === null}
-              markdown={markdownString === null ? undefined : markdownString}
-            />
-          }
+          detail={detail}
         />
         <List.Item
           id="latest"
           title="Latest"
           subtitle="View the latest xkcd comic."
-          detail={
-            <List.Item.Detail
-              isLoading={markdownString === null}
-              markdown={markdownString === null ? undefined : markdownString}
-            />
-          }
+          detail={detail}
           actions={
             <ActionPanel>
               <OpenComicInBrowser />
@@ -163,12 +157,7 @@ ${data.alt}
             key={num - idx}
             title={`Comic #${num - idx}`}
             keywords={[num - idx + ""]}
-            detail={
-              <List.Item.Detail
-                isLoading={markdownString === null}
-                markdown={markdownString === null ? undefined : markdownString}
-              />
-            }
+            detail={detail}
             accessoryIcon={readStatus[num - idx] ? undefined : { source: Icon.Dot, tintColor: Color.Blue }}
             accessoryTitle={readStatus[num - idx] ? "" : "unread"}
             actions={
