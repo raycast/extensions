@@ -13,6 +13,7 @@ import { useInterval, useStateFromLocalStorage } from "./utils/hooks";
 import { capitalize, truncate } from "./utils/string";
 import { padList } from "./utils/list";
 import { createClient } from "./modules/client";
+import { renderDetails } from "./utils/renderDetails";
 
 enum TorrentStatus {
   Stopped = 0,
@@ -34,7 +35,7 @@ const TorrentStatusLabel: Record<string, string> = {
   Seeding: "Seeding",
 };
 
-type Torrent = {
+export type Torrent = {
   id: number;
   torrentFile: string;
   name: string;
@@ -45,7 +46,26 @@ type Torrent = {
   status: TorrentStatus;
   rateDownload: number;
   rateUpload: number;
-  files: { name: string }[];
+  files: { name: string; bytesCompleted: number; length: number }[];
+  pieces: string;
+  pieceCount: number;
+  pieceSize: number;
+  hashString: string;
+  creator: string;
+  dateCreated: number;
+  downloadDir: string;
+  isPrivate: boolean;
+  trackers: { announce: string; scrape: string; id: number; tier: number }[];
+  trackerStats: {
+    tier: number;
+    host: string;
+    announce: string;
+    leecherCount: number;
+    seederCount: number;
+    lastScrapeTime: number;
+    lastAnnounceTime: number;
+    downloadCount: number;
+  }[];
 };
 
 type SessionStats = {
@@ -190,6 +210,7 @@ export default function TorrentList() {
   const [torrents, setTorrents] = useState<Torrent[]>([]);
   const [sessionStats, setSessionStats] = useState<SessionStats | null>(null);
   const [didLoad, setDidLoad] = useState(false);
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
 
   const updateData = useCallback(async () => {
     try {
@@ -226,6 +247,7 @@ export default function TorrentList() {
 
   return (
     <List
+      isShowingDetail={isShowingDetail}
       isLoading={!didLoad || loadingStatusFilter}
       searchBarPlaceholder="Filter torrents by name..."
       onSearchTextChange={setSearch}
@@ -256,6 +278,8 @@ export default function TorrentList() {
             rateUpload={paddedRateUploads[index]}
             percentDone={paddedPercentDones[index]}
             sessionStats={sessionStats}
+            isShowingDetail={isShowingDetail}
+            onToggleDetail={() => setIsShowingDetail((value) => !value)}
             onStop={async (torrent) => {
               try {
                 await transmission.stop([torrent.id]);
@@ -312,6 +336,8 @@ function TorrentListItem({
   onRemove,
   onStartAll,
   onStopAll,
+  onToggleDetail,
+  isShowingDetail,
   rateDownload,
   rateUpload,
   percentDone,
@@ -323,6 +349,8 @@ function TorrentListItem({
   onStartAll: (torrent: Torrent) => Promise<void>;
   onStopAll: (torrent: Torrent) => Promise<void>;
   onRemove: (torrent: Torrent, deleteLocalData: boolean) => Promise<void>;
+  onToggleDetail: () => void;
+  isShowingDetail: boolean;
   rateDownload: string;
   rateUpload: string;
   percentDone: string;
@@ -338,6 +366,8 @@ function TorrentListItem({
     .filter(Boolean)
     .join(" - ");
 
+  const downloadStats = [`↓ ${rateDownload}`, " - ", `↑ ${rateUpload}`, " - ", percentDone].join(" ");
+
   return (
     <List.Item
       id={String(torrent.id)}
@@ -347,12 +377,11 @@ function TorrentListItem({
         source: statusIconSource(torrent),
         tintColor: statusIconColor(torrent),
       }}
-      accessoryTitle={[`↓ ${rateDownload}`, " - ", `↑ ${rateUpload}`, " - ", percentDone].join(" ")}
-      detail={
-        <List.Item.Detail markdown="![Illustration](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png)" />
-      }
+      accessoryTitle={!isShowingDetail ? downloadStats : undefined}
+      detail={isShowingDetail && <List.Item.Detail markdown={renderDetails(torrent, downloadStats)} />}
       actions={
         <ActionPanel>
+          <Action title={isShowingDetail ? "Hide details" : "Show details"} onAction={onToggleDetail} />
           <ActionPanel.Section title={`Selected Torrent (${selectedTorrentTitle})`}>
             <Action
               title={torrent.status === TorrentStatus.Stopped ? "Start Torrent" : "Stop Torrent"}
