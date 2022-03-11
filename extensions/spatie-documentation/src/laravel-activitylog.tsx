@@ -10,21 +10,19 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import algoliaSearch from "algoliasearch/lite";
 import algoliaConfig from "./config/algolia";
-import { getSubTitle, getTitle } from "./helpers";
+import { getTitle, getSubTitle } from "./helpers";
 import { DocList, SpatieDocsHit } from "./types";
 
 const documentation: { [key: string]: DocList } = {
-  v3: require("./documentation/laravel-backup/v3.json"),
-  v4: require("./documentation/laravel-backup/v4.json"),
-  v5: require("./documentation/laravel-backup/v5.json"),
-  v6: require("./documentation/laravel-backup/v6.json"),
-  v7: require("./documentation/laravel-backup/v7.json"),
-  v8: require("./documentation/laravel-backup/v8.json"),
+  v1: require("./documentation/laravel-activitylog/v1.json"),
+  v2: require("./documentation/laravel-activitylog/v2.json"),
+  v3: require("./documentation/laravel-activitylog/v3.json"),
+  v4: require("./documentation/laravel-activitylog/v4.json"),
 };
 
 export default function SearchDocumentation() {
   const getPreference = getPreferenceValues();
-  const facetFilterVersion = "version:" + getPreference.spatieLaravelBackupVersion;
+  const facetFilterVersion = "version:" + getPreference.spatieLaravelActivitylogVersion;
 
   const algoliaClient = useMemo(() => {
     return algoliaSearch(algoliaConfig.app_id, algoliaConfig.api_key);
@@ -46,7 +44,7 @@ export default function SearchDocumentation() {
     return await algoliaIndex
       .search(query, {
         hitsPerPage: 11,
-        facetFilters: [facetFilterVersion, "project:laravel-backup"],
+        facetFilters: [facetFilterVersion, "project:laravel-activitylog"],
       })
       .then((res) => {
         setIsLoading(false);
@@ -54,7 +52,7 @@ export default function SearchDocumentation() {
       })
       .catch((err) => {
         setIsLoading(false);
-        showToast(ToastStyle.Failure, "Error searching Spatie Laravel Backup Documentation", err.message);
+        showToast(ToastStyle.Failure, "Error searching Spatie Laravel Activitylog Documentation", err.message);
         return [];
       });
   };
@@ -63,7 +61,7 @@ export default function SearchDocumentation() {
     (async () => setSearchResults(await search()))();
   }, []);
 
-  const currentDocs = documentation[getPreference.spatieLaravelBackupVersion];
+  const currentDocs = documentation[getPreference.spatieLaravelActivitylogVersion];
   return (
     <List
       throttle={true}

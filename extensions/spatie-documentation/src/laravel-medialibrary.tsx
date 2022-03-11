@@ -9,22 +9,19 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import algoliaSearch from "algoliasearch/lite";
+import { DocList, SpatieDocsHit } from "./types";
 import algoliaConfig from "./config/algolia";
 import { getSubTitle, getTitle } from "./helpers";
-import { DocList, SpatieDocsHit } from "./types";
 
 const documentation: { [key: string]: DocList } = {
-  v3: require("./documentation/laravel-backup/v3.json"),
-  v4: require("./documentation/laravel-backup/v4.json"),
-  v5: require("./documentation/laravel-backup/v5.json"),
-  v6: require("./documentation/laravel-backup/v6.json"),
-  v7: require("./documentation/laravel-backup/v7.json"),
-  v8: require("./documentation/laravel-backup/v8.json"),
+  v7: require("./documentation/laravel-medialibrary/v7.json"),
+  v8: require("./documentation/laravel-medialibrary/v8.json"),
+  v9: require("./documentation/laravel-medialibrary/v9.json"),
+  v10: require("./documentation/laravel-medialibrary/v10.json"),
 };
 
 export default function SearchDocumentation() {
   const getPreference = getPreferenceValues();
-  const facetFilterVersion = "version:" + getPreference.spatieLaravelBackupVersion;
 
   const algoliaClient = useMemo(() => {
     return algoliaSearch(algoliaConfig.app_id, algoliaConfig.api_key);
@@ -46,7 +43,7 @@ export default function SearchDocumentation() {
     return await algoliaIndex
       .search(query, {
         hitsPerPage: 11,
-        facetFilters: [facetFilterVersion, "project:laravel-backup"],
+        facetFilters: ["version:" + getPreference.spatieLaravelMedialibraryVersion, "project:laravel-medialibrary"],
       })
       .then((res) => {
         setIsLoading(false);
@@ -54,7 +51,7 @@ export default function SearchDocumentation() {
       })
       .catch((err) => {
         setIsLoading(false);
-        showToast(ToastStyle.Failure, "Error searching Spatie Laravel Backup Documentation", err.message);
+        showToast(ToastStyle.Failure, "Error searching Spatie Laravel Medialibrary Documentation", err.message);
         return [];
       });
   };
@@ -63,7 +60,7 @@ export default function SearchDocumentation() {
     (async () => setSearchResults(await search()))();
   }, []);
 
-  const currentDocs = documentation[getPreference.spatieLaravelBackupVersion];
+  const currentDocs = documentation[getPreference.spatieLaravelMedialibraryVersion];
   return (
     <List
       throttle={true}
