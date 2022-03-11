@@ -8,8 +8,13 @@ import {
   Toast,
 } from '@raycast/api';
 import { useEffect, useRef, useState } from 'react';
-import { getCurrency } from './utils';
 import Service, { Coin } from './service';
+import {
+  Currency,
+  formatPrice,
+  getCurrencies,
+  getPreferredCurrency,
+} from './utils';
 
 enum FormFieldDataType {
   Coin,
@@ -22,19 +27,20 @@ interface FormResult {
   to: string;
 }
 
-const DEFAULT_COIN = 'bitcoin';
-
 export default function Command() {
+  const DEFAULT_COIN = 'bitcoin';
+  const { id: DEFAULT_CURRENCY } = getPreferredCurrency();
+
   const [isLoading, setLoading] = useState<boolean>(true);
   const [coins, setCoins] = useState<Coin[]>([]);
-  const [currencies, setCurrencies] = useState<string[]>([]);
+  const currencies = getCurrencies();
   const selectedCoin = useRef<string>(DEFAULT_COIN);
-  const selectedCurrency = useRef<string>(getCurrency());
+  const selectedCurrency = useRef<string>(DEFAULT_CURRENCY);
   const [fieldOrder, setFieldOrder] = useState<FormFieldDataType[]>([
     FormFieldDataType.Coin,
     FormFieldDataType.Currency,
   ]);
-  const result = useRef<number | null>(null);
+  const result = useRef<[number, string]>([0, '']);
 
   const service = new Service();
 
@@ -45,15 +51,12 @@ export default function Command() {
       // for the command. It also makes the UI lag when swapping the field order
       // and makes searching the drop down more cumbersome (there are sometimes
       // coins that have the same / very similar symbols). Keeping the list to 2000
-      // feels like a could comprimise between functionality and performance.
+      // feels like a good compromise between functionality and performance.
       try {
         const coins = await service.getTop2000CoinList(
           selectedCurrency.current,
         );
         setCoins(coins);
-
-        const currencies = await service.getSupportedVsCurrencies();
-        setCurrencies(currencies);
       } catch (err) {
         await showToast({
           style: Toast.Style.Failure,
@@ -69,11 +72,12 @@ export default function Command() {
   }, []);
 
   const reset = () => {
-    result.current = null;
+    result.current = [0, ''];
   };
 
-  const copyResultToClipboard = async () => {
-    await Clipboard.copy(`${result.current}`);
+  const copyResultToClipboard = async (unformatted = false) => {
+    const value = unformatted ? `${result.current[0]}` : result.current[1];
+    await Clipboard.copy(value);
     await showHUD('Copied to Clipboard');
 
     reset();
@@ -143,31 +147,43 @@ export default function Command() {
     }
 
     let total = 0;
-    let title = '';
+    let totalFormatted = '';
 
     if (fieldOrder[0] == FormFieldDataType.Coin) {
       total = price * parseFloat(amount);
-      title = `${total} ${currency.toUpperCase()}`;
+
+      const currencyData = currencies.find(
+        ({ id }) => id === currency,
+      ) as Currency;
+
+      totalFormatted = formatPrice(total, currencyData.symbol);
     } else {
       total = parseFloat(amount) / price;
-      title = `${total}`;
 
       const coinData = coins.find(({ id }) => id === coin) as Coin;
 
-      title += ` ${coinData.symbol.toUpperCase()}`;
+      totalFormatted = formatPrice(total, coinData.symbol);
     }
 
-    result.current = total;
+    result.current = [total, totalFormatted];
 
     toast.style = Toast.Style.Success;
-    toast.title = title;
+    toast.title = totalFormatted;
     toast.primaryAction = {
-      title: 'Copy to Clipboard',
+      title: 'Copy',
       shortcut: {
         modifiers: ['cmd', 'shift'],
         key: 'c',
       },
-      onAction: copyResultToClipboard,
+      onAction: () => copyResultToClipboard(),
+    };
+    toast.secondaryAction = {
+      title: 'Copy Raw',
+      shortcut: {
+        modifiers: ['cmd', 'shift'],
+        key: 'x',
+      },
+      onAction: () => copyResultToClipboard(true),
     };
   };
 
@@ -175,7 +191,7 @@ export default function Command() {
     .map((coin) => {
       return {
         value: coin.id,
-        title: coin.symbol.toUpperCase(),
+        title: `${coin.name} (${coin.symbol.toUpperCase()})`,
         selected: selectedCoin.current === coin.id,
       };
     })
@@ -187,9 +203,9 @@ export default function Command() {
   const currencyItems = currencies
     .map((currency) => {
       return {
-        value: currency,
-        title: currency.toUpperCase(),
-        selected: selectedCurrency.current === currency,
+        value: currency.id,
+        title: `${currency.name} (${currency.symbol})`,
+        selected: selectedCurrency.current === currency.id,
       };
     })
     // Fake the defaultValue by keeping the users selected currency at the top of
@@ -209,9 +225,23 @@ export default function Command() {
         <ActionPanel>
           <Action.SubmitForm title="Calculate" onSubmit={onFormSubmit} />
           <Action
-            title="Copy Result to Clipboard"
+            title="Copy Unformatted Result"
             onAction={async () => {
-              if (result.current === null) {
+              if (result.current[1] === '') {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: 'Nothing to copy',
+                });
+                return;
+              }
+
+              copyResultToClipboard(true);
+            }}
+          />
+          <Action
+            title="Copy Formatted Result"
+            onAction={async () => {
+              if (result.current[1] === '') {
                 await showToast({
                   style: Toast.Style.Failure,
                   title: 'Nothing to copy',
@@ -220,6 +250,10 @@ export default function Command() {
               }
 
               copyResultToClipboard();
+            }}
+            shortcut={{
+              modifiers: ['cmd', 'shift'],
+              key: 'f',
             }}
           />
           <Action
