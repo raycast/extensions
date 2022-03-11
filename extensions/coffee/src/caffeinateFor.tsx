@@ -2,14 +2,14 @@ import { Form, ActionPanel, SubmitFormAction, showToast, ToastStyle, popToRoot }
 import Caffeinate from "./caffeinate";
 
 const durationUnitMultiplierMap = {
-  'seconds': 1,
-  'minutes': 60,
-  'hours': 60 * 60,
-}
+  seconds: 1,
+  minutes: 60,
+  hours: 60 * 60,
+};
 
 interface FormValues {
   time: string;
-  unit: keyof typeof durationUnitMultiplierMap
+  unit: keyof typeof durationUnitMultiplierMap;
 }
 
 const CaffeinateFor = () => {
@@ -20,10 +20,10 @@ const CaffeinateFor = () => {
       return;
     }
 
-    const multiplier = durationUnitMultiplierMap[unit] ?? 1
+    const multiplier = durationUnitMultiplierMap[unit] ?? 1;
 
     await Caffeinate(`-t ${timeAsNumber * multiplier}`);
-    popToRoot()
+    popToRoot();
   };
 
   return (
@@ -33,7 +33,7 @@ const CaffeinateFor = () => {
           <SubmitFormAction title="Caffeinate" onSubmit={onSubmit} />
         </ActionPanel>
       }
-      >
+    >
       <Form.TextField id="time" title="Duration" />
       <Form.Dropdown id="unit" title="Duration Unit" defaultValue="minutes">
         <Form.Dropdown.Item value="seconds" title="Seconds" />
