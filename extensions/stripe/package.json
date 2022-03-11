@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "stripe",
-  "title": "Stripe",
+  "title": "Stripe Quicklinks",
   "description": "This extension allows you to make an invoice, create a payment, add a new product, and start a new subscription.",
   "icon": "stripe.png",
   "author": "pradeepb28",
@@ -9,31 +9,31 @@
   "commands": [
     {
       "name": "create-a-new-invoice",
-      "title": "Create a new invoice",
+      "title": "Create a New Invoice",
       "subtitle": "Stripe",
       "description": "It creates an invoice for your business on your stripe account",
-      "mode": "view"
+      "mode": "no-view"
     },
     {
       "name": "create-a-new-payment",
-      "title": "Create a new payment",
+      "title": "Create a New Payment",
       "subtitle": "Stripe",
       "description": "Send and accept payments",
-      "mode": "view"
+      "mode": "no-view"
     },
     {
       "name": "create-a-new-product",
-      "title": "Create a new product",
+      "title": "Create a New Product",
       "subtitle": "Stripe",
       "description": "Add a new offering to your stripe product catalog",
-      "mode": "view"
+      "mode": "no-view"
     },
     {
       "name": "create-a-new-subscription",
-      "title": "Create a new subscription",
+      "title": "Create a New Subscription",
       "subtitle": "Stripe",
       "description": "Create new subscription accounts for your customers",
-      "mode": "view"
+      "mode": "no-view"
     }
   ],
   "dependencies": {
