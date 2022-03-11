@@ -1,4 +1,4 @@
-import { Form, ActionPanel, SubmitFormAction, FormValues, showToast, ToastStyle } from "@raycast/api";
+import { Form, ActionPanel, SubmitFormAction, FormValues, showToast, ToastStyle, popToRoot } from "@raycast/api";
 import Caffeinate from "./caffeinate";
 
 const CaffeinateFor = () => {
@@ -9,6 +9,7 @@ const CaffeinateFor = () => {
     }
 
     await Caffeinate(`-t ${time}`);
+    popToRoot()
   };
 
   return (
