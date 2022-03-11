@@ -39,6 +39,7 @@ const CommandPanel = (props: CommandPanelProps) => {
           <Action.CopyToClipboard title="Copy Detail URL" content={weburl} />
           <Action.Push
             title="Show Details"
+            icon={Icon.Eye}
             shortcut={{ modifiers: ["cmd"], key: "." }}
             target={<DetailMarkdown markdown={"Loading...."} command={props.path.replace(/^\//, "")} />}
           />

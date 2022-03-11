@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "linux-command",
-  "title": "Linux Command",
+  "title": "Search Linux Commands",
   "description": "Search through linux commands and get detailed information in Chinese.",
   "icon": "command-icon.png",
   "author": "jaywcjlove",
@@ -9,8 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Linux Command",
-      "subtitle": "搜索 Linux 命令",
+      "title": "Search Linux Command",
       "description": "Search Linux command Chinese documentation.",
       "mode": "view"
     }
