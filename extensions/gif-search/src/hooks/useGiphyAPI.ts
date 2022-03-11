@@ -5,7 +5,7 @@ import { GiphyFetch } from "@giphy/js-fetch-api";
 import type { GifsResult } from "@giphy/js-fetch-api";
 import type { IGif as GiphyGif } from "@giphy/js-types";
 
-import { getAPIKey, GIF_SERVICE } from "../preferences";
+import { fetchConfig, getAPIKey, GIF_SERVICE } from "../preferences";
 
 import type { IGif } from "../models/gif";
 interface FetchState {
@@ -14,7 +14,20 @@ interface FetchState {
   error?: Error;
 }
 
-const gf = new GiphyFetch(getAPIKey(GIF_SERVICE.GIPHY));
+let gf: GiphyFetch;
+async function getAPI() {
+  if (!gf) {
+    let apiKey = getAPIKey(GIF_SERVICE.GIPHY);
+    if (!apiKey) {
+      const config = await fetchConfig();
+      apiKey = config.apiKeys[GIF_SERVICE.GIPHY];
+    }
+
+    gf = new GiphyFetch(apiKey);
+  }
+
+  return gf;
+}
 
 export default function useGiphyAPI({ offset = 0 }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -29,10 +42,11 @@ export default function useGiphyAPI({ offset = 0 }) {
 
       let results: GifsResult;
       try {
+        const api = await getAPI();
         if (term) {
-          results = await gf.search(term, { offset });
+          results = await api.search(term, { offset });
         } else {
-          results = await gf.trending({ offset, limit: 10 });
+          results = await api.trending({ offset, limit: 10 });
         }
         setResults({ items: results.data.map(mapGiphyResponse), term });
       } catch (e) {

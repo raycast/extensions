@@ -2,7 +2,7 @@ import path from "path";
 import { AbortError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { getAPIKey, GIF_SERVICE } from "../preferences";
+import { fetchConfig, getAPIKey, GIF_SERVICE } from "../preferences";
 
 import TenorAPI, { TenorResults } from "../models/tenor";
 import type { TenorGif } from "../models/tenor";
@@ -14,7 +14,20 @@ interface FetchState {
   error?: Error;
 }
 
-const tenor = new TenorAPI(getAPIKey(GIF_SERVICE.TENOR));
+let tenor: TenorAPI;
+async function getAPI() {
+  if (!tenor) {
+    let apiKey = getAPIKey(GIF_SERVICE.TENOR);
+    if (!apiKey) {
+      const config = await fetchConfig();
+      apiKey = config.apiKeys[GIF_SERVICE.TENOR];
+    }
+
+    tenor = new TenorAPI(apiKey);
+  }
+
+  return tenor;
+}
 
 export default function useTenorAPI({ offset = 0 }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -29,10 +42,11 @@ export default function useTenorAPI({ offset = 0 }) {
 
       let results: TenorResults;
       try {
+        const api = await getAPI();
         if (term) {
-          results = await tenor.search(term, { offset });
+          results = await api.search(term, { offset });
         } else {
-          results = await tenor.trending({ offset, limit: 10 });
+          results = await api.trending({ offset, limit: 10 });
         }
         setResults({ items: results.results.map(mapTenorResponse), term });
       } catch (e) {
