@@ -36,7 +36,7 @@ const CaffeinateWhile = () => {
             title="Caffeinate"
             onSubmit={async (data) => {
               await Caffeinate(`-w ${data.process}`);
-              popToRoot()
+              popToRoot();
             }}
           />
         </ActionPanel>
