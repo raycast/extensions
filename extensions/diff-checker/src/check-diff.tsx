@@ -54,7 +54,7 @@ function DiffView(props: DiffProps) {
   ## Diff
 
   \`\`\`
-  ${diff}
+${diff}
   \`\`\``;
   return <Detail markdown={markdown} />;
 }
