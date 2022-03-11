@@ -4,7 +4,7 @@
   "title": "Google Translate",
   "description": "Simple translation using Google Translate",
   "icon": "google-translate.png",
-  "author": "ospfranco",
+  "author": "gebeto",
   "license": "MIT",
   "commands": [
     {
