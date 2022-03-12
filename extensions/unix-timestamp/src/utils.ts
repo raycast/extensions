@@ -178,7 +178,7 @@ export function validateDateInput(
     };
   }
 
-  if (year > 2037) {
+  if (year > 2038) {
     return {
       field: 'year',
       error: 'out-of-bounds',
