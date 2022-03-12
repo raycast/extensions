@@ -9,28 +9,28 @@
   "commands": [
     {
       "name": "create-a-new-invoice",
-      "title": "Create a New Invoice",
+      "title": "Create New Invoice",
       "subtitle": "Stripe",
       "description": "It creates an invoice for your business on your stripe account",
       "mode": "no-view"
     },
     {
       "name": "create-a-new-payment",
-      "title": "Create a New Payment",
+      "title": "Create New Payment",
       "subtitle": "Stripe",
       "description": "Send and accept payments",
       "mode": "no-view"
     },
     {
       "name": "create-a-new-product",
-      "title": "Create a New Product",
+      "title": "Create New Product",
       "subtitle": "Stripe",
       "description": "Add a new offering to your stripe product catalog",
       "mode": "no-view"
     },
     {
       "name": "create-a-new-subscription",
-      "title": "Create a New Subscription",
+      "title": "Create New Subscription",
       "subtitle": "Stripe",
       "description": "Create new subscription accounts for your customers",
       "mode": "no-view"
