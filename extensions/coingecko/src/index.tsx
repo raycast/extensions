@@ -219,13 +219,21 @@ function Info(props: IdProps) {
         await service.getCoinInfo(props.id);
       setLoading(false);
       const markdown = `
-  **Name**: ${name}
+  ## Name
 
-  **Symbol**: ${symbol.toUpperCase()}
+  ${name}
 
-  **Market Cap Rank**: ${market_cap_rank}
+  ## Symbol
 
-  [Homepage](${links.homepage[0]})
+  ${symbol.toUpperCase()}
+
+  ## Market Cap Rank
+
+  ${market_cap_rank}
+
+  ## Homepage
+
+  [${links.homepage[0]}](${links.homepage[0]})
       `;
       setMarkdown(markdown);
     }
