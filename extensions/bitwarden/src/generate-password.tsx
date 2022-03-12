@@ -1,4 +1,15 @@
-import { ActionPanel, Icon, Clipboard, Action, showHUD, Form, showToast, Toast, LocalStorage } from "@raycast/api";
+import {
+  ActionPanel,
+  Icon,
+  Clipboard,
+  Action,
+  showHUD,
+  Form,
+  showToast,
+  Toast,
+  LocalStorage,
+  Detail,
+} from "@raycast/api";
 import { useBitwarden, useOneTimePasswordHistoryWarning, usePasswordGenerator, usePasswordOptions } from "./hooks";
 import { UnlockForm } from "./components";
 import { Bitwarden } from "./api";
@@ -25,6 +36,9 @@ const GeneratePassword = () => {
 
   if (state.vaultStatus === "locked") {
     return <UnlockForm setSessionToken={setSessionToken} bitwardenApi={bitwardenApi} />;
+  }
+  if (!options) {
+    return <Detail isLoading={true} />;
   }
 
   const showDebouncedToast = debounce(500, showToast);
