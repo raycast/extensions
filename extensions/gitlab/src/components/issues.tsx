@@ -1,4 +1,14 @@
-import { ActionPanel, List, Color, showToast, ToastStyle, Detail, PushAction, ImageMask } from "@raycast/api";
+import {
+  ActionPanel,
+  List,
+  Color,
+  showToast,
+  ToastStyle,
+  Detail,
+  PushAction,
+  ImageMask,
+  CopyToClipboardAction,
+} from "@raycast/api";
 import { gql } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
@@ -34,6 +44,7 @@ const GET_ISSUE_DETAIL = gql`
   query GetIssueDetail($id: ID!) {
     issue(id: $id) {
       description
+      webUrl
     }
   }
 `;
@@ -50,14 +61,19 @@ export function IssueDetailFetch(props: { project: Project; issueId: number }): 
   }
 }
 
+interface IssueDetailData {
+  description: string;
+  projectWebUrl?: string;
+}
+
 export function IssueDetail(props: { issue: Issue }): JSX.Element {
   const issue = props.issue;
-  const { description, error, isLoading } = useDetail(props.issue.id);
+  const { issueDetail, error, isLoading } = useDetail(props.issue.id);
   if (error) {
     showToast(ToastStyle.Failure, "Could not get issue details", error);
   }
 
-  const desc = (description ? description : props.issue.description) || "";
+  const desc = (issueDetail?.description ? issueDetail.description : props.issue.description) || "";
 
   const lines: string[] = [];
   if (issue) {
@@ -69,7 +85,7 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
     lines.push(`Status: \`${capitalizeFirstLetter(issue.state)}\``);
     const labels = issue.labels.map((i) => `\`${i.name || i}\``).join(" ") + "  \n";
     lines.push(`Labels: ${labels || "<No Label>"}`);
-    lines.push("## Description\n" + optimizeMarkdownText(desc));
+    lines.push("## Description\n" + optimizeMarkdownText(desc, issueDetail?.projectWebUrl));
   }
   const md = lines.join("  \n");
 
@@ -82,18 +98,19 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
         <ActionPanel>
           <GitLabOpenInBrowserAction url={props.issue.web_url} />
           <IssueItemActions issue={props.issue} />
+          <CopyToClipboardAction title="Copy Issue Description" content={issue.description} />
         </ActionPanel>
       }
     />
   );
 }
 
-export function useDetail(issueID: number): {
-  description?: string;
+function useDetail(issueID: number): {
+  issueDetail?: IssueDetailData;
   error?: string;
   isLoading: boolean;
 } {
-  const [description, setDescription] = useState<string>();
+  const [issueDetail, setIssueDetail] = useState<IssueDetailData>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -116,8 +133,17 @@ export function useDetail(issueID: number): {
           variables: { id: `gid://gitlab/Issue/${issueID}` },
         });
         const desc = data.data.issue.description || "<no description>";
+        const webUrl = (data.data.issue.webUrl as string) || "";
+        let projectWebUrl: string | undefined;
+        const index = webUrl.indexOf("/-/");
+        if (index > 1) {
+          projectWebUrl = webUrl.substring(0, index);
+        }
         if (!didUnmount) {
-          setDescription(desc);
+          setIssueDetail({
+            description: desc,
+            projectWebUrl: projectWebUrl,
+          });
         }
       } catch (e) {
         if (!didUnmount) {
@@ -137,7 +163,7 @@ export function useDetail(issueID: number): {
     };
   }, [issueID]);
 
-  return { description, error, isLoading };
+  return { issueDetail, error, isLoading };
 }
 
 export function IssueListItem(props: { issue: Issue; refreshData: () => void }): JSX.Element {

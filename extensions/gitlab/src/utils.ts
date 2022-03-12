@@ -7,11 +7,12 @@ import { constants } from "fs";
 import * as crypto from "crypto";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
+import urljoin from "url-join";
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types,no-useless-escape */
 
 export function projectIconUrl(project: Project): string | undefined {
   let result: string | undefined;
@@ -100,7 +101,7 @@ export function replaceAll(str: string, find: RegExp, replace: string): string {
   return str.replace(find, replace);
 }
 
-export function optimizeMarkdownText(text: string): string {
+export function optimizeMarkdownText(text: string, baseUrl?: string): string {
   let result = text;
   // remove html comments
   result = replaceAll(result, /<!--[\s\S]*?-->/g, "");
@@ -110,6 +111,31 @@ export function optimizeMarkdownText(text: string): string {
 
   // <br> to markdown new line
   result = replaceAll(result, /<br>/g, "  \n");
+
+  if (baseUrl) {
+    // replace relative links with absolute ones
+    try {
+      const regexMdLinks = /\[([^\[]+)\](\(.*\))/gm;
+      const matches = result.match(regexMdLinks);
+      if (matches) {
+        const singleMatch = /\[([^\[]+)\]\((.*)\)/;
+        for (let i = 0; i < matches.length; i++) {
+          const text = singleMatch.exec(matches[i]);
+          if (text) {
+            const word = text[1];
+            const link = text[2].trim();
+            if (link.startsWith("/")) {
+              const fullUrl = urljoin(baseUrl, link);
+              const mdUrl = `[${word}](${fullUrl})`;
+              result = result.replace(text[0], mdUrl);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      // ignore errors
+    }
+  }
 
   return result;
 }

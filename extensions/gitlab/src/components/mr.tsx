@@ -8,6 +8,7 @@ import {
   PushAction,
   ImageMask,
   ImageLike,
+  CopyToClipboardAction,
 } from "@raycast/api";
 import { Group, MergeRequest, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
@@ -46,6 +47,9 @@ const GET_MR_DETAIL = gql`
   query GetMRDetail($id: ID!) {
     mergeRequest(id: $id) {
       description
+      project {
+        webUrl
+      }
     }
   }
 `;
@@ -80,14 +84,19 @@ export function MRDetailFetch(props: { project: Project; mrId: number }): JSX.El
   }
 }
 
+interface MRDetailData {
+  description: string;
+  projectWebUrl: string;
+}
+
 export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   const mr = props.mr;
-  const { description, error, isLoading } = useDetail(props.mr.id);
+  const { mrdetail, error, isLoading } = useDetail(props.mr.id);
   if (error) {
     showToast(ToastStyle.Failure, "Could not get merge request details", error);
   }
 
-  const desc = (description ? description : props.mr.description) || "";
+  const desc = (mrdetail?.description ? mrdetail.description : props.mr.description) || "";
 
   const lines: string[] = [];
   if (mr) {
@@ -99,7 +108,7 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
     lines.push(`Status: \`${capitalizeFirstLetter(mr.state)}\``);
     const labels = mr.labels.map((i) => `\`${i.name || i}\``).join(" ");
     lines.push(`Labels: ${labels || "<No Label>"}`);
-    lines.push("## Description\n" + optimizeMarkdownText(desc));
+    lines.push("## Description\n" + optimizeMarkdownText(desc, mrdetail?.projectWebUrl));
   }
 
   const md = lines.join("  \n");
@@ -113,18 +122,19 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
         <ActionPanel>
           <GitLabOpenInBrowserAction url={props.mr.web_url} />
           <MRItemActions mr={props.mr} />
+          <CopyToClipboardAction title="Copy Merge Request Description" content={props.mr.description} />
         </ActionPanel>
       }
     />
   );
 }
 
-export function useDetail(issueID: number): {
-  description?: string;
+function useDetail(issueID: number): {
+  mrdetail?: MRDetailData;
   error?: string;
   isLoading: boolean;
 } {
-  const [description, setDescription] = useState<string>();
+  const [mrdetail, setMRDetail] = useState<MRDetailData>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -147,8 +157,12 @@ export function useDetail(issueID: number): {
           variables: { id: `gid://gitlab/MergeRequest/${issueID}` },
         });
         const desc = data.data.mergeRequest.description || "<no description>";
+        const projectWebUrl = data.data.mergeRequest.project.webUrl;
         if (!didUnmount) {
-          setDescription(desc);
+          setMRDetail({
+            projectWebUrl: projectWebUrl,
+            description: desc,
+          });
         }
       } catch (e) {
         if (!didUnmount) {
@@ -168,7 +182,7 @@ export function useDetail(issueID: number): {
     };
   }, [issueID]);
 
-  return { description, error, isLoading };
+  return { mrdetail, error, isLoading };
 }
 
 interface MRListProps {
