@@ -55,9 +55,14 @@ export default function Command() {
 
   useEffect(() => {
     async function fetchList() {
-      const coins = await service.getCoinList();
-      setLoading(false);
-      setCoins(coins);
+      try {
+        const coins = await service.getCoinList();
+        setLoading(false);
+        setCoins(coins);
+      } catch(e) {
+        setLoading(false);
+        showToast({ style: Toast.Style.Failure, title: 'Failed to fetch the coin list' })
+      }
     }
 
     async function fetchFavorites() {
