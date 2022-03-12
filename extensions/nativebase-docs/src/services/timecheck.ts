@@ -9,7 +9,6 @@ export async function timeCheck() {
     // @ts-expect-error lastTime is already a number
     const timeDiff = Date.now() - lastTime
     const timeDiffInMinutes = timeDiff
-    console.log('timeDiffInMinutes', timeDiffInMinutes)
     if (timeDiffInMinutes > 60) {
       await LocalStorage.setItem('nb-docs:lastTime', Date.now())
       return true
