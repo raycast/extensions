@@ -13,6 +13,7 @@ import { gitlab } from "../common";
 import { Label, MergeRequest } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { getErrorMessage } from "../utils";
+import { ProjectCommitList } from "./commits/list";
 import { LabelList } from "./label";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
@@ -160,7 +161,20 @@ export function MRItemActions(props: { mr: MergeRequest; onDataChange?: () => vo
       <CopyToClipboardAction title="Copy Merge Request Number" content={mr.iid} />
       <CopyToClipboardAction title="Copy Merge Request URL" content={mr.web_url} />
       <CopyToClipboardAction title="Copy Merge Request Title" content={mr.title} />
+      <ShowMRCommitsAction mr={mr} />
       <ShowMRLabelsAction labels={mr.labels} />
     </React.Fragment>
+  );
+}
+
+export function ShowMRCommitsAction(props: { mr: MergeRequest }): JSX.Element {
+  const mr = props.mr;
+  return (
+    <PushAction
+      title="Show Commits"
+      icon={{ source: GitLabIcons.commit, tintColor: Color.PrimaryText }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      target={<ProjectCommitList projectID={mr.project_id} refName={mr.source_branch} />}
+    />
   );
 }

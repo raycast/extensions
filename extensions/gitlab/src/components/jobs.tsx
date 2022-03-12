@@ -36,7 +36,7 @@ const GET_PIPELINE_JOBS = gql`
   }
 `;
 
-function getIcon(status: string): Image {
+export function getCIJobStatusIcon(status: string): Image {
   switch (status.toLowerCase()) {
     case "success": {
       return { source: GitLabIcons.status_success, tintColor: Color.Green };
@@ -84,7 +84,7 @@ function getStatusText(status: string) {
 
 export function JobListItem(props: { job: Job; projectFullPath: string; onRefreshJobs: () => void }): JSX.Element {
   const job = props.job;
-  const icon = getIcon(job.status);
+  const icon = getCIJobStatusIcon(job.status);
   const subtitle = "#" + getIdFromGqlId(job.id);
   const status = getStatusText(job.status.toLowerCase());
   return (

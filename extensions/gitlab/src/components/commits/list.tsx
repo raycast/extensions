@@ -1,14 +1,24 @@
-import { ActionPanel, ActionPanelSection, Color, List, PushAction, showToast, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  ActionPanelSection,
+  Color,
+  ImageLike,
+  List,
+  PushAction,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 import urljoin from "url-join";
 import { useCache } from "../../cache";
 import { gitlab } from "../../common";
-import { Project } from "../../gitlabapi";
+import { Project, User } from "../../gitlabapi";
 import { GitLabIcons } from "../../icons";
 import { GitLabOpenInBrowserAction } from "../actions";
 import { Event } from "../event";
-import { PipelineJobsListByCommit } from "../jobs";
+import { getCIJobStatusIcon, PipelineJobsListByCommit } from "../jobs";
+import { CommitListItem, getCommitStatus } from "./item";
 
-function CommitListItem(props: { event: Event }): JSX.Element {
+function EventCommitListItem(props: { event: Event }): JSX.Element {
   const e = props.event;
   const commit = e.push_data?.commit_to;
   const ref = e.push_data?.ref;
@@ -22,6 +32,19 @@ function CommitListItem(props: { event: Event }): JSX.Element {
     {
       deps: [e.project_id],
       secondsToRefetch: 15 * 60,
+    }
+  );
+  const { data: status } = useCache<CommitStatus | undefined>(
+    `project_commit_status_${e.project_id}_${commit}`,
+    async (): Promise<CommitStatus | undefined> => {
+      if (commit) {
+        return await getCommitStatus(e.project_id, commit);
+      }
+      return undefined;
+    },
+    {
+      deps: [commit, e.project_id],
+      secondsToRefetch: 30,
     }
   );
   const webAction = (): JSX.Element | undefined => {
@@ -48,12 +71,15 @@ function CommitListItem(props: { event: Event }): JSX.Element {
     return null;
   };
 
+  const statusIcon: ImageLike | undefined = status?.status ? getCIJobStatusIcon(status.status) : undefined;
+  const icon: ImageLike | undefined = statusIcon ? statusIcon : { source: GitLabIcons.commit, tintColor: Color.Green };
+
   return (
     <List.Item
       title={title}
       subtitle={ref || commit}
       accessoryTitle={project?.name_with_namespace}
-      icon={{ source: GitLabIcons.commit, tintColor: Color.Green }}
+      icon={icon}
       actions={
         <ActionPanel>
           <ActionPanelSection>
@@ -88,7 +114,68 @@ export function RecentCommitsList(): JSX.Element {
   return (
     <List isLoading={isLoading}>
       {data?.map((e) => (
-        <CommitListItem event={e} key={`${e.target_id}${e.project_id}`} />
+        <EventCommitListItem event={e} key={`${e.target_id}${e.project_id}`} />
+      ))}
+    </List>
+  );
+}
+
+export interface CommitStatus {
+  status: string;
+  author: User;
+  ref?: string;
+}
+
+export interface Commit {
+  id: string;
+  short_id: string;
+  title: string;
+  created_at: string;
+  message: string;
+  committer_name: string;
+  author_name: string;
+  committed_date: string;
+  web_url: string;
+}
+
+async function getProjectCommits(projectID: number, refName?: string): Promise<Commit[] | undefined> {
+  let args: Record<string, string> | undefined;
+  if (refName) {
+    args = {
+      ref_name: refName,
+    };
+  }
+  const commits: Commit[] = await gitlab.fetch(`projects/${projectID}/repository/commits`, args).then((d) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return d.map((data: any) => data as Commit);
+  });
+  return commits;
+}
+
+export function ProjectCommitList(props: { projectID: number; refName?: string }): JSX.Element {
+  const projectID = props.projectID;
+  const refName = props.refName;
+  let cacheKey = `project_commits_${projectID}`;
+  if (refName) {
+    cacheKey += `_${refName}`;
+  }
+  const { data, error, isLoading } = useCache<Commit[] | undefined>(
+    cacheKey,
+    async (): Promise<Commit[] | undefined> => {
+      return await getProjectCommits(projectID, refName);
+    },
+    {
+      deps: [projectID, refName],
+      secondsToRefetch: 60,
+    }
+  );
+  if (error) {
+    showToast(ToastStyle.Failure, "Could not fetch commits from project", error);
+  }
+  return (
+    <List isLoading={isLoading}>
+      {data?.map((e) => (
+        <CommitListItem key={e.id} commit={e} projectID={projectID} />
       ))}
     </List>
   );
