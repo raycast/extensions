@@ -6,9 +6,7 @@ import { useState, useEffect } from "react";
 import { getErrorMessage } from "../utils";
 import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
 import { ShowReviewMRAction } from "./review_actions";
-import { useCache } from "../cache";
-import { CommitStatus } from "./commits/list";
-import { getCommitStatus } from "./commits/item";
+import { useCommitStatus } from "./commits/utils";
 import { getCIJobStatusIcon } from "./jobs";
 
 export function ReviewList(): JSX.Element {
@@ -39,19 +37,7 @@ export function ReviewList(): JSX.Element {
 
 function ReviewListItem(props: { mr: MergeRequest }) {
   const mr = props.mr;
-  const { data: status } = useCache<CommitStatus | undefined>(
-    `project_commit_status_${mr.project_id}_${mr.sha}`,
-    async (): Promise<CommitStatus | undefined> => {
-      if (mr.sha) {
-        return await getCommitStatus(mr.project_id, mr.sha);
-      }
-      return undefined;
-    },
-    {
-      deps: [mr.sha, mr.project_id],
-      secondsToRefetch: 30,
-    }
-  );
+  const { commitStatus: status } = useCommitStatus(mr.project_id, mr.sha);
   const statusIcon: ImageLike | undefined = status?.status ? getCIJobStatusIcon(status.status) : undefined;
   return (
     <List.Item

@@ -16,7 +16,8 @@ import { GitLabIcons } from "../../icons";
 import { GitLabOpenInBrowserAction } from "../actions";
 import { Event } from "../event";
 import { getCIJobStatusIcon, PipelineJobsListByCommit } from "../jobs";
-import { CommitListItem, getCommitStatus } from "./item";
+import { CommitListItem } from "./item";
+import { useCommitStatus } from "./utils";
 
 function EventCommitListItem(props: { event: Event }): JSX.Element {
   const e = props.event;
@@ -34,19 +35,7 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
       secondsToRefetch: 15 * 60,
     }
   );
-  const { data: status } = useCache<CommitStatus | undefined>(
-    `project_commit_status_${e.project_id}_${commit}`,
-    async (): Promise<CommitStatus | undefined> => {
-      if (commit) {
-        return await getCommitStatus(e.project_id, commit);
-      }
-      return undefined;
-    },
-    {
-      deps: [commit, e.project_id],
-      secondsToRefetch: 30,
-    }
-  );
+  const { commitStatus: status } = useCommitStatus(e.project_id, commit);
   const webAction = (): JSX.Element | undefined => {
     if (project) {
       const proUrl = project.web_url;

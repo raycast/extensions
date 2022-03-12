@@ -26,10 +26,8 @@ import {
 import { gql } from "@apollo/client";
 import { MRItemActions } from "./mr_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
-import { useCache } from "../cache";
-import { CommitStatus } from "./commits/list";
-import { getCommitStatus } from "./commits/item";
 import { getCIJobStatusIcon } from "./jobs";
+import { useCommitStatus } from "./commits/utils";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -273,19 +271,7 @@ export function MRListItem(props: {
   const icon = getIcon();
   let accessoryIcon: ImageLike | undefined = { source: mr.author?.avatar_url || "", mask: ImageMask.Circle };
   if (props.showCIStatus) {
-    const { data: status } = useCache<CommitStatus | undefined>(
-      `project_commit_status_${mr.project_id}_${mr.sha}`,
-      async (): Promise<CommitStatus | undefined> => {
-        if (mr.sha) {
-          return await getCommitStatus(mr.project_id, mr.sha);
-        }
-        return undefined;
-      },
-      {
-        deps: [mr.sha, mr.project_id],
-        secondsToRefetch: 30,
-      }
-    );
+    const { commitStatus: status } = useCommitStatus(mr.project_id, mr.sha);
     if (status) {
       accessoryIcon = getCIJobStatusIcon(status.status);
     }
