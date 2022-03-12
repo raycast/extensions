@@ -26,6 +26,10 @@ import {
 import { gql } from "@apollo/client";
 import { MRItemActions } from "./mr_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
+import { useCache } from "../cache";
+import { CommitStatus } from "./commits/list";
+import { getCommitStatus } from "./commits/item";
+import { getCIJobStatusIcon } from "./jobs";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -233,7 +237,13 @@ export function MRList({
     >
       <List.Section title={title} subtitle={mrs?.length.toString() || "0"}>
         {mrs?.map((mr) => (
-          <MRListItem key={mr.id} mr={mr} refreshData={refresh} action={selectProjectAction} />
+          <MRListItem
+            key={mr.id}
+            mr={mr}
+            refreshData={refresh}
+            action={selectProjectAction}
+            showCIStatus={scope === MRScope.assigned_to_me}
+          />
         ))}
       </List.Section>
       <List.Section>
@@ -243,7 +253,12 @@ export function MRList({
   );
 }
 
-export function MRListItem(props: { mr: MergeRequest; refreshData: () => void; action?: JSX.Element }): JSX.Element {
+export function MRListItem(props: {
+  mr: MergeRequest;
+  refreshData: () => void;
+  action?: JSX.Element;
+  showCIStatus?: boolean;
+}): JSX.Element {
   const mr = props.mr;
 
   const getIcon = (): ImageLike => {
@@ -256,13 +271,32 @@ export function MRListItem(props: { mr: MergeRequest; refreshData: () => void; a
     }
   };
   const icon = getIcon();
+  let accessoryIcon: ImageLike | undefined = { source: mr.author?.avatar_url || "", mask: ImageMask.Circle };
+  if (props.showCIStatus) {
+    const { data: status } = useCache<CommitStatus | undefined>(
+      `project_commit_status_${mr.project_id}_${mr.sha}`,
+      async (): Promise<CommitStatus | undefined> => {
+        if (mr.sha) {
+          return await getCommitStatus(mr.project_id, mr.sha);
+        }
+        return undefined;
+      },
+      {
+        deps: [mr.sha, mr.project_id],
+        secondsToRefetch: 30,
+      }
+    );
+    if (status) {
+      accessoryIcon = getCIJobStatusIcon(status.status);
+    }
+  }
   return (
     <List.Item
       id={mr.id.toString()}
       title={mr.title}
       subtitle={"#" + mr.iid}
       icon={icon}
-      accessoryIcon={{ source: mr.author?.avatar_url || "", mask: ImageMask.Circle }}
+      accessoryIcon={accessoryIcon}
       accessoryTitle={toDateString(mr.updated_at)}
       actions={
         <ActionPanel>
