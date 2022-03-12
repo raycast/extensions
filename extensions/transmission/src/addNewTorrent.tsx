@@ -1,12 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  SubmitFormAction,
-  showToast,
-  ToastStyle,
-  popToRoot,
-  getPreferenceValues,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, popToRoot, getPreferenceValues } from "@raycast/api";
 import { useState, useCallback, useMemo } from "react";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -25,10 +17,10 @@ export default function AddNewTorrent() {
         "download-dir": expandTidle(values.downloadDir),
       });
 
-      showToast(ToastStyle.Success, `Torrent added to your list`);
+      showToast(Toast.Style.Success, `Torrent added to your list`);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      showToast(ToastStyle.Failure, `The torrent couldn't be added: ${error.code}`);
+      showToast(Toast.Style.Failure, `The torrent couldn't be added: ${error.code}`);
     } finally {
       popToRoot({ clearSearchBar: true });
     }
@@ -38,7 +30,7 @@ export default function AddNewTorrent() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Add Torrent" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Add Torrent" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

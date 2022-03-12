@@ -1,7 +1,16 @@
-import { Form, ActionPanel, CopyToClipboardAction, showToast, ToastStyle, Icon } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  CopyToClipboardAction,
+  showToast,
+  ToastStyle,
+  Icon,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import { parse as parseCsv } from "papaparse";
 import fetch from "node-fetch";
+import { useStateFromLocalStorage } from "./hooks";
 
 type CsvRow = {
   Country: string;
@@ -29,6 +38,10 @@ const EURO = {
   ISOCode: "EUR",
   rate: 1,
 };
+
+const preferences = getPreferenceValues();
+
+const decimals = Number(preferences.decimals);
 
 export default function Command() {
   const [loading, setLoading] = useState(true);
@@ -62,10 +75,10 @@ export default function Command() {
       });
   }, [date]);
 
-  const [fromCurrency, setFromCurrency] = useState<string>("Euro");
-  const [toCurrency, setToCurrency] = useState<string>("U.S. Dollar");
-  const [fromAmount, setFromAmount] = useState("1.00");
-  const [toAmount, setToAmount] = useState("1.00");
+  const [fromCurrency, setFromCurrency] = useStateFromLocalStorage<string>("fromCurrency", "Euro");
+  const [toCurrency, setToCurrency] = useStateFromLocalStorage<string>("toCurrency", "U.S. Dollar");
+  const [fromAmount, setFromAmount] = useState("1");
+  const [toAmount, setToAmount] = useState((1).toFixed(decimals));
 
   useEffect(() => {
     const fromRate = rates.find((rate) => rate.currency === fromCurrency);
@@ -74,10 +87,10 @@ export default function Command() {
 
     if (!Number.isNaN(fromAmountNumber) && fromRate && toRate) {
       if (fromRate.ISOCode === "EUR") {
-        setToAmount((fromAmountNumber * toRate.rate).toFixed(2));
+        setToAmount((fromAmountNumber * toRate.rate).toFixed(decimals));
       }
       if (toRate.ISOCode === "EUR") {
-        setToAmount((fromAmountNumber / fromRate.rate).toFixed(2));
+        setToAmount((fromAmountNumber / fromRate.rate).toFixed(decimals));
       }
     } else {
       setToAmount("");

@@ -31,7 +31,6 @@ interface Installable {
   versions: Versions;
   outdated: boolean;
   caveats?: string;
-  conflicts_with?: string[];
 }
 
 export interface Cask extends Installable {
@@ -41,6 +40,7 @@ export interface Cask extends Installable {
   installed?: string; // version
   auto_updates: boolean;
   depends_on: CaskDependency;
+  conflicts_with?: { cask: string[] };
 }
 
 export interface CaskDependency {
@@ -56,6 +56,7 @@ export interface Formula extends Installable, Nameable {
   keg_only: boolean;
   linked_key: string;
   pinned: boolean;
+  conflicts_with?: string[];
 }
 
 interface Outdated extends Nameable {

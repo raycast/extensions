@@ -147,14 +147,17 @@
       "placeholder": "Enter your GitLab API token."
     },
     {
-      "name" : "cirefreshinterval",
-      "type" :"textfield",
+      "name": "cirefreshinterval",
+      "type": "textfield",
       "required": false,
       "default": "10",
       "title": "CI Auto Refresh Interval (sec)",
       "description": "Refresh interval in seconds for CI Pipeline/Job lists. Values between 1-9 are not recommended. 0 mean no auto refresh at all",
       "placeholder": "10"
     }
+  ],
+  "contributors": [
+    "Loskir"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",

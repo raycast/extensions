@@ -1,4 +1,4 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import _ from "lodash";
 import { useState } from "react";
 import { FallbackSearchSection, HistoryListSection, PermissionError } from "./components";
@@ -13,7 +13,11 @@ const Command = () => {
     if (isPermissionError(error)) {
       return <PermissionError />;
     } else {
-      showToast(ToastStyle.Failure, "Cannot search history", error instanceof Error ? error.message : undefined);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Cannot search history",
+        message: error instanceof Error ? error.message : undefined,
+      });
     }
   }
 
