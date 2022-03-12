@@ -1,12 +1,11 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
   Detail,
   Form,
   showToast,
-  SubmitFormAction,
-  ToastStyle,
   useNavigation,
+  Action,
+  Toast,
 } from '@raycast/api';
 import { formatUnits, parseUnits } from '@ethersproject/units';
 
@@ -23,27 +22,27 @@ export default function Command() {
     const { input, inputDecimals, outputDecimals } = values;
 
     if (!isInt(input)) {
-      showToast(
-        ToastStyle.Failure,
-        'Invalid input',
-        '"Input" should be a number'
-      );
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Invalid input',
+        message: '"Input" should be a number',
+      });
       return;
     }
     if (!isDecimal(inputDecimals)) {
-      showToast(
-        ToastStyle.Failure,
-        'Invalid input',
-        '"Input decimals" should be a decimal'
-      );
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Invalid input',
+        message: '"Input decimals" should be a decimal',
+      });
       return;
     }
     if (!isDecimal(outputDecimals)) {
-      showToast(
-        ToastStyle.Failure,
-        'Invalid input',
-        '"Output decimals" should be a decimals'
-      );
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Invalid input',
+        message: '"Output decimals" should be a decimals',
+      });
       return;
     }
 
@@ -60,14 +59,14 @@ export default function Command() {
           output={output}
           inputDecimals={inputDecimalsNumber}
           outputDecimals={outputDecimalsNumber}
-        />
+        />,
       );
     } catch {
-      showToast(
-        ToastStyle.Failure,
-        'Failed to convert',
-        'Please make sure that decimals are in the correct order'
-      );
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Failed to convert',
+        message: 'Please make sure that decimals are in the correct order',
+      });
     }
   }
 
@@ -87,7 +86,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={handleSubmit} />
+          <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -118,7 +117,7 @@ function ConvertionView(props: ConvertionProps) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <CopyToClipboardAction title="Copy Result" content={output} />
+          <Action.CopyToClipboard title="Copy Result" content={output} />
         </ActionPanel>
       }
     />

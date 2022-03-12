@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Detail, Icon, List } from '@raycast/api';
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Detail,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from '@raycast/api';
 import { useEffect, useState } from 'react';
 
 import Service, { Account, DnsRecord, Zone } from './service';
@@ -49,7 +60,7 @@ function Command() {
           const account = accounts.find((account) => account.id === accountId);
           const name = account?.name || '';
           return (
-            <List.Section title={name}>
+            <List.Section title={name} key={accountId}>
               {accountSites.map((site) => (
                 <List.Item
                   actions={
@@ -63,6 +74,14 @@ function Command() {
                         icon={Icon.List}
                         title="Show DNS Records"
                         target={<DnsRecordView siteId={site.id} />}
+                      />
+                      <Action.Push
+                        icon={Icon.Hammer}
+                        title="Purge Files from Cache by URL"
+                        target={
+                          <CachePurgeView accountId={accountId} id={site.id} />
+                        }
+                        shortcut={{ modifiers: ['cmd'], key: 'p' }}
                       />
                       <Action.OpenInBrowser
                         title="Open on Cloudflare"
@@ -187,6 +206,62 @@ function DnsRecordView(props: DnsRecordProps) {
       ))}
     </List>
   );
+}
+
+function CachePurgeView(props: SiteProps) {
+  const { id } = props;
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Purge Files"
+            onSubmit={(values) => clearUrlsFromCache(id, values.urls)}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextArea
+        id="urls"
+        title="List of URL(s)"
+        placeholder="Separate URL(s) one per line"
+      />
+    </Form>
+  );
+}
+
+async function clearUrlsFromCache(zoneId: string, urls: string) {
+  if (
+    !(await confirmAlert({
+      title: 'Do you really want to purge the files from cache?',
+      primaryAction: { title: 'Purge', style: Alert.ActionStyle.Destructive },
+    }))
+  ) {
+    return;
+  }
+
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: 'Purging URL(s)',
+  });
+
+  // Split URLs by newline
+  const urlList = urls.split('\n');
+
+  const result = await service.purgeFilesbyURL(zoneId, urlList);
+
+  if (result.success) {
+    toast.style = Toast.Style.Success;
+    toast.title = 'URL(s) purged';
+    return;
+  }
+
+  toast.style = Toast.Style.Failure;
+  toast.title = 'Failed to purge URL(s)';
+  if (result.errors.length > 0) {
+    toast.message = result.errors[0].message;
+  }
 }
 
 export default Command;

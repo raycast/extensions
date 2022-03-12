@@ -1,12 +1,11 @@
 import { JsonFragment } from '@ethersproject/abi';
 import {
   ActionPanel,
-  copyTextToClipboard,
   Form,
-  FormSeparator,
   showToast,
-  SubmitFormAction,
-  ToastStyle,
+  Action,
+  Clipboard,
+  Toast,
 } from '@raycast/api';
 import Coder from 'abi-coder';
 import { useMemo, useState } from 'react';
@@ -54,24 +53,33 @@ export default function Command() {
   function handleSubmit(formValues: Values) {
     const abiString = formValues.abi;
     if (!isAbi(abiString)) {
-      showToast(ToastStyle.Failure, 'Invalid ABI');
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Invalid ABI',
+      });
       return;
     }
     const abi = JSON.parse(abiString);
     const coder = new Coder(abi);
     const data = encode(coder, selectedItem, formValues);
     if (!data) {
-      showToast(ToastStyle.Failure, 'Convertion failed');
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Convertion failed',
+      });
       return;
     }
-    copyTextToClipboard(data);
-    showToast(ToastStyle.Success, 'Copied to clipboard');
+    Clipboard.copy(data);
+    showToast({
+      style: Toast.Style.Success,
+      title: 'Copied to clipboard',
+    });
   }
 
   function encode(
     coder: Coder,
     selectedItem: JsonFragment | null,
-    formValues: Values
+    formValues: Values,
   ): string | null {
     if (!selectedItem) {
       return null;
@@ -112,7 +120,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={handleSubmit} />
+          <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -130,7 +138,7 @@ export default function Command() {
           onChange={setSelectedItemIndex}
         >
           {items.map((item, index) => (
-            <Form.DropdownItem
+            <Form.Dropdown.Item
               title={getItemTitle(item)}
               value={index.toString()}
             />
@@ -139,7 +147,7 @@ export default function Command() {
       )}
       {selectedItem && (
         <>
-          <FormSeparator />
+          <Form.Separator />
           {getItemForm(selectedItem)}
         </>
       )}

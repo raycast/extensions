@@ -1,113 +1,132 @@
-export type PokeAPI = {
+export interface PokeAPI {
   data: Data;
   errors?: Error[];
-};
+}
 
-export type Data = {
+export interface Data {
   pokemon_v2_pokemon: PokemonV2Pokemon[];
-};
+}
 
-type Error = {
+export interface Error {
   extensions: Extensions;
   message: string;
-};
+}
 
-type Extensions = {
+export interface Extensions {
   path: string;
   code: string;
-};
+}
 
-export type PokemonV2Pokemon = {
+export interface PokemonV2Pokemon {
+  base_experience: number;
   id: number;
   name: string;
   height: number;
   weight: number;
-  pokemon_v2_pokemonabilities_aggregate: PokemonV2PokemonabilitiesAggregate;
-  pokemon_v2_pokemonstats_aggregate: PokemonV2PokemonstatsAggregate;
-  pokemon_v2_pokemontypes_aggregate: PokemonV2PokemontypesAggregate;
+  pokemon_v2_pokemonabilities: PokemonV2Pokemonability[];
+  pokemon_v2_pokemonstats: PokemonV2Pokemonstat[];
+  pokemon_v2_pokemontypes: PokemonV2Pokemontype[];
   pokemon_v2_pokemonspecy: PokemonV2Pokemonspecy;
-};
+}
 
-type PokemonV2PokemonabilitiesAggregate = {
-  nodes: PokemonV2PokemonabilitiesAggregateNode[];
-};
-
-type PokemonV2PokemonabilitiesAggregateNode = {
+export interface PokemonV2Pokemonability {
   is_hidden: boolean;
   pokemon_v2_ability: PokemonV2Ability;
-};
+}
 
-type PokemonV2Ability = {
+export interface PokemonV2Ability {
   pokemon_v2_abilitynames: PokemonV2Name[];
-};
+}
 
-type PokemonV2Name = {
-  genus: string;
+export interface PokemonV2Name {
   name: string;
-};
+}
 
-export type PokemonV2Pokemonspecy = {
-  is_mythical: boolean;
-  is_legendary: boolean;
+export interface PokemonV2Pokemonspecy {
+  base_happiness: number;
+  capture_rate: number;
+  gender_rate: number;
+  growth_rate_id: number;
+  hatch_counter: number;
   is_baby: boolean;
+  is_legendary: boolean;
+  is_mythical: boolean;
   name: string;
   pokemon_v2_evolutionchain: PokemonV2Evolutionchain;
-  pokemon_v2_pokemonspeciesnames: PokemonV2Name[];
+  pokemon_v2_pokemonegggroups: PokemonV2Pokemonegggroup[];
+  pokemon_v2_pokemons: PokemonV2PokemonspecyPokemonV2Pokemon[];
   pokemon_v2_pokemonspeciesflavortexts: PokemonV2Pokemonspeciesflavortext[];
-};
+  pokemon_v2_pokemonspeciesnames: PokemonV2Pokemonspeciesname[];
+}
 
-type PokemonV2Evolutionchain = {
+export interface PokemonV2Evolutionchain {
   pokemon_v2_pokemonspecies: PokemonV2PokemonspecyElement[];
-};
+}
 
-type PokemonV2PokemonspecyElement = {
+export interface PokemonV2PokemonspecyElement {
   id: number;
   name: string;
-  pokemon_v2_pokemonspeciesnames: PokemonV2Name[];
-};
+  evolves_from_species_id?: number;
+  pokemon_v2_pokemonspeciesnames: PokemonV2Pokemonspeciesname[];
+}
 
-type PokemonV2Pokemonspeciesflavortext = {
+export interface PokemonV2Pokemonspeciesname extends PokemonV2Name {
+  genus: string;
+  language_id: number;
+}
+
+export interface PokemonV2Pokemonegggroup {
+  pokemon_v2_egggroup: PokemonV2Egggroup;
+}
+
+export interface PokemonV2Egggroup {
+  pokemon_v2_egggroupnames: PokemonV2Name[];
+  name: string;
+}
+
+export interface PokemonV2PokemonspecyPokemonV2Pokemon {
+  name: string;
+  pokemon_v2_pokemonforms: PokemonV2Pokemonform[];
+  pokemon_v2_pokemontypes: PokemonV2Pokemontype[];
+}
+
+export interface PokemonV2Pokemonform {
+  form_name: string;
+  pokemon_id: number;
+  pokemon_v2_pokemonformnames: PokemonV2Pokemonformname[];
+}
+
+export interface PokemonV2Pokemonformname {
+  name: string;
+  pokemon_name: string;
+}
+
+export interface PokemonV2Pokemonspeciesflavortext {
   flavor_text: string;
   pokemon_v2_version: PokemonV2Version;
-};
+}
 
-type PokemonV2Version = {
+export interface PokemonV2Version {
   id: number;
   name: string;
   pokemon_v2_versionnames: PokemonV2Name[];
-};
+}
 
-type PokemonV2PokemonstatsAggregate = {
-  nodes: PokemonV2PokemonstatsAggregateNode[];
-  aggregate: Aggregate;
-};
-
-type Aggregate = {
-  sum: Sum;
-};
-
-type Sum = {
+export interface PokemonV2Pokemonstat {
   base_stat: number;
-};
-
-type PokemonV2PokemonstatsAggregateNode = {
-  base_stat: number;
+  effort: number;
   pokemon_v2_stat: PokemonV2Stat;
-};
+}
 
-type PokemonV2Stat = {
+export interface PokemonV2Stat {
   name: string;
   pokemon_v2_statnames: PokemonV2Name[];
-};
+}
 
-type PokemonV2PokemontypesAggregate = {
-  nodes: PokemonV2PokemontypesAggregateNode[];
-};
-
-type PokemonV2PokemontypesAggregateNode = {
+export interface PokemonV2Pokemontype {
   pokemon_v2_type: PokemonV2Type;
-};
+}
 
-type PokemonV2Type = {
+export interface PokemonV2Type {
   pokemon_v2_typenames: PokemonV2Name[];
-};
+}

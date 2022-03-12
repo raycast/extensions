@@ -1,12 +1,11 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
   Detail,
   Form,
   showToast,
-  SubmitFormAction,
-  ToastStyle,
   useNavigation,
+  Action,
+  Toast,
 } from '@raycast/api';
 import Service from './service';
 import { isSignature, normalizeHex } from './utils';
@@ -25,12 +24,18 @@ export default function Command() {
     const signatureHash = normalizeHex(hash);
     const isValid = isSignature(signatureHash);
     if (!isValid) {
-      showToast(ToastStyle.Failure, 'Invalid signature hash');
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Invalid signature hash',
+      });
       return;
     }
     const signature = await service.getFunctionSignature(signatureHash);
     if (!signature) {
-      showToast(ToastStyle.Failure, 'Signature not found');
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Signature not found',
+      });
       return;
     }
     push(<FunctionView signature={signature} />);
@@ -40,7 +45,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={handleSubmit} />
+          <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -67,7 +72,7 @@ function FunctionView(props: FunctionProps) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <CopyToClipboardAction content={signature} />
+          <Action.CopyToClipboard content={signature} />
         </ActionPanel>
       }
     />

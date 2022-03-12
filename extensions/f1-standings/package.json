@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "f1-standings",
-  "title": "F1 Standings",
+  "title": "Formula 1",
   "description": "List the current standings in Formula 1",
   "icon": "command-icon.png",
   "author": "csigritz",
@@ -20,6 +20,14 @@
       "title": "Constructor Standings",
       "subtitle": "F1",
       "description": "Current F1 Constructor's Championship Standings",
+      "mode": "view",
+      "keywords": ["formula"]
+    },
+    {
+      "name": "schedule",
+      "title": "Race Schedule",
+      "subtitle": "F1",
+      "description": "Current F1 Race Schedule",
       "mode": "view",
       "keywords": ["formula"]
     }

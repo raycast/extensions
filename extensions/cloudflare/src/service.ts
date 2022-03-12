@@ -60,6 +60,20 @@ interface DnsRecord {
   content: string;
 }
 
+interface CloudflareError {
+  code: number;
+  message: string;
+}
+
+interface CachePurgeResult {
+  success: boolean;
+  errors: CloudflareError[];
+  messages: string[];
+  result: {
+    id: string;
+  };
+}
+
 type SourceType = 'github' | 'gitlab';
 
 interface SourceItem {
@@ -174,13 +188,10 @@ class Service {
   }
 
   async listZones(account: Account): Promise<Zone[]> {
-    const { id, name } = account;
+    const { id } = account;
     const response = await this.client.get<Response<ZoneItem[]>>('zones', {
       params: {
-        account: {
-          id,
-          name,
-        },
+        'account.id': id,
       },
     });
     return response.data.result.map((item) => formatZone(item));
@@ -199,6 +210,20 @@ class Service {
       const { name, type, content } = item;
       return { name, type, content };
     });
+  }
+
+  async purgeFilesbyURL(
+    zoneId: string,
+    urls: string[],
+  ): Promise<CachePurgeResult> {
+    const response = await this.client.post<CachePurgeResult>(
+      `zones/${zoneId}/purge_cache`,
+      {
+        files: urls,
+      },
+    );
+    const { success, errors, messages, result } = response.data;
+    return { success, errors, messages, result };
   }
 
   async listPages(accountId: string): Promise<Page[]> {

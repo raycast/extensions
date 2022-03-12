@@ -36,6 +36,20 @@ export default function ActionTransform(j: JSCodeshift, root: Collection<any>) {
       });
 
     root
+      .find(j.JSXClosingElement, {
+        name: { name: name[0] },
+      })
+      .replaceWith((p) => {
+        needToAddImport = true;
+        return j.jsxClosingElement(
+          j.jsxMemberExpression(
+            j.jsxIdentifier("Action"),
+            j.jsxIdentifier(name[1])
+          )
+        );
+      });
+
+    root
       .find(j.TSTypeReference, {
         typeName: {
           name: name[0] + "Props",
@@ -79,6 +93,22 @@ export default function ActionTransform(j: JSCodeshift, root: Collection<any>) {
         p.node.attributes,
         p.node.selfClosing
       );
+    });
+  root
+    .find(j.JSXClosingElement, {
+      name: { name: "ActionPanelItem" },
+    })
+    .replaceWith((p) => {
+      needToAddImport = true;
+      return j.jsxClosingElement(j.jsxIdentifier("Action"));
+    });
+  root
+    .find(j.JSXClosingElement, {
+      name: { object: { name: "ActionPanel" }, property: { name: "Item" } },
+    })
+    .replaceWith((p) => {
+      needToAddImport = true;
+      return j.jsxClosingElement(j.jsxIdentifier("Action"));
     });
 
   root
