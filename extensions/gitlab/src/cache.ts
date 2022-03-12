@@ -2,7 +2,7 @@ import { environment } from "@raycast/api";
 import path from "path/posix";
 import * as fs from "fs/promises";
 import { constants } from "fs";
-import { currentSeconds, fileExists, getErrorMessage } from "./utils";
+import { currentSeconds, daysInSeconds, fileExists, getErrorMessage } from "./utils";
 import { useEffect, useState } from "react";
 
 export function getLargeCacheDirectory(): string {
@@ -119,7 +119,7 @@ export function useCache<T>(
   isLoading: boolean;
 } {
   const secondsToRefetch = options.secondsToRefetch === undefined ? 5 * 60 : options.secondsToRefetch;
-  const secondsToInvalid = options.secondsToInvalid === undefined ? 24 * 60 * 60 : options.secondsToInvalid;
+  const secondsToInvalid = options.secondsToInvalid === undefined ? daysInSeconds(3) : options.secondsToInvalid;
   const [data, setData] = useState<T>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
