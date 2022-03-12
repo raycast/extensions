@@ -59,9 +59,12 @@ export default function Command() {
         const coins = await service.getCoinList();
         setLoading(false);
         setCoins(coins);
-      } catch(e) {
+      } catch (e) {
         setLoading(false);
-        showToast({ style: Toast.Style.Failure, title: 'Failed to fetch the coin list' })
+        showToast({
+          style: Toast.Style.Failure,
+          title: 'Failed to fetch the coin list',
+        });
       }
     }
 
