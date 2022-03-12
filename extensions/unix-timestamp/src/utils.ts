@@ -178,12 +178,6 @@ export function validateDateInput(
     };
   }
 
-  if (year > 2038) {
-    return {
-      field: 'year',
-      error: 'out-of-bounds',
-    };
-  }
   if (month > 12) {
     return {
       field: 'month',
