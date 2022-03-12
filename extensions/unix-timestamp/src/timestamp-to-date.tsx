@@ -56,7 +56,7 @@ function ConvertAction() {
       });
       return;
     }
-    if (value > 2147483647) {
+    if (value > 8640000000000) {
       showToast({
         style: Toast.Style.Failure,
         title: 'The value is too high',
