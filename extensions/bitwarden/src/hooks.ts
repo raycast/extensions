@@ -64,7 +64,7 @@ type State = typeof initialState;
 type Action =
   | { type: "generate" }
   | { type: "setPassword"; password: string }
-  | { type: "failure" }
+  | { type: "fail" }
   | { type: "clear"; password: string };
 
 const passwordReducer = (state: State, action: Action): State => {
@@ -73,31 +73,35 @@ const passwordReducer = (state: State, action: Action): State => {
       return { ...state, isGenerating: true };
     case "setPassword":
       return { password: action.password, isGenerating: false };
-    case "failure":
+    case "fail":
       return { ...state, isGenerating: false };
     case "clear":
       return { isGenerating: false, password: undefined };
   }
 };
 
-export function usePasswordGenerator(bitwardenApi: Bitwarden) {
-  const { getUpdatedOptions } = usePasswordOptions();
+export function usePasswordGenerator(
+  bitwardenApi: Bitwarden,
+  options: PasswordGeneratorOptions | undefined,
+  hookOptions?: { regenerateOnOptionChange: boolean }
+) {
+  const { regenerateOnOptionChange = true } = hookOptions ?? {};
   const [state, dispatch] = useReducer(passwordReducer, initialState);
 
   const generatePassword = async () => {
     try {
       dispatch({ type: "generate" });
-      const options = await getUpdatedOptions();
       const password = await bitwardenApi.generatePassword(options);
       dispatch({ type: "setPassword", password });
     } catch (error) {
-      dispatch({ type: "failure" });
+      dispatch({ type: "fail" });
     }
   };
 
   useEffect(() => {
+    if (!regenerateOnOptionChange || !options) return;
     generatePassword();
-  }, []);
+  }, [options]);
 
   return { ...state, regeneratePassword: generatePassword };
 }
@@ -115,21 +119,17 @@ export const usePasswordOptions = () => {
     await LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS, JSON.stringify(newOptions));
   };
 
-  const getUpdatedOptions = async () => {
+  const restoreStoredOptions = async () => {
     const storedOptions = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS);
     const newOptions = { ...DEFAULT_PASSWORD_OPTIONS, ...(storedOptions ? JSON.parse(storedOptions) : {}) };
-    return newOptions;
-  };
-
-  const restoreStoredOptions = async () => {
-    setOptions(await getUpdatedOptions());
+    setOptions(newOptions);
   };
 
   useEffect(() => {
     restoreStoredOptions();
   }, []);
 
-  return { options, setOption, getUpdatedOptions };
+  return { options, setOption };
 };
 
 export const useOneTimePasswordHistoryWarning = async () => {
