@@ -1,6 +1,6 @@
 import dedent from "dedent-js";
 import prettyBytes from "pretty-bytes";
-import type { Torrent } from "../listTorrents";
+import type { Torrent } from "../types";
 import { formatDate } from "./date";
 import { renderPieces } from "./renderCells";
 
