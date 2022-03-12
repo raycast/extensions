@@ -1,7 +1,7 @@
 import { ActionPanel, environment, Form, popToRoot, showInFinder, showToast, Action, Toast } from "@raycast/api";
 import { writeFileSync } from "fs";
 import { resolve } from "path/posix";
-import { ArgumentType } from "./types";
+import { ArgumentType, argumentTypes, scriptModes } from "./types";
 
 const languageToProperties: Record<
   string,
@@ -28,6 +28,7 @@ const languageToProperties: Record<
 interface FormValues {
   template: string;
   title: string;
+  mode: string;
   packageName?: string;
   percentEncoded: boolean;
   type: ArgumentType;
@@ -46,7 +47,8 @@ export default function PipeCommandForm(): JSX.Element {
 
     const metadataLines = [
       `${languageProperties.comments} @raycast.title ${values.title}`,
-      `${languageProperties.comments} @raycast.input {"type": "${
+      `${languageProperties.comments} @raycast.mode ${values.mode}`,
+      `${languageProperties.comments} @raycast.argument1 {"type": "${
         values.type
       }", "percentEncoded": ${!!values.percentEncoded}}`,
     ];
@@ -75,10 +77,15 @@ export default function PipeCommandForm(): JSX.Element {
           <Form.Dropdown.Item key={language} title={language} value={language} />
         ))}
       </Form.Dropdown>
+      <Form.Dropdown title="Mode" id="mode">
+        {scriptModes.map((mode) => (
+          <Form.Dropdown.Item key={mode} title={mode} value={mode} />
+        ))}
+      </Form.Dropdown>
       <Form.TextField title="Title" placeholder="Command Title" id="title" />
       <Form.TextField title="Package Name" placeholder="E. g., Developer Utils" id="packageName" />
       <Form.Dropdown title="Accept" id="type">
-        {["text", "file"].map((type) => (
+        {argumentTypes.map((type) => (
           <Form.Dropdown.Item key={type} title={type} value={type} />
         ))}
       </Form.Dropdown>

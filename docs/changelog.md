@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.30.2 – 2022-03-11
+
+### 🐞 Fixes
+
+- Fixed updating the list `isShowingDetail` property
+- Fixed unnecessarily reloading the list detail view on search term changes
+
+## 1.30.0 - 2022-03-09
+
+### ✨ New
+
+- We’ve added the highly requested **search bar dropdown** 🎉 ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #72](https://github.com/raycast/extensions/issues/72)): you can now add a dropdown component as an accessory to the search bar; the dropdown shows up in the top-right corner and can be used for filtering lists and toggling list states. (So it’s a good time to remove any workarounds with actions or navigation for showing a different set of items in the list.)
+- The **search bar text** 🔎 can now be programmatically updated ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #281](https://github.com/raycast/extensions/issues/281)) while you can still opt into built-in filtering at the same time
+- **List-detail views**: list views now support a `detail` property that allows you to display a detail view on the right-hand side of list items ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #83](https://github.com/raycast/extensions/issues/83)) 👯‍♂️; you can use the feature to display additional content side-by-side as users scroll through the list
+- Support for rendering **SVG files** 🖼️ where images are accepted ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #77](https://github.com/raycast/extensions/issues/77)), including in the `Detail` view’s markdown
+- New method `Clipboard.readText()` to read the last copied text from the system’s clipboard 📋
+- Added a new prop `type` to `Form.DatePicker` 📅 to control the date components asked from the user
+
+### 💎 Improvements
+
+- **Toast action handlers** 🍞 can now still be called if the toast outlives a dismissed extension
+- Support for multiple actions of type `Action.SubmitForm` in a form’s Action Panel
+
+### 🐞 Fixes
+
+- Fixed some flickering that could happen when using `React.memo`
+- Fixed a few edge cases around Action Panels
+- Fixed duplicated shortcut shown in the Action Panel’s tooltip when setting the default shortcut explicitly on the primary action
+- Fixed updating a `Form.Description` component
+
 ## 1.29.0 - 2022-02-23
 
 ### ✨ New

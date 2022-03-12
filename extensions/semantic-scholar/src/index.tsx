@@ -2,12 +2,15 @@ import {
   ActionPanel,
   Action,
   List,
-  Icon,
   showToast,
   Toast,
   Detail,
+  Icon,
+  showHUD,
+  popToRoot,
+  Clipboard,
 } from "@raycast/api";
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 
 export default function Command() {
@@ -23,7 +26,7 @@ export default function Command() {
       <List.Section title="Results" subtitle={state.results.length + ""}>
         {state.results.map((paper) => (
           <SearchListItem
-            key={paper.title}
+            key={paper.id}
             paper={paper}
             searchUrl={state.searchUrl}
           />
@@ -70,8 +73,13 @@ function SearchListItem({
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Title" content={paper.title} />
-            <Action.CopyToClipboard title="Copy DOI" content={paper.DOI} />
             <Action.CopyToClipboard title="Copy URL" content={paper.url} />
+            {paper.DOI && (
+              <React.Fragment>
+                <Action.CopyToClipboard title="Copy DOI" content={paper.DOI} />
+                <ActionCopyBibTeX DOI={paper.DOI} />
+              </React.Fragment>
+            )}
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -100,7 +108,12 @@ function PaperDetails({ paper }: { paper: Paper }) {
               title="Open in Connect Papers"
               url={connectPapersURL(paper)}
             />
-            <Action.CopyToClipboard title="Copy DOI" content={paper.DOI} />
+            {paper.DOI && (
+              <React.Fragment>
+                <Action.CopyToClipboard title="Copy DOI" content={paper.DOI} />
+                <ActionCopyBibTeX DOI={paper.DOI} />
+              </React.Fragment>
+            )}
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -189,7 +202,7 @@ async function performSearch(
   }
 
   const params = new URLSearchParams();
-  params.append("query", searchText.length === 0 ? "@raycast/api" : searchText);
+  params.append("query", searchText);
   params.append(
     "fields",
     "url,abstract,authors,url,title,citationCount,externalIds,venue,year,referenceCount"
@@ -246,9 +259,55 @@ async function performSearch(
       year: paper.year,
       referenceCount: paper.referenceCount,
       citationCount: paper.citationCount,
-      DOI: paper.externalIds.DOI ? paper.externalIds.DOI : "unknown",
+      DOI: paper.externalIds.DOI,
     };
   });
+}
+
+function ActionCopyBibTeX({ DOI }: { DOI: string }) {
+  const cancelRef = useRef<AbortController | null>(null);
+
+  const copyBibTex = useCallback(async () => {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Fetching BibTeX from doi.org",
+    });
+
+    try {
+      cancelRef.current?.abort();
+      cancelRef.current = new AbortController();
+
+      // Get BibTeX from doi.org
+      const url = new URL(DOI, "https://doi.org");
+
+      const response = await fetch(url.toString(), {
+        method: "get",
+        headers: {
+          Accept: "application/x-bibtex",
+        },
+        signal: cancelRef.current.signal,
+      });
+
+      const bibTeX = await response.text();
+
+      if (!response.ok || bibTeX === undefined) {
+        throw new Error("BibTeX was not found");
+      }
+
+      // Copy the response to the clipboard
+      await showHUD("Copied to Clipboard");
+      await Clipboard.copy(bibTeX);
+      await popToRoot();
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Unable to fetch BibTeX";
+      toast.message = String(error);
+    }
+  }, [cancelRef]);
+
+  return (
+    <Action title="Copy BibTeX" icon={Icon.Clipboard} onAction={copyBibTex} />
+  );
 }
 
 interface SearchState {
@@ -271,5 +330,5 @@ interface Paper {
   year: number;
   referenceCount: number;
   citationCount: number;
-  DOI: string;
+  DOI: string | undefined;
 }

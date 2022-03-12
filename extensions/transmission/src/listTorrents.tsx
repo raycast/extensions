@@ -3,12 +3,13 @@
  * RPC spec is available at https://trac.transmissionbt.com/browser/trunk/extras/rpc-spec.txt
  */
 
-import { List, showToast, ToastStyle, Icon, ActionPanel, Color, getPreferenceValues } from "@raycast/api";
+import { List, showToast, Toast, Icon, ActionPanel, Action, Color, getPreferenceValues } from "@raycast/api";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import Transmission from "transmission-promise";
+import { $enum } from "ts-enum-util";
 import { formatDistanceToNow } from "date-fns";
 import prettyBytes from "pretty-bytes";
-import { useInterval } from "./utils/hooks";
+import { useInterval, useStateFromLocalStorage } from "./utils/hooks";
 import { capitalize, truncate } from "./utils/string";
 import { padList } from "./utils/list";
 import { createClient } from "./modules/client";
@@ -22,6 +23,16 @@ enum TorrentStatus {
   QueuedToSeed = 5,
   Seeding = 6,
 }
+
+const TorrentStatusLabel: Record<string, string> = {
+  Stopped: "Stopped",
+  QueuedToCheckFiles: "Queued to check files",
+  CheckingFiles: "Checking files",
+  QueuedToDownload: "Queued to download",
+  Downloading: "Downloading",
+  QueuedToSeed: "Queued to seed",
+  Seeding: "Seeding",
+};
 
 type Torrent = {
   id: number;
@@ -156,7 +167,7 @@ const stopAllTorrents = async (transmission: Transmission) => {
     await transmission.stop(torrents.map((t) => t.id));
   } catch (error: any) {
     console.error(error);
-    showToast(ToastStyle.Failure, `Could not stop torrents: ${error.code}`);
+    showToast(Toast.Style.Failure, `Could not stop torrents: ${error.code}`);
   }
 };
 
@@ -166,12 +177,15 @@ const startAllTorrents = async (transmission: Transmission) => {
     await transmission.start(torrents.map((t) => t.id));
   } catch (error: any) {
     console.error(error);
-    showToast(ToastStyle.Failure, `Could not start torrents: ${error.code}`);
+    showToast(Toast.Style.Failure, `Could not start torrents: ${error.code}`);
   }
 };
 
 export default function TorrentList() {
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter, loadingStatusFilter] = useStateFromLocalStorage<
+    keyof typeof TorrentStatus | "All"
+  >("statusFilter", "All");
   const transmission = useMemo(() => createClient(), []);
   const [torrents, setTorrents] = useState<Torrent[]>([]);
   const [sessionStats, setSessionStats] = useState<SessionStats | null>(null);
@@ -184,7 +198,7 @@ export default function TorrentList() {
       setSessionStats(sessionStats);
     } catch (error: any) {
       console.error(error);
-      showToast(ToastStyle.Failure, `Could not load torrents: ${error.code}`);
+      showToast(Toast.Style.Failure, `Could not load torrents: ${error.code}`);
     }
   }, [transmission]);
 
@@ -211,8 +225,27 @@ export default function TorrentList() {
   );
 
   return (
-    <List isLoading={!didLoad} searchBarPlaceholder="Filter torrents by name..." onSearchTextChange={setSearch}>
+    <List
+      isLoading={!didLoad || loadingStatusFilter}
+      searchBarPlaceholder="Filter torrents by name..."
+      onSearchTextChange={setSearch}
+      searchBarAccessory={
+        <List.Dropdown
+          value={statusFilter}
+          tooltip="Filter by status"
+          onChange={(status) => setStatusFilter(status as keyof typeof TorrentStatus)}
+        >
+          <List.Dropdown.Item title="All" value="All" />
+          {$enum(TorrentStatus).map((value) => {
+            const status = TorrentStatus[value];
+            return <List.Dropdown.Item key={status} title={TorrentStatusLabel[status]} value={status} />;
+          })}
+        </List.Dropdown>
+      }
+    >
       {sortedTorrents
+        // status filter
+        .filter((x) => (statusFilter === "All" ? true : x.status === TorrentStatus[statusFilter]))
         // fuzzy search
         .filter((x) => x.name.toLowerCase().includes(search.toLowerCase()))
         .map((torrent, index) => (
@@ -228,43 +261,43 @@ export default function TorrentList() {
                 await transmission.stop([torrent.id]);
               } catch (error: any) {
                 console.error(error);
-                showToast(ToastStyle.Failure, `Could not stop torrent: ${torrent.name}`);
+                showToast(Toast.Style.Failure, `Could not stop torrent: ${torrent.name}`);
                 return;
               }
               await updateData();
-              showToast(ToastStyle.Success, `Torrent ${torrent.name} stopped`);
+              showToast(Toast.Style.Success, `Torrent ${torrent.name} stopped`);
             }}
             onStart={async (torrent) => {
               try {
                 await transmission.start([torrent.id]);
               } catch (error: any) {
                 console.error(error);
-                showToast(ToastStyle.Failure, `Could not start torrent: ${torrent.name}`);
+                showToast(Toast.Style.Failure, `Could not start torrent: ${torrent.name}`);
                 return;
               }
               await updateData();
-              showToast(ToastStyle.Success, `Torrent ${torrent.name} started`);
+              showToast(Toast.Style.Success, `Torrent ${torrent.name} started`);
             }}
             onRemove={async (torrent, deleteLocalData) => {
               try {
                 await transmission.remove([torrent.id], deleteLocalData);
               } catch (error: any) {
                 console.error(error);
-                showToast(ToastStyle.Failure, `Could not start torrent: ${torrent.name}`);
+                showToast(Toast.Style.Failure, `Could not start torrent: ${torrent.name}`);
                 return;
               }
               await updateData();
-              showToast(ToastStyle.Success, `Torrent ${torrent.name} deleted`);
+              showToast(Toast.Style.Success, `Torrent ${torrent.name} deleted`);
             }}
             onStartAll={async () => {
               await startAllTorrents(transmission);
               await updateData();
-              showToast(ToastStyle.Success, `All torrents started`);
+              showToast(Toast.Style.Success, `All torrents started`);
             }}
             onStopAll={async () => {
               await stopAllTorrents(transmission);
               await updateData();
-              showToast(ToastStyle.Success, `All torrents stopped`);
+              showToast(Toast.Style.Success, `All torrents stopped`);
             }}
           />
         ))}
@@ -315,21 +348,24 @@ function TorrentListItem({
         tintColor: statusIconColor(torrent),
       }}
       accessoryTitle={[`↓ ${rateDownload}`, " - ", `↑ ${rateUpload}`, " - ", percentDone].join(" ")}
+      detail={
+        <List.Item.Detail markdown="![Illustration](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png)" />
+      }
       actions={
         <ActionPanel>
           <ActionPanel.Section title={`Selected Torrent (${selectedTorrentTitle})`}>
-            <ActionPanel.Item
+            <Action
               title={torrent.status === TorrentStatus.Stopped ? "Start Torrent" : "Stop Torrent"}
               onAction={() => (torrent.status === TorrentStatus.Stopped ? onStart(torrent) : onStop(torrent))}
             />
             <ActionPanel.Submenu title="Remove Torrent">
-              <ActionPanel.Item title="Preserve Local Data" onAction={() => onRemove(torrent, false)} />
-              <ActionPanel.Item title="Delete Local Data" onAction={() => onRemove(torrent, true)} />
+              <Action title="Preserve Local Data" onAction={() => onRemove(torrent, false)} />
+              <Action title="Delete Local Data" onAction={() => onRemove(torrent, true)} />
             </ActionPanel.Submenu>
           </ActionPanel.Section>
           <ActionPanel.Section title={`All Torrents (↓ ${totalRateDownload} - ↑ ${totalRateUpload})`}>
-            <ActionPanel.Item title="Start All" onAction={() => onStartAll(torrent)} />
-            <ActionPanel.Item title="Stop All" onAction={() => onStopAll(torrent)} />
+            <Action title="Start All" onAction={() => onStartAll(torrent)} />
+            <Action title="Stop All" onAction={() => onStopAll(torrent)} />
           </ActionPanel.Section>
         </ActionPanel>
       }
