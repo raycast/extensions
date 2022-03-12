@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List, LocalStorage } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useCurrentSelectedComic, maxNum } from "./xkcd";
 import { useAtom } from "jotai";
 import { currentComicAtom, lastViewedAtom, maxNumAtom, readStatusAtom, totalReadAtom } from "./atoms";
@@ -14,6 +14,7 @@ export default function main() {
   const [lastViewed, setLastViewed] = useAtom(lastViewedAtom);
   const [currentComicNumber, setCurrentComic] = useAtom(currentComicAtom);
   const [currentComic, loadingComic] = useCurrentSelectedComic(currentComicNumber);
+  const selectedId = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (!currentComic) {
@@ -45,9 +46,11 @@ export default function main() {
 
   const onSelectionChange = useCallback(
     (id: string | undefined) => {
-      if (!id) {
+      if (!id || selectedId.current === id) {
         return;
       }
+
+      selectedId.current = id;
 
       if (id === "random-unread") {
         setCurrentComic(getRandomUnread(readStatus, num));
@@ -65,7 +68,7 @@ export default function main() {
         }
       }
     },
-    [setCurrentComic, lastViewed, readStatus]
+    [setCurrentComic, lastViewed, readStatus, selectedId]
   );
 
   if (loading) return <List isLoading />;
