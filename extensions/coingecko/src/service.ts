@@ -67,11 +67,11 @@ export default class Service {
     return response.data;
   }
 
-  async getTop2000CoinList(currency: string): Promise<Coin[]> {
+  async getTopCoins(currency: string, count: number): Promise<Coin[]> {
     const coins: MarketCapRankedCoinList = {};
     const requests = [];
     const perPage = 250;
-    const totalPages = 8;
+    const totalPages = Math.ceil(count / perPage);
     let currentPage = 1;
 
     while (currentPage < totalPages) {
