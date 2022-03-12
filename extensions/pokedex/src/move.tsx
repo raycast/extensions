@@ -67,7 +67,11 @@ export default function Move() {
                           },
                           { p: move.short_effect },
                           { p: `**Power**: ${move.power || "-"}` },
-                          { p: `**Accuracy**: ${move.accuracy || "-"}` },
+                          {
+                            p: `**Accuracy**: ${
+                              move.accuracy ? move.accuracy + "%" : "-"
+                            }`,
+                          },
                           { p: `**PP**: ${move.pp || "-"}` },
                         ])}
                       />
