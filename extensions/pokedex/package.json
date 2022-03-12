@@ -6,6 +6,7 @@
   "icon": "icon.png",
   "author": "anhthang",
   "license": "MIT",
+  "categories": ["Fun", "Other"],
   "commands": [
     {
       "name": "pokemon",
