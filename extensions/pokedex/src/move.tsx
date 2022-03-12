@@ -1,5 +1,11 @@
 import { useMemo, useState } from "react";
-import { List, getPreferenceValues } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  getPreferenceValues,
+} from "@raycast/api";
 import json2md from "json2md";
 import groupBy from "lodash.groupby";
 import TypeDropdown from "./components/type_dropdown";
@@ -11,6 +17,9 @@ const preference = getPreferenceValues();
 export default function Move() {
   const [searchText, setSearchText] = useState<string>("");
   const [type, setType] = useState<string>("all");
+  const [showPreview, setShowPreview] = useState<boolean>(
+    preference.showPreview
+  );
 
   const generations = useMemo(() => {
     let listing = searchText
@@ -32,7 +41,7 @@ export default function Move() {
     <List
       throttle
       onSearchTextChange={setSearchText}
-      isShowingDetail={preference.showPreview}
+      isShowingDetail={showPreview}
       searchBarAccessory={
         <TypeDropdown command="Move" onSelectType={setType} />
       }
@@ -45,14 +54,12 @@ export default function Move() {
                 <List.Item
                   key={idx}
                   title={move.name}
-                  subtitle={
-                    preference.showPreview ? undefined : move.short_effect
-                  }
+                  subtitle={showPreview ? undefined : move.short_effect}
                   icon={`moves/${move.damage_class || "status"}.png`}
                   accessoryTitle={move.type}
                   accessoryIcon={`types/${move.type.toLowerCase()}.svg`}
                   detail={
-                    preference.showPreview ? (
+                    showPreview ? (
                       <List.Item.Detail
                         markdown={json2md([
                           {
@@ -65,6 +72,15 @@ export default function Move() {
                         ])}
                       />
                     ) : undefined
+                  }
+                  actions={
+                    <ActionPanel>
+                      <Action
+                        title={showPreview ? "Hide Preview" : "Show Preview"}
+                        icon={Icon.Sidebar}
+                        onAction={() => setShowPreview(!showPreview)}
+                      />
+                    </ActionPanel>
                   }
                 />
               );
