@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Detail, List } from '@raycast/api'
+import { Action, ActionPanel, Detail, List, LocalStorage } from '@raycast/api'
 import fetch from 'node-fetch'
 import React, { useEffect } from 'react'
 import { Docs } from './components'
+import { timeCheck } from './services/timecheck'
 import { ContentResponse } from './types'
 
 export default function main() {
@@ -15,15 +16,14 @@ export default function main() {
 
   const getVersions = async () => {
     try {
+      const cachedVersions = await LocalStorage.getItem('nb-docs:versions')
+      if ((await timeCheck()) && cachedVersions) {
+        setVersions(await JSON.parse(cachedVersions as string))
+        setLoading(false)
+        return
+      }
       const res = await fetch(
-        'https://api.github.com/repos/GeekyAnts/nativebase-docs/contents/docs',
-        {
-          method: 'GET',
-          headers: {
-            // CACHE THE CALL FOR 1 Hour
-            'Cache-Control': 'max-age=3600'
-          }
-        }
+        'https://api.github.com/repos/GeekyAnts/nativebase-docs/contents/docs'
       )
 
       if (res.status !== 200) {
@@ -35,7 +35,9 @@ export default function main() {
 
       const data = (await res.json()) as Array<ContentResponse>
       data.reverse()
-      setVersions(data?.map((d) => d?.name))
+      const mappedVersions = data?.map((d) => d?.name)
+      LocalStorage.setItem('nb-docs:versions', JSON.stringify(mappedVersions))
+      setVersions(mappedVersions)
       setLoading(false)
       return data
     } catch (err) {

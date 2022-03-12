@@ -1,6 +1,7 @@
-import { Action, ActionPanel, List } from '@raycast/api'
+import { Action, ActionPanel, List, LocalStorage } from '@raycast/api'
 import fetch from 'node-fetch'
 import React, { useEffect } from 'react'
+import { timeCheck } from '../services/timecheck'
 import { PagePage, Sidebar, SidebarResponse } from '../types'
 
 interface IDocsProps {
@@ -15,19 +16,27 @@ export const Docs = (props: IDocsProps) => {
   }, [])
 
   const fetchSidebar = async () => {
+    const cachedSidebar = await LocalStorage.getItem(
+      `nb-docs:sidebar-${props.version}`
+    )
+    if ((await timeCheck()) && cachedSidebar) {
+      setSidebar(await JSON.parse(cachedSidebar as string))
+      return
+    }
     const res = await fetch(
-      `https://raw.githubusercontent.com/GeekyAnts/nativebase-docs/main/docs/${props.version}/sidebar.json`,
-      {
-        method: 'GET'
-      }
+      `https://raw.githubusercontent.com/GeekyAnts/nativebase-docs/main/docs/${props.version}/sidebar.json`
     )
     const data = (await res.json()) as SidebarResponse
     setSidebar(data?.sidebar)
+    LocalStorage.setItem(
+      `nb-docs:sidebar-${props.version}`,
+      JSON.stringify(data?.sidebar)
+    )
   }
 
   return (
     <List
-      navigationTitle={`NB Docs for version ${props.version}`}
+      navigationTitle={`NativeBase ${props.version} Documentation`}
       isLoading={!sidebar.length}
     >
       {sidebar?.map((item, index) => {
