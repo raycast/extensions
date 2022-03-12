@@ -55,7 +55,7 @@ export default function Move() {
                   key={idx}
                   title={move.name}
                   subtitle={showPreview ? undefined : move.short_effect}
-                  icon={`moves/${move.damage_class || "status"}.png`}
+                  icon={`moves/${move.damage_class || "status"}.svg`}
                   accessoryTitle={move.type}
                   accessoryIcon={`types/${move.type.toLowerCase()}.svg`}
                   detail={
