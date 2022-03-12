@@ -6,6 +6,7 @@ import { LOCAL_STORAGE_KEY, PASSWORD_OPTIONS_MAP } from "./const";
 import { capitalise, objectEntries } from "./utils";
 import { PasswordGeneratorOptions, PasswordOptionField, PasswordOptionsToFieldEntries, PasswordType } from "./types";
 import { Shortcut } from "@raycast/api/types/api/app/keyboard";
+import { debounce } from "throttle-debounce";
 
 const SHORTCUTS = {
   COPY_TO_CLIPBOARD: { key: "enter", modifiers: ["opt"] } as Shortcut,
@@ -26,6 +27,8 @@ const GeneratePassword = () => {
     return <UnlockForm setSessionToken={setSessionToken} bitwardenApi={bitwardenApi} />;
   }
 
+  const showDebouncedToast = debounce(500, showToast);
+
   const copyToClipboard = async () => {
     if (!password) return;
     await Clipboard.copy(password);
@@ -39,14 +42,17 @@ const GeneratePassword = () => {
   };
 
   const handleFieldChange =
-    <O extends keyof PasswordGeneratorOptions>(option: O, errorMessage?: string) =>
+    <O extends keyof PasswordGeneratorOptions>(field: O, errorMessage?: string) =>
     async (value: PasswordGeneratorOptions[O]) => {
-      if (!isValidField(option, value)) {
-        // TODO: Add debounce to reduce the change of showing a toast when typing
-        if (errorMessage) await showToast(Toast.Style.Failure, errorMessage);
+      if (isValidFieldValue(field, value)) {
+        showDebouncedToast.cancel();
+        setOption(field, value);
         return;
       }
-      setOption(option, value);
+
+      if (errorMessage) {
+        showDebouncedToast(Toast.Style.Failure, errorMessage);
+      }
     };
 
   const passwordType: PasswordType = options?.passphrase ? "passphrase" : "password";
@@ -107,10 +113,10 @@ async function clearStorage() {
   }
 }
 
-function isValidField<O extends keyof PasswordGeneratorOptions>(option: O, value: PasswordGeneratorOptions[O]) {
-  if (option === "length") return !isNaN(Number(value)) && Number(value) >= 5 && Number(value) <= 128;
-  if (option === "separator") return (value as string).length === 1;
-  if (option === "words") return !isNaN(Number(value)) && Number(value) >= 3 && Number(value) <= 20;
+function isValidFieldValue<O extends keyof PasswordGeneratorOptions>(field: O, value: PasswordGeneratorOptions[O]) {
+  if (field === "length") return !isNaN(Number(value)) && Number(value) >= 5 && Number(value) <= 128;
+  if (field === "separator") return (value as string).length === 1;
+  if (field === "words") return !isNaN(Number(value)) && Number(value) >= 3 && Number(value) <= 20;
   return true;
 }
 
