@@ -1,10 +1,15 @@
-import { ActionPanel, List, showToast, ToastStyle, Color } from "@raycast/api";
+import { ActionPanel, List, showToast, ToastStyle, Color, ImageLike } from "@raycast/api";
 import { MergeRequest } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
 import { getErrorMessage } from "../utils";
-import { GitLabOpenInBrowserAction } from "./actions";
+import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
+import { ShowReviewMRAction } from "./review_actions";
+import { useCache } from "../cache";
+import { CommitStatus } from "./commits/list";
+import { getCommitStatus } from "./commits/item";
+import { getCIJobStatusIcon } from "./jobs";
 
 export function ReviewList(): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
@@ -34,15 +39,33 @@ export function ReviewList(): JSX.Element {
 
 function ReviewListItem(props: { mr: MergeRequest }) {
   const mr = props.mr;
+  const { data: status } = useCache<CommitStatus | undefined>(
+    `project_commit_status_${mr.project_id}_${mr.sha}`,
+    async (): Promise<CommitStatus | undefined> => {
+      if (mr.sha) {
+        return await getCommitStatus(mr.project_id, mr.sha);
+      }
+      return undefined;
+    },
+    {
+      deps: [mr.sha, mr.project_id],
+      secondsToRefetch: 30,
+    }
+  );
+  const statusIcon: ImageLike | undefined = status?.status ? getCIJobStatusIcon(status.status) : undefined;
   return (
     <List.Item
       id={mr.id.toString()}
       title={mr.title}
       subtitle={"#" + mr.iid}
       icon={{ source: GitLabIcons.mropen, tintColor: Color.Green }}
+      accessoryIcon={statusIcon}
       actions={
         <ActionPanel>
-          <GitLabOpenInBrowserAction url={mr.web_url} />
+          <DefaultActions
+            action={<ShowReviewMRAction mr={mr} />}
+            webAction={<GitLabOpenInBrowserAction url={mr.web_url} />}
+          />
         </ActionPanel>
       }
     />
