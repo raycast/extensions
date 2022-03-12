@@ -394,7 +394,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
   if (!title && !icon && !actionElement) {
     title = `Unknown event: ${action_name}`;
     icon = { source: Icon.QuestionMark, tintColor: Color.SecondaryText };
-    actionElement = <CopyToClipboardAction content={JSON.stringify(ev, null, 2)} title="Copy event details" />;
+    actionElement = <CopyToClipboardAction content={JSON.stringify(ev, null, 2)} title="Copy Event Details" />;
   }
   const accessoryTitle = project && !error ? project.fullPath : undefined;
 
