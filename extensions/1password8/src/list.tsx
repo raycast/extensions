@@ -1,14 +1,4 @@
-import {
-  ActionPanel,
-  Detail,
-  environment,
-  Icon,
-  List,
-  popToRoot,
-  showHUD,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, Detail, environment, Icon, List, popToRoot, showHUD, showToast, ToastStyle } from "@raycast/api";
 import fg from "fast-glob";
 import fs from "fs";
 import open from "open";
@@ -57,33 +47,19 @@ async function getPasswords(): Promise<OnePasswordMetaItem[] | void> {
       if (Array.isArray(cache)) {
         return Promise.resolve(cache);
       } else {
-        const metaItems = await fg(
-          [`${ONE_PASSWORD_8_CLI_FOLDER}/**/*.onepassword-item-metadata`],
-          {
-            onlyFiles: true,
-            deep: 2,
-          }
-        );
+        const metaItems = await fg([`${ONE_PASSWORD_8_CLI_FOLDER}/**/*.onepassword-item-metadata`], {
+          onlyFiles: true,
+          deep: 2,
+        });
         const onePasswordMetaItems = metaItems
-          .map(
-            (file) =>
-              new OnePasswordMetaItem(
-                JSON.parse(fs.readFileSync(file, "utf-8").toString())
-              )
-          )
-          .sort((first, second) =>
-            first.itemTitle.localeCompare(second.itemTitle)
-          );
+          .map((file) => new OnePasswordMetaItem(JSON.parse(fs.readFileSync(file, "utf-8").toString())))
+          .sort((first, second) => first.itemTitle.localeCompare(second.itemTitle));
 
         setCache(onePasswordMetaItems);
         return Promise.resolve(onePasswordMetaItems);
       }
     } catch (error) {
-      showToast(
-        ToastStyle.Failure,
-        "Error",
-        "Could not read 1Passwords database"
-      );
+      showToast(ToastStyle.Failure, "Error", "Could not read 1Passwords database");
       return Promise.resolve([]);
     }
   }
@@ -93,13 +69,10 @@ async function getPasswords(): Promise<OnePasswordMetaItem[] | void> {
  * Main command
  */
 export default function Command() {
-  const [onePasswordMetaItems, setOnePasswordMetaItems] =
-    useState<OnePasswordMetaItem[]>();
+  const [onePasswordMetaItems, setOnePasswordMetaItems] = useState<OnePasswordMetaItem[]>();
 
   useEffect(() => {
-    getPasswords().then((value) =>
-      setOnePasswordMetaItems(value as OnePasswordMetaItem[])
-    );
+    getPasswords().then((value) => setOnePasswordMetaItems(value as OnePasswordMetaItem[]));
   }, [setOnePasswordMetaItems]);
 
   return fs.existsSync(ONE_PASSWORD_8_CLI_FOLDER) ? (
@@ -109,11 +82,7 @@ export default function Command() {
   );
 }
 
-function PasswordList({
-  onePasswordMetaItems,
-}: {
-  onePasswordMetaItems: OnePasswordMetaItem[] | undefined;
-}) {
+function PasswordList({ onePasswordMetaItems }: { onePasswordMetaItems: OnePasswordMetaItem[] | undefined }) {
   interface OnePasswordMetaItemCategories {
     [key: string]: OnePasswordMetaItemsCategory;
   }
@@ -128,19 +97,12 @@ function PasswordList({
         metaItems: [],
       };
     }
-    categories[onePasswordMetaItem.categoryPluralName].metaItems.push(
-      onePasswordMetaItem
-    );
+    categories[onePasswordMetaItem.categoryPluralName].metaItems.push(onePasswordMetaItem);
   });
 
-  const sortedCategories = Object.values(categories).sort(
-    (a, b) => b.metaItems.length - a.metaItems.length
-  );
+  const sortedCategories = Object.values(categories).sort((a, b) => b.metaItems.length - a.metaItems.length);
   return (
-    <List
-      searchBarPlaceholder="Filter items by name..."
-      isLoading={onePasswordMetaItems === undefined}
-    >
+    <List searchBarPlaceholder="Filter items by name..." isLoading={onePasswordMetaItems === undefined}>
       {sortedCategories?.map((onePasswordMetaItemsCategory) => (
         <PasswordListCategory
           onePasswordMetaItemsCategory={onePasswordMetaItemsCategory}
@@ -170,32 +132,20 @@ function getIconForCategory(categoryUUID: string) {
   }
 }
 
-function PasswordListCategory(props: {
-  onePasswordMetaItemsCategory: OnePasswordMetaItemsCategory;
-}) {
+function PasswordListCategory(props: { onePasswordMetaItemsCategory: OnePasswordMetaItemsCategory }) {
   const onePasswordMetaItemsCategory = props.onePasswordMetaItemsCategory;
   return (
     <List.Section
-      id={
-        onePasswordMetaItemsCategory.categoryUUID +
-        onePasswordMetaItemsCategory.categoryPluralName
-      }
+      id={onePasswordMetaItemsCategory.categoryUUID + onePasswordMetaItemsCategory.categoryPluralName}
       title={onePasswordMetaItemsCategory.categoryPluralName}
       subtitle={`${onePasswordMetaItemsCategory.metaItems.length} Items`}
     >
-      {onePasswordMetaItemsCategory.metaItems?.map(
-        (onePasswordMetaItem, index) => (
-          <PasswordListItem
-            key={
-              onePasswordMetaItem.uuid +
-              onePasswordMetaItem.vaultUUID +
-              index +
-              Math.random()
-            }
-            onePasswordMetaItem={onePasswordMetaItem}
-          />
-        )
-      )}
+      {onePasswordMetaItemsCategory.metaItems?.map((onePasswordMetaItem, index) => (
+        <PasswordListItem
+          key={onePasswordMetaItem.uuid + onePasswordMetaItem.vaultUUID + index + Math.random()}
+          onePasswordMetaItem={onePasswordMetaItem}
+        />
+      ))}
     </List.Section>
   );
 }
@@ -231,11 +181,7 @@ function PasswordListItem(props: { onePasswordMetaItem: OnePasswordMetaItem }) {
 }
 
 // Actions
-async function perform1PasswordAction(
-  action: string,
-  onePasswordMetaItem: OnePasswordMetaItem,
-  message: string
-) {
+async function perform1PasswordAction(action: string, onePasswordMetaItem: OnePasswordMetaItem, message: string) {
   const url = `onepassword://${action}/?a=${onePasswordMetaItem.profileUUID}&v=${onePasswordMetaItem.vaultUUID}&i=${onePasswordMetaItem.uuid}`;
 
   popToRoot({ clearSearchBar: true });
@@ -247,18 +193,11 @@ async function perform1PasswordAction(
   showHUD(message);
 }
 
-async function performOpenInBrowserAction(
-  onePasswordMetaItem: OnePasswordMetaItem,
-  message: string
-) {
+async function performOpenInBrowserAction(onePasswordMetaItem: OnePasswordMetaItem, message: string) {
   const website = onePasswordMetaItem.websiteURLs?.[0];
 
   if (!website) {
-    showToast(
-      ToastStyle.Failure,
-      "Error",
-      `${onePasswordMetaItem.itemTitle} has no website to open.`
-    );
+    showToast(ToastStyle.Failure, "Error", `${onePasswordMetaItem.itemTitle} has no website to open.`);
     return;
   }
 
@@ -271,9 +210,7 @@ async function performOpenInBrowserAction(
   showHUD(message);
 }
 
-const OpenAndFillAction = ({
-  onePasswordMetaItem,
-}: ActionProps): JSX.Element => (
+const OpenAndFillAction = ({ onePasswordMetaItem }: ActionProps): JSX.Element => (
   <ActionPanel.Item
     icon={Icon.Link}
     title="Open"
