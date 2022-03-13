@@ -3,6 +3,7 @@ import { ActionPanel, Action, List, Color, showToast, Toast, popToRoot, Detail }
 import fetch from "node-fetch";
 import { Race, RaceResult } from "./types";
 import { useSeasons } from "./useSeasons";
+import flagFromNationality from "./flagFromNationality";
 
 interface ScheduleState {
   season: string;
@@ -161,7 +162,13 @@ function RaceResultsView({ season, round }: RaceResultViewProps) {
                 source: item.position + ".png",
                 tintColor: Color.PrimaryText,
               }}
-              title={item.Driver.givenName + " " + item.Driver.familyName}
+              title={
+                flagFromNationality(item.Driver.nationality) +
+                " " +
+                item.Driver.givenName +
+                " " +
+                item.Driver.familyName
+              }
               subtitle={item.Constructor.name}
               accessoryTitle={String(item.points)}
               actions={
