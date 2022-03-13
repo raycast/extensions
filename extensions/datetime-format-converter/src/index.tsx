@@ -5,9 +5,8 @@ export default function main() {
   const { push } = useNavigation();
 
   function timeConverter(time: string) {
-    console.log(time);
     if (!time || time === "now") {
-      push(ResultList(formatTime(new Date())));
+      push(ResultList(formatTime(new Date().toString())));
     } else {
       const dTime = dayjs(time);
       if (dTime.isValid()) {
@@ -24,7 +23,12 @@ export default function main() {
 
   function formatTime(time: string) {
     const dTime = dayjs(time);
-    return [dTime.format("YYYY-MM-DD hh:mm:ss"), dTime.format(), dTime.valueOf(), dTime.unix()];
+    return [
+      dTime.format("YYYY-MM-DD hh:mm:ss").toString(),
+      dTime.format().toString(),
+      dTime.valueOf().toString(),
+      dTime.unix().toString(),
+    ];
   }
 
   function ResultList(times: string[]) {
@@ -36,6 +40,12 @@ export default function main() {
       </List>
     );
   }
+
+  type ActionItem = {
+    item: {
+      content: string;
+    };
+  };
 
   function Actions({ item }: ActionItem) {
     return (
