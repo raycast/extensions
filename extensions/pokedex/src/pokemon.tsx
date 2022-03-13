@@ -62,7 +62,28 @@ export default function SearchPokemon() {
                   icon="icon_sort.svg"
                   target={<PokemonDetail />}
                 />
+                <Action
+                  title={showPreview ? "Hide Preview" : "Show Preview"}
+                  icon={Icon.Sidebar}
+                  onAction={() => setShowPreview(!showPreview)}
+                />
               </ActionPanel>
+            }
+            detail={
+              showPreview ? (
+                <List.Item.Detail
+                  markdown={json2md([
+                    {
+                      h1: "Surprise Me!",
+                    },
+                    {
+                      p: `Show a random Pokémon details between the inclusive **${
+                        pokemons[0].name
+                      }** and **${pokemons.reverse()[0].name}** bounds`,
+                    },
+                  ])}
+                />
+              ) : undefined
             }
           />
         </List.Section>

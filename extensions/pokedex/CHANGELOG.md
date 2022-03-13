@@ -3,7 +3,7 @@
 ## 2022-03-12
 - Addws type filter, split view for Moves
 - Added SVG icon for better render
-- Addeed changelog
+- Added changelog
 
 ## 2022-03-10
 - Added new commands: Moves, Abilities
