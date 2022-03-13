@@ -16,7 +16,7 @@ import {
 import { spawnSync } from "child_process";
 import { chmodSync } from "fs";
 import { dirname } from "path";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { ArgumentType, ScriptCommand, ScriptMode } from "./types";
 import { codeblock, parseScriptCommands, sortByAccessTime } from "./utils";
 
@@ -40,23 +40,62 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
 
   return (
     <List isLoading={typeof parsed == "undefined"} searchBarPlaceholder={`Pipe ${props.input.type} to`}>
-      {props.input.type == "file" ? (
-        <List.Item
-          icon={Icon.Document}
-          title="Open With..."
-          subtitle="File Actions"
-          actions={
-            <ActionPanel>
-              <Action.OpenWith path={props.input.content} />
-            </ActionPanel>
-          }
-        />
-      ) : null}
-      {parsed?.commands
-        .filter((command) => command.metadatas.argument1.type == props.input.type)
-        .map((command) => (
-          <PipeCommand key={command.path} command={command} input={props.input} onTrash={loadCommands} />
-        ))}
+      <List.Section title="Pipe Commands">
+        {parsed?.commands
+          .filter((command) => command.metadatas.argument1.type == props.input.type)
+          .map((command) => (
+            <PipeCommand key={command.path} command={command} input={props.input} onTrash={loadCommands} />
+          ))}
+      </List.Section>
+      <List.Section title="Raycast Actions">
+        {props.input.type == "file" ? (
+          <Fragment>
+            <List.Item
+              icon={Icon.Finder}
+              title="Open File"
+              subtitle="File Actions"
+              actions={
+                <ActionPanel>
+                  <Action.Open title="Open File" target={props.input.content} />
+                </ActionPanel>
+              }
+            />
+            <List.Item
+              icon={Icon.Document}
+              title="Open With..."
+              subtitle="File Actions"
+              actions={
+                <ActionPanel>
+                  <Action.OpenWith path={props.input.content} />
+                </ActionPanel>
+              }
+            />
+          </Fragment>
+        ) : (
+          <Fragment>
+            <List.Item
+              icon={Icon.TextDocument}
+              title="Create Snippet..."
+              subtitle="Text Actions"
+              actions={
+                <ActionPanel>
+                  <Action.CreateSnippet snippet={{ text: props.input.content }} />
+                </ActionPanel>
+              }
+            />
+            <List.Item
+              icon={Icon.Link}
+              title="Create Quickink..."
+              subtitle="Text Actions"
+              actions={
+                <ActionPanel>
+                  <Action.CreateQuicklink quicklink={{ link: props.input.content }} />
+                </ActionPanel>
+              }
+            />
+          </Fragment>
+        )}
+      </List.Section>
     </List>
   );
 }
@@ -66,8 +105,13 @@ export function getRaycastIcon(scriptIcon: string | undefined, defaultIcon: Imag
   return icon ? icon : defaultIcon;
 }
 
-export function PipeCommand(props: { command: ScriptCommand; input?: PipeInput; onTrash: () => void }) {
-  const { command, input, onTrash } = props;
+export function PipeCommand(props: {
+  command: ScriptCommand;
+  input?: PipeInput;
+  onTrash: () => void;
+  showContent?: boolean;
+}): JSX.Element {
+  const { command, input, onTrash, showContent } = props;
   const defaultIcon = command.metadatas.argument1.type == "file" ? Icon.Document : Icon.Text;
   const navigation = useNavigation();
 
@@ -86,8 +130,7 @@ export function PipeCommand(props: { command: ScriptCommand; input?: PipeInput; 
     });
     toast.hide();
     if (status !== 0) {
-      showHUD(stderr ? `⚠️ ${stderr}` : `⚠️ Error: Process terminated with status ${status}`);
-      return stdout;
+      throw new Error(stderr ? `⚠️ ${stderr}` : `⚠️ Process terminated with status ${status}`);
     }
 
     return stdout;
@@ -99,7 +142,10 @@ export function PipeCommand(props: { command: ScriptCommand; input?: PipeInput; 
       icon={getRaycastIcon(command.metadatas.icon, defaultIcon)}
       accessoryIcon={command.user ? Icon.Person : undefined}
       title={command.metadatas.title}
-      subtitle={command.metadatas.packageName}
+      subtitle={showContent ? undefined : command.metadatas.packageName}
+      detail={
+        showContent ? <List.Item.Detail markdown={["## Content", codeblock(command.content)].join("\n")} /> : undefined
+      }
       actions={
         <ActionPanel>
           {typeof input != "undefined" ? (
@@ -119,18 +165,13 @@ export function PipeCommand(props: { command: ScriptCommand; input?: PipeInput; 
           ) : null}
           {command.user ? (
             <ActionPanel.Section>
-              <Action.OpenWith path={command.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+              <Action.Open title="Open Command" target={command.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+              <Action.OpenWith path={command.path} shortcut={{ modifiers: ["cmd", "shift"], key: "o" }} />
               <Action.ShowInFinder path={command.path} shortcut={{ modifiers: ["cmd", "shift"], key: "o" }} />
               <Action.Trash paths={command.path} onTrash={onTrash} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
             </ActionPanel.Section>
           ) : null}
           <ActionPanel.Section>
-            <Action.Push
-              icon={Icon.Text}
-              title="Show Script Contents"
-              shortcut={{ modifiers: ["cmd"], key: "p" }}
-              target={<Detail markdown={codeblock(command.content)} />}
-            />
             <Action.CopyToClipboard
               title="Copy Script Contents"
               shortcut={{ modifiers: ["opt", "shift"], key: "c" }}
@@ -149,35 +190,38 @@ function CommandAction(props: {
   origin: "clipboard" | "selection";
 }) {
   const { mode, runCommand, origin } = props;
-  const copyAction = (
-    <Action
-      title="Copy Script Output"
-      icon={Icon.Clipboard}
-      onAction={async () => {
+  const navigation = useNavigation();
+
+  function outputHandler(onOutput: (output: string) => void, exit?: boolean) {
+    return async () => {
+      try {
         const output = await runCommand();
-        if (output) Clipboard.copy(output);
-        await closeMainWindow();
-        await popToRoot();
-      }}
-    />
+        if (output) await onOutput(output);
+        if (exit) {
+          await closeMainWindow();
+          await popToRoot();
+        }
+      } catch (e) {
+        navigation.push(<Detail markdown={["## An error occurred!", codeblock((e as Error).message)].join("\n")} />);
+      }
+    };
+  }
+
+  const copyAction = (
+    <Action title="Copy Script Output" icon={Icon.Clipboard} onAction={outputHandler(Clipboard.copy, true)} />
   );
   switch (mode) {
     case "silent":
-      return (
-        <Action
-          icon={Icon.Terminal}
-          title="Run Script"
-          onAction={async () => {
-            const output = await runCommand();
-            if (output) showHUD(output);
-            await closeMainWindow();
-            await popToRoot();
-          }}
-        />
-      );
+      return <Action icon={Icon.Terminal} title="Run Script" onAction={outputHandler(showHUD, true)} />;
     case "fullOutput":
       return (
-        <Action.Push icon={Icon.Text} title="Show Script Output" target={<PipeDetails runCommand={runCommand} />} />
+        <Action
+          icon={Icon.Text}
+          title="Show Script Output"
+          onAction={outputHandler(async (output) => {
+            await navigation.push(<Detail markdown={codeblock(output)} />);
+          })}
+        />
       );
     case "copy":
       return copyAction;
@@ -185,31 +229,7 @@ function CommandAction(props: {
       return origin == "clipboard" ? (
         copyAction
       ) : (
-        <Action
-          title="Paste Script Output"
-          icon={Icon.Clipboard}
-          onAction={async () => {
-            const output = await runCommand();
-            if (output) Clipboard.paste(output);
-            await closeMainWindow();
-            await popToRoot();
-          }}
-        />
+        <Action title="Paste Script Output" icon={Icon.Clipboard} onAction={outputHandler(Clipboard.paste, true)} />
       );
   }
-}
-
-function PipeDetails(props: { runCommand: () => Promise<string> }) {
-  const [content, setContent] = useState<string>();
-  useEffect(() => {
-    props.runCommand().then(setContent);
-  }, []);
-
-  return (
-    <Detail
-      isLoading={typeof content == "undefined"}
-      markdown={content ? codeblock(content) : undefined}
-      actions={<ActionPanel>{content ? <Action.CopyToClipboard content={content} /> : null}</ActionPanel>}
-    />
-  );
 }
