@@ -16,6 +16,46 @@ function userToIcon(user?: User): ImageLike {
   return { source: result, mask: ImageMask.Circle };
 }
 
+const actionColors: Record<string, Color> = {
+  marked: Color.Green,
+  assigned: Color.Purple,
+  directly_addressed: Color.Red,
+  mentioned: Color.Green,
+};
+
+function getActionColor(actionName: string): Color {
+  if (!actionName) {
+    return Color.Green;
+  }
+  let result = actionColors[actionName];
+  if (!result) {
+    result = Color.Green;
+  }
+  return result;
+}
+
+const targetTypeSouce: Record<string, string> = {
+  mergerequest: GitLabIcons.merge_request,
+  issue: GitLabIcons.issue,
+  epic: GitLabIcons.epic,
+};
+
+function getTargetTypeSource(tt: string): string {
+  if (!tt) {
+    return GitLabIcons.todo;
+  }
+  let result = targetTypeSouce[tt.toLowerCase()];
+  if (!result) {
+    result = GitLabIcons.todo;
+  }
+  return result;
+}
+
+function getIcon(todo: Todo): ImageLike {
+  const tt = todo.target_type;
+  return { source: getTargetTypeSource(tt), tintColor: getActionColor(todo.action_name) };
+}
+
 export function TodoList(): JSX.Element {
   const { todos, error, isLoading, performRefetch: refresh } = useTodos();
 
@@ -46,7 +86,7 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JS
       subtitle={subtitle}
       accessoryTitle={todo.action_name}
       accessoryIcon={userToIcon(todo.author)}
-      icon={{ source: GitLabIcons.todo, tintColor: Color.Green }}
+      icon={getIcon(todo)}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
