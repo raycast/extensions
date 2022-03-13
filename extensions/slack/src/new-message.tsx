@@ -16,7 +16,7 @@ export default function Command() {
   }, []);
 
   return (
-    <List isLoading={!!users || !!groups || !!channels}>
+    <List isLoading={!users || !groups || !channels}>
       <List.Section title="Users">
         {users?.map(({ name, id, teamId, icon }) => (
           <List.Item
