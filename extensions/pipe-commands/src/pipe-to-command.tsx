@@ -192,12 +192,12 @@ function CommandAction(props: {
   const { mode, runCommand, origin } = props;
   const navigation = useNavigation();
 
-  function outputHandler(onOutput: (output: string) => void, exit?: boolean) {
+  function outputHandler(onSuccess: (output: string) => void, exitOnSuccess?: boolean) {
     return async () => {
       try {
         const output = await runCommand();
-        if (output) await onOutput(output);
-        if (exit) {
+        if (output) await onSuccess(output);
+        if (exitOnSuccess) {
           await closeMainWindow();
           await popToRoot();
         }
@@ -219,7 +219,16 @@ function CommandAction(props: {
           icon={Icon.Text}
           title="Show Script Output"
           onAction={outputHandler(async (output) => {
-            await navigation.push(<Detail markdown={codeblock(output)} />);
+            await navigation.push(
+              <Detail
+                markdown={codeblock(output)}
+                actions={
+                  <ActionPanel>
+                    <Action.CopyToClipboard content={output} />
+                  </ActionPanel>
+                }
+              />
+            );
           })}
         />
       );
