@@ -22,6 +22,7 @@ const useFetcher = () => {
       params: {
         q: `site:kubernetes.io ${query}`,
         offset,
+        responseFilter: "webPages",
       },
     }).finally(() => setLoading(false));
   };

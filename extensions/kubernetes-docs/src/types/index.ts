@@ -52,3 +52,28 @@ export type DocsItem = {
   language: string;
   isNavigational: boolean;
 };
+
+export enum Language {
+  English = "en",
+  German = "de",
+  Chinese = "zh",
+  Indonesian = "id",
+  Japanese = "ja",
+  Korean = "ko",
+  French = "fr",
+  Italian = "it",
+  Spanish = "es",
+  Portuguese = "pt",
+  Russian = "ru",
+  Polish = "pl",
+  Ukrainian = "uk",
+}
+
+export type DocFile = {
+  title: string;
+  link: string;
+};
+
+export type Preferences = {
+  language: Language;
+};
