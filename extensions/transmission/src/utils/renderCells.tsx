@@ -13,7 +13,15 @@ const theme = {
   },
 };
 
-export async function renderPieces(pieces: string, width = 1000): Promise<string> {
+export async function renderPieces({
+  pieces,
+  width = 1000,
+  complete = false,
+}: {
+  pieces: string;
+  width?: number;
+  complete?: boolean;
+}): Promise<string> {
   const isDark = await isDarkMode();
 
   const colors = theme[isDark ? "dark" : "light"];
@@ -36,6 +44,8 @@ export async function renderPieces(pieces: string, width = 1000): Promise<string
   const cellsMarkup = splitEvery(18, cells)
     .map((row: number[], rowIndex: number) =>
       row.map((alpha, colIndex) => {
+        if (complete) alpha = 1;
+
         const fill = alpha < 0.1 ? colors.gray : colors.accent;
         const opacity = alpha < 0.1 ? 1 : Math.max(0.5, alpha);
         const size = cellSize - strokeWidth * 2;
