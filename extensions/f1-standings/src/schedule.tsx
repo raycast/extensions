@@ -1,23 +1,37 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Action, List, Color, showToast, Toast, popToRoot, Detail } from "@raycast/api";
 import fetch from "node-fetch";
-
 import { Race, RaceResult } from "./types";
+import { useSeasons } from "./useSeasons";
 
 interface ScheduleState {
-  season?: number;
-  items?: Race[];
-  selectedRound?: number;
+  season: string;
+  items: Race[];
+  selectedRound: number;
+  isLoading: boolean;
   error?: Error;
 }
 
 export default function Command() {
-  const [state, setState] = useState<ScheduleState>({});
+  const [state, setState] = useState<ScheduleState>({
+    season: "",
+    items: [],
+    selectedRound: 1000,
+    isLoading: true,
+  });
+  const seasons = useSeasons();
   useEffect(() => {
+    if (!state.season) {
+      return;
+    }
     async function fetchSchedule() {
+      setState((previous) => ({
+        ...previous,
+        isLoading: true,
+      }));
       const season = new Date().getFullYear();
       try {
-        const res = await fetch(`https://ergast.com/api/f1/${season}.json`);
+        const res = await fetch(`https://ergast.com/api/f1/${state.season}.json`);
         const data = (await res.json()) as any;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -26,11 +40,12 @@ export default function Command() {
         if (allRaces.length == 0) {
           throw new Error("No races found");
         }
-        setState({
+        setState((previous) => ({
+          ...previous,
           items: allRaces,
-          season,
           selectedRound: upcomingRaces.length > 0 ? parseInt(upcomingRaces[0].round) : 1000,
-        });
+          isLoading: false,
+        }));
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
@@ -38,19 +53,35 @@ export default function Command() {
           message: `Could not load ${season} race schedule. Please try later again.`,
         });
         await popToRoot({ clearSearchBar: true });
-        setState({
+        setState((previous) => ({
+          ...previous,
+          isLoading: false,
           error: error instanceof Error ? error : new Error("Could not load schedule"),
-        });
+        }));
       }
     }
 
     fetchSchedule();
-  }, []);
+  }, [state.season]);
 
   return (
-    <List isLoading={!state.items && !state.error} selectedItemId={state.selectedRound?.toString()}>
+    <List
+      isLoading={!state.season || state.isLoading}
+      selectedItemId={state.selectedRound?.toString()}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select season"
+          onChange={(newValue) => setState((previous) => ({ ...previous, season: newValue }))}
+          storeValue
+        >
+          {seasons.map((season) => (
+            <List.Dropdown.Item key={season.season} value={`${season.season}`} title={`${season.season}`} />
+          ))}
+        </List.Dropdown>
+      }
+    >
       <List.Section title={"Season " + state.season}>
-        {state.items?.map((item) => (
+        {state.items.map((item) => (
           <List.Item
             key={item.round.toString()}
             id={item.round.toString()}
@@ -70,7 +101,7 @@ export default function Command() {
                 {parseInt(item.round) < state.selectedRound! && (
                   <Action.Push
                     title="Show Results"
-                    target={<RaceResultsView season={state.season!} round={parseInt(item.round)} />}
+                    target={<RaceResultsView season={state.season} round={parseInt(item.round)} />}
                   />
                 )}
                 <Action.OpenInBrowser url={item.Circuit.url} />
@@ -89,7 +120,7 @@ interface RaceResultState {
 }
 
 interface RaceResultViewProps {
-  season: number;
+  season: string;
   round: number;
 }
 
