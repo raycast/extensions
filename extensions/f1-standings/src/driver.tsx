@@ -3,6 +3,7 @@ import { ActionPanel, Action, List, Color, showToast, Toast, popToRoot } from "@
 import fetch from "node-fetch";
 import { DriverStanding } from "./types";
 import { useSeasons } from "./useSeasons";
+import flagFromNationality from "./flagFromNationality";
 
 interface State {
   season: string;
@@ -76,7 +77,9 @@ export default function Command() {
               source: item.position + ".png",
               tintColor: Color.PrimaryText,
             }}
-            title={item.Driver.givenName + " " + item.Driver.familyName}
+            title={
+              flagFromNationality(item.Driver.nationality) + " " + item.Driver.givenName + " " + item.Driver.familyName
+            }
             subtitle={item.Constructors[item.Constructors.length - 1]?.name}
             accessoryTitle={String(item.points)}
             actions={
