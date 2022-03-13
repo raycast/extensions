@@ -1,11 +1,9 @@
 import { ActionPanel, Color, ImageLike, ImageMask, List, showToast, ToastStyle } from "@raycast/api";
 import { Todo, User } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { gitlab } from "../common";
-import { useState, useEffect } from "react";
 import { CloseAllTodoAction, CloseTodoAction, ShowTodoDetailsAction } from "./todo_actions";
-import { getErrorMessage, now } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
+import { useTodos } from "./todo/utils";
 
 function userToIcon(user?: User): ImageLike {
   let result = "";
@@ -19,8 +17,7 @@ function userToIcon(user?: User): ImageLike {
 }
 
 export function TodoList(): JSX.Element {
-  const [searchText, setSearchText] = useState<string>();
-  const { todos, error, isLoading, refresh } = useSearch(searchText);
+  const { todos, error, isLoading, performRefetch: refresh } = useTodos();
 
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search Merge Requests", error);
@@ -31,12 +28,7 @@ export function TodoList(): JSX.Element {
   }
 
   return (
-    <List
-      searchBarPlaceholder="Filter Todos by name..."
-      onSearchTextChange={setSearchText}
-      isLoading={isLoading}
-      throttle={true}
-    >
+    <List searchBarPlaceholder="Filter Todos by name..." isLoading={isLoading} throttle={true}>
       {todos?.map((todo) => (
         <TodoListItem key={todo.id} todo={todo} refreshData={refresh} />
       ))}
@@ -69,59 +61,4 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JS
       }
     />
   );
-}
-
-export function useSearch(query: string | undefined): {
-  todos?: Todo[];
-  error?: string;
-  isLoading: boolean;
-  refresh: () => void;
-} {
-  const [todos, setTodos] = useState<Todo[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [timestamp, setTimestamp] = useState<Date>(now());
-
-  const refresh = () => {
-    setTimestamp(now());
-  };
-
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
-
-    async function fetchData() {
-      if (query === null || didUnmount) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const glTodos = await gitlab.getTodos({ search: query || "" });
-
-        if (!didUnmount) {
-          setTodos(glTodos);
-        }
-      } catch (e) {
-        if (!didUnmount) {
-          setError(getErrorMessage(e));
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, [query, timestamp]);
-
-  return { todos, error, isLoading, refresh };
 }

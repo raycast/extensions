@@ -117,18 +117,32 @@ export function useCache<T>(
   data?: T;
   error?: string;
   isLoading: boolean;
+  performRefetch: () => void;
 } {
   const secondsToRefetch = options.secondsToRefetch === undefined ? 5 * 60 : options.secondsToRefetch;
   const secondsToInvalid = options.secondsToInvalid === undefined ? daysInSeconds(3) : options.secondsToInvalid;
   const [data, setData] = useState<T>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [timestamp, setTimestamp] = useState<Date>(new Date());
+  let shouldForceRefetch = false;
+  const depsAll = [timestamp];
+  if (options.deps) {
+    for (const d of options.deps) {
+      depsAll.push(d);
+    }
+  }
 
   const search = async (alldata: T) => {
     if (options.onFilter) {
       return await options.onFilter(alldata);
     }
     return alldata;
+  };
+
+  const performRefetch = () => {
+    shouldForceRefetch = true;
+    setTimestamp(new Date());
   };
 
   useEffect(() => {
@@ -196,6 +210,9 @@ export function useCache<T>(
           setError(getErrorMessage(e));
         }
       } finally {
+        if (shouldForceRefetch) {
+          shouldForceRefetch = false;
+        }
         if (!didUnmount && !refetch) {
           setIsLoading(false);
         }
@@ -207,7 +224,7 @@ export function useCache<T>(
     return () => {
       didUnmount = true;
     };
-  }, options.deps);
+  }, depsAll);
 
-  return { data, error, isLoading };
+  return { data, error, isLoading, performRefetch };
 }

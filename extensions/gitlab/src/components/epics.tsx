@@ -64,7 +64,7 @@ export function EpicList(props: { group: Group }) {
     {
       deps: [searchText],
       onFilter: async (epics) => {
-        return await searchData<Epic>(epics, { search: searchText || "", keys: ["title"], limit: 50 });
+        return searchData<Epic>(epics, { search: searchText || "", keys: ["title"], limit: 50 });
       },
     }
   );

@@ -125,7 +125,7 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
     {
       deps: [searchText, membership, starred],
       onFilter: async (projects) => {
-        return await searchData<Project[]>(projects, {
+        return searchData<Project[]>(projects, {
           search: searchText || "",
           keys: ["name_with_namespace"],
           limit: 50,

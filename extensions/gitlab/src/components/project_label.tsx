@@ -15,7 +15,7 @@ export function ProjectLabelList(props: { project: Project }): JSX.Element {
     {
       deps: [searchText, props.project],
       onFilter: async (labels) => {
-        return await searchData<Label[]>(labels, {
+        return searchData<Label[]>(labels, {
           search: searchText || "",
           keys: ["name"],
           limit: 50,

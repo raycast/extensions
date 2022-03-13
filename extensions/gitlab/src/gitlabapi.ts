@@ -592,8 +592,8 @@ export class GitLab {
     return issueItems;
   }
 
-  async getTodos(params: Record<string, any>): Promise<Todo[]> {
-    const issueItems: Todo[] = await this.fetch("todos", params).then((issues) => {
+  async getTodos(params: Record<string, any>, all?: boolean): Promise<Todo[]> {
+    const issueItems: Todo[] = await this.fetch("todos", params, all).then((issues) => {
       return issues.map((issue: any) => ({
         title: issue.target.title,
         action_name: issue.action_name,
@@ -644,7 +644,7 @@ export class GitLab {
     const dataAll: Group[] = await receiveLargeCachedObject(hashRecord(params, "mygroups"), async () => {
       return ((await this.fetch(`groups`, params, true)) as Group[]) || [];
     });
-    return await searchData<Group>(dataAll, { search: search, keys: ["title"], limit: 50 });
+    return searchData<Group>(dataAll, { search: search, keys: ["title"], limit: 50 });
   }
 
   async getUserEpics(params: Record<string, any> = {}): Promise<Epic[]> {
@@ -713,10 +713,10 @@ export class GitLab {
   }
 }
 
-export async function searchData<Type>(
+export function searchData<Type>(
   data: any,
   params: { search: string; keys: string[]; limit: number; threshold?: number; ignoreLocation?: boolean }
-): Promise<any> {
+): any {
   const options = {
     includeScore: true,
     threshold: params.threshold || 0.2,

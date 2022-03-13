@@ -422,7 +422,7 @@ export function EventList(): JSX.Element {
       deps: [searchText],
       secondsToRefetch: 60,
       onFilter: async (epics) => {
-        return await searchData<Event>(epics, {
+        return searchData<Event>(epics, {
           search: searchText || "",
           keys: ["action_name", "target_title"],
           limit: 50,
