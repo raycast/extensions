@@ -29,7 +29,6 @@ export default function Command() {
         ...previous,
         isLoading: true,
       }));
-      const season = new Date().getFullYear();
       try {
         const res = await fetch(`https://ergast.com/api/f1/${state.season}.json`);
         const data = (await res.json()) as any;
@@ -50,7 +49,7 @@ export default function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Error",
-          message: `Could not load ${season} race schedule. Please try later again.`,
+          message: `Could not load ${state.season} race schedule. Please try later again.`,
         });
         await popToRoot({ clearSearchBar: true });
         setState((previous) => ({
