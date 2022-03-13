@@ -8,6 +8,7 @@
   "contributors": [
     "Codely"
   ],
+  "categories": ["Applications", "Web"],
   "license": "MIT",
   "commands": [
     {
@@ -32,10 +33,10 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-  ],
+  "preferences": [],
   "dependencies": {
     "@raycast/api": "^1.25.0",
+    "react-async": "^10.0.1",
     "run-applescript": "^6.0.0",
     "sql.js": "^1.6.2"
   },
@@ -53,6 +54,7 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
   }
 }

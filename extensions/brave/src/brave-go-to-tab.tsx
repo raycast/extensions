@@ -1,58 +1,16 @@
-import {
-  ActionPanel,
-  closeMainWindow,
-  popToRoot,
-  CopyToClipboardAction,
-  Icon,
-  List,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, List, showToast, ToastStyle } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { useEffect, useState } from "react";
-import { faviconUrl } from "./utils";
-
-class Tab {
-  static readonly TAB_CONTENTS_SEPARATOR: string = "~~~";
-
-  constructor(
-    public readonly title: string,
-    public readonly url: string,
-    public readonly favicon: string,
-    public readonly windowsIndex: number,
-    public readonly tabIndex: number
-  ) {}
-
-  static parse(line: string): Tab {
-    const parts = line.split(this.TAB_CONTENTS_SEPARATOR);
-
-    return new Tab(parts[0], parts[1], parts[2], +parts[3], +parts[4]);
-  }
-
-  key(): string {
-    return `${this.windowsIndex}${Tab.TAB_CONTENTS_SEPARATOR}${this.tabIndex}`;
-  }
-
-  urlWithoutScheme(): string {
-    return this.url.replace(/(^\w+:|^)\/\//, "").replace("www.", "");
-  }
-
-  urlDomain(): string {
-    return this.urlWithoutScheme().split("/")[0];
-  }
-
-  braveFavicon(): string {
-    return faviconUrl(64, this.url);
-  }
-}
+import Tab from "./components/tab";
+import BraveGoToTab from "./components/brave-goto-tab";
 
 async function getOpenTabs(): Promise<Tab[]> {
-  showToast(ToastStyle.Success, "Tabs", "Getting tabs");
+  await showToast(ToastStyle.Success, "Tabs", "Getting tabs");
   const faviconFormula = '""';
 
-    let openTabs = "";
-    try {
-      openTabs = await runAppleScript(`
+  let openTabs = "";
+  try {
+    openTabs = await runAppleScript(`
         set _output to ""
         tell application "Brave Browser"
           set _window_index to 1
@@ -71,9 +29,8 @@ async function getOpenTabs(): Promise<Tab[]> {
         end tell
         return _output
     `);
-  }
-  catch(e) {
-    showToast(ToastStyle.Failure, "Failed to get tabs", "Error: " + e.message);
+  } catch ({ message }) {
+    await showToast(ToastStyle.Failure, "Failed to get tabs", `Error: ${message}`);
   }
 
   const tabs = openTabs
@@ -81,18 +38,8 @@ async function getOpenTabs(): Promise<Tab[]> {
     .filter((line) => line.length !== 0)
     .map((line) => Tab.parse(line));
 
-  showToast(ToastStyle.Success, "Available tabs", tabs.length.toString());
+  await showToast(ToastStyle.Success, "Available tabs", tabs.length.toString());
   return tabs;
-}
-
-async function setActiveTab(tab: Tab): Promise<void> {
-  await runAppleScript(`
-    tell application "Brave Browser"
-      activate
-      set index of window (${tab.windowsIndex} as number) to (${tab.windowsIndex} as number)
-      set active tab index of window (${tab.windowsIndex} as number) to (${tab.tabIndex} as number)
-    end tell
-  `);
 }
 
 interface State {
@@ -119,7 +66,7 @@ export default function Command() {
   );
 }
 
-function TabListItem(props: { tab: Tab; }) {
+function TabListItem(props: { tab: Tab }) {
   return (
     <List.Item
       title={props.tab.title}
@@ -138,14 +85,4 @@ function Actions(props: { tab: Tab }) {
       <CopyToClipboardAction title="Copy URL" content={props.tab.url} />
     </ActionPanel>
   );
-}
-
-function BraveGoToTab(props: { tab: Tab }) {
-  async function handleAction() {
-    closeMainWindow();
-    popToRoot();
-    await setActiveTab(props.tab);
-  }
-
-  return <ActionPanel.Item title="Open tab" icon={{ source: Icon.Eye }} onAction={handleAction} />;
 }

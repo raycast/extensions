@@ -1,15 +1,9 @@
-import {
-  List,
-  ToastStyle,
-  showToast,
-  popToRoot,
-  ActionPanel,
-  OpenInBrowserAction,
-  CopyToClipboardAction,
-} from "@raycast/api";
+import { List, ToastStyle, showToast, ActionPanel, CopyToClipboardAction } from "@raycast/api";
 import { useState, ReactElement } from "react";
+import { useAsync } from "react-async";
 import { HistoryEntry, useBraveHistorySearch } from "./browserHistory";
 import { faviconUrl } from "./utils";
+import BraveOpenNewTab from "./components/brave-open-new-tab";
 
 type GroupedEntries = Map<string, HistoryEntry[]>;
 
@@ -18,7 +12,7 @@ export default function Command(): ReactElement {
   const { isLoading, error, entries } = useBraveHistorySearch(searchText);
 
   if (error) {
-    showToast(ToastStyle.Failure, "An Error Occurred", error.toString());
+    useAsync(async () => await showToast(ToastStyle.Failure, "An Error Occurred", error.toString()));
   }
 
   const groupedEntries = entries ? groupEntries(entries) : undefined;
@@ -63,16 +57,12 @@ const HistoryItem = (props: { entry: HistoryEntry }): ReactElement => {
   return <List.Item id={id} title={title} subtitle={url} icon={favicon} actions={<Actions entry={props.entry} />} />;
 };
 
-const onBrowserOpen = () => {
-  popToRoot({ clearSearchBar: true });
-};
-
 const Actions = (props: { entry: HistoryEntry }): ReactElement => {
   const { title, url } = props.entry;
 
   return (
     <ActionPanel title={title}>
-      <OpenInBrowserAction title="Open in Browser" url={url} onOpen={onBrowserOpen} />
+      <BraveOpenNewTab title={"Open in Browser"} url={url} />
       <CopyToClipboardAction title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
     </ActionPanel>
   );

@@ -5,44 +5,15 @@ import {
   CopyToClipboardAction,
   Icon,
   List,
-  OpenInBrowserAction,
   showToast,
   ToastStyle,
 } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { HistoryEntry, useBraveHistorySearch } from "./browserHistory";
-import { useEffect, useState, ReactElement } from "react";
-import { faviconUrl } from "./utils";
-
-class Tab {
-  static readonly TAB_CONTENTS_SEPARATOR: string = "~~~";
-
-  constructor(
-    public readonly title: string,
-    public readonly url: string,
-    public readonly favicon: string,
-    public readonly windowsIndex: number,
-    public readonly tabIndex: number
-  ) {}
-
-  static parse(line: string): Tab {
-    const parts = line.split(this.TAB_CONTENTS_SEPARATOR);
-
-    return new Tab(parts[0], parts[1], parts[2], +parts[3], +parts[4]);
-  }
-
-  key(): string {
-    return `${this.windowsIndex}${Tab.TAB_CONTENTS_SEPARATOR}${this.tabIndex}`;
-  }
-
-  urlWithoutScheme(): string {
-    return this.url.replace(/(^\w+:|^)\/\//, "").replace("www.", "");
-  }
-
-  braveFavicon(): string {
-    return faviconUrl(64, this.url);
-  }
-}
+import React, { useEffect, useState, ReactElement } from "react";
+import { faviconUrl, openNewTabWithUrl } from "./utils";
+import Tab from "./components/tab";
+import BraveOpenNewTab from "./components/brave-open-new-tab";
 
 async function getOpenTabs(): Promise<Tab[]> {
   const faviconFormula = '""';
@@ -72,30 +43,18 @@ async function getOpenTabs(): Promise<Tab[]> {
     .filter((line) => line.length !== 0)
     .map((line) => Tab.parse(line));
 
-  showToast(ToastStyle.Success, "Open tabs", tabs.length.toString());
+  await showToast(ToastStyle.Success, "Open tabs", tabs.length.toString());
   return tabs;
 }
 
 async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
-  popToRoot();
-  closeMainWindow({ clearRootSearch: true });
-
-  const script =
-    `
-    tell application "Brave Browser"
-      activate
-      tell window 1
-          set newTab to make new tab ` +
-    (queryText ? 'with properties {URL:"https://www.google.com/search?q=' + queryText + '"}' : "") +
-    ` 
-      end tell
-    end tell
-  `;
-
-  return await runAppleScript(script);
+  const url = queryText ? `https://www.google.com/search?q=${encodeURIComponent(queryText)}` : queryText;
+  return await openNewTabWithUrl(url);
 }
 
 async function setActiveTab(tab: Tab): Promise<void> {
+  await popToRoot();
+  await closeMainWindow({ clearRootSearch: true });
   await runAppleScript(`
     tell application "Brave Browser"
       activate
@@ -109,7 +68,7 @@ interface State {
   tabs?: Tab[];
 }
 
-export default function Command(): ReactElement {
+export default function Command() {
   const [searchText, setSearchText] = useState<string>();
   const { isLoading, error, entries } = useBraveHistorySearch(searchText);
 
@@ -139,9 +98,9 @@ export default function Command(): ReactElement {
 
   return (
     <List
-      onSearchTextChange={function (query) {
+      onSearchTextChange={async function (query) {
         setSearchText(query);
-        getTabs(query);
+        await getTabs(query);
       }}
       isLoading={isLoading}
       throttle={false}
@@ -153,14 +112,14 @@ export default function Command(): ReactElement {
           actions={<NewTabActions query={searchText} />}
         />
       </List.Section>
-      <List.Section title="Open Tabs" key="open-tabs">
-        {state.tabs?.map((tab) => (
-          <TabListItem key={tab.key()} tab={tab} />
-        ))}
-      </List.Section>
       <List.Section title="Recently Closed" key="recently-closed">
         {entries?.map((e) => (
           <HistoryItem entry={e} key={e.id} />
+        ))}
+      </List.Section>
+      <List.Section title="Open Tabs" key="open-tabs">
+        {state.tabs?.map((tab) => (
+          <TabListItem key={tab.key()} tab={tab} />
         ))}
       </List.Section>
     </List>
@@ -173,8 +132,8 @@ const NewTabActions = (props: { query: string | undefined }): ReactElement => {
   return (
     <ActionPanel title="New Tab">
       <ActionPanel.Item
-        onAction={function () {
-          openNewTab(query);
+        onAction={async () => {
+          await openNewTab(query);
         }}
         title={query ? `Search "${query}"` : "Open Empty Tab"}
       />
@@ -203,13 +162,13 @@ const HistoryItemActions = (props: { entry: HistoryEntry }): ReactElement => {
 
   return (
     <ActionPanel title={title}>
-      <OpenInBrowserAction title="Open in Tab" url={url} />
+      <BraveOpenNewTab title="Open in Tab" url={url} />
       <CopyToClipboardAction title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
     </ActionPanel>
   );
 };
 
-function TabListItem(props: { tab: Tab; }) {
+function TabListItem(props: { tab: Tab }) {
   return (
     <List.Item
       title={props.tab.title}
