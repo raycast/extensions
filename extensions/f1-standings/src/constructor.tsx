@@ -32,7 +32,7 @@ export default function Command() {
         const data = (await res.json()) as any;
         setState((previous) => ({
           ...previous,
-          items: data.MRData.StandingsTable.StandingsLists[0].ConstructorStandings,
+          items: data.MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings ?? [],
           isLoading: false,
         }));
       } catch (error) {
