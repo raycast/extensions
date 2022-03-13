@@ -90,6 +90,7 @@ export function usePasswordGenerator(
 
   const generatePassword = async () => {
     try {
+      if (state.isGenerating) return;
       dispatch({ type: "generate" });
       const password = await bitwardenApi.generatePassword(options);
       dispatch({ type: "setPassword", password });
