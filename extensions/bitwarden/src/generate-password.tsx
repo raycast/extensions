@@ -1,53 +1,23 @@
-import {
-  ActionPanel,
-  Icon,
-  Clipboard,
-  Action,
-  showHUD,
-  Form,
-  showToast,
-  Toast,
-  LocalStorage,
-  Detail,
-} from "@raycast/api";
-import { useBitwarden, useOneTimePasswordHistoryWarning, usePasswordGenerator, usePasswordOptions } from "./hooks";
-import { UnlockForm } from "./components";
+import { ActionPanel, Icon, Action, Form, showToast, Toast, LocalStorage, Detail } from "@raycast/api";
+import { useOneTimePasswordHistoryWarning, usePasswordGenerator, usePasswordOptions } from "./hooks";
 import { Bitwarden } from "./api";
 import { LOCAL_STORAGE_KEY, PASSWORD_OPTIONS_MAP } from "./const";
 import { capitalise, objectEntries } from "./utils";
 import { PasswordGeneratorOptions, PasswordOptionField, PasswordOptionsToFieldEntries, PasswordType } from "./types";
-import { Shortcut } from "@raycast/api/types/api/app/keyboard";
 import { debounce } from "throttle-debounce";
-
-const SHORTCUTS = {
-  COPY_TO_CLIPBOARD: { key: "enter", modifiers: ["opt"] } as Shortcut,
-  REGENERATE_PASSWORD: { key: "backspace", modifiers: ["opt"] } as Shortcut,
-};
 
 const FormSpace = () => <Form.Description text="" />;
 
 const GeneratePassword = () => {
   const bitwardenApi = new Bitwarden();
-  const [state, setSessionToken] = useBitwarden(bitwardenApi);
   const { options, setOption } = usePasswordOptions();
   const { password, regeneratePassword, isGenerating } = usePasswordGenerator(bitwardenApi, options);
 
   useOneTimePasswordHistoryWarning();
 
-  if (state.vaultStatus === "locked") {
-    return <UnlockForm setSessionToken={setSessionToken} bitwardenApi={bitwardenApi} />;
-  }
-  if (!options) {
-    return <Detail isLoading={true} />;
-  }
+  if (!options) return <Detail isLoading={true} />;
 
-  const showDebouncedToast = debounce(500, showToast);
-
-  const copyToClipboard = async () => {
-    if (!password) return;
-    await Clipboard.copy(password);
-    showHUD("Copied to clipboard");
-  };
+  const showDebouncedToast = debounce(1000, showToast);
 
   const regenerate = () => regeneratePassword();
 
@@ -76,17 +46,28 @@ const GeneratePassword = () => {
       isLoading={isGenerating}
       actions={
         <ActionPanel>
-          <Action
-            title="Copy password"
-            icon={Icon.Clipboard}
-            onAction={copyToClipboard}
-            shortcut={SHORTCUTS.COPY_TO_CLIPBOARD}
-          />
+          {!!password && (
+            <>
+              <Action.CopyToClipboard
+                title="Copy password"
+                icon={Icon.Clipboard}
+                content={password}
+                shortcut={{ key: "enter", modifiers: ["cmd"] }}
+              />
+              <Action.Paste
+                title="Paste password to active app"
+                icon={Icon.Text}
+                content={password}
+                shortcut={{ key: "enter", modifiers: ["cmd", "shift"] }}
+              />
+            </>
+          )}
+
           <Action
             title="Regenerate password"
             icon={Icon.ArrowClockwise}
             onAction={regenerate}
-            shortcut={SHORTCUTS.REGENERATE_PASSWORD}
+            shortcut={{ key: "backspace", modifiers: ["cmd"] }}
           />
           {process.env.NODE_ENV === "development" && (
             <Action title="Clear storage" icon={Icon.Trash} onAction={clearStorage} />
@@ -151,7 +132,7 @@ function OptionField({ option, currentOptions, handleFieldChange, field }: Optio
         id={option}
         title={label}
         label={hint}
-        value={Boolean(option ? currentOptions?.[option] ?? false : false)}
+        value={Boolean(currentOptions?.[option])}
         onChange={handleFieldChange}
       />
     );
@@ -163,7 +144,7 @@ function OptionField({ option, currentOptions, handleFieldChange, field }: Optio
       id={option}
       title={label}
       placeholder={hint}
-      value={String(option ? currentOptions?.[option] ?? "" : "")}
+      value={String(currentOptions?.[option] ?? "")}
       onChange={handleFieldChange}
     />
   );
