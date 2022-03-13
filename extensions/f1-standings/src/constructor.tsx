@@ -3,7 +3,7 @@ import { ActionPanel, Action, List, Color, showToast, Toast, popToRoot } from "@
 import fetch from "node-fetch";
 import { ConstructorStanding } from "./types";
 import { useSeasons } from "./useSeasons";
-import flagFromNationality from "./flagFromNationality";
+import getFlag from "./getFlag";
 
 interface State {
   season: string;
@@ -77,7 +77,7 @@ export default function Command() {
               source: item.position + ".png",
               tintColor: Color.PrimaryText,
             }}
-            title={flagFromNationality(item.Constructor?.nationality) + " " + item.Constructor.name}
+            title={getFlag(item.Constructor?.nationality) + " " + item.Constructor.name}
             accessoryTitle={String(item.points)}
             actions={
               <ActionPanel title={item.Constructor.name}>
