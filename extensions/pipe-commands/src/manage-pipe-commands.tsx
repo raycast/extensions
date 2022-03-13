@@ -24,8 +24,7 @@ export default function managePipeCommands() {
           <List.Item
             key={path}
             icon={Icon.ExclamationMark}
-            title="Invalid Pipe Command"
-            subtitle={basename(path)}
+            title={basename(path)}
             detail={
               <List.Item.Detail
                 markdown={["## Errors", ...errors.map((error) => `- ${error}`), "## Content", codeblock(content)].join(
