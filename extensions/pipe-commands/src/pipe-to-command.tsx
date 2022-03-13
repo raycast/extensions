@@ -39,7 +39,7 @@ export function PipeCommands(props: { input: PipeInput }): JSX.Element {
   }, []);
 
   return (
-    <List isLoading={typeof parsed == "undefined"} searchBarPlaceholder={`Pipe ${props.input.type} to`}>
+    <List isLoading={typeof parsed == "undefined"} searchBarPlaceholder="Pipe to">
       <List.Section title="Pipe Commands">
         {parsed?.commands
           .filter((command) => command.metadatas.argument1.type == props.input.type)
