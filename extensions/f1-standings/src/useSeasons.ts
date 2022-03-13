@@ -11,7 +11,7 @@ export const useSeasons = () => {
   const [seasons, setSeasons] = useState<Season[]>([]);
 
   useEffect(() => {
-    async function fetchDrivers() {
+    async function fetchSeasons() {
       try {
         const res = await fetch("https://ergast.com/api/f1/seasons.json?limit=100");
         const data = (await res.json()) as any;
@@ -27,7 +27,7 @@ export const useSeasons = () => {
       }
     }
 
-    fetchDrivers();
+    fetchSeasons();
   }, []);
 
   return seasons;
