@@ -3,7 +3,18 @@
  * RPC spec is available at https://trac.transmissionbt.com/browser/trunk/extras/rpc-spec.txt
  */
 
-import { List, showToast, Toast, ActionPanel, Action, getPreferenceValues, useNavigation } from "@raycast/api";
+import {
+  List,
+  showToast,
+  Toast,
+  ActionPanel,
+  Action,
+  getPreferenceValues,
+  useNavigation,
+  Icon,
+  Color,
+  Keyboard,
+} from "@raycast/api";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import Transmission from "transmission-promise";
 import { $enum } from "ts-enum-util";
@@ -17,6 +28,10 @@ import { useAsync } from "react-use";
 import { type SessionStats, TorrentStatus, type Torrent } from "./types";
 import { formatStatus, statusIcon } from "./utils/status";
 import { TorrentConfiguration } from "./components/TorrentConfiguration";
+import path from "path";
+import { existsSync } from "fs";
+
+const pauseIcon = { source: "status-stopped.png", tintColor: Color.SecondaryText };
 
 const TorrentStatusLabel: Record<string, string> = {
   Stopped: "Stopped",
@@ -153,7 +168,7 @@ export default function TorrentList() {
                 return;
               }
               await updateData();
-              showToast(Toast.Style.Success, `Torrent ${torrent.name} stopped`);
+              showToast(Toast.Style.Success, `Torrent ${torrent.name} paused`);
             }}
             onStart={async (torrent) => {
               try {
@@ -164,7 +179,7 @@ export default function TorrentList() {
                 return;
               }
               await updateData();
-              showToast(Toast.Style.Success, `Torrent ${torrent.name} started`);
+              showToast(Toast.Style.Success, `Torrent ${torrent.name} resumed`);
             }}
             onRemove={async (torrent, deleteLocalData) => {
               try {
@@ -180,12 +195,12 @@ export default function TorrentList() {
             onStartAll={async () => {
               await startAllTorrents(transmission);
               await updateData();
-              showToast(Toast.Style.Success, `All torrents started`);
+              showToast(Toast.Style.Success, `All torrents resumed`);
             }}
             onStopAll={async () => {
               await stopAllTorrents(transmission);
               await updateData();
-              showToast(Toast.Style.Success, `All torrents stopped`);
+              showToast(Toast.Style.Success, `All torrents paused`);
             }}
           />
         ))}
@@ -236,6 +251,8 @@ function TorrentListItem({
   const downloadStats = [`↓ ${rateDownload}`, " - ", `↑ ${rateUpload}`, " - ", percentDone].join(" ");
   const details = useAsync(() => renderDetails(torrent, downloadStats), [torrent, downloadStats]);
 
+  const files = torrent.files.filter((file) => existsSync(path.join(torrent.downloadDir, file.name)));
+
   return (
     <List.Item
       id={String(torrent.id)}
@@ -246,24 +263,82 @@ function TorrentListItem({
       detail={isShowingDetail && <List.Item.Detail markdown={details.value} isLoading={details.loading} />}
       actions={
         <ActionPanel>
-          <Action title={isShowingDetail ? "Hide details" : "Show details"} onAction={onToggleDetail} />
           <ActionPanel.Section title={`Selected Torrent (${selectedTorrentTitle})`}>
             <Action
-              title={torrent.status === TorrentStatus.Stopped ? "Start Torrent" : "Stop Torrent"}
+              icon={Icon.Binoculars}
+              title={isShowingDetail ? "Hide details" : "Show details"}
+              onAction={onToggleDetail}
+            />
+            <Action
+              icon={torrent.status === TorrentStatus.Stopped ? Icon.ArrowClockwise : pauseIcon}
+              title={torrent.status === TorrentStatus.Stopped ? "Resume Download" : "Pause Download"}
               onAction={() => (torrent.status === TorrentStatus.Stopped ? onStart(torrent) : onStop(torrent))}
             />
-            <ActionPanel.Submenu title="Remove Torrent">
-              <Action title="Preserve Local Data" onAction={() => onRemove(torrent, false)} />
-              <Action title="Delete Local Data" onAction={() => onRemove(torrent, true)} />
+            <ActionPanel.Submenu
+              title="Remove Torrent"
+              icon={Icon.Trash}
+              shortcut={{ key: "backspace", modifiers: ["cmd"] }}
+            >
+              <Action
+                title="Preserve Local Data"
+                shortcut={{ key: "backspace", modifiers: ["cmd"] }}
+                onAction={() => onRemove(torrent, false)}
+              />
+              <Action
+                title="Delete Local Data"
+                shortcut={{ key: "backspace", modifiers: ["cmd", "shift"] }}
+                onAction={() => onRemove(torrent, true)}
+              />
             </ActionPanel.Submenu>
+            <Action.Open
+              title="Open Download Folder"
+              shortcut={{ key: "d", modifiers: ["cmd"] }}
+              target={torrent.downloadDir}
+            />
+            {files.length >= 1 ? (
+              <ActionPanel.Submenu
+                icon={Icon.Upload}
+                title="Open Downloaded Files..."
+                shortcut={{ key: "o", modifiers: ["cmd"] }}
+              >
+                {files.map((file, index) => (
+                  <Action.OpenWith
+                    key={index}
+                    shortcut={
+                      index < 10 ? { key: String(index + 1) as Keyboard.KeyEquivalent, modifiers: ["cmd"] } : undefined
+                    }
+                    title={file.name}
+                    path={path.join(torrent.downloadDir, file.name)}
+                  />
+                ))}
+              </ActionPanel.Submenu>
+            ) : files.length === 1 ? (
+              <Action.OpenWith
+                icon={Icon.Upload}
+                title={files[0].name}
+                path={path.join(torrent.downloadDir, files[0].name)}
+              />
+            ) : null}
             <Action
+              icon={Icon.Gear}
               title="Configuration"
+              shortcut={{ key: ",", modifiers: ["cmd"] }}
               onAction={() => push(<TorrentConfiguration torrent={torrent} updateData={updateData} />)}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title={`All Torrents (↓ ${totalRateDownload} - ↑ ${totalRateUpload})`}>
-            <Action title="Start All" onAction={() => onStartAll(torrent)} />
-            <Action title="Stop All" onAction={() => onStopAll(torrent)} />
+            <Action
+              shortcut={{ key: "r", modifiers: ["cmd", "shift"] }}
+              title="Resume All"
+              icon={Icon.ArrowClockwise}
+              onAction={() => onStartAll(torrent)}
+            />
+            <Action
+              shortcut={{ key: "p", modifiers: ["cmd", "shift"] }}
+              title="Pause All"
+              icon={pauseIcon}
+              onAction={() => onStopAll(torrent)}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
