@@ -7,10 +7,14 @@ import { convertMacTime2JSTime, getSectionNameByDate } from "../utils/date";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const taskObject2Task = (object: Record<string, any>): Task => {
   return {
-    id: object.id as string,
-    title: object.title as string,
+    id: object.id as Task["id"],
+    title: object.title as Task["title"],
+    content: object.content as Task["content"],
+    desc: object.desc as Task["desc"],
     priority: object.priority as Task["priority"],
     projectId: object.projectId as Task["projectId"],
+    items: object.items as Task["items"],
+    kind: object.kind as Task["kind"],
   };
 };
 

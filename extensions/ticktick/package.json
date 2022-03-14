@@ -22,7 +22,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.2",
+    "@raycast/api": "^1.30.2",
     "moment": "^2.29.1",
     "run-applescript": "^6.0.0"
   },
@@ -36,7 +36,6 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-html": "^6.2.0",
     "eslint-plugin-react-hooks": "^4.2.0",
-    "react-devtools": "^4.21.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

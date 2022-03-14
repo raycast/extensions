@@ -10,8 +10,9 @@ const TaskItem: React.FC<{
   priority: Task["priority"];
   projectId: Task["projectId"];
   actionType: "today" | "week" | "project";
+  detailMarkdown: string;
 }> = (props) => {
-  const { id, title, priority, projectId, actionType } = props;
+  const { id, title, priority, projectId, actionType, detailMarkdown } = props;
 
   const projectName = useMemo(() => {
     return getProjectNameById(projectId) || "";
@@ -51,6 +52,7 @@ const TaskItem: React.FC<{
         </ActionPanel>
       }
       accessoryTitle={addSpaceBetweenEmojiAndText(projectName)}
+      detail={<List.Item.Detail markdown={detailMarkdown} />}
     />
   );
 };

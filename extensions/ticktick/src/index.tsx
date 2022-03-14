@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import React, { useEffect, useMemo, useState } from "react";
 import { getToday } from "./service/osScript";
-import { Section } from "./service/task";
+import { getTaskDetailMarkdownContent, Section } from "./service/task";
 import useStartApp from "./hooks/useStartApp";
 import TaskItem from "./components/taskItem";
 import useSearchTasks from "./hooks/useSearchTasks";
@@ -36,7 +36,12 @@ const TickTickToday: React.FC<{}> = () => {
   }, [isInitCompleted, searchQuery, searchTasks, todaySections]);
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setSearchQuery} searchBarPlaceholder="Search all tasks...">
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setSearchQuery}
+      searchBarPlaceholder="Search all tasks..."
+      isShowingDetail
+    >
       {searchTasks
         ? searchTasks.map((task) => (
             <TaskItem
@@ -46,6 +51,7 @@ const TickTickToday: React.FC<{}> = () => {
               title={task.title}
               projectId={task.projectId}
               priority={task.priority}
+              detailMarkdown={getTaskDetailMarkdownContent(task)}
             />
           ))
         : todaySections?.map((section) => {
@@ -59,6 +65,7 @@ const TickTickToday: React.FC<{}> = () => {
                     title={task.title}
                     projectId={task.projectId}
                     priority={task.priority}
+                    detailMarkdown={getTaskDetailMarkdownContent(task)}
                   />
                 ))}
               </List.Section>
