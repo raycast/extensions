@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "workflowy",
+  "title": "Workflowy",
+  "description": "Browse you workflowy tree",
+  "icon": "icon.png",
+  "author": "pomdtr",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Browse Nodes",
+      "description": "Template for showing a static list",
+      "mode": "view"
+    },
+    {
+      "name": "favourites",
+      "title": "Browse Favourites",
+      "description": "Template for showing a static list",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "sessionID",
+      "title": "Session ID Cookie",
+      "required": true,
+      "type": "textfield",
+      "description": "Workflowy session ID cookie"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.30.2",
+    "html-to-text": "^8.1.0",
+    "node-fetch": "^3.2.3",
+    "sanitize-html": "^2.7.0",
+    "swr": "^1.2.2",
+    "turndown": "^7.1.1"
+  },
+  "devDependencies": {
+    "@types/html-to-text": "^8.1.0",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@types/sanitize-html": "^2.6.2",
+    "@types/turndown": "^5.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
