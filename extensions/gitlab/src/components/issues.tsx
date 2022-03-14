@@ -202,6 +202,11 @@ interface IssueListProps {
   state?: IssueState;
   project?: Project;
   group?: Group;
+  searchBarAccessory?:
+    | boolean
+    | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
+    | null
+    | undefined;
 }
 
 function navTitle(project?: Project, group?: Group): string | undefined {
@@ -219,6 +224,7 @@ export function IssueList({
   state = IssueState.all,
   project = undefined,
   group = undefined,
+  searchBarAccessory = undefined,
 }: IssueListProps): JSX.Element {
   const [searchText, setSearchText] = useState<string>();
   const { issues, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
@@ -239,6 +245,7 @@ export function IssueList({
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
+      searchBarAccessory={searchBarAccessory}
       navigationTitle={navTitle(project, group)}
     >
       <List.Section title={title} subtitle={issues?.length.toString() || ""}>
@@ -369,7 +376,7 @@ export function useSearch(
     return () => {
       didUnmount = true;
     };
-  }, [query, timestamp]);
+  }, [query, timestamp, project]);
 
   return { issues, error, isLoading, refresh };
 }
