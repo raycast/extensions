@@ -20,17 +20,6 @@ versions.
 
 ---
 
-## Adding a GitHub PAT
-
-- This extension would still work without the token, but to avoid rate limiting
-  it is recommended that you add a GitHub Personal Access Token in the
-  extension's preferences.
-
-- [Create the token from here](https://github.com/settings/tokens)
-- No additional scopes are required for the token.
-
----
-
 ## Versions
 
 ![Versions](./media/ss-versions.png)
