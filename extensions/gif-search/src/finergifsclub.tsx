@@ -27,7 +27,7 @@ export default function Command() {
       throttle={true}
       searchBarPlaceholder="Search quotes from The Office on The Finer Gifs Club..."
       onSearchTextChange={search}
-      isShowingDetail={showPreview && !isLoading}
+      isShowingDetail={showPreview && !isLoading && results?.items?.length}
     >
       <GifList term={results?.term} results={results?.items} />
     </List>
