@@ -408,12 +408,12 @@ export class GitLab {
     }
   }
 
-  async getIssues(params: Record<string, any>, project?: Project): Promise<Issue[]> {
+  async getIssues(params: Record<string, any>, project?: Project, all?: boolean): Promise<Issue[]> {
     const projectPrefix = project ? `projects/${project.id}/` : "";
     if (!params.with_labels_details) {
       params.with_labels_details = "true";
     }
-    const issueItems: Issue[] = await this.fetch(`${projectPrefix}issues`, params).then((issues) => {
+    const issueItems: Issue[] = await this.fetch(`${projectPrefix}issues`, params, all).then((issues) => {
       return issues.map((issue: any) => jsonDataToIssue(issue));
     });
     return issueItems;

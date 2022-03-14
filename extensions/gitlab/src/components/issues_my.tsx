@@ -7,6 +7,8 @@ import { daysInSeconds } from "../utils";
 import { IssueListItem, IssueScope, IssueState } from "./issues";
 import { MyProjectsDropdown } from "./project";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 function MyIssueList(props: {
   issues: Issue[] | undefined;
   isLoading: boolean;
@@ -19,14 +21,12 @@ function MyIssueList(props: {
     | undefined;
 }): JSX.Element {
   const issues = props.issues;
-  //const { issues, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
 
   if (!issues) {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
   const refresh = () => {
-    console.log("REFRETCH CALLED");
     props.performRefetch();
   };
 
@@ -54,7 +54,7 @@ export function MyIssues(props: { scope: IssueScope; state: IssueState }): JSX.E
     showToast(Toast.Style.Failure, "Cannot load issues", error);
   }
   const issues: Issue[] | undefined = project ? raw?.filter((i) => i.project_id === project.id) : raw;
-  const title = scope == IssueScope.assigned_to_me ? "Your Assigned Issues" : "Your Created Issues";
+  const title = scope == IssueScope.assigned_to_me ? "Your Assigned Issues" : "Your Recently Created Issues";
   return (
     <MyIssueList
       isLoading={isLoading}
@@ -79,8 +79,11 @@ function useMyIssues(
   } = useCache<Issue[] | undefined>(
     `myissues_${scope}_${state}`,
     async (): Promise<Issue[] | undefined> => {
-      console.log("REFETCH");
-      return await gitlab.getIssues({ state, scope });
+      return await gitlab.getIssues(
+        { state, scope },
+        undefined,
+        scope === IssueScope.assigned_to_me && state === IssueState.opened ? true : false
+      );
     },
     {
       deps: [project, scope, state],

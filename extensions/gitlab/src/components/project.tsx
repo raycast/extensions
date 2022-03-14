@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  List,
-  showToast,
-  ToastStyle,
-  PushAction,
-  Color,
-  Image,
-} from "@raycast/api";
+import { ActionPanel, CopyToClipboardAction, List, showToast, ToastStyle, PushAction, Color } from "@raycast/api";
 import { useState } from "react";
 import { gitlab, gitlabgql } from "../common";
 import { Project, searchData } from "../gitlabapi";

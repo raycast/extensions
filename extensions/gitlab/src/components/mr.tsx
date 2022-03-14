@@ -257,7 +257,7 @@ export function MRListItem(props: {
     <List.Item
       id={mr.id.toString()}
       title={mr.title}
-      subtitle={"#" + mr.iid}
+      subtitle={"!" + mr.iid}
       icon={icon}
       accessoryIcon={accessoryIcon}
       accessoryTitle={toDateString(mr.updated_at)}
