@@ -1,5 +1,6 @@
-import { useNavigation, List, Icon, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { useNavigation, List, Icon, ActionPanel, Action, showToast, Toast, environment } from "@raycast/api";
 import { convert } from "html-to-text";
+import { resolve } from "path";
 import { useState } from "react";
 import useSWR from "swr";
 import { workflowyFetcher } from "./fetch";
@@ -89,7 +90,11 @@ export function Node(props: {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser url={link} />
-            <Action.OpenInBrowser title="Open in Desktop App" url={`workflowy://${link}`} />
+            <Action.OpenInBrowser
+              icon={resolve(environment.assetsPath, "icon.png")}
+              title="Open in Desktop App"
+              url={`workflowy://${link}`}
+            />
             <Action
               icon={Icon.Text}
               title="Toggle Details"

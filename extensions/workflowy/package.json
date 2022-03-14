@@ -2,21 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "workflowy",
   "title": "Workflowy",
-  "description": "Browse you workflowy tree",
+  "description": "Browse your Workflowy Tree from Raycast",
   "icon": "icon.png",
   "author": "pomdtr",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Browse Nodes",
-      "description": "Template for showing a static list",
-      "mode": "view"
-    },
-    {
-      "name": "favourites",
-      "title": "Browse Favourites",
-      "description": "Template for showing a static list",
+      "title": "Search Nodes",
+      "subtitle": "Workflowy",
+      "description": "Browse your Workflowy Tree from Raycast",
       "mode": "view"
     }
   ],

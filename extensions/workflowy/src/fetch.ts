@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
-import { WorkflowyFavourite, WorkflowyNode } from "./types";
+import { WorkflowyNode } from "./types";
 
 interface WorkflowyResponse {
   projectTreeData: {
@@ -39,23 +39,7 @@ async function fetchNodes(sessionId: string) {
   return { nodes, parentToChildren };
 }
 
-async function fetchSettings(sessionId: string) {
-  const res = await fetch("https://workflowy.com/get_user_data/", {
-    headers: {
-      accept: "application/json",
-      cookie: `sessionid=${sessionId};`,
-    },
-    referrerPolicy: "no-referrer",
-    body: null,
-    method: "GET",
-  });
-  const payload: any = await res.json();
-  return payload.settings;
-}
-
 export async function workflowyFetcher() {
   const { sessionID } = getPreferenceValues();
-  const [nodes, settings] = await Promise.all([fetchNodes(sessionID), fetchSettings(sessionID)]);
-  const favourites: WorkflowyFavourite[] = JSON.parse(settings.saved_views_json);
-  return { ...nodes, favourites };
+  return await fetchNodes(sessionID);
 }
