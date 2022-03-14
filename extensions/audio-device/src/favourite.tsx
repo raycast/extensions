@@ -19,4 +19,4 @@ export default async () => {
       title: "No favourite output audio device specified",
     });
   }
-}
+};

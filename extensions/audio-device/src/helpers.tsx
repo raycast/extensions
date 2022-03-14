@@ -114,7 +114,11 @@ function SetAudioDeviceAction({ device, type }: SetAudioDeviceActionProps) {
           showHUD(`Active ${type} audio device set to ${device.name}`);
         } catch (e) {
           console.log(e);
-          showToast(ToastStyle.Failure, `Error!`, `There was an error setting the active ${type} audio device to ${device.name}`);
+          showToast(
+            ToastStyle.Failure,
+            `Error!`,
+            `There was an error setting the active ${type} audio device to ${device.name}`
+          );
         }
       }}
     />

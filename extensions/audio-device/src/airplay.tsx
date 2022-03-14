@@ -9,7 +9,7 @@ import {
   popToRoot,
   showHUD,
   showToast,
-  Toast
+  Toast,
 } from "@raycast/api";
 import { useAsync } from "react-use";
 import { useEffect, useState } from "react";
