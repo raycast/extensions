@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "slack",
   "title": "Slack",
-  "description": "Search for chats, snooze notifications, and set your presence status.",
+  "description": "Search for chats, see unread messages, snooze notifications, and set your presence status.",
   "categories": [
     "Communication",
     "Productivity"
@@ -17,6 +17,13 @@
       "subtitle": "Slack",
       "description": "Search for all workspace members, group chats, and channels and open them directly in your Slack app.",
       "mode": "view"
+    },
+    {
+      "name": "unread-messages",
+      "title": "Unread Messages",
+      "subtitle": "Slack",
+      "description": "Open an overview of unread messages directly in your native Slack app.",
+      "mode": "no-view"
     },
     {
       "name": "set-snooze",
@@ -46,7 +53,8 @@
   "dependencies": {
     "@raycast/api": "^1.30.1",
     "@slack/web-api": "^6.7.0",
-    "date-fns": "^2.28.0"
+    "date-fns": "^2.28.0",
+    "run-applescript": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
