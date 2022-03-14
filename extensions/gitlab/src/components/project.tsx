@@ -185,3 +185,33 @@ export function useMyProjects(): { projects: Project[] | undefined; error?: stri
   );
   return { projects, error, isLoading };
 }
+
+export function MyProjectsDropdown(props: { onChange: (pro: Project | undefined) => void }): JSX.Element | null {
+  const { projects: myprojects } = useMyProjects();
+  if (myprojects) {
+    return (
+      <List.Dropdown
+        tooltip="Select Project"
+        onChange={(newValue) => {
+          const pro = myprojects.find((p) => `${p.id}` === newValue);
+          props.onChange(pro);
+        }}
+      >
+        <List.Dropdown.Section>
+          <List.Dropdown.Item title="All Projects" value="-" />
+        </List.Dropdown.Section>
+        <List.Dropdown.Section>
+          {myprojects.map((pro) => (
+            <List.Dropdown.Item
+              key={`${pro.id}`}
+              title={pro.name_with_namespace}
+              icon={projectIconUrl(pro)}
+              value={`${pro.id}`}
+            />
+          ))}
+        </List.Dropdown.Section>
+      </List.Dropdown>
+    );
+  }
+  return null;
+}
