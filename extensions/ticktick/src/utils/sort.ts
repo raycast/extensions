@@ -20,7 +20,7 @@ function _compareId(id1: string, id2: string) {
   if (id1 == null && id2 == null) {
     return 0;
   }
-  let ret = _defined(id1, id2);
+  const ret = _defined(id1, id2);
   if (ret !== 0) {
     return ret;
   }
