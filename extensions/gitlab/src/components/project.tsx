@@ -1,4 +1,13 @@
-import { ActionPanel, CopyToClipboardAction, List, showToast, ToastStyle, PushAction, Color } from "@raycast/api";
+import {
+  ActionPanel,
+  CopyToClipboardAction,
+  List,
+  showToast,
+  ToastStyle,
+  PushAction,
+  Color,
+  Image,
+} from "@raycast/api";
 import { useState } from "react";
 import { gitlab, gitlabgql } from "../common";
 import { Project, searchData } from "../gitlabapi";
@@ -186,6 +195,12 @@ export function useMyProjects(): { projects: Project[] | undefined; error?: stri
   return { projects, error, isLoading };
 }
 
+function MyProjectsDropdownItem(props: { project: Project }): JSX.Element {
+  const pro = props.project;
+  const { localFilepath } = useImage(projectIconUrl(pro), GitLabIcons.project);
+  return <List.Dropdown.Item title={pro.name_with_namespace} icon={localFilepath} value={`${pro.id}`} />;
+}
+
 export function MyProjectsDropdown(props: { onChange: (pro: Project | undefined) => void }): JSX.Element | null {
   const { projects: myprojects } = useMyProjects();
   if (myprojects) {
@@ -202,12 +217,7 @@ export function MyProjectsDropdown(props: { onChange: (pro: Project | undefined)
         </List.Dropdown.Section>
         <List.Dropdown.Section>
           {myprojects.map((pro) => (
-            <List.Dropdown.Item
-              key={`${pro.id}`}
-              title={pro.name_with_namespace}
-              icon={projectIconUrl(pro)}
-              value={`${pro.id}`}
-            />
+            <MyProjectsDropdownItem key={`${pro.id}`} project={pro} />
           ))}
         </List.Dropdown.Section>
       </List.Dropdown>

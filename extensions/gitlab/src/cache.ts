@@ -3,7 +3,7 @@ import path from "path/posix";
 import * as fs from "fs/promises";
 import { constants } from "fs";
 import { currentSeconds, daysInSeconds, fileExists, getErrorMessage } from "./utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function getLargeCacheDirectory(): string {
   const sp = environment.supportPath;
@@ -119,13 +119,13 @@ export function useCache<T>(
   isLoading: boolean;
   performRefetch: () => void;
 } {
-  const secondsToRefetch = options.secondsToRefetch === undefined ? 5 * 60 : options.secondsToRefetch;
+  const secondsToRefetchUser = options.secondsToRefetch === undefined ? 5 * 60 : options.secondsToRefetch;
   const secondsToInvalid = options.secondsToInvalid === undefined ? daysInSeconds(3) : options.secondsToInvalid;
   const [data, setData] = useState<T>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [timestamp, setTimestamp] = useState<Date>(new Date());
-  let shouldForceRefetch = false;
+  const shouldForceRefetch = useRef(false);
   const depsAll = [timestamp];
   if (options.deps) {
     for (const d of options.deps) {
@@ -141,7 +141,7 @@ export function useCache<T>(
   };
 
   const performRefetch = () => {
-    shouldForceRefetch = true;
+    shouldForceRefetch.current = true;
     setTimestamp(new Date());
   };
 
@@ -162,6 +162,10 @@ export function useCache<T>(
 
       try {
         console.log("check data from cache");
+        const secondsToRefetch = shouldForceRefetch.current === true ? 0 : secondsToRefetchUser;
+        if (shouldForceRefetch.current) {
+          console.log("force refetch");
+        }
         const cacheData = await getLargeCacheObjectData(key);
         if (cacheData && cacheData.ageInSeconds < secondsToInvalid) {
           console.log("cache data found");
@@ -211,7 +215,7 @@ export function useCache<T>(
         }
       } finally {
         if (shouldForceRefetch) {
-          shouldForceRefetch = false;
+          shouldForceRefetch.current = false;
         }
         if (!didUnmount && !refetch) {
           setIsLoading(false);

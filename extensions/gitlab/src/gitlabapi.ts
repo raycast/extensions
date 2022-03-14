@@ -49,7 +49,7 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
     id: mr.id,
     iid: mr.iid,
     state: mr.state,
-    updated_at: new Date(mr.updated_at),
+    updated_at: mr.updated_at,
     author: userFromJson(mr.author),
     project_id: mr.project_id,
     description: mr.description,
@@ -80,7 +80,7 @@ export function jsonDataToIssue(issue: any): Issue {
     iid: issue.iid,
     reference_full: issue.references?.full,
     state: issue.state,
-    updated_at: new Date(issue.updated_at),
+    updated_at: issue.updated_at,
     author: userFromJson(issue.author),
     project_id: issue.project_id,
     milestone: dataToMilestone(issue.milestone),
@@ -162,7 +162,7 @@ export class Issue {
   public reference_full = "";
   public state = "";
   public author: User | undefined;
-  public updated_at = new Date(2000, 1, 1);
+  public updated_at = "";
   public project_id = 0;
   public milestone?: Milestone = undefined;
   public labels: Label[] = [];
@@ -176,7 +176,7 @@ export class MergeRequest {
   public iid = 0;
   public state = "";
   public author: User | undefined;
-  public updated_at = new Date(2000, 1, 1);
+  public updated_at = "";
   public project_id = 0;
   public reference_full = "";
   public labels: Label[] = [];

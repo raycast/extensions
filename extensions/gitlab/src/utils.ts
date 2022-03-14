@@ -36,9 +36,10 @@ export function projectIcon(project: Project): ImageLike {
   return { source: result, mask: ImageMask.Circle };
 }
 
-export function toDateString(d: Date): string {
-  const mo = new Intl.DateTimeFormat("en", { month: "short" }).format(d);
-  const da = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(d);
+export function toDateString(d: string): string {
+  const date = new Date(d);
+  const mo = new Intl.DateTimeFormat("en", { month: "short" }).format(date);
+  const da = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(date);
   return `${da}. ${mo}`;
 }
 

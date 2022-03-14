@@ -3,7 +3,7 @@ import { MRList, MRScope } from "./components/mr";
 import { MyProjectsDropdown } from "./components/project";
 import { Project } from "./gitlabapi";
 
-export default function MyMergeRequests(): JSX.Element {
+export default function MyMergeRequestsRoot(): JSX.Element {
   const [project, setProject] = useState<Project>();
   return (
     <MRList
