@@ -1,6 +1,7 @@
 import { splitEvery } from "ramda";
 import { isDarkMode } from "./darkMode";
 import BitField from "bitfield";
+import { renderToString } from "react-dom/server";
 
 const theme = {
   light: {
@@ -11,6 +12,39 @@ const theme = {
     gray: "#4F4F51",
     accent: "#007DD7",
   },
+};
+
+interface CellProps {
+  alpha: number;
+  complete: boolean;
+  colors: {
+    gray: string;
+    accent: string;
+  };
+  cellSize: number;
+  strokeWidth: number;
+  colIndex: number;
+  rowIndex: number;
+}
+
+const Cell = ({ alpha, complete, colors, cellSize, strokeWidth, colIndex, rowIndex }: CellProps) => {
+  if (complete) alpha = 1;
+
+  const fill = alpha < 0.1 ? colors.gray : colors.accent;
+  const opacity = alpha < 0.1 ? 1 : Math.max(0.5, alpha);
+  const size = cellSize - strokeWidth * 2;
+  return (
+    <rect
+      fill={fill}
+      fillOpacity={opacity}
+      x={colIndex * cellSize + strokeWidth}
+      y={rowIndex * cellSize}
+      width={size}
+      height={size}
+      rx={strokeWidth}
+      ry={strokeWidth}
+    />
+  );
 };
 
 export async function renderPieces({
@@ -43,21 +77,24 @@ export async function renderPieces({
 
   const cellsMarkup = splitEvery(18, cells)
     .map((row: number[], rowIndex: number) =>
-      row.map((alpha, colIndex) => {
-        if (complete) alpha = 1;
-
-        const fill = alpha < 0.1 ? colors.gray : colors.accent;
-        const opacity = alpha < 0.1 ? 1 : Math.max(0.5, alpha);
-        const size = cellSize - strokeWidth * 2;
-        return `<rect fill="${fill}" fill-opacity="${opacity}" x="${colIndex * cellSize + strokeWidth}" y="${
-          rowIndex * cellSize
-        }" width="${size}" height="${size}" rx="${strokeWidth}" ry="${strokeWidth}" />`;
-      })
+      row.map((alpha, colIndex) => (
+        <Cell
+          key={`${rowIndex}-${colIndex}`}
+          alpha={alpha}
+          complete={complete}
+          colors={colors}
+          cellSize={cellSize}
+          strokeWidth={strokeWidth}
+          colIndex={colIndex}
+          rowIndex={rowIndex}
+        />
+      ))
     )
-    .flat()
-    .join("");
+    .flat();
 
-  return `<svg style="width: 100%;" viewBox="0 0 ${width} ${width}" xmlns="http://www.w3.org/2000/svg">
-    ${cellsMarkup}
-  </svg>`;
+  return renderToString(
+    <svg viewBox={`0 0 ${width} ${width}`} xmlns="http://www.w3.org/2000/svg">
+      {cellsMarkup}
+    </svg>
+  );
 }
