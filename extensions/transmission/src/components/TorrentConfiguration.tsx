@@ -23,7 +23,7 @@ export const TorrentConfiguration = ({ id }: { id: Torrent["id"] }) => {
           <Form.Dropdown
             id="bandwidthPriority"
             title="Transfer Priority"
-            value={String(BandwidthPriority[torrent.bandwidthPriority])}
+            value={String(torrent.bandwidthPriority)}
             onChange={async (priority) => {
               await mutateTorrent.update(torrent.id, {
                 bandwidthPriority: Number(priority),
