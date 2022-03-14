@@ -10,7 +10,7 @@
 /extensions/api-icon-list                            @PitNikola
 /extensions/apple-notes                              @tumispro @ron-myers
 /extensions/atomic                                   @joepio
-/extensions/audio-device                             @benvp @mathieudutour
+/extensions/audio-device                             @benvp @mathieudutour @mike182uk @FezVrasta
 /extensions/authy                                    @guga4ka @lukekarrys
 /extensions/banca-d-italia-currency-converter        @FezVrasta
 /extensions/base64                                   @DanielSinclair
@@ -22,7 +22,7 @@
 /extensions/bitbucket                                @Lp-Francois
 /extensions/bitly-url-shortener                      @blessanm86
 /extensions/bitrise                                  @ubuntudroid
-/extensions/bitwarden                                @pomdtr @daniel-stoneuk
+/extensions/bitwarden                                @pomdtr @daniel-stoneuk @jomifepe
 /extensions/brew                                     @nhojb
 /extensions/brew-services                            @es183923
 /extensions/bttv-emote                               @Aayush9029
@@ -78,7 +78,7 @@
 /extensions/envato                                   @Slllava
 /extensions/ethereum-utils                           @Destiner
 /extensions/everhour                                 @farisaziz12
-/extensions/f1-standings                             @csigritz
+/extensions/f1-standings                             @csigritz @sxn
 /extensions/facetime                                 @ron-myers
 /extensions/figma-files                              @michaelwschultz
 /extensions/file-manager                             @es183923
@@ -141,6 +141,7 @@
 /extensions/lark                                     @tmkx
 /extensions/lastfm                                   @eggsy
 /extensions/linguee                                  @geekdada
+/extensions/linux-command                            @jaywcjlove
 /extensions/lobsters                                 @dev99problems
 /extensions/lorem-ipsum                              @AntonNiklasson
 /extensions/markdown-reference                       @codedbyjordan
@@ -204,6 +205,7 @@
 /extensions/search-rubygems                          @aleks
 /extensions/semantic-scholar                         @blainerothrock
 /extensions/send-to-flomo                            @ahonn
+/extensions/sentry                                   @thomaspaulmann
 /extensions/sf-symbols-search                        @peteschaffner
 /extensions/shopify-developer-changelog              @sandypockets
 /extensions/simpread                                 @Kenshin
@@ -218,6 +220,7 @@
 /extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers
 /extensions/spotify-player                           @mattisssa
 /extensions/stackoverflow                            @sadanand-singh
+/extensions/stripe                                   @pradeepb28
 /extensions/surge                                    @ysj151215
 /extensions/swift-evolution                          @BProg
 /extensions/switchhosts                              @tiancheng92

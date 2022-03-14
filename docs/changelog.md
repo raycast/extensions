@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.30.2 – 2022-03-11
+
+### 🐞 Fixes
+
+- Fixed updating the list `isShowingDetail` property
+- Fixed unnecessarily reloading the list detail view on search term changes
+
 ## 1.30.0 - 2022-03-09
 
 ### ✨ New
