@@ -27,7 +27,7 @@ export default function Command() {
       throttle={true}
       searchBarPlaceholder="Search for gifs on Tenor..."
       onSearchTextChange={search}
-      isShowingDetail={showPreview && !isLoading && results?.items?.length}
+      isShowingDetail={showPreview && !isLoading && results?.items?.length != 0}
     >
       <GifList term={results?.term} results={results?.items} />
     </List>
