@@ -10,10 +10,14 @@ export default function SubredditPostList({
   favorites,
   addFavoriteSubreddit,
   removeFavoriteSubreddit,
+  showDetail,
+  toggleShowDetail,
 }: {
   favorites: string[];
   addFavoriteSubreddit: (subreddit: string) => void;
   removeFavoriteSubreddit: (subreddit: string) => void;
+  showDetail: boolean;
+  toggleShowDetail: () => void;
 }) {
   const [results, setResults] = useState<RedditResultSubreddit[]>([]);
   const [searching, setSearching] = useState(false);
@@ -90,7 +94,14 @@ export default function SubredditPostList({
               <ActionPanel>
                 <Action.Push
                   title={`Search in r/${x.subredditName}`}
-                  target={<FilterBySubredditPostList subredditName={x.subredditName} subreddit={x.subreddit} />}
+                  target={
+                    <FilterBySubredditPostList
+                      subredditName={x.subredditName}
+                      subreddit={x.subreddit}
+                      showDetailSetting={showDetail}
+                      toggleShowDetailSetting={toggleShowDetail}
+                    />
+                  }
                 />
                 <Action.OpenInBrowser url={x.url} icon={Icon.Globe} />
                 {!x.isFavorite && (

@@ -7,11 +7,11 @@ async function getSelection(): Promise<PipeInput> {
   try {
     const files = await getSelectedFinderItems();
     if (files.length == 0) throw new Error("No file selected!");
-    return { type: "file", content: files[0].path };
-  } catch {
+    return { type: "file", content: files[0].path, origin: "selection" };
+  } catch (e) {
     const content = await getSelectedText();
     const type = existsSync(content) ? "file" : "text";
-    return { type, content };
+    return { type, content, origin: "selection" };
   }
 }
 

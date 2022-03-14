@@ -10,9 +10,11 @@ import Service, {
 import {
   formatDate,
   formatDeployDate,
+  formatDeployStatus,
   getDeployUrl,
   getSiteUrl,
   getToken,
+  handleNetworkError,
 } from './utils';
 
 const service = new Service(getToken());
@@ -47,9 +49,14 @@ export default function Command() {
 
   useEffect(() => {
     async function fetchSites() {
-      const sites = await service.getSites();
-      setSites(sites);
-      setLoading(false);
+      try {
+        const sites = await service.getSites();
+        setSites(sites);
+        setLoading(false);
+      } catch (e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchSites();
@@ -79,13 +86,19 @@ export default function Command() {
                     }
                   />
                   <Action.OpenInBrowser
-                    title="Open in Netlify"
+                    title="Open on Netlify"
                     url={getSiteUrl(site.name)}
+                    shortcut={{ key: 'n', modifiers: ['cmd'] }}
                   />
-                  <Action.OpenInBrowser title="Open Site" url={site.siteUrl} />
+                  <Action.OpenInBrowser
+                    title="Open Site"
+                    url={site.siteUrl}
+                    shortcut={{ key: 's', modifiers: ['cmd'] }}
+                  />
                   <Action.OpenInBrowser
                     title="Open Repository"
                     url={site.repositoryUrl}
+                    shortcut={{ key: 'g', modifiers: ['cmd'] }}
                   />
                 </ActionPanel>
               }
@@ -124,9 +137,14 @@ function SiteView(props: SiteProps) {
 
   useEffect(() => {
     async function fetchSite() {
-      const site = await service.getSite(id);
-      setSite(site);
-      setLoading(false);
+      try {
+        const site = await service.getSite(id);
+        setSite(site);
+        setLoading(false);
+      } catch (e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchSite();
@@ -146,11 +164,17 @@ function SiteView(props: SiteProps) {
   const markdown = `
   # ${name}
 
-  Autopublish **${isAutoPublishEnabled ? 'enabled' : 'disabled'}**.
+  ## Autopublish
 
-  Last published on ${formatDate(publishDate)}.
+  ${isAutoPublishEnabled ? 'enabled' : 'disabled'}
+
+  ## Last publish date
+
+  ${formatDate(publishDate)}
   
-  Created ${formatDate(createDate)}.
+  ## Creation date
+
+  ${formatDate(createDate)}
   `;
 
   return (
@@ -173,13 +197,19 @@ function SiteView(props: SiteProps) {
             }
           />
           <Action.OpenInBrowser
-            title="Open in Netlify"
+            title="Open on Netlify"
             url={getSiteUrl(site.name)}
+            shortcut={{ key: 'n', modifiers: ['cmd'] }}
           />
-          <Action.OpenInBrowser title="Open Site" url={site.siteUrl} />
+          <Action.OpenInBrowser
+            title="Open Site"
+            url={site.siteUrl}
+            shortcut={{ key: 's', modifiers: ['cmd'] }}
+          />
           <Action.OpenInBrowser
             title="Open Repository"
             url={site.repositoryUrl}
+            shortcut={{ key: 'g', modifiers: ['cmd'] }}
           />
         </ActionPanel>
       }
@@ -195,9 +225,14 @@ function DeployListView(props: DeployListProps) {
 
   useEffect(() => {
     async function fetchSite() {
-      const deploys = await service.getDeploys(siteId);
-      setDeploys(deploys);
-      setLoading(false);
+      try {
+        const deploys = await service.getDeploys(siteId);
+        setDeploys(deploys);
+        setLoading(false);
+      } catch (e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchSite();
@@ -229,7 +264,7 @@ function DeployListView(props: DeployListProps) {
                 target={<DeployView siteId={siteId} id={deploy.id} />}
               />
               <Action.OpenInBrowser
-                title="Open in Netlify"
+                title="Open on Netlify"
                 url={getDeployUrl(siteName, deploy.id)}
               />
             </ActionPanel>
@@ -248,9 +283,14 @@ function DeployView(props: DeployProps) {
 
   useEffect(() => {
     async function fetchSite() {
-      const deploy = await service.getDeploy(siteId, id);
-      setDeploy(deploy);
-      setLoading(false);
+      try {
+        const deploy = await service.getDeploy(siteId, id);
+        setDeploy(deploy);
+        setLoading(false);
+      } catch (e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchSite();
@@ -259,14 +299,18 @@ function DeployView(props: DeployProps) {
   if (!deploy) {
     return <Detail isLoading={isLoading} navigationTitle="Deploy" />;
   }
-  const { name, site, siteUrl, author, publishDate, commitUrl } = deploy;
-
-  const authorMessage = author ? ` by ${author}` : '';
+  const { name, site, siteUrl, publishDate, commitUrl, status } = deploy;
 
   const markdown = `
   # ${name}
 
-  Published on ${formatDeployDate(publishDate)}${authorMessage}.
+  ## Date
+
+  ${formatDeployDate(publishDate)}
+
+  ## Status
+
+  ${formatDeployStatus(status)}
   `;
 
   return (
@@ -277,11 +321,20 @@ function DeployView(props: DeployProps) {
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            title="Open in Netlify"
+            title="Open on Netlify"
             url={getDeployUrl(site.name, id)}
+            shortcut={{ key: 'n', modifiers: ['cmd'] }}
           />
-          <Action.OpenInBrowser title="Open Site" url={siteUrl} />
-          <Action.OpenInBrowser title="Open Commit" url={commitUrl} />
+          <Action.OpenInBrowser
+            title="Open Site"
+            url={siteUrl}
+            shortcut={{ key: 's', modifiers: ['cmd'] }}
+          />
+          <Action.OpenInBrowser
+            title="Open Commit"
+            url={commitUrl}
+            shortcut={{ key: 'g', modifiers: ['cmd'] }}
+          />
         </ActionPanel>
       }
     />

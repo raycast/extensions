@@ -1,19 +1,26 @@
 export interface ScriptCommand {
   path: string;
+  content: string;
+  user: boolean;
   metadatas: ScriptMetadatas;
 }
 
 export interface ScriptMetadatas {
   title: string;
   icon?: string;
-  argument1: ScriptInput;
+  argument1: ScriptArgument;
+  mode: ScriptMode;
   packageName?: string;
   currentDirectoryPath?: string;
 }
 
-export type ArgumentType = "text" | "file";
+export const argumentTypes = ["text", "file"] as const;
+export type ArgumentType = typeof argumentTypes[number];
 
-export interface ScriptInput {
+export const scriptModes = ["silent", "fullOutput", "copy", "replace"] as const;
+export type ScriptMode = typeof scriptModes[number];
+
+export interface ScriptArgument {
   type: ArgumentType;
   percentEncoded?: boolean;
 }

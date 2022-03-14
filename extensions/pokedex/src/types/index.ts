@@ -66,6 +66,7 @@ export interface PokemonV2Evolutionchain {
 export interface PokemonV2PokemonspecyElement {
   id: number;
   name: string;
+  evolves_from_species_id?: number;
   pokemon_v2_pokemonspeciesnames: PokemonV2Pokemonspeciesname[];
 }
 
@@ -113,6 +114,7 @@ export interface PokemonV2Version {
 
 export interface PokemonV2Pokemonstat {
   base_stat: number;
+  effort: number;
   pokemon_v2_stat: PokemonV2Stat;
 }
 

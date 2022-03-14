@@ -3,7 +3,7 @@ import { addDays } from "date-fns";
 import { Project, Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
 import { mutate } from "swr";
 import { ViewMode, SWRKeys } from "../types";
-import { isRecurring, displayDueDate, getAPIDate, getToday } from "../utils";
+import { isRecurring, displayDueDate, getAPIDate, getToday, isExactTimeTask } from "../utils";
 import { priorities } from "../constants";
 import { todoist, handleError } from "../api";
 
@@ -24,7 +24,7 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
 
     try {
       await todoist.closeTask(task.id);
-      await showToast({ style: Toast.Style.Success, title: "Task updated" });
+      await showToast({ style: Toast.Style.Success, title: "Task completed 🙌" });
       mutate(SWRKeys.tasks);
     } catch (error) {
       handleError({ error, title: "Unable to complete task" });
@@ -80,6 +80,10 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
     additionalListItemProps.accessoryIcon = Icon.ArrowClockwise;
   }
 
+  if (isExactTimeTask(task)) {
+    additionalListItemProps.accessoryIcon = Icon.Clock;
+  }
+
   const priority = priorities.find((p) => p.value === task.priority);
 
   if (priority) {
@@ -90,7 +94,6 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
 
   return (
     <List.Item
-      id={String(task.id)}
       title={task.content}
       subtitle={task.description}
       {...additionalListItemProps}
