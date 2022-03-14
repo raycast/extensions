@@ -2,8 +2,9 @@ import {
   Action,
   ActionPanel,
   Detail,
-  Icon,
   Form,
+  Icon,
+  showToast,
   useNavigation,
 } from '@raycast/api';
 
@@ -24,14 +25,21 @@ function Command() {
           <Action.SubmitForm
             title="Find Difference"
             icon={Icon.Eye}
-            onSubmit={(values: FormValues) =>
-              push(
-                <DiffView
-                  original={values.original}
-                  changed={values.changed}
-                />,
-              )
-            }
+            onSubmit={(values: FormValues) => {
+              const { original, changed } = values;
+              if (original === changed) {
+                showToast({
+                  title: 'Files are identical',
+                });
+              } else {
+                push(
+                  <DiffView
+                    original={values.original}
+                    changed={values.changed}
+                  />,
+                );
+              }
+            }}
           />
         </ActionPanel>
       }
@@ -54,7 +62,7 @@ function DiffView(props: DiffProps) {
   ## Diff
 
   \`\`\`
-  ${diff}
+${diff}
   \`\`\``;
   return <Detail markdown={markdown} />;
 }
