@@ -1,6 +1,6 @@
 # Git Repos Changelog
 
-## Store Updates (2022-03-12)
+## Store Updates (2022-03-14)
 - Add categories and screenshots for the store
 - Update to latest Raycast API
 
