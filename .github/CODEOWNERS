@@ -133,6 +133,7 @@
 /extensions/kill-process                             @rolandleth
 /extensions/kinopoisk                                @mattisssa
 /extensions/kubectx                                  @oktaysenkan
+/extensions/kubernetes-docs                          @rpvsilva
 /extensions/laracasts                                @danyelkeddah
 /extensions/laravel-docs                             @indykoning @indykoning @indykoning
 /extensions/laravel-forge                            @KevinBatdorf
