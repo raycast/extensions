@@ -6,7 +6,8 @@
 2. Click Button `Create New App`
 3. Select `From an app manifest`
 4. Select a workspace to which you want to grant the extension access.
-5. Copy and paste the following manifest:
+5. Copy and paste the following manifest:  
+   _Feel free to exclude permission scope groups - see comments - if you don't want to have the full experience of this extension._
 
 ```
 display_information:
@@ -14,12 +15,17 @@ display_information:
 oauth_config:
   scopes:
     user:
+      # Command: New Message
       - channels:read
       - groups:read
       - mpim:read
-      - users.profile:read
       - users:read
+
+      # Command: Set Presence
+      - users.profile:read
       - users:write
+
+      # Command: Set Snooze
       - dnd:read
       - dnd:write
 settings:
