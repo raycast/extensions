@@ -12,8 +12,8 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "new-message",
-      "title": "New Message",
+      "name": "search",
+      "title": "Search",
       "subtitle": "Slack",
       "description": "Search for all workspace members, group chats, and channels and open them directly in your Slack app.",
       "mode": "view"

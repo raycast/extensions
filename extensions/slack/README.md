@@ -15,7 +15,7 @@ display_information:
 oauth_config:
   scopes:
     user:
-      # Command: New Message
+      # Command: Search
       - channels:read
       - groups:read
       - mpim:read
