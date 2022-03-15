@@ -5,6 +5,10 @@
   "description": "View and manage your Laravel Forge-managed servers",
   "icon": "command-icon.png",
   "author": "KevinBatdorf",
+  "contributors": [
+    "KevinBatdorf",
+    "macbookandrew"
+  ],
   "license": "MIT",
   "commands": [
     {
