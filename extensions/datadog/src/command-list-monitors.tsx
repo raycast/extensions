@@ -9,9 +9,8 @@ import {
   WARN,
 } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/MonitorOverallStates";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useMonitors } from "./useMonitors";
-import { linkDomain } from "./util";
-import { clearLocalState } from "./cache";
+import { useMonitors, clearLocalState, Caches } from "./fetchers";
+import { linkDomain } from "./utils";
 
 const statusIcon = (status: MonitorOverallStates | undefined) => {
   const icon = (name: string, themable = false) => {
@@ -59,7 +58,7 @@ export default function CommandListMonitors() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`https://${linkDomain()}/monitors/${monitor.id}`} />
-              <Action icon={Icon.Trash} title="Clear monitors cache" onAction={() => clearLocalState("monitors")} />
+              <Action icon={Icon.Trash} title="Clear monitors cache" onAction={() => clearLocalState(Caches.Monitors)} />
             </ActionPanel>
           }
         />

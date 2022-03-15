@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useNotebooks } from "./useNotebooks";
-import { linkDomain } from "./util";
-import { clearLocalState } from "./cache";
+import { useNotebooks, clearLocalState, Caches } from "./fetchers";
+import { linkDomain } from "./utils";
 
 // noinspection JSUnusedGlobalSymbols
 export default function CommandListNotebooks() {
@@ -19,7 +18,7 @@ export default function CommandListNotebooks() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`https://${linkDomain()}/notebook/${notebook.id}`} />
-              <Action icon={Icon.Trash} title="Clear notebooks cache" onAction={() => clearLocalState("notebooks")} />
+              <Action icon={Icon.Trash} title="Clear notebooks cache" onAction={() => clearLocalState(Caches.Notebooks)} />
             </ActionPanel>
           }
         />

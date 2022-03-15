@@ -1,5 +1,6 @@
 import { DashboardSummaryDefinition } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/DashboardSummaryDefinition";
-import { dashboardsApi } from "./datadog-api";
+import { Caches } from ".";
+import { dashboardsApi } from "../clients/datadog";
 import { useLocalState } from "./cache";
 
 type State = {
@@ -14,7 +15,7 @@ export const useDashboards = () => {
       .then(data => ({ dashboards: data } as State));
   };
 
-  const {state, loading: dashboardsAreLoading} = useLocalState<State>("dashboards", { dashboards: [] }, loader);
+  const { state, loading: dashboardsAreLoading } = useLocalState<State>(Caches.Dashboards, { dashboards: [] }, loader);
 
   return { state, dashboardsAreLoading };
 };

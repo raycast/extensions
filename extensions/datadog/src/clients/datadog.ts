@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { v1 } from "@datadog/datadog-api-client";
 import fetch, { Response } from "node-fetch";
-import { APM } from "./types";
+import { APM } from "../types";
 
 const { "api-key": API_KEY, "app-key": APP_KEY, server: SERVER } = getPreferenceValues();
 

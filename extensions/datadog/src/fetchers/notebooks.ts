@@ -1,10 +1,10 @@
 import { NotebooksResponseData } from "@datadog/datadog-api-client/dist/packages/datadog-api-client-v1/models/NotebooksResponseData";
-import { notebooksApi } from "./datadog-api";
+import { Caches } from ".";
+import { notebooksApi } from "../clients/datadog";
 import { useLocalState } from "./cache";
 
 type State = {
   notebooks: NotebooksResponseData[];
-  favorites: NotebooksResponseData[];
 };
 
 export const useNotebooks = () => {
@@ -15,7 +15,11 @@ export const useNotebooks = () => {
       .then(notebooks => ({ notebooks: notebooks } as State));
   };
 
-  const {state, updateAndSaveState, loading: notebooksAreLoading} = useLocalState<State>("notebooks", { notebooks: [], favorites: [] }, loader);
+  const {
+    state,
+    updateAndSaveState,
+    loading: notebooksAreLoading,
+  } = useLocalState<State>(Caches.Notebooks, { notebooks: [] }, loader);
 
   return { state, updateAndSaveState, notebooksAreLoading };
 };

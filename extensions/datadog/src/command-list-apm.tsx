@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useAPM } from "./useAPM";
-import { linkDomain } from "./util";
-import { clearLocalState } from "./cache";
+import { useAPM, clearLocalState, Caches } from "./fetchers";
+import { linkDomain } from "./utils";
 
 // noinspection JSUnusedGlobalSymbols
 export default function CommandListAPM() {
@@ -20,7 +19,7 @@ export default function CommandListAPM() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`https://${linkDomain()}/apm/service/${apm.name}?env=${apm.env}`} />
-              <Action icon={Icon.Trash} title="Clear apm cache" onAction={() => clearLocalState("apm")} />
+              <Action icon={Icon.Trash} title="Clear apm cache" onAction={() => clearLocalState(Caches.Apm)} />
             </ActionPanel>
           }
         />

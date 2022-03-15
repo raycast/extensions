@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useDashboards } from "./useDashboards";
-import { linkDomain } from "./util";
-import { clearLocalState } from "./cache";
+import { useDashboards, clearLocalState, Caches } from "./fetchers";
+import { linkDomain } from "./utils";
 
 // noinspection JSUnusedGlobalSymbols
 export default function CommandListDashboards() {
@@ -19,7 +18,7 @@ export default function CommandListDashboards() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={`https://${linkDomain()}${dashboard.url}`} />
-              <Action icon={Icon.Trash} title="Clear dashboards cache" onAction={() => clearLocalState("dashboards")} />
+              <Action icon={Icon.Trash} title="Clear dashboards cache" onAction={() => clearLocalState(Caches.Dashboards)} />
             </ActionPanel>
           }
         />
