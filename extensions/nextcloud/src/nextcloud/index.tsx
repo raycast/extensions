@@ -1,42 +1,12 @@
-import { showToast, Toast } from "@raycast/api";
-import { AbortError } from "node-fetch";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { performGetActivity } from "./activity";
-import { performListFavorites, performSearch } from "./files";
+import { environment, showToast, Toast } from "@raycast/api";
+import { XMLParser } from "fast-xml-parser";
+import fetch, { AbortError } from "node-fetch";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { getPreferences } from "../lib/preferences";
 
 type Fetcher<A, R> = (args: { signal: AbortSignal; args?: A }) => Promise<R>;
 
-export function useActivity() {
-  const {
-    state: { results, isLoading },
-    perform: getActivity,
-  } = useQuery(({ signal }) => {
-    return performGetActivity(signal);
-  });
-  return { activity: results ?? [], isLoading, getActivity };
-}
-
-export function useFavorites() {
-  const {
-    state: { results, isLoading },
-    perform: getFavorites,
-  } = useQuery(({ signal }) => {
-    return performListFavorites(signal);
-  });
-  return { favorites: results ?? [], isLoading, getFavorites };
-}
-
-export function useSearch() {
-  const {
-    state: { results, isLoading },
-    perform: search,
-  } = useQuery(async ({ signal, args }: { signal: AbortSignal; args?: string }) => {
-    return performSearch(signal, args);
-  });
-  return { results: results ?? [], isLoading, search };
-}
-
-function useQuery<A, R>(fetcher: Fetcher<A, R>) {
+export function useQuery<A, R>(fetcher: Fetcher<A, R>, deps: React.DependencyList = []) {
   const [state, setState] = useState<{ results: R | null; isLoading: boolean }>({ results: null, isLoading: true });
   const cancelRef = useRef<AbortController | null>(null);
 
@@ -69,18 +39,81 @@ function useQuery<A, R>(fetcher: Fetcher<A, R>) {
         showToast({ style: Toast.Style.Failure, title: "API request failed", message: String(error) });
       }
     },
-    [cancelRef, setState]
+    [cancelRef, setState, ...deps]
   );
 
   useEffect(() => {
-    perform();
     return () => {
       cancelRef.current?.abort();
     };
-  }, []);
+  }, deps);
 
   return {
     state,
     perform,
   };
+}
+
+export async function webdavRequest({
+  signal,
+  body,
+  base = "",
+  method,
+}: {
+  signal: AbortSignal;
+  body: string;
+  base?: string;
+  method: string;
+}) {
+  const { hostname, username, password } = getPreferences();
+
+  const response = await fetch(`https://${hostname}/remote.php/dav/${encodeURI(base)}`, {
+    method,
+    headers: {
+      "User-Agent": `Raycast/${environment.raycastVersion}`,
+      "Content-Type": "text/xml",
+      Authorization: "Basic " + Buffer.from(username + ":" + password).toString("base64"),
+    },
+    body,
+    signal,
+  });
+  const responseBody = await response.text();
+
+  const parser = new XMLParser();
+  const dom = parser.parse(responseBody);
+  if (!("d:multistatus" in dom)) {
+    throw new Error("Invalid response: " + responseBody);
+  }
+
+  // undefined -> No result
+  // Object -> Single hit
+  // Array -> Multiple hits
+  const dres = dom["d:multistatus"]["d:response"] ?? [];
+  return Array.isArray(dres) ? dres : [dres];
+}
+
+export async function jsonRequest<T>({
+  signal,
+  base,
+  body,
+  method = "GET",
+}: {
+  signal: AbortSignal;
+  base: string;
+  body?: Record<string, unknown>;
+  method?: string;
+}) {
+  const { hostname, username, password } = getPreferences();
+
+  const response = await fetch(`https://${hostname}/apps/deck/api/v1.1/${base}`, {
+    method,
+    headers: {
+      "OCS-APIRequest": "true",
+      "Content-Type": "application/json",
+      authorization: "Basic " + Buffer.from(username + ":" + password).toString("base64"),
+    },
+    body: JSON.stringify(body),
+    signal,
+  });
+  return (await response.json()) as T;
 }

@@ -1,8 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import path from "path";
 import { getPreferences } from "./lib/preferences";
-import { useFavorites } from "./nextcloud";
-import { Favorite } from "./nextcloud/files";
+import { Favorite, useFavorites } from "./nextcloud/favorites";
 
 export default function Command() {
   const { isLoading, favorites } = useFavorites();

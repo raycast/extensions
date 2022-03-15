@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nextcloud",
   "title": "Nextcloud",
-  "description": "Search files or list favorites in Nextcloud.",
+  "description": "Search files, favorites, deck and activity in Nextcloud.",
   "version": "0.0.0",
   "icon": "nextcloud.png",
   "author": "uetchy",
@@ -32,6 +32,13 @@
       "title": "Show Activity",
       "subtitle": "Nextcloud",
       "description": "Show activity.",
+      "mode": "view"
+    },
+    {
+      "name": "deck",
+      "title": "Manage Deck",
+      "subtitle": "Nextcloud",
+      "description": "Manage tasks in Nextcloud Deck. You have to install Deck app on Nextcloud beforehand.",
       "mode": "view"
     }
   ],
@@ -86,6 +93,7 @@
     "eslint": "^8.11.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.29.4",
     "prettier": "^2.5.1",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"

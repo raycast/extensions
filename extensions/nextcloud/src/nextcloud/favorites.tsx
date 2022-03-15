@@ -1,0 +1,60 @@
+import path from "path";
+import { useEffect } from "react";
+import { useQuery, webdavRequest } from ".";
+import { getPreferences } from "../lib/preferences";
+
+export function useFavorites() {
+  const {
+    state: { results, isLoading },
+    perform,
+  } = useQuery(({ signal }) => {
+    return performListFavorites(signal);
+  });
+
+  useEffect(() => {
+    perform();
+  }, []);
+
+  return {
+    isLoading,
+    favorites: results ?? [],
+    getFavorites: perform,
+  };
+}
+
+export async function performListFavorites(signal: AbortSignal): Promise<Favorite[]> {
+  const { username } = getPreferences();
+  const body = makeBodyForListFavorites();
+  const items = await webdavRequest({ body, signal, base: `files/${encodeURIComponent(username)}`, method: "REPORT" });
+  const res = items.map((item) => {
+    const href = item["d:href"];
+    const match = /^\/remote.php\/dav\/files\/[^/]+?\/(.+?)$/.exec(href);
+    if (!match) throw new Error("Invalid href: " + href);
+    const fullpath = "/" + decodeURIComponent(match[1]);
+    const dirname = path.dirname(fullpath);
+    const filename = path.basename(fullpath);
+
+    return {
+      fullpath,
+      dirname,
+      filename,
+    };
+  });
+  return res;
+}
+
+function makeBodyForListFavorites() {
+  return `<?xml version="1.0"?>
+    <oc:filter-files  xmlns:d="DAV:" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns">
+      <oc:filter-rules>
+        <oc:favorite>1</oc:favorite>
+      </oc:filter-rules>
+    </oc:filter-files>
+    `;
+}
+
+export interface Favorite {
+  fullpath: string;
+  dirname: string;
+  filename: string;
+}

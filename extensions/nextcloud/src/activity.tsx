@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useActivity } from "./nextcloud";
-import { Activity } from "./nextcloud/activity";
 import { formatDistanceToNow, parseISO } from "date-fns";
+import { Activity, useActivity } from "./nextcloud/activity";
 
 export default function Command() {
   const { isLoading, activity } = useActivity();
@@ -60,8 +59,12 @@ function getIcon(activityType: string) {
     case "security":
       source = Icon.Binoculars;
       break;
+    case "deck":
+    case "deck_card_description":
+      source = Icon.List;
+      break;
     default:
-      console.log(activityType);
+      console.log("Unrecognized icon type:", activityType);
   }
   return { source, tintColor };
 }
