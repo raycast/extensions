@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { formatDistanceToNow, parseISO } from "date-fns";
-import { Activity, useActivity } from "./nextcloud/activity";
+import { Activity, useActivity } from "./activity/hooks";
+import { capitalize } from "./utils";
 
 export default function Command() {
   const { isLoading, activity } = useActivity();
@@ -67,9 +68,4 @@ function getIcon(activityType: string) {
       console.log("Unrecognized icon type:", activityType);
   }
   return { source, tintColor };
-}
-
-function capitalize(text: string): string {
-  if (!text) return text;
-  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 }

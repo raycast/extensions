@@ -1,7 +1,7 @@
 import path from "path";
 import { useEffect } from "react";
-import { useQuery, webdavRequest } from ".";
-import { getPreferences } from "../lib/preferences";
+import { useQuery, webdavRequest } from "../nextcloud";
+import { getPreferences } from "../preferences";
 
 export function useFavorites() {
   const {

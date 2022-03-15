@@ -2,7 +2,7 @@ import { environment, showToast, Toast } from "@raycast/api";
 import { XMLParser } from "fast-xml-parser";
 import fetch, { AbortError } from "node-fetch";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { getPreferences } from "../lib/preferences";
+import { getPreferences } from "./preferences";
 
 type Fetcher<A, R> = (args: { signal: AbortSignal; args?: A }) => Promise<R>;
 
@@ -105,10 +105,12 @@ export async function jsonRequest<T>({
 }) {
   const { hostname, username, password } = getPreferences();
 
-  const response = await fetch(`https://${hostname}/apps/deck/api/v1.1/${base}`, {
+  console.log(`https://${hostname}/apps/${base}`);
+  const response = await fetch(`https://${hostname}/apps/${base}`, {
     method,
     headers: {
       "OCS-APIRequest": "true",
+      "User-Agent": `Raycast/${environment.raycastVersion}`,
       "Content-Type": "application/json",
       authorization: "Basic " + Buffer.from(username + ":" + password).toString("base64"),
     },

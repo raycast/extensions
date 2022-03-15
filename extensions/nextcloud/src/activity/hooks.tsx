@@ -1,8 +1,8 @@
 import { XMLParser } from "fast-xml-parser";
 import fetch from "node-fetch";
 import { useEffect } from "react";
-import { useQuery } from ".";
-import { getPreferences } from "../lib/preferences";
+import { useQuery } from "../nextcloud";
+import { getPreferences } from "../preferences";
 
 export function useActivity() {
   const {

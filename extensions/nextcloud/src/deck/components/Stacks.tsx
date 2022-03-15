@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { formatDistanceToNow, parseISO } from "date-fns";
-import { getPreferences } from "../../lib/preferences";
-import { Card, useStacks } from "../../nextcloud/deck";
+import { getPreferences } from "../../preferences";
+import { Card, useStacks } from "../hooks";
 
 export function Stacks({ boardId }: { boardId: number }) {
   const { isLoading, stacks } = useStacks(boardId);
@@ -22,7 +22,7 @@ export function Stacks({ boardId }: { boardId: number }) {
 function Card({ card, boardId }: { card: Card; boardId: number }) {
   const { hostname } = getPreferences();
   const cardUrl = `https://${hostname}/apps/deck/#/board/${boardId}/card/${card.id}`;
-  console.log(card);
+
   const overdue = card.overdue > 0;
   const dueDate = card.duedate
     ? (overdue ? "Overdue by " : "Due in ") + formatDistanceToNow(parseISO(card.duedate))

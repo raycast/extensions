@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { getPreferences } from "../../lib/preferences";
-import { Board, useBoards } from "../../nextcloud/deck";
+import { getPreferences } from "../../preferences";
+import { Board, useBoards } from "../hooks";
 import { Stacks } from "./Stacks";
 
 export function Boards() {

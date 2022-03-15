@@ -36,9 +36,9 @@
     },
     {
       "name": "deck",
-      "title": "Manage Deck",
+      "title": "Show Deck",
       "subtitle": "Nextcloud",
-      "description": "Manage tasks in Nextcloud Deck. You have to install Deck app on Nextcloud beforehand.",
+      "description": "Show tasks in Nextcloud Deck. You have to install Deck app on Nextcloud beforehand.",
       "mode": "view"
     }
   ],

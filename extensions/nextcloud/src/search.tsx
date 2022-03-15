@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import filesize from "file-size";
-import { getPreferences } from "./lib/preferences";
-import { SearchResult, useSearch } from "./nextcloud/files";
+import { getPreferences } from "./preferences";
+import { SearchResult, useSearch } from "./search/hooks";
 
 export default function Command() {
   const { isLoading, results, search } = useSearch();

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { jsonRequest, useQuery } from ".";
+import { jsonRequest, useQuery } from "../nextcloud";
 
 export function useBoards() {
   const {
@@ -43,11 +43,11 @@ export function useStacks(boardId: number) {
 }
 
 export async function getBoards(signal: AbortSignal): Promise<Board[]> {
-  return await jsonRequest({ signal, base: "boards" });
+  return await jsonRequest({ signal, base: "deck/api/v1.1/boards" });
 }
 
 export async function getStacks(signal: AbortSignal, boardId: number): Promise<Stack[]> {
-  return await jsonRequest({ signal, base: `boards/${boardId}/stacks` });
+  return await jsonRequest({ signal, base: `deck/api/v1.1/boards/${boardId}/stacks` });
 }
 
 export interface Board {

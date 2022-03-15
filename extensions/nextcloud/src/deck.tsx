@@ -1,4 +1,4 @@
-import { Boards } from "./components/deck/Boards";
+import { Boards } from "./deck/components/Boards";
 
 export default function Command() {
   return <Boards />;
