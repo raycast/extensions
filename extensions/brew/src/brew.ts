@@ -428,5 +428,5 @@ function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {
 }
 
 async function execSignal(cmd: string, cancel?: AbortController): Promise<ExecResult> {
-  return await execp(cmd, { signal: cancel?.signal });
+  return await execp(cmd, { signal: cancel?.signal, maxBuffer: 10 * 1024 * 1024 });
 }
