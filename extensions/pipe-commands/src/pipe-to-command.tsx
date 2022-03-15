@@ -18,7 +18,7 @@ import { spawnSync } from "child_process";
 import { chmodSync } from "fs";
 import { dirname } from "path";
 import { useEffect, useState } from "react";
-import { ScriptCommand, ScriptMode } from "./types";
+import { ScriptCommand } from "./types";
 import { codeblock, parseScriptCommands, sortByAccessTime } from "./utils";
 
 type InputType = "selection" | "clipboard";
@@ -143,7 +143,18 @@ function CommandAction(props: { command: ScriptCommand; inputFrom: "clipboard" |
           await popToRoot();
         }
       } catch (e) {
-        navigation.push(<Detail markdown={["## An error occurred!", codeblock((e as Error).message)].join("\n")} />);
+        const toast = await showToast({
+          title: "An error occured",
+          primaryAction: {
+            title: "Copy Error Message",
+            onAction: async () => {
+              await Clipboard.copy((e as Error).message);
+              await toast.hide();
+            },
+          },
+          message: (e as Error).message,
+          style: Toast.Style.Failure,
+        });
       }
     };
   }
