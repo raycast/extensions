@@ -14,7 +14,7 @@ export const useMonitors = () => {
     return monitorsApi.listMonitors({ monitorTags: tags }).then(monitors => ({ monitors: monitors } as State));
   };
 
-  const [state, monitorsAreLoading] = useLocalState<State>("monitors", { monitors: [] }, loader);
+  const {state, loading: monitorsAreLoading} = useLocalState<State>("monitors", { monitors: [] }, loader);
 
   return { state, monitorsAreLoading };
 };

@@ -17,7 +17,7 @@ export const useAPM = () => {
       .then(apm => ({ apm: apm } as State));
   };
 
-  const [state, apmIsLoading] = useLocalState<State>("apm", { apm: [] }, loader);
+  const {state, loading: apmIsLoading} = useLocalState<State>("apm", { apm: [] }, loader);
 
   return { state, apmIsLoading };
 };

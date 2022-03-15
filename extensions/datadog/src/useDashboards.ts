@@ -14,7 +14,7 @@ export const useDashboards = () => {
       .then(data => ({ dashboards: data } as State));
   };
 
-  const [state, dashboardsAreLoading] = useLocalState<State>("dashboards", { dashboards: [] }, loader);
+  const {state, loading: dashboardsAreLoading} = useLocalState<State>("dashboards", { dashboards: [] }, loader);
 
   return { state, dashboardsAreLoading };
 };

@@ -4,6 +4,7 @@ import { useLocalState } from "./cache";
 
 type State = {
   notebooks: NotebooksResponseData[];
+  favorites: NotebooksResponseData[];
 };
 
 export const useNotebooks = () => {
@@ -14,7 +15,7 @@ export const useNotebooks = () => {
       .then(notebooks => ({ notebooks: notebooks } as State));
   };
 
-  const [state, notebooksAreLoading] = useLocalState<State>("notebooks", { notebooks: [] }, loader);
+  const {state, updateAndSaveState, loading: notebooksAreLoading} = useLocalState<State>("notebooks", { notebooks: [], favorites: [] }, loader);
 
-  return { state, notebooksAreLoading };
+  return { state, updateAndSaveState, notebooksAreLoading };
 };
