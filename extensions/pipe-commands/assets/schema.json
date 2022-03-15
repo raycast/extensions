@@ -1,20 +1,16 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
-        "ArgumentType": {
-            "enum": [
-                "file",
-                "text"
-            ],
-            "type": "string"
-        },
         "ScriptArgument": {
             "properties": {
                 "percentEncoded": {
                     "type": "boolean"
                 },
                 "type": {
-                    "$ref": "#/definitions/ArgumentType"
+                    "enum": [
+                        "text"
+                    ],
+                    "type": "string"
                 }
             },
             "required": [

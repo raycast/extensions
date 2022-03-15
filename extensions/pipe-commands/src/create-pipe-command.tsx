@@ -1,7 +1,7 @@
 import { ActionPanel, environment, Form, popToRoot, showInFinder, showToast, Action, Toast } from "@raycast/api";
 import { writeFileSync } from "fs";
 import { resolve } from "path/posix";
-import { ArgumentType, argumentTypes, scriptModes } from "./types";
+import { scriptModes } from "./types";
 
 const languageToProperties: Record<
   string,
@@ -41,7 +41,6 @@ interface FormValues {
   mode: string;
   packageName?: string;
   percentEncoded: boolean;
-  type: ArgumentType;
 }
 
 export default function PipeCommandForm(): JSX.Element {
@@ -58,9 +57,9 @@ export default function PipeCommandForm(): JSX.Element {
     const metadataLines = [
       `${languageProperties.commentSign} @raycast.title ${values.title}`,
       `${languageProperties.commentSign} @raycast.mode ${values.mode}`,
-      `${languageProperties.commentSign} @raycast.argument1 {"type": "${
-        values.type
-      }", "percentEncoded": ${!!values.percentEncoded}}`,
+      `${
+        languageProperties.commentSign
+      } @raycast.argument1 {"type": "text", "percentEncoded": ${!!values.percentEncoded}}`,
     ];
 
     const help = `${languageProperties.commentSign} Documentation is available at https://github.com/raycast/extensions/blob/main/extensions/pipe-commands/README.md`;
@@ -93,11 +92,6 @@ export default function PipeCommandForm(): JSX.Element {
       </Form.Dropdown>
       <Form.TextField title="Title" placeholder="Command Title" id="title" />
       <Form.TextField title="Package Name" placeholder="E. g., Developer Utils" id="packageName" />
-      <Form.Dropdown title="Accept" id="type">
-        {argumentTypes.map((type) => (
-          <Form.Dropdown.Item key={type} title={type} value={type} />
-        ))}
-      </Form.Dropdown>
       <Form.Checkbox
         defaultValue={false}
         title="Percent Encoded"

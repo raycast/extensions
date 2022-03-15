@@ -14,9 +14,6 @@ export default function managePipeCommands() {
 
   useEffect(loadCommands, []);
 
-  const textCommands = state?.commands.filter((command) => command.metadatas.argument1.type === "text");
-  const fileCommands = state?.commands.filter((command) => command.metadatas.argument1.type === "file");
-
   return (
     <List isLoading={typeof state == "undefined"} isShowingDetail>
       <List.Section title="Invalid Commands">
@@ -42,13 +39,8 @@ export default function managePipeCommands() {
           />
         ))}
       </List.Section>
-      <List.Section title="File Commands">
-        {fileCommands?.map((cmd) => (
-          <PipeCommand key={cmd.path} command={cmd} onTrash={loadCommands} showContent />
-        ))}
-      </List.Section>
-      <List.Section title="Text Commands">
-        {textCommands?.map((cmd) => (
+      <List.Section title="Commands">
+        {state?.commands?.map((cmd) => (
           <PipeCommand key={cmd.path} command={cmd} onTrash={loadCommands} showContent />
         ))}
       </List.Section>
