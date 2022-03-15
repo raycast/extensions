@@ -40,6 +40,13 @@
       "subtitle": "Nextcloud",
       "description": "Show tasks in Nextcloud Deck. You have to install Deck app on Nextcloud beforehand.",
       "mode": "view"
+    },
+    {
+      "name": "notes",
+      "title": "Show Notes",
+      "subtitle": "Nextcloud",
+      "description": "Manage notes in Nextcloud.",
+      "mode": "view"
     }
   ],
   "preferences": [
