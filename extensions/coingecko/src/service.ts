@@ -26,6 +26,14 @@ interface CoinInfo {
   links: {
     homepage: string[];
   };
+  market_data: {
+    current_price: {
+      [key: string]: number;
+    };
+  };
+  image: {
+    small: string;
+  };
 }
 
 interface MarketCapRankedCoinList {
@@ -47,13 +55,14 @@ export default class Service {
     return price;
   }
 
-  async getCoinInfo(id: string): Promise<CoinInfo> {
+  async getCoinInfo(id: string, signal?: AbortSignal): Promise<CoinInfo> {
     const response = await client.get<CoinInfo>(`coins/${id}`, {
+      signal,
       params: {
         id,
         localization: false,
         tickers: false,
-        market_data: false,
+        market_data: true,
         community_data: false,
         developer_data: false,
         sparkline: false,
@@ -94,11 +103,12 @@ export default class Service {
     return Object.values(coins);
   }
 
-  async getCoinPriceHistory(id: string, days = 30) {
+  async getCoinPriceHistory(id: string, days = 30, signal?: AbortSignal) {
     const currency = getPreferredCurrency();
     const response = await client.get<PriceResponse>(
       `/coins/${id}/market_chart`,
       {
+        signal,
         params: {
           vs_currency: currency.id,
           days,

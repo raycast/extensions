@@ -282,10 +282,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.30.3",
     "axios": "^0.24.0",
-    "fuse.js": "^6.5.3",
-    "rss-parser": "^3.12.0"
+    "fuse.js": "^6.5.3"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

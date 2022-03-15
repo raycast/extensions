@@ -1,27 +1,29 @@
 import {
   ActionPanel,
-  Detail,
   Icon,
   List,
   showToast,
   Action,
   Toast,
 } from '@raycast/api';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Fuse from 'fuse.js';
+import { setTimeout } from 'timers/promises';
 
 import Service, { Coin } from './service';
 import { addFavorite, getFavorites, removeFavorite } from './storage';
 import { formatDate, formatPrice, getPreferredCurrency } from './utils';
 
-interface IdProps {
+interface InfoProps {
   id: string;
 }
 
 interface ListItemProps {
   coin: Coin;
   isFavorite: boolean;
+  isShowingDetail: boolean;
   onFavoriteToggle: () => void;
+  onDetailToggle: () => void;
 }
 
 interface FavoriteProps {
@@ -43,6 +45,7 @@ export default function Command() {
   const service = new Service();
   const [coins, setCoins] = useState<Coin[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
+  const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
   const [input, setInput] = useState<string>('');
   const [favorites, setFavorites] = useState<string[]>([]);
 
@@ -90,6 +93,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail={isShowingDetail}
       onSearchTextChange={setInput}
       searchBarPlaceholder="Search by coin name or symbol"
     >
@@ -105,6 +109,8 @@ export default function Command() {
               coin={coin}
               isFavorite={true}
               onFavoriteToggle={() => toggleFavorite(id, true)}
+              isShowingDetail={isShowingDetail}
+              onDetailToggle={() => setIsShowingDetail(!isShowingDetail)}
             />
           );
         })}
@@ -119,6 +125,8 @@ export default function Command() {
               coin={item}
               isFavorite={isFavorite}
               onFavoriteToggle={() => toggleFavorite(id, isFavorite)}
+              isShowingDetail={isShowingDetail}
+              onDetailToggle={() => setIsShowingDetail(!isShowingDetail)}
             />
           );
         })}
@@ -127,7 +135,13 @@ export default function Command() {
   );
 }
 
-function ListItemCoin({ coin, isFavorite, onFavoriteToggle }: ListItemProps) {
+function ListItemCoin({
+  coin,
+  isFavorite,
+  onFavoriteToggle,
+  onDetailToggle,
+  isShowingDetail,
+}: ListItemProps) {
   const { id, name, symbol } = coin;
   const subtitle = symbol.toUpperCase();
   const url = `https://www.coingecko.com/en/coins/${id}`;
@@ -136,8 +150,14 @@ function ListItemCoin({ coin, isFavorite, onFavoriteToggle }: ListItemProps) {
       title={name}
       subtitle={subtitle}
       accessoryIcon={isFavorite ? Icon.Star : undefined}
+      detail={isShowingDetail && <Info id={id} />}
       actions={
         <ActionPanel>
+          <Action
+            icon={Icon.Text}
+            title={`${isShowingDetail ? 'Hide' : 'Show'} Info`}
+            onAction={onDetailToggle}
+          />
           <Action.OpenInBrowser url={url} />
           <FavoriteAction isFavorite={isFavorite} onToggle={onFavoriteToggle} />
           <Action
@@ -145,18 +165,6 @@ function ListItemCoin({ coin, isFavorite, onFavoriteToggle }: ListItemProps) {
             title="Get Price"
             shortcut={{ modifiers: ['cmd'], key: 'p' }}
             onAction={() => showPrice(id)}
-          />
-          <Action.Push
-            icon={Icon.Clock}
-            title="Get Historical Price"
-            shortcut={{ modifiers: ['cmd'], key: 'h' }}
-            target={<HistoricalPrice id={id} />}
-          />
-          <Action.Push
-            icon={Icon.List}
-            title="Get Info"
-            shortcut={{ modifiers: ['cmd'], key: 'i' }}
-            target={<Info id={id} />}
           />
         </ActionPanel>
       }
@@ -187,67 +195,80 @@ async function showPrice(id: string) {
   const priceString = formatPrice(price, currency.id);
   showToast({
     style: Toast.Style.Success,
-    title: `Price: ${priceString}`,
+    title: priceString,
   });
 }
 
-function HistoricalPrice(props: IdProps) {
-  const [markdown, setMarkdown] = useState<string>('');
+function Info(props: InfoProps) {
+  const [markdown, setMarkdown] = useState<string>('Loading...');
   const [isLoading, setLoading] = useState<boolean>(true);
+  const shouldLoadInfo = useRef(true);
   const currency = getPreferredCurrency();
 
   useEffect(() => {
-    async function fetchList() {
-      const prices = await service.getCoinPriceHistory(props.id);
-      setLoading(false);
-      const markdown = prices
+    const controller = new AbortController();
+
+    async function fetchInfo() {
+      // Debounce fetching info
+      await setTimeout(300);
+      if (shouldLoadInfo.current === false) return;
+
+      const { name, symbol, market_cap_rank, links, market_data, image } =
+        await service.getCoinInfo(props.id, controller.signal);
+      const currentPrice = formatPrice(
+        market_data.current_price[currency.id],
+        currency.id,
+      );
+      const marketCapRank = market_cap_rank ? `#${market_cap_rank}` : 'Unknown';
+      const historicalPrices = (
+        await service.getCoinPriceHistory(props.id, 30, controller.signal)
+      )
         .map(([timestamp, price]) => {
           const date = new Date(timestamp);
-          const dateString = formatDate(date);
-          const priceString = formatPrice(price, currency.id);
-          return `**${dateString}:** ${priceString}`;
+
+          return [formatDate(date), formatPrice(price, currency.id)];
         })
-        .join('\n\n');
-      setMarkdown(markdown);
-    }
+        .reverse() // Sort entries descending
+        .slice(2); // Remove the first 2 entries as they will be for the current date
 
-    fetchList();
-  }, []);
+      setMarkdown(`&nbsp;![](${image.small})
+# ${name} (${symbol.toUpperCase()})
+[${links.homepage[0]}](${links.homepage[0]})
 
-  return <Detail isLoading={isLoading} markdown={markdown} />;
-}
+###
 
-function Info(props: IdProps) {
-  const [markdown, setMarkdown] = useState<string>('');
-  const [isLoading, setLoading] = useState<boolean>(true);
+**Market Cap Rank** ${marketCapRank}
 
-  useEffect(() => {
-    async function fetchList() {
-      const { name, symbol, market_cap_rank, links } =
-        await service.getCoinInfo(props.id);
+###
+
+**Current Price** ${currentPrice}
+
+###
+
+**Historical Prices (Last 30 Days)**
+
+###
+
+${historicalPrices
+  .map(([date, price]) => {
+    return `- _${date} -_ **${price}**`;
+  })
+  .join('\n\n')}`);
       setLoading(false);
-      const markdown = `
-  ## Name
-
-  ${name}
-
-  ## Symbol
-
-  ${symbol.toUpperCase()}
-
-  ## Market Cap Rank
-
-  ${market_cap_rank}
-
-  ## Homepage
-
-  [${links.homepage[0]}](${links.homepage[0]})
-      `;
-      setMarkdown(markdown);
     }
 
-    fetchList();
+    fetchInfo().catch((err) => {
+      if (err.message === 'cancelled') return;
+
+      setMarkdown('Failed to fetch coin info');
+      setLoading(false);
+    });
+
+    return () => {
+      controller.abort();
+      shouldLoadInfo.current = false;
+    };
   }, []);
 
-  return <Detail isLoading={isLoading} markdown={markdown} />;
+  return <List.Item.Detail isLoading={isLoading} markdown={markdown} />;
 }
