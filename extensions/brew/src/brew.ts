@@ -26,7 +26,7 @@ export interface Nameable {
 
 interface Installable {
   tap: string;
-  desc: string;
+  desc?: string;
   homepage: string;
   versions: Versions;
   outdated: boolean;
@@ -237,12 +237,33 @@ export async function brewSearch(searchText: string, limit?: number): Promise<In
 
   if (searchText.length > 0) {
     const target = searchText.toLowerCase();
-    formulae = formulae?.filter((formula) => {
-      return formula.name.toLowerCase().includes(target);
-    });
-    casks = casks?.filter((cask) => {
-      return cask.token.toLowerCase().includes(target);
-    });
+    function compare(lhs: string, rhs: string): number {
+      const lhs_matches = lhs.toLowerCase().includes(target);
+      const rhs_matches = rhs.toLowerCase().includes(target);
+      if (lhs_matches && !rhs_matches) {
+        return -1;
+      } else if (rhs_matches && !lhs_matches) {
+        return 1;
+      } else {
+        return lhs.localeCompare(rhs);
+      }
+    }
+
+    formulae = formulae
+      ?.filter((formula) => {
+        return formula.name.toLowerCase().includes(target) || formula.desc?.toLowerCase().includes(target);
+      })
+      .sort((lhs, rhs) => {
+        return compare(lhs.name, rhs.name);
+      });
+
+    casks = casks
+      ?.filter((cask) => {
+        return cask.token.toLowerCase().includes(target) || cask.desc?.toLowerCase().includes(target);
+      })
+      .sort((lhs, rhs) => {
+        return compare(lhs.token, rhs.token);
+      });
   }
 
   const formulaeLen = formulae.length;
