@@ -7,7 +7,6 @@ export default async function Command() {
   await showHUD(`Open unread messages`);
   await runAppleScript(
     buildScriptEnsuringSlackIsRunning(`
-      activate
       tell application "System Events" to tell process "Slack" to keystroke "A" using {command down, shift down}
     `)
   );

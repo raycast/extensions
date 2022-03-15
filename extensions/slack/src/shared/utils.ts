@@ -23,7 +23,16 @@ const buildScriptEnsuringSlackIsRunning = (commandsToRunAfterSlackIsRunning: str
           set _openCounter to _openCounter + 0.5
           if _openCounter > _maxOpenWaitTimeInSeconds then exit repeat
         end repeat
+
+        delay 6
+
+        # Exit 'Set yourself to active?' window
+        activate
+        tell application "System Events"
+          key code 53
+        end tell
       end if
+      activate
       ${commandsToRunAfterSlackIsRunning}
     end tell`;
 };
