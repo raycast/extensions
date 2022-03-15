@@ -215,6 +215,7 @@ export const SiteCommands = ({ site, server }: { site: ISite; server: IServer })
           onAction={() => Site.deploy(site, server)}
         />
       )}
+      <OpenInBrowserAction icon={Icon.Globe} title="Open on Forge" url={`https://forge.laravel.com/servers/${server.id}/sites/${site.id}`} />
       {url && <OpenInBrowserAction icon={Icon.Globe} title="Open Site in Browser" url={url.toString()} />}
     </>
   );
