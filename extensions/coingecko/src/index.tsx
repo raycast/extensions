@@ -55,9 +55,17 @@ export default function Command() {
 
   useEffect(() => {
     async function fetchList() {
-      const coins = await service.getCoinList();
-      setLoading(false);
-      setCoins(coins);
+      try {
+        const coins = await service.getCoinList();
+        setLoading(false);
+        setCoins(coins);
+      } catch (e) {
+        setLoading(false);
+        showToast({
+          style: Toast.Style.Failure,
+          title: 'Failed to fetch the coin list',
+        });
+      }
     }
 
     async function fetchFavorites() {
@@ -219,13 +227,21 @@ function Info(props: IdProps) {
         await service.getCoinInfo(props.id);
       setLoading(false);
       const markdown = `
-  **Name**: ${name}
+  ## Name
 
-  **Symbol**: ${symbol.toUpperCase()}
+  ${name}
 
-  **Market Cap Rank**: ${market_cap_rank}
+  ## Symbol
 
-  [Homepage](${links.homepage[0]})
+  ${symbol.toUpperCase()}
+
+  ## Market Cap Rank
+
+  ${market_cap_rank}
+
+  ## Homepage
+
+  [${links.homepage[0]}](${links.homepage[0]})
       `;
       setMarkdown(markdown);
     }

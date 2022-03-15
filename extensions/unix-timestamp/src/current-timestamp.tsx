@@ -1,13 +1,10 @@
-import { showToast, Clipboard, Toast } from '@raycast/api';
+import { Clipboard, showHUD } from '@raycast/api';
 
 import { getCurrentTimestamp } from './utils';
 
-export default function main() {
+export default async function main() {
   const timestamp = getCurrentTimestamp();
-  showToast({
-    style: Toast.Style.Success,
-    title: 'Copied to clipboard',
-  });
   Clipboard.copy(timestamp.toString());
+  await showHUD('Copied to clipboard');
   return null;
 }

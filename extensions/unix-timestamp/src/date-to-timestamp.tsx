@@ -7,7 +7,12 @@ import {
   Clipboard,
   Toast,
 } from '@raycast/api';
-import { getTimestamp, toDate } from './utils';
+import {
+  DateValidationError,
+  getTimestamp,
+  toDate,
+  validateDateInput,
+} from './utils';
 
 interface Form {
   year: string;
@@ -48,45 +53,20 @@ function ConvertAction() {
     const minutesNumber = parseInt(minutes || '0');
     const secondsNumber = parseInt(seconds || '0');
 
-    if (isNaN(yearNumber)) {
+    const validatationError = validateDateInput(
+      yearNumber,
+      monthNumber,
+      dayNumber,
+      hoursNumber,
+      minutesNumber,
+      secondsNumber,
+    );
+
+    if (validatationError) {
+      const title = getValidationErrorText(validatationError);
       showToast({
         style: Toast.Style.Failure,
-        title: 'Invalid field value: "Year"',
-      });
-      return;
-    }
-    if (isNaN(monthNumber)) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Invalid field value: "Month"',
-      });
-      return;
-    }
-    if (isNaN(dayNumber)) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Invalid field value: "Day"',
-      });
-      return;
-    }
-    if (isNaN(hoursNumber)) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Invalid field value: "Hours"',
-      });
-      return;
-    }
-    if (isNaN(minutesNumber)) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Invalid field value: "Minutes"',
-      });
-      return;
-    }
-    if (isNaN(secondsNumber)) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: 'Invalid field value: "Seconds"',
+        title,
       });
       return;
     }
@@ -115,4 +95,48 @@ function ConvertAction() {
       onSubmit={handleSubmit}
     />
   );
+}
+
+function getValidationErrorText(validatationError: DateValidationError) {
+  const { error, field } = validatationError;
+
+  let errorText = '';
+  switch (error) {
+    case 'not-a-number':
+      errorText = 'Not a number';
+      break;
+    case 'negative':
+      errorText = 'Negative value';
+      break;
+    case 'out-of-bounds':
+      errorText = 'The value is too high';
+      break;
+    default:
+      errorText = 'Unknown error';
+      break;
+  }
+
+  let fieldText = '';
+  switch (field) {
+    case 'year':
+      fieldText = 'Year';
+      break;
+    case 'month':
+      fieldText = 'Month';
+      break;
+    case 'day':
+      fieldText = 'Day';
+      break;
+    case 'hours':
+      fieldText = 'Hours';
+      break;
+    case 'minutes':
+      fieldText = 'Minutes';
+      break;
+    case 'seconds':
+      fieldText = 'Seconds';
+      break;
+  }
+
+  return `${errorText}: "${fieldText}"`;
 }
