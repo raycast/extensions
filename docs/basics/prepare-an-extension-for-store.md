@@ -106,7 +106,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ### Screenshots
 
-![Screenshots will show in an extensions detail screen](<../.gitbook/assets/screenshots-example (1).png>)
+![Screenshots will show in an extensions detail screen](<../.gitbook/assets/screenshots-example.png>)
 
 * Screenshots are displayed in the metadata of an extension details screen, where users can click and browse through them to understand what your extension does in greater detail, before installing
 * You can add a maximum of six screenshots. We recommend adding at least three, so your extensions detail screen looks beautiful.
@@ -115,7 +115,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 * To add a screenshot to your extension metadata, simply create a new folder called `metadata` in your extension folder. Then, add all your images to the `metadata` folder using the specifications below, following the Do’s and Dont’s. We’ll handle the rest.
 
-![Extension folder structure with a metadata folder and screenshots](<../.gitbook/assets/folder-structure (1).png>)
+![Extension folder structure with a metadata folder and screenshots](<../.gitbook/assets/folder-structure.png>)
 
 #### Specifications
 
