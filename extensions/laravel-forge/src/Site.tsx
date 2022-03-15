@@ -81,6 +81,18 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
     <>
       <List searchBarPlaceholder="Search sites...">
         <List.Section title={`Site Commands (${current.name})`}>
+          <List.Item
+            id="open-on-forge"
+            key="open-on-forge"
+            title={`Open ${current.name} on Laravel Forge`}
+            icon={Icon.Globe}
+            accessoryTitle="forge.laravel.com"
+            actions={
+              <ActionPanel>
+                <OpenInBrowserAction url={`https://forge.laravel.com/servers/${server.id}/sites/${site.id}`} />
+              </ActionPanel>
+            }
+          />
           {site.repository && (
             <List.Item
               id="site-deploy"
@@ -100,18 +112,6 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
               }
             />
           )}
-          <List.Item
-            id="open-on-forge"
-            key="open-on-forge"
-            title={`Open ${current.name} on Laravel Forge`}
-            icon={Icon.Globe}
-            accessoryTitle="forge.laravel.com"
-            actions={
-              <ActionPanel>
-                <OpenInBrowserAction url={`https://forge.laravel.com/servers/${server.id}/sites/${site.id}`} />
-              </ActionPanel>
-            }
-          />
           <List.Item
             id="site-env"
             key="site-env"
@@ -197,6 +197,11 @@ export const SiteCommands = ({ site, server }: { site: ISite; server: IServer })
   }
   return (
     <>
+      <OpenInBrowserAction
+        icon={Icon.Globe}
+        title="Open on Forge"
+        url={`https://forge.laravel.com/servers/${server.id}/sites/${site.id}`}
+      />
       {/* As fas as I'm aware only sites with a repo can deploy */}
       {site.repository && (
         <ActionPanel.Item
@@ -205,11 +210,6 @@ export const SiteCommands = ({ site, server }: { site: ISite; server: IServer })
           onAction={() => Site.deploy(site, server)}
         />
       )}
-      <OpenInBrowserAction
-        icon={Icon.Globe}
-        title="Open on Forge"
-        url={`https://forge.laravel.com/servers/${server.id}/sites/${site.id}`}
-      />
       {url && <OpenInBrowserAction icon={Icon.Globe} title="Open Site in Browser" url={url.toString()} />}
     </>
   );
