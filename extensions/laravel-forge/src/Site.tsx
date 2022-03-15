@@ -136,7 +136,9 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
             accessoryTitle="press to edit in browser"
             actions={
               <ActionPanel>
-                <OpenInBrowserAction url={`https://forge.laravel.com/servers/${server.id}/sites/${site.id}/environment`} />
+                <OpenInBrowserAction
+                  url={`https://forge.laravel.com/servers/${server.id}/sites/${site.id}/environment`}
+                />
               </ActionPanel>
             }
           />
