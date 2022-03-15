@@ -105,7 +105,6 @@ export async function jsonRequest<T>({
 }) {
   const { hostname, username, password } = getPreferences();
 
-  console.log(`https://${hostname}/apps/${base}`);
   const response = await fetch(`https://${hostname}/apps/${base}`, {
     method,
     headers: {

@@ -3,11 +3,11 @@ import { formatDistanceToNow, parseISO } from "date-fns";
 import { getPreferences } from "../../preferences";
 import { Card, useStacks } from "../hooks";
 
-export function Stacks({ boardId }: { boardId: number }) {
+export function Stacks({ boardId, boardName }: { boardId: number; boardName: string }) {
   const { isLoading, stacks } = useStacks(boardId);
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} navigationTitle={`Board: ${boardName}`}>
       {stacks.map((stack) => (
         <List.Section key={stack.id} title={stack.title} subtitle={String(stacks.length)}>
           {stack.cards.map((card) => (

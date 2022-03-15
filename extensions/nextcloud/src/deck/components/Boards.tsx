@@ -30,7 +30,11 @@ function Board({ board }: { board: Board }) {
       actions={
         <ActionPanel title={board.title}>
           <ActionPanel.Section>
-            <Action.Push title="Show Stacks" target={<Stacks boardId={board.id} />} />
+            <Action.Push
+              title="Show Stacks"
+              target={<Stacks boardId={board.id} boardName={board.title} />}
+              icon={Icon.ArrowRight}
+            />
             <Action.OpenInBrowser title="Open in Browser" url={boardUrl} />
           </ActionPanel.Section>
         </ActionPanel>

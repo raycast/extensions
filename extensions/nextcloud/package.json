@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nextcloud",
   "title": "Nextcloud",
-  "description": "Search files, favorites, deck and activity in Nextcloud.",
+  "description": "Search files, deck, notes, favorites and activity in Nextcloud.",
   "version": "0.0.0",
   "icon": "nextcloud.png",
   "author": "uetchy",
