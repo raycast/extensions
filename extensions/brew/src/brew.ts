@@ -237,24 +237,12 @@ export async function brewSearch(searchText: string, limit?: number): Promise<In
 
   if (searchText.length > 0) {
     const target = searchText.toLowerCase();
-    function compare(lhs: string, rhs: string): number {
-      const lhs_matches = lhs.toLowerCase().includes(target);
-      const rhs_matches = rhs.toLowerCase().includes(target);
-      if (lhs_matches && !rhs_matches) {
-        return -1;
-      } else if (rhs_matches && !lhs_matches) {
-        return 1;
-      } else {
-        return lhs.localeCompare(rhs);
-      }
-    }
-
     formulae = formulae
       ?.filter((formula) => {
         return formula.name.toLowerCase().includes(target) || formula.desc?.toLowerCase().includes(target);
       })
       .sort((lhs, rhs) => {
-        return compare(lhs.name, rhs.name);
+        return brewCompare(lhs.name, rhs.name, target);
       });
 
     casks = casks
@@ -262,7 +250,7 @@ export async function brewSearch(searchText: string, limit?: number): Promise<In
         return cask.token.toLowerCase().includes(target) || cask.desc?.toLowerCase().includes(target);
       })
       .sort((lhs, rhs) => {
-        return compare(lhs.token, rhs.token);
+        return brewCompare(lhs.token, rhs.token, target);
       });
   }
 
@@ -425,6 +413,18 @@ function brewIdentifier(item: Cask | Nameable): string {
 
 function isCask(maybeCask: Cask | Nameable): maybeCask is Cask {
   return (maybeCask as Cask).token != undefined;
+}
+
+function brewCompare(lhs: string, rhs: string, target: string): number {
+  const lhs_matches = lhs.toLowerCase().includes(target);
+  const rhs_matches = rhs.toLowerCase().includes(target);
+  if (lhs_matches && !rhs_matches) {
+    return -1;
+  } else if (rhs_matches && !lhs_matches) {
+    return 1;
+  } else {
+    return lhs.localeCompare(rhs);
+  }
 }
 
 async function execSignal(cmd: string, cancel?: AbortController): Promise<ExecResult> {
