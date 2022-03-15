@@ -81,6 +81,18 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
     <>
       <List searchBarPlaceholder="Search sites...">
         <List.Section title={`Site Commands (${current.name})`}>
+          <List.Item
+            id="open-on-forge"
+            key="open-on-forge"
+            title="Open on Laravel Forge"
+            icon={Icon.Globe}
+            accessoryTitle="Press to open on Laravel Forge"
+            actions={
+              <ActionPanel>
+                <OpenInBrowserAction url={`https://forge.laravel.com/servers/${server.id}/sites/${site.id}`} />
+              </ActionPanel>
+            }
+          />
           {site.repository && (
             <List.Item
               id="site-deploy"
@@ -113,6 +125,18 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
                   icon={Icon.TextDocument}
                   target={<EnvironmentFile site={site} server={server} />}
                 />
+              </ActionPanel>
+            }
+          />
+          <List.Item
+            id="edit-site-env"
+            key="edit-site-env"
+            title="Edit .env file"
+            icon={Icon.Globe}
+            accessoryTitle="press to edit in browser"
+            actions={
+              <ActionPanel>
+                <OpenInBrowserAction url={`https://forge.laravel.com/servers/${server.id}/sites/${site.id}/environment`} />
               </ActionPanel>
             }
           />
