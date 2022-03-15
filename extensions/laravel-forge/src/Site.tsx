@@ -103,7 +103,7 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
           <List.Item
             id="open-on-forge"
             key="open-on-forge"
-            title="Open on Laravel Forge"
+            title={`Open ${current.name} on Laravel Forge`}
             icon={Icon.Globe}
             accessoryTitle="forge.laravel.com"
             actions={
