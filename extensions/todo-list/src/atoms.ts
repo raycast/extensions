@@ -58,3 +58,13 @@ export const todoAtom = atom(
 );
 
 export const searchModeAtom = atom(false);
+
+export const searchBarTextAtom = atom("");
+export const newTodoTextAtom = atom((get) => get(searchBarTextAtom).trim());
+export const editingAtom = atom<
+  | false
+  | {
+      sectionKey: keyof TodoSections;
+      index: number;
+    }
+>(false);

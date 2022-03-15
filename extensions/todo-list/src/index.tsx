@@ -1,48 +1,22 @@
-import { ActionPanel, clearSearchBar, List, showToast, ToastStyle } from "@raycast/api";
-import { useState } from "react";
-import { searchModeAtom, todoAtom } from "./atoms";
+import { List } from "@raycast/api";
+import { editingAtom, searchBarTextAtom, searchModeAtom } from "./atoms";
 import { useAtom } from "jotai";
-import _ from "lodash";
-import { insertIntoSection, compare } from "./utils";
-import DeleteAllAction from "./delete_all";
 import TodoSection from "./todo_section";
-import SearchModeAction from "./search_mode_action";
+import ListActions from "./list_actions";
 
 export default function TodoList() {
-  const [todoSections, setTodoSections] = useAtom(todoAtom);
-  const [newTodoText, setNewTodoText] = useState("");
   const [searchMode] = useAtom(searchModeAtom);
+  const [searchBarText, setSearchBarText] = useAtom(searchBarTextAtom);
+  const [editing] = useAtom(editingAtom);
 
-  const addTodo = async () => {
-    if (newTodoText.length === 0) {
-      await showToast(ToastStyle.Failure, "Empty todo", "Todo items cannot be empty.");
-      return;
-    }
-    todoSections.todo = [
-      ...insertIntoSection(
-        todoSections.todo,
-        {
-          title: newTodoText,
-          completed: false,
-          timeAdded: Date.now(),
-        },
-        compare
-      ),
-    ];
-    await clearSearchBar();
-    setTodoSections(_.cloneDeep(todoSections));
-  };
   return (
     <List
+      navigationTitle={`Manage Todo List${editing !== false ? " • Editing" : searchMode ? " • Searching" : ""}`}
       key={searchMode ? "search" : "nosearch"}
-      actions={
-        <ActionPanel>
-          {!searchMode && <ActionPanel.Item title="Create Todo" onAction={() => addTodo()} />}
-          <SearchModeAction />
-          <DeleteAllAction />
-        </ActionPanel>
-      }
-      onSearchTextChange={searchMode ? undefined : (text: string) => setNewTodoText(text.trimEnd())}
+      actions={<ListActions />}
+      enableFiltering={searchMode}
+      searchText={searchBarText}
+      onSearchTextChange={(text: string) => setSearchBarText(text)}
       searchBarPlaceholder={searchMode ? "Search todos" : "Type and hit enter to add an item to your list"}
     >
       <TodoSection sectionKey="pinned" />
