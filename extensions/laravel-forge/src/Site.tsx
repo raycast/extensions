@@ -125,18 +125,8 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
                   icon={Icon.TextDocument}
                   target={<EnvironmentFile site={site} server={server} />}
                 />
-              </ActionPanel>
-            }
-          />
-          <List.Item
-            id="edit-site-env"
-            key="edit-site-env"
-            title="Edit .env file"
-            icon={Icon.Globe}
-            accessoryTitle="press to edit in browser"
-            actions={
-              <ActionPanel>
                 <OpenInBrowserAction
+                  title="Edit on Forge"
                   url={`https://forge.laravel.com/servers/${server.id}/sites/${site.id}/environment`}
                 />
               </ActionPanel>
