@@ -5,7 +5,7 @@
   "description": "Search files or list favorites in Nextcloud.",
   "version": "0.0.0",
   "icon": "nextcloud.png",
-  "author": "uetchy <y@uechi.io>",
+  "author": "uetchy",
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
