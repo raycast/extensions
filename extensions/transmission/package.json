@@ -116,6 +116,15 @@
       "description": "Comma-separated list of paths where you often download your torrents (must be full-paths or tidle-prefixed ones)",
       "type": "textfield",
       "default": "~/Downloads"
+    },
+    {
+      "name": "rememberStatusFilter",
+      "title": "Status Filter",
+      "required": false,
+      "description": "Remember the status filter when opening the list",
+      "label": "Remember",
+      "type": "checkbox",
+      "default": true
     }
   ],
   "dependencies": {

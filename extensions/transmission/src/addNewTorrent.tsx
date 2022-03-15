@@ -16,6 +16,7 @@ import expandTidle from "expand-tilde";
 import { createClient } from "./modules/client";
 import { useAsync } from "react-use";
 import { runAppleScript } from "run-applescript";
+import path from "path";
 
 const preferences = getPreferenceValues();
 
@@ -25,14 +26,15 @@ export default function AddNewTorrent() {
   const transmission = useMemo(() => createClient(), []);
 
   const handleSubmit = useCallback(async (values: { input: string; downloadDir: string }) => {
+    const resolvedDownloadDir = expandTidle(path.resolve(values.downloadDir));
     try {
       if (values.input.startsWith("magnet:")) {
         await transmission.addUrl(values.input, {
-          "download-dir": expandTidle(values.downloadDir),
+          "download-dir": resolvedDownloadDir,
         });
       } else {
         await transmission.add(expandTidle(values.input), {
-          "download-dir": expandTidle(values.downloadDir),
+          "download-dir": resolvedDownloadDir,
         });
       }
 
@@ -42,8 +44,7 @@ export default function AddNewTorrent() {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      console.log(error);
-      showToast(Toast.Style.Failure, `The torrent couldn't be added: ${error.code ?? "unknown error"}`);
+      showToast(Toast.Style.Failure, `The torrent couldn't be added: ${error.toString().slice("Error: ".length)}`);
     }
   }, []);
 

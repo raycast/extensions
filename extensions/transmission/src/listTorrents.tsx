@@ -58,18 +58,45 @@ const sortTorrents = (t1: Torrent, t2: Torrent): number => {
   }
 };
 
+type TorrentStatusFilterType = keyof typeof TorrentStatus | "All";
+let useStatusFilter: () => [TorrentStatusFilterType, (status: TorrentStatusFilterType) => void, boolean];
+
+if (preferences.rememberStatusFilter) {
+  useStatusFilter = () => useStateFromLocalStorage<keyof typeof TorrentStatus | "All">("statusFilter", "All");
+} else {
+  useStatusFilter = () => {
+    const [state, setState] = useState<TorrentStatusFilterType>("All");
+    return [state, setState, false];
+  };
+}
+
 export default function TorrentList() {
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter, loadingStatusFilter] = useStateFromLocalStorage<
-    keyof typeof TorrentStatus | "All"
-  >("statusFilter", "All");
   const { data: torrents, error: torrentsError } = useAllTorrents();
   const { data: sessionStats } = useSessionStats();
   const mutateTorrent = useMutateTorrent();
 
   const didLoad = torrents != null && sessionStats != null;
 
+  const [statusFilter, setStatusFilter, loadingStatusFilter] = useStatusFilter();
+  const sortedTorrents = useMemo(() => torrents?.sort(sortTorrents) ?? [], [torrents]);
+  const filteredTorrents = useMemo(
+    () =>
+      didLoad
+        ? sortedTorrents
+            // status filter
+            .filter((x) => (statusFilter === "All" ? true : x.status === TorrentStatus[statusFilter]))
+            // fuzzy search
+            .filter((x) => x.name.toLowerCase().includes(search.toLowerCase()))
+        : [],
+    [sortedTorrents, didLoad, search, statusFilter]
+  );
+
   const [isShowingDetail, setIsShowingDetail] = useState(false);
+  useEffect(() => {
+    if (filteredTorrents.length > 0) return;
+    setIsShowingDetail(false);
+  }, [filteredTorrents.length]);
 
   useEffect(() => {
     if (torrentsError == null) return;
@@ -77,8 +104,6 @@ export default function TorrentList() {
     console.error(torrentsError);
     showToast(Toast.Style.Failure, `Could not load torrents: ${torrentsError.code}`);
   }, [torrentsError]);
-
-  const sortedTorrents = useMemo(() => torrents?.sort(sortTorrents) ?? [], [torrents]);
 
   const paddedRateDownloads = useMemo(
     () => padList(sortedTorrents.map((t) => `${prettyBytes(t.rateDownload)}/s`)),
@@ -114,63 +139,58 @@ export default function TorrentList() {
       }
     >
       {didLoad &&
-        sortedTorrents
-          // status filter
-          .filter((x) => (statusFilter === "All" ? true : x.status === TorrentStatus[statusFilter]))
-          // fuzzy search
-          .filter((x) => x.name.toLowerCase().includes(search.toLowerCase()))
-          .map((torrent, index) => (
-            <TorrentListItem
-              key={torrent.id}
-              torrent={torrent}
-              rateDownload={paddedRateDownloads[index]}
-              rateUpload={paddedRateUploads[index]}
-              percentDone={paddedPercentDones[index]}
-              sessionStats={sessionStats}
-              isShowingDetail={isShowingDetail}
-              onToggleDetail={() => setIsShowingDetail((value) => !value)}
-              onStop={async (torrent) => {
-                try {
-                  await mutateTorrent.stop(torrent.id);
-                } catch (error: any) {
-                  console.error(error);
-                  showToast(Toast.Style.Failure, `Could not stop torrent: ${torrent.name}`);
-                  return;
-                }
-                showToast(Toast.Style.Success, `Torrent ${torrent.name} paused`);
-              }}
-              onStart={async (torrent) => {
-                try {
-                  await mutateTorrent.start(torrent.id);
-                } catch (error: any) {
-                  console.error(error);
-                  showToast(Toast.Style.Failure, `Could not start torrent: ${torrent.name}`);
-                  return;
-                }
-                showToast(Toast.Style.Success, `Torrent ${torrent.name} resumed`);
-              }}
-              onRemove={async (torrent) => {
-                try {
-                  await mutateTorrent.remove(torrent.id);
-                } catch (error: any) {
-                  console.error(error);
-                  showToast(Toast.Style.Failure, `Could not start torrent: ${torrent.name}`);
-                  return;
-                }
-                showToast(Toast.Style.Success, `Torrent ${torrent.name} deleted`);
-              }}
-              onStartAll={async () => {
-                await mutateTorrent.startAll();
+        filteredTorrents.map((torrent, index) => (
+          <TorrentListItem
+            key={torrent.id}
+            torrent={torrent}
+            rateDownload={paddedRateDownloads[index]}
+            rateUpload={paddedRateUploads[index]}
+            percentDone={paddedPercentDones[index]}
+            sessionStats={sessionStats}
+            isShowingDetail={isShowingDetail}
+            onToggleDetail={() => setIsShowingDetail((value) => !value)}
+            onStop={async (torrent) => {
+              try {
+                await mutateTorrent.stop(torrent.id);
+              } catch (error: any) {
+                console.error(error);
+                showToast(Toast.Style.Failure, `Could not stop torrent: ${torrent.name}`);
+                return;
+              }
+              showToast(Toast.Style.Success, `Torrent ${torrent.name} paused`);
+            }}
+            onStart={async (torrent) => {
+              try {
+                await mutateTorrent.start(torrent.id);
+              } catch (error: any) {
+                console.error(error);
+                showToast(Toast.Style.Failure, `Could not start torrent: ${torrent.name}`);
+                return;
+              }
+              showToast(Toast.Style.Success, `Torrent ${torrent.name} resumed`);
+            }}
+            onRemove={async (torrent) => {
+              try {
+                await mutateTorrent.remove(torrent.id);
+              } catch (error: any) {
+                console.error(error);
+                showToast(Toast.Style.Failure, `Could not start torrent: ${torrent.name}`);
+                return;
+              }
+              showToast(Toast.Style.Success, `Torrent ${torrent.name} deleted`);
+            }}
+            onStartAll={async () => {
+              await mutateTorrent.startAll();
 
-                showToast(Toast.Style.Success, `All torrents resumed`);
-              }}
-              onStopAll={async () => {
-                await mutateTorrent.stopAll();
+              showToast(Toast.Style.Success, `All torrents resumed`);
+            }}
+            onStopAll={async () => {
+              await mutateTorrent.stopAll();
 
-                showToast(Toast.Style.Success, `All torrents paused`);
-              }}
-            />
-          ))}
+              showToast(Toast.Style.Success, `All torrents paused`);
+            }}
+          />
+        ))}
     </List>
   );
 }
