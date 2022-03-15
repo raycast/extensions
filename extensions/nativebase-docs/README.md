@@ -22,8 +22,8 @@ versions.
 
 ## Versions
 
-![Versions](./media/ss-versions-02.png)
+![Versions](./metadata/ss-versions-02.png)
 
 ## Pages
 
-![Pages](./media/ss-pages-01.png)
+![Pages](./metadata/ss-pages-01.png)
