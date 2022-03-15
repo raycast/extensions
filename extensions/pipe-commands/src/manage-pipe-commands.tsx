@@ -16,7 +16,7 @@ export default function managePipeCommands() {
 
   return (
     <List isLoading={typeof state == "undefined"} isShowingDetail>
-      <List.Section title="Invalid Commands">
+      <List.Section title="Invalid">
         {state?.invalid.map(({ path, content, errors }) => (
           <List.Item
             key={path}
@@ -39,7 +39,7 @@ export default function managePipeCommands() {
           />
         ))}
       </List.Section>
-      <List.Section title="Commands">
+      <List.Section title="Valid">
         {state?.commands?.map((cmd) => (
           <PipeCommand key={cmd.path} command={cmd} onTrash={loadCommands} showContent />
         ))}
