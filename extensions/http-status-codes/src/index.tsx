@@ -20,11 +20,7 @@ export default function Command() {
   return (
     <List isLoading={false} searchBarPlaceholder="Filter by code or description...">
       {Object.entries(codeGroups).map(([firstDigit, codes]) => (
-        <List.Section
-          key={firstDigit}
-          title={`${firstDigit}xx`}
-          subtitle={getCodeGroupDescription(firstDigit)}
-        >
+        <List.Section key={firstDigit} title={`${firstDigit}xx`} subtitle={getCodeGroupDescription(firstDigit)}>
           {codes.map((code) => (
             <List.Item
               key={code.code}
@@ -33,7 +29,7 @@ export default function Command() {
               keywords={[code.description]} // make subtitle searchable
               icon={{
                 source: Icon.Dot,
-                tintColor: statusCodeToColor(code.code)
+                tintColor: statusCodeToColor(code.code),
               }}
               accessoryTitle={code.reference}
               actions={
@@ -56,15 +52,15 @@ export default function Command() {
 // Based on Steve Schoger's https://www.steveschoger.com/status-code-poster/
 function statusCodeToColor(status: string): string {
   switch (status[0]) {
-    case"1":
+    case "1":
       return "#cff9fe";
-    case  "2":
+    case "2":
       return "#d4f7ae";
-    case  "3":
+    case "3":
       return "#cdc7ff";
-    case  "4":
+    case "4":
       return "#f9f4b5";
-    case  "5":
+    case "5":
       return "#fbb7b7";
     default:
       return "#ffffff";
