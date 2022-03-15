@@ -10,8 +10,9 @@ import {
   Icon,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { ItemType, SurfApplication } from "./utils";
+import { SurfApplication } from "./utils";
 import { SUGGEST_APP_SUPPORT_TYPE } from "./constants";
+import { ItemType } from "./input";
 
 export default function ApplicationsList(props: { setSurfBrowsers: any }) {
   const _setSurfBrowsers = props.setSurfBrowsers;
