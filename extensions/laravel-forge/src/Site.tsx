@@ -86,7 +86,7 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
             key="open-on-forge"
             title="Open on Laravel Forge"
             icon={Icon.Globe}
-            accessoryTitle="Press to open on Laravel Forge"
+            accessoryTitle="forge.laravel.com"
             actions={
               <ActionPanel>
                 <OpenInBrowserAction url={`https://forge.laravel.com/servers/${server.id}/sites/${site.id}`} />
