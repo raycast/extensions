@@ -1,17 +1,10 @@
 import { splitEvery } from "ramda";
-import { isDarkMode } from "./darkMode";
 import BitField from "bitfield";
 import { renderToString } from "react-dom/server";
 
-const theme = {
-  light: {
-    gray: "#C8C7C9",
-    accent: "#007DD7",
-  },
-  dark: {
-    gray: "#4F4F51",
-    accent: "#007DD7",
-  },
+const colors = {
+  gray: "#888888",
+  accent: "#007DD7",
 };
 
 interface CellProps {
@@ -56,10 +49,6 @@ export async function renderPieces({
   width?: number;
   complete?: boolean;
 }): Promise<string> {
-  const isDark = await isDarkMode();
-
-  const colors = theme[isDark ? "dark" : "light"];
-
   const buffer = Buffer.from(pieces, "base64");
   const bitfield = new BitField(buffer);
 
@@ -68,9 +57,12 @@ export async function renderPieces({
   const bits: boolean[] = [];
   bitfield.forEach((bit) => bits.push(bit));
 
-  const cells = splitEvery(bits.length / cellsCount, bits).map(
-    (chunk) => ((100 / chunk.length) * chunk.filter(Boolean).length) / 100
-  );
+  const cells =
+    bits.length > 0
+      ? splitEvery(bits.length / cellsCount, bits).map(
+          (chunk) => ((100 / chunk.length) * chunk.filter(Boolean).length) / 100
+        )
+      : Array.from({ length: cellsCount }).map(() => 0);
 
   const strokeWidth = width / 100;
   const cellSize = width / 18;
