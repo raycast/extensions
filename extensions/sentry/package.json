@@ -25,7 +25,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.0",
+    "@raycast/api": "^1.31.0",
     "javascript-time-ago": "^2.3.13",
     "node-fetch": "^3.2.1",
     "swr": "^1.2.2"
