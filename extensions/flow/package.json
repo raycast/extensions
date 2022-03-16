@@ -31,6 +31,13 @@
       "mode": "no-view"
     },
     {
+      "name": "start-next-break",
+      "title": "Start Next Break",
+      "subtitle": "Flow",
+      "description": "Start the next break",
+      "mode": "no-view"
+    },
+    {
       "name": "hide-timer",
       "title": "Hide Timer",
       "subtitle": "Flow",
@@ -59,9 +66,9 @@
       "mode": "no-view"
     },
     {
-      "name": "next-session",
-      "title": "Next Session",
-      "description": "Start the next Flow session",
+      "name": "start-focus-session",
+      "title": "Start Focus Session",
+      "description": "Start the next focus session",
       "mode": "no-view"
     }
   ],

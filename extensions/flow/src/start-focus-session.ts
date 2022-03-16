@@ -1,5 +1,5 @@
 import { showHUD, Toast, ToastStyle } from "@raycast/api";
-import { isFlowInstalled, skipSession } from "./utils";
+import { getCurrentPhase, isFlowInstalled, resetTimer, skipSession } from "./utils";
 
 export default async function() {
   const toast = new Toast({
@@ -16,6 +16,11 @@ export default async function() {
     return;
   }
 
-  await skipSession();
-  await showHUD("Session skipped");
+  const phase = await getCurrentPhase();
+  if (phase !== "Flow") {
+    await skipSession();
+  } else {
+    await resetTimer();
+  }
+  await showHUD("Focus session started");
 }
