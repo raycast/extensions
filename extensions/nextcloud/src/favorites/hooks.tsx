@@ -1,24 +1,13 @@
 import path from "path";
-import { useEffect } from "react";
 import { useQuery, webdavRequest } from "../nextcloud";
 import { getPreferences } from "../preferences";
 
 export function useFavorites() {
-  const {
-    state: { results, isLoading },
-    perform,
-  } = useQuery(({ signal }) => {
-    return performListFavorites(signal);
-  });
-
-  useEffect(() => {
-    perform();
-  }, []);
+  const { data, isLoading } = useQuery((signal) => performListFavorites(signal));
 
   return {
+    favorites: data ?? [],
     isLoading,
-    favorites: results ?? [],
-    getFavorites: perform,
   };
 }
 

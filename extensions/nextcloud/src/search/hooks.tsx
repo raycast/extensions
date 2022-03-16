@@ -1,19 +1,21 @@
 import path from "path";
+import { useCallback, useState } from "react";
 import { useQuery, webdavRequest } from "../nextcloud";
 import { getPreferences } from "../preferences";
 
 export function useSearch() {
-  const {
-    state: { results, isLoading },
-    perform,
-  } = useQuery(async ({ signal, args }: { signal: AbortSignal; args?: string }) => {
-    return performSearch(signal, args);
-  });
+  const [query, setQuery] = useState<string>();
+
+  const { data, isLoading } = useQuery((signal) => performSearch(signal, query), [query]);
+
+  const search = useCallback((query: string) => {
+    setQuery(query);
+  }, []);
 
   return {
+    search,
     isLoading,
-    results: results ?? [],
-    search: perform,
+    results: data ?? [],
   };
 }
 

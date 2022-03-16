@@ -4,7 +4,7 @@ import { getPreferences } from "../../preferences";
 import { Card, useStacks } from "../hooks";
 
 export function Stacks({ boardId, boardName }: { boardId: number; boardName: string }) {
-  const { isLoading, stacks } = useStacks(boardId);
+  const { stacks, isLoading } = useStacks(boardId);
 
   return (
     <List isLoading={isLoading} navigationTitle={`Board: ${boardName}`}>

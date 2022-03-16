@@ -4,7 +4,7 @@ import { Activity, useActivity } from "./activity/hooks";
 import { capitalize } from "./utils";
 
 export default function Command() {
-  const { isLoading, activity } = useActivity();
+  const { activity, isLoading } = useActivity();
 
   return (
     <List isLoading={isLoading}>

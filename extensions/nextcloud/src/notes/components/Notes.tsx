@@ -4,7 +4,7 @@ import { Note, useNotes } from "../hooks";
 import { NoteDetails } from "./NoteDetails";
 
 export function Notes() {
-  const { isLoading, notes } = useNotes();
+  const { notes, isLoading } = useNotes();
 
   return (
     <List isLoading={isLoading}>

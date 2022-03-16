@@ -4,7 +4,7 @@ import { getPreferences } from "./preferences";
 import { SearchResult, useSearch } from "./search/hooks";
 
 export default function Command() {
-  const { isLoading, results, search } = useSearch();
+  const { results, isLoading, search } = useSearch();
 
   return (
     <List isLoading={isLoading} onSearchTextChange={search} searchBarPlaceholder="Search files..." throttle>

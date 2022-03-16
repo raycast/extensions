@@ -1,22 +1,11 @@
-import { useEffect } from "react";
 import { jsonRequest, useQuery } from "../nextcloud";
 
 export function useNotes() {
-  const {
-    state: { results, isLoading },
-    perform,
-  } = useQuery(({ signal }) => {
-    return getNotes(signal);
-  });
-
-  useEffect(() => {
-    perform();
-  }, []);
+  const { data, isLoading } = useQuery((signal) => getNotes(signal));
 
   return {
+    notes: data ?? [],
     isLoading,
-    notes: results ?? [],
-    getNotes: perform,
   };
 }
 

@@ -1,44 +1,20 @@
-import { useEffect } from "react";
 import { jsonRequest, useQuery } from "../nextcloud";
 
 export function useBoards() {
-  const {
-    state: { results, isLoading },
-    perform,
-  } = useQuery(({ signal }) => {
-    return getBoards(signal);
-  });
-
-  useEffect(() => {
-    perform();
-  }, []);
+  const { data, isLoading } = useQuery((signal) => getBoards(signal));
 
   return {
+    boards: data ?? [],
     isLoading,
-    boards: results ?? [],
-    getBoards: perform,
   };
 }
 
 export function useStacks(boardId: number) {
-  const {
-    state: { results, isLoading },
-    perform,
-  } = useQuery(
-    async ({ signal }: { signal: AbortSignal }): Promise<Stack[]> => {
-      return getStacks(signal, boardId);
-    },
-    [boardId]
-  );
-
-  useEffect(() => {
-    perform();
-  }, []);
+  const { data, isLoading } = useQuery(async (signal): Promise<Stack[]> => getStacks(signal, boardId), [boardId]);
 
   return {
+    stacks: data ?? [],
     isLoading,
-    stacks: results ?? [],
-    getStacks: perform,
   };
 }
 

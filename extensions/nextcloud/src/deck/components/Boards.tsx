@@ -4,7 +4,7 @@ import { Board, useBoards } from "../hooks";
 import { Stacks } from "./Stacks";
 
 export function Boards() {
-  const { isLoading, boards } = useBoards();
+  const { boards, isLoading } = useBoards();
 
   return (
     <List isLoading={isLoading}>

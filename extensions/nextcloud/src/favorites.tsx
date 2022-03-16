@@ -4,7 +4,7 @@ import { Favorite, useFavorites } from "./favorites/hooks";
 import { getPreferences } from "./preferences";
 
 export default function Command() {
-  const { isLoading, favorites } = useFavorites();
+  const { favorites, isLoading } = useFavorites();
 
   return (
     <List isLoading={isLoading}>
