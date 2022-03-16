@@ -29,14 +29,13 @@ export default function Command() {
               keywords={[code.description]} // make subtitle searchable
               icon={{
                 source: Icon.Dot,
-                tintColor: statusCodeToColor(code.code),
+                tintColor: statusCodeToColor(code.code)
               }}
-              accessoryTitle={code.reference}
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser
                     title="Open in browser"
-                    url={`https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/${code.code}`}
+                    url={getCodeDocsUrl(code.code)}
                   />
                   <Action.CopyToClipboard content={code.code} />
                 </ActionPanel>
@@ -82,4 +81,14 @@ function getCodeGroupDescription(firstDigit: string): string {
     default:
       return "";
   }
+}
+
+function getCodeDocsUrl(code: string): string {
+  const codesWithoutDocs = ["102", "207", "208", "226", "305", "421", "423", "424", "509"];
+
+  if (codesWithoutDocs.includes(code)) {
+    return "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status";
+  }
+
+  return `https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/${code}`;
 }
