@@ -15,7 +15,7 @@
       "preferences": [
         {
           "name": "giphy-apiKey",
-          "type": "textfield",
+          "type": "password",
           "required": true,
           "title": "Giphy API Key",
           "placeholder": "Giphy API Key",
@@ -31,7 +31,7 @@
       "preferences": [
         {
           "name": "tenor-apiKey",
-          "type": "textfield",
+          "type": "password",
           "required": true,
           "title": "Tenor API Key",
           "placeholder": "Tenor API Key",

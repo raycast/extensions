@@ -29,6 +29,8 @@ export default function useFinerGifsClubAPI({ offset = 0 }) {
         if (term) {
           results = await finergifs.search(term, { offset });
           setResults({ items: results.results.map(mapFinerGifsResponse), term });
+        } else {
+          setResults({ items: [], term });
         }
       } catch (e) {
         const error = e as Error;
