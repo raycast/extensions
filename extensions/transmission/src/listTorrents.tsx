@@ -245,7 +245,14 @@ function TorrentListItem({
       title={truncate(torrent.name, 60)}
       icon={statusIcon(torrent)}
       accessoryTitle={!isShowingDetail ? downloadStats : undefined}
-      detail={isShowingDetail && <List.Item.Detail markdown={details.value} isLoading={details.loading} />}
+      detail={
+        isShowingDetail && (
+          <List.Item.Detail
+            markdown={details.value ?? `\`\`\`\n${details.error}\n\`\`\``}
+            isLoading={details.loading}
+          />
+        )
+      }
       actions={
         <ActionPanel>
           <ActionPanel.Section title={`Selected Torrent (${selectedTorrentTitle})`}>
