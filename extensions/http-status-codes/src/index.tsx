@@ -8,14 +8,16 @@ type Code = {
 };
 
 export default function Command() {
-  const codeGroups = Object.entries(http.STATUS_CODES)
-    .reduce((groups: { [firstDigit: string]: Code[] }, [code, description]) => {
+  const codeGroups = Object.entries(http.STATUS_CODES).reduce(
+    (groups: { [firstDigit: string]: Code[] }, [code, description]) => {
       const group = groups[code[0]] || [];
       group.push({ code, description });
       groups[code[0]] = group;
 
       return groups;
-    }, {});
+    },
+    {}
+  );
 
   return (
     <List isLoading={false} searchBarPlaceholder="Filter by code or description...">
@@ -29,14 +31,11 @@ export default function Command() {
               keywords={[code.description]} // make subtitle searchable
               icon={{
                 source: Icon.Dot,
-                tintColor: statusCodeToColor(code.code)
+                tintColor: statusCodeToColor(code.code),
               }}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser
-                    title="Open in browser"
-                    url={getCodeDocsUrl(code.code)}
-                  />
+                  <Action.OpenInBrowser title="Open in browser" url={getCodeDocsUrl(code.code)} />
                   <Action.CopyToClipboard content={code.code} />
                 </ActionPanel>
               }
