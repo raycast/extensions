@@ -82,7 +82,7 @@ export function mailtoBuilder(emailGroup: string): string {
 }
 
 export function isUrl(text: string): boolean {
-  const regex = /^(?:(http|https|ftp):\/\/)?((?:[\w-]+\.)+[a-z0-9]+)((?:\/[^/?#]*)+)?(\?[^#]+)?(#.+)?$/i;
+  const regex = /^(http|https|ftp):\/\/((?:[\w-]+\.)+[a-z0-9]+)((?:\/[^/?#]*)+)?(\?[^#]+)?(#.+)?$/i;
   return regex.test(text) || isIP(text);
 }
 
