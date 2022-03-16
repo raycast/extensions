@@ -1,9 +1,9 @@
-import { ActionPanel, getPreferenceValues, List, Action, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import algoliasearch from "algoliasearch/lite";
 import striptags from "striptags";
 import groupBy from "lodash.groupby";
-
+import { DocumentationList } from "./documentation_list";
 const APPID = "ML0LEBN7FQ";
 const APIKEY = "f49cbd92a74532cc55cfbffa5e5a7d01";
 const INDEX = "vuejs";
@@ -40,9 +40,30 @@ type SectionHit = {
   items: VueJsDocsHit[];
 };
 
+type DocLink = {
+  title: string;
+  url: string;
+};
+
+export type DocList = {
+  section: {
+    title: string;
+    items: DocLink[];
+  };
+};
+
+const DOCS: { [key: string]: DocList[] } = {
+  v2: require("./documentation/v2.json"),
+  v3: require("./documentation/v3.json"),
+};
+
+type Preferences = {
+  vueVersion: string;
+};
+
 export default function Command() {
-  const preferences = getPreferenceValues();
-  const navigationTitle = `Search Documentation: (${preferences.vueVersion})`;
+  const vueVersion = getPreferenceValues<Preferences>().vueVersion;
+  const navigationTitle = `Search Documentation: (${vueVersion})`;
   const algoliaClient = useMemo(() => {
     return algoliasearch(APPID, APIKEY);
   }, [APPID, APIKEY]);
@@ -86,7 +107,7 @@ export default function Command() {
     return await algoliaIndex
       .search(query, {
         hitsPerPage: 11,
-        facetFilters: [`version:${preferences.vueVersion}`],
+        facetFilters: [`version:${vueVersion}`],
       })
       .then((res) => {
         setIsLoading(false);
@@ -140,7 +161,7 @@ export default function Command() {
             />
           ))}
         </List.Section>
-      ))}
+      )) || <DocumentationList docs={DOCS[vueVersion]} />}
     </List>
   );
 }
