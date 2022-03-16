@@ -13,8 +13,14 @@ async function ensureBinary() {
   }
 }
 
+let lastKnownMode = false;
 export const isDarkMode = async () => {
   await ensureBinary();
-  const output = await execa(binary, ["status"]);
-  return output.stdout === "on";
+  try {
+    const output = await execa(binary, ["status"]);
+    lastKnownMode = output.stdout === "on";
+    return lastKnownMode;
+  } catch (err) {
+    return lastKnownMode;
+  }
 };
