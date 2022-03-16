@@ -1,8 +1,7 @@
 import { showHUD, Toast, ToastStyle } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
-import { isFlowInstalled } from "./utils";
+import { isFlowInstalled, resetTimer, startTimer } from "./utils";
 
-export default async function resetTimer() {
+export default async function () {
   const toast = new Toast({
     title: "Resetting timer",
     style: ToastStyle.Animated,
@@ -17,7 +16,7 @@ export default async function resetTimer() {
     return;
   }
 
-  await runAppleScript('tell application "Flow" to reset');
-  await runAppleScript('tell application "Flow" to start');
+  await resetTimer();
+  await startTimer();
   await showHUD("Timer reset");
 }

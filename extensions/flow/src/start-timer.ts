@@ -1,8 +1,7 @@
 import { showHUD, Toast, ToastStyle } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
-import { isFlowInstalled } from "./utils";
+import { isFlowInstalled, startTimer } from "./utils";
 
-export default async function startTimer() {
+export default async function () {
   const toast = new Toast({
     title: "Starting timer",
     style: ToastStyle.Animated,
@@ -17,6 +16,6 @@ export default async function startTimer() {
     return;
   }
 
-  await runAppleScript('tell application "Flow" to start');
+  await startTimer();
   await showHUD("Timer started");
 }

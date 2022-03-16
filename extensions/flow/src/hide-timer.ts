@@ -1,8 +1,7 @@
-import { runAppleScript } from "run-applescript";
 import { closeMainWindow, Toast, ToastStyle } from "@raycast/api";
-import { isFlowInstalled } from "./utils";
+import { hideTimer, isFlowInstalled } from "./utils";
 
-export default async function hideTimer() {
+export default async function () {
   const toast = new Toast({
     title: "Hiding timer",
     style: ToastStyle.Animated,
@@ -17,6 +16,6 @@ export default async function hideTimer() {
     return;
   }
 
-  await runAppleScript('tell application "Flow" to hide');
+  await hideTimer();
   await closeMainWindow();
 }

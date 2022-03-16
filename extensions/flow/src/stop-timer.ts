@@ -1,8 +1,7 @@
 import { showHUD, Toast, ToastStyle } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
-import { isFlowInstalled } from "./utils";
+import { isFlowInstalled, stopTimer } from "./utils";
 
-export default async function stopTimer() {
+export default async function () {
   const toast = new Toast({
     title: "Stopping timer",
     style: ToastStyle.Animated,
@@ -17,6 +16,6 @@ export default async function stopTimer() {
     return;
   }
 
-  await runAppleScript('tell application "Flow" to stop');
+  await stopTimer();
   await showHUD("Timer stopped");
 }

@@ -1,8 +1,7 @@
-import { runAppleScript } from "run-applescript";
 import { showHUD, Toast, ToastStyle } from "@raycast/api";
-import { isFlowInstalled } from "./utils";
+import { isFlowInstalled, quitFlow } from "./utils";
 
-export default async function quitFlow() {
+export default async function () {
   const toast = new Toast({
     title: "Quitting Flow",
     style: ToastStyle.Animated,
@@ -17,6 +16,6 @@ export default async function quitFlow() {
     return;
   }
 
-  await runAppleScript('tell application "Flow" to quit');
+  await quitFlow();
   await showHUD("Flow has been closed");
 }

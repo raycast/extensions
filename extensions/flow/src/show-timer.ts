@@ -1,8 +1,7 @@
-import { runAppleScript } from "run-applescript";
-import { isFlowInstalled } from "./utils";
+import { isFlowInstalled, showTimer } from "./utils";
 import { Toast, ToastStyle } from "@raycast/api";
 
-export default async function showTimer() {
+export default async function () {
   const toast = new Toast({
     title: "Showing timer",
     style: ToastStyle.Animated,
@@ -17,5 +16,5 @@ export default async function showTimer() {
     return;
   }
 
-  await runAppleScript('tell application "Flow" to show');
+  await showTimer();
 }
