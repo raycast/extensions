@@ -60,6 +60,9 @@ function getIcon(activityType: string) {
     case "security":
       source = Icon.Binoculars;
       break;
+    case "card":
+      source = Icon.Person;
+      break;
     case "deck":
     case "deck_card_description":
       source = Icon.List;
