@@ -5,6 +5,7 @@ import { useLocalState } from "./cache";
 
 type State = {
   notebooks: NotebooksResponseData[];
+  favorites: NotebooksResponseData[];
 };
 
 export const useNotebooks = () => {
@@ -19,7 +20,7 @@ export const useNotebooks = () => {
     state,
     updateAndSaveState,
     loading: notebooksAreLoading,
-  } = useLocalState<State>(Caches.Notebooks, { notebooks: [] }, loader);
+  } = useLocalState<State>(Caches.Notebooks, { notebooks: [], favorites: [] }, loader);
 
   return { state, updateAndSaveState, notebooksAreLoading };
 };
