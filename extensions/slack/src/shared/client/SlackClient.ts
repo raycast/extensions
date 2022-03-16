@@ -1,5 +1,4 @@
 import { slackWebClient } from "./WebClient";
-import { LocalStorageService } from "./LocalStorageService";
 
 interface Item {
   id: string;
@@ -33,98 +32,86 @@ const sortNames = (a: string, b: string) => {
 
 export class SlackClient {
   public static async getUsers(): Promise<User[]> {
-    const users = await LocalStorageService.get<User[]>("users", async (): Promise<User[]> => {
-      const userList = await slackWebClient.users.list();
+    const userList = await slackWebClient.users.list();
 
-      const result =
-        userList.members
-          ?.filter(
-            ({ is_bot, is_workflow_bot, deleted, id }) => !is_bot && !is_workflow_bot && !deleted && id !== "USLACKBOT"
-          )
-          .map(({ id, name: username, profile, team_id }) => {
-            const firstName = profile?.first_name ?? "";
-            const lastName = profile?.last_name ?? "";
-            const name = `${firstName} ${lastName}`;
+    const users =
+      userList.members
+        ?.filter(
+          ({ is_bot, is_workflow_bot, deleted, id }) => !is_bot && !is_workflow_bot && !deleted && id !== "USLACKBOT"
+        )
+        .map(({ id, name: username, profile, team_id }) => {
+          const firstName = profile?.first_name ?? "";
+          const lastName = profile?.last_name ?? "";
+          const name = `${firstName} ${lastName}`;
 
-            const displayName = name.trim() ? name : profile?.display_name;
+          const displayName = name.trim() ? name : profile?.display_name;
 
-            return {
-              id,
-              name: displayName,
-              icon: profile?.image_24,
-              teamId: team_id,
-              username,
-            };
-          })
-          .filter((i): i is User => (i.id && i.id.trim() && i.name?.trim() && i.teamId?.trim() ? true : false))
-          .sort((a, b) => sortNames(a.name, b.name)) ?? [];
-
-      return result;
-    });
+          return {
+            id,
+            name: displayName,
+            icon: profile?.image_24,
+            teamId: team_id,
+            username,
+          };
+        })
+        .filter((i): i is User => (i.id && i.id.trim() && i.name?.trim() && i.teamId?.trim() ? true : false))
+        .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return users ?? [];
   }
 
   public static async getChannels(): Promise<Channel[]> {
-    const channels = await LocalStorageService.get<Channel[]>("channels", async (): Promise<Channel[]> => {
-      const publicChannels = await slackWebClient.conversations.list({
-        exclude_archived: true,
-        types: "public_channel",
-        limit: 1000,
-      });
-      const privateChannels = await slackWebClient.conversations.list({
-        exclude_archived: true,
-        types: "private_channel",
-        limit: 1000,
-      });
-
-      const publicAndPrivateChannels = [...(publicChannels.channels ?? []), ...(privateChannels.channels ?? [])];
-
-      const items: Item[] =
-        publicAndPrivateChannels
-          ?.map(({ id, name, shared_team_ids, internal_team_ids }) => {
-            const teamIds = [...(internal_team_ids ?? []), ...(shared_team_ids ?? [])];
-            const teamId = teamIds.length > 0 ? teamIds[0] : "";
-            return { id, name, teamId };
-          })
-          .filter((i): i is Channel => (i.id?.trim() && i.name?.trim() && i.teamId.trim() ? true : false))
-          .sort((a, b) => sortNames(a.name, b.name)) ?? [];
-
-      return items;
+    const publicChannels = await slackWebClient.conversations.list({
+      exclude_archived: true,
+      types: "public_channel",
+      limit: 1000,
     });
+    const privateChannels = await slackWebClient.conversations.list({
+      exclude_archived: true,
+      types: "private_channel",
+      limit: 1000,
+    });
+
+    const publicAndPrivateChannels = [...(publicChannels.channels ?? []), ...(privateChannels.channels ?? [])];
+
+    const channels: Item[] =
+      publicAndPrivateChannels
+        ?.map(({ id, name, shared_team_ids, internal_team_ids }) => {
+          const teamIds = [...(internal_team_ids ?? []), ...(shared_team_ids ?? [])];
+          const teamId = teamIds.length > 0 ? teamIds[0] : "";
+          return { id, name, teamId };
+        })
+        .filter((i): i is Channel => (i.id?.trim() && i.name?.trim() && i.teamId.trim() ? true : false))
+        .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return channels ?? [];
   }
 
   public static async getGroups(): Promise<Group[]> {
-    const groups = await LocalStorageService.get<Group[]>("groups", async (): Promise<Group[]> => {
-      const users = await SlackClient.getUsers();
+    const users = await SlackClient.getUsers();
 
-      const conversations = await slackWebClient.conversations.list({
-        exclude_archived: true,
-        types: "mpim",
-        limit: 1000,
-      });
-
-      const items: Group[] =
-        conversations.channels
-          ?.map(({ id, name, shared_team_ids, internal_team_ids }) => {
-            const teamIds = [...(internal_team_ids ?? []), ...(shared_team_ids ?? [])];
-            const teamId = teamIds.length > 0 ? teamIds[0] : "";
-
-            const userNames = name?.replace("mpdm-", "").replace("-1", "").split("--") ?? [];
-            const displayName = userNames
-              .map((username) => users.find((user) => user.username === username)?.name)
-              .filter((x) => !!x)
-              .join(", ");
-
-            return { id, name: displayName, teamId };
-          })
-          .filter((i): i is Group => (i.id?.trim() && i.name?.trim() && i.teamId.trim() ? true : false))
-          .sort((a, b) => sortNames(a.name, b.name)) ?? [];
-
-      return items;
+    const conversations = await slackWebClient.conversations.list({
+      exclude_archived: true,
+      types: "mpim",
+      limit: 1000,
     });
+
+    const groups: Group[] =
+      conversations.channels
+        ?.map(({ id, name, shared_team_ids, internal_team_ids }) => {
+          const teamIds = [...(internal_team_ids ?? []), ...(shared_team_ids ?? [])];
+          const teamId = teamIds.length > 0 ? teamIds[0] : "";
+
+          const userNames = name?.replace("mpdm-", "").replace("-1", "").split("--") ?? [];
+          const displayName = userNames
+            .map((username) => users.find((user) => user.username === username)?.name)
+            .filter((x) => !!x)
+            .join(", ");
+
+          return { id, name: displayName, teamId };
+        })
+        .filter((i): i is Group => (i.id?.trim() && i.name?.trim() && i.teamId.trim() ? true : false))
+        .sort((a, b) => sortNames(a.name, b.name)) ?? [];
 
     return groups ?? [];
   }

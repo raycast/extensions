@@ -1,19 +1,20 @@
 import { Action, ActionPanel, Image, List } from "@raycast/api";
-import { useEffect, useState } from "react";
 
-import { SlackClient, Channel, Group, User } from "./shared/client";
+import { CacheProvider, useChannels, useGroups, useUsers } from "./shared/client";
 import { openChannel, openChat } from "./shared/utils";
 
 export default function Command() {
-  const [users, setUsers] = useState<User[]>();
-  const [channels, setChannels] = useState<Channel[]>();
-  const [groups, setGroups] = useState<Group[]>();
+  return (
+    <CacheProvider>
+      <SlackList />
+    </CacheProvider>
+  );
+}
 
-  useEffect(() => {
-    SlackClient.getUsers().then(setUsers);
-    SlackClient.getChannels().then(setChannels);
-    SlackClient.getGroups().then(setGroups);
-  }, []);
+function SlackList() {
+  const { data: users } = useUsers();
+  const { data: channels } = useChannels();
+  const { data: groups } = useGroups();
 
   return (
     <List isLoading={!users || !groups || !channels}>
