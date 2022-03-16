@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vuejs-documentation",
-  "title": "VueJS documentation",
+  "title": "Searching Vue.js Documentation",
   "description": "Search VueJS documentation (v3)",
   "icon": "vue-icon.png",
   "author": "DavidPascaud",
@@ -13,8 +13,8 @@
     {
       "name": "index",
       "title": "Search Documentation",
-      "subtitle": "VueJS Docs",
-      "description": "Search VueJS documentation from RayCast",
+      "subtitle": "Vue.js",
+      "description": "Search Vue.js documentation from Raycast",
       "mode": "view"
     }
   ],
