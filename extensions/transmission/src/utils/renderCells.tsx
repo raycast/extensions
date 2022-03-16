@@ -54,12 +54,18 @@ export async function renderPieces({
 
   const cellsCount = Math.pow(18, 2);
 
-  const bits: boolean[] = [];
+  let bits: boolean[] = [];
   bitfield.forEach((bit) => bits.push(bit));
+
+  // if we don't have enough pieces to compose a graph, we multiply them
+  if (bits.length < cellsCount) {
+    const diff = Math.ceil(cellsCount / bits.length);
+    bits = bits.map((bit) => Array.from({ length: diff }, () => bit)).flat();
+  }
 
   const cells =
     bits.length > 0
-      ? splitEvery(bits.length / cellsCount, bits).map(
+      ? splitEvery(Math.round(bits.length / cellsCount), bits).map(
           (chunk) => ((100 / chunk.length) * chunk.filter(Boolean).length) / 100
         )
       : Array.from({ length: cellsCount }).map(() => 0);
