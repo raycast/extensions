@@ -11,6 +11,7 @@ export type Docset = {
   docsetKeyword: string;
   keyword: string;
   pluginKeyword: string;
+  suggestedKeyword: string;
 };
 
 export function useDocsets(searchText: string): [Docset[], boolean] {
@@ -61,12 +62,9 @@ export function getDocsets(): Promise<Docset[]> {
 
             return {
               ...docset,
-              docsetKeyword:
-                "keyword" in docset
-                  ? stripColon(docset.keyword)
-                  : "pluginKeyword" in docset
-                  ? stripColon(docset.pluginKeyword)
-                  : stripColon(docset.docsetBundle),
+              docsetKeyword: stripColon(
+                docset.keyword || docset.suggestedKeyword || docset.pluginKeyword || docset.docsetBundle
+              ),
             };
           });
 

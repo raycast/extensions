@@ -5,6 +5,9 @@
   "description": "List the current standings in Formula 1",
   "icon": "command-icon.png",
   "author": "csigritz",
+  "contributors": [
+    "sxn"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -13,7 +16,9 @@
       "subtitle": "F1",
       "description": "Current F1 Driver's Championship Standings",
       "mode": "view",
-      "keywords": ["formula"]
+      "keywords": [
+        "formula"
+      ]
     },
     {
       "name": "constructor",
@@ -21,7 +26,9 @@
       "subtitle": "F1",
       "description": "Current F1 Constructor's Championship Standings",
       "mode": "view",
-      "keywords": ["formula"]
+      "keywords": [
+        "formula"
+      ]
     },
     {
       "name": "schedule",
@@ -29,11 +36,13 @@
       "subtitle": "F1",
       "description": "Current F1 Race Schedule",
       "mode": "view",
-      "keywords": ["formula"]
+      "keywords": [
+        "formula"
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.30.2",
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {

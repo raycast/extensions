@@ -1,6 +1,6 @@
 # This file is generated. Do not modify directly.
 
-/extensions/1password7                               @khasbilegt
+/extensions/1password7                               @khasbilegt @thomaspaulmann
 /extensions/8ball                                    @Gitsack
 /extensions/airport                                  @siddharthsharma94
 /extensions/algolia                                  @valentindotxyz
@@ -10,7 +10,7 @@
 /extensions/api-icon-list                            @PitNikola
 /extensions/apple-notes                              @tumispro @ron-myers
 /extensions/atomic                                   @joepio
-/extensions/audio-device                             @benvp @mathieudutour
+/extensions/audio-device                             @benvp @mathieudutour @mike182uk @FezVrasta
 /extensions/authy                                    @guga4ka @lukekarrys
 /extensions/banca-d-italia-currency-converter        @FezVrasta
 /extensions/base64                                   @DanielSinclair
@@ -22,7 +22,7 @@
 /extensions/bitbucket                                @Lp-Francois
 /extensions/bitly-url-shortener                      @blessanm86
 /extensions/bitrise                                  @ubuntudroid
-/extensions/bitwarden                                @pomdtr @daniel-stoneuk
+/extensions/bitwarden                                @pomdtr @daniel-stoneuk @jomifepe
 /extensions/brew                                     @nhojb
 /extensions/brew-services                            @es183923
 /extensions/bttv-emote                               @Aayush9029
@@ -43,7 +43,7 @@
 /extensions/clickup                                  @Ali-Parandeh
 /extensions/clockify                                 @ismamz @sxn
 /extensions/cloudflare                               @Destiner @niklaswa
-/extensions/coffee                                   @mooxl
+/extensions/coffee                                   @mooxl @bibixx
 /extensions/coinbase-pro                             @farisaziz12
 /extensions/coingecko                                @Destiner @mike182uk
 /extensions/coinmarketcap-crypto-crawler             @moojing
@@ -78,7 +78,7 @@
 /extensions/envato                                   @Slllava
 /extensions/ethereum-utils                           @Destiner
 /extensions/everhour                                 @farisaziz12
-/extensions/f1-standings                             @csigritz
+/extensions/f1-standings                             @csigritz @sxn
 /extensions/facetime                                 @ron-myers
 /extensions/figma-files                              @michaelwschultz
 /extensions/file-manager                             @es183923
@@ -103,7 +103,7 @@
 /extensions/google-maps-search                       @ratoru
 /extensions/google-meet                              @vitoorgomes
 /extensions/google-search                            @mblode
-/extensions/google-translate                         @ospfranco
+/extensions/google-translate                         @ospfranco @FezVrasta
 /extensions/google-trends                            @kkange
 /extensions/grafana                                  @Lp-Francois
 /extensions/graphcdn                                 @mathieudutour
@@ -133,6 +133,7 @@
 /extensions/kill-process                             @rolandleth
 /extensions/kinopoisk                                @mattisssa
 /extensions/kubectx                                  @oktaysenkan
+/extensions/kubernetes-docs                          @rpvsilva
 /extensions/laracasts                                @danyelkeddah
 /extensions/laravel-docs                             @indykoning @indykoning @indykoning
 /extensions/laravel-forge                            @KevinBatdorf
@@ -152,6 +153,7 @@
 /extensions/music                                    @Rawnly
 /extensions/must                                     @eggsy
 /extensions/myip                                     @kkange
+/extensions/nativebase-docs                          @ShubhamVerma1811
 /extensions/netlify                                  @Destiner
 /extensions/node-js-evaluate                         @selfish
 /extensions/nos-news                                 @Joran-Dob
@@ -169,6 +171,7 @@
 /extensions/pipedrive                                @stephendolan
 /extensions/ploi                                     @Cannonb4ll
 /extensions/pocket                                   @vimtor
+/extensions/podcasts                                 @ron-myers
 /extensions/pokedex                                  @anhthang
 /extensions/polished                                 @LekoArts
 /extensions/port-manager                             @lucaschultz
@@ -220,6 +223,7 @@
 /extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers
 /extensions/spotify-player                           @mattisssa
 /extensions/stackoverflow                            @sadanand-singh
+/extensions/stripe                                   @pradeepb28
 /extensions/surge                                    @ysj151215
 /extensions/swift-evolution                          @BProg
 /extensions/switchhosts                              @tiancheng92

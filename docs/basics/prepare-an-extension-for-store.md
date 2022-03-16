@@ -106,7 +106,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ### Screenshots
 
-![Screenshots will show in an extensions detail screen](<../.gitbook/assets/screenshots-example (1).png>)
+![Screenshots will show in an extensions detail screen](<../.gitbook/assets/screenshots-example.png>)
 
 * Screenshots are displayed in the metadata of an extension details screen, where users can click and browse through them to understand what your extension does in greater detail, before installing
 * You can add a maximum of six screenshots. We recommend adding at least three, so your extensions detail screen looks beautiful.
@@ -115,7 +115,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 * To add a screenshot to your extension metadata, simply create a new folder called `metadata` in your extension folder. Then, add all your images to the `metadata` folder using the specifications below, following the Do’s and Dont’s. We’ll handle the rest.
 
-![Extension folder structure with a metadata folder and screenshots](<../.gitbook/assets/folder-structure (1).png>)
+![Extension folder structure with a metadata folder and screenshots](<../.gitbook/assets/folder-structure.png>)
 
 #### Specifications
 
@@ -149,10 +149,10 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 
 ### Version History
 
-![A changelog.md file displayed in the app](../.gitbook/assets/version-history.png)
+![A CHANGELOG.md file displayed in the app](../.gitbook/assets/version-history.png)
 
-* Make it easier for users to see exactly what notable changes have been made between each release of your extension with a `changelog.md` file in your extension metadata
-  * To add Version History to your extension, add a `changelog.md` file to the root folder of your extension
+* Make it easier for users to see exactly what notable changes have been made between each release of your extension with a `CHANGELOG.md` file in your extension metadata
+  * To add Version History to your extension, add a `CHANGELOG.md` file to the root folder of your extension
 * See an extension files structure with [screenshots and a changelog file](prepare-an-extension-for-store.md#adding-screenshots)&#x20;
 * With each change, provide clear and descriptive information around the latest update, providing a title as a ## h2 header followed by ar date timestamp (YYYY-MM-DD)
 * Below is an example of a changelog that follows the correct format
