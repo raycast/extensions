@@ -4,11 +4,11 @@ interface Item {
   id: string;
   teamId: string;
   name: string;
+  icon: string;
 }
 
 export interface User extends Item {
   username: string;
-  icon: string | undefined;
 }
 
 export type Channel = Item;
@@ -74,12 +74,12 @@ export class SlackClient {
 
     const publicAndPrivateChannels = [...(publicChannels.channels ?? []), ...(privateChannels.channels ?? [])];
 
-    const channels: Item[] =
+    const channels: Channel[] =
       publicAndPrivateChannels
-        ?.map(({ id, name, shared_team_ids, internal_team_ids }) => {
+        ?.map(({ id, name, shared_team_ids, internal_team_ids, is_private }) => {
           const teamIds = [...(internal_team_ids ?? []), ...(shared_team_ids ?? [])];
           const teamId = teamIds.length > 0 ? teamIds[0] : "";
-          return { id, name, teamId };
+          return { id, name, teamId, icon: is_private ? "channel-private.png" : "channel-public.png" };
         })
         .filter((i): i is Channel => (i.id?.trim() && i.name?.trim() && i.teamId.trim() ? true : false))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];
@@ -108,7 +108,7 @@ export class SlackClient {
             .filter((x) => !!x)
             .join(", ");
 
-          return { id, name: displayName, teamId };
+          return { id, name: displayName, teamId, icon: "channel-private.png" };
         })
         .filter((i): i is Group => (i.id?.trim() && i.name?.trim() && i.teamId.trim() ? true : false))
         .sort((a, b) => sortNames(a.name, b.name)) ?? [];

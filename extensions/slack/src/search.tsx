@@ -33,10 +33,11 @@ function SlackList() {
         ))}
       </List.Section>
       <List.Section title="Channels">
-        {channels?.map(({ name, id, teamId }) => (
+        {channels?.map(({ name, id, teamId, icon }) => (
           <List.Item
             key={id}
             title={name}
+            icon={icon}
             actions={
               <ActionPanel>
                 <Action title="Open in Slack" onAction={() => openChannel(teamId, id)} />
@@ -46,10 +47,11 @@ function SlackList() {
         ))}
       </List.Section>
       <List.Section title="Groups">
-        {groups?.map(({ name, id, teamId }) => (
+        {groups?.map(({ name, id, teamId, icon }) => (
           <List.Item
             key={id}
             title={name}
+            icon={icon}
             actions={
               <ActionPanel>
                 <Action title="Open in Slack" onAction={() => openChannel(teamId, id)} />
