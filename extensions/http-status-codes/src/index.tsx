@@ -1,21 +1,21 @@
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
-import codes from "./codes.json";
 import React from "react";
+import http from "http";
 
 type Code = {
   code: string;
   description: string;
-  reference: string;
 };
 
 export default function Command() {
-  const codeGroups = (codes as Code[]).reduce((groups: { [firstDigit: string]: Code[] }, code) => {
-    const group = groups[code.code[0]] || [];
-    group.push(code);
-    groups[code.code[0]] = group;
+  const codeGroups = Object.entries(http.STATUS_CODES)
+    .reduce((groups: { [firstDigit: string]: Code[] }, [code, description]) => {
+      const group = groups[code[0]] || [];
+      group.push({ code, description });
+      groups[code[0]] = group;
 
-    return groups;
-  }, {});
+      return groups;
+    }, {});
 
   return (
     <List isLoading={false} searchBarPlaceholder="Filter by code or description...">
