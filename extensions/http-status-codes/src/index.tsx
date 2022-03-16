@@ -28,7 +28,7 @@ export default function Command() {
               key={code.code}
               title={code.code}
               subtitle={code.description}
-              keywords={[code.description || '']} // make subtitle searchable
+              keywords={[code.description || ""]} // make subtitle searchable
               icon={{
                 source: Icon.Dot,
                 tintColor: statusCodeToColor(code.code),
