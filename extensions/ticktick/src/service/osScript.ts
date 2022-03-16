@@ -148,9 +148,9 @@ export const getSearchByKeyword = async (keyword: string) => {
   }
 };
 
-export const getProjectId2Project = async () => {
+export const getProjects = async () => {
   const installed = await checkAppInstalled();
-  if (!installed) return {};
+  if (!installed) return [];
   try {
     const result = (await runAppleScript(`
     set result to ""
@@ -160,18 +160,17 @@ export const getProjectId2Project = async () => {
     return result
   `)) as string;
     if (result === "missing value") {
-      return {};
+      return [];
     }
 
     const parsedResult = JSON.parse(result);
-    const projectId2Project: Record<string, Project> = {};
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    parsedResult.forEach((project: any) => {
-      projectId2Project[project.id] = projectObject2Project(project);
+    const projects: Project[] = parsedResult.map((project: any) => {
+      return projectObject2Project(project);
     });
-    return projectId2Project;
+    return projects;
   } catch (e) {
     errorHandler(e);
-    return {};
+    return [];
   }
 };

@@ -19,6 +19,13 @@
       "subtitle": "TickTick",
       "description": "Show next 7 days tasks.",
       "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search Tasks",
+      "subtitle": "TickTick",
+      "description": "Search tasks.",
+      "mode": "view"
     }
   ],
   "dependencies": {

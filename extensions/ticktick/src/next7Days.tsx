@@ -22,7 +22,7 @@ const TickTickNext7Days: React.FC<Record<string, never>> = () => {
     }
   }, [isInitCompleted]);
 
-  const { searchTasks } = useSearchTasks({ searchQuery, isInitCompleted });
+  const { searchTasks, isSearching } = useSearchTasks({ searchQuery, isInitCompleted });
 
   const isLoading = useMemo(() => {
     if (!isInitCompleted) {
@@ -30,10 +30,10 @@ const TickTickNext7Days: React.FC<Record<string, never>> = () => {
     }
 
     if (searchQuery) {
-      return searchTasks == null;
+      return isSearching;
     }
     return sections == null;
-  }, [isInitCompleted, searchQuery, searchTasks, sections]);
+  }, [isInitCompleted, searchQuery, isSearching, sections]);
 
   return (
     <List

@@ -49,6 +49,7 @@ export const getTaskDetailMarkdownContent = (task: Task) => {
   if (isChecklistModeTask(task)) {
     // https://commonmark.org/ line break need two \n
     content = (task.desc || "").replace(/\n/g, "\n\n");
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const items = [...task.items!];
     items.sort(sort.checklist).forEach((item) => {
       content += `\n- [${item.status === 0 ? " " : "x"}] ${item.title}`;

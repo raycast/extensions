@@ -8,6 +8,7 @@ function _compareDigit(d1: number, d2: number) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function _defined(d1: any, d2: any) {
   if (d1) {
     return d2 ? 0 : -1;
