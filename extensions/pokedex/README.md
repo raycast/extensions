@@ -7,7 +7,7 @@ A [Raycast](https://raycast.com/) extenstion that lets you search for a Pokémon
 
 This extension is made by [Anh Thang Bui](https://github.com/anhthang) and uses [PokéAPI](https://pokeapi.co/).
 
-![Example](./media/example.png)
+![Example](./metadata/pokedex-02.png)
 
 ## Features
 
