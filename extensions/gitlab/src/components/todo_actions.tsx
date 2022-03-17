@@ -20,12 +20,15 @@ export function ShowTodoDetailsAction(props: { todo: Todo }) {
   }
 }
 
-export function CloseTodoAction(props: { todo: Todo }) {
+export function CloseTodoAction(props: { todo: Todo; finished?: () => void }) {
   const todo = props.todo;
   async function handleAction() {
     try {
       await gitlab.post(`todos/${todo.id}/mark_as_done`);
       showToast(ToastStyle.Success, "Done", "Todo is now marked as done");
+      if (props.finished) {
+        props.finished();
+      }
     } catch (error: any) {
       showToast(
         ToastStyle.Failure,
@@ -44,11 +47,14 @@ export function CloseTodoAction(props: { todo: Todo }) {
   );
 }
 
-export function CloseAllTodoAction() {
+export function CloseAllTodoAction(props: { finished?: () => void }) {
   async function handleAction() {
     try {
       await gitlab.post(`todos/mark_as_done`);
       showToast(ToastStyle.Success, "Done", "All Todos are now marked as done");
+      if (props.finished) {
+        props.finished();
+      }
     } catch (error: any) {
       showToast(
         ToastStyle.Failure,
@@ -63,15 +69,5 @@ export function CloseAllTodoAction() {
       icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
       onAction={handleAction}
     />
-  );
-}
-
-export function TodoItemActions(props: { todo: Todo }) {
-  const todo = props.todo;
-  return (
-    <React.Fragment>
-      <CloseTodoAction todo={todo} />
-      <CloseAllTodoAction />
-    </React.Fragment>
   );
 }

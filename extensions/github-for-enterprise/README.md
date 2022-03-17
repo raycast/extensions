@@ -38,9 +38,9 @@ This extension brings GitHub Enterprise support to Raycast through the use of Gr
 - On this page, we'll create a new access token. Click on `Generate new token` in the upper-right.
 - Leave a `note` for your token (Eg. `Raycast`). This will help you identify it in the future.
 - You'll need to check the following boxes to ensure this extension can perform properly:
-    - `repo`
-    - `user`
-    - `write:discussion`
+  - `repo`
+  - `user`
+  - `write:discussion`
 - Click `Generate token` and save this value somewhere. **You'll only be able to see this once**.
 
 > Future updates to this extension will offer more functionality that may require additional scopes be defined in this token.
@@ -49,7 +49,7 @@ This extension brings GitHub Enterprise support to Raycast through the use of Gr
 
 Launch the GitHub for Enterprise Raycast extension. You can select any command to get started.
 
-When launching a command, you'll be presented with a configuration screen asking for three pieces of information: 
+When launching a command, you'll be presented with a configuration screen asking for three pieces of information:
 
 - `GraphQL API` (Eg. https://github.mycompany.com/api/graphql)
 - `Username`

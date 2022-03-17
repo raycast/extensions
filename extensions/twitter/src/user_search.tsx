@@ -7,21 +7,20 @@ import { twitterClient, useRefresher } from "./twitterapi";
 export default function UserList() {
   const [query, setQuery] = useState<string | undefined>();
   // eslint-disable-next-line
-  const { data, error, isLoading, fetcher } = useRefresher<UserV1[] | undefined>(
-    async (): Promise<UserV1[] | undefined> => {
-      if (query && query.length > 0 && query !== "@") {
-        const userdata = await twitterClient.v1.searchUsers(query);
-        const users: UserV1[] = [];
-        for (const u of userdata) {
-          users.push(u);
-        }
-        return users;
-      } else {
-        return undefined;
+  const { data, error, isLoading, fetcher } = useRefresher<UserV1[] | undefined>(async (): Promise<
+    UserV1[] | undefined
+  > => {
+    if (query && query.length > 0 && query !== "@") {
+      const userdata = await twitterClient.v1.searchUsers(query);
+      const users: UserV1[] = [];
+      for (const u of userdata) {
+        users.push(u);
       }
-    },
-    [query]
-  );
+      return users;
+    } else {
+      return undefined;
+    }
+  }, [query]);
   if (error) {
     showToast(ToastStyle.Failure, "Error", error);
   }

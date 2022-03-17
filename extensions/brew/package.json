@@ -11,37 +11,55 @@
       "name": "installed",
       "title": "Show Installed",
       "subtitle": "Brew",
-      "description": "List installed brew formulae",
+      "description": "List installed brew formulae & casks",
       "mode": "view"
     },
     {
       "name": "search",
-      "title": "Search Formulae",
+      "title": "Search",
       "subtitle": "Brew",
-      "description": "Search brew formulae",
+      "description": "Search brew formulae & casks",
       "mode": "view"
     },
     {
       "name": "outdated",
       "title": "Show Outdated",
       "subtitle": "Brew",
-      "description": "Show outdated brew formulae",
+      "description": "Show outdated brew formulae & casks",
       "mode": "view"
+    },
+    {
+      "name": "upgrade",
+      "title": "Upgrade",
+      "subtitle": "Brew",
+      "description": "Upgrade brew formulae & casks",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "greedyUpgrades",
+      "type": "checkbox",
+      "required": false,
+      "title": "Upgrades",
+      "description": "Include auto-updating casks when upgrading or checking for outdated items.",
+      "default": false,
+      "label": "Include auto-updating casks when upgrading"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "node-fetch": "^2.6.1"
+    "@raycast/api": "^1.30.3",
+    "node-fetch": "^2.6.7"
   },
   "devDependencies": {
-    "@types/node": "^16.4.3",
-    "@types/node-fetch": "^2.5.12",
-    "@types/react": "^17.0.15",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
-    "eslint": "^7.31.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.3.5"
+    "@types/node": "^16.11.26",
+    "@types/node-fetch": "^2.6.1",
+    "@types/react": "^17.0.40",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.5.0",
+    "typescript": "^4.6.2"
   },
   "scripts": {
     "dev": "ray develop target"

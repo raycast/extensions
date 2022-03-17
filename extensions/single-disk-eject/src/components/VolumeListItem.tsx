@@ -1,9 +1,9 @@
-import { ActionPanel, List } from '@raycast/api'
+import { ActionPanel, List } from "@raycast/api";
 
-import { Volume } from '../types'
+import { Volume } from "../types";
 
 export default function VolumeListItem(props: { volume: Volume; eject: (volume: Volume) => Promise<void> }) {
-  const { volume, eject } = props
+  const { volume, eject } = props;
 
   return (
     <List.Item
@@ -18,5 +18,5 @@ export default function VolumeListItem(props: { volume: Volume; eject: (volume: 
         </ActionPanel>
       }
     />
-  )
+  );
 }

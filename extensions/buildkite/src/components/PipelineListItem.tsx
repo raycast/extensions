@@ -39,9 +39,14 @@ export function PipelineListItem({ pipeline }: PipelineListItemProps) {
       accessoryIcon={favoriteIcon}
       actions={
         <ActionPanel>
-          <PushAction icon={Icon.Eye} target={<Builds pipeline={`${org}/${pipeline.slug}`} />} title="View Builds" />
           <OpenInBrowserAction url={pipeline.url} />
           <CopyToClipboardAction content={pipeline.url} title="Copy URL" />
+          <PushAction
+            icon={Icon.Eye}
+            target={<Builds pipeline={`${org}/${pipeline.slug}`} />}
+            title="View Builds"
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+          />
         </ActionPanel>
       }
     />

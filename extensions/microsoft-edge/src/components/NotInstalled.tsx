@@ -1,14 +1,7 @@
-import {
-  ActionPanel,
-  ActionPanelItem,
-  Detail,
-  showToast,
-  Toast,
-  ToastStyle
-  } from '@raycast/api';
-import { DEFAULT_ERROR_TITLE, DownloadMSEdgeMDText } from '../common/constants';
-import { execSync } from 'child_process';
-import { useState } from 'react';
+import { ActionPanel, ActionPanelItem, Detail, showToast, Toast, ToastStyle } from "@raycast/api";
+import { DEFAULT_ERROR_TITLE, DownloadMSEdgeMDText } from "../common/constants";
+import { execSync } from "child_process";
+import { useState } from "react";
 
 export function NotInstalled({
   onInstall = () => {

@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { useState } from 'react';
+import axios from "axios";
+import { useState } from "react";
 import {
   getPreferenceValues,
   ActionPanel,
@@ -8,7 +8,7 @@ import {
   SubmitFormAction,
   showToast,
   ToastStyle,
-} from '@raycast/api';
+} from "@raycast/api";
 
 interface Preferences {
   api: string;
@@ -17,28 +17,28 @@ interface Preferences {
 
 export default function Command() {
   const preferences: Preferences = getPreferenceValues();
-  const [text, setText] = useState<string>('');
+  const [text, setText] = useState<string>("");
   const [tags, setTags] = useState<string>(preferences.defaultTags);
 
   async function handleSubmit(values: Record<string, FormValue>) {
     let content = values.memo;
 
-    if (content !== '') {
+    if (content !== "") {
       if (tags) {
         content += ` ${values.tags}`;
       }
-      showToast(ToastStyle.Animated, 'Sending');
+      showToast(ToastStyle.Animated, "Sending");
       const response = await axios.post(preferences.api, { content });
 
       if (response.data?.code === 0) {
-        showToast(ToastStyle.Success, 'Success', 'Successfully sent MEMO');
-        setText('');
+        showToast(ToastStyle.Success, "Success", "Successfully sent MEMO");
+        setText("");
         setTags(preferences.defaultTags);
       } else {
-        showToast(ToastStyle.Failure, 'Failed', 'Check that API MEMO URL is correct');
+        showToast(ToastStyle.Failure, "Failed", "Check that API MEMO URL is correct");
       }
     } else {
-      showToast(ToastStyle.Failure, 'Failed', "MEMO can't be left empty");
+      showToast(ToastStyle.Failure, "Failed", "MEMO can't be left empty");
     }
   }
 

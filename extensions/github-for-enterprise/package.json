@@ -1,97 +1,97 @@
 {
-    "name": "github-for-enterprise",
-    "title": "GitHub Enterprise",
-    "description": "Visualize and manage your issues and pull requests",
-    "icon": "icon.png",
-    "author": "Kinbaum",
-    "license": "MIT",
-    "commands": [
-        {
-            "name": "issues-create",
-            "title": "Create Issue",
-            "subtitle": "GitHub Enterprise",
-            "description": "GitHub actions",
-            "mode": "view"
-        },
-        {
-            "name": "issues-open",
-            "title": "Open Issues",
-            "subtitle": "GitHub Enterprise",
-            "description": "GitHub actions",
-            "mode": "view"
-        },
-        {
-            "name": "issues-search",
-            "title": "Search Issues",
-            "subtitle": "GitHub Enterprise",
-            "description": "GitHub actions",
-            "mode": "view"
-        },
-        {
-            "name": "prs-open",
-            "title": "Open Pull Requests",
-            "subtitle": "GitHub Enterprise",
-            "description": "GitHub actions",
-            "mode": "view"
-        },
-        {
-            "name": "prs",
-            "title": "My Pull Requests",
-            "subtitle": "GitHub Enterprise",
-            "description": "GitHub actions",
-            "mode": "view"
-        }
-    ],
-    "preferences": [
-        {
-            "name": "graphqlEndpoint",
-            "type": "textfield",
-            "required": true,
-            "title": "GraphQL API",
-            "description": "API of your GitHub GraphQL instance",
-            "placeholder": "https://github.mycompany.com/api/graphql"
-        },
-        {
-            "name": "username",
-            "type": "textfield",
-            "required": true,
-            "title": "Username",
-            "description": "Your GitHub username",
-            "placeholder": "Kinbaum"
-        },
-        {
-            "name": "token",
-            "type": "password",
-            "required": true,
-            "title": "Token",
-            "description": "Your GitHub API token",
-            "placeholder": "Enter your personal access token"
-        }
-    ],
-    "dependencies": {
-        "@raycast/api": "^1.25.4",
-        "debounce": "^1.2.1",
-        "fuse.js": "^6.4.6",
-        "graphql": "^15.6.1",
-        "graphql-request": "^3.6.1",
-        "gray-matter": "^4.0.3",
-        "swr": "^1.0.1",
-        "timeago.js": "^4.0.2"
+  "name": "github-for-enterprise",
+  "title": "GitHub Enterprise",
+  "description": "Visualize and manage your issues and pull requests",
+  "icon": "icon.png",
+  "author": "Kinbaum",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "issues-create",
+      "title": "Create Issue",
+      "subtitle": "GitHub Enterprise",
+      "description": "GitHub actions",
+      "mode": "view"
     },
-    "devDependencies": {
-        "@types/debounce": "^1.2.1",
-        "@types/node": "~16.10.0",
-        "@types/react": "^17.0.28",
-        "@typescript-eslint/eslint-plugin": "^5.0.0",
-        "@typescript-eslint/parser": "^5.0.0",
-        "eslint": "^7.32.0",
-        "eslint-config-next": "^11.1.2",
-        "eslint-config-prettier": "^8.3.0",
-        "react-devtools": "^4.19.2",
-        "typescript": "^4.4.3"
+    {
+      "name": "issues-open",
+      "title": "Open Issues",
+      "subtitle": "GitHub Enterprise",
+      "description": "GitHub actions",
+      "mode": "view"
     },
-    "scripts": {
-        "build": "ray build -e dist",
-        "dev": "ray develop"
+    {
+      "name": "issues-search",
+      "title": "Search Issues",
+      "subtitle": "GitHub Enterprise",
+      "description": "GitHub actions",
+      "mode": "view"
+    },
+    {
+      "name": "prs-open",
+      "title": "Open Pull Requests",
+      "subtitle": "GitHub Enterprise",
+      "description": "GitHub actions",
+      "mode": "view"
+    },
+    {
+      "name": "prs",
+      "title": "My Pull Requests",
+      "subtitle": "GitHub Enterprise",
+      "description": "GitHub actions",
+      "mode": "view"
     }
+  ],
+  "preferences": [
+    {
+      "name": "graphqlEndpoint",
+      "type": "textfield",
+      "required": true,
+      "title": "GraphQL API",
+      "description": "API of your GitHub GraphQL instance",
+      "placeholder": "https://github.mycompany.com/api/graphql"
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "title": "Username",
+      "description": "Your GitHub username",
+      "placeholder": "Kinbaum"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Token",
+      "description": "Your GitHub API token",
+      "placeholder": "Enter your personal access token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.25.4",
+    "debounce": "^1.2.1",
+    "fuse.js": "^6.4.6",
+    "graphql": "^15.6.1",
+    "graphql-request": "^3.6.1",
+    "gray-matter": "^4.0.3",
+    "swr": "^1.0.1",
+    "timeago.js": "^4.0.2"
+  },
+  "devDependencies": {
+    "@types/debounce": "^1.2.1",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-next": "^11.1.2",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
 }

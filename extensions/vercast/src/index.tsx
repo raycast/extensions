@@ -1,130 +1,113 @@
 import {
   render,
   ActionPanel,
-  SubmitFormAction,
   PushAction,
   Color,
   Icon,
   List,
-  Form,
-  FormValues,
   OpenInBrowserAction,
   preferences,
   showToast,
   ToastStyle,
-  useNavigation,
-} from '@raycast/api'
-import { randomUUID } from 'crypto'
-import { useEffect, useState } from 'react'
-import useInterval from './use-interval'
-import {
-  Deployment,
-  DeploymentState,
-  fetchDeployments,
-  fetchTeams,
-  fetchUsername,
-  Team,
-} from './vercel'
+} from "@raycast/api";
+import { randomUUID } from "crypto";
+import { useEffect, useState } from "react";
+import useInterval from "./use-interval";
+import { Deployment, DeploymentState, fetchDeployments, fetchTeams, fetchUsername, Team } from "./vercel";
 
-import {
-  UpdateEnvironmentVariable,
-} from './actions'
+import { UpdateEnvironmentVariable } from "./actions";
 
-render(<Main />)
+render(<Main />);
 
 function Main(): JSX.Element {
   // Get preference values
-  const token = String(preferences.token.value)
+  const token = String(preferences.token.value);
   if (token.length !== 24) {
-    showToast(ToastStyle.Failure, 'Invalid token detected')
-    throw new Error('Invalid token length detected')
+    showToast(ToastStyle.Failure, "Invalid token detected");
+    throw new Error("Invalid token length detected");
   }
 
   // Setup useState objects
-  const [username, setUsername] = useState('')
-  const [deployments, setDeployments] = useState<Deployment[]>()
-  const [teams, setTeams] = useState<Team[]>()
+  const [username, setUsername] = useState("");
+  const [deployments, setDeployments] = useState<Deployment[]>();
+  const [teams, setTeams] = useState<Team[]>();
   useEffect(() => {
-    const ignoredTeamIDs = String(preferences.ignoredTeams.value ?? '')
-      .split(',')
+    const ignoredTeamIDs = String(preferences.ignoredTeams.value ?? "")
+      .split(",")
       .map((id) => id.trim())
-      .filter((id) => id !== '')
+      .filter((id) => id !== "");
     const fetchData = async () => {
-      const [fetchedUsername, fetchedTeams] = await Promise.all([
-        fetchUsername(),
-        fetchTeams(ignoredTeamIDs),
-      ])
-      const fetchedDeployments = await fetchDeployments(
-        fetchedUsername,
-        fetchedTeams
-      )
-      setUsername(fetchedUsername)
-      setTeams(fetchedTeams)
-      setDeployments(fetchedDeployments)
-    }
-    fetchData()
-  }, [])
+      const [fetchedUsername, fetchedTeams] = await Promise.all([fetchUsername(), fetchTeams(ignoredTeamIDs)]);
+      const fetchedDeployments = await fetchDeployments(fetchedUsername, fetchedTeams);
+      setUsername(fetchedUsername);
+      setTeams(fetchedTeams);
+      setDeployments(fetchedDeployments);
+    };
+    fetchData();
+  }, []);
 
   // Refresh deployments every 2 seconds
   useInterval(async () => {
     if (username && teams) {
-      setDeployments(await fetchDeployments(username, teams))
+      setDeployments(await fetchDeployments(username, teams));
     }
-  }, 8000)
+  }, 8000);
 
   return (
     <List isLoading={!deployments}>
       {deployments?.map((d) => {
-        let iconSource = Icon.Globe
-        let iconTintColor = Color.PrimaryText
+        let iconSource = Icon.Globe;
+        let iconTintColor = Color.PrimaryText;
         switch (d.state) {
           case DeploymentState.ready:
-            iconSource = Icon.Checkmark
-            iconTintColor = Color.Green
-            break
+            iconSource = Icon.Checkmark;
+            iconTintColor = Color.Green;
+            break;
           case DeploymentState.deploying:
-            iconSource = Icon.Hammer
-            iconTintColor = Color.Yellow
-            break
+            iconSource = Icon.Hammer;
+            iconTintColor = Color.Yellow;
+            break;
           case DeploymentState.failed:
-            iconSource = Icon.XmarkCircle
-            iconTintColor = Color.Red
-            break
+            iconSource = Icon.XmarkCircle;
+            iconTintColor = Color.Red;
+            break;
           case DeploymentState.canceled:
-            iconSource = Icon.XmarkCircle
-            iconTintColor = Color.SecondaryText
-            break
+            iconSource = Icon.XmarkCircle;
+            iconTintColor = Color.SecondaryText;
+            break;
         }
-        const randomID = randomUUID()
+        const randomID = randomUUID();
         return (
           <List.Item
             key={d.id + randomID}
             id={d.id + randomID}
-            title={(d.owner === username ? '' : `${d.owner}/`) + d.project}
+            title={(d.owner === username ? "" : `${d.owner}/`) + d.project}
             subtitle={d.domain}
             accessoryTitle={d.timeSince}
             icon={{ tintColor: iconTintColor, source: iconSource }}
             actions={
               <ActionPanel>
-                <ActionPanel.Section title={(d.owner === username ? '' : `${d.owner}/`) + d.project}>
+                <ActionPanel.Section title={(d.owner === username ? "" : `${d.owner}/`) + d.project}>
                   <OpenInBrowserAction url={d.url} />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Project Settings">
-                  <PushAction 
+                  <PushAction
                     icon={Icon.Gear}
-                    title="Environment Variable"                     
+                    title="Environment Variable"
                     shortcut={{ modifiers: ["cmd"], key: "e" }}
-                    target={<UpdateEnvironmentVariable
-                      projectId={d.project}
-                      projectName={(d.owner === username ? '' : `${d.owner}/`) + d.project}
-                    />} 
+                    target={
+                      <UpdateEnvironmentVariable
+                        projectId={d.project}
+                        projectName={(d.owner === username ? "" : `${d.owner}/`) + d.project}
+                      />
+                    }
                   />
                 </ActionPanel.Section>
               </ActionPanel>
             }
           />
-        )
+        );
       })}
     </List>
-  )
+  );
 }

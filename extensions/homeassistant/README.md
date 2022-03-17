@@ -58,12 +58,12 @@ and all in real time 🚀.
 
 - Goto to your Home Assistant instance e.g. `https://myhomeassistant:8123`
 - Click on your profile (next to notifications) in the left sidebar
-- Scroll down to the  `Long-Lived Access Tokens` section
+- Scroll down to the `Long-Lived Access Tokens` section
 - Create a token via `Create Token`
 - Store the given token in a secure box, Home Assistant wont show it again
 - Go to the Raycast preferences of Home Assistant or start a Home Assistant command
 - Set your Home Assistant URL like e.g. `https://myhomeassistant:8123`
-- Set your access token from the previous step into `API Token` 
+- Set your access token from the previous step into `API Token`
 
 Now you should be able to manage your Home Assistant instance with Raycast 🚀.
 

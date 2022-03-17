@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "polished",
+  "title": "Polished",
+  "description": "Convert & Modify Colors with HEX, RGB, and HSL values. You can lighten & darken colors, invert them, do contrast calculations and much more.",
+  "icon": "icon.png",
+  "author": "lekoarts",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-hex",
+      "title": "Convert HEX",
+      "description": "Convert HEX code to RGBA & HSL values",
+      "mode": "view",
+      "keywords": [
+        "hex"
+      ]
+    },
+    {
+      "name": "convert-rgb",
+      "title": "Convert RGB",
+      "description": "Convert RGB code to HEX & HSL values",
+      "mode": "view",
+      "keywords": [
+        "rgb"
+      ]
+    },
+    {
+      "name": "contrast-ratio",
+      "title": "Contrast Ratio",
+      "description": "Determines which contrast guidelines have been met for two colors. Based on the contrast calculations recommended by W3.",
+      "mode": "view",
+      "keywords": [
+        "contrast",
+        "ratio",
+        "color guidelines"
+      ]
+    },
+    {
+      "name": "color-utilities",
+      "title": "Color Utilities",
+      "description": "Modify your colors. Lighten, darken, transparentize, complement, grayscale, invert, and readable color.",
+      "mode": "view",
+      "keywords": [
+        "lighten",
+        "darken",
+        "complement",
+        "grayscale",
+        "invert",
+        "readable"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.1",
+    "polished": "^4.1.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

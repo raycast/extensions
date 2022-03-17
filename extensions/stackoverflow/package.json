@@ -18,10 +18,11 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
-    "node-fetch": "^3.0.0",
-    "he": "^1.2.0"
+    "he": "^1.2.0",
+    "node-fetch": "^3.0.0"
   },
   "devDependencies": {
+    "@types/he": "^1.1.2",
     "@types/node": "^16.11.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

@@ -1,18 +1,12 @@
-import { 
-  ScriptCommand 
-} from "@models"
+import { ScriptCommand } from "@models";
 
-import { 
-  checkIsValidURL,
-} from "@urls"
+import { checkIsValidURL } from "@urls";
 
-import { 
-  URLConstants 
-} from "@constants"
+import { URLConstants } from "@constants";
 
 const Expression = {
-  emoji: /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi
-}
+  emoji: /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/gi,
+};
 
 export enum IconStyle {
   Light,
@@ -25,48 +19,47 @@ export enum IconType {
 }
 
 export interface IconResult {
-  type: IconType,
-  content: string
+  type: IconType;
+  content: string;
 }
 
-export const iconDarkURLFor = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Dark)
+export const iconDarkURLFor = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Dark);
 
-export const iconLightURLFor = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Light)
+export const iconLightURLFor = (scriptCommand: ScriptCommand) => iconURL(scriptCommand, IconStyle.Light);
 
 const iconURL = (scriptCommand: ScriptCommand, style: IconStyle): IconResult | null => {
   if (!scriptCommand.icon) {
-    return null
+    return null;
   }
 
-  let path = scriptCommand.icon.light
-  
+  let path = scriptCommand.icon.light;
+
   if (style === IconStyle.Dark) {
-    path = scriptCommand.icon.dark
+    path = scriptCommand.icon.dark;
   }
 
   if (!path || path.length == 0) {
-    return null
+    return null;
   }
-  
-  const emojiRegex = new RegExp(Expression.emoji)
+
+  const emojiRegex = new RegExp(Expression.emoji);
 
   if (emojiRegex.test(path)) {
     return {
       type: IconType.Emoji,
-      content: path
-    }
-  }
-  else if (checkIsValidURL(path)) {
+      content: path,
+    };
+  } else if (checkIsValidURL(path)) {
     return {
       type: IconType.URL,
-      content: path
-    }
+      content: path,
+    };
   }
-  
-  const url = `${URLConstants.baseRawURL}/${scriptCommand.path}${path}`
-  
+
+  const url = `${URLConstants.baseRawURL}/${scriptCommand.path}${path}`;
+
   return {
     type: IconType.URL,
-    content: url
-  }
-}
+    content: url,
+  };
+};

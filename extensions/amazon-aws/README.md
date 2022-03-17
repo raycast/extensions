@@ -1,9 +1,15 @@
 # Amazon AWS
+
 ### Commands:
+
 - List your EC2 Instances.
 - List your SQS Queues.
+- List your CodePipelines.
+- List your CloudFormation Stacks.
+- Access your AWS Console.
 
 ## Configuration
+
 This extension uses your `~/.aws/credentials` file to get your access key id and secret.
 
 - [Configuration and credential file settings](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html)

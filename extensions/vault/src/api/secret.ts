@@ -17,17 +17,20 @@ export const getSecret = async (secretEngine: string, path: string): Promise<Sec
     if (response.status >= 200 && response.status < 300) {
       return (json as PathsJSON).data.data;
     } else {
-      if ((json as Record<string, unknown>).errors && ((json as Record<string, unknown>).errors as string[]).length > 0) {
+      if (
+        (json as Record<string, unknown>).errors &&
+        ((json as Record<string, unknown>).errors as string[]).length > 0
+      ) {
         throw new Error(((json as Record<string, unknown>).errors as string[])[0]);
       } else {
-        throw new Error('An unknown error occured');
+        throw new Error("An unknown error occured");
       }
     }
   } catch (err) {
     showToast(ToastStyle.Failure, `Could not get secret: ${err.message}`);
     return Promise.resolve(undefined);
   }
-}
+};
 
 type PathsJSON = {
   data: SecretData;
@@ -35,8 +38,8 @@ type PathsJSON = {
 
 type SecretData = {
   data: Secret;
-}
+};
 
 export type Secret = {
   [key: string]: string;
-}
+};

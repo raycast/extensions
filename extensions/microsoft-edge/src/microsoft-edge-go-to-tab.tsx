@@ -1,16 +1,11 @@
-import { checkIfBrowserIsInstalled } from './utils/appleScriptUtils';
-import { DEFAULT_ERROR_TITLE, EDGE_NOT_INSTALLED_MESSAGE } from './common/constants';
-import { getOpenTabs } from './common/getOpenTabs';
-import {
-  getPreferenceValues,
-  List,
-  showToast,
-  ToastStyle
-  } from '@raycast/api';
-import { NotInstalled } from './components/NotInstalled';
-import { Tab } from './lib/Tab';
-import { TabListItem } from './components/TabListItem';
-import { useEffect, useState } from 'react';
+import { checkIfBrowserIsInstalled } from "./utils/appleScriptUtils";
+import { DEFAULT_ERROR_TITLE, EDGE_NOT_INSTALLED_MESSAGE } from "./common/constants";
+import { getOpenTabs } from "./common/getOpenTabs";
+import { getPreferenceValues, List, showToast, ToastStyle } from "@raycast/api";
+import { NotInstalled } from "./components/NotInstalled";
+import { Tab } from "./lib/Tab";
+import { TabListItem } from "./components/TabListItem";
+import { useEffect, useState } from "react";
 
 interface State {
   tabs?: Tab[];

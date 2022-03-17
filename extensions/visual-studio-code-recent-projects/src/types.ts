@@ -1,9 +1,13 @@
+import { existsSync } from "fs";
+import { URL } from "url";
+
 export interface FileEntry {
   fileUri: string;
 }
 
 export function isFileEntry(entry: EntryLike): entry is FileEntry {
-  return (entry as FileEntry).fileUri !== undefined;
+  const { fileUri } = entry as FileEntry;
+  return fileUri !== undefined && existsSync(new URL(fileUri));
 }
 
 export interface FolderEntry {
@@ -11,11 +15,8 @@ export interface FolderEntry {
 }
 
 export function isFolderEntry(entry: EntryLike): entry is FolderEntry {
-  return (entry as FolderEntry).folderUri !== undefined;
-}
-
-export function isRemoteEntry(entry: EntryLike): entry is FolderEntry {
-  return isFolderEntry(entry) && entry.folderUri.startsWith("vscode-remote://");
+  const { folderUri } = entry as FolderEntry;
+  return folderUri !== undefined && existsSync(new URL(folderUri));
 }
 
 export interface WorkspaceEntry {
@@ -25,9 +26,27 @@ export interface WorkspaceEntry {
 }
 
 export function isWorkspaceEntry(entry: EntryLike): entry is WorkspaceEntry {
-  return (
-    (entry as WorkspaceEntry).workspace !== undefined && (entry as WorkspaceEntry).workspace.configPath !== undefined
-  );
+  const { workspace } = entry as WorkspaceEntry;
+  return workspace !== undefined && workspace.configPath !== undefined && existsSync(new URL(workspace.configPath));
 }
 
-export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry;
+export interface RemoteEntry {
+  folderUri: string;
+  remoteAuthority: string;
+  label: string;
+}
+
+export function isRemoteEntry(entry: EntryLike): entry is RemoteEntry {
+  const { folderUri, remoteAuthority } = entry as RemoteEntry;
+  return folderUri !== undefined && remoteAuthority !== undefined;
+}
+
+export type EntryLike = FolderEntry | FileEntry | WorkspaceEntry | RemoteEntry;
+
+export enum VSCodeBuild {
+  Code = "Code",
+  Insiders = "Code - Insiders",
+}
+export interface Preferences {
+  build: VSCodeBuild;
+}

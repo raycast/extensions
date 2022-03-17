@@ -5,7 +5,7 @@ import { Character, getBlocks, getCharacters } from "unidata";
 // Output path for the generated dataset.
 const datasetOutputPath = path.resolve(__dirname, "../assets/dataset.json");
 
-// To avoid hitting memory limits, we retrieve only a subset of the unicode characters (mainly common symbols). 
+// To avoid hitting memory limits, we retrieve only a subset of the unicode characters (mainly common symbols).
 // Only characters part of these blocks will be included in the output.
 // See https://jrgraphix.net/r/Unicode for the full list of avilable names.
 const blockNamesToFilter = [
@@ -71,7 +71,6 @@ function getCharactersByCodeRange(startCode: number, endCode: number) {
   });
 
   const dataset = { blocks: filteredBlocks, characters };
-
 
   fs.writeFileSync(datasetOutputPath, JSON.stringify(dataset));
 

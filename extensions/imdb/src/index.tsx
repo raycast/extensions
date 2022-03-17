@@ -24,7 +24,10 @@ export default function SearchResults() {
             setTitles((previous) =>
               !previous.map((t) => t.imdbID).includes(enrichedTitle.imdbID)
                 ? // if the enriched title isn't in the list, add it, and re-sort the list
-                  [...previous, enrichedTitle].sort((a, b) => sortOrder.indexOf(a.imdbID) - sortOrder.indexOf(b.imdbID))
+                  [...previous, enrichedTitle].sort(
+                    (a, b) =>
+                      sortOrder.indexOf(a.imdbID) - sortOrder.indexOf(b.imdbID)
+                  )
                 : [...previous]
             );
           }
@@ -71,7 +74,9 @@ export default function SearchResults() {
           {bestMatch ? (
             <List.Section
               title="Best Match"
-              subtitle={`${bestMatch.Type.charAt(0).toUpperCase() + bestMatch.Type.slice(1)}`}
+              subtitle={`${
+                bestMatch.Type.charAt(0).toUpperCase() + bestMatch.Type.slice(1)
+              }`}
             >
               <ListItem title={bestMatch} />
             </List.Section>

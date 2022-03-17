@@ -12,10 +12,11 @@ Before using the command, you need to retrieve your Todoist token located in the
 
 ## Features
 
-- See your tasks due today
+- See your tasks due today, grouped by default, by priority, or by project
 - See your upcoming tasks grouped by dates
-- See all your projects, tasks by project and if your project is starred
+- See all your projects and the associated tasks grouped by default, by priority or by date
 - Create a task
+- Create a project
 
 For each task, you can:
 
@@ -41,3 +42,4 @@ For each task, you can:
 - Tasks in the "Today" and "Upcoming" views are not ordered the same as in your Todoist app because of a limitation from the [Todoist REST API](https://developer.todoist.com/rest/v1/#overview). The [Sync API](https://developer.todoist.com/sync/v8/) supports it but is not adapted for a Raycast extension.
 - You can't move a task to another project because of a limitation from the Todoist REST API.
 - Filters are not supported because of a limitation from the Todoist REST API.
+- It's not possible to get tasks only assigned to you when sharing projects because of a limitation from the Todoist REST API.
