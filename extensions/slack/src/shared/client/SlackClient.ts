@@ -44,7 +44,9 @@ export class SlackClient {
           const lastName = profile?.last_name ?? "";
           const name = `${firstName} ${lastName}`;
 
-          const displayName = name.trim() ? name : profile?.display_name;
+          const [displayName] = [name, profile?.display_name, profile?.real_name].filter(
+            (x): x is string => !!x?.trim()
+          );
 
           return {
             id,
