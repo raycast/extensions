@@ -47,7 +47,6 @@ export default function Command() {
   );
 }
 
-// Based on Steve Schoger's https://www.steveschoger.com/status-code-poster/
 function statusCodeToColor(status: string): Color {
   switch (status[0]) {
     case "1":
