@@ -154,7 +154,7 @@ export default function () {
 
                     return freshCopyModeState
                 })
-            }, 400)
+            }, 800)
             return
         }
 
