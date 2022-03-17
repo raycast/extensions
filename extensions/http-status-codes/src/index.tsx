@@ -35,7 +35,7 @@ export default function Command() {
               }}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser title="Open in browser" url={getCodeDocsUrl(code.code)} />
+                  <Action.OpenInBrowser url={getCodeDocsUrl(code.code)} />
                   <Action.CopyToClipboard content={code.code} />
                 </ActionPanel>
               }
