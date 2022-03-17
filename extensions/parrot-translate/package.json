@@ -24,10 +24,6 @@
             "description": "Select you first language",
             "data": [
                 {
-                    "title": "Auto Detect",
-                    "value": "auto"
-                },
-                {
                     "title": "English",
                     "value": "en"
                 },
@@ -289,6 +285,7 @@
     "scripts": {
         "build": "ray build -e dist",
         "dev": "ray develop",
-        "lint": "ray lint"
+        "lint": "ray lint",
+        "fix": "prettier --write ."
     }
 }

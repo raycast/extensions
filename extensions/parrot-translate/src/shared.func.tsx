@@ -89,7 +89,7 @@ export function reformatTranslateResult(data: ITranslateResult): ITranslateRefor
 }
 
 // API Document https://ai.youdao.com/DOCSIRMA/html/自然语言翻译/API文档/文本翻译服务/文本翻译服务-API文档.html
-export function requestYoudaoAPI(queryText: string, translateTargetLanguage: string): Promise<any> {
+export function requestYoudaoAPI(queryText: string, targetLanguage: string): Promise<any> {
     function truncate(q: string): string {
         const len = q.length
         return len <= 20 ? q : q.substring(0, 10) + len + q.substring(len - 10, len)
@@ -115,7 +115,7 @@ export function requestYoudaoAPI(queryText: string, translateTargetLanguage: str
             q: queryText,
             appKey: APP_ID,
             curtime: timestamp,
-            to: translateTargetLanguage,
+            to: targetLanguage,
         })
     )
 }

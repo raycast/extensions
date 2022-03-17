@@ -7,6 +7,16 @@ import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, Keyboard } f
 
 const preferences: IPreferences = getPreferenceValues()
 
+export function ActionFeedback() {
+    return (
+        <Action.OpenInBrowser
+            icon={Icon.QuestionMark}
+            title="Feedback"
+            url="https://github.com/Haojen/raycast-Parrot"
+        />
+    )
+}
+
 export function ActionCopyListSection(props: IActionCopyListSection) {
     if (!props.copyText) {
         return null
@@ -83,61 +93,53 @@ export class ListActionPanel extends Component<IListItemActionPanelItem> {
     }
 
     render() {
-        const playSoundIcon = Icon.Message
         return (
             <ActionPanel>
                 <ActionCopyListSection copyText={this.props.copyText} copyMode={this.props.copyMode} />
-                {(this.props.currentFromLanguage || this.props.currentTargetLanguage) &&
-                    this.props.queryText &&
-                    this.props.copyText && (
-                        <ActionPanel.Section title="Play Sound">
-                            <Action
-                                title="Play Query Text Sound"
-                                icon={playSoundIcon}
-                                onAction={() =>
-                                    this.onPlaySound(this.props?.queryText, this.props.currentFromLanguage?.languageId)
-                                }
-                            />
-                            <Action
-                                title="Play Result Text Sound"
-                                icon={playSoundIcon}
-                                onAction={() =>
-                                    this.onPlaySound(this.props.copyText, this.props.currentTargetLanguage?.languageId)
-                                }
-                            />
-                        </ActionPanel.Section>
-                    )}
-                {this.props.queryText && this.props.copyText && (
-                    <ActionPanel.Section title="Language">
-                        {LANGUAGE_LIST.map((region) => {
-                            return (
-                                <Action
-                                    key={region.languageId}
-                                    title={region.languageTitle}
-                                    onAction={() => this.props.onLanguageUpdate(region)}
-                                    icon={
-                                        this.props.currentTargetLanguage?.languageId === region.languageId
-                                            ? Icon.ArrowRight
-                                            : Icon.Globe
-                                    }
-                                />
-                            )
-                        })}
-                    </ActionPanel.Section>
-                )}
-                <ActionPanel.Section title="Others">
-                    <Action.OpenInBrowser
-                        icon={Icon.QuestionMark}
-                        title="Feedback"
-                        url="https://github.com/Haojen/raycast-Parrot"
+                <ActionPanel.Section title="Play Sound">
+                    <Action
+                        title="Play Query Text Sound"
+                        icon={Icon.Message}
+                        onAction={() =>
+                            this.onPlaySound(this.props?.queryText, this.props.currentFromLanguage?.languageId)
+                        }
                     />
-                    {this.props.currentFromLanguage && this.props.currentTargetLanguage && this.props.copyText && (
-                        <Action.OpenInBrowser
-                            icon={Icon.Link}
-                            title="See Google Translate Results"
-                            url={this.getGoogleTranslateURL()}
-                        />
-                    )}
+                    <Action
+                        title="Play Result Text Sound"
+                        icon={Icon.Message}
+                        onAction={() =>
+                            this.onPlaySound(this.props.copyText, this.props.currentTargetLanguage?.languageId)
+                        }
+                    />
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Target Language">
+                    {LANGUAGE_LIST.map((region) => {
+                        const isCurrentFromLanguage = this.props.currentFromLanguage?.languageId === region.languageId
+                        const isCurrentTargetLanguage =
+                            this.props.currentTargetLanguage?.languageId === region.languageId
+                        if (isCurrentFromLanguage || isCurrentTargetLanguage) return null
+
+                        return (
+                            <Action
+                                key={region.languageId}
+                                title={region.languageTitle}
+                                onAction={() => this.props.onLanguageUpdate(region)}
+                                icon={
+                                    this.props.currentTargetLanguage?.languageId === region.languageId
+                                        ? Icon.ArrowRight
+                                        : Icon.Globe
+                                }
+                            />
+                        )
+                    })}
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Others">
+                    <ActionFeedback />
+                    <Action.OpenInBrowser
+                        icon={Icon.Link}
+                        title="See Google Translate Results"
+                        url={this.getGoogleTranslateURL()}
+                    />
                 </ActionPanel.Section>
             </ActionPanel>
         )
