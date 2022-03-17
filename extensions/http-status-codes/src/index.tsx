@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Color } from "@raycast/api";
 import React from "react";
 import http from "http";
 
