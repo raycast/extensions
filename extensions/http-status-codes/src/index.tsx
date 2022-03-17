@@ -50,15 +50,15 @@ export default function Command() {
 function statusCodeToColor(status: string): Color {
   switch (status[0]) {
     case "1":
-      return Color.Yellow;
+      return Color.Blue;
     case "2":
       return Color.Green;
     case "3":
-      return Color.Blue;
+      return Color.Yellow;
     case "4":
-      return Color.Red;
-    case "5":
       return Color.Orange;
+    case "5":
+      return Color.Red;
     default:
       return Color.Magenta;
   }
