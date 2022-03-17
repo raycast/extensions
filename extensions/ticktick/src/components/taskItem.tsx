@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Icon, List, OpenAction } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCallback, useMemo } from "react";
 import { getProjectNameById } from "../service/project";
 import { Task } from "../service/task";
@@ -47,7 +47,7 @@ const TaskItem: React.FC<{
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Open">
-            <OpenAction title="Open in TickTick" target={target} icon={Icon.Window} />
+            <Action.Open title="Open in TickTick" target={target} icon={Icon.Window} />
           </ActionPanel.Section>
         </ActionPanel>
       }
