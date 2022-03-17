@@ -18,9 +18,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.2",
-    "axios": "^0.24.0",
-    "cheerio": "^1.0.0-rc.10"
+    "@raycast/api": "^1.30.3",
+    "@types/ip": "^1.1.0",
+    "axios": "^0.26.1",
+    "cheerio": "^1.0.0-rc.10",
+    "ip": "^1.1.5"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

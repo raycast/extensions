@@ -1,8 +1,9 @@
-import { ActionPanel, CopyToClipboardAction, Icon, List, PushAction, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import LookUp from "./lookup";
 import Torrent from "./torrent";
+import { address } from "ip";
 
 export type LoadingStatus = "loading" | "success" | "failure";
 
@@ -10,6 +11,7 @@ export default function Command() {
   const [status, setStatus] = useState<LoadingStatus>("loading");
   const [ip, setIp] = useState("");
   const { pop } = useNavigation();
+  const localIp = address("public", "ipv4").toString();
 
   useEffect(() => {
     async function getIp() {
@@ -28,13 +30,30 @@ export default function Command() {
   return (
     <List isLoading={status === "loading"}>
       <List.Item
-        icon={ip === "" ? "" : Icon.Globe}
-        title={ip}
-        accessoryTitle="My public IP address"
+        icon={Icon.Desktop}
+        title={localIp}
+        accessoryTitle="local IP address"
         actions={
           status === "success" && (
             <ActionPanel>
-              <CopyToClipboardAction
+              <Action.CopyToClipboard
+                content={localIp}
+                onCopy={() => {
+                  pop();
+                }}
+              />
+            </ActionPanel>
+          )
+        }
+      />
+      <List.Item
+        icon={ip === "" ? "" : Icon.Globe}
+        title={ip}
+        accessoryTitle="public IP address"
+        actions={
+          status === "success" && (
+            <ActionPanel>
+              <Action.CopyToClipboard
                 content={ip}
                 onCopy={() => {
                   pop();
@@ -50,10 +69,10 @@ export default function Command() {
             icon={ip === "" ? "" : Icon.Eye}
             title=""
             subtitle="IP Lookup"
-            accessoryTitle="Details of the IP"
+            accessoryTitle="Details of the public IP address"
             actions={
               <ActionPanel>
-                <PushAction title="IP Lookup" target={<LookUp />} />
+                <Action.Push title="IP Lookup" target={<LookUp />} />
               </ActionPanel>
             }
           />
@@ -61,10 +80,10 @@ export default function Command() {
             icon={ip === "" ? "" : Icon.Download}
             title=""
             subtitle="Torrent History"
-            accessoryTitle="Torrent download history of the IP"
+            accessoryTitle="Torrent download history of the public IP address"
             actions={
               <ActionPanel>
-                <PushAction title="Torrent History" target={<Torrent ip={ip} />} />
+                <Action.Push title="Torrent History" target={<Torrent ip={ip} />} />
               </ActionPanel>
             }
           />
