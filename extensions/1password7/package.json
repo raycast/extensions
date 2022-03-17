@@ -24,6 +24,30 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "appVersion",
+      "type": "dropdown",
+      "title": "1Password App Version",
+      "description": "Select the version of the 1Password app you want to use",
+      "data": [
+        {
+          "title": "Automatic (Default)",
+          "value": "automatic"
+        },
+        {
+          "title": "1Password 8",
+          "value": "onepassword8"
+        },
+        {
+          "title": "1Password 7",
+          "value": "onepassword7"
+        }
+      ],
+      "default": "automatic",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "open": "^8.3.0",
