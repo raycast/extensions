@@ -1,10 +1,10 @@
 import { showHUD, Toast, ToastStyle } from "@raycast/api";
 import { isFlowInstalled, skipSession } from "./utils";
 
-export default async function() {
+export default async function () {
   const toast = new Toast({
     title: "Skipping session",
-    style: ToastStyle.Animated
+    style: ToastStyle.Animated,
   });
 
   toast.show();
