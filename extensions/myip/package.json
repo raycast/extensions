@@ -19,12 +19,12 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.30.3",
-    "@types/ip": "^1.1.0",
     "axios": "^0.26.1",
     "cheerio": "^1.0.0-rc.10",
     "ip": "^1.1.5"
   },
   "devDependencies": {
+    "@types/ip": "^1.1.0",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
