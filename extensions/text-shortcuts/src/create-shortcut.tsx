@@ -1,0 +1,380 @@
+import React, { useEffect, useState } from "react";
+import { Action, ActionPanel, Form, Icon, LocalStorage, popToRoot, showToast, Toast } from "@raycast/api";
+import { simulatePressKeyboard } from "./util/utils";
+import {
+  cases,
+  checkAffix,
+  checkInfo,
+  coders,
+  createShortcut,
+  icons,
+  Shortcut,
+  ShortcutInfo,
+  ShortcutSource,
+  Taction,
+  TactionType,
+  tags,
+  transforms,
+} from "./util/shortcut";
+import { runAppleScript } from "run-applescript";
+import { variables } from "./util/variable";
+
+export default function CreateShortcut(props: { shortcut: Shortcut }) {
+  const _editShortcut = props.shortcut;
+  const editShortcut = typeof _editShortcut == "undefined" ? new Shortcut() : _editShortcut;
+  const [localShortcuts, setLocalShortcuts] = useState<Shortcut[]>([]);
+  const [info, setInfo] = useState<ShortcutInfo>({
+    name: "",
+    id: "",
+    icon: icons[0],
+    source: ShortcutSource.USER,
+    visibility: true,
+    tag: [],
+  });
+  const [tactions, setTactions] = useState<Taction[]>([]);
+
+  useEffect(() => {
+    async function _fetchLocalShortcut() {
+      setInfo(editShortcut.info);
+      setTactions(editShortcut.tactions);
+      const _localShortcut = await LocalStorage.getItem<string>("shortcuts");
+      if (typeof _localShortcut == "string") {
+        setLocalShortcuts(JSON.parse(_localShortcut));
+      }
+      await runAppleScript("");
+    }
+
+    _fetchLocalShortcut().then();
+  }, []);
+
+  return (
+    <Form
+      actions={
+        <CreateShortcutActions
+          info={info}
+          tactions={tactions}
+          localShortcuts={localShortcuts}
+          setTactions={setTactions}
+        />
+      }
+    >
+      <Form.TextField
+        id={"name"}
+        title={"Name"}
+        defaultValue={editShortcut.info.name}
+        placeholder={"Shortcut name"}
+        onChange={(newValue) => {
+          info.name = newValue;
+          setInfo(info);
+        }}
+      />
+      <Form.Dropdown
+        id={"icons"}
+        title={"Icon"}
+        defaultValue={editShortcut.info.icon}
+        onChange={(newValue) => {
+          info.icon = newValue as Icon;
+          setInfo(info);
+        }}
+      >
+        {icons.map((value) => {
+          return <Form.Dropdown.Item key={value} title={" "} icon={value} value={value} />;
+        })}
+      </Form.Dropdown>
+
+      <Form.TagPicker
+        id={"tags"}
+        title={"Tag"}
+        defaultValue={editShortcut.info.tag}
+        placeholder={"Shortcut tags"}
+        onChange={(newValue) => {
+          info.tag = newValue;
+          setInfo(info);
+        }}
+      >
+        {tags.map((value) => {
+          return <Form.TagPicker.Item key={value} title={value} icon={Icon.Pin} value={value} />;
+        })}
+      </Form.TagPicker>
+
+      {tactions.map((taction, index, array) => {
+        switch (taction.type) {
+          case TactionType.DELETE: {
+            return (
+              <React.Fragment key={"delete_fragment" + index}>
+                <Form.Separator />
+                <Form.TextField
+                  id={"delete" + index}
+                  key={"delete" + index}
+                  title={TactionType.DELETE}
+                  placeholder={"Delete word"}
+                  value={array[index].content[0]}
+                  onChange={(newValue) => {
+                    const _tactions = [...tactions];
+                    _tactions[index].content[0] = newValue;
+                    setTactions(_tactions);
+                  }}
+                />
+              </React.Fragment>
+            );
+          }
+          case TactionType.REPLACE: {
+            return (
+              <React.Fragment key={"replace_fragment" + index}>
+                <Form.Separator />
+                <Form.TextField
+                  id={"replace" + index}
+                  key={"replace" + index}
+                  title={TactionType.REPLACE}
+                  placeholder={"Replace"}
+                  value={array[index].content[0]}
+                  onChange={(newValue) => {
+                    tactions[index].content[0] = newValue;
+                  }}
+                />
+                <Form.TextField
+                  id={"replace_with" + index}
+                  key={"replace_with" + index}
+                  title={""}
+                  placeholder={"with"}
+                  value={array[index].content[1]}
+                  onChange={(newValue) => {
+                    tactions[index].content[1] = newValue;
+                  }}
+                />
+              </React.Fragment>
+            );
+          }
+          case TactionType.AFFIX: {
+            return (
+              <React.Fragment key={"affix_fragment" + index}>
+                <Form.Separator />
+                <Form.TextArea
+                  id={"affix" + index}
+                  key={"affix" + index}
+                  title={TactionType.AFFIX}
+                  value={array[index].content[0]}
+                  placeholder={
+                    'Such as Prefix$VARIABLE$Suffix\n\nTemplate can only have a maximum of one "Input" variable'
+                  }
+                  onChange={(newValue) => {
+                    updateTactionContent(newValue, index, [...array], setTactions);
+                  }}
+                />
+                <Form.Dropdown
+                  id={"affix_variable" + index}
+                  key={"affix_variable" + index}
+                  defaultValue={""}
+                  onChange={async (newValue) => {
+                    // await simulatePressKeyboard(48, "shift");
+                    updateTactionContent(`${tactions[index].content[0]}${newValue}`, index, [...array], setTactions);
+                  }}
+                >
+                  {variables.map((variable) => {
+                    return (
+                      <Form.Dropdown.Item
+                        key={"variable" + variable.title}
+                        title={variable.title}
+                        value={variable.value}
+                      />
+                    );
+                  })}
+                </Form.Dropdown>
+              </React.Fragment>
+            );
+          }
+          case TactionType.CASE: {
+            return (
+              <React.Fragment key={"case_fragment" + index}>
+                <Form.Separator />
+                <Form.Dropdown
+                  id={"case" + index}
+                  key={"case" + index}
+                  title={TactionType.CASE}
+                  defaultValue={array[index].content[0]}
+                  onChange={async (newValue) => {
+                    updateTactionContent(newValue, index, [...array], setTactions);
+                  }}
+                >
+                  {cases.map((cases, caseIndex) => {
+                    return <Form.Dropdown.Item key={"case" + caseIndex} title={cases} value={cases} />;
+                  })}
+                </Form.Dropdown>
+              </React.Fragment>
+            );
+          }
+          case TactionType.CODER: {
+            return (
+              <React.Fragment key={"coder_fragment" + index}>
+                <Form.Separator />
+                <Form.Dropdown
+                  id={"coder" + index}
+                  key={"coder" + index}
+                  title={TactionType.CODER}
+                  defaultValue={array[index].content[0]}
+                  onChange={async (newValue) => {
+                    updateTactionContent(newValue, index, [...array], setTactions);
+                  }}
+                >
+                  {coders.map((coder) => {
+                    return <Form.Dropdown.Item key={"coder" + coder} title={coder} value={coder} />;
+                  })}
+                </Form.Dropdown>
+              </React.Fragment>
+            );
+          }
+          case TactionType.TRANSFORM: {
+            return (
+              <React.Fragment key={"transform_fragment" + index}>
+                <Form.Separator />
+                <Form.Dropdown
+                  id={"transform" + index}
+                  key={"transform" + index}
+                  title={TactionType.TRANSFORM}
+                  defaultValue={array[index].content[0]}
+                  onChange={async (newValue) => {
+                    updateTactionContent(newValue, index, [...array], setTactions);
+                  }}
+                >
+                  {transforms.map((transform) => {
+                    return <Form.Dropdown.Item key={"convert" + transform} title={transform} value={transform} />;
+                  })}
+                </Form.Dropdown>
+              </React.Fragment>
+            );
+          }
+        }
+      })}
+    </Form>
+  );
+}
+
+function CreateShortcutActions(props: {
+  info: ShortcutInfo;
+  tactions: Taction[];
+  localShortcuts: Shortcut[];
+  setTactions: any;
+}) {
+  const info = props.info;
+  const tactions = props.tactions;
+  const localShortcuts = props.localShortcuts;
+  const setTactions = props.setTactions;
+  return (
+    <ActionPanel>
+      <Action
+        title="More Actions"
+        icon={Icon.Terminal}
+        onAction={async () => {
+          try {
+            await simulatePressKeyboard(40, "command");
+          } catch (e) {
+            await showToast(Toast.Style.Failure, String(e));
+          }
+        }}
+      />
+      <Action
+        title="Create Shortcut"
+        icon={Icon.Download}
+        onAction={async () => {
+          const _checkInfo = checkInfo(info.name, tactions);
+          const _checkAffix = checkAffix(tactions);
+          if (!_checkInfo.nameValid) {
+            await showToast(Toast.Style.Failure, `Name of shortcut cannot be empty`);
+          } else if (!_checkInfo.tactionCountValid) {
+            await showToast(Toast.Style.Failure, `Shortcut requires at least one action`);
+          } else if (!_checkInfo.tactionContentValid.valid) {
+            await showToast(
+              Toast.Style.Failure,
+              `Shortcut has empty actions, check${_checkInfo.tactionContentValid.actionIndex} action`
+            );
+          } else if (!_checkAffix.valid) {
+            await showToast(
+              Toast.Style.Failure,
+              `Affix has more than one "Input" variable, check${_checkAffix.affixIndex} action`
+            );
+          } else {
+            await createShortcut(info, tactions, localShortcuts);
+            await popToRoot({ clearSearchBar: false });
+            await showToast(Toast.Style.Success, `Shortcut Created`);
+          }
+        }}
+      />
+      <ActionPanel.Section title="Add Action">
+        <Action
+          title={TactionType.DELETE}
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd"], key: "d" }}
+          onAction={async () => {
+            setTactions([...tactions, { type: TactionType.DELETE, content: [""] }]);
+          }}
+        />
+        <Action
+          title={TactionType.CODER}
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          onAction={async () => {
+            setTactions([...tactions, { type: TactionType.CODER, content: [""] }]);
+          }}
+        />
+        <Action
+          title={TactionType.CASE}
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          onAction={async () => {
+            setTactions([...tactions, { type: TactionType.CASE, content: [""] }]);
+          }}
+        />
+        <Action
+          title={TactionType.REPLACE}
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          onAction={async () => {
+            setTactions([...tactions, { type: TactionType.REPLACE, content: [""] }]);
+          }}
+        />
+        <Action
+          title={TactionType.TRANSFORM}
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd"], key: "t" }}
+          onAction={async () => {
+            setTactions([...tactions, { type: TactionType.TRANSFORM, content: [""] }]);
+          }}
+        />
+        <Action
+          title={TactionType.AFFIX}
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd"], key: "l" }}
+          onAction={async () => {
+            setTactions([...tactions, { type: TactionType.AFFIX, content: [""] }]);
+          }}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section title="Remove Action">
+        <Action
+          title="Remove Last Action"
+          icon={Icon.Trash}
+          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+          onAction={async () => {
+            const _tactions = [...tactions];
+            _tactions.pop();
+            setTactions(_tactions);
+          }}
+        />
+        <Action
+          title="Remove All Action"
+          icon={Icon.ExclamationMark}
+          shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
+          onAction={async () => {
+            setTactions([]);
+          }}
+        />
+      </ActionPanel.Section>
+    </ActionPanel>
+  );
+}
+
+function updateTactionContent(content: string, index: number, taction: Taction[], setTactions: any, contentIndex = 0) {
+  taction[index].content[contentIndex] = content;
+  setTactions(taction);
+}
