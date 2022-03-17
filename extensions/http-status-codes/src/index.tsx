@@ -48,20 +48,20 @@ export default function Command() {
 }
 
 // Based on Steve Schoger's https://www.steveschoger.com/status-code-poster/
-function statusCodeToColor(status: string): string {
+function statusCodeToColor(status: string): Color {
   switch (status[0]) {
     case "1":
-      return "#cff9fe";
+      return Color.Yellow;
     case "2":
-      return "#d4f7ae";
+      return Color.Green;
     case "3":
-      return "#cdc7ff";
+      return Color.Blue;
     case "4":
-      return "#f9f4b5";
+      return Color.Red;
     case "5":
-      return "#fbb7b7";
+      return Color.Orange;
     default:
-      return "#ffffff";
+      return Color.Magenta;
   }
 }
 
