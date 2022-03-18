@@ -6,6 +6,10 @@
   "icon": "command-icon.png",
   "author": "pomdtr",
   "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "pipe-selection-to-command",
