@@ -1,4 +1,15 @@
-import { ActionPanel, environment, Form, popToRoot, showInFinder, showToast, Action, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  environment,
+  Form,
+  popToRoot,
+  showInFinder,
+  showToast,
+  Action,
+  Toast,
+  Icon,
+  List,
+} from "@raycast/api";
 import { writeFileSync } from "fs";
 import { resolve } from "path/posix";
 import { scriptModes } from "./types";
@@ -40,6 +51,7 @@ interface FormValues {
   title: string;
   mode: string;
   packageName?: string;
+  icon: string;
   percentEncoded: boolean;
 }
 
@@ -57,10 +69,15 @@ export default function PipeCommandForm(): JSX.Element {
     const metadataLines = [
       `${languageProperties.commentSign} @raycast.title ${values.title}`,
       `${languageProperties.commentSign} @raycast.mode ${values.mode}`,
+      `${languageProperties.commentSign} @raycast.icon ${values.icon}`,
       `${
         languageProperties.commentSign
       } @raycast.argument1 {"type": "text", "percentEncoded": ${!!values.percentEncoded}}`,
     ];
+
+    if (values.packageName) {
+      metadataLines.push(`${languageProperties.commentSign} @raycast.packageName ${values.packageName}`);
+    }
 
     const help = `${languageProperties.commentSign} Documentation is available at https://github.com/raycast/extensions/blob/main/extensions/pipe-commands/README.md`;
     const content = [languageProperties.shebang, "", help, ...metadataLines, "", languageProperties.helloWorld].join(
@@ -91,6 +108,11 @@ export default function PipeCommandForm(): JSX.Element {
         ))}
       </Form.Dropdown>
       <Form.TextField title="Title" placeholder="Command Title" id="title" />
+      <Form.Dropdown title="Icon" id="icon" defaultValue="text-alignleft-16">
+        {Object.entries(Icon).map(([key, value]) => (
+          <Form.Dropdown.Item icon={value} key={key} title={key} value={value} />
+        ))}
+      </Form.Dropdown>
       <Form.TextField title="Package Name" placeholder="E. g., Developer Utils" id="packageName" />
       <Form.Checkbox
         defaultValue={false}
