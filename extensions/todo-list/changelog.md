@@ -1,6 +1,6 @@
 # Todo List Changelog
 
-## Fix URLs Without Scheme (2022-03-17)
+## Fix Handling URLs Without a Scheme (2022-03-17)
 
 Previously, URLs without a scheme would crash the extension -- these are now handled by adding the `http` scheme if there is no scheme.
 
