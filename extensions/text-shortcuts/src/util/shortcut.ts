@@ -213,7 +213,7 @@ function tactionAffix(input: string, taction: Taction) {
     /(\$MONTH\$)/g,
     date.getMonth() + 1 < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1 + ""
   );
-  output = output.replaceAll(/(\$DAY\$)/g, date.getDay() < 10 ? "0" + date.getDay() : date.getDay() + "");
+  output = output.replaceAll(/(\$DAY\$)/g, date.getDate() < 10 ? "0" + date.getDate() : date.getDate() + "");
   output = output.replaceAll(/(\$HOUR\$)/g, date.getHours() < 10 ? "0" + date.getHours() : date.getHours() + "");
   output = output.replaceAll(
     /(\$MINUTE\$)/g,
