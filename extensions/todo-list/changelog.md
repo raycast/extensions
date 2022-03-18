@@ -2,7 +2,7 @@
 
 ## Fix URLs Without Scheme (2022-03-17)
 
-- Previously, URLs without a scheme would crash the extension -- these are now handled by adding the `http` scheme if there is no scheme.
+Previously, URLs without a scheme would crash the extension -- these are now handled by adding the `http` scheme if there is no scheme.
 
 ## Opening URLs and Editing Todos (2022-03-10)
 
