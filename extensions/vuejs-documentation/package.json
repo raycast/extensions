@@ -18,26 +18,6 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "vueVersion",
-      "type": "dropdown",
-      "required": true,
-      "title": "VueJS version",
-      "description": "Specify the VueJS version it will search the docs for.",
-      "default": "v3",
-      "data": [
-        {
-          "title": "v3",
-          "value": "v3"
-        },
-        {
-          "title": "v2",
-          "value": "v2"
-        }
-      ]
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.30.1",
     "algoliasearch": "^4.12.2",
