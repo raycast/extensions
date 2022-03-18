@@ -18,7 +18,7 @@ import {
 import { useState, useMemo, useEffect } from "react";
 import { $enum } from "ts-enum-util";
 import prettyBytes from "pretty-bytes";
-import { useStateFromLocalStorage } from "./utils/hooks";
+import { usePersistentState } from "raycast-toolkit";
 import { truncate } from "./utils/string";
 import { padList } from "./utils/list";
 import { useAllTorrents, useMutateTorrent, useSessionStats } from "./modules/client";
@@ -53,6 +53,8 @@ const sortTorrents = (t1: Torrent, t2: Torrent): number => {
       return t1.name.localeCompare(t2.name) * direction;
     case "status":
       return (t2.status - t1.status) * direction;
+    case "addedDate":
+      return (t2.addedDate - t1.addedDate) * direction;
     default:
       return 0;
   }
@@ -62,7 +64,7 @@ type TorrentStatusFilterType = keyof typeof TorrentStatus | "All";
 let useStatusFilter: () => [TorrentStatusFilterType, (status: TorrentStatusFilterType) => void, boolean];
 
 if (preferences.rememberStatusFilter) {
-  useStatusFilter = () => useStateFromLocalStorage<keyof typeof TorrentStatus | "All">("statusFilter", "All");
+  useStatusFilter = () => usePersistentState<keyof typeof TorrentStatus | "All">("statusFilter", "All");
 } else {
   useStatusFilter = () => {
     const [state, setState] = useState<TorrentStatusFilterType>("All");
