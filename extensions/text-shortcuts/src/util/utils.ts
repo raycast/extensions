@@ -10,8 +10,11 @@ export const preferences = () => {
     annotation: preferencesMap.get("annotation"),
     case: preferencesMap.get("case"),
     coder: preferencesMap.get("coder"),
+    format: preferencesMap.get("format"),
     markdown: preferencesMap.get("markdown"),
     time: preferencesMap.get("time"),
+    rememberTag: preferencesMap.get("remember-tag"),
+    detail: preferencesMap.get("detail"),
   };
 };
 export const isEmpty = (string: string | null | undefined) => {

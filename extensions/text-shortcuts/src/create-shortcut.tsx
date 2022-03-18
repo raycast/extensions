@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Action, ActionPanel, Form, Icon, LocalStorage, popToRoot, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  LocalStorage,
+  popToRoot,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { simulatePressKeyboard } from "./util/utils";
 import {
   cases,
@@ -19,8 +29,13 @@ import {
 import { runAppleScript } from "run-applescript";
 import { variables } from "./util/variable";
 
-export default function CreateShortcut(props: { shortcut: Shortcut }) {
+export default function CreateShortcut(props: {
+  shortcut: Shortcut;
+  updateListUseState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
+}) {
   const _editShortcut = props.shortcut;
+  const [updateList, setUpdateList] =
+    typeof _editShortcut == "undefined" ? useState<boolean>(false) : props.updateListUseState;
   const editShortcut = typeof _editShortcut == "undefined" ? new Shortcut() : _editShortcut;
   const [localShortcuts, setLocalShortcuts] = useState<Shortcut[]>([]);
   const [info, setInfo] = useState<ShortcutInfo>({
@@ -55,6 +70,7 @@ export default function CreateShortcut(props: { shortcut: Shortcut }) {
           tactions={tactions}
           localShortcuts={localShortcuts}
           setTactions={setTactions}
+          updateListUseState={[updateList, setUpdateList]}
         />
       }
     >
@@ -254,11 +270,14 @@ function CreateShortcutActions(props: {
   tactions: Taction[];
   localShortcuts: Shortcut[];
   setTactions: any;
+  updateListUseState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
 }) {
   const info = props.info;
   const tactions = props.tactions;
   const localShortcuts = props.localShortcuts;
   const setTactions = props.setTactions;
+  const [updateList, setUpdateList] = props.updateListUseState;
+  const { pop } = useNavigation();
   return (
     <ActionPanel>
       <Action
@@ -294,7 +313,8 @@ function CreateShortcutActions(props: {
             );
           } else {
             await createShortcut(info, tactions, localShortcuts);
-            await popToRoot({ clearSearchBar: false });
+            pop();
+            setUpdateList(!updateList);
             await showToast(Toast.Style.Success, `Shortcut Created`);
           }
         }}

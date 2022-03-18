@@ -22,6 +22,7 @@ import { MARKDOWNS_SHORTCUTS } from "./build-in/markdown";
 import { CASES_SHORTCUTS } from "./build-in/case";
 import { CODERS_SHORTCUTS } from "./build-in/coder";
 import { TIMES_SHORTCUTS } from "./build-in/time";
+import { FORMAT_SHORTCUTS } from "./build-in/format";
 
 export default function SearchShortcut() {
   const [itemInput, setItemInput] = useState<ItemInput>(new ItemInput());
@@ -29,6 +30,7 @@ export default function SearchShortcut() {
   const [allShortcuts, setAllShortcuts] = useState<Shortcut[]>([]);
   const [detail, setDetail] = useState<string>("");
   const [tag, setTag] = useState<string>("All");
+  const [updateList, setUpdateList] = useState<boolean>(false);
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -43,7 +45,7 @@ export default function SearchShortcut() {
     }
 
     _fetchBuildInShortcut().then();
-  }, []);
+  }, [updateList]);
 
   useEffect(() => {
     async function _fetchBuildInShortcut() {
@@ -57,6 +59,9 @@ export default function SearchShortcut() {
       }
       if (preferences().coder) {
         _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(CODERS_SHORTCUTS)];
+      }
+      if (preferences().format) {
+        _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(FORMAT_SHORTCUTS)];
       }
       if (preferences().markdown) {
         _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(MARKDOWNS_SHORTCUTS)];
@@ -85,7 +90,7 @@ export default function SearchShortcut() {
 
   return (
     <List
-      isShowingDetail={true}
+      isShowingDetail={preferences().detail}
       isLoading={allShortcuts.length == 0}
       searchBarPlaceholder={"Search shortcut"}
       onSelectionChange={(id) => {
@@ -94,6 +99,7 @@ export default function SearchShortcut() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Shortcut Tags"
+          storeValue={preferences().rememberTag}
           onChange={async (newValue) => {
             setTag(newValue);
           }}
@@ -148,7 +154,7 @@ export default function SearchShortcut() {
                           title={"Edit Shortcut"}
                           icon={Icon.Pencil}
                           onAction={async () => {
-                            push(<CreateShortcut shortcut={value} />);
+                            push(<CreateShortcut shortcut={value} updateListUseState={[updateList, setUpdateList]} />);
                           }}
                         />
                         <Action

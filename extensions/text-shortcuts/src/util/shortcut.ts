@@ -53,7 +53,8 @@ enum Coders {
 export const coders = Object.values(Coders);
 
 enum Transform {
-  STAMP_TO_TIME1 = "Stamp to time",
+  STAMP_TO_TIME_LOCAL = "Stamp to time",
+  FORMAT_JSON = "Format JSON",
   TRIM_LINE = "Trim line",
   Sort_LINE1 = "Sort line by A-Z",
   Sort_LINE2 = "Sort line by Z-A",
@@ -386,11 +387,18 @@ function tactionCoder(input: string, taction: Taction) {
 
 function tactionTransform(input: string, taction: Taction) {
   switch (taction.content[0]) {
-    case Transform.STAMP_TO_TIME1: {
+    case Transform.STAMP_TO_TIME_LOCAL: {
       if (/^[0-9]*$/.test(input)) {
         const timeT = new Date(Number(input)).toLocaleString().slice(0, 19);
         return timeT.replace("T", " ").replaceAll("/", "-");
       } else {
+        return input;
+      }
+    }
+    case Transform.FORMAT_JSON: {
+      try {
+        return JSON.stringify(JSON.parse(input), null, 2);
+      } catch (e) {
         return input;
       }
     }

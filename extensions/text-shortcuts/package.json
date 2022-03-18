@@ -14,6 +14,23 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "remember-tag",
+          "type": "checkbox",
+          "required": false,
+          "title": "Preferences",
+          "label": "Remember Filter Tag",
+          "description": "Remember Shortcut Filter Tag.",
+          "default": true
+        },
+        {
+          "name": "detail",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Shortcut Detail",
+          "description": "Show Shortcut's text on the right.",
+          "default": true
+        },
+        {
           "name": "annotation",
           "type": "checkbox",
           "required": false,
@@ -36,6 +53,14 @@
           "required": false,
           "label": "Encode & Encode",
           "description": "Show Encode & Encode shortcuts.",
+          "default": true
+        },
+        {
+          "name": "format",
+          "type": "checkbox",
+          "required": false,
+          "label": "Format",
+          "description": "Show Format shortcuts.",
           "default": true
         },
         {
