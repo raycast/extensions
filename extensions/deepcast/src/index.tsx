@@ -7,7 +7,7 @@ import {
   showToast,
   ToastStyle,
   getPreferenceValues,
-  Icon
+  Icon,
 } from "@raycast/api";
 import got from "got";
 import { useEffect, useState } from "react";
@@ -98,7 +98,7 @@ const Command = () => {
     // Slicing to handle cases such as "EN-GB", "EN-US", "PT-PT", "PT-BR", ...
     const newSourceValue = targetLanguage.slice(0, 2);
     // Picking the first occurrence of a target language that starts with the source language (always 2 chars)
-    const newTargetValue = Object.keys(target_languages).find(key => key.startsWith(sourceLanguage));
+    const newTargetValue = Object.keys(target_languages).find((key) => key.startsWith(sourceLanguage));
 
     if (newTargetValue != undefined) {
       // Set the new language values
