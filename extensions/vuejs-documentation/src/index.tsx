@@ -1,4 +1,5 @@
-import { ActionPanel, List, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import algoliasearch from "algoliasearch/lite";
 import striptags from "striptags";
@@ -35,6 +36,10 @@ type VueJsDocsHit = {
   };
 };
 
+enum LSKeys {
+  VueVersion = "vueVersion",
+}
+
 type SectionHit = {
   section: string;
   items: VueJsDocsHit[];
@@ -53,17 +58,39 @@ export type DocList = {
 };
 
 const DOCS: { [key: string]: DocList[] } = {
-  v2: require("./documentation/v2.json"),
   v3: require("./documentation/v3.json"),
+  v2: require("./documentation/v2.json"),
 };
 
-type Preferences = {
-  vueVersion: string;
-};
+const vueVersions: string[] = Object.keys(DOCS);
 
 export default function Command() {
-  const vueVersion = getPreferenceValues<Preferences>().vueVersion;
+  const [query, setQuery] = useState<string>("");
+  const [searchResults, setSearchResults] = useState<any[] | undefined>();
+  const [isLoadingResults, setIsLoadingResults] = useState(false);
+  const [vueVersion, setVueVersion] = useState<string>(vueVersions[0]);
+
+  useEffect(() => {
+    (async () => setSearchResults(await search()))();
+  }, []);
+
+  useEffect(() => {
+    (() => {
+      setQuery("");
+      setSearchResults(undefined);
+    })();
+  }, [vueVersion]);
+
+  const onSearchTextChange = async (query: string) => {
+    setSearchResults(await search(query));
+  };
+
+  const onVersionChange = (version: string) => {
+    setVueVersion(version);
+  };
+
   const navigationTitle = `Search Documentation: (${vueVersion})`;
+
   const algoliaClient = useMemo(() => {
     return algoliasearch(APPID, APIKEY);
   }, [APPID, APIKEY]);
@@ -71,9 +98,6 @@ export default function Command() {
   const algoliaIndex = useMemo(() => {
     return algoliaClient.initIndex(INDEX);
   }, [algoliaClient, INDEX]);
-
-  const [searchResults, setSearchResults] = useState<any[] | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
 
   const hierarchyToArray = (hierarchy: KeyValueHierarchy) => {
     return Object.values(hierarchy)
@@ -102,7 +126,9 @@ export default function Command() {
     if (query === "") {
       return;
     }
-    setIsLoading(true);
+
+    setQuery(query);
+    setIsLoadingResults(true);
 
     return await algoliaIndex
       .search(query, {
@@ -110,11 +136,11 @@ export default function Command() {
         facetFilters: [`version:${vueVersion}`],
       })
       .then((res) => {
-        setIsLoading(false);
+        setIsLoadingResults(false);
         return mapHits(res.hits);
       })
       .catch((err) => {
-        setIsLoading(false);
+        setIsLoadingResults(false);
         showToast(Toast.Style.Failure, "Error searching VueJS Documentation", err.message);
         return [];
       });
@@ -128,21 +154,29 @@ export default function Command() {
     items,
   });
 
-  const onSearchTextChange = async (query: string) => {
-    setSearchResults(await search(query));
-  };
-
-  useEffect(() => {
-    (async () => setSearchResults(await search()))();
-  }, []);
-
   return (
     <List
       navigationTitle={navigationTitle}
       throttle={true}
       enableFiltering={false}
-      isLoading={isLoading}
+      isLoading={isLoadingResults}
+      searchText={query}
       onSearchTextChange={onSearchTextChange}
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Select version"
+          onChange={onVersionChange}
+          id={LSKeys.VueVersion}
+          storeValue={true}
+          defaultValue={vueVersions[0]}
+        >
+          <List.Dropdown.Section title="Select version">
+            {vueVersions.map((version, index) => (
+              <List.Dropdown.Item title={version} value={version} key={index} />
+            ))}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
     >
       {searchResults?.map((hit: SectionHit, k: number) => (
         <List.Section title={hit.section} key={k}>
