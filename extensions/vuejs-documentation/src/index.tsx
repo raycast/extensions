@@ -1,5 +1,4 @@
 import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
-import { LocalStorage } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import algoliasearch from "algoliasearch/lite";
 import striptags from "striptags";
@@ -68,7 +67,8 @@ export default function Command() {
   const [query, setQuery] = useState<string>("");
   const [searchResults, setSearchResults] = useState<any[] | undefined>();
   const [isLoadingResults, setIsLoadingResults] = useState(false);
-  const [vueVersion, setVueVersion] = useState<string>(vueVersions[0]);
+  const [vueVersion, setVueVersion] = useState<string | undefined>();
+  const [isLoadingVueVersion, setIsLoadingVueVersion] = useState(true);
 
   useEffect(() => {
     (async () => setSearchResults(await search()))();
@@ -78,6 +78,7 @@ export default function Command() {
     (() => {
       setQuery("");
       setSearchResults(undefined);
+      setIsLoadingVueVersion(false)
     })();
   }, [vueVersion]);
 
@@ -88,8 +89,6 @@ export default function Command() {
   const onVersionChange = (version: string) => {
     setVueVersion(version);
   };
-
-  const navigationTitle = `Search Documentation: (${vueVersion})`;
 
   const algoliaClient = useMemo(() => {
     return algoliasearch(APPID, APIKEY);
@@ -154,9 +153,22 @@ export default function Command() {
     items,
   });
 
+  if (! vueVersion) {
+    return (
+        <List isLoading={isLoadingVueVersion} searchBarAccessory={
+          <List.Dropdown tooltip="Select version" onChange={onVersionChange} id={LSKeys.VueVersion} storeValue={true}>
+            <List.Dropdown.Section title="Select version">
+              {vueVersions.map((version, index) => (
+                  <List.Dropdown.Item title={version} value={version} key={index}/>
+              ))}
+            </List.Dropdown.Section>
+          </List.Dropdown>
+        }/>
+    )
+  }
+
   return (
     <List
-      navigationTitle={navigationTitle}
       throttle={true}
       enableFiltering={false}
       isLoading={isLoadingResults}
@@ -168,7 +180,6 @@ export default function Command() {
           onChange={onVersionChange}
           id={LSKeys.VueVersion}
           storeValue={true}
-          defaultValue={vueVersions[0]}
         >
           <List.Dropdown.Section title="Select version">
             {vueVersions.map((version, index) => (
