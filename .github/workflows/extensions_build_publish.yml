@@ -62,7 +62,7 @@ jobs:
         if: success() && github.event_name == 'workflow_dispatch'
         uses: edge/simple-slack-notify@master
         with:
-          color: "danger"
+          color: "good"
           text: ":white_check_mark: ${env.GITHUB_WORKFLOW} has succeeded"
           fields: |
             [
