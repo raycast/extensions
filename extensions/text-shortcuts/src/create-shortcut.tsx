@@ -182,7 +182,6 @@ export default function CreateShortcut(props: {
                   key={"affix_variable" + index}
                   defaultValue={""}
                   onChange={async (newValue) => {
-                    // await simulatePressKeyboard(48, "shift");
                     updateTactionContent(`${tactions[index].content[0]}${newValue}`, index, [...array], setTactions);
                   }}
                 >

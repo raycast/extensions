@@ -6,14 +6,14 @@ Combine transformation actions to create powerful automations for your text.
 
 -------
 
-## Live Snippest
+## Live Snippet
 
-Not only for text processing, but also as a live Snippest for text.
-Add variables to your Snippest that can be automatically converted when pasting.
+Not only for text processing, but also as a live Snippet for text.
+Add variables to your Snippet that can be automatically converted when pasting.
 
 ------
 
-Built-in multiple shortcuts to support installation ready to use
+Built-in multiple shortcuts support installation ready to use.
 
 **Now! Use your imagination to create your own Text Shortcuts.**
 

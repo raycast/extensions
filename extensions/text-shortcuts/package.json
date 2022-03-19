@@ -4,7 +4,10 @@
   "title": "Text Shortcuts",
   "description": "Use Text Shortcuts to handle text from the selection or clipboard.",
   "icon": "text-shortcuts.png",
-  "author": "koinzhang",
+  "author": "koinzhang",  "categories": [
+  "Developer Tools",
+  "Productivity"
+],
   "license": "MIT",
   "commands": [
     {
