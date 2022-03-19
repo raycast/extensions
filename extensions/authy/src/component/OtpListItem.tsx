@@ -52,8 +52,8 @@ export default function OtpListItem({ item, basis, timeLeft, refresh }: OtpListI
       accessoryIcon={{
         source: {
           light: `${environment.assetsPath}/${icondir}/light/${pie}.png`,
-          dark: `${environment.assetsPath}/${icondir}/dark/${pie}.png`
-        }
+          dark: `${environment.assetsPath}/${icondir}/dark/${pie}.png`,
+        },
       }}
       icon={icon(item)}
       keywords={[subtitle]}
