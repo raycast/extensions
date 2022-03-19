@@ -78,7 +78,7 @@ export default function Command() {
     (() => {
       setQuery("");
       setSearchResults(undefined);
-      setIsLoadingVueVersion(false)
+      setIsLoadingVueVersion(false);
     })();
   }, [vueVersion]);
 
@@ -153,18 +153,21 @@ export default function Command() {
     items,
   });
 
-  if (! vueVersion) {
+  if (!vueVersion) {
     return (
-        <List isLoading={isLoadingVueVersion} searchBarAccessory={
+      <List
+        isLoading={isLoadingVueVersion}
+        searchBarAccessory={
           <List.Dropdown tooltip="Select version" onChange={onVersionChange} id={LSKeys.VueVersion} storeValue={true}>
             <List.Dropdown.Section title="Select version">
               {vueVersions.map((version, index) => (
-                  <List.Dropdown.Item title={version} value={version} key={index}/>
+                <List.Dropdown.Item title={version} value={version} key={index} />
               ))}
             </List.Dropdown.Section>
           </List.Dropdown>
-        }/>
-    )
+        }
+      />
+    );
   }
 
   return (
@@ -175,12 +178,7 @@ export default function Command() {
       searchText={query}
       onSearchTextChange={onSearchTextChange}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select version"
-          onChange={onVersionChange}
-          id={LSKeys.VueVersion}
-          storeValue={true}
-        >
+        <List.Dropdown tooltip="Select version" onChange={onVersionChange} id={LSKeys.VueVersion} storeValue={true}>
           <List.Dropdown.Section title="Select version">
             {vueVersions.map((version, index) => (
               <List.Dropdown.Item title={version} value={version} key={index} />
