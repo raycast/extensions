@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action } from "@raycast/api";
+import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import Parser from "rss-parser";
 
 export function StoryListItem(props: { item: Parser.Item; index: number }) {
@@ -11,7 +11,8 @@ export function StoryListItem(props: { item: Parser.Item; index: number }) {
       icon={icon}
       title={props.item.title ?? "No title"}
       subtitle={props.item.creator}
-      accessoryTitle={`👍  ${points}    💬  ${comments}`}
+      accessoryIcon={Icon.Bubble}
+      accessoryTitle={`${comments}    👍  ${points}`}
       actions={<Actions item={props.item} />}
     />
   );
