@@ -1,12 +1,23 @@
 import useSWR from "swr";
 import { fetchBookmarks, sendAction } from "./api";
-import { Bookmark } from "./types";
+import { Bookmark, ReadState } from "./types";
 import { showToast, Toast } from "@raycast/api";
 import { useEffect } from "react";
 import { HTTPError } from "got";
 
-export function useBookmarks() {
-  const { data, error, isValidating, mutate } = useSWR<Array<Bookmark>, HTTPError>("v3/get", fetchBookmarks);
+interface UseBookmarksOptions {
+  readState: ReadState;
+}
+
+export function useBookmarks({ readState }: UseBookmarksOptions) {
+  const {
+    data,
+    error,
+    isValidating,
+    mutate
+  } = useSWR<Array<Bookmark>, HTTPError>(["v3/get", readState], async (url, readState) => {
+    return fetchBookmarks({ state: readState });
+  });
 
   useEffect(() => {
     if (error) {

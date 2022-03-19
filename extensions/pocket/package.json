@@ -40,6 +40,28 @@
           "value": "pocket-website"
         }
       ]
+    },
+    {
+      "name": "defaultFilter",
+      "title": "Default Filter",
+      "type": "dropdown",
+      "required": false,
+      "default": "all",
+      "description": "Default filter for the list of bookmarks",
+      "data": [
+        {
+          "title": "All Bookmarks",
+          "value": "all"
+        },
+        {
+          "title": "Unread",
+          "value": "unread"
+        },
+        {
+          "title": "Archived",
+          "value": "archive"
+        }
+      ]
     }
   ],
   "categories": [

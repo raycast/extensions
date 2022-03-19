@@ -1,13 +1,39 @@
 import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useBookmarks } from "./utils/hooks";
+import { useState } from "react";
+import { ReadState } from "./utils/types";
 
 const preferences = getPreferenceValues();
 
 export default function Search() {
-  const { bookmarks, loading, toggleFavorite, refreshBookmarks, archiveBookmark, deleteBookmark } = useBookmarks();
+  const [readState, setReadState] = useState(preferences.defaultFilter);
+  const {
+    bookmarks,
+    loading,
+    toggleFavorite,
+    refreshBookmarks,
+    archiveBookmark,
+    deleteBookmark
+  } = useBookmarks({ readState });
 
   return (
-    <List throttle isLoading={loading} searchBarPlaceholder="Filter bookmarks by title...">
+    <List
+      throttle
+      isLoading={loading}
+      searchBarPlaceholder="Filter bookmarks by title..."
+      searchBarAccessory={
+        <List.Dropdown
+          storeValue
+          defaultValue={readState}
+          onChange={(readState) => setReadState(readState as ReadState)}
+          tooltip="Filter Bookmarks"
+        >
+          <List.Dropdown.Item title="All Bookmarks" value={ReadState.All} />
+          <List.Dropdown.Item title="Unread" value={ReadState.Unread} />
+          <List.Dropdown.Item title="Archived" value={ReadState.Archive} />
+        </List.Dropdown>
+      }
+    >
       {bookmarks.map((bookmark) => (
         <List.Item
           key={bookmark.id}
