@@ -7,14 +7,9 @@ const preferences = getPreferenceValues();
 
 export default function Search() {
   const [readState, setReadState] = useState(preferences.defaultFilter);
-  const {
-    bookmarks,
-    loading,
-    toggleFavorite,
-    refreshBookmarks,
-    archiveBookmark,
-    deleteBookmark
-  } = useBookmarks({ readState });
+  const { bookmarks, loading, toggleFavorite, refreshBookmarks, archiveBookmark, deleteBookmark } = useBookmarks({
+    readState,
+  });
 
   return (
     <List

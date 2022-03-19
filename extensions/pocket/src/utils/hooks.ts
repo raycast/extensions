@@ -10,14 +10,12 @@ interface UseBookmarksOptions {
 }
 
 export function useBookmarks({ readState }: UseBookmarksOptions) {
-  const {
-    data,
-    error,
-    isValidating,
-    mutate
-  } = useSWR<Array<Bookmark>, HTTPError>(["v3/get", readState], async (url, readState) => {
-    return fetchBookmarks({ state: readState });
-  });
+  const { data, error, isValidating, mutate } = useSWR<Array<Bookmark>, HTTPError>(
+    ["v3/get", readState],
+    async (url, readState) => {
+      return fetchBookmarks({ state: readState });
+    }
+  );
 
   useEffect(() => {
     if (error) {
@@ -33,7 +31,7 @@ export function useBookmarks({ readState }: UseBookmarksOptions) {
     const bookmark = data?.find((bookmark) => bookmark.id === id);
     const toast = new Toast({
       title: bookmark?.favorite ? "Removing from favorites" : "Adding to favorites",
-      style: Toast.Style.Animated
+      style: Toast.Style.Animated,
     });
     toast.show();
     await sendAction({ id, action: bookmark?.favorite ? "unfavorite" : "favorite" });
@@ -47,7 +45,7 @@ export function useBookmarks({ readState }: UseBookmarksOptions) {
     const bookmark = data?.find((bookmark) => bookmark.id === id);
     const toast = new Toast({
       title: "Deleting bookmark",
-      style: Toast.Style.Animated
+      style: Toast.Style.Animated,
     });
     toast.show();
     await sendAction({ id, action: "delete" });
@@ -61,7 +59,7 @@ export function useBookmarks({ readState }: UseBookmarksOptions) {
     const bookmark = data?.find((bookmark) => bookmark.id === id);
     const toast = new Toast({
       title: "Archiving bookmark",
-      style: Toast.Style.Animated
+      style: Toast.Style.Animated,
     });
     toast.show();
     await sendAction({ id, action: "archive" });
@@ -77,6 +75,6 @@ export function useBookmarks({ readState }: UseBookmarksOptions) {
     refreshBookmarks: mutate,
     toggleFavorite,
     deleteBookmark,
-    archiveBookmark
+    archiveBookmark,
   };
 }
