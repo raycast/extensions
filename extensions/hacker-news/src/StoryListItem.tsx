@@ -12,7 +12,7 @@ export function StoryListItem(props: { item: Parser.Item; index: number }) {
       title={props.item.title ?? "No title"}
       subtitle={props.item.creator}
       accessoryIcon={Icon.Bubble}
-      accessoryTitle={`${comments}    👍  ${points}`}
+      accessoryTitle={`${comments}    👍 ${points}`}
       actions={<Actions item={props.item} />}
     />
   );
