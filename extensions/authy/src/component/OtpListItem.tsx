@@ -1,12 +1,4 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  environment,
-  getPreferenceValues,
-  Icon,
-  List,
-  PasteAction,
-} from "@raycast/api";
+import { ActionPanel, environment, getPreferenceValues, Icon, List, Action, popToRoot } from "@raycast/api";
 import { icondir } from "../constants";
 import { icon } from "../util/icon";
 import { compare } from "../util/compare";
@@ -15,17 +7,17 @@ const { primaryActionIsCopy } = getPreferenceValues<{ primaryActionIsCopy: boole
 
 function PrimaryAction({ pin }: { pin: string }) {
   return primaryActionIsCopy ? (
-    <CopyToClipboardAction title="Copy OTP" content={pin} />
+    <Action.CopyToClipboard title="Copy OTP" content={pin} onCopy={() => popToRoot()} />
   ) : (
-    <PasteAction title="Output OTP" content={pin} />
+    <Action.Paste title="Output OTP" content={pin} onPaste={() => popToRoot()} />
   );
 }
 
 function SecondaryAction({ pin }: { pin: string }) {
   return primaryActionIsCopy ? (
-    <PasteAction title="Output OTP" content={pin} />
+    <Action.Paste title="Output OTP" content={pin} onPaste={() => popToRoot()} />
   ) : (
-    <CopyToClipboardAction title="Copy OTP" content={pin} />
+    <Action.CopyToClipboard title="Copy OTP" content={pin} onCopy={() => popToRoot()} />
   );
 }
 
@@ -60,8 +52,8 @@ export default function OtpListItem({ item, basis, timeLeft, refresh }: OtpListI
       accessoryIcon={{
         source: {
           light: `${environment.assetsPath}/${icondir}/light/${pie}.png`,
-          dark: `${environment.assetsPath}/${icondir}/dark/${pie}.png`,
-        },
+          dark: `${environment.assetsPath}/${icondir}/dark/${pie}.png`
+        }
       }}
       icon={icon(item)}
       keywords={[subtitle]}
@@ -69,7 +61,7 @@ export default function OtpListItem({ item, basis, timeLeft, refresh }: OtpListI
         <ActionPanel>
           <PrimaryAction pin={otp ?? ""} />
           <SecondaryAction pin={otp ?? ""} />
-          <ActionPanel.Item
+          <Action
             title={"Sync"}
             icon={Icon.ArrowClockwise}
             shortcut={{ modifiers: ["cmd"], key: "r" }}

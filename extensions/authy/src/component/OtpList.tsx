@@ -1,4 +1,4 @@
-import { getPreferenceValues, List, popToRoot, showToast, ToastStyle } from "@raycast/api";
+import { getPreferenceValues, List, popToRoot, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { addToCache, APPS_KEY, DEVICE_ID, getFromCache, SECRET_SEED, SERVICES_KEY } from "../cache";
 import { AuthyApp, Services } from "../client/dto";
@@ -24,7 +24,11 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
   });
 
   async function refresh(): Promise<void> {
-    const toast = await showToast(ToastStyle.Animated, "Authy", "Refreshing");
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Authy",
+      message: "Refreshing",
+    });
     await toast.show();
     setState({ apps: [], services: [] });
     try {
@@ -39,7 +43,11 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
       await addToCache(SERVICES_KEY, services);
     } catch (error) {
       if (error instanceof Error) {
-        await showToast(ToastStyle.Failure, "Authy", error.message);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Authy",
+          message: error.message,
+        });
         await popToRoot();
       } else {
         throw error;
@@ -47,7 +55,11 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
     }
     await loadData();
     await toast.hide();
-    await showToast(ToastStyle.Success, "Authy", "Data was successful refreshed");
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Authy",
+      message: "Data has been synced",
+    });
   }
 
   async function loadData(): Promise<void> {
@@ -92,7 +104,11 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
       });
     } catch (error) {
       if (error instanceof Error) {
-        await showToast(ToastStyle.Failure, "Authy", error.message);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Authy",
+          message: error.message,
+        });
       } else {
         throw error;
       }
