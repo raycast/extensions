@@ -5,6 +5,9 @@
   "description": "Read the latest stories of Hacker News.",
   "icon": "icon.png",
   "author": "thomas",
+  "categories": [
+    "News"
+  ],
   "contributors": [
     "sxn"
   ],
