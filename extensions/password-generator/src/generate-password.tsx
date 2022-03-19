@@ -1,5 +1,14 @@
 import { useState, Fragment } from "react";
-import { ActionPanel, Action, Form, SubmitFormAction, Detail, copyTextToClipboard, showToast, ToastStyle } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Form,
+  SubmitFormAction,
+  Detail,
+  copyTextToClipboard,
+  showToast,
+  ToastStyle,
+} from "@raycast/api";
 
 import { generatePassword } from "./helpers/helpers";
 
@@ -22,7 +31,7 @@ export default function Command() {
 
     if (Number.isFinite(lengthNumber) && lengthNumber > 4 && lengthNumber < 65) {
       const generatedPassword = generatePassword(lengthNumber, useNumbers, useChars);
-    //   console.log("generatedPassword", generatedPassword);
+      //   console.log("generatedPassword", generatedPassword);
       setPassword(generatedPassword);
       values = {};
       copyTextToClipboard(generatedPassword);
@@ -63,13 +72,11 @@ export default function Command() {
           <Detail
             markdown={`### Generated Password copied to clipboard!`}
             actions={
-                <ActionPanel>
-                    <Action.CopyToClipboard
-                    content={password}
-                  />
-                </ActionPanel>
+              <ActionPanel>
+                <Action.CopyToClipboard content={password} />
+              </ActionPanel>
             }
-            />
+          />
         </Fragment>
       )}
       {error && (
