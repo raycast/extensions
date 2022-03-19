@@ -41,7 +41,7 @@ export function UnlockForm(props: {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Unlock" onSubmit={onSubmit} />
+          <Action.SubmitForm title="Unlock" onSubmit={onSubmit} shortcut={{ key: "enter", modifiers: [] }} />
         </ActionPanel>
       }
     >
