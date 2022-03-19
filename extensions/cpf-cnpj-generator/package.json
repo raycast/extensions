@@ -26,6 +26,15 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "pasteToApplication",
+      "type": "checkbox",
+      "required": false,
+      "label": "Paste to frontmost Application",
+      "description": "Copy the content to the Clipboard and also paste to the frontmost application"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.28.0"
   },

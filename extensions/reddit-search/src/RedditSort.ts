@@ -21,4 +21,8 @@ export const comments = {
   name: "Comments",
 } as Sort;
 
-export default { relevance, hot, top, latest, comments };
+export const allSortOrders = [relevance, hot, top, latest, comments];
+
+export const getSortFromValue = (sortValue: string) => allSortOrders.find((x) => x.sortValue === sortValue) as Sort;
+
+export default { relevance, hot, top, latest, comments, allSortOrders, getSortFromValue };

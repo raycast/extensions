@@ -92,7 +92,7 @@ ${markdown}
 }
 
 function formatConflicts(formula: Formula): string {
-  if (!formula.conflicts_with) {
+  if (!formula.conflicts_with || formula.conflicts_with.length == 0) {
     return "";
   }
 

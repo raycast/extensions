@@ -5,6 +5,9 @@
   "description": "Search, open or edit your 1Password 7 passwords from Raycast",
   "icon": "1password-icon.png",
   "author": "khasbilegt",
+  "contributors": [
+    "thomas"
+  ],
   "license": "MIT",
   "commands": [
     {
