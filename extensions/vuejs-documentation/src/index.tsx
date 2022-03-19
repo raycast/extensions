@@ -4,6 +4,7 @@ import algoliasearch from "algoliasearch/lite";
 import striptags from "striptags";
 import groupBy from "lodash.groupby";
 import { DocumentationList } from "./documentation_list";
+import { VersionDropdown } from "./version_dropdown";
 const APPID = "ML0LEBN7FQ";
 const APIKEY = "f49cbd92a74532cc55cfbffa5e5a7d01";
 const INDEX = "vuejs";
@@ -158,13 +159,7 @@ export default function Command() {
       <List
         isLoading={isLoadingVueVersion}
         searchBarAccessory={
-          <List.Dropdown tooltip="Select version" onChange={onVersionChange} id={LSKeys.VueVersion} storeValue={true}>
-            <List.Dropdown.Section title="Select version">
-              {vueVersions.map((version, index) => (
-                <List.Dropdown.Item title={version} value={version} key={index} />
-              ))}
-            </List.Dropdown.Section>
-          </List.Dropdown>
+          <VersionDropdown id={LSKeys.VueVersion} vueVersions={vueVersions} onVersionChange={onVersionChange} />
         }
       />
     );
@@ -178,13 +173,7 @@ export default function Command() {
       searchText={query}
       onSearchTextChange={onSearchTextChange}
       searchBarAccessory={
-        <List.Dropdown tooltip="Select version" onChange={onVersionChange} id={LSKeys.VueVersion} storeValue={true}>
-          <List.Dropdown.Section title="Select version">
-            {vueVersions.map((version, index) => (
-              <List.Dropdown.Item title={version} value={version} key={index} />
-            ))}
-          </List.Dropdown.Section>
-        </List.Dropdown>
+        <VersionDropdown id={LSKeys.VueVersion} vueVersions={vueVersions} onVersionChange={onVersionChange} />
       }
     >
       {searchResults?.map((hit: SectionHit, k: number) => (
