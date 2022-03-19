@@ -2,21 +2,21 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "password-generator",
   "title": "Password Generator",
-  "description": "Generates a password from 5–32 characters with options for case, special characters, and more",
+  "description": "Generates a password from 5–64 characters with options for case, special characters, and more",
   "icon": "password-generator-icon.png",
   "author": "joshuaiz",
+  "categories": ["Productivity", "Developer Tools"],
   "license": "MIT",
   "commands": [
     {
       "name": "generate-password",
       "title": "Generate Password",
-      "subtitle": "Quickly generate a password with options",
       "description": "Generates a password from 5–32 characters in length with options for case, numbers, special characters, and more.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0",
+    "@raycast/api": "^1.30.2",
     "prettier": "^2.5.1"
   },
   "devDependencies": {
