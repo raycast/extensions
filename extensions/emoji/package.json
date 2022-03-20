@@ -6,6 +6,10 @@
   "icon": "command-icon.png",
   "author": "FezVrasta",
   "license": "MIT",
+  "categories": [
+    "System",
+    "Media"
+  ],
   "commands": [
     {
       "name": "emoji",
@@ -64,8 +68,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.30.3",
+    "emojilib": "^3.0.6",
+    "fuse.js": "^6.5.3",
     "generate-emoji-list": "^1.0.1",
+    "raycast-toolkit": "^1.0.2",
     "react": "^17.0.2"
   },
   "devDependencies": {
