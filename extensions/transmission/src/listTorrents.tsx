@@ -92,10 +92,11 @@ export default function TorrentList() {
     [sortedTorrents, didLoad, search, statusFilter]
   );
 
-  const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [expanded, setExpanded] = useState<number | null>(null);
+
   useEffect(() => {
     if (filteredTorrents.length > 0) return;
-    setIsShowingDetail(false);
+    setExpanded(null);
   }, [filteredTorrents.length]);
 
   useEffect(() => {
@@ -120,10 +121,13 @@ export default function TorrentList() {
 
   return (
     <List
-      isShowingDetail={isShowingDetail}
+      isShowingDetail={expanded != null}
       isLoading={!didLoad || loadingStatusFilter}
       searchBarPlaceholder="Filter torrents by name..."
       onSearchTextChange={setSearch}
+      onSelectionChange={(value) => {
+        setTimeout(() => setExpanded((expanded) => (expanded != null ? Number(value) : null)), 100);
+      }}
       searchBarAccessory={
         <List.Dropdown
           value={statusFilter}
@@ -147,8 +151,10 @@ export default function TorrentList() {
             rateUpload={paddedRateUploads[index]}
             percentDone={paddedPercentDones[index]}
             sessionStats={sessionStats}
-            isShowingDetail={isShowingDetail}
-            onToggleDetail={() => setIsShowingDetail((value) => !value)}
+            isShowingDetail={expanded != null}
+            onToggleDetail={() => {
+              setExpanded((expanded) => (expanded === torrent.id ? null : torrent.id));
+            }}
             onStop={async (torrent) => {
               try {
                 await mutateTorrent.stop(torrent.id);
@@ -234,7 +240,10 @@ function TorrentListItem({
     .join(" - ");
 
   const downloadStats = [`↓ ${rateDownload}`, " - ", `↑ ${rateUpload}`, " - ", percentDone].join(" ");
-  const details = useAsync(() => renderDetails(torrent, downloadStats), [torrent, downloadStats]);
+  const details = useAsync(
+    () => (isShowingDetail ? renderDetails(torrent, downloadStats) : Promise.resolve(null)),
+    [isShowingDetail, torrent, downloadStats]
+  );
 
   const files = torrent.files.filter((file) => existsSync(path.join(torrent.downloadDir, file.name)));
 
