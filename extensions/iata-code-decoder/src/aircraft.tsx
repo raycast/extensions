@@ -113,7 +113,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<A
   const params = new URLSearchParams();
   params.append("query", searchText);
 
-  const response = await fetch("https://timrogers-air-api.herokuapp.com/aircraft" + "?" + params.toString(), {
+  const response = await fetch("https://iata-code-decoder-api.herokuapp.com/aircraft" + "?" + params.toString(), {
     method: "get",
     signal: signal,
   });
