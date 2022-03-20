@@ -95,7 +95,13 @@ export default function Command() {
             }}
             title={getFlag(item.Circuit.Location.country) + " " + item.raceName + " " + item.season}
             subtitle={item.Circuit.Location.locality + ", " + item.Circuit.Location.country}
-            accessoryTitle={item.date}
+            accessoryTitle={new Date(item.date + "T" + item.time).toLocaleString([], {
+              year: "numeric",
+              month: "2-digit",
+              day: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+            })}
             actions={
               <ActionPanel title={item.raceName}>
                 {parseInt(item.round) < state.selectedRound! && (
