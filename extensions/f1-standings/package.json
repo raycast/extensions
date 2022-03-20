@@ -8,6 +8,9 @@
   "contributors": [
     "sxn"
   ],
+  "categories": [
+    "Fun"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -52,6 +55,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
     "prettier": "^2.5.1",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"

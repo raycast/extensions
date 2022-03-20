@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActionPanel, Action, List, Color, showToast, Toast, popToRoot } from "@raycast/api";
 import fetch from "node-fetch";
 import { ConstructorStanding } from "./types";
@@ -18,18 +18,24 @@ export default function Command() {
     items: [],
     isLoading: true,
   });
+  const cancelRef = useRef<AbortController | null>(null);
   const seasons = useSeasons();
   useEffect(() => {
     if (!state.season) {
       return;
     }
     async function fetchConstructors() {
+      cancelRef.current?.abort();
+      cancelRef.current = new AbortController();
       setState((previous) => ({
         ...previous,
         isLoading: true,
       }));
       try {
-        const res = await fetch(`https://ergast.com/api/f1/${state.season}/constructorStandings.json`);
+        const res = await fetch(`https://ergast.com/api/f1/${state.season}/constructorStandings.json`, {
+          method: "get",
+          signal: cancelRef.current.signal,
+        });
         const data = (await res.json()) as any;
         setState((previous) => ({
           ...previous,
@@ -50,9 +56,14 @@ export default function Command() {
         }));
       }
     }
-
     fetchConstructors();
-  }, [state.season]);
+  }, [cancelRef, state.season]);
+
+  useEffect(() => {
+    return () => {
+      cancelRef?.current?.abort();
+    };
+  }, []);
 
   return (
     <List
