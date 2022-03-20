@@ -1,13 +1,25 @@
 import { useEffect, useState } from "react";
 import { List, showToast, Toast } from "@raycast/api";
 import Parser from "rss-parser";
-const parser = new Parser();
-
+import { startCase } from "lodash";
 import { StoryListItem } from "./StoryListItem";
 
 enum Topic {
-  Frontpage = "frontpage",
+  Active = "active",
+  AskHN = "ask",
+  Best = "best",
+  BestComments = "bestcomments",
+  Classic = "classic",
+  FrontPage = "frontpage",
+  Invited = "invited",
+  Jobs = "jobs",
+  Launches = "launches",
+  NewComments = "newcomments",
+  Newest = "newest",
+  Polls = "polls",
+  Pool = "pool",
   ShowHN = "show",
+  WhoIsHiring = "whoishiring",
 }
 
 interface State {
@@ -16,6 +28,8 @@ interface State {
   topic: Topic | null;
   error?: Error;
 }
+
+const parser = new Parser();
 
 export default function Command() {
   const [state, setState] = useState<State>({ items: [], isLoading: true, topic: null });
@@ -61,8 +75,9 @@ export default function Command() {
           storeValue
           onChange={(newValue) => setState((previous) => ({ ...previous, topic: newValue as Topic }))}
         >
-          <List.Dropdown.Item title="Front Page" value={Topic.Frontpage} />
-          <List.Dropdown.Item title="Show HN" value={Topic.ShowHN} />
+          {Object.entries(Topic).map(([name, value]) => (
+            <List.Dropdown.Item key={value} title={startCase(name)} value={value} />
+          ))}
         </List.Dropdown>
       }
     >

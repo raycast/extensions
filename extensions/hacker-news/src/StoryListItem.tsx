@@ -6,13 +6,26 @@ export function StoryListItem(props: { item: Parser.Item; index: number }) {
   const points = getPoints(props.item);
   const comments = getComments(props.item);
 
+  const hasComments = typeof comments !== "undefined";
+  const hasPoints = typeof points !== "undefined";
+  const getAccessoryTitle = () => {
+    const parts = [];
+    if (hasComments) {
+      parts.push(`${comments}`);
+    }
+    if (hasPoints) {
+      parts.push(`👍 ${points}`);
+    }
+    return parts.join("    ");
+  };
+
   return (
     <List.Item
       icon={icon}
       title={props.item.title ?? "No title"}
       subtitle={props.item.creator}
-      accessoryIcon={Icon.Bubble}
-      accessoryTitle={`${comments}    👍 ${points}`}
+      accessoryIcon={hasComments ? Icon.Bubble : undefined}
+      accessoryTitle={getAccessoryTitle()}
       actions={<Actions item={props.item} />}
     />
   );
