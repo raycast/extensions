@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "image-converter",
   "title": "Image Converter",
-  "description": "Convert images to different formats.",
+  "description": "Convert images to different formats. PNG images to JPG, or JPG images to PNG.",
   "categories": [
     "Media",
     "Design Tools"
