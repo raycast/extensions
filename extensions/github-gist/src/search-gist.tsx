@@ -22,6 +22,7 @@ export default function main() {
   useEffect(() => {
     async function _fetchBuildInShortcut() {
       try {
+        setGists([]);
         const _gists = await requestGist(route);
         setGists(_gists);
       } catch (e) {
@@ -35,6 +36,7 @@ export default function main() {
   useEffect(() => {
     async function _fetchBuildInShortcut() {
       if (!isEmpty(rawURL)) {
+        setGistFileContent("");
         const { data } = await octokit.request(`GET ${rawURL}`);
         setGistFileContent(data);
       }
@@ -46,7 +48,7 @@ export default function main() {
   return (
     <List
       isShowingDetail={preference.detail}
-      isLoading={gists.length == 0}
+      isLoading={gists.length === 0}
       searchBarPlaceholder={"Search Gist"}
       onSelectionChange={(id) => {
         if (typeof id !== "undefined" && id != null) {
@@ -78,7 +80,12 @@ export default function main() {
                   icon={Icon.TextDocument}
                   title={gistFile.filename}
                   accessoryTitle={gistFile.language}
-                  detail={<List.Item.Detail markdown={`\`\`\`\n${gistFileContent}`} />}
+                  detail={
+                    <List.Item.Detail
+                      isLoading={gistFileContent.length === 0}
+                      markdown={`\`\`\`\n${gistFileContent}`}
+                    />
+                  }
                   actions={
                     <ActionPanel>
                       <Action
@@ -113,7 +120,7 @@ export default function main() {
                         icon={Icon.Globe}
                         shortcut={{ modifiers: ["cmd"], key: "o" }}
                         onAction={async () => {
-                          await open(gistArray[gistIndex].html_url, "");
+                          await open(gistArray[gistIndex].html_url);
                           await showHUD("Open in Browser");
                         }}
                       />

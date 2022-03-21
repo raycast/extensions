@@ -19,20 +19,38 @@ This extension brings GitHub Gist support to Raycast through the personal access
 
 > Future updates to this extension will offer more functionality that may require additional scopes be defined in this token.
 
-## Gist Tag
+## Create Gist
 
-- My Gists
-- My Starred
-- All Public Gists
+Automatically get the selected text or clipboard and generate a gistfile, you can also add additional gistfiles and finally create a gist.
+Once created successfully, you can choose to copy the link or open it in your browser.
 
-## Action
+## Search Gist
 
-- Copy to Clipboard
-- Paste to Active App
-- Copy Gist Link
-- Open in Browser
-- Star Gist *(Only in MyGists)*
-- Delete Gist *(Only in MyGists)*
-- Unstar Gist *(Only in My Starred)*
-- Star Gist *(Only in All Public Gists)*
-- Clone Gist
+Search and display gists from GitHub.
+
+- Gist Tag
+
+  - My Gists
+
+  - My Starred
+
+  - All Public Gists
+
+
+- Action
+
+  - Copy to Clipboard
+
+  - Paste to Active App
+
+  - Copy Gist Link
+
+  - Open in Browser
+  - Star Gist *(Only in MyGists)*
+  - Delete Gist *(Only in MyGists)*
+
+  - Unstar Gist *(Only in My Starred)*
+
+  - Star Gist *(Only in All Public Gists)*
+
+  - Clone Gist

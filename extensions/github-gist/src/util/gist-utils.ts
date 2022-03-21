@@ -3,6 +3,11 @@ import { isEmpty, preference } from "./utils";
 
 export interface GistFile {
   filename: string;
+  content: string;
+}
+
+export interface GistItem {
+  filename: string;
   language: string;
   raw_url: string;
 }
@@ -10,7 +15,7 @@ export interface Gist {
   gist_id: string;
   description: string;
   html_url: string;
-  file: GistFile[];
+  file: GistItem[];
 }
 
 export enum GITHUB_GISTS {
@@ -73,4 +78,23 @@ export async function deleteGist(gist_id: string) {
   return await octokit.request(`DELETE /gists/${gist_id}`, {
     gist_id: gist_id,
   });
+}
+
+export async function createGist(description: string, isPublic = false, files: { [p: string]: { content: string } }) {
+  return await octokit.request("POST /gists", {
+    description: description,
+    public: isPublic,
+    files: files,
+  });
+}
+
+export function checkGistFile(gistFiles: GistFile[]) {
+  const isValid = { valid: true, contentIndex: "" };
+  gistFiles.forEach((value, index) => {
+    if (isEmpty(value.content)) {
+      isValid.valid = false;
+      isValid.contentIndex = isValid.contentIndex + " " + (index + 1);
+    }
+  });
+  return isValid;
 }
