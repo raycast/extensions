@@ -12,7 +12,7 @@ export interface Preferences {
 
 export interface OnePassword {
   cliFolder: string;
-  cliRequiredMessage: string;
+  installationGuide: string;
   openAndFill: (metaItem: OnePasswordMetaItem) => Promise<void>;
   edit: (metaItem: OnePasswordMetaItem) => Promise<void>;
   view: (metaItem: OnePasswordMetaItem) => Promise<void>;

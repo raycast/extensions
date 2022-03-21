@@ -26,8 +26,4 @@ switch (preferences.appVersion) {
     break;
 }
 
-export const cliFolder = onePassword.cliFolder;
-export const cliRequiredMessage = onePassword.cliRequiredMessage;
-export const openAndFill = onePassword.openAndFill;
-export const edit = onePassword.edit;
-export const view = onePassword.view;
+export default onePassword;

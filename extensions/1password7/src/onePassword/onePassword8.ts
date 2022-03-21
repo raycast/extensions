@@ -5,7 +5,7 @@ import { OnePassword } from "./types";
 const onePassword: OnePassword = {
   // This is the default location of `opbookmarks`. @see https://github.com/dteare/opbookmarks
   cliFolder: `${homedir()}/.config/op/bookmarks`,
-  cliRequiredMessage: `
+  installationGuide: `
 # Enable 3rd party app integrations to use
 To use this extension please install the 1Password CLI and run \`opbookmarks\`.
 1. Make sure you using 1Password 8

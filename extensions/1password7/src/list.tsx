@@ -4,7 +4,7 @@ import fs from "fs";
 import OnePasswordMetaItem from "./OnePasswordMetaItem.dto";
 import { useEffect, useState } from "react";
 import OnePasswordMetaItemsCategory from "./OnePasswordMetaItemsCategory.dto";
-import { cliFolder, cliRequiredMessage, edit, openAndFill, view } from "./onePassword";
+import onePassword from "./onePassword";
 
 const CACHE_DIR = environment.supportPath;
 const CACHE_FILE = `${CACHE_DIR}/cache.json`;
@@ -14,14 +14,14 @@ type ActionProps = {
 };
 
 async function getPasswords(): Promise<OnePasswordMetaItem[] | void> {
-  if (fs.existsSync(cliFolder)) {
+  if (fs.existsSync(onePassword.cliFolder)) {
     try {
       const cache = getCache();
 
       if (Array.isArray(cache)) {
         return Promise.resolve(cache);
       } else {
-        const metaItems = await fg([`${cliFolder}/**/*.onepassword-item-metadata`], {
+        const metaItems = await fg([`${onePassword.cliFolder}/**/*.onepassword-item-metadata`], {
           onlyFiles: true,
           deep: 2,
         });
@@ -48,10 +48,10 @@ export default function Command() {
     getPasswords().then((value) => setOnePasswordMetaItems(value as OnePasswordMetaItem[]));
   }, [setOnePasswordMetaItems]);
 
-  return fs.existsSync(cliFolder) ? (
+  return fs.existsSync(onePassword.cliFolder) ? (
     <PasswordList onePasswordMetaItems={onePasswordMetaItems} />
   ) : (
-    <Detail markdown={cliRequiredMessage} />
+    <Detail markdown={onePassword.installationGuide} />
   );
 }
 
@@ -162,7 +162,7 @@ const OpenAndFillAction = ({ onePasswordMetaItem }: ActionProps) => {
       title="Open and Fill"
       onAction={async () => {
         try {
-          await openAndFill(onePasswordMetaItem);
+          await onePassword.openAndFill(onePasswordMetaItem);
           await popToRoot({ clearSearchBar: true });
         } catch (error) {
           await showToast(
@@ -183,7 +183,7 @@ const ViewAction = ({ onePasswordMetaItem }: ActionProps) => {
       title="View"
       onAction={async () => {
         try {
-          await view(onePasswordMetaItem);
+          await onePassword.view(onePasswordMetaItem);
         } catch (error) {
           await showToast(ToastStyle.Failure, "Error", "Could not view item");
         }
@@ -199,7 +199,7 @@ const EditAction = ({ onePasswordMetaItem }: ActionProps) => {
       title="Edit"
       onAction={async () => {
         try {
-          await edit(onePasswordMetaItem);
+          await onePassword.edit(onePasswordMetaItem);
         } catch (error) {
           await showToast(ToastStyle.Failure, "Error", "Could not edit item");
         }
