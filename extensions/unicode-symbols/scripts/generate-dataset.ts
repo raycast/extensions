@@ -63,11 +63,12 @@ function getCharactersByCodeRange(startCode: number, endCode: number) {
   return characters;
 }
 
+// Some symbols don't have a proper name set in the unicode database.
+const unicodeToNameMap: Record<number, string> = { 63743: "APPLE LOGO" };
 const mapCodeToName = (char: Character): Character => {
-  const map: Record<number, string> = { 63743: "APPLE LOGO" };
   return {
     ...char,
-    name: map[char.code] || char.name,
+    name: unicodeToNameMap[char.code] || char.name,
   };
 };
 
