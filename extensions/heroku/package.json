@@ -28,9 +28,11 @@
   "dependencies": {
     "@raycast/api": "^1.30.3",
     "@youri-kane/heroku-client": "^0.1.5",
+    "gravatar": "^1.8.2",
     "swr": "^1.2.2"
   },
   "devDependencies": {
+    "@types/gravatar": "^1.8.3",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
