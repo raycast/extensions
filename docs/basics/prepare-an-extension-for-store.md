@@ -106,7 +106,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ### Screenshots
 
-![Screenshots will show in an extensions detail screen](<../.gitbook/assets/screenshots-example.png>)
+![Screenshots will show in an extensions detail screen](../.gitbook/assets/screenshots-example.png)
 
 * Screenshots are displayed in the metadata of an extension details screen, where users can click and browse through them to understand what your extension does in greater detail, before installing
 * You can add a maximum of six screenshots. We recommend adding at least three, so your extensions detail screen looks beautiful.
@@ -115,7 +115,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 * To add a screenshot to your extension metadata, simply create a new folder called `metadata` in your extension folder. Then, add all your images to the `metadata` folder using the specifications below, following the Do’s and Dont’s. We’ll handle the rest.
 
-![Extension folder structure with a metadata folder and screenshots](<../.gitbook/assets/folder-structure.png>)
+![Extension folder structure with a metadata folder and screenshots](../.gitbook/assets/folder-structure.png)
 
 #### Specifications
 
@@ -153,37 +153,43 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 
 * Make it easier for users to see exactly what notable changes have been made between each release of your extension with a `CHANGELOG.md` file in your extension metadata
   * To add Version History to your extension, add a `CHANGELOG.md` file to the root folder of your extension
-* See an extension files structure with [screenshots and a changelog file](prepare-an-extension-for-store.md#adding-screenshots)&#x20;
-* With each change, provide clear and descriptive information around the latest update, providing a title as a ## h2 header followed by ar date timestamp (YYYY-MM-DD)
+* See an extension files structure with [screenshots and a changelog file](prepare-an-extension-for-store.md#adding-screenshots)
+* With each change, provide clear and descriptive information around the latest update, providing a title as a h2 header followed by a date timestamp YYYY-MM-DD
+  * Make sure your change title is within square brackets
+  * Separate your title and date with a hyphen `-` and spaces either side of the hyphen
 * Below is an example of a changelog that follows the correct format
 
 ```markdown
 # Brew Changelog
 
-## Added a bunch of new feedback - (2022-01-17)
+## [Added a bunch of new feedback] - 2022-01-17
 - Improve reliability of `outdated` command
 - Add action to copy formula/cask name
 - Add cask name & tap to cask details
 - Add Toast action to cancel current action
 - Add Toast action to copy error log after failure
 
-## New Additions - (2022-12-13)
+## [New Additions] - 2022-12-13
 - Add greedy upgrade preference
 - Add `upgrade` command
 
-## Fixes & Bits - (2021-11-19)
+## [Fixes & Bits] - 2021-11-19
 - Improve discovery of brew prefix
 - Update Cask.installed correctly after installation
 - Fix installed state after uninstalling search result
 - Fix cache check after installing/uninstalling cask
 - Add uninstall action to outdated action panel
 
-## New Commands - (2021-11-04)
+## [New Commands] - 2021-11-04
 Add support for searching and managing casks
 
-## Added Brew - (2021-10-26)
+## [Added Brew] - 2021-10-26
 Initial version code
 ```
+
+{% hint style="info" %}
+You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you format your changelog correctly
+{% endhint %}
 
 ### Contributing to Existing Extensions vs Creating a New One
 
