@@ -3,8 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { GiphyFetch } from "@giphy/js-fetch-api";
 import type { GifsResult } from "@giphy/js-fetch-api";
+import type { IGif as GiphyGif } from "@giphy/js-types";
 
-import { mapGiphyResponse } from "../models/gif";
 import { getAPIKey, GIF_SERVICE } from "../preferences";
 
 import type { IGif } from "../models/gif";
@@ -56,4 +56,16 @@ export default function useGiphyAPI({ offset = 0 }) {
   }, []);
 
   return [results, isLoading, search] as const;
+}
+
+export function mapGiphyResponse(giphyResp: GiphyGif) {
+  return <IGif>{
+    id: giphyResp.id,
+    title: giphyResp.title,
+    url: giphyResp.url,
+    slug: giphyResp.slug,
+    preview_gif_url: giphyResp.images.preview_gif.url,
+    gif_url: giphyResp.images.fixed_height.url,
+    attribution: "poweredby_giphy.png",
+  };
 }

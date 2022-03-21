@@ -2,14 +2,14 @@ import { useEffect } from "react";
 import { List, showToast, Toast } from "@raycast/api";
 
 import { getShowPreview } from "./preferences";
-import useTenorAPI from "./hooks/useTenorAPI";
+import useFinerGifsClubAPI from "./hooks/useFinerGifsClubAPI";
 import { GifList } from "./components/GifList";
 
 import "./fetch-polyfill";
 
 export default function Command() {
   const showPreview = getShowPreview();
-  const [results, isLoading, search] = useTenorAPI({});
+  const [results, isLoading, search] = useFinerGifsClubAPI({});
 
   useEffect(() => {
     if (results?.error) {
@@ -25,7 +25,7 @@ export default function Command() {
     <List
       isLoading={isLoading}
       throttle={true}
-      searchBarPlaceholder="Search for gifs on Tenor..."
+      searchBarPlaceholder="Search quotes from The Office on The Finer Gifs Club..."
       onSearchTextChange={search}
       isShowingDetail={showPreview && results?.items?.length != 0}
     >

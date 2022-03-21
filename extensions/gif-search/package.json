@@ -15,7 +15,7 @@
       "preferences": [
         {
           "name": "giphy-apiKey",
-          "type": "textfield",
+          "type": "password",
           "required": true,
           "title": "Giphy API Key",
           "placeholder": "Giphy API Key",
@@ -31,13 +31,19 @@
       "preferences": [
         {
           "name": "tenor-apiKey",
-          "type": "textfield",
+          "type": "password",
           "required": true,
           "title": "Tenor API Key",
           "placeholder": "Tenor API Key",
           "description": "API Key used to perform searches on Tenor. You can get one for free at https://tenor.com/gifapi"
         }
       ]
+    },
+    {
+      "name": "finergifsclub",
+      "title": "Search The Finer Gifs Club",
+      "description": "Search quotes from The Office on TheFinerGifs.club",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -66,6 +72,10 @@
         {
           "title": "Copy Page URL to Clipboard",
           "value": "copyPageUrl"
+        },
+        {
+          "title": "Copy File to Clipboard",
+          "value": "copyFile"
         }
       ]
     }
@@ -73,7 +83,9 @@
   "dependencies": {
     "@giphy/js-fetch-api": "^4.1.2",
     "@raycast/api": "^1.30.0",
-    "node-fetch": "^3.2.1"
+    "node-fetch": "^3.2.1",
+    "run-applescript": "^6.0.0",
+    "tempy": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
