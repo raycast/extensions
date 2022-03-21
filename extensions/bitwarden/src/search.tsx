@@ -148,6 +148,17 @@ function ItemListItem(props: {
       actions={
         <ActionPanel>
           {item.login?.password ? <PasswordActions password={item.login.password} /> : null}
+          {item.login?.username ? (
+            <ActionPanel.Item
+              shortcut={{ modifiers: ["cmd"], key: "u" }}
+              title="Copy Username"
+              icon={Icon.Person}
+              onAction={() => {
+                Clipboard.copy(item.login?.username);
+                closeMainWindow({ clearRootSearch: true });
+              }}
+            />
+          ) : null}
           {item.login?.totp ? (
             <ActionPanel.Item
               shortcut={{ modifiers: ["cmd"], key: "t" }}
