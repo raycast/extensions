@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "heroku",
+  "title": "heroku",
+  "description": "Heroku extension for Raycast",
+  "icon": "command-icon.png",
+  "author": "Yukai",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "apps",
+      "title": "Show Apps",
+      "description": "Show your Apps",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "password",
+      "name": "apiKey",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Heroku API Key",
+      "link": "https://dashboard.heroku.com/account",
+      "placeholder": "Enter your Heroku API Key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.30.3",
+    "@youri-kane/heroku-client": "^0.1.5",
+    "swr": "^1.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
