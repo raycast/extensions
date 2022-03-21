@@ -13,11 +13,13 @@
   "commands": [{
       "name": "convertToPng",
       "title": "Convert an Image to PNG",
+      "description": "Take a JGP file from your clipboard and convert it to a PNG file.",
       "mode": "no-view"
     },
     {
       "name": "convertToJpg",
       "title": "Convert an Image to JPG",
+      "description": "Take a PNG file from your clipboard and convert it to a JPG file.",
       "mode": "no-view"
     }
   ],
