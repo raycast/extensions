@@ -191,8 +191,8 @@ const ViewAction = ({ onePasswordMetaItem }: ActionProps) => {
         } catch (error) {
           await showToast({
             style: Toast.Style.Failure,
-            title: "Error",
-            message: "Could not view item",
+            title: "Failed viewing item",
+            message: error instanceof Error ? error.message : undefined,
           });
         }
       }}
@@ -211,8 +211,8 @@ const EditAction = ({ onePasswordMetaItem }: ActionProps) => {
         } catch (error) {
           await showToast({
             style: Toast.Style.Failure,
-            title: "Error",
-            message: "Could not edit item",
+            title: "Failed editing item",
+            message: error instanceof Error ? error.message : undefined,
           });
         }
       }}
