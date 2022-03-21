@@ -14,7 +14,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "frontpage",
       "title": "Hacker News",
       "description": "Get the latest Hacker News stories.",
       "mode": "view"
