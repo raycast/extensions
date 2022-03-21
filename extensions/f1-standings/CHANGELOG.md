@@ -1,6 +1,6 @@
 # F1 Standings Changelog
 
-## [⌚ Display dates for races and sessions] - 2022-03-20
+## [⌚ Display time and date for races and sessions when available] - 2022-03-21
 
 - Show race dates
 - Open season-specific race URLs
