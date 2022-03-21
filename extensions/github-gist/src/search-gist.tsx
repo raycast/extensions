@@ -1,4 +1,15 @@
-import { List, ActionPanel, Action, Icon, Clipboard, open, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  Clipboard,
+  open,
+  showHUD,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   deleteGist,
@@ -11,6 +22,7 @@ import {
   unStarGist,
 } from "./util/gist-utils";
 import { isEmpty, preference } from "./util/utils";
+import CreateGist from "./create-gist";
 
 export default function main() {
   const [route, setRoute] = useState<string>("");
@@ -18,10 +30,12 @@ export default function main() {
   const [rawURL, setRawURL] = useState<string>("");
   const [gistFileContent, setGistFileContent] = useState<string>("");
   const [refresh, setRefresh] = useState<boolean>(false);
+  const { push } = useNavigation();
 
   useEffect(() => {
     async function _fetchBuildInShortcut() {
       try {
+        setGists([]);
         const _gists = await requestGist(route);
         setGists(_gists);
       } catch (e) {
@@ -35,6 +49,7 @@ export default function main() {
   useEffect(() => {
     async function _fetchBuildInShortcut() {
       if (!isEmpty(rawURL)) {
+        setGistFileContent("");
         const { data } = await octokit.request(`GET ${rawURL}`);
         setGistFileContent(data);
       }
@@ -46,7 +61,7 @@ export default function main() {
   return (
     <List
       isShowingDetail={preference.detail}
-      isLoading={gists.length == 0}
+      isLoading={gists.length === 0}
       searchBarPlaceholder={"Search Gist"}
       onSelectionChange={(id) => {
         if (typeof id !== "undefined" && id != null) {
@@ -77,26 +92,39 @@ export default function main() {
                   key={"gistFile" + gistIndex + gistFileIndex}
                   icon={Icon.TextDocument}
                   title={gistFile.filename}
-                  accessoryTitle={gistFile.language}
-                  detail={<List.Item.Detail markdown={`\`\`\`\n${gistFileContent}`} />}
+                  accessories={[{ text: gistFile.language }]}
+                  detail={
+                    <List.Item.Detail
+                      isLoading={gistFileContent.length === 0}
+                      markdown={`\`\`\`\n${gistFileContent}`}
+                    />
+                  }
                   actions={
                     <ActionPanel>
                       <Action
                         title={preference.primaryAction === "copy" ? "Copy to Clipboard" : "Paste to Active App"}
                         icon={preference.primaryAction === "copy" ? Icon.Clipboard : Icon.Window}
                         onAction={async () => {
-                          preference.primaryAction === "copy"
-                            ? await Clipboard.copy(gistFileContent)
-                            : await Clipboard.paste(gistFileContent);
+                          if (preference.primaryAction === "copy") {
+                            await Clipboard.copy(gistFileContent);
+                            await showToast(Toast.Style.Success, "Copy Gist to Clipboard");
+                          } else {
+                            await Clipboard.paste(gistFileContent);
+                            await showHUD("Paste to Active App");
+                          }
                         }}
                       />
                       <Action
                         title={preference.primaryAction === "copy" ? "Paste to Active App" : "Copy to Clipboard"}
                         icon={preference.primaryAction === "copy" ? Icon.Window : Icon.Clipboard}
                         onAction={async () => {
-                          preference.primaryAction === "copy"
-                            ? await Clipboard.paste(gistFileContent)
-                            : await Clipboard.copy(gistFileContent);
+                          if (preference.primaryAction === "copy") {
+                            await Clipboard.paste(gistFileContent);
+                            await showHUD("Paste to Active App");
+                          } else {
+                            await Clipboard.copy(gistFileContent);
+                            await showToast(Toast.Style.Success, "Copy Gist to Clipboard");
+                          }
                         }}
                       />
 
@@ -106,6 +134,7 @@ export default function main() {
                         shortcut={{ modifiers: ["cmd"], key: "l" }}
                         onAction={async () => {
                           await Clipboard.copy(gistArray[gistIndex].html_url);
+                          await showToast(Toast.Style.Success, "Copy Gist Link");
                         }}
                       />
                       <Action
@@ -113,8 +142,8 @@ export default function main() {
                         icon={Icon.Globe}
                         shortcut={{ modifiers: ["cmd"], key: "o" }}
                         onAction={async () => {
-                          await open(gistArray[gistIndex].html_url, "");
-                          await showHUD("Open in Browser");
+                          await open(gistArray[gistIndex].html_url);
+                          await showHUD("Open Gist in Browser");
                         }}
                       />
 
@@ -135,6 +164,14 @@ export default function main() {
                                       } else {
                                         await showToast(Toast.Style.Failure, "Star Gist Failure");
                                       }
+                                    }}
+                                  />
+                                  <Action
+                                    title={"Edit Gist"}
+                                    icon={Icon.Pencil}
+                                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                                    onAction={async () => {
+                                      push(<CreateGist gist={gistArray[gistIndex]} />);
                                     }}
                                   />
                                   <Action
