@@ -92,18 +92,26 @@ export default function main() {
                         title={preference.primaryAction === "copy" ? "Copy to Clipboard" : "Paste to Active App"}
                         icon={preference.primaryAction === "copy" ? Icon.Clipboard : Icon.Window}
                         onAction={async () => {
-                          preference.primaryAction === "copy"
-                            ? await Clipboard.copy(gistFileContent)
-                            : await Clipboard.paste(gistFileContent);
+                          if (preference.primaryAction === "copy") {
+                            await Clipboard.copy(gistFileContent);
+                            await showToast(Toast.Style.Success, "Copy Gist to Clipboard");
+                          } else {
+                            await Clipboard.paste(gistFileContent);
+                            await showHUD("Paste to Active App");
+                          }
                         }}
                       />
                       <Action
                         title={preference.primaryAction === "copy" ? "Paste to Active App" : "Copy to Clipboard"}
                         icon={preference.primaryAction === "copy" ? Icon.Window : Icon.Clipboard}
                         onAction={async () => {
-                          preference.primaryAction === "copy"
-                            ? await Clipboard.paste(gistFileContent)
-                            : await Clipboard.copy(gistFileContent);
+                          if (preference.primaryAction === "copy") {
+                            await Clipboard.paste(gistFileContent);
+                            await showHUD("Paste to Active App");
+                          } else {
+                            await Clipboard.copy(gistFileContent);
+                            await showToast(Toast.Style.Success, "Copy Gist to Clipboard");
+                          }
                         }}
                       />
 
@@ -113,6 +121,7 @@ export default function main() {
                         shortcut={{ modifiers: ["cmd"], key: "l" }}
                         onAction={async () => {
                           await Clipboard.copy(gistArray[gistIndex].html_url);
+                          await showToast(Toast.Style.Success, "Copy Gist Link");
                         }}
                       />
                       <Action
@@ -121,7 +130,7 @@ export default function main() {
                         shortcut={{ modifiers: ["cmd"], key: "o" }}
                         onAction={async () => {
                           await open(gistArray[gistIndex].html_url);
-                          await showHUD("Open in Browser");
+                          await showHUD("Open Gist in Browser");
                         }}
                       />
 
