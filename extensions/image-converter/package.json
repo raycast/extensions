@@ -12,14 +12,12 @@
   "license": "MIT",
   "commands": [{
       "name": "convertToPng",
-      "title": "Convert Image to PNG",
-      "description": "jpg -› png",
+      "title": "Convert an Image to PNG",
       "mode": "no-view"
     },
     {
       "name": "convertToJpg",
-      "title": "Convert Image to JPG",
-      "description": "png -› jpg",
+      "title": "Convert an Image to JPG",
       "mode": "no-view"
     }
   ],
