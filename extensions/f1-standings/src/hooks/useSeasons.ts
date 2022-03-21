@@ -7,7 +7,7 @@ interface Season {
   url: string;
 }
 
-export const useSeasons = () => {
+const useSeasons = () => {
   const [seasons, setSeasons] = useState<Season[]>([]);
 
   useEffect(() => {
@@ -32,3 +32,5 @@ export const useSeasons = () => {
 
   return seasons;
 };
+
+export default useSeasons;
