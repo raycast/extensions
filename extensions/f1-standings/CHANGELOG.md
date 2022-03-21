@@ -1,24 +1,24 @@
 # F1 Standings Changelog
 
-## 2022.03.20
+## [⌚ Display dates for races and sessions] - 2022-03-20
 
 - Show race dates
 - Open season-specific race URLs
 
-## 2022.03.14
+## [🍂 Allow switching between all F1 seasons] - 2022-03-14
 
 - Allow browsing through all seasons instead of only the current one
 - Show race/constructor/race flags
 
-## 2022.03.01
+## [🐞 Race Schedule fixes] - 2022-03-01
 
 - Show an error if no races where found in Race Schedule
-- Remove localization from dates in Race schedule
+- Remove localization from dates in Race Schedule
 
-## 2022.02.28
+## [🏁 Added Race Schedule command] - 2022-02-28
 
 - Add Race Schedule
 
-## 2022.02.21
+## [🎂 Added F1 Standings] - 2022-02-21
 
 - Initial version
