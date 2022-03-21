@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, environment, Icon, List, popToRoot, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Detail, environment, Icon, List, popToRoot, showToast, Action, Toast } from "@raycast/api";
 import fg from "fast-glob";
 import fs from "fs";
 import OnePasswordMetaItem from "./OnePasswordMetaItem.dto";
@@ -33,7 +33,11 @@ async function getPasswords(): Promise<OnePasswordMetaItem[] | void> {
         return Promise.resolve(onePasswordMetaItems);
       }
     } catch (error) {
-      showToast(ToastStyle.Failure, "Error", "Could not read 1Passwords database");
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "Could not read 1Passwords database",
+      });
       return Promise.resolve([]);
     }
   }
@@ -157,7 +161,7 @@ function PasswordListItem(props: { onePasswordMetaItem: OnePasswordMetaItem }) {
 
 const OpenAndFillAction = ({ onePasswordMetaItem }: ActionProps) => {
   return onePasswordMetaItem.websiteURLs?.length ? (
-    <ActionPanel.Item
+    <Action
       icon={Icon.Link}
       title="Open and Fill"
       onAction={async () => {
@@ -165,11 +169,11 @@ const OpenAndFillAction = ({ onePasswordMetaItem }: ActionProps) => {
           await onePassword.openAndFill(onePasswordMetaItem);
           await popToRoot({ clearSearchBar: true });
         } catch (error) {
-          await showToast(
-            ToastStyle.Failure,
-            "Failed opening and filling item",
-            error instanceof Error ? error.message : undefined
-          );
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed opening and filling item",
+            message: error instanceof Error ? error.message : undefined,
+          });
         }
       }}
     />
@@ -178,14 +182,18 @@ const OpenAndFillAction = ({ onePasswordMetaItem }: ActionProps) => {
 
 const ViewAction = ({ onePasswordMetaItem }: ActionProps) => {
   return (
-    <ActionPanel.Item
+    <Action
       icon={Icon.Eye}
       title="View"
       onAction={async () => {
         try {
           await onePassword.view(onePasswordMetaItem);
         } catch (error) {
-          await showToast(ToastStyle.Failure, "Error", "Could not view item");
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Error",
+            message: "Could not view item",
+          });
         }
       }}
     />
@@ -194,14 +202,18 @@ const ViewAction = ({ onePasswordMetaItem }: ActionProps) => {
 
 const EditAction = ({ onePasswordMetaItem }: ActionProps) => {
   return (
-    <ActionPanel.Item
+    <Action
       icon={Icon.Gear}
       title="Edit"
       onAction={async () => {
         try {
           await onePassword.edit(onePasswordMetaItem);
         } catch (error) {
-          await showToast(ToastStyle.Failure, "Error", "Could not edit item");
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Error",
+            message: "Could not edit item",
+          });
         }
       }}
     />
