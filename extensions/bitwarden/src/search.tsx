@@ -14,7 +14,7 @@ import {
 import { Item, VaultStatus } from "./types";
 import React, { useEffect, useState } from "react";
 import treeify from "treeify";
-import { filterNullishPropertiesFromObject, codeBlock, titleCase, faviconUrl } from "./utils";
+import { filterNullishPropertiesFromObject, codeBlock, titleCase, faviconUrl, withKeywords } from "./utils";
 import { useBitwarden } from "./hooks";
 import { TroubleshootingGuide, UnlockForm } from "./components";
 import { Bitwarden } from "./api";
@@ -46,7 +46,7 @@ function ItemList(props: {
   async function loadItems(sessionToken: string) {
     try {
       const items = await bitwardenApi.listItems<Item>("items", sessionToken);
-      setItems(items);
+      setItems(withKeywords(items));
     } catch (error) {
       showToast(Toast.Style.Failure, "Failed to search vault");
     }
@@ -141,7 +141,7 @@ function ItemListItem(props: {
     <List.Item
       id={item.id}
       title={item.name}
-      keywords={item.name.split(/\W/)}
+      keywords={item.keywords}
       accessoryIcon={item.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined}
       icon={getIcon(item)}
       subtitle={item.login?.username || undefined}

@@ -1,6 +1,6 @@
 import { Icon } from "@raycast/api";
 import { URL } from "url";
-import { PasswordGeneratorOptions } from "./types";
+import { Item, PasswordGeneratorOptions } from "./types";
 
 export function codeBlock(content: string): string {
   return "```\n" + content + "\n```";
@@ -43,3 +43,37 @@ export function getPasswordGeneratingArgs(options: PasswordGeneratorOptions): st
 }
 
 export const capitalise = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
+
+export function withKeywords(items: Item[]): Item[] {
+  return items.map((item: Item) => {
+    const keywords = [item.name];
+    if (item.card) {
+      const { brand, number } = item.card;
+      if (brand !== null) {
+        keywords.push(brand);
+      }
+      if (number !== null) {
+        // Similar to Bitwarden, use the last 5 digits if the card is Amex
+        const isAmex = /^3[47]/.test(number);
+        keywords.push(number.substring(number.length - (isAmex ? 5 : 4), number.length));
+      }
+    }
+    if (item.login?.username) {
+      keywords.push(item.login.username);
+    }
+    if (item.login?.uris) {
+      for (const uri of item.login.uris) {
+        if (uri.uri !== null) {
+          try {
+            keywords.push(...new URL(uri.uri).hostname.split("."));
+          } catch (error) {
+            // Invalid hostname
+          }
+        }
+      }
+    }
+    // Unique keywords
+    item.keywords = [...new Set(keywords)];
+    return item;
+  });
+}
