@@ -1,6 +1,7 @@
 import {
+  Action,
   ActionPanel,
-  copyTextToClipboard,
+  Clipboard,
   Form,
   getPreferenceValues,
   Icon,
@@ -8,7 +9,7 @@ import {
   popToRoot,
   showHUD,
   showToast,
-  ToastStyle,
+  Toast,
   useNavigation,
 } from "@raycast/api";
 import { execa } from "execa";
@@ -97,7 +98,7 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
       if (query) {
         scriptResult = await runScript(query);
         if (scriptResult.isSuccess) {
-          await copyTextToClipboard(scriptResult.result);
+          await Clipboard.copy(scriptResult.result);
           copyAction(pop);
         }
       }
@@ -106,7 +107,7 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
         await showHUD("✅ Result Copied to Clipboard");
       } else {
         if (scriptResult.result) {
-          await showToast(ToastStyle.Failure, scriptResult.result);
+          await showToast(Toast.Style.Failure, scriptResult.result);
         }
         moveWindow(runType);
       }
@@ -125,7 +126,7 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
         <ActionPanel>
           {info.type.map((type) => {
             return type === "list" ? (
-              <ActionPanel.Item
+              <Action
                 key={type}
                 title={"Run Script"}
                 icon={Icon.Pencil}
@@ -134,7 +135,7 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
                 }}
               />
             ) : type === "form" ? (
-              <ActionPanel.Item
+              <Action
                 key={type}
                 title={"Run Script to Form"}
                 icon={Icon.Document}
@@ -143,11 +144,11 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
                 }}
               />
             ) : (
-              <ActionPanel.Item
+              <Action
                 key={type}
                 title={"Run Script to Clipboard"}
                 icon={Icon.ArrowRight}
-                shortcut={{ modifiers: ["ctrl"], key: "v" }}
+                shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
                 onAction={async () => {
                   action("clipboard");
                 }}
@@ -220,21 +221,21 @@ function ResultActionView(props: { content: Result; info: Info }) {
     content.result.length > 0 && (
       <ActionPanel title={info.title}>
         <ActionPanel.Section>
-          <ActionPanel.Item
+          <Action
             title="Copy Result to Clipboard"
             icon={Icon.Clipboard}
             onAction={async () => {
-              await copyTextToClipboard(content.result);
+              await Clipboard.copy(content.result);
               await showHUD("✅ Result Copied to Clipboard");
               copyAction(pop);
             }}
           />
 
-          <ActionPanel.Item
+          <Action
             title="Copy Query to Clipboard"
             icon={Icon.Clipboard}
             onAction={async () => {
-              await copyTextToClipboard(content.query);
+              await Clipboard.copy(content.query);
               await showHUD("✅ Query Copied to Clipboard");
               copyAction(pop);
             }}
