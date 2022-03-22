@@ -19,6 +19,16 @@ This extension brings GitHub Gist support to Raycast through the personal access
 
 > Future updates to this extension will offer more functionality that may require additional scopes be defined in this token.
 
+## Screencast
+
+- Create Gist
+
+https://user-images.githubusercontent.com/36128970/159211152-65b06683-56a3-4db4-842f-3acb05c6ce62.mp4
+
+- Search Gist
+
+https://user-images.githubusercontent.com/36128970/159161962-70adae29-29c5-4026-82d0-19f23b8dcc22.mp4
+
 ## Create Gist
 
 Automatically get the selected text or clipboard and generate a gistfile, you can also add additional gistfiles and finally create a gist.
