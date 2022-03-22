@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Color, Icon, Image, ImageLike, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { AppBuild } from "@youri-kane/heroku-client/dist/requests/appBuilds/types";
 import useSWR from "swr";
 import heroku, { simplifyCustomResponse } from "./heroku";
 import gravatar from "gravatar";
 
-const getBuildAccessoryIcon = ({ status }: { status: AppBuild["status"] }): ImageLike => {
+const getBuildAccessoryIcon = ({ status }: { status: AppBuild["status"] }): Image.ImageLike => {
   switch (status) {
     case "succeeded":
       return { source: Icon.Checkmark, tintColor: Color.Green };
