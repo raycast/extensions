@@ -68,8 +68,6 @@ export function extractKeywords(item: Item): string[] {
     }
   }
   // Unique keywords
-  const filteredKeywords: string[] = keywords.filter(
-    (keyword): keyword is string => !(keyword === null || keyword === undefined)
-  );
-  return [...new Set(filteredKeywords)];
+  const uniqueKeywords = new Set(keywords.filter((keyword): keyword is string => !!keyword));
+  return [...uniqueKeywords];
 }
