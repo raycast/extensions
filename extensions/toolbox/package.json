@@ -6,6 +6,10 @@
   "icon": "icon.png",
   "author": "Kang",
   "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "index",
@@ -18,7 +22,7 @@
   "preferences": [
     {
       "name": "copy",
-      "description": "Select whether the state of the toolbox extension after copying",
+      "description": "After copying the values, select where to move the toolbox screen.",
       "type": "dropdown",
       "required": false,
       "title": "Action after copy",
@@ -29,20 +33,20 @@
           "value": "none"
         },
         {
-          "title": "Back",
+          "title": "Pop to list",
           "value": "back"
         },
         {
-          "title": "Exit",
+          "title": "Pop to root",
           "value": "exit"
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.2",
+    "@raycast/api": "^1.30.3",
     "esrever": "^0.2.0",
-    "execa": "^6.0.0",
+    "execa": "^6.1.0",
     "js-base64": "^3.7.2",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
