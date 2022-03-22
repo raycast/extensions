@@ -17,9 +17,9 @@
   },
   "commands": [
     {
-      "name": "search-icons",
-      "title": "Search Icons",
-      "description": "Search and view icons",
+      "name": "view-icons",
+      "title": "View Icons",
+      "description": "View available icons",
       "mode": "view"
     }
   ],
