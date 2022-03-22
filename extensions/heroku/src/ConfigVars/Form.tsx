@@ -39,6 +39,23 @@ export function EditConfigVarsForm({
               }
             }}
           />
+          <Action.SubmitForm
+            title="Delete Variable"
+            icon={Icon.Trash}
+            onSubmit={async () => {
+              try {
+                await heroku.requests.updateAppConfigVars({
+                  params: { appId },
+                  body: { [env]: null },
+                });
+                mutate(["config-vars", appId]);
+
+                pop();
+              } catch (e) {
+                showToast(Toast.Style.Failure, "Failed to delete variable");
+              }
+            }}
+          />
         </ActionPanel>
       }
     >
@@ -60,6 +77,34 @@ export function EditConfigVarsForm({
   );
 }
 
-export function NewConfigVarsForm() {
-  return <Form></Form>;
+export function NewConfigVarsForm({ appId }: { appId: string }) {
+  const { pop } = useNavigation();
+
+  return (
+    <Form
+      navigationTitle="New Environment Variable"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            onSubmit={async (values) => {
+              try {
+                await heroku.requests.updateAppConfigVars({
+                  params: { appId },
+                  body: { [values.env_name]: values.env_value },
+                });
+                mutate(["config-vars", appId]);
+
+                pop();
+              } catch (e) {
+                showToast(Toast.Style.Failure, "Failed to create variable");
+              }
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="env_name" title="Environment Variable" />
+      <Form.TextArea id="env_value" title="Environment Value" />
+    </Form>
+  );
 }

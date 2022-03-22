@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { ConfigVars } from "@youri-kane/heroku-client/dist/requests/apps";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import heroku, { simplifyCustomResponse } from "./heroku";
-import { EditConfigVarsForm } from "./ConfigVars/Form";
+import { EditConfigVarsForm, NewConfigVarsForm } from "./ConfigVars/Form";
 
 export default function ConfigVars({ appId, appName }: { appId: string; appName: string }) {
   const { data, error } = useSWR(["config-vars", appId], () =>
@@ -26,6 +26,23 @@ export default function ConfigVars({ appId, appName }: { appId: string; appName:
                 title="Edit"
                 icon={Icon.Gear}
                 target={<EditConfigVarsForm env={key} configVars={data} appName={appName} appId={appId} />}
+              />
+              <Action.Push
+                title="New Variable"
+                icon={Icon.Plus}
+                target={<NewConfigVarsForm appId={appId} />}
+              />
+              <Action
+                title="Delete"
+                icon={Icon.Trash}
+                onAction={async () => {
+                  await heroku.requests.updateAppConfigVars({
+                    params: { appId },
+                    body: { [key]: null },
+                  });
+
+                  mutate(["config-vars", appId]);
+                }}
               />
             </ActionPanel>
           }
