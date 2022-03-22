@@ -84,9 +84,7 @@ class Service {
   }
 
   async listIcons(set: string): Promise<Icon[]> {
-    const response = await client.get<IconResponse>(
-      `/json/${set}.json`,
-    );
+    const response = await client.get<IconResponse>(`/json/${set}.json`);
     const ids = Object.keys(response.data.icons);
     return ids.map((id) => {
       const icon = response.data.icons[id];
