@@ -2,7 +2,7 @@ import path from "path";
 import { AbortError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { fetchConfig, getAPIKey, GIF_SERVICE } from "../preferences";
+import { getAPIKey, GIF_SERVICE } from "../preferences";
 
 import TenorAPI, { TenorResults } from "../models/tenor";
 import type { TenorGif } from "../models/tenor";
@@ -17,13 +17,7 @@ interface FetchState {
 let tenor: TenorAPI;
 async function getAPI() {
   if (!tenor) {
-    let apiKey = getAPIKey(GIF_SERVICE.TENOR);
-    if (!apiKey) {
-      const config = await fetchConfig();
-      apiKey = config.apiKeys[GIF_SERVICE.TENOR];
-    }
-
-    tenor = new TenorAPI(apiKey);
+    tenor = new TenorAPI(await getAPIKey(GIF_SERVICE.TENOR));
   }
 
   return tenor;

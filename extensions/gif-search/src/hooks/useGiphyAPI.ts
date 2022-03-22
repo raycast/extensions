@@ -5,7 +5,7 @@ import { GiphyFetch } from "@giphy/js-fetch-api";
 import type { GifsResult } from "@giphy/js-fetch-api";
 import type { IGif as GiphyGif } from "@giphy/js-types";
 
-import { fetchConfig, getAPIKey, GIF_SERVICE } from "../preferences";
+import { getAPIKey, GIF_SERVICE } from "../preferences";
 
 import type { IGif } from "../models/gif";
 interface FetchState {
@@ -17,13 +17,7 @@ interface FetchState {
 let gf: GiphyFetch;
 async function getAPI() {
   if (!gf) {
-    let apiKey = getAPIKey(GIF_SERVICE.GIPHY);
-    if (!apiKey) {
-      const config = await fetchConfig();
-      apiKey = config.apiKeys[GIF_SERVICE.GIPHY];
-    }
-
-    gf = new GiphyFetch(apiKey);
+    gf = new GiphyFetch(await getAPIKey(GIF_SERVICE.GIPHY));
   }
 
   return gf;

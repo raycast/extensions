@@ -29,8 +29,14 @@ export function getPrefs() {
   return prefs;
 }
 
-export function getAPIKey(serviceName: ServiceName) {
-  return getPrefs()[`${serviceName}-${API_KEY}`];
+export async function getAPIKey(serviceName: ServiceName) {
+  let apiKey = getPrefs()[`${serviceName}-${API_KEY}`];
+  if (!apiKey) {
+    const config = await fetchConfig();
+    apiKey = config.apiKeys[GIF_SERVICE.GIPHY];
+  }
+
+  return apiKey;
 }
 
 export function getShowPreview() {
