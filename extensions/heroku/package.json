@@ -1,16 +1,19 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "heroku",
-  "title": "heroku",
+  "title": "Heroku",
   "description": "Heroku extension for Raycast",
   "icon": "heroku_logo.png",
+  "categories": [
+    "Developer Tools"
+  ],
   "author": "Yukai",
   "license": "MIT",
   "commands": [
     {
       "name": "apps",
-      "title": "Show Apps",
-      "description": "Show your Apps",
+      "title": "List Apps",
+      "description": "List your Apps",
       "subtitle": "Heroku",
       "mode": "view"
     }

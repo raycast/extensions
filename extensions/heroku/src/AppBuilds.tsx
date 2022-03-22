@@ -81,6 +81,7 @@ export default function AppBuilds({ appId }: { appId: string }) {
                     <Action.Push
                       title="Open Build Output"
                       target={<AppBuildStreamPreview url={build.output_stream_url} />}
+                      icon={Icon.Terminal}
                     />
                     <Action.OpenInBrowser url={build.output_stream_url} title="Open Build Output (Web)" />
                   </ActionPanel>
