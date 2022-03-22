@@ -1,14 +1,18 @@
 # Wikipedia Changelog
 
-## Categories & Screenshots (2022-03-12)
+## [Categories & Screenshots] - (2022-03-12)
+
 Add categories and screenshots for the store
 
-## Fixes & Performance (2022-03-02)
+## [Fixes & Performance] - (2022-03-02)
+
 - Fix page open issues caused by unescaped page title characters
 - Use native `open` Raycast utility
 
-## Simplified Extension (2022-20-01)
+## [Simplified Extension] - (2022-20-01)
+
 Remove page preview from the extension
 
-## Added Wikipedia (2022-01-17)
+## [Added Wikipedia] - (2022-01-17)
+
 Initial version code
