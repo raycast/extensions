@@ -229,14 +229,13 @@ function PasswordActions(props: { password: string }) {
 
 function UsernameActions(props: { username: string }) {
   return (
-    <ActionPanel.Item
-      shortcut={{ modifiers: ["cmd"], key: "u" }}
+    <Action.CopyToClipboard
+      key="copy"
       title="Copy Username"
+      content={props.username}
       icon={Icon.Person}
-      onAction={() => {
-        Clipboard.copy(props.username);
-        closeMainWindow({ clearRootSearch: true });
-      }}
+      shortcut={{ modifiers: ["cmd"], key: "u" }}
+      onCopy={(content) => closeMainWindow({ clearRootSearch: true })}
     />
   );
 }
