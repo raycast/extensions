@@ -1,9 +1,5 @@
 import axios from 'axios';
 
-const iconSetClient = axios.create({
-  baseURL: 'https://icon-sets.iconify.design',
-});
-
 const apiClient = axios.create({
   baseURL: 'https://api.iconify.design',
 });
@@ -41,11 +37,6 @@ interface SetResponse {
   height: number;
   displayHeight: number;
   hidden: boolean;
-}
-
-interface SetListResponse {
-  visible: Record<SetCategory, Record<string, SetResponse>>;
-  hidden: Record<string, SetResponse>;
 }
 
 interface Set {
@@ -109,29 +100,24 @@ interface Icon {
 
 class Service {
   async listSets(): Promise<Set[]> {
-    const response = await iconSetClient.get<string>('/assets/collections.js');
-    const stringIndex = response.data.indexOf('{');
-    const string = response.data.substring(
-      stringIndex,
-      response.data.length - 2,
+    const response = await githubClient.get<Record<string, SetResponse>>(
+      '/collections.json',
     );
-    const list = JSON.parse(string) as SetListResponse;
-    const sets: Set[] = [];
-    for (const categoryId in list.visible) {
-      const category = categoryId as SetCategory;
-      const categorySets = list.visible[category];
-      for (const id in categorySets) {
-        const set = categorySets[id];
-        const { prefix, name, total } = set;
-        sets.push({
-          id: prefix,
+    const ids = Object.keys(response.data);
+    return ids
+      .map((id) => {
+        const { name, total, category } = response.data[id];
+        return {
+          id,
           name,
           count: total,
-          category,
-        });
-      }
-    }
-    return sets;
+          category: category as SetCategory,
+        };
+      })
+      .filter((icon) => {
+        const { hidden } = response.data[icon.id];
+        return !hidden;
+      });
   }
 
   async queryIcons(set: string, query: string): Promise<string[]> {
