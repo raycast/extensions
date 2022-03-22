@@ -93,6 +93,7 @@
 /extensions/github-for-enterprise                    @Kinbaum
 /extensions/github-repository-search                 @thomaspaulmann
 /extensions/github-stars                             @mrmartineau
+/extensions/github-status                            @FezVrasta
 /extensions/gitignore                                @daniel-stoneuk
 /extensions/gitlab                                   @tonka3000 @Loskir
 /extensions/gitmoji                                  @ricoberger
