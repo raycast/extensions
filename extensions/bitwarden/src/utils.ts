@@ -44,33 +44,32 @@ export function getPasswordGeneratingArgs(options: PasswordGeneratorOptions): st
 
 export const capitalise = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
-export function withKeywords(items: Item[]): Item[] {
-  return items.map((item: Item) => {
-    const keywords: (string | null | undefined)[] = [item.name];
-    if (item.card) {
-      const { brand, number } = item.card;
-      keywords.push(brand);
-      if (number !== null) {
-        // Similar to Bitwarden, use the last 5 digits if the card is Amex
-        const isAmex = /^3[47]/.test(number);
-        keywords.push(number.substring(number.length - (isAmex ? 5 : 4), number.length));
-      }
+export function extractKeywords(item: Item): string[] {
+  const keywords: (string | null | undefined)[] = [item.name];
+  if (item.card) {
+    const { brand, number } = item.card;
+    keywords.push(brand);
+    if (number !== null) {
+      // Similar to Bitwarden, use the last 5 digits if the card is Amex
+      const isAmex = /^3[47]/.test(number);
+      keywords.push(number.substring(number.length - (isAmex ? 5 : 4), number.length));
     }
-    keywords.push(item.login?.username);
-    if (item.login?.uris) {
-      for (const uri of item.login.uris) {
-        if (uri.uri !== null) {
-          try {
-            keywords.push(...new URL(uri.uri).hostname.split("."));
-          } catch (error) {
-            // Invalid hostname
-          }
+  }
+  keywords.push(item.login?.username);
+  if (item.login?.uris) {
+    for (const uri of item.login.uris) {
+      if (uri.uri !== null) {
+        try {
+          keywords.push(...new URL(uri.uri).hostname.split("."));
+        } catch (error) {
+          // Invalid hostname
         }
       }
     }
-    // Unique keywords
-    let filteredKeywords: string[] = keywords.filter((keyword): keyword is string => !(keyword === null || keyword === undefined));
-    item.keywords = [...new Set(filteredKeywords)];
-    return item;
-  });
+  }
+  // Unique keywords
+  const filteredKeywords: string[] = keywords.filter(
+    (keyword): keyword is string => !(keyword === null || keyword === undefined)
+  );
+  return [...new Set(filteredKeywords)];
 }

@@ -18,7 +18,6 @@ export interface Item {
   passwordHistory?: PasswordHistory[];
   secureNote?: SecureNote;
   card?: Card;
-  keywords: string[];
 }
 
 export interface Identity {
