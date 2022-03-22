@@ -59,7 +59,7 @@ export default function Command() {
 
   return (
     <List isLoading={data.loading}>
-      {data.value?.incidents?.length && (
+      {data.value?.incidents && (
         <List.Section title="Incidents">
           {data.value?.incidents?.map((incident) => (
             <List.Item
