@@ -1,5 +1,5 @@
 import path from "path";
-import { AbortError } from "node-fetch";
+import { AbortError, FetchError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { getAPIKey, GIF_SERVICE } from "../preferences";
@@ -15,9 +15,9 @@ interface FetchState {
 }
 
 let tenor: TenorAPI;
-async function getAPI() {
-  if (!tenor) {
-    tenor = new TenorAPI(await getAPIKey(GIF_SERVICE.TENOR));
+async function getAPI(force?: boolean) {
+  if (!tenor || force) {
+    tenor = new TenorAPI(await getAPIKey(GIF_SERVICE.TENOR, force));
   }
 
   return tenor;
@@ -44,9 +44,12 @@ export default function useTenorAPI({ offset = 0 }) {
         }
         setResults({ items: results.results.map(mapTenorResponse), term });
       } catch (e) {
-        const error = e as Error;
+        const error = e as FetchError;
         if (e instanceof AbortError) {
           return;
+        } else if (error.code == "401") {
+          error.message = "Invalid credentials, please try again.";
+          await getAPI(true);
         }
         setResults({ error });
       } finally {

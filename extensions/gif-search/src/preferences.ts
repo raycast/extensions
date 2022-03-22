@@ -29,11 +29,11 @@ export function getPrefs() {
   return prefs;
 }
 
-export async function getAPIKey(serviceName: ServiceName) {
+export async function getAPIKey(serviceName: ServiceName, forceRefresh?: boolean) {
   let apiKey = getPrefs()[`${serviceName}-${API_KEY}`];
   if (!apiKey) {
-    const config = await fetchConfig();
-    apiKey = config.apiKeys[GIF_SERVICE.GIPHY];
+    const config = await fetchConfig(forceRefresh);
+    apiKey = config.apiKeys[serviceName];
   }
 
   return apiKey;
@@ -54,9 +54,13 @@ export type Config = {
 };
 
 const configPath = path.resolve(environment.supportPath, "config.json");
-export async function fetchConfig() {
+export async function fetchConfig(forceRefresh?: boolean) {
   let config: Config;
   try {
+    if (forceRefresh) {
+      throw new Error("Forcibly fetching config from server");
+    }
+
     config = JSON.parse(fs.readFileSync(configPath, "utf-8")) as Config;
 
     const { mtime } = fs.statSync(configPath);
