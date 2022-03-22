@@ -6,6 +6,10 @@
   "icon": "icon.png",
   "author": "Kang",
   "license": "MIT",
+  "categories": [
+    "System",
+    "Web"
+  ],
   "commands": [
     {
       "name": "index",
