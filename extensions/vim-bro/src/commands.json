@@ -503,5 +503,145 @@
       "kbd": "x",
       "#text": "delete (cut) character"
     }
+  ],
+
+  "Indent text": [
+    {
+      "kbd": ">>",
+      "#text": "indent (move right) line one shiftwidth"
+    },
+    {
+      "kbd": "<<",
+      "#text": "de-indent (move left) line one shiftwidth"
+    },
+    {
+      "kbd": ">%",
+      "#text": "indent a block with () or {} (cursor on brace)"
+    },
+    {
+      "kbd": ">ib",
+      "#text": "indent inner block with ()"
+    },
+    {
+      "kbd": ">at",
+      "#text": "indent a block with <> tags"
+    },
+    {
+      "kbd": "3==",
+      "#text": "re-indent 3 lines"
+    },
+    {
+      "kbd": "=%",
+      "#text": "re-indent a block with () or {} (cursor on brace)"
+    },
+    {
+      "kbd": "=iB",
+      "#text": "re-indent inner block with {}"
+    },
+    {
+      "kbd": "gg=G",
+      "#text": "re-indent entire buffer"
+    },
+    {
+      "kbd": "]p",
+      "#text": "paste and adjust indent to current line"
+    }
+  ],
+
+  "Exiting": [
+    {
+      "kbd": ":w",
+      "#text": "write (save) the file, but don't exit"
+    },
+    {
+      "kbd": ":w !sudo tee %",
+      "#text": "write out the current file using sudo"
+    },
+    {
+      "kbd": ":wq or :x or ZZ",
+      "#text": "write (save) and quit"
+    },
+    {
+      "kbd": ":q",
+      "#text": "quit (fails if there are unsaved changes)"
+    },
+    {
+      "kbd": ":q! or ZQ",
+      "#text": "quit and throw away unsaved changes"
+    },
+    {
+      "kbd": ":wqa",
+      "#text": "write (save) and quit on all tabs"
+    }
+  ],
+
+  "Search and replace": [
+    {
+      "kbd": "/pattern",
+      "#text": "search for pattern"
+    },
+    {
+      "kbd": "?pattern",
+      "#text": "search backward for pattern"
+    },
+    {
+      "kbd": "\\vpattern",
+      "#text": "'very magic' pattern: non-alphanumeric characters are interpreted as special regex symbols (no escaping needed)"
+    },
+    {
+      "kbd": "n",
+      "#text": "repeat search in same direction"
+    },
+    {
+      "kbd": "N",
+      "#text": "repeat search in opposite direction"
+    },
+    {
+      "kbd": ":%s/old/new/g",
+      "#text": "replace all old with new throughout file"
+    },
+    {
+      "kbd": ":%s/old/new/gc",
+      "#text": "replace all old with new throughout file with confirmations"
+    },
+    {
+      "kbd": ":noh[lsearch]",
+      "#text": "remove highlighting of search matches"
+    }
+  ],
+
+  "Tabs": [
+    {
+      "kbd": ":tabnew or :tabnew {page.words.file}",
+      "#text": "open a file in a new tab"
+    },
+    {
+      "kbd": "Ctrl + wT",
+      "#text": "move the current split window into its own tab"
+    },
+    {
+      "kbd": "gt or :tabn[ext]",
+      "#text": "move to the next tab"
+    },
+    {
+      "kbd": "gT or :tabp[revious]",
+      "#text": "move to the previous tab"
+    },
+    {
+      "kbd": "#gt",
+      "#text": "move to tab number #"
+    },
+    {
+      "kbd": ":tabm[ove] #",
+      "#text": "move current tab to the #th position (indexed from 0)"
+    },
+    {
+      "kbd": ":tabc[lose]",
+      "#text": "close the current tab and all its windows"
+    },
+    {
+      "kbd": ":tabo[nly]",
+      "#text": "close all tabs except for the current one"
+    }
   ]
 }
