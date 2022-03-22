@@ -8,6 +8,10 @@ const apiClient = axios.create({
   baseURL: 'https://api.iconify.design',
 });
 
+const githubClient = axios.create({
+  baseURL: 'https://raw.githubusercontent.com/iconify/icon-sets/master',
+});
+
 type SetCategory =
   | 'General'
   | 'Emoji'
@@ -61,10 +65,19 @@ interface IconQueryResponse {
 
 interface IconInfoResponse {
   prefix: string;
-  total: number;
-  title: string;
-  uncategorized: string[];
-  categories: Record<string, string[]>;
+  info: {
+    name: string;
+    total: number;
+    category: string;
+  };
+  icons: Record<
+    string,
+    {
+      body: string;
+    }
+  >;
+  width: number;
+  height: number;
 }
 
 interface IconInfo {
@@ -132,37 +145,21 @@ class Service {
     return response.data.icons.map((icon) => icon.split(':')[1]);
   }
 
-  async listIcons(set: string): Promise<IconInfo[]> {
-    const response = await apiClient.get<IconInfoResponse>('/collection', {
-      params: {
-        prefix: set,
-        info: true,
-        chars: true,
-        aliases: true,
-      },
-    });
-    const list: IconInfo[] = [];
-    const { total, uncategorized, categories } = response.data;
-    for (const id of uncategorized) {
-      list.push({
+  async listIcons(set: string): Promise<Icon[]> {
+    const response = await githubClient.get<IconInfoResponse>(
+      `/json/${set}.json`,
+    );
+    const ids = Object.keys(response.data.icons);
+    return ids.map((id) => {
+      const icon = response.data.icons[id];
+      return {
         setId: set,
-        total,
-        category: '',
         id,
-      });
-    }
-    for (const category in categories) {
-      const categoryIcons = categories[category];
-      for (const id of categoryIcons) {
-        list.push({
-          setId: set,
-          total,
-          category,
-          id,
-        });
-      }
-    }
-    return list;
+        width: response.data.width,
+        height: response.data.height,
+        body: icon.body,
+      };
+    });
   }
 
   async getIcons(set: string, ids: string[]) {

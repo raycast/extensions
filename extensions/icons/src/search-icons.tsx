@@ -1,4 +1,13 @@
-import { Action, ActionPanel, Clipboard, Color, List, showHUD, showToast, Toast } from '@raycast/api';
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Color,
+  List,
+  showHUD,
+  showToast,
+  Toast,
+} from '@raycast/api';
 import { useEffect, useState } from 'react';
 
 import Service, { Icon, Set } from './service';
@@ -45,8 +54,6 @@ interface SetProps {
 }
 
 function SetView(props: SetProps) {
-  const [query, setQuery] = useState('');
-  const [iconIds, setIconIds] = useState<string[]>([]);
   const [icons, setIcons] = useState<Icon[]>([]);
   const [isLoading, setLoading] = useState(true);
 
@@ -55,17 +62,14 @@ function SetView(props: SetProps) {
   useEffect(() => {
     async function fetchIcons() {
       setLoading(true);
-      setIconIds([]);
       setIcons([]);
-      const iconIds = await service.queryIcons(id, query);
-      const icons = await service.getIcons(id, iconIds);
+      const icons = await service.listIcons(id);
       setIcons(icons);
-      setIconIds(iconIds);
       setLoading(false);
     }
 
     fetchIcons();
-  }, [query]);
+  }, []);
 
   async function copyIcon(iconId: string) {
     const toast = await showToast({
@@ -80,23 +84,22 @@ function SetView(props: SetProps) {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      onSearchTextChange={(text) => setQuery(text)}
-      throttle
-    >
-      {iconIds.map((id, index) => {
-        const { body, width, height } = icons[index];
+    <List isLoading={isLoading}>
+      {icons.map((icon) => {
+        const { id, body, width, height } = icon;
         const svgIcon = toSvg(body, width, height);
-        const icon = toBase64(svgIcon);
+        const base64Icon = toBase64(svgIcon);
         return (
           <List.Item
-            icon={{ source: icon, tintColor: Color.PrimaryText }}
+            icon={{ source: base64Icon, tintColor: Color.PrimaryText }}
             key={id}
             title={id}
             actions={
               <ActionPanel>
-                <Action title='Copy to Clipboard' onAction={() => copyIcon(id)} />
+                <Action
+                  title="Copy to Clipboard"
+                  onAction={() => copyIcon(id)}
+                />
               </ActionPanel>
             }
           />
