@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, Image, List } from "@raycast/api";
-import axios from 'axios'
+import axios from "axios";
 import { AppBuild } from "@youri-kane/heroku-client/dist/requests/appBuilds/types";
 import useSWR from "swr";
 import heroku, { simplifyCustomResponse } from "./heroku";
@@ -33,18 +33,20 @@ const groupByDate = (builds: AppBuild[]) => {
   return groups;
 };
 
-function AppBuildStreamPreview ({ url }: { url: string }) {
+function AppBuildStreamPreview({ url }: { url: string }) {
   const { data, error } = useSWR(url, () => axios.get(url).then(({ data }) => data));
 
   if (!data) {
-    return <List isLoading />
+    return <List isLoading />;
   }
 
-  return <Detail
-    markdown={`\`\`\`
+  return (
+    <Detail
+      markdown={`\`\`\`
 ${data}
 \`\`\``}
-  />
+    />
+  );
 }
 
 export default function AppBuilds({ appId }: { appId: string }) {

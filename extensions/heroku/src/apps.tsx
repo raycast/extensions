@@ -24,9 +24,8 @@ export default function Command() {
             title={app.name}
             key={app.id}
             icon={Icon.Desktop}
-            accessoryTitle={app.updated_at ? `Updated at ${new Date(app.updated_at).toLocaleString()}` : ""}
+            accessoryTitle={app.updated_at ? new Date(app.updated_at).toLocaleString() : ""}
             subtitle={app.stack.name}
-            accessoryIcon={Icon.Calendar}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser

@@ -3,7 +3,7 @@
   "name": "heroku",
   "title": "heroku",
   "description": "Heroku extension for Raycast",
-  "icon": "command-icon.png",
+  "icon": "heroku_logo.png",
   "author": "Yukai",
   "license": "MIT",
   "commands": [
@@ -11,6 +11,7 @@
       "name": "apps",
       "title": "Show Apps",
       "description": "Show your Apps",
+      "subtitle": "Heroku",
       "mode": "view"
     }
   ],

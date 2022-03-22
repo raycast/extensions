@@ -27,11 +27,7 @@ export default function ConfigVars({ appId, appName }: { appId: string; appName:
                 icon={Icon.Gear}
                 target={<EditConfigVarsForm env={key} configVars={data} appName={appName} appId={appId} />}
               />
-              <Action.Push
-                title="New Variable"
-                icon={Icon.Plus}
-                target={<NewConfigVarsForm appId={appId} />}
-              />
+              <Action.Push title="New Variable" icon={Icon.Plus} target={<NewConfigVarsForm appId={appId} />} />
               <Action
                 title="Delete"
                 icon={Icon.Trash}
