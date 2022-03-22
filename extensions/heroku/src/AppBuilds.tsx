@@ -33,7 +33,7 @@ const groupByDate = (builds: AppBuild[]) => {
   return groups;
 };
 
-function AppBuildStreamPreview({ url }: { url: string }) {
+function AppBuildStreamPreview({ url, appName }: { url: string; appName: string }) {
   const { data, error } = useSWR(url, () => axios.get(url).then(({ data }) => data));
 
   if (!data) {
@@ -42,6 +42,7 @@ function AppBuildStreamPreview({ url }: { url: string }) {
 
   return (
     <Detail
+      navigationTitle={`${appName} Build Log`}
       markdown={`\`\`\`
 ${data}
 \`\`\``}
@@ -49,8 +50,8 @@ ${data}
   );
 }
 
-export default function AppBuilds({ appId }: { appId: string }) {
-  const { data, error } = useSWR("builds", () =>
+export default function AppBuilds({ appId, appName }: { appId: string; appName: string }) {
+  const { data, error } = useSWR(["builds", appId], () =>
     heroku.requests.getAppBuilds({ params: { appId } }).then(simplifyCustomResponse)
   );
 
@@ -59,7 +60,7 @@ export default function AppBuilds({ appId }: { appId: string }) {
   }
 
   return (
-    <List>
+    <List navigationTitle={`${appName} Builds`}>
       {groupByDate(data).map((builds) => {
         const build = builds[0];
         const dateString = new Date(build.created_at).toLocaleDateString();
@@ -80,7 +81,7 @@ export default function AppBuilds({ appId }: { appId: string }) {
                   <ActionPanel>
                     <Action.Push
                       title="Open Build Output"
-                      target={<AppBuildStreamPreview url={build.output_stream_url} />}
+                      target={<AppBuildStreamPreview url={build.output_stream_url} appName={appName} />}
                       icon={Icon.Terminal}
                     />
                     <Action.OpenInBrowser url={build.output_stream_url} title="Open Build Output (Web)" />

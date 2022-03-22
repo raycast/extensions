@@ -23,13 +23,13 @@ export default function ConfigVars({ appId, appName }: { appId: string; appName:
           actions={
             <ActionPanel>
               <Action.Push
-                title="Edit"
+                title="Edit Variable"
                 icon={Icon.Gear}
                 target={<EditConfigVarsForm env={key} configVars={data} appName={appName} appId={appId} />}
               />
               <Action.Push title="New Variable" icon={Icon.Plus} target={<NewConfigVarsForm appId={appId} />} />
               <Action
-                title="Delete"
+                title="Delete Variable"
                 icon={Icon.Trash}
                 onAction={async () => {
                   await heroku.requests.updateAppConfigVars({

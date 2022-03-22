@@ -36,7 +36,7 @@ export default function Command() {
                 <Action.Push
                   title="Show Builds"
                   icon={Icon.Hammer}
-                  target={<AppBuilds appId={app.id} key={app.id} />}
+                  target={<AppBuilds appId={app.id} key={app.id} appName={app.name} />}
                   shortcut={{
                     modifiers: ["cmd"],
                     key: "b",
