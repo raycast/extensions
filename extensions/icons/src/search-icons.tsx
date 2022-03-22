@@ -71,18 +71,6 @@ function SetView(props: SetProps) {
     fetchIcons();
   }, []);
 
-  async function copyIcon(iconId: string) {
-    const toast = await showToast({
-      title: 'Fetching the icon',
-      style: Toast.Style.Animated,
-    });
-    const [{ body, height, width }] = await service.getIcons(id, [iconId]);
-    const svg = toSvg(body, width, height);
-    Clipboard.copy(svg);
-    toast.hide();
-    showHUD('Copied to Clipboard');
-  }
-
   return (
     <List isLoading={isLoading}>
       {icons.map((icon) => {
@@ -96,10 +84,7 @@ function SetView(props: SetProps) {
             title={id}
             actions={
               <ActionPanel>
-                <Action
-                  title="Copy to Clipboard"
-                  onAction={() => copyIcon(id)}
-                />
+                <Action.CopyToClipboard content={svgIcon} />
               </ActionPanel>
             }
           />
