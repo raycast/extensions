@@ -46,21 +46,17 @@ export const capitalise = (value: string) => value.charAt(0).toUpperCase() + val
 
 export function withKeywords(items: Item[]): Item[] {
   return items.map((item: Item) => {
-    const keywords = [item.name];
+    const keywords: (string | null | undefined)[] = [item.name];
     if (item.card) {
       const { brand, number } = item.card;
-      if (brand !== null) {
-        keywords.push(brand);
-      }
+      keywords.push(brand);
       if (number !== null) {
         // Similar to Bitwarden, use the last 5 digits if the card is Amex
         const isAmex = /^3[47]/.test(number);
         keywords.push(number.substring(number.length - (isAmex ? 5 : 4), number.length));
       }
     }
-    if (item.login?.username) {
-      keywords.push(item.login.username);
-    }
+    keywords.push(item.login?.username);
     if (item.login?.uris) {
       for (const uri of item.login.uris) {
         if (uri.uri !== null) {
@@ -73,7 +69,8 @@ export function withKeywords(items: Item[]): Item[] {
       }
     }
     // Unique keywords
-    item.keywords = [...new Set(keywords)];
+    let filteredKeywords: string[] = keywords.filter((keyword): keyword is string => !(keyword === null || keyword === undefined));
+    item.keywords = [...new Set(filteredKeywords)];
     return item;
   });
 }
