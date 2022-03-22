@@ -1,4 +1,5 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, Image, List } from "@raycast/api";
+import axios from 'axios'
 import { AppBuild } from "@youri-kane/heroku-client/dist/requests/appBuilds/types";
 import useSWR from "swr";
 import heroku, { simplifyCustomResponse } from "./heroku";
@@ -32,6 +33,20 @@ const groupByDate = (builds: AppBuild[]) => {
   return groups;
 };
 
+function AppBuildStreamPreview ({ url }: { url: string }) {
+  const { data, error } = useSWR(url, () => axios.get(url).then(({ data }) => data));
+
+  if (!data) {
+    return <List isLoading />
+  }
+
+  return <Detail
+    markdown={`\`\`\`
+${data}
+\`\`\``}
+  />
+}
+
 export default function AppBuilds({ appId }: { appId: string }) {
   const { data, error } = useSWR("builds", () =>
     heroku.requests.getAppBuilds({ params: { appId } }).then(simplifyCustomResponse)
@@ -61,7 +76,11 @@ export default function AppBuilds({ appId }: { appId: string }) {
                 accessoryTitle={new Date(build.created_at).toLocaleString()}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser url={build.output_stream_url} title="Open Build Output" />
+                    <Action.Push
+                      title="Open Build Output"
+                      target={<AppBuildStreamPreview url={build.output_stream_url} />}
+                    />
+                    <Action.OpenInBrowser url={build.output_stream_url} title="Open Build Output (Web)" />
                   </ActionPanel>
                 }
                 icon={getBuildAccessoryIcon(build)}
