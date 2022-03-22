@@ -51,6 +51,14 @@ interface Set {
   category: SetCategory;
 }
 
+interface IconQueryResponse {
+  icons: string[];
+  total: number;
+  limit: number;
+  start: number;
+  collections: Record<string, SetResponse>;
+}
+
 interface IconInfoResponse {
   prefix: string;
   total: number;
@@ -68,9 +76,12 @@ interface IconInfo {
 
 interface IconResponse {
   prefix: string;
-  icons: Record<string, {
-    body: string,
-  }>;
+  icons: Record<
+    string,
+    {
+      body: string;
+    }
+  >;
   width: number;
   height: number;
 }
@@ -85,12 +96,11 @@ interface Icon {
 
 class Service {
   async listSets(): Promise<Set[]> {
-    const response = await iconSetClient.get<string>(
-      '/assets/collections.js',
-    );
+    const response = await iconSetClient.get<string>('/assets/collections.js');
     const stringIndex = response.data.indexOf('{');
     const string = response.data.substring(
-      stringIndex, response.data.length - 2
+      stringIndex,
+      response.data.length - 2,
     );
     const list = JSON.parse(string) as SetListResponse;
     const sets: Set[] = [];
@@ -109,6 +119,17 @@ class Service {
       }
     }
     return sets;
+  }
+
+  async queryIcons(set: string, query: string): Promise<string[]> {
+    const response = await apiClient.get<IconQueryResponse>('/search', {
+      params: {
+        query,
+        collection: set,
+        limit: 100,
+      },
+    });
+    return response.data.icons.map((icon) => icon.split(':')[1]);
   }
 
   async listIcons(set: string): Promise<IconInfo[]> {

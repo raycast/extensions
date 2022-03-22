@@ -1,7 +1,8 @@
-import { Action, ActionPanel, Clipboard, List, showHUD, showToast, Toast } from '@raycast/api';
+import { Action, ActionPanel, Clipboard, Color, List, showHUD, showToast, Toast } from '@raycast/api';
 import { useEffect, useState } from 'react';
-import Service, { Icon, IconInfo, Set } from './service';
-import { wrapIcon } from './utils';
+
+import Service, { Icon, Set } from './service';
+import { toSvg, toBase64 } from './utils';
 
 const service = new Service();
 
@@ -44,20 +45,27 @@ interface SetProps {
 }
 
 function SetView(props: SetProps) {
-  const [iconInfos, setIconInfos] = useState<IconInfo[]>([]);
+  const [query, setQuery] = useState('');
+  const [iconIds, setIconIds] = useState<string[]>([]);
+  const [icons, setIcons] = useState<Icon[]>([]);
   const [isLoading, setLoading] = useState(true);
 
   const { id } = props;
 
   useEffect(() => {
-    async function fetchIconInfo() {
-      const iconInfos = await service.listIcons(id);
-      setIconInfos(iconInfos);
+    async function fetchIcons() {
+      setLoading(true);
+      setIconIds([]);
+      setIcons([]);
+      const iconIds = await service.queryIcons(id, query);
+      const icons = await service.getIcons(id, iconIds);
+      setIcons(icons);
+      setIconIds(iconIds);
       setLoading(false);
     }
 
-    fetchIconInfo();
-  }, []);
+    fetchIcons();
+  }, [query]);
 
   async function copyIcon(iconId: string) {
     const toast = await showToast({
@@ -65,22 +73,30 @@ function SetView(props: SetProps) {
       style: Toast.Style.Animated,
     });
     const [{ body, height, width }] = await service.getIcons(id, [iconId]);
-    const svg = wrapIcon(body, height, width);
+    const svg = toSvg(body, width, height);
     Clipboard.copy(svg);
     toast.hide();
     showHUD('Copied to Clipboard');
   }
 
   return (
-    <List isLoading={isLoading}>
-      {iconInfos.map((iconInfo) => {
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={(text) => setQuery(text)}
+      throttle
+    >
+      {iconIds.map((id, index) => {
+        const { body, width, height } = icons[index];
+        const svgIcon = toSvg(body, width, height);
+        const icon = toBase64(svgIcon);
         return (
           <List.Item
-            key={iconInfo.id}
-            title={iconInfo.id}
+            icon={{ source: icon, tintColor: Color.PrimaryText }}
+            key={id}
+            title={id}
             actions={
               <ActionPanel>
-                <Action title='Copy to Clipboard' onAction={() => copyIcon(iconInfo.id)} />
+                <Action title='Copy to Clipboard' onAction={() => copyIcon(id)} />
               </ActionPanel>
             }
           />

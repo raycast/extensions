@@ -1,8 +1,22 @@
-function wrapIcon(path: string, height: number, width: number) {
-  const svg = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg">${path}</svg>`;
-  return svg;
+import { encode } from 'js-base64';
+
+function toSvg(path: string, width: number, height: number): string {
+  return `
+  <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
+    <style>
+      path {
+        fill: white;
+      }
+    </style>
+    ${path}
+  </svg>`;
+}
+
+function toBase64(svg: string): string {
+  return `data:image/svg+xml;base64,${encode(svg)}`;
 }
 
 export {
-  wrapIcon,
+  toSvg,
+  toBase64,
 };
