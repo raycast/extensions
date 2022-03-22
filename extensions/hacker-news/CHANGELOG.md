@@ -1,6 +1,6 @@
 # Hacker News Changelog
 
-## [🎉 Added all of the RSS feeds] - 2022-03-21
+## [🎉 Added all of the RSS feeds] - (2022-03-21)
 
 - Merge `Show HN` and `Front Page` commands into a single command + adds the following new [HNRSS](https://hnrss.github.io/) feeds:
   - Active
@@ -18,14 +18,14 @@
   - Who Is Hiring
 - Update dependencies
 
-## [🔍 Added Show HN] - 2022-01-15
+## [🔍 Added Show HN] - (2022-01-15)
 
 - Add `Show HN` command
 
-## [🐞 Fixed points and comments counter] - 2021-12-05
+## [🐞 Fixed points and comments counter] - (2021-12-05)
 
 - Fix points and comments counter
 
-## [🎂 Added Hacker News] - 2021-10-11
+## [🎂 Added Hacker News] - (2021-10-11)
 
 - Initial version
