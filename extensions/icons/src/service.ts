@@ -79,7 +79,19 @@ class Service {
       })
       .filter((icon) => {
         const { hidden } = response.data[icon.id];
-        return !hidden;
+        // Temporarily removing some sets to prevent "Out of Memory" error
+        // when displaying a list with a large number of items
+        const largeSets = [
+          'ic',
+          'fluent',
+          'openmoji',
+          'twemoji',
+          'noto',
+          'noto-v1',
+          'emojione-v1',
+        ];
+        const large = largeSets.includes(icon.id);
+        return !hidden && !large;
       });
   }
 
