@@ -189,7 +189,7 @@
         "text": "move forward one full screen"
       },
       {
-        "kbd": "Cmd + d",
+        "kbd": "Ctrl + d",
         "text": "move forward 1/2 a screen"
       },
       {

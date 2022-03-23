@@ -12,7 +12,7 @@ type CommandGroup = {
   commands: Command[];
 };
 
-export default function Command() {
+export default function CommandSearch() {
   const commandGroups = commandsRaw as CommandGroup[];
 
   const [searchText, setSearchText] = useState("");
@@ -34,8 +34,9 @@ export default function Command() {
     notMatchedCommandGroups.forEach((group: CommandGroup) => {
       const list: Command[] = [];
       group.commands.forEach((item: Command) => {
-        const title = String(item.text).toLowerCase();
-        if (title.toLowerCase().includes(searchText.toLowerCase())) {
+        if (item.text.toLowerCase().includes(searchText.toLowerCase())) {
+          list.push(item);
+        } else if (item.kbd.toLowerCase().includes(searchText.toLowerCase())) {
           list.push(item);
         }
       });
