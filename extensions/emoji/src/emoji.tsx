@@ -28,7 +28,7 @@ const filterList = (list: Category[], searchText: string, category: string): Cat
 };
 
 export default function Main(): ReactElement {
-  const [list, setList] = usePersistentState<Emoji[]>("emoji-list", []);
+  const [list, setList] = usePersistentState<Emoji[]>("emoji-list-v2", []);
   const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
