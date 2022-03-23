@@ -1,5 +1,5 @@
 import { ActionPanel, Form, showToast, Clipboard, Action, Toast } from "@raycast/api";
-import { BigNumber } from "ethers";
+import { BigNumber } from "@ethersproject/bignumber";
 
 const REGEX = /^(?:0[xX]?)?[0-9a-fA-F]+$/;
 

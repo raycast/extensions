@@ -26,8 +26,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.3",
-    "ethers": "^5.6.1"
+    "@ethersproject/bignumber": "^5.6.0",
+    "@raycast/api": "^1.30.3"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
