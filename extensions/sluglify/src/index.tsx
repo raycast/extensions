@@ -1,4 +1,6 @@
-import { ActionPanel, Form, Action, Clipboard, showHUD, useNavigation, clearSearchBar } from "@raycast/api";
+import { ActionPanel, Action, List } from "@raycast/api";
+
+import { useState } from "react";
 
 function string_to_slug(str: string): string {
   return str
@@ -12,26 +14,28 @@ function string_to_slug(str: string): string {
 }
 
 export default function Command() {
-  const { pop } = useNavigation();
+  const [slug, setSlug] = useState("");
 
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Sluglify"
-            onSubmit={async ({ text }) => {
-              const slug = string_to_slug(text);
-              await Clipboard.copy(slug);
-              await showHUD(`Copied to clipboard: ${slug}`);
-              pop();
-              await clearSearchBar();
-            }}
-          />
-        </ActionPanel>
-      }
+    <List
+      onSearchTextChange={(e) => {
+        setSlug(string_to_slug(e));
+      }}
+      searchBarPlaceholder="Type your text"
+      throttle
     >
-      <Form.TextField id="text" placeholder="Enter text to sluglify" />
-    </Form>
+      {slug.length > 0 && (
+        <List.Section title="Your slug">
+          <List.Item
+            title={slug}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard title="Copy Slug" content={slug} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+    </List>
   );
 }
