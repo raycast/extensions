@@ -1,4 +1,4 @@
-# 1Password Changelog
+# Spotify Controls Changelog
 
 ## [Fix] - 2022-02-07
 
