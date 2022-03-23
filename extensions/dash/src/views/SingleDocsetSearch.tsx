@@ -1,8 +1,9 @@
 import { List } from "@raycast/api";
 import { useState } from "react";
-import DashResult from "./components/DashResult";
-import { Docset } from "./util/docsets";
-import { useDocsetSearch } from "./util/useDocsetSearch";
+
+import { DashResult } from "../components";
+import { Docset } from "../types";
+import { useDocsetSearch } from "../hooks";
 
 export default function SingleDocsetSearch({ docset }: { docset: Docset }) {
   const [searchText, setSearchText] = useState("");
