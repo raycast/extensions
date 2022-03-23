@@ -21,7 +21,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.30.0",
+    "@raycast/api": "^1.31.0",
     "lodash": "^4.17.21",
     "rss-parser": "3.12.0"
   },
