@@ -1,36 +1,48 @@
 import { List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import commands from "./commands.json";
+import commandsRaw from "./commands.json";
+
+type Command = {
+  kbd: string;
+  text: string;
+};
+
+type CommandGroup = {
+  key: string;
+  commands: Command[];
+};
 
 export default function Command() {
+  const commandGroups = commandsRaw as CommandGroup[];
+
   const [searchText, setSearchText] = useState("");
-  const [filteredList, setFilteredList] = useState(commands);
+  const [filteredList, setFilteredList] = useState(commandGroups);
 
   useEffect(() => {
-    const filteredCommands: any = {};
+    const filteredCommandGroups: CommandGroup[] = [];
 
-    const notMatchedTitles: any = {};
+    const notMatchedCommandGroups: CommandGroup[] = [];
 
-    Object.entries(commands).forEach(([key, value]) => {
-      if (key.toLowerCase().includes(searchText.toLowerCase())) {
-        filteredCommands[key] = value;
+    commandGroups.forEach((group: CommandGroup) => {
+      if (group.key.toLowerCase().includes(searchText.toLowerCase())) {
+        filteredCommandGroups.push(group);
       } else {
-        notMatchedTitles[key] = value;
+        notMatchedCommandGroups.push(group);
       }
     });
 
-    Object.entries(notMatchedTitles).forEach(([key, value]) => {
-      const list: any = [];
-      value.forEach((item: any) => {
-        const title = String(item["#text"]).toLowerCase();
+    notMatchedCommandGroups.forEach((group: CommandGroup) => {
+      const list: Command[] = [];
+      group.commands.forEach((item: Command) => {
+        const title = String(item.text).toLowerCase();
         if (title.toLowerCase().includes(searchText.toLowerCase())) {
           list.push(item);
         }
       });
 
-      filteredCommands[key] = list;
+      filteredCommandGroups.push({ key: group.key, commands: list });
     });
-    setFilteredList(filteredCommands);
+    setFilteredList(filteredCommandGroups);
   }, [searchText]);
 
   return (
@@ -40,16 +52,13 @@ export default function Command() {
       navigationTitle="Search vim commands"
       searchBarPlaceholder="Learn new command by searching it here."
     >
-      {Object.entries(filteredList).map(([key, value]) => {
+      {filteredList.map((commandGroup: CommandGroup) => {
+        const key = commandGroup.key;
+        const commands = commandGroup.commands;
         return (
           <List.Section title={key[0].toUpperCase() + key.slice(1)}>
-            {value.map((command) => {
-              return (
-                <List.Item
-                  title={command["#text"][0].toUpperCase() + command["#text"].slice(1)}
-                  subtitle={command.kbd}
-                />
-              );
+            {commands.map((command: Command) => {
+              return <List.Item title={command.text[0].toUpperCase() + command.text.slice(1)} subtitle={command.kbd} />;
             })}
           </List.Section>
         );
