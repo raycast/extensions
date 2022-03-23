@@ -1,4 +1,5 @@
 import { ActionPanel, Form, showToast, Clipboard, Action, Toast } from "@raycast/api";
+import { BigNumber } from "ethers";
 
 const REGEX = /^(?:0[xX]?)?[0-9a-fA-F]+$/;
 
@@ -7,13 +8,10 @@ function isHex(h: string) {
 }
 
 function ShareSecretAction() {
-  async function handleSubmit(values: { hex: string | number }) {
-    if (!values.hex || !isHex(String(values.hex))) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "invalid hex",
-      });
-      return;
+  async function handleSubmit(values: { hex: string }) {
+    let hexInput = values.hex.toLowerCase();
+    if (hexInput.slice(0, 2) !== "0x") {
+      hexInput = "0x" + hexInput;
     }
 
     const toast = await showToast({
@@ -22,7 +20,8 @@ function ShareSecretAction() {
     });
 
     try {
-      const decimal: string = parseInt(String(values.hex), 16).toString();
+      const bn = BigNumber.from(hexInput);
+      const decimal = bn.toString();
       await Clipboard.copy(decimal);
 
       toast.style = Toast.Style.Success;
@@ -31,8 +30,7 @@ function ShareSecretAction() {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failure";
-      console.log(error);
-      toast.message = String(error);
+      toast.message = `${values.hex} invalid hex`;
     }
   }
 

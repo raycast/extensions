@@ -3,7 +3,11 @@
   "name": "enigma",
   "title": "Enigma - Convert values",
   "description": "Convert values between encodings",
-  "categories": ["Data", "Developer Tools", "Productivity"],
+  "categories": [
+    "Data",
+    "Developer Tools",
+    "Productivity"
+  ],
   "icon": "command-icon.png",
   "author": "cheeseburgoor",
   "license": "MIT",
@@ -22,7 +26,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.3"
+    "@raycast/api": "^1.30.3",
+    "ethers": "^5.6.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
