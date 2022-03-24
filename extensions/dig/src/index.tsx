@@ -160,7 +160,7 @@ async function digByQuery(query: string): Promise<Result[]> {
     return x;
 
   } catch (e) {
-    showToast(ToastStyle.Failure, `Could not resolve domain`);
+    showToast(ToastStyle.Failure, `Could not resolve Domain`);
     return Promise.resolve([]);
   }
 }
