@@ -6,6 +6,7 @@ import { ViewMode, SWRKeys } from "../types";
 import { isRecurring, displayDueDate, getAPIDate, getToday, isExactTimeTask } from "../utils";
 import { priorities } from "../constants";
 import { todoist, handleError } from "../api";
+import TaskDetail from "./TaskDetail";
 
 const schedules = [
   { name: "Today", amount: 0 },
@@ -99,6 +100,8 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
       {...additionalListItemProps}
       actions={
         <ActionPanel>
+          <Action.Push title="Show Details" target={<TaskDetail task={task} />} icon={Icon.Sidebar} />
+
           <Action.OpenInBrowser url={task.url} />
 
           <Action
