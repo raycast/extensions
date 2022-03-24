@@ -7,7 +7,7 @@ export default function useDashApp(): [Application | null, boolean] {
   useEffect(() => {
     (async () => {
       const applications = await getApplications();
-      for (let application of applications) {
+      for (const application of applications) {
         if (application.bundleId?.startsWith("com.kapeli.dash")) {
           setDashApp(application);
           return;
