@@ -7,6 +7,21 @@ export interface IGif {
   slug: string;
   preview_gif_url: string;
   gif_url: string;
+  metadata?: {
+    width: number;
+    height: number;
+    size?: number;
+    labels?: {
+      title: string;
+      text: string;
+    }[];
+    links?: {
+      title: string;
+      target: string;
+      text: string;
+    }[];
+    tags?: string[];
+  };
   attribution?:
     | {
         dark: string;

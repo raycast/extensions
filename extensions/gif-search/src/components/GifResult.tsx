@@ -5,6 +5,7 @@ import tempy from "tempy";
 
 import { Action, ActionPanel, Icon, List, showHUD } from "@raycast/api";
 
+import { GifDetails } from "./GifDetails";
 import { IGif, renderGifMarkdownDetails } from "../models/gif";
 import { getShowPreview, getDefaultAction } from "../preferences";
 
@@ -34,8 +35,16 @@ export function GifResult(props: { item: IGif; index: number }) {
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
     />
   );
+  const viewDetails = (
+    <Action.Push icon={Icon.Eye} key="viewDetails" title="View GIF Details" target={<GifDetails item={props.item} />} />
+  );
 
-  const actions = [openInBrowser, copyGif, copyFile, copyUrl];
+  const actions = [viewDetails, openInBrowser, copyGif, copyFile, copyUrl];
+  if (showPreview) {
+    // Move View Details to the end if using gif preview
+    actions.push(actions.shift());
+  }
+
   const defaultAction = getDefaultAction();
   for (let index = 0; index < actions.length; index++) {
     const action = actions[index];

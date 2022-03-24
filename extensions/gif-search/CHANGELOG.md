@@ -1,6 +1,7 @@
 # GIF Search Changelog
 
-## [Fix GIF Preview Height] - 2022-03-30
+## [Add GIF Details, Fix GIF Preview Height] - 2022-03-30
+- Adds a GIF Details page that displays GIF metadata
 - Fixes the jumpiness when jumping between GIF previews by giving all gifs a static 200px height
 - Changes the attribution image based on the theme environment to enhance readability
 ## [Improved Experience] - 2022-03-22

@@ -1,3 +1,4 @@
+import formatRelative from "date-fns/formatRelative";
 import { AbortError, FetchError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -78,6 +79,17 @@ export function mapGiphyResponse(giphyResp: GiphyGif) {
     slug: giphyResp.slug,
     preview_gif_url: giphyResp.images.preview_gif.url,
     gif_url: giphyResp.images.fixed_height.url,
+    metadata: {
+      width: giphyResp.images.original.width,
+      height: giphyResp.images.original.height,
+      size: parseInt(giphyResp.images.original.size ?? "", 10) ?? 0,
+      labels: [
+        { title: "Created", text: formatRelative(new Date(giphyResp.import_datetime), new Date()) },
+        giphyResp.username && { title: "User", text: giphyResp.username },
+      ],
+      links: [giphyResp.source && { title: "Source", text: giphyResp.source_tld, target: giphyResp.source }],
+      tags: giphyResp.tags,
+    },
     attribution:
       environment.theme === "light" ? "Poweredby_100px-White_VertLogo.png" : "Poweredby_100px-Black_VertLogo.png",
   };
