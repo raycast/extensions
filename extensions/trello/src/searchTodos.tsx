@@ -3,13 +3,10 @@ import { useState } from "react";
 import { returnTodos } from "./utils/fetchTodos";
 import { TrelloFetchResponse } from "./trelloResponse.model";
 import { TodoListItem } from "./TrelloListItem";
-import { getBoards } from "./utils/fetchBoards";
 
 export default function PackageList() {
   const [results, setTodos] = useState<TrelloFetchResponse>([]);
   const [loading, setLoading] = useState<boolean>(false);
-
-  getBoards()
 
   const onSearchTextChange = async (text: string) => {
     setLoading(true);

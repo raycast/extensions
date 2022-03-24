@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getBoards } from "./utils/fetchBoards";
+import { returnBoards } from "./utils/fetchBoards";
 import { Board } from "./Board";
 
 export default function BoardsList() {
@@ -9,7 +9,7 @@ export default function BoardsList() {
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    getBoards().then((response) => {
+    returnBoards().then((response) => {
       const sortedBoards = response.filter(a => !a.closed).sort((a, b) => new Date(a.dateLastActivity).getMilliseconds() - new Date(b.dateLastActivity).getMilliseconds());
       setAllBoards(sortedBoards);
       setBoards(sortedBoards);
