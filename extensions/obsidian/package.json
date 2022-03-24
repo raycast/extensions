@@ -17,10 +17,10 @@
   ],
   "commands": [
     {
-      "name": "index",
+      "name": "searchNoteCommand",
       "title": "Search Note",
       "subtitle": "Obsidian",
-      "description": "Search, open, view, copy, paste and edit any note in Obsidian",
+      "description": "Search, open, view, copy, paste and edit any note in Obsidian.",
       "mode": "view",
       "preferences": [
         {
@@ -68,14 +68,21 @@
       ]
     },
     {
-      "name": "openvault",
+      "name": "openVaultCommand",
       "title": "Open Vault",
       "subtitle": "Obsidian",
-      "description": "Open a vault in Obsidian",
+      "description": "Open a vault in Obsidian.",
       "mode": "view"
     },
     {
-      "name": "createnote",
+      "name": "dailyNoteCommand",
+      "title": "Daily Note",
+      "subtitle": "Obsidian",
+      "description": "Open daily note in Obsidian. Will create new daily note when it doesn't exist yet.",
+      "mode": "view"
+    },
+    {
+      "name": "createNoteCommand",
       "title": "Create Note",
       "subtitle": "Obsidian",
       "description": "Create new note",

@@ -27,22 +27,26 @@ This command lets you create new notes on the fly by entering a name, optionally
 
 <img width="831" alt="Create Note command" src="https://user-images.githubusercontent.com/67844154/149658484-50b87db0-e6cf-4669-89b1-e3c674723066.png">
 
+## Daily Note
+This command will open the daily note from the selected vault. If a daily note doesn't exist it will create one and open it.
+It requires the community plugin [Advanced Obsidian URI](https://obsidian.md/plugins?id=obsidian-advanced-uri) and the core plugin "Daily notes" to be installed and enabled.
+
 ## Preferences
-### Search Note
+### General settings
 - set path/paths to your vault/vaults (comma separated)
+### Search Note
 - exclude folders, files and paths so they dont show up in the search
 - hide YAML frontmatter in "Quick Look" and copy/paste
 - hide wikilinks in "Quick Look" and copy/paste
 - select primary action (for `enter`)
-
-### Open Vault
-- list of vault names
-
 ### Create Note
-- set path/paths to your vault/vaults (comma separated)
 - default path where a new note will be created
 - default tag (will be selected by default in the tag picker)
 - list of tags to be suggested in the tag picker (comma separated)
+
+## Blog posts:
+- [First Update Raycast Obsidian Extension](https://www.marc-julian.de/2022/03/Obsidian%20Raycast%20Extension%20Update.html)
+- [Obsidian Raycast Extension](https://www.marc-julian.de/2022/01/raycastobsidian.html)
 
 ## Demo (old)
 https://user-images.githubusercontent.com/67844154/145954580-2a1cde55-a597-4298-8c6c-9cdc8d297a55.mov
