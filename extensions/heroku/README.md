@@ -2,6 +2,6 @@
 
 ## Setup
 
-![api-key](./metadata/API_KEY.jpeg)
+![api-key](./media/API_KEY.jpeg)
 
 Visit Heroku [Account Settings](https://dashboard.heroku.com/account) and copy the API_KEY
