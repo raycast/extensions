@@ -235,8 +235,19 @@ function TorrentListItem({
     .filter(Boolean)
     .join(" - ");
 
-  const downloadStats = [`↓ ${rateDownload}`, " - ", `↑ ${rateUpload}`, " - ", percentDone].join(" ");
-  const details = useAsync(() => renderDetails(torrent, downloadStats), [torrent, downloadStats]);
+  const downloadStats = useMemo(
+    () => [
+      { icon: Icon.ChevronDown, textIcon: "↓", text: rateDownload },
+      { icon: Icon.ChevronUp, textIcon: "↑", text: rateUpload },
+      { text: percentDone },
+    ],
+    [rateDownload, rateUpload, percentDone]
+  );
+
+  const details = useAsync(
+    () => renderDetails(torrent, downloadStats.map(({ textIcon, text }) => [textIcon, text].join(" ")).join(" - ")),
+    [torrent, downloadStats]
+  );
 
   const files = torrent.files.filter((file) => existsSync(path.join(torrent.downloadDir, file.name)));
 
@@ -246,7 +257,7 @@ function TorrentListItem({
       key={torrent.id}
       title={truncate(torrent.name, 60)}
       icon={statusIcon(torrent)}
-      accessoryTitle={!isShowingDetail ? downloadStats : undefined}
+      accessories={!isShowingDetail ? downloadStats.map(({ text, icon }) => ({ text, icon })) : undefined}
       detail={
         isShowingDetail && (
           <List.Item.Detail
