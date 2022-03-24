@@ -8,7 +8,7 @@ description: Learn how to build your first extension and use it in Raycast.
 
 Open the Create Extension command, name your extension "Hello World" and select the "Hello World" template. Pick a parent folder in the Location field and press `⌘` `↵` to continue.
 
-![Create a new extension](../.gitbook/assets/basics-create-extension.png)
+<img width="1024" alt="create-extension-march-2022" src="https://user-images.githubusercontent.com/17166544/159986562-53cfb7f8-c1b1-4515-8196-65e642138795.png">
 
 Next, you'll need to follow the on-screen instructions to build the extension.
 
@@ -17,6 +17,7 @@ Next, you'll need to follow the on-screen instructions to build the extension.
 Open your terminal, navigate to your extension directory and run `npm install && npm run dev`. Open Raycast, and you'll notice your extension at the top of the root search. Press `↵` to open it.
 
 ![Your first extension](../.gitbook/assets/basics-build-extension.png)
+
 
 ### Develop your extension
 
