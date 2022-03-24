@@ -1,0 +1,58 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "ScriptArgument": {
+            "properties": {
+                "percentEncoded": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "enum": [
+                        "text"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "type"
+            ],
+            "type": "object"
+        },
+        "ScriptMode": {
+            "enum": [
+                "copy",
+                "fullOutput",
+                "replace",
+                "silent"
+            ],
+            "type": "string"
+        }
+    },
+    "properties": {
+        "argument1": {
+            "$ref": "#/definitions/ScriptArgument"
+        },
+        "currentDirectoryPath": {
+            "type": "string"
+        },
+        "icon": {
+            "type": "string"
+        },
+        "mode": {
+            "$ref": "#/definitions/ScriptMode"
+        },
+        "packageName": {
+            "type": "string"
+        },
+        "title": {
+            "type": "string"
+        }
+    },
+    "required": [
+        "argument1",
+        "mode",
+        "title"
+    ],
+    "type": "object"
+}
+

@@ -57,6 +57,7 @@ export type Torrent = {
     lastAnnounceTime: number;
     downloadCount: number;
   }[];
+  addedDate: number;
 };
 
 export type SessionStats = {

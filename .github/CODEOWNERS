@@ -28,6 +28,7 @@
 /extensions/bttv-emote                               @Aayush9029
 /extensions/bugmenot                                 @Yukaii
 /extensions/buildkite                                @mskelton
+/extensions/cache-control-builder                    @rkusa
 /extensions/calendar                                 @fuksman
 /extensions/calendly                                 @eluce2
 /extensions/can-i-use                                @thomaslombart
@@ -62,7 +63,7 @@
 /extensions/datadog                                  @kudrykv @rcruzper @aexvir
 /extensions/days-until-christmas                     @MEGApixel23
 /extensions/debank                                   @Yukaii
-/extensions/deepcast                                 @mooxl
+/extensions/deepcast                                 @mooxl @mooxl
 /extensions/designer-news                            @itsnwa
 /extensions/devdocs                                  @pomdtr
 /extensions/diff-checker                             @Destiner
@@ -93,6 +94,7 @@
 /extensions/github-for-enterprise                    @Kinbaum
 /extensions/github-repository-search                 @thomaspaulmann
 /extensions/github-stars                             @mrmartineau
+/extensions/github-status                            @FezVrasta
 /extensions/gitignore                                @daniel-stoneuk
 /extensions/gitlab                                   @tonka3000 @Loskir
 /extensions/gitmoji                                  @ricoberger
@@ -107,7 +109,7 @@
 /extensions/google-trends                            @kkange
 /extensions/grafana                                  @Lp-Francois
 /extensions/graphcdn                                 @mathieudutour
-/extensions/hacker-news                              @thomaspaulmann
+/extensions/hacker-news                              @thomaspaulmann @sxn
 /extensions/harvest                                  @eluce2
 /extensions/hashnode                                 @dpnick
 /extensions/hazeover                                 @ratoru
@@ -192,7 +194,7 @@
 /extensions/raynab                                   @gogocharli
 /extensions/rebrandly                                @grikomsn
 /extensions/reddit-search                            @ewlcheng
-/extensions/remove-background                        @maantje
+/extensions/remove-background                        @maantje @FezVrasta
 /extensions/render                                   @Destiner
 /extensions/ricescore                                @tonka3000
 /extensions/roblox-games                             @TayIorRobinson

@@ -31,7 +31,7 @@ export function useSearchBookmarks(searchKind: SearchKind) {
   const cancelRef = useRef<AbortController | null>(null);
 
   const search = useCallback(
-    async function search(searchText: string) {
+    async (searchText: string) => {
       cancelRef.current?.abort();
       cancelRef.current = new AbortController();
       try {
