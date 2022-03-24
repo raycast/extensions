@@ -9,33 +9,37 @@ import RaceResultList from "../views/RaceResultList";
 function RaceList() {
   const [season, setSeason] = useState<string | null>(null);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
-  const [selectedRound, setSelectedRound] = useState<string | null>(null);
+  const [preselectedRound, setPreselectedRound] = useState<string | undefined>();
   const seasons = useSeasons();
   const [pastRaces, upcomingRaces, isLoading] = useRaces(season);
 
   useEffect(() => {
-    if (selectedRound === null) {
+    const upcomingRounds = Object.keys(upcomingRaces);
+    if (upcomingRounds.length === 0) {
+      setPreselectedRound(undefined);
       return;
     }
-    const race = pastRaces[selectedRound] || upcomingRaces[selectedRound];
-    if (!race) {
-      return;
-    }
-    const raceDates = getRaceDates(race);
-    if (raceDates.length) {
-      return;
-    }
-    setIsShowingDetail(false);
-  }, [selectedRound, pastRaces]);
+    setPreselectedRound((_) => upcomingRounds[0]);
+  }, [upcomingRaces]);
 
   return (
     <List
       isLoading={!season || isLoading}
-      onSelectionChange={(round) => {
-        if (typeof round === "undefined") {
+      selectedItemId={preselectedRound}
+      onSelectionChange={(selectedRound) => {
+        if (typeof selectedRound === "undefined") {
           return;
         }
-        setSelectedRound(round);
+        const race = pastRaces[selectedRound] || upcomingRaces[selectedRound];
+        if (!race) {
+          setIsShowingDetail(false);
+          return;
+        }
+        const raceDates = getRaceDates(race);
+        if (raceDates.length) {
+          return;
+        }
+        setIsShowingDetail(false);
       }}
       searchBarAccessory={
         <List.Dropdown tooltip="Select season" onChange={(newValue) => setSeason(newValue)} storeValue>
