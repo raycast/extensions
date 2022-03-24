@@ -3,32 +3,36 @@ import { useState, useEffect } from "react";
 import { usePersistentState } from "raycast-toolkit";
 import { execSync } from "child_process";
 import { existsSync, readFileSync } from "fs";
-import { getDashApp } from "../util";
+import useDashApp from "./useDashApp";
 import { Docset } from "../types";
+import { Application } from "@raycast/api";
 
 export default function useDocsets(): [Docset[], boolean] {
   const [isLoading, setLoading] = useState(true);
   const [docsets, setDocsets, isDocsetsLoading] = usePersistentState<Docset[]>("docsets-v1", []);
+  const [dashApp, isDashAppLoading] = useDashApp();
 
   useEffect(() => {
+    if (!dashApp) {
+      return;
+    }
     (async () => {
       setLoading(true);
       try {
-        setDocsets(await getDocsets());
+        setDocsets(await getDocsets(dashApp));
       } catch (err) {
         setDocsets([]);
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [dashApp]);
 
-  return [docsets, isLoading || isDocsetsLoading];
+  return [docsets, isLoading || isDocsetsLoading || isDashAppLoading];
 }
 
-async function getDocsets(): Promise<Docset[]> {
+async function getDocsets(dashApp: Application): Promise<Docset[]> {
   const filename = tempy.file({ extension: ".json" });
-  const dashApp = await getDashApp();
   execSync(`defaults read ${dashApp.bundleId} docsets | plutil -convert json -r -o ${filename} -`);
   const data = readFileSync(filename, "utf8");
   return JSON.parse(data).map((docset: Docset) => ({

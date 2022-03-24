@@ -2,15 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import { parse } from "fast-xml-parser";
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { getDashApp } from "../util";
+import useDashApp from "./useDashApp";
 import { DashResult } from "../types";
+import { Application } from "@raycast/api";
 const execFilePromisified = promisify(execFile);
 
 export default function useDocsetSearch(searchText: string, keyword = ""): [DashResult[], boolean] {
   const [state, setState] = useState<{ isLoading: boolean; results: DashResult[] }>({ isLoading: true, results: [] });
   const cancel = useRef<AbortController>(new AbortController());
+  const [dashApp, isDashAppLoading] = useDashApp();
 
   useEffect(() => {
+    if (!dashApp) {
+      return;
+    }
     (async () => {
       setState((previous) => ({ ...previous, isLoading: true }));
       cancel.current?.abort();
@@ -21,7 +26,7 @@ export default function useDocsetSearch(searchText: string, keyword = ""): [Dash
       }
       try {
         setState({
-          results: await searchDash(`${keyword ? `${keyword}:` : ""}${searchText}`, cancel.current.signal),
+          results: await searchDash(dashApp, `${keyword ? `${keyword}:` : ""}${searchText}`, cancel.current.signal),
           isLoading: false,
         });
       } catch (err) {
@@ -31,14 +36,12 @@ export default function useDocsetSearch(searchText: string, keyword = ""): [Dash
     return function cleanup() {
       cancel.current?.abort();
     };
-  }, [searchText]);
+  }, [dashApp, searchText]);
 
-  return [state.results, state.isLoading];
+  return [state.results, state.isLoading || isDashAppLoading];
 }
 
-async function searchDash(query: string, signal: AbortSignal): Promise<DashResult[]> {
-  const dashApp = await getDashApp();
-
+async function searchDash(dashApp: Application, query: string, signal: AbortSignal): Promise<DashResult[]> {
   try {
     const { stdout: data } = await execFilePromisified(`./dashAlfredWorkflow`, [query], {
       cwd: `${dashApp.path}/Contents/Resources`,
