@@ -5,7 +5,17 @@ import { JustWatchMedia, JustWatchMediaOffers, MediaProvider } from "./types";
 export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
   const countryCode = (await LocalStorage.getItem<string>("country_code")) || "en_CA";
 
-  const url = `https://apis.justwatch.com/content/titles/${countryCode}/popular?language=en&body={"page_size":8,"page":1,"query":"${query}","content_types":["show","movie"]}`;
+  const searchParams = new URLSearchParams({
+    language: "en",
+    body: JSON.stringify({
+      page_size: 8,
+      page: 1,
+      query,
+      content_types: ["show", "movie"],
+    }),
+  });
+
+  const url = `https://apis.justwatch.com/content/titles/${countryCode}/popular?${searchParams}`;
   const providerUrl = `https://apis.justwatch.com/content/providers/locale/${countryCode}`;
 
   const providersResponse = await fetch(providerUrl, { method: "GET" });
