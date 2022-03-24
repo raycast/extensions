@@ -12,13 +12,17 @@ export default function ({ result, index }: { result: DashResult; index: number 
       key={result["@_uid"]}
       title={decode(result.title.toString())}
       subtitle={decode(subtitle)}
-      accessoryTitle={docsetName}
       icon={result.icon}
       actions={
         <ActionPanel>
           <Action title="Open in Dash" onAction={async () => dashCallbackInBackground(index)} />
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: docsetName,
+        },
+      ]}
     />
   );
 }

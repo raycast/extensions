@@ -19,7 +19,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.30.3",
+    "@raycast/api": "^1.31.0",
     "execa": "6.1.0",
     "fast-xml-parser": "3.20.3",
     "html-entities": "2.3.2",
