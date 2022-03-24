@@ -1,14 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  SubmitFormAction,
-  OpenInBrowserAction,
-  copyTextToClipboard,
-  showToast,
-  ToastStyle,
-  getPreferenceValues,
-  Icon,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, Clipboard, showToast, Toast, getPreferenceValues, Icon } from "@raycast/api";
 import got from "got";
 import { useEffect, useState } from "react";
 import { source_languages, target_languages } from "./utils";
@@ -71,12 +61,12 @@ const Command = () => {
         const translation = JSON.parse(response.body).translations[0].text;
         setLoading(false);
         setTranslation(translation);
-        copyTextToClipboard(translation);
-        await showToast(ToastStyle.Success, "The translation was copied to your clipboard.");
+        await Clipboard.copy(translation);
+        await showToast(Toast.Style.Success, "The translation was copied to your clipboard.");
       } catch (error) {
         setLoading(false);
         await showToast(
-          ToastStyle.Failure,
+          Toast.Style.Failure,
           "Something went wrong",
           "Check your internet connection, API key, or you've maxed out the API."
         );
@@ -88,7 +78,7 @@ const Command = () => {
     // No action if the source language is not set ("Detect" by default)
     if (sourceLanguage === "") {
       await showToast(
-        ToastStyle.Failure,
+        Toast.Style.Failure,
         "Source language not set",
         "Please select a source language before switching languages."
       );
@@ -112,7 +102,7 @@ const Command = () => {
     } else {
       // Should never happen
       await showToast(
-        ToastStyle.Failure,
+        Toast.Style.Failure,
         "Something went wrong",
         `Could not switch between ${sourceLanguage} and ${targetLanguage}`
       );
@@ -123,8 +113,8 @@ const Command = () => {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Translate" onSubmit={submit} />
-          <OpenInBrowserAction title="Free API Key" url="https://www.deepl.com/pro-api" />
+          <Action.SubmitForm title="Translate" onSubmit={submit} />
+          <Action.OpenInBrowser title="Free API Key" url="https://www.deepl.com/pro-api" />
           <SwitchLanguagesAction onSwitchLanguages={switchLanguages} />
         </ActionPanel>
       }
