@@ -32,7 +32,7 @@ export interface IGif {
 
 export function renderGifMarkdownDetails(gif: IGif) {
   let md = `
-## ${gif.title}
+### ${gif.title}
 
 <img alt="${gif.title}" src="${gif.gif_url}" height="200" />
 
