@@ -26,7 +26,7 @@
 - Remember the color value in "Create project" form
 - Upgrade the dependencies
 
-## [Create and delete projects] - 2022-12-22
+## [Create and delete projects] - 2021-12-22
 
 - New command to create a Todoist project
 - New action panel item to delete a project in the project's search with confirmation alert
