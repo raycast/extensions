@@ -2,14 +2,18 @@ import { Action, ActionPanel, Detail, Form, showHUD } from "@raycast/api";
 import formatDistance from "date-fns/formatDistance";
 import { useEffect, useState } from "react";
 
-import { SlackClient, SnoozeStatus } from "./shared/client";
+import { SlackClient, SnoozeStatus, onApiError } from "./shared/client";
 
 export default function Command() {
   const [snoozeStatus, setSnoozeStatus] = useState<SnoozeStatus>();
 
-  useEffect(() => {
-    SlackClient.getSnoozeStatus().then(setSnoozeStatus);
-  }, []);
+  const updateSnoozeStatus = () => {
+    SlackClient.getSnoozeStatus()
+      .then(setSnoozeStatus)
+      .catch(() => onApiError({ exitExtension: true }));
+  };
+
+  useEffect(updateSnoozeStatus, []);
 
   if (!snoozeStatus) {
     return <Detail isLoading={true} />;
@@ -22,17 +26,21 @@ export default function Command() {
           <Action.SubmitForm
             title="Submit"
             onSubmit={async ({ snooze }) => {
-              if (snooze.startsWith("activate-for-")) {
-                const minutes = parseInt(snooze.replace("activate-for-", ""));
-                await SlackClient.setSnooze(minutes);
-                await showHUD(`Activated`);
-              } else {
-                await SlackClient.endSnooze();
-                await showHUD(`Deactivated`);
-              }
+              try {
+                if (snooze.startsWith("activate-for-")) {
+                  const minutes = parseInt(snooze.replace("activate-for-", ""));
+                  await SlackClient.setSnooze(minutes);
+                  await showHUD(`Activated`);
+                } else {
+                  await SlackClient.endSnooze();
+                  await showHUD(`Deactivated`);
+                }
 
-              setSnoozeStatus(undefined);
-              SlackClient.getSnoozeStatus().then(setSnoozeStatus);
+                setSnoozeStatus(undefined);
+                updateSnoozeStatus();
+              } catch {
+                await onApiError();
+              }
             }}
           />
         </ActionPanel>

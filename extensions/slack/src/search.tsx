@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Image, List } from "@raycast/api";
 
-import { CacheProvider, useChannels, useGroups, useUsers } from "./shared/client";
+import { CacheProvider, onApiError, useChannels, useGroups, useUsers } from "./shared/client";
 import { openChannel, openChat } from "./shared/utils";
 
 export default function Command() {
@@ -12,12 +12,16 @@ export default function Command() {
 }
 
 function SlackList() {
-  const { data: users } = useUsers();
-  const { data: channels } = useChannels();
-  const { data: groups } = useGroups();
+  const { data: users, error: usersError } = useUsers();
+  const { data: channels, error: channelsError } = useChannels();
+  const { data: groups, error: groupsError } = useGroups();
+
+  if (!users && !channels && !groups && usersError && channelsError && groupsError) {
+    onApiError({ exitExtension: true });
+  }
 
   return (
-    <List isLoading={!users || !groups || !channels}>
+    <List isLoading={(!users && !usersError) || (!groups && !groupsError) || (!channels && !channelsError)}>
       <List.Section title="Users">
         {users?.map(({ name, id, teamId, icon }) => (
           <List.Item
@@ -32,6 +36,7 @@ function SlackList() {
           />
         ))}
       </List.Section>
+
       <List.Section title="Channels">
         {channels?.map(({ name, id, teamId, icon }) => (
           <List.Item
@@ -46,6 +51,7 @@ function SlackList() {
           />
         ))}
       </List.Section>
+
       <List.Section title="Groups">
         {groups?.map(({ name, id, teamId, icon }) => (
           <List.Item

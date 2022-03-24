@@ -1,3 +1,4 @@
+import { popToRoot, showToast, Toast } from "@raycast/api";
 import { slackWebClient } from "./WebClient";
 
 interface Item {
@@ -28,6 +29,18 @@ const sortNames = (a: string, b: string) => {
     return 1;
   }
   return 0;
+};
+
+export const onApiError = async (props?: { exitExtension: boolean }): Promise<void> => {
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Slack API Error",
+    message: "Your Slack token might be invalid",
+  });
+
+  if (props?.exitExtension) {
+    await popToRoot({ clearSearchBar: true });
+  }
 };
 
 export class SlackClient {

@@ -1,14 +1,18 @@
 import { Action, ActionPanel, Detail, Form, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { PresenceStatus, SlackClient } from "./shared/client";
+import { PresenceStatus, SlackClient, onApiError } from "./shared/client";
 
 export default function Command() {
   const [presence, setPresence] = useState<PresenceStatus>();
 
-  useEffect(() => {
-    SlackClient.getPresence().then(setPresence);
-  }, []);
+  const updatePresence = () => {
+    SlackClient.getPresence()
+      .then(setPresence)
+      .catch(() => onApiError({ exitExtension: true }));
+  };
+
+  useEffect(updatePresence, []);
 
   if (!presence) {
     return <Detail isLoading={true} />;
@@ -34,16 +38,20 @@ export default function Command() {
           <Action.SubmitForm
             title="Submit"
             onSubmit={async ({ presence }) => {
-              if (presence === "offline") {
-                await SlackClient.setPresence("away");
-                await showHUD(`Force offline`);
-              } else {
-                await SlackClient.setPresence("auto");
-                await showHUD(`Auto`);
-              }
+              try {
+                if (presence === "offline") {
+                  await SlackClient.setPresence("away");
+                  await showHUD(`Force offline`);
+                } else {
+                  await SlackClient.setPresence("auto");
+                  await showHUD(`Auto`);
+                }
 
-              setPresence(undefined);
-              SlackClient.getPresence().then(setPresence);
+                setPresence(undefined);
+                updatePresence();
+              } catch {
+                await onApiError();
+              }
             }}
           />
         </ActionPanel>
