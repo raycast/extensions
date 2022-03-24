@@ -24,11 +24,13 @@
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.16.0",
+    "@typescript-eslint/parser": "^5.16.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react": "^7.29.4",
     "prettier": "^2.5.1",
+    "prettier-eslint": "^13.0.0",
     "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },

@@ -10,7 +10,11 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-var execSync = require('child_process').execSync;
+const { execSync } = require("child_process");
+
+//const execSync2 = require('child_process').execSync;
+//const execSync2 = execSync;
+//var execSync2 = require('execSync');
 
 export default function DigSearchResultsList() {
   const [query, setQuery] = useState<null | string>(null);
@@ -48,10 +52,7 @@ export default function DigSearchResultsList() {
           accessories={[{ text: result.summary }]}
           actions={
             <ActionPanel>
-              <CopyToClipboardAction
-                title="Copy Destination"
-                content={result.summary}
-              />
+              <CopyToClipboardAction title="Copy Destination" content={result.summary} />
               <OpenInBrowserAction url={result.url} />
               <ActionPanel.Item
                 title="Show NS-record Details"
@@ -98,69 +99,64 @@ type Result = {
 };
 
 function getNSEntry(cmdLine: string) {
-  var n = cmdLine.split(" ");
+  const n = cmdLine.split(" ");
   return n[n.length - 1];
-
 }
 
 function hasWhiteSpace(s: string) {
-  return s.indexOf(' ') >= 0;
+  return s.indexOf(" ") >= 0;
 }
 
 async function digByQuery(query: string): Promise<Result[]> {
   try {
+    // Prepare:
+    const str = query.trim();
+    const cmd = "";
 
-  // Prepare:
-  var str = query.trim();
-
-  // Check if string have options:
-  if(hasWhiteSpace(str)) {
-    
-    var queryArr = str.split(" ");
-    let query = queryArr[0].trim();
-    let option = queryArr[1].trim();
-    var cmd = "host -t " + option + " " + query;
-
-  } else {
-    var cmd = "host " + query;
-  }
-  
-  // Define execOptions:
-  var options = {
-    encoding: 'utf8'
-  };
-    
-  // Execute command:
-  let execReturnData = (execSync(cmd, options));
-  
-  // Split lines into array:
-  let execReturnDataArr = execReturnData.split("\n");
-  
-  // Prepare Output:
-  var x = [];
-    
-  // Loop stdout lines:
-  for(const val of execReturnDataArr) {
-
-    // Grab summary:
-    var sum = getNSEntry(val);
-  
-    // If not empty push into x arr:
-    if(val && sum) {
-      x.push( {
-            title: val,
-            summary: sum,
-            url: "https://www.nslookup.io/dns-records/" + query
-        } 
-      );
+    // Check if string have options:
+    if (hasWhiteSpace(str)) {
+      const queryArr = str.split(" ");
+      const query = queryArr[0].trim();
+      const option = queryArr[1].trim();
+      const cmd = "host -t " + option + " " + query;
+    } else {
+      const cmd = "host " + query;
     }
-  }
-  
+
+    // Define execOptions:
+    const options = {
+      encoding: "utf8",
+    };
+
+    // Execute command:
+
+    const execReturnData = execSync(cmd, options);
+
+    // Split lines into array:
+    const execReturnDataArr = execReturnData.split("\n");
+
+    // Prepare Output:
+    const x = [];
+
+    // Loop stdout lines:
+    for (const val of execReturnDataArr) {
+      // Grab summary:
+      const sum = getNSEntry(val);
+
+      // If not empty push into x arr:
+      if (val && sum) {
+        x.push({
+          title: val,
+          summary: sum,
+          url: "https://www.nslookup.io/dns-records/" + query,
+        });
+      }
+    }
+
     // Return x arr
     return x;
-
   } catch (e) {
-    showToast(ToastStyle.Failure, `Could not resolve Domain`);
+    showToast(ToastStyle.Failure, `Could not resolve domain`);
     return Promise.resolve([]);
   }
 }
