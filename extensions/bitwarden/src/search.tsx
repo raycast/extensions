@@ -148,7 +148,7 @@ function ItemListItem(props: {
       actions={
         <ActionPanel>
           {item.login?.password ? <PasswordActions password={item.login.password} /> : null}
-          {item.login?.username ? <UsernameActions username={item.login.username} /> : null}
+          {item.login?.username ? <UsernameAction username={item.login.username} /> : null}
           {item.login?.totp ? (
             <ActionPanel.Item
               shortcut={{ modifiers: ["cmd"], key: "t" }}
@@ -227,11 +227,11 @@ function PasswordActions(props: { password: string }) {
   );
 }
 
-function UsernameActions({ username }: { username: string }) {
+function UsernameAction(props: { username: string }) {
   return (
     <Action.CopyToClipboard
       title="Copy Username"
-      content={username}
+      content={props.username}
       icon={Icon.Person}
       shortcut={{ modifiers: ["cmd"], key: "u" }}
       onCopy={(content) => closeMainWindow({ clearRootSearch: true })}
