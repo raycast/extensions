@@ -2,7 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 import TaskList from "./TaskList";
 import useSWR from "swr";
 import { partition } from "lodash";
-import { isBefore } from "date-fns";
 import { ViewMode, SWRKeys, ProjectGroupBy, SectionWithTasks } from "../types";
 import { todoist, handleError } from "../api";
 import { getSectionsWithPriorities, getSectionsWithDueDates, getSectionsWithLabels } from "../utils";
