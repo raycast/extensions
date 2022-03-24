@@ -1,9 +1,10 @@
-# Authy Integration Changelog
+# Authy Extension Changelog
 
-## [Store metadata] - 2022-03-22
+## [Sort codes by usage] - 2022-03-25
 
 - Add metadata for store
 - Pop to root search after copy/paste OTP
+- [#1171](https://github.com/raycast/extensions/issues/1171) Sort list by recent usage
 
 ## [More icons and preference to hide services] - 2022-02-10
 

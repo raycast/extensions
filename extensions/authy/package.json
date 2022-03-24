@@ -60,6 +60,14 @@
       "type": "checkbox",
       "description": "Primary action copies pin to clipboard instead of outputing to front application",
       "default": true
+    },
+    {
+      "required": false,
+      "name": "recentlyUsedOrder",
+      "label": "Pop to up codes that you recently used",
+      "type": "checkbox",
+      "description": "Bring codes to top of the list one you used it",
+      "default": false
     }
   ],
   "dependencies": {

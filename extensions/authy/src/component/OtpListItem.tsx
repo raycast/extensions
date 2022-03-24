@@ -1,27 +1,41 @@
 import { ActionPanel, environment, getPreferenceValues, Icon, List, Action, popToRoot } from "@raycast/api";
 import { icondir } from "../constants";
 import { icon } from "../util/icon";
-import { compare } from "../util/compare";
+import { compareByName } from "../util/compare";
+import { addToCache, checkIfCached, getFromCache, RECENTLY_USED } from "../cache";
 
-const { primaryActionIsCopy } = getPreferenceValues<{ primaryActionIsCopy: boolean }>();
+const { primaryActionIsCopy, recentlyUsedOrder } =
+  getPreferenceValues<{ primaryActionIsCopy: boolean; recentlyUsedOrder: boolean }>();
 
-function PrimaryAction({ pin }: { pin: string }) {
+async function onAction(id: string) {
+  if (recentlyUsedOrder) {
+    const recentlyUsed = (await checkIfCached(RECENTLY_USED))
+      ? new Map<string, number>(await getFromCache(RECENTLY_USED))
+      : new Map<string, number>();
+    recentlyUsed.set(id, Date.now());
+    await addToCache(RECENTLY_USED, Array.from(recentlyUsed.entries()));
+  }
+  await popToRoot();
+}
+
+function PrimaryAction({ pin, id }: { pin: string; id: string }) {
   return primaryActionIsCopy ? (
-    <Action.CopyToClipboard title="Copy OTP" content={pin} onCopy={() => popToRoot()} />
+    <Action.CopyToClipboard title="Copy OTP" content={pin} onCopy={() => onAction(id)} />
   ) : (
-    <Action.Paste title="Output OTP" content={pin} onPaste={() => popToRoot()} />
+    <Action.Paste title="Output OTP" content={pin} onPaste={() => onAction(id)} />
   );
 }
 
-function SecondaryAction({ pin }: { pin: string }) {
+function SecondaryAction({ pin, id }: { pin: string; id: string }) {
   return primaryActionIsCopy ? (
-    <Action.Paste title="Output OTP" content={pin} onPaste={() => popToRoot()} />
+    <Action.Paste title="Output OTP" content={pin} onPaste={() => onAction(id)} />
   ) : (
-    <Action.CopyToClipboard title="Copy OTP" content={pin} onCopy={() => popToRoot()} />
+    <Action.CopyToClipboard title="Copy OTP" content={pin} onCopy={() => onAction(id)} />
   );
 }
 
 export interface Otp {
+  id: string;
   name: string;
   digits: number;
   generate: () => string;
@@ -41,7 +55,7 @@ interface OtpListItemProps {
 export default function OtpListItem({ item, basis, timeLeft, refresh }: OtpListItemProps) {
   const otp = item.generate();
   const subtitle = item.issuer || item.accountType || "";
-  const subtitleDisplay = subtitle.match("authenticator") || !compare(subtitle, item.name) ? "" : subtitle;
+  const subtitleDisplay = subtitle.match("authenticator") || !compareByName(subtitle, item.name) ? "" : subtitle;
   const pie = `pie-${basis === 30 ? timeLeft : timeLeft * 3}`;
 
   return (
@@ -59,8 +73,8 @@ export default function OtpListItem({ item, basis, timeLeft, refresh }: OtpListI
       keywords={[subtitle]}
       actions={
         <ActionPanel>
-          <PrimaryAction pin={otp ?? ""} />
-          <SecondaryAction pin={otp ?? ""} />
+          <PrimaryAction pin={otp ?? ""} id={item.id} />
+          <SecondaryAction pin={otp ?? ""} id={item.id} />
           <Action
             title={"Sync"}
             icon={Icon.ArrowClockwise}

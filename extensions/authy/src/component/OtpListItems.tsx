@@ -1,6 +1,5 @@
 import { useEffect, useState, Fragment } from "react";
 import OtpListItem, { Otp } from "./OtpListItem";
-import { compare } from "../util/compare";
 
 function calculateTimeLeft(basis: number) {
   return basis - (new Date().getSeconds() % basis);
@@ -39,17 +38,15 @@ export default function OtpListItems({ items, refresh }: OtpListItemsProps) {
 
   return (
     <Fragment>
-      {items
-        .sort((a: Otp, b: Otp) => compare(a.name, b.name))
-        .map((item, index) => (
-          <OtpListItem
-            key={index}
-            item={item}
-            basis={item.type === "service" ? 30 : 10}
-            timeLeft={item.type === "service" ? timeLeft30 : timeLeft10}
-            refresh={refresh}
-          />
-        ))}
+      {items.map((item, index) => (
+        <OtpListItem
+          key={index}
+          item={item}
+          basis={item.type === "service" ? 30 : 10}
+          timeLeft={item.type === "service" ? timeLeft30 : timeLeft10}
+          refresh={refresh}
+        />
+      ))}
     </Fragment>
   );
 }
