@@ -1,12 +1,15 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { List, } from "@raycast/api";
+import { useState } from "react";
 import { returnTodos } from "./utils/fetchTodos";
 import { TrelloFetchResponse } from "./trelloResponse.model";
 import { TodoListItem } from "./TrelloListItem";
+import { getBoards } from "./utils/fetchBoards";
 
 export default function PackageList() {
   const [results, setTodos] = useState<TrelloFetchResponse>([]);
   const [loading, setLoading] = useState<boolean>(false);
+
+  getBoards()
 
   const onSearchTextChange = async (text: string) => {
     setLoading(true);
@@ -20,8 +23,8 @@ export default function PackageList() {
     <List isLoading={loading} searchBarPlaceholder={`Search todos`} onSearchTextChange={onSearchTextChange} throttle>
       {results?.length
         ? results.map((result) => {
-            return <TodoListItem key={result.id} result={result} />;
-          })
+          return <TodoListItem key={result.id} result={result} />;
+        })
         : null}
     </List>
   );
