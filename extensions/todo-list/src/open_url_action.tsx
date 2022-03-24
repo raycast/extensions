@@ -8,7 +8,7 @@ const OpenUrlAction = ({ url, shortcut, title }: { url: string; shortcut?: Keybo
     hostname = new URL(url).hostname;
   } catch (e) {
     try {
-      resolvedUrl = `http://${url}`;
+      resolvedUrl = `https://${url}`;
       hostname = new URL(resolvedUrl).hostname;
     } catch (e) {
       return null;
