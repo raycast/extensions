@@ -13,7 +13,6 @@ const { apitoken }: Preferences = getPreferenceValues();
 const { username }: Preferences = getPreferenceValues();
 
 export const returnTodos = async (searchTerm: string): Promise<TrelloFetchResponse> => {
-
   try {
     if (searchTerm != "") {
       const response = await fetch(

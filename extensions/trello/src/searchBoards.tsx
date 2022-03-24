@@ -10,40 +10,51 @@ export default function BoardsList() {
 
   useEffect(() => {
     returnBoards().then((response) => {
-      const sortedBoards = response.filter(a => !a.closed).sort((a, b) => new Date(a.dateLastActivity).getMilliseconds() - new Date(b.dateLastActivity).getMilliseconds());
+      const sortedBoards = response
+        .filter((a) => !a.closed)
+        .sort(
+          (a, b) => new Date(a.dateLastActivity).getMilliseconds() - new Date(b.dateLastActivity).getMilliseconds()
+        );
       setAllBoards(sortedBoards);
       setBoards(sortedBoards);
       setLoading(false);
     });
-
-  }, [])
+  }, []);
 
   const onSearchTextChange = (text: string) => {
-    setBoards(allBoards.filter(x => x.name.toLowerCase().includes(text.toLowerCase())));
+    setBoards(allBoards.filter((x) => x.name.toLowerCase().includes(text.toLowerCase())));
     setLoading(false);
   };
   return (
     <List
       isShowingDetail={false}
-      isLoading={loading} searchBarPlaceholder={`Search boards`} onSearchTextChange={onSearchTextChange} throttle>
+      isLoading={loading}
+      searchBarPlaceholder={`Search boards`}
+      onSearchTextChange={onSearchTextChange}
+      throttle
+    >
       {boards?.length > 0
         ? boards.map((board) => {
-          return <List.Item
-
-            icon={board.prefs.backgroundImageScaled ? board.prefs.backgroundImageScaled[0].url : ""}
-            key={board.id}
-            title={board.name}
-            subtitle={board.organization?.displayName}
-            detail={< List.Item.Detail
-              markdown={`# [${board.name}](${board.shortUrl})
-![Illustration](${board.prefs.backgroundImageScaled ? board.prefs.backgroundImageScaled[2].url : ""})`} />}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={board.shortUrl} />
-              </ActionPanel>
-            }
-          />
-        })
+            return (
+              <List.Item
+                icon={board.prefs.backgroundImageScaled ? board.prefs.backgroundImageScaled[0].url : ""}
+                key={board.id}
+                title={board.name}
+                subtitle={board.organization?.displayName}
+                detail={
+                  <List.Item.Detail
+                    markdown={`# [${board.name}](${board.shortUrl})
+![Illustration](${board.prefs.backgroundImageScaled ? board.prefs.backgroundImageScaled[2].url : ""})`}
+                  />
+                }
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser url={board.shortUrl} />
+                  </ActionPanel>
+                }
+              />
+            );
+          })
         : null}
     </List>
   );
