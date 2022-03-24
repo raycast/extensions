@@ -22,7 +22,7 @@
 /extensions/bitbucket                                @Lp-Francois
 /extensions/bitly-url-shortener                      @blessanm86
 /extensions/bitrise                                  @ubuntudroid
-/extensions/bitwarden                                @pomdtr @daniel-stoneuk @jomifepe
+/extensions/bitwarden                                @pomdtr @daniel-stoneuk @jomifepe @andreaselia
 /extensions/brew                                     @nhojb
 /extensions/brew-services                            @es183923
 /extensions/bttv-emote                               @Aayush9029
@@ -138,7 +138,7 @@
 /extensions/kubernetes-docs                          @rpvsilva
 /extensions/laracasts                                @danyelkeddah
 /extensions/laravel-docs                             @indykoning @indykoning @indykoning
-/extensions/laravel-forge                            @KevinBatdorf
+/extensions/laravel-forge                            @KevinBatdorf @macbookandrew
 /extensions/laravel-livewire                         @tafhyseni
 /extensions/large-type                               @gon250
 /extensions/lark                                     @tmkx
