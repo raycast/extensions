@@ -118,7 +118,7 @@ export default function GetTables() {
                         title="Visit Club Page"
                         url={`https://www.premierleague.com/clubs/${
                           team.id
-                        }/${team.name.replaceAll(" ", "-")}/overview`}
+                        }/${team.name.replace(/ /g, "-")}/overview`}
                       />
                     </ActionPanel>
                   }
