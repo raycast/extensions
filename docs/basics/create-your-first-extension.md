@@ -8,7 +8,7 @@ description: Learn how to build your first extension and use it in Raycast.
 
 Open the Create Extension command, name your extension "Hello World" and select the "Hello World" template. Pick a parent folder in the Location field and press `⌘` `↵` to continue.
 
-<img width="1024" alt="create-extension-march-2022" src="https://user-images.githubusercontent.com/17166544/159986562-53cfb7f8-c1b1-4515-8196-65e642138795.png">
+![Create Extension command in Raycast](https://user-images.githubusercontent.com/17166544/159986562-53cfb7f8-c1b1-4515-8196-65e642138795.png)
 
 Next, you'll need to follow the on-screen instructions to build the extension.
 
