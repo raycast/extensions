@@ -63,17 +63,17 @@ function RaceList() {
                 detail={raceDates.length ? <RaceSessionDetails raceDates={raceDates} /> : undefined}
                 actions={
                   <ActionPanel title={race.raceName}>
+                    <Action.Push
+                      title="Show Results"
+                      target={<RaceResultList season={season} round={race.round} />}
+                      icon={{ source: "flag-checkered.png", tintColor: Color.Green }}
+                    />
                     {raceDates.length ? (
                       <Action
                         title={isShowingDetail ? "Hide Sessions" : "Show Sessions"}
                         onAction={() => setIsShowingDetail((previous) => !previous)}
                       />
                     ) : null}
-                    <Action.Push
-                      title="Show Results"
-                      target={<RaceResultList season={season} round={race.round} />}
-                      icon={{ source: "flag-checkered.png", tintColor: Color.Green }}
-                    />
                     <Action.OpenInBrowser url={race.url || race.Circuit.url} />
                   </ActionPanel>
                 }
