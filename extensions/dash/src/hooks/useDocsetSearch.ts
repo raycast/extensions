@@ -10,7 +10,7 @@ const execFilePromisified = promisify(execFile);
 export default function useDocsetSearch(searchText: string, keyword = ""): [DashResult[], boolean] {
   const [state, setState] = useState<{ isLoading: boolean; results: DashResult[] }>({ isLoading: true, results: [] });
   const cancel = useRef<AbortController>(new AbortController());
-  const [dashApp, isDashAppLoading] = useDashApp();
+  const dashApp = useDashApp();
 
   useEffect(() => {
     if (!dashApp) {
@@ -38,7 +38,7 @@ export default function useDocsetSearch(searchText: string, keyword = ""): [Dash
     };
   }, [dashApp, searchText]);
 
-  return [state.results, state.isLoading || isDashAppLoading];
+  return [state.results, state.isLoading];
 }
 
 async function searchDash(dashApp: Application, query: string, signal: AbortSignal): Promise<DashResult[]> {

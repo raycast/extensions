@@ -1,9 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Application, getApplications } from "@raycast/api";
-import { usePersistentState } from "raycast-toolkit";
 
-export default function useDashApp(): [Application | null, boolean] {
-  const [dashApp, setDashApp, isLoading] = usePersistentState<Application | null>("dashApp", null);
+export default function useDashApp() {
+  const [dashApp, setDashApp] = useState<Application | null>(null);
   useEffect(() => {
     (async () => {
       const applications = await getApplications();
@@ -17,5 +16,5 @@ export default function useDashApp(): [Application | null, boolean] {
     })();
   }, []);
 
-  return [dashApp, isLoading];
+  return dashApp;
 }

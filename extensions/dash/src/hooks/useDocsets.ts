@@ -10,7 +10,7 @@ import { Application } from "@raycast/api";
 export default function useDocsets(): [Docset[], boolean] {
   const [isLoading, setLoading] = useState(true);
   const [docsets, setDocsets, isDocsetsLoading] = usePersistentState<Docset[]>("docsets-v1", []);
-  const [dashApp, isDashAppLoading] = useDashApp();
+  const dashApp = useDashApp();
 
   useEffect(() => {
     if (!dashApp) {
@@ -28,7 +28,7 @@ export default function useDocsets(): [Docset[], boolean] {
     })();
   }, [dashApp]);
 
-  return [docsets, isLoading || isDocsetsLoading || isDashAppLoading];
+  return [docsets, isLoading || isDocsetsLoading];
 }
 
 async function getDocsets(dashApp: Application): Promise<Docset[]> {
