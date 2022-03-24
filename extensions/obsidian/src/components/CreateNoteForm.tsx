@@ -46,8 +46,8 @@ export function CreateNoteForm(props: { vaultPath: string }) {
   const { pop } = useNavigation();
 
   function createNewNote(noteProps: FormValue) {
-    let nc = new NoteCreator(noteProps, vaultPath);
-    let saved = nc.createNote();
+    const nc = new NoteCreator(noteProps, vaultPath);
+    const saved = nc.createNote();
     if (saved) {
       pop();
     }

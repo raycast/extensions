@@ -2,7 +2,7 @@ import { List, ActionPanel, OpenAction } from "@raycast/api";
 import { parseVaults } from "./VaultUtils";
 
 export default function Command() {
-  let vaults = parseVaults();
+  const vaults = parseVaults();
 
   return (
     <List isLoading={vaults === undefined}>

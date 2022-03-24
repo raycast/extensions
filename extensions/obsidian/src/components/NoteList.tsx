@@ -14,8 +14,8 @@ export function NoteList(props: { vaultPath: string }) {
     async function fetch() {
       try {
         await fs.promises.access(vaultPath + "/.");
-        let nl = new NoteLoader(vaultPath);
-        let _notes = nl.loadNotes();
+        const nl = new NoteLoader(vaultPath);
+        const _notes = nl.loadNotes();
 
         setNotes(_notes);
       } catch (error) {

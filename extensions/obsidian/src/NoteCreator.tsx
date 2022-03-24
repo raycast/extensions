@@ -12,7 +12,7 @@ interface FormValue {
 class NoteCreator {
   vaultPath: string;
   noteProps: FormValue;
-  saved: boolean = false;
+  saved = false;
 
   constructor(noteProps: FormValue, vaultPath: string) {
     this.vaultPath = vaultPath;
@@ -43,7 +43,7 @@ class NoteCreator {
   }
 
   async saveNote(content: string) {
-    let notePath = path.join(this.vaultPath, this.noteProps.path);
+    const notePath = path.join(this.vaultPath, this.noteProps.path);
 
     if (fs.existsSync(path.join(notePath, this.noteProps.name + ".md"))) {
       const options: AlertOptions = {

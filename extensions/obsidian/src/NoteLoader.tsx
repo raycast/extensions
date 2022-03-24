@@ -14,7 +14,7 @@ class NoteLoader {
 
   loadNotes() {
     const notes: Note[] = [];
-    let files = this.getFiles();
+    const files = this.getFiles();
 
     let key = 0;
     for (const f of files) {
@@ -44,7 +44,7 @@ class NoteLoader {
     const files = fs.readdirSync(dirPath);
     arrayOfFiles = arrayOfFiles || [];
 
-    for (let file of files) {
+    for (const file of files) {
       const next = fs.statSync(dirPath + "/" + file);
       if (next.isDirectory() && !file.includes(".obsidian")) {
         arrayOfFiles = this.getFilesHelp(dirPath + "/" + file, exFolders, arrayOfFiles);

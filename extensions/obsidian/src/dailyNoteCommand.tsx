@@ -6,7 +6,7 @@ import fs from "fs";
 export default function Command() {
   let vaults = parseVaults();
   vaults = vaults.filter((vault: Vault) => {
-    var plugins: Array<String> = JSON.parse(fs.readFileSync(vault.path + "/.obsidian/community-plugins.json", "utf-8"));
+    const plugins: Array<string> = JSON.parse(fs.readFileSync(vault.path + "/.obsidian/community-plugins.json", "utf-8"));
     if (plugins.includes("obsidian-advanced-uri")) {
       return vault;
     }
