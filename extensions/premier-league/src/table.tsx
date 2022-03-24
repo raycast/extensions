@@ -86,18 +86,18 @@ export default function GetTables() {
                 startingPosition,
               } = entry;
 
-              let accessoryIcon: Image.ImageLike = {
+              let icon: Image.ImageLike = {
                 source: Icon.Dot,
                 tintColor: Color.SecondaryText,
               };
 
               if (position < startingPosition) {
-                accessoryIcon = {
+                icon = {
                   source: Icon.ChevronUp,
                   tintColor: Color.Green,
                 };
               } else if (position > startingPosition) {
-                accessoryIcon = {
+                icon = {
                   source: Icon.ChevronDown,
                   tintColor: Color.Red,
                 };
@@ -105,24 +105,29 @@ export default function GetTables() {
 
               const props: Partial<List.Item.Props> = showDetails
                 ? {
-                    accessoryTitle: overall.points.toString(),
-                    accessoryIcon,
+                    accessories: [{ text: overall.points.toString(), icon }],
                     detail: (
                       <List.Item.Detail markdown={json2md(club(entry))} />
                     ),
                   }
                 : {
                     subtitle: team.club.abbr,
-                    accessoryTitle: `Played: ${overall.played} Points: ${overall.points}`,
+                    accessories: [
+                      { text: `Played: ${overall.played}` },
+                      { text: `Points: ${overall.points}` },
+                    ],
                   };
 
               if (!showDetails && next) {
                 const nextTeam =
                   ground.id === next.ground.id ? next.teams[1] : next.teams[0];
-                props.accessoryIcon = {
-                  source: `https://resources.premierleague.com/premierleague/badges/${nextTeam.team.altIds.opta}.svg`,
-                  fallback: "default.png",
-                };
+
+                props.accessories?.push({
+                  icon: {
+                    source: `https://resources.premierleague.com/premierleague/badges/${nextTeam.team.altIds.opta}.svg`,
+                    fallback: "default.png",
+                  },
+                });
               }
 
               return (
