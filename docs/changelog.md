@@ -11,7 +11,7 @@
 ### 💎 Improvements
 
 - **Environment**: the current theme (`"dark" | "light"`) configured via Raycast appearance preferences is now globally accessible through `environment.theme`
-- **SVG**: You can now specify width and height attributes for images in markdown (<img> tag).
+- **SVG**: You can now specify width and height attributes for images in markdown (`<img>` tag).
 - **Dev Tools:** the “Create Extension” command lets you add categories to your extension; the categories are displayed alongside the new metadata on our revamped details page in the store.
 - **Dev Tools**: added a new development action to clear the local assets cache, e.g. to render an updated list icon without having to restart Raycast. ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #1095](https://github.com/raycast/extensions/issues/1095))
 - **Preferences**: the `required` property in manifest preferences is now optional.
