@@ -2,6 +2,8 @@ import path from "path";
 import { AbortError, FetchError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { environment } from "@raycast/api";
+
 import { getAPIKey, GIF_SERVICE } from "../preferences";
 
 import TenorAPI, { TenorResults } from "../models/tenor";
@@ -78,6 +80,6 @@ export function mapTenorResponse(tenorResp: TenorGif) {
     slug: path.basename(tenorResp.itemurl),
     preview_gif_url: mediaItem.tinygif.preview,
     gif_url: mediaItem.tinygif.url,
-    attribution: "poweredby_tenor.png",
+    attribution: environment.theme === "light" ? "PB_tenor_logo_grey_vertical.png" : "PB_tenor_logo_blue_vertical.png",
   };
 }

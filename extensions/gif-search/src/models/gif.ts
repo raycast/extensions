@@ -19,7 +19,7 @@ export function renderGifMarkdownDetails(gif: IGif) {
   let md = `
 ## ${gif.title}
 
-![${gif.title}](${gif.gif_url})
+<img alt="${gif.title}" src="${gif.gif_url}" height="200" />
 
 \`\`\`
 Static preview, animated preview coming soon!
@@ -27,9 +27,7 @@ Static preview, animated preview coming soon!
   `;
 
   if (gif.attribution) {
-    md += `
-![Powered by](file:${environment.assetsPath}/${gif.attribution})
-`;
+    md += `<img height="36" alt="Powered by" src="file:${environment.assetsPath}/${gif.attribution}" />`;
   }
 
   return md;

@@ -1,8 +1,10 @@
 # GIF Search Changelog
 
+## [Fix GIF Preview Height] - 2022-03-30
+- Fixes the jumpiness when jumping between GIF previews by giving all gifs a static 200px height
+- Changes the attribution image based on the theme environment to enhance readability
 ## [Improved Experience] - 2022-03-22
 - Giphy and Tenor keys no longer required, downloads shared keys by default
-
 ## [New Customizations & New GIF Search Engine] - 2022-03-21
 - Adds support for copying the GIF file itself (instead of the URL) to the clipboard via AppleScript
 - Adds a "Secondary Action" preference to change the action on CMD + ENTER
