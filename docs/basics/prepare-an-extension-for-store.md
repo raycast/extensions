@@ -106,7 +106,7 @@ Here you will find requirements and guidelines that you'll need to follow in ord
 
 ### Screenshots
 
-![Screenshots will show in an extensions detail screen](../.gitbook/assets/screenshots-example.png)
+<img width="1024" alt="media-preview" src="https://user-images.githubusercontent.com/17166544/159986998-a67ebd18-ae24-4b19-8123-ac1c600d18b3.png">
 
 * Screenshots are displayed in the metadata of an extension details screen, where users can click and browse through them to understand what your extension does in greater detail, before installing
 * You can add a maximum of six screenshots. We recommend adding at least three, so your extensions detail screen looks beautiful.
@@ -186,6 +186,9 @@ Add support for searching and managing casks
 ## [Added Brew] - 2021-10-26
 Initial version code
 ```
+
+![An extensions version history on raycast.com/store](https://user-images.githubusercontent.com/17166544/159987128-1e9f22a6-506b-4edd-bb40-e121bfdc46f8.png)
+
 
 {% hint style="info" %}
 You can use [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) to help you format your changelog correctly
