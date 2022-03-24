@@ -1,9 +1,9 @@
-import { Action, ActionPanel, List, Icon } from "@raycast/api";
+import { Action, ActionPanel, List, Icon, Image, Color } from "@raycast/api";
 import { useEffect, useState } from "react";
 import json2md from "json2md";
 import SeasonDropdown, { seasons } from "./components/season_dropdown";
 import { getTables } from "./api";
-import { Entry, Table } from "./types";
+import { Entry, Table } from "./types/table";
 
 export default function GetTables() {
   const [tables, setTables] = useState<Table[]>([]);
@@ -12,7 +12,9 @@ export default function GetTables() {
   const [showDetails, setShowDetails] = useState<boolean>(false);
 
   useEffect(() => {
+    setTables([]);
     setLoading(true);
+
     getTables(season).then((data) => {
       setTables(data);
       setLoading(false);
@@ -75,11 +77,36 @@ export default function GetTables() {
         return (
           <List.Section key={table.gameWeek}>
             {table.entries.map((entry) => {
-              const { overall, team, position, ground, next } = entry;
+              const {
+                overall,
+                team,
+                position,
+                ground,
+                next,
+                startingPosition,
+              } = entry;
+
+              let accessoryIcon: Image.ImageLike = {
+                source: Icon.Dot,
+                tintColor: Color.SecondaryText,
+              };
+
+              if (position < startingPosition) {
+                accessoryIcon = {
+                  source: Icon.ChevronUp,
+                  tintColor: Color.Green,
+                };
+              } else if (position > startingPosition) {
+                accessoryIcon = {
+                  source: Icon.ChevronDown,
+                  tintColor: Color.Red,
+                };
+              }
 
               const props: Partial<List.Item.Props> = showDetails
                 ? {
                     accessoryTitle: overall.points.toString(),
+                    accessoryIcon,
                     detail: (
                       <List.Item.Detail markdown={json2md(club(entry))} />
                     ),
