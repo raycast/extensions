@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import execa from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
-import { PasswordGeneratorOptions, VaultStatus } from "./types";
+import { Item, PasswordGeneratorOptions, VaultStatus } from "./types";
 import { getPasswordGeneratingArgs } from "./utils";
 
 export class Bitwarden {
@@ -33,9 +33,11 @@ export class Bitwarden {
     await this.exec(["login", "--apikey"]);
   }
 
-  async listItems<ItemType>(type: string, sessionToken: string): Promise<ItemType[]> {
+  async listItems(type: string, sessionToken: string): Promise<Item[]> {
     const { stdout } = await this.exec(["list", type, "--session", sessionToken]);
-    return JSON.parse(stdout);
+    const items = JSON.parse(stdout);
+    // Filter out items without a name property (they are not displayed in the bitwarden app)
+    return items.filter((item: any) => !!item.name);
   }
 
   async getTotp(id: string, sessionToken: string): Promise<string> {

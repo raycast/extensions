@@ -45,7 +45,7 @@ function ItemList(props: {
 
   async function loadItems(sessionToken: string) {
     try {
-      const items = await bitwardenApi.listItems<Item>("items", sessionToken);
+      const items = await bitwardenApi.listItems("items", sessionToken);
       setItems(items);
     } catch (error) {
       showToast(Toast.Style.Failure, "Failed to search vault");
