@@ -2,6 +2,8 @@ import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { showToast, Toast } from "@raycast/api";
 import { PremierLeague, Table } from "../types/table";
 import { Content, Fixture } from "../types/fixture";
+import { seasons } from "../components/season_dropdown";
+import { clubs } from "../components/club_dropdown";
 
 function showFailureToast() {
   showToast(
@@ -31,10 +33,12 @@ export const getTables = async (seasonId: string): Promise<Table[]> => {
   }
 };
 
-export const getFixtures = async (seasonId: string): Promise<Content[]> => {
+export const getFixtures = async (clubId: string): Promise<Content[]> => {
+  const teams = clubId === "-1" ? clubs.map((c) => c.value).join() : clubId;
+
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `https://footballapi.pulselive.com/football/fixtures?comps=1&teams=1,2,130,131,43,4,6,7,9,26,10,11,12,23,14,20,21,33,25,38&compSeasons=${seasonId}&page=0&pageSize=40&sort=asc&statuses=U,L&altIds=true`,
+    url: `https://footballapi.pulselive.com/football/fixtures?comps=1&teams=${teams}&compSeasons=${seasons[0].value}&page=0&pageSize=40&sort=asc&statuses=U,L&altIds=true`,
     headers: {
       Origin: "https://www.premierleague.com",
     },
