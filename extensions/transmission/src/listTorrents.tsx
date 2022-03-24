@@ -108,16 +108,16 @@ export default function TorrentList() {
   }, [torrentsError]);
 
   const paddedRateDownloads = useMemo(
-    () => padList(sortedTorrents.map((t) => `${prettyBytes(t.rateDownload)}/s`)),
-    [torrents]
+    () => padList(filteredTorrents.map((t) => `${prettyBytes(t.rateDownload)}/s`)),
+    [filteredTorrents]
   );
   const paddedRateUploads = useMemo(
-    () => padList(sortedTorrents.map((t) => `${prettyBytes(t.rateUpload)}/s`)),
-    [torrents]
+    () => padList(filteredTorrents.map((t) => `${prettyBytes(t.rateUpload)}/s`)),
+    [filteredTorrents]
   );
   const paddedPercentDones = useMemo(
-    () => padList(sortedTorrents.map((t) => `${Math.round(t.percentDone * 100)}%`)),
-    [torrents]
+    () => padList(filteredTorrents.map((t) => `${Math.round(t.percentDone * 100)}%`)),
+    [filteredTorrents]
   );
 
   return (
