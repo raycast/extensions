@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "dig",
+  "name": "Dig (DNS Lookup)",
   "title": "Dig (DNS Lookup)",
-  "description": "**digs a host**\nex. dig facebook.com ns = returns nameserver for Facebook\nex. dig raycast.com mx = returns mailexchangers for raycast.com",
+  "description": "DNS lookup and nameserver query using the built-in host command",
   "icon": "command-icon.png",
   "author": "danielbahl",
   "categories": [
@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "dig",
-      "subtitle": "digs a hostname for ns-records",
+      "subtitle": "Query Hostname",
       "description": "Returns NS-records from the hostname",
       "mode": "view"
     }
