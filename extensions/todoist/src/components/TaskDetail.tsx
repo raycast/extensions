@@ -1,6 +1,7 @@
-import { Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { Task, colors } from "@doist/todoist-api-typescript";
 import useSWR from "swr";
+import { format } from "date-fns";
 import { displayDueDate } from "../utils";
 import { priorities } from "../constants";
 import { SWRKeys } from "../types";
@@ -32,6 +33,13 @@ export default function TaskDetail({ task }: TaskDetailProps): JSX.Element {
     };
   });
 
+  let displayedDate = "No due date";
+  if (task.due) {
+    const dueDate = displayDueDate(task.due.date);
+
+    displayedDate = task.due.datetime ? `${dueDate} ${format(new Date(task.due.datetime), "HH:mm")}` : dueDate;
+  }
+
   return (
     <Detail
       markdown={`# ${task.content}\n\n${task.description}`}
@@ -42,11 +50,7 @@ export default function TaskDetail({ task }: TaskDetailProps): JSX.Element {
             text={project?.name}
             icon={project?.inboxProject ? Icon.Envelope : Icon.List}
           />
-          <Detail.Metadata.Label
-            title="Due Date"
-            text={task.due?.date ? displayDueDate(task.due.date) : "No due date"}
-            icon={Icon.Calendar}
-          />
+          <Detail.Metadata.Label title="Due Date" text={displayedDate} icon={Icon.Calendar} />
           <Detail.Metadata.Label
             title="Priority"
             text={priority?.name}
@@ -64,6 +68,11 @@ export default function TaskDetail({ task }: TaskDetailProps): JSX.Element {
             </Detail.Metadata.TagList>
           ) : null}
         </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser url={task.url} />
+        </ActionPanel>
       }
     />
   );
