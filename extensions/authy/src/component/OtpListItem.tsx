@@ -1,11 +1,13 @@
-import { ActionPanel, environment, getPreferenceValues, Icon, List, Action, popToRoot } from "@raycast/api";
+import { ActionPanel, environment, getPreferenceValues, Icon, List, Action } from "@raycast/api";
 import { icondir } from "../constants";
 import { icon } from "../util/icon";
 import { compareByName } from "../util/compare";
 import { addToCache, checkIfCached, getFromCache, RECENTLY_USED } from "../cache";
 
-const { primaryActionIsCopy, recentlyUsedOrder } =
-  getPreferenceValues<{ primaryActionIsCopy: boolean; recentlyUsedOrder: boolean }>();
+const { primaryActionIsCopy, recentlyUsedOrder } = getPreferenceValues<{
+  primaryActionIsCopy: boolean;
+  recentlyUsedOrder: boolean;
+}>();
 
 async function onAction(id: string) {
   if (recentlyUsedOrder) {
@@ -15,7 +17,6 @@ async function onAction(id: string) {
     recentlyUsed.set(id, Date.now());
     await addToCache(RECENTLY_USED, Array.from(recentlyUsed.entries()));
   }
-  await popToRoot();
 }
 
 function PrimaryAction({ pin, id }: { pin: string; id: string }) {
