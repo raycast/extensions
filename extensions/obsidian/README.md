@@ -6,8 +6,9 @@ This command allows for quick access to all of your notes.
 It features several actions which you can trigger with these keyboard shortcuts: 
 - `enter` will open the note in "Quick Look"
 - `cmd + enter` will open the note in Obsidian
-- `shift + cmd + A` will let you add text to the note
-- `opt + c` will copy the selected notes content to your clipboard
+- `opt + a` will let you append text to the note
+- `opt + s` will append selected text to the note
+- `opt + c` will copy the notes content to your clipboard
 - `opt + v` will paste the notes content to the app you used before raycast
 - `opt + l` will copy a markdown link for the note to your clipboard
 - `opt + u` will copy the obsidian URI for the note to your clipboard (see: [Obsidian URI](https://help.obsidian.md/Advanced+topics/Using+obsidian+URI))

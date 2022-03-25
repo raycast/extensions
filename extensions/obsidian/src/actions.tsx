@@ -1,5 +1,6 @@
 import {
   ActionPanel,
+  Action,
   OpenAction,
   getPreferenceValues,
   CopyToClipboardAction,
@@ -7,6 +8,10 @@ import {
   PushAction,
   Detail,
   Icon,
+  showToast,
+  ToastStyle,
+  getSelectedText,
+  print,
 } from "@raycast/api";
 
 import fs from "fs";
@@ -37,6 +42,22 @@ function getNoteContent(note: Note) {
   return content;
 }
 
+async function appendSelectedTextTo(note: Note) {
+  let selectedText = "";
+  try {
+    selectedText = await getSelectedText();
+    console.log(selectedText);
+    if (selectedText.trim() == "") {
+      showToast(ToastStyle.Failure, "No text selected");
+    } else {
+      fs.appendFileSync(note.path, "\n\n" + selectedText);
+      showToast(ToastStyle.Success, "Added selected text to note");
+    }
+  } catch {
+    showToast(ToastStyle.Failure, "Couldn't copy selected text");
+  }
+}
+
 function NoteQuickLook(props: { note: Note }) {
   const note = props.note;
   const content = getNoteContent(note);
@@ -60,7 +81,16 @@ export function NoteActions(props: { note: Note }) {
       <PushAction
         title="Append to note"
         target={<AppendNoteForm note={note} />}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+        shortcut={{ modifiers: ["opt"], key: "a" }}
+        icon={Icon.Pencil}
+      />
+
+      <Action
+        title="Append selected text"
+        shortcut={{ modifiers: ["opt"], key: "s" }}
+        onAction={() => {
+          appendSelectedTextTo(note);
+        }}
         icon={Icon.Pencil}
       />
 
@@ -78,12 +108,14 @@ export function NoteActions(props: { note: Note }) {
 
       <CopyToClipboardAction
         title="Copy markdown link"
+        icon={Icon.Link}
         content={`[${note.title}](obsidian://open?path=${encodeURIComponent(note.path)})`}
         shortcut={{ modifiers: ["opt"], key: "l" }}
       />
 
       <CopyToClipboardAction
         title="Copy obsidian URI"
+        icon={Icon.Link}
         content={`obsidian://open?path=${encodeURIComponent(note.path)}`}
         shortcut={{ modifiers: ["opt"], key: "u" }}
       />
