@@ -23,6 +23,7 @@
     {
       "name": "startFocusTime",
       "title": "Start Focus Session",
+      "subtitle": "RescueTime",
       "description": "Starts a Focus Session for RescueTime. Enter default value for duration of Focus Session in preferences if you prefer a value other than 25",
       "mode": "no-view",
       "preferences": [
