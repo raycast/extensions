@@ -19,8 +19,8 @@
       "mode": "view"
     },
     {
-      "name": "unread-messages",
-      "title": "Unread Messages",
+      "name": "open-unread-messages",
+      "title": "Open Unread Messages",
       "subtitle": "Slack",
       "description": "Open an overview of unread messages directly in your native Slack app.",
       "mode": "no-view"
