@@ -15,10 +15,15 @@ interface CreateTaskProps {
 export default function CreateTask({ projectId: initialProjectId }: CreateTaskProps) {
   const { push } = useNavigation();
   const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
+  const { data: sections, error: getSectionsError } = useSWR(SWRKeys.sections, () => todoist.getSections());
   const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
 
   if (getProjectsError) {
     handleError({ error: getProjectsError, title: "Unable to get projects" });
+  }
+
+  if (getSectionsError) {
+    handleError({ error: getSectionsError, title: "Unable to get sections" });
   }
 
   if (getLabelsError) {
@@ -34,6 +39,7 @@ export default function CreateTask({ projectId: initialProjectId }: CreateTaskPr
   const [dueDate, setDueDate] = useState<Date | undefined>();
   const [priority, setPriority] = useState<string>(String(lowestPriority.value));
   const [projectId, setProjectId] = useState<string>(String(initialProjectId) || "");
+  const [sectionId, setSectionId] = useState<string>();
   const [labelIds, setLabelIds] = useState<string[]>();
 
   function clear() {
@@ -63,6 +69,10 @@ export default function CreateTask({ projectId: initialProjectId }: CreateTaskPr
       body.projectId = parseInt(projectId);
     }
 
+    if (sectionId) {
+      body.sectionId = parseInt(sectionId);
+    }
+
     if (labelIds && labelIds.length > 0) {
       body.labelIds = labelIds.map((id) => parseInt(id));
     }
@@ -89,6 +99,8 @@ export default function CreateTask({ projectId: initialProjectId }: CreateTaskPr
       handleError({ error, title: "Unable to create task" });
     }
   }
+
+  const projectSections = sections?.filter((section) => String(section.projectId) === projectId);
 
   return (
     <Form
@@ -128,6 +140,14 @@ export default function CreateTask({ projectId: initialProjectId }: CreateTaskPr
       {projects && projects.length > 0 ? (
         <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId} storeValue>
           {projects.map(({ id, name }) => (
+            <Form.Dropdown.Item value={String(id)} title={name} key={id} />
+          ))}
+        </Form.Dropdown>
+      ) : null}
+
+      {projectSections && projectSections.length > 0 ? (
+        <Form.Dropdown id="section_id" title="Section" value={sectionId} onChange={setSectionId} storeValue>
+          {projectSections.map(({ id, name }) => (
             <Form.Dropdown.Item value={String(id)} title={name} key={id} />
           ))}
         </Form.Dropdown>
