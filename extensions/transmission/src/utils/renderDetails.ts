@@ -27,7 +27,7 @@ export const renderDetails = async (torrent: Torrent, downloadStats: string) => 
 
     ${downloadStats}
 
-    <img src="data:image/svg+xml;base64,${Buffer.from(img).toString("base64")}" />
+    <img src="data:image/svg+xml;base64,${encodeURIComponent(img)}" />
 
     ## Files
 
