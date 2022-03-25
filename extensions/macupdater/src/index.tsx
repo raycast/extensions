@@ -9,9 +9,10 @@ export default function Command() {
 
   useEffect(() => {
     const today = new Date();
-    const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(
-      today.getDay() + 1
-    ).padStart(2, "0")}`;
+    const date = `${today.getFullYear()}-${String(
+      today.getMonth() + 1
+    ).padStart(2, "0")}-${String(today.getDate() - 1).padStart(2, "0")}`;
+    console.log(date);
     scrapeMacUpdater(`https://macupdater.net/app_updates/index-${date}.html`)
       .then((updates) => {
         setUpdates(updates);
