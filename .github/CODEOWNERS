@@ -116,6 +116,7 @@
 /extensions/helm-docs                                @tiagomichaelsousa
 /extensions/hexlify                                  @gkpln3
 /extensions/homeassistant                            @tonka3000 @altrdev
+/extensions/http-status-codes                        @AlexVanderbist
 /extensions/huggingcast                              @ragnorc
 /extensions/imdb                                     @ryan-exe
 /extensions/inertiajs-documentation                  @danyelkeddah
