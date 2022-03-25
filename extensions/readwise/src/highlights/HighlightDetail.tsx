@@ -2,11 +2,15 @@ import { ActionPanel, Action, Detail } from "@raycast/api";
 import formatDate from "date-fns/format";
 
 export const HighlightDetail = ({ item }: { item: Highlight }) => {
+  const bookUrl = `https://readwise.io/bookreview/${item.book_id}`;
+
   return (
     <Detail
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Text" content={item.text} shortcut={{ modifiers: ["cmd"], key: "." }} />
+          {item.url && <Action.OpenInBrowser title="Open Source" url={item.url} />}
+          <Action.OpenInBrowser title="Browse Highlights" url={bookUrl} />
         </ActionPanel>
       }
       navigationTitle={"Highlight"}
@@ -25,12 +29,8 @@ export const HighlightDetail = ({ item }: { item: Highlight }) => {
             </Detail.Metadata.TagList>
           )}
           <Detail.Metadata.Separator />
-          {item.url && <Detail.Metadata.Link title="Link" target={item.url} text={item.url} />}
-          <Detail.Metadata.Link
-            title="Source"
-            target={`https://readwise.io/bookreview/${item.book_id}`}
-            text="Browse highlights"
-          />
+          {item.url && <Detail.Metadata.Link title="Source" target={item.url} text={item.url} />}
+          <Detail.Metadata.Link title="Related" target={bookUrl} text="Browse related highlights" />
           <Detail.Metadata.Separator />
         </Detail.Metadata>
       }

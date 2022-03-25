@@ -1,10 +1,16 @@
-import { Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import formatDate from "date-fns/format";
 import { Book } from "./types";
 
 export const BookDetail = ({ item }: { item: Book }) => {
   return (
     <Detail
+      actions={
+        <ActionPanel>
+          {item.source_url && <Action.OpenInBrowser title="Open Source" url={item.source_url} />}
+          <Action.OpenInBrowser title="Browse Highlights" url={item.highlights_url} />
+        </ActionPanel>
+      }
       navigationTitle={"Highlight"}
       metadata={
         <Detail.Metadata>
