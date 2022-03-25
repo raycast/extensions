@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-justwatch",
-  "title": "Search JustWatch",
+  "title": "JustWatch Search",
   "description": "Quickly find where a movie or tv show is streaming.",
   "icon": "command-icon.png",
   "author": "rishabswift",
@@ -36,5 +36,38 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint"
-  }
+  },
+  "preferences": [
+    {
+      "title": "Show Results",
+      "name": "flatrate",
+      "description": "Show streaming services when you use JustWatch Search",
+      "required": true,
+      "default": true,
+      "type": "checkbox",
+      "label": "Available for Streaming (like Netflix)"
+    },
+    {
+      "name": "free",
+      "description": "Show free services when you use JustWatch Search",
+      "required": true,
+      "default": true,
+      "type": "checkbox",
+      "label": "Available for Free"
+    },
+    {
+      "name": "buy",
+      "description": "Show available buying options when you use JustWatch Search",
+      "required": true,
+      "type": "checkbox",
+      "label": "Available for Purchase"
+    },
+    {
+      "name": "rent",
+      "description": "Show available rental options when you use JustWatch Search",
+      "required": true,
+      "type": "checkbox",
+      "label": "Available for Rental"
+    }
+  ]
 }

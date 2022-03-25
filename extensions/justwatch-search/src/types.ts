@@ -15,6 +15,7 @@ export interface JustWatchMedia {
   type: string;
   year: number;
   thumbnail: string;
+  jw_url: string;
   offers: JustWatchMediaOffers[];
 }
 

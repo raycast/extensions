@@ -1,6 +1,15 @@
 import fetch from "node-fetch";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { JustWatchMedia, JustWatchMediaOffers, MediaProvider } from "./types";
+import { getPreferenceValues } from "@raycast/api";
+import { parse } from "url";
+
+interface Preferences {
+  flatrate?: boolean;
+  buy?: boolean;
+  rent?: boolean;
+  free?: boolean;
+}
 
 export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
   const countryCode = (await LocalStorage.getItem<string>("country_code")) || "en_CA";
@@ -14,6 +23,8 @@ export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
       content_types: ["show", "movie"],
     }),
   });
+
+  const preferences = getPreferenceValues<Preferences>();
 
   const url = `https://apis.justwatch.com/content/titles/${countryCode}/popular?${searchParams}`;
   const providerUrl = `https://apis.justwatch.com/content/providers/locale/${countryCode}`;
@@ -55,6 +66,7 @@ export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
         type: value.object_type,
         year: value.original_release_year,
         thumbnail: `https://images.justwatch.com${thumbnail}`,
+        jw_url: `https://justwatch.com${value.full_path}`,
         offers: [],
       };
 
@@ -81,7 +93,10 @@ export async function searchMedias(query: string): Promise<JustWatchMedia[]> {
             name: provider.clear_name,
           };
 
-          media.offers.push(mediaOffer);
+          // check preferences and ensure we show the results...
+          if (preferences[mediaOffer.type] !== undefined && preferences[mediaOffer.type]) {
+            media.offers.push(mediaOffer);
+          }
         }
       });
 

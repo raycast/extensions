@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Image, List, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { searchMedias } from "./api";
-import { Country, JustWatchMedia, JustWatchMediaOffers } from "./types";
+import { Country, JustWatchMedia, JustWatchMediaOffers, MediaType } from "./types";
 
 export default function SearchJustwatch() {
   const [medias, setMedias] = useState<JustWatchMedia[]>([]);
@@ -71,16 +71,31 @@ export default function SearchJustwatch() {
       >
         {medias.map((media) => (
           <List.Section key={media.id} title={`${media.name} (${media.year})`} subtitle={`${media.type}`}>
-            {media.offers.map((offer) => (
+            {media.offers.length > 0 ? (
+              media.offers.map((offer) => (
+                <List.Item
+                  title={offer.name || "-"}
+                  key={offer.url}
+                  icon={{ source: offer.icon, mask: Image.Mask.RoundedRectangle }}
+                  accessoryTitle={`${offer.price_amount ? "($$)" : ""} ${offer.seasons}`}
+                  detail={<Detail media={media} offer={offer} />}
+                  actions={<Actions media={media} offer={offer} />}
+                />
+              ))
+            ) : (
               <List.Item
-                title={offer.name || "-"}
-                key={offer.url}
-                icon={{ source: offer.icon, mask: Image.Mask.RoundedRectangle }}
-                accessoryTitle={`${offer.price_amount ? "($$)" : ""} ${offer.seasons}`}
-                detail={<Detail media={media} offer={offer} />}
-                actions={<Actions media={media} offer={offer} />}
+                title={``}
+                subtitle={"No available options"}
+                key={`${media.id}-no-options`}
+                icon={{ source: Icon.ExclamationMark, mask: Image.Mask.RoundedRectangle }}
+                detail={<DetailNoOffers media={media} />}
+                actions={
+                  <ActionPanel>
+                    <Action.OpenInBrowser url={media.jw_url} title={`Open in JustWatch.com`} />
+                  </ActionPanel>
+                }
               />
-            ))}
+            )}
           </List.Section>
         ))}
       </List>
@@ -92,11 +107,28 @@ export default function SearchJustwatch() {
       <List.Item.Detail
         markdown={`
 # ${props.media.name} (${props.media.year})
-Available for **${props.offer.price_amount ? props.offer.price : "Streaming"}**
 
-![Illustration](${props.media.thumbnail})
+<img src="${props.media.thumbnail}" height="280"/>
 
-> **URL:** [${props.offer.url}](${props.offer.url})
+Available for **${getMediaType(props.offer.price_amount, props.offer.price, props.offer.type)}** on [${
+          props.offer.name
+        }](${props.offer.url})
+`}
+      />
+    );
+  }
+
+  function DetailNoOffers(props: { media: JustWatchMedia }) {
+    return (
+      <List.Item.Detail
+        markdown={`
+# ${props.media.name} (${props.media.year})
+
+<img src="${props.media.thumbnail}" height="220"/>
+
+This is not available to watch at any of the services you selected. 
+
+Try changing the country or updating your selection of services in preferences.
 `}
       />
     );
@@ -106,8 +138,31 @@ Available for **${props.offer.price_amount ? props.offer.price : "Streaming"}**
     return (
       <ActionPanel>
         <Action.OpenInBrowser url={props.offer.url} title={`Open in Browser`} />
-        <Action.CopyToClipboard content={props.offer.url} title={"Copy URL to Clipboard"} />
+        <Action.OpenInBrowser url={props.media.jw_url} title={`Open in JustWatch.com`} />
+        <Action.CopyToClipboard
+          shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+          content={props.offer.url}
+          title={"Copy URL to Clipboard"}
+        />
       </ActionPanel>
     );
+  }
+
+  function getMediaType(amount: number, price: string, type: string) {
+    if (amount) {
+      if (type === MediaType.buy) {
+        return `Purchase (${price})`;
+      } else if (type === MediaType.rent) {
+        return `Rent (${price})`;
+      }
+    }
+
+    if (type == MediaType.stream) {
+      return "Streaming";
+    }
+
+    if (type == MediaType.free) {
+      return "Free";
+    }
   }
 }
