@@ -7,12 +7,12 @@ export const HighlightsList = ({ item }: { item: Highlight }) => {
     <List.Item
       title={item.text}
       subtitle={item.note}
-      accessories={[{ text: item.url, icon: Icon.Link }]}
+      accessories={(item.url && [{ text: item.url, icon: Icon.Link }]) || undefined}
       actions={
         <ActionPanel>
           <Action.Push title="Show Details" target={<HighlightDetail item={item} />} />
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Browser" url={item.url} />
+            {item.url && <Action.OpenInBrowser title="Open in Browser" url={item.url} />}
             <Action.CopyToClipboard title="Copy Text" content={item.text} shortcut={{ modifiers: ["cmd"], key: "." }} />
           </ActionPanel.Section>
         </ActionPanel>
