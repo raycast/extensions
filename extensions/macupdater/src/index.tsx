@@ -2,17 +2,14 @@ import { useEffect, useState } from "react";
 import { List } from "@raycast/api";
 import { scrapeMacUpdater, Update } from "./scrape";
 import { UpdateListItem } from "./UpdateListItem";
+import { subDays, format } from "date-fns";
 
 export default function Command() {
   const [updates, setUpdates] = useState<Update[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const today = new Date();
-    const date = `${today.getFullYear()}-${String(
-      today.getMonth() + 1
-    ).padStart(2, "0")}-${String(today.getDate() - 1).padStart(2, "0")}`;
-    console.log(date);
+    const date = format(subDays(new Date(), 1), "yyyy-MM-dd");
     scrapeMacUpdater(`https://macupdater.net/app_updates/index-${date}.html`)
       .then((updates) => {
         setUpdates(updates);
