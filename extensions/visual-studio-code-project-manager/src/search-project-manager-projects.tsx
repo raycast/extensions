@@ -18,7 +18,7 @@ import config from "parse-git-config";
 import { dirname } from "path";
 import { ReactElement } from "react";
 import tildify from "tildify";
-import { CachedProjectEntry, Preferences, ProjectEntry } from "./types";
+import { CachedProjectEntry, Preferences, ProjectEntry, VSCodeBuild } from "./types";
 
 const STORAGE = `${homedir()}/Library/Application Support/Code/User/globalStorage/alefragnani.project-manager`;
 
@@ -29,6 +29,13 @@ const gitClientInstalled = existsSync(gitClientPath);
 
 const terminalPath = preferences.terminalAppPath || "";
 const terminalInstalled = existsSync(terminalPath);
+
+const build: VSCodeBuild = preferences.build;
+const appKeyMapping = {
+  Code: "com.microsoft.VSCode",
+  "Code - Insiders": "com.microsoft.VSCodeInsiders",
+} as const;
+const appKey: string = appKeyMapping[build] ?? appKeyMapping.Code;
 
 function getProjectEntries(): ProjectEntry[] {
   const storagePath = getPreferencesPath() || STORAGE;
@@ -145,7 +152,7 @@ function ProjectListItem({ name, rootPath, tags }: ProjectEntry) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenAction title="Open in Code" icon="command-icon.png" target={path} application="Visual Studio Code" />
+            <OpenAction title={`Open in ${build}`} icon="command-icon.png" target={path} application={appKey} />
             {terminalInstalled && (
               <ActionPanel.Item
                 title="Open in Terminal"
