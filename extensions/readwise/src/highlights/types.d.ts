@@ -15,7 +15,7 @@ interface Highlight {
   location: number;
   location_type: string;
   highlighted_at: string;
-  url: string;
+  url: string | null;
   color: string;
   updated: string;
   book_id: number;

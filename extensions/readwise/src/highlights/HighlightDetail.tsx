@@ -25,7 +25,12 @@ export const HighlightDetail = ({ item }: { item: Highlight }) => {
             </Detail.Metadata.TagList>
           )}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link title="Link" target={item.url} text="Link" />
+          {item.url && <Detail.Metadata.Link title="Link" target={item.url} text={item.url} />}
+          <Detail.Metadata.Link
+            title="Source"
+            target={`https://readwise.io/bookreview/${item.book_id}`}
+            text="Browse highlights"
+          />
           <Detail.Metadata.Separator />
         </Detail.Metadata>
       }
