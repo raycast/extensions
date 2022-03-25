@@ -10,7 +10,6 @@ export default function Command() {
   useEffect(() => {
     scrapeMacUpdater(`https://macupdater.net/app_updates/top-1000-mac-apps.html`, 1)
       .then((updates) => {
-        console.log(updates);
         setUpdates(updates);
         setIsLoading(false);
       })
