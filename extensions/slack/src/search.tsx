@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 
 import { CacheProvider, onApiError, useChannels, useGroups, useUsers } from "./shared/client";
 import { openChannel, openChat } from "./shared/utils";
@@ -27,7 +27,7 @@ function SlackList() {
           <List.Item
             key={id}
             title={name}
-            icon={icon ? { source: icon, mask: Image.Mask.Circle } : undefined}
+            icon={icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person}
             actions={
               <ActionPanel>
                 <Action title="Open in Slack" onAction={() => openChat(teamId, id)} />
