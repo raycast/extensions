@@ -148,6 +148,7 @@
     "execa": "^6.1.0",
     "expand-tilde": "^2.0.2",
     "node-fetch": "^3.2.2",
+    "polished": "^4.1.4",
     "pretty-bytes": "^6.0.0",
     "ramda": "^0.28.0",
     "raycast-toolkit": "^1.0.2",
