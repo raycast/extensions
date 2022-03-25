@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "readwise",
+  "title": "Readwise",
+  "description": "Search and browser your Readwise Library.",
+  "icon": "icon.png",
+  "author": "natterstefan",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "highlights",
+      "title": "Search Readwise Highlights",
+      "subtitle": "Browse highlights on Readwise",
+      "description": "Browse highlights on Readwise",
+      "keywords": [
+        "highlight"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "books",
+      "title": "Search Readwise Library",
+      "subtitle": "Browser your Readwise Library",
+      "description": "Browser your Readwise Library",
+      "keywords": [
+        "book",
+        "books",
+        "article",
+        "articles",
+        "podcast",
+        "podcasts"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Readwise API Token",
+      "description": "Your Readwise API access token",
+      "link": "https://readwise.io/access_token",
+      "placeholder": "Enter your API access token"
+    },
+    {
+      "name": "pageSize",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Page Sze",
+      "description": "Define how many results you want to get per default (default is 100, max is 1000)",
+      "link": "https://readwise.io/api_deets",
+      "placeholder": "Enter the page size value",
+      "default": "100"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.31.0",
+    "date-fns": "^2.28.0",
+    "node-fetch": "^3.0.0",
+    "query-string": "^7.1.1",
+    "swr": "^1.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
