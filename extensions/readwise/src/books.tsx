@@ -22,8 +22,11 @@ export default function Command() {
       enableFiltering
       searchBarAccessory={
         <List.Dropdown tooltip="Search Options" onChange={refetch} value="">
-          <List.Dropdown.Section title="Page Navigation">
+          <List.Dropdown.Section title="Search Options">
             <List.Dropdown.Item title={"-"} value={""} />
+          </List.Dropdown.Section>
+
+          <List.Dropdown.Section title="Page Navigation">
             {data?.previous && <List.Dropdown.Item title={"Previous Page"} value={getUrlParamsString(data.previous)} />}
             {data?.next && <List.Dropdown.Item title={"Next Page"} value={getUrlParamsString(data.next)} />}
           </List.Dropdown.Section>
