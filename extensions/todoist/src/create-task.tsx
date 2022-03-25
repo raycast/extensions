@@ -8,7 +8,11 @@ import { getAPIDate } from "./utils";
 import Project from "./components/Project";
 import { SWRKeys } from "./types";
 
-export default function CreateTask() {
+interface CreateTaskProps {
+  projectId?: number;
+}
+
+export default function CreateTask({ projectId: initialProjectId }: CreateTaskProps) {
   const { push } = useNavigation();
   const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
   const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
@@ -29,7 +33,7 @@ export default function CreateTask() {
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState<Date | undefined>();
   const [priority, setPriority] = useState<string>(String(lowestPriority.value));
-  const [projectId, setProjectId] = useState<string>();
+  const [projectId, setProjectId] = useState<string>(String(initialProjectId) || "");
   const [labelIds, setLabelIds] = useState<string[]>();
 
   function clear() {

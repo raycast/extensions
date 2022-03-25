@@ -1,10 +1,11 @@
-import { getPreferenceValues } from "@raycast/api";
+import { List, getPreferenceValues, ActionPanel, Action } from "@raycast/api";
 import TaskList from "./TaskList";
 import useSWR from "swr";
 import { partition } from "lodash";
 import { ViewMode, SWRKeys, ProjectGroupBy, SectionWithTasks } from "../types";
 import { todoist, handleError } from "../api";
 import { getSectionsWithPriorities, getSectionsWithDueDates, getSectionsWithLabels } from "../utils";
+import CreateTask from "../create-task";
 
 interface ProjectProps {
   projectId: number;
@@ -63,7 +64,21 @@ function Project({ projectId }: ProjectProps): JSX.Element {
     sections = getSectionsWithLabels({ tasks: tasks || [], labels: labels || [] });
   }
 
-  return <TaskList mode={ViewMode.project} sections={sections} isLoading={!rawTasks || !allSections} />;
+  return rawTasks?.length === 0 ? (
+    <List isLoading={!rawTasks}>
+      <List.EmptyView
+        title="No tasks in this project. How about creating one?"
+        icon="master-plan.svg"
+        actions={
+          <ActionPanel>
+            <Action.Push title="Create Task" target={<CreateTask projectId={projectId} />} />
+          </ActionPanel>
+        }
+      />
+    </List>
+  ) : (
+    <TaskList mode={ViewMode.project} sections={sections} isLoading={!rawTasks || !allSections} />
+  );
 }
 
 export default Project;
