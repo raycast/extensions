@@ -1,6 +1,5 @@
 import {
   ActionPanel,
-  Action,
   OpenAction,
   getPreferenceValues,
   CopyToClipboardAction,
@@ -11,8 +10,10 @@ import {
   showToast,
   ToastStyle,
   getSelectedText,
-  print,
 } from "@raycast/api";
+
+//@ts-ignore
+import { Action } from "@raycast/api";
 
 import fs from "fs";
 import React from "react";
