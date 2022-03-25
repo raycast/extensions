@@ -1,9 +1,6 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import got from "got";
 
-// TODO: implement changelog.md file?
-// re-do icon to meet guidelines
-
 export default async () => {
   const toast = await showToast({
     style: Toast.Style.Animated,
