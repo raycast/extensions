@@ -40,6 +40,7 @@
     {
       "name": "endFocusTime",
       "title": "End Focus Session",
+      "subtitle": "RescueTime",
       "description": "Ends a Focus Session for RescueTime",
       "mode": "no-view"
     }
