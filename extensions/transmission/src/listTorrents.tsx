@@ -245,7 +245,11 @@ function TorrentListItem({
   );
 
   const details = useAsync(
-    () => renderDetails(torrent, downloadStats.map(({ textIcon, text }) => [textIcon, text].join(" ")).join(" - ")),
+    () =>
+      renderDetails(
+        torrent,
+        downloadStats.map(({ textIcon, text }) => [textIcon, text.trim()].join(" ").trim()).join(" - ")
+      ),
     [torrent, downloadStats]
   );
 
