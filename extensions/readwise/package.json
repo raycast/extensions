@@ -50,7 +50,7 @@
       "name": "pageSize",
       "type": "textfield",
       "required": false,
-      "title": "Default Page Sze",
+      "title": "Page Size",
       "description": "Define how many results you want to get per default (default is 100, max is 1000)",
       "link": "https://readwise.io/api_deets",
       "placeholder": "Enter the page size value",
