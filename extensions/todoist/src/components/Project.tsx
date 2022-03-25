@@ -71,7 +71,7 @@ function Project({ projectId }: ProjectProps): JSX.Element {
         icon="master-plan.svg"
         actions={
           <ActionPanel>
-            <Action.Push title="Create Task" target={<CreateTask projectId={projectId} />} />
+            <Action.Push title="Create Task" target={<CreateTask />} />
           </ActionPanel>
         }
       />
