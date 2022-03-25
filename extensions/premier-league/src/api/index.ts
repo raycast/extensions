@@ -41,6 +41,7 @@ export const getTables = async (seasonId: string): Promise<Table[]> => {
 
 export const getFixtures = async (
   clubId: string,
+  page: number,
   sort: string,
   statuses: string
 ): Promise<Content[]> => {
@@ -53,8 +54,8 @@ export const getFixtures = async (
       comps: 1,
       teams,
       compSeasons: seasons[0].value,
-      page: 0,
-      pageSize: 400,
+      page,
+      pageSize: 40,
       sort,
       statuses,
       altIds: true,
