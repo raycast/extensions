@@ -14,7 +14,7 @@ export default function Fixture() {
     setFixtures([]);
     setLoading(true);
 
-    getFixtures(club, "asc", "U,L").then((data) => {
+    getFixtures(club, "desc", "C").then((data) => {
       setFixtures(data);
       setLoading(false);
     });
@@ -30,20 +30,17 @@ export default function Fixture() {
     >
       {Object.entries(categories).map(([label, matches]) => {
         return (
-          <List.Section
-            key={label}
-            title={label === "undefined" ? "Date To Be Confirmed" : label}
-          >
+          <List.Section key={label} title={label}>
             {matches.map((match) => {
               return (
                 <List.Item
                   key={match.id}
-                  title={`${match.teams[0].team.name} - ${match.teams[1].team.name}`}
+                  title={`${match.teams[0].team.name} ${match.teams[0].score} - ${match.teams[1].score} ${match.teams[1].team.name}`}
                   accessories={[
                     {
                       text: `${match.ground.name}, ${match.ground.city}`,
+                      icon: "stadium.svg",
                     },
-                    { text: match.kickoff.label || "TBC", icon: Icon.Clock },
                   ]}
                   actions={
                     <ActionPanel>

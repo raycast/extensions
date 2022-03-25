@@ -16,7 +16,13 @@ function showFailureToast() {
 export const getTables = async (seasonId: string): Promise<Table[]> => {
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `https://footballapi.pulselive.com/football/standings?compSeasons=${seasonId}&altIds=true&detail=2&FOOTBALL_COMPETITION=1`,
+    url: `https://footballapi.pulselive.com/football/standings`,
+    params: {
+      compSeasons: seasonId,
+      altIds: true,
+      detail: 2,
+      FOOTBALL_COMPETITION: 1,
+    },
     headers: {
       Origin: "https://www.premierleague.com",
     },
@@ -33,12 +39,26 @@ export const getTables = async (seasonId: string): Promise<Table[]> => {
   }
 };
 
-export const getFixtures = async (clubId: string): Promise<Content[]> => {
+export const getFixtures = async (
+  clubId: string,
+  sort: string,
+  statuses: string
+): Promise<Content[]> => {
   const teams = clubId === "-1" ? clubs.map((c) => c.value).join() : clubId;
 
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `https://footballapi.pulselive.com/football/fixtures?comps=1&teams=${teams}&compSeasons=${seasons[0].value}&page=0&pageSize=40&sort=asc&statuses=U,L&altIds=true`,
+    url: `https://footballapi.pulselive.com/football/fixtures`,
+    params: {
+      comps: 1,
+      teams,
+      compSeasons: seasons[0].value,
+      page: 0,
+      pageSize: 400,
+      sort,
+      statuses,
+      altIds: true,
+    },
     headers: {
       Origin: "https://www.premierleague.com",
     },

@@ -21,7 +21,14 @@
       "name": "fixture",
       "title": "Fixtures",
       "subtitle": "Premier League",
-      "description": "View the Premier League fixtures for the current season",
+      "description": "View the 380 Premier League fixtures for the current season.",
+      "mode": "view"
+    },
+    {
+      "name": "result",
+      "title": "Results",
+      "subtitle": "Premier League",
+      "description": "View Premier League scores, results & season archives, along with other competitions involving Premier League clubs.",
       "mode": "view"
     }
   ],

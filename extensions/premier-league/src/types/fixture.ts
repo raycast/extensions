@@ -12,11 +12,14 @@ export interface Content {
   ground: Ground;
   neutralGround: boolean;
   status: Status;
-  phase: string;
+  phase: Phase;
+  outcome: Outcome;
+  attendance?: number;
+  clock?: Clock;
   fixtureType: FixtureType;
   extraTime: boolean;
   shootout: boolean;
-  goals: any[];
+  goals: Goal[];
   penaltyShootouts: any[];
   behindClosedDoors: boolean;
   id: number;
@@ -25,6 +28,11 @@ export interface Content {
 
 export interface AltIDS {
   opta: string;
+}
+
+export interface Clock {
+  secs: number;
+  label: string;
 }
 
 export enum FixtureType {
@@ -46,7 +54,7 @@ export interface CompSeason {
 
 export interface Competition {
   abbreviation: Abbreviation;
-  description: Description;
+  description: CompetitionDescription;
   level: Level;
   source: string;
   id: number;
@@ -57,7 +65,7 @@ export enum Abbreviation {
   EnPR = "EN_PR",
 }
 
-export enum Description {
+export enum CompetitionDescription {
   PremierLeague = "Premier League",
 }
 
@@ -79,6 +87,21 @@ export enum Type {
   L = "L",
 }
 
+export interface Goal {
+  personId: number;
+  clock: Clock;
+  phase: string;
+  type: TypeEnum;
+  description: TypeEnum;
+  assistId?: number;
+}
+
+export enum TypeEnum {
+  G = "G",
+  O = "O",
+  P = "P",
+}
+
 export interface Ground {
   name: string;
   city: string;
@@ -97,12 +120,25 @@ export interface Kickoff {
   gmtOffset?: number;
 }
 
+export enum Outcome {
+  A = "A",
+  D = "D",
+  H = "H",
+}
+
+export enum Phase {
+  F = "F",
+}
+
 export enum Status {
+  C = "C",
+  L = "L",
   U = "U",
 }
 
 export interface TeamElement {
   team: TeamTeam;
+  score: number;
 }
 
 export interface TeamTeam {
