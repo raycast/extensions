@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
-
+import { map } from "modern-async";
 import he from "he";
 
 interface Preferences {
@@ -14,6 +14,7 @@ export type QueryResultItem = {
   title: string;
   subtitle: string;
   url: string;
+  pdf_url: string;
   link: string;
   raw_link: string;
   accessoryTitle: string;
@@ -61,8 +62,36 @@ const parseResponse = (item) => {
     url: `zotero://select/items/0_${item.key}`,
     accessoryTitle: `${name} ${!isNaN(date.getFullYear()) ? date.getFullYear() : ""}`,
     icon: `paper.png`,
+    pdf_url: ``,
   };
 };
+
+function combine_results(val, index, arr) {
+  val["pdf_url"] = this[val.id] ? `zotero://open-pdf/library/items/${this[val.id]}` : ``;
+  return val;
+}
+
+async function get_pdf_key(key: string) {
+  const preferences: Preferences = getPreferenceValues();
+  const requestOptions = {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${preferences.api_token}`,
+    },
+  };
+  const query = `https://api.zotero.org/users/${preferences.user_id}/items/${key}/children`;
+  const response = await fetch(query, requestOptions);
+  if (response.status !== 200) {
+    const data = (await response.json()) as { message?: unknown } | undefined;
+    throw new Error(`${data?.message || "Not OK"}`);
+  }
+  const data = (await response.json()) as Array<any>;
+  const pdf_data = data.filter((d) => d.data.contentType === "application/pdf");
+  // NOTE: In case multiple pdf files are found, just first one is picked up to open.
+  // Its not clear to me what should be the correct logic to find the primary PDF
+  return pdf_data.length > 0 ? `${pdf_data[0].key}` : ``;
+}
 
 export const searchResources = async (q: string): Promise<QueryResultItem[]> => {
   const preferences: Preferences = getPreferenceValues();
@@ -84,5 +113,13 @@ export const searchResources = async (q: string): Promise<QueryResultItem[]> => 
     throw new Error(`${data?.message || "Not OK"}`);
   }
   const data = (await response.json()) as Array<any>;
-  return data.map(parseResponse);
+  const res = data.map(parseResponse);
+
+  const item_keys = res.map((item) => item.id);
+  const pdf_key_map_list = await map(item_keys, async (v) => {
+    const pdf_key = await get_pdf_key(v);
+    return { key: v, value: pdf_key };
+  });
+  const pdf_key_map = pdf_key_map_list.reduce((obj, item) => ((obj[item.key] = item.value), obj), {});
+  return res.map(combine_results, pdf_key_map);
 };

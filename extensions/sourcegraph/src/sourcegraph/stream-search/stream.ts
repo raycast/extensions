@@ -1,7 +1,5 @@
 // Copied from https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/client/shared/src/search/stream.ts?L12&subtree=true
 
-import { AggregableBadge } from "sourcegraph";
-
 // https://sourcegraph.com/github.com/sourcegraph/sourcegraph/-/blob/cmd/frontend/graphqlbackend/schema.graphql?L3323&subtree=true
 export type SymbolKind = string;
 
@@ -70,7 +68,6 @@ interface LineMatch {
   line: string;
   lineNumber: number;
   offsetAndLengths: number[][];
-  aggregableBadges?: AggregableBadge[];
 }
 
 export interface SymbolMatch {

@@ -29,11 +29,14 @@
       "mode": "no-view"
     }
   ],
+  "categories": [
+    "Web",
+    "News"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.25.7",
+    "@raycast/api": "^1.27.1",
     "swr": "^1.0.1",
-    "got": "^11.8.3",
-    "run-applescript": "^6.0.0"
+    "got": "^11.8.3"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
@@ -47,6 +50,8 @@
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

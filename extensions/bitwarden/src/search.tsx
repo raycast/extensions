@@ -3,23 +3,23 @@ import {
   List,
   Icon,
   showToast,
-  ToastStyle,
-  PushAction,
   Detail,
-  CopyToClipboardAction,
   getPreferenceValues,
-  copyTextToClipboard,
   closeMainWindow,
+  Color,
+  Toast,
+  Clipboard,
+  Action,
 } from "@raycast/api";
-import { Item, Folder, VaultStatus } from "./types";
-import { useEffect, useState } from "react";
+import { Item, VaultStatus } from "./types";
+import React, { useEffect, useState } from "react";
 import treeify from "treeify";
 import { filterNullishPropertiesFromObject, codeBlock, titleCase, faviconUrl } from "./utils";
 import { useBitwarden } from "./hooks";
 import { TroubleshootingGuide, UnlockForm } from "./components";
 import { Bitwarden } from "./api";
 
-const { fetchFavicons } = getPreferenceValues();
+const { fetchFavicons, primaryAction } = getPreferenceValues();
 
 export default function Search(): JSX.Element {
   try {
@@ -41,35 +41,24 @@ function ItemList(props: {
   vaultStatus: VaultStatus | undefined;
 }) {
   const { bitwardenApi, sessionToken, vaultStatus } = props;
-  const [state, setState] = useState<{ folders: Folder[]; items: Item[] }>();
-
-  const folderMap: Record<string, Folder> = {};
-  for (const folder of state?.folders || []) {
-    if (folder.id) {
-      folderMap[folder.id] = folder;
-    }
-  }
+  const [items, setItems] = useState<Item[]>();
 
   async function loadItems(sessionToken: string) {
     try {
-      const [items, folders] = await Promise.all([
-        bitwardenApi.listItems<Item>("items", sessionToken),
-        bitwardenApi.listItems<Folder>("folders", sessionToken),
-      ]);
-
-      setState({ items, folders });
+      const items = await bitwardenApi.listItems("items", sessionToken);
+      setItems(items);
     } catch (error) {
-      showToast(ToastStyle.Failure, "Failed to search vault");
+      showToast(Toast.Style.Failure, "Failed to search vault");
     }
   }
 
   async function copyTotp(sessionToken: string | undefined, id: string) {
     if (sessionToken) {
       const totp = await bitwardenApi.getTotp(id, sessionToken);
-      copyTextToClipboard(totp);
+      Clipboard.copy(totp);
       closeMainWindow({ clearRootSearch: true });
     } else {
-      showToast(ToastStyle.Failure, "Failed to fetch TOTP.");
+      showToast(Toast.Style.Failure, "Failed to fetch TOTP.");
     }
   }
 
@@ -81,52 +70,38 @@ function ItemList(props: {
 
   async function refreshItems() {
     if (sessionToken) {
-      const toast = await showToast(ToastStyle.Animated, "Syncing Items...");
+      const toast = await showToast(Toast.Style.Animated, "Syncing Items...");
       await bitwardenApi.sync(sessionToken);
       await loadItems(sessionToken);
       await toast.hide();
     }
   }
 
-  const favoriteItems = [];
-  const regularItems = [];
-  for (const item of state?.items || []) {
-    item.favorite ? favoriteItems.push(item) : regularItems.push(item);
-  }
-
   return (
-    <List isLoading={typeof state === "undefined"}>
-      <List.Section title="Favorites">
-        {favoriteItems.map((item) => (
-          <ItemListItem
-            key={item.id}
-            item={item}
-            folder={item.folderId ? folderMap[item.folderId] : undefined}
-            refreshItems={refreshItems}
-            sessionToken={sessionToken}
-            copyTotp={copyTotp}
-          />
-        ))}
-      </List.Section>
-      <List.Section title="Others">
-        {regularItems.map((item) => (
-          <ItemListItem
-            key={item.id}
-            item={item}
-            folder={item.folderId ? folderMap[item.folderId] : undefined}
-            refreshItems={refreshItems}
-            sessionToken={sessionToken}
-            copyTotp={copyTotp}
-          />
-        ))}
-      </List.Section>
+    <List isLoading={typeof items === "undefined"}>
+      {items
+        ? items
+            .sort((a, b) => {
+              if (a.favorite && b.favorite) return 0;
+              return a.favorite ? -1 : 1;
+            })
+            .map((item) => (
+              <ItemListItem
+                key={item.id}
+                item={item}
+                refreshItems={refreshItems}
+                sessionToken={sessionToken}
+                copyTotp={copyTotp}
+              />
+            ))
+        : null}
     </List>
   );
 }
 
 function getIcon(item: Item) {
   const iconUri = item.login?.uris?.[0]?.uri;
-  if (fetchFavicons && iconUri) return faviconUrl(64, iconUri);
+  if (fetchFavicons && iconUri) return faviconUrl(iconUri);
   return {
     1: Icon.Globe,
     2: Icon.TextDocument,
@@ -137,17 +112,13 @@ function getIcon(item: Item) {
 
 function ItemListItem(props: {
   item: Item;
-  folder: Folder | undefined;
   refreshItems?: () => void;
   sessionToken: string | undefined;
   copyTotp: (sessionToken: string | undefined, id: string) => void;
 }) {
-  const { item, folder, refreshItems, sessionToken, copyTotp } = props;
+  const { item, refreshItems, sessionToken, copyTotp } = props;
   const { name, notes, identity, login, secureNote, fields, passwordHistory, card } = item;
-  const accessoryIcons = [];
 
-  if (folder) accessoryIcons.push(`📂 ${folder.name}`);
-  if (item.favorite) accessoryIcons.push(`⭐️`);
   const fieldMap = Object.fromEntries(fields?.map((field) => [field.name, field.value]) || []);
   const uriMap = Object.fromEntries(
     login?.uris?.filter((uri) => uri.uri).map((uri, index) => [`uri${index + 1}`, uri.uri]) || []
@@ -161,7 +132,6 @@ function ItemListItem(props: {
     card: filterNullishPropertiesFromObject(card),
     secureNote,
     fields,
-    folder: folder?.name,
     passwordHistory,
   });
 
@@ -172,21 +142,23 @@ function ItemListItem(props: {
       id={item.id}
       title={item.name}
       keywords={item.name.split(/\W/)}
-      accessoryTitle={accessoryIcons ? accessoryIcons.join("  ") : undefined}
+      accessoryIcon={item.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined}
       icon={getIcon(item)}
       subtitle={item.login?.username || undefined}
       actions={
         <ActionPanel>
-          {item.login?.password ? <CopyToClipboardAction title="Copy Password" content={item.login.password} /> : null}
+          {item.login?.password ? <PasswordActions password={item.login.password} /> : null}
+          {item.login?.username ? <UsernameAction username={item.login.username} /> : null}
           {item.login?.totp ? (
             <ActionPanel.Item
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
               title="Copy TOTP"
               icon={Icon.Clipboard}
               onAction={() => copyTotp(sessionToken, item.id)}
             />
           ) : null}
           {item.notes ? (
-            <PushAction
+            <Action.Push
               title="Show Secure Note"
               icon={Icon.TextDocument}
               target={
@@ -194,7 +166,7 @@ function ItemListItem(props: {
                   markdown={codeBlock(item.notes)}
                   actions={
                     <ActionPanel>
-                      <CopyToClipboardAction title="Copy Secure Notes" content={item.notes} />
+                      <Action.CopyToClipboard title="Copy Secure Notes" content={item.notes} />
                     </ActionPanel>
                   }
                 />
@@ -208,7 +180,6 @@ function ItemListItem(props: {
           >
             {Object.entries({
               username: login?.username,
-              folder: folder?.name,
               notes,
               ...card,
               ...identity,
@@ -216,11 +187,11 @@ function ItemListItem(props: {
               ...uriMap,
             }).map(([title, content], index) =>
               content ? (
-                <CopyToClipboardAction key={index} title={titleCase(title)} content={content as string | number} />
+                <Action.CopyToClipboard key={index} title={titleCase(title)} content={content as string | number} />
               ) : null
             )}
           </ActionPanel.Submenu>
-          <PushAction
+          <Action.Push
             title={"Show Details"}
             icon={Icon.Text}
             shortcut={{ modifiers: ["cmd"], key: "i" }}
@@ -229,13 +200,13 @@ function ItemListItem(props: {
                 markdown={codeBlock(tree)}
                 actions={
                   <ActionPanel>
-                    <CopyToClipboardAction content={tree} />
+                    <Action.CopyToClipboard content={tree} />
                   </ActionPanel>
                 }
               />
             }
           />
-          <ActionPanel.Item
+          <Action
             title="Refresh Items"
             shortcut={{ modifiers: ["cmd"], key: "r" }}
             icon={Icon.ArrowClockwise}
@@ -243,6 +214,27 @@ function ItemListItem(props: {
           />
         </ActionPanel>
       }
+    />
+  );
+}
+
+function PasswordActions(props: { password: string }) {
+  const copyAction = <Action.CopyToClipboard key="copy" title="Copy Password" content={props.password} />;
+  const pasteAction = <Action.Paste key="paste" title="Paste Password" content={props.password} />;
+
+  return (
+    <React.Fragment>{primaryAction == "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}</React.Fragment>
+  );
+}
+
+function UsernameAction(props: { username: string }) {
+  return (
+    <Action.CopyToClipboard
+      title="Copy Username"
+      content={props.username}
+      icon={Icon.Person}
+      shortcut={{ modifiers: ["cmd"], key: "u" }}
+      onCopy={(content) => closeMainWindow({ clearRootSearch: true })}
     />
   );
 }

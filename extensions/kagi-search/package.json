@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kagi-search",
+  "title": "Kagi Search",
+  "description": "Searches the Closed Beta of Kagi Search, using the autosuggestions url.",
+  "icon": "command-icon.png",
+  "author": "fearoffish",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Kagi",
+      "description": "Search Kagi with autosuggestions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "title": "Kagi Token",
+      "description": "Please enter your Kagi token, which can be found at https://kagi.com/settings?p=user_details in your Session Link",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.3",
+    "node-fetch": "^3.1.0",
+    "open": "^8.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

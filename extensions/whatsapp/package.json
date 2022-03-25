@@ -29,6 +29,11 @@
       "mode": "view"
     }
   ],
+  "categories": [
+    "Applications",
+    "Communication",
+    "Productivity"
+  ],
   "dependencies": {
     "@raycast/api": "^1.25.6",
     "fromnow": "^3.0.1",

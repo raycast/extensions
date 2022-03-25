@@ -80,7 +80,7 @@ export const Server = {
 
 const getServers = async () => {
   try {
-    const response = await axios.get(`${PLOI_API_URL}/servers`);
+    const response = await axios.get(`${PLOI_API_URL}/servers?per_page=50`);
 
     const serverData = (await response.data) as ServersResponse;
     const servers = serverData?.data ?? [];

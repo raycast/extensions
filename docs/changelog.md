@@ -1,5 +1,89 @@
 # Changelog
 
+## 1.31.0 – 2022-03-23
+
+### ✨ New
+
+- **Detail Metadata**: we’ve added a new property `metadata` to the `Detail` component; this allows you to add structured metadata that is displayed on the right side in a detail view (similar to the Linear, Asana or Jira extensions). We support types such as labels, coloured tags, links, and separators. ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #219](https://github.com/raycast/extensions/issues/219))
+- **List Accessories**: list components can now show multiple accessory items through the new `accessories` property. (Previously you could only configure one `accessoryTitle` and `accesoryIcon`, both of which continue to work but have been marked deprecated.) Each item can be configured as text-only, icon-only, or icon + text. ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #72](https://github.com/raycast/extensions/issues/72))
+- **List Empty View**: list components can define a new `EmptyView` that gives you control over the icon, title, description and optional actions to use when there are no items in a list. (Previously we would default to a “No results” view.) You can use the component to show a custom image and text when the search does not return results or the user is required to first perform some setup. ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #447](https://github.com/raycast/extensions/issues/447))
+
+### 💎 Improvements
+
+- **Environment**: the current theme (`"dark" | "light"`) configured via Raycast appearance preferences is now globally accessible through `environment.theme`
+- **SVG**: You can now specify width and height attributes for images in markdown (`<img>` tag).
+- **Dev Tools:** the “Create Extension” command lets you add categories to your extension; the categories are displayed alongside the new metadata on our revamped details page in the store.
+- **Dev Tools**: added a new development action to clear the local assets cache, e.g. to render an updated list icon without having to restart Raycast. ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #1095](https://github.com/raycast/extensions/issues/1095))
+- **Preferences**: the `required` property in manifest preferences is now optional.
+
+### 🐞 Fixes
+
+- Fixed the extension icon not being updated during development.
+- Fixed an extension’s cached icon not being cleared when updated from the store. (Note that other dynamically loaded images in the assets folder may still be cached, so if you want to enforce an update for end users you need to rename them.)
+- Fixed an edge case where some search bar characters would be wrongly passed to pushed lists in a navigation stack.
+
+## 1.30.2 – 2022-03-11
+
+### 🐞 Fixes
+
+- Fixed updating the list `isShowingDetail` property
+- Fixed unnecessarily reloading the list detail view on search term changes
+
+## 1.30.0 - 2022-03-09
+
+### ✨ New
+
+- We’ve added the highly requested **search bar dropdown** 🎉 ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #72](https://github.com/raycast/extensions/issues/72)): you can now add a dropdown component as an accessory to the search bar; the dropdown shows up in the top-right corner and can be used for filtering lists and toggling list states. (So it’s a good time to remove any workarounds with actions or navigation for showing a different set of items in the list.)
+- The **search bar text** 🔎 can now be programmatically updated ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #281](https://github.com/raycast/extensions/issues/281)) while you can still opt into built-in filtering at the same time
+- **List-detail views**: list views now support a `detail` property that allows you to display a detail view on the right-hand side of list items ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #83](https://github.com/raycast/extensions/issues/83)) 👯‍♂️; you can use the feature to display additional content side-by-side as users scroll through the list
+- Support for rendering **SVG files** 🖼️ where images are accepted ([![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)Issue #77](https://github.com/raycast/extensions/issues/77)), including in the `Detail` view’s markdown
+- New method `Clipboard.readText()` to read the last copied text from the system’s clipboard 📋
+- Added a new prop `type` to `Form.DatePicker` 📅 to control the date components asked from the user
+
+### 💎 Improvements
+
+- **Toast action handlers** 🍞 can now still be called if the toast outlives a dismissed extension
+- Support for multiple actions of type `Action.SubmitForm` in a form’s Action Panel
+
+### 🐞 Fixes
+
+- Fixed some flickering that could happen when using `React.memo`
+- Fixed a few edge cases around Action Panels
+- Fixed duplicated shortcut shown in the Action Panel’s tooltip when setting the default shortcut explicitly on the primary action
+- Fixed updating a `Form.Description` component
+
+## 1.29.0 - 2022-02-23
+
+### ✨ New
+
+- Add 2 new Actions: `Action.CreateSnippet` and `Action.CreateQuicklink`. Use them in your extensions to provide users an option to integrate deeper with Raycast, for example, by creating a Quicklink from a frequently visited website.
+
+### 💎 Improvements
+
+- Various documentation fixes and improvements such as new media for UI components.
+- Synchronous React state update calls are now batched, leading to less re-rendering.
+- Markdown comments will now be hidden in the `Detail` view
+
+### 🐞 Fixes
+
+- Fixed a crash that could happen when switching between a development and store version of an extension or restarting the Node connection.
+- Fixed an issue with React Developer Tools sometimes not getting opened.
+- Limit the width that the `ActionPanel` can take.
+
+## 1.28.0 - 2022-02-09
+
+### 💎 Improvements
+
+- Completely **revised (backwards-compatible) API** – new namespaces, better organisation, more consistency, updated templates, revamped docs. Check out the full [migration guide](https://developers.raycast.com/migration/v1.28.0) and get rid of those deprecation warnings. (At the same time, don’t worry, your extension is going to work as before, even if you don’t take immediate action.)
+- We’ve **prettified the CLI output** 💅: all output is now more colourful, cleaner and easier to parse. Update the npm package to v1.28.0 to get the latest CLI for development.
+- **Fallback images**: You can now specify local asset files or built-in icons that are displayed when image loading fails, for example when a remote file is missing (![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)[Issue #108](https://github.com/raycast/extensions/issues/108)); [see the docs](https://developers.raycast.com/api-reference/user-interface/icons-and-images)
+- **Toasts** are now passed as argument to their action callback, so you can directly act on them in the handler function (for example, hiding them)
+- **Extensions feedback:** We’ve added **better bug report and feature request actions** both to the store details page of an extension and to the error screen; the actions prefill some data already in the templates so that reporting issues and feature requests becomes easier for end users.
+
+### 🐞 Bugfixes
+
+- Fixed tag picker images and emojis not being properly displayed (​​![](https://www.notion.so/image/https%3A%2F%2Fwww.notion.so%2Fimages%2Fexternal_integrations%2Fgithub-icon.png?width=12&userId=&cache=v2)[Issue #493](https://github.com/raycast/extensions/issues/493))
+
 ## 1.27.1 - 2022-01-28
 
 ### 💎 Improvements
