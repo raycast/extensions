@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "macupdater",
   "title": "MacUpdater",
-  "description": "Get lists of app updates and top apps from macupdater.net",
+  "description": "Get app updates and popular apps from macupdater.net",
   "icon": "update-command-icon.png",
   "author": "kall",
   "categories": [
@@ -15,7 +15,7 @@
       "icon": "update-command-icon.png",
       "title": "Daily macOS App Updates",
       "subtitle": "Yesterday",
-      "description": "View a list of all macOS apps updated today from macupdater.net",
+      "description": "View a list of all macOS apps updated yesterday",
       "mode": "view"
     },
     {
@@ -23,13 +23,12 @@
       "icon": "top-command-icon.png",
       "title": "Top 1000 macOS Apps",
       "subtitle": "Popular",
-      "description": "View a list of the 1000 most popular macOS apps from macupdater.net",
+      "description": "View a list of the 1000 most popular macOS apps on macupdater.net",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.31.0",
-    "date-fns": "^2.28.0",
     "scrape-it": "^5.3.2"
   },
   "devDependencies": {
