@@ -38,7 +38,7 @@ export default function CreateTask({ projectId: initialProjectId }: CreateTaskPr
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState<Date | undefined>();
   const [priority, setPriority] = useState<string>(String(lowestPriority.value));
-  const [projectId, setProjectId] = useState<string>(String(initialProjectId) || "");
+  const [projectId, setProjectId] = useState<string | undefined>(String(initialProjectId) || undefined);
   const [sectionId, setSectionId] = useState<string>();
   const [labelIds, setLabelIds] = useState<string[]>();
 
@@ -147,6 +147,7 @@ export default function CreateTask({ projectId: initialProjectId }: CreateTaskPr
 
       {projectSections && projectSections.length > 0 ? (
         <Form.Dropdown id="section_id" title="Section" value={sectionId} onChange={setSectionId} storeValue>
+          <Form.Dropdown.Item value="" title="No section" />
           {projectSections.map(({ id, name }) => (
             <Form.Dropdown.Item value={String(id)} title={name} key={id} />
           ))}
