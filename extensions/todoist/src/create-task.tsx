@@ -111,7 +111,13 @@ export default function CreateTask({ projectId: initialProjectId }: CreateTaskPr
 
       <Form.Separator />
 
-      <Form.DatePicker id="due_date" title="Due date" value={dueDate} onChange={setDueDate} />
+      <Form.DatePicker
+        id="due_date"
+        title="Due date"
+        value={dueDate}
+        onChange={setDueDate}
+        type={Form.DatePicker.Type.Date}
+      />
 
       <Form.Dropdown id="priority" title="Priority" value={priority} onChange={setPriority}>
         {priorities.map(({ value, name }) => (
