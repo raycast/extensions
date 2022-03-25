@@ -2,7 +2,6 @@ import fetch from "node-fetch";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { JustWatchMedia, JustWatchMediaOffers, MediaProvider } from "./types";
 import { getPreferenceValues } from "@raycast/api";
-import { parse } from "url";
 
 interface Preferences {
   flatrate?: boolean;
