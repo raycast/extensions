@@ -1,4 +1,4 @@
-import { List, ActionPanel, OpenAction, showToast, ToastStyle } from "@raycast/api";
+import { List, ActionPanel, OpenAction, showToast, ToastStyle, Detail } from "@raycast/api";
 import { Vault } from "./interfaces";
 import { parseVaults } from "./VaultUtils";
 import fs from "fs";
@@ -15,11 +15,10 @@ export default function Command() {
   });
 
   if (vaults.length == 0) {
-    showToast(
-      ToastStyle.Failure,
-      "Advanced URI plugin not installed.",
-      "This command requires the Advanced URI plugin for Obsidian. Install it through the community plugins list."
-    );
+    const text =
+      "# Advanced URI plugin not installed.\nThis command requires the [Advanced URI plugin](https://obsidian.md/plugins?id=obsidian-advanced-uri) for Obsidian.  \n  \n Install it through the community plugins list.";
+
+    return <Detail navigationTitle="Advanced URI plugin not installed" markdown={text} />;
   }
 
   return (
