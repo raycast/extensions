@@ -13,8 +13,8 @@
     {
       "name": "index",
       "icon": "update-command-icon.png",
-      "title": "All macOS App Updates",
-      "subtitle": "Today",
+      "title": "Daily macOS App Updates",
+      "subtitle": "Yesterday",
       "description": "View a list of all macOS apps updated today from macupdater.net",
       "mode": "view"
     },
