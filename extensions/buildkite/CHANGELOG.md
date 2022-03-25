@@ -7,4 +7,4 @@
 
 ## [Initial Version] - 2021-10-22
 
-Add Things Extension.
+Add Buildkite Extension.
