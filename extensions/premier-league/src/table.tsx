@@ -105,7 +105,10 @@ export default function GetTables() {
 
               const props: Partial<List.Item.Props> = showDetails
                 ? {
-                    accessories: [{ text: overall.points.toString(), icon }],
+                    accessories: [
+                      { text: overall.points.toString() },
+                      { icon },
+                    ],
                     detail: (
                       <List.Item.Detail markdown={json2md(club(entry))} />
                     ),

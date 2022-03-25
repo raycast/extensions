@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import groupBy from "lodash.groupby";
 import { getFixtures } from "./api";
@@ -39,8 +39,12 @@ export default function Fixture() {
                 <List.Item
                   key={match.id}
                   title={`${match.teams[0].team.name} - ${match.teams[1].team.name}`}
-                  subtitle={`🏟️ ${match.ground.name}, ${match.ground.city}`}
-                  accessories={[{ text: match.kickoff.label || "TBC" }]}
+                  accessories={[
+                    {
+                      text: `${match.ground.name}, ${match.ground.city}`,
+                    },
+                    { text: match.kickoff.label || "TBC", icon: Icon.Clock },
+                  ]}
                 />
               );
             })}
