@@ -24,7 +24,7 @@ export const HighlightDetail = ({ item }: { item: Highlight }) => {
           {item.tags.length > 0 && (
             <Detail.Metadata.TagList title="Tag">
               {item.tags.map((tag) => (
-                <Detail.Metadata.TagList.Item text={tag.name} />
+                <Detail.Metadata.TagList.Item key={tag.name} text={tag.name} />
               ))}
             </Detail.Metadata.TagList>
           )}
