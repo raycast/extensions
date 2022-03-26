@@ -31,21 +31,21 @@
       "name": "activity",
       "title": "Show Activity",
       "subtitle": "Nextcloud",
-      "description": "Show activity.",
+      "description": "Show activity. You need to activate Activity app on Nextcloud beforehand.",
       "mode": "view"
     },
     {
       "name": "deck",
       "title": "Show Deck",
       "subtitle": "Nextcloud",
-      "description": "Show tasks in Nextcloud Deck. You have to install Deck app on Nextcloud beforehand.",
+      "description": "Show tasks in Nextcloud Deck. You need to activate Deck app on Nextcloud beforehand.",
       "mode": "view"
     },
     {
       "name": "notes",
       "title": "Show Notes",
       "subtitle": "Nextcloud",
-      "description": "Manage notes in Nextcloud.",
+      "description": "Manage notes in Nextcloud. You need to activate Notes app on Nextcloud beforehand.",
       "mode": "view"
     }
   ],
