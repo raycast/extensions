@@ -55,7 +55,7 @@
       "required": false,
       "title": "Build",
       "default": "Code",
-      "description": "Select which build of Visual Studio Code to use when searching for recent projects",
+      "description": "Select which build of Visual Studio Code to use",
       "data": [
         {
           "value": "Code",
