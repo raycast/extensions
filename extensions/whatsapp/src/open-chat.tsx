@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Action, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useWhatsAppChats } from "./utils/use-whatsapp-chats";
 import { isGroupChat, isPhoneChat, WhatsAppChat } from "./utils/types";
 import WhatsAppPhoneChatForm from "./add-chat";
@@ -41,6 +41,18 @@ export default function ChatList() {
 
   return (
     <List isLoading={isLoading} selectedItemId={selectedItemId} searchBarPlaceholder="Filter chats by name...">
+      {!isLoading && chats.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.Person}
+          title="Add a chat to get started"
+          description="Until WhatsApp releases a public API you will need to add contacts and groups manually using the other commands"
+          actions={
+            <ActionPanel>
+              <Action.Push title="Add First Contact" target={<WhatsAppPhoneChatForm />} />
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {pinnedChats.length > 0 ? (
         <List.Section title="Pinned Chats">
           {pinnedChats.map((chat) => (
@@ -139,7 +151,12 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
               onOpen={() => onOpenChat(chat)}
             />
             {webUrl ? (
-              <Action.OpenInBrowser title="Open in Web" icon={Icon.Globe} url={webUrl} onOpen={() => onOpenChat(chat)} />
+              <Action.OpenInBrowser
+                title="Open in Web"
+                icon={Icon.Globe}
+                url={webUrl}
+                onOpen={() => onOpenChat(chat)}
+              />
             ) : null}
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -159,7 +176,10 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
           <ActionPanel.Section>
             <Action.CopyToClipboard content={chat.name} title="Copy Name" />
             {isGroupChat(chat) ? (
-              <Action.CopyToClipboard content={`https://chat.whatsapp.com/${chat.groupCode}`} title="Copy Invite Link" />
+              <Action.CopyToClipboard
+                content={`https://chat.whatsapp.com/${chat.groupCode}`}
+                title="Copy Invite Link"
+              />
             ) : (
               <Action.CopyToClipboard content={chat.phone} title="Copy Phone Number" />
             )}

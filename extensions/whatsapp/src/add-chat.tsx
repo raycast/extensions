@@ -28,7 +28,7 @@ export default function WhatsAppPhoneChatForm({ defaultValue }: WhatsAppPhoneCha
       id: isCreation ? randomId() : defaultValue.id,
       name: formValues.name,
       pinned: !!formValues.pinned,
-      phone: phoneInformation.phoneNumber
+      phone: phoneInformation.phoneNumber,
     };
 
     const isNewPhoneNumber = isCreation || savedChat.phone !== defaultValue.phone;
