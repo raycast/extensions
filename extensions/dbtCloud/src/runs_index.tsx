@@ -12,7 +12,7 @@ export default function PackageList() {
     async function fetchAllJobsRun() {
       try {
         setLoading(true);
-        await returnRuns().then(response => {
+        await returnRuns().then((response) => {
           setTodos(response);
           setLoading(false);
         });
@@ -27,7 +27,7 @@ export default function PackageList() {
   return (
     <List isLoading={loading} searchBarPlaceholder={`Filter Jobs`} throttle>
       {results?.length
-        ? results.map(result => {
+        ? results.map((result) => {
             return <JobRunsListItem key={result.id} result={result} />;
           })
         : null}
