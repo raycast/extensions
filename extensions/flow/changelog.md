@@ -2,7 +2,7 @@
 
 ## [Start Commands & Keywords] - 2022-03-16
 - Improve command search by adding keywords like `pause` for command like `Stop Timer`
-- Replace `Next Session` command for `Start Focus Session`
+- Replace `Next Session` command for `Start Next Focus`
 - Add `Start Next Break` command
 
 ## [Categories] - 2022-03-12

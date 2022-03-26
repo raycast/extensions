@@ -3,7 +3,7 @@ import { getCurrentPhase, isFlowInstalled, skipSession } from "./utils";
 
 export default async function() {
   const toast = new Toast({
-    title: "Starting next break",
+    title: "Starting next focus",
     style: Toast.Style.Animated
   });
 
@@ -17,9 +17,9 @@ export default async function() {
   }
 
   const phase = await getCurrentPhase();
-  if (phase === "Flow") {
+  if (phase !== "Flow") {
     await skipSession();
-    await showHUD("Break started");
+    await showHUD("Focus started");
     return;
   }
 
@@ -27,8 +27,8 @@ export default async function() {
 
   const options: Alert.Options = {
     icon: { source: Icon.ExclamationMark, tintColor: Color.Yellow },
-    title: "Currently in break phase",
-    message: "Are you sure you want to skip your next focus and start a new break?"
+    title: "Currently in focus phase",
+    message: "Are you sure you want to skip your next break and start a new focus session?"
   };
 
   if (await confirmAlert(options)) {
