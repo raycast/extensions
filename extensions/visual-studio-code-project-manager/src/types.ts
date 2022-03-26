@@ -5,7 +5,7 @@ export interface ProjectEntry {
   enabled: boolean;
 }
 
-export interface GitCachedProjectEntry {
+export interface CachedProjectEntry {
   name: string;
   fullPath: string;
 }

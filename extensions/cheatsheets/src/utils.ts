@@ -50,7 +50,9 @@ function stripTemplateTags(markdown: string): string {
   return markdown
     .split('\n')
     .filter((line) => {
-      const isTag = (line[0] === '{' && line[1] === ':') || (line[1] === '%' && line[line.length - 1] === '}');
+      const isTag =
+        (line[0] === '{' && line[1] === ':') ||
+        (line[1] === '%' && line[line.length - 1] === '}');
       return !isTag;
     })
     .join('\n');

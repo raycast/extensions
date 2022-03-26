@@ -3,15 +3,13 @@ import {
   List,
   Icon,
   showToast,
-  ToastStyle,
-  PushAction,
   Detail,
-  CopyToClipboardAction,
   getPreferenceValues,
-  copyTextToClipboard,
   closeMainWindow,
-  PasteAction,
   Color,
+  Toast,
+  Clipboard,
+  Action,
 } from "@raycast/api";
 import { Item, VaultStatus } from "./types";
 import React, { useEffect, useState } from "react";
@@ -47,20 +45,20 @@ function ItemList(props: {
 
   async function loadItems(sessionToken: string) {
     try {
-      const items = await bitwardenApi.listItems<Item>("items", sessionToken);
+      const items = await bitwardenApi.listItems("items", sessionToken);
       setItems(items);
     } catch (error) {
-      showToast(ToastStyle.Failure, "Failed to search vault");
+      showToast(Toast.Style.Failure, "Failed to search vault");
     }
   }
 
   async function copyTotp(sessionToken: string | undefined, id: string) {
     if (sessionToken) {
       const totp = await bitwardenApi.getTotp(id, sessionToken);
-      copyTextToClipboard(totp);
+      Clipboard.copy(totp);
       closeMainWindow({ clearRootSearch: true });
     } else {
-      showToast(ToastStyle.Failure, "Failed to fetch TOTP.");
+      showToast(Toast.Style.Failure, "Failed to fetch TOTP.");
     }
   }
 
@@ -72,7 +70,7 @@ function ItemList(props: {
 
   async function refreshItems() {
     if (sessionToken) {
-      const toast = await showToast(ToastStyle.Animated, "Syncing Items...");
+      const toast = await showToast(Toast.Style.Animated, "Syncing Items...");
       await bitwardenApi.sync(sessionToken);
       await loadItems(sessionToken);
       await toast.hide();
@@ -150,15 +148,17 @@ function ItemListItem(props: {
       actions={
         <ActionPanel>
           {item.login?.password ? <PasswordActions password={item.login.password} /> : null}
+          {item.login?.username ? <UsernameAction username={item.login.username} /> : null}
           {item.login?.totp ? (
             <ActionPanel.Item
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
               title="Copy TOTP"
               icon={Icon.Clipboard}
               onAction={() => copyTotp(sessionToken, item.id)}
             />
           ) : null}
           {item.notes ? (
-            <PushAction
+            <Action.Push
               title="Show Secure Note"
               icon={Icon.TextDocument}
               target={
@@ -166,7 +166,7 @@ function ItemListItem(props: {
                   markdown={codeBlock(item.notes)}
                   actions={
                     <ActionPanel>
-                      <CopyToClipboardAction title="Copy Secure Notes" content={item.notes} />
+                      <Action.CopyToClipboard title="Copy Secure Notes" content={item.notes} />
                     </ActionPanel>
                   }
                 />
@@ -187,11 +187,11 @@ function ItemListItem(props: {
               ...uriMap,
             }).map(([title, content], index) =>
               content ? (
-                <CopyToClipboardAction key={index} title={titleCase(title)} content={content as string | number} />
+                <Action.CopyToClipboard key={index} title={titleCase(title)} content={content as string | number} />
               ) : null
             )}
           </ActionPanel.Submenu>
-          <PushAction
+          <Action.Push
             title={"Show Details"}
             icon={Icon.Text}
             shortcut={{ modifiers: ["cmd"], key: "i" }}
@@ -200,13 +200,13 @@ function ItemListItem(props: {
                 markdown={codeBlock(tree)}
                 actions={
                   <ActionPanel>
-                    <CopyToClipboardAction content={tree} />
+                    <Action.CopyToClipboard content={tree} />
                   </ActionPanel>
                 }
               />
             }
           />
-          <ActionPanel.Item
+          <Action
             title="Refresh Items"
             shortcut={{ modifiers: ["cmd"], key: "r" }}
             icon={Icon.ArrowClockwise}
@@ -219,10 +219,22 @@ function ItemListItem(props: {
 }
 
 function PasswordActions(props: { password: string }) {
-  const copyAction = <CopyToClipboardAction key="copy" title="Copy Password" content={props.password} />;
-  const pasteAction = <PasteAction key="paste" title="Paste Password" content={props.password} />;
+  const copyAction = <Action.CopyToClipboard key="copy" title="Copy Password" content={props.password} />;
+  const pasteAction = <Action.Paste key="paste" title="Paste Password" content={props.password} />;
 
   return (
     <React.Fragment>{primaryAction == "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}</React.Fragment>
+  );
+}
+
+function UsernameAction(props: { username: string }) {
+  return (
+    <Action.CopyToClipboard
+      title="Copy Username"
+      content={props.username}
+      icon={Icon.Person}
+      shortcut={{ modifiers: ["cmd"], key: "u" }}
+      onCopy={(content) => closeMainWindow({ clearRootSearch: true })}
+    />
   );
 }

@@ -5,13 +5,13 @@ const path = require("path");
 const semver = require("semver");
 const { exec } = require("child_process");
 
-const jscodeshift = require
-  .resolve("jscodeshift")
-  .replace(/index\.js$/, "bin/jscodeshift.js");
+const jscodeshift = require.resolve("jscodeshift").replace(/index\.js$/, "bin/jscodeshift.js");
+
+const migrationToolFolder = path.dirname(__dirname);
 
 // Get all the migration folders and sort them
 const migrations = fs
-  .readdirSync(path.dirname(__dirname))
+  .readdirSync(migrationToolFolder)
   .filter((x) => x.match(/^[0-9]+\.[0-9]+\.[0-9]+$/g))
   .sort((a, b) => (semver.gt(a, b) ? 1 : -1));
 
@@ -24,10 +24,7 @@ if (!_extensionPath) {
 
 const extensionPath = path.resolve(_extensionPath);
 
-if (
-  !fs.existsSync(extensionPath) ||
-  !fs.existsSync(path.join(extensionPath, "package.json"))
-) {
+if (!fs.existsSync(extensionPath) || !fs.existsSync(path.join(extensionPath, "package.json"))) {
   console.error(`❌ Cannot find extension at "${extensionPath}"`);
   process.exit(1);
 }
@@ -47,13 +44,11 @@ if (!currentVersion) {
   process.exit(1);
 }
 
-console.log(
-  `💡 Found the current version of @raycast/api: ${currentVersion.version}`
-);
+console.log(`💡 Found the current version of @raycast/api: ${currentVersion.version}`);
 
-const migrationsToApply = migrations.filter((x) =>
-  semver.gt(x, currentVersion.version)
-);
+const migrationsToApply = migrations.filter((x) => semver.gt(x, currentVersion.version));
+
+const realMigrations = migrationsToApply.filter((x) => fs.existsSync(path.join(migrationToolFolder, x, "index.ts")));
 
 if (migrationsToApply.length === 0) {
   console.log(`✅ There are no migrations to apply`);
@@ -61,12 +56,12 @@ if (migrationsToApply.length === 0) {
 }
 
 console.log(
-  `⤴️  There ${migrationsToApply.length > 1 ? "are" : "is"} ${
-    migrationsToApply.length
-  } migration${migrationsToApply.length > 1 ? "s" : ""} to apply:`
+  `⤴️  There ${realMigrations.length > 1 ? "are" : "is"} ${realMigrations.length} migration${
+    realMigrations.length > 1 ? "s" : ""
+  } to apply:`
 );
 
-migrationsToApply.forEach((x) => console.log(`  - ${x}`));
+realMigrations.forEach((x) => console.log(`  - ${x}`));
 
 console.log("");
 console.log("-----------------------");
@@ -74,33 +69,23 @@ console.log("");
 console.log("🎭 Updating the @raycast/api version in the package.json...");
 console.log("");
 
-packageJSON.dependencies["@raycast/api"] = `^${
-  migrationsToApply[migrationsToApply.length - 1]
-}`;
+packageJSON.dependencies["@raycast/api"] = `^${migrationsToApply[migrationsToApply.length - 1]}`;
 
-fs.writeFileSync(
-  path.join(extensionPath, "package.json"),
-  `${JSON.stringify(packageJSON, null, "  ")}\n`,
-  "utf8"
-);
+fs.writeFileSync(path.join(extensionPath, "package.json"), `${JSON.stringify(packageJSON, null, "  ")}\n`, "utf8");
 
 new Promise((resolve, reject) => {
-  let stream = exec(
-    `npm install`,
-    { cwd: extensionPath },
-    (err, stdout, stderr) => {
-      if (err) {
-        reject(stderr);
-      } else {
-        resolve();
-      }
+  let stream = exec(`npm install`, { cwd: extensionPath }, (err, stdout, stderr) => {
+    if (err) {
+      reject(stderr);
+    } else {
+      resolve();
     }
-  );
+  });
 
   stream.stdout.pipe(process.stdout);
 })
   .then(() => {
-    return migrationsToApply.reduce((p, migration) => {
+    return realMigrations.reduce((p, migration) => {
       return p.then(() => {
         console.log("");
         console.log("-----------------------");
@@ -111,7 +96,7 @@ new Promise((resolve, reject) => {
         return new Promise((resolve, reject) => {
           let stream = exec(
             `find "${extensionPath}" \\( -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' \\) -not -path "*/node_modules/*" | xargs "${jscodeshift}" --verbose=2 --extensions=tsx,ts,jsx,js --parser=tsx -t ./${migration}/index.ts`,
-            { cwd: path.dirname(__dirname) },
+            { cwd: migrationToolFolder },
             (err, stdout, stderr) => {
               if (err) {
                 reject(stderr);
@@ -135,17 +120,13 @@ new Promise((resolve, reject) => {
     console.log(`🧹 Cleaning up...`);
 
     return new Promise((resolve, reject) => {
-      let stream = exec(
-        `./node_modules/.bin/ray lint --fix`,
-        { cwd: extensionPath },
-        (err, stdout, stderr) => {
-          if (err) {
-            reject(stderr);
-          } else {
-            resolve();
-          }
+      let stream = exec(`./node_modules/.bin/ray lint --fix`, { cwd: extensionPath }, (err, stdout, stderr) => {
+        if (err) {
+          reject(stderr);
+        } else {
+          resolve();
         }
-      );
+      });
 
       stream.stdout.pipe(process.stdout);
     });
