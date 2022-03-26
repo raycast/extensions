@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "dbtCloud",
+  "name": "dbtcloud",
   "title": "dbt Cloud",
   "description": "Helps you get information about your dbt Cloud jobs",
   "icon": "icon.png",
