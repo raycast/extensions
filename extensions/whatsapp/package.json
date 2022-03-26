@@ -35,7 +35,7 @@
     "Productivity"
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.6",
+    "@raycast/api": "^1.31.0",
     "fromnow": "^3.0.1",
     "phone": "^3.1.10"
   },
