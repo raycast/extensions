@@ -5,7 +5,7 @@ description: This example shows how to show an RSS feed as a List.
 # Hacker News
 
 {% hint style="info" %}
-The source code of the example can be found [here](../../examples/hacker-news). You can install it [here](https://www.raycast.com/thomas/hacker-news).
+The source code of the example can be found [here](https://github.com/raycast/extensions/tree/main/extensions/hacker-news#readme). You can install it [here](https://www.raycast.com/thomas/hacker-news).
 {% endhint %}
 
 Who doesn't like a good morning read on [Hacker News](https://news.ycombinator.com) with a warm coffee?! In this example, we create a simple list with the top stories on the frontpage.
@@ -181,7 +181,7 @@ function StoryListItem(props: { item: Parser.Item; index: number }) {
 
 ### Handle errors
 
-Lastly, we want to be a good citizen and also handle errors appropriately to guarantee a smooth experience. We'll show a toast whenever our network request fails:
+Lastly, we want to be a good citizen and handle errors appropriately to guarantee a smooth experience. We'll show a toast whenever our network request fails:
 
 ```typescript
 export default function Command() {

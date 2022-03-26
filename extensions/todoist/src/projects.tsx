@@ -1,20 +1,10 @@
-import {
-  ActionPanel,
-  PushAction,
-  Icon,
-  showToast,
-  ToastStyle,
-  List,
-  OpenInBrowserAction,
-  confirmAlert,
-  render,
-} from "@raycast/api";
+import { ActionPanel, Icon, showToast, Toast, List, confirmAlert, Action } from "@raycast/api";
 import useSWR, { mutate } from "swr";
 import { todoist, handleError } from "./api";
 import Project from "./components/Project";
 import { SWRKeys } from "./types";
 
-function Projects() {
+export default function Projects() {
   const { data, error } = useSWR(SWRKeys.projects, () => todoist.getProjects());
 
   if (error) {
@@ -25,11 +15,11 @@ function Projects() {
 
   async function deleteProject(id: number) {
     if (await confirmAlert({ title: "Are you sure you want to delete this project?" })) {
-      await showToast(ToastStyle.Animated, "Deleting project");
+      await showToast({ style: Toast.Style.Animated, title: "Deleting project" });
 
       try {
         await todoist.deleteProject(id);
-        await showToast(ToastStyle.Success, "Project deleted");
+        await showToast({ style: Toast.Style.Success, title: "Project deleted" });
         mutate(SWRKeys.projects);
       } catch (error) {
         handleError({ error, title: "Unable to delete project" });
@@ -48,9 +38,9 @@ function Projects() {
           {...(project.favorite ? { accessoryIcon: Icon.Star } : {})}
           actions={
             <ActionPanel>
-              <PushAction icon={Icon.TextDocument} title="Show Details" target={<Project projectId={project.id} />} />
-              <OpenInBrowserAction url={project.url} />
-              <ActionPanel.Item
+              <Action.Push icon={Icon.TextDocument} title="Show Details" target={<Project projectId={project.id} />} />
+              <Action.OpenInBrowser url={project.url} />
+              <Action
                 title="Delete Project"
                 icon={Icon.Trash}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
@@ -63,5 +53,3 @@ function Projects() {
     </List>
   );
 }
-
-render(<Projects />);

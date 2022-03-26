@@ -13,11 +13,11 @@
 
 - [Getting Started](basics/getting-started.md)
 - [Create Your First Extension](basics/create-your-first-extension.md)
+- [Contribute to an Extension](basics/contribute-to-an-extension.md)
 - [Prepare an Extension for Store](basics/prepare-an-extension-for-store.md)
 - [Publish an Extension](basics/publish-an-extension.md)
 - [Debug an Extension](basics/debug-an-extension.md)
 - [Install an Extension](basics/install-an-extension.md)
-- [Import an Extension](basics/import-an-extension.md)
 
 ## Examples
 
@@ -65,4 +65,5 @@
 - [Changelog](changelog.md)
 - [Migration](migration/README.md)
   - [v1.28.0](migration/v1.28.0.md)
+  - [v1.31.0](migration/v1.31.0.md)
 - [FAQ](faq.md)

@@ -1,12 +1,11 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
   Detail,
   Form,
   showToast,
-  SubmitFormAction,
-  ToastStyle,
   useNavigation,
+  Action,
+  Toast,
 } from '@raycast/api';
 import Service from './service';
 import { isEventTopic, normalizeHex } from './utils';
@@ -25,12 +24,18 @@ export default function Command() {
     const topicHash = normalizeHex(hash);
     const isValid = isEventTopic(topicHash);
     if (!isValid) {
-      showToast(ToastStyle.Failure, 'Invalid topic hash');
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Invalid topic hash',
+      });
       return;
     }
     const event = await service.getEvent(topicHash);
     if (!event) {
-      showToast(ToastStyle.Failure, 'Topic not found');
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Topic not found',
+      });
       return;
     }
     push(<FunctionView event={event} />);
@@ -40,7 +45,7 @@ export default function Command() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={handleSubmit} />
+          <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -67,7 +72,7 @@ function FunctionView(props: FunctionProps) {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <CopyToClipboardAction content={event} />
+          <Action.CopyToClipboard content={event} />
         </ActionPanel>
       }
     />
