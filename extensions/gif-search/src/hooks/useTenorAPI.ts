@@ -1,10 +1,11 @@
+import path from "path";
 import { AbortError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { mapTenorResponse } from "../models/gif";
 import { getAPIKey, GIF_SERVICE } from "../preferences";
 
-import Tenor, { TenorResults } from "../models/tenor";
+import TenorAPI, { TenorResults } from "../models/tenor";
+import type { TenorGif } from "../models/tenor";
 import type { IGif } from "../models/gif";
 
 interface FetchState {
@@ -13,7 +14,7 @@ interface FetchState {
   error?: Error;
 }
 
-const tenor = new Tenor(getAPIKey(GIF_SERVICE.TENOR));
+const tenor = new TenorAPI(getAPIKey(GIF_SERVICE.TENOR));
 
 export default function useTenorAPI({ offset = 0 }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -55,4 +56,17 @@ export default function useTenorAPI({ offset = 0 }) {
   }, []);
 
   return [results, isLoading, search] as const;
+}
+
+export function mapTenorResponse(tenorResp: TenorGif) {
+  const mediaItem = tenorResp.media[0];
+  return <IGif>{
+    id: tenorResp.id,
+    title: tenorResp.title || tenorResp.h1_title || tenorResp.content_description,
+    url: tenorResp.itemurl,
+    slug: path.basename(tenorResp.itemurl),
+    preview_gif_url: mediaItem.tinygif.preview,
+    gif_url: mediaItem.tinygif.url,
+    attribution: "poweredby_tenor.png",
+  };
 }

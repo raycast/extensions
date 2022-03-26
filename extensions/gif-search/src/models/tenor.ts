@@ -29,7 +29,7 @@ interface TenorMedia {
 
 const API_BASE_URL = "https://g.tenor.com/";
 
-export default class Tenor {
+export default class TenorAPI {
   private static locale = "en_US";
   private static mediaFilter = "basic";
 
@@ -42,8 +42,8 @@ export default class Tenor {
   async trending(options: { offset: number; limit: number }) {
     const reqUrl = new URL("/v1/trending", API_BASE_URL);
     reqUrl.searchParams.set("key", this.apiKey);
-    reqUrl.searchParams.set("locale", Tenor.locale);
-    reqUrl.searchParams.set("media_filter", Tenor.mediaFilter);
+    reqUrl.searchParams.set("locale", TenorAPI.locale);
+    reqUrl.searchParams.set("media_filter", TenorAPI.mediaFilter);
     reqUrl.searchParams.set("limit", options?.limit?.toString() ?? "10");
 
     if (options?.offset) {
@@ -58,8 +58,8 @@ export default class Tenor {
     const reqUrl = new URL("/v1/search", API_BASE_URL);
     reqUrl.searchParams.set("key", this.apiKey);
     reqUrl.searchParams.set("q", term);
-    reqUrl.searchParams.set("locale", Tenor.locale);
-    reqUrl.searchParams.set("media_filter", Tenor.mediaFilter);
+    reqUrl.searchParams.set("locale", TenorAPI.locale);
+    reqUrl.searchParams.set("media_filter", TenorAPI.mediaFilter);
     reqUrl.searchParams.set("limit", options?.limit?.toString() ?? "10");
 
     if (options?.offset) {
