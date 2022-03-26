@@ -7,6 +7,7 @@ export const HighlightsList = ({ item }: { item: Highlight }) => {
     <List.Item
       title={item.text}
       subtitle={item.note}
+      keywords={item.tags.map((tag) => tag.name)}
       accessories={(item.url && [{ text: item.url, icon: Icon.Link }]) || undefined}
       actions={
         <ActionPanel>
