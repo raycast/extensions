@@ -11,6 +11,20 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "dailyreview",
+      "title": "Open Readwise Daily Review",
+      "subtitle": "Opens your Daily Review on Readwise",
+      "description": "Opens your Daily Review on Readwise with your default browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "library",
+      "title": "Open Readwise Library",
+      "subtitle": "Opens your Library on Readwise",
+      "description": "Opens your Library on Readwise with your default browser",
+      "mode": "no-view"
+    },
+    {
       "name": "highlights",
       "title": "Search Readwise Highlights",
       "subtitle": "Browse highlights on Readwise",
