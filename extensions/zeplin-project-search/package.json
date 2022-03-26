@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zeplin-project-raycast-extension",
+  "title": "Zeplin Project Search",
+  "description": "List and Search Zeplin Projects",
+  "icon": "command-icon.png",
+  "author": "dorukgunes",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "searchProject",
+      "title": "Search Project",
+      "subtitle": "Zeplin",
+      "description": "List and Search Zeplin Projects",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "PERSONAL_ACCESS_TOKEN",
+      "type": "password",
+      "required": true,
+      "title": "Personal Access Token",
+      "description": "Log in to Zeplin and click developer tab under profile to create a personal access token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.26.2",
+    "date-fns": "^2.27.0",
+    "node-fetch": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

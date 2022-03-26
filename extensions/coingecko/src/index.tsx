@@ -1,9 +1,18 @@
-import { ActionPanel, Detail, Icon, List, OpenInBrowserAction, PushAction, ToastStyle, showToast } from "@raycast/api";
-import { useEffect, useState, useMemo } from "react";
+import {
+  ActionPanel,
+  Detail,
+  Icon,
+  List,
+  showToast,
+  Action,
+  Toast,
+} from '@raycast/api';
+import { useEffect, useState, useMemo } from 'react';
+import Fuse from 'fuse.js';
 
-import Service, { Coin } from "./service";
-import { addFavorite, getFavorites, removeFavorite } from "./storage";
-import { filterCoins, formatDate, formatPrice } from "./utils";
+import Service, { Coin } from './service';
+import { addFavorite, getFavorites, removeFavorite } from './storage';
+import { formatDate, formatPrice, getPreferredCurrency } from './utils';
 
 interface IdProps {
   id: string;
@@ -21,24 +30,42 @@ interface FavoriteProps {
 }
 
 // Limit the number of list items rendered for performance
-const ITEM_LIMIT = 1000;
+const ITEM_LIMIT = 100;
 
 const service = new Service();
+const fuseSearch = new Fuse<Coin>([], {
+  keys: ['name', 'symbol'],
+  includeScore: true,
+  threshold: 0.3,
+});
 
 export default function Command() {
   const service = new Service();
   const [coins, setCoins] = useState<Coin[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
-  const [input, setInput] = useState<string>("");
+  const [input, setInput] = useState<string>('');
   const [favorites, setFavorites] = useState<string[]>([]);
 
-  const list = useMemo(() => filterCoins(coins, input), [coins, input]);
+  useEffect(() => fuseSearch.setCollection(coins), [coins]);
+
+  const filteredList = useMemo(
+    () => fuseSearch.search(input, { limit: ITEM_LIMIT }).map((s) => s.item),
+    [input],
+  );
 
   useEffect(() => {
     async function fetchList() {
-      const coins = await service.getCoinList();
-      setLoading(false);
-      setCoins(coins);
+      try {
+        const coins = await service.getCoinList();
+        setLoading(false);
+        setCoins(coins);
+      } catch (e) {
+        setLoading(false);
+        showToast({
+          style: Toast.Style.Failure,
+          title: 'Failed to fetch the coin list',
+        });
+      }
     }
 
     async function fetchFavorites() {
@@ -61,18 +88,29 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={setInput} searchBarPlaceholder="Search by coin name or symbol">
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={setInput}
+      searchBarPlaceholder="Search by coin name or symbol"
+    >
       <List.Section title="Favorites">
         {favorites.map((id) => {
-          const coin = list.find((coin) => coin.id === id);
+          const coin = (input ? filteredList : coins).find(
+            (coin) => coin.id === id,
+          );
           if (!coin) return;
           return (
-            <ListItemCoin key={id} coin={coin} isFavorite={true} onFavoriteToggle={() => toggleFavorite(id, true)} />
+            <ListItemCoin
+              key={id}
+              coin={coin}
+              isFavorite={true}
+              onFavoriteToggle={() => toggleFavorite(id, true)}
+            />
           );
         })}
       </List.Section>
       <List.Section title="All">
-        {list.slice(0, ITEM_LIMIT).map((item) => {
+        {filteredList.map((item) => {
           const { id } = item;
           const isFavorite = favorites.includes(id);
           return (
@@ -100,24 +138,24 @@ function ListItemCoin({ coin, isFavorite, onFavoriteToggle }: ListItemProps) {
       accessoryIcon={isFavorite ? Icon.Star : undefined}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction url={url} />
+          <Action.OpenInBrowser url={url} />
           <FavoriteAction isFavorite={isFavorite} onToggle={onFavoriteToggle} />
-          <ActionPanel.Item
+          <Action
             icon={Icon.Text}
             title="Get Price"
-            shortcut={{ modifiers: ["cmd"], key: "p" }}
+            shortcut={{ modifiers: ['cmd'], key: 'p' }}
             onAction={() => showPrice(id)}
           />
-          <PushAction
+          <Action.Push
             icon={Icon.Clock}
             title="Get Historical Price"
-            shortcut={{ modifiers: ["cmd"], key: "h" }}
+            shortcut={{ modifiers: ['cmd'], key: 'h' }}
             target={<HistoricalPrice id={id} />}
           />
-          <PushAction
+          <Action.Push
             icon={Icon.List}
             title="Get Info"
-            shortcut={{ modifiers: ["cmd"], key: "i" }}
+            shortcut={{ modifiers: ['cmd'], key: 'i' }}
             target={<Info id={id} />}
           />
         </ActionPanel>
@@ -128,24 +166,35 @@ function ListItemCoin({ coin, isFavorite, onFavoriteToggle }: ListItemProps) {
 
 function FavoriteAction(props: FavoriteProps) {
   const { isFavorite, onToggle } = props;
-  const title = isFavorite ? "Remove from Favorites" : "Add to Favorites";
-  return <ActionPanel.Item icon={Icon.Star} title={title} onAction={onToggle} />;
+  const title = isFavorite ? 'Remove from Favorites' : 'Add to Favorites';
+  return <Action icon={Icon.Star} title={title} onAction={onToggle} />;
 }
 
 async function showPrice(id: string) {
-  showToast(ToastStyle.Animated, "Fetching price…");
-  const price = await service.getPrice(id);
+  showToast({
+    style: Toast.Style.Animated,
+    title: 'Fetching price…',
+  });
+  const currency = getPreferredCurrency();
+  const price = await service.getPrice(id, currency.id);
   if (!price) {
-    showToast(ToastStyle.Failure, "Failed to fetch the price");
+    showToast({
+      style: Toast.Style.Failure,
+      title: 'Failed to fetch the price',
+    });
     return;
   }
-  const priceString = formatPrice(price);
-  showToast(ToastStyle.Success, `Price: ${priceString}`);
+  const priceString = formatPrice(price, currency.id);
+  showToast({
+    style: Toast.Style.Success,
+    title: `Price: ${priceString}`,
+  });
 }
 
 function HistoricalPrice(props: IdProps) {
-  const [markdown, setMarkdown] = useState<string>("");
+  const [markdown, setMarkdown] = useState<string>('');
   const [isLoading, setLoading] = useState<boolean>(true);
+  const currency = getPreferredCurrency();
 
   useEffect(() => {
     async function fetchList() {
@@ -155,10 +204,10 @@ function HistoricalPrice(props: IdProps) {
         .map(([timestamp, price]) => {
           const date = new Date(timestamp);
           const dateString = formatDate(date);
-          const priceString = formatPrice(price);
+          const priceString = formatPrice(price, currency.id);
           return `**${dateString}:** ${priceString}`;
         })
-        .join("\n\n");
+        .join('\n\n');
       setMarkdown(markdown);
     }
 
@@ -169,21 +218,30 @@ function HistoricalPrice(props: IdProps) {
 }
 
 function Info(props: IdProps) {
-  const [markdown, setMarkdown] = useState<string>("");
+  const [markdown, setMarkdown] = useState<string>('');
   const [isLoading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     async function fetchList() {
-      const { name, symbol, market_cap_rank, links } = await service.getCoinInfo(props.id);
+      const { name, symbol, market_cap_rank, links } =
+        await service.getCoinInfo(props.id);
       setLoading(false);
       const markdown = `
-  **Name**: ${name}
+  ## Name
 
-  **Symbol**: ${symbol.toUpperCase()}
+  ${name}
 
-  **Market Cap Rank**: ${market_cap_rank}
+  ## Symbol
 
-  [Homepage](${links.homepage[0]})
+  ${symbol.toUpperCase()}
+
+  ## Market Cap Rank
+
+  ${market_cap_rank}
+
+  ## Homepage
+
+  [${links.homepage[0]}](${links.homepage[0]})
       `;
       setMarkdown(markdown);
     }

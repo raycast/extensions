@@ -6,6 +6,9 @@
   "icon": "icon.png",
   "author": "thomaslombart",
   "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
   "commands": [
     {
       "name": "index",

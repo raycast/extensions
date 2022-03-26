@@ -1,4 +1,4 @@
-import { ActionPanel, ActionPanelItem, Detail, showToast, Toast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Detail, showToast, Toast, Action, getPreferenceValues } from "@raycast/api";
 import { execSync } from "child_process";
 import { useState } from "react";
 
@@ -8,28 +8,33 @@ export default function NotInstalled({
   },
 }) {
   const [isLoading, setIsLoading] = useState(false);
+  const PATH = getPreferenceValues<Preferences>().path;
   return (
     <Detail
       actions={
         <ActionPanel>
           {!isLoading && (
-            <ActionPanelItem
+            <Action
               title="Install with Homebrew"
               onAction={async () => {
                 if (isLoading) return;
 
                 setIsLoading(true);
 
-                const toast = new Toast({ style: ToastStyle.Animated, title: "Installing..." });
+                const toast = await showToast({ style: Toast.Style.Animated, title: "Installing..." });
                 await toast.show();
 
                 try {
-                  execSync(`zsh -l -c 'brew tap jakehilborn/jakehilborn && brew install displayplacer'`);
+                  execSync(`zsh -l -c 'PATH=${PATH} brew tap jakehilborn/jakehilborn && brew install displayplacer'`);
                   await toast.hide();
                   onRefresh();
                 } catch {
                   await toast.hide();
-                  await showToast(ToastStyle.Failure, "Error", "An unknown error occured while trying to install");
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Error",
+                    message: "An unknown error occured while trying to install",
+                  });
                 }
                 setIsLoading(false);
               }}

@@ -6,12 +6,13 @@
   "icon": "command-icon.png",
   "author": "Falcon",
   "contributors": [
-    "Hodglim"
+    "Hodglim",
+    "JonathanWbn"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "ec2",
       "title": "EC2 Instances",
       "subtitle": "Amazon AWS",
       "description": "List and Filter All your EC2 Instances",
@@ -36,6 +37,13 @@
       "title": "Console",
       "subtitle": "Amazon AWS",
       "description": "Launch AWS console links",
+      "mode": "view"
+    },
+    {
+      "name": "cloudformation",
+      "title": "CloudFormation Stacks",
+      "subtitle": "Amazon AWS",
+      "description": "List All your CloudFormation Stacks",
       "mode": "view"
     }
   ],

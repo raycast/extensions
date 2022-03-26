@@ -149,6 +149,14 @@ function PasswordListCategory(props: { onePasswordMetaItemsCategory: OnePassword
   );
 }
 
+function getItemAccessoryTitle(item: OnePasswordMetaItem) {
+  const vaultName = `🗄 ${item.vaultName}`;
+  if (item.accountName) {
+    return `👤 ${item.accountName} ${vaultName}`;
+  }
+  return vaultName;
+}
+
 function PasswordListItem(props: { onePasswordMetaItem: OnePasswordMetaItem }) {
   const onePasswordMetaItem = props.onePasswordMetaItem;
 
@@ -157,7 +165,7 @@ function PasswordListItem(props: { onePasswordMetaItem: OnePasswordMetaItem }) {
       title={onePasswordMetaItem.itemTitle}
       subtitle={onePasswordMetaItem.categorySingularName}
       icon={getIconForCategory(onePasswordMetaItem.categoryUUID)}
-      accessoryTitle={`👤 ${onePasswordMetaItem.accountName}  🗄 ${onePasswordMetaItem.vaultName}`}
+      accessoryTitle={getItemAccessoryTitle(onePasswordMetaItem)}
       actions={
         <ActionPanel>
           {onePasswordMetaItem.categoryUUID === "001" && (
@@ -175,34 +183,35 @@ function PasswordListItem(props: { onePasswordMetaItem: OnePasswordMetaItem }) {
 async function doAction(action: string, onePasswordMetaItem: OnePasswordMetaItem, addHash: boolean, message: string) {
   let url = `onepassword7://${action}/${onePasswordMetaItem.vaultUUID}/${onePasswordMetaItem.uuid}`;
 
-  if (addHash) {
+  if (addHash && onePasswordMetaItem.websiteURLs?.length) {
     const hashedUrl = shajs("sha256").update(onePasswordMetaItem.websiteURLs[0]).digest("hex");
     url = url + `/${hashedUrl}`;
   }
 
-  popToRoot({ clearSearchBar: true });
-
   await open(url, { app: { name: "1Password 7" } });
 
+  popToRoot({ clearSearchBar: true });
   showHUD(message);
 }
 
-const OpenAndFillAction = ({ onePasswordMetaItem }: ActionProps): JSX.Element => (
-  <ActionPanel.Item
-    icon={Icon.Link}
-    title="Open and Fill"
-    onAction={async () => {
-      doAction(
-        "open_and_fill",
-        onePasswordMetaItem,
-        true,
-        `Opening ${onePasswordMetaItem.itemTitle} in your default browser`
-      );
-    }}
-  />
-);
+const OpenAndFillAction = ({ onePasswordMetaItem }: ActionProps) => {
+  return onePasswordMetaItem.websiteURLs?.length ? (
+    <ActionPanel.Item
+      icon={Icon.Link}
+      title="Open and Fill"
+      onAction={async () => {
+        doAction(
+          "open_and_fill",
+          onePasswordMetaItem,
+          true,
+          `Opening ${onePasswordMetaItem.itemTitle} in your default browser`
+        );
+      }}
+    />
+  ) : null;
+};
 
-const ViewAction = ({ onePasswordMetaItem }: ActionProps): JSX.Element => (
+const ViewAction = ({ onePasswordMetaItem }: ActionProps) => (
   <ActionPanel.Item
     icon={Icon.Eye}
     title="View in 1Password"
@@ -213,7 +222,7 @@ const ViewAction = ({ onePasswordMetaItem }: ActionProps): JSX.Element => (
   />
 );
 
-const EditAction = ({ onePasswordMetaItem }: ActionProps): JSX.Element => (
+const EditAction = ({ onePasswordMetaItem }: ActionProps) => (
   <ActionPanel.Item
     icon={Icon.Gear}
     title="Edit in 1Password"

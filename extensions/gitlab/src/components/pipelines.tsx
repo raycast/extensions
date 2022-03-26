@@ -10,10 +10,13 @@ import {
   PushAction,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { gitlabgql } from "../common";
+import { getCIRefreshInterval, gitlabgql } from "../common";
 import { gql } from "@apollo/client";
-import { getIdFromGqlId } from "../utils";
+import { getIdFromGqlId, now } from "../utils";
 import { JobList } from "./jobs";
+import { RefreshPipelinesAction } from "./pipeline_actions";
+import useInterval from "use-interval";
+import { GitLabIcons } from "../icons";
 
 const GET_PIPELINES = gql`
   query GetProjectPipeplines($fullPath: ID!) {
@@ -35,22 +38,25 @@ const GET_PIPELINES = gql`
 function getIcon(status: string): Image {
   switch (status.toLowerCase()) {
     case "success": {
-      return { source: Icon.Checkmark, tintColor: Color.Green };
+      return { source: GitLabIcons.status_success, tintColor: Color.Green };
     }
     case "created": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Yellow };
+      return { source: GitLabIcons.status_created, tintColor: Color.Yellow };
     }
     case "pending": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Yellow };
+      return { source: GitLabIcons.status_pending, tintColor: Color.Yellow };
     }
     case "running": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Blue };
+      return { source: GitLabIcons.status_running, tintColor: Color.Blue };
     }
     case "failed": {
-      return { source: Icon.ExclamationMark, tintColor: Color.Red };
+      return { source: GitLabIcons.status_failed, tintColor: Color.Red };
+    }
+    case "canceled": {
+      return { source: GitLabIcons.status_canceled, tintColor: Color.PrimaryText };
     }
     default:
-      return { source: Icon.ExclamationMark, tintColor: Color.Magenta };
+      return { source: GitLabIcons.status_notfound, tintColor: Color.Magenta };
   }
 }
 
@@ -62,7 +68,7 @@ function getStatusText(status: string) {
   }
 }
 
-export function PipelineListItem(props: { pipeline: any; projectFullPath: string }) {
+export function PipelineListItem(props: { pipeline: any; projectFullPath: string; onRefreshPipelines: () => void }) {
   const pipeline = props.pipeline;
   const icon = getIcon(pipeline.status);
   return (
@@ -74,11 +80,17 @@ export function PipelineListItem(props: { pipeline: any; projectFullPath: string
       accessoryTitle={getStatusText(pipeline.status.toLowerCase())}
       actions={
         <ActionPanel>
-          <PushAction
-            title="Show Jobs"
-            target={<JobList projectFullPath={props.projectFullPath} pipelineIID={pipeline.iid} />}
-          />
-          <OpenInBrowserAction url={pipeline.webUrl} />
+          <ActionPanel.Section>
+            <PushAction
+              title="Show Jobs"
+              target={<JobList projectFullPath={props.projectFullPath} pipelineIID={pipeline.iid} />}
+              icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
+            />
+            <OpenInBrowserAction url={pipeline.webUrl} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <RefreshPipelinesAction onRefreshPipelines={props.onRefreshPipelines} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -86,14 +98,22 @@ export function PipelineListItem(props: { pipeline: any; projectFullPath: string
 }
 
 export function PipelineList(props: { projectFullPath: string }) {
-  const { pipelines, error, isLoading } = useSearch("", props.projectFullPath);
+  const { pipelines, error, isLoading, refresh } = useSearch("", props.projectFullPath);
+  useInterval(() => {
+    refresh();
+  }, getCIRefreshInterval());
   if (error) {
     showToast(ToastStyle.Failure, "Cannot search Pipelines", error);
   }
   return (
     <List isLoading={isLoading} navigationTitle="Pipelines">
       {pipelines?.map((pipeline) => (
-        <PipelineListItem key={pipeline.id} pipeline={pipeline} projectFullPath={props.projectFullPath} />
+        <PipelineListItem
+          key={pipeline.id}
+          pipeline={pipeline}
+          projectFullPath={props.projectFullPath}
+          onRefreshPipelines={refresh}
+        />
       ))}
     </List>
   );
@@ -106,10 +126,16 @@ export function useSearch(
   pipelines: any[];
   error?: string;
   isLoading: boolean;
+  refresh: () => void;
 } {
   const [pipelines, setPipelines] = useState<any[]>([]);
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [timestamp, setTimestamp] = useState<Date>(now());
+
+  const refresh = () => {
+    setTimestamp(now());
+  };
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -125,7 +151,11 @@ export function useSearch(
       setError(undefined);
 
       try {
-        const data = await gitlabgql.client.query({ query: GET_PIPELINES, variables: { fullPath: projectFullPath } });
+        const data = await gitlabgql.client.query({
+          query: GET_PIPELINES,
+          variables: { fullPath: projectFullPath },
+          fetchPolicy: "network-only",
+        });
         const glData: Record<string, any>[] = data.data.project.pipelines.nodes.map((p: any) => ({
           id: getIdFromGqlId(p.id),
           iid: `${p.iid}`,
@@ -153,7 +183,7 @@ export function useSearch(
     return () => {
       didUnmount = true;
     };
-  }, [query, projectFullPath]);
+  }, [query, projectFullPath, timestamp]);
 
-  return { pipelines, error, isLoading };
+  return { pipelines, error, isLoading, refresh };
 }

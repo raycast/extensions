@@ -1,4 +1,4 @@
-import { Color, Icon, List, ListSection } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { Cask, Formula } from "../brew";
 import { brewFormatVersion, brewIsInstalled, brewName } from "../brew";
 import { CaskActionPanel, FormulaActionPanel } from "./actionPanels";
@@ -12,33 +12,32 @@ export interface FormulaListProps {
   onAction: () => void;
 }
 
-export function FormulaList(props: FormulaListProps) {
+export function FormulaList(props: FormulaListProps): JSX.Element {
   const formulae = props.formulae;
   const casks = props.casks;
-
   return (
     <List
       searchBarPlaceholder={props.searchBarPlaceholder}
       onSearchTextChange={props.onSearchTextChange}
       isLoading={props.isLoading}
     >
-      <ListSection title="Formulae">
+      <List.Section title="Formulae">
         {formulae.map((formula) => (
           <FormulaListItem key={`formula-${formula.name}`} formula={formula} onAction={props.onAction} />
         ))}
         {formulae.isTruncated() && <MoreListItem />}
-      </ListSection>
-      <ListSection title="Casks">
+      </List.Section>
+      <List.Section title="Casks">
         {props.casks.map((cask) => (
           <CaskListItem key={`cask-${cask.token}`} cask={cask} onAction={props.onAction} />
         ))}
         {casks.isTruncated() && <MoreListItem />}
-      </ListSection>
+      </List.Section>
     </List>
   );
 }
 
-export function FormulaListItem(props: { formula: Formula; onAction: () => void }) {
+export function FormulaListItem(props: { formula: Formula; onAction: () => void }): JSX.Element {
   const formula = props.formula;
   let version = formula.versions.stable;
   let tintColor = Color.SecondaryText;
@@ -59,7 +58,7 @@ export function FormulaListItem(props: { formula: Formula; onAction: () => void 
   );
 }
 
-export function CaskListItem(props: { cask: Cask; onAction: () => void }) {
+export function CaskListItem(props: { cask: Cask; onAction: () => void }): JSX.Element {
   const cask = props.cask;
   let version = cask.version;
   let tintColor = Color.SecondaryText;
@@ -80,6 +79,6 @@ export function CaskListItem(props: { cask: Cask; onAction: () => void }) {
   );
 }
 
-export function MoreListItem() {
+export function MoreListItem(): JSX.Element {
   return <List.Item title="" icon={Icon.Dot} />;
 }

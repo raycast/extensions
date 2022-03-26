@@ -1,4 +1,4 @@
-import { ActionPanelItem, Icon, showToast, ToastStyle } from "@raycast/api";
+import { Action, Icon, showToast, Toast } from "@raycast/api";
 import {
   brewName,
   brewInstall,
@@ -8,14 +8,16 @@ import {
   brewUpgrade,
   brewUpgradeAll,
 } from "../brew";
-import { showFailureToast } from "../utils";
+import { showActionToast, showFailureToast } from "../utils";
 import { Cask, Formula, OutdatedFormula, Nameable } from "../brew";
 
-export function FormulaInstallAction(props: { formula: Cask | Formula; onAction: (result: boolean) => void }) {
+export function FormulaInstallAction(props: {
+  formula: Cask | Formula;
+  onAction: (result: boolean) => void;
+}): JSX.Element {
   // TD: Support installing other versions?
-
   return (
-    <ActionPanelItem
+    <Action
       title={"Install"}
       icon={Icon.Plus}
       shortcut={{ modifiers: ["cmd"], key: "i" }}
@@ -26,9 +28,12 @@ export function FormulaInstallAction(props: { formula: Cask | Formula; onAction:
   );
 }
 
-export function FormulaUninstallAction(props: { formula: Cask | Nameable; onAction: (result: boolean) => void }) {
+export function FormulaUninstallAction(props: {
+  formula: Cask | Nameable;
+  onAction: (result: boolean) => void;
+}): JSX.Element {
   return (
-    <ActionPanelItem
+    <Action
       title="Uninstall"
       icon={Icon.Trash}
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
@@ -40,9 +45,12 @@ export function FormulaUninstallAction(props: { formula: Cask | Nameable; onActi
   );
 }
 
-export function FormulaUpgradeAction(props: { formula: Cask | Nameable; onAction: (result: boolean) => void }) {
+export function FormulaUpgradeAction(props: {
+  formula: Cask | Nameable;
+  onAction: (result: boolean) => void;
+}): JSX.Element {
   return (
-    <ActionPanelItem
+    <Action
       title="Upgrade"
       icon={Icon.Hammer}
       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
@@ -54,9 +62,9 @@ export function FormulaUpgradeAction(props: { formula: Cask | Nameable; onAction
   );
 }
 
-export function FormulaUpgradeAllAction(props: { onAction: (result: boolean) => void }) {
+export function FormulaUpgradeAllAction(props: { onAction: (result: boolean) => void }): JSX.Element {
   return (
-    <ActionPanelItem
+    <Action
       title="Upgrade All"
       icon={Icon.Hammer}
       onAction={async () => {
@@ -72,9 +80,8 @@ export function FormulaPinAction(props: {
   onAction: (result: boolean) => void;
 }): JSX.Element {
   const isPinned = props.formula.pinned;
-
   return (
-    <ActionPanelItem
+    <Action
       title={isPinned ? "Unpin" : "Pin"}
       icon={Icon.Pin}
       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
@@ -92,81 +99,75 @@ export function FormulaPinAction(props: {
 /// Utilties
 
 async function install(formula: Cask | Formula): Promise<boolean> {
-  showToast(ToastStyle.Animated, `Installing ${brewName(formula)}`);
+  const abort = showActionToast({ title: `Installing ${brewName(formula)}`, cancelable: true });
   try {
-    await brewInstall(formula);
-    showToast(ToastStyle.Success, `Installed ${brewName(formula)}`);
+    await brewInstall(formula, abort);
+    showToast(Toast.Style.Success, `Installed ${brewName(formula)}`);
     return true;
   } catch (err) {
-    console.error(err);
-    showFailureToast("Install failed", err);
+    showFailureToast("Install failed", err as Error);
     return false;
   }
 }
 
 async function uninstall(formula: Cask | Nameable): Promise<boolean> {
-  showToast(ToastStyle.Animated, `Uninstalling ${brewName(formula)}`);
+  const abort = showActionToast({ title: `Uninstalling ${brewName(formula)}`, cancelable: true });
   try {
-    await brewUninstall(formula);
-    showToast(ToastStyle.Success, `Uninstalled ${brewName(formula)}`);
+    await brewUninstall(formula, abort);
+    showToast(Toast.Style.Success, `Uninstalled ${brewName(formula)}`);
     return true;
   } catch (err) {
-    console.error(err);
-    showFailureToast("Uninstall failed", err);
+    showFailureToast("Uninstall failed", err as Error);
     return false;
   }
 }
 
 async function upgrade(formula: Cask | Nameable): Promise<boolean> {
-  showToast(ToastStyle.Animated, `Upgrading ${brewName(formula)}`);
+  const abort = showActionToast({ title: `Upgrading ${brewName(formula)}`, cancelable: true });
   try {
-    await brewUpgrade(formula);
-    showToast(ToastStyle.Success, `Upgraded ${brewName(formula)}`);
+    await brewUpgrade(formula, abort);
+    showToast(Toast.Style.Success, `Upgraded ${brewName(formula)}`);
     return true;
   } catch (err) {
-    console.log(err);
-    showFailureToast("Upgrade formula failed", err);
+    showFailureToast("Upgrade formula failed", err as Error);
     return false;
   }
 }
 
 async function upgradeAll(): Promise<boolean> {
-  showToast(ToastStyle.Animated, `Upgrading all formula`);
+  const abort = showActionToast({ title: "Upgrading all formula", cancelable: true });
   try {
-    await brewUpgradeAll();
-    showToast(ToastStyle.Success, `Upgrade formula succeeded`);
+    await brewUpgradeAll(abort);
+    showToast(Toast.Style.Success, "Upgrade formula succeeded");
     return true;
   } catch (err) {
-    console.log(err);
-    showFailureToast("Upgrade formula failed", err);
+    showFailureToast("Upgrade formula failed", err as Error);
     return false;
   }
 }
 
 async function pin(formula: Formula | OutdatedFormula): Promise<boolean> {
-  showToast(ToastStyle.Animated, `Pinning ${brewName(formula)}`);
+  showToast(Toast.Style.Animated, `Pinning ${brewName(formula)}`);
   try {
     await brewPinFormula(formula);
     formula.pinned = true;
-    showToast(ToastStyle.Success, `Pinned ${brewName(formula)}`);
+    showToast(Toast.Style.Success, `Pinned ${brewName(formula)}`);
     return true;
   } catch (err) {
-    console.error(err);
-    showFailureToast("Pin formula failed", err);
+    showFailureToast("Pin formula failed", err as Error);
     return false;
   }
 }
 
 async function unpin(formula: Formula | OutdatedFormula): Promise<boolean> {
-  showToast(ToastStyle.Animated, `Unpinning ${brewName(formula)}`);
+  showToast(Toast.Style.Animated, `Unpinning ${brewName(formula)}`);
   try {
     await brewUnpinFormula(formula);
     formula.pinned = false;
-    showToast(ToastStyle.Success, `Unpinned ${brewName(formula)}`);
+    showToast(Toast.Style.Success, `Unpinned ${brewName(formula)}`);
     return true;
   } catch (err) {
-    console.error(err);
-    showFailureToast("Unpin formula failed", err);
+    showFailureToast("Unpin formula failed", err as Error);
     return false;
   }
 }

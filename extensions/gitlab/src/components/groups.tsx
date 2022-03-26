@@ -2,6 +2,7 @@ import {
   ActionPanel,
   Color,
   CopyToClipboardAction,
+  Icon,
   ImageLike,
   ImageMask,
   List,
@@ -56,52 +57,59 @@ export function GroupListItem(props: { group: any }) {
       icon={localImageFilepath}
       actions={
         <ActionPanel>
-          <PushAction
-            title="Open Group"
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            target={<GroupList parentGroup={props.group} />}
-          />
-          <OpenInBrowserAction url={group.web_url} />
-          <CopyToClipboardAction title="Copy Group ID" content={group.id} />
-          <PushAction
-            title="Epics"
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
-            icon={{ source: GitLabIcons.epic, tintColor: Color.PrimaryText }}
-            target={<EpicList group={props.group} />}
-          />
-          <PushAction
-            title="Issues"
-            shortcut={{ modifiers: ["cmd"], key: "i" }}
-            icon={{ source: GitLabIcons.issue, tintColor: Color.PrimaryText }}
-            target={<IssueList group={group} scope={IssueScope.all} state={IssueState.opened} />}
-          />
-          <PushAction
-            title="Merge Requests"
-            shortcut={{ modifiers: ["cmd"], key: "m" }}
-            icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
-            target={<MRList group={group} scope={MRScope.all} state={MRState.opened} />}
-          />
-          <PushAction
-            title="Milestones"
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
-            icon={{ source: GitLabIcons.milestone, tintColor: Color.PrimaryText }}
-            target={<MilestoneList group={group} />}
-          />
-          <OpenInBrowserAction
-            title="Labels"
-            icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
-            url={webUrl(props.group, "-/labels")}
-          />
-          <OpenInBrowserAction
-            title="Security & Compliance"
-            icon={{ source: GitLabIcons.security, tintColor: Color.PrimaryText }}
-            url={webUrl(props.group, "-/security/dashboard")}
-          />
-          <OpenInBrowserAction
-            title="Settings"
-            icon={{ source: GitLabIcons.settings, tintColor: Color.PrimaryText }}
-            url={webUrl(props.group, "-/edit")}
-          />
+          <ActionPanel.Section>
+            <PushAction
+              title="Show Group"
+              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              target={<GroupList parentGroup={props.group} />}
+              icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
+            />
+            <OpenInBrowserAction url={group.web_url} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <CopyToClipboardAction title="Copy Group ID" content={group.id} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <PushAction
+              title="Epics"
+              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              icon={{ source: GitLabIcons.epic, tintColor: Color.PrimaryText }}
+              target={<EpicList group={props.group} />}
+            />
+            <PushAction
+              title="Issues"
+              shortcut={{ modifiers: ["cmd"], key: "i" }}
+              icon={{ source: GitLabIcons.issue, tintColor: Color.PrimaryText }}
+              target={<IssueList group={group} scope={IssueScope.all} state={IssueState.opened} />}
+            />
+            <PushAction
+              title="Merge Requests"
+              shortcut={{ modifiers: ["cmd"], key: "m" }}
+              icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
+              target={<MRList group={group} scope={MRScope.all} state={MRState.opened} />}
+            />
+            <PushAction
+              title="Milestones"
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              icon={{ source: GitLabIcons.milestone, tintColor: Color.PrimaryText }}
+              target={<MilestoneList group={group} />}
+            />
+            <OpenInBrowserAction
+              title="Labels"
+              icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
+              url={webUrl(props.group, "-/labels")}
+            />
+            <OpenInBrowserAction
+              title="Security & Compliance"
+              icon={{ source: GitLabIcons.security, tintColor: Color.PrimaryText }}
+              url={webUrl(props.group, "-/security/dashboard")}
+            />
+            <OpenInBrowserAction
+              title="Settings"
+              icon={{ source: GitLabIcons.settings, tintColor: Color.PrimaryText }}
+              url={webUrl(props.group, "-/edit")}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

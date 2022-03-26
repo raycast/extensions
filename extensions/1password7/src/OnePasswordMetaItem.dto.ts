@@ -7,10 +7,10 @@ export default class OnePasswordMetaItem {
   categoryPluralName: string;
   modifiedAt: number;
   profileUUID: string;
-  websiteURLs: string[];
+  websiteURLs?: string[];
   categorySingularName: string;
   categoryUUID: string;
-  accountName: string;
+  accountName?: string;
   createdAt: number;
 
   constructor(metaItem: any) {

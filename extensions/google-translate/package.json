@@ -5,6 +5,9 @@
   "description": "Simple translation using Google Translate",
   "icon": "google-translate.png",
   "author": "ospfranco",
+  "contributors": [
+    "FezVrasta"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -408,7 +411,7 @@
           "value": "th"
         },
         {
-          "title": "🇹🇭 Turkish",
+          "title": "🇹🇷 Turkish",
           "value": "tr"
         },
         {
