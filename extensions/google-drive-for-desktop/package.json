@@ -8,8 +8,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "search-google-drive-for-desktop-files",
+      "name": "index",
       "title": "Search Google Drive for Desktop Files",
+      "subtitle": "Google Drive for Desktop",
       "description": "Search files of Google Drive for Desktop",
       "mode": "view"
     }
