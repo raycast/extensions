@@ -1,4 +1,4 @@
-import { ActionPanel, Color, CopyToClipboardAction, Icon, List, OpenInBrowserAction, PushAction } from "@raycast/api";
+import { ActionPanel, Color, Action, Icon, List } from "@raycast/api";
 import { useWhatsAppChats } from "./utils/use-whatsapp-chats";
 import { isGroupChat, isPhoneChat, WhatsAppChat } from "./utils/types";
 import WhatsAppPhoneChatForm from "./add-chat";
@@ -132,14 +132,14 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Open in WhatsApp"
               icon="whatsapp-outline.png"
               url={appUrl}
               onOpen={() => onOpenChat(chat)}
             />
             {webUrl ? (
-              <OpenInBrowserAction title="Open in Web" icon={Icon.Globe} url={webUrl} onOpen={() => onOpenChat(chat)} />
+              <Action.OpenInBrowser title="Open in Web" icon={Icon.Globe} url={webUrl} onOpen={() => onOpenChat(chat)} />
             ) : null}
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -149,7 +149,7 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
               icon={Icon.Pin}
               onAction={() => onPinAction(chat)}
             />
-            <PushAction title="Edit Chat" icon={Icon.Pencil} target={form} />
+            <Action.Push title="Edit Chat" icon={Icon.Pencil} target={form} />
             <ActionPanel.Item
               title="Delete Chat"
               icon={{ source: Icon.Trash, tintColor: Color.Red }}
@@ -157,11 +157,11 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CopyToClipboardAction content={chat.name} title="Copy Name" />
+            <Action.CopyToClipboard content={chat.name} title="Copy Name" />
             {isGroupChat(chat) ? (
-              <CopyToClipboardAction content={`https://chat.whatsapp.com/${chat.groupCode}`} title="Copy Invite Link" />
+              <Action.CopyToClipboard content={`https://chat.whatsapp.com/${chat.groupCode}`} title="Copy Invite Link" />
             ) : (
-              <CopyToClipboardAction content={chat.phone} title="Copy Phone Number" />
+              <Action.CopyToClipboard content={chat.phone} title="Copy Phone Number" />
             )}
           </ActionPanel.Section>
         </ActionPanel>
