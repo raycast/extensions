@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import groupBy from "lodash.groupby";
+import { format, parse } from "date-fns";
 import { getFixtures } from "./api";
 import { Content } from "./types/fixture";
 import ClubDropdown from "./components/club_dropdown";
@@ -51,6 +52,16 @@ export default function Fixture() {
             title={label === "undefined" ? "Date To Be Confirmed" : label}
           >
             {matches.map((match) => {
+              const label = match.kickoff.label
+                ?.replace("BST", "+01:00")
+                .replace("GMT", "+00:00");
+              const kickoff = label
+                ? format(
+                    parse(label, "EEE d MMM yyyy, HH:mm XXX", new Date()),
+                    "EEE, dd MMM yyyy HH:mm"
+                  )
+                : "TBC";
+
               return (
                 <List.Item
                   key={match.id}
@@ -58,8 +69,9 @@ export default function Fixture() {
                   accessories={[
                     {
                       text: `${match.ground.name}, ${match.ground.city}`,
+                      icon: "stadium.svg",
                     },
-                    { text: match.kickoff.label || "TBC", icon: Icon.Clock },
+                    { text: kickoff, icon: Icon.Clock },
                   ]}
                   actions={
                     <ActionPanel>
