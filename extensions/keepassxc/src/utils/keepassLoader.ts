@@ -51,7 +51,8 @@ const loadEntries = () =>
   getSearchEntryCommand().then(
     (cmd) =>
       new Promise<string[]>((resolve, reject) => {
-        const cli = spawn(`${keepassxcCli}`, [cmd, "-q", `${database}`, "/"]);
+        const search_keywrod = cmd === "search" ? "" : "/";
+        const cli = spawn(`${keepassxcCli}`, [cmd, "-q", `${database}`, search_keywrod]);
         cli.stdin.write(`${dbPassword}\n`);
         cli.stdin.end();
         cli.on("error", reject);
