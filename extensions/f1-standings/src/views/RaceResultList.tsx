@@ -23,12 +23,12 @@ function RaceResultList({ season, round }: RaceResultViewProps) {
               }}
               title={getFlag(item.Driver.nationality) + " " + item.Driver.givenName + " " + item.Driver.familyName}
               subtitle={item.Constructor.name}
-              accessoryTitle={String(item.points)}
               actions={
                 <ActionPanel title={item.Driver.givenName + " " + item.Driver.familyName}>
                   <Action.OpenInBrowser url={item.Driver.url} />
                 </ActionPanel>
               }
+              accessories={[{ text: String(item.points) }]}
             />
           ))}
         </List.Section>

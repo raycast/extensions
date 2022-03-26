@@ -54,16 +54,19 @@ function RaceList() {
         <List.Section title="Past Races">
           {Object.values(pastRaces).map((race) => {
             const raceDates = getRaceDates(race);
+            const accessories = [];
+            if (!isShowingDetail && race.date && race.time) {
+              accessories.push({ text: formatDate(new Date(race.date + "T" + race.time)) });
+            }
+            accessories.push({ icon: { source: "flag-checkered.png", tintColor: Color.Green } });
 
             return (
               <List.Item
                 key={race.round}
                 id={race.round}
                 icon={{ source: `${race.round}.png`, tintColor: Color.PrimaryText }}
-                accessoryIcon={{ source: "flag-checkered.png", tintColor: Color.Green }}
                 title={`${getFlag(race.Circuit.Location.country)} ${race.raceName} ${race.season}`}
                 subtitle={`${race.Circuit.Location.locality}, ${race.Circuit.Location.country}`}
-                accessoryTitle={isShowingDetail ? undefined : formatDate(new Date(race.date + "T" + race.time))}
                 detail={raceDates.length ? <RaceSessionDetails raceDates={raceDates} /> : undefined}
                 actions={
                   <ActionPanel title={race.raceName}>
@@ -81,6 +84,7 @@ function RaceList() {
                     <Action.OpenInBrowser url={race.url || race.Circuit.url} />
                   </ActionPanel>
                 }
+                accessories={accessories}
               />
             );
           })}
@@ -90,15 +94,18 @@ function RaceList() {
         <List.Section title="Upcoming races">
           {Object.values(upcomingRaces).map((race) => {
             const raceDates = getRaceDates(race);
+            const accessories = [];
+            if (!isShowingDetail && race.date && race.time) {
+              accessories.push({ text: formatDate(new Date(`${race.date}T${race.time}`)) });
+            }
+            accessories.push({ icon: { source: "flag-checkered.png", tintColor: Color.PrimaryText } });
             return (
               <List.Item
                 key={race.round}
                 id={race.round}
                 icon={{ source: `${race.round}.png`, tintColor: Color.PrimaryText }}
-                accessoryIcon={{ source: "flag-checkered.png", tintColor: Color.PrimaryText }}
                 title={`${getFlag(race.Circuit.Location.country)} ${race.raceName} ${race.season}`}
                 subtitle={`${race.Circuit.Location.locality}, ${race.Circuit.Location.country}`}
-                accessoryTitle={isShowingDetail ? undefined : formatDate(new Date(`${race.date}T${race.time}`))}
                 detail={raceDates.length ? <RaceSessionDetails raceDates={raceDates} /> : undefined}
                 actions={
                   <ActionPanel title={race.raceName}>
@@ -111,6 +118,7 @@ function RaceList() {
                     <Action.OpenInBrowser url={race.url || race.Circuit.url} />
                   </ActionPanel>
                 }
+                accessories={accessories}
               />
             );
           })}

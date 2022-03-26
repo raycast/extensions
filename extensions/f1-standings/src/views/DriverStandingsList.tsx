@@ -32,12 +32,12 @@ function DriverList() {
                 standing.Driver.familyName
               }`}
               subtitle={standing.Constructors[standing.Constructors.length - 1]?.name}
-              accessoryTitle={standing.points}
               actions={
                 <ActionPanel title={`${standing.Driver.givenName} ${standing.Driver.familyName}`}>
                   <Action.OpenInBrowser url={standing.Driver.url} />
                 </ActionPanel>
               }
+              accessories={[{ text: standing.points }]}
             />
           ))}
         </List.Section>
