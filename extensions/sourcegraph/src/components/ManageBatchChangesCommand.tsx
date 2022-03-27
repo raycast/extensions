@@ -46,7 +46,7 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
     ExpandableErrorToast(push, "Unexpected error", "Get batch changes failed", error.message).show();
   }
 
-  const showSuggestions = !loading && (searchText === "")
+  const showSuggestions = !loading && searchText === "";
   return (
     <List
       isLoading={loading}
