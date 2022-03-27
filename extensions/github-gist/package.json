@@ -73,7 +73,7 @@
   ],
   "dependencies": {
     "@octokit/core": "^3.6.0",
-    "@raycast/api": "^1.30.3"
+    "@raycast/api": "^1.31.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
