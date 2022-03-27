@@ -1,13 +1,12 @@
-import { ActionPanel, List, showToast, Color, ImageLike, Toast, Image } from "@raycast/api";
+import { ActionPanel, List, showToast, Color, Toast, Image } from "@raycast/api";
 import { MergeRequest } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab } from "../common";
-import { useState, useEffect } from "react";
-import { daysInSeconds, getErrorMessage } from "../utils";
+import { daysInSeconds, toDateString } from "../utils";
 import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
 import { ShowReviewMRAction } from "./review_actions";
 import { useCommitStatus } from "./commits/utils";
-import { getCIJobStatusIcon } from "./jobs";
+import { getCIJobStatusEmoji } from "./jobs";
 import { useCache } from "../cache";
 
 export function ReviewList(): JSX.Element {
@@ -33,14 +32,20 @@ export function ReviewList(): JSX.Element {
 function ReviewListItem(props: { mr: MergeRequest }) {
   const mr = props.mr;
   const { commitStatus: status } = useCommitStatus(mr.project_id, mr.sha);
-  const statusIcon: Image.ImageLike | undefined = status?.status ? getCIJobStatusIcon(status.status) : undefined;
+  const ciStatusEmoji: string | undefined = status?.status ? getCIJobStatusEmoji(status.status) : undefined;
+  const subtitle: string[] = [`!${mr.iid}`];
+  if (ciStatusEmoji) {
+    subtitle.push(ciStatusEmoji);
+  }
+  const accessoryIcon: Image.ImageLike | undefined = { source: mr.author?.avatar_url || "", mask: Image.Mask.Circle };
   return (
     <List.Item
       id={mr.id.toString()}
       title={mr.title}
-      subtitle={"#" + mr.iid}
+      subtitle={subtitle.join("    ")}
       icon={{ source: GitLabIcons.mropen, tintColor: Color.Green }}
-      accessoryIcon={statusIcon}
+      accessoryIcon={accessoryIcon}
+      accessoryTitle={toDateString(mr.updated_at)}
       actions={
         <ActionPanel>
           <DefaultActions
