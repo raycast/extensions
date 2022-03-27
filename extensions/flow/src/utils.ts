@@ -13,7 +13,7 @@ export async function isFlowInstalled() {
   return applications.some(({ bundleId }) => bundleId === "design.yugen.Flow");
 }
 
-export async function stopTimer() {
+export async function pauseTimer() {
   await runAppleScript('tell application "Flow" to stop');
 }
 

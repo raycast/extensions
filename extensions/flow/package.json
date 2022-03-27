@@ -11,16 +11,16 @@
       "name": "start-timer",
       "title": "Start Timer",
       "subtitle": "Flow",
-      "description": "Start or resume timer",
+      "description": "Resume current timer",
       "keywords": ["start", "play"],
       "mode": "no-view"
     },
     {
-      "name": "stop-timer",
-      "title": "Stop Timer",
+      "name": "pause-timer",
+      "title": "Pause Timer",
       "subtitle": "Flow",
-      "description": "Stop or pause timer",
-      "keywords": ["stop", "pause"],
+      "description": "Pause current timer",
+      "keywords": ["stop"],
       "mode": "no-view"
     },
     {
