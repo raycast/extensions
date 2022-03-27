@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getLargeCacheDirectory, useCache } from "./cache";
+import { cacheLog, getLargeCacheDirectory, useCache } from "./cache";
 import { gitlab } from "./common";
 import { daysInSeconds, hashString } from "./utils";
 import path from "path/posix";
@@ -42,7 +42,7 @@ async function getImageCacheDirectory(ensureDirectory = false): Promise<string> 
   const cacheDir = getLargeCacheDirectory();
   const imgDir = path.join(cacheDir, "img");
   if (ensureDirectory) {
-    console.log(`create img cache directoy '${imgDir}'`);
+    cacheLog(`create img cache directoy '${imgDir}'`);
     await fs.mkdir(imgDir, { recursive: true });
   }
   return imgDir;
