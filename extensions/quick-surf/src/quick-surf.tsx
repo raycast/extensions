@@ -76,7 +76,7 @@ export default function SurfWithSpecificBrowser() {
           id="Type"
           title={itemInput.content}
           icon={Icon.Text}
-          accessoryTitle={"WordCount  " + itemInput.content.length}
+          accessories={[{ text: "WordCount  " + itemInput.content.length }]}
           actions={
             <ActionPanel>
               <Action
@@ -138,7 +138,7 @@ function MoreBoards(props: { setBrowsers: any }) {
       id="MoreBoards"
       title={"More Boards"}
       icon={{ source: { light: "more-board.png", dark: "more-board@dark.png" }, mask: Image.Mask.RoundedRectangle }}
-      accessoryIcon={Icon.ArrowRight}
+      accessories={[{ icon: Icon.ArrowRight }]}
       actions={
         <ActionPanel>
           <Action
@@ -177,9 +177,13 @@ function ApplicationsListItem(props: {
       key={application.bundleId}
       title={application.name}
       icon={{ fileIcon: application.path }}
-      accessoryTitle={(function (index: number): string {
-        return "⌘ " + (index + 2);
-      })(index)}
+      accessories={[
+        {
+          text: (function (index: number): string {
+            return "⌘ " + (index + 2);
+          })(index),
+        },
+      ]}
       actions={
         <ActionPanel>
           <Action
