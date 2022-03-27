@@ -14,6 +14,8 @@ function MyMRList(props: {
   isLoading: boolean;
   title?: string;
   performRefetch: () => void;
+  searchText?: string | undefined;
+  onSearchTextChange?: (text: string) => void;
   searchBarAccessory?:
     | boolean
     | React.ReactElement<List.Dropdown.Props, string | React.JSXElementConstructor<any>>
@@ -34,6 +36,8 @@ function MyMRList(props: {
     <List
       searchBarPlaceholder="Filter Merge Requests by name..."
       isLoading={props.isLoading}
+      searchText={props.searchText}
+      onSearchTextChange={props.onSearchTextChange}
       searchBarAccessory={props.searchBarAccessory}
     >
       <List.Section title={props.title} subtitle={mrs?.length.toString() || ""}>
@@ -45,7 +49,12 @@ function MyMRList(props: {
   );
 }
 
-export function MyMergeRequests(props: { scope: MRScope; state: MRState }): JSX.Element {
+export function MyMergeRequests(props: {
+  scope: MRScope;
+  state: MRState;
+  searchText?: string | undefined;
+  onSearchTextChange?: (text: string) => void;
+}): JSX.Element {
   const scope = props.scope;
   const state = props.state;
   const [project, setProject] = useState<Project>();
@@ -62,12 +71,14 @@ export function MyMergeRequests(props: { scope: MRScope; state: MRState }): JSX.
       mrs={mrs}
       title={title}
       performRefetch={performRefetch}
+      searchText={props.searchText}
+      onSearchTextChange={props.onSearchTextChange}
       searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
     />
   );
 }
 
-function useMyMergeRequests(
+export function useMyMergeRequests(
   scope: MRScope,
   state: MRState,
   project: Project | undefined

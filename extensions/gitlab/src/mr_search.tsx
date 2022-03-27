@@ -1,6 +1,5 @@
-import { MRScope, MRState } from "./components/mr";
-import { MyMergeRequests } from "./components/mr_my";
+import { SearchMyMergeRequests } from "./components/mr_search";
 
 export default function MyMergeRequestsSearchRoot(): JSX.Element {
-  return <MyMergeRequests scope={MRScope.created_by_me} state={MRState.all} />;
+  return <SearchMyMergeRequests />;
 }
