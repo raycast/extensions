@@ -1,8 +1,14 @@
-import { List } from "@raycast/api";
+import { getPreferenceValues, List } from "@raycast/api";
 import fs from "fs";
 
+interface Preferences {
+  rootPath: string;
+  excludePaths?: string;
+}
+
 export default function SearchGoogleDriveForDesktopFile() {
-  const files = fs.readdirSync("/Volumes/GoogleDrive/", { withFileTypes: true });
+  const preferences = getPreferenceValues<Preferences>();
+  const files = fs.readdirSync(preferences.rootPath, { withFileTypes: true });
   return (
     <List>
       {files.map((file) => (
