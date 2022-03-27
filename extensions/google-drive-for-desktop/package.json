@@ -15,6 +15,26 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "rootPath",
+      "title": "Google Drive Path",
+      "description": "Google Drive for Desktop path to search",
+      "required": true,
+      "placeholder": "/Volumes/GoogleDrive",
+      "default": "/Volumes/GoogleDrive",
+      "type": "textfield"
+    },
+    {
+      "name": "excludePaths",
+      "title": "Exclude Paths",
+      "description": "Paths to exclude from search",
+      "required": false,
+      "placeholder": "path1, path2, ...",
+      "default": "",
+      "type": "textfield"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.31.0"
   },
