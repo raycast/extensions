@@ -1,5 +1,4 @@
-import { render } from "@raycast/api";
-import { IssueList, IssueScope, IssueState } from "./components/issues";
+import { IssueScope, IssueState } from "./components/issues";
 import { MyIssues } from "./components/issues_my";
 
 export default function MyIssuesSearchRoot(): JSX.Element {

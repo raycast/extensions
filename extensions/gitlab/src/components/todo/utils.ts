@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { useCache } from "../../cache";
 import { gitlab } from "../../common";
-import { Todo } from "../../gitlabapi";
+import { Project, Todo } from "../../gitlabapi";
 import { daysInSeconds } from "../../utils";
 
-export function useTodos(search?: string): {
+export function useTodos(
+  search?: string,
+  project?: Project | undefined
+): {
   todos: Todo[];
   error?: string;
   isLoading: boolean;
@@ -23,7 +26,10 @@ export function useTodos(search?: string): {
     }
   );
   useEffect(() => {
-    setTodos(data || []);
-  }, [data]);
+    const todosFiltered = project
+      ? data?.filter((t) => t.project_with_namespace === project?.name_with_namespace)
+      : data;
+    setTodos(todosFiltered || []);
+  }, [data, project]);
   return { todos, isLoading, error, performRefetch };
 }
