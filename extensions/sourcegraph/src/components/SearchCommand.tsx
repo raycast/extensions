@@ -9,33 +9,30 @@ import {
   Clipboard,
   Toast,
   useNavigation,
-  Keyboard,
 } from "@raycast/api";
-import { useState, useRef, Fragment, useEffect } from "react";
+import { useState, useRef, Fragment } from "react";
 import { nanoid } from "nanoid";
-
-import checkAuthEffect from "../hooks/checkAuthEffect";
-import { copyShortcut, secondaryActionShortcut, tertiaryActionShortcut } from "./shortcuts";
+import { DateTime } from "luxon";
 
 import { Sourcegraph, instanceName } from "../sourcegraph";
 import { performSearch, SearchResult, Suggestion } from "../sourcegraph/stream-search";
 import { ContentMatch, SymbolMatch } from "../sourcegraph/stream-search/stream";
 import { ColorDefault, ColorPrivate } from "./colors";
+import ExpandableErrorToast from "./ExpandableErrorToast";
+import { copyShortcut, tertiaryActionShortcut } from "./shortcuts";
 
-export default function SearchCommand(src: Sourcegraph) {
+/**
+ * SearchCommand is the shared search command implementation.
+ */
+export default function SearchCommand({ src }: { src: Sourcegraph }) {
   const { state, search } = useSearch(src);
   const srcName = instanceName(src);
-  const nav = useNavigation();
-
-  useEffect(checkAuthEffect(src, nav));
-
   return (
     <List
       isLoading={state.isLoading}
       onSearchTextChange={search}
-      searchBarPlaceholder={`Search ${srcName} ${
-        src.defaultContext ? `context ${src.defaultContext}` : `(e.g. 'fmt.Sprintf lang:go')`
-      }`}
+      searchText={state.searchText}
+      searchBarPlaceholder={`Search ${srcName} (e.g. 'fmt.Sprintf lang:go')`}
       throttle
     >
       {/* show suggestions IFF no results */}
@@ -124,9 +121,7 @@ function SearchResultItem({
   const { match } = searchResult;
   let title = "";
   let subtitle = "";
-  let context = match.repository;
-  let url = searchResult.url;
-  let multiResult = false;
+  const accessory: List.Item.Accessory = { text: match.repository };
 
   const icon: Image.ImageLike = { source: Icon.Dot, tintColor: ColorDefault };
   switch (match.type) {
@@ -143,7 +138,12 @@ function SearchResultItem({
       }
       title = match.repository;
       subtitle = match.description || "";
-      context = match.repoStars ? `${match.repoStars} ★` : "";
+      if (match.repoStars) {
+        accessory.text = `${match.repoStars}`;
+        accessory.icon = Icon.Star;
+      } else {
+        accessory.text = "";
+      }
       break;
     case "commit":
       icon.source = Icon.MemoryChip;
@@ -159,50 +159,37 @@ function SearchResultItem({
       icon.source = Icon.Text;
       title = match.lineMatches.map((l) => l.line.trim()).join(" ... ");
       subtitle = match.path;
-      if (match.lineMatches.length === 1) {
-        url = `${searchResult.url}?L${match.lineMatches[0].lineNumber}`;
-      } else {
-        multiResult = true;
-      }
       break;
     case "symbol":
       icon.source = Icon.Link;
       title = match.symbols.map((s) => s.name).join(", ");
       subtitle = match.path;
-      if (match.symbols.length === 1) {
-        url = `${searchResult.url}#${match.symbols[0].url}`;
-      } else {
-        multiResult = true;
-      }
       break;
   }
 
-  const peekAction = (shortcut?: Keyboard.Shortcut) => (
-    <Action.Push
-      key={nanoid()}
-      title="Peek Result Details"
-      target={<PeekSearchResult searchResult={searchResult} />}
-      shortcut={shortcut}
-      icon={{ source: Icon.MagnifyingGlass }}
-    />
-  );
-  const customActions: CustomResultActions = {};
-  if (multiResult) {
-    customActions.openAction = peekAction();
-  } else {
-    customActions.extraActions = [peekAction(secondaryActionShortcut)];
+  const accessories: List.Item.Accessory[] = [];
+  if (accessory.text || accessory.icon) {
+    accessories.push(accessory);
   }
 
   return (
     <List.Item
       title={title}
       subtitle={subtitle}
-      accessoryTitle={context}
+      accessories={accessories}
       icon={icon}
-      accessoryIcon={multiResult ? { source: Icon.ArrowRight } : undefined}
       actions={
         <ActionPanel>
-          {resultActions(url, customActions)}
+          {resultActions(searchResult.url, {
+            openAction: (
+              <Action.Push
+                key={nanoid()}
+                title="View Result"
+                target={<ResultView searchResult={searchResult} icon={icon} />}
+                icon={{ source: Icon.MagnifyingGlass }}
+              />
+            ),
+          })}
           <ActionPanel.Section key={nanoid()} title="Query Actions">
             <Action.OpenInBrowser title="Open Query" url={queryURL} shortcut={tertiaryActionShortcut} />
             <Action.CopyToClipboard title="Copy Link to Query" content={queryURL} />
@@ -213,12 +200,12 @@ function SearchResultItem({
   );
 }
 
-function MultiResultPeek({ searchResult }: { searchResult: { url: string; match: ContentMatch | SymbolMatch } }) {
+function MultiResultView({ searchResult }: { searchResult: { url: string; match: ContentMatch | SymbolMatch } }) {
   const { match } = searchResult;
-  const navigationTitle = `Peek ${match.type} results`;
+  const navigationTitle = `View ${match.type} results`;
   const matchTitle = `${match.repository} ${match.repoStars ? `- ${match.repoStars} ★` : ""}`;
 
-  // Match types with expanded peek support
+  // Match types with expanded view support
   switch (match.type) {
     case "content":
       return (
@@ -228,7 +215,7 @@ function MultiResultPeek({ searchResult }: { searchResult: { url: string; match:
               <List.Item
                 key={nanoid()}
                 title={l.line}
-                accessoryTitle={`L${l.lineNumber}`}
+                accessories={[{ text: `L${l.lineNumber}` }]}
                 actions={<ActionPanel>{resultActions(`${searchResult.url}?L${l.lineNumber}`)}</ActionPanel>}
               />
             ))}
@@ -245,7 +232,7 @@ function MultiResultPeek({ searchResult }: { searchResult: { url: string; match:
                 key={nanoid()}
                 title={s.name}
                 subtitle={s.containerName}
-                accessoryTitle={s.kind.toLowerCase()}
+                accessories={[{ text: s.kind.toLowerCase() }]}
                 actions={<ActionPanel>{resultActions(`${searchResult.url}#${s.url}`)}</ActionPanel>}
               />
             ))}
@@ -255,44 +242,53 @@ function MultiResultPeek({ searchResult }: { searchResult: { url: string; match:
   }
 }
 
-function PeekSearchResult({ searchResult }: { searchResult: SearchResult }) {
+function ResultView({ searchResult, icon }: { searchResult: SearchResult; icon: Image.ImageLike }) {
   const { match } = searchResult;
-  const navigationTitle = `Peek ${match.type} result`;
-  const matchTitle = `**${match.repository}** ${match.repoStars ? `- ${match.repoStars} ★` : ""}`;
+  const navigationTitle = `View ${match.type} result`;
 
-  // Match types that use markdown view support
+  const markdownTitle = `**${match.repository}**`;
   let markdownContent = "";
+  const metadata: React.ReactNode[] = [
+    <Detail.Metadata.TagList title="Match type" key={nanoid()}>
+      <Detail.Metadata.TagList.Item text={match.type} icon={icon} />
+    </Detail.Metadata.TagList>,
+    <Detail.Metadata.Link
+      title="Repository"
+      text={match.repository}
+      target={`https://${match.repository}`}
+      key={nanoid()}
+    />,
+  ];
+  if (match.repoStars) {
+    metadata.push(<Detail.Metadata.Label title="Stars" text={`${match.repoStars}`} key={nanoid()} />);
+  }
+
   switch (match.type) {
+    // Match types that have multi result view
+
     case "content":
     case "symbol":
-      return <MultiResultPeek searchResult={{ url: searchResult.url, match }} />;
+      return <MultiResultView searchResult={{ url: searchResult.url, match }} key={nanoid()} />;
+
+    // Match types that use markdown view
 
     case "repo":
-      markdownContent = `> ${match.private ? "Private" : "Public"} ${match.type} match
-  
----
-
-${match.description || ""}`;
+      markdownContent = match.description || "";
+      metadata.push(
+        <Detail.Metadata.Label title="Visibility" text={match.private ? "Private" : "Public"} key={nanoid()} />
+      );
       break;
 
     case "path":
-      markdownContent = `> ${match.type} match
-
----
-
-\`${match.path}\`
-`;
+      markdownContent = `\`${match.path}\``;
       break;
 
     case "commit":
-      markdownContent = `> ${match.type} match in ${match.detail}
-  
----
-
-${match.label}
+      markdownContent = `${match.label}
 
 ${match.content}
 `;
+      metadata.push(<Detail.Metadata.Label title="Details" text={match.detail} key={nanoid()} />);
       break;
 
     default:
@@ -304,11 +300,22 @@ ${JSON.stringify(match, null, "  ")}
 `;
   }
 
+  if (match.repoLastFetched) {
+    metadata.push(
+      <Detail.Metadata.Label
+        title="Last updated"
+        text={DateTime.fromISO(match.repoLastFetched).toRelative() || match.repoLastFetched}
+        key={nanoid()}
+      />
+    );
+  }
+
   return (
     <Detail
       navigationTitle={navigationTitle}
-      markdown={`${matchTitle}\n\n${markdownContent}`}
+      markdown={`${markdownTitle}\n\n${markdownContent}`}
       actions={<ActionPanel>{resultActions(searchResult.url)}</ActionPanel>}
+      metadata={<Detail.Metadata>{metadata}</Detail.Metadata>}
     ></Detail>
   );
 }
@@ -358,28 +365,20 @@ interface SearchState {
   isLoading: boolean;
 }
 
-const containsFilterRegex = new RegExp(/context:\S+/);
-
 function useSearch(src: Sourcegraph) {
   const [state, setState] = useState<SearchState>({
-    searchText: "",
+    searchText: src.defaultContext ? `context:${src.defaultContext} ` : "",
     results: [],
     suggestions: [],
     summary: "",
     isLoading: false,
   });
   const cancelRef = useRef<AbortController | null>(null);
-
   const { push } = useNavigation();
 
   async function search(searchText: string) {
     cancelRef.current?.abort();
     cancelRef.current = new AbortController();
-
-    // inject context if not overwridden
-    if (src.defaultContext && !containsFilterRegex.test(searchText)) {
-      searchText = `context:${src.defaultContext} ${searchText}`;
-    }
 
     try {
       setState((oldState) => ({
@@ -406,16 +405,7 @@ function useSearch(src: Sourcegraph) {
           }));
         },
         onAlert: (alert) => {
-          new Toast({
-            style: Toast.Style.Failure,
-            title: alert.title,
-            primaryAction: {
-              title: "View details",
-              onAction: () => {
-                push(<Detail markdown={`**${alert.title}**\n\n${alert.description}`} navigationTitle="Alert" />);
-              },
-            },
-          }).show();
+          ExpandableErrorToast(push, "Alert", alert.title, alert.description || "").show();
         },
         onProgress: (progress) => {
           setState((oldState) => ({
@@ -429,17 +419,7 @@ function useSearch(src: Sourcegraph) {
         isLoading: false,
       }));
     } catch (error) {
-      new Toast({
-        style: Toast.Style.Failure,
-        title: "Search failed",
-        message: String(error),
-        primaryAction: {
-          title: "View details",
-          onAction: () => {
-            push(<Detail markdown={`**Search failed:** ${String(error)}`} navigationTitle="Unexpected error" />);
-          },
-        },
-      }).show();
+      ExpandableErrorToast(push, "Unexpected error", "Search failed", String(error)).show();
 
       setState((oldState) => ({
         ...oldState,

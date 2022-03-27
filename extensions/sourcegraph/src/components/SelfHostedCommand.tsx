@@ -1,8 +1,16 @@
+import { ApolloProvider } from "@apollo/client";
 import { ActionPanel, Detail, Action } from "@raycast/api";
-import { ReactElement } from "react";
-import { sourcegraphSelfHosted, Sourcegraph, isCloud } from "../sourcegraph";
+import { useEffect } from "react";
 
-export default function SelfHostedCommand({ command }: { command: (src: Sourcegraph) => ReactElement }) {
+import checkAuthEffect from "../hooks/checkAuthEffect";
+import { sourcegraphSelfHosted, Sourcegraph } from "../sourcegraph";
+import { newApolloClient } from "../sourcegraph/gql/apollo";
+
+/**
+ * SelfHostedCommand wraps the given command with the configuration for a self-hosted
+ * Sourcegraph instance.
+ */
+export default function SelfHostedCommand({ Command }: { Command: React.FunctionComponent<{ src: Sourcegraph }> }) {
   const tryCloudMessage = "Alternatively, you can try the Sourcegraph Cloud version of this command first.";
 
   const helpActions = (
@@ -35,7 +43,7 @@ export default function SelfHostedCommand({ command }: { command: (src: Sourcegr
       />
     );
   }
-  if (!isCloud(src.instance) && !src.token) {
+  if (!src.token) {
     return (
       <Detail
         navigationTitle="Invalid Sourcegraph Self-Hosted access token"
@@ -45,5 +53,11 @@ export default function SelfHostedCommand({ command }: { command: (src: Sourcegr
     );
   }
 
-  return command(src);
+  useEffect(checkAuthEffect(src));
+
+  return (
+    <ApolloProvider client={newApolloClient(src)}>
+      <Command src={src} />
+    </ApolloProvider>
+  );
 }

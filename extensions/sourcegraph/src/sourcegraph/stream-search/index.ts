@@ -1,5 +1,4 @@
-import EventSource from "@bobheadxi/node-eventsource-http2";
-import { AbortSignal } from "node-fetch";
+import EventSource from "eventsource";
 import { remark } from "remark";
 import strip from "strip-markdown";
 
@@ -70,6 +69,7 @@ export async function performSearch(
 
     // errors from stream
     stream.addEventListener("error", (error) => {
+      stream.close();
       reject(`${JSON.stringify(error)}`);
     });
 
@@ -185,6 +185,7 @@ export async function performSearch(
 
     // done indicator
     stream.addEventListener("done", () => {
+      stream.close();
       resolve();
     });
   });
