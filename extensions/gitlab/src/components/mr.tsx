@@ -26,7 +26,7 @@ import {
 import { gql } from "@apollo/client";
 import { MRItemActions } from "./mr_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
-import { getCIJobStatusIcon } from "./jobs";
+import { getCIJobStatusEmoji } from "./jobs";
 import { useCommitStatus } from "./commits/utils";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
@@ -221,7 +221,7 @@ export function MRList({
     >
       <List.Section title={title} subtitle={mrs?.length.toString() || "0"}>
         {mrs?.map((mr) => (
-          <MRListItem key={mr.id} mr={mr} refreshData={refresh} showCIStatus={scope === MRScope.assigned_to_me} />
+          <MRListItem key={mr.id} mr={mr} refreshData={refresh} />
         ))}
       </List.Section>
     </List>
@@ -246,18 +246,23 @@ export function MRListItem(props: {
     }
   };
   const icon = getIcon();
-  let accessoryIcon: ImageLike | undefined = { source: mr.author?.avatar_url || "", mask: ImageMask.Circle };
-  if (props.showCIStatus) {
+  const accessoryIcon: ImageLike | undefined = { source: mr.author?.avatar_url || "", mask: ImageMask.Circle };
+  let cistatusEmoji: string | undefined;
+  if (props.showCIStatus === undefined || props.showCIStatus === true) {
     const { commitStatus: status } = useCommitStatus(mr.project_id, mr.sha);
     if (status) {
-      accessoryIcon = getCIJobStatusIcon(status.status);
+      cistatusEmoji = getCIJobStatusEmoji(status.status);
     }
+  }
+  const subtitle: string[] = [`!${mr.iid}`];
+  if (cistatusEmoji) {
+    subtitle.push(cistatusEmoji);
   }
   return (
     <List.Item
       id={mr.id.toString()}
       title={mr.title}
-      subtitle={"!" + mr.iid}
+      subtitle={subtitle.join("    ")}
       icon={icon}
       accessoryIcon={accessoryIcon}
       accessoryTitle={toDateString(mr.updated_at)}

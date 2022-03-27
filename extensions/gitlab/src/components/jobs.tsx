@@ -73,6 +73,46 @@ export function getCIJobStatusIcon(status: string): Image {
   */
 }
 
+export function getCIJobStatusEmoji(status: string): string {
+  switch (status.toLowerCase()) {
+    case "success": {
+      return "✅";
+    }
+    case "created": {
+      return "🔨";
+    }
+    case "pending": {
+      return "⏰";
+    }
+    case "running": {
+      return "🔄";
+    }
+    case "failed": {
+      return "❌";
+    }
+    case "canceled": {
+      return "🛑";
+    }
+    case "skipped": {
+      return "➡️";
+    }
+    case "scheduled": {
+      return "🕐";
+    }
+    case "manual": {
+      return "👨‍💼";
+    }
+    default:
+      console.log(status);
+      return "💼";
+  }
+  /*
+  missing 
+  * WAITING_FOR_RESOURCE
+  * PREPARING
+  */
+}
+
 function getStatusText(status: string) {
   const s = status.toLowerCase();
   if (s === "success") {

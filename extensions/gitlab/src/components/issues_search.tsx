@@ -6,6 +6,8 @@ import { Issue } from "../gitlabapi";
 import { daysInSeconds, getErrorMessage, hashRecord } from "../utils";
 import { IssueListItem, IssueScope, IssueState } from "./issues";
 
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+
 export function SearchMyIssues(): JSX.Element {
   const scope = IssueScope.created_by_me;
   const state = IssueState.all;

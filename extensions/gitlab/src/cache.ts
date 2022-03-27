@@ -5,9 +5,11 @@ import { constants } from "fs";
 import { currentSeconds, daysInSeconds, fileExists, getErrorMessage } from "./utils";
 import { useEffect, useRef, useState } from "react";
 
+/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+
 const logCaching = false;
 
-export function cacheLog(message?: any, ...optionalParams: any[]) {
+export function cacheLog(message?: any, ...optionalParams: any[]): void {
   if (logCaching) {
     console.log(message, ...optionalParams);
   }

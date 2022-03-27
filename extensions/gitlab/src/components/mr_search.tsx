@@ -39,7 +39,7 @@ export function SearchMyMergeRequests(): JSX.Element {
     <List isLoading={isLoading} searchText={search} onSearchTextChange={setSearch} throttle>
       <List.Section title={title} subtitle={data ? `${data.length}` : undefined}>
         {data?.map((m) => (
-          <MRListItem key={m.id} mr={m} refreshData={performRefetch} />
+          <MRListItem key={m.id} mr={m} refreshData={performRefetch} showCIStatus={true} />
         ))}
       </List.Section>
     </List>

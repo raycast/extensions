@@ -42,7 +42,7 @@ function MyMRList(props: {
     >
       <List.Section title={props.title} subtitle={mrs?.length.toString() || ""}>
         {mrs?.map((mr) => (
-          <MRListItem key={mr.id} mr={mr} refreshData={refresh} />
+          <MRListItem key={mr.id} mr={mr} refreshData={refresh} showCIStatus={true} />
         ))}
       </List.Section>
     </List>
