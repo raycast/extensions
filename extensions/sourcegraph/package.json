@@ -172,7 +172,7 @@
     "fmt": "ray lint --fix",
     "raycast-publish": ".scripts/raycast-publish.sh",
     "gql-schema": "apollo-codegen introspect-schema https://sourcegraph.com/.api/graphql --output src/sourcegraph/gql/schema.json",
-    "gql-gen": "apollo-codegen generate src/sourcegraph/gql/*.ts --schema src/sourcegraph/gql/schema.json --target typescript --output src/sourcegraph/gql/schema.ts",
+    "gql-gen": "apollo-codegen generate src/sourcegraph/gql/queries.ts src/sourcegraph/gql/mutations.ts --schema src/sourcegraph/gql/schema.json --target typescript --output src/sourcegraph/gql/schema.ts && npm run fmt",
     "gql": "npm run gql-schema && npm run gql-gen"
   }
 }
