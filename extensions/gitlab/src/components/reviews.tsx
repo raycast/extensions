@@ -1,5 +1,5 @@
 import { ActionPanel, List, showToast, Color, Toast, Image } from "@raycast/api";
-import { MergeRequest } from "../gitlabapi";
+import { MergeRequest, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab } from "../common";
 import { daysInSeconds, toDateString } from "../utils";
@@ -8,9 +8,12 @@ import { ShowReviewMRAction } from "./review_actions";
 import { useCommitStatus } from "./commits/utils";
 import { getCIJobStatusEmoji } from "./jobs";
 import { useCache } from "../cache";
+import { useEffect, useState } from "react";
+import { MyProjectsDropdown } from "./project";
 
 export function ReviewList(): JSX.Element {
-  const { mrs, error, isLoading } = useMyReviews();
+  const [project, setProject] = useState<Project>();
+  const { mrs, error, isLoading } = useMyReviews(project);
 
   if (error) {
     showToast(Toast.Style.Failure, "Cannot search Reviews", error);
@@ -21,7 +24,12 @@ export function ReviewList(): JSX.Element {
   }
 
   return (
-    <List searchBarPlaceholder="Filter Reviews by name..." isLoading={isLoading} throttle={true}>
+    <List
+      searchBarPlaceholder="Filter Reviews by name..."
+      isLoading={isLoading}
+      throttle
+      searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
+    >
       {mrs?.map((mr) => (
         <ReviewListItem key={mr.id} mr={mr} />
       ))}
@@ -58,18 +66,14 @@ function ReviewListItem(props: { mr: MergeRequest }) {
   );
 }
 
-function useMyReviews(): {
+function useMyReviews(project?: Project | undefined): {
   mrs: MergeRequest[] | undefined;
   isLoading: boolean | undefined;
   error: string | undefined;
   performRefetch: () => void;
 } {
-  const {
-    data: mrs,
-    isLoading,
-    error,
-    performRefetch,
-  } = useCache<MergeRequest[] | undefined>(
+  const [mrs, setMrs] = useState<MergeRequest[]>();
+  const { data, isLoading, error, performRefetch } = useCache<MergeRequest[] | undefined>(
     `myreviews`,
     async (): Promise<MergeRequest[] | undefined> => {
       const user = await gitlab.getMyself();
@@ -83,9 +87,13 @@ function useMyReviews(): {
     },
     {
       deps: [],
-      secondsToRefetch: 10,
+      secondsToRefetch: 1,
       secondsToInvalid: daysInSeconds(7),
     }
   );
+  useEffect(() => {
+    const filtered = project ? data?.filter((m) => m.project_id === project?.id) : data;
+    setMrs(filtered || []);
+  }, [data, project]);
   return { mrs, isLoading, error, performRefetch };
 }
