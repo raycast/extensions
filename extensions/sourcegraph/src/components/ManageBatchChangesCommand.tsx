@@ -46,7 +46,7 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
     ExpandableErrorToast(push, "Unexpected error", "Get batch changes failed", error.message).show();
   }
 
-  const count = batchChanges.length;
+  const showSuggestions = !loading && (searchText === "")
   return (
     <List
       isLoading={loading}
@@ -54,9 +54,9 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       enableFiltering={true}
-      selectedItemId={count > 0 ? "first-result" : undefined}
+      selectedItemId={showSuggestions ? "first-result" : undefined}
     >
-      {!loading && searchText === "" ? (
+      {showSuggestions ? (
         <List.Section title={"Suggestions"}>
           <List.Item
             title="Create a batch change"
