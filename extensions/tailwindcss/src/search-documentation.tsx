@@ -1,8 +1,8 @@
-import { ActionPanel, List, OpenInBrowserAction, CopyToClipboardAction } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 
 export default function SearchDocumentation() {
   return (
-    <List>
+    <List searchBarPlaceholder="Search documentation by title or section...">
       {Object.entries(documentation).map(([section, items]) => (
         <List.Section title={section} key={section}>
           {items.map((item) => (
@@ -13,8 +13,8 @@ export default function SearchDocumentation() {
               keywords={[item.title, section]}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction url={item.url} />
-                  <CopyToClipboardAction title="Copy URL" content={item.url} />
+                  <Action.OpenInBrowser url={item.url} />
+                  <Action.CopyToClipboard title="Copy URL" content={item.url} />
                 </ActionPanel>
               }
             />
