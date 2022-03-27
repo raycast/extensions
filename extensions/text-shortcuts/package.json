@@ -4,10 +4,11 @@
   "title": "Text Shortcuts",
   "description": "Use Text Shortcuts to handle text from the selection or clipboard.",
   "icon": "text-shortcuts.png",
-  "author": "koinzhang",  "categories": [
-  "Developer Tools",
-  "Productivity"
-],
+  "author": "koinzhang",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -92,7 +93,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.1",
+    "@raycast/api": "^1.31.0",
     "run-applescript": "^6.0.0",
     "ts-md5": "^1.2.11"
   },
