@@ -21,9 +21,7 @@
   <a href="#contributing"><strong>Contributing</strong></a>
 </p>
 
-<p align="center">
-  <img src="https://github.com/bobheadxi/raycast-sourcegraph/blob/main/assets/demo.png?raw=true" alt="demo" />
-</p>
+![search demo](metadata/1-search.png)
 
 <br />
 
@@ -68,6 +66,8 @@ To get started, you can try the [public Sourcegraph Cloud contexts](https://sour
 
 The Sourcegraph Raycast extension allows you to set a default context for your searches in the "Search Code" command preferences.
 
+![search demo](metadata/1-search.png)
+
 ### Find Search Notebooks
 
 Browse and preview [search notebooks](https://docs.sourcegraph.com/notebooks) straight from Raycast.
@@ -75,12 +75,16 @@ Notebooks enable powerful live – and persistent – documentation, shareable w
 
 To get started, you can try the [public Sourcegraph Cloud notebooks](https://sourcegraph.com/notebooks?tab=explore), or configure your own from your Sourcegraph Cloud account or self-hosted Sourcegraph instance!
 
+![notebooks](metadata/3-notebook-view.png)
+
 ### Manage Batch Changes
 
 Browse, view, publish, and merge changesets for [batch changes](https://about.sourcegraph.com/batch-changes) straight from Raycast.
 Batch changes automate large-scale code changes to keep your code up to date, fix critical security issues, and pay down tech debt across all of your repositories.
 
 Batch changes is currently only supported on [Sourcegraph Self-Hosted](#sourcegraph-self-hosted).
+
+![notebooks](metadata/4-batch-change-manage.png)
 
 <br />
 
