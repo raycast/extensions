@@ -1,21 +1,11 @@
-import {
-  ActionPanel,
-  List,
-  showToast,
-  ToastStyle,
-  Color,
-  Detail,
-  PushAction,
-  ImageMask,
-  ImageLike,
-  CopyToClipboardAction,
-} from "@raycast/api";
+import { ActionPanel, List, showToast, Color, Detail, Action, Image, Toast } from "@raycast/api";
 import { Group, MergeRequest, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab, gitlabgql } from "../common";
 import { useState, useEffect } from "react";
 import {
   capitalizeFirstLetter,
+  daysInSeconds,
   getErrorMessage,
   now,
   optimizeMarkdownText,
@@ -27,7 +17,7 @@ import { gql } from "@apollo/client";
 import { MRItemActions } from "./mr_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { getCIJobStatusEmoji } from "./jobs";
-import { useCommitStatus } from "./commits/utils";
+import { useCache } from "../cache";
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 
@@ -59,7 +49,7 @@ const GET_MR_DETAIL = gql`
 export function MRDetailFetch(props: { project: Project; mrId: number }): JSX.Element {
   const { mr, isLoading, error } = useMR(props.project.id, props.mrId);
   if (error) {
-    showToast(ToastStyle.Failure, "Could not fetch Merge Request Details", error);
+    showToast(Toast.Style.Failure, "Could not fetch Merge Request Details", error);
   }
   if (isLoading || !mr) {
     return <Detail isLoading={isLoading} />;
@@ -77,7 +67,7 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   const mr = props.mr;
   const { mrdetail, error, isLoading } = useDetail(props.mr.id);
   if (error) {
-    showToast(ToastStyle.Failure, "Could not get merge request details", error);
+    showToast(Toast.Style.Failure, "Could not get merge request details", error);
   }
 
   const desc = (mrdetail?.description ? mrdetail.description : props.mr.description) || "";
@@ -106,7 +96,7 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
         <ActionPanel>
           <GitLabOpenInBrowserAction url={props.mr.web_url} />
           <MRItemActions mr={props.mr} />
-          <CopyToClipboardAction title="Copy Merge Request Description" content={props.mr.description} />
+          <Action.CopyToClipboard title="Copy Merge Request Description" content={props.mr.description} />
         </ActionPanel>
       }
     />
@@ -201,7 +191,7 @@ export function MRList({
   const { mrs, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Merge Requests", error);
+    showToast(Toast.Style.Failure, "Cannot search Merge Requests", error);
   }
 
   if (!mrs) {
@@ -236,22 +226,22 @@ export function MRListItem(props: {
 }): JSX.Element {
   const mr = props.mr;
 
-  const getIcon = (): ImageLike => {
+  const getIcon = (): Image.ImageLike => {
     if (mr.state === "merged") {
-      return { source: GitLabIcons.merged, tintColor: Color.Purple, mask: ImageMask.Circle };
+      return { source: GitLabIcons.merged, tintColor: Color.Purple, mask: Image.Mask.Circle };
     } else if (mr.state === "closed") {
-      return { source: GitLabIcons.mropen, tintColor: Color.Red, mask: ImageMask.Circle };
+      return { source: GitLabIcons.mropen, tintColor: Color.Red, mask: Image.Mask.Circle };
     } else {
-      return { source: GitLabIcons.mropen, tintColor: Color.Green, mask: ImageMask.Circle };
+      return { source: GitLabIcons.mropen, tintColor: Color.Green, mask: Image.Mask.Circle };
     }
   };
   const icon = getIcon();
-  const accessoryIcon: ImageLike | undefined = { source: mr.author?.avatar_url || "", mask: ImageMask.Circle };
+  const accessoryIcon: Image.ImageLike | undefined = { source: mr.author?.avatar_url || "", mask: Image.Mask.Circle };
   let cistatusEmoji: string | undefined;
   if (props.showCIStatus === undefined || props.showCIStatus === true) {
-    const { commitStatus: status } = useCommitStatus(mr.project_id, mr.sha);
-    if (status) {
-      cistatusEmoji = getCIJobStatusEmoji(status.status);
+    const { mrpipelines } = useMRPipelines(mr);
+    if (mrpipelines && mrpipelines.length > 0) {
+      cistatusEmoji = getCIJobStatusEmoji(mrpipelines[0].status);
     }
   }
   const subtitle: string[] = [`!${mr.iid}`];
@@ -269,7 +259,7 @@ export function MRListItem(props: {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction
+            <Action.Push
               title="Show Details"
               target={<MRDetail mr={mr} />}
               icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
@@ -474,4 +464,43 @@ export function useMR(
   }, [projectID, mrID]);
 
   return { mr, error, isLoading };
+}
+
+interface MRPipeline {
+  id: number;
+  sha: string;
+  ref: string;
+  status: string;
+}
+
+function useMRPipelines(mr: MergeRequest): {
+  mrpipelines: MRPipeline[] | undefined;
+  isLoading: boolean | undefined;
+  error: string | undefined;
+  performRefetch: () => void;
+} {
+  const {
+    data: mrpipelines,
+    isLoading,
+    error,
+    performRefetch,
+  } = useCache<MRPipeline[] | undefined>(
+    `mrpipelines_${mr.project_id}_${mr.iid}`,
+    async (): Promise<MRPipeline[] | undefined> => {
+      const result: MRPipeline[] | undefined = await gitlab
+        .fetch(`projects/${mr.project_id}/merge_requests/${mr.iid}/pipelines`)
+        .then((data) => {
+          return data?.map((m: any) => {
+            return m as MRPipeline;
+          });
+        });
+      return result;
+    },
+    {
+      deps: [mr],
+      secondsToRefetch: 10,
+      secondsToInvalid: daysInSeconds(7),
+    }
+  );
+  return { mrpipelines, isLoading, error, performRefetch };
 }
