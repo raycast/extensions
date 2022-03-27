@@ -473,7 +473,7 @@ interface MRPipeline {
   status: string;
 }
 
-function useMRPipelines(mr: MergeRequest): {
+export function useMRPipelines(mr: MergeRequest): {
   mrpipelines: MRPipeline[] | undefined;
   isLoading: boolean | undefined;
   error: string | undefined;

@@ -5,11 +5,11 @@ import { gitlab } from "../common";
 import { daysInSeconds, toDateString } from "../utils";
 import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
 import { ShowReviewMRAction } from "./review_actions";
-import { useCommitStatus } from "./commits/utils";
 import { getCIJobStatusEmoji } from "./jobs";
 import { useCache } from "../cache";
 import { useEffect, useState } from "react";
 import { MyProjectsDropdown } from "./project";
+import { useMRPipelines } from "./mr";
 
 export function ReviewList(): JSX.Element {
   const [project, setProject] = useState<Project>();
@@ -39,11 +39,13 @@ export function ReviewList(): JSX.Element {
 
 function ReviewListItem(props: { mr: MergeRequest }) {
   const mr = props.mr;
-  const { commitStatus: status } = useCommitStatus(mr.project_id, mr.sha);
-  const ciStatusEmoji: string | undefined = status?.status ? getCIJobStatusEmoji(status.status) : undefined;
   const subtitle: string[] = [`!${mr.iid}`];
-  if (ciStatusEmoji) {
-    subtitle.push(ciStatusEmoji);
+  const { mrpipelines } = useMRPipelines(mr);
+  if (mrpipelines && mrpipelines.length > 0) {
+    const ciStatusEmoji = getCIJobStatusEmoji(mrpipelines[0].status);
+    if (ciStatusEmoji) {
+      subtitle.push(ciStatusEmoji);
+    }
   }
   const accessoryIcon: Image.ImageLike | undefined = { source: mr.author?.avatar_url || "", mask: Image.Mask.Circle };
   return (
