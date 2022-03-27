@@ -1,33 +1,28 @@
-import { ActionPanel, List, showToast, ToastStyle, Color, ImageLike } from "@raycast/api";
+import { ActionPanel, List, showToast, Color, ImageLike, Toast, Image } from "@raycast/api";
 import { MergeRequest } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
-import { getErrorMessage } from "../utils";
+import { daysInSeconds, getErrorMessage } from "../utils";
 import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
 import { ShowReviewMRAction } from "./review_actions";
 import { useCommitStatus } from "./commits/utils";
 import { getCIJobStatusIcon } from "./jobs";
+import { useCache } from "../cache";
 
 export function ReviewList(): JSX.Element {
-  const [searchText, setSearchText] = useState<string>();
-  const { mrs, error, isLoading } = useSearch(searchText);
+  const { mrs, error, isLoading } = useMyReviews();
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Reviews", error);
+    showToast(Toast.Style.Failure, "Cannot search Reviews", error);
   }
 
-  if (!mrs) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  if (isLoading === undefined) {
+    return <List isLoading={true} searchBarPlaceholder="" />;
   }
 
   return (
-    <List
-      searchBarPlaceholder="Filter Reviews by name..."
-      onSearchTextChange={setSearchText}
-      isLoading={isLoading}
-      throttle={true}
-    >
+    <List searchBarPlaceholder="Filter Reviews by name..." isLoading={isLoading} throttle={true}>
       {mrs?.map((mr) => (
         <ReviewListItem key={mr.id} mr={mr} />
       ))}
@@ -38,7 +33,7 @@ export function ReviewList(): JSX.Element {
 function ReviewListItem(props: { mr: MergeRequest }) {
   const mr = props.mr;
   const { commitStatus: status } = useCommitStatus(mr.project_id, mr.sha);
-  const statusIcon: ImageLike | undefined = status?.status ? getCIJobStatusIcon(status.status) : undefined;
+  const statusIcon: Image.ImageLike | undefined = status?.status ? getCIJobStatusIcon(status.status) : undefined;
   return (
     <List.Item
       id={mr.id.toString()}
@@ -58,58 +53,34 @@ function ReviewListItem(props: { mr: MergeRequest }) {
   );
 }
 
-export function useSearch(query: string | undefined): {
-  mrs?: MergeRequest[];
-  error?: string;
-  isLoading: boolean;
+function useMyReviews(): {
+  mrs: MergeRequest[] | undefined;
+  isLoading: boolean | undefined;
+  error: string | undefined;
+  performRefetch: () => void;
 } {
-  const [mrs, setMRs] = useState<MergeRequest[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
-
-    async function fetchData() {
-      if (query === null || didUnmount) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const user = await gitlab.getMyself();
-        const glMRs = await gitlab.getMergeRequests({
-          state: "opened",
-          reviewer_id: user.id,
-          search: query || "",
-          in: "title",
-          scope: "all",
-        });
-
-        if (!didUnmount) {
-          setMRs(glMRs);
-        }
-      } catch (e) {
-        if (!didUnmount) {
-          setError(getErrorMessage(e));
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
+  const {
+    data: mrs,
+    isLoading,
+    error,
+    performRefetch,
+  } = useCache<MergeRequest[] | undefined>(
+    `myreviews`,
+    async (): Promise<MergeRequest[] | undefined> => {
+      const user = await gitlab.getMyself();
+      const glMRs = await gitlab.getMergeRequests({
+        state: "opened",
+        reviewer_id: user.id,
+        in: "title",
+        scope: "all",
+      });
+      return glMRs;
+    },
+    {
+      deps: [],
+      secondsToRefetch: 10,
+      secondsToInvalid: daysInSeconds(7),
     }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, [query]);
-
-  return { mrs, error, isLoading };
+  );
+  return { mrs, isLoading, error, performRefetch };
 }
