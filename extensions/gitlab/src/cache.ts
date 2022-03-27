@@ -131,7 +131,7 @@ export function useCache<T>(
   const secondsToInvalid = options.secondsToInvalid === undefined ? daysInSeconds(3) : options.secondsToInvalid;
   const [data, setData] = useState<T>();
   const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>();
   const [timestamp, setTimestamp] = useState<Date>(new Date());
   const shouldForceRefetch = useRef(false);
   const depsAll = [timestamp];

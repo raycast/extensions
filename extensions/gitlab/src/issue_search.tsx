@@ -1,6 +1,5 @@
-import { IssueScope, IssueState } from "./components/issues";
-import { MyIssues } from "./components/issues_my";
+import { SearchMyIssues } from "./components/issues_search";
 
 export default function MyIssuesSearchRoot(): JSX.Element {
-  return <MyIssues scope={IssueScope.created_by_me} state={IssueState.all} />;
+  return <SearchMyIssues />;
 }
