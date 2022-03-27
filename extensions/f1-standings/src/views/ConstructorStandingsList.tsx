@@ -26,12 +26,12 @@ function ConstructorList() {
               key={standing.Constructor.constructorId}
               icon={{ source: `${standing.position}.png`, tintColor: Color.PrimaryText }}
               title={`${getFlag(standing.Constructor?.nationality)} ${standing.Constructor.name}`}
-              accessoryTitle={String(standing.points)}
               actions={
                 <ActionPanel title={standing.Constructor.name}>
                   <Action.OpenInBrowser url={standing.Constructor.url} />
                 </ActionPanel>
               }
+              accessories={[{ text: String(standing.points) }]}
             />
           ))}
         </List.Section>
