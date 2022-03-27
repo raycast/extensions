@@ -124,7 +124,7 @@ export function useCache<T>(
 ): {
   data?: T;
   error?: string;
-  isLoading: boolean;
+  isLoading: boolean | undefined;
   performRefetch: () => void;
 } {
   const secondsToRefetchUser = options.secondsToRefetch === undefined ? 5 * 60 : options.secondsToRefetch;

@@ -31,6 +31,9 @@ export function SearchMyMergeRequests(): JSX.Element {
   if (error) {
     showToast(Toast.Style.Failure, "Could not fetch Merge Requests", getErrorMessage(error));
   }
+  if (isLoading === undefined) {
+    return <List isLoading={true} searchBarPlaceholder="" />;
+  }
   const title = search ? "Search Results" : "Created Recently";
   return (
     <List isLoading={isLoading} searchText={search} onSearchTextChange={setSearch} throttle>

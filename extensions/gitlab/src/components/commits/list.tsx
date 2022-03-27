@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  ActionPanelSection,
-  Color,
-  ImageLike,
-  List,
-  PushAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Image, List, showToast, Toast } from "@raycast/api";
 import urljoin from "url-join";
 import { useCache } from "../../cache";
 import { gitlab } from "../../common";
@@ -50,7 +41,7 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
   const action = (): JSX.Element | undefined | null => {
     if (project && commit) {
       return (
-        <PushAction
+        <Action.Push
           title="Open Pipeline"
           icon={{ source: GitLabIcons.ci, tintColor: Color.PrimaryText }}
           target={<PipelineJobsListByCommit project={project} sha={commit} />}
@@ -60,8 +51,10 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
     return null;
   };
 
-  const statusIcon: ImageLike | undefined = status?.status ? getCIJobStatusIcon(status.status) : undefined;
-  const icon: ImageLike | undefined = statusIcon ? statusIcon : { source: GitLabIcons.commit, tintColor: Color.Green };
+  const statusIcon: Image.ImageLike | undefined = status?.status ? getCIJobStatusIcon(status.status) : undefined;
+  const icon: Image.ImageLike | undefined = statusIcon
+    ? statusIcon
+    : { source: GitLabIcons.commit, tintColor: Color.Green };
 
   return (
     <List.Item
@@ -71,10 +64,10 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
       icon={icon}
       actions={
         <ActionPanel>
-          <ActionPanelSection>
+          <ActionPanel.Section>
             {action()}
             {webAction()}
-          </ActionPanelSection>
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -98,7 +91,10 @@ export function RecentCommitsList(): JSX.Element {
     }
   );
   if (error) {
-    showToast(ToastStyle.Failure, "Could not fetch events", error);
+    showToast(Toast.Style.Failure, "Could not fetch events", error);
+  }
+  if (isLoading === undefined) {
+    return <List isLoading={true} searchBarPlaceholder="" />;
   }
   return (
     <List isLoading={isLoading}>
@@ -159,7 +155,7 @@ export function ProjectCommitList(props: { projectID: number; refName?: string }
     }
   );
   if (error) {
-    showToast(ToastStyle.Failure, "Could not fetch commits from project", error);
+    showToast(Toast.Style.Failure, "Could not fetch commits from project", error);
   }
   return (
     <List isLoading={isLoading}>

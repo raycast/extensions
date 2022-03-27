@@ -11,7 +11,7 @@ import { MyProjectsDropdown } from "./project";
 
 function MyIssueList(props: {
   issues: Issue[] | undefined;
-  isLoading: boolean;
+  isLoading?: boolean | undefined;
   title?: string;
   performRefetch: () => void;
   searchBarAccessory?:
@@ -70,7 +70,12 @@ function useMyIssues(
   scope: IssueScope,
   state: IssueState,
   project: Project | undefined
-): { issues: Issue[] | undefined; isLoading: boolean; error: string | undefined; performRefetch: () => void } {
+): {
+  issues: Issue[] | undefined;
+  isLoading: boolean | undefined;
+  error: string | undefined;
+  performRefetch: () => void;
+} {
   const {
     data: issues,
     isLoading,

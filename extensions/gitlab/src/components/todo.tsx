@@ -66,8 +66,8 @@ export function TodoList(): JSX.Element {
     showToast(Toast.Style.Failure, "Cannot search Merge Requests", error);
   }
 
-  if (!todos) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
+  if (isLoading === undefined) {
+    return <List isLoading={true} searchBarPlaceholder="" />;
   }
 
   return (

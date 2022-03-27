@@ -11,7 +11,7 @@ import { MyProjectsDropdown } from "./project";
 
 function MyMRList(props: {
   mrs: MergeRequest[] | undefined;
-  isLoading: boolean;
+  isLoading?: boolean | undefined;
   title?: string;
   performRefetch: () => void;
   searchText?: string | undefined;
@@ -82,7 +82,12 @@ export function useMyMergeRequests(
   scope: MRScope,
   state: MRState,
   project: Project | undefined
-): { mrs: MergeRequest[] | undefined; isLoading: boolean; error: string | undefined; performRefetch: () => void } {
+): {
+  mrs: MergeRequest[] | undefined;
+  isLoading: boolean | undefined;
+  error: string | undefined;
+  performRefetch: () => void;
+} {
   const {
     data: mrs,
     isLoading,

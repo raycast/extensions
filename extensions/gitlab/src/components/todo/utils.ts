@@ -10,7 +10,7 @@ export function useTodos(
 ): {
   todos: Todo[];
   error?: string;
-  isLoading: boolean;
+  isLoading: boolean | undefined;
   performRefetch: () => void;
 } {
   const [todos, setTodos] = useState<Todo[]>([]);
