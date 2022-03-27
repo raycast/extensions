@@ -1,10 +1,10 @@
 import { Alert, Color, confirmAlert, Icon, showHUD, Toast } from "@raycast/api";
 import { getCurrentPhase, isFlowInstalled, skipSession } from "./utils";
 
-export default async function() {
+export default async function () {
   const toast = new Toast({
     title: "Starting next break",
-    style: Toast.Style.Animated
+    style: Toast.Style.Animated,
   });
 
   toast.show();
@@ -28,7 +28,7 @@ export default async function() {
   const options: Alert.Options = {
     icon: { source: Icon.ExclamationMark, tintColor: Color.Yellow },
     title: "Currently in break phase",
-    message: "Are you sure you want to skip your next focus and start a new break?"
+    message: "Are you sure you want to skip your next focus and start a new break?",
   };
 
   if (await confirmAlert(options)) {
