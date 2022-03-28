@@ -112,7 +112,6 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
     signal: signal,
   });
 
-  
   const root = parse(await response.text());
   const searchResults = root.querySelector("div.SearchResults");
 
