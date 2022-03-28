@@ -18,8 +18,7 @@ const getKeepassXCVersion = () =>
       chuncks.push(chunck);
     });
     cli.stdout.on("end", () => {
-      console.log(chuncks.join().toString());
-      const version = parseFloat(chuncks.join().toString().split(".").slice(0, 2).join("."));
+      const version = parseFloat(chuncks.join("").toString().split(".").slice(0, 2).join("."));
       console.log("current keepassxc version:", version);
       // remove \n in the end
       resolve(version);
@@ -63,7 +62,7 @@ const loadEntries = () =>
         });
         // finish when all chunck has been collected
         cli.stdout.on("end", () => {
-          resolve(entryFilter(chuncks.join().toString()));
+          resolve(entryFilter(chuncks.join("").toString()));
         });
       })
   );
@@ -87,7 +86,7 @@ const getPassword = (entry: string) =>
       chuncks.push(chunck);
     });
     cli.stdout.on("end", () => {
-      const password = chuncks.join().toString();
+      const password = chuncks.join("").toString();
       // remove \n in the end
       resolve(password.slice(0, password.length - 1));
     });
@@ -105,13 +104,14 @@ const getUsername = (entry: string) =>
       chuncks.push(chunck);
     });
     cli.stdout.on("end", () => {
-      const username = chuncks.join().toString();
+      const username = chuncks.join("").toString();
       // remove \n in the end
       resolve(username.slice(0, username.length - 1));
     });
   });
 
 const copyAndPastePassword = async (entry: string) => {
+  console.log("copy and password of entry:", entry);
   return copyPassword(entry).then((password) => {
     return pasteText(password).then(() => password);
   });
