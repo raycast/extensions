@@ -281,6 +281,17 @@ const markdownReference = [
     additional_examples: [],
   },
   {
+    name: "Task Lists",
+    description:
+      "Task lists (also referred to as checklists and todo lists) allow you to create a list of items with checkboxes. In Markdown applications that support task lists, checkboxes will be displayed next to the content. To create a task list, add dashes (-) and brackets with a space ([ ]) in front of task list items. To select a checkbox, add an x in between the brackets ([x]).",
+    examples: [
+      {
+        markdown: "- [x] Write the press release\n- [ ] Update the website\n- [ ] Contact the media"
+      }
+    ],
+    additional_examples: []
+  },
+  {
     name: "Unordered Lists",
     description:
       "To create an unordered list, add dashes (`-`), asterisks (`*`), or plus signs (`+`) in front of line items. Indent one or more items to create a nested list.",
