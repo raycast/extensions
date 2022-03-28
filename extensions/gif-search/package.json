@@ -2,10 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gif-search",
   "title": "GIF Search",
-  "description": "Search for animated GIFs from giphy.com or tenor.com",
+  "description": "Search the Internet for animated GIFs",
   "icon": "command-icon.png",
   "author": "josephschmitt",
   "license": "MIT",
+  "categories": [
+    "Media",
+    "Fun",
+    "Web"
+  ],
   "commands": [
     {
       "name": "giphy",

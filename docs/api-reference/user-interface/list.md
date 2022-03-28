@@ -207,7 +207,7 @@ export default function Command() {
                   />
                 ),
               }
-            : { accessoryTitle: pokemon.types.join(" ") };
+            : { accessories: [ { text: pokemon.types.join(" ") } ] };
           return (
             <List.Item
               key={pokemon.id}
@@ -228,6 +228,41 @@ export default function Command() {
 ```
 
 {% endtab %}
+
+{% tab title="ListWithEmptyView.tsx" %}
+
+```typescript
+import { useState } from "react";
+import { List } from "@raycast/api";
+
+export default function CommandWithCustomEmptyView() {
+  const [state, setState] = useState({ searchText: "", items: [] });
+
+  useEffect(() => {
+    // perform an API call that eventually populates `items`.
+  }, [state.searchText]);
+
+  return (
+    <List
+      onSearchTextChange={(newValue) =>
+        setState((previous) => ({ ...previous, searchText: newValue }))
+      }
+    >
+      {state.searchText === "" && state.items.length === 0 ? (
+        <List.EmptyView
+          icon={{ source: "https://placekitten.com/500/500" }}
+          title="Type something to get started"
+        />
+      ) : (
+        state.items.map((item) => <List.Item key={item} title={item} />)
+      )}
+    </List>
+  );
+}
+```
+
+{% endtab %}
+
 {% endtabs %}
 
 ## API Reference
@@ -417,6 +452,58 @@ export default function Command() {
 | children | <code>null</code> or <code>[List.Dropdown.Item](#list.dropdown.item)</code> or <code>[List.Dropdown.Item](#list.dropdown.item)[]</code> | No       | -       | The item elements of the section. |
 | title    | <code>string</code>                                                                                                                     | No       | -       | Title displayed above the section |
 
+### List.EmptyView
+
+A view to display when there aren't any items available. Use to greet users with a friendly message if the
+extension requires user input before it can show any list items e.g. when searching for a package, an article etc.
+
+Raycast provides a default `EmptyView` that will be displayed if the List component either has no children,
+or if it has children, but none of them match the query in the search bar. This too can be overridden by passing an
+empty view alongside the other `List.Item`s.
+
+Note that the `EmptyView` is _never_ displayed if the `List`'s `isLoading` property is true and the search bar is empty.
+
+#### Example
+
+```typescript
+import { useState } from "react";
+import { List } from "@raycast/api";
+
+export default function CommandWithCustomEmptyView() {
+  const [state, setState] = useState({ searchText: "", items: [] });
+
+  useEffect(() => {
+    // perform an API call that eventually populates `items`.
+  }, [state.searchText]);
+
+  return (
+    <List
+      onSearchTextChange={(newValue) =>
+        setState((previous) => ({ ...previous, searchText: newValue }))
+      }
+    >
+      {state.searchText === "" && state.items.length === 0 ? (
+        <List.EmptyView
+          icon={{ source: "https://placekitten.com/500/500" }}
+          title="Type something to get started"
+        />
+      ) : (
+        state.items.map((item) => <List.Item key={item} title={item} />)
+      )}
+    </List>
+  );
+}
+```
+
+#### Props
+
+| Prop        | Type                                                      | Required | Default                             | Description                                                                                                                                                                                                                                                                           |
+| :---------- | :-------------------------------------------------------- | :------- | :---------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| icon        | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | Raycast's default `EmptyView` icon. | An icon displayed in the center of the EmptyView. If an SVG is used, its longest side will be 128 pixels. Other images will be up/downscaled proportionally so that the longest side is between 64 and 256 pixels. If not specified, Raycast's default `EmptyView` icon will be used. |
+| title       | <code>string</code>                                       | No       | -                                   | The main title displayed for the Empty View. Must fit in a single line.                                                                                                                                                                                                               |
+| description | <code>string</code>                                       | No       | -                                   | A description explaining why the empty view is shown. Can be up to three lines long.                                                                                                                                                                                                  |
+| actions     | <code>[ActionPanel](./action-panel.md#actionpanel)</code> | No       | -                                   | An [ActionPanel](./action-panel.md#actionpanel) that will be shown when the EmptyView is visible.                                                                                                                                                                                     |
+
 ### List.Item
 
 A item in the [List](#list).
@@ -437,7 +524,7 @@ export default function Command() {
         icon={Icon.Star}
         title="Augustiner Helles"
         subtitle="0,5 Liter"
-        accessoryTitle="Germany"
+        accessories={[{ text: "Germany" }]}
       />
     </List>
   );
@@ -446,17 +533,50 @@ export default function Command() {
 
 #### Props
 
-| Prop           | Type                                                                           | Required | Default | Description                                                                                                                                                                                         |
-| :------------- | :----------------------------------------------------------------------------- | :------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| title          | <code>string</code>                                                            | Yes      | -       | The main title displayed for that item.                                                                                                                                                             |
-| actions        | <code>null</code> or <code>[ActionPanel](./action-panel.md#actionpanel)</code> | No       | -       | An [ActionPanel](./action-panel.md#actionpanel) that will be shown when the item is selected.                                                                                                       |
-| icon           | <code>[ImageLike](./icons-and-images.md#imagelike)</code>                      | No       | -       | A optional icon displayed for the list item.                                                                                                                                                        |
-| id             | <code>string</code>                                                            | No       | -       | ID of the item. Make sure to assign each item a unique ID or a UUID will be auto generated.                                                                                                         |
-| keywords       | <code>string[]</code>                                                          | No       | -       | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. |
-| subtitle       | <code>string</code>                                                            | No       | -       | An optional subtitle displayed next to the main title.                                                                                                                                              |
-| accessoryIcon  | <code>[ImageLike](./icons-and-images.md#imagelike)</code>                      | No       | -       | A optional icon displayed as accessory for the list item.                                                                                                                                           |
-| accessoryTitle | <code>string</code>                                                            | No       | -       | An additional title displayed for the item.                                                                                                                                                         |
-| detail         | <code>null</code> or <code>[List.Item.Detail](#list.item.detail)</code>        | No       | -       | The `List.Item.Detail` to be rendered in the right side area when the parent `List` is showing detail and the item is selected.                                                                     |
+| Prop        | Type                                                                           | Required | Default | Description                                                                                                                                                                                         |
+| :---------- | :----------------------------------------------------------------------------- | :------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| title       | <code>string</code>                                                            | Yes      | -       | The main title displayed for that item.                                                                                                                                                             |
+| actions     | <code>null</code> or <code>[ActionPanel](./action-panel.md#actionpanel)</code> | No       | -       | An [ActionPanel](./action-panel.md#actionpanel) that will be shown when the item is selected.                                                                                                       |
+| icon        | <code>[ImageLike](./icons-and-images.md#imagelike)</code>                      | No       | -       | A optional icon displayed for the list item.                                                                                                                                                        |
+| id          | <code>string</code>                                                            | No       | -       | ID of the item. Make sure to assign each item a unique ID or a UUID will be auto generated.                                                                                                         |
+| keywords    | <code>string[]</code>                                                          | No       | -       | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. |
+| subtitle    | <code>string</code>                                                            | No       | -       | An optional subtitle displayed next to the main title.                                                                                                                                              |
+| accessories | <code>[List.Item.Accessory](#list.item.accessory)</code>                       | No       | -       | An optional array of accessory items displayed on the right side in the list item.                                                                                                                  |
+| detail      | <code>null</code> or <code>[List.Item.Detail](#list.item.detail)</code>        | No       | -       | The `List.Item.Detail` to be rendered in the right side area when the parent `List` is showing detail and the item is selected.                                                                     |
+
+### List.Item.Accessory
+
+An interface describing an accessory view in a `List.Item`.
+
+![List.Item accessories illustration](../../.gitbook/assets/list-item-accessories.png)
+
+#### Props
+
+| Prop | Type                                                      | Required | Default            | Description                                                                                                               |
+| :--- | :-------------------------------------------------------- | :------- | :----------------- | :------------------------------------------------------------------------------------------------------------------------ |
+| text | <code>string</code>                                       | No       | <code>null</code>  | An optional text that will be used as the label.                                                                          |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | <code>false</code> | An optional image that will be used as the icon. **The image will be shown in front of the text if `text` is specified.** |
+
+#### Example
+
+```typescript
+import { Icon, List } from "@raycast/api";
+
+export default function Command() {
+  return (
+    <List>
+      <List.Item
+        title="An Item with Accessories"
+        accessories={[
+          { text: `An Accessory Text`, icon: Icon.Hammer },
+          { icon: Icon.Person },
+          { text: "Just Do It!" },
+        ]}
+      />
+    </List>
+  );
+}
+```
 
 ### List.Item.Detail
 
@@ -488,10 +608,10 @@ export default function Command() {
 
 #### Props
 
-| Prop      | Type                 | Required    | Default            | Description                                                                |
-| :-------- | :------------------- | :---------- | :----------------- | :------------------------------------------------------------------------- | 
+| Prop      | Type                 | Required    | Default            | Description                                                                                                                   |
+| :-------- | :------------------- | :---------- | :----------------- | :---------------------------------------------------------------------------------------------------------------------------- |
 | markdown  | <code>string         | null</code> | No                 | The CommonMark string to be rendered in the right side area when the parent List is showing details and the item is selected. |
-| isLoading | <code>boolean</code> | No          | <code>false</code> | Indicates whether a loading bar should be shown or hidden above the detail |
+| isLoading | <code>boolean</code> | No          | <code>false</code> | Indicates whether a loading bar should be shown or hidden above the detail                                                    |
 
 ### List.Section
 
