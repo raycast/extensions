@@ -165,9 +165,9 @@
     {
       "name": "primaryaction",
       "type": "dropdown",
-      "title": "Primary Action",
-      "required": false,
-      "default": "browser",
+      "title": "Preferred Primary Action",
+      "required": true,
+      "default": "detail",
       "data": [
         {
           "title": "Open in Browser",
