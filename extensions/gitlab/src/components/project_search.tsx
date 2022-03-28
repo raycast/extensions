@@ -1,6 +1,6 @@
 import { ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { gitlab, gitlabgql } from "../common";
+import { gitlab } from "../common";
 import { Project } from "../gitlabapi";
 import { getErrorMessage, projectIcon } from "../utils";
 import {

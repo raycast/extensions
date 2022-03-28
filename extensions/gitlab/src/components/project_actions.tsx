@@ -1,17 +1,14 @@
 import {
   Action,
   ActionPanel,
-  ActionPanelItem,
   closeMainWindow,
   Color,
   Icon,
-  KeyboardShortcut,
+  Keyboard,
   List,
-  ListItem,
   popToRoot,
-  PushAction,
   showToast,
-  ToastStyle,
+  Toast,
 } from "@raycast/api";
 import * as open from "open";
 import React from "react";
@@ -41,17 +38,17 @@ function CloneURLInVSCodeListItem(props: { url?: string }) {
         await open.default(vscodeurl);
       }
     } catch (e) {
-      showToast(ToastStyle.Failure, "Could not clone in VSCode", getErrorMessage(e));
+      showToast(Toast.Style.Failure, "Could not clone in VSCode", getErrorMessage(e));
     }
   };
   if (props.url && props.url.length > 0) {
     return (
-      <ListItem
+      <List.Item
         title={props.url}
         icon={{ fileIcon: getVSCodeAppPath() || "" }}
         actions={
           <ActionPanel>
-            <ActionPanelItem title="Clone" onAction={() => clone(props.url || "")} />
+            <Action title="Clone" onAction={() => clone(props.url || "")} />
           </ActionPanel>
         }
       />
@@ -71,14 +68,14 @@ function CloneInVSCodeList(props: { project: Project }): JSX.Element {
 }
 
 export function CloneProjectInVSCodeAction(props: {
-  shortcut?: KeyboardShortcut;
+  shortcut?: Keyboard.Shortcut;
   project: Project;
 }): JSX.Element | null {
   const pro = props.project;
   const code = getVSCodeAppPath();
   if (code && (pro.http_url_to_repo || pro.ssh_url_to_repo)) {
     return (
-      <PushAction
+      <Action.Push
         title="Clone in VSCode"
         icon={{ fileIcon: code }}
         shortcut={props.shortcut}
@@ -90,7 +87,7 @@ export function CloneProjectInVSCodeAction(props: {
   }
 }
 
-export function CloneProjectInGitPod(props: { shortcut?: KeyboardShortcut; project: Project }): JSX.Element | null {
+export function CloneProjectInGitPod(props: { shortcut?: Keyboard.Shortcut; project: Project }): JSX.Element | null {
   const pro = props.project;
   const url = `https://gitpod.io#${pro.web_url}`;
   if (pro.http_url_to_repo || pro.ssh_url_to_repo) {
@@ -107,9 +104,9 @@ export function CloneProjectInGitPod(props: { shortcut?: KeyboardShortcut; proje
   }
 }
 
-export function ShowProjectLabels(props: { project: Project; shortcut?: KeyboardShortcut }): JSX.Element {
+export function ShowProjectLabels(props: { project: Project; shortcut?: Keyboard.Shortcut }): JSX.Element {
   return (
-    <PushAction
+    <Action.Push
       title="Labels"
       target={<ProjectLabelList project={props.project} />}
       shortcut={props.shortcut}
@@ -120,7 +117,7 @@ export function ShowProjectLabels(props: { project: Project; shortcut?: Keyboard
 
 export function OpenProjectAction(props: { project: Project }): JSX.Element {
   return (
-    <PushAction
+    <Action.Push
       title="Open Project"
       icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
       target={<ProjectNavMenusList project={props.project} />}

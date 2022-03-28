@@ -1,14 +1,4 @@
-import {
-  ActionPanel,
-  List,
-  Color,
-  showToast,
-  ToastStyle,
-  Detail,
-  PushAction,
-  ImageMask,
-  CopyToClipboardAction,
-} from "@raycast/api";
+import { Action, ActionPanel, List, Color, showToast, Toast, Detail, Image } from "@raycast/api";
 import { gql } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
@@ -52,7 +42,7 @@ const GET_ISSUE_DETAIL = gql`
 export function IssueDetailFetch(props: { project: Project; issueId: number }): JSX.Element {
   const { issue, isLoading, error } = useIssue(props.project.id, props.issueId);
   if (error) {
-    showToast(ToastStyle.Failure, "Could not fetch Issue Details", error);
+    showToast(Toast.Style.Failure, "Could not fetch Issue Details", error);
   }
   if (isLoading || !issue) {
     return <Detail isLoading={isLoading} />;
@@ -70,7 +60,7 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
   const issue = props.issue;
   const { issueDetail, error, isLoading } = useDetail(props.issue.id);
   if (error) {
-    showToast(ToastStyle.Failure, "Could not get issue details", error);
+    showToast(Toast.Style.Failure, "Could not get issue details", error);
   }
 
   const desc = (issueDetail?.description ? issueDetail.description : props.issue.description) || "";
@@ -98,7 +88,7 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
         <ActionPanel>
           <GitLabOpenInBrowserAction url={props.issue.web_url} />
           <IssueItemActions issue={props.issue} />
-          <CopyToClipboardAction title="Copy Issue Description" content={issue.description} />
+          <Action.CopyToClipboard title="Copy Issue Description" content={issue.description} />
         </ActionPanel>
       }
     />
@@ -176,12 +166,12 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }):
       title={issue.title}
       subtitle={"#" + issue.iid}
       icon={{ source: GitLabIcons.issue, tintColor: tintColor }}
-      accessoryIcon={{ source: issue.author?.avatar_url || "", mask: ImageMask.Circle }}
+      accessoryIcon={{ source: issue.author?.avatar_url || "", mask: Image.Mask.Circle }}
       accessoryTitle={extraSubtitle + toDateString(issue.updated_at)}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction
+            <Action.Push
               title="Show Details"
               target={<IssueDetail issue={issue} />}
               icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
@@ -230,7 +220,7 @@ export function IssueList({
   const { issues, error, isLoading, refresh } = useSearch(searchText, scope, state, project, group);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search issue", error);
+    showToast(Toast.Style.Failure, "Cannot search issue", error);
   }
 
   if (!issues) {

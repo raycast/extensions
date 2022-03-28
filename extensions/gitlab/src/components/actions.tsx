@@ -1,12 +1,12 @@
-import { ImageLike, KeyboardShortcut, OpenInBrowserAction, popToRoot } from "@raycast/api";
+import { Action, Image, Keyboard, popToRoot } from "@raycast/api";
 import React from "react";
 import { getPreferPopToRootPreference, getPrimaryActionPreference, PrimaryAction } from "../common";
 
 export function GitLabOpenInBrowserAction(props: {
   url: string;
   title?: string | undefined;
-  shortcut?: KeyboardShortcut | undefined;
-  icon?: ImageLike;
+  shortcut?: Keyboard.Shortcut | undefined;
+  icon?: Image.ImageLike;
 }): JSX.Element {
   const afterOpen = async () => {
     if (getPreferPopToRootPreference()) {
@@ -14,7 +14,7 @@ export function GitLabOpenInBrowserAction(props: {
     }
   };
   return (
-    <OpenInBrowserAction
+    <Action.OpenInBrowser
       url={props.url}
       title={props.title}
       shortcut={props.shortcut}

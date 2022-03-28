@@ -1,4 +1,4 @@
-import { ActionPanel, List, Image, Color, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, List, Image, Color, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Project } from "../gitlabapi";
 import { gitlab } from "../common";
@@ -53,7 +53,7 @@ export function BranchList(props: { project: Project }) {
   const [query, setQuery] = useState<string>("");
   const { branches, error, isLoading } = useSearch(query, props.project);
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search branches", error);
+    showToast(Toast.Style.Failure, "Cannot search branches", error);
   }
 
   return (

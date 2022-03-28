@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Icon } from "@raycast/api";
+import { Action, Color, Icon } from "@raycast/api";
 
 export function RefreshJobsAction(props: { onRefreshJobs?: () => void }): JSX.Element {
   const handle = () => {
@@ -7,7 +7,7 @@ export function RefreshJobsAction(props: { onRefreshJobs?: () => void }): JSX.El
     }
   };
   return (
-    <ActionPanel.Item
+    <Action
       title="Refresh"
       icon={{ source: Icon.ArrowClockwise, tintColor: Color.PrimaryText }}
       shortcut={{ modifiers: ["cmd"], key: "r" }}

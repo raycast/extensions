@@ -1,4 +1,4 @@
-import { ActionPanel, Color, CopyToClipboardAction, Icon, List, PushAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Color, Action, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
 import { dataToProject, Group, Project } from "../gitlabapi";
@@ -38,7 +38,7 @@ export function GroupListItem(props: { group: any }): JSX.Element {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction
+            <Action.Push
               title="Show Group"
               shortcut={{ modifiers: ["cmd"], key: "n" }}
               target={<GroupList parentGroup={props.group} />}
@@ -47,28 +47,28 @@ export function GroupListItem(props: { group: any }): JSX.Element {
             <GitLabOpenInBrowserAction url={group.web_url} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CopyToClipboardAction title="Copy Group ID" content={group.id} />
+            <Action.CopyToClipboard title="Copy Group ID" content={group.id} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <PushAction
+            <Action.Push
               title="Epics"
               shortcut={{ modifiers: ["cmd"], key: "e" }}
               icon={{ source: GitLabIcons.epic, tintColor: Color.PrimaryText }}
               target={<EpicList group={props.group} />}
             />
-            <PushAction
+            <Action.Push
               title="Issues"
               shortcut={{ modifiers: ["cmd"], key: "i" }}
               icon={{ source: GitLabIcons.issue, tintColor: Color.PrimaryText }}
               target={<IssueList group={group} scope={IssueScope.all} state={IssueState.opened} />}
             />
-            <PushAction
+            <Action.Push
               title="Merge Requests"
               shortcut={{ modifiers: ["cmd"], key: "m" }}
               icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
               target={<MRList group={group} scope={MRScope.all} state={MRState.opened} />}
             />
-            <PushAction
+            <Action.Push
               title="Milestones"
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               icon={{ source: GitLabIcons.milestone, tintColor: Color.PrimaryText }}
@@ -103,7 +103,7 @@ export function GroupList(props: { parentGroup?: Group }): JSX.Element {
   const { groupsinfo, error, isLoading } = useSearch(searchText, parentGroupID);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Groups", error);
+    showToast(Toast.Style.Failure, "Cannot search Groups", error);
   }
 
   if (!groupsinfo) {

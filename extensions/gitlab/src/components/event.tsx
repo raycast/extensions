@@ -1,16 +1,4 @@
-import {
-  ActionPanel,
-  Color,
-  ColorLike,
-  CopyToClipboardAction,
-  Icon,
-  ImageLike,
-  ImageSource,
-  List,
-  PushAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
@@ -67,7 +55,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
     }
   );
   let title = "";
-  let icon: ImageLike | undefined;
+  let icon: Image.ImageLike | undefined;
   const action_name = ev.action_name;
   let actionElement: JSX.Element | undefined;
   switch (action_name) {
@@ -93,7 +81,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
         const an = capitalizeFirstLetter(ev.action_name);
         const pd = ev.push_data;
         if (pd) {
-          let iconColor: ColorLike | undefined;
+          let iconColor: Color.ColorLike | undefined;
           switch (ev.action_name) {
             case "pushed new":
               {
@@ -111,7 +99,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
               }
               break;
           }
-          let iconSource: ImageSource | undefined;
+          let iconSource: Image.Source | undefined;
           if (pd.ref_type === "branch") {
             const ref = pd.ref;
             title = `${an} branch ${ref}`;
@@ -185,7 +173,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
               actionElement = (
                 <DefaultActions
                   action={
-                    <PushAction
+                    <Action.Push
                       title="Open Issue"
                       icon={{ source: GitLabIcons.issue, tintColor: Color.PrimaryText }}
                       target={<IssueDetailFetch project={project} issueId={ev.target_iid} />}
@@ -228,7 +216,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
               actionElement = (
                 <DefaultActions
                   action={
-                    <PushAction
+                    <Action.Push
                       title="Open Merge Request"
                       icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
                       target={<MRDetailFetch project={project} mrId={ev.target_iid} />}
@@ -365,7 +353,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
               actionElement = (
                 <DefaultActions
                   action={
-                    <PushAction
+                    <Action.Push
                       title="Open Merge Request"
                       icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
                       target={<MRDetailFetch project={project} mrId={mrIId} />}
@@ -394,7 +382,7 @@ export function EventListItem(props: { event: Event }): JSX.Element {
   if (!title && !icon && !actionElement) {
     title = `Unknown event: ${action_name}`;
     icon = { source: Icon.QuestionMark, tintColor: Color.SecondaryText };
-    actionElement = <CopyToClipboardAction content={JSON.stringify(ev, null, 2)} title="Copy Event Details" />;
+    actionElement = <Action.CopyToClipboard content={JSON.stringify(ev, null, 2)} title="Copy Event Details" />;
   }
   const accessoryTitle = project && !error ? project.fullPath : undefined;
 
@@ -431,7 +419,7 @@ export function EventList(): JSX.Element {
     }
   );
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Events", error);
+    showToast(Toast.Style.Failure, "Cannot search Events", error);
   }
 
   if (!data) {

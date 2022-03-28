@@ -1,4 +1,4 @@
-import { getLocalStorageItem, ImageLike, ImageMask, setLocalStorageItem } from "@raycast/api";
+import { Image, LocalStorage } from "@raycast/api";
 import { Project } from "./gitlabapi";
 import { GitLabIcons } from "./icons";
 import * as fs from "fs/promises";
@@ -25,7 +25,7 @@ export function projectIconUrl(project: Project): string | undefined {
   return result;
 }
 
-export function projectIcon(project: Project): ImageLike {
+export function projectIcon(project: Project): Image.ImageLike {
   let result: string = GitLabIcons.project;
   // TODO check also namespace for icon
   if (project.avatar_url) {
@@ -33,7 +33,7 @@ export function projectIcon(project: Project): ImageLike {
   } else if (project.owner && project.owner.avatar_url) {
     result = project.owner.avatar_url;
   }
-  return { source: result, mask: ImageMask.Circle };
+  return { source: result, mask: Image.Mask.Circle };
 }
 
 export function toDateString(d: string): string {
@@ -54,7 +54,7 @@ export function currentSeconds(): number {
 
 export async function getCacheObject(key: string, seconds: number): Promise<any> {
   console.log(`get cache object ${key} from store`);
-  const cache = await getLocalStorageItem(key);
+  const cache = await LocalStorage.getItem(key);
   console.log("after local storage");
   console.log(cache);
   if (cache) {
@@ -79,7 +79,7 @@ export async function setCacheObject(key: string, payload: any): Promise<void> {
   console.log(cache_data);
   const text = JSON.stringify(cache_data);
   console.log(text.length);
-  await setLocalStorageItem(key, text);
+  await LocalStorage.setItem(key, text);
 }
 
 export async function fileExists(filename: string): Promise<boolean> {

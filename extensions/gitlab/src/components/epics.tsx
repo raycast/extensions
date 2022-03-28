@@ -1,4 +1,4 @@
-import { ActionPanel, Color, CopyToClipboardAction, Image, ImageMask, List, showToast, ToastStyle } from "@raycast/api";
+import { Action, ActionPanel, Color, Image, List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { useCache } from "../cache";
 import { gitlab } from "../common";
@@ -25,7 +25,7 @@ export function EpicListItem(props: { epic: any }) {
     <List.Item
       id={epic.id.toString()}
       title={epic.title}
-      accessoryIcon={{ source: epic.author.avatar_url || "", mask: ImageMask.Circle }}
+      accessoryIcon={{ source: epic.author.avatar_url || "", mask: Image.Mask.Circle }}
       icon={icon}
       actions={
         <ActionPanel>
@@ -34,7 +34,7 @@ export function EpicListItem(props: { epic: any }) {
             <CreateEpicTodoAction epic={epic} shortcut={{ modifiers: ["cmd"], key: "t" }} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CopyToClipboardAction title="Copy Epic ID" content={epic.id} />
+            <Action.CopyToClipboard title="Copy Epic ID" content={epic.id} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <ClearLocalCacheAction />
@@ -70,7 +70,7 @@ export function EpicList(props: { group: Group }) {
   );
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search epics", error);
+    showToast(Toast.Style.Failure, "Cannot search epics", error);
   }
 
   const navTitle = `Epics ${props.group.full_path}`;

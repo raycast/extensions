@@ -1,4 +1,4 @@
-import { ActionPanel, List, Icon, Image, Color, showToast, ToastStyle, ListSection, ListItem } from "@raycast/api";
+import { ActionPanel, List, Icon, Image, Color, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCIRefreshInterval, gitlab, gitlabgql } from "../common";
 import { gql } from "@apollo/client";
@@ -156,16 +156,16 @@ export function JobList(props: { projectFullPath: string; pipelineIID: string })
     refresh();
   }, getCIRefreshInterval());
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Pipelines", error);
+    showToast(Toast.Style.Failure, "Cannot search Pipelines", error);
   }
   return (
     <List isLoading={isLoading} navigationTitle="Jobs">
       {Object.keys(stages).map((stagekey) => (
-        <ListSection key={stagekey} title={stagekey}>
+        <List.Section key={stagekey} title={stagekey}>
           {stages[stagekey].map((job) => (
             <JobListItem job={job} projectFullPath={props.projectFullPath} onRefreshJobs={refresh} key={job.id} />
           ))}
-        </ListSection>
+        </List.Section>
       ))}
     </List>
   );
@@ -267,7 +267,7 @@ interface Commit {
 export function PipelineJobsListByCommit(props: { project: Project; sha: string }): JSX.Element {
   const { commit, isLoading, error } = useCommit(props.project.id, props.sha);
   if (error) {
-    showToast(ToastStyle.Failure, "Could not fetch Commit Details", error);
+    showToast(Toast.Style.Failure, "Could not fetch Commit Details", error);
   }
   if (isLoading || !commit) {
     return <List isLoading={isLoading} searchBarPlaceholder="Loading" />;
@@ -277,7 +277,7 @@ export function PipelineJobsListByCommit(props: { project: Project; sha: string 
     } else {
       return (
         <List>
-          <ListItem title="No piplelines attached" />
+          <List.Item title="No piplelines attached" />
         </List>
       );
     }

@@ -1,4 +1,4 @@
-import { ActionPanel, Color, CopyToClipboardAction, Detail, Icon, List, PushAction } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
 import { Label } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 
@@ -22,12 +22,12 @@ export function LabelListItem(props: { label: Label }): JSX.Element {
       accessoryTitle={accessoryTitle}
       actions={
         <ActionPanel>
-          <PushAction
+          <Action.Push
             title="Show Details"
             target={<LabelDetail label={l} />}
             icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
           />
-          <CopyToClipboardAction title="Copy Color" content={l.color} />
+          <Action.CopyToClipboard title="Copy Color" content={l.color} />
         </ActionPanel>
       }
     />

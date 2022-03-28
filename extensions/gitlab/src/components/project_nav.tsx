@@ -1,4 +1,4 @@
-import { ActionPanel, Color, ImageLike, KeyboardShortcut, List, PushAction } from "@raycast/api";
+import { Action, ActionPanel, Color, Image, Keyboard, List } from "@raycast/api";
 import { Project } from "../gitlabapi";
 import { gitlabgql } from "../common";
 import { ReactNode } from "react";
@@ -14,9 +14,9 @@ import { ProjectCommitList } from "./commits/list";
 
 export function ProjectNavMenuItem(props: {
   title: string;
-  shortcut?: KeyboardShortcut | undefined;
+  shortcut?: Keyboard.Shortcut | undefined;
   target: ReactNode;
-  icon?: ImageLike;
+  icon?: Image.ImageLike;
 }): JSX.Element {
   return (
     <List.Item
@@ -24,7 +24,7 @@ export function ProjectNavMenuItem(props: {
       icon={props.icon}
       actions={
         <ActionPanel>
-          <PushAction title="Open Menu" shortcut={props.shortcut} target={props.target} />
+          <Action.Push title="Open Menu" shortcut={props.shortcut} target={props.target} />
         </ActionPanel>
       }
     />
@@ -33,9 +33,9 @@ export function ProjectNavMenuItem(props: {
 
 export function ProjectNavMenuBrowserItem(props: {
   title: string;
-  shortcut?: KeyboardShortcut | undefined;
+  shortcut?: Keyboard.Shortcut | undefined;
   url: string;
-  icon?: ImageLike;
+  icon?: Image.ImageLike;
 }): JSX.Element {
   return (
     <List.Item

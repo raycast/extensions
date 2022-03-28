@@ -1,4 +1,4 @@
-import { ActionPanel, CopyToClipboardAction, ImageMask, List, showToast, ToastStyle } from "@raycast/api";
+import { Action, ActionPanel, Image, List, showToast, Toast } from "@raycast/api";
 import { User } from "../gitlabapi";
 import { gitlab } from "../common";
 import { useState, useEffect } from "react";
@@ -10,7 +10,7 @@ export function UserList(): JSX.Element {
   const { users, error, isLoading } = useSearch(searchText);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Merge Requests", error);
+    showToast(Toast.Style.Failure, "Cannot search Merge Requests", error);
   }
 
   if (!users) {
@@ -33,13 +33,13 @@ export function UserListItem(props: { user: User }): JSX.Element {
       id={user.id.toString()}
       title={user.name}
       subtitle={"#" + user.username}
-      icon={{ source: user.avatar_url, mask: ImageMask.Circle }}
+      icon={{ source: user.avatar_url, mask: Image.Mask.Circle }}
       actions={
         <ActionPanel>
           <GitLabOpenInBrowserAction url={user.web_url} />
-          <CopyToClipboardAction title="Copy User ID" content={user.id} />
-          <CopyToClipboardAction title="Copy Username" content={user.username} />
-          <CopyToClipboardAction title="Copy Name" content={user.name} />
+          <Action.CopyToClipboard title="Copy User ID" content={user.id} />
+          <Action.CopyToClipboard title="Copy Username" content={user.username} />
+          <Action.CopyToClipboard title="Copy Name" content={user.name} />
         </ActionPanel>
       }
     />

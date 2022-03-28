@@ -1,4 +1,4 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { gitlab } from "../common";
 import { Label, Project, searchData } from "../gitlabapi";
@@ -25,7 +25,7 @@ export function ProjectLabelList(props: { project: Project }): JSX.Element {
   );
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Project labels", error);
+    showToast(Toast.Style.Failure, "Cannot search Project labels", error);
   }
 
   if (!data) {
