@@ -67,7 +67,6 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
         <ActionPanel>
           <ActionPanel.Section>
             <Action.Push title="Show Details" target={<TaskDetail task={task} />} icon={Icon.Sidebar} />
-            <Action.OpenInBrowser url={task.url} />
           </ActionPanel.Section>
 
           <TaskActions task={task} />

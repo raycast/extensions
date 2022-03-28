@@ -103,7 +103,7 @@ export default function CreateTask() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create task" onSubmit={submit} icon={Icon.Plus} />
+          <Action.SubmitForm title="Create Task" onSubmit={submit} icon={Icon.Plus} />
         </ActionPanel>
       }
     >

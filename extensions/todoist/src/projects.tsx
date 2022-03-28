@@ -39,13 +39,23 @@ export default function Projects() {
           actions={
             <ActionPanel>
               <Action.Push icon={Icon.TextDocument} title="Show Details" target={<Project projectId={project.id} />} />
+
               <Action.OpenInBrowser url={project.url} />
-              <Action
-                title="Delete Project"
-                icon={Icon.Trash}
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                onAction={() => deleteProject(project.id)}
+
+              <Action.CopyToClipboard
+                title="Copy Project URL"
+                content={project.url}
+                shortcut={{ modifiers: ["cmd"], key: "," }}
               />
+
+              <ActionPanel.Section>
+                <Action
+                  title="Delete Project"
+                  icon={Icon.Trash}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  onAction={() => deleteProject(project.id)}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

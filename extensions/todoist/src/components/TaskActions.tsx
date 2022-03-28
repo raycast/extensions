@@ -6,6 +6,7 @@ import { SWRKeys } from "../types";
 import { getAPIDate, getToday } from "../utils";
 import { priorities } from "../constants";
 import { todoist, handleError } from "../api";
+import TaskEdit from "./TaskEdit";
 
 const schedules = [
   { name: "Today", amount: 0 },
@@ -59,19 +60,22 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
   return (
     <>
       <ActionPanel.Section>
+        <Action.Push
+          title="Edit Task"
+          icon={Icon.Pencil}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          target={<TaskEdit task={task} />}
+        />
+
         <Action
           id="completeTask"
           title="Complete Task"
           icon={Icon.Checkmark}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={{ modifiers: ["cmd"], key: "enter" }}
           onAction={() => completeTask(task)}
         />
 
-        <ActionPanel.Submenu
-          icon={Icon.Calendar}
-          title="Schedule..."
-          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-        >
+        <ActionPanel.Submenu icon={Icon.Calendar} title="Schedule" shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
           {schedules.map(({ name, amount }) => (
             <Action
               key={name}
@@ -85,7 +89,7 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
         <ActionPanel.Submenu
           icon={Icon.LevelMeter}
           shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-          title="Change priority..."
+          title="Change Priority"
         >
           {priorities.map(({ value, name, color }) => (
             <Action
@@ -97,6 +101,12 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
             />
           ))}
         </ActionPanel.Submenu>
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action.OpenInBrowser url={task.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+
+        <Action.CopyToClipboard title="Copy Task URL" content={task.url} shortcut={{ modifiers: ["cmd"], key: "," }} />
       </ActionPanel.Section>
 
       <ActionPanel.Section>
