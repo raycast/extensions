@@ -6,7 +6,9 @@ Bring Todoist to Raycast so that you can manage your tasks easily. No more conte
 
 ## Getting started
 
-Before using the command, you need to retrieve your Todoist token located in the [integration settings view](https://todoist.com/prefs/integrations)
+Before using the command, you need to retrieve your Todoist token located in the [integration settings view](https://todoist.com/app/settings/integrations) under the section called **API token**.
+
+Then, copy it and paste it either in the extension's Welcome screen or in the extensionss preferences under **Todoist Token**.
 
 ## Limitations
 
