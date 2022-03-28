@@ -1,24 +1,7 @@
 import { ActionPanel, Detail, List, useNavigation } from "@raycast/api";
 import { useState } from "react";
-import markdownReference from "./reference";
-import escape from "./markdown-escape";
-
-interface ReferenceType {
-  name: string;
-  description: string;
-  examples: Example[];
-  additional_examples: AdditionalExample[];
-}
-
-interface Example {
-  markdown: string;
-  html: string;
-}
-
-interface AdditionalExample extends Example {
-  name: string;
-  description: string;
-}
+import markdownReference from "./markdownReference";
+import Reference, { ReferenceType } from "./Reference";
 
 const MarkdownReference = () => {
   const [results, setResults] = useState<ReferenceType[]>(markdownReference);
@@ -65,43 +48,6 @@ const MarkdownReference = () => {
           />
         ))}
     </List>
-  );
-};
-
-const Reference = (reference: ReferenceType) => {
-  const { pop } = useNavigation();
-
-  let mdString = `
-   # ${reference.name}
-   ---
-   ${reference.description}
-   
-   ## Examples
-   ---
-  `;
-
-  reference.examples.map((example) => {
-    mdString += `\n${escape(example.markdown)}\n`;
-  });
-
-  if (reference.additional_examples.length) {
-    mdString += ` ## Additional Examples`;
-    reference.additional_examples.map((additionalExample) => {
-      mdString += `\n ## ${additionalExample.name}\n`;
-      mdString += `${additionalExample.description}\n`;
-      mdString += `\n${escape(additionalExample.markdown)}\n`;
-    });
-  }
-
-  return (
-    <Detail
-      markdown={mdString}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Item title="Back" onAction={pop} />
-        </ActionPanel>
-      }
-    />
   );
 };
 
