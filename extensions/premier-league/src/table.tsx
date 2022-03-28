@@ -9,7 +9,7 @@ export default function GetTables() {
   const [tables, setTables] = useState<Table[]>([]);
   const [season, setSeason] = useState<string>(seasons[0].value);
   const [loading, setLoading] = useState<boolean>(false);
-  const [showDetails, setShowDetails] = useState<boolean>(false);
+  const [showStats, setShowStats] = useState<boolean>(false);
 
   useEffect(() => {
     setTables([]);
@@ -26,7 +26,6 @@ export default function GetTables() {
 
     const dataObject = [
       { h1: team.name },
-      { h2: "Overview" },
       { p: ground.name ? `Stadium: ${ground.name}, **${ground.city}**` : "" },
       { p: ground.capacity ? `Capacity: ${ground.capacity}` : "" },
       { h2: "Stats" },
@@ -71,7 +70,7 @@ export default function GetTables() {
       throttle
       searchBarAccessory={<SeasonDropdown onSelect={setSeason} />}
       isLoading={loading}
-      isShowingDetail={showDetails}
+      isShowingDetail={showStats}
     >
       {tables.map((table) => {
         return (
@@ -103,7 +102,7 @@ export default function GetTables() {
                 };
               }
 
-              const props: Partial<List.Item.Props> = showDetails
+              const props: Partial<List.Item.Props> = showStats
                 ? {
                     accessories: [
                       { text: overall.points.toString() },
@@ -121,7 +120,7 @@ export default function GetTables() {
                     ],
                   };
 
-              if (!showDetails && next) {
+              if (!showStats && next) {
                 const nextTeam =
                   ground.id === next.ground.id ? next.teams[1] : next.teams[0];
 
@@ -145,9 +144,9 @@ export default function GetTables() {
                   actions={
                     <ActionPanel>
                       <Action
-                        title={showDetails ? "Hide Details" : "Show Details"}
+                        title={showStats ? "Hide Stats" : "Show Stats"}
                         icon={Icon.Sidebar}
-                        onAction={() => setShowDetails(!showDetails)}
+                        onAction={() => setShowStats(!showStats)}
                       />
                       <Action.OpenInBrowser
                         title="Visit Club Page"

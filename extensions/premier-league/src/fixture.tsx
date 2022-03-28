@@ -58,20 +58,19 @@ export default function Fixture() {
               const kickoff = label
                 ? format(
                     parse(label, "EEE d MMM yyyy, HH:mm XXX", new Date()),
-                    "EEE, dd MMM yyyy HH:mm"
+                    "HH:mm"
                   )
                 : "TBC";
 
               return (
                 <List.Item
                   key={match.id}
-                  title={`${match.teams[0].team.name} - ${match.teams[1].team.name}`}
+                  title={kickoff}
+                  subtitle={`${match.teams[0].team.name} - ${match.teams[1].team.name}`}
+                  icon={Icon.Clock}
                   accessories={[
-                    {
-                      text: `${match.ground.name}, ${match.ground.city}`,
-                      icon: "stadium.svg",
-                    },
-                    { text: kickoff, icon: Icon.Clock },
+                    { text: `${match.ground.name}, ${match.ground.city}` },
+                    { icon: "stadium.svg" },
                   ]}
                   actions={
                     <ActionPanel>
