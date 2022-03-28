@@ -78,14 +78,15 @@ const Reference = (reference: ReferenceType) => {
    ${reference.description}
    
    ## Examples
+   ---
   `;
 
   reference.examples.map((example) => {
     mdString += `\n${escape(example.markdown)}\n`;
   });
 
-  if (reference.additional_examples) {
-    mdString += `# Additional Examples`;
+  if (reference.additional_examples.length) {
+    mdString += ` ## Additional Examples`;
     reference.additional_examples.map((additionalExample) => {
       mdString += `\n ## ${additionalExample.name}\n`;
       mdString += `${additionalExample.description}\n`;
