@@ -1,6 +1,7 @@
 const replacements: Array<Array<RegExp | string>> = [
   [/\*/g, "\\*", "asterisks"],
-  [/#/g, "\\#", "number signs"],
+  [/#/g, "\\#", "plus sign"],
+  [/\+/g, "\\+", "number signs"],
   [/\//g, "\\/", "slashes"],
   [/\(/g, "\\(", "parentheses"],
   [/\)/g, "\\)", "parentheses"],
@@ -10,7 +11,7 @@ const replacements: Array<Array<RegExp | string>> = [
   [/>/g, "&gt;", "angle brackets"],
   [/_/g, "\\_", "underscores"],
   [/=/g, "\n\\=", "equals sign"],
-  [/-/g, "\n\\-", "hyphen"],
+  [/-/g, "\n\\-", "hyphen"]
 ];
 
 export default function (str: string, skips: (string | RegExp)[] = []) {
