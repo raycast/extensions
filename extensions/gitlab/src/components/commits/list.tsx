@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Image, List, showToast, Toast } from "@raycast/api";
+import { useState } from "react";
 import urljoin from "url-join";
 import { useCache } from "../../cache";
 import { gitlab } from "../../common";
@@ -7,6 +8,7 @@ import { GitLabIcons } from "../../icons";
 import { GitLabOpenInBrowserAction } from "../actions";
 import { Event } from "../event";
 import { getCIJobStatusIcon, PipelineJobsListByCommit } from "../jobs";
+import { MyProjectsDropdown } from "../project";
 import { CommitListItem } from "./item";
 import { useCommitStatus } from "./utils";
 
@@ -75,6 +77,7 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
 }
 
 export function RecentCommitsList(): JSX.Element {
+  const [project, setProject] = useState<Project>();
   const { data, error, isLoading } = useCache<Event[]>(
     "events_pushed",
     async (): Promise<Event[]> => {
@@ -96,9 +99,11 @@ export function RecentCommitsList(): JSX.Element {
   if (isLoading === undefined) {
     return <List isLoading={true} searchBarPlaceholder="" />;
   }
+  const commits = project ? data?.filter((e) => e.project_id === project.id) : data;
+
   return (
-    <List isLoading={isLoading}>
-      {data?.map((e) => (
+    <List isLoading={isLoading} searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}>
+      {commits?.map((e) => (
         <EventCommitListItem event={e} key={`${e.target_id}${e.project_id}`} />
       ))}
     </List>
