@@ -11,10 +11,10 @@ const replacements: Array<Array<RegExp | string>> = [
   [/>/g, "&gt;", "angle brackets"],
   [/_/g, "\\_", "underscores"],
   [/=/g, "\n\\=", "equals sign"],
-  [/-/g, "\n\\-", "hyphen"]
+  [/-/g, "\n\\-", "hyphen"],
 ];
 
-export default function escapeMd (str: string, skips: (string | RegExp)[] = []) {
+export default function escapeMd(str: string, skips: (string | RegExp)[] = []) {
   return replacements.reduce((str, replacement) => {
     const name: RegExp | string = replacement[2];
     return name && skips.indexOf(name) !== -1 ? str : str.replace(replacement[0], replacement[1].toString());

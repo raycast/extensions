@@ -287,10 +287,10 @@ const markdownReference = [
     examples: [
       {
         markdown: "- [x] Write the press release\n- [ ] Update the website\n- [ ] Contact the media",
-        html: ""
-      }
+        html: "",
+      },
     ],
-    additional_examples: []
+    additional_examples: [],
   },
   {
     name: "Unordered Lists",
