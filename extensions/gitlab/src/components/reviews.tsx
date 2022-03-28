@@ -27,7 +27,6 @@ export function ReviewList(): JSX.Element {
     <List
       searchBarPlaceholder="Filter Reviews by name..."
       isLoading={isLoading}
-      throttle
       searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
     >
       {mrs?.map((mr) => (
