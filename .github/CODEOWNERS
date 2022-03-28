@@ -118,6 +118,7 @@
 /extensions/homeassistant                            @tonka3000 @altrdev
 /extensions/http-status-codes                        @AlexVanderbist
 /extensions/huggingcast                              @ragnorc
+/extensions/iata-code-decoder                        @timrogers
 /extensions/imdb                                     @ryan-exe
 /extensions/inertiajs-documentation                  @danyelkeddah
 /extensions/jetbrains                                @gdsmith
