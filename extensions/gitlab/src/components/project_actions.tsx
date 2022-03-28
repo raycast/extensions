@@ -1,4 +1,5 @@
 import {
+  Action,
   ActionPanel,
   ActionPanelItem,
   closeMainWindow,
@@ -14,12 +15,17 @@ import {
 } from "@raycast/api";
 import * as open from "open";
 import React from "react";
-import { getPrimaryActionPreference, PrimaryAction } from "../common";
+import { getPrimaryActionPreference, gitlabgql, PrimaryAction } from "../common";
 import { Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { getErrorMessage } from "../utils";
 import { getVSCodeAppPath } from "../vscode";
 import { GitLabOpenInBrowserAction } from "./actions";
+import { BranchList } from "./branch";
+import { IssueList, IssueScope } from "./issues";
+import { MilestoneList } from "./milestones";
+import { MRList, MRScope } from "./mr";
+import { PipelineList } from "./pipelines";
 import { ProjectLabelList } from "./project_label";
 import { ProjectNavMenusList } from "./project_nav";
 
@@ -142,4 +148,97 @@ export function ProjectDefaultActions(props: { project: Project }): JSX.Element 
       </React.Fragment>
     );
   }
+}
+
+export function CopyProjectIDToClipboardAction(props: { project: Project }): JSX.Element {
+  return <Action.CopyToClipboard title="Copy Project ID" content={props.project.id} />;
+}
+
+export function OpenProjectIssuesPushAction(props: { project: Project }): JSX.Element {
+  return (
+    <Action.Push
+      title="Issues"
+      shortcut={{ modifiers: ["cmd"], key: "i" }}
+      icon={{ source: GitLabIcons.issue, tintColor: Color.PrimaryText }}
+      target={<IssueList scope={IssueScope.all} project={props.project} />}
+    />
+  );
+}
+
+export function OpenProjectMergeRequestsPushAction(props: { project: Project }): JSX.Element {
+  return (
+    <Action.Push
+      title="Merge Requests"
+      shortcut={{ modifiers: ["cmd"], key: "m" }}
+      icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
+      target={<MRList scope={MRScope.all} project={props.project} />}
+    />
+  );
+}
+
+export function OpenProjectBranchesPushAction(props: { project: Project }): JSX.Element {
+  return (
+    <Action.Push
+      title="Branches"
+      shortcut={{ modifiers: ["cmd"], key: "b" }}
+      icon={{ source: GitLabIcons.branches, tintColor: Color.PrimaryText }}
+      target={<BranchList project={props.project} />}
+    />
+  );
+}
+
+export function OpenProjectPipelinesPushAction(props: { project: Project }): JSX.Element {
+  return (
+    <Action.Push
+      title="Pipelines"
+      shortcut={{ modifiers: ["cmd"], key: "p" }}
+      icon={{ source: GitLabIcons.ci, tintColor: Color.PrimaryText }}
+      target={<PipelineList projectFullPath={props.project.fullPath} />}
+    />
+  );
+}
+
+export function OpenProjectMilestonesPushAction(props: { project: Project }): JSX.Element {
+  return (
+    <Action.Push
+      title="Milestones"
+      shortcut={{ modifiers: ["cmd"], key: "s" }}
+      icon={{ source: GitLabIcons.milestone, tintColor: Color.PrimaryText }}
+      target={<MilestoneList project={props.project} />}
+    />
+  );
+}
+
+function webUrl(project: Project, partial: string) {
+  return gitlabgql.urlJoin(`${project.fullPath}/${partial}`);
+}
+
+export function OpenProjectLabelsInBrowserAction(props: { project: Project }): JSX.Element {
+  return (
+    <GitLabOpenInBrowserAction
+      title="Labels"
+      icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
+      url={webUrl(props.project, "-/labels")}
+    />
+  );
+}
+
+export function OpenProjectSecurityComplianceInBrowserAction(props: { project: Project }): JSX.Element {
+  return (
+    <GitLabOpenInBrowserAction
+      title="Security & Compliance"
+      icon={{ source: GitLabIcons.security, tintColor: Color.PrimaryText }}
+      url={webUrl(props.project, "-/security/discover")}
+    />
+  );
+}
+
+export function OpenProjectSettingsInBrowserAction(props: { project: Project }): JSX.Element {
+  return (
+    <GitLabOpenInBrowserAction
+      title="Settings"
+      icon={{ source: GitLabIcons.settings, tintColor: Color.PrimaryText }}
+      url={webUrl(props.project, "edit")}
+    />
+  );
 }

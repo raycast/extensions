@@ -1,22 +1,24 @@
-import { ActionPanel, CopyToClipboardAction, List, showToast, ToastStyle, PushAction, Color } from "@raycast/api";
+import { ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { gitlab, gitlabgql } from "../common";
 import { Project } from "../gitlabapi";
 import { getErrorMessage, projectIcon } from "../utils";
-import { PipelineList } from "./pipelines";
-import { BranchList } from "./branch";
-import { MilestoneList } from "./milestones";
-import { MRList, MRScope } from "./mr";
-import { ProjectNavMenusList } from "./project_nav";
-import { IssueList, IssueScope } from "./issues";
-import { CloneProjectInGitPod, CloneProjectInVSCodeAction, ShowProjectLabels } from "./project_actions";
-import { GitLabIcons } from "../icons";
+import {
+  CloneProjectInGitPod,
+  CloneProjectInVSCodeAction,
+  CopyProjectIDToClipboardAction,
+  OpenProjectBranchesPushAction,
+  OpenProjectIssuesPushAction,
+  OpenProjectLabelsInBrowserAction,
+  OpenProjectMergeRequestsPushAction,
+  OpenProjectMilestonesPushAction,
+  OpenProjectPipelinesPushAction,
+  OpenProjectSecurityComplianceInBrowserAction,
+  OpenProjectSettingsInBrowserAction,
+  ProjectDefaultActions,
+  ShowProjectLabels,
+} from "./project_actions";
 import { ClearLocalCacheAction } from "./cache_actions";
-import { GitLabOpenInBrowserAction } from "./actions";
-
-function webUrl(project: Project, partial: string) {
-  return gitlabgql.urlJoin(`${project.fullPath}/${partial}`);
-}
 
 export function ProjectListItem(props: { project: Project }): JSX.Element {
   const project = props.project;
@@ -29,65 +31,23 @@ export function ProjectListItem(props: { project: Project }): JSX.Element {
       actions={
         <ActionPanel>
           <ActionPanel.Section title={project.name_with_namespace}>
-            <GitLabOpenInBrowserAction url={project.web_url} />
-            <PushAction
-              title="Explore"
-              icon={{ source: GitLabIcons.explorer, tintColor: Color.PrimaryText }}
-              target={<ProjectNavMenusList project={project} />}
-            />
+            <ProjectDefaultActions project={project} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CopyToClipboardAction title="Copy Project ID" content={project.id} />
+            <CopyProjectIDToClipboardAction project={project} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <PushAction
-              title="Issues"
-              shortcut={{ modifiers: ["cmd"], key: "i" }}
-              icon={{ source: GitLabIcons.issue, tintColor: Color.PrimaryText }}
-              target={<IssueList scope={IssueScope.all} project={project} />}
-            />
-            <PushAction
-              title="Merge Requests"
-              shortcut={{ modifiers: ["cmd"], key: "m" }}
-              icon={{ source: GitLabIcons.merge_request, tintColor: Color.PrimaryText }}
-              target={<MRList scope={MRScope.all} project={project} />}
-            />
-            <PushAction
-              title="Branches"
-              shortcut={{ modifiers: ["cmd"], key: "b" }}
-              icon={{ source: GitLabIcons.branches, tintColor: Color.PrimaryText }}
-              target={<BranchList project={project} />}
-            />
-            <PushAction
-              title="Pipelines"
-              shortcut={{ modifiers: ["cmd"], key: "p" }}
-              icon={{ source: GitLabIcons.ci, tintColor: Color.PrimaryText }}
-              target={<PipelineList projectFullPath={project.fullPath} />}
-            />
-            <PushAction
-              title="Milestones"
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
-              icon={{ source: GitLabIcons.milestone, tintColor: Color.PrimaryText }}
-              target={<MilestoneList project={project} />}
-            />
+            <OpenProjectIssuesPushAction project={project} />
+            <OpenProjectMergeRequestsPushAction project={project} />
+            <OpenProjectBranchesPushAction project={project} />
+            <OpenProjectPipelinesPushAction project={project} />
+            <OpenProjectMilestonesPushAction project={project} />
             <ShowProjectLabels project={props.project} shortcut={{ modifiers: ["cmd"], key: "l" }} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Open in Browser">
-            <GitLabOpenInBrowserAction
-              title="Labels"
-              icon={{ source: GitLabIcons.labels, tintColor: Color.PrimaryText }}
-              url={webUrl(props.project, "-/labels")}
-            />
-            <GitLabOpenInBrowserAction
-              title="Security & Compliance"
-              icon={{ source: GitLabIcons.security, tintColor: Color.PrimaryText }}
-              url={webUrl(props.project, "-/security/discover")}
-            />
-            <GitLabOpenInBrowserAction
-              title="Settings"
-              icon={{ source: GitLabIcons.settings, tintColor: Color.PrimaryText }}
-              url={webUrl(props.project, "edit")}
-            />
+            <OpenProjectLabelsInBrowserAction project={project} />
+            <OpenProjectSecurityComplianceInBrowserAction project={project} />
+            <OpenProjectSettingsInBrowserAction project={project} />
           </ActionPanel.Section>
           <ActionPanel.Section title="IDE">
             <CloneProjectInVSCodeAction shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} project={project} />
@@ -107,7 +67,7 @@ export function ProjectSearchList(): JSX.Element {
   const { projects, error, isLoading } = useSearch(searchText);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Project", error);
+    showToast(Toast.Style.Failure, "Cannot search Project", error);
   }
 
   if (!projects) {
