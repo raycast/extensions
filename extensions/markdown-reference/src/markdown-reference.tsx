@@ -28,9 +28,8 @@ const MarkdownReference = () => {
   const search = (query: string) => {
     if (query !== "") {
       const searchResults = markdownReference.filter((reference: ReferenceType) => {
-        const refTitle = reference.name.toLowerCase();
-
-        return refTitle.startsWith(query);
+        let refTitle = reference.name.toLowerCase().split(" ");
+        return refTitle[0].startsWith(query) || (refTitle.length > 1 && refTitle[1].startsWith(query));
       });
 
       setResults(searchResults);
