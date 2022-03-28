@@ -97,7 +97,7 @@ export default function NewFileWithName(props: { fileType: FileType }) {
       </Form.Dropdown>
       <Form.TextField
         id={"Filename"}
-        title={"Filename"}
+        title={"File Name"}
         placeholder={"File name without extension (Optional)"}
         onChange={(newValue) => {
           setFileName(newValue + fileType.extension);
@@ -106,7 +106,7 @@ export default function NewFileWithName(props: { fileType: FileType }) {
       {fileType.simpleContent && (
         <Form.TextArea
           id={"FileContent"}
-          title={"FileContent"}
+          title={"File Content"}
           placeholder={"File content (Optional)"}
           onChange={(newValue) => {
             setFileContent(newValue);
