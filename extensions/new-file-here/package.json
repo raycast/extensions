@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "new-file-here",
+  "title": "New File Here",
+  "description": "Create a new file in the current Finder window or on the desktop.",
+  "icon": "new-file-here.png",
+  "author": "koinzhang",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "show_document",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show File Template",
+      "description": "Show file templates for document types.",
+      "default": true,
+      "label": "Document"
+    },
+    {
+      "name": "show_code",
+      "type": "checkbox",
+      "required": false,
+      "description": "Show file templates for code types.",
+      "default": true,
+      "label": "Code"
+    },
+    {
+      "name": "show_script",
+      "type": "checkbox",
+      "required": false,
+      "description": "Show file templates for script types.",
+      "default": true,
+      "label": "Script"
+    }
+  ],
+  "commands": [
+    {
+      "name": "new-file-here",
+      "title": "New File Here",
+      "description": "Create a new file in the current Finder window or on the desktop.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.31.0",
+    "run-applescript": "^6.0.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
