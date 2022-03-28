@@ -7,7 +7,7 @@
 - Website domain
 
 ## [Copy Username] - 2022-03-24
-- Add `Paste Password` action
+- Add `Copy Username` action with shortcut
 
 ## [Password Generation] - 2022-03-14
 - Add `Generate Password` command
