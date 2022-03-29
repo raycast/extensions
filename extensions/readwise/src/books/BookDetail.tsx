@@ -11,10 +11,13 @@ export const BookDetail = ({ item }: { item: Book }) => {
           <Action.OpenInBrowser title="Browse Highlights" url={item.highlights_url} />
         </ActionPanel>
       }
-      navigationTitle={"Highlight"}
+      navigationTitle={"Source Detail"}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Author" text={item.author} />
+          <Detail.Metadata.Label title="Category" text={item.category} />
+          <Detail.Metadata.Label title="Source" text={item.source} />
+
           <Detail.Metadata.Label
             title="Last Highlighted At"
             text={formatDate(new Date(item.last_highlight_at), "MMMM dd, yyyy hh:mm")}
@@ -27,6 +30,7 @@ export const BookDetail = ({ item }: { item: Book }) => {
               ))}
             </Detail.Metadata.TagList>
           )}
+
           <Detail.Metadata.Link title="Highlights" target={item.highlights_url} text="Link" />
           <Detail.Metadata.Label title="Source" text={item.source} />
           {item.source_url && <Detail.Metadata.Link title="Source URL" target={item.source_url} text="Link" />}
