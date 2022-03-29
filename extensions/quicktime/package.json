@@ -10,7 +10,7 @@
     {
       "name": "start-screen-recording",
       "title": "Start Screen Recording",
-      "subtitle": "QuickTime Player",
+      "subtitle": "QuickTime",
       "description": "This command lets your start screen recording using QuickTime player.",
       "mode": "no-view"
     },
