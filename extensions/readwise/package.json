@@ -73,10 +73,10 @@
       "type": "textfield",
       "required": false,
       "title": "Page Size",
-      "description": "Define how many results you want to get per default (default is 100, max is 1000)",
+      "description": "Define how many results you want to get per default (default is 500, max is 1000)",
       "link": "https://readwise.io/api_deets",
       "placeholder": "Enter the page size value",
-      "default": "100"
+      "default": "500"
     }
   ],
   "dependencies": {
