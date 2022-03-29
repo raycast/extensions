@@ -18,7 +18,8 @@
   "commands": [
     {
       "name": "view-icons",
-      "title": "View Icons",
+      "title": "Search Icons",
+      "subtitle": "Iconify",
       "description": "View available icons",
       "mode": "view"
     }
