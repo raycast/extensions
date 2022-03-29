@@ -1,5 +1,7 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
 import formatDate from "date-fns/format";
+
+import { getFormatedDateString } from "../utils";
 import { Book } from "./types";
 
 export const BookDetail = ({ item }: { item: Book }) => {
@@ -18,11 +20,8 @@ export const BookDetail = ({ item }: { item: Book }) => {
           <Detail.Metadata.Label title="Category" text={item.category} />
           <Detail.Metadata.Label title="Source" text={item.source} />
 
-          <Detail.Metadata.Label
-            title="Last Highlighted At"
-            text={formatDate(new Date(item.last_highlight_at), "MMMM dd, yyyy hh:mm")}
-          />
-          <Detail.Metadata.Label title="Updated At" text={formatDate(new Date(item.updated), "MMMM dd, yyyy hh:mm")} />
+          <Detail.Metadata.Label title="Last Highlighted At" text={getFormatedDateString(item.last_highlight_at)} />
+          <Detail.Metadata.Label title="Updated At" text={getFormatedDateString(item.updated)} />
           {item.tags.length > 0 && (
             <Detail.Metadata.TagList title="Tag">
               {item.tags.map((tag) => (

@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Detail } from "@raycast/api";
-import formatDate from "date-fns/format";
 
 import { useBook } from "../books/useBook";
+import { getFormatedDateString, joinStringsWithDelimiter } from "../utils";
 
 export const HighlightDetail = ({ item }: { item: Highlight }) => {
   const { data, loading } = useBook(item.book_id);
@@ -31,11 +31,8 @@ export const HighlightDetail = ({ item }: { item: Highlight }) => {
           <Detail.Metadata.Separator />
 
           {/* HIGHLIGHT DETAILS */}
-          <Detail.Metadata.Label
-            title="Highlighted At"
-            text={formatDate(new Date(item.highlighted_at), "MMMM dd, yyyy hh:mm")}
-          />
-          <Detail.Metadata.Label title="Updated At" text={formatDate(new Date(item.updated), "MMMM dd, yyyy hh:mm")} />
+          <Detail.Metadata.Label title="Highlighted At" text={getFormatedDateString(item.highlighted_at)} />
+          <Detail.Metadata.Label title="Updated At" text={getFormatedDateString(item.updated)} />
           {item.tags.length > 0 && (
             <Detail.Metadata.TagList title="Tag">
               {item.tags.map((tag) => (
@@ -53,7 +50,10 @@ export const HighlightDetail = ({ item }: { item: Highlight }) => {
           <Detail.Metadata.Separator />
         </Detail.Metadata>
       }
-      markdown={[`## Hightlight\n${item.text}`, item.note && `## Notes\n${item.note}`].filter(Boolean).join("\n\n")}
+      markdown={joinStringsWithDelimiter(
+        [`## Hightlight\n${item.text}`, item.note && `## Notes\n${item.note}`],
+        "\n\n"
+      )}
     />
   );
 };
