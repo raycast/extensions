@@ -49,6 +49,13 @@
         "podcasts"
       ],
       "mode": "view"
+    },
+    {
+      "name": "tags",
+      "title": "Browse Highlight Tags",
+      "subtitle": "Browser your Readwise Highlight Tags",
+      "description": "Browser your Readwise Highlight Tags",
+      "mode": "view"
     }
   ],
   "preferences": [
