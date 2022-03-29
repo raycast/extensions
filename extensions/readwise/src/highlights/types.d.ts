@@ -22,7 +22,7 @@ interface Highlight {
   tags: Tag[];
 }
 
-interface HighlightsRequest {
+interface HighlightsResponse {
   count: number;
   next: string;
   previous: null;

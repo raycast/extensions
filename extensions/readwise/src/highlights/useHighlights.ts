@@ -1,24 +1,13 @@
-import { useState } from "react";
-import useSWR from "swr";
 import queryString from "query-string";
 
-import { fetchReadwise } from "../api";
-import { useHandleError } from "../hooks/useHandleError";
-import { getPreferences } from "../preferences";
-
-const { pageSize } = getPreferences();
+import { useListApi } from "../api/useApi";
 
 export function useHighlights() {
-  const [params, setParams] = useState<HighlightParameters>({
-    page_size: pageSize,
-  });
-
-  const { data, error, isValidating } = useSWR<HighlightsRequest, HTTPError>(["/v2/highlights", params], fetchReadwise);
-  useHandleError(error);
+  const { data, loading, setParams } = useListApi<HighlightsResponse, HighlightParameters>("/v2/highlights");
 
   return {
     data,
-    loading: (!data && !error) || isValidating,
+    loading,
     refetch: async (pageUrl: string) => {
       setParams(queryString.parse(new URL(pageUrl).search));
     },

@@ -1,15 +1,11 @@
-import useSWR from "swr";
-
-import { useHandleError } from "../hooks/useHandleError";
-import { fetchReadwise } from "../api";
+import { useDetailApi } from "../api/useApi";
 import { Book } from "./types";
 
 export function useBook(bookId: number) {
-  const { data, error, isValidating } = useSWR<Book, HTTPError>(`/v2/books/${bookId}`, fetchReadwise);
-  useHandleError(error);
+  const { data, loading } = useDetailApi<Book>(`/v2/books/${bookId}`);
 
   return {
     data,
-    loading: (!data && !error) || isValidating,
+    loading,
   };
 }
