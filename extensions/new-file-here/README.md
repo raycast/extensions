@@ -7,7 +7,7 @@
 - **New File with Name**
   - Create a new file wih name and content in the current Finder window or on the desktop.
 
-⚠️**Caution**: It will overwrite the file with the same name
+⚠️**Caution**: This extension does not create a file when a file with the same name exists.
 
 ------
 

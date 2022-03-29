@@ -2,19 +2,20 @@ import fs from "fs";
 import * as XLSX from "xlsx";
 import { Action, ActionPanel, Icon, List, open, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect } from "react";
-import { getFinderPath, preferences } from "./utils";
+import { checkFileExists, getFinderPath, preferences } from "./utils";
 import { codeFileTypes, documentFileTypes, FileType, scriptFileTypes } from "./file-type";
 import { runAppleScript } from "run-applescript";
 import NewFileWithName from "./new-file-with-name";
 
 export default function main() {
   const preference = preferences();
+
   useEffect(() => {
-    async function _fetchBuildInShortcut() {
+    async function _initRunAppleScript() {
       await runAppleScript("");
     }
 
-    _fetchBuildInShortcut().then();
+    _initRunAppleScript().then();
   }, []);
 
   return (
@@ -100,20 +101,22 @@ export async function createNewFile(
   fileName = createFileName(fileType),
   fileContent = ""
 ) {
+  const isExist = await checkFileExists(fileName);
   const filePath = path + fileName;
-  if (fileType.name === "Excel") {
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet([]);
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, filePath);
-  } else {
-    fs.writeFileSync(filePath, fileContent);
+  if (!isExist) {
+    if (fileType.name === "Excel") {
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet([]);
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+      XLSX.writeFile(workbook, filePath);
+    } else {
+      fs.writeFileSync(filePath, fileContent);
+    }
   }
 
-  //show toast
   const options: Toast.Options = {
-    style: Toast.Style.Success,
-    title: "Create File Success",
+    style: isExist ? Toast.Style.Failure : Toast.Style.Success,
+    title: isExist ? "File already Exists" : "Create File Success",
     message: "Click to open file",
     primaryAction: {
       title: "Open File",

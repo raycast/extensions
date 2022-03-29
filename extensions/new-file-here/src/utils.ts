@@ -29,7 +29,32 @@ export const getFinderPath = async () => {
   try {
     return await runAppleScript(scriptFinderPath);
   } catch (e) {
-    console.debug(String(e));
+    console.log(String(e));
     return "Not running";
   }
+};
+
+const scriptExistsFile = (fileName: string) => `
+tell application "Finder"
+    set folderPath  to insertion location as alias
+    set fileName to ("${fileName}")
+    if exists file  (folderPath & fileName as text) then
+        return true
+    else 
+        return false
+    end if
+end tell
+`;
+
+export const checkFileExists = async (fileName: string) => {
+  try {
+    return stringToBoolean(await runAppleScript(scriptExistsFile(fileName)));
+  } catch (e) {
+    console.log(String(e));
+    return false;
+  }
+};
+
+const stringToBoolean = (string: string) => {
+  return /^true$/i.test(string);
 };

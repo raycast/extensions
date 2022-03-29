@@ -13,11 +13,11 @@ export default function NewFileWithName(props: { fileType: FileType }) {
   const [fileContent, setFileContent] = useState<string>("");
 
   useEffect(() => {
-    async function _fetchFileName() {
+    async function _initRunAppleScript() {
       await runAppleScript("");
     }
 
-    _fetchFileName().then();
+    _initRunAppleScript().then();
   }, []);
 
   return (
