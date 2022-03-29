@@ -30,7 +30,8 @@
       "subtitle": "Browse highlights on Readwise",
       "description": "Browse highlights on Readwise",
       "keywords": [
-        "highlight"
+        "highlight",
+        "highlights"
       ],
       "mode": "view"
     },
