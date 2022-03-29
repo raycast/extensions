@@ -1,6 +1,7 @@
 import { ActionPanel, Action, Detail } from "@raycast/api";
 
 import { useBook } from "../books/useBook";
+import { DetailMetaDataTags } from "../components/DetailMetadata";
 import { getFormatedDateString, joinStringsWithDelimiter } from "../utils";
 
 export const HighlightDetail = ({ item }: { item: Highlight }) => {
@@ -33,13 +34,7 @@ export const HighlightDetail = ({ item }: { item: Highlight }) => {
           {/* HIGHLIGHT DETAILS */}
           <Detail.Metadata.Label title="Highlighted At" text={getFormatedDateString(item.highlighted_at)} />
           <Detail.Metadata.Label title="Updated At" text={getFormatedDateString(item.updated)} />
-          {item.tags.length > 0 && (
-            <Detail.Metadata.TagList title="Tag">
-              {item.tags.map((tag) => (
-                <Detail.Metadata.TagList.Item key={tag.name} text={tag.name} />
-              ))}
-            </Detail.Metadata.TagList>
-          )}
+          <DetailMetaDataTags tags={item.tags} />
 
           <Detail.Metadata.Separator />
 
