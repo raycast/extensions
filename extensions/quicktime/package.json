@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quicktime",
-  "title": "QuickTime",
+  "title": "QuickTime Recording",
   "description": "This extension has collection of commands that lets you start screen recording, movie recording and sound recording instantly.",
   "icon": "quicktime.png",
   "author": "pradeepb28",
