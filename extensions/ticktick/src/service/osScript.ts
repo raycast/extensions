@@ -51,17 +51,11 @@ const errorHandler = (err: unknown) => {
   showToast(ToastStyle.Failure, "Something went wrong");
 };
 
-export const getToday = async () => {
+const getDateListData = async (command: string) => {
   const installed = await checkAppInstalled();
   if (!installed) return [];
   try {
-    const result = (await runAppleScript(`
-    set result to ""
-    tell application "TickTick"
-	    set result to today tasks from "raycast"
-    end tell
-    return result
-  `)) as string;
+    const result = (await runAppleScript(command)) as string;
     if (result === "missing value") {
       return [];
     }
@@ -87,40 +81,24 @@ export const getToday = async () => {
   }
 };
 
-export const getNext7Days = async () => {
-  const installed = await checkAppInstalled();
-  if (!installed) return [];
-  try {
-    const result = (await runAppleScript(`
+export const getToday = async () => {
+  return await getDateListData(`
     set result to ""
     tell application "TickTick"
-	    set result to next7days tasks from "raycast"
+      set result to today tasks from "raycast"
     end tell
     return result
-  `)) as string;
-    if (result === "missing value") {
-      return [];
-    }
-    const parsedResult = JSON.parse(result);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return parsedResult.map((section: any) => {
-      if (section.id === "note") {
-        return {
-          id: "note",
-          name: "Note",
-          children: section.tasks.map(taskObject2Task),
-        };
-      }
-      return {
-        id: `date-${section.date}`,
-        name: getSectionNameByDate(new Date(convertMacTime2JSTime(section.date))),
-        children: section.tasks.map(taskObject2Task),
-      };
-    });
-  } catch (e) {
-    errorHandler(e);
-    return [];
-  }
+  `);
+};
+
+export const getNext7Days = async () => {
+  return await getDateListData(`
+    set result to ""
+    tell application "TickTick"
+      set result to next7days tasks from "raycast"
+    end tell
+    return result
+  `);
 };
 
 export const getSearchByKeyword = async (keyword: string) => {
