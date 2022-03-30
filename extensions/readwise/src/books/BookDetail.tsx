@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
-import formatDate from "date-fns/format";
 import { DetailMetaDataTags } from "../components/DetailMetadata";
 
 import { getFormatedDateString } from "../utils";

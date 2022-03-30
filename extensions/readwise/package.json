@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "readwise",
   "title": "Readwise",
-  "description": "Search and browser your Readwise Library.",
+  "description": "Search and browse your Readwise Library.",
   "icon": "icon.png",
   "author": "natterstefan",
   "categories": [
@@ -12,22 +12,22 @@
   "commands": [
     {
       "name": "dailyreview",
-      "title": "Open Readwise Daily Review",
-      "subtitle": "Opens your Daily Review on Readwise",
-      "description": "Opens your Daily Review on Readwise with your default browser",
+      "title": "Open Daily Review",
+      "subtitle": "Readwise",
+      "description": "Opens your Daily Review on Readwise with your default browser.",
       "mode": "no-view"
     },
     {
       "name": "library",
-      "title": "Open Readwise Library",
-      "subtitle": "Opens your Library on Readwise",
-      "description": "Opens your Library on Readwise with your default browser",
+      "title": "Open Library",
+      "subtitle": "Readwise",
+      "description": "Opens your Library on Readwise with your default browser.",
       "mode": "no-view"
     },
     {
       "name": "highlights",
-      "title": "Search Readwise Highlights",
-      "subtitle": "Browse highlights on Readwise",
+      "title": "Search Highlights",
+      "subtitle": "Readwise",
       "description": "Browse highlights on Readwise",
       "keywords": [
         "highlight",
@@ -37,9 +37,9 @@
     },
     {
       "name": "books",
-      "title": "Search Readwise Library",
-      "subtitle": "Browser your Readwise Library",
-      "description": "Browser your Readwise Library",
+      "title": "Search Library",
+      "subtitle": "Readwise",
+      "description": "Browse your Readwise Library",
       "keywords": [
         "book",
         "books",
@@ -53,8 +53,8 @@
     {
       "name": "tags",
       "title": "Browse Highlight Tags",
-      "subtitle": "Browser your Readwise Highlight Tags",
-      "description": "Browser your Readwise Highlight Tags",
+      "subtitle": "Readwise",
+      "description": "Browse your Readwise Highlight Tags",
       "mode": "view"
     }
   ],
