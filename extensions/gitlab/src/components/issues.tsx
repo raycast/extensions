@@ -180,7 +180,6 @@ function useDetail(issueID: number): {
 export function IssueListItem(props: { issue: Issue; refreshData: () => void }): JSX.Element {
   const issue = props.issue;
   const tintColor = issue.state === "opened" ? Color.Green : Color.Red;
-  const extraSubtitle = issue.milestone ? `${issue.milestone.title}  |  ` : "";
   return (
     <List.Item
       id={issue.id.toString()}
@@ -188,7 +187,8 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }):
       subtitle={"#" + issue.iid}
       icon={{ source: GitLabIcons.issue, tintColor: tintColor }}
       accessories={ensureCleanAccessories([
-        { text: extraSubtitle + toDateString(issue.updated_at) },
+        { text: issue.milestone ? issue.milestone.title : undefined },
+        { text: toDateString(issue.updated_at) },
         { icon: { source: issue.author?.avatar_url || "", mask: Image.Mask.Circle } },
       ])}
       actions={
