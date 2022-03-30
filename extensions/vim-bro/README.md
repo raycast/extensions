@@ -2,11 +2,11 @@
 
 Learn vim commands without leaving your window.
 
-![Screenshot 1](./screenshots/Screenshot_1.png)
+![Screenshot 1](./metadata/Screenshot_1.png)
 
-![Screenshot 2](./screenshots/Screenshot_2.png)
+![Screenshot 2](./metadata/Screenshot_2.png)
 
-![Screenshot 3](./screenshots/Screenshot_3.png)
+![Screenshot 3](./metadata/Screenshot_3.png)
 
 ## Roadmap
 
