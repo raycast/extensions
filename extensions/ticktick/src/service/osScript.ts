@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import { Project } from "./project";
 import { Task } from "./task";
 import { runAppleScript } from "run-applescript";
@@ -32,7 +32,7 @@ const checkAppInstalled = async () => {
 
     if (result === "false") {
       showToast(
-        ToastStyle.Failure,
+        Toast.Style.Failure,
         "Application not found",
         "Please install TickTick or upgrade to the latest version."
       );
@@ -41,14 +41,18 @@ const checkAppInstalled = async () => {
 
     return true;
   } catch (error) {
-    showToast(ToastStyle.Failure, "Application not found", "Please install TickTick or upgrade to the latest version.");
+    showToast(
+      Toast.Style.Failure,
+      "Application not found",
+      "Please install TickTick or upgrade to the latest version."
+    );
     return false;
   }
 };
 
 const errorHandler = (err: unknown) => {
   console.log("parse error", err);
-  showToast(ToastStyle.Failure, "Something went wrong");
+  showToast(Toast.Style.Failure, "Something went wrong");
 };
 
 const getDateListData = async (command: string) => {
