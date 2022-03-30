@@ -55,13 +55,23 @@ export default function useFinerGifsClubAPI({ offset = 0 }) {
   return [results, isLoading, search] as const;
 }
 
+const EPISODE_NUM_REGEX = /^(\d{2})x(\d{2})-.+/i;
+
 export function mapFinerGifsResponse(finerGifsResp: FinerGif) {
   const gifUrl = new URL(finerGifsResp.fields.fileid + ".gif", "https://media.thefinergifs.club");
+  const [, season, episode] = finerGifsResp.fields.fileid.match(EPISODE_NUM_REGEX) || new Array(2);
+
   return <IGif>{
     id: finerGifsResp.id,
     title: finerGifsResp.fields.text,
     slug: finerGifsResp.fields.fileid,
     preview_gif_url: gifUrl.toString(),
     gif_url: gifUrl.toString(),
+    metadata:
+      season || episode
+        ? {
+            labels: [season && { title: "Season", text: season }, episode && { title: "Episode", text: episode }],
+          }
+        : undefined,
   };
 }
