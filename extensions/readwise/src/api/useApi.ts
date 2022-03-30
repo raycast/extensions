@@ -21,13 +21,16 @@ const { pageSize } = getPreferences();
 export const DEFAULT_LIST_PARAMS = { page_size: pageSize };
 
 export const useListApi = <T, Params extends DefaultParams>(endpoint: string, defaultParams?: Params) => {
-  const [params, setParams] = useState(defaultParams || DEFAULT_LIST_PARAMS);
+  const defaultQueryParams = defaultParams || DEFAULT_LIST_PARAMS;
+  const [params, setParams] = useState(defaultQueryParams);
 
   const { data, error, isValidating } = useSWR<T, HTTPError>([endpoint, params], fetchReadwise);
   useHandleError(error);
 
   return {
+    currentParams: params,
     data,
+    defaultParams: defaultQueryParams,
     loading: (!data && !error) || isValidating,
     setParams,
   };

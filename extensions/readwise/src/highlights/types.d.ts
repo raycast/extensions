@@ -24,7 +24,7 @@ interface Highlight {
 
 interface HighlightsResponse {
   count: number;
-  next: string;
-  previous: null;
+  next: string | null;
+  previous: string | null;
   results: Highlight[];
 }

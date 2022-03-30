@@ -1,4 +1,4 @@
-import React, { ComponentType } from "react";
+import React, { ComponentType, ReactNode } from "react";
 import { List } from "@raycast/api";
 import { getListSubtitle } from "../utils";
 
@@ -6,6 +6,7 @@ type ResultItem = { id: number };
 type ListProps<T extends ResultItem> = { item: T };
 
 interface IResultsListProps<T extends ResultItem, K extends ListProps<T>> {
+  actions: ReactNode;
   data:
     | {
         results: T[];
@@ -16,6 +17,7 @@ interface IResultsListProps<T extends ResultItem, K extends ListProps<T>> {
 }
 
 export const ResultsList = <T extends ResultItem, K extends ListProps<T>>({
+  actions,
   data,
   loading,
   listView: ListView,
@@ -29,7 +31,7 @@ export const ResultsList = <T extends ResultItem, K extends ListProps<T>>({
 
       {data?.results.map((result) => {
         // @ts-expect-error ts(2322): 'K' could be instantiated with a different subtype of constraint 'ListProps<T>'
-        return <ListView key={result.id} item={result} />;
+        return <ListView key={result.id} item={result} actions={actions} />;
       })}
     </List.Section>
   );

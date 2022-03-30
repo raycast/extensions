@@ -1,9 +1,9 @@
-import { List } from "@raycast/api";
+import { Action, List } from "@raycast/api";
 
 import { useBooks } from "./books/useBooks";
-import { BooksList } from "./books/BooksList";
+import { BooksListItems } from "./books/BooksListItems";
 import { Category } from "./books/types";
-import { getListSubtitle, getUrlParamsString } from "./utils";
+import { getUrlParamsString } from "./utils";
 import { ResultsList } from "./components/ResultsList";
 
 const CATEGORIES: { label: string; category: Category }[] = [
@@ -16,29 +16,49 @@ const CATEGORIES: { label: string; category: Category }[] = [
 
 export default function Command() {
   const { data, loading, refetch } = useBooks();
+  const { next, previous } = data || {};
 
   return (
     <List
       isLoading={loading}
       enableFiltering
       searchBarAccessory={
-        <List.Dropdown tooltip="Search Options" onChange={refetch} value="">
-          <List.Dropdown.Item title={"Default Search Options"} value={""} />
-
-          <List.Dropdown.Section title="Page Navigation">
-            {data?.previous && <List.Dropdown.Item title={"Previous Page"} value={getUrlParamsString(data.previous)} />}
-            {data?.next && <List.Dropdown.Item title={"Next Page"} value={getUrlParamsString(data.next)} />}
-          </List.Dropdown.Section>
-
-          <List.Dropdown.Section title="Highlight Category">
-            {CATEGORIES.map(({ label, category }) => (
-              <List.Dropdown.Item key={category} title={label} value={`category=${category}`} />
-            ))}
-          </List.Dropdown.Section>
+        <List.Dropdown tooltip="Search Options" onChange={refetch}>
+          <List.Dropdown.Item title={"All Categories"} value={""} />
+          {CATEGORIES.map(({ label, category }) => (
+            <List.Dropdown.Item key={category} title={label} value={`category=${category}&page=1`} />
+          ))}
         </List.Dropdown>
       }
     >
-      <ResultsList loading={loading} data={data} listView={BooksList} />
+      <ResultsList
+        loading={loading}
+        data={data}
+        actions={
+          <>
+            {next && (
+              <Action
+                icon={"➡️"}
+                title="Next Page"
+                onAction={() => refetch(getUrlParamsString(next))}
+                shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
+              />
+            )}
+            {previous && (
+              <>
+                <Action
+                  icon={"⬅️"}
+                  title="Previous Page"
+                  onAction={() => refetch(getUrlParamsString(previous))}
+                  shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+                />
+                <Action icon={"🏠"} title="Back to Home" onAction={() => refetch("")} />
+              </>
+            )}
+          </>
+        }
+        listView={BooksListItems}
+      />
     </List>
   );
 }
