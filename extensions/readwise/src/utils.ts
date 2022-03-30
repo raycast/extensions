@@ -16,3 +16,6 @@ export const joinStringsWithDelimiter: (values: (string | null | undefined)[], d
 
   return "";
 };
+
+export const getListSubtitle = (loading: boolean, totalCount: number) =>
+  loading ? "Loading..." : totalCount.toString();

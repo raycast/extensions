@@ -2,6 +2,7 @@ import { List } from "@raycast/api";
 
 import { useHighlights } from "./highlights/useHighlights";
 import { HighlightsList } from "./highlights/HighlightsList";
+import { ResultsList } from "./components/ResultsList";
 
 export default function Command() {
   const { data, loading, refetch } = useHighlights();
@@ -21,11 +22,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.Section title="Results" subtitle={data?.results.length + ""}>
-        {data?.results.map((result) => (
-          <HighlightsList key={result.id} item={result} />
-        ))}
-      </List.Section>
+      <ResultsList loading={loading} data={data} listView={HighlightsList} />
     </List>
   );
 }

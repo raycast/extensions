@@ -3,7 +3,8 @@ import { List } from "@raycast/api";
 import { useBooks } from "./books/useBooks";
 import { BooksList } from "./books/BooksList";
 import { Category } from "./books/types";
-import { getUrlParamsString } from "./utils";
+import { getListSubtitle, getUrlParamsString } from "./utils";
+import { ResultsList } from "./components/ResultsList";
 
 const CATEGORIES: { label: string; category: Category }[] = [
   { label: "Articles", category: "articles" },
@@ -37,11 +38,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.Section title="Results" subtitle={data?.results.length + ""}>
-        {data?.results.map((result) => (
-          <BooksList key={result.id} item={result} />
-        ))}
-      </List.Section>
+      <ResultsList loading={loading} data={data} listView={BooksList} />
     </List>
   );
 }

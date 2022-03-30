@@ -2,9 +2,13 @@ import { List } from "@raycast/api";
 
 import { useTags } from "./tags/useTags";
 import { TagsList } from "./tags/TagsList";
+import { getListSubtitle } from "./utils";
 
 export default function Command() {
   const { data, loading, refetch } = useTags();
+
+  const totalCount = data?.results.length || 0;
+  const listSubtitle = getListSubtitle(loading, totalCount);
 
   return (
     <List
@@ -21,7 +25,9 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.Section title="Results" subtitle={data?.results.length + ""}>
+      <List.Section title="Results" subtitle={listSubtitle}>
+        {!loading && !data?.results.length && <List.EmptyView title="Nothing found." />}
+
         {data?.results.map((result) => (
           <TagsList key={result.name} item={result} />
         ))}
