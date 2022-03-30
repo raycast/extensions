@@ -5,6 +5,7 @@
   "description": "Translate words, or entire sentences, into 26 different languages using DeepL.",
   "icon": "icon.png",
   "author": "mooxl",
+  "contributors": ["peter-gy"],
   "license": "MIT",
   "commands": [
     {
@@ -217,7 +218,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.31.0",
     "got": "^11.8.2"
   },
   "devDependencies": {

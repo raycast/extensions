@@ -1,16 +1,8 @@
-import {
-  showToast,
-  ToastStyle,
-  Form,
-  ActionPanel,
-  SubmitFormAction,
-  Detail,
-  CopyToClipboardAction,
-} from "@raycast/api";
+import { showToast, Form, ActionPanel, Detail, Toast, Action } from "@raycast/api";
 import { Bitwarden } from "./api";
 
 export function TroubleshootingGuide(): JSX.Element {
-  showToast(ToastStyle.Failure, "Bitwarden CLI not found");
+  showToast(Toast.Style.Failure, "Bitwarden CLI not found");
   const markdown = `# The Bitwarden CLI was not found
 ## Please check that:
 
@@ -23,7 +15,7 @@ export function TroubleshootingGuide(): JSX.Element {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <CopyToClipboardAction title={"Copy Homebrew Installation Command"} content="brew install bitwarden-cli" />
+          <Action.CopyToClipboard title={"Copy Homebrew Installation Command"} content="brew install bitwarden-cli" />
         </ActionPanel>
       }
     />
@@ -36,20 +28,20 @@ export function UnlockForm(props: {
 }): JSX.Element {
   async function onSubmit(values: { password: string }) {
     try {
-      const toast = await showToast(ToastStyle.Animated, "Unlocking Vault...", "Please wait");
+      const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
       const sessionToken = await props.bitwardenApi.unlock(values.password);
       toast.hide();
 
       props.setSessionToken(sessionToken);
     } catch (error) {
-      showToast(ToastStyle.Failure, "Failed to unlock vault", "Invalid credentials");
+      showToast(Toast.Style.Failure, "Failed to unlock vault", "Invalid credentials");
     }
   }
   return (
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Unlock" onSubmit={onSubmit} />
+          <Action.SubmitForm title="Unlock" onSubmit={onSubmit} shortcut={{ key: "enter", modifiers: [] }} />
         </ActionPanel>
       }
     >

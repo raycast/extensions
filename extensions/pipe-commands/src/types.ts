@@ -14,13 +14,10 @@ export interface ScriptMetadatas {
   currentDirectoryPath?: string;
 }
 
-export const argumentTypes = ["text", "file"] as const;
-export type ArgumentType = typeof argumentTypes[number];
-
 export const scriptModes = ["silent", "fullOutput", "copy", "replace"] as const;
 export type ScriptMode = typeof scriptModes[number];
 
 export interface ScriptArgument {
-  type: ArgumentType;
+  type: "text";
   percentEncoded?: boolean;
 }

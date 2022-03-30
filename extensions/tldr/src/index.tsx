@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   closeMainWindow,
-  Detail,
   environment,
   Icon,
   List,
@@ -45,55 +44,56 @@ async function readPages() {
 }
 
 export default function TLDRList(): JSX.Element {
-  const [platforms, setPlatforms] = useState<Platform[]>();
-  const [query, setQuery] = useState("");
-  useEffect(() => {
-    async function loadPages() {
-      if (!existsSync(CACHE_DIR) || readdirSync(CACHE_DIR).length === 0) {
-        await refreshPages();
-      }
+  const [platforms, setPlatforms] = useState<Record<string, Platform>>();
+  const [selectedPlatformName, setSelectedPlatformName] = useState<string>("osx");
 
-      setPlatforms(await readPages());
+  const selectedPlatforms = platforms ? [platforms[selectedPlatformName], platforms["common"]] : undefined;
+
+  async function loadPages(options?: { forceRefresh?: boolean }) {
+    if (!existsSync(CACHE_DIR) || readdirSync(CACHE_DIR).length === 0 || options?.forceRefresh) {
+      await refreshPages();
     }
+    const platforms = await readPages();
+    setPlatforms(Object.fromEntries(platforms.map((platform) => [platform.name, platform])));
+  }
+
+  useEffect(() => {
     loadPages();
   }, []);
 
   return (
     <List
-      searchBarPlaceholder="Search for command..."
-      onSearchTextChange={(query) => {
-        setQuery(query);
-      }}
+      isShowingDetail
+      searchBarAccessory={
+        <List.Dropdown tooltip="Platform" storeValue onChange={setSelectedPlatformName}>
+          <List.Dropdown.Section>
+            {["osx", "linux", "windows", "sunos", "android"].map((platform) => (
+              <List.Dropdown.Item title={platform} value={platform} key={platform} />
+            ))}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
       isLoading={!platforms}
     >
-      {platforms?.map((platform) => (
+      {selectedPlatforms?.map((platform) => (
         <List.Section title={platform.name} key={platform.name}>
           {platform.pages
-            .filter((page) => page.command.startsWith(query))
             .sort((a, b) => a.command.localeCompare(b.command))
             .map((page) => (
               <List.Item
                 title={page.command}
+                detail={<List.Item.Detail markdown={page.markdown} />}
                 key={page.filename}
-                subtitle={page.subtitle}
-                accessoryTitle={page.filename}
                 actions={
                   <ActionPanel>
-                    <Action.Push title="Show Commands" icon={Icon.ArrowRight} target={<CommandList page={page} />} />
+                    <Action.Push title="Browse Examples" icon={Icon.ArrowRight} target={<CommandList page={page} />} />
                     <OpenCommandWebsiteAction page={page} />
-                    <Action.Push
-                      icon={Icon.Text}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                      title="Print Markdown Page"
-                      target={<PageDetails page={page} />}
-                    />
                     <Action
                       title="Refresh Pages"
                       icon={Icon.ArrowClockwise}
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                       onAction={async () => {
-                        await refreshPages();
-                        setPlatforms(await readPages());
+                        await loadPages({ forceRefresh: true });
                       }}
                     />
                   </ActionPanel>
@@ -103,21 +103,6 @@ export default function TLDRList(): JSX.Element {
         </List.Section>
       ))}
     </List>
-  );
-}
-
-function PageDetails(props: { page: Page }) {
-  const page = props.page;
-  return (
-    <Detail
-      markdown={page.markdown}
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard content={page.markdown} />
-          <OpenCommandWebsiteAction page={page} />
-        </ActionPanel>
-      }
-    />
   );
 }
 

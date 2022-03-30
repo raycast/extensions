@@ -1,7 +1,7 @@
 import { Action, ActionPanel, clearSearchBar, Color, Icon, List } from "@raycast/api";
 import React, { useEffect } from "react";
 import { exportClipboard, exportPaste } from "./clipboard";
-import { useGitignore } from "./hooks";
+import { useGitignore, useListDetailPreference } from "./hooks";
 import GitignorePreview from "./preview";
 import { GitignoreFile } from "./types";
 
@@ -14,6 +14,8 @@ function GitignoreList({
   selected: boolean;
   toggleSelection: (gitignoreFile: GitignoreFile) => void;
 }) {
+  const listDetail = useListDetailPreference();
+
   return (
     <React.Fragment>
       {gitignoreFiles.map((gitignore) => {
@@ -26,6 +28,7 @@ function GitignoreList({
             title={gitignore.name}
             keywords={keywords}
             accessoryTitle={gitignore.folder}
+            detail={listDetail && <GitignorePreview gitignoreFiles={[gitignore]} listPreview />}
             actions={
               <ActionPanel>
                 <Action
@@ -54,16 +57,21 @@ export default function Gitignore() {
     clearSearchBar({ forceScrollToTop: false });
   }, [selectedIds]);
 
+  const listDetail = useListDetailPreference();
+
   const selected = gitignoreFiles.filter((gitignoreFile) => selectedIds.has(gitignoreFile.id));
   const unselected = gitignoreFiles.filter((gitignoreFile) => !selectedIds.has(gitignoreFile.id));
 
+  const lastUpdatedSubtitle = lastUpdated != null ? `Last updated ${lastUpdated.toLocaleString()}` : "";
+
   return (
-    <List isLoading={loading}>
+    <List isLoading={loading} isShowingDetail={listDetail}>
       <List.Section>
         {selected.length > 0 ? (
           <List.Item
             icon={Icon.Document}
-            title="Create .gitignore From Selection"
+            title="Create .gitignore"
+            detail={listDetail && <GitignorePreview gitignoreFiles={selected} listPreview />}
             actions={
               <ActionPanel>
                 <CopyToClipboardAction selected={selected} />
@@ -77,7 +85,8 @@ export default function Gitignore() {
             <List.Item
               icon={Icon.Download}
               title="Refresh"
-              subtitle={lastUpdated != null ? `Last updated ${lastUpdated.toLocaleString()}` : undefined}
+              subtitle={!listDetail ? lastUpdatedSubtitle : undefined}
+              detail={listDetail && <List.Item.Detail markdown={`### ${lastUpdatedSubtitle}`} />}
               actions={
                 <ActionPanel>
                   <Action title="Refresh" onAction={refresh} />
