@@ -45,9 +45,7 @@ function DriverList() {
               actions={
                 <ActionPanel title={`${standing.Driver.givenName} ${standing.Driver.familyName}`}>
                   <Action.OpenInBrowser title="View on Wikipedia.org" url={standing.Driver.url} icon="wikipedia.png" />
-                  {driverUrl && (
-                    <Action.OpenInBrowser title="View on Formula1.com" url={driverUrl} icon="formula1.png" />
-                  )}
+                  {driverUrl && <Action.OpenInBrowser title="View on Formula1.com" url={driverUrl} icon="🏎️" />}
                 </ActionPanel>
               }
               accessories={[{ text: standing.points }]}

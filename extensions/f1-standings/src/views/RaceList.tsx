@@ -90,7 +90,7 @@ function RaceList() {
                       url={race.url || race.Circuit.url}
                       icon="wikipedia.png"
                     />
-                    {raceUrl && <Action.OpenInBrowser title="View on Formula1.com" url={raceUrl} icon="formula1.png" />}
+                    {raceUrl && <Action.OpenInBrowser title="View on Formula1.com" url={raceUrl} icon="🏎️" />}
                   </ActionPanel>
                 }
                 accessories={accessories}
@@ -125,7 +125,7 @@ function RaceList() {
                       />
                     ) : null}
                     <Action.OpenInBrowser url={race.url || race.Circuit.url} />
-                    {raceUrl && <Action.OpenInBrowser title="View on Formula1.com" url={raceUrl} icon="formula1.png" />}
+                    {raceUrl && <Action.OpenInBrowser title="View on Formula1.com" url={raceUrl} icon="🏎️" />}
                   </ActionPanel>
                 }
                 accessories={accessories}

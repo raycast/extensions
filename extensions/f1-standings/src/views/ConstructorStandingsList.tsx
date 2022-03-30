@@ -45,7 +45,7 @@ function ConstructorList() {
                     icon="wikipedia.png"
                   />
                   {constructorUrl && (
-                    <Action.OpenInBrowser title="View on Formula1.com" url={constructorUrl} icon="formula1.png" />
+                    <Action.OpenInBrowser title="View on Formula1.com" url={constructorUrl} icon="🏎️" />
                   )}
                 </ActionPanel>
               }
@@ -64,10 +64,10 @@ function EmptyView({ season }: { season: string | null }) {
   }
   if (Number.parseInt(season, 10) < 1958) {
     return (
-      <List.EmptyView icon="formula1.png" description="The Constructors Championship was not awarded until 1958" />
+      <List.EmptyView icon="empty-view.png" description="The Constructors Championship was not awarded until 1958" />
     );
   }
-  return <List.EmptyView icon="formula1.png" description="No results" />;
+  return <List.EmptyView icon="empty-view.png" description="No results" />;
 }
 
 export default ConstructorList;
