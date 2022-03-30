@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "View MLB scores",
-      "description": "",
+      "description": "Get scores of today's MLB games.",
       "mode": "view"
     }
   ],
