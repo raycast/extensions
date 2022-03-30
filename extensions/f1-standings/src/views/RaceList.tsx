@@ -124,7 +124,11 @@ function RaceList() {
                         onAction={() => setIsShowingDetail((previous) => !previous)}
                       />
                     ) : null}
-                    <Action.OpenInBrowser url={race.url || race.Circuit.url} />
+                    <Action.OpenInBrowser
+                      title="View on Wikipedia.org"
+                      url={race.url || race.Circuit.url}
+                      icon="wikipedia.png"
+                    />
                     {raceUrl && <Action.OpenInBrowser title="View on Formula1.com" url={raceUrl} icon="🏎️" />}
                   </ActionPanel>
                 }
