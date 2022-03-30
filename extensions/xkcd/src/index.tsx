@@ -5,6 +5,7 @@ import { useAtom } from "jotai";
 import { currentComicAtom, lastViewedAtom, maxNumAtom, readStatusAtom, totalReadAtom } from "./atoms";
 import getRandomUnread from "./get_random_unread";
 import OpenComicInBrowser from "./open_in_browser";
+import ExplainXkcd from "./explain_xkcd";
 
 export default function main() {
   const [num, setNum] = useAtom(maxNumAtom);
@@ -81,7 +82,7 @@ export default function main() {
           ? `
 # ${currentComic.title} - #${currentComic.num}
 
-${currentComic.alt}}
+${currentComic.alt}
 
 ![${currentComic.alt}](${currentComic.img})`
           : undefined
@@ -101,6 +102,7 @@ ${currentComic.alt}}
             actions={
               <ActionPanel>
                 <OpenComicInBrowser />
+                <ExplainXkcd />
               </ActionPanel>
             }
           />
@@ -113,12 +115,14 @@ ${currentComic.alt}}
             actions={
               <ActionPanel>
                 <Action
+                  icon={Icon.TwoArrowsClockwise}
                   title="Random Unread"
                   onAction={() => {
                     setCurrentComic(getRandomUnread(readStatus, num));
                   }}
                 />
                 <OpenComicInBrowser />
+                <ExplainXkcd />
               </ActionPanel>
             }
             detail={detail}
@@ -131,12 +135,14 @@ ${currentComic.alt}}
           actions={
             <ActionPanel>
               <Action
+                icon={Icon.TwoArrowsClockwise}
                 title="Random"
                 onAction={() => {
                   setCurrentComic(Math.floor(Math.random() * num + 1));
                 }}
               />
               <OpenComicInBrowser />
+              <ExplainXkcd />
             </ActionPanel>
           }
           detail={detail}
@@ -149,6 +155,7 @@ ${currentComic.alt}}
           actions={
             <ActionPanel>
               <OpenComicInBrowser />
+              <ExplainXkcd />
             </ActionPanel>
           }
         />
@@ -166,6 +173,7 @@ ${currentComic.alt}}
             actions={
               <ActionPanel>
                 <OpenComicInBrowser />
+                <ExplainXkcd />
               </ActionPanel>
             }
           />

@@ -9,6 +9,7 @@
 /extensions/android-adb-input                        @STAR-ZERO
 /extensions/api-icon-list                            @PitNikola
 /extensions/apple-notes                              @tumispro @ron-myers
+/extensions/asyncapi                                 @smoya
 /extensions/atomic                                   @joepio
 /extensions/audio-device                             @benvp @mathieudutour @mike182uk @FezVrasta
 /extensions/authy                                    @guga4ka @lukekarrys
@@ -22,7 +23,7 @@
 /extensions/bitbucket                                @Lp-Francois
 /extensions/bitly-url-shortener                      @blessanm86
 /extensions/bitrise                                  @ubuntudroid
-/extensions/bitwarden                                @pomdtr @daniel-stoneuk @jomifepe
+/extensions/bitwarden                                @pomdtr @daniel-stoneuk @jomifepe @andreaselia
 /extensions/brew                                     @nhojb
 /extensions/brew-services                            @es183923
 /extensions/bttv-emote                               @Aayush9029
@@ -116,7 +117,9 @@
 /extensions/helm-docs                                @tiagomichaelsousa
 /extensions/hexlify                                  @gkpln3
 /extensions/homeassistant                            @tonka3000 @altrdev
+/extensions/http-status-codes                        @AlexVanderbist
 /extensions/huggingcast                              @ragnorc
+/extensions/iata-code-decoder                        @timrogers
 /extensions/imdb                                     @ryan-exe
 /extensions/inertiajs-documentation                  @danyelkeddah
 /extensions/jetbrains                                @gdsmith
@@ -138,7 +141,7 @@
 /extensions/kubernetes-docs                          @rpvsilva
 /extensions/laracasts                                @danyelkeddah
 /extensions/laravel-docs                             @indykoning @indykoning @indykoning
-/extensions/laravel-forge                            @KevinBatdorf
+/extensions/laravel-forge                            @KevinBatdorf @macbookandrew
 /extensions/laravel-livewire                         @tafhyseni
 /extensions/large-type                               @gon250
 /extensions/lark                                     @tmkx
@@ -157,6 +160,7 @@
 /extensions/myip                                     @kkange
 /extensions/nativebase-docs                          @ShubhamVerma1811
 /extensions/netlify                                  @Destiner
+/extensions/nextcloud                                @uetchy
 /extensions/node-js-evaluate                         @selfish
 /extensions/nos-news                                 @Joran-Dob
 /extensions/notion                                   @HenriChabrand
@@ -216,6 +220,7 @@
 /extensions/simpread                                 @Kenshin
 /extensions/single-disk-eject                        @johndturn
 /extensions/sketch                                   @aesign
+/extensions/slack                                    @momme-rtf
 /extensions/slack-status                             @PitNikola
 /extensions/snake                                    @tonka3000
 /extensions/solana-explorer                          @TrGiLong
@@ -261,6 +266,7 @@
 /extensions/vercast                                  @gleich
 /extensions/visual-studio-code-project-manager       @MarkusLanger
 /extensions/visual-studio-code-recent-projects       @thomaspaulmann @iainsimmons
+/extensions/vuejs-documentation                      @Dpblandin
 /extensions/weather                                  @tonka3000
 /extensions/whatsapp                                 @vimtor
 /extensions/wikipedia                                @vimtor
