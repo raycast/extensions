@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import {
   capitalizeFirstLetter,
   daysInSeconds,
+  ensureCleanAccessories,
   getErrorMessage,
   now,
   optimizeMarkdownText,
@@ -254,8 +255,7 @@ export function MRListItem(props: {
       title={mr.title}
       subtitle={subtitle.join("    ")}
       icon={icon}
-      accessoryIcon={accessoryIcon}
-      accessoryTitle={toDateString(mr.updated_at)}
+      accessories={ensureCleanAccessories([{ text: toDateString(mr.updated_at) }, { icon: accessoryIcon }])}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

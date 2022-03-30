@@ -6,6 +6,7 @@ import { GitLabOpenInBrowserAction } from "./actions";
 import { useTodos } from "./todo/utils";
 import { MyProjectsDropdown } from "./project";
 import { useState } from "react";
+import { ensureCleanAccessories } from "../utils";
 
 function userToIcon(user?: User): Image.ImageLike {
   let result = "";
@@ -92,8 +93,7 @@ export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JS
       id={todo.id.toString()}
       title={todo.title}
       subtitle={subtitle}
-      accessoryTitle={todo.action_name}
-      accessoryIcon={userToIcon(todo.author)}
+      accessories={ensureCleanAccessories([{ text: todo.action_name }, { icon: userToIcon(todo.author) }])}
       icon={getIcon(todo)}
       actions={
         <ActionPanel>

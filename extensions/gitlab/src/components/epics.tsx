@@ -4,6 +4,7 @@ import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Epic, Group, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
+import { ensureCleanAccessories } from "../utils";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { ClearLocalCacheAction } from "./cache_actions";
 import { CreateEpicTodoAction } from "./epic_actions";
@@ -25,7 +26,9 @@ export function EpicListItem(props: { epic: any }) {
     <List.Item
       id={epic.id.toString()}
       title={epic.title}
-      accessoryIcon={{ source: epic.author.avatar_url || "", mask: Image.Mask.Circle }}
+      accessories={ensureCleanAccessories([
+        { icon: { source: epic.author.avatar_url || "", mask: Image.Mask.Circle } },
+      ])}
       icon={icon}
       actions={
         <ActionPanel>

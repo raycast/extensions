@@ -2,7 +2,7 @@ import { ActionPanel, List, showToast, Color, Toast, Image } from "@raycast/api"
 import { MergeRequest, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { gitlab } from "../common";
-import { daysInSeconds, toDateString } from "../utils";
+import { daysInSeconds, ensureCleanAccessories, toDateString } from "../utils";
 import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
 import { ShowReviewMRAction } from "./review_actions";
 import { getCIJobStatusEmoji } from "./jobs";
@@ -53,8 +53,7 @@ function ReviewListItem(props: { mr: MergeRequest }) {
       title={mr.title}
       subtitle={subtitle.join("    ")}
       icon={{ source: GitLabIcons.mropen, tintColor: Color.Green }}
-      accessoryIcon={accessoryIcon}
-      accessoryTitle={toDateString(mr.updated_at)}
+      accessories={ensureCleanAccessories([{ text: toDateString(mr.updated_at) }, { icon: accessoryIcon }])}
       actions={
         <ActionPanel>
           <DefaultActions

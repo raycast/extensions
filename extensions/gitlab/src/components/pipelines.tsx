@@ -2,7 +2,7 @@ import { Action, ActionPanel, List, Icon, Image, Color, showToast, Toast } from 
 import { useEffect, useState } from "react";
 import { getCIRefreshInterval, gitlabgql } from "../common";
 import { gql } from "@apollo/client";
-import { getErrorMessage, getIdFromGqlId, now } from "../utils";
+import { ensureCleanAccessories, getErrorMessage, getIdFromGqlId, now } from "../utils";
 import { JobList } from "./jobs";
 import { RefreshPipelinesAction } from "./pipeline_actions";
 import useInterval from "use-interval";
@@ -74,7 +74,7 @@ export function PipelineListItem(props: {
       title={pipeline.id.toString()}
       icon={icon}
       subtitle={pipeline.ref || ""}
-      accessoryTitle={getStatusText(pipeline.status.toLowerCase())}
+      accessories={ensureCleanAccessories([{ text: getStatusText(pipeline.status.toLowerCase()) }])}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
