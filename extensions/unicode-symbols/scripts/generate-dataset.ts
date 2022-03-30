@@ -37,7 +37,7 @@ const blockNamesToFilter = [
 
 // Specify here any additional characters and blocks to include in the dataset.
 const additionalCharacterValues = ["", "⌘", "⌥", "⏎", "⌫"];
-const additionalBlockNames = ["Combining Diacritical Marks", "Miscellaneous Technical", "Private Use Area"];
+const additionalBlockNames = ["Miscellaneous Technical", "Private Use Area"];
 
 // Grab unicode blocks and characters using https://github.com/chbrown/unidata/
 const allBlocks = getBlocks();
