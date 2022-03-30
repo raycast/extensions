@@ -78,7 +78,13 @@ export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean 
     />
   );
   const viewDetails = (
-    <Action.Push icon={Icon.Eye} key="viewDetails" title="View GIF Details" target={<GifDetails item={props.item} />} />
+    <Action.Push
+      icon={Icon.Eye}
+      key="viewDetails"
+      title="View GIF Details"
+      target={<GifDetails item={props.item} />}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+    />
   );
 
   const actions = [openInBrowser, copyGif, copyFile, copyUrl];
