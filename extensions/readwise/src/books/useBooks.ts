@@ -1,17 +1,19 @@
 import queryString from "query-string";
 
 import { BookParameters, BookResponse } from "./types";
-import { useListApi, DEFAULT_LIST_PARAMS } from "../api/useApi";
+import { useListApi } from "../api/useApi";
+
+export const BASE_URL = "/v2/books";
 
 export function useBooks() {
-  const { data, loading, setParams } = useListApi<BookResponse, BookParameters>("/v2/books", DEFAULT_LIST_PARAMS);
+  const { data, loading, setParams, defaultParams } = useListApi<BookResponse, BookParameters>(BASE_URL);
 
   return {
     data,
     loading,
     refetch: async (parameters: string) => {
       setParams({
-        ...DEFAULT_LIST_PARAMS,
+        ...defaultParams,
         ...queryString.parse(parameters),
       });
     },
