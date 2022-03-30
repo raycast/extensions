@@ -4,8 +4,7 @@ import { Task } from "./task";
 import { runAppleScript } from "run-applescript";
 import { convertMacTime2JSTime, getSectionNameByDate } from "../utils/date";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const taskObject2Task = (object: Record<string, any>): Task => {
+const taskObject2Task = (object: Record<string, unknown>): Task => {
   return {
     id: object.id as Task["id"],
     title: object.title as Task["title"],
@@ -18,8 +17,7 @@ const taskObject2Task = (object: Record<string, any>): Task => {
   };
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const projectObject2Project = (object: Record<string, any>): Project => {
+const projectObject2Project = (object: Record<string, unknown>): Project => {
   return {
     id: object.id as string,
     name: object.name as string,
@@ -48,8 +46,7 @@ const checkAppInstalled = async () => {
   }
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const errorHandler = (err: any) => {
+const errorHandler = (err: unknown) => {
   console.log("parse error", err);
   showToast(ToastStyle.Failure, "Something went wrong");
 };
