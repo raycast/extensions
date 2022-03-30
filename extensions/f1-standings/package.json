@@ -46,7 +46,9 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.31.0",
-    "node-fetch": "^3.0.0"
+    "cheerio": "^1.0.0-rc.10",
+    "node-fetch": "^3.0.0",
+    "raycast-toolkit": "^1.0.3"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

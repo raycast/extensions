@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Action, List, Color } from "@raycast/api";
-
-import { useRaces, useSeasons } from "../hooks";
+import { useFormula1RaceUrl, useRaces, useSeasons } from "../hooks";
 import { formatDate, getFlag, getRaceDates } from "../utils";
 import RaceSessionDetails from "../components/RaceSessionDetails";
 import RaceResultList from "../views/RaceResultList";
+import { Race } from "../types";
 
 function RaceList() {
+  const [selectedRace, setSelectedRace] = useState<Race | null>(null);
   const [season, setSeason] = useState<string | null>(null);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [preselectedRound, setPreselectedRound] = useState<string | undefined>();
   const seasons = useSeasons();
   const [pastRaces, upcomingRaces, isLoading] = useRaces(season);
+  const raceUrl = useFormula1RaceUrl(season, selectedRace);
 
   useEffect(() => {
     const upcomingRounds = Object.keys(upcomingRaces);
@@ -32,9 +34,11 @@ function RaceList() {
         }
         const race = pastRaces[selectedRound] || upcomingRaces[selectedRound];
         if (!race) {
+          setSelectedRace(null);
           setIsShowingDetail(false);
           return;
         }
+        setSelectedRace(race);
         const raceDates = getRaceDates(race);
         if (raceDates.length) {
           return;
@@ -81,7 +85,12 @@ function RaceList() {
                         onAction={() => setIsShowingDetail((previous) => !previous)}
                       />
                     ) : null}
-                    <Action.OpenInBrowser url={race.url || race.Circuit.url} />
+                    <Action.OpenInBrowser
+                      title="View on Wikipedia.org"
+                      url={race.url || race.Circuit.url}
+                      icon="wikipedia.png"
+                    />
+                    {raceUrl && <Action.OpenInBrowser title="View on Formula1.com" url={raceUrl} icon="🏎️" />}
                   </ActionPanel>
                 }
                 accessories={accessories}
@@ -115,7 +124,12 @@ function RaceList() {
                         onAction={() => setIsShowingDetail((previous) => !previous)}
                       />
                     ) : null}
-                    <Action.OpenInBrowser url={race.url || race.Circuit.url} />
+                    <Action.OpenInBrowser
+                      title="View on Wikipedia.org"
+                      url={race.url || race.Circuit.url}
+                      icon="wikipedia.png"
+                    />
+                    {raceUrl && <Action.OpenInBrowser title="View on Formula1.com" url={raceUrl} icon="🏎️" />}
                   </ActionPanel>
                 }
                 accessories={accessories}
