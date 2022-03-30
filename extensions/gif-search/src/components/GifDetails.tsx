@@ -35,7 +35,7 @@ export function GifDetails(props: { item: IGif }) {
     <Detail
       markdown={renderGifMarkdownDetails(props.item)}
       actions={<GifDetailsActions item={props.item} showViewDetails={false} />}
-      metadata={
+      metadata={metadata ?
         <Detail.Metadata>
           <Detail.Metadata.Label title="Width" text={metadata?.width.toString()} />
           <Detail.Metadata.Label title="Height" text={metadata?.height.toString()} />
@@ -44,7 +44,7 @@ export function GifDetails(props: { item: IGif }) {
           {links}
           {tags}
         </Detail.Metadata>
-      }
+        : undefined}
     />
   );
 }
