@@ -1,0 +1,183 @@
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Icon,
+  List,
+  LocalStorage,
+  open,
+  showHUD,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { DirectoryInfo, DirectoryType, SortBy } from "./directory-info";
+import React, { useEffect, useState } from "react";
+import AddDirectory from "./add-directory";
+import { checkPathValid, preferences } from "./utils";
+
+export default function CommonDirectory() {
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [commonDirectory, setCommonDirectory] = useState<DirectoryInfo[]>([]);
+  const [updateList, setUpdateList] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const { sortBy } = preferences();
+  const { push } = useNavigation();
+
+  useEffect(() => {
+    async function _fetchLocalStorage() {
+      const _localDirectory = await LocalStorage.getItem(DirectoryType.DIRECTORY);
+      const _commonDirectory: DirectoryInfo[] = typeof _localDirectory == "string" ? JSON.parse(_localDirectory) : [];
+      if (sortBy === SortBy.NameUp) {
+        _commonDirectory.sort(function (a, b) {
+          return b.name.toUpperCase() < a.name.toUpperCase() ? 1 : -1;
+        });
+      } else if (sortBy === SortBy.NameDown) {
+        _commonDirectory.sort(function (a, b) {
+          return b.name.toUpperCase() > a.name.toUpperCase() ? 1 : -1;
+        });
+      }
+      setCommonDirectory(_commonDirectory);
+      setLoading(false);
+    }
+
+    _fetchLocalStorage().then();
+  }, [updateList]);
+
+  return (
+    <List
+      isLoading={loading}
+      searchBarPlaceholder={"Search File Type"}
+      onSearchTextChange={(newValue) => {
+        setSearchValue(newValue);
+      }}
+    >
+      {commonDirectory.length === 0 ? (
+        <List.EmptyView
+          title={"No directory. Please add first"}
+          description={"You can always add directories from the Action Panel"}
+          actions={
+            <ActionPanel>
+              <Action
+                title={"Add Directory"}
+                icon={Icon.Download}
+                onAction={async () => {
+                  push(<AddDirectory updateListUseState={[updateList, setUpdateList]} />);
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        commonDirectory.map((directory, index) => {
+          if (
+            directory.alias.toLowerCase().includes(searchValue.toLowerCase()) ||
+            directory.name.toLowerCase().includes(searchValue.toLowerCase())
+          )
+            return (
+              <DirectoryItem
+                key={directory.id}
+                directory={directory}
+                setCommonDirectory={setCommonDirectory}
+                index={index}
+                commonDirectory={commonDirectory}
+                updateListUseState={[updateList, setUpdateList]}
+              />
+            );
+        })
+      )}
+    </List>
+  );
+}
+
+function DirectoryItem(props: {
+  directory: DirectoryInfo;
+  setCommonDirectory: React.Dispatch<React.SetStateAction<DirectoryInfo[]>>;
+  index: number;
+  commonDirectory: DirectoryInfo[];
+  updateListUseState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
+}) {
+  const directory = props.directory;
+  const setCommonDirectory = props.setCommonDirectory;
+  const index = props.index;
+  const commonDirectory = props.commonDirectory;
+  const [updateList, setUpdateList] = props.updateListUseState;
+  const { push } = useNavigation();
+  const { sortBy } = preferences();
+  return (
+    <List.Item
+      icon={{ source: directory.icon }}
+      title={directory.name}
+      subtitle={directory.alias}
+      accessories={[{ text: directory.path }, { icon: directory.valid ? "✅" : "⚠️" }]}
+      actions={
+        <ActionPanel>
+          <Action
+            title={"Reveal in Finder"}
+            icon={Icon.Finder}
+            onAction={async () => {
+              try {
+                const pathValid = await checkPathValid(directory.path);
+                let _commonDirectory = [...commonDirectory];
+                if (pathValid) {
+                  await open(directory.path);
+                  await showHUD("Reveal in Finder");
+                  _commonDirectory[index].valid = true;
+                  if (sortBy === SortBy.Rank) {
+                    _commonDirectory = await upRank([..._commonDirectory], index);
+                  }
+                } else {
+                  await showToast(Toast.Style.Failure, "Path Has Expired");
+                  _commonDirectory[index].valid = false;
+                }
+                setCommonDirectory(_commonDirectory);
+                await LocalStorage.setItem(DirectoryType.DIRECTORY, JSON.stringify(_commonDirectory));
+              } catch (e) {
+                await showToast(Toast.Style.Failure, "Path Has Expired" + String(e));
+              }
+            }}
+          />
+          <Action
+            title={"Copy to Clipboard"}
+            icon={Icon.Clipboard}
+            onAction={async () => {
+              await Clipboard.copy(directory.path);
+              await showToast(Toast.Style.Success, "Path Copied to Clipboard");
+            }}
+          />
+          <Action
+            title={"Add Directory"}
+            icon={Icon.Download}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            onAction={async () => {
+              push(<AddDirectory updateListUseState={[updateList, setUpdateList]} />);
+            }}
+          />
+          <Action
+            title={"Remove Directory"}
+            icon={Icon.Trash}
+            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+            onAction={async () => {
+              const _commonDirectory = [...commonDirectory];
+              _commonDirectory.splice(index, 1);
+              setCommonDirectory(_commonDirectory);
+              await LocalStorage.setItem(DirectoryType.DIRECTORY, JSON.stringify(_commonDirectory));
+              await showToast(Toast.Style.Success, "Remove Success");
+            }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+async function upRank(directory: DirectoryInfo[], index: number) {
+  let allRank = 0;
+  directory.forEach((value) => [(allRank = allRank + value.rank)]);
+  directory[index].rank = Math.floor((directory[index].rank + 1 - directory[index].rank / allRank) * 100) / 100;
+  await LocalStorage.setItem(DirectoryType.DIRECTORY, JSON.stringify(directory));
+  directory.sort(function (a, b) {
+    return b.rank - a.rank;
+  });
+  return directory;
+}
