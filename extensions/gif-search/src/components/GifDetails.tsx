@@ -35,16 +35,18 @@ export function GifDetails(props: { item: IGif }) {
     <Detail
       markdown={renderGifMarkdownDetails(props.item)}
       actions={<GifDetailsActions item={props.item} showViewDetails={false} />}
-      metadata={metadata ?
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Width" text={metadata?.width.toString()} />
-          <Detail.Metadata.Label title="Height" text={metadata?.height.toString()} />
-          {metadata?.size && <Detail.Metadata.Label title="Size" text={FileSizeFormat.si(metadata?.size)} />}
-          {labels}
-          {links}
-          {tags}
-        </Detail.Metadata>
-        : undefined}
+      metadata={
+        metadata ? (
+          <Detail.Metadata>
+            {metadata?.width ? <Detail.Metadata.Label title="Width" text={metadata.width.toString()} /> : undefined}
+            {metadata?.height ? <Detail.Metadata.Label title="Height" text={metadata.height.toString()} /> : undefined}
+            {metadata?.size && <Detail.Metadata.Label title="Size" text={FileSizeFormat.si(metadata?.size)} />}
+            {labels}
+            {links}
+            {tags}
+          </Detail.Metadata>
+        ) : undefined
+      }
     />
   );
 }

@@ -8,8 +8,8 @@ export interface IGif {
   preview_gif_url: string;
   gif_url: string;
   metadata?: {
-    width: number;
-    height: number;
+    width?: number;
+    height?: number;
     size?: number;
     labels?: {
       title: string;
