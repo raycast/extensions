@@ -19,7 +19,7 @@ interface Props {
 const SearchFilter: React.FC<Props> = (props) => {
   const { filterSections, onFilterChange } = props;
   return (
-    <List.Dropdown tooltip="Select Drink Type" storeValue={true} onChange={onFilterChange}>
+    <List.Dropdown tooltip="Select Project" storeValue={true} onChange={onFilterChange}>
       {filterSections.map((section) => {
         const renderFilters = section.filters.map((filter) => (
           <List.Dropdown.Item key={filter.id} title={filter.name} value={filter.id} />
