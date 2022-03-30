@@ -1,4 +1,4 @@
-import { AbortError } from "node-fetch";
+import { AbortError, FetchError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { GiphyFetch } from "@giphy/js-fetch-api";
@@ -14,7 +14,14 @@ interface FetchState {
   error?: Error;
 }
 
-const gf = new GiphyFetch(getAPIKey(GIF_SERVICE.GIPHY));
+let gf: GiphyFetch;
+async function getAPI(force?: boolean) {
+  if (!gf || force) {
+    gf = new GiphyFetch(await getAPIKey(GIF_SERVICE.GIPHY, force));
+  }
+
+  return gf;
+}
 
 export default function useGiphyAPI({ offset = 0 }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -29,16 +36,20 @@ export default function useGiphyAPI({ offset = 0 }) {
 
       let results: GifsResult;
       try {
+        const api = await getAPI();
         if (term) {
-          results = await gf.search(term, { offset });
+          results = await api.search(term, { offset });
         } else {
-          results = await gf.trending({ offset, limit: 10 });
+          results = await api.trending({ offset, limit: 10 });
         }
         setResults({ items: results.data.map(mapGiphyResponse), term });
       } catch (e) {
-        const error = e as Error;
+        const error = e as FetchError;
         if (e instanceof AbortError) {
           return;
+        } else if (error.message.toLowerCase().includes("invalid authentication credentials")) {
+          error.message = "Invalid credentials, please try again.";
+          await getAPI(true);
         }
         setResults({ error });
       } finally {
