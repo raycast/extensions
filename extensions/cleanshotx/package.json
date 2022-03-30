@@ -119,6 +119,7 @@
             "mode": "no-view"
         }
     ],
+    "categories": ["Applications"],
     "dependencies": {
         "@raycast/api": "^1.26.3",
         "open": "^8.4.0"
