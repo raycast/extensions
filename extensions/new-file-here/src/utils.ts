@@ -1,6 +1,7 @@
 import { runAppleScript } from "run-applescript";
 import { getPreferenceValues } from "@raycast/api";
 import { Values } from "@raycast/api/types/api/app/localStorage";
+import fs from "fs";
 
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
@@ -34,27 +35,11 @@ export const getFinderPath = async () => {
   }
 };
 
-const scriptExistsFile = (fileName: string) => `
-tell application "Finder"
-    set folderPath  to insertion location as alias
-    set fileName to ("${fileName}")
-    if exists file  (folderPath & fileName as text) then
-        return true
-    else 
-        return false
-    end if
-end tell
-`;
-
-export const checkFileExists = async (fileName: string) => {
+export const checkFileExists = async (filePath: string) => {
   try {
-    return stringToBoolean(await runAppleScript(scriptExistsFile(fileName)));
+    fs.accessSync(filePath);
+    return true;
   } catch (e) {
-    console.log(String(e));
     return false;
   }
-};
-
-const stringToBoolean = (string: string) => {
-  return /^true$/i.test(string);
 };

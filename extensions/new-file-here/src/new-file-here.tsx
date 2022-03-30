@@ -101,8 +101,8 @@ export async function createNewFile(
   fileName = createFileName(fileType),
   fileContent = ""
 ) {
-  const isExist = await checkFileExists(fileName);
   const filePath = path + fileName;
+  const isExist = await checkFileExists(filePath);
   if (!isExist) {
     if (fileType.name === "Excel") {
       const workbook = XLSX.utils.book_new();
