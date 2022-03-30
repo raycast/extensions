@@ -9,7 +9,7 @@ import afs from "fs/promises";
 function CameraImage(props: { state: State }): JSX.Element {
   const s = props.state;
   const ep = s.attributes.entity_picture;
-  const { localFilepath, error } = useImage(s.entity_id);
+  const { localFilepath, isLoading, error } = useImage(s.entity_id);
   if (error) {
     showToast(ToastStyle.Failure, "Could not fetch image", error);
   }
@@ -17,11 +17,7 @@ function CameraImage(props: { state: State }): JSX.Element {
   if (localFilepath) {
     md += `\n![Camera](${localFilepath})`;
   }
-  /*else if (ep) {
-    const imageUrl = ha.urlJoin(ep);
-    md += `\n![Camera](${imageUrl})`;
-  }*/
-  return <Detail markdown={md} />;
+  return <Detail markdown={md} isLoading={isLoading} />;
 }
 
 export function CameraShowImage(props: { state: State }): JSX.Element | null {
@@ -110,6 +106,7 @@ export function useImage(
         await ha.getCameraProxyURL(entityID, localFilepath);
         const base64Img = await fileToBase64Image(localFilepath);
         if (!didUnmount) {
+          setTimeout(fetchData, 3000);
           setLocalFilepath(base64Img);
         }
       } catch (error) {
