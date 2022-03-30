@@ -64,6 +64,20 @@ interface MRDetailData {
   projectWebUrl: string;
 }
 
+function stateColor(state: string): Color.ColorLike {
+  switch (state) {
+    case "closed": {
+      return Color.Red;
+    }
+    case "merged": {
+      return Color.Purple;
+    }
+    default: {
+      return Color.Green;
+    }
+  }
+}
+
 export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   const mr = props.mr;
   const { mrdetail, error, isLoading } = useDetail(props.mr.id);
@@ -76,17 +90,11 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
   const lines: string[] = [];
   if (mr) {
     lines.push(`# ${mr.title}`);
-    lines.push(`Merge \`${mr.source_branch}\` into \`${mr.target_branch}\``);
-    if (mr.author) {
-      lines.push(`Author: ${mr.author.name} [@${mr.author.username}](${mr.author.web_url})`);
-    }
-    lines.push(`Status: \`${capitalizeFirstLetter(mr.state)}\``);
-    const labels = mr.labels.map((i) => `\`${i.name || i}\``).join(" ");
-    lines.push(`Labels: ${labels || "<No Label>"}`);
-    lines.push("## Description\n" + optimizeMarkdownText(desc, mrdetail?.projectWebUrl));
+    lines.push(optimizeMarkdownText(desc, mrdetail?.projectWebUrl));
   }
 
   const md = lines.join("  \n");
+  const author = mr.author ? `${mr.author.name}` : "<no author>";
 
   return (
     <Detail
@@ -99,6 +107,25 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
           <MRItemActions mr={props.mr} />
           <Action.CopyToClipboard title="Copy Merge Request Description" content={props.mr.description} />
         </ActionPanel>
+      }
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.TagList title="Status">
+            <Detail.Metadata.TagList.Item
+              text={capitalizeFirstLetter(mr.state)}
+              color={stateColor(mr.state)}
+              //icon={stateIcon(issue.state)}
+            />
+          </Detail.Metadata.TagList>
+          <Detail.Metadata.Label title="From" text={mr.source_branch} />
+          <Detail.Metadata.Label title="Into" text={mr.target_branch} />
+          <Detail.Metadata.Label title="Author" text={author} />
+          <Detail.Metadata.TagList title="Labels">
+            {mr.labels.map((m) => (
+              <Detail.Metadata.TagList.Item text={m.name} color={m.color} />
+            ))}
+          </Detail.Metadata.TagList>
+        </Detail.Metadata>
       }
     />
   );
