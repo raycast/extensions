@@ -95,6 +95,7 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
 
   const md = lines.join("  \n");
   const author = mr.author ? `${mr.author.name}` : "<no author>";
+  const milestone = mr.milestone ? mr.milestone.title : "<no milestone>";
 
   return (
     <Detail
@@ -120,6 +121,7 @@ export function MRDetail(props: { mr: MergeRequest }): JSX.Element {
           <Detail.Metadata.Label title="From" text={mr.source_branch} />
           <Detail.Metadata.Label title="Into" text={mr.target_branch} />
           <Detail.Metadata.Label title="Author" text={author} />
+          <Detail.Metadata.Label title="Milestone" text={milestone} />
           <Detail.Metadata.TagList title="Labels">
             {mr.labels.map((m) => (
               <Detail.Metadata.TagList.Item text={m.name} color={m.color} />
@@ -282,7 +284,11 @@ export function MRListItem(props: {
       title={mr.title}
       subtitle={subtitle.join("    ")}
       icon={icon}
-      accessories={ensureCleanAccessories([{ text: toDateString(mr.updated_at) }, { icon: accessoryIcon }])}
+      accessories={ensureCleanAccessories([
+        { text: mr.milestone?.title },
+        { text: toDateString(mr.updated_at) },
+        { icon: accessoryIcon },
+      ])}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

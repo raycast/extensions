@@ -67,6 +67,8 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
     target_branch: mr.target_branch,
     merge_commit_sha: mr.merge_commit_sha,
     sha: mr.sha,
+    milestone: mr.milestone ? mr.milestone as Milestone : undefined,
+    draft: mr.draft
   };
 }
 
@@ -192,6 +194,8 @@ export class MergeRequest {
   public target_branch = "";
   public merge_commit_sha = "";
   public sha = "";
+  public milestone?: Milestone;
+  public draft = false;
 }
 
 export interface TodoGroup {
