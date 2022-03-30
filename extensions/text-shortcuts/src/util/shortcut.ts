@@ -145,14 +145,7 @@ export async function createShortcut(info: ShortcutInfo, tactions: Taction[], sh
   if (info.tag.length == 0) {
     info.tag = [tags[tags.length - 1]];
   }
-  for (let i = 0; i < tactions.length; i++) {
-    if (tactions[i].type === TactionType.AFFIX) {
-      const match = Array.from(tactions[i].content[0].matchAll(/(\$TEXT\$)|(\$LINE\$)|(\$WORD\$)/g));
-      if (match.length > 0) {
-        tactions[i].content[1] = match[0][0];
-      }
-    }
-  }
+  tactions = handleLiveTemplate(tactions);
   if (info.id.length > 0) {
     shortcuts.map((value, index) => {
       if (value.info.id == info.id) {
@@ -169,10 +162,22 @@ export async function createShortcut(info: ShortcutInfo, tactions: Taction[], sh
   await LocalStorage.setItem("shortcuts", JSON.stringify(shortcuts));
 }
 
-export function runShortcut(input: string, shortcut: Shortcut) {
+export function handleLiveTemplate(tactions: Taction[]) {
+  for (let i = 0; i < tactions.length; i++) {
+    if (tactions[i].type === TactionType.AFFIX) {
+      const match = Array.from(tactions[i].content[0].matchAll(/(\$TEXT\$)|(\$LINE\$)|(\$WORD\$)/g));
+      if (match.length > 0) {
+        tactions[i].content[1] = match[0][0];
+      }
+    }
+  }
+  return tactions;
+}
+
+export function runShortcut(input: string, tactions: Taction[]) {
   try {
     let output = input;
-    shortcut.tactions.map((value) => {
+    tactions.map((value) => {
       switch (value.type) {
         case TactionType.DELETE: {
           output = output.replaceAll(value.content[0], "");

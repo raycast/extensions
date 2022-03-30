@@ -1,15 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  LocalStorage,
-  popToRoot,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
 import { simulatePressKeyboard } from "./util/utils";
 import {
   cases,
@@ -64,6 +54,7 @@ export default function CreateShortcut(props: {
 
   return (
     <Form
+      navigationTitle={"Create Text Shortcut"}
       actions={
         <CreateShortcutActions
           info={info}
@@ -113,162 +104,163 @@ export default function CreateShortcut(props: {
         })}
       </Form.TagPicker>
 
-      {tactions.map((taction, index, array) => {
-        switch (taction.type) {
-          case TactionType.DELETE: {
-            return (
-              <React.Fragment key={"delete_fragment" + index}>
-                <Form.Separator />
-                <Form.TextField
-                  id={"delete" + index}
-                  key={"delete" + index}
-                  title={TactionType.DELETE}
-                  placeholder={"Delete word"}
-                  value={array[index].content[0]}
-                  onChange={(newValue) => {
-                    const _tactions = [...tactions];
-                    _tactions[index].content[0] = newValue;
-                    setTactions(_tactions);
-                  }}
-                />
-              </React.Fragment>
-            );
-          }
-          case TactionType.REPLACE: {
-            return (
-              <React.Fragment key={"replace_fragment" + index}>
-                <Form.Separator />
-                <Form.TextField
-                  id={"replace" + index}
-                  key={"replace" + index}
-                  title={TactionType.REPLACE}
-                  placeholder={"Replace"}
-                  value={array[index].content[0]}
-                  onChange={(newValue) => {
-                    tactions[index].content[0] = newValue;
-                  }}
-                />
-                <Form.TextField
-                  id={"replace_with" + index}
-                  key={"replace_with" + index}
-                  title={""}
-                  placeholder={"with"}
-                  value={array[index].content[1]}
-                  onChange={(newValue) => {
-                    tactions[index].content[1] = newValue;
-                  }}
-                />
-              </React.Fragment>
-            );
-          }
-          case TactionType.AFFIX: {
-            return (
-              <React.Fragment key={"affix_fragment" + index}>
-                <Form.Separator />
-                <Form.TextArea
-                  id={"affix" + index}
-                  key={"affix" + index}
-                  title={TactionType.AFFIX}
-                  value={array[index].content[0]}
-                  placeholder={
-                    'Such as Prefix$VARIABLE$Suffix\n\nTemplate can only have a maximum of one "Input" variable'
-                  }
-                  onChange={(newValue) => {
-                    updateTactionContent(newValue, index, [...array], setTactions);
-                  }}
-                />
-                <Form.Dropdown
-                  id={"affix_variable" + index}
-                  key={"affix_variable" + index}
-                  defaultValue={""}
-                  onChange={async (newValue) => {
-                    updateTactionContent(`${tactions[index].content[0]}${newValue}`, index, [...array], setTactions);
-                  }}
-                >
-                  {variables.map((variable) => {
-                    return (
-                      <Form.Dropdown.Item
-                        key={"variable" + variable.title}
-                        title={variable.title}
-                        value={variable.value}
-                      />
-                    );
-                  })}
-                </Form.Dropdown>
-              </React.Fragment>
-            );
-          }
-          case TactionType.CASE: {
-            return (
-              <React.Fragment key={"case_fragment" + index}>
-                <Form.Separator />
-                <Form.Dropdown
-                  id={"case" + index}
-                  key={"case" + index}
-                  title={TactionType.CASE}
-                  defaultValue={array[index].content[0]}
-                  onChange={async (newValue) => {
-                    updateTactionContent(newValue, index, [...array], setTactions);
-                  }}
-                >
-                  {cases.map((cases, caseIndex) => {
-                    return <Form.Dropdown.Item key={"case" + caseIndex} title={cases} value={cases} />;
-                  })}
-                </Form.Dropdown>
-              </React.Fragment>
-            );
-          }
-          case TactionType.CODER: {
-            return (
-              <React.Fragment key={"coder_fragment" + index}>
-                <Form.Separator />
-                <Form.Dropdown
-                  id={"coder" + index}
-                  key={"coder" + index}
-                  title={TactionType.CODER}
-                  defaultValue={array[index].content[0]}
-                  onChange={async (newValue) => {
-                    updateTactionContent(newValue, index, [...array], setTactions);
-                  }}
-                >
-                  {coders.map((coder) => {
-                    return <Form.Dropdown.Item key={"coder" + coder} title={coder} value={coder} />;
-                  })}
-                </Form.Dropdown>
-              </React.Fragment>
-            );
-          }
-          case TactionType.TRANSFORM: {
-            return (
-              <React.Fragment key={"transform_fragment" + index}>
-                <Form.Separator />
-                <Form.Dropdown
-                  id={"transform" + index}
-                  key={"transform" + index}
-                  title={TactionType.TRANSFORM}
-                  defaultValue={array[index].content[0]}
-                  onChange={async (newValue) => {
-                    updateTactionContent(newValue, index, [...array], setTactions);
-                  }}
-                >
-                  {transforms.map((transform) => {
-                    return <Form.Dropdown.Item key={"convert" + transform} title={transform} value={transform} />;
-                  })}
-                </Form.Dropdown>
-              </React.Fragment>
-            );
-          }
-        }
-      })}
+      <Form.Description text={"Shortcut Key:   ⌘D     ⌘E     ⌘N     ⌘R     ⌘T     ⌘L"} />
+      <Form.Description text={"Delete | Coder | Case | Replace | Transform | Template"} />
+
+      {tactionForms(tactions, setTactions)}
     </Form>
   );
+}
+
+export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<React.SetStateAction<Taction[]>>) {
+  return tactions.map((taction, index, array) => {
+    switch (taction.type) {
+      case TactionType.DELETE: {
+        return (
+          <React.Fragment key={"delete_fragment" + index}>
+            <Form.Separator />
+            <Form.TextField
+              id={"delete" + index}
+              key={"delete" + index}
+              title={TactionType.DELETE}
+              placeholder={"Delete word"}
+              value={array[index].content[0]}
+              onChange={(newValue) => {
+                const _tactions = [...tactions];
+                _tactions[index].content[0] = newValue;
+                setTactions(_tactions);
+              }}
+            />
+          </React.Fragment>
+        );
+      }
+      case TactionType.REPLACE: {
+        return (
+          <React.Fragment key={"replace_fragment" + index}>
+            <Form.Separator />
+            <Form.TextField
+              id={"replace" + index}
+              key={"replace" + index}
+              title={TactionType.REPLACE}
+              placeholder={"Replace"}
+              value={array[index].content[0]}
+              onChange={(newValue) => {
+                tactions[index].content[0] = newValue;
+              }}
+            />
+            <Form.TextField
+              id={"replace_with" + index}
+              key={"replace_with" + index}
+              title={""}
+              placeholder={"with"}
+              value={array[index].content[1]}
+              onChange={(newValue) => {
+                tactions[index].content[1] = newValue;
+              }}
+            />
+          </React.Fragment>
+        );
+      }
+      case TactionType.AFFIX: {
+        return (
+          <React.Fragment key={"affix_fragment" + index}>
+            <Form.Separator />
+            <Form.TextArea
+              id={"affix" + index}
+              key={"affix" + index}
+              title={TactionType.AFFIX}
+              value={array[index].content[0]}
+              placeholder={'Such as Prefix$VARIABLE$Suffix\n\nTemplate can only have a maximum of one "Input" variable'}
+              onChange={(newValue) => {
+                updateTactionContent(newValue, index, [...array], setTactions);
+              }}
+            />
+            <Form.Dropdown
+              id={"affix_variable" + index}
+              key={"affix_variable" + index}
+              defaultValue={""}
+              onChange={async (newValue) => {
+                updateTactionContent(`${tactions[index].content[0]}${newValue}`, index, [...array], setTactions);
+              }}
+            >
+              {variables.map((variable) => {
+                return (
+                  <Form.Dropdown.Item key={"variable" + variable.title} title={variable.title} value={variable.value} />
+                );
+              })}
+            </Form.Dropdown>
+          </React.Fragment>
+        );
+      }
+      case TactionType.CASE: {
+        return (
+          <React.Fragment key={"case_fragment" + index}>
+            <Form.Separator />
+            <Form.Dropdown
+              id={"case" + index}
+              key={"case" + index}
+              title={TactionType.CASE}
+              defaultValue={array[index].content[0]}
+              onChange={async (newValue) => {
+                updateTactionContent(newValue, index, [...array], setTactions);
+              }}
+            >
+              {cases.map((cases, caseIndex) => {
+                return <Form.Dropdown.Item key={"case" + caseIndex} title={cases} value={cases} />;
+              })}
+            </Form.Dropdown>
+          </React.Fragment>
+        );
+      }
+      case TactionType.CODER: {
+        return (
+          <React.Fragment key={"coder_fragment" + index}>
+            <Form.Separator />
+            <Form.Dropdown
+              id={"coder" + index}
+              key={"coder" + index}
+              title={TactionType.CODER}
+              defaultValue={array[index].content[0]}
+              onChange={async (newValue) => {
+                updateTactionContent(newValue, index, [...array], setTactions);
+              }}
+            >
+              {coders.map((coder) => {
+                return <Form.Dropdown.Item key={"coder" + coder} title={coder} value={coder} />;
+              })}
+            </Form.Dropdown>
+          </React.Fragment>
+        );
+      }
+      case TactionType.TRANSFORM: {
+        return (
+          <React.Fragment key={"transform_fragment" + index}>
+            <Form.Separator />
+            <Form.Dropdown
+              id={"transform" + index}
+              key={"transform" + index}
+              title={TactionType.TRANSFORM}
+              defaultValue={array[index].content[0]}
+              onChange={async (newValue) => {
+                updateTactionContent(newValue, index, [...array], setTactions);
+              }}
+            >
+              {transforms.map((transform) => {
+                return <Form.Dropdown.Item key={"convert" + transform} title={transform} value={transform} />;
+              })}
+            </Form.Dropdown>
+          </React.Fragment>
+        );
+      }
+    }
+  });
 }
 
 function CreateShortcutActions(props: {
   info: ShortcutInfo;
   tactions: Taction[];
   localShortcuts: Shortcut[];
-  setTactions: any;
+  setTactions: React.Dispatch<React.SetStateAction<Taction[]>>;
   updateListUseState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
 }) {
   const info = props.info;
@@ -318,6 +310,19 @@ function CreateShortcutActions(props: {
           }
         }}
       />
+      <TactionActions tactions={tactions} setTactions={setTactions} />
+    </ActionPanel>
+  );
+}
+
+export function TactionActions(props: {
+  tactions: Taction[];
+  setTactions: React.Dispatch<React.SetStateAction<Taction[]>>;
+}) {
+  const tactions = props.tactions;
+  const setTactions = props.setTactions;
+  return (
+    <>
       <ActionPanel.Section title="Add Action">
         <Action
           title={TactionType.DELETE}
@@ -389,7 +394,7 @@ function CreateShortcutActions(props: {
           }}
         />
       </ActionPanel.Section>
-    </ActionPanel>
+    </>
   );
 }
 

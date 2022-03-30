@@ -4,12 +4,11 @@ A powerful and easy to use tool that will help you transform your text.
 Text Shortcuts removes the need to perform repetitive tasks manually on your text.
 Combine transformation actions to create powerful automations for your text.
 
--------
+**Command:**
 
-## Live Snippet
-
-Not only for text processing, but also as a live Snippet for text.
-Add variables to your Snippet that can be automatically converted when pasting.
+- **Create Text Shortcut**: Create Text Shortcut with actions
+- **Search Text Shortcut**: Search for built-in or custom shortcuts to handle selected or clipboard text
+- **Run Text Shortcut Now**: Run actions directly to handle selected or clipboard text
 
 ------
 

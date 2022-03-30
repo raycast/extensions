@@ -6,14 +6,12 @@ import {
   Clipboard,
   ActionPanel,
   Action,
-  popToRoot,
-  showHUD,
   Icon,
   useNavigation,
   confirmAlert,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { fetchItemInput, ItemInput, ItemSource } from "./util/input";
+import { fetchItemInput } from "./util/input";
 import { runShortcut, Shortcut, ShortcutSource, tags } from "./util/shortcut";
 import CreateShortcut from "./create-shortcut";
 import { preferences } from "./util/utils";
@@ -25,7 +23,6 @@ import { TIMES_SHORTCUTS } from "./build-in/time";
 import { FORMAT_SHORTCUTS } from "./build-in/format";
 
 export default function SearchShortcut() {
-  const [itemInput, setItemInput] = useState<ItemInput>(new ItemInput());
   const [userShortcuts, setUserShortcuts] = useState<Shortcut[]>([]);
   const [allShortcuts, setAllShortcuts] = useState<Shortcut[]>([]);
   const [detail, setDetail] = useState<string>("");
@@ -75,26 +72,14 @@ export default function SearchShortcut() {
     _fetchBuildInShortcut().then();
   }, [userShortcuts]);
 
-  useEffect(() => {
-    async function _fetchItemInput() {
-      const inputItem = await fetchItemInput();
-      if (inputItem.source == ItemSource.NULL) {
-        await showToast(Toast.Style.Failure, "Nothing is detected from Selected or Clipboard!");
-      } else {
-        setItemInput(inputItem);
-      }
-    }
-
-    _fetchItemInput().then();
-  }, []);
-
   return (
     <List
       isShowingDetail={preferences().detail}
       isLoading={allShortcuts.length == 0}
       searchBarPlaceholder={"Search shortcut"}
-      onSelectionChange={(id) => {
-        setDetail(runShortcut(itemInput.content, allShortcuts[Number(id)]));
+      onSelectionChange={async (id) => {
+        const _inputItem = await fetchItemInput();
+        setDetail(runShortcut(_inputItem.content, allShortcuts[Number(id)].tactions));
       }}
       searchBarAccessory={
         <List.Dropdown
@@ -126,12 +111,12 @@ export default function SearchShortcut() {
                     <ActionPanel>
                       <Action
                         title={"Run Shortcut"}
-                        icon={Icon.Hammer}
+                        icon={Icon.TwoArrowsClockwise}
                         onAction={async () => {
-                          const _runShortcut = runShortcut(itemInput.content, value);
+                          const _inputItem = await fetchItemInput();
+                          const _runShortcut = runShortcut(_inputItem.content, value.tactions);
                           await Clipboard.paste(_runShortcut);
-                          await showHUD("Paste Shortcut's Text");
-                          await popToRoot({ clearSearchBar: false });
+                          await showToast(Toast.Style.Success, "Paste Shortcut's Text");
                         }}
                       />
                     </ActionPanel>
@@ -142,12 +127,12 @@ export default function SearchShortcut() {
                       <ActionPanel>
                         <Action
                           title={"Run Shortcut"}
-                          icon={Icon.Hammer}
+                          icon={Icon.TwoArrowsClockwise}
                           onAction={async () => {
-                            const _runShortcut = runShortcut(itemInput.content, value);
+                            const _inputItem = await fetchItemInput();
+                            const _runShortcut = runShortcut(_inputItem.content, value.tactions);
                             await Clipboard.paste(_runShortcut);
-                            await showHUD("Paste Shortcut's Text");
-                            await popToRoot({ clearSearchBar: false });
+                            await showToast(Toast.Style.Success, "Paste Shortcut's Text");
                           }}
                         />
                         <Action
