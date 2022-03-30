@@ -67,8 +67,8 @@ export function jsonDataToMergeRequest(mr: any): MergeRequest {
     target_branch: mr.target_branch,
     merge_commit_sha: mr.merge_commit_sha,
     sha: mr.sha,
-    milestone: mr.milestone ? mr.milestone as Milestone : undefined,
-    draft: mr.draft
+    milestone: mr.milestone ? (mr.milestone as Milestone) : undefined,
+    draft: mr.draft,
   };
 }
 
