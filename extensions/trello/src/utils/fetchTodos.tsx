@@ -1,4 +1,4 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
 import fetch from "node-fetch";
 import { TrelloFetchResponse } from "../trelloResponse.model";
 
@@ -13,7 +13,6 @@ const { apitoken }: Preferences = getPreferenceValues();
 const { username }: Preferences = getPreferenceValues();
 
 export const returnTodos = async (searchTerm: string): Promise<TrelloFetchResponse> => {
-
   try {
     if (searchTerm != "") {
       const response = await fetch(
@@ -30,12 +29,12 @@ export const returnTodos = async (searchTerm: string): Promise<TrelloFetchRespon
         const json = await response.json();
         return json as TrelloFetchResponse;
       } catch (error) {
-        showToast(Toast.Style.Failure, "An error occured", "Could not fetch todos, check your credentials");
+        showToast(ToastStyle.Failure, "An error occured", "Could not fetch todos, check your credentials");
         return Promise.resolve([]);
       }
     }
   } catch (error) {
-    showToast(Toast.Style.Failure, "An error occured", "Could not fetch todos, check your credentials");
+    showToast(ToastStyle.Failure, "An error occured", "Could not fetch todos, check your credentials");
     return Promise.resolve([]);
   }
 };

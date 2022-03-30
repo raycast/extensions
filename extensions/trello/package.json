@@ -15,17 +15,10 @@
       "mode": "view"
     },
     {
-      "name": "searchTodos",
+      "name": "search",
       "title": "Search Todos",
       "subtitle": "Trello",
       "description": "Search all todos across all your boards",
-      "mode": "view"
-    },
-    {
-      "name": "searchBoards",
-      "title": "Search Boards",
-      "subtitle": "Trello",
-      "description": "Search all Boards across all your boards",
       "mode": "view"
     }
   ],
@@ -60,7 +53,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.3"
+    "@raycast/api": "^1.29.1"
   },
   "devDependencies": {
     "@types/node": "~17.0.21",
