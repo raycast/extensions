@@ -60,6 +60,7 @@ const EPISODE_NUM_REGEX = /^(\d{2})x(\d{2})-.+/i;
 export function mapFinerGifsResponse(finerGifsResp: FinerGif) {
   const gifUrl = new URL(finerGifsResp.fields.fileid + ".gif", "https://media.thefinergifs.club");
   const [, season, episode] = finerGifsResp.fields.fileid.match(EPISODE_NUM_REGEX) || new Array(2);
+  const epInt = parseInt(season, 10);
 
   return <IGif>{
     id: finerGifsResp.id,
@@ -71,6 +72,13 @@ export function mapFinerGifsResponse(finerGifsResp: FinerGif) {
       season || episode
         ? {
             labels: [season && { title: "Season", text: season }, episode && { title: "Episode", text: episode }],
+            links: [
+              epInt && {
+                title: "The TVDB",
+                text: `Season ${epInt}`,
+                target: `https://thetvdb.com/series/the-office-us/seasons/official/${epInt}`,
+              },
+            ],
           }
         : undefined,
   };
