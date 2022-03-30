@@ -1,25 +1,20 @@
 import { Action, ActionPanel, List, Icon, Image, Color } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import json2md from "json2md";
-import SeasonDropdown, { seasons } from "./components/season_dropdown";
-import { getTables } from "./api";
-import { Entry, Table } from "./types/table";
+import { Entry } from "./types";
+import { useSeasons, useTables } from "./hooks";
 
 export default function GetTables() {
-  const [tables, setTables] = useState<Table[]>([]);
-  const [season, setSeason] = useState<string>(seasons[0].value);
-  const [loading, setLoading] = useState<boolean>(false);
+  const season = useSeasons();
+
+  const [selectedSeason, setSeason] = useState<string>(
+    season.seasons[0]?.id.toString()
+  );
   const [showStats, setShowStats] = useState<boolean>(false);
 
-  useEffect(() => {
-    setTables([]);
-    setLoading(true);
+  const table = useTables(selectedSeason);
 
-    getTables(season).then((data) => {
-      setTables(data);
-      setLoading(false);
-    });
-  }, [season]);
+  const loading = [season.loading, table.loading].some((i) => i);
 
   const club = (entry: Entry): json2md.DataObject => {
     const { overall, team, ground, form, next, startingPosition } = entry;
@@ -68,11 +63,25 @@ export default function GetTables() {
   return (
     <List
       throttle
-      searchBarAccessory={<SeasonDropdown onSelect={setSeason} />}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter by Season" onChange={setSeason}>
+          <List.Dropdown.Section>
+            {season.seasons.map((season) => {
+              return (
+                <List.Dropdown.Item
+                  key={season.id}
+                  value={season.id.toString()}
+                  title={season.label}
+                />
+              );
+            })}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
       isLoading={loading}
       isShowingDetail={showStats}
     >
-      {tables.map((table) => {
+      {table.tables.map((table) => {
         return (
           <List.Section key={table.gameWeek}>
             {table.entries.map((entry) => {

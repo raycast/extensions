@@ -1,49 +1,50 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import groupBy from "lodash.groupby";
 import { format, parse } from "date-fns";
-import { getFixtures } from "./api";
-import { Content } from "./types/fixture";
-import ClubDropdown from "./components/club_dropdown";
+import { useFixtures, useSeasons, useTeams } from "./hooks";
 
 export default function Fixture() {
-  const [fixtures, setFixtures] = useState<Content[]>([]);
-  const [lastPage, setLastPage] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [club, setClub] = useState<string>("-1");
+  const season = useSeasons();
+  const club = useTeams(season.seasons[0]?.id.toString());
+
   const [page, setPage] = useState<number>(0);
+  const [teams, setTeams] = useState<string>("-1");
 
-  useEffect(() => {
-    setLoading(true);
-    setFixtures([]);
-    setPage(0);
+  const fixture = useFixtures({
+    teams,
+    page,
+    sort: "asc",
+    statuses: "U,L",
+  });
 
-    getFixtures(club, page, "asc", "U,L").then((data) => {
-      setFixtures(data);
-      setLoading(false);
-    });
-  }, [club]);
-
-  useEffect(() => {
-    setLoading(true);
-
-    getFixtures(club, page, "asc", "U,L").then((data) => {
-      const matches = fixtures.concat(data);
-      if (data.length === 0) {
-        setLastPage(true);
-      }
-      setFixtures(matches);
-      setLoading(false);
-    });
-  }, [page]);
-
-  const categories = groupBy(fixtures, (f) => f.kickoff.label?.split(",")[0]);
+  const loading = [season.loading, club.loading, fixture.loading].some(
+    (i) => i
+  );
+  const categories = groupBy(
+    fixture.fixtures,
+    (f) => f.kickoff.label?.split(",")[0]
+  );
 
   return (
     <List
       throttle
       isLoading={loading}
-      searchBarAccessory={<ClubDropdown onSelect={setClub} />}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter by Club" onChange={setTeams}>
+          <List.Dropdown.Section>
+            {club.clubs.map((club) => {
+              return (
+                <List.Dropdown.Item
+                  key={club.value}
+                  value={club.value}
+                  title={club.title}
+                />
+              );
+            })}
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
     >
       {Object.entries(categories).map(([label, matches]) => {
         return (
@@ -77,7 +78,7 @@ export default function Fixture() {
                       <Action.OpenInBrowser
                         url={`https://www.premierleague.com/match/${match.id}`}
                       />
-                      {!lastPage && (
+                      {!fixture.lastPage && (
                         <Action
                           title="Load More"
                           icon={Icon.MagnifyingGlass}
