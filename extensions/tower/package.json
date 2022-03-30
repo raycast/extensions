@@ -5,7 +5,7 @@
   "description": "Navigate and open your repositories in Tower.",
   "icon": "icon.png",
   "author": "tdwesten",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "license": "MIT",
   "commands": [
     {
@@ -35,27 +35,27 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
-    "node-fetch": "^2.6.1",
+    "@raycast/api": "^1.28.0",
     "node-git-current-branch": "^2.0.1",
-    "plist": "^3.0.3",
+    "plist": "^3.0.4",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "^16.4.3",
-    "@types/node-fetch": "^2.5.12",
-    "@types/open": "^6.2.1",
+    "@types/node": "~16.10.0",
     "@types/plist": "^3.0.2",
-    "@types/react": "^17.0.20",
-    "@typescript-eslint/eslint-plugin": "^4.28.5",
-    "@typescript-eslint/parser": "^4.28.5",
-    "eslint": "^7.31.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
+    "@typescript-eslint/parser": "^5.12.0",
+    "eslint": "^8.9.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.20.1",
-    "typescript": "^4.3.5"
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.23.0",
+    "typescript": "^4.5.5"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

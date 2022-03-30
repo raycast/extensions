@@ -1,2 +1,2 @@
-import VolumeList from './components/VolumeList'
-export default VolumeList
+import VolumeList from "./components/VolumeList";
+export default VolumeList;

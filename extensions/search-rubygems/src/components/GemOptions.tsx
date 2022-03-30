@@ -1,9 +1,11 @@
 import { Icon, PushAction, List, ActionPanel, OpenInBrowserAction, CopyToClipboardAction } from "@raycast/api";
-import type { GemSearchResult } from '../rubygems/types';
-import { GemInfo } from './GemInfo';
-import { mapGemLinks } from '../utils';
+import type { GemSearchResult } from "../rubygems/types";
+import { GemInfo } from "./GemInfo";
+import { mapGemLinks } from "../utils";
 
-interface Props { gem: GemSearchResult };
+interface Props {
+  gem: GemSearchResult;
+}
 
 export const GemOptions = ({ gem }: Props): JSX.Element => {
   return (
@@ -16,13 +18,7 @@ export const GemOptions = ({ gem }: Props): JSX.Element => {
           accessoryTitle="Dependencies and more"
           actions={
             <ActionPanel>
-              <PushAction
-                title="Show Details"
-                icon={Icon.TextDocument}
-                target={
-                  <GemInfo key={gem.sha} gem={gem} />
-                }
-              />
+              <PushAction title="Show Details" icon={Icon.TextDocument} target={<GemInfo key={gem.sha} gem={gem} />} />
             </ActionPanel>
           }
         />
@@ -39,25 +35,22 @@ export const GemOptions = ({ gem }: Props): JSX.Element => {
         />
       </List.Section>
       <List.Section title="Links">
-        {
-          mapGemLinks(gem).map(link => {
-            return <List.Item
-              title={`Open ${link['title']}`}
-              accessoryTitle={link['link']}
-              key={link['title']}
+        {mapGemLinks(gem).map((link) => {
+          return (
+            <List.Item
+              title={`Open ${link["title"]}`}
+              accessoryTitle={link["link"]}
+              key={link["title"]}
               icon={Icon.Globe}
               actions={
                 <ActionPanel>
-                  <OpenInBrowserAction
-                    title="Open"
-                    url={link['link']}
-                  />
+                  <OpenInBrowserAction title="Open" url={link["link"]} />
                 </ActionPanel>
               }
             />
-          })
-        }
+          );
+        })}
       </List.Section>
     </List>
   );
-}
+};

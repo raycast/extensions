@@ -10,11 +10,7 @@ import { OpenPageSubmenuAction } from "./OpenPageSubmenuAction";
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
-export default function FileListItem(props: {
-  file: File;
-  extraKey?: string;
-  onVisit: (file: File) => void;
-}) {
+export default function FileListItem(props: { file: File; extraKey?: string; onVisit: (file: File) => void }) {
   const { file, extraKey, onVisit } = props;
 
   const accessoryTitle = String(timeAgo.format(new Date(file.last_modified)));
@@ -29,9 +25,7 @@ export default function FileListItem(props: {
         <ActionPanel>
           <ActionPanel.Section>
             <OpenProjectFileAction file={props.file} onVisit={onVisit} />
-            <CopyToClipboardAction
-              content={`https://figma.com/file/${file.key}`}
-            />
+            <CopyToClipboardAction content={`https://figma.com/file/${file.key}`} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <OpenPageSubmenuAction file={props.file} onVisit={onVisit} />

@@ -6,6 +6,10 @@
   "icon": "extension-icon.png",
   "author": "fe9lix",
   "license": "MIT",
+  "categories": [
+    "Media",
+    "Web"
+  ],
   "commands": [
     {
       "name": "addBookmark",
@@ -20,6 +24,13 @@
       "subtitle": "Pinboard",
       "description": "Searches your Pinboard bookmarks by tags.",
       "mode": "view"
+    },
+    {
+      "name": "searchBookmarksWithConstantTags",
+      "title": "Search Bookmarks With Constant Tags",
+      "subtitle": "Pinboard",
+      "description": "Searches your Pinboard bookmarks by tags, but add one or more tags from preferences. Optional.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -30,12 +41,20 @@
       "title": "API Token",
       "description": "Enter your API Token (Pinboard Settings > Password)",
       "placeholder": "Enter your API Token (Pinboard Settings > Password)"
+    },
+    {
+      "name": "constantTags",
+      "type": "textfield",
+      "required": false,
+      "title": "Constant tags",
+      "description": "Enter the tags you want to add when searching with constant tags",
+      "placeholder": "bookmarks"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.30.0",
     "he": "^1.2.0",
-    "node-fetch": "^3.0.0"
+    "node-fetch": "^3.2.0"
   },
   "devDependencies": {
     "@types/he": "^1.1.2",
@@ -45,6 +64,7 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

@@ -5,21 +5,21 @@
 //   "Set quicktype target language"
 
 export interface Script {
-    type:              string;
-    requiresPrompt?:   boolean;
-    id:                string;
-    command:           string;
-    filePath:          string;
-    kenv:              string;
-    icon:              string;
-    name:              string;
-    menu?:             string;
-    description?:      string;
-    author?:           string;
-    twitter?:          string;
-    note?:             string;
-    exclude?:          boolean;
-    shortcut?:         string;
-    friendlyShortcut?: string;
-    tabs?:             string[];
+  type: string;
+  requiresPrompt?: boolean;
+  id: string;
+  command: string;
+  filePath: string;
+  kenv: string;
+  icon: string;
+  name: string;
+  menu?: string;
+  description?: string;
+  author?: string;
+  twitter?: string;
+  note?: string;
+  exclude?: boolean;
+  shortcut?: string;
+  friendlyShortcut?: string;
+  tabs?: string[];
 }

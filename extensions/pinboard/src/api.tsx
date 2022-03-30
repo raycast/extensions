@@ -1,8 +1,10 @@
-import { preferences, showToast, ToastStyle } from "@raycast/api";
-import { useState, useEffect, useRef } from "react";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { useState, useEffect, useRef, useCallback } from "react";
 import fetch, { AbortError } from "node-fetch";
 
 const apiBasePath = "https://api.pinboard.in/v1";
+
+const { apiToken, constantTags } = getPreferenceValues();
 
 export interface Bookmark {
   id: string;
@@ -20,43 +22,56 @@ export interface BookmarksState {
 }
 
 export enum SearchKind {
+  Constant,
   All,
 }
 
 export function useSearchBookmarks(searchKind: SearchKind) {
   const [state, setState] = useState<BookmarksState>({ bookmarks: [], isLoading: true, title: "" });
-  const cancel = useRef<AbortController | null>(null);
+  const cancelRef = useRef<AbortController | null>(null);
+
+  const search = useCallback(
+    async (searchText: string) => {
+      cancelRef.current?.abort();
+      cancelRef.current = new AbortController();
+      try {
+        setState((oldState) => ({
+          ...oldState,
+          isLoading: true,
+        }));
+        let bookmarks: Bookmark[];
+        switch (searchKind) {
+          case SearchKind.All:
+            bookmarks = await searchBookmarks(searchText, searchKind, cancelRef.current.signal);
+            break;
+          case SearchKind.Constant:
+            bookmarks = await searchBookmarks(searchText + " " + constantTags, searchKind, cancelRef.current.signal);
+            break;
+        }
+
+        setState((oldState) => ({
+          ...oldState,
+          bookmarks: bookmarks,
+          isLoading: false,
+          title: searchKind === SearchKind.All && searchText.length === 0 ? "Recent Bookmarks" : "Found Bookmarks",
+        }));
+      } catch (error) {
+        if (error instanceof AbortError) {
+          return;
+        }
+        console.error("searchBookmarks error", error);
+        showToast({ title: "Could not search bookmarks", message: String(error), style: Toast.Style.Failure });
+      }
+    },
+    [searchKind]
+  );
 
   useEffect(() => {
     search("");
     return () => {
-      cancel.current?.abort();
+      cancelRef.current?.abort();
     };
-  }, []);
-
-  async function search(searchText: string) {
-    cancel.current?.abort();
-    cancel.current = new AbortController();
-    try {
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true,
-      }));
-      const bookmarks = await searchBookmarks(searchText, searchKind, cancel.current.signal);
-      setState((oldState) => ({
-        ...oldState,
-        bookmarks: bookmarks,
-        isLoading: false,
-        title: searchKind === SearchKind.All && searchText.length === 0 ? "Recent Bookmarks" : "Found Bookmarks",
-      }));
-    } catch (error) {
-      if (error instanceof AbortError) {
-        return;
-      }
-      console.error("searchBookmarks error", error);
-      showToast(ToastStyle.Failure, "Could not search bookmarks", String(error));
-    }
-  }
+  }, [search]);
 
   return {
     state: state,
@@ -73,7 +88,7 @@ async function searchBookmarks(searchText: string, kind: SearchKind, signal: Abo
     params.append("results", "100");
   }
   params.append("format", "json");
-  params.append("auth_token", preferences.apiToken.value as string);
+  params.append("auth_token", apiToken);
 
   const response = await fetch(apiBasePath + path + "?" + params.toString(), {
     method: "get",
@@ -106,7 +121,7 @@ export async function addBookmark(bookmark: Bookmark): Promise<unknown> {
   params.append("shared", bookmark.private ? "no" : "yes");
   params.append("toread", bookmark.readLater ? "yes" : "no");
   params.append("format", "json");
-  params.append("auth_token", preferences.apiToken.value as string);
+  params.append("auth_token", apiToken);
 
   const response = await fetch(apiBasePath + "/posts/add?" + params.toString(), {
     method: "post",

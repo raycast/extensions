@@ -1,13 +1,8 @@
-import { collectionsDbPath, getProfileName } from '../utils/pathUtils';
-import { Database } from 'sql.js';
-import {
-  decodeUint8ArrayBlob,
-  loadDataToLocalDb,
-  termsAsParamNames,
-  termsAsParams
-  } from '../utils/sqlUtils';
-import { NullableString, UrlDetail, UrlSearchResult } from '../schema/types';
-import { useUrlSearch } from './useUrlSearch';
+import { collectionsDbPath, getProfileName } from "../utils/pathUtils";
+import { Database } from "sql.js";
+import { decodeUint8ArrayBlob, loadDataToLocalDb, termsAsParamNames, termsAsParams } from "../utils/sqlUtils";
+import { NullableString, UrlDetail, UrlSearchResult } from "../schema/types";
+import { useUrlSearch } from "./useUrlSearch";
 
 interface ItemSource {
   url: string;

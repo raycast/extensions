@@ -13,9 +13,7 @@ export function xcodeSimulatorsList(
   xcodeSimulatorService: XcodeSimulatorService
 ): JSX.Element {
   return (
-    <List
-      isLoading={!groupedXcodeSimulators}
-      searchBarPlaceholder="Search for Xcode Simulators">
+    <List isLoading={!groupedXcodeSimulators} searchBarPlaceholder="Search for Xcode Simulators">
       {groupedXcodeSimulators ? sections(groupedXcodeSimulators, xcodeSimulatorService) : undefined}
     </List>
   );
@@ -30,23 +28,14 @@ function sections(
   groupedXcodeSimulators: Map<string, XcodeSimulator[]>,
   xcodeSimulatorService: XcodeSimulatorService
 ): JSX.Element[] {
-  return Array
-    .from(groupedXcodeSimulators)
+  return Array.from(groupedXcodeSimulators)
     .sort(([lhs], [rhs]) => lhs.localeCompare(rhs))
     .map(([runtime, xcodeSimulators]) => {
       return (
-        <List.Section
-          key={runtime}
-          title={runtime}>
-          {
-            xcodeSimulators
-              .map((xcodeSimulator) => {
-                return xcodeSimulatorListItem(
-                  xcodeSimulator,
-                  xcodeSimulatorService
-                );
-              })
-          }
+        <List.Section key={runtime} title={runtime}>
+          {xcodeSimulators.map((xcodeSimulator) => {
+            return xcodeSimulatorListItem(xcodeSimulator, xcodeSimulatorService);
+          })}
         </List.Section>
       );
     });

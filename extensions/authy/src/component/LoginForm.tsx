@@ -4,7 +4,7 @@ import {
   completeRegistration,
   getAuthyApps,
   getServices,
-  requestRegistration
+  requestRegistration,
 } from "../client/authy-client";
 import {
   ActionPanel,
@@ -15,7 +15,7 @@ import {
   render,
   showToast,
   SubmitFormAction,
-  ToastStyle
+  ToastStyle,
 } from "@raycast/api";
 import {
   addToCache,
@@ -27,7 +27,7 @@ import {
   removeFromCache,
   REQUEST_ID,
   SECRET_SEED,
-  SERVICES_KEY
+  SERVICES_KEY,
 } from "../cache";
 import Authy from "../search-otp";
 import { genTOTP } from "../util/utils";
@@ -58,14 +58,13 @@ async function requestLoginIfNeeded() {
       throw error;
     }
   }
-
 }
 
 async function checkForApproval(setLogin: (step: boolean) => void) {
   const toast = await showToast(ToastStyle.Animated, "Checking request status");
   try {
     const { authyId } = getPreferenceValues<{ authyId: number }>();
-    if (!await checkIfCached(DEVICE_ID) || !await checkIfCached(SECRET_SEED)) {
+    if (!(await checkIfCached(DEVICE_ID)) || !(await checkIfCached(SECRET_SEED))) {
       const requestId: string = await getFromCache(REQUEST_ID);
       const registrationStatus = await checkRequestStatus(authyId, requestId);
 
@@ -117,19 +116,20 @@ async function resetRegistration() {
 
 export default function LoginForm(props: { setLogin: (step: boolean) => void }) {
   useEffect(() => {
-    (
-      async () => {
-        await requestLoginIfNeeded();
-      })();
+    (async () => {
+      await requestLoginIfNeeded();
+    })();
   });
 
   return (
-    <Detail markdown={`${message}`} actions={
-      <ActionPanel>
-        <SubmitFormAction icon={Icon.Clipboard} title="Agree" onSubmit={() => checkForApproval(props.setLogin)} />
-        <ActionPanel.Item icon={Icon.ExclamationMark} title={"Start From Scratch"} onAction={resetRegistration} />
-      </ActionPanel>
-    }
+    <Detail
+      markdown={`${message}`}
+      actions={
+        <ActionPanel>
+          <SubmitFormAction icon={Icon.Clipboard} title="Agree" onSubmit={() => checkForApproval(props.setLogin)} />
+          <ActionPanel.Item icon={Icon.ExclamationMark} title={"Start From Scratch"} onAction={resetRegistration} />
+        </ActionPanel>
+      }
     />
   );
 }

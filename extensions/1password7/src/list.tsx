@@ -82,29 +82,31 @@ export default function Command() {
 }
 
 function PasswordList({ onePasswordMetaItems }: { onePasswordMetaItems: OnePasswordMetaItem[] | undefined }) {
-
   interface OnePasswordMetaItemCategories {
-    [key: string]: OnePasswordMetaItemsCategory
+    [key: string]: OnePasswordMetaItemsCategory;
   }
 
   const categories: OnePasswordMetaItemCategories = {};
 
-  onePasswordMetaItems?.forEach(onePasswordMetaItem => {
-    if(!categories[onePasswordMetaItem.categoryPluralName]){
+  onePasswordMetaItems?.forEach((onePasswordMetaItem) => {
+    if (!categories[onePasswordMetaItem.categoryPluralName]) {
       categories[onePasswordMetaItem.categoryPluralName] = {
         categoryPluralName: onePasswordMetaItem.categoryPluralName,
         categoryUUID: onePasswordMetaItem.categoryUUID,
-        metaItems: []
-      }
+        metaItems: [],
+      };
     }
     categories[onePasswordMetaItem.categoryPluralName].metaItems.push(onePasswordMetaItem);
   });
 
-  const sortedCategories = Object.values(categories).sort((a, b) => b.metaItems.length - a .metaItems.length);
+  const sortedCategories = Object.values(categories).sort((a, b) => b.metaItems.length - a.metaItems.length);
   return (
     <List searchBarPlaceholder="Filter items by name..." isLoading={onePasswordMetaItems === undefined}>
-      {sortedCategories?.map(onePasswordMetaItemsCategory => (
-          <PasswordListCategory onePasswordMetaItemsCategory={onePasswordMetaItemsCategory} key={onePasswordMetaItemsCategory.categoryUUID}/>
+      {sortedCategories?.map((onePasswordMetaItemsCategory) => (
+        <PasswordListCategory
+          onePasswordMetaItemsCategory={onePasswordMetaItemsCategory}
+          key={onePasswordMetaItemsCategory.categoryUUID}
+        />
       ))}
     </List>
   );
@@ -131,20 +133,28 @@ function getIconForCategory(categoryUUID: string) {
 
 function PasswordListCategory(props: { onePasswordMetaItemsCategory: OnePasswordMetaItemsCategory }) {
   const onePasswordMetaItemsCategory = props.onePasswordMetaItemsCategory;
-  return(
-      <List.Section
-          id={onePasswordMetaItemsCategory.categoryUUID + onePasswordMetaItemsCategory.categoryPluralName}
-          title={onePasswordMetaItemsCategory.categoryPluralName}
-          subtitle={`${onePasswordMetaItemsCategory.metaItems.length} Items`}
-      >
-        {onePasswordMetaItemsCategory.metaItems?.map((onePasswordMetaItem, index) => (
-            <PasswordListItem
-                key={onePasswordMetaItem.uuid + onePasswordMetaItem.vaultUUID + index + Math.random()}
-                onePasswordMetaItem={onePasswordMetaItem}
-            />
-        ))}
-      </List.Section>
-  )
+  return (
+    <List.Section
+      id={onePasswordMetaItemsCategory.categoryUUID + onePasswordMetaItemsCategory.categoryPluralName}
+      title={onePasswordMetaItemsCategory.categoryPluralName}
+      subtitle={`${onePasswordMetaItemsCategory.metaItems.length} Items`}
+    >
+      {onePasswordMetaItemsCategory.metaItems?.map((onePasswordMetaItem, index) => (
+        <PasswordListItem
+          key={onePasswordMetaItem.uuid + onePasswordMetaItem.vaultUUID + index + Math.random()}
+          onePasswordMetaItem={onePasswordMetaItem}
+        />
+      ))}
+    </List.Section>
+  );
+}
+
+function getItemAccessoryTitle(item: OnePasswordMetaItem) {
+  const vaultName = `🗄 ${item.vaultName}`;
+  if (item.accountName) {
+    return `👤 ${item.accountName} ${vaultName}`;
+  }
+  return vaultName;
 }
 
 function PasswordListItem(props: { onePasswordMetaItem: OnePasswordMetaItem }) {
@@ -155,10 +165,12 @@ function PasswordListItem(props: { onePasswordMetaItem: OnePasswordMetaItem }) {
       title={onePasswordMetaItem.itemTitle}
       subtitle={onePasswordMetaItem.categorySingularName}
       icon={getIconForCategory(onePasswordMetaItem.categoryUUID)}
-      accessoryTitle={`👤 ${onePasswordMetaItem.accountName}  🗄 ${onePasswordMetaItem.vaultName}`}
+      accessoryTitle={getItemAccessoryTitle(onePasswordMetaItem)}
       actions={
         <ActionPanel>
-          {onePasswordMetaItem.categoryUUID === "001" && <OpenAndFillAction onePasswordMetaItem={onePasswordMetaItem} />}
+          {onePasswordMetaItem.categoryUUID === "001" && (
+            <OpenAndFillAction onePasswordMetaItem={onePasswordMetaItem} />
+          )}
           <ViewAction onePasswordMetaItem={onePasswordMetaItem} />
           <EditAction onePasswordMetaItem={onePasswordMetaItem} />
         </ActionPanel>
@@ -171,34 +183,35 @@ function PasswordListItem(props: { onePasswordMetaItem: OnePasswordMetaItem }) {
 async function doAction(action: string, onePasswordMetaItem: OnePasswordMetaItem, addHash: boolean, message: string) {
   let url = `onepassword7://${action}/${onePasswordMetaItem.vaultUUID}/${onePasswordMetaItem.uuid}`;
 
-  if (addHash) {
+  if (addHash && onePasswordMetaItem.websiteURLs?.length) {
     const hashedUrl = shajs("sha256").update(onePasswordMetaItem.websiteURLs[0]).digest("hex");
     url = url + `/${hashedUrl}`;
   }
 
-  popToRoot({ clearSearchBar: true });
-
   await open(url, { app: { name: "1Password 7" } });
 
+  popToRoot({ clearSearchBar: true });
   showHUD(message);
 }
 
-const OpenAndFillAction = ({ onePasswordMetaItem }: ActionProps): JSX.Element => (
-  <ActionPanel.Item
-    icon={Icon.Link}
-    title="Open and Fill"
-    onAction={async () => {
-      doAction(
-        "open_and_fill",
-        onePasswordMetaItem,
-        true,
-        `Opening ${onePasswordMetaItem.itemTitle} in your default browser`
-      );
-    }}
-  />
-);
+const OpenAndFillAction = ({ onePasswordMetaItem }: ActionProps) => {
+  return onePasswordMetaItem.websiteURLs?.length ? (
+    <ActionPanel.Item
+      icon={Icon.Link}
+      title="Open and Fill"
+      onAction={async () => {
+        doAction(
+          "open_and_fill",
+          onePasswordMetaItem,
+          true,
+          `Opening ${onePasswordMetaItem.itemTitle} in your default browser`
+        );
+      }}
+    />
+  ) : null;
+};
 
-const ViewAction = ({ onePasswordMetaItem }: ActionProps): JSX.Element => (
+const ViewAction = ({ onePasswordMetaItem }: ActionProps) => (
   <ActionPanel.Item
     icon={Icon.Eye}
     title="View in 1Password"
@@ -209,7 +222,7 @@ const ViewAction = ({ onePasswordMetaItem }: ActionProps): JSX.Element => (
   />
 );
 
-const EditAction = ({ onePasswordMetaItem }: ActionProps): JSX.Element => (
+const EditAction = ({ onePasswordMetaItem }: ActionProps) => (
   <ActionPanel.Item
     icon={Icon.Gear}
     title="Edit in 1Password"

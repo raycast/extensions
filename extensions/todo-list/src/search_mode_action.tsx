@@ -1,14 +1,14 @@
-import { ActionPanel, clearSearchBar, Color, Icon, showHUD, showToast, ToastStyle } from "@raycast/api";
+import { Action, clearSearchBar, Icon, showToast, Toast } from "@raycast/api";
 import { useAtom } from "jotai";
 import { searchModeAtom } from "./atoms";
 
 const SearchModeAction = () => {
   const [searchMode, setSearchMode] = useAtom(searchModeAtom);
   return (
-    <ActionPanel.Item
+    <Action
       title={`Switch to ${searchMode ? "insert" : "search"} mode`}
       onAction={async () => {
-        await showToast(ToastStyle.Success, `Switched to ${searchMode ? "insert" : "search"} mode.`);
+        await showToast(Toast.Style.Success, `Switched to ${searchMode ? "insert" : "search"} mode.`);
         setSearchMode(!searchMode);
         await clearSearchBar();
       }}

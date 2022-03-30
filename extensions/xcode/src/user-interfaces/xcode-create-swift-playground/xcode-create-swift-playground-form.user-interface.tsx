@@ -21,66 +21,34 @@ export function xcodeCreateSwiftPlaygroundForm(
         <ActionPanel>
           <SubmitFormAction
             title={"Create Swift Playground"}
-            onSubmit={
-              formValues => {
-                onFormSubmit(
-                  formValues,
-                  xcodeSwiftPlaygroundService,
-                  navigation
-                );
-              }
-            }
+            onSubmit={(formValues) => {
+              onFormSubmit(formValues, xcodeSwiftPlaygroundService, navigation);
+            }}
           />
         </ActionPanel>
-      }>
-      <Form.TextField
-        id="name"
-        title={"Name"}
-        defaultValue="MyPlayground"
-      />
-      <Form.TextField
-        id="location"
-        title="Location"
-        defaultValue="~/Desktop"
-      />
-      <Form.Dropdown
-        id="platform"
-        title="Platform"
-        defaultValue={XcodeSwiftPlaygroundPlatform.iOS}>
-        {
-          Object
-            .keys(XcodeSwiftPlaygroundPlatform)
-            .map(platform => platform.toLocaleLowerCase())
-            .map((platform) => {
-              return <Form.Dropdown.Item
-                key={platform}
-                value={platform}
-                title={platform.replace("os", "OS")}
-              />;
-            })
-        }
+      }
+    >
+      <Form.TextField id="name" title={"Name"} defaultValue="MyPlayground" />
+      <Form.TextField id="location" title="Location" defaultValue="~/Desktop" />
+      <Form.Dropdown id="platform" title="Platform" defaultValue={XcodeSwiftPlaygroundPlatform.iOS}>
+        {Object.keys(XcodeSwiftPlaygroundPlatform)
+          .map((platform) => platform.toLocaleLowerCase())
+          .map((platform) => {
+            return <Form.Dropdown.Item key={platform} value={platform} title={platform.replace("os", "OS")} />;
+          })}
       </Form.Dropdown>
-      <Form.Dropdown
-        id="template"
-        title="Template"
-        defaultValue={XcodeSwiftPlaygroundTemplate.empty}>
-        {
-          Object
-            .keys(XcodeSwiftPlaygroundTemplate)
-            .map((platform) => {
-              return <Form.Dropdown.Item
-                key={platform}
-                value={platform}
-                title={platform.charAt(0).toUpperCase() + platform.slice(1)}
-              />;
-            })
-        }
+      <Form.Dropdown id="template" title="Template" defaultValue={XcodeSwiftPlaygroundTemplate.empty}>
+        {Object.keys(XcodeSwiftPlaygroundTemplate).map((platform) => {
+          return (
+            <Form.Dropdown.Item
+              key={platform}
+              value={platform}
+              title={platform.charAt(0).toUpperCase() + platform.slice(1)}
+            />
+          );
+        })}
       </Form.Dropdown>
-      <Form.Checkbox
-        id="open"
-        label="Open in Xcode after creation"
-        defaultValue={true}
-      />
+      <Form.Checkbox id="open" label="Open in Xcode after creation" defaultValue={true} />
     </Form>
   );
 }
@@ -107,27 +75,21 @@ async function onFormSubmit(
     // Log error
     console.log(error);
     // Show failure Toast
-    await showToast(
-      ToastStyle.Failure,
-      "An error occurred while creating the Swift Playground"
-    );
+    await showToast(ToastStyle.Failure, "An error occurred while creating the Swift Playground");
     // Return out of function
     return;
   }
   // Check if Swift Playground already exists and should not be opened
   if (swiftPlayground.alreadyExists && !formValues.open) {
     // Inform user that the Playground already exists
-    return showToast(
-      ToastStyle.Failure,
-      "Swift Playground already exists"
-    );
+    return showToast(ToastStyle.Failure, "Swift Playground already exists");
   }
   // Initialize success message title
   const successMessageTitle = [
     "Swift Playground",
     swiftPlayground.alreadyExists ? "opened" : "created",
     "at",
-    tildify(swiftPlayground.path)
+    tildify(swiftPlayground.path),
   ].join(" ");
   // Check if should open Swift Playground after creation
   if (formValues.open) {
@@ -138,17 +100,11 @@ async function onFormSubmit(
       await showHUD(successMessageTitle);
     } catch {
       // Show failure Toast
-      await showToast(
-        ToastStyle.Failure,
-        "Swift Playground could not be opened"
-      );
+      await showToast(ToastStyle.Failure, "Swift Playground could not be opened");
     }
   } else {
     // Show success Toast
-    await showToast(
-      ToastStyle.Success,
-      successMessageTitle
-    );
+    await showToast(ToastStyle.Success, successMessageTitle);
   }
   // Pop to root
   navigation.pop();

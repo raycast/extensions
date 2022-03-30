@@ -18,7 +18,7 @@ import config from "parse-git-config";
 import { dirname } from "path";
 import { ReactElement } from "react";
 import tildify from "tildify";
-import { GitCachedProjectEntry, Preferences, ProjectEntry } from "./types";
+import { CachedProjectEntry, Preferences, ProjectEntry } from "./types";
 
 const STORAGE = `${homedir()}/Library/Application Support/Code/User/globalStorage/alefragnani.project-manager`;
 
@@ -33,7 +33,7 @@ const terminalInstalled = existsSync(terminalPath);
 function getProjectEntries(): ProjectEntry[] {
   const storagePath = getPreferencesPath() || STORAGE;
   const savedProjectsFile = `${storagePath}/projects.json`;
-  const cachedGitProjectsFile = `${storagePath}/projects_cache_git.json`;
+  const cachedProjectsFiles = [`${storagePath}/projects_cache_git.json`, `${storagePath}/projects_cache_any.json`];
 
   const projectEntries: ProjectEntry[] = [];
   if (existsSync(savedProjectsFile)) {
@@ -41,12 +41,15 @@ function getProjectEntries(): ProjectEntry[] {
     projectEntries.push(...savedProjects);
   }
 
-  if (existsSync(cachedGitProjectsFile)) {
-    const cachedEntries: GitCachedProjectEntry[] = JSON.parse(readFileSync(cachedGitProjectsFile).toString());
-    cachedEntries.forEach(({ name, fullPath }) => {
-      projectEntries.push({ name, rootPath: fullPath, tags: [], enabled: true });
-    });
-  }
+  cachedProjectsFiles.forEach((cachedFile) => {
+    if (existsSync(cachedFile)) {
+      const cachedEntries: CachedProjectEntry[] = JSON.parse(readFileSync(cachedFile).toString());
+      cachedEntries.forEach(({ name, fullPath }) => {
+        projectEntries.push({ name, rootPath: fullPath, tags: [], enabled: true });
+      });
+    }
+  });
+
   return projectEntries;
 }
 

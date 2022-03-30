@@ -1,0 +1,76 @@
+{
+  "name": "audio-device",
+  "title": "Set Audio Device",
+  "description": "Switch the active audio device of your mac.",
+  "icon": "command-icon.png",
+  "author": "benvp",
+  "contributors": [
+    "mathieudutour",
+    "mike182uk",
+    "FezVrasta"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "set-output-device",
+      "title": "Set Output Device",
+      "subtitle": "Audio Device",
+      "description": "Sets the active audio output device.",
+      "mode": "view"
+    },
+    {
+      "name": "set-input-device",
+      "title": "Set Input Device",
+      "subtitle": "Audio Device",
+      "description": "Sets the active audio input device.",
+      "mode": "view"
+    },
+    {
+      "name": "favourite",
+      "title": "Set Output Device to Favourite",
+      "subtitle": "Audio Device",
+      "description": "Sets the active audio output device to the favourite specified in the preferences",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "airplay",
+      "required": false,
+      "title": "Enable AirPlay Support",
+      "description": "Enable AirPlay speakers detection on the output devices list.",
+      "label": "Include AirPlay devices",
+      "type": "checkbox",
+      "default": false
+    },
+    {
+      "name": "favourite",
+      "required": false,
+      "title": "Favourite Output Device",
+      "description": "The name, as found in the output device list, of the output device to use as the favourite one",
+      "type": "textfield",
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.29.1",
+    "execa": "^6.0.0",
+    "macos-audio-devices": "^1.4.0",
+    "react-use": "^17.3.2",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "copy-binary": "cp node_modules/macos-audio-devices/audio-devices assets/audio-devices",
+    "build": "npm run copy-binary && ray build -e dist",
+    "dev": "npm run copy-binary && ray develop"
+  }
+}

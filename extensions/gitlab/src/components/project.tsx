@@ -45,6 +45,8 @@ export function ProjectListItem(props: { project: Project }) {
           <ActionPanel.Section title={project.name_with_namespace}>
             <OpenInBrowserAction url={project.web_url} />
             <CopyToClipboardAction title="Copy Project ID" content={project.id} />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
             <PushAction
               title="Issues"
               shortcut={{ modifiers: ["cmd"], key: "i" }}

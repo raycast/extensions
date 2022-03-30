@@ -1,4 +1,4 @@
-import { ActionPanel, Color, CopyToClipboardAction, Icon, List, OpenInBrowserAction, PushAction } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useWhatsAppChats } from "./utils/use-whatsapp-chats";
 import { isGroupChat, isPhoneChat, WhatsAppChat } from "./utils/types";
 import WhatsAppPhoneChatForm from "./add-chat";
@@ -10,11 +10,11 @@ export default function ChatList() {
   const { chats, isLoading, updateChats } = useWhatsAppChats();
   const [selectedItemId, setSelectedItemId] = useState<string>();
 
-  const pinnedChats = chats.filter(chat => chat.pinned).sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0));
-  const unpinnedChats = chats.filter(chat => !chat.pinned).sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0));
+  const pinnedChats = chats.filter((chat) => chat.pinned).sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0));
+  const unpinnedChats = chats.filter((chat) => !chat.pinned).sort((a, b) => (b.lastOpened || 0) - (a.lastOpened || 0));
 
   async function handlePin(chat: WhatsAppChat) {
-    const newChats = chats.map(c => {
+    const newChats = chats.map((c) => {
       if (c.id === chat.id) {
         return { ...c, pinned: !c.pinned };
       }
@@ -25,12 +25,12 @@ export default function ChatList() {
   }
 
   async function handleDelete(chat: WhatsAppChat) {
-    const newChats = chats.filter(c => c.id !== chat.id);
+    const newChats = chats.filter((c) => c.id !== chat.id);
     await updateChats(newChats);
   }
 
   async function handleOpen(chat: WhatsAppChat) {
-    const newChats = chats.map(c => {
+    const newChats = chats.map((c) => {
       if (c.id === chat.id) {
         return { ...c, lastOpened: Date.now() };
       }
@@ -41,9 +41,21 @@ export default function ChatList() {
 
   return (
     <List isLoading={isLoading} selectedItemId={selectedItemId} searchBarPlaceholder="Filter chats by name...">
+      {!isLoading && chats.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.Person}
+          title="Add a chat to get started"
+          description="Until WhatsApp releases a public API you will need to add contacts and groups manually using the other commands"
+          actions={
+            <ActionPanel>
+              <Action.Push title="Add First Contact" target={<WhatsAppPhoneChatForm />} />
+            </ActionPanel>
+          }
+        />
+      ) : null}
       {pinnedChats.length > 0 ? (
         <List.Section title="Pinned Chats">
-          {pinnedChats.map(chat => (
+          {pinnedChats.map((chat) => (
             <ChatListItem
               key={chat.id}
               chat={chat}
@@ -56,7 +68,7 @@ export default function ChatList() {
       ) : null}
       {pinnedChats.length === 0 ? (
         <>
-          {unpinnedChats.map(chat => (
+          {unpinnedChats.map((chat) => (
             <ChatListItem
               key={chat.id}
               chat={chat}
@@ -68,7 +80,7 @@ export default function ChatList() {
         </>
       ) : (
         <List.Section title="Other Chats">
-          {unpinnedChats.map(chat => (
+          {unpinnedChats.map((chat) => (
             <ChatListItem
               key={chat.id}
               chat={chat}
@@ -102,7 +114,7 @@ function getChatItemProps(chat: WhatsAppChat) {
       webUrl: `https://web.whatsapp.com/send?phone=${phone}&text=`,
       icon: Icon.Person,
       keywords: [chat.phone, phone],
-      form: <WhatsAppPhoneChatForm defaultValue={chat} />
+      form: <WhatsAppPhoneChatForm defaultValue={chat} />,
     };
   } else {
     return {
@@ -113,7 +125,7 @@ function getChatItemProps(chat: WhatsAppChat) {
       webUrl: null,
       icon: Icon.Circle,
       keywords: [chat.groupCode, "group"],
-      form: <WhatsAppGroupChatForm defaultValue={chat} />
+      form: <WhatsAppGroupChatForm defaultValue={chat} />,
     };
   }
 }
@@ -132,14 +144,14 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenInBrowserAction
+            <Action.OpenInBrowser
               title="Open in WhatsApp"
               icon="whatsapp-outline.png"
               url={appUrl}
               onOpen={() => onOpenChat(chat)}
             />
             {webUrl ? (
-              <OpenInBrowserAction
+              <Action.OpenInBrowser
                 title="Open in Web"
                 icon={Icon.Globe}
                 url={webUrl}
@@ -154,11 +166,7 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
               icon={Icon.Pin}
               onAction={() => onPinAction(chat)}
             />
-            <PushAction
-              title="Edit Chat"
-              icon={Icon.Pencil}
-              target={form}
-            />
+            <Action.Push title="Edit Chat" icon={Icon.Pencil} target={form} />
             <ActionPanel.Item
               title="Delete Chat"
               icon={{ source: Icon.Trash, tintColor: Color.Red }}
@@ -166,11 +174,14 @@ function ChatListItem({ chat, onPinAction, onDeleteChat, onOpenChat }: ChatListI
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CopyToClipboardAction content={chat.name} title="Copy Name" />
+            <Action.CopyToClipboard content={chat.name} title="Copy Name" />
             {isGroupChat(chat) ? (
-              <CopyToClipboardAction content={`https://chat.whatsapp.com/${chat.groupCode}`} title="Copy Invite Link" />
+              <Action.CopyToClipboard
+                content={`https://chat.whatsapp.com/${chat.groupCode}`}
+                title="Copy Invite Link"
+              />
             ) : (
-              <CopyToClipboardAction content={chat.phone} title="Copy Phone Number" />
+              <Action.CopyToClipboard content={chat.phone} title="Copy Phone Number" />
             )}
           </ActionPanel.Section>
         </ActionPanel>

@@ -2,9 +2,11 @@ import { Icon, Detail, ActionPanel, OpenInBrowserAction } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useRubyGemsGemDetail } from "../rubygems/useRubyGemsGemDetail";
 import type { GemSearchResult, GemDetailResponse, Dependency } from "../rubygems/types";
-import { titleize, mapGemLinks } from '../utils';
+import { titleize, mapGemLinks } from "../utils";
 
-interface Props { gem: GemSearchResult }
+interface Props {
+  gem: GemSearchResult;
+}
 
 export const GemInfo = ({ gem }: Props): JSX.Element => {
   const [gemDetails, setGemInfo] = useState<string>("");
@@ -12,51 +14,55 @@ export const GemInfo = ({ gem }: Props): JSX.Element => {
 
   const mapInfoValues = (gemDetails: GemDetailResponse) => {
     return Object.keys(gemDetails)
-      .filter(key => !key.match(new RegExp(/info|name|uri|dependencies|licenses|metadata/)))
+      .filter((key) => !key.match(new RegExp(/info|name|uri|dependencies|licenses|metadata/)))
       .sort()
-      .map(key => {
-        if(gemDetails[key]) return `**${titleize(key)}:** ${gemDetails[key].toLocaleString()}`;
-      }
-    ).join("\n\n");
+      .map((key) => {
+        if (gemDetails[key]) return `**${titleize(key)}:** ${gemDetails[key].toLocaleString()}`;
+      })
+      .join("\n\n");
   };
 
   const mapDependencies = (gemDetails: GemDetailResponse) => {
     const mapDependencyListItems = (label: string, dependencies: Dependency[]) => {
-      if(dependencies.length) {
+      if (dependencies.length) {
         return [
           `**${label}**\n\n`,
-          dependencies.map(dependency => {
-            return `- **${dependency.name}** _${dependency.requirements}_`
-          }).join("\n\n"),
+          dependencies
+            .map((dependency) => {
+              return `- **${dependency.name}** _${dependency.requirements}_`;
+            })
+            .join("\n\n"),
         ].join("\n\n");
       }
     };
 
     return [
       `## Dependencies`,
-      mapDependencyListItems('Runtime', gemDetails['dependencies']?.runtime || []),
-      mapDependencyListItems('Development', gemDetails['dependencies']?.development || []),
+      mapDependencyListItems("Runtime", gemDetails["dependencies"]?.runtime || []),
+      mapDependencyListItems("Development", gemDetails["dependencies"]?.development || []),
     ].join("\n\n");
   };
 
   const buildMarkdown = (gemDetails: GemDetailResponse) => {
     return [
-      `# ${gemDetails['name']}\n\n`,
-      `> ${gemDetails['info']}\n\n`,
+      `# ${gemDetails["name"]}\n\n`,
+      `> ${gemDetails["info"]}\n\n`,
       `**License** ${gemDetails?.licenses?.join(", ") || "n/a"}`,
       mapInfoValues(gemDetails),
       mapDependencies(gemDetails),
     ].join("\n\n");
-  }
+  };
 
   const loadGemDetails = async () => {
     setLoading(true);
     const gemDetails = await useRubyGemsGemDetail(gem.name);
-    if(gemDetails?.name) setGemInfo(buildMarkdown(gemDetails));
+    if (gemDetails?.name) setGemInfo(buildMarkdown(gemDetails));
     setLoading(false);
-  }
+  };
 
-  useEffect(() => { loadGemDetails(); }, []);
+  useEffect(() => {
+    loadGemDetails();
+  }, []);
 
   return (
     <Detail
@@ -66,24 +72,19 @@ export const GemInfo = ({ gem }: Props): JSX.Element => {
       markdown={`${gemDetails}`}
       actions={
         <ActionPanel>
-          <OpenInBrowserAction
-            icon={Icon.Globe}
-            key={gem.name}
-            title="Open on rubygems.org"
-            url={gem.project_uri}
-          />
-          {
-            mapGemLinks(gem).map(link => {
-              return <OpenInBrowserAction
+          <OpenInBrowserAction icon={Icon.Globe} key={gem.name} title="Open on rubygems.org" url={gem.project_uri} />
+          {mapGemLinks(gem).map((link) => {
+            return (
+              <OpenInBrowserAction
                 icon={Icon.Globe}
-                key={link['title']}
-                title={`Open ${link['title']}`}
-                url={link['link']}
+                key={link["title"]}
+                title={`Open ${link["title"]}`}
+                url={link["link"]}
               />
-            })
-          }
+            );
+          })}
         </ActionPanel>
       }
     />
   );
-}
+};

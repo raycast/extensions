@@ -11,8 +11,5 @@ export default () => {
   // Use Navigation
   const navigation = useNavigation();
   // Xcode create Swift Playground Form
-  return xcodeCreateSwiftPlaygroundForm(
-    xcodeSwiftPlaygroundService,
-    navigation
-  );
+  return xcodeCreateSwiftPlaygroundForm(xcodeSwiftPlaygroundService, navigation);
 };

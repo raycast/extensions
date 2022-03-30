@@ -14,17 +14,14 @@ Once saved, copy the `secret_xxxxx` token and save it in Raycast extension's pre
 
 <img width="1680" alt="Screenshot 2021-11-06 at 09 50 21" src="https://user-images.githubusercontent.com/18643714/140604577-9e64459f-12be-4a2c-9283-3fbddb8cdbfb.png">
 
-
 ### Share Database
 
 Now go into your workspace, find a database you want to use with Raycast and `Share` this database with your newly created Notion integration.
 
 <img width="1680" alt="Screenshot 2021-11-06 at 09 54 13" src="https://user-images.githubusercontent.com/18643714/140604616-23b7e76f-2023-41fa-a60f-e24a6cd5ed24.png">
 
-
 You're all set 🙌
 Go back to Raycast to start using the extension.
-
 
 ## Create Database Item
 
@@ -35,6 +32,7 @@ From Raycast, type `Create Database Item` to load the command and select a datab
 All editable fields will be retrieved from this database.
 
 As of today, here are the compatible properties:
+
 - ✏️ Text
 - 📞 Phone number
 - ✉️ Email
@@ -43,5 +41,6 @@ As of today, here are the compatible properties:
 - 🏷 Multi-select
 
 And coming soon:
+
 - 👥 People
 - 🔀 Database relations

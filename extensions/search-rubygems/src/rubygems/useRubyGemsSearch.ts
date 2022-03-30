@@ -1,11 +1,11 @@
 import { showToast, ToastStyle } from "@raycast/api";
-import fetch from 'node-fetch';
-import type { GemsSearchResponse } from './types';
+import fetch from "node-fetch";
+import type { GemsSearchResponse } from "./types";
 
-export const useRubyGemsSearch = async (searchTerm = ''): Promise<GemsSearchResponse> => {
-  const preparedSearchTerm = searchTerm.replace(/\s+/g, '+');
+export const useRubyGemsSearch = async (searchTerm = ""): Promise<GemsSearchResponse> => {
+  const preparedSearchTerm = searchTerm.replace(/\s+/g, "+");
 
-  if(!preparedSearchTerm) return Promise.resolve([]);
+  if (!preparedSearchTerm) return Promise.resolve([]);
 
   try {
     const response = await fetch(`https://rubygems.org/api/v1/search.json?query=${preparedSearchTerm}`);
@@ -13,8 +13,7 @@ export const useRubyGemsSearch = async (searchTerm = ''): Promise<GemsSearchResp
     return jsonResponse as GemsSearchResponse;
   } catch (error) {
     console.error(error);
-    showToast(ToastStyle.Failure, 'Searching rubygems.org failed!');
-    return Promise.resolve([])
+    showToast(ToastStyle.Failure, "Searching rubygems.org failed!");
+    return Promise.resolve([]);
   }
-
-}
+};

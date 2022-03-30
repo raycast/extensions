@@ -17,23 +17,25 @@ import {
   showHUD,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
-import { HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseTypes";
-import _, { isDate } from "lodash";
+import { HarvestProjectAssignment, HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseTypes";
+import _ from "lodash";
 import dayjs from "dayjs";
 
 export default function Command({
   onSave = async () => {
     return;
   },
+  viewDate = new Date(),
   entry,
 }: {
   onSave: () => Promise<void>;
   entry?: HarvestTimeEntry;
+  viewDate: Date;
 }) {
   const { pop } = useNavigation();
-  const { data: company } = useCompany();
+  const { data: company, error } = useCompany();
   const { data: projects } = useMyProjects();
   const [projectId, setProjectId] = useState<string>();
   const [tasks, setTasks] = useState<HarvestTaskAssignment[]>([]);
@@ -41,6 +43,35 @@ export default function Command({
   const [notes, setNotes] = useState<string>();
   const [hours, setHours] = useState<string>();
   const [spentDate, setSpentDate] = useState<Date>();
+
+  useEffect(() => {
+    if (error) {
+      if (error.isAxiosError && error.response?.status === 401) {
+        showToast(
+          ToastStyle.Failure,
+          "Invalid Token",
+          "Your API token or Account ID is invalid. Go to Raycast Preferences to update it."
+        );
+      } else {
+        showToast(ToastStyle.Failure, "Unknown Error", "Could not get your company data");
+      }
+    }
+  }, [error]);
+
+  const groupedProjects = useMemo(() => {
+    // return an array of arrays thats grouped by client to easily group them via a map function
+    return _.reduce<
+      _.Dictionary<[HarvestProjectAssignment, ...HarvestProjectAssignment[]]>,
+      Array<Array<HarvestProjectAssignment>>
+    >(
+      _.groupBy(projects, (o) => o.client.id),
+      (result, value) => {
+        result.push(value);
+        return result;
+      },
+      []
+    );
+  }, [projects]);
 
   useEffect(() => {
     if (!entry) return;
@@ -68,7 +99,7 @@ export default function Command({
 
     setTimeFormat(hours);
 
-    const spentDate = _.isDate(values.spent_date) ? values.spent_date : new Date();
+    const spentDate = _.isDate(values.spent_date) ? values.spent_date : viewDate;
 
     const data = _.omitBy(values, _.isEmpty);
     const timeEntry = await newTimeEntry({
@@ -155,13 +186,21 @@ export default function Command({
           setTaskAssignments(newValue);
         }}
       >
-        {projects?.map((project) => {
+        {groupedProjects?.map((groupedProject) => {
+          const client = groupedProject[0].client;
           return (
-            <Form.DropdownItem
-              value={project.project.id.toString()}
-              title={`[${project.project.code}] ${project.project.name}`}
-              key={project.id}
-            />
+            <Form.DropdownSection title={client.name} key={client.id}>
+              {groupedProject.map((project) => {
+                const code = project.project.code;
+                return (
+                  <Form.DropdownItem
+                    value={project.project.id.toString()}
+                    title={`${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
+                    key={project.id}
+                  />
+                );
+              })}
+            </Form.DropdownSection>
           );
         })}
       </Form.Dropdown>

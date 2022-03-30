@@ -1,15 +1,23 @@
 import got from "got";
 import showdown from "showdown";
 import EmailValidator from "email-validator";
-import { Form, popToRoot, ActionPanel, copyTextToClipboard, SubmitFormAction, showToast, Toast, ToastStyle, getPreferenceValues } from "@raycast/api";
-import { Note, Preferences } from "./types"
+import {
+  Form,
+  popToRoot,
+  ActionPanel,
+  copyTextToClipboard,
+  SubmitFormAction,
+  showToast,
+  Toast,
+  ToastStyle,
+  getPreferenceValues,
+} from "@raycast/api";
+import { Note, Preferences } from "./types";
 
 export default function Command() {
-
   const preferences: Preferences = getPreferenceValues();
 
   async function handleSubmit(values: Note) {
-
     if (values.saidBy !== "" && EmailValidator.validate(values.saidBy) === false) {
       await showToast(ToastStyle.Failure, "Email format is not valid");
     } else if (values.title === "") {
@@ -26,14 +34,14 @@ export default function Command() {
         const htmlContent = markdownConverter.makeHtml(values.content);
 
         const { body } = await got.post("https://api.productboard.com/notes", {
-          json: { 
-            title: values.title, 
-            content: htmlContent, 
-            customer_email: values.saidBy, 
-            tags: tags, 
+          json: {
+            title: values.title,
+            content: htmlContent,
+            customer_email: values.saidBy,
+            tags: tags,
           },
           headers: {
-            Authorization: 'Bearer ' + preferences.PUBLIC_API_TOKEN,
+            Authorization: "Bearer " + preferences.PUBLIC_API_TOKEN,
           },
           responseType: "json",
         });
@@ -47,7 +55,7 @@ export default function Command() {
         toast.title = "Failed pushing note";
         toast.message = String(error);
       }
-      
+
       popToRoot({ clearSearchBar: true });
     }
   }
@@ -63,8 +71,18 @@ export default function Command() {
       <Form.TextField id="title" title="Title" placeholder="Enter title" />
       <Form.TextArea id="content" title="Content" placeholder="Enter content of the note (markdown supported)" />
       <Form.Separator />
-      <Form.TextField id="tags" title="Tags" placeholder="Enter tags (separate by comma)" defaultValue={preferences.TAGS_DEFAULT} />
-      <Form.TextField id="saidBy" title="Said by" placeholder="Enter valid email" defaultValue={preferences.USER_EMAIL} />
+      <Form.TextField
+        id="tags"
+        title="Tags"
+        placeholder="Enter tags (separate by comma)"
+        defaultValue={preferences.TAGS_DEFAULT}
+      />
+      <Form.TextField
+        id="saidBy"
+        title="Said by"
+        placeholder="Enter valid email"
+        defaultValue={preferences.USER_EMAIL}
+      />
     </Form>
   );
 }

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "netlify",
+  "title": "Netlify",
+  "description": "View your Netlify sites, domains, and team members",
+  "icon": "icon.png",
+  "author": "destiner",
+  "categories": ["Developer Tools", "Web"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-sites",
+      "title": "View Sites",
+      "subtitle": "Netlify",
+      "description": "View your sites",
+      "mode": "view"
+    },
+    {
+      "name": "view-domains",
+      "title": "View Domains",
+      "subtitle": "Netlify",
+      "description": "View your domains",
+      "mode": "view"
+    },
+    {
+      "name": "view-members",
+      "title": "View Members",
+      "subtitle": "Netlify",
+      "description": "View team members",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Personal access token",
+      "placeholder": "Your token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.28.0",
+    "axios": "^0.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}

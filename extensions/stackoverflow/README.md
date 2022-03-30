@@ -2,7 +2,6 @@
 
 This extension brings [stackoverflow](https://stackoverflow.com/) search to Raycast!
 
-
 ## Features
 
 - search multiple keywords - eg. - "How to Plot Image in Python" etc.

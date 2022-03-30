@@ -157,7 +157,6 @@ function useGame(
       game.start(textSize);
       game.draw();
     }
-    return () => {};
   }, [textSize]);
   return { field, game, score, message, restart };
 }

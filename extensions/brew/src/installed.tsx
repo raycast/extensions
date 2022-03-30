@@ -8,20 +8,21 @@ interface State {
   isLoading: boolean;
 }
 
-export default function Main() {
-  const [state, setState] = useState<State>({isLoading: true});
+export default function Main(): JSX.Element {
+  const [state, setState] = useState<State>({ isLoading: true });
 
   useEffect(() => {
-    if (!state.isLoading) { return; }
+    if (!state.isLoading) {
+      return;
+    }
 
     brewFetchInstalled(true)
-      .then(results => {
-        setState({results: results, isLoading: false});
+      .then((results) => {
+        setState({ results: results, isLoading: false });
       })
-      .catch(err => {
-        console.log("brewFetchInstalled error:", err);
+      .catch((err) => {
         showFailureToast("Brew list failed", err);
-        setState({isLoading: false});
+        setState({ isLoading: false });
       });
   }, [state]);
 
@@ -29,13 +30,14 @@ export default function Main() {
   const casks = state.results?.casks ?? [];
 
   return (
-    <FormulaList formulae={formulae}
-                 casks={casks}
-                 searchBarPlaceholder="Filter results by name"
-                 isLoading={state.isLoading}
-                 onAction={() => {
-                   setState((oldState) => ({ ...oldState, isLoading: true}));
-                 }}
+    <FormulaList
+      formulae={formulae}
+      casks={casks}
+      searchBarPlaceholder="Filter results by name"
+      isLoading={state.isLoading}
+      onAction={() => {
+        setState((oldState) => ({ ...oldState, isLoading: true }));
+      }}
     />
   );
 }

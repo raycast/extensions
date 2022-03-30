@@ -4,13 +4,13 @@ import { useState, useEffect } from "react";
 import { getPaths } from "../api/paths";
 import { SecretKeys } from "./SecretKeys";
 
-export const Paths = (props: { secretEngine: string, prefix: string }) => {
+export const Paths = (props: { secretEngine: string; prefix: string }) => {
   const [state, setState] = useState<{ paths: string[] }>({ paths: [] });
 
   const fetchPaths = async () => {
     const paths = await getPaths(props.secretEngine, props.prefix);
     setState((oldState) => ({ ...oldState, paths: paths }));
-  }
+  };
 
   useEffect(() => {
     fetchPaths();
@@ -23,9 +23,9 @@ export const Paths = (props: { secretEngine: string, prefix: string }) => {
       ))}
     </List>
   );
-}
+};
 
-const PathItem = (props: { secretEngine: string, prefix: string, path: string }) => {
+const PathItem = (props: { secretEngine: string; prefix: string; path: string }) => {
   const { push } = useNavigation();
 
   return (
@@ -36,12 +36,17 @@ const PathItem = (props: { secretEngine: string, prefix: string, path: string })
       icon={props.path.slice(-1) === "/" ? Icon.List : Icon.Document}
       actions={
         <ActionPanel>
-          <ActionPanel.Item title="Select" icon={Icon.List} onAction={() => props.path.slice(-1) === "/"
-            ? push(<Paths secretEngine={props.secretEngine} prefix={`${props.prefix}${props.path}`} />)
-            : push(<SecretKeys secretEngine={props.secretEngine} path={`${props.prefix}${props.path}`} />)}
+          <ActionPanel.Item
+            title="Select"
+            icon={Icon.List}
+            onAction={() =>
+              props.path.slice(-1) === "/"
+                ? push(<Paths secretEngine={props.secretEngine} prefix={`${props.prefix}${props.path}`} />)
+                : push(<SecretKeys secretEngine={props.secretEngine} path={`${props.prefix}${props.path}`} />)
+            }
           />
         </ActionPanel>
       }
     />
   );
-}
+};

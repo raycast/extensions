@@ -1,22 +1,15 @@
-import {
-  ActionPanel,
-  getPreferenceValues,
-  Icon,
-  List,
-  showToast,
-  ToastStyle
-  } from '@raycast/api';
-import { DEFAULT_ERROR_TITLE, EDGE_NOT_INSTALLED_MESSAGE } from './common/constants';
-import { getOpenTabs } from './common/getOpenTabs';
-import { NotInstalled } from './components/NotInstalled';
-import { NullableString } from './schema/types';
-import { openNewTab } from './common/openNewTab';
-import { ReactElement, useEffect, useState } from 'react';
-import { Tab } from './lib/Tab';
-import { TabListItem } from './components/TabListItem';
-import { UrlListItem } from './components/UrlListItem';
-import { urlParser } from './utils/urlUtils';
-import { useHistorySearch } from './hooks/useHistorySearch';
+import { ActionPanel, getPreferenceValues, Icon, List, showToast, ToastStyle } from "@raycast/api";
+import { DEFAULT_ERROR_TITLE, EDGE_NOT_INSTALLED_MESSAGE } from "./common/constants";
+import { getOpenTabs } from "./common/getOpenTabs";
+import { NotInstalled } from "./components/NotInstalled";
+import { NullableString } from "./schema/types";
+import { openNewTab } from "./common/openNewTab";
+import { ReactElement, useEffect, useState } from "react";
+import { Tab } from "./lib/Tab";
+import { TabListItem } from "./components/TabListItem";
+import { UrlListItem } from "./components/UrlListItem";
+import { urlParser } from "./utils/urlUtils";
+import { useHistorySearch } from "./hooks/useHistorySearch";
 
 interface State {
   tabs?: Tab[];

@@ -9,6 +9,7 @@ Extension for quickly changing your Slack status. Set up presets for common stat
 3. Select "From an app manifest"
 4. Select Workspace where you are going to use it
 5. Select JSON format on manifest editor page and paste this code:
+
 ```
 {
     "_metadata": {
@@ -34,9 +35,10 @@ Extension for quickly changing your Slack status. Set up presets for common stat
     }
 }
 ```
+
 6. Press "Next" and then "Create"
 7. In the sidebar select "OAuth & Permissions"
 8. Press "Install to Workspace" button in "OAuth Tokens for Your Workspace" section
 9. Once installed, you'll be able to copy your access token. It starts with "xoxp-"
 
-*Note: If this instruction wasn't clear, please let me know in [Slack Community](https://raycast.com/community) or feel free to create a PR with improved steps.*
+_Note: If this instruction wasn't clear, please let me know in [Slack Community](https://raycast.com/community) or feel free to create a PR with improved steps._

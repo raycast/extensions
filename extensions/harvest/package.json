@@ -18,6 +18,39 @@
       "name": "listTimeEntries",
       "icon": "timer.png",
       "title": "Today's Timesheet",
+      "preferences": [
+        {
+          "name": "sortBy",
+          "title": "Sort By",
+          "description": "How should the time entries in your timesheet be sorted?",
+          "required": false,
+          "default": "updated-desc",
+          "value": "updated-desc",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Updated Time - Newest First",
+              "value": "updated-desc"
+            },
+            {
+              "title": "Updated Time - Oldest First",
+              "value": "updated-asc"
+            },
+            {
+              "title": "Created Time - Newest First",
+              "value": "created-desc"
+            },
+            {
+              "title": "Created Time - Oldest First",
+              "value": "created-asc"
+            },
+            {
+              "title": "No Sorting",
+              "value": "none"
+            }
+          ]
+        }
+      ],
       "subtitle": "Harvest",
       "description": "Start a new Timer",
       "mode": "view"
@@ -50,11 +83,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.0",
+    "@raycast/api": "^1.26.3",
     "axios": "^0.23.0",
     "dayjs": "^1.10.7",
     "lodash": "^4.17.21",
-    "swr": "^1.1.0"
+    "swr": "^1.1.2"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.175",

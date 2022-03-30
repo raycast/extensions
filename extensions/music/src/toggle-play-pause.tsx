@@ -1,8 +1,7 @@
-import { closeMainWindow } from '@raycast/api'
-import * as playerControls from './util/controls'
-
+import { closeMainWindow } from "@raycast/api";
+import * as playerControls from "./util/controls";
 
 export default async () => {
-	await closeMainWindow()
-	await playerControls.togglePlay()
-}
+  await closeMainWindow();
+  await playerControls.togglePlay();
+};
