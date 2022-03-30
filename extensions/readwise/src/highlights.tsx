@@ -1,8 +1,9 @@
-import { Action, Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
 
-import { HOME_PAGE, useHighlights } from "./highlights/useHighlights";
+import { BASE_URL, useHighlights } from "./highlights/useHighlights";
 import { HighlightsListItem } from "./highlights/HighlightsListItem";
 import { ResultsList } from "./components/ResultsList";
+import { ListActions } from "./components/Actions";
 
 export default function Command() {
   const { data, loading, refetch } = useHighlights();
@@ -14,27 +15,11 @@ export default function Command() {
         loading={loading}
         data={data}
         actions={
-          <>
-            {next && (
-              <Action
-                icon={"➡️"}
-                title="Next Page"
-                onAction={() => refetch(next)}
-                shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
-              />
-            )}
-            {previous && (
-              <>
-                <Action
-                  icon={"⬅️"}
-                  title="Previous Page"
-                  onAction={() => refetch(previous)}
-                  shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
-                />
-                <Action icon={"🏠"} title="Back to Home" onAction={() => refetch(HOME_PAGE)} />
-              </>
-            )}
-          </>
+          <ListActions
+            onHomeAction={() => refetch(BASE_URL)}
+            onNextAction={next ? () => refetch(next) : undefined}
+            onPreviousAction={previous ? () => previous && refetch(previous) : undefined}
+          />
         }
         listView={HighlightsListItem}
       />

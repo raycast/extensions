@@ -1,8 +1,9 @@
-import { Action, List } from "@raycast/api";
+import { List } from "@raycast/api";
 
-import { useTags } from "./tags/useTags";
+import { BASE_URL, useTags } from "./tags/useTags";
 import { TagsListItem } from "./tags/TagsListItem";
 import { getListSubtitle } from "./utils";
+import { ListActions } from "./components/Actions";
 
 export default function Command() {
   const { data, loading, refetch } = useTags();
@@ -21,27 +22,11 @@ export default function Command() {
             key={result.name}
             item={result}
             actions={
-              <>
-                {next && (
-                  <Action
-                    icon={"➡️"}
-                    title="Next Page"
-                    onAction={() => refetch(next)}
-                    shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
-                  />
-                )}
-                {previous && (
-                  <>
-                    <Action
-                      icon={"⬅️"}
-                      title="Previous Page"
-                      onAction={() => refetch(previous)}
-                      shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
-                    />
-                    <Action icon={"🏠"} title="Back to Home" onAction={() => refetch("")} />
-                  </>
-                )}
-              </>
+              <ListActions
+                onHomeAction={() => refetch(BASE_URL)}
+                onNextAction={next ? () => refetch(next) : undefined}
+                onPreviousAction={previous ? () => previous && refetch(previous) : undefined}
+              />
             }
           />
         ))}

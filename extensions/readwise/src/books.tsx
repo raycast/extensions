@@ -1,10 +1,11 @@
-import { Action, List } from "@raycast/api";
+import { List } from "@raycast/api";
 
 import { useBooks } from "./books/useBooks";
 import { BooksListItems } from "./books/BooksListItems";
 import { Category } from "./books/types";
 import { getUrlParamsString } from "./utils";
 import { ResultsList } from "./components/ResultsList";
+import { ListActions } from "./components/Actions";
 
 const CATEGORIES: { label: string; category: Category }[] = [
   { label: "Articles", category: "articles" },
@@ -35,27 +36,11 @@ export default function Command() {
         loading={loading}
         data={data}
         actions={
-          <>
-            {next && (
-              <Action
-                icon={"➡️"}
-                title="Next Page"
-                onAction={() => refetch(getUrlParamsString(next))}
-                shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
-              />
-            )}
-            {previous && (
-              <>
-                <Action
-                  icon={"⬅️"}
-                  title="Previous Page"
-                  onAction={() => refetch(getUrlParamsString(previous))}
-                  shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
-                />
-                <Action icon={"🏠"} title="Back to Home" onAction={() => refetch("")} />
-              </>
-            )}
-          </>
+          <ListActions
+            onHomeAction={() => refetch("")}
+            onNextAction={next ? () => refetch(getUrlParamsString(next)) : undefined}
+            onPreviousAction={previous ? () => previous && refetch(getUrlParamsString(previous)) : undefined}
+          />
         }
         listView={BooksListItems}
       />
