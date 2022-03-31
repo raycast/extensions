@@ -22,13 +22,13 @@ const TranslateForm = () => {
       setText(value.slice(0, 5000));
       showToast({
         style: Toast.Style.Failure,
-        title: 'Limit',
-        message: "Max length (5000 chars) for a single translation exceeded."
+        title: "Limit",
+        message: "Max length (5000 chars) for a single translation exceeded.",
       });
     } else {
       setText(value);
     }
-  }
+  };
 
   const doTranslate = React.useMemo(() => {
     const debouncedTranslate = debounce(
