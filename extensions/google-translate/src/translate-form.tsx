@@ -69,6 +69,15 @@ const TranslateForm = () => {
           </ActionPanel.Section>
 
           <ActionPanel.Section title="Settings">
+            <Action
+              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+              onAction={() => {
+                const oldFromLang = fromLang;
+                setFromLang(toLang);
+                setToLang(oldFromLang);
+              }}
+              title={`${toLangObj.flag || toLangObj.code} <-> ${fromLangObj.flag || fromLangObj.code} Switch Languages`}
+            />
             <ActionPanel.Submenu
               shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
               title="Change From Language"
