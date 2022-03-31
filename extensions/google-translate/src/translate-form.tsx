@@ -79,32 +79,38 @@ const TranslateForm = () => {
               title={`${toLangObj.flag || toLangObj.code} <-> ${fromLangObj.flag || fromLangObj.code} Switch Languages`}
             />
             <ActionPanel.Submenu
-              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-              title="Change From Language"
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              title="Change Languages"
               icon={fromLangObj?.flag}
             >
-              {languages.map((lang) => (
-                <Action
-                  key={lang.code}
-                  onAction={() => setFromLang(lang.code)}
-                  title={lang.name}
-                  icon={lang?.flag ?? "🏳️"}
-                />
-              ))}
-            </ActionPanel.Submenu>
-            <ActionPanel.Submenu
-              shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-              title="Change To Language"
-              icon={toLangObj?.flag}
-            >
-              {languages.map((lang) => (
-                <Action
-                  key={lang.code}
-                  onAction={() => setToLang(lang.code)}
-                  title={lang.name}
-                  icon={lang?.flag ?? "🏳️"}
-                />
-              ))}
+              <ActionPanel.Submenu
+                shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                title="Change From Language"
+                icon={fromLangObj?.flag}
+              >
+                {languages.map((lang) => (
+                  <Action
+                    key={lang.code}
+                    onAction={() => setFromLang(lang.code)}
+                    title={lang.name}
+                    icon={lang?.flag ?? "🏳️"}
+                  />
+                ))}
+              </ActionPanel.Submenu>
+              <ActionPanel.Submenu
+                shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                title="Change To Language"
+                icon={toLangObj?.flag}
+              >
+                {languages.map((lang) => (
+                  <Action
+                    key={lang.code}
+                    onAction={() => setToLang(lang.code)}
+                    title={lang.name}
+                    icon={lang?.flag ?? "🏳️"}
+                  />
+                ))}
+              </ActionPanel.Submenu>
             </ActionPanel.Submenu>
           </ActionPanel.Section>
         </ActionPanel>
