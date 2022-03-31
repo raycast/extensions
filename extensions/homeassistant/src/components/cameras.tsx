@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Detail, Icon, PushAction, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Color, Detail, getPreferenceValues, Icon, PushAction, showToast, ToastStyle } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCacheFilepath } from "../cache";
 import { ha } from "../common";
@@ -8,7 +8,6 @@ import afs from "fs/promises";
 
 function CameraImage(props: { state: State }): JSX.Element {
   const s = props.state;
-  const ep = s.attributes.entity_picture;
   const { localFilepath, isLoading, error } = useImage(s.entity_id);
   if (error) {
     showToast(ToastStyle.Failure, "Could not fetch image", error);
@@ -106,7 +105,10 @@ export function useImage(
         await ha.getCameraProxyURL(entityID, localFilepath);
         const base64Img = await fileToBase64Image(localFilepath);
         if (!didUnmount) {
-          setTimeout(fetchData, 3000);
+          const interval = getCameraRefreshInterval();
+          if (interval && interval > 0) {
+            setTimeout(fetchData, interval);
+          }
           setLocalFilepath(base64Img);
         }
       } catch (error) {
@@ -128,4 +130,24 @@ export function useImage(
   }, [entityID]);
 
   return { localFilepath, error, isLoading };
+}
+
+const defaultRefreshInterval = 3000;
+
+export function getCameraRefreshInterval(): number | null {
+  const preferences = getPreferenceValues();
+  const userValue = preferences.camerarefreshinterval as string;
+  if (!userValue || userValue.length <= 0) {
+    return defaultRefreshInterval;
+  }
+  const msec = parseFloat(userValue);
+  if (Number.isNaN(msec)) {
+    console.log(`invalid value ${userValue}, fallback to null`);
+    return null;
+  }
+  if (msec < 1) {
+    return null;
+  } else {
+    return msec;
+  }
 }

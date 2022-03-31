@@ -180,6 +180,15 @@
       "default": false,
       "title": "Style",
       "description": "Show Entity IDs as subtitle"
+    },
+    {
+      "name": "camerarefreshinterval",
+      "type": "textfield",
+      "required": false,
+      "default": "3000",
+      "title": "Camera Refresh Interval (ms)",
+      "description": "Refresh interval in ms for camera streams. Values < 2000 are not recommended. 0 mean no auto refresh at all",
+      "placeholder": "3000 "
     }
   ],
   "dependencies": {

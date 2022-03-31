@@ -233,9 +233,7 @@ export class HomeAssistant {
     return params.localFilepath;
   }
 
-  async getCameraProxyURL(entityID: string, localFilepath: string) {
-    await this.downloadFile(`camera_proxy/${entityID}`, { localFilepath: localFilepath })
-    //await this.fetch(`camera_proxy/${entityID}`);
+  async getCameraProxyURL(entityID: string, localFilepath: string): Promise<void> {
+    await this.downloadFile(`camera_proxy/${entityID}`, { localFilepath: localFilepath });
   }
-
 }
