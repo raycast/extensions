@@ -1,5 +1,5 @@
 import React from "react";
-import { Action, ActionPanel, Form } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
 import translate from "@vitalets/google-translate-api";
 import debounce from "debounce";
 import { usePreferences } from "./hooks";
@@ -16,6 +16,19 @@ const TranslateForm = () => {
 
   const [isLoading, setIsLoading] = React.useState(false);
   const [translated, setTranslated] = React.useState<translate.ITranslateResponse["text"]>();
+
+  const handleChange = (value: string) => {
+    if (value.length > 5000) {
+      setText(value.slice(0, 5000));
+      showToast({
+        style: Toast.Style.Failure,
+        title: 'Limit',
+        message: "Max length (5000 chars) for a single translation exceeded."
+      });
+    } else {
+      setText(value);
+    }
+  }
 
   const doTranslate = React.useMemo(() => {
     const debouncedTranslate = debounce(
@@ -88,7 +101,7 @@ const TranslateForm = () => {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="text" title="Text" value={text} onChange={setText} />
+      <Form.TextArea id="text" title="Text" value={text} onChange={handleChange} />
       <Form.Dropdown id="language_from" title="From" value={fromLang} onChange={setFromLang} storeValue>
         {languages.map((lang) => (
           <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={lang?.flag ?? "🏳️"} />
