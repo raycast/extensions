@@ -5,6 +5,10 @@
   "description": "Simple translation using Google Translate",
   "icon": "google-translate.png",
   "author": "ospfranco",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
   "contributors": [
     "FezVrasta"
   ],
