@@ -13,9 +13,14 @@ export function getFilteredDataset(query?: string): DataSet {
 }
 
 export const getFaviconUrl = (domain: string | undefined) => {
-  if (domain) {
-    return `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(domain)}`;
+  if (!domain) {
+    return Icon.Globe;
   }
+
+  return {
+    source: `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(domain)}`,
+    fallback: Icon.Globe,
+  };
 };
 
 export default function main() {
