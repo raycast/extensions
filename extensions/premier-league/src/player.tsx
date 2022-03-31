@@ -104,8 +104,8 @@ export default function Player() {
                   target={<PlayerProfile {...p} />}
                 />
                 <Action
-                  title="Load More"
-                  icon={Icon.MagnifyingGlass}
+                  title="Next Page"
+                  icon={Icon.ArrowRight}
                   onAction={() => {
                     setPage(page + 1);
                   }}

@@ -1,6 +1,7 @@
 import { Action, ActionPanel, List, Icon, Image, Color } from "@raycast/api";
 import { useState } from "react";
 import json2md from "json2md";
+import { format, parse } from "date-fns";
 import { Entry } from "./types";
 import { useSeasons, useTables } from "./hooks";
 
@@ -45,12 +46,22 @@ export default function GetTables() {
     ];
 
     if (next) {
+      const label = next.kickoff.label
+        ?.replace("BST", "+01:00")
+        .replace("GMT", "+00:00");
+      const kickoff = label
+        ? format(
+            parse(label, "EEE d MMM yyyy, HH:mm XXX", new Date()),
+            "EEE d MMM yyyy, HH:mm"
+          )
+        : "";
+
       dataObject.push(
         { h2: "Next Fixture" },
         {
           p: [
             `**${next.teams[0].team.name} - ${next.teams[1].team.name}**`,
-            `Time: ${next.kickoff.label}`,
+            `Time: ${kickoff}`,
             `Stadium: ${next.ground.name}, **${next.ground.city}**`,
           ],
         }
