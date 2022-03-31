@@ -1,4 +1,4 @@
-import { ActionPanel, Color, Detail, getPreferenceValues, Icon, PushAction, showToast, ToastStyle } from "@raycast/api";
+import { Color, Detail, getPreferenceValues, Icon, showToast, Action, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getCacheFilepath } from "../cache";
 import { ha } from "../common";
@@ -10,7 +10,11 @@ function CameraImage(props: { state: State }): JSX.Element {
   const s = props.state;
   const { localFilepath, isLoading, error } = useImage(s.entity_id);
   if (error) {
-    showToast(ToastStyle.Failure, "Could not fetch image", error);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Could not fetch image",
+      message: error,
+    });
   }
   let md = `# ${s.attributes.friendly_name || s.entity_id}`;
   if (localFilepath) {
@@ -26,7 +30,7 @@ export function CameraShowImage(props: { state: State }): JSX.Element | null {
     return null;
   }
   return (
-    <PushAction
+    <Action.Push
       title="Show Image"
       shortcut={{ modifiers: ["cmd"], key: "i" }}
       icon={{ source: Icon.Eye, tintColor: Color.PrimaryText }}
@@ -44,7 +48,7 @@ export function CameraTurnOnAction(props: { state: State }): JSX.Element | null 
     await ha.callService("camera", "turn_on", { entity_id: s.entity_id });
   };
   return (
-    <ActionPanel.Item
+    <Action
       title="Turn On"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "o" }}
@@ -62,7 +66,7 @@ export function CameraTurnOffAction(props: { state: State }): JSX.Element | null
     await ha.callService("camera", "turn_off", { entity_id: s.entity_id });
   };
   return (
-    <ActionPanel.Item
+    <Action
       title="Turn Off"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "f" }}

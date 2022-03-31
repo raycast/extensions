@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 import urljoin from "url-join";
 import { getErrorMessage } from "./utils";
@@ -92,7 +92,11 @@ export class HomeAssistant {
     try {
       await this.post(`services/${domain}/${service}`, (params = userparams));
     } catch (error) {
-      showToast(ToastStyle.Failure, "Error", getErrorMessage(error));
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: getErrorMessage(error),
+      });
     }
   }
 
