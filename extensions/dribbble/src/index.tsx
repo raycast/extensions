@@ -1,39 +1,24 @@
 import React from "react";
 import { ActionPanel, Detail, List, Action } from "@raycast/api";
-import got from "got";
-import { parse } from "node-html-parser";
+import { fetchShots, Shot } from "./data";
 
 export default function Command() {
+  const [isLoading, setIsLoading] = React.useState(true);
   const [filter, setFilter] = React.useState("recent");
-  const [items, setItems] = React.useState<any[]>([]);
+  const [items, setItems] = React.useState<Shot[]>([]);
 
   React.useEffect(() => {
-    (async () => {
-      const data = await got(`https://dribbble.com/shots/${filter}`).text();
-
-      const document = parse(data);
-      const items = document.querySelectorAll("li.shot-thumbnail");
-      const parsedItems = items.map((item) => {
-        const title = item.querySelector(".shot-title")?.textContent;
-        const link = item.querySelector(".shot-thumbnail-link")?.getAttribute("href");
-
-        const img = item.querySelector('img[data-sizes="auto"]');
-        const srcSet = img?.getAttribute("data-srcset");
-        const srcs = srcSet?.split(", ").map((s) => s.split(" "));
-
-        return {
-          title: title,
-          icon: srcs[0][0],
-          image: srcs[Math.min(2, srcs.length - 1)][0],
-          link: "https://dribbble.com" + link,
-        };
-      });
-      setItems(parsedItems);
-    })();
+    setIsLoading(true);
+    setItems([]);
+    fetchShots(filter)
+      .then(setItems)
+      .then(() => setIsLoading(false))
+      .catch(() => setIsLoading(false));
   }, [filter]);
 
   return (
     <List
+      isLoading={isLoading}
       isShowingDetail
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" value={filter} onChange={setFilter}>
@@ -77,21 +62,7 @@ export default function Command() {
           </List.Dropdown.Section>
         </List.Dropdown>
       }
-      actions={
-        <ActionPanel>
-          <Action.Push title="Show Details" target={<Detail markdown="# Hey! 👋" />} />
-        </ActionPanel>
-      }
     >
-      {/* <List.Item
-        icon="list-icon.png"
-        title="Greeting"
-        actions={
-          <ActionPanel>
-            <Action.Push title="Show Details" target={<Detail markdown="# Hey! 👋" />} />
-          </ActionPanel>
-        }
-      /> */}
       {items.map((item) => (
         <List.Item
           key={item.icon}
