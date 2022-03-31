@@ -57,9 +57,15 @@ export default function CommandSearch() {
         const key = commandGroup.key;
         const commands = commandGroup.commands;
         return (
-          <List.Section title={key[0].toUpperCase() + key.slice(1)}>
+          <List.Section key={key} title={key[0].toUpperCase() + key.slice(1)}>
             {commands.map((command: Command) => {
-              return <List.Item title={command.text[0].toUpperCase() + command.text.slice(1)} subtitle={command.kbd} />;
+              return (
+                <List.Item
+                  key={command.kbd}
+                  title={command.text[0].toUpperCase() + command.text.slice(1)}
+                  subtitle={command.kbd}
+                />
+              );
             })}
           </List.Section>
         );
