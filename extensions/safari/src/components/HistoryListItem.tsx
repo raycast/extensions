@@ -35,8 +35,12 @@ const HistoryListItem = (props: { entry: HistoryItem; searchText?: string }) => 
     <List.Item
       title={props.entry.title}
       icon={getFaviconUrl(domain)}
-      accessoryTitle={domain}
       actions={<Actions entry={props.entry} searchText={props.searchText} />}
+      accessories={[
+        {
+          text: domain,
+        },
+      ]}
     />
   ) : null;
 };
