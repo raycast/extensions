@@ -1,5 +1,5 @@
 import path from "path";
-import { AbortError } from "node-fetch";
+import { AbortError, FetchError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { getAPIKey, GIF_SERVICE } from "../preferences";
@@ -14,7 +14,14 @@ interface FetchState {
   error?: Error;
 }
 
-const tenor = new TenorAPI(getAPIKey(GIF_SERVICE.TENOR));
+let tenor: TenorAPI;
+async function getAPI(force?: boolean) {
+  if (!tenor || force) {
+    tenor = new TenorAPI(await getAPIKey(GIF_SERVICE.TENOR, force));
+  }
+
+  return tenor;
+}
 
 export default function useTenorAPI({ offset = 0 }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -29,16 +36,20 @@ export default function useTenorAPI({ offset = 0 }) {
 
       let results: TenorResults;
       try {
+        const api = await getAPI();
         if (term) {
-          results = await tenor.search(term, { offset });
+          results = await api.search(term, { offset });
         } else {
-          results = await tenor.trending({ offset, limit: 10 });
+          results = await api.trending({ offset, limit: 10 });
         }
         setResults({ items: results.results.map(mapTenorResponse), term });
       } catch (e) {
-        const error = e as Error;
+        const error = e as FetchError;
         if (e instanceof AbortError) {
           return;
+        } else if (error.code == "401") {
+          error.message = "Invalid credentials, please try again.";
+          await getAPI(true);
         }
         setResults({ error });
       } finally {
