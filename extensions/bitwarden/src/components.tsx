@@ -32,7 +32,7 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
       const status = await bitwardenApi.status();
       if (status == "unauthenticated") {
         try {
-          bitwardenApi.login();
+          await bitwardenApi.login();
         } catch (error) {
           showToast(Toast.Style.Failure, "Failed to unlock vault.", "Please your API Key and Secret.");
           return;

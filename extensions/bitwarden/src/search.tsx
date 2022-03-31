@@ -19,7 +19,6 @@ import { codeBlock, titleCase, faviconUrl, extractKeywords } from "./utils";
 import { Bitwarden } from "./api";
 import { SESSION_KEY } from "./const";
 import { TroubleshootingGuide, UnlockForm } from "./components";
-import { existsSync } from "fs";
 
 const { fetchFavicons, primaryAction } = getPreferenceValues();
 
@@ -45,16 +44,13 @@ function useSession() {
 }
 
 export default function Search() {
-  const {
-    cliPath = process.arch == "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw",
-    clientId,
-    clientSecret,
-  } = getPreferenceValues();
-  if (!existsSync(cliPath)) {
+  const { cliPath, clientId, clientSecret } = getPreferenceValues();
+  try {
+    const api = new Bitwarden(clientId, clientSecret, cliPath);
+    return <ItemList api={api} />;
+  } catch (e) {
     return <TroubleshootingGuide />;
   }
-  const api = new Bitwarden(cliPath, clientId, clientSecret);
-  return <ItemList api={api} />;
 }
 
 export function ItemList(props: { api: Bitwarden }) {
@@ -72,11 +68,13 @@ export function ItemList(props: { api: Bitwarden }) {
     }
   }
 
-  async function copyTotp(sessionToken: string | undefined, id: string) {
-    if (sessionToken) {
-      const totp = await bitwardenApi.getTotp(id, sessionToken);
-      Clipboard.copy(totp);
-      closeMainWindow({ clearRootSearch: true });
+  async function copyTotp(id: string) {
+    if (session.token) {
+      const toast = await showToast(Toast.Style.Success, "Copying TOTP Code...");
+      const totp = await bitwardenApi.getTotp(id, session.token);
+      await Clipboard.copy(totp);
+      await toast.hide();
+      await closeMainWindow({ clearRootSearch: true });
     } else {
       showToast(Toast.Style.Failure, "Failed to fetch TOTP.");
     }
@@ -129,7 +127,6 @@ export function ItemList(props: { api: Bitwarden }) {
                 item={item}
                 lockVault={session.deleteToken}
                 refreshItems={refreshItems}
-                sessionToken={session.token}
                 copyTotp={copyTotp}
               />
             ))
@@ -153,10 +150,9 @@ function BitwardenItem(props: {
   item: Item;
   refreshItems?: () => void;
   lockVault: () => void;
-  sessionToken: string | undefined;
-  copyTotp: (sessionToken: string | undefined, id: string) => void;
+  copyTotp: (id: string) => void;
 }) {
-  const { item, refreshItems, sessionToken, copyTotp, lockVault } = props;
+  const { item, refreshItems, copyTotp, lockVault } = props;
   const { notes, identity, login, fields, card } = item;
 
   const keywords = useMemo(() => extractKeywords(item), [item]);
@@ -194,9 +190,9 @@ function BitwardenItem(props: {
                 shortcut={{ modifiers: ["cmd"], key: "t" }}
                 title="Copy TOTP"
                 icon={Icon.Clipboard}
-                onAction={() => {
-                  copyTotp(sessionToken, item.id);
-                  exit();
+                onAction={async () => {
+                  await copyTotp(item.id);
+                  await exit();
                 }}
               />
             ) : null}

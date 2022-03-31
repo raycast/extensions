@@ -15,23 +15,23 @@ import { LOCAL_STORAGE_KEY, PASSWORD_OPTIONS_MAP } from "./const";
 import { capitalise, objectEntries } from "./utils";
 import { PasswordGeneratorOptions, PasswordOptionField, PasswordOptionsToFieldEntries, PasswordType } from "./types";
 import { debounce } from "throttle-debounce";
-import { existsSync } from "fs";
 import { TroubleshootingGuide } from "./components";
 
 const FormSpace = () => <Form.Description text="" />;
 
-const GeneratePassword = () => {
-  const {
-    cliPath = process.arch == "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw",
-    clientId,
-    clientSecret,
-  } = getPreferenceValues();
-  if (!existsSync(cliPath)) {
+export default function GeneratePassword() {
+  const { cliPath, clientId, clientSecret } = getPreferenceValues();
+  try {
+    const bitwardenApi = new Bitwarden(clientId, clientSecret, cliPath);
+    return <PasswordGenerator bitwardenApi={bitwardenApi} />;
+  } catch (e) {
     return <TroubleshootingGuide />;
   }
-  const bitwardenApi = new Bitwarden(cliPath, clientId, clientSecret);
+}
+
+function PasswordGenerator(props: { bitwardenApi: Bitwarden }) {
   const { options, setOption } = usePasswordOptions();
-  const { password, regeneratePassword, isGenerating } = usePasswordGenerator(bitwardenApi, options);
+  const { password, regeneratePassword, isGenerating } = usePasswordGenerator(props.bitwardenApi, options);
 
   useOneTimePasswordHistoryWarning();
 
@@ -120,7 +120,7 @@ const GeneratePassword = () => {
       ))}
     </Form>
   );
-};
+}
 
 async function clearStorage() {
   for (const key of Object.values(LOCAL_STORAGE_KEY)) {
@@ -169,5 +169,3 @@ function OptionField({ option, currentOptions, handleFieldChange, field }: Optio
     />
   );
 }
-
-export default GeneratePassword;

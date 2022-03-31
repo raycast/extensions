@@ -1,4 +1,5 @@
 import execa from "execa";
+import { existsSync } from "fs";
 import { dirname } from "path/posix";
 import { Item, PasswordGeneratorOptions, VaultStatus } from "./types";
 import { getPasswordGeneratingArgs } from "./utils";
@@ -6,7 +7,13 @@ import { getPasswordGeneratingArgs } from "./utils";
 export class Bitwarden {
   private env: Record<string, string>;
   cliPath: string;
-  constructor(cliPath: string, clientId: string, clientSecret: string) {
+  constructor(clientId: string, clientSecret: string, cliPath: string) {
+    if (!cliPath) {
+      cliPath = process.arch == "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw";
+    }
+    if (!existsSync(cliPath)) {
+      throw new Error(`Bitwarden CLI not found at ${cliPath}`);
+    }
     this.cliPath = cliPath;
     this.env = {
       BW_CLIENTSECRET: clientSecret.trim(),
