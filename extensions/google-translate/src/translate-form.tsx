@@ -23,7 +23,7 @@ const TranslateForm = () => {
       showToast({
         style: Toast.Style.Failure,
         title: "Limit",
-        message: "Max length (5000 chars) for a single translation exceeded.",
+        message: "Max length (5000 chars) for a single translation exceeded",
       });
     } else {
       setText(value);
