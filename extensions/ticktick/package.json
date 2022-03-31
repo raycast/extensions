@@ -5,6 +5,9 @@
   "icon": "tick-logo.png",
   "author": "appest",
   "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "index",
