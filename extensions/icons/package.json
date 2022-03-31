@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "icons",
-  "title": "Icons",
+  "name": "iconify",
+  "title": "Iconify — Search Icons",
   "description": "Search icons via Iconify",
   "icon": "icon.png",
   "author": "destiner",
@@ -18,7 +18,7 @@
   "commands": [
     {
       "name": "view-icons",
-      "title": "Search Icons",
+      "title": "View Icons",
       "subtitle": "Iconify",
       "description": "View available icons",
       "mode": "view"
