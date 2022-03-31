@@ -18,7 +18,8 @@
       "description": "Start something .new! .new links are shortcuts to your favorite actions on the websites you love.",
       "mode": "view",
       "keywords": [
-        "new"
+        "new",
+        "dot-new"
       ]
     }
   ],
