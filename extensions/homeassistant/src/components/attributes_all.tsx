@@ -17,7 +17,7 @@ export function StatesAttributesList(): JSX.Element {
     });
   }
 
-  if (!states) {
+  if (!states || states.length <= 0) {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
