@@ -13,7 +13,7 @@
     {
       "name": "index",
       "title": "Dribbble",
-      "description": "Show popular shots",
+      "description": "List Dribbble Shots",
       "mode": "view"
     }
   ],
