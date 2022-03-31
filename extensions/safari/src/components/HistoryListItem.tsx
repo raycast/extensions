@@ -39,6 +39,7 @@ const HistoryListItem = (props: { entry: HistoryItem; searchText?: string }) => 
       accessories={[
         {
           text: domain,
+          tooltip: props.entry.url,
         },
       ]}
     />

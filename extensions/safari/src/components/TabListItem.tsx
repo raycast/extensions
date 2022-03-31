@@ -41,6 +41,7 @@ const TabListItem = (props: { tab: Tab; refresh: () => void }) => {
       accessories={[
         {
           text: domain,
+          tooltip: props.tab.url,
         },
       ]}
     />
