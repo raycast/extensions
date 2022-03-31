@@ -12,6 +12,12 @@ export function getFilteredDataset(query?: string): DataSet {
   return !query ? dataset : fuse.search(query, { limit: 10 }).map((result) => result.item);
 }
 
+export const getFaviconUrl = (domain: string | undefined) => {
+  if (domain) {
+    return `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(domain)}`;
+  }
+};
+
 export default function main() {
   const [prepDataSet, setPrepDataSet] = useState(getFilteredDataset());
 
@@ -29,7 +35,8 @@ export default function main() {
         <List.Item
           key={index}
           title={url}
-          accessories={[{ text: text }, { text: provider, icon: Icon.Link }]}
+          subtitle={text}
+          accessories={[{ text: provider, icon: getFaviconUrl(url) }]}
           actions={
             <ActionPanel>
               {/* We anticipate the protocol which hopefully is https anyway! */}
