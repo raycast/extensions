@@ -23,10 +23,10 @@ export default function Main(): ReactElement {
     showToast(Toast.Style.Failure, "", error);
   }
 
-  function getTarget(repo: GitRepo, bundleId: string): string {
+  function getTarget(repo: GitRepo, bundleId = ""): string {
     // Should it return the repo fullPath or url?
     if (
-      bundleId.toLowerCase() === repo.defaultBrowserId.toLocaleLowerCase() &&
+      bundleId.toLowerCase() === repo.defaultBrowserId.toLowerCase() &&
       repo.remotes.length > 0 &&
       repo.remotes[0].url.length > 0
     ) {
