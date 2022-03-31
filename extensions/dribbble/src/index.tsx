@@ -1,5 +1,5 @@
 import React from "react";
-import { ActionPanel, Detail, List, Action } from "@raycast/api";
+import { ActionPanel, List, Action } from "@raycast/api";
 import { fetchShots, Shot } from "./data";
 
 export default function Command() {
