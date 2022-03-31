@@ -1,7 +1,7 @@
 import { ActionPanel, List, Action } from '@raycast/api';
 import { useEffect, useMemo, useState } from 'react';
 import Service, { Domain } from './service';
-import { getDomainUrl, getToken } from './utils';
+import { getDomainUrl, getToken, handleNetworkError } from './utils';
 
 const service = new Service(getToken());
 
@@ -35,9 +35,14 @@ export default function Command() {
 
   useEffect(() => {
     async function fetchDomains() {
-      const domains = await service.getDomains();
-      setDomains(domains);
-      setLoading(false);
+      try {
+        const domains = await service.getDomains();
+        setDomains(domains);
+        setLoading(false);
+      } catch (e) {
+        setLoading(false);
+        handleNetworkError(e);
+      }
     }
 
     fetchDomains();
@@ -55,7 +60,7 @@ export default function Command() {
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser
-                      title="Open in Netlify"
+                      title="Open on Netlify"
                       url={getDomainUrl(domain)}
                     />
                   </ActionPanel>

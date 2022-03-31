@@ -6,6 +6,9 @@
   "icon": "icon.png",
   "author": "thomas",
   "license": "MIT",
+  "categories": [
+    "Fun"
+  ],
   "commands": [
     {
       "name": "index",

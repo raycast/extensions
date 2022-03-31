@@ -2,7 +2,8 @@ import { getPreferenceValues } from "@raycast/api";
 import execa from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
-import { VaultStatus } from "./types";
+import { Item, PasswordGeneratorOptions, VaultStatus } from "./types";
+import { getPasswordGeneratingArgs } from "./utils";
 
 export class Bitwarden {
   private env: Record<string, string>;
@@ -32,9 +33,11 @@ export class Bitwarden {
     await this.exec(["login", "--apikey"]);
   }
 
-  async listItems<ItemType>(type: string, sessionToken: string): Promise<ItemType[]> {
+  async listItems(type: string, sessionToken: string): Promise<Item[]> {
     const { stdout } = await this.exec(["list", type, "--session", sessionToken]);
-    return JSON.parse(stdout);
+    const items = JSON.parse(stdout);
+    // Filter out items without a name property (they are not displayed in the bitwarden app)
+    return items.filter((item: any) => !!item.name);
   }
 
   async getTotp(id: string, sessionToken: string): Promise<string> {
@@ -55,6 +58,12 @@ export class Bitwarden {
   async status(sessionToken: string | undefined): Promise<VaultStatus> {
     const { stdout } = await this.exec(sessionToken ? ["status", "--session", sessionToken] : ["status"]);
     return JSON.parse(stdout).status;
+  }
+
+  async generatePassword(options?: PasswordGeneratorOptions): Promise<string> {
+    const args = options ? getPasswordGeneratingArgs(options) : [];
+    const { stdout } = await this.exec(["generate", ...args]);
+    return stdout;
   }
 
   private async exec(args: string[]): Promise<execa.ExecaChildProcess> {

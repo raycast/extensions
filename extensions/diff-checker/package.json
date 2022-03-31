@@ -5,6 +5,7 @@
   "description": "Compare content of two texts",
   "icon": "icon.png",
   "author": "destiner",
+  "categories": ["Data", "Developer Tools"],
   "license": "MIT",
   "commands": [
     {

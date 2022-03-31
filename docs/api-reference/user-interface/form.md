@@ -234,14 +234,24 @@ export default function Command() {
 
 #### Props
 
-| Prop         | Type                       | Required | Default | Description                                                                                                                                                                                                       |
-| ------------ | -------------------------- | -------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| defaultValue | `Date`                     | No       | -       | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
-| id           | `string`                   | Yes      | -       | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
-| storeValue   | `boolean`                  | No       | -       | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
-| title        | `string`                   | No       | -       | The title displayed on the left side of the item.                                                                                                                                                                 |
-| value        | `Date`                     | No       | -       | The current value of the item.                                                                                                                                                                                    |
-| onChange     | `(newValue: Date) => void` | No       | -       |                                                                                                                                                                                                                   |
+| Prop         | Type                                            | Required | Default                         | Description                                                                                                                                                                                                       |
+| ------------ | ----------------------------------------------- | -------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| defaultValue | `Date`                                          | No       | -                               | The default value of the item. Keep in mind that `defaultValue` will be configured once per component lifecycle. This means that if a user changes the value, `defaultValue` won't be configured on re-rendering. |
+| id           | `string`                                        | Yes      | -                               | ID of the form item. Make sure to assign each form item a unique id. When using `Action.SubmitForm`, your can access the value with this id.                                                                      |
+| storeValue   | `boolean`                                       | No       | -                               | Indicates whether the value of the item should be persisted after submitting, and restored next time the form is rendered.                                                                                        |
+| title        | `string`                                        | No       | -                               | The title displayed on the left side of the item.                                                                                                                                                                 |
+| value        | `Date`                                          | No       | -                               | The current value of the item.                                                                                                                                                                                    |
+| onChange     | `(newValue: Date) => void`                      | No       | -                               |                                                                                                                                                                                                                   |
+| type         | `[Form.DatePicker.Type](#form.datepicker.type]` | No       | `Form.DatePicker.Type.DateTime` | Indicates what types of date components can be picked                                                                                                                                                             |
+
+#### Form.DatePicker.Type
+
+The types of date components the user can pick with a \`Form.DatePicker
+
+| Name     | Description                                                      |
+| -------- | ---------------------------------------------------------------- |
+| DateTime | Hour and second can be picked in addition to year, month and day |
+| Date     | Only year, month, and day can be picked                          |
 
 ### Form.Dropdown
 
