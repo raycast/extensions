@@ -16,7 +16,10 @@
       "title": ".new",
       "subtitle": "Start something new!",
       "description": "Start something .new! .new links are shortcuts to your favorite actions on the websites you love.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "new"
+      ]
     }
   ],
   "dependencies": {
