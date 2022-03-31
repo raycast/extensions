@@ -42,6 +42,7 @@ import { ScriptRunAction } from "./scripts";
 import { ButtonPressAction } from "./buttons";
 import { SceneActivateAction } from "./scenes";
 import { ensureCleanAccessories } from "../utils";
+import { InputBooleanOffAction, InputBooleanOnAction, InputBooleanToggleAction } from "./input_boolean";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -176,6 +177,9 @@ function getIcon(state: State): Image.ImageLike | undefined {
   } else if (e.startsWith("scene")) {
     return { source: "palette.png", tintColor: PrimaryIconColor };
   } else if (e.startsWith("switch")) {
+    const wallSwitch = state.state === "on" ? { source: "on.png" } : { source: "off.png", tintColor: PrimaryIconColor };
+    return wallSwitch;
+  } else if (e.startsWith("input_boolean")) {
     const wallSwitch = state.state === "on" ? { source: "on.png" } : { source: "off.png", tintColor: PrimaryIconColor };
     return wallSwitch;
   } else {
@@ -776,6 +780,30 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               onAction={async () => await ha.turnOffSwitch(props.state.entity_id)}
               icon={{ source: "power-btn.png", tintColor: Color.Red }}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "input_boolean": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section>
+            <InputBooleanToggleAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Controls">
+            <InputBooleanOnAction state={state} />
+            <InputBooleanOffAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
