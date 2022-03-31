@@ -106,7 +106,11 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
       <ActionPanel.Section>
         <Action.OpenInBrowser url={task.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
 
-        <Action.CopyToClipboard title="Copy Task URL" content={task.url} shortcut={{ modifiers: ["cmd"], key: "," }} />
+        <Action.CopyToClipboard
+          title="Copy Task URL"
+          content={task.url}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>

@@ -45,7 +45,7 @@ export default function Projects() {
               <Action.CopyToClipboard
                 title="Copy Project URL"
                 content={project.url}
-                shortcut={{ modifiers: ["cmd"], key: "," }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               />
 
               <ActionPanel.Section>
