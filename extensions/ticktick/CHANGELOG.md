@@ -1,6 +1,6 @@
 # TickTick Changelog
 
-## [Added] - 2022-3-31
+## [Added] - 2022-03-31
 
 - Support List-detail view for better user experience.
 - Add `Search Tasks` command for quick search tasks.
