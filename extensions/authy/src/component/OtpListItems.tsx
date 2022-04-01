@@ -1,4 +1,4 @@
-import { useEffect, useState, Fragment } from "react";
+import { useEffect, useState } from "react";
 import OtpListItem, { Otp } from "./OtpListItem";
 
 function calculateTimeLeft(basis: number) {
@@ -13,9 +13,10 @@ interface TimeState {
 interface OtpListItemsProps {
   items: Otp[];
   refresh: () => Promise<void>;
+  setOtpList: (value: (prev: Otp[]) => Otp[]) => void;
 }
 
-export default function OtpListItems({ items, refresh }: OtpListItemsProps) {
+export default function OtpListItems({ items, refresh, setOtpList }: OtpListItemsProps) {
   const [{ timeLeft10, timeLeft30 }, setTimes] = useState<TimeState>({
     timeLeft10: calculateTimeLeft(10),
     timeLeft30: calculateTimeLeft(30),
@@ -37,16 +38,18 @@ export default function OtpListItems({ items, refresh }: OtpListItemsProps) {
   }, []);
 
   return (
-    <Fragment>
+    <>
       {items.map((item, index) => (
         <OtpListItem
           key={index}
+          index={index}
           item={item}
           basis={item.type === "service" ? 30 : 10}
           timeLeft={item.type === "service" ? timeLeft30 : timeLeft10}
           refresh={refresh}
+          setOtpList={setOtpList}
         />
       ))}
-    </Fragment>
+    </>
   );
 }

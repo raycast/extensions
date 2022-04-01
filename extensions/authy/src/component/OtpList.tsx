@@ -1,4 +1,4 @@
-import { getPreferenceValues, List, popToRoot, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   addToCache,
@@ -22,7 +22,7 @@ import OtpListItems from "./OtpListItems";
 const { preferCustomName } = getPreferenceValues<{ preferCustomName: boolean }>();
 
 export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login: boolean) => void }) {
-  const [otpList, setState] = useState<Otp[]>([]);
+  const [otpList, setOtpList] = useState<Otp[]>([]);
 
   async function refresh(): Promise<void> {
     const toast = await showToast({
@@ -31,7 +31,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
       message: "Refreshing",
     });
     await toast.show();
-    setState([]);
+    setOtpList([]);
     try {
       const { authyId } = getPreferenceValues<{ authyId: number }>();
       const deviceId: number = await getFromCache(DEVICE_ID);
@@ -49,7 +49,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
           title: "Authy",
           message: error.message,
         });
-        await popToRoot();
+        return;
       } else {
         throw error;
       }
@@ -112,7 +112,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
         allItems = allItems.sort((a, b) => compareByDate(recentlyUsed.get(a.id) ?? 0, recentlyUsed.get(b.id) ?? 0));
       }
 
-      setState(allItems);
+      setOtpList(allItems);
     } catch (error) {
       if (error instanceof Error) {
         await showToast({
@@ -134,7 +134,7 @@ export function OtpList(props: { isLogin: boolean | undefined; setLogin: (login:
 
   return (
     <List searchBarPlaceholder="Search" isLoading={isLoading}>
-      <OtpListItems refresh={refresh} items={otpList} />
+      <OtpListItems refresh={refresh} items={otpList} setOtpList={setOtpList} />
     </List>
   );
 }

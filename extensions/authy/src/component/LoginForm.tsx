@@ -6,17 +6,7 @@ import {
   getServices,
   requestRegistration,
 } from "../client/authy-client";
-import {
-  ActionPanel,
-  Detail,
-  environment,
-  getPreferenceValues,
-  Icon,
-  render,
-  showToast,
-  Action,
-  Toast,
-} from "@raycast/api";
+import { ActionPanel, Detail, environment, getPreferenceValues, Icon, showToast, Action, Toast } from "@raycast/api";
 import {
   addToCache,
   APPS_KEY,
@@ -29,7 +19,6 @@ import {
   SECRET_SEED,
   SERVICES_KEY,
 } from "../cache";
-import Authy from "../search-otp";
 import { genTOTP } from "../util/utils";
 
 const message = `
@@ -138,7 +127,7 @@ async function resetRegistration() {
   await removeFromCache(REQUEST_ID);
   await removeFromCache(DEVICE_ID);
   await removeFromCache(SECRET_SEED);
-  await render(<Authy />);
+  await requestLoginIfNeeded();
 }
 
 export default function LoginForm(props: { setLogin: (step: boolean) => void }) {
@@ -153,8 +142,18 @@ export default function LoginForm(props: { setLogin: (step: boolean) => void }) 
       markdown={`${message}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Clipboard} title="Agree" onSubmit={() => checkForApproval(props.setLogin)} />
-          <Action icon={Icon.ExclamationMark} title={"Start From Scratch"} onAction={resetRegistration} />
+          <Action.SubmitForm
+            icon={Icon.Checkmark}
+            title="Agree"
+            onSubmit={() => checkForApproval(props.setLogin)}
+            shortcut={{ key: "enter", modifiers: [] }}
+          />
+          <Action
+            icon={Icon.ExclamationMark}
+            title={"Start From Scratch"}
+            onAction={resetRegistration}
+            shortcut={{ key: "enter", modifiers: ["cmd"] }}
+          />
         </ActionPanel>
       }
     />
