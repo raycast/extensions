@@ -31,7 +31,8 @@ export default function main() {
             title={quote["content"]}
             key={quote["content"]}
             accessories={[
-              { text: `${quote["character"]["firstname"]} ${quote["character"]["lastname"]}`, icon: Icon.Person },
+              { text: `${quote["character"]["firstname"]} ${quote["character"]["lastname"]}` },
+              { icon: Icon.Person },
             ]}
             actions={
               <ActionPanel>
