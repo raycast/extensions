@@ -12,9 +12,9 @@ import {
   Action,
 } from "@raycast/api";
 import { Item, VaultStatus } from "./types";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import treeify from "treeify";
-import { filterNullishPropertiesFromObject, codeBlock, titleCase, faviconUrl } from "./utils";
+import { filterNullishPropertiesFromObject, codeBlock, titleCase, faviconUrl, extractKeywords } from "./utils";
 import { useBitwarden } from "./hooks";
 import { TroubleshootingGuide, UnlockForm } from "./components";
 import { Bitwarden } from "./api";
@@ -119,6 +119,8 @@ function ItemListItem(props: {
   const { item, refreshItems, sessionToken, copyTotp } = props;
   const { name, notes, identity, login, secureNote, fields, passwordHistory, card } = item;
 
+  const keywords = useMemo(() => extractKeywords(item), [item]);
+
   const fieldMap = Object.fromEntries(fields?.map((field) => [field.name, field.value]) || []);
   const uriMap = Object.fromEntries(
     login?.uris?.filter((uri) => uri.uri).map((uri, index) => [`uri${index + 1}`, uri.uri]) || []
@@ -141,7 +143,7 @@ function ItemListItem(props: {
     <List.Item
       id={item.id}
       title={item.name}
-      keywords={item.name.split(/\W/)}
+      keywords={keywords}
       accessoryIcon={item.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined}
       icon={getIcon(item)}
       subtitle={item.login?.username || undefined}
