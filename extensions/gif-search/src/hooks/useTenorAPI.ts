@@ -1,10 +1,15 @@
-import { AbortError } from "node-fetch";
+import formatRelative from "date-fns/formatRelative";
+import fromUnixTime from "date-fns/fromUnixTime";
+import path from "path";
+import { AbortError, FetchError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { mapTenorResponse } from "../models/gif";
+import { environment } from "@raycast/api";
+
 import { getAPIKey, GIF_SERVICE } from "../preferences";
 
-import Tenor, { TenorResults } from "../models/tenor";
+import TenorAPI, { TenorResults } from "../models/tenor";
+import type { TenorGif } from "../models/tenor";
 import type { IGif } from "../models/gif";
 
 interface FetchState {
@@ -13,7 +18,14 @@ interface FetchState {
   error?: Error;
 }
 
-const tenor = new Tenor(getAPIKey(GIF_SERVICE.TENOR));
+let tenor: TenorAPI;
+async function getAPI(force?: boolean) {
+  if (!tenor || force) {
+    tenor = new TenorAPI(await getAPIKey(GIF_SERVICE.TENOR, force));
+  }
+
+  return tenor;
+}
 
 export default function useTenorAPI({ offset = 0 }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -28,16 +40,20 @@ export default function useTenorAPI({ offset = 0 }) {
 
       let results: TenorResults;
       try {
+        const api = await getAPI();
         if (term) {
-          results = await tenor.search(term, { offset });
+          results = await api.search(term, { offset });
         } else {
-          results = await tenor.trending({ offset, limit: 10 });
+          results = await api.trending({ offset, limit: 10 });
         }
         setResults({ items: results.results.map(mapTenorResponse), term });
       } catch (e) {
-        const error = e as Error;
+        const error = e as FetchError;
         if (e instanceof AbortError) {
           return;
+        } else if (error.code == "401") {
+          error.message = "Invalid credentials, please try again.";
+          await getAPI(true);
         }
         setResults({ error });
       } finally {
@@ -55,4 +71,24 @@ export default function useTenorAPI({ offset = 0 }) {
   }, []);
 
   return [results, isLoading, search] as const;
+}
+
+export function mapTenorResponse(tenorResp: TenorGif) {
+  const mediaItem = tenorResp.media[0];
+  return <IGif>{
+    id: tenorResp.id,
+    title: tenorResp.title || tenorResp.h1_title || tenorResp.content_description,
+    url: tenorResp.itemurl,
+    slug: path.basename(tenorResp.itemurl),
+    preview_gif_url: mediaItem.tinygif.preview,
+    gif_url: mediaItem.tinygif.url,
+    metadata: {
+      width: mediaItem.gif.dims[0],
+      height: mediaItem.gif.dims[1],
+      size: mediaItem.gif.size,
+      labels: [{ title: "Created", text: formatRelative(fromUnixTime(tenorResp.created), new Date()) }],
+      tags: tenorResp.tags,
+    },
+    attribution: environment.theme === "light" ? "PB_tenor_logo_grey_vertical.png" : "PB_tenor_logo_blue_vertical.png",
+  };
 }

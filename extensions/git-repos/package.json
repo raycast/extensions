@@ -104,8 +104,13 @@
       "default": ""
     }
   ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.31.0",
+    "default-browser": "^3.0.0",
     "node-fetch": "^3.0.0",
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2"

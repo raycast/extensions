@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { getCurrency } from './utils';
+import { getPreferredCurrency } from './utils';
 
 type Price = Record<string, Record<string, number>>;
 
@@ -67,11 +67,11 @@ export default class Service {
     return response.data;
   }
 
-  async getTop2000CoinList(currency: string): Promise<Coin[]> {
+  async getTopCoins(currency: string, count: number): Promise<Coin[]> {
     const coins: MarketCapRankedCoinList = {};
     const requests = [];
     const perPage = 250;
-    const totalPages = 8;
+    const totalPages = Math.ceil(count / perPage);
     let currentPage = 1;
 
     while (currentPage < totalPages) {
@@ -95,24 +95,17 @@ export default class Service {
   }
 
   async getCoinPriceHistory(id: string, days = 30) {
-    const currency = getCurrency();
+    const currency = getPreferredCurrency();
     const response = await client.get<PriceResponse>(
       `/coins/${id}/market_chart`,
       {
         params: {
-          vs_currency: currency,
+          vs_currency: currency.id,
           days,
           interval: 'daily',
         },
       },
     );
     return response.data.prices;
-  }
-
-  async getSupportedVsCurrencies(): Promise<string[]> {
-    const response = await client.get<string[]>(
-      '/simple/supported_vs_currencies',
-    );
-    return response.data;
   }
 }

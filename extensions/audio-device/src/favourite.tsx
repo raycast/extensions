@@ -1,15 +1,22 @@
-import { getPreferenceValues, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { setOutputDevice } from "./utils";
 
-const preferences = getPreferenceValues();
-if (preferences.favourite != null && preferences.favourite !== "") {
-  setOutputDevice(preferences.favourite);
-  popToRoot();
-  showHUD(`Active audio device set to ${preferences.favourite}`);
-} else {
-  showToast({
-    style: Toast.Style.Failure,
-    title: "No favorite device specified",
-  });
-  popToRoot();
-}
+export default async () => {
+  const preferences = getPreferenceValues();
+  if (preferences.favourite != null && preferences.favourite !== "") {
+    try {
+      await setOutputDevice(preferences.favourite);
+      await showHUD(`Active output audio device set to ${preferences.favourite}`);
+    } catch (err) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Favourite output audio device could not be set",
+      });
+    }
+  } else {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "No favourite output audio device specified",
+    });
+  }
+};

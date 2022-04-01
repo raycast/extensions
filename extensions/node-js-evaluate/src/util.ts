@@ -1,31 +1,51 @@
 import { State } from "./types";
 
 export function doEval(state: State, long = false): State {
-  const newState = { ...state };
+  let evalResult, result, type;
   const query = state.query.trim() ?? "";
-  let result;
 
   try {
     try {
-      result = JSON.parse(query);
+      try {
+        evalResult = JSON.parse(query);
+      } catch (_) {
+        evalResult = eval(`(${query})`);
+      }
     } catch (_) {
-      result = eval(query);
+      evalResult = eval(query);
     }
-    newState.type = toType(result);
   } catch (err) {
-    newState.type = "error";
-    result = (err as Error).toString();
+    type = "error";
+    evalResult = (err as Error).toString();
   }
 
-  newState.result = JSON.stringify(result, null, long ? 2 : undefined) ?? result?.toString();
-  return newState;
+  type ||= toType(evalResult);
+
+  if (!isPrimitive(evalResult as never)) {
+    console.log(evalResult);
+    result = JSON.stringify(
+      evalResult,
+      (_, value) => {
+        if (isPrimitive(value as never) && JSON.stringify(value) === "null") return value?.toString() ?? value;
+        return value;
+      },
+      long ? 2 : undefined
+    );
+  }
+
+  result ||= evalResult?.toString() ?? "undefined";
+  return { ...state, type, result };
 }
 
-export function toType(obj: unknown): string {
+function toType(obj: unknown): string {
   return (
     {}.toString
       .call(obj)
       .match(/\s([a-zA-Z]+)/)?.[1]
       .toLowerCase() ?? "undefined"
   );
+}
+
+function isPrimitive(test: never) {
+  return test !== Object(test);
 }

@@ -42,6 +42,10 @@
       ]
     }
   ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "search",
