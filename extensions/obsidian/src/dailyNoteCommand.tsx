@@ -5,7 +5,7 @@ import fs from "fs";
 
 export default function Command() {
   let vaults = parseVaults();
-  let vaultsWithoutPlugin: Array<Vault> = [];
+  const vaultsWithoutPlugin: Array<Vault> = [];
   vaults = vaults.filter((vault: Vault) => {
     const communityPluginsPath = vault.path + "/.obsidian/community-plugins.json";
     if (!fs.existsSync(communityPluginsPath)) {
