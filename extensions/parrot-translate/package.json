@@ -15,6 +15,7 @@
             "mode": "view"
         }
     ],
+    "categories": ["Documentation", "Web", "Developer Tools"],
     "preferences": [
         {
             "name": "lang1",
