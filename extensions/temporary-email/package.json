@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "temporary-email",
   "title": "Temporary Email",
-  "description": "",
+  "description": "Quickly and easily create a temporary email.",
   "icon": "command-icon.png",
   "author": "natterstefan",
   "categories": [
