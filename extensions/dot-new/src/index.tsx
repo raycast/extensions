@@ -41,7 +41,8 @@ export default function main() {
           key={index}
           title={url}
           subtitle={text}
-          accessories={[{ text: provider, icon: getFaviconUrl(url) }]}
+          icon={getFaviconUrl(url)}
+          accessories={[{ text: provider }]}
           actions={
             <ActionPanel>
               {/* We anticipate the protocol which hopefully is https anyway! */}
