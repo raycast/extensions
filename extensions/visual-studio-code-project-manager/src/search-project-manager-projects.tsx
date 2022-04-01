@@ -20,8 +20,6 @@ import { ReactElement } from "react";
 import tildify from "tildify";
 import { CachedProjectEntry, Preferences, ProjectEntry, VSCodeBuild } from "./types";
 
-const STORAGE = `${homedir()}/Library/Application Support/Code/User/globalStorage/alefragnani.project-manager`;
-
 const preferences: Preferences = getPreferenceValues();
 
 const gitClientPath = preferences.gitClientAppPath || "";
@@ -36,6 +34,8 @@ const appKeyMapping = {
   "Code - Insiders": "com.microsoft.VSCodeInsiders",
 } as const;
 const appKey: string = appKeyMapping[build] ?? appKeyMapping.Code;
+
+const STORAGE = `${homedir()}/Library/Application Support/${build}/User/globalStorage/alefragnani.project-manager`;
 
 function getProjectEntries(): ProjectEntry[] {
   const storagePath = getPreferencesPath() || STORAGE;
