@@ -72,7 +72,11 @@ const TickTickSearch: React.FC<Record<string, never>> = () => {
       isShowingDetail
       searchBarAccessory={<SearchFilter filterSections={filterSections} onFilterChange={onFilterChange} />}
     >
-      {renderTasks}
+      {!searchTasks && renderTasks.length === 0 ? (
+        <List.EmptyView title="Type something to search tasks" />
+      ) : (
+        renderTasks
+      )}
     </List>
   );
 };
