@@ -4,7 +4,7 @@ import { State } from "../haapi";
 
 export function InputBooleanToggleAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
-  if (!s.entity_id.startsWith("input_boolean")) {
+  if (!s.entity_id.startsWith("input_boolean") || s.attributes.editable !== true) {
     return null;
   }
   const handle = async () => {
@@ -15,7 +15,7 @@ export function InputBooleanToggleAction(props: { state: State }): JSX.Element |
 
 export function InputBooleanOnAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
-  if (!s.entity_id.startsWith("input_boolean")) {
+  if (!s.entity_id.startsWith("input_boolean") || s.attributes.editable !== true) {
     return null;
   }
   const handle = async () => {
@@ -33,7 +33,7 @@ export function InputBooleanOnAction(props: { state: State }): JSX.Element | nul
 
 export function InputBooleanOffAction(props: { state: State }): JSX.Element | null {
   const s = props.state;
-  if (!s.entity_id.startsWith("input_boolean")) {
+  if (!s.entity_id.startsWith("input_boolean") || s.attributes.editable !== true) {
     return null;
   }
   const handle = async () => {
