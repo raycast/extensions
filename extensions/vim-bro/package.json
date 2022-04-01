@@ -14,8 +14,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Vim Bro",
-      "subtitle": "Search Vim Commands",
+      "title": "Search Vim Commands",
       "description": "Search vim commands",
       "mode": "view"
     }
