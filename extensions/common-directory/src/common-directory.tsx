@@ -165,6 +165,23 @@ function DirectoryItem(props: {
               await showToast(Toast.Style.Success, "Remove Success");
             }}
           />
+          <Action
+            title={"Rest All Rank"}
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
+            onAction={async () => {
+              const _commonDirectory = [...commonDirectory];
+              _commonDirectory.forEach((directory) => {
+                directory.rank = 1;
+              });
+              _commonDirectory.sort(function (a, b) {
+                return b.name.toUpperCase() < a.name.toUpperCase() ? 1 : -1;
+              });
+              setCommonDirectory(_commonDirectory);
+              await LocalStorage.setItem(DirectoryType.DIRECTORY, JSON.stringify(_commonDirectory));
+              await showToast(Toast.Style.Success, "Reset Success");
+            }}
+          />
         </ActionPanel>
       }
     />
