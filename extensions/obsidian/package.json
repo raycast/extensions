@@ -4,6 +4,7 @@
   "description": "Search, open, view, copy, paste and edit any note in Obsidian",
   "icon": "command-icon.png",
   "author": "marcjulian",
+  "categories": ["Productivity"],
   "license": "MIT",
   "preferences": [
     {
@@ -116,11 +117,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0"
+    "@raycast/api": "^1.31.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
+    "@types/react": "^17.0.43",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

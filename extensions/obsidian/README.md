@@ -1,4 +1,4 @@
-# obsidian-raycast
+# Obsidian for Raycast
 This is a raycast extension with commands for the note taking and knowledge management app Obsidian. To use it, simply open Raycast Search and type one of the following commands:
 
 ## Search Note
@@ -15,18 +15,22 @@ It features several actions which you can trigger with these keyboard shortcuts:
 
 The primary action (`enter`) can be changed in the extensions preferences.
 
-<img width="793" alt="Obsidian Raycast Search" src="https://user-images.githubusercontent.com/67844154/138552923-35bfbfdf-a46a-4d23-ab7a-c17d90323f58.png">
+![Search Note Command](https://user-images.githubusercontent.com/67844154/161255751-8a460ca1-c38f-4133-adaa-909f7a450ab1.png)
+
 
 
 ## Open Vault
 This command will show a list of previously specified vaults which you can open by pressing `enter`.
 
-<img width="795" alt="Obsidian Open Vault command" src="https://user-images.githubusercontent.com/67844154/147991366-ef494cf8-bae7-4141-8fb6-fc14cf10182e.png">
+![Open Vault Command](https://user-images.githubusercontent.com/67844154/161255791-66445ad2-0e27-4c5b-b751-a8a404d18c15.png)
+
+
 
 ## Create Note
 This command lets you create new notes on the fly by entering a name, optionally a path to a subfolder in your vault and some content. You can use the tag picker to add tags to the notes YAML frontmatter.
 
-<img width="831" alt="Create Note command" src="https://user-images.githubusercontent.com/67844154/149658484-50b87db0-e6cf-4669-89b1-e3c674723066.png">
+![Create Note Command](https://user-images.githubusercontent.com/67844154/161255831-b21fd820-68b8-4829-a654-b470646ba67b.png)
+
 
 ## Daily Note
 This command will open the daily note from the selected vault. If a daily note doesn't exist it will create one and open it.
@@ -48,9 +52,6 @@ It requires the community plugin [Advanced Obsidian URI](https://obsidian.md/plu
 ## Blog posts:
 - [First Update Raycast Obsidian Extension](https://www.marc-julian.de/2022/03/Obsidian%20Raycast%20Extension%20Update.html)
 - [Obsidian Raycast Extension](https://www.marc-julian.de/2022/01/raycastobsidian.html)
-
-## Demo (old)
-https://user-images.githubusercontent.com/67844154/145954580-2a1cde55-a597-4298-8c6c-9cdc8d297a55.mov
 
 ## Contributions and Credits
 Thank you [macedotavares](https://forum.obsidian.md/t/big-sur-icon/8121?u=marcjulian) for letting me use your amazing Obsidian (Big Sur) icon.
