@@ -23,6 +23,13 @@
       "subtitle": "LaLiga",
       "description": "Find out the results of the last round of LaLiga and the previous ones of LaLiga.",
       "mode": "view"
+    },
+    {
+      "name": "club",
+      "title": "Clubs",
+      "subtitle": "LaLiga",
+      "description": "Clubs and Teams of LaLiga.",
+      "mode": "view"
     }
   ],
   "dependencies": {

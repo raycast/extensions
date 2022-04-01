@@ -4,3 +4,4 @@
 
 - Added Standings
 - Added Results
+- Added Clubs

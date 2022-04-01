@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import CompetitionDropdown, {
   competitions,
 } from "./components/competition_dropdown";
-import { Match } from "./types/match";
+import { Match } from "./types";
 import { getCurrentGameWeek, getMatches } from "./api";
 
 interface Matchday {
@@ -43,6 +43,7 @@ export default function Fixture() {
 
   return (
     <List
+      navigationTitle="Results | LaLiga"
       throttle
       isLoading={loading}
       searchBarAccessory={<CompetitionDropdown onSelect={setCompetition} />}
