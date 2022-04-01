@@ -1,4 +1,4 @@
-import { ActionPanel, Form, SubmitFormAction, useNavigation, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Form, Action, useNavigation, showToast, Toast } from "@raycast/api";
 import fs from "fs";
 
 interface Note {
@@ -17,7 +17,7 @@ export function AppendNoteForm(props: { note: Note }) {
 
   function addTextToNote(text: FormValue) {
     fs.appendFileSync(note.path, "\n\n" + text.content);
-    showToast(ToastStyle.Success, "Added text to note");
+    showToast({ title: "Added text to note", style: Toast.Style.Success });
     pop();
   }
 
@@ -26,7 +26,7 @@ export function AppendNoteForm(props: { note: Note }) {
       navigationTitle={"Add text to: " + note.title}
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Submit" onSubmit={addTextToNote} />
+          <Action.SubmitForm title="Submit" onSubmit={addTextToNote} />
         </ActionPanel>
       }
     >

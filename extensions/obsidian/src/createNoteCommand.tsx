@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 
 import { CreateNoteForm } from "./components/CreateNoteForm";
 import { VaultSelection } from "./components/VaultSelection";
@@ -12,10 +12,10 @@ export default function Command() {
   } else if (vaults.length == 1) {
     return <CreateNoteForm vaultPath={vaults[0].path} />;
   } else {
-    showToast(
-      ToastStyle.Failure,
-      "Path Error",
-      "Something went wrong with your vault path. There are no paths to select from."
-    );
+    showToast({
+      title: "Path Error",
+      message: "Something went wrong with your vault path. There are no paths to select from.",
+      style: Toast.Style.Failure,
+    });
   }
 }

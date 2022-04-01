@@ -1,18 +1,33 @@
-import { List, ActionPanel, OpenAction, showToast, ToastStyle, Detail } from "@raycast/api";
+import { List, ActionPanel, Action, Detail, showToast, Toast } from "@raycast/api";
 import { Vault } from "./interfaces";
 import { parseVaults } from "./VaultUtils";
 import fs from "fs";
 
 export default function Command() {
   let vaults = parseVaults();
+  let vaultsWithoutPlugin: Array<Vault> = [];
   vaults = vaults.filter((vault: Vault) => {
-    const plugins: Array<string> = JSON.parse(
-      fs.readFileSync(vault.path + "/.obsidian/community-plugins.json", "utf-8")
-    );
-    if (plugins.includes("obsidian-advanced-uri")) {
-      return vault;
+    const communityPluginsPath = vault.path + "/.obsidian/community-plugins.json";
+    if (!fs.existsSync(communityPluginsPath)) {
+      vaultsWithoutPlugin.push(vault);
+    } else {
+      const plugins: Array<string> = JSON.parse(fs.readFileSync(communityPluginsPath, "utf-8"));
+
+      if (plugins.includes("obsidian-advanced-uri")) {
+        return vault;
+      } else {
+        vaultsWithoutPlugin.push(vault);
+      }
     }
   });
+
+  if (vaultsWithoutPlugin.length > 0) {
+    showToast({
+      title: "Vaults without Daily Note plugin:",
+      message: vaultsWithoutPlugin.map((vault: Vault) => vault.name).join(", "),
+      style: Toast.Style.Failure,
+    });
+  }
 
   if (vaults.length == 0) {
     const text =
@@ -29,7 +44,7 @@ export default function Command() {
           key={vault.key}
           actions={
             <ActionPanel>
-              <OpenAction
+              <Action.Open
                 title="Daily Note"
                 target={"obsidian://advanced-uri?vault=" + encodeURIComponent(vault.name) + "&daily=true"}
               />

@@ -1,4 +1,4 @@
-import { showToast, ToastStyle, AlertOptions, confirmAlert, Icon } from "@raycast/api";
+import { showToast, Toast, confirmAlert, Icon } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 
@@ -21,7 +21,7 @@ class NoteCreator {
 
   createNote() {
     if (this.noteProps.name == "") {
-      showToast(ToastStyle.Failure, "Please enter a name");
+      showToast({ title: "Please enter a name", style: Toast.Style.Failure });
     } else {
       const content = this.buildNoteContent();
       this.saveNote(content);
@@ -46,7 +46,7 @@ class NoteCreator {
     const notePath = path.join(this.vaultPath, this.noteProps.path);
 
     if (fs.existsSync(path.join(notePath, this.noteProps.name + ".md"))) {
-      const options: AlertOptions = {
+      const options = {
         title: "Override note",
         message: 'Are you sure you want to override the note: "' + this.noteProps.name + '"?',
         icon: Icon.ExclamationMark,
@@ -64,19 +64,31 @@ class NoteCreator {
       try {
         fs.mkdirSync(notePath, { recursive: true });
       } catch {
-        showToast(ToastStyle.Failure, "Couldn't create folder structure for the given path.");
+        showToast({
+          title: "Couldn't create directories for the given path:",
+          message: notePath,
+          style: Toast.Style.Failure,
+        });
         return;
       }
       try {
         fs.writeFileSync(path.join(notePath, this.noteProps.name + ".md"), content);
       } catch {
-        showToast(ToastStyle.Failure, "Couldn't write the file: " + notePath + "/" + this.noteProps.name + ".md");
+        showToast({
+          title: "Couldn't write to file:",
+          message: notePath + "/" + this.noteProps.name + ".md",
+          style: Toast.Style.Failure,
+        });
         return;
       }
-      showToast(ToastStyle.Success, "Created new note");
+      showToast({ title: "Note created", style: Toast.Style.Success });
       this.saved = true;
     } catch {
-      showToast(ToastStyle.Failure, "Something went wrong. Maybe your vault, path or filename is not valid.");
+      showToast({
+        title: "Something went wrong",
+        message: " Maybe your vault, path or filename is not valid",
+        style: Toast.Style.Failure,
+      });
     }
   }
 }

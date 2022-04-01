@@ -1,4 +1,4 @@
-import { List, ActionPanel, OpenAction } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
 import { parseVaults } from "./VaultUtils";
 
 export default function Command() {
@@ -12,7 +12,7 @@ export default function Command() {
           key={vault.key}
           actions={
             <ActionPanel>
-              <OpenAction title="Open vault" target={"obsidian://open?vault=" + encodeURIComponent(vault.name)} />
+              <Action.Open title="Open vault" target={"obsidian://open?vault=" + encodeURIComponent(vault.name)} />
             </ActionPanel>
           }
         />

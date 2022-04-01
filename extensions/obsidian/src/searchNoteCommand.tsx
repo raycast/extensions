@@ -1,4 +1,4 @@
-import { showToast, ToastStyle } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 
 import { parseVaults } from "./VaultUtils";
 import { NoteList } from "./components/NoteList";
@@ -12,6 +12,10 @@ export default function Command() {
   } else if (vaults.length == 1) {
     return <NoteList vaultPath={vaults[0].path} />;
   } else {
-    showToast(ToastStyle.Failure, "Path Error", "Something went wrong with your vault path.");
+    showToast({
+      title: "Path Error",
+      message: "Something went wrong with your vault path. There are no paths to select from.",
+      style: Toast.Style.Failure,
+    });
   }
 }

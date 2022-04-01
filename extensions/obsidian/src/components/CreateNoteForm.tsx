@@ -1,4 +1,4 @@
-import { ActionPanel, Form, SubmitFormAction, useNavigation, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Form, Action, useNavigation, getPreferenceValues } from "@raycast/api";
 
 import NoteCreator from "../NoteCreator";
 import { NoteFormPreferences, FormValue } from "../interfaces";
@@ -58,7 +58,7 @@ export function CreateNoteForm(props: { vaultPath: string }) {
       navigationTitle={"Create new Note"}
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Create" onSubmit={createNewNote} />
+          <Action.SubmitForm title="Create" onSubmit={createNewNote} />
         </ActionPanel>
       }
     >

@@ -1,19 +1,13 @@
 import {
+  Action,
   ActionPanel,
-  OpenAction,
   getPreferenceValues,
-  CopyToClipboardAction,
-  PasteAction,
-  PushAction,
   Detail,
   Icon,
   showToast,
-  ToastStyle,
+  Toast,
   getSelectedText,
 } from "@raycast/api";
-
-//@ts-ignore
-import { Action } from "@raycast/api";
 
 import fs from "fs";
 import React from "react";
@@ -49,13 +43,13 @@ async function appendSelectedTextTo(note: Note) {
     selectedText = await getSelectedText();
     console.log(selectedText);
     if (selectedText.trim() == "") {
-      showToast(ToastStyle.Failure, "No text selected");
+      showToast({ title: "No text selected", message: "Make sure to select some text.", style: Toast.Style.Failure });
     } else {
       fs.appendFileSync(note.path, "\n\n" + selectedText);
-      showToast(ToastStyle.Success, "Added selected text to note");
+      showToast({ title: "Added selected text to note", style: Toast.Style.Success });
     }
   } catch {
-    showToast(ToastStyle.Failure, "Couldn't copy selected text");
+    showToast({ title: "Couldn't copy selected text", style: Toast.Style.Failure });
   }
 }
 
@@ -67,7 +61,7 @@ function NoteQuickLook(props: { note: Note }) {
       markdown={content}
       actions={
         <ActionPanel>
-          <OpenAction title="Open in Obsidian" target={"obsidian://open?path=" + encodeURIComponent(note.path)} />
+          <Action.Open title="Open in Obsidian" target={"obsidian://open?path=" + encodeURIComponent(note.path)} />
           <NoteActions note={note} />
         </ActionPanel>
       }
@@ -79,7 +73,7 @@ export function NoteActions(props: { note: Note }) {
   const note = props.note;
   return (
     <React.Fragment>
-      <PushAction
+      <Action.Push
         title="Append to note"
         target={<AppendNoteForm note={note} />}
         shortcut={{ modifiers: ["opt"], key: "a" }}
@@ -95,26 +89,26 @@ export function NoteActions(props: { note: Note }) {
         icon={Icon.Pencil}
       />
 
-      <CopyToClipboardAction
+      <Action.CopyToClipboard
         title="Copy note content"
         content={getNoteContent(note)}
         shortcut={{ modifiers: ["opt"], key: "c" }}
       />
 
-      <PasteAction
+      <Action.Paste
         title="Paste note content"
         content={getNoteContent(note)}
         shortcut={{ modifiers: ["opt"], key: "v" }}
       />
 
-      <CopyToClipboardAction
+      <Action.CopyToClipboard
         title="Copy markdown link"
         icon={Icon.Link}
         content={`[${note.title}](obsidian://open?path=${encodeURIComponent(note.path)})`}
         shortcut={{ modifiers: ["opt"], key: "l" }}
       />
 
-      <CopyToClipboardAction
+      <Action.CopyToClipboard
         title="Copy obsidian URI"
         icon={Icon.Link}
         content={`obsidian://open?path=${encodeURIComponent(note.path)}`}
@@ -129,10 +123,10 @@ export function OpenNoteActions(props: { note: Note }) {
   const pref: SearchNotePreferences = getPreferenceValues();
   const primaryAction = pref.primaryAction;
 
-  const quicklook = <PushAction title="Quick Look" target={<NoteQuickLook note={note} />} icon={Icon.Eye} />;
+  const quicklook = <Action.Push title="Quick Look" target={<NoteQuickLook note={note} />} icon={Icon.Eye} />;
 
   const obsidian = (
-    <OpenAction title="Open in Obsidian" target={"obsidian://open?path=" + encodeURIComponent(note.path)} />
+    <Action.Open title="Open in Obsidian" target={"obsidian://open?path=" + encodeURIComponent(note.path)} />
   );
 
   if (primaryAction == PrimaryAction.QuickLook) {

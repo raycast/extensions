@@ -1,4 +1,4 @@
-import { List, ActionPanel, showToast, ToastStyle } from "@raycast/api";
+import { List, ActionPanel, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 import fs from "fs";
@@ -19,7 +19,11 @@ export function NoteList(props: { vaultPath: string }) {
 
         setNotes(_notes);
       } catch (error) {
-        showToast(ToastStyle.Failure, "The path set in preferences does not exist.");
+        showToast({
+          title: "The path set in preferences doesn't exist",
+          message: "Please set a valid path in preferences",
+          style: Toast.Style.Failure,
+        });
       }
     }
     fetch();
