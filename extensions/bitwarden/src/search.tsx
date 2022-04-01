@@ -125,7 +125,10 @@ export function ItemList(props: { api: Bitwarden }) {
               <BitwardenItem
                 key={item.id}
                 item={item}
-                lockVault={session.deleteToken}
+                lockVault={async () => {
+                  await bitwardenApi.lock();
+                  await session.deleteToken();
+                }}
                 refreshItems={refreshItems}
                 copyTotp={copyTotp}
               />
