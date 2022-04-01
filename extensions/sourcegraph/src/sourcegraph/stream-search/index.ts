@@ -1,11 +1,7 @@
 import EventSource from "eventsource";
-import { remark } from "remark";
-import strip from "strip-markdown";
 
 import { getMatchUrl, SearchEvent, SearchMatch } from "./stream";
 import { Sourcegraph } from "..";
-
-const stripMarkdown = remark().use(strip);
 
 export interface SearchResult {
   url: string;
@@ -86,11 +82,6 @@ export async function performSearch(
           // Do some pre-processing of results, since some of the API outputs are a bit
           // confusing, to make it easier later on.
           switch (match.type) {
-            case "commit":
-              // Commit stuff comes already markdown-formatted?? so strip formatting
-              match.label = stripMarkdown.processSync(match.label)?.value.toString().split(`› `).pop() || "";
-              match.detail = stripMarkdown.processSync(match.detail)?.value.toString();
-              break;
             case "content":
               // Line number appears 0-indexed, for ease of use increment it so links
               // aren't off by 1.

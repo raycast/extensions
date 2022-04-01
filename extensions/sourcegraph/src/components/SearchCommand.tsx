@@ -151,9 +151,9 @@ function SearchResultItem({
       break;
     case "commit":
       icon.source = Icon.MemoryChip;
-      title = match.label;
+      title = match.message;
       // just get the date
-      subtitle = match.detail.split(" ").slice(1).join(" ");
+      subtitle = match.authorDate;
       break;
     case "path":
       icon.source = Icon.TextDocument;
@@ -263,9 +263,6 @@ function ResultView({ searchResult, icon }: { searchResult: SearchResult; icon: 
       key={nanoid()}
     />,
   ];
-  if (match.repoStars) {
-    metadata.push(<Detail.Metadata.Label title="Stars" text={`${match.repoStars}`} key={nanoid()} />);
-  }
 
   switch (match.type) {
     // Match types that have multi result view
@@ -288,19 +285,16 @@ function ResultView({ searchResult, icon }: { searchResult: SearchResult; icon: 
       break;
 
     case "commit": {
-      markdownContent = `${match.label}
-
-${match.content}
-`;
-      const detailParts = match.detail.split(" ");
-      if (detailParts.length > 1) {
-        metadata.push(
-          <Detail.Metadata.Label title="Commit" text={detailParts[0]} key={nanoid()} />,
-          <Detail.Metadata.Label title="Committed" text={detailParts.splice(1).join(" ")} key={nanoid()} />
-        );
-      } else {
-        metadata.push(<Detail.Metadata.Label title="Details" text={match.detail} key={nanoid()} />);
-      }
+      markdownContent = match.message;
+      metadata.push(
+        <Detail.Metadata.Label title="Author" text={match.authorName} key={nanoid()} />,
+        <Detail.Metadata.Label title="Commit" text={match.oid} key={nanoid()} />,
+        <Detail.Metadata.Label
+          title="Committed"
+          text={DateTime.fromISO(match.authorDate).toRelative() || "Unknown"}
+          key={nanoid()}
+        />
+      );
       break;
     }
 
@@ -311,6 +305,10 @@ ${match.content}
 ${JSON.stringify(match, null, "  ")}
 \`\`\`
 `;
+  }
+
+  if (match.repoStars) {
+    metadata.push(<Detail.Metadata.Label title="Stars" text={`${match.repoStars}`} key={nanoid()} />);
   }
 
   return (
