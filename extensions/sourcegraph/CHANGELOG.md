@@ -3,6 +3,7 @@
 ## [Batch Changes, revamped previews, and refined behaviour](https://github.com/raycast/extensions/pull/1228) - 2022-03-27
 
 - **batch-changes**: "Manage Batch Changes" is a new command that allows you to browse, view, publish, merge, and retry changesets for [Sourcegraph Batch Changes](https://about.sourcegraph.com/batch-changes)! This is only supported on Sourcegraph Self-Hosted. ([#11](https://github.com/bobheadxi/raycast-sourcegraph/pull/11), [#13](https://github.com/bobheadxi/raycast-sourcegraph/pull/13))
+- **search**: Search results now have a new drilldown action to query within the result's repository or file using the `Cmd-S` shortcut. For example, on a repository result, `Cmd-S` will start a search with the `repo:` filter.
 - **search**: Some search result types now leverage metadata details.
 - **notebooks**: Notebook view now leverage metadata details and support the new Symbol block type.
 - **search**, **notebooks**: The default action on results is now to always open a preview in Raycast, rather than opening in browser directly, for consistency.

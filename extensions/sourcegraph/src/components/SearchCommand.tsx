@@ -17,22 +17,22 @@ import { DateTime } from "luxon";
 import { Sourcegraph, instanceName } from "../sourcegraph";
 import { performSearch, SearchResult, Suggestion } from "../sourcegraph/stream-search";
 import { ContentMatch, SymbolMatch } from "../sourcegraph/stream-search/stream";
-import { ColorDefault, ColorPrivate } from "./colors";
+import { ColorDefault, ColorEmphasis, ColorPrivate } from "./colors";
 import ExpandableErrorToast from "./ExpandableErrorToast";
-import { copyShortcut, tertiaryActionShortcut } from "./shortcuts";
+import { copyShortcut, drilldownShortcut, tertiaryActionShortcut } from "./shortcuts";
 
 /**
  * SearchCommand is the shared search command implementation.
  */
 export default function SearchCommand({ src }: { src: Sourcegraph }) {
-  const [searchText, updateSearchText] = useState(src.defaultContext ? `context:${src.defaultContext} ` : "");
+  const [searchText, setSearchText] = useState(src.defaultContext ? `context:${src.defaultContext} ` : "");
   const { state, search } = useSearch(src);
   const srcName = instanceName(src);
   return (
     <List
       isLoading={state.isLoading}
       onSearchTextChange={(text) => {
-        updateSearchText(text);
+        setSearchText(text);
         search(text);
       }}
       searchText={searchText}
@@ -74,7 +74,13 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
       {/* results */}
       <List.Section title="Results" subtitle={state.summary || ""}>
         {state.results.map((searchResult) => (
-          <SearchResultItem key={nanoid()} searchResult={searchResult} searchText={searchText} src={src} />
+          <SearchResultItem
+            key={nanoid()}
+            searchResult={searchResult}
+            searchText={searchText}
+            src={src}
+            setSearchText={setSearchText}
+          />
         ))}
       </List.Section>
     </List>
@@ -111,14 +117,48 @@ function getQueryURL(src: Sourcegraph, query: string) {
   return `${src.instance}?q=${encodeURIComponent(query)}`;
 }
 
+function makeDrilldownAction(
+  name: string,
+  setSearchText: (text: string) => void,
+  opts: { repo?: string; revision?: string; file?: string }
+) {
+  const escapeRegexp = (text: string) => text.replace(".", "\\.");
+
+  const clauses: string[] = [];
+  if (opts.repo) {
+    let repoQuery = `r:${escapeRegexp(opts.repo)}`;
+    if (opts.revision) {
+      repoQuery += `@${opts.revision}`;
+    }
+    clauses.push(repoQuery);
+  }
+  if (opts.file) {
+    clauses.push(`f:${escapeRegexp(opts.file)}`);
+  }
+
+  return (
+    <Action
+      title={name}
+      icon={Icon.MagnifyingGlass}
+      key={nanoid()}
+      shortcut={drilldownShortcut}
+      onAction={() => {
+        setSearchText(`${clauses.join(" ")} `);
+      }}
+    />
+  );
+}
+
 function SearchResultItem({
   searchResult,
   searchText,
   src,
+  setSearchText,
 }: {
   searchResult: SearchResult;
   searchText: string;
   src: Sourcegraph;
+  setSearchText: (text: string) => void;
 }) {
   const queryURL = getQueryURL(src, searchText);
 
@@ -126,6 +166,7 @@ function SearchResultItem({
   let title = "";
   let subtitle = "";
   const accessory: List.Item.Accessory = { text: match.repository };
+  let drilldownAction: React.ReactElement | undefined;
 
   const icon: Image.ImageLike = { source: Icon.Dot, tintColor: ColorDefault };
   switch (match.type) {
@@ -148,26 +189,45 @@ function SearchResultItem({
       } else {
         accessory.text = "";
       }
+      drilldownAction = makeDrilldownAction("Search Repository", setSearchText, {
+        repo: match.repository,
+      });
       break;
     case "commit":
       icon.source = Icon.MemoryChip;
       title = match.message;
       // just get the date
       subtitle = match.authorDate;
+      drilldownAction = makeDrilldownAction("Search Revision", setSearchText, {
+        repo: match.repository,
+        revision: match.oid,
+      });
       break;
     case "path":
       icon.source = Icon.TextDocument;
       title = match.path;
+      drilldownAction = makeDrilldownAction("Search File", setSearchText, {
+        repo: match.repository,
+        file: match.path,
+      });
       break;
     case "content":
       icon.source = Icon.Text;
       title = match.lineMatches.map((l) => l.line.trim()).join(" ... ");
       subtitle = match.path;
+      drilldownAction = makeDrilldownAction("Search File", setSearchText, {
+        repo: match.repository,
+        file: match.path,
+      });
       break;
     case "symbol":
       icon.source = Icon.Link;
       title = match.symbols.map((s) => s.name).join(", ");
       subtitle = match.path;
+      drilldownAction = makeDrilldownAction("Search File", setSearchText, {
+        repo: match.repository,
+        file: match.path,
+      });
       break;
   }
 
@@ -193,6 +253,7 @@ function SearchResultItem({
                 icon={{ source: Icon.MagnifyingGlass }}
               />
             ),
+            extraActions: drilldownAction && [drilldownAction],
           })}
           <ActionPanel.Section key={nanoid()} title="Query Actions">
             <Action.OpenInBrowser title="Open Query" url={queryURL} shortcut={tertiaryActionShortcut} />
@@ -326,7 +387,7 @@ function SuggestionItem({ suggestion }: { suggestion: Suggestion }) {
     <List.Item
       title={suggestion.title}
       subtitle={suggestion.description}
-      icon={{ source: suggestion.query ? Icon.Clipboard : Icon.ExclamationMark }}
+      icon={{ source: suggestion.query ? Icon.Clipboard : Icon.ExclamationMark, tintColor: ColorEmphasis }}
       actions={
         suggestion.query ? (
           <ActionPanel>
