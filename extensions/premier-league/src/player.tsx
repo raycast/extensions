@@ -3,16 +3,12 @@ import json2md from "json2md";
 import { useState } from "react";
 import { usePlayers, useSeasons } from "./hooks";
 import { PlayerContent } from "./types";
-
-function getFlagEmoji(countryCode: string) {
-  return countryCode
-    .toUpperCase()
-    .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
-}
+import { getFlagEmoji } from "./utils";
 
 function PlayerProfile(props: PlayerContent) {
   return (
     <Detail
+      navigationTitle={`${props.name.display} | Profile`}
       markdown={json2md([
         { h1: props.name.display },
         {
@@ -93,7 +89,7 @@ export default function Player() {
                 text: p.nationalTeam.country,
               },
               {
-                icon: getFlagEmoji(p.nationalTeam.isoCode.slice(0, 2)),
+                icon: getFlagEmoji(p.nationalTeam.isoCode),
               },
             ]}
             actions={
