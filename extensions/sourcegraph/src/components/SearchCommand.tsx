@@ -292,20 +292,18 @@ function ResultView({ searchResult, icon }: { searchResult: SearchResult; icon: 
 
 ${match.content}
 `;
-      const detailParts = match.detail.split(' ')
+      const detailParts = match.detail.split(" ");
       if (detailParts.length > 1) {
         metadata.push(
           <Detail.Metadata.Label title="Commit" text={detailParts[0]} key={nanoid()} />,
-          <Detail.Metadata.Label title="Committed" text={detailParts.splice(1).join(' ')} key={nanoid()} />,
+          <Detail.Metadata.Label title="Committed" text={detailParts.splice(1).join(" ")} key={nanoid()} />
         );
       } else {
-        metadata.push(
-          <Detail.Metadata.Label title="Details" text={match.detail} key={nanoid()} />
-        );
+        metadata.push(<Detail.Metadata.Label title="Details" text={match.detail} key={nanoid()} />);
       }
       break;
     }
- 
+
     default:
       markdownContent = `Unsupported result type - full data:
 
