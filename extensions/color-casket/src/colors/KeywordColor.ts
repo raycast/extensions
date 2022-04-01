@@ -21,7 +21,7 @@ export default class KeywordColor extends Color<KEYWORD> {
       this,
       new HEXColor(convert.keyword.hex(this.value)),
       new RGBColor(convert.keyword.rgb(this.value)),
-      new HSLColor(convert.keyword.hsl(this.value)),
+      new HSLColor(convert.keyword.hsl(this.value))
     ];
   }
 
