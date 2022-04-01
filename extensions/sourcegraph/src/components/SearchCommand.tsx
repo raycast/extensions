@@ -287,14 +287,25 @@ function ResultView({ searchResult, icon }: { searchResult: SearchResult; icon: 
       markdownContent = `\`${match.path}\``;
       break;
 
-    case "commit":
+    case "commit": {
       markdownContent = `${match.label}
 
 ${match.content}
 `;
-      metadata.push(<Detail.Metadata.Label title="Details" text={match.detail} key={nanoid()} />);
+      const detailParts = match.detail.split(' ')
+      if (detailParts.length > 1) {
+        metadata.push(
+          <Detail.Metadata.Label title="Commit" text={detailParts[0]} key={nanoid()} />,
+          <Detail.Metadata.Label title="Committed" text={detailParts.splice(1).join(' ')} key={nanoid()} />,
+        );
+      } else {
+        metadata.push(
+          <Detail.Metadata.Label title="Details" text={match.detail} key={nanoid()} />
+        );
+      }
       break;
-
+    }
+ 
     default:
       markdownContent = `Unsupported result type - full data:
 
@@ -302,16 +313,6 @@ ${match.content}
 ${JSON.stringify(match, null, "  ")}
 \`\`\`
 `;
-  }
-
-  if (match.repoLastFetched) {
-    metadata.push(
-      <Detail.Metadata.Label
-        title="Last updated"
-        text={DateTime.fromISO(match.repoLastFetched).toRelative() || match.repoLastFetched}
-        key={nanoid()}
-      />
-    );
   }
 
   return (
