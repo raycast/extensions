@@ -47,7 +47,7 @@ export default function CommonDirectory() {
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder={"Search File Type"}
+      searchBarPlaceholder={"Search Common Directory"}
       onSearchTextChange={(newValue) => {
         setSearchValue(newValue);
       }}
