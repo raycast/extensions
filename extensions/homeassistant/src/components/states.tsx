@@ -43,6 +43,7 @@ import { ButtonPressAction } from "./buttons";
 import { SceneActivateAction } from "./scenes";
 import { ensureCleanAccessories } from "../utils";
 import { InputBooleanOffAction, InputBooleanOnAction, InputBooleanToggleAction } from "./input_boolean";
+import { InputNumberDecrementAction, InputNumberIncrementAction } from "./input_number";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -804,6 +805,27 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           <ActionPanel.Section title="Controls">
             <InputBooleanOnAction state={state} />
             <InputBooleanOffAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "input_number": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <InputNumberIncrementAction state={state} />
+            <InputNumberDecrementAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
