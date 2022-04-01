@@ -25,13 +25,17 @@ import { copyShortcut, tertiaryActionShortcut } from "./shortcuts";
  * SearchCommand is the shared search command implementation.
  */
 export default function SearchCommand({ src }: { src: Sourcegraph }) {
+  const [searchText, updateSearchText] = useState(src.defaultContext ? `context:${src.defaultContext} ` : "");
   const { state, search } = useSearch(src);
   const srcName = instanceName(src);
   return (
     <List
       isLoading={state.isLoading}
-      onSearchTextChange={search}
-      searchText={state.searchText}
+      onSearchTextChange={(text) => {
+        updateSearchText(text);
+        search(text);
+      }}
+      searchText={searchText}
       searchBarPlaceholder={`Search ${srcName} (e.g. 'fmt.Sprintf lang:go')`}
       throttle
     >
@@ -44,11 +48,11 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
 
           <Fragment>
             <List.Item
-              title={`${state.searchText.length > 0 ? "Continue" : "Compose"} query in browser`}
+              title={`${searchText.length > 0 ? "Continue" : "Compose"} query in browser`}
               icon={{ source: Icon.MagnifyingGlass }}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser url={getQueryURL(src, state.searchText)} />
+                  <Action.OpenInBrowser url={getQueryURL(src, searchText)} />
                 </ActionPanel>
               }
             />
@@ -70,7 +74,7 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
       {/* results */}
       <List.Section title="Results" subtitle={state.summary || ""}>
         {state.results.map((searchResult) => (
-          <SearchResultItem key={nanoid()} searchResult={searchResult} searchText={state.searchText} src={src} />
+          <SearchResultItem key={nanoid()} searchResult={searchResult} searchText={searchText} src={src} />
         ))}
       </List.Section>
     </List>
@@ -358,7 +362,6 @@ function SuggestionItem({ suggestion }: { suggestion: Suggestion }) {
 }
 
 interface SearchState {
-  searchText: string;
   results: SearchResult[];
   suggestions: Suggestion[];
   summary: string | null;
@@ -367,7 +370,6 @@ interface SearchState {
 
 function useSearch(src: Sourcegraph) {
   const [state, setState] = useState<SearchState>({
-    searchText: src.defaultContext ? `context:${src.defaultContext} ` : "",
     results: [],
     suggestions: [],
     summary: "",
@@ -383,7 +385,6 @@ function useSearch(src: Sourcegraph) {
     try {
       setState((oldState) => ({
         ...oldState,
-        searchText,
         results: [],
         suggestions: [],
         summary: null,
