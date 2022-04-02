@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 import { nanoid } from "nanoid";
 import { useQuery } from "@apollo/client";
 
-import { Sourcegraph, instanceName } from "../sourcegraph";
+import { Sourcegraph, instanceName, newURL } from "../sourcegraph";
 import { copyShortcut } from "./shortcuts";
 import { ColorDefault, ColorEmphasis, ColorPrivate } from "./colors";
 import ExpandableErrorToast from "./ExpandableErrorToast";
@@ -52,7 +52,7 @@ export default function FindNotebooksCommand({ src }: { src: Sourcegraph }) {
             icon={{ source: Icon.Plus }}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Create in Browser" url={`${src.instance}/notebooks/new`} />
+                <Action.OpenInBrowser title="Create in Browser" url={newURL(src, `/notebooks/new`)} />
               </ActionPanel>
             }
           />
@@ -90,7 +90,7 @@ function NotebookResultItem({
   }
   const stars = notebook.stars?.totalCount || 0;
   const author = notebook.creator?.displayName || notebook.creator?.username || "";
-  const url = `${src.instance}/notebooks/${notebook.id}`;
+  const url = newURL(src, `/notebooks/${notebook.id}`);
   const accessories: List.Item.Accessory[] = [];
   if (stars) {
     accessories.push({
@@ -162,7 +162,7 @@ ${
     : ""
 }`;
 
-  const notebookURL = `${src.instance}/notebooks/${notebook.id}`;
+  const notebookURL = newURL(src, `/notebooks/${notebook.id}`);
   const namespaceIsCreator = notebook.namespace?.namespaceName == notebook.creator?.username;
   return (
     <Detail
@@ -170,12 +170,12 @@ ${
       navigationTitle={"Preview Search Notebook"}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Link title="Author" text={author} target={`${src.instance}/${notebook.creator?.url}`} />
+          <Detail.Metadata.Link title="Author" text={author} target={newURL(src, notebook.creator?.url || "")} />
           {notebook.namespace && !namespaceIsCreator ? (
             <Detail.Metadata.Link
               title="Owned by"
               text={notebook.namespace.namespaceName}
-              target={`${src.instance}/${notebook.namespace.url}`}
+              target={newURL(src, notebook.namespace.url)}
             />
           ) : (
             <Fragment />

@@ -1,7 +1,7 @@
 import EventSource from "eventsource";
 
 import { getMatchUrl, SearchEvent, SearchMatch } from "./stream";
-import { Sourcegraph } from "..";
+import { newURL, Sourcegraph } from "..";
 
 export interface SearchResult {
   url: string;
@@ -41,7 +41,7 @@ export async function performSearch(
     return;
   }
 
-  const parameters = [
+  const parameters = new URLSearchParams([
     ["q", query],
     ["v", "V2"],
     ["t", "literal"],
@@ -49,9 +49,8 @@ export async function performSearch(
     // ['dk', (decorationKinds || ['html']).join('|')],
     // ['dc', (decorationContextLines || '1').toString()],
     ["display", "1500"],
-  ];
-  const parameterEncoded = parameters.map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
-  const requestURL = `${src.instance}/.api/search/stream?${parameterEncoded}`;
+  ]);
+  const requestURL = newURL(src, "/.api/search/stream", parameters);
   const stream = src.token
     ? new EventSource(requestURL, { headers: { Authorization: `token ${src.token}` } })
     : new EventSource(requestURL);
@@ -78,7 +77,7 @@ export async function performSearch(
 
       handlers.onResults(
         event.data.map((match): SearchResult => {
-          const matchURL = `${src.instance}${getMatchUrl(match)}`;
+          const matchURL = newURL(src, getMatchUrl(match));
           // Do some pre-processing of results, since some of the API outputs are a bit
           // confusing, to make it easier later on.
           switch (match.type) {
@@ -94,7 +93,7 @@ export async function performSearch(
                 // Trim out the path that we already have in matchURL so that we can just
                 // append it, similar to other match types where we append the line number
                 // of the match.
-                s.url = s.url.split("#").pop() || "";
+                s.url = s.url.split(/#|\?/).pop() || "";
               });
           }
           return { url: matchURL, match };

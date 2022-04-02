@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 import { nanoid } from "nanoid";
 import { ApolloProvider, useApolloClient, useMutation, useQuery } from "@apollo/client";
 
-import { Sourcegraph, instanceName } from "../sourcegraph";
+import { Sourcegraph, instanceName, newURL } from "../sourcegraph";
 import {
   BatchChangeFields as BatchChange,
   ChangesetFields as Changeset,
@@ -63,7 +63,7 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
             icon={{ source: Icon.Plus }}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Create in Browser" url={`${src.instance}/batch-changes/create`} />
+                <Action.OpenInBrowser title="Create in Browser" url={newURL(src, '/batch-changes/create')} />
               </ActionPanel>
             }
           />
@@ -123,7 +123,7 @@ function BatchChangeItem({
   }
 
   const { changesetsStats } = batchChange;
-  const url = `${src.instance}${batchChange.url}`;
+  const url = newURL(src, batchChange.url);
   const client = useApolloClient();
   return (
     <List.Item
@@ -172,7 +172,7 @@ function BatchChangeItem({
           <Action.OpenInBrowser
             key={nanoid()}
             title="Open Batch Changes in Browser"
-            url={`${src.instance}/batch-changes`}
+            url={newURL(src, '/batch-changes')}
             shortcut={tertiaryActionShortcut}
           />
         </ActionPanel>
@@ -254,7 +254,7 @@ function ChangesetItem({
   }
   const url =
     (changeset.__typename === "ExternalChangeset" && changeset.externalURL?.url) ||
-    `${src.instance}${batchChange.url}?status=${changeset.state}`;
+    newURL(src, batchChange.url, new URLSearchParams({ status: changeset.state }));
 
   const { push } = useNavigation();
   async function delayedRefreshChangesets() {
@@ -448,7 +448,7 @@ function ChangesetItem({
           <Action.OpenInBrowser
             key={nanoid()}
             title="Open Changesets in Browser"
-            url={`${src.instance}${batchChange.url}`}
+            url={newURL(src, batchChange.url)}
             shortcut={tertiaryActionShortcut}
           />
         </ActionPanel>

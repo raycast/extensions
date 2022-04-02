@@ -3,7 +3,7 @@ import { useState, useRef, Fragment, useEffect } from "react";
 import { nanoid } from "nanoid";
 import { DateTime } from "luxon";
 
-import { Sourcegraph, instanceName } from "../sourcegraph";
+import { Sourcegraph, instanceName, newURL } from "../sourcegraph";
 import { performSearch, SearchResult, Suggestion } from "../sourcegraph/stream-search";
 import { ContentMatch, SymbolMatch } from "../sourcegraph/stream-search/stream";
 import { ColorDefault, ColorEmphasis, ColorPrivate } from "./colors";
@@ -108,7 +108,7 @@ function resultActions(url: string, customActions?: CustomResultActions) {
 }
 
 function getQueryURL(src: Sourcegraph, query: string) {
-  return `${src.instance}?q=${encodeURIComponent(query)}`;
+  return newURL(src, "/search", new URLSearchParams({ q: query }));
 }
 
 function makeDrilldownAction(
@@ -264,6 +264,12 @@ function MultiResultView({ searchResult }: { searchResult: { url: string; match:
   const navigationTitle = `View ${match.type} results`;
   const matchTitle = `${match.repository} ${match.repoStars ? `- ${match.repoStars} ★` : ""}`;
 
+  const urlWithHash = (url: string, hash: string) => {
+    const parsed = new URL(url)
+    parsed.hash = hash
+    return parsed.toString()
+  }
+
   // Match types with expanded view support
   switch (match.type) {
     case "content":
@@ -275,7 +281,7 @@ function MultiResultView({ searchResult }: { searchResult: { url: string; match:
                 key={nanoid()}
                 title={l.line}
                 accessories={[{ text: `L${l.lineNumber}` }]}
-                actions={<ActionPanel>{resultActions(`${searchResult.url}?L${l.lineNumber}`)}</ActionPanel>}
+                actions={<ActionPanel>{resultActions(urlWithHash(searchResult.url, `L${l.lineNumber}`))}</ActionPanel>}
               />
             ))}
           </List.Section>
@@ -292,7 +298,7 @@ function MultiResultView({ searchResult }: { searchResult: { url: string; match:
                 title={s.name}
                 subtitle={s.containerName}
                 accessories={[{ text: s.kind.toLowerCase() }]}
-                actions={<ActionPanel>{resultActions(`${searchResult.url}#${s.url}`)}</ActionPanel>}
+                actions={<ActionPanel>{resultActions(urlWithHash(searchResult.url, s.url))}</ActionPanel>}
               />
             ))}
           </List.Section>
