@@ -1,12 +1,4 @@
-import {
-  ActionPanel,
-  List,
-  Action,
-  Detail,
-  Icon,
-  Image,
-  useNavigation,
-} from "@raycast/api";
+import { ActionPanel, List, Action, Detail, Icon, Image, useNavigation } from "@raycast/api";
 import { useState, useRef, Fragment, useEffect } from "react";
 import { nanoid } from "nanoid";
 import { DateTime } from "luxon";
@@ -25,8 +17,8 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
   const [searchText, setSearchText] = useState(src.defaultContext ? `context:${src.defaultContext} ` : "");
   const { state, search } = useSearch(src);
   useEffect(() => {
-    search(searchText)
-  }, [searchText])
+    search(searchText);
+  }, [searchText]);
   const srcName = instanceName(src);
   return (
     <List
@@ -40,7 +32,12 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
       {!state.isLoading && state.results.length === 0 ? (
         <List.Section title="Suggestions" subtitle={state.summary || ""}>
           {state.suggestions.slice(0, 3).map((suggestion) => (
-            <SuggestionItem key={nanoid()} suggestion={suggestion} searchText={searchText} setSearchText={setSearchText} />
+            <SuggestionItem
+              key={nanoid()}
+              suggestion={suggestion}
+              searchText={searchText}
+              setSearchText={setSearchText}
+            />
           ))}
 
           <Fragment>
@@ -379,7 +376,15 @@ ${JSON.stringify(match, null, "  ")}
   );
 }
 
-function SuggestionItem({ suggestion, searchText, setSearchText }: { suggestion: Suggestion, searchText: string, setSearchText: (text: string) => void }) {
+function SuggestionItem({
+  suggestion,
+  searchText,
+  setSearchText,
+}: {
+  suggestion: Suggestion;
+  searchText: string;
+  setSearchText: (text: string) => void;
+}) {
   return (
     <List.Item
       title={suggestion.title}
@@ -395,7 +400,7 @@ function SuggestionItem({ suggestion, searchText, setSearchText }: { suggestion:
               title="Apply Suggestion"
               icon={Icon.Clipboard}
               onAction={async () => {
-                setSearchText(`${searchText} ${suggestion.query}`)
+                setSearchText(`${searchText} ${suggestion.query}`);
               }}
             />
           </ActionPanel>
