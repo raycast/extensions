@@ -463,6 +463,8 @@ empty view alongside the other `List.Item`s.
 
 Note that the `EmptyView` is _never_ displayed if the `List`'s `isLoading` property is true and the search bar is empty.
 
+![List EmptyView illustration](../../.gitbook/assets/list-empty-view.png)
+
 #### Example
 
 ```typescript

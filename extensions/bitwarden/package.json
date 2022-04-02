@@ -17,6 +17,9 @@
     "security",
     "passwords"
   ],
+  "categories": [
+    "Security"
+  ],
   "commands": [
     {
       "name": "search",

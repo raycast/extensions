@@ -1,10 +1,12 @@
-import { ActionPanel, List, Action, Icon, Color } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail } from "@raycast/api";
 import fetch from "node-fetch";
 import { useAsync } from "react-use";
 
 interface Status {
   components: StatusComponent[];
   incidents: StatusIncident[];
+  status: { indicator: string; description: string };
+  scheduled_maintenances: StatusScheduledMaintenance[];
 }
 
 interface StatusIncident {
@@ -25,6 +27,15 @@ interface StatusIncidentUpdate {
   updated_at: string;
 }
 
+interface StatusScheduledMaintenance {
+  id: string;
+  name: string;
+  components: StatusComponent[];
+  shortlink: string;
+  scheduled_for: string;
+  scheduled_until: string;
+}
+
 interface StatusComponent {
   id: string;
   name: string;
@@ -42,11 +53,20 @@ const colorsMap: Record<string, string> = {
   major_outage: Color.Red,
 };
 
-const statusMap: Record<string, string> = {
-  operational: "Operational",
-  partial_outage: "Partial Outage",
-  major_outage: "Major Outage",
-};
+const printIncident = (incident: StatusIncident) => [
+  `### ${incident.name}`,
+  `_Posted at [${new Date(incident.created_at).toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "numeric",
+  })}](${incident.shortlink})_\n\nStatus: _${incident.status}_`,
+  ...incident.incident_updates.map(
+    (update) =>
+      `- [${new Date(update.updated_at).toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "numeric",
+      })}] ${update.body}`
+  ),
+];
 
 export default function Command() {
   const data = useAsync<() => Promise<Status>>(
@@ -58,38 +78,68 @@ export default function Command() {
   );
 
   return (
-    <List isLoading={data.loading}>
-      {data.value?.incidents && (
-        <List.Section title="Incidents">
-          {data.value?.incidents?.map((incident) => (
-            <List.Item
-              key={incident.id}
-              icon={{ source: Icon.ExclamationMark, tintColor: Color.Yellow }}
-              title={incident.name}
-              accessoryTitle={`${incident.incident_updates.length} updates`}
-              actions={
-                <ActionPanel>
-                  <Action.OpenInBrowser title="Show Updates" url={incident.shortlink} />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      )}
-      <List.Section title="Components">
-        {data.value?.components
-          .filter((component) => component.name !== "Visit www.githubstatus.com for more information")
-          .sort((a, b) => a.position - b.position)
-          .map((component) => (
-            <List.Item
-              key={component.id}
-              icon={{ source: Icon.Dot, tintColor: colorsMap[component.status] }}
-              title={component.name}
-              subtitle={component.description}
-              accessoryTitle={statusMap[component.status]}
-            />
-          ))}
-      </List.Section>
-    </List>
+    <Detail
+      isLoading={data.loading}
+      navigationTitle="GitHub Status Summary"
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser url="https://www.githubstatus.com" />
+        </ActionPanel>
+      }
+      markdown={`## General Status\n\n${data.value?.status.description ?? "Loading..."}\n\n${
+        data.value?.incidents.length
+          ? ["## Incidents", ...data.value?.incidents.flatMap(printIncident)].join("\n\n")
+          : ""
+      }`}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.TagList title="Components Status">
+            {data.value?.components
+              .filter((component) => component.name !== "Visit www.githubstatus.com for more information")
+              .sort((a, b) => a.position - b.position)
+              .map((component) => (
+                <Detail.Metadata.TagList.Item
+                  key={component.name}
+                  text={component.name}
+                  color={colorsMap[component.status]}
+                />
+              ))}
+          </Detail.Metadata.TagList>
+          {data.value?.scheduled_maintenances.flatMap((maintainence) => [
+            <Detail.Metadata.Separator key={`${maintainence.id}-separator`} />,
+            <Detail.Metadata.Link
+              key={maintainence.id}
+              title="Scheduled Maintainence"
+              text={maintainence.name.replace(/^Scheduled Maintenance for /, "")}
+              target={maintainence.shortlink}
+            />,
+            <Detail.Metadata.Label
+              key={`${maintainence.id}-scheduled`}
+              title="Scheduled for"
+              text={`${new Date(maintainence.scheduled_for).toLocaleString([], {
+                month: "long",
+                day: "numeric",
+                hour: "numeric",
+                minute: "numeric",
+              })} to ${new Date(maintainence.scheduled_until).toLocaleString([], {
+                hour: "numeric",
+                minute: "numeric",
+              })}`}
+            />,
+            maintainence.components.length ? (
+              <Detail.Metadata.TagList key={`${maintainence.id}-components`} title="Affected Components">
+                {maintainence.components.map((component) => (
+                  <Detail.Metadata.TagList.Item
+                    key={component.name}
+                    text={component.name}
+                    color={colorsMap[component.status]}
+                  />
+                ))}
+              </Detail.Metadata.TagList>
+            ) : null,
+          ])}
+        </Detail.Metadata>
+      }
+    />
   );
 }
