@@ -39,11 +39,23 @@ async function getCurrentBackendWithSecret() {
   }
 }
 
-async function fetchBackend(endpoint: string) {
+async function fetchBackend({
+  endpoint,
+  method = "GET",
+  body,
+}: {
+  endpoint: string;
+  method?: string;
+  body?: Record<string, string>;
+}) {
   const [backend, secret] = await getCurrentBackendWithSecret();
   const url = new URL(backend);
   const finalUrl = `${trimTrailingSlash(url.href)}${endpoint}`;
-  return fetch(finalUrl, secret ? { headers: { Authorization: `Bearer ${secret}` } } : undefined);
+  return fetch(finalUrl, {
+    method,
+    headers: secret ? { Authorization: `Bearer ${secret}` } : {},
+    body: body ? JSON.stringify(body) : undefined,
+  });
 }
 
 async function buildWSURLBase(endpoint: string, params = {}) {
