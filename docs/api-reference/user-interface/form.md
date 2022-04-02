@@ -1,6 +1,6 @@
 # Form
 
-![](../../.gitbook/assets/form.png)
+![](../../.gitbook/assets/example-doppler-share-secrets.png)
 
 ## API Reference
 

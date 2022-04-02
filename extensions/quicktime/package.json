@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quicktime",
-  "title": "QuickTime",
+  "title": "QuickTime Recording",
   "description": "This extension has collection of commands that lets you start screen recording, movie recording and sound recording instantly.",
   "icon": "quicktime.png",
   "author": "pradeepb28",
@@ -11,14 +11,14 @@
     {
       "name": "start-screen-recording",
       "title": "Start Screen Recording",
-      "subtitle": "QuickTime Player",
+      "subtitle": "QuickTime",
       "description": "This command lets your start screen recording using QuickTime player.",
       "mode": "no-view"
     },
     {
       "name": "start-audio-recording",
       "title": "Start Audio Recording",
-      "subtitle": "QuickTime Player",
+      "subtitle": "QuickTime",
       "description": "This command lets your start audio recording using QuickTime player.",
       "mode": "no-view"
     }

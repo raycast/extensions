@@ -1,7 +1,10 @@
 # Whatsapp Changelog
 
-## Categories & Screenshots (2022-03-12)
+## [Empty Screen] - 2022-03-26
+Add empty screen for the `Open Chat` command to avoid confusions
+
+## [Categories & Screenshots] - 2022-03-12
 Add categories and screenshots for the store
 
-## Added Whatsapp (2021-12-06)
+## [Added Whatsapp] - 2021-12-06
 Initial version code

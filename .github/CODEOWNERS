@@ -5,10 +5,11 @@
 /extensions/airport                                  @siddharthsharma94
 /extensions/algolia                                  @valentindotxyz
 /extensions/aliyun-oss                               @yangxyo
-/extensions/amazon-aws                               @victor-falcon @Hodglim @JonathanWbn
+/extensions/amazon-aws                               @victor-falcon @Hodglim @JonathanWbn @gebeto
 /extensions/android-adb-input                        @STAR-ZERO
 /extensions/api-icon-list                            @PitNikola
 /extensions/apple-notes                              @tumispro @ron-myers
+/extensions/asyncapi                                 @smoya
 /extensions/atomic                                   @joepio
 /extensions/audio-device                             @benvp @mathieudutour @mike182uk @FezVrasta
 /extensions/authy                                    @guga4ka @lukekarrys
@@ -22,12 +23,13 @@
 /extensions/bitbucket                                @Lp-Francois
 /extensions/bitly-url-shortener                      @blessanm86
 /extensions/bitrise                                  @ubuntudroid
-/extensions/bitwarden                                @pomdtr @daniel-stoneuk @jomifepe
+/extensions/bitwarden                                @pomdtr @daniel-stoneuk @jomifepe @andreaselia
 /extensions/brew                                     @nhojb
 /extensions/brew-services                            @es183923
 /extensions/bttv-emote                               @Aayush9029
 /extensions/bugmenot                                 @Yukaii
 /extensions/buildkite                                @mskelton
+/extensions/cache-control-builder                    @rkusa
 /extensions/calendar                                 @fuksman
 /extensions/calendly                                 @eluce2
 /extensions/can-i-use                                @thomaslombart
@@ -62,7 +64,7 @@
 /extensions/datadog                                  @kudrykv @rcruzper @aexvir
 /extensions/days-until-christmas                     @MEGApixel23
 /extensions/debank                                   @Yukaii
-/extensions/deepcast                                 @mooxl
+/extensions/deepcast                                 @mooxl @mooxl
 /extensions/designer-news                            @itsnwa
 /extensions/devdocs                                  @pomdtr
 /extensions/diff-checker                             @Destiner
@@ -93,6 +95,7 @@
 /extensions/github-for-enterprise                    @Kinbaum
 /extensions/github-repository-search                 @thomaspaulmann
 /extensions/github-stars                             @mrmartineau
+/extensions/github-status                            @FezVrasta
 /extensions/gitignore                                @daniel-stoneuk
 /extensions/gitlab                                   @tonka3000 @Loskir
 /extensions/gitmoji                                  @ricoberger
@@ -107,14 +110,17 @@
 /extensions/google-trends                            @kkange
 /extensions/grafana                                  @Lp-Francois
 /extensions/graphcdn                                 @mathieudutour
-/extensions/hacker-news                              @thomaspaulmann
+/extensions/hacker-news                              @thomaspaulmann @sxn
 /extensions/harvest                                  @eluce2
 /extensions/hashnode                                 @dpnick
 /extensions/hazeover                                 @ratoru
 /extensions/helm-docs                                @tiagomichaelsousa
 /extensions/hexlify                                  @gkpln3
 /extensions/homeassistant                            @tonka3000 @altrdev
+/extensions/http-status-codes                        @AlexVanderbist
 /extensions/huggingcast                              @ragnorc
+/extensions/iata-code-decoder                        @timrogers
+/extensions/iconify                                  @Destiner
 /extensions/imdb                                     @ryan-exe
 /extensions/inertiajs-documentation                  @danyelkeddah
 /extensions/jetbrains                                @gdsmith
@@ -136,7 +142,7 @@
 /extensions/kubernetes-docs                          @rpvsilva
 /extensions/laracasts                                @danyelkeddah
 /extensions/laravel-docs                             @indykoning @indykoning @indykoning
-/extensions/laravel-forge                            @KevinBatdorf
+/extensions/laravel-forge                            @KevinBatdorf @macbookandrew
 /extensions/laravel-livewire                         @tafhyseni
 /extensions/large-type                               @gon250
 /extensions/lark                                     @tmkx
@@ -155,6 +161,7 @@
 /extensions/myip                                     @kkange
 /extensions/nativebase-docs                          @ShubhamVerma1811
 /extensions/netlify                                  @Destiner
+/extensions/nextcloud                                @uetchy
 /extensions/node-js-evaluate                         @selfish
 /extensions/nos-news                                 @Joran-Dob
 /extensions/notion                                   @HenriChabrand
@@ -192,7 +199,7 @@
 /extensions/raynab                                   @gogocharli
 /extensions/rebrandly                                @grikomsn
 /extensions/reddit-search                            @ewlcheng
-/extensions/remove-background                        @maantje
+/extensions/remove-background                        @maantje @FezVrasta
 /extensions/render                                   @Destiner
 /extensions/ricescore                                @tonka3000
 /extensions/roblox-games                             @TayIorRobinson
@@ -214,6 +221,7 @@
 /extensions/simpread                                 @Kenshin
 /extensions/single-disk-eject                        @johndturn
 /extensions/sketch                                   @aesign
+/extensions/slack                                    @momme-rtf
 /extensions/slack-status                             @PitNikola
 /extensions/snake                                    @tonka3000
 /extensions/solana-explorer                          @TrGiLong
@@ -259,6 +267,7 @@
 /extensions/vercast                                  @gleich
 /extensions/visual-studio-code-project-manager       @MarkusLanger
 /extensions/visual-studio-code-recent-projects       @thomaspaulmann @iainsimmons
+/extensions/vuejs-documentation                      @Dpblandin
 /extensions/weather                                  @tonka3000
 /extensions/whatsapp                                 @vimtor
 /extensions/wikipedia                                @vimtor
