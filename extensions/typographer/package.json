@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "typographer",
   "title": "Typographer: make text pretty",
-  "description": "Make your text's typography pretty: fix quotes, dashes and spaces. Works offline.",
+  "description": "Make your text's typography pretty: fix quotes, dashes, and spaces. Works offline.",
   "icon": "raycast-typographer.png",
   "author": "mikeozornin",
   "categories": [
@@ -14,15 +14,15 @@
     {
       "name": "index",
       "title": "Typograph Selected Text",
-      "description": "Process text and paste it in the most foreground app",
+      "description": "Process text and paste it into the most foreground app",
       "mode": "no-view",
       "preferences": [
         {
           "name": "LANGUAGE",
           "type": "dropdown",
           "required": true,
-          "title": "Prefered language",
-          "description": "Preferences for local typography rules",
+          "title": "Preferred language",
+          "description": "Will be used for typography rules",
           "data": [
             {
               "value": "be",
