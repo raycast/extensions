@@ -243,7 +243,7 @@ export interface Timestamp {
 export interface PlayerContent {
   playerId: number;
   info: Info;
-  nationalTeam: NationalTeam;
+  nationalTeam?: NationalTeam;
   currentTeam?: TeamTeam;
   previousTeam?: TeamTeam;
   height?: number;

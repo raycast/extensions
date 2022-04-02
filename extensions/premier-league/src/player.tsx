@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import json2md from "json2md";
 import { useState } from "react";
-import { usePlayers, useSeasons, useStaffs, useTeams } from "./hooks";
+import { usePlayers, useSeasons, useTeams } from "./hooks";
 import { Award, Club, PlayerContent } from "./types";
 import { getFlagEmoji } from "./utils";
 
@@ -77,7 +77,7 @@ function PlayerProfile(props: PlayerContent) {
         <Detail.Metadata>
           <Detail.Metadata.Label
             title="Nationality"
-            text={props.nationalTeam.country}
+            text={props.nationalTeam?.country}
           />
           <Detail.Metadata.Label
             title="Date of Birth"
@@ -125,10 +125,7 @@ export default function Player(props: { club: Club }) {
 
   const [page, setPage] = useState<number>(0);
 
-  const player =
-    teamId === "-1"
-      ? usePlayers(teamId, seasonId, page)
-      : useStaffs(teamId, seasonId);
+  const player = usePlayers(teamId, seasonId, page);
 
   return (
     <List
@@ -165,10 +162,12 @@ export default function Player(props: { club: Club }) {
             }}
             accessories={[
               {
-                text: p.nationalTeam.country,
+                text: p.nationalTeam?.country || p.birth.country.country,
               },
               {
-                icon: getFlagEmoji(p.nationalTeam.isoCode),
+                icon: getFlagEmoji(
+                  p.nationalTeam?.isoCode || p.birth.country.isoCode
+                ),
               },
             ]}
             actions={

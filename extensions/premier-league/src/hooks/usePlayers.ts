@@ -11,33 +11,22 @@ const usePlayers = (team: string, season: string, page: number) => {
       setLoading(true);
       setPlayers([]);
 
-      getPlayers(team, season, page).then((data) => {
-        setPlayers(data);
-        setLoading(false);
-      });
+      if (team === "-1") {
+        getPlayers(team, season, page).then((data) => {
+          setPlayers(data);
+          setLoading(false);
+        });
+      } else {
+        console.log("s", team, season, page);
+        getStaffs(team, season).then((data) => {
+          setPlayers(data);
+          setLoading(false);
+        });
+      }
     }
   }, [team, season, page]);
 
   return { players, loading };
 };
 
-const useStaffs = (team: string, season: string) => {
-  const [players, setPlayers] = useState<PlayerContent[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (team && season) {
-      setLoading(true);
-      setPlayers([]);
-
-      getStaffs(team, season).then((data) => {
-        setPlayers(data);
-        setLoading(false);
-      });
-    }
-  }, [team, season]);
-
-  return { players, loading };
-};
-
-export { usePlayers, useStaffs };
+export default usePlayers;
