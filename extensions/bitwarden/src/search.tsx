@@ -130,8 +130,10 @@ export function ItemList(props: { api: Bitwarden }) {
                 key={item.id}
                 item={item}
                 lockVault={async () => {
+                  const toast = await showToast({ title: "Locking Vault...", style: Toast.Style.Animated });
                   await bitwardenApi.lock();
                   await session.deleteToken();
+                  await toast.hide();
                 }}
                 refreshItems={refreshItems}
                 copyTotp={copyTotp}
