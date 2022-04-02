@@ -16,7 +16,7 @@ export default function Command() {
   useEffect(() => {
     async function getIp() {
       try {
-        const { data } = await axios.get("http://api64.ipify.org");
+        const { data } = await axios.get("https://api64.ipify.org");
         setIp(data);
         setStatus("success");
       } catch (error) {
@@ -47,7 +47,8 @@ export default function Command() {
         }
       />
       <List.Item
-        icon={ip === "" ? "" : Icon.Globe}
+        subtitle={ip === "" ? "Loading..." : ""}
+        icon={Icon.Globe}
         title={ip}
         accessoryTitle="public IP address"
         actions={
@@ -72,7 +73,7 @@ export default function Command() {
             accessoryTitle="Details of the public IP address"
             actions={
               <ActionPanel>
-                <Action.Push title="IP Lookup" target={<LookUp />} />
+                <Action.Push title="IP Lookup" target={<LookUp />} icon={Icon.Eye} />
               </ActionPanel>
             }
           />
@@ -83,7 +84,7 @@ export default function Command() {
             accessoryTitle="Torrent download history of the public IP address"
             actions={
               <ActionPanel>
-                <Action.Push title="Torrent History" target={<Torrent ip={ip} />} />
+                <Action.Push title="Torrent History" target={<Torrent ip={ip} />} icon={Icon.Download} />
               </ActionPanel>
             }
           />
