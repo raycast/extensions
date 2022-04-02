@@ -20,9 +20,7 @@ export function debounce<A = unknown, R = void>(fn: (args: A) => R, ms: number):
 
   const debounce = (args: A): Promise<R> =>
     new Promise((resolve) => {
-      if (timer) {
-        clearTimeout(timer);
-      }
+      clearTimeout(timer);
 
       timer = setTimeout(() => {
         resolve(fn(args));
