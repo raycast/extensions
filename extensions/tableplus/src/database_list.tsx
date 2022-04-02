@@ -1,55 +1,54 @@
-import { ActionPanel, Icon, List, OpenInBrowserAction, showToast, ToastStyle, getPreferenceValues } from "@raycast/api";
-import plist from "plist";
-import fs from "fs";
-import { homedir } from "os";
+import { ActionPanel, Action, Icon, List, showToast, Toast, getPreferenceValues } from "@raycast/api"
+import plist from "plist"
+import fs from "fs"
+import { homedir } from "os"
+import expandTidle from "expand-tilde"
+import { useEffect, useState } from "react"
+import { Connection, Group, tintColors, Preferences } from "./interfaces"
 
-import expandTidle from "expand-tilde";
-
-import { useEffect, useState } from "react";
-import { Connection, Group, tintColors, Preferences } from "./interfaces";
-
-const EmptyGroupID = "__EMPTY__";
-const preferences: Preferences = getPreferenceValues();
+const EmptyGroupID = "__EMPTY__"
+const preferences: Preferences = getPreferenceValues()
+const appendPath = fs.existsSync(`${homedir()}/Library/Application Support/com.tinyapp.TablePlus-setapp/Data/`) ? '-setapp': ''
 const directoryPath = preferences.path
   ? expandTidle(preferences.path)
-  : `${homedir()}/Library/Application Support/com.tinyapp.TablePlus/Data/`;
+  : `${homedir()}/Library/Application Support/com.tinyapp.TablePlus${appendPath}/Data/`
 
 export default function DatabaseList() {
-  const [state, setState] = useState<{ isLoading: boolean; connections?: Group[] }>({ isLoading: true });
+  const [state, setState] = useState<{ isLoading: boolean; connections?: Group[] }>({ isLoading: true })
 
   useEffect(() => {
     async function fetch() {
-      const tablePlusLocation = `${directoryPath}/Connections.plist`;
-      const groupLocations = `${directoryPath}/ConnectionGroups.plist`;
+      const tablePlusLocation = `${directoryPath}/Connections.plist`
+      const groupLocations = `${directoryPath}/ConnectionGroups.plist`
 
       if (!fs.existsSync(tablePlusLocation)) {
         showToast(
-          ToastStyle.Failure,
+          Toast.Style.Failure,
           "Error loading connections",
           "TablePlus data directory not found, add directory path in preferences"
-        );
-        setState({ isLoading: false });
+        )
+        setState({ isLoading: false })
       } else {
         const connectionsList = plist.parse(
           fs.readFileSync(tablePlusLocation, "utf8")
-        ) as ReadonlyArray<plist.PlistObject>;
-        const groupList = plist.parse(fs.readFileSync(groupLocations, "utf8")) as ReadonlyArray<plist.PlistObject>;
+        ) as ReadonlyArray<plist.PlistObject>
+        const groupList = plist.parse(fs.readFileSync(groupLocations, "utf8")) as ReadonlyArray<plist.PlistObject>
 
         const groups = new Map<string, Group>(
           groupList.map((group) => [
             group.ID.toString(),
             { id: group.ID.toString(), name: group.Name.toString(), connections: [] },
           ])
-        );
+        )
 
         groups.set(EmptyGroupID, {
           id: EmptyGroupID,
           name: "Ungrouped",
           connections: [],
-        });
+        })
 
         connectionsList.forEach((connection) => {
-          const groupId = connection.GroupID?.toString() !== "" ? connection.GroupID?.toString() : EmptyGroupID;
+          const groupId = connection.GroupID?.toString() !== "" ? connection.GroupID?.toString() : EmptyGroupID
 
           const conn: Connection = {
             id: connection.ID.toString(),
@@ -63,23 +62,27 @@ export default function DatabaseList() {
             DatabaseHost: connection.DatabaseHost.toString(),
             Driver: connection.Driver.toString(),
             Environment: connection.Enviroment.toString(),
-          };
+          }
 
-          groups.get(groupId)?.connections.push(conn);
-        });
+          groups.get(groupId)?.connections.push(conn)
+        })
 
-        setState({ isLoading: false, connections: Array.from(groups.values()) });
+        setState({ isLoading: false, connections: Array.from(groups.values()) })
       }
     }
 
-    fetch();
-  }, []);
+    fetch()
+  }, [])
 
   return (
     <List isLoading={state.isLoading} searchBarPlaceholder="Filter connections...">
+      <List.EmptyView
+        icon={{ source: "no-view.png" }}
+        title="No databases found in TablePlus, go add one!"
+      />
       {state &&
         state.connections?.map((item) => {
-          const subtitle = `${item.connections.length} ${renderPluralIfNeeded(item.connections.length)}`;
+          const subtitle = `${item.connections.length} ${renderPluralIfNeeded(item.connections.length)}`
 
           return (
             <List.Section key={item.id} title={item.name} subtitle={subtitle}>
@@ -87,29 +90,29 @@ export default function DatabaseList() {
                 <ConnectionListItem key={connection.id} connection={connection} />
               ))}
             </List.Section>
-          );
+          )
         })}
     </List>
-  );
+  )
 
   function renderPluralIfNeeded(itemsLength: number) {
-    return `item${itemsLength > 1 ? "s" : ""}`;
+    return `item${itemsLength > 1 ? "s" : ""}`
   }
 
   function ConnectionListItem(props: { connection: Connection }) {
-    const connection = props.connection;
+    const connection = props.connection
 
-    let subtitle = connection.isOverSSH ? "SSH" : connection.isSocket ? "SOCKET" : connection.DatabaseHost;
+    let subtitle = connection.isOverSSH ? "SSH" : connection.isSocket ? "SOCKET" : connection.DatabaseHost
     if (connection.database && connection.Driver !== "SQLite") {
-      subtitle += ` : ${connection.database}`;
+      subtitle += ` : ${connection.database}`
     } else if (connection.Driver === "SQLite" && connection.isOverSSH) {
-      subtitle += ` : ${connection.DatabaseHost}`;
+      subtitle += ` : ${connection.DatabaseHost}`
     }
 
-    let groupIcon = "icon.png";
+    let groupIcon = "icon.png"
     if (connection.groupId) {
       if (fs.existsSync(`${directoryPath}/${connection.groupId}`)) {
-        groupIcon = `${directoryPath}/${connection.groupId}`;
+        groupIcon = `${directoryPath}/${connection.groupId}`
       }
     }
 
@@ -119,15 +122,17 @@ export default function DatabaseList() {
         key={connection.id}
         title={connection.name}
         subtitle={subtitle}
-        accessoryIcon={groupIcon}
-        accessoryTitle={connection.Driver}
+        accessories={[
+          { text: connection.Driver },
+          { icon: groupIcon },
+        ]}
         icon={{ source: Icon.Dot, tintColor: tintColors[connection.Environment] }}
         actions={
           <ActionPanel>
-            <OpenInBrowserAction title="Open Database" url={`tableplus://?id=${connection.id}`} />
+            <Action.OpenInBrowser title="Open Database" url={`tableplus://?id=${connection.id}`} />
           </ActionPanel>
         }
       />
-    );
+    )
   }
 }

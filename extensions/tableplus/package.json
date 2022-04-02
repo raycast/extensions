@@ -3,7 +3,7 @@
   "name": "tableplus",
   "title": "TablePlus",
   "description": "Search and open database connections in TablePlus",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "icon": "icon.png",
   "author": "pernielsentikaer",
   "license": "MIT",
@@ -23,11 +23,11 @@
       "required": false,
       "title": "TablePlus data directory",
       "placeholder": "Leave blank for default location",
-      "description": "If you installed TablePlus with SetApp or moved the data directory\r\n(must be full-paths or tidle-prefixed ones)"
+      "description": "If you moved the data directory\r\n(must be full-paths or tidle-prefixed ones)"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.1",
+    "@raycast/api": "^1.31.0",
     "plist": "^3.0.4"
   },
   "devDependencies": {
