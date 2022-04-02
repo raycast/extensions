@@ -90,10 +90,8 @@ export async function performSearch(
               break;
             case "symbol":
               match.symbols.forEach((s) => {
-                // Trim out the path that we already have in matchURL so that we can just
-                // append it, similar to other match types where we append the line number
-                // of the match.
-                s.url = s.url.split(/#|\?/).pop() || "";
+                // Turn this into a full URL
+                s.url = newURL(src, s.url);
               });
           }
           return { url: matchURL, match };

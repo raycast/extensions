@@ -63,7 +63,7 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
             icon={{ source: Icon.Plus }}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Create in Browser" url={newURL(src, '/batch-changes/create')} />
+                <Action.OpenInBrowser title="Create in Browser" url={newURL(src, "/batch-changes/create")} />
               </ActionPanel>
             }
           />
@@ -172,7 +172,7 @@ function BatchChangeItem({
           <Action.OpenInBrowser
             key={nanoid()}
             title="Open Batch Changes in Browser"
-            url={newURL(src, '/batch-changes')}
+            url={newURL(src, "/batch-changes")}
             shortcut={tertiaryActionShortcut}
           />
         </ActionPanel>
