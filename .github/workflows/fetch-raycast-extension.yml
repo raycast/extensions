@@ -13,7 +13,6 @@ jobs:
                 path: 'extensions/laravel-forge'
             - name: Clean up files for store
               run: |
-                rm ./.github/workflows/fetch-latest-forge-extension.yml
                 rm -rf ./extensions/laravel-forge/.github
                 rm -rf ./extensions/laravel-forge/.git
                 rm ./extensions/laravel-forge/assets/screenshot*
