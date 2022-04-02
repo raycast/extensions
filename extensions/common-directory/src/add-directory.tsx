@@ -4,10 +4,10 @@ import React, { useEffect, useState } from "react";
 import { checkPathValid, getDirectoryName, getFinderPath, getSelectedDirectory, isDirectoryOrFile } from "./utils";
 
 export default function AddDirectory(props: {
-  updateListUseState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
+  updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
 }) {
   const [updateList, setUpdateList] =
-    typeof props.updateListUseState == "undefined" ? useState<boolean>(false) : props.updateListUseState;
+    typeof props.updateListUseState == "undefined" ? useState<number[]>([0]) : props.updateListUseState;
   const [path, setPath] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [alias, setAlias] = useState<string>("");
@@ -38,7 +38,9 @@ export default function AddDirectory(props: {
             icon={Icon.Download}
             onAction={async () => {
               await addDirectory(alias, path);
-              setUpdateList(!updateList);
+              const _updateList = [...updateList];
+              _updateList[0]++;
+              setUpdateList(_updateList);
             }}
           />
           <Action

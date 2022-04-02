@@ -19,7 +19,7 @@ import { checkPathValid, preferences } from "./utils";
 export default function CommonDirectory() {
   const [searchValue, setSearchValue] = useState<string>("");
   const [commonDirectory, setCommonDirectory] = useState<DirectoryInfo[]>([]);
-  const [updateList, setUpdateList] = useState<boolean>(false);
+  const [updateList, setUpdateList] = useState<number[]>([0]);
   const [loading, setLoading] = useState<boolean>(true);
   const { sortBy } = preferences();
   const { push } = useNavigation();
@@ -95,7 +95,7 @@ function DirectoryItem(props: {
   setCommonDirectory: React.Dispatch<React.SetStateAction<DirectoryInfo[]>>;
   index: number;
   commonDirectory: DirectoryInfo[];
-  updateListUseState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
+  updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
 }) {
   const directory = props.directory;
   const setCommonDirectory = props.setCommonDirectory;
