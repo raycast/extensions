@@ -1,6 +1,6 @@
 import fs from "fs";
 import { runAppleScript } from "run-applescript";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, getSelectedFinderItems } from "@raycast/api";
 import { Values } from "@raycast/api/types/api/app/localStorage";
 import { DirectoryType } from "./directory-info";
 
@@ -32,6 +32,22 @@ export const getFinderPath = async () => {
   } catch (e) {
     console.log(String(e));
     return "Not running";
+  }
+};
+
+export const getSelectedDirectory = async () => {
+  const selectedFile: string[] = [];
+  try {
+    const selectedFinderItem = await getSelectedFinderItems();
+    selectedFinderItem.forEach((value) => {
+      const stat = fs.lstatSync(value.path);
+      if (stat.isDirectory()) {
+        selectedFile.push(value.path);
+      }
+    });
+    return selectedFile;
+  } catch (e) {
+    return selectedFile;
   }
 };
 

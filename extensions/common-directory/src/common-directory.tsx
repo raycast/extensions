@@ -106,7 +106,7 @@ function DirectoryItem(props: {
   const { sortBy } = preferences();
   return (
     <List.Item
-      icon={{ source: directory.icon }}
+      icon={{ fileIcon: directory.path }}
       title={directory.name}
       subtitle={directory.alias}
       accessories={[{ text: directory.path }, { icon: directory.valid ? "✅" : "⚠️" }]}
@@ -127,22 +127,22 @@ function DirectoryItem(props: {
                     _commonDirectory = await upRank([..._commonDirectory], index);
                   }
                 } else {
-                  await showToast(Toast.Style.Failure, "Path Has Expired");
+                  await showToast(Toast.Style.Failure, "Path has expired.");
                   _commonDirectory[index].valid = false;
                 }
                 setCommonDirectory(_commonDirectory);
                 await LocalStorage.setItem(DirectoryType.DIRECTORY, JSON.stringify(_commonDirectory));
               } catch (e) {
-                await showToast(Toast.Style.Failure, "Path Has Expired" + String(e));
+                await showToast(Toast.Style.Failure, "Path has expired." + String(e));
               }
             }}
           />
           <Action
-            title={"Copy to Clipboard"}
+            title={"Copy Directory Path"}
             icon={Icon.Clipboard}
             onAction={async () => {
               await Clipboard.copy(directory.path);
-              await showToast(Toast.Style.Success, "Path Copied to Clipboard");
+              await showToast(Toast.Style.Success, "Directory path copied!");
             }}
           />
           <Action
@@ -156,13 +156,13 @@ function DirectoryItem(props: {
           <Action
             title={"Remove Directory"}
             icon={Icon.Trash}
-            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+            shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
             onAction={async () => {
               const _commonDirectory = [...commonDirectory];
               _commonDirectory.splice(index, 1);
               setCommonDirectory(_commonDirectory);
               await LocalStorage.setItem(DirectoryType.DIRECTORY, JSON.stringify(_commonDirectory));
-              await showToast(Toast.Style.Success, "Remove Success");
+              await showToast(Toast.Style.Success, "Remove success!");
             }}
           />
           <Action
@@ -179,7 +179,7 @@ function DirectoryItem(props: {
               });
               setCommonDirectory(_commonDirectory);
               await LocalStorage.setItem(DirectoryType.DIRECTORY, JSON.stringify(_commonDirectory));
-              await showToast(Toast.Style.Success, "Reset Success");
+              await showToast(Toast.Style.Success, "Reset success!");
             }}
           />
         </ActionPanel>
