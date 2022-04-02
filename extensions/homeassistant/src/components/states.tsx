@@ -202,7 +202,7 @@ export function StatesList(props: { domain: string; deviceClass?: string | undef
     });
   }
 
-  if (!states || states.length <= 0) {
+  if (!states) {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 
