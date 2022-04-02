@@ -1,6 +1,11 @@
-import { getSelectedText, Clipboard, showHUD, getPreferenceValues } from "@raycast/api";
+import {
+  getSelectedText,
+  Clipboard,
+  showHUD,
+  getPreferenceValues,
+} from "@raycast/api";
 
-import Typograf from 'typograf';
+import Typograf from "typograf";
 
 export default async function main() {
   const { LANGUAGE } = getPreferenceValues();

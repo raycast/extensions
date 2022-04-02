@@ -6,7 +6,8 @@
   "icon": "raycast-typographer.png",
   "author": "mikeozornin",
   "categories": [
-    "Design Tools", "Productivity"
+    "Design Tools",
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
@@ -23,35 +24,122 @@
           "title": "Prefered language",
           "description": "Preferences for local typography rules",
           "data": [
-            {"value": "be",     "title": "Belarusian"},
-            {"value": "bg",     "title": "Bulgarian"},
-            {"value": "ca",     "title": "Catalan"},
-            {"value": "cs",     "title": "Czech"},
-            {"value": "da",     "title": "Danish"},
-            {"value": "de",     "title": "German"},
-            {"value": "el",     "title": "Greek"},
-            {"value": "en-GB",  "title": "English, UK"},
-            {"value": "en-US",  "title": "English, US; English, Canada"},
-            {"value": "eo",     "title": "Esperanto"},
-            {"value": "es",     "title": "Spanish"},
-            {"value": "et",     "title": "Estonian"},
-            {"value": "fi",     "title": "Finnish"},
-            {"value": "fr",     "title": "French"},
-            {"value": "ga",     "title": "Irish"},
-            {"value": "hu",     "title": "Hungarian"},
-            {"value": "it",     "title": "Italian"},
-            {"value": "lv",     "title": "Latvian"},
-            {"value": "nl",     "title": "Dutch"},
-            {"value": "no",     "title": "Norwegian"},
-            {"value": "pl",     "title": "Polish"},
-            {"value": "ro",     "title": "Romanian"},
-            {"value": "ru",     "title": "Russian"},
-            {"value": "sk",     "title": "Slovak"},
-            {"value": "sl",     "title": "Slovenian"},
-            {"value": "sr",     "title": "Serbian"},
-            {"value": "sv",     "title": "Swedish"},
-            {"value": "tr",     "title": "Turkish"},
-            {"value": "uk",     "title": "Ukrainian"}
+            {
+              "value": "be",
+              "title": "Belarusian"
+            },
+            {
+              "value": "bg",
+              "title": "Bulgarian"
+            },
+            {
+              "value": "ca",
+              "title": "Catalan"
+            },
+            {
+              "value": "cs",
+              "title": "Czech"
+            },
+            {
+              "value": "da",
+              "title": "Danish"
+            },
+            {
+              "value": "de",
+              "title": "German"
+            },
+            {
+              "value": "el",
+              "title": "Greek"
+            },
+            {
+              "value": "en-GB",
+              "title": "English, UK"
+            },
+            {
+              "value": "en-US",
+              "title": "English, US; English, Canada"
+            },
+            {
+              "value": "eo",
+              "title": "Esperanto"
+            },
+            {
+              "value": "es",
+              "title": "Spanish"
+            },
+            {
+              "value": "et",
+              "title": "Estonian"
+            },
+            {
+              "value": "fi",
+              "title": "Finnish"
+            },
+            {
+              "value": "fr",
+              "title": "French"
+            },
+            {
+              "value": "ga",
+              "title": "Irish"
+            },
+            {
+              "value": "hu",
+              "title": "Hungarian"
+            },
+            {
+              "value": "it",
+              "title": "Italian"
+            },
+            {
+              "value": "lv",
+              "title": "Latvian"
+            },
+            {
+              "value": "nl",
+              "title": "Dutch"
+            },
+            {
+              "value": "no",
+              "title": "Norwegian"
+            },
+            {
+              "value": "pl",
+              "title": "Polish"
+            },
+            {
+              "value": "ro",
+              "title": "Romanian"
+            },
+            {
+              "value": "ru",
+              "title": "Russian"
+            },
+            {
+              "value": "sk",
+              "title": "Slovak"
+            },
+            {
+              "value": "sl",
+              "title": "Slovenian"
+            },
+            {
+              "value": "sr",
+              "title": "Serbian"
+            },
+            {
+              "value": "sv",
+              "title": "Swedish"
+            },
+            {
+              "value": "tr",
+              "title": "Turkish"
+            },
+            {
+              "value": "uk",
+              "title": "Ukrainian"
+            }
           ]
         }
       ]
