@@ -5,6 +5,7 @@
   "description": "This extension has collection of commands that lets you start screen recording, movie recording and sound recording instantly.",
   "icon": "quicktime.png",
   "author": "pradeepb28",
+  "categories": ["Productivity", "Applications"],
   "license": "MIT",
   "commands": [
     {
