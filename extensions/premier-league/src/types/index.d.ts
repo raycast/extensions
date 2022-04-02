@@ -1,9 +1,26 @@
-export interface Fixture {
+export interface EPLClub {
+  pageInfo: PageInfo;
+  content: TeamTeam[];
+}
+
+export interface EPLFixture {
   pageInfo: PageInfo;
   content: Content[];
 }
 
-export interface Standing {
+export interface EPLPlayer {
+  pageInfo: PageInfo;
+  content: PlayerContent[];
+}
+
+export interface EPLStaff {
+  compSeason: CompSeason;
+  team: TeamTeam;
+  players: PlayerContent[];
+  officials: Official[];
+}
+
+export interface EPLStanding {
   compSeason: CompSeason;
   timestamp: Timestamp;
   live: boolean;
@@ -194,6 +211,7 @@ export interface TeamTeam {
   name: string;
   club: Club;
   teamType: TeamType;
+  grounds: Ground[];
   shortName: string;
   id: number;
   altIds: AltIDS;
@@ -222,22 +240,31 @@ export interface Timestamp {
   label: string;
 }
 
-export interface Player {
-  pageInfo: PageInfo;
-  content: PlayerContent[];
-}
-
 export interface PlayerContent {
   playerId: number;
   info: Info;
   nationalTeam: NationalTeam;
   currentTeam?: TeamTeam;
+  previousTeam?: TeamTeam;
+  height?: number;
+  weight?: number;
+  latestPosition: LatestPosition;
+  appearances: number;
+  cleanSheets: number;
+  saves?: number;
+  goalsConceded?: number;
+  awards?: Awards;
+  joinDate?: Timestamp;
   birth: Birth;
   age: string;
   name: Name;
   id: number;
   altIds: AltIDS;
-  previousTeam?: TeamTeam;
+  goals?: number;
+  assists?: number;
+  tackles?: number;
+  shots?: number;
+  keyPasses?: number;
 }
 
 export interface Birth {
@@ -271,4 +298,37 @@ export interface Name {
   first: string;
   last: string;
   middle?: string;
+}
+
+export interface Awards {
+  GOLDEN_GLOVE?: Award[];
+  CHAMPIONS?: Award[];
+  PLAYER_OF_THE_MONTH?: Award[];
+  GOAL_OF_THE_MONTH?: Award[];
+  GOLDEN_BOOT?: Award[];
+  PLAYER_OF_THE_SEASON?: Award[];
+}
+
+export interface Award {
+  date: CHAMPIONDate;
+  compSeason: CHAMPIONCompSeason;
+  notes?: string;
+}
+
+export interface CHAMPIONCompSeason {
+  label: string;
+  id: number;
+}
+
+export interface CHAMPIONDate {
+  year: number;
+  month: number;
+  day: number;
+}
+
+export enum LatestPosition {
+  Defender = "DEFENDER",
+  Forward = "FORWARD",
+  Goalkeeper = "GOALKEEPER",
+  Midfielder = "MIDFIELDER",
 }

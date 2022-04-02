@@ -44,6 +44,13 @@
       "subtitle": "Premier League",
       "description": "Find profiles and information about current and all-time Premier League managers",
       "mode": "view"
+    },
+    {
+      "name": "club",
+      "title": "Clubs",
+      "subtitle": "Premier League",
+      "description": "Find profiles and information about current and all-time Premier League clubs",
+      "mode": "view"
     }
   ],
   "dependencies": {

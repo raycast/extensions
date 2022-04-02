@@ -64,7 +64,7 @@ export default function Manager() {
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Show Details"
+                  title="View Manager"
                   icon={Icon.Sidebar}
                   target={<PlayerProfile {...p} />}
                 />

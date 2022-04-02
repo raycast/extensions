@@ -6,7 +6,7 @@ interface Club {
   value: string;
 }
 
-const useTeams = (season: string | undefined) => {
+const useTeams = (season: string) => {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 

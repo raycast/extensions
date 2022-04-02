@@ -1,14 +1,38 @@
 import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import json2md from "json2md";
 import { useState } from "react";
-import { usePlayers, useSeasons } from "./hooks";
-import { PlayerContent } from "./types";
+import { usePlayers, useSeasons, useStaffs, useTeams } from "./hooks";
+import { Award, Club, PlayerContent } from "./types";
 import { getFlagEmoji } from "./utils";
+
+const awardMap: { [key: string]: string } = {
+  GOLDEN_GLOVE: "Golden Glove",
+  CHAMPIONS: "Premier League Champion",
+  PLAYER_OF_THE_MONTH: "Player of the Month",
+  GOAL_OF_THE_MONTH: "Goal of the Month",
+  GOLDEN_BOOT: "Golden Boot",
+  PLAYER_OF_THE_SEASON: "Player of the Season",
+};
+
+const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
 
 function PlayerProfile(props: PlayerContent) {
   return (
     <Detail
-      navigationTitle={`${props.name.display} | Profile`}
+      navigationTitle={`${props.name.display} | Profile & Stats`}
       markdown={json2md([
         { h1: props.name.display },
         {
@@ -16,6 +40,38 @@ function PlayerProfile(props: PlayerContent) {
             source: `https://resources.premierleague.com/premierleague/photos/players/250x250/${props.altIds.opta}.png`,
           },
         },
+        {
+          h2: "Premier League Record",
+        },
+        {
+          p: [
+            `Appearances: ${props.appearances}`,
+            `Clean sheets: ${props.cleanSheets}`,
+            `Goals: ${props.goals || 0}`,
+            `Assists: ${props.assists || 0}`,
+          ],
+        },
+        {
+          h2: props.awards ? "Honours & Awards" : "",
+        },
+        ...Object.entries(props.awards || {})
+          .map(([key, awards]) => {
+            return [
+              {
+                h3: awardMap[key],
+              },
+              {
+                ul: awards.map((award: Award) => {
+                  return key.endsWith("MONTH")
+                    ? `${months[award.date.month - 1]} ${
+                        award.compSeason.label
+                      }`
+                    : award.compSeason.label;
+                }),
+              },
+            ];
+          })
+          .flat(),
       ])}
       metadata={
         <Detail.Metadata>
@@ -27,51 +83,74 @@ function PlayerProfile(props: PlayerContent) {
             title="Date of Birth"
             text={props.birth.date.label}
           />
+          <Detail.Metadata.Label
+            title="Height (cm)"
+            text={props.height?.toString()}
+          />
           <Detail.Metadata.Label title="Age" text={props.age} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label
-            title="Current Team"
-            text={props.currentTeam?.club.name}
-          />
-          <Detail.Metadata.Label
-            title="Previous Team"
-            text={props.previousTeam?.club.name}
+            title="Joined Date"
+            text={props.joinDate?.label}
           />
           <Detail.Metadata.Label
             title="Position"
             text={props.info.positionInfo}
           />
+          <Detail.Metadata.Label
+            title="Shirt Number"
+            text={props.info.shirtNum?.toString()}
+          />
         </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser
+            url={`https://www.premierleague.com/players/${
+              props.id
+            }/${props.name.display.replace(/ /g, "-")}/overview`}
+          />
+        </ActionPanel>
       }
     />
   );
 }
 
-export default function Player() {
-  const season = useSeasons();
-  const [page, setPage] = useState<number>(0);
-  const [selectedSeason, setSeason] = useState<string>(
-    season.seasons[0]?.id.toString()
-  );
+export default function Player(props: { club: Club }) {
+  const [teamId, setTeam] = useState<string>(props.club?.id.toString() ?? "-1");
 
-  const player = usePlayers(selectedSeason, page);
+  const season = useSeasons();
+  const seasonId = season.seasons[0]?.id.toString();
+  const team = useTeams(seasonId);
+
+  const [page, setPage] = useState<number>(0);
+
+  const player =
+    teamId === "-1"
+      ? usePlayers(teamId, seasonId, page)
+      : useStaffs(teamId, seasonId);
 
   return (
     <List
       throttle
+      navigationTitle={
+        props.club ? `Squad | ${props.club.name} | Club` : "Players"
+      }
       isLoading={season.loading || player.loading}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Season" onChange={setSeason}>
-          {season.seasons.map((s) => {
-            return (
-              <List.Dropdown.Item
-                key={s.id}
-                value={s.id.toString()}
-                title={s.label}
-              />
-            );
-          })}
-        </List.Dropdown>
+        props.club ? undefined : (
+          <List.Dropdown tooltip="Filter by Club" onChange={setTeam}>
+            {team.clubs.map((s) => {
+              return (
+                <List.Dropdown.Item
+                  key={s.value}
+                  value={s.value}
+                  title={s.title}
+                />
+              );
+            })}
+          </List.Dropdown>
+        )
       }
     >
       {player.players.map((p) => {
@@ -95,7 +174,7 @@ export default function Player() {
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Show Details"
+                  title="View Player"
                   icon={Icon.Sidebar}
                   target={<PlayerProfile {...p} />}
                 />

@@ -1,6 +1,21 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { showToast, Toast } from "@raycast/api";
-import { Standing, Fixture, Content, Table, TeamTeam, Player } from "../types";
+import {
+  EPLStanding,
+  EPLFixture,
+  Content,
+  Table,
+  TeamTeam,
+  EPLPlayer,
+  EPLClub,
+  EPLStaff,
+  PlayerContent,
+} from "../types";
+
+const endpoint = "https://footballapi.pulselive.com/football";
+const headers = {
+  Origin: "https://www.premierleague.com",
+};
 
 function showFailureToast() {
   showToast(
@@ -10,14 +25,10 @@ function showFailureToast() {
   );
 }
 
-const headers = {
-  Origin: "https://www.premierleague.com",
-};
-
 export const getSeasons = async () => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: "https://footballapi.pulselive.com/football/competitions/1/compseasons",
+    url: `${endpoint}/competitions/1/compseasons`,
     params: {
       page: 0,
       pageSize: 100,
@@ -36,10 +47,35 @@ export const getSeasons = async () => {
   }
 };
 
+export const getClubs = async (compSeasons: string): Promise<TeamTeam[]> => {
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `${endpoint}/teams`,
+    params: {
+      page: 0,
+      pageSize: 100,
+      comps: 1,
+      altIds: true,
+      compSeasons,
+    },
+    headers,
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLClub> = await axios(config);
+
+    return data.content;
+  } catch (e) {
+    showFailureToast();
+
+    return [];
+  }
+};
+
 export const getTeams = async (season: string) => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `https://footballapi.pulselive.com/football/compseasons/${season}/teams`,
+    url: `${endpoint}/compseasons/${season}/teams`,
     headers,
   };
 
@@ -57,7 +93,7 @@ export const getTeams = async (season: string) => {
 export const getTables = async (seasonId: string): Promise<Table[]> => {
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `https://footballapi.pulselive.com/football/standings`,
+    url: `${endpoint}/standings`,
     params: {
       compSeasons: seasonId,
       altIds: true,
@@ -68,7 +104,7 @@ export const getTables = async (seasonId: string): Promise<Table[]> => {
   };
 
   try {
-    const { data }: AxiosResponse<Standing> = await axios(config);
+    const { data }: AxiosResponse<EPLStanding> = await axios(config);
 
     return data.tables;
   } catch (e) {
@@ -90,7 +126,7 @@ export const getFixtures = async (props: {
 
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `https://footballapi.pulselive.com/football/fixtures`,
+    url: `${endpoint}/fixtures`,
     params: {
       comps: 1,
       pageSize: 40,
@@ -101,7 +137,7 @@ export const getFixtures = async (props: {
   };
 
   try {
-    const { data }: AxiosResponse<Fixture> = await axios(config);
+    const { data }: AxiosResponse<EPLFixture> = await axios(config);
     const lastPage = data.pageInfo.page === data.pageInfo.numPages - 1;
 
     return [data.content, lastPage];
@@ -112,26 +148,64 @@ export const getFixtures = async (props: {
   }
 };
 
-export const getPlayers = async (season: string, page: number) => {
+export const getPlayers = async (
+  teams: string,
+  season: string,
+  page: number
+): Promise<PlayerContent[]> => {
+  const params: { [key: string]: string | number | boolean } = {
+    pageSize: 50,
+    compSeasons: season,
+    altIds: true,
+    page,
+    type: "player",
+    id: -1,
+    compSeasonId: season,
+  };
+
+  if (teams !== "-1") {
+    params.teams = teams;
+  }
+
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `https://footballapi.pulselive.com/football/players`,
+    url: `${endpoint}/players`,
+    params,
+    headers,
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLPlayer> = await axios(config);
+
+    return data.content;
+  } catch (e) {
+    showFailureToast();
+
+    return [];
+  }
+};
+
+export const getStaffs = async (
+  team: string,
+  season: string
+): Promise<PlayerContent[]> => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `${endpoint}/teams/${team}/compseasons/${season}/staff`,
     params: {
-      pageSize: 30,
-      compSeasons: season,
+      pageSize: 50,
+      // compSeasons: season,
       altIds: true,
-      page,
+      page: 0,
       type: "player",
-      id: -1,
-      compSeasonId: season,
     },
     headers,
   };
 
   try {
-    const { data }: AxiosResponse<Player> = await axios(config);
+    const { data }: AxiosResponse<EPLStaff> = await axios(config);
 
-    return data.content;
+    return data.players;
   } catch (e) {
     showFailureToast();
 
@@ -142,7 +216,7 @@ export const getPlayers = async (season: string, page: number) => {
 export const getManagers = async (compSeasons: string) => {
   const config: AxiosRequestConfig = {
     method: "get",
-    url: `https://footballapi.pulselive.com/football/teamofficials`,
+    url: `${endpoint}/teamofficials`,
     params: {
       pageSize: 100,
       compSeasons,
@@ -156,7 +230,7 @@ export const getManagers = async (compSeasons: string) => {
   };
 
   try {
-    const { data }: AxiosResponse<Player> = await axios(config);
+    const { data }: AxiosResponse<EPLPlayer> = await axios(config);
 
     return data.content;
   } catch (e) {

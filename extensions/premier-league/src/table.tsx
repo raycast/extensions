@@ -168,12 +168,12 @@ export default function GetTables() {
                         icon={Icon.Sidebar}
                         onAction={() => setShowStats(!showStats)}
                       />
-                      <Action.OpenInBrowser
+                      {/* <Action.OpenInBrowser
                         title="Visit Club Page"
                         url={`https://www.premierleague.com/clubs/${
                           team.id
                         }/${team.name.replace(/ /g, "-")}/overview`}
-                      />
+                      /> */}
                     </ActionPanel>
                   }
                 />

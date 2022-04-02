@@ -1,22 +1,43 @@
 import { useEffect, useState } from "react";
-import { getPlayers } from "../api";
+import { getPlayers, getStaffs } from "../api";
 import { PlayerContent } from "../types";
 
-const usePlayers = (season: string, page: number) => {
+const usePlayers = (team: string, season: string, page: number) => {
   const [players, setPlayers] = useState<PlayerContent[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (season) {
+    if (team && season) {
       setLoading(true);
-      getPlayers(season, page).then((data) => {
+      setPlayers([]);
+
+      getPlayers(team, season, page).then((data) => {
         setPlayers(data);
         setLoading(false);
       });
     }
-  }, [season, page]);
+  }, [team, season, page]);
 
   return { players, loading };
 };
 
-export default usePlayers;
+const useStaffs = (team: string, season: string) => {
+  const [players, setPlayers] = useState<PlayerContent[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (team && season) {
+      setLoading(true);
+      setPlayers([]);
+
+      getStaffs(team, season).then((data) => {
+        setPlayers(data);
+        setLoading(false);
+      });
+    }
+  }, [team, season]);
+
+  return { players, loading };
+};
+
+export { usePlayers, useStaffs };
