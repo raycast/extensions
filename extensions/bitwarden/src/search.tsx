@@ -14,7 +14,7 @@ import {
   popToRoot,
 } from "@raycast/api";
 import { Item } from "./types";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { codeBlock, titleCase, faviconUrl, extractKeywords } from "./utils";
 import { Bitwarden } from "./api";
 import { SESSION_KEY } from "./const";
@@ -56,15 +56,18 @@ export default function Search() {
 export function ItemList(props: { api: Bitwarden }) {
   const bitwardenApi = props.api;
   const session = useSession();
-  const [locked, setLocked] = useState(false);
-  const [items, setItems] = useState<Item[]>();
+  const [state, setState] = useState<{ items: Item[]; isLocked: boolean; isLoading: boolean }>({
+    items: [],
+    isLocked: false,
+    isLoading: true,
+  });
 
   async function loadItems(sessionToken: string) {
     try {
       const items = await bitwardenApi.listItems(sessionToken);
-      setItems(items);
+      setState((previous) => ({ ...previous, isLoading: false, items }));
     } catch (error) {
-      setLocked(true);
+      setState((previous) => ({ ...previous, isLocked: true }));
     }
   }
 
@@ -86,7 +89,7 @@ export function ItemList(props: { api: Bitwarden }) {
       return;
     }
     if (!token) {
-      setLocked(true);
+      setState((previous) => ({ ...previous, isLocked: true }));
     } else {
       loadItems(token);
     }
@@ -101,22 +104,23 @@ export function ItemList(props: { api: Bitwarden }) {
     }
   }
 
-  if (locked) {
+  if (state.isLocked) {
     return (
       <UnlockForm
         bitwardenApi={bitwardenApi}
         onUnlock={async (token) => {
           await session.setToken(token);
-          await setLocked(false);
+          setState((previous) => ({ ...previous, isLocked: false }));
         }}
       />
     );
   }
 
   return (
-    <List isLoading={typeof items === "undefined"}>
-      {items
-        ? items
+    <List isLoading={state.isLoading}>
+      {state.items ? (
+        <Fragment>
+          {state.items
             .sort((a, b) => {
               if (a.favorite && b.favorite) return 0;
               return a.favorite ? -1 : 1;
@@ -132,8 +136,19 @@ export function ItemList(props: { api: Bitwarden }) {
                 refreshItems={refreshItems}
                 copyTotp={copyTotp}
               />
-            ))
-        : null}
+            ))}
+          <List.EmptyView
+            icon={{ source: "bitwarden-64.png" }}
+            title="No matching items found."
+            description="Hit the refresh button to sync your vault."
+            actions={
+              <ActionPanel>
+                <Action icon={Icon.ArrowClockwise} title={"Refresh Items"} onAction={refreshItems} />
+              </ActionPanel>
+            }
+          />
+        </Fragment>
+      ) : undefined}
     </List>
   );
 }
@@ -246,7 +261,12 @@ function BitwardenItem(props: {
               icon={Icon.ArrowClockwise}
               onAction={refreshItems}
             />
-            <Action icon={Icon.XmarkCircle} title="Lock Vault" onAction={lockVault} />
+            <Action
+              icon={Icon.XmarkCircle}
+              title="Lock Vault"
+              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+              onAction={lockVault}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }

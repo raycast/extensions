@@ -3,7 +3,7 @@
   "name": "bitwarden",
   "title": "Bitwarden Vault",
   "description": "Access a Bitwarden account. Requires installing the Bitwarden CLI.",
-  "icon": "bitwarden.png",
+  "icon": "bitwarden-512.png",
   "author": "pomdtr",
   "contributors": [
     "daniel-stoneuk",
@@ -92,7 +92,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.2",
+    "@raycast/api": "^1.31.0",
     "execa": "^5.1.1",
     "throttle-debounce": "^3.0.1"
   },
