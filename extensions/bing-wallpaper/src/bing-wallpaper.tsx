@@ -74,23 +74,24 @@ ${getCopyright(bingImage.copyright).copyright}`}
                     await downloadPicture(downloadSize, bingImage);
                   }}
                 />
-                <Action
-                  icon={Icon.Globe}
-                  title={"Search Picture"}
-                  onAction={async () => {
-                    await open(buildCopyrightURL(bingImage.copyrightlink));
-                    await showHUD("Search picture in browser");
-                  }}
-                />
+
                 <Action
                   icon={Icon.Desktop}
                   title={"Set Desktop Wallpaper"}
-                  shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
                   onAction={() => {
                     setWallpaper(
                       getPictureName(bingImage.url) + "-" + bingImage.startdate,
                       buildBingImageURL(bingImage.url, "raw")
                     ).then(() => "");
+                  }}
+                />
+                <Action
+                  icon={Icon.Globe}
+                  title={"Search Picture"}
+                  shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
+                  onAction={async () => {
+                    await open(buildCopyrightURL(bingImage.copyrightlink));
+                    await showHUD("Search picture in browser");
                   }}
                 />
                 <Action
@@ -118,7 +119,9 @@ async function downloadPicture(downSize: string, bingImage: BingImage) {
       return res.arrayBuffer();
     })
     .then(function (buffer) {
-      const picturePath = `${homedir()}/Downloads/${getPictureName(bingImage.url)}-${bingImage.startdate}.png`;
+      const picturePath = `${homedir()}/Downloads/${getPictureName(bingImage.url)}-${
+        bingImage.startdate
+      }-${downSize}.png`;
       fs.writeFile(picturePath, Buffer.from(buffer), async (error) => {
         if (error != null) {
           await showToast(Toast.Style.Failure, String(error));

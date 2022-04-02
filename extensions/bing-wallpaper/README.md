@@ -7,8 +7,8 @@
 **Actions**
 
 - Download Picture(↩︎): Download Bing Pictures, directory is `/Users/xxxx/Downloads`
-- Search Picture(⌘↩︎): Search current picture with bing
-- Set Desktop Wallpaper(⇧⌘↩︎): Set the current picture as desktop wallpaper
+- Set Desktop Wallpaper(⌘↩︎): Set the current picture as desktop wallpaper
+- Search Picture(⇧⌘↩︎): Search current picture with bing
 - Clear Wallpaper Cache(⇧⌘⌫): Clear picture cache created when the “**Set Desktop Wallpaper**” action is used
 
 **Preferences**
