@@ -1,13 +1,4 @@
-import {
-  Icon,
-  OpenInBrowserAction,
-  List,
-  ActionPanel,
-  PushAction,
-  CopyToClipboardAction,
-  Color,
-  setLocalStorageItem,
-} from "@raycast/api";
+import { Icon, List, ActionPanel, Color, Action, LocalStorage } from "@raycast/api";
 import { useState } from "react";
 import { Site } from "./api/Site";
 import { IServer, ServerCommands } from "./Server";
@@ -23,7 +14,7 @@ export const SitesList = ({ server, sites: sitesArray }: { server: IServer; site
       if (isMounted.current && sites?.length) {
         setSites(sites);
         // Add the server list to storage to avoid content flash
-        await setLocalStorageItem(`forge-sites-${server.id}`, JSON.stringify(sites));
+        await LocalStorage.setItem(`forge-sites-${server.id}`, JSON.stringify(sites));
       }
     })
   );
@@ -39,11 +30,12 @@ export const SitesList = ({ server, sites: sitesArray }: { server: IServer; site
 
 const SiteListItem = ({ site, server }: { site: ISite; server: IServer }) => {
   const { icon: stateIcon, text: stateText } = siteStatusState(site);
+  if (!site?.id) return null;
   return (
     <List.Item
       id={site.id.toString()}
       key={site.id}
-      title={site.name}
+      title={site?.name ?? "Site name undefined"}
       subtitle={site.repository ?? site.app ?? ""}
       icon={stateIcon}
       //   accessoryIcon={siteStatus().icon}
@@ -51,7 +43,7 @@ const SiteListItem = ({ site, server }: { site: ISite; server: IServer }) => {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction
+            <Action.Push
               title="Open Site Info"
               icon={Icon.Binoculars}
               target={<SitesSingleView site={site} server={server} />}
@@ -80,16 +72,16 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
   return (
     <>
       <List searchBarPlaceholder="Search sites...">
-        <List.Section title={`Site Commands (${current.name})`}>
+        <List.Section title={`${server.name?.toUpperCase()} -> Sites -> ${current.name}`}>
           <List.Item
             id="open-on-forge"
             key="open-on-forge"
-            title={`Open ${current.name} on Laravel Forge`}
+            title={`Open on Laravel Forge`}
             icon={Icon.Globe}
             accessoryTitle="forge.laravel.com"
             actions={
               <ActionPanel>
-                <OpenInBrowserAction url={`https://forge.laravel.com/servers/${server.id}/sites/${site.id}`} />
+                <Action.OpenInBrowser url={`https://forge.laravel.com/servers/${server.id}/sites/${site.id}`} />
               </ActionPanel>
             }
           />
@@ -120,12 +112,12 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
             accessoryTitle="press to view"
             actions={
               <ActionPanel>
-                <PushAction
+                <Action.Push
                   title="Open .env File"
                   icon={Icon.TextDocument}
                   target={<EnvironmentFile site={site} server={server} />}
                 />
-                <OpenInBrowserAction
+                <Action.OpenInBrowser
                   title="Edit on Forge"
                   url={`https://forge.laravel.com/servers/${server.id}/sites/${site.id}/environment`}
                 />
@@ -140,7 +132,7 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
             accessoryTitle="press to view"
             actions={
               <ActionPanel>
-                <PushAction
+                <Action.Push
                   title="Open Nginx Config"
                   icon={Icon.TextDocument}
                   target={<NginxFile site={site} server={server} />}
@@ -174,7 +166,7 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
                   accessoryTitle={value}
                   actions={
                     <ActionPanel>
-                      <CopyToClipboardAction content={value ?? ""} />
+                      <Action.CopyToClipboard content={value ?? ""} />
                     </ActionPanel>
                   }
                 />
@@ -197,7 +189,7 @@ export const SiteCommands = ({ site, server }: { site: ISite; server: IServer })
   }
   return (
     <>
-      <OpenInBrowserAction
+      <Action.OpenInBrowser
         icon={Icon.Globe}
         title="Open on Forge"
         url={`https://forge.laravel.com/servers/${server.id}/sites/${site.id}`}
@@ -210,39 +202,39 @@ export const SiteCommands = ({ site, server }: { site: ISite; server: IServer })
           onAction={() => Site.deploy(site, server)}
         />
       )}
-      {url && <OpenInBrowserAction icon={Icon.Globe} title="Open Site in Browser" url={url.toString()} />}
+      {url && <Action.OpenInBrowser icon={Icon.Globe} title="Open Site in Browser" url={url.toString()} />}
     </>
   );
 };
 
 export interface ISite {
-  id: number;
-  serverIid: number;
-  name: string;
-  aliases: Array<string>;
-  directory: string;
-  wildcards: boolean;
-  status: string;
-  repository: string;
-  repositoryProvider: string;
-  repositoryBranch: string;
-  repositoryStatus: string;
-  quickDeploy: boolean;
-  deploymentStatus: string | null;
-  isOnline: boolean;
-  projectType: string;
-  phpVersion: string;
-  app: string | null;
-  appStatus: string | null;
-  slackChannel: string | null;
-  telegramChatId: string | null;
-  telegramChatTitle: string | null;
-  teamsWebhookUrl: string | null;
-  discordWebhookUrl: string | null;
-  createdAt: string;
-  telegramSecret: string;
-  username: string;
-  deploymentUrl: string;
-  isSecured: boolean;
-  tags: Array<string>;
+  id?: number;
+  serverId?: number;
+  name?: string;
+  aliases?: string[];
+  directory?: string;
+  wildcards?: boolean;
+  status?: string;
+  repository?: string;
+  repositoryProvider?: string;
+  repositoryBranch?: string;
+  repositoryStatus?: string;
+  quickDeploy?: boolean;
+  deploymentStatus?: string;
+  isOnline?: boolean;
+  projectType?: string;
+  phpVersion?: string;
+  app?: string;
+  appStatus?: string;
+  slackChannel?: string;
+  telegramChatId?: string;
+  telegramChatTitle?: string;
+  teamsWebhookUrl?: string;
+  discordWebhookUrl?: string;
+  createdAt?: string;
+  telegramSecret?: string;
+  username?: string;
+  deploymentUrl?: string;
+  isSecured?: boolean;
+  tags?: string[];
 }

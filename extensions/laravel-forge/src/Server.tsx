@@ -1,15 +1,4 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  List,
-  OpenInBrowserAction,
-  Icon,
-  preferences,
-  PushAction,
-  allLocalStorageItems,
-  setLocalStorageItem,
-  LocalStorageValues,
-} from "@raycast/api";
+import { ActionPanel, List, Icon, Action, getPreferenceValues, LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Server } from "./api/Server";
 import { Site } from "./api/Site";
@@ -18,7 +7,7 @@ import { getServerColor, useIsMounted } from "./helpers";
 
 export const ServersList = () => {
   const [servers, setServers] = useState<IServer[]>([]);
-  const [siteData, setSiteData] = useState<LocalStorageValues>({});
+  const [siteData, setSiteData] = useState<LocalStorage.Values>({});
   const [loading, setLoading] = useState(true);
   const isMounted = useIsMounted();
 
@@ -33,14 +22,14 @@ export const ServersList = () => {
     const key = `forge-sites-${serverId.toString()}`;
     // If the sites already exist in the cache, or not found, do nothign
     if (siteData[key] || !isMounted.current) return;
-    const server = servers.find((s) => s.id.toString() === serverId) as IServer;
+    const server = servers.find((s) => s?.id?.toString() === serverId) as IServer;
     if (!server) return;
     const thisSiteData = (await Site.getAll(server)) as ISite[] | undefined;
-    thisSiteData && (await setLocalStorageItem(`forge-sites-${serverId}`, JSON.stringify(thisSiteData)));
+    thisSiteData && (await LocalStorage.setItem(`forge-sites-${serverId}`, JSON.stringify(thisSiteData)));
   };
 
   useEffect(() => {
-    allLocalStorageItems()
+    LocalStorage.allItems()
       .then((data) => {
         if (!isMounted.current) return;
         const servers = data["forge-servers"];
@@ -56,7 +45,7 @@ export const ServersList = () => {
           setLoading(false);
           // Add the server list to storage to avoid content flash
           servers && setServers(servers);
-          await setLocalStorageItem("forge-servers", JSON.stringify(servers));
+          await LocalStorage.setItem("forge-servers", JSON.stringify(servers));
         });
       });
   }, []);
@@ -76,7 +65,7 @@ export const ServersList = () => {
       onSelectionChange={(serverId) => serverId && maybeFetchAndCacheSites(serverId)}
     >
       {servers.map((server: IServer) => {
-        const key = `forge-sites-${server.id.toString()}`;
+        const key = `forge-sites-${server?.id?.toString()}`;
         const sites = JSON.parse(siteData[key] ?? "[]") as ISite[];
         return <ServerListItem key={server.id} server={server} sites={sites} />;
       })}
@@ -85,20 +74,22 @@ export const ServersList = () => {
 };
 
 const ServerListItem = ({ server, sites }: { server: IServer; sites: ISite[] }) => {
+  if (!server?.id) return null;
   return (
     <List.Item
       id={server.id.toString()}
       key={server.id}
-      title={server.name}
+      keywords={server.keywords}
+      accessoryTitle={server?.keywords?.join(", ")}
+      title={server?.name ?? "Server name undefined"}
       icon={{
         source: "server.png",
-        tintColor: getServerColor(server.provider),
+        tintColor: getServerColor(server?.provider ?? ""),
       }}
-      accessoryTitle={server.ipAddress}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <PushAction
+            <Action.Push
               title="Open Server Information"
               icon={Icon.Binoculars}
               target={<SingleServerView server={server} sites={sites} />}
@@ -114,10 +105,11 @@ const ServerListItem = ({ server, sites }: { server: IServer; sites: ISite[] }) 
 };
 
 const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }) => {
-  const sshUser = preferences?.laravel_forge_ssh_user?.value ?? "forge";
+  const preferences = getPreferenceValues();
+  const sshUser = preferences?.laravel_forge_ssh_user ?? "forge";
   return (
     <List searchBarPlaceholder="Search sites...">
-      <List.Section title={`Sites (${server.name})`}>
+      <List.Section title={`${server.name?.toUpperCase()} -> Sites`}>
         <SitesList server={server} sites={sites} />
       </List.Section>
       <List.Section title="Common Commands">
@@ -129,7 +121,7 @@ const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }
           accessoryTitle="forge.laravel.com"
           actions={
             <ActionPanel>
-              <OpenInBrowserAction url={`https://forge.laravel.com/servers/${server.id}`} />
+              <Action.OpenInBrowser url={`https://forge.laravel.com/servers/${server.id}`} />
             </ActionPanel>
           }
         />
@@ -141,7 +133,7 @@ const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }
           accessoryTitle={`ssh://${sshUser}@${server.ipAddress}`}
           actions={
             <ActionPanel>
-              <OpenInBrowserAction
+              <Action.OpenInBrowser
                 title={`Open SSH Connection (${sshUser})`}
                 url={`ssh://${sshUser}@${server.ipAddress}`}
               />
@@ -156,7 +148,7 @@ const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }
           accessoryTitle={server.ipAddress}
           actions={
             <ActionPanel>
-              <CopyToClipboardAction title="Copy IP Address" content={server.ipAddress} />
+              <Action.CopyToClipboard title="Copy IP Address" content={server?.ipAddress ?? ""} />
             </ActionPanel>
           }
         />
@@ -169,7 +161,7 @@ const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }
           icon={Icon.ArrowClockwise}
           actions={
             <ActionPanel>
-              <ActionPanel.Item
+              <Action
                 icon={Icon.ArrowClockwise}
                 title="Reboot Server"
                 onAction={async () => await Server.reboot({ serverId: server.id, token: server.apiToken })}
@@ -186,7 +178,7 @@ const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }
               icon={Icon.ArrowClockwise}
               actions={
                 <ActionPanel>
-                  <ActionPanel.Item
+                  <Action
                     icon={Icon.ArrowClockwise}
                     title={`Reboot ${label}`}
                     onAction={async () =>
@@ -205,48 +197,50 @@ const SingleServerView = ({ server, sites }: { server: IServer; sites: ISite[] }
 };
 
 export const ServerCommands = ({ server }: { server: IServer }) => {
-  const sshUser = preferences?.laravel_forge_ssh_user?.value ?? "forge";
+  const preferences = getPreferenceValues();
+  const sshUser = preferences?.laravel_forge_ssh_user ?? "forge";
   return (
     <>
-      <OpenInBrowserAction title="Open on Laravel Forge" url={`https://forge.laravel.com/servers/${server.id}`} />
-      <OpenInBrowserAction
+      <Action.OpenInBrowser title="Open on Laravel Forge" url={`https://forge.laravel.com/servers/${server.id}`} />
+      <Action.OpenInBrowser
         icon={Icon.Terminal}
         title={`Open SSH Connection (${sshUser})`}
         url={`ssh://${sshUser}@${server.ipAddress}`}
       />
-      <ActionPanel.Item
+      <Action
         icon={Icon.ArrowClockwise}
         title="Reboot Server"
         onAction={() => Server.reboot({ serverId: server.id, token: server.apiToken })}
       />
-      <CopyToClipboardAction title="Copy IP Address" content={server.ipAddress} />
+      <Action.CopyToClipboard title="Copy IP Address" content={server?.ipAddress ?? ""} />
     </>
   );
 };
 
 export interface IServer {
-  apiToken: string;
-  id: number;
-  credentialId: string;
-  name: string;
-  type: string;
-  provider: string;
-  providerId: string;
-  size: string;
-  region: string;
-  dbStatus: string | null;
-  redisStatus: string | null;
-  phpVersion: string;
-  phpCliVersion: string;
-  databaseType: string;
-  ipAddress: string;
-  sshPort: number;
-  privateIpAddress: string;
-  blackfireStatus: string | null;
-  papertrailStatus: string | null;
-  revoked: boolean;
-  createdAt: string;
-  isReady: boolean;
-  tags: Array<string>;
-  network: string;
+  apiToken?: string;
+  id?: number;
+  credentialId?: string;
+  name?: string;
+  type?: string;
+  provider?: string;
+  providerId?: string;
+  size?: string;
+  region?: string;
+  dbStatus?: string | null;
+  redisStatus?: string | null;
+  phpVersion?: string;
+  phpCliVersion?: string;
+  databaseType?: string;
+  ipAddress?: string;
+  sshPort?: number;
+  privateIpAddress?: string;
+  blackfireStatus?: string | null;
+  papertrailStatus?: string | null;
+  revoked?: boolean;
+  createdAt?: string;
+  isReady?: boolean;
+  tags?: Array<string>;
+  keywords?: Array<string>;
+  network?: string;
 }
