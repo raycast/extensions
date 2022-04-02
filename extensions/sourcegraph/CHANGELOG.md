@@ -9,6 +9,7 @@
 - **search**, **notebooks**: The default action on results is now to always open a preview in Raycast, rather than opening in browser directly, for consistency.
 - **search**: The default context is now explicitly pre-populated in the search bar, instead of being implicit.
 - **search**: Potential fix for issue with connecting to self-hosted Sourcegraph instances. ([raycast/extensions#1126](https://github.com/raycast/extensions/issues/1126))
+- **search**: You can now apply suggestions directly with an action.
 - **prefs**: Fixed issue with self-hosted instance URLs that have trailing slashes. ([#12](https://github.com/bobheadxi/raycast-sourcegraph/pull/12))
 
 ## [Bug fixes](https://github.com/raycast/extensions/pull/919) - 2022-02-15

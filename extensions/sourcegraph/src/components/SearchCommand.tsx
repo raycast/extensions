@@ -2,15 +2,12 @@ import {
   ActionPanel,
   List,
   Action,
-  showToast,
   Detail,
   Icon,
   Image,
-  Clipboard,
-  Toast,
   useNavigation,
 } from "@raycast/api";
-import { useState, useRef, Fragment } from "react";
+import { useState, useRef, Fragment, useEffect } from "react";
 import { nanoid } from "nanoid";
 import { DateTime } from "luxon";
 
@@ -27,14 +24,14 @@ import { copyShortcut, drilldownShortcut, tertiaryActionShortcut } from "./short
 export default function SearchCommand({ src }: { src: Sourcegraph }) {
   const [searchText, setSearchText] = useState(src.defaultContext ? `context:${src.defaultContext} ` : "");
   const { state, search } = useSearch(src);
+  useEffect(() => {
+    search(searchText)
+  }, [searchText])
   const srcName = instanceName(src);
   return (
     <List
       isLoading={state.isLoading}
-      onSearchTextChange={(text) => {
-        setSearchText(text);
-        search(text);
-      }}
+      onSearchTextChange={setSearchText}
       searchText={searchText}
       searchBarPlaceholder={`Search ${srcName} (e.g. 'fmt.Sprintf lang:go')`}
       throttle
@@ -43,7 +40,7 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
       {!state.isLoading && state.results.length === 0 ? (
         <List.Section title="Suggestions" subtitle={state.summary || ""}>
           {state.suggestions.slice(0, 3).map((suggestion) => (
-            <SuggestionItem key={nanoid()} suggestion={suggestion} />
+            <SuggestionItem key={nanoid()} suggestion={suggestion} searchText={searchText} setSearchText={setSearchText} />
           ))}
 
           <Fragment>
@@ -126,7 +123,7 @@ function makeDrilldownAction(
 
   const clauses: string[] = [];
   if (opts.repo) {
-    let repoQuery = `r:${escapeRegexp(opts.repo)}`;
+    let repoQuery = `r:^${escapeRegexp(opts.repo)}$`;
     if (opts.revision) {
       repoQuery += `@${opts.revision}`;
     }
@@ -139,7 +136,7 @@ function makeDrilldownAction(
   return (
     <Action
       title={name}
-      icon={Icon.MagnifyingGlass}
+      icon={Icon.Binoculars}
       key={nanoid()}
       shortcut={drilldownShortcut}
       onAction={() => {
@@ -382,35 +379,37 @@ ${JSON.stringify(match, null, "  ")}
   );
 }
 
-function SuggestionItem({ suggestion }: { suggestion: Suggestion }) {
+function SuggestionItem({ suggestion, searchText, setSearchText }: { suggestion: Suggestion, searchText: string, setSearchText: (text: string) => void }) {
   return (
     <List.Item
       title={suggestion.title}
       subtitle={suggestion.description}
-      icon={{ source: suggestion.query ? Icon.Clipboard : Icon.ExclamationMark, tintColor: ColorEmphasis }}
+      icon={{
+        source: suggestion.query ? Icon.Binoculars : Icon.ExclamationMark,
+        tintColor: suggestion.query ? ColorDefault : ColorEmphasis,
+      }}
       actions={
         suggestion.query ? (
           <ActionPanel>
             <Action
-              title="Copy Suggestion"
+              title="Apply Suggestion"
+              icon={Icon.Clipboard}
               onAction={async () => {
-                await Clipboard.copy(` ${suggestion.query}`);
-                showToast(Toast.Style.Success, "Suggestion copied - paste it to continue searching!");
+                setSearchText(`${searchText} ${suggestion.query}`)
               }}
             />
           </ActionPanel>
         ) : (
           <ActionPanel>
             <Action.Push
-              key={nanoid()}
               title="View Suggestion"
+              icon={{ source: Icon.Document }}
               target={
                 <Detail
                   markdown={`${suggestion.title}${suggestion.description ? `\n\n${suggestion.description}` : ""}`}
                   navigationTitle="Suggestion"
                 />
               }
-              icon={{ source: Icon.MagnifyingGlass }}
             />
           </ActionPanel>
         )
