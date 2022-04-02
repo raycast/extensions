@@ -1,5 +1,5 @@
 import { runAppleScript } from "run-applescript";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
 import { Values } from "@raycast/api/types/api/app/localStorage";
 import fs from "fs";
 
@@ -18,7 +18,7 @@ export const isEmpty = (string: string | null | undefined) => {
 
 const scriptFinderPath = `
 if application "Finder" is not running then
-    return "Not running"
+    return "Finder not running"
 end if
 
 tell application "Finder"
@@ -30,16 +30,48 @@ export const getFinderPath = async () => {
   try {
     return await runAppleScript(scriptFinderPath);
   } catch (e) {
-    console.log(String(e));
-    return "Not running";
+    return "Finder not running";
   }
 };
 
-export const checkFileExists = async (filePath: string) => {
+export const checkDirectoryExists = async (filePath: string) => {
   try {
     fs.accessSync(filePath);
     return true;
   } catch (e) {
     return false;
+  }
+};
+
+export const checkIsFile = async (path: string) => {
+  try {
+    const stat = fs.lstatSync(path);
+    return stat.isFile();
+  } catch (e) {
+    await showToast(Toast.Style.Failure, String(e));
+    return false;
+  }
+};
+
+export const getFileInfo = (path: string) => {
+  const obj1 = path.lastIndexOf("/");
+  const obj2 = path.lastIndexOf(".");
+  return { nameWithoutExtension: path.substring(obj1 + 1, obj2), extension: path.substring(obj2 + 1) };
+};
+
+export const getSelectedFile = async () => {
+  const selectedFile: string[] = [];
+  try {
+    const selectedFinderItem = await getSelectedFinderItems();
+    selectedFinderItem.forEach((value) => {
+      const stat = fs.lstatSync(value.path);
+      if (stat.isFile()) {
+        selectedFile.push(value.path);
+      }
+    });
+    return selectedFile;
+  } catch (e) {
+    await showToast(Toast.Style.Failure, "Fetch nothing.");
+    return selectedFile;
   }
 };

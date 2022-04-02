@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "new-file-here",
-  "title": "New File Here",
-  "description": "Create a new file in the current Finder window or on the desktop.",
-  "icon": "new-file-here.png",
+  "title": "Easy New File",
+  "description": "Quickly create file in the current Finder window or on the desktop.",
+  "icon": "easy-new-file-icon.png",
   "author": "koinzhang",
   "categories": [
     "Developer Tools",
@@ -40,8 +40,16 @@
   "commands": [
     {
       "name": "new-file-here",
+      "icon": "new-file-here-icon.png",
       "title": "New File Here",
       "description": "Create a new file in the current Finder window or on the desktop.",
+      "mode": "view"
+    },
+    {
+      "name": "add-file-template",
+      "icon": "add-file-template-icon.png",
+      "title": "Add File Template",
+      "description": "Add a file template that you can use in the \"New File Here\" command.",
       "mode": "view"
     }
   ],
