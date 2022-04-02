@@ -141,6 +141,27 @@
               "title": "Ukrainian"
             }
           ]
+        },
+        {
+          "name": "HTML_ENTITIES",
+          "type": "dropdown",
+          "required": true,
+          "title": "Output symbols",
+          "description": "How to output HTML entity symbols",
+          "data": [
+            {
+              "value": "default",
+              "title": "As characters: «Apple»"
+            },
+            {
+              "value": "digit",
+              "title": "Digit codes: &#171;Apple&#187;"
+            },
+            {
+              "value": "name",
+              "title": "HTML entities: &laquo;Apple&raquo;"
+            }
+          ]
         }
       ]
     }
