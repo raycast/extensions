@@ -104,8 +104,8 @@ export default function CreateShortcut() {
           setIsPublic(newValue == "true");
         }}
       >
-        <Form.DropdownItem key={"secret"} title={"Secret"} value={"false"} />
-        <Form.DropdownItem key={"public"} title={"Public"} value={"true"} />
+        <Form.Dropdown.Item key={"secret"} title={"Secret"} value={"false"} />
+        <Form.Dropdown.Item key={"public"} title={"Public"} value={"true"} />
       </Form.Dropdown>
       {gistFiles.map((gistFile, index, array) => {
         return (
