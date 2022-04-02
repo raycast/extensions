@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bing-wallpaper",
   "title": "Bing Wallpaper",
-  "description": "Get Bing wallpapers within 15 days.",
+  "description": "Get and set Bing wallpapers within 15 days.",
   "icon": "bing-wallpaper-icon.png",
   "author": "koinzhang",
   "license": "MIT",
@@ -56,7 +56,7 @@
     {
       "name": "bing-wallpaper",
       "title": "Bing Wallpaper",
-      "description": "Get Bing wallpapers within 15 days.",
+      "description": "Get and set Bing wallpapers within 15 days.",
       "mode": "view"
     }
   ],
