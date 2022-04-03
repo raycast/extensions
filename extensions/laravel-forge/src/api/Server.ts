@@ -1,4 +1,4 @@
-import { showToast, popToRoot, Toast, getPreferenceValues } from "@raycast/api";
+import { showToast, Toast, getPreferenceValues } from "@raycast/api";
 import fetch from "node-fetch";
 import { IServer } from "../Server";
 import { sortBy } from "lodash";
@@ -61,15 +61,16 @@ export const Server = {
 
 const getServers = async (token: string) => {
   const headers = theHeaders(token);
+  const response = await fetch(`${FORGE_API_URL}/servers`, {
+    method: "get",
+    headers,
+  });
+  if (response.status === 401) {
+    throw new Error("Error authenticating with Forge");
+  }
+  // Get site data which will by searchable along with servers
+  let keywordsByServer: Record<number, Set<string>> = {};
   try {
-    const response = await fetch(`${FORGE_API_URL}/servers`, {
-      method: "get",
-      headers,
-    });
-    if (response.status === 401) {
-      throw new Error("Error authenticating with Forge");
-    }
-    // Get site data which will by searchable along with servers
     const sitesResponse = await fetch(`${FORGE_API_URL}/sites`, {
       method: "get",
       headers,
@@ -77,29 +78,23 @@ const getServers = async (token: string) => {
     const sitesData = (await sitesResponse.json()) as SitesResponse;
     let sites = sitesData?.sites ?? [];
     sites = sites?.map((s) => mapKeys(s, (_, k) => camelCase(k)) as ISite);
-    const keywordsByServer = getSiteKeywords(sites);
-
-    // Get the server data
-    const serverData = (await response.json()) as ServersResponse;
-    let servers = serverData?.servers ?? [];
-    servers = servers.map((s) => mapKeys(s, (_, k) => camelCase(k)) as IServer);
-    return servers
-      .map((server) => {
-        server.keywords = server?.id ? [...keywordsByServer[server.id]] : [];
-        server.apiToken = token;
-        return server;
-      })
-      .filter((s) => !s.revoked);
+    keywordsByServer = getSiteKeywords(sites);
   } catch (error) {
     console.error(error);
-    await popToRoot();
-    if (error instanceof Error) {
-      showToast(Toast.Style.Failure, error?.message);
-      return [];
-    }
-    showToast(Toast.Style.Failure, "Api request failed");
-    return [];
+    // fail gracefully
   }
+
+  // Get the server data
+  const serverData = (await response.json()) as ServersResponse;
+  let servers = serverData?.servers ?? [];
+  servers = servers.map((s) => mapKeys(s, (_, k) => camelCase(k)) as IServer);
+  return servers
+    .map((server) => {
+      server.keywords = server?.id && keywordsByServer[server.id] ? [...keywordsByServer[server.id]] : [];
+      server.apiToken = token;
+      return server;
+    })
+    .filter((s) => !s.revoked);
 };
 
 const getSiteKeywords = (sites: ISite[]) => {

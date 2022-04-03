@@ -9,6 +9,10 @@
     "macbookandrew"
   ],
   "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
   "commands": [
     {
       "name": "index",

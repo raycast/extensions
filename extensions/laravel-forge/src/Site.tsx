@@ -11,11 +11,11 @@ export const SitesList = ({ server, sites: sitesArray }: { server: IServer; site
   const isMounted = useIsMounted();
   usePolling(() =>
     Site.getAll(server).then(async (sites: ISite[] | undefined) => {
-      if (isMounted.current && sites?.length) {
-        setSites(sites);
-        // Add the server list to storage to avoid content flash
-        await LocalStorage.setItem(`forge-sites-${server.id}`, JSON.stringify(sites));
-      }
+      if (!isMounted.current) return;
+      if (!sites?.length) return;
+      setSites(sites);
+      // Add the server list to storage to avoid content flash
+      await LocalStorage.setItem(`forge-sites-${server.id}`, JSON.stringify(sites));
     })
   );
 
@@ -220,17 +220,17 @@ export interface ISite {
   repositoryBranch?: string;
   repositoryStatus?: string;
   quickDeploy?: boolean;
-  deploymentStatus?: string;
+  deploymentStatus?: string | null;
   isOnline?: boolean;
   projectType?: string;
   phpVersion?: string;
-  app?: string;
-  appStatus?: string;
-  slackChannel?: string;
-  telegramChatId?: string;
-  telegramChatTitle?: string;
-  teamsWebhookUrl?: string;
-  discordWebhookUrl?: string;
+  app?: string | null;
+  appStatus?: string | null;
+  slackChannel?: string | null;
+  telegramChatId?: string | null;
+  telegramChatTitle?: string | null;
+  teamsWebhookUrl?: string | null;
+  discordWebhookUrl?: string | null;
   createdAt?: string;
   telegramSecret?: string;
   username?: string;
