@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Form, showToast, Toast, environment } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { checkDirectoryExists, checkIsFile, getFileInfo, getSelectedFile } from "./utils";
+import { checkDirectoryExists, checkIsFile, getChooseFile, getFileInfo, getSelectedFile } from "./utils";
 import fs from "fs";
 
 export default function AddFileTemplate(props: {
@@ -43,6 +43,18 @@ export default function AddFileTemplate(props: {
               const _path = await fetchFilePath();
               setPath(_path);
               setName(getFileInfo(_path).nameWithoutExtension);
+            }}
+          />
+          <Action
+            title={"Choose Directory"}
+            icon={Icon.Sidebar}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            onAction={() => {
+              getChooseFile().then((path) => {
+                console.debug(`Selected Directory: ${path}`);
+                setPath(path);
+                setName(getFileInfo(path).nameWithoutExtension);
+              });
             }}
           />
         </ActionPanel>

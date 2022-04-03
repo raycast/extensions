@@ -34,6 +34,24 @@ export const getFinderPath = async () => {
   }
 };
 
+const scriptChooseFile = `
+if application "Finder" is not running then
+    return "Not running"
+end if
+
+return POSIX path of (choose file)
+`;
+
+export const getChooseFile = async () => {
+  let finderPath = "";
+  try {
+    finderPath = await runAppleScript(scriptChooseFile);
+    return finderPath;
+  } catch (e) {
+    return finderPath;
+  }
+};
+
 export const checkDirectoryExists = async (filePath: string) => {
   try {
     fs.accessSync(filePath);

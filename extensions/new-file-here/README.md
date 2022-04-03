@@ -29,7 +29,7 @@
 
   1. Keep your Finder window at the frontmost
   2. Select a file. (Folders will not be detected for now)
-  3. Optional: You can also fill in the file directory manually.
+  3. Optional: You can also choose and fill in the file directory manually.
 
 
 
