@@ -44,6 +44,7 @@ import { SceneActivateAction } from "./scenes";
 import { ensureCleanAccessories } from "../utils";
 import { InputBooleanOffAction, InputBooleanOnAction, InputBooleanToggleAction } from "./input_boolean";
 import { InputNumberDecrementAction, InputNumberIncrementAction } from "./input_number";
+import { TimerCancelAction, TimerPauseAction, TimerStartAction } from "./timer";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -183,6 +184,9 @@ function getIcon(state: State): Image.ImageLike | undefined {
   } else if (e.startsWith("input_boolean")) {
     const wallSwitch = state.state === "on" ? { source: "on.png" } : { source: "off.png", tintColor: PrimaryIconColor };
     return wallSwitch;
+  } else if (e.startsWith("timer")) {
+    const color = state.state === "active" ? Color.Yellow : PrimaryIconColor;
+    return { source: "av-timer.png", tintColor: color };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
@@ -826,6 +830,28 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
           <ActionPanel.Section title="Controls">
             <InputNumberIncrementAction state={state} />
             <InputNumberDecrementAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "timer": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <TimerStartAction state={state} />
+            <TimerPauseAction state={state} />
+            <TimerCancelAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
