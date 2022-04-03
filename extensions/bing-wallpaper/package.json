@@ -3,7 +3,7 @@
   "name": "bing-wallpaper",
   "title": "Bing Wallpaper",
   "description": "Get and set Bing wallpapers within 15 days.",
-  "icon": "bing-wallpaper-icon.png",
+  "icon": "wallpaper-icon.png",
   "author": "koinzhang",
   "categories": [
     "Media",
@@ -11,15 +11,6 @@
   ],
   "license": "MIT",
   "preferences": [
-    {
-      "name": "randomWallpaperOnStart",
-      "title": "Wallpaper Settings",
-      "description": "Set random wallpaper when command on start.",
-      "label": "Random Wallpaper On Start",
-      "type": "checkbox",
-      "default": true,
-      "required": true
-    },
     {
       "name": "applyTo",
       "title": "Apply Wallpaper To",
@@ -68,9 +59,28 @@
   "commands": [
     {
       "name": "bing-wallpaper",
+      "icon": "bing-wallpaper-icon.png",
       "title": "Bing Wallpaper",
       "description": "Get and set Bing wallpapers within 15 days.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "randomWallpaperOnStart",
+          "title": "Wallpaper Settings",
+          "description": "Set random wallpaper when command on start.",
+          "label": "Random Wallpaper On Start",
+          "type": "checkbox",
+          "default": true,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "random-wallpaper",
+      "icon": "random-wallpaper-icon.png",
+      "title": "Random Wallpaper",
+      "description": "Set Random Bing wallpapers to desktop.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

@@ -32,7 +32,6 @@ export default function CommonDirectory() {
                 const _bingWallpaperHD = (first_data as BingResponseData).images.concat(
                   (second_data as BingResponseData).images
                 );
-                // const _bingWallpaperHD = [...new Set(bingWallpaperHD.concat()];
                 setBingWallpaperHD(_bingWallpaperHD);
               });
           });
@@ -81,13 +80,6 @@ ${getCopyright(bingImage.copyright).copyright}`}
             actions={
               <ActionPanel>
                 <Action
-                  icon={Icon.Download}
-                  title={"Download Picture"}
-                  onAction={async () => {
-                    await downloadPicture(downloadSize, bingImage);
-                  }}
-                />
-                <Action
                   icon={Icon.Desktop}
                   title={"Set Desktop Wallpaper"}
                   onAction={() => {
@@ -95,6 +87,13 @@ ${getCopyright(bingImage.copyright).copyright}`}
                       getPictureName(bingImage.url) + "-" + bingImage.startdate,
                       buildBingImageURL(bingImage.url, "raw")
                     ).then(() => "");
+                  }}
+                />
+                <Action
+                  icon={Icon.Download}
+                  title={"Download Picture"}
+                  onAction={async () => {
+                    await downloadPicture(downloadSize, bingImage);
                   }}
                 />
                 <Action
