@@ -2,7 +2,7 @@ import { ActionPanel, List, Action, Icon, useNavigation, Toast, Image, Color, sh
 import { useState, Fragment, useMemo } from "react";
 import { DateTime } from "luxon";
 import { nanoid } from "nanoid";
-import { ApolloProvider, useApolloClient, useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 
 import { Sourcegraph, instanceName, newURL } from "../sourcegraph";
 import {
@@ -35,7 +35,9 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
   const srcName = instanceName(src);
   const [searchText, setSearchText] = useState("");
 
-  const { loading, error, data, refetch } = useQuery<GetBatchChanges>(GET_BATCH_CHANGES);
+  const { loading, error, data, refetch } = useQuery<GetBatchChanges>(GET_BATCH_CHANGES, {
+    client: src.client,
+  });
   const refresh = async () => {
     await refetch();
   };
@@ -123,36 +125,41 @@ function BatchChangeItem({
   }
 
   const { changesetsStats } = batchChange;
+  const accessories: List.Item.Accessory[] = [];
+  if (changesetsStats.open) {
+    accessories.push({
+      icon: { tintColor: Color.Green, source: Icon.Circle },
+      text: `${changesetsStats.open}`,
+    });
+  }
+  if (changesetsStats.merged) {
+    accessories.push({
+      icon: { tintColor: Color.Purple, source: Icon.Checkmark },
+      text: `${changesetsStats.merged}`,
+    });
+  }
+  if (changesetsStats.draft || changesetsStats.unpublished) {
+    accessories.push({
+      icon: { tintColor: Color.SecondaryText, source: Icon.Document },
+      text: `${changesetsStats.draft + changesetsStats.unpublished}`,
+    });
+  }
+
   const url = newURL(src, batchChange.url);
-  const client = useApolloClient();
   return (
     <List.Item
       id={id}
       icon={icon}
       title={`${batchChange.namespace.namespaceName} / ${batchChange.name}`}
       subtitle={updated ? `by ${author}, updated ${updated}` : author}
-      accessories={
-        changesetsStats.total
-          ? [
-              {
-                text: `${changesetsStats.merged} / ${
-                  changesetsStats.closed + changesetsStats.merged + changesetsStats.open
-                } / ${changesetsStats.total}`,
-              },
-            ]
-          : undefined
-      }
+      accessories={accessories}
       actions={
         <ActionPanel>
           <Action.Push
             key={nanoid()}
             title="View Batch Change"
             icon={{ source: Icon.MagnifyingGlass }}
-            target={
-              <ApolloProvider client={client}>
-                <BatchChangeView batchChange={batchChange} src={src} />
-              </ApolloProvider>
-            }
+            target={<BatchChangeView batchChange={batchChange} src={src} />}
           />
           <Action.OpenInBrowser key={nanoid()} url={url} shortcut={secondaryActionShortcut} />
           <Action
@@ -183,6 +190,7 @@ function BatchChangeItem({
 
 function BatchChangeView({ batchChange, src }: { batchChange: BatchChange; src: Sourcegraph }) {
   const { loading, error, data, refetch } = useQuery<GetChangesets, GetChangesetsVariables>(GET_CHANGESETS, {
+    client: src.client,
     variables: {
       namespace: batchChange.namespace.id,
       name: batchChange.name,
@@ -267,12 +275,19 @@ function ChangesetItem({
     toast.hide();
   }
 
-  const [mergeChangeset, { error: mergeError }] = useMutation<MergeChangeset, MergeChangesetVariables>(MERGE_CHANGESET);
+  const [mergeChangeset, { error: mergeError }] = useMutation<MergeChangeset, MergeChangesetVariables>(
+    MERGE_CHANGESET,
+    {
+      client: src.client,
+    }
+  );
   const [reenqueueChangeset, { error: reenqueueError }] = useMutation<ReenqueueChangeset, ReenqueueChangesetVariables>(
-    REENQUEUE_CHANGESET
+    REENQUEUE_CHANGESET,
+    { client: src.client }
   );
   const [publishChangeset, { error: publishError }] = useMutation<PublishChangeset, PublishChangesetVariables>(
-    PUBLISH_CHANGESET
+    PUBLISH_CHANGESET,
+    { client: src.client }
   );
   const error = mergeError || publishError || reenqueueError;
   if (error) {

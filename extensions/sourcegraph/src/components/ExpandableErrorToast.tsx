@@ -1,5 +1,6 @@
 import { Toast, Detail } from "@raycast/api";
 import { ReactNode } from "react";
+import { bold } from "../markdown";
 
 /**
  * ExpandableErrorToast creates a failure toast with the given navigationTitle and title,
@@ -18,7 +19,7 @@ export default function ExpandableErrorToast(
     primaryAction: {
       title: "View details",
       onAction: () => {
-        push(<Detail markdown={`**${title}**\n\n${description}`} navigationTitle={navigationTitle} />);
+        push(<Detail markdown={`${bold(title)}\n\n${description}`} navigationTitle={navigationTitle} />);
       },
     },
   });

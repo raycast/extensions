@@ -173,6 +173,8 @@ export interface GetBatchChanges_batchChanges_nodes_changesetsStats {
   open: number; // The count of open changesets.
   closed: number; // The count of closed changesets.
   failed: number; // The count of changesets in failed state.
+  unpublished: number; // The count of unpublished changesets.
+  draft: number; // The count of draft changesets.
 }
 
 export interface GetBatchChanges_batchChanges_nodes {
@@ -250,6 +252,36 @@ export interface GetChangesets {
 export interface GetChangesetsVariables {
   namespace: string;
   name: string;
+}
+
+/* tslint:disable */
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL query operation: GetFileContents
+// ====================================================
+
+export interface GetFileContents_repository_commit_blob {
+  content: string; // The content of this blob.
+  binary: boolean; // Whether or not it is binary.
+}
+
+export interface GetFileContents_repository_commit {
+  blob: GetFileContents_repository_commit_blob | null; // The Git blob in this commit at the given path.
+}
+
+export interface GetFileContents_repository {
+  commit: GetFileContents_repository_commit | null; // Returns information about the given commit in the repository, or null if no commit exists with the given rev.
+}
+
+export interface GetFileContents {
+  repository: GetFileContents_repository | null; // Looks up a repository by either name or cloneURL.
+}
+
+export interface GetFileContentsVariables {
+  repo: string;
+  rev: string;
+  path: string;
 }
 
 /* tslint:disable */
@@ -354,6 +386,8 @@ export interface BatchChangeFields_changesetsStats {
   open: number; // The count of open changesets.
   closed: number; // The count of closed changesets.
   failed: number; // The count of changesets in failed state.
+  unpublished: number; // The count of unpublished changesets.
+  draft: number; // The count of draft changesets.
 }
 
 export interface BatchChangeFields {
@@ -405,6 +439,18 @@ export interface ChangesetFields_ExternalChangeset {
 }
 
 export type ChangesetFields = ChangesetFields_HiddenExternalChangeset | ChangesetFields_ExternalChangeset;
+
+/* tslint:disable */
+// This file was automatically generated and should not be edited.
+
+// ====================================================
+// GraphQL fragment: BlobContents
+// ====================================================
+
+export interface BlobContents {
+  content: string; // The content of this blob.
+  binary: boolean; // Whether or not it is binary.
+}
 
 /* tslint:disable */
 // This file was automatically generated and should not be edited.

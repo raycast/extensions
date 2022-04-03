@@ -15,6 +15,7 @@ import {
   SearchNotebookFields as SearchNotebook,
   NotebooksOrderBy,
 } from "../sourcegraph/gql/schema";
+import { bold, codeBlock, inlineCode, italic, quoteBlock } from "../markdown";
 
 /**
  * FindNotebooksCommand is the shared search notebooks command.
@@ -22,6 +23,7 @@ import {
 export default function FindNotebooksCommand({ src }: { src: Sourcegraph }) {
   const [searchText, setSearchText] = useState("");
   const { loading, error, data } = useQuery<GetNotebooks, GetNotebooksVariables>(GET_NOTEBOOKS, {
+    client: src.client,
     variables: {
       query: searchText,
       orderBy: searchText ? NotebooksOrderBy.NOTEBOOK_STAR_COUNT : NotebooksOrderBy.NOTEBOOK_UPDATED_AT,
@@ -127,15 +129,11 @@ function NotebookResultItem({
   );
 }
 
-function codeBlock(content: string) {
-  return `\`\`\`\n${content}\n\`\`\``;
-}
-
 function NotebookPreviewView({ notebook, src }: { notebook: SearchNotebook; src: Sourcegraph }) {
   const author = notebook.creator?.displayName
     ? `${notebook.creator.displayName} (@${notebook.creator.username})`
     : `@${notebook.creator?.username}`;
-  const preview = `**${notebook.title}**
+  const preview = `${bold(notebook.title)}
 
 ${
   notebook.blocks
@@ -149,13 +147,15 @@ ${
             case "FileBlock":
               return codeBlock(`${b.fileInput.repositoryName} > ${b.fileInput.filePath}`);
             case "SymbolBlock": {
-              const symbol = `> *${b.symbolInput.symbolKind.toLocaleLowerCase()}* **${b.symbolInput.symbolName}** ${
-                b.symbolInput.symbolContainerName
-              }`;
+              const symbol = quoteBlock(
+                `${italic(b.symbolInput.symbolKind.toLocaleLowerCase())} ${bold(b.symbolInput.symbolName)} ${
+                  b.symbolInput.symbolContainerName
+                }`
+              );
               return `${symbol}\n${codeBlock(`${b.symbolInput.repositoryName} > ${b.symbolInput.filePath}`)}`;
             }
             default:
-              return `> Unsupported block type: \`${b.__typename}\``;
+              return quoteBlock(`Unsupported block type: ${inlineCode(b.__typename)}`);
           }
         })
         .join("\n\n")
@@ -180,19 +180,19 @@ ${
           ) : (
             <Fragment />
           )}
+          <Detail.Metadata.Label title="Visibility" text={notebook.public ? "Public" : "Private"} />
           {notebook.stars.totalCount ? (
             <Detail.Metadata.Label title="Stars" text={`${notebook.stars.totalCount}`} />
           ) : (
             <Fragment />
           )}
-          <Detail.Metadata.Label title="Visibility" text={notebook.public ? "Public" : "Private"} />
-          <Detail.Metadata.Label
-            title="Created"
-            text={DateTime.fromISO(notebook.createdAt).toRelative() || "Unknown"}
-          />
           <Detail.Metadata.Label
             title="Updated"
             text={DateTime.fromISO(notebook.updatedAt).toRelative() || "Unknown"}
+          />
+          <Detail.Metadata.Label
+            title="Created"
+            text={DateTime.fromISO(notebook.createdAt).toRelative() || "Unknown"}
           />
         </Detail.Metadata>
       }

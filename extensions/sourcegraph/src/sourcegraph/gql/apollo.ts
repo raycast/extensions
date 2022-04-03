@@ -1,12 +1,11 @@
 import { createHttpLink, ApolloClient, InMemoryCache } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import fetch from "cross-fetch";
-import { Sourcegraph } from "..";
 import { changesetFieldsPossibleTypes } from "./queries";
 
-export function newApolloClient(src: Sourcegraph) {
+export function newApolloClient(connect: { instance: string; token?: string }) {
   const httpLink = createHttpLink({
-    uri: `${src.instance}/.api/graphql`,
+    uri: `${connect.instance}/.api/graphql`,
     fetch,
   });
 
@@ -14,7 +13,7 @@ export function newApolloClient(src: Sourcegraph) {
     return {
       headers: {
         ...headers,
-        Authorization: src.token ? `token ${src.token}` : "",
+        Authorization: connect.token ? `token ${connect.token}` : "",
       },
     };
   });

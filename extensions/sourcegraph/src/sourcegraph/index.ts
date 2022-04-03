@@ -1,4 +1,6 @@
+import { ApolloClient, NormalizedCacheObject } from "@apollo/client";
 import { getPreferenceValues } from "@raycast/api";
+import { newApolloClient } from "./gql/apollo";
 
 export interface Sourcegraph {
   /**
@@ -13,6 +15,10 @@ export interface Sourcegraph {
    * Default search context when searching on Sourcegraph Cloud
    */
   defaultContext?: string;
+  /**
+   * Client for executing GraphQL requests with.
+   */
+  client: ApolloClient<NormalizedCacheObject>;
 }
 
 const cloudURL = "https://sourcegraph.com";
@@ -50,10 +56,14 @@ interface Preferences {
  */
 export function sourcegraphCloud(): Sourcegraph {
   const prefs: Preferences = getPreferenceValues();
-  return {
+  const connect = {
     instance: cloudURL,
     token: prefs.cloudToken,
+  };
+  return {
+    ...connect,
     defaultContext: prefs.cloudDefaultContext,
+    client: newApolloClient(connect),
   };
 }
 
@@ -62,14 +72,18 @@ export function sourcegraphCloud(): Sourcegraph {
  */
 export function sourcegraphSelfHosted(): Sourcegraph | null {
   const prefs: Preferences = getPreferenceValues();
-  if (prefs.customInstance) {
-    return {
-      instance: prefs.customInstance.replace(/\/$/, ""),
-      token: prefs.customInstanceToken,
-      defaultContext: prefs.customInstanceDefaultContext,
-    };
+  if (!prefs.customInstance) {
+    return null;
   }
-  return null;
+  const connect = {
+    instance: prefs.customInstance.replace(/\/$/, ""),
+    token: prefs.customInstanceToken,
+  };
+  return {
+    ...connect,
+    defaultContext: prefs.customInstanceDefaultContext,
+    client: newApolloClient(connect),
+  };
 }
 
 /**

@@ -9,6 +9,10 @@ import { ContentMatch, SymbolMatch } from "../sourcegraph/stream-search/stream";
 import { ColorDefault, ColorEmphasis, ColorPrivate } from "./colors";
 import ExpandableErrorToast from "./ExpandableErrorToast";
 import { copyShortcut, drilldownShortcut, tertiaryActionShortcut } from "./shortcuts";
+import { useLazyQuery } from "@apollo/client";
+import { GET_FILE_CONTENTS } from "../sourcegraph/gql/queries";
+import { GetFileContents, GetFileContentsVariables } from "../sourcegraph/gql/schema";
+import { bold, codeBlock, quoteBlock } from "../markdown";
 
 /**
  * SearchCommand is the shared search command implementation.
@@ -243,7 +247,7 @@ function SearchResultItem({
               <Action.Push
                 key={nanoid()}
                 title="View Result"
-                target={<ResultView searchResult={searchResult} icon={icon} />}
+                target={<ResultView src={src} searchResult={searchResult} icon={icon} />}
                 icon={{ source: Icon.MagnifyingGlass }}
               />
             ),
@@ -310,11 +314,19 @@ function MultiResultView({ searchResult }: { searchResult: { url: string; match:
   }
 }
 
-function ResultView({ searchResult, icon }: { searchResult: SearchResult; icon: Image.ImageLike }) {
+function ResultView({
+  src,
+  searchResult,
+  icon,
+}: {
+  src: Sourcegraph;
+  searchResult: SearchResult;
+  icon: Image.ImageLike;
+}) {
   const { match } = searchResult;
   const navigationTitle = `View ${match.type} result`;
 
-  const markdownTitle = `**${match.repository}**`;
+  const markdownTitle = bold(match.repository);
   let markdownContent = "";
   const metadata: React.ReactNode[] = [
     <Detail.Metadata.TagList title="Match type" key={nanoid()}>
@@ -327,6 +339,10 @@ function ResultView({ searchResult, icon }: { searchResult: SearchResult; icon: 
       key={nanoid()}
     />,
   ];
+
+  const [getFileContents, fileContents] = useLazyQuery<GetFileContents, GetFileContentsVariables>(GET_FILE_CONTENTS, {
+    client: src.client,
+  });
 
   switch (match.type) {
     // Match types that have multi result view
@@ -345,7 +361,40 @@ function ResultView({ searchResult, icon }: { searchResult: SearchResult; icon: 
       break;
 
     case "path":
-      markdownContent = `\`${match.path}\``;
+      markdownContent = `${codeBlock(match.path)}\n\n---\n\n`;
+      if (!fileContents.called) {
+        // TODO: Certain langauges/file seem to contain characters that don't play with
+        // well with the markdown renderer. For now just allowlist a few ones that seem
+        // okay, and investigate what it might take to do proper escaping.
+        const allowedExtensions = [".md", ".go"];
+        if (allowedExtensions.filter((ext) => match.path.endsWith(ext)).length > 0) {
+          getFileContents({
+            variables: {
+              repo: match.repository,
+              rev: match.commit || "",
+              path: match.path,
+            },
+          });
+        } else {
+          markdownContent += quoteBlock(`File preview is not yet supported for this file type.`);
+        }
+      } else if (!fileContents.loading) {
+        if (fileContents.data) {
+          const blob = fileContents.data.repository?.commit?.blob;
+          if (!blob) {
+            markdownContent += quoteBlock("Blob not found");
+          } else if (blob.binary) {
+            markdownContent += quoteBlock(`File preview is not yet supported for this file type.`);
+          } else if (blob.content) {
+            markdownContent += match.path.endsWith(".md") ? blob?.content : codeBlock(blob?.content);
+          } else {
+            markdownContent += quoteBlock("No content found");
+          }
+        }
+        if (fileContents.error) {
+          markdownContent += quoteBlock(`Failed to fetch file: ${fileContents.error}`);
+        }
+      }
       break;
 
     case "commit": {
@@ -363,12 +412,7 @@ function ResultView({ searchResult, icon }: { searchResult: SearchResult; icon: 
     }
 
     default:
-      markdownContent = `Unsupported result type - full data:
-
-\`\`\`
-${JSON.stringify(match, null, "  ")}
-\`\`\`
-`;
+      markdownContent = `Unsupported result type - full data:\n\n${codeBlock(JSON.stringify(match, null, "  "))}`;
   }
 
   if (match.repoStars) {
