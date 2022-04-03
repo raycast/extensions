@@ -18,8 +18,8 @@
   "preferences": [
     {
       "name": "rootPath",
-      "title": "Google Drive Path",
-      "description": "Google Drive for Desktop path to search",
+      "title": "Root Path for Google Drive for Desktop",
+      "description": "Google Drive for Desktop root path to search",
       "required": true,
       "placeholder": "/Volumes/GoogleDrive",
       "default": "/Volumes/GoogleDrive",
@@ -28,9 +28,9 @@
     {
       "name": "excludePaths",
       "title": "Exclude Paths",
-      "description": "Paths to exclude from search",
-      "required": true,
-      "placeholder": "path1, path2, ...",
+      "description": "Full paths to exclude from search",
+      "required": false,
+      "placeholder": "/Volumes/GoogleDrive/MyDrive/Secrets, /Volumes/GoogleDrive/MyDrive/Priavte, ...",
       "default": "",
       "type": "textfield"
     }
