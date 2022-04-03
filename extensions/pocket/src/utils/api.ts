@@ -52,7 +52,7 @@ function formatBookmark(bookmark: RawBookmark): Bookmark {
     favorite: bookmark.favorite === "1",
     tags: bookmark.tags ? Object.keys(bookmark.tags) : [],
     author: bookmark.authors ? Object.values(bookmark.authors)[0]?.name : "",
-    updatedAt: new Date(parseInt(`${bookmark.time_added}000`))
+    updatedAt: new Date(parseInt(`${bookmark.time_added}000`)),
   };
 }
 
@@ -61,8 +61,8 @@ export async function createBookmark({ url }: CreateBookmarkRequest) {
     json: {
       consumer_key: consumerKey,
       access_token: accessToken,
-      url: encodeURI(url)
-    }
+      url: encodeURI(url),
+    },
   });
   const result = JSON.parse(response.body);
   return formatBookmark(result.item);
@@ -77,10 +77,10 @@ export async function sendAction({ id, action }: SendActionRequest) {
         {
           action,
           item_id: id,
-          time: Math.floor(new Date().getTime() / 1000)
-        }
-      ]
-    }
+          time: Math.floor(new Date().getTime() / 1000),
+        },
+      ],
+    },
   });
 }
 
@@ -92,8 +92,8 @@ export async function fetchBookmarks({ state, count }: FetchBookmarksRequest): P
       detailType: "complete",
       sort: "newest",
       count,
-      state
-    }
+      state,
+    },
   });
   const result = JSON.parse(response.body) as FetchBookmarksResponse;
   const bookmarks: Array<Bookmark> = Object.values(result.list).map(formatBookmark);

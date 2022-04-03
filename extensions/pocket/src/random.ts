@@ -3,10 +3,10 @@ import { fetchBookmarks } from "./utils/api";
 import { HTTPError } from "got";
 import { ReadState } from "./utils/types";
 
-export default async function() {
+export default async function () {
   const toast = new Toast({
     title: "Searching bookmarks",
-    style: Toast.Style.Animated
+    style: Toast.Style.Animated,
   });
 
   toast.show();

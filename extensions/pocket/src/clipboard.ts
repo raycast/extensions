@@ -4,10 +4,10 @@ import { HTTPError } from "got";
 
 const urlRegex = /[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)?/gi;
 
-export default async function() {
+export default async function () {
   const toast = new Toast({
     title: "Creating bookmark",
-    style: Toast.Style.Animated
+    style: Toast.Style.Animated,
   });
 
   toast.show();
@@ -30,14 +30,14 @@ export default async function() {
       shortcut: { modifiers: ["cmd", "shift"], key: "o" },
       onAction: () => {
         open(bookmark.pocketUrl);
-      }
+      },
     };
     toast.secondaryAction = {
       title: "Copy Pocket URL",
       shortcut: { modifiers: ["cmd", "shift"], key: "c" },
       onAction: () => {
         Clipboard.copy(bookmark.pocketUrl);
-      }
+      },
     };
   } catch (error) {
     toast.style = Toast.Style.Failure;
