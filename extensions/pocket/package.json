@@ -78,16 +78,23 @@
     },
     {
       "name": "random",
-      "title": "Random Bookmark",
+      "title": "Open Random Bookmark",
       "subtitle": "Pocket",
       "description": "Opens a random unread bookmark",
       "mode": "no-view"
     },
     {
       "name": "latest",
-      "title": "Latest Bookmark",
+      "title": "Open Latest Bookmark",
       "subtitle": "Pocket",
       "description": "Opens the latest added unread bookmark",
+      "mode": "no-view"
+    },
+    {
+      "name": "clipboard",
+      "title": "Create Bookmark from Clipboard",
+      "subtitle": "Pocket",
+      "description": "Create bookmark from clipboard contents",
       "mode": "no-view"
     }
   ],
