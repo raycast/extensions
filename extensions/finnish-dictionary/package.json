@@ -11,14 +11,14 @@
       "name": "fe",
       "title": "Finnish to English",
       "subtitle": "Define a finnish word to english",
-      "description": "",
+      "description": "Define a finnish word to english",
       "mode": "view"
     },
     {
       "name": "ef",
       "title": "English to Finnish",
       "subtitle": "Define an english word to finnish",
-      "description": "",
+      "description": "Define a finnish word to english",
       "mode": "view"
     }
   ],
