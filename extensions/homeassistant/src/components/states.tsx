@@ -48,6 +48,7 @@ import { TimerCancelAction, TimerPauseAction, TimerStartAction } from "./timer";
 import { InputSelectOptionSelectAction } from "./input_select";
 import { InputButtonPressAction } from "./input_button";
 import { InputTextSetValueAction } from "./input_text";
+import { InputDateTimeSetValueAction } from "./input_datetime";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -196,6 +197,18 @@ function getIcon(state: State): Image.ImageLike | undefined {
     return { source: "gesture-tap-button.png", tintColor: PrimaryIconColor };
   } else if (e.startsWith("input_text")) {
     return { source: "form-textbox.png", tintColor: PrimaryIconColor };
+  } else if (e.startsWith("input_datetime")) {
+    let source = "calendar-clock.png";
+    const hasDate: boolean = state.attributes.has_date || false;
+    const hasTime: boolean = state.attributes.has_time || false;
+    if (hasDate && hasTime) {
+      source = "calendar-clock.png";
+    } else if (hasDate) {
+      source = "calendar.png";
+    } else if (hasTime) {
+      source = "clock-time-four.png";
+    }
+    return { source: source, tintColor: PrimaryIconColor };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
@@ -923,6 +936,26 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
         <ActionPanel>
           <ActionPanel.Section title="Controls">
             <InputTextSetValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "input_datetime": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <InputDateTimeSetValueAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
