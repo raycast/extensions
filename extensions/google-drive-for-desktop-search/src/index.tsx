@@ -34,6 +34,7 @@ const getFileInfo = async (rootPath: string, excludePaths: string[]): Promise<Fi
             if (stats.isFile()) {
               return [{ name: file, path: filePath }];
             }
+
             return [];
           })
       )
@@ -58,7 +59,7 @@ export default function SearchGoogleDriveForDesktopFile() {
   }, [setFiles, rootPath, exludePaths]);
 
   return (
-    <List>
+    <List isLoading={files.length === 0}>
       {files.map((file) => (
         <List.Item
           key={file.path}
