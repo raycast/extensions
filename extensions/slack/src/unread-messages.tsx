@@ -208,7 +208,7 @@ function UnreadMessagesConversation({
   }
 
   return (
-    <List navigationTitle={`Unread Messages - ${conversationName}`} isLoading={!isValidatingUsers} isShowingDetail>
+    <List navigationTitle={`Unread Messages - ${conversationName}`} isLoading={isValidatingUsers} isShowingDetail>
       {messageHistory.map((message, index) => {
         const user = users?.find((u) => u.id === message.senderId);
         return (

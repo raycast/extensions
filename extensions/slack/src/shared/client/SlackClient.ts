@@ -208,9 +208,12 @@ export class SlackClient {
         conversationId: conversationInfos[index].channel!.id!,
         messageHistory: messages
           ?.map((message) => ({
-            receivedAt: message.ts ? new Date(parseInt(message.ts) * 1000) : undefined,
-            message: message?.text ?? "",
-            senderId: message.user,
+            receivedAt: message.ts ? new Date(parseFloat(message.ts) * 1000) : undefined,
+            message:
+              message.text && message.text !== "This content can't be displayed."
+                ? message.text
+                : message.blocks?.map((block) => block.text?.text).join("\n\n\n\n\n\n\n\n"),
+            senderId: message.user ?? message.bot_id,
           }))
           .filter((x): x is Message => !!x.receivedAt && !!x.message && !!x.senderId),
       }))
