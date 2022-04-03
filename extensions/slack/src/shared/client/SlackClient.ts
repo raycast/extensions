@@ -22,6 +22,16 @@ export interface SnoozeStatus {
   snoozeEnd: Date | undefined;
 }
 
+export interface Message {
+  receivedAt: Date;
+  message: string;
+  senderId: string;
+}
+export interface UnreadChannelInfo {
+  conversationId: string;
+  messageHistory: Message[];
+}
+
 const sortNames = (a: string, b: string) => {
   if (a < b) {
     return -1;
@@ -169,5 +179,47 @@ export class SlackClient {
 
   public static async endSnooze(): Promise<void> {
     await slackWebClient.dnd.endSnooze();
+  }
+
+  public static async getUnreadConversations(conversationIds: string[]): Promise<UnreadChannelInfo[]> {
+    if (conversationIds.length > 30) {
+      throw new Error("Too many conversations");
+    }
+
+    if (conversationIds.length === 0) {
+      return [];
+    }
+
+    const conversationInfos = await Promise.all(
+      conversationIds.map((id) => slackWebClient.conversations.info({ channel: id }))
+    );
+
+    const conversationHistories = await Promise.all(
+      conversationInfos.map((conversationInfo) =>
+        slackWebClient.conversations.history({
+          channel: conversationInfo.channel!.id!,
+          oldest: conversationInfo.channel!.last_read,
+        })
+      )
+    );
+
+    const unreadConversations = conversationHistories
+      .map(({ messages }, index) => ({
+        conversationId: conversationInfos[index].channel!.id!,
+        messageHistory: messages
+          ?.map((message) => ({
+            receivedAt: message.ts ? new Date(parseInt(message.ts) * 1000) : undefined,
+            message: message?.text ?? "",
+            senderId: message.user,
+          }))
+          .filter((x): x is Message => !!x.receivedAt && !!x.message && !!x.senderId),
+      }))
+      .filter((channel): channel is UnreadChannelInfo => !!channel.messageHistory && channel.messageHistory.length > 0)
+      .sort(
+        (a, b) =>
+          new Date(b.messageHistory[0].receivedAt).getTime() - new Date(a.messageHistory[0].receivedAt).getTime()
+      );
+
+    return unreadConversations;
   }
 }

@@ -2,7 +2,7 @@ import { Action, ActionPanel, Icon, Image, List, LocalStorage, showToast, Toast 
 import { isEqual } from "lodash";
 import { useEffect, useState } from "react";
 
-import { CacheProvider, onApiError, useChannels, useGroups, useUsers } from "./shared/client";
+import { CacheProvider, onApiError, useChannels, useGroups, useUnreadConversations, useUsers } from "./shared/client";
 
 const conversationsStorageKey = "$unread-messages$selected-conversations";
 
@@ -16,6 +16,12 @@ export default function Command() {
 
 function UnreadMessagesOverview() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>();
+
+  const {
+    data: unreadConversations,
+    error: unreadConversationsError,
+    isValidating,
+  } = useUnreadConversations(selectedConversations);
 
   const setConversations = async () => {
     const item = await LocalStorage.getItem(conversationsStorageKey);
@@ -42,8 +48,12 @@ function UnreadMessagesOverview() {
     return () => clearInterval(interval);
   }, [selectedConversations]);
 
+  if (!unreadConversations && unreadConversationsError) {
+    onApiError({ exitExtension: true });
+  }
+
   return (
-    <List isLoading={!selectedConversations}>
+    <List isLoading={!selectedConversations || isValidating}>
       {selectedConversations && selectedConversations.length === 0 && (
         <List.EmptyView
           icon={Icon.Gear}
@@ -56,6 +66,21 @@ function UnreadMessagesOverview() {
           description="You need to configure this command by selecting conversations that you want to observe. You can choose up to 30 due to Slack API restrictions."
         />
       )}
+
+      {selectedConversations &&
+        selectedConversations.length > 0 &&
+        !!unreadConversations &&
+        unreadConversations.length === 0 && (
+          <List.EmptyView
+            actions={
+              <ActionPanel>
+                <Action.Push title="Configure" target={<ConfigurationWrapper />} />
+              </ActionPanel>
+            }
+            title="No Unread Messages Found"
+            description="Configure command again for observing different conversations."
+          />
+        )}
     </List>
   );
 }
