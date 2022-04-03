@@ -180,7 +180,7 @@ function UnreadMessagesOverview() {
                     />
                     <Action.Push
                       title="Configure Command"
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                      shortcut={{ modifiers: ["opt"], key: "c" }}
                       target={<ConfigurationWrapper />}
                     />
                   </ActionPanel>
