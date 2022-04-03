@@ -5,7 +5,6 @@ import {
   buildBingImageURL,
   buildBingWallpapersURL,
   buildCopyrightURL,
-  buildTime,
   getCopyright,
   getPictureName,
 } from "./bing-wallpaper-utils";
@@ -17,7 +16,7 @@ import { deleteCache, preferences, setWallpaper } from "./utils";
 
 export default function CommonDirectory() {
   const [bingWallpaperHD, setBingWallpaperHD] = useState<BingImage[]>([]);
-  const { downloadSize } = preferences();
+  const { randomWallpaperOnStart, downloadSize } = preferences();
 
   useEffect(() => {
     async function _fetchWallpaper() {
@@ -48,6 +47,20 @@ export default function CommonDirectory() {
     _fetchWallpaper().then();
   }, []);
 
+  useEffect(() => {
+    async function _randomWallpaperOnStart() {
+      if (randomWallpaperOnStart && bingWallpaperHD.length != 0) {
+        const randomImage = bingWallpaperHD[Math.floor(Math.random() * bingWallpaperHD.length)];
+        setWallpaper(
+          getPictureName(randomImage.url) + "-" + randomImage.startdate,
+          buildBingImageURL(randomImage.url, "raw")
+        ).then(() => "");
+      }
+    }
+
+    _randomWallpaperOnStart().then();
+  }, [bingWallpaperHD]);
+
   return (
     <List isShowingDetail={true} isLoading={bingWallpaperHD.length === 0} searchBarPlaceholder={"Search WallPaper"}>
       {bingWallpaperHD?.map((bingImage, index) => {
@@ -74,7 +87,6 @@ ${getCopyright(bingImage.copyright).copyright}`}
                     await downloadPicture(downloadSize, bingImage);
                   }}
                 />
-
                 <Action
                   icon={Icon.Desktop}
                   title={"Set Desktop Wallpaper"}
@@ -86,9 +98,21 @@ ${getCopyright(bingImage.copyright).copyright}`}
                   }}
                 />
                 <Action
+                  icon={Icon.Window}
+                  title={"Set Random Wallpaper"}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  onAction={() => {
+                    const randomImage = bingWallpaperHD[Math.floor(Math.random() * bingWallpaperHD.length)];
+                    setWallpaper(
+                      getPictureName(randomImage.url) + "-" + randomImage.startdate,
+                      buildBingImageURL(randomImage.url, "raw")
+                    ).then(() => "");
+                  }}
+                />
+                <Action
                   icon={Icon.Globe}
                   title={"Search Picture"}
-                  shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
+                  shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
                   onAction={async () => {
                     await open(buildCopyrightURL(bingImage.copyrightlink));
                     await showHUD("Search picture in browser");

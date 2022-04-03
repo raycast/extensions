@@ -7,6 +7,7 @@ import fs from "fs";
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
+    randomWallpaperOnStart: preferencesMap.get("randomWallpaperOnStart") as boolean,
     applyTo: preferencesMap.get("applyTo") as string,
     downloadSize: preferencesMap.get("downloadSize") as string,
   };

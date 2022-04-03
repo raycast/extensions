@@ -5,8 +5,21 @@
   "description": "Get and set Bing wallpapers within 15 days.",
   "icon": "bing-wallpaper-icon.png",
   "author": "koinzhang",
+  "categories": [
+    "Media",
+    "System"
+  ],
   "license": "MIT",
   "preferences": [
+    {
+      "name": "randomWallpaperOnStart",
+      "title": "Wallpaper Settings",
+      "description": "Set random wallpaper when command on start.",
+      "label": "Random Wallpaper On Start",
+      "type": "checkbox",
+      "default": true,
+      "required": true
+    },
     {
       "name": "applyTo",
       "title": "Apply Wallpaper To",
@@ -23,7 +36,7 @@
         }
       ],
       "required": false,
-      "default": "current"
+      "default": "every"
     },
     {
       "name": "downloadSize",
