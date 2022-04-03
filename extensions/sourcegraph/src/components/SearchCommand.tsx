@@ -366,7 +366,7 @@ function ResultView({
         // TODO: Certain langauges/file seem to contain characters that don't play with
         // well with the markdown renderer. For now just allowlist a few ones that seem
         // okay, and investigate what it might take to do proper escaping.
-        const allowedExtensions = [".md", ".go"];
+        const allowedExtensions = [".md", ".go", ".sh", ".yaml", ".yml", ".json"];
         if (allowedExtensions.filter((ext) => match.path.endsWith(ext)).length > 0) {
           getFileContents({
             variables: {
