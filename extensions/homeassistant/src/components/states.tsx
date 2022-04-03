@@ -1017,7 +1017,7 @@ export function useStateSearch(
             (e.attributes.friendly_name || "").toLowerCase().includes(query.toLowerCase())
         );
       }
-      haStates = haStates.slice(0, 100);
+      haStates = haStates.slice(0, 1000);
       setStates(haStates);
     } else {
       setStates([]);
