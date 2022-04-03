@@ -190,6 +190,9 @@
       "description": "Pop to root after e.g. open the browser"
     }
   ],
+  "categories": [
+    "Developer Tools"
+  ],
   "contributors": [
     "Loskir"
   ],
