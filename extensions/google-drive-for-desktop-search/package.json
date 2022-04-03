@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "google-drive-for-desktop",
-  "title": "google-drive-for-desktop",
+  "name": "google-drive-for-desktop-search",
+  "title": "google-drive-for-desktop-search",
   "description": "",
-  "icon": "google-drive-for-desktop.png",
+  "icon": "google-drive-for-desktop-search.png",
   "author": "nametake",
   "license": "MIT",
   "commands": [
@@ -29,7 +29,7 @@
       "name": "excludePaths",
       "title": "Exclude Paths",
       "description": "Paths to exclude from search",
-      "required": false,
+      "required": true,
       "placeholder": "path1, path2, ...",
       "default": "",
       "type": "textfield"
