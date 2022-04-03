@@ -82,6 +82,13 @@
       "subtitle": "Pocket",
       "description": "Opens a random unread bookmark",
       "mode": "no-view"
+    },
+    {
+      "name": "latest",
+      "title": "Latest Bookmark",
+      "subtitle": "Pocket",
+      "description": "Opens the latest added unread bookmark",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

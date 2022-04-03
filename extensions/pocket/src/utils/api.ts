@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import got from "got";
-import { Bookmark } from "./types";
+import { Bookmark, ReadState } from "./types";
 
 const preferences = getPreferenceValues();
 const consumerKey = preferences.consumerKey;
@@ -30,7 +30,7 @@ interface SendActionRequest {
 }
 
 interface FetchBookmarksRequest {
-  state?: string;
+  state?: ReadState;
   count?: number;
 }
 

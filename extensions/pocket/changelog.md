@@ -1,8 +1,9 @@
 # Pocket Changelog
 
-## [Read State Filters] - 2022-03-19
+## [Filters & Commands] - 2022-03-19
 - Add `All`, `Unread` and `Archived` filters for the `Search Bookmarks` command
 - Add new preference to select default read state filter
+- Add `Latest Bookmark` command to open the latest unread bookmark
 
 ## [Categories & Screenshots] - 2022-03-12
 Add categories and screenshots for the store
