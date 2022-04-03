@@ -42,7 +42,7 @@ function EventCommitListItem(props: { event: Event }): JSX.Element {
   };
 
   const action = (): JSX.Element | undefined | null => {
-    if (project && commit) {
+    if (project && commit && status?.status) {
       return (
         <Action.Push
           title="Open Pipeline"
