@@ -195,7 +195,7 @@
       "default": "3000",
       "title": "Camera Refresh Interval (ms)",
       "description": "Refresh interval in ms for camera streams. Values < 2000 are not recommended. 0 mean no auto refresh at all",
-      "placeholder": "3000 "
+      "placeholder": "3000"
     }
   ],
   "dependencies": {
