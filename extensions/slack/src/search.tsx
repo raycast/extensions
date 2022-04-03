@@ -1,12 +1,15 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 
 import { CacheProvider, onApiError, useChannels, useGroups, useUsers } from "./shared/client";
+import { UpdatesModal } from "./shared/UpdatesModal";
 import { openChannel, openChat } from "./shared/utils";
 
 export default function Command() {
   return (
     <CacheProvider>
-      <SlackList />
+      <UpdatesModal>
+        <SlackList />
+      </UpdatesModal>
     </CacheProvider>
   );
 }

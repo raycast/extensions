@@ -12,6 +12,7 @@ import {
   useUnreadConversations,
   useUsers,
 } from "./shared/client";
+import { UpdatesModal } from "./shared/UpdatesModal";
 import { openChannel, timeDifference } from "./shared/utils";
 
 const conversationsStorageKey = "$unread-messages$selected-conversations";
@@ -19,7 +20,9 @@ const conversationsStorageKey = "$unread-messages$selected-conversations";
 export default function Command() {
   return (
     <CacheProvider>
-      <UnreadMessagesOverview />
+      <UpdatesModal>
+        <UnreadMessagesOverview />
+      </UpdatesModal>
     </CacheProvider>
   );
 }
