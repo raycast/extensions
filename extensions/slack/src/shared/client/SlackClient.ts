@@ -222,4 +222,8 @@ export class SlackClient {
 
     return unreadConversations;
   }
+
+  public static async markAsRead(conversationId: string): Promise<void> {
+    await slackWebClient.conversations.mark({ channel: conversationId, ts: `${new Date().getTime() / 1000}` });
+  }
 }

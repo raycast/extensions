@@ -27,6 +27,11 @@
           - groups:history
           - im:history
           - mpim:history
+          # Command: Unread Messages (optional - needed for marking conversations as read)
+          - channels:write
+          - groups:write
+          - im:write
+          - mpim:write
 
           # Command: Set Presence
           - users:read

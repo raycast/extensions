@@ -6,6 +6,7 @@ import {
   CacheProvider,
   Message,
   onApiError,
+  SlackClient,
   useChannels,
   useGroups,
   useUnreadConversations,
@@ -33,6 +34,7 @@ function UnreadMessagesOverview() {
     data: unreadConversations,
     error: unreadConversationsError,
     isValidating,
+    mutate,
   } = useUnreadConversations(selectedConversations);
 
   const setConversations = async () => {
@@ -63,6 +65,29 @@ function UnreadMessagesOverview() {
   if (!unreadConversations && unreadConversationsError) {
     onApiError({ exitExtension: true });
   }
+
+  const markConversationAsRead = async (conversationId: string, actionTriggeredManually?: boolean): Promise<void> => {
+    try {
+      await SlackClient.markAsRead(conversationId);
+
+      if (actionTriggeredManually) {
+        showToast({
+          style: Toast.Style.Success,
+          title: `Marked as read`,
+        });
+      }
+
+      // optimistic rendering: mark conversation as read
+      mutate(
+        unreadConversations?.filter((c) => c.conversationId !== conversationId),
+        { revalidate: false, populateCache: true }
+      );
+    } catch {
+      if (actionTriggeredManually) {
+        onApiError();
+      }
+    }
+  };
 
   return (
     <List isLoading={!selectedConversations || isValidating}>
@@ -119,8 +144,13 @@ function UnreadMessagesOverview() {
                         <Action
                           title="Open in Slack"
                           onAction={() => {
+                            markConversationAsRead(unreadConversation.conversationId);
                             openChannel(conversation.teamId, conversation.id);
                           }}
+                        />
+                        <Action
+                          title="Mark as read"
+                          onAction={() => markConversationAsRead(unreadConversation.conversationId, true)}
                         />
                       </>
                     )}
