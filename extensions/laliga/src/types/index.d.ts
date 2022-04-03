@@ -15,6 +15,11 @@ export interface LaLigaMatch {
   matches: Match[];
 }
 
+export interface LaLigaClubSquad {
+  total: number;
+  squads: Squad[];
+}
+
 export interface Match {
   id: number;
   name: string;
@@ -86,7 +91,7 @@ export interface Club {
   shortname: string;
   selector_name: string;
   address: string;
-  foundation: Date;
+  foundation?: Date;
   web: string;
   twitter: string;
   facebook: string;
@@ -188,4 +193,74 @@ export interface Subscription {
 export interface Temperature {
   enabled_historical: boolean;
   enabled_forecast: boolean;
+}
+
+export interface Squad {
+  id: number;
+  shirt_number?: number;
+  current: boolean;
+  loan: boolean;
+  loan_to: boolean;
+  position: Position;
+  team: Team;
+  person: Person;
+  role: Role;
+  photos: { [key: string]: Photo };
+  opta_id: string;
+  lde_id?: number;
+}
+
+export interface Person {
+  id: number;
+  name: string;
+  nickname: string;
+  firstname: string;
+  lastname: string;
+  gender: Gender;
+  date_of_birth: Date;
+  place_of_birth?: string;
+  weight?: number;
+  height?: number;
+  international: boolean;
+  country?: Country;
+  slug: string;
+}
+
+export interface Country {
+  id: string;
+}
+
+export enum Gender {
+  Male = "male",
+}
+
+export interface Photo {
+  "1024x1113"?: string;
+  "128x139"?: string;
+  "2048x2225"?: string;
+  "256x278"?: string;
+  "512x556"?: string;
+  "64x70"?: string;
+  "1024x1024"?: string;
+  "128x128"?: string;
+  "2048x2048"?: string;
+  "256x256"?: string;
+  "512x512"?: string;
+  "64x64"?: string;
+}
+
+export interface Position {
+  id: number;
+  name: string;
+  slug: string;
+  plural_name?: string;
+  female_name?: string;
+  female_plural_name?: string;
+}
+
+export interface Role {
+  id: number;
+  name: string;
+  female_name: string;
+  slug: string;
 }

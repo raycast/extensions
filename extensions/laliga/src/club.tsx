@@ -14,6 +14,7 @@ export default function Club() {
 
   useEffect(() => {
     setLoading(true);
+    setClubs([]);
 
     getTeams(competition).then((data) => {
       setClubs(data);
@@ -35,16 +36,13 @@ export default function Club() {
             title={club.nickname}
             subtitle={club.shortname}
             icon={club.shield.url}
-            accessories={[
-              { text: club.venue.name },
-              { icon: club.venue.image?.url },
-            ]}
+            accessories={[{ text: club.venue.name }, { icon: "stadium.svg" }]}
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="Show Club Details"
+                  title="Club Profile"
                   icon={Icon.Sidebar}
-                  target={<ClubDetails slug={club.slug} />}
+                  target={<ClubDetails {...club} />}
                 />
               </ActionPanel>
             }

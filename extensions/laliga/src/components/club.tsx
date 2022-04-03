@@ -1,96 +1,92 @@
-import { useEffect, useState } from "react";
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import json2md from "json2md";
-import { getTeam } from "../api";
 import { Team } from "../types";
 import { format } from "date-fns";
+import ClubSquad from "./squad";
 
-export default function ClubDetails(props: { slug: string }) {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [team, setTeam] = useState<Team | undefined>(undefined);
-
-  useEffect(() => {
-    setLoading(true);
-    getTeam(props.slug).then((data) => {
-      setTeam(data);
-      setLoading(false);
-    });
-  }, [props.slug]);
+export default function ClubDetails(team: Team) {
+  const { club, venue } = team;
 
   return (
     <Detail
-      navigationTitle={team ? `${team.nickname} | LaLiga` : "LaLiga"}
-      isLoading={loading}
-      markdown={
-        team
-          ? json2md([
-              { h1: team.name },
-              { p: team.club.address },
-              team.venue.image
-                ? {
-                    img: {
-                      source: team.venue.image.url,
-                      title: team.venue.name,
-                    },
-                  }
-                : { img: [] },
-            ])
-          : undefined
-      }
+      navigationTitle={`${club.nickname} | Club`}
+      markdown={json2md([
+        { h1: club.name },
+        { p: club.address },
+        venue.image
+          ? {
+              img: {
+                source: venue.image.url,
+                title: venue.name,
+              },
+            }
+          : { img: [] },
+      ])}
       metadata={
-        team && (
-          <Detail.Metadata>
-            <Detail.Metadata.Label
-              title="Year of foundation"
-              text={
-                team.foundation ? format(new Date(team.foundation), "yyyy") : ""
-              }
-            />
+        <Detail.Metadata>
+          <Detail.Metadata.Label
+            title="Year of foundation"
+            text={
+              team.foundation ? format(new Date(team.foundation), "yyyy") : ""
+            }
+          />
 
-            <Detail.Metadata.Label
-              title="President"
-              text={team.club.president}
+          <Detail.Metadata.TagList title="Club Colors">
+            <Detail.Metadata.TagList.Item
+              text={team.color}
+              color={team.color}
             />
+            {team.color_secondary && (
+              <Detail.Metadata.TagList.Item
+                text={team.color_secondary}
+                color={team.color_secondary}
+              />
+            )}
+          </Detail.Metadata.TagList>
 
-            <Detail.Metadata.Label title="Stadium" text={team.venue.name} />
+          <Detail.Metadata.Label title="President" text={club.president} />
+          <Detail.Metadata.Label title="Stadium" text={venue.name} />
+
+          <Detail.Metadata.Link
+            title="Official Website"
+            text={club.web}
+            target={club.web}
+          />
+          <Detail.Metadata.Separator />
+          {club.twitter && (
             <Detail.Metadata.Link
-              title="Official Website"
-              text={team.web}
-              target={team.web}
+              title="Twitter"
+              text={club.twitter}
+              target={`https://twitter.com/${club.twitter.replace("@", "")}`}
             />
-            <Detail.Metadata.Separator />
-            {team.twitter && (
-              <Detail.Metadata.Link
-                title="Twitter"
-                text={team.twitter}
-                target={`https://twitter.com/${team.twitter.replace("@", "")}`}
-              />
-            )}
-            {team.facebook && (
-              <Detail.Metadata.Link
-                title="Facebook"
-                text={team.facebook}
-                target={team.facebook}
-              />
-            )}
-            {team.instagram && (
-              <Detail.Metadata.Link
-                title="Instagram"
-                text={team.instagram}
-                target={team.instagram}
-              />
-            )}
-          </Detail.Metadata>
-        )
+          )}
+          {club.facebook && (
+            <Detail.Metadata.Link
+              title="Facebook"
+              text={club.facebook}
+              target={club.facebook}
+            />
+          )}
+          {club.instagram && (
+            <Detail.Metadata.Link
+              title="Instagram"
+              text={club.instagram}
+              target={club.instagram}
+            />
+          )}
+        </Detail.Metadata>
       }
       actions={
-        team && (
-          <ActionPanel>
-            <Action.OpenInBrowser
-              url={`https://www.laliga.com/en-GB/clubs/${team.slug}`}
-            />
-          </ActionPanel>
-        )
+        <ActionPanel>
+          <Action.OpenInBrowser
+            url={`https://www.laliga.com/en-GB/clubs/${club.slug}`}
+          />
+          <Action.Push
+            title="Squad"
+            icon={Icon.Person}
+            target={<ClubSquad {...club} />}
+          />
+        </ActionPanel>
       }
     />
   );

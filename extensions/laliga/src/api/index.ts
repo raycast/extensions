@@ -3,9 +3,11 @@ import { showToast, Toast } from "@raycast/api";
 import {
   LaLigaClub,
   LaLigaClubs,
+  LaLigaClubSquad,
   LaLigaMatch,
   LaLigaStanding,
   Match,
+  Squad,
   Standing,
   Team,
 } from "../types";
@@ -18,10 +20,12 @@ function showFailureToast() {
   );
 }
 
+const endpoint = "https://apim.laliga.com/public-service/api/v1";
+
 export const getCurrentGameWeek = async (competition: string) => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `https://apim.laliga.com/public-service/api/v1/subscriptions/${competition}/current-gameweek`,
+    url: `${endpoint}/subscriptions/${competition}/current-gameweek`,
     headers: {
       "Ocp-Apim-Subscription-Key": "c13c3a8e2f6b46da9c5c425cf61fab3e",
     },
@@ -41,7 +45,7 @@ export const getCurrentGameWeek = async (competition: string) => {
 export const getTeams = async (season: string): Promise<Team[]> => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `https://apim.laliga.com/public-service/api/v1/teams`,
+    url: `${endpoint}/teams`,
     params: {
       subscriptionSlug: season,
       limit: 99,
@@ -68,7 +72,7 @@ export const getTeams = async (season: string): Promise<Team[]> => {
 export const getTeam = async (team: string) => {
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `https://apim.laliga.com/public-service/api/v1/teams/${team}`,
+    url: `${endpoint}/teams/${team}`,
     headers: {
       "Ocp-Apim-Subscription-Key": "c13c3a8e2f6b46da9c5c425cf61fab3e",
     },
@@ -123,6 +127,34 @@ export const getMatches = async (
     const { data }: AxiosResponse<LaLigaMatch> = await axios(config);
 
     return data.matches;
+  } catch (e) {
+    showFailureToast();
+
+    return [];
+  }
+};
+
+export const getSquad = async (team: string): Promise<Squad[]> => {
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `${endpoint}/teams/${team}/squad-manager`,
+    params: {
+      limit: 50,
+      offset: 0,
+      orderField: "id",
+      orderType: "DESC",
+      seasonYear: "2021",
+    },
+    headers: {
+      "Ocp-Apim-Subscription-Key": "c13c3a8e2f6b46da9c5c425cf61fab3e",
+      "Content-Language": "en",
+    },
+  };
+
+  try {
+    const { data }: AxiosResponse<LaLigaClubSquad> = await axios(config);
+
+    return data.squads;
   } catch (e) {
     showFailureToast();
 
