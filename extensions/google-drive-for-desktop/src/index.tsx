@@ -1,11 +1,47 @@
 import { getPreferenceValues, List } from "@raycast/api";
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
+import { useEffect, useState } from "react";
 
 interface Preferences {
   rootPath: string;
   excludePaths?: string;
 }
+
+interface FileInfo {
+  name: string;
+  path: string;
+}
+
+const getFileInfo = async (rootPath: string, excludePaths: string[]): Promise<FileInfo[]> => {
+  const walk = async (dir: string): Promise<FileInfo[]> => {
+    const files = await fs.readdir(dir);
+    return (
+      await Promise.all(
+        files
+          .filter(file => !file.startsWith("."))
+          .map<Promise<FileInfo[]>>(async (file): Promise<FileInfo[]> => {
+            const filePath = path.join(dir, file);
+
+            if (excludePaths.includes(filePath)) {
+              return [];
+            }
+
+            const stats = await fs.stat(filePath);
+            if (stats.isDirectory()) {
+              return [{ name: file, path: filePath }, ...(await walk(filePath))];
+            }
+            if (stats.isFile()) {
+              return [{ name: file, path: filePath }];
+            }
+            return [];
+          })
+      )
+    ).reduce((prev, files) => [...prev, ...files], []);
+  };
+
+  return walk(rootPath);
+};
 
 export default function SearchGoogleDriveForDesktopFile() {
   const preferences = getPreferenceValues<Preferences>();
@@ -13,11 +49,18 @@ export default function SearchGoogleDriveForDesktopFile() {
   const rootPath = path.resolve(preferences.rootPath);
   const exludePaths = preferences.excludePaths?.split(",").map((p) => path.resolve(p)) ?? [];
 
-  const files = fs.readdirSync(preferences.rootPath, { withFileTypes: true });
+  const [files, setFiles] = useState<FileInfo[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      setFiles(await getFileInfo(rootPath, exludePaths));
+    })();
+  }, [setFiles, rootPath, exludePaths]);
+
   return (
     <List>
       {files.map((file) => (
-        <List.Item key={file.name} title={file.name} />
+        <List.Item key={file.path} title={file.name} subtitle={file.path} icon={{ fileIcon: file.path }} />
       ))}
     </List>
   );
