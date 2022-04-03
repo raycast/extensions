@@ -1,21 +1,44 @@
 import { Form, ActionPanel, Action, Icon, showToast, Toast, Clipboard, open, showHUD } from "@raycast/api";
 import React from "react";
 import { useEffect, useState } from "react";
-import { checkGistFile, createGist, GistFile } from "./util/gist-utils";
+import { checkGistFile, createGist, Gist, GistFile, octokit, updateGist } from "./util/gist-utils";
 import { fetchItemInput, ItemSource } from "./util/input";
 
-export default function CreateShortcut() {
+export default function CreateGist(props: { gist: Gist }) {
+  const gist =
+    typeof props.gist == "undefined"
+      ? {
+          gist_id: "",
+          description: "",
+          html_url: "",
+          file: [],
+        }
+      : props.gist;
+  const isEdit = typeof props.gist != "undefined";
   const [description, setDescription] = useState<string>("");
   const [isPublic, setIsPublic] = useState<boolean>(false);
   const [gistFiles, setGistFiles] = useState<GistFile[]>([]);
 
   useEffect(() => {
     async function _fetchItemInput() {
-      const inputItem = await fetchItemInput();
-      if (inputItem.source === ItemSource.NULL) {
-        await showToast(Toast.Style.Failure, "Nothing is detected from Selected or Clipboard!");
+      if (isEdit) {
+        const _gistFiles: GistFile[] = [];
+        for (const value of gist.file) {
+          const { data } = await octokit.request(`GET ${value.raw_url}`);
+          _gistFiles.push({
+            filename: value.filename,
+            content: data as string,
+          });
+        }
+        setDescription(gist.description);
+        setGistFiles(_gistFiles);
       } else {
-        setGistFiles([...gistFiles, { filename: "", content: inputItem.content }]);
+        const inputItem = await fetchItemInput();
+        if (inputItem.source === ItemSource.NULL) {
+          await showToast(Toast.Style.Failure, "Nothing is detected from Selected or Clipboard!");
+        } else {
+          setGistFiles([...gistFiles, { filename: "", content: inputItem.content }]);
+        }
       }
     }
 
@@ -24,14 +47,15 @@ export default function CreateShortcut() {
 
   return (
     <Form
+      navigationTitle={"Create Gist"}
       actions={
         <ActionPanel>
           <Action
-            title="Create Gist"
+            title={isEdit ? "Update Gist" : "Create Gist"}
             icon={Icon.Upload}
             onAction={async () => {
               try {
-                await showToast(Toast.Style.Animated, "Creating Gist");
+                await showToast(Toast.Style.Animated, isEdit ? "Update Gist" : "Creating Gist");
                 const _isValid = checkGistFile(gistFiles);
                 if (!_isValid.valid) {
                   await showToast(
@@ -44,11 +68,16 @@ export default function CreateShortcut() {
                   gistFiles.forEach((value) => {
                     files[value.filename] = { content: value.content };
                   });
-                  const response = await createGist(description, isPublic, files);
-                  if (response.status === 201) {
+                  let response: any;
+                  if (isEdit) {
+                    response = await updateGist(gist.gist_id, description, files);
+                  } else {
+                    response = await createGist(description, isPublic, files);
+                  }
+                  if (response.status === 201 || response.status === 200) {
                     const options: Toast.Options = {
                       style: Toast.Style.Success,
-                      title: "Create Gist Success",
+                      title: isEdit ? "Update Gist Success" : "Create Gist Success",
                       message: "Click to copy gist link",
                       primaryAction: {
                         title: "Copy Gist Link",
@@ -69,7 +98,7 @@ export default function CreateShortcut() {
                     };
                     await showToast(options);
                   } else {
-                    await showToast(Toast.Style.Success, "Create Gist Failure");
+                    await showToast(Toast.Style.Success, isEdit ? "Update Gist Failure" : "Create Gist Failure");
                   }
                 }
               } catch (e) {
@@ -82,6 +111,18 @@ export default function CreateShortcut() {
             icon={Icon.Document}
             onAction={async () => {
               setGistFiles([...gistFiles, { filename: "", content: "" }]);
+              await showToast(Toast.Style.Success, "Add File Failure");
+            }}
+          />
+          <Action
+            title="Remove File"
+            icon={Icon.Document}
+            shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
+            onAction={async () => {
+              const _gistFiles = [...gistFiles];
+              _gistFiles.pop();
+              setGistFiles(_gistFiles);
+              await showToast(Toast.Style.Success, "Remove File Failure");
             }}
           />
         </ActionPanel>
@@ -91,22 +132,24 @@ export default function CreateShortcut() {
         id={"description"}
         title={"Description"}
         placeholder={"Gist description..."}
-        defaultValue={description}
+        value={description}
         onChange={(newValue) => {
           setDescription(newValue);
         }}
       />
-      <Form.Dropdown
-        id={"visibility"}
-        key={"visibility"}
-        title={"Visibility"}
-        onChange={(newValue) => {
-          setIsPublic(newValue == "true");
-        }}
-      >
-        <Form.Dropdown.Item key={"secret"} title={"Secret"} value={"false"} />
-        <Form.Dropdown.Item key={"public"} title={"Public"} value={"true"} />
-      </Form.Dropdown>
+      {!isEdit && (
+        <Form.Dropdown
+          id={"visibility"}
+          key={"visibility"}
+          title={"Visibility"}
+          onChange={(newValue) => {
+            setIsPublic(newValue == "true");
+          }}
+        >
+          <Form.Dropdown.Item key={"secret"} title={"Secret"} value={"false"} />
+          <Form.Dropdown.Item key={"public"} title={"Public"} value={"true"} />
+        </Form.Dropdown>
+      )}
       {gistFiles.map((gistFile, index, array) => {
         return (
           <React.Fragment key={"file_fragment" + index}>
@@ -114,7 +157,7 @@ export default function CreateShortcut() {
             <Form.TextField
               id={"file_name" + index}
               key={"file_name" + index}
-              title={"Filename"}
+              title={" Filename  " + (index + 1)}
               placeholder={"Filename include extension..."}
               value={array[index].filename}
               onChange={(newValue) => {
@@ -127,7 +170,7 @@ export default function CreateShortcut() {
               id={"file_content" + index}
               key={"file_content" + index}
               value={array[index].content}
-              title={"File Content"}
+              title={"Content"}
               placeholder={"File content can't be empty..."}
               onChange={(newValue) => {
                 const _gistFiles = [...gistFiles];

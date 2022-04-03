@@ -1,4 +1,15 @@
-import { List, ActionPanel, Action, Icon, Clipboard, open, showHUD, showToast, Toast } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  Clipboard,
+  open,
+  showHUD,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   deleteGist,
@@ -11,6 +22,7 @@ import {
   unStarGist,
 } from "./util/gist-utils";
 import { isEmpty, preference } from "./util/utils";
+import CreateGist from "./create-gist";
 
 export default function main() {
   const [route, setRoute] = useState<string>("");
@@ -18,6 +30,7 @@ export default function main() {
   const [rawURL, setRawURL] = useState<string>("");
   const [gistFileContent, setGistFileContent] = useState<string>("");
   const [refresh, setRefresh] = useState<boolean>(false);
+  const { push } = useNavigation();
 
   useEffect(() => {
     async function _fetchBuildInShortcut() {
@@ -151,6 +164,14 @@ export default function main() {
                                       } else {
                                         await showToast(Toast.Style.Failure, "Star Gist Failure");
                                       }
+                                    }}
+                                  />
+                                  <Action
+                                    title={"Edit Gist"}
+                                    icon={Icon.Pencil}
+                                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                                    onAction={async () => {
+                                      push(<CreateGist gist={gistArray[gistIndex]} />);
                                     }}
                                   />
                                   <Action

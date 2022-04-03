@@ -88,6 +88,14 @@ export async function createGist(description: string, isPublic = false, files: {
   });
 }
 
+export async function updateGist(gistId: string, description: string, files: { [p: string]: { content: string } }) {
+  return await octokit.request("PATCH /gists/{gist_id}", {
+    gist_id: gistId,
+    description: description,
+    files: files,
+  });
+}
+
 export function checkGistFile(gistFiles: GistFile[]) {
   const isValid = { valid: true, contentIndex: "" };
   gistFiles.forEach((value, index) => {
