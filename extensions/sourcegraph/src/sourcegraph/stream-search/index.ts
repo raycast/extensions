@@ -55,18 +55,17 @@ export async function performSearch(
     ? new EventSource(requestURL, { headers: { Authorization: `token ${src.token}` } })
     : new EventSource(requestURL);
 
-  return new Promise((resolve, reject) => {
-    // signal cancelling
-    abort.addEventListener("abort", () => {
+  return new Promise((resolve) => {
+    /**
+     * All events that indicate the end of the request should use this to resolve.
+     */
+    const resolveStream = () => {
       stream.close();
       resolve();
-    });
+    };
 
-    // errors from stream
-    stream.addEventListener("error", (error) => {
-      stream.close();
-      reject(`${JSON.stringify(error)}`);
-    });
+    // signal cancelling
+    abort.addEventListener("abort", resolveStream);
 
     // matches from the Sourcegraph API
     stream.addEventListener("matches", (message) => {
@@ -118,6 +117,18 @@ export async function performSearch(
           }),
         false
       );
+    });
+
+    // errors from stream
+    stream.addEventListener("error", (message) => {
+      const event: SearchEvent = {
+        type: "error",
+        data: message.data ? JSON.parse(message.data) : {},
+      };
+      handlers.onAlert({
+        title: event.data.name ? event.data.name : event.data.message,
+        description: event.data.name ? event.data.message : undefined,
+      });
     });
 
     // alerts from the Sourcegraph API
@@ -172,9 +183,6 @@ export async function performSearch(
     });
 
     // done indicator
-    stream.addEventListener("done", () => {
-      stream.close();
-      resolve();
-    });
+    stream.addEventListener("done", resolveStream);
   });
 }
