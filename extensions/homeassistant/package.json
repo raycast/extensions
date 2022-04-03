@@ -141,7 +141,14 @@
       "name": "switches",
       "title": "Switches",
       "subtitle": "Home Assistant",
-      "description": "Get/Set states of Home Assistant switches",
+      "description": "Get/Set states of Home Assistant Switches",
+      "mode": "view"
+    },
+    {
+      "name": "helpers",
+      "title": "Helpers",
+      "subtitle": "Home Assistant",
+      "description": "Get/Set states of Home Assistant Helpers",
       "mode": "view"
     }
   ],
