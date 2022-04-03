@@ -1,4 +1,4 @@
-import { Icon, Color, Action } from "@raycast/api";
+import { Color, Action } from "@raycast/api";
 import { ha } from "../common";
 import { State } from "../haapi";
 
