@@ -6,6 +6,7 @@ export interface DirectoryInfo {
   type: DirectoryType;
   valid: boolean;
   rank: number;
+  isCommon: boolean;
 }
 
 export enum DirectoryType {

@@ -14,14 +14,16 @@ import {
 import { DirectoryInfo, DirectoryType, SortBy } from "./directory-info";
 import React, { useEffect, useState } from "react";
 import AddDirectory from "./add-directory";
-import { checkPathValid, preferences } from "./utils";
+import { checkPathValid, getOpenFinderWindowPath, preferences } from "./utils";
+import { runAppleScript } from "run-applescript";
 
 export default function CommonDirectory() {
   const [searchValue, setSearchValue] = useState<string>("");
   const [commonDirectory, setCommonDirectory] = useState<DirectoryInfo[]>([]);
+  const [openDirectory, setOpenDirectory] = useState<DirectoryInfo[]>([]);
   const [updateList, setUpdateList] = useState<number[]>([0]);
   const [loading, setLoading] = useState<boolean>(true);
-  const { sortBy } = preferences();
+  const { sortBy, showOpenDirectory } = preferences();
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -39,6 +41,7 @@ export default function CommonDirectory() {
       }
       setCommonDirectory(_commonDirectory);
       setLoading(false);
+      if (showOpenDirectory) setOpenDirectory(await getOpenFinderWindowPath());
     }
 
     _fetchLocalStorage().then();
@@ -69,22 +72,41 @@ export default function CommonDirectory() {
           }
         />
       ) : (
-        commonDirectory.map((directory, index) => {
-          if (
-            directory.alias.toLowerCase().includes(searchValue.toLowerCase()) ||
-            directory.name.toLowerCase().includes(searchValue.toLowerCase())
-          )
-            return (
-              <DirectoryItem
-                key={directory.id}
-                directory={directory}
-                setCommonDirectory={setCommonDirectory}
-                index={index}
-                commonDirectory={commonDirectory}
-                updateListUseState={[updateList, setUpdateList]}
-              />
-            );
-        })
+        <>
+          <List.Section title={"Common Directory"}>
+            {commonDirectory.map((directory, index) => {
+              if (
+                directory.alias.toLowerCase().includes(searchValue.toLowerCase()) ||
+                directory.name.toLowerCase().includes(searchValue.toLowerCase())
+              )
+                return (
+                  <DirectoryItem
+                    key={directory.id}
+                    directory={directory}
+                    setCommonDirectory={setCommonDirectory}
+                    index={index}
+                    commonDirectory={commonDirectory}
+                    updateListUseState={[updateList, setUpdateList]}
+                  />
+                );
+            })}
+          </List.Section>
+          <List.Section title={"Open Directory"}>
+            {openDirectory.map((directory, index) => {
+              if (directory.name.toLowerCase().includes(searchValue.toLowerCase()))
+                return (
+                  <DirectoryItem
+                    key={directory.id}
+                    directory={directory}
+                    setCommonDirectory={setCommonDirectory}
+                    index={index}
+                    commonDirectory={openDirectory}
+                    updateListUseState={[updateList, setUpdateList]}
+                  />
+                );
+            })}
+          </List.Section>
+        </>
       )}
     </List>
   );
@@ -117,21 +139,26 @@ function DirectoryItem(props: {
             icon={Icon.Finder}
             onAction={async () => {
               try {
-                const pathValid = await checkPathValid(directory.path);
-                let _commonDirectory = [...commonDirectory];
-                if (pathValid) {
+                if (directory.isCommon) {
+                  const pathValid = await checkPathValid(directory.path);
+                  let _commonDirectory = [...commonDirectory];
+                  if (pathValid) {
+                    await open(directory.path);
+                    await showHUD("Reveal in Finder");
+                    _commonDirectory[index].valid = true;
+                    if (sortBy === SortBy.Rank) {
+                      _commonDirectory = await upRank([..._commonDirectory], index);
+                    }
+                  } else {
+                    await showToast(Toast.Style.Failure, "Path has expired.");
+                    _commonDirectory[index].valid = false;
+                  }
+                  setCommonDirectory(_commonDirectory);
+                  await LocalStorage.setItem(DirectoryType.DIRECTORY, JSON.stringify(_commonDirectory));
+                } else {
                   await open(directory.path);
                   await showHUD("Reveal in Finder");
-                  _commonDirectory[index].valid = true;
-                  if (sortBy === SortBy.Rank) {
-                    _commonDirectory = await upRank([..._commonDirectory], index);
-                  }
-                } else {
-                  await showToast(Toast.Style.Failure, "Path has expired.");
-                  _commonDirectory[index].valid = false;
                 }
-                setCommonDirectory(_commonDirectory);
-                await LocalStorage.setItem(DirectoryType.DIRECTORY, JSON.stringify(_commonDirectory));
               } catch (e) {
                 await showToast(Toast.Style.Failure, "Path has expired." + String(e));
               }
@@ -153,35 +180,39 @@ function DirectoryItem(props: {
               push(<AddDirectory updateListUseState={[updateList, setUpdateList]} />);
             }}
           />
-          <Action
-            title={"Remove Directory"}
-            icon={Icon.Trash}
-            shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
-            onAction={async () => {
-              const _commonDirectory = [...commonDirectory];
-              _commonDirectory.splice(index, 1);
-              setCommonDirectory(_commonDirectory);
-              await LocalStorage.setItem(DirectoryType.DIRECTORY, JSON.stringify(_commonDirectory));
-              await showToast(Toast.Style.Success, "Remove success!");
-            }}
-          />
-          <Action
-            title={"Rest All Rank"}
-            icon={Icon.ArrowClockwise}
-            shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
-            onAction={async () => {
-              const _commonDirectory = [...commonDirectory];
-              _commonDirectory.forEach((directory) => {
-                directory.rank = 1;
-              });
-              _commonDirectory.sort(function (a, b) {
-                return b.name.toUpperCase() < a.name.toUpperCase() ? 1 : -1;
-              });
-              setCommonDirectory(_commonDirectory);
-              await LocalStorage.setItem(DirectoryType.DIRECTORY, JSON.stringify(_commonDirectory));
-              await showToast(Toast.Style.Success, "Reset success!");
-            }}
-          />
+          {directory.isCommon && (
+            <>
+              <Action
+                title={"Remove Directory"}
+                icon={Icon.Trash}
+                shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
+                onAction={async () => {
+                  const _commonDirectory = [...commonDirectory];
+                  _commonDirectory.splice(index, 1);
+                  setCommonDirectory(_commonDirectory);
+                  await LocalStorage.setItem(DirectoryType.DIRECTORY, JSON.stringify(_commonDirectory));
+                  await showToast(Toast.Style.Success, "Remove success!");
+                }}
+              />
+              <Action
+                title={"Rest All Rank"}
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
+                onAction={async () => {
+                  const _commonDirectory = [...commonDirectory];
+                  _commonDirectory.forEach((directory) => {
+                    directory.rank = 1;
+                  });
+                  _commonDirectory.sort(function (a, b) {
+                    return b.name.toUpperCase() < a.name.toUpperCase() ? 1 : -1;
+                  });
+                  setCommonDirectory(_commonDirectory);
+                  await LocalStorage.setItem(DirectoryType.DIRECTORY, JSON.stringify(_commonDirectory));
+                  await showToast(Toast.Style.Success, "Reset success!");
+                }}
+              />
+            </>
+          )}
         </ActionPanel>
       }
     />

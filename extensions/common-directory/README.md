@@ -11,6 +11,8 @@ Quick access to frequently used folder directories
 
 **Preference**
 
+- **More Directory**: Show more directories
+  - [x] Open Directory: Directory of currently open Finder folders
 - **Sort By**: Commonly used directory sorting methods
   - Rank: Sorted by usage frequency
   - Name Up: According to the name ascending order

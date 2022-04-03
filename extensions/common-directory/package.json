@@ -19,10 +19,19 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "showOpenDirectory",
+          "type": "checkbox",
+          "required": false,
+          "title": "More Directory",
+          "label": "Open Directory",
+          "description": "There is some delay when fetching Open Directory.",
+          "default": true
+        },
+        {
           "name": "SortBy",
           "type": "dropdown",
           "required": false,
-          "title": "Sort by",
+          "title": "Directory Sort by",
           "description": "Directory sorting method (default: Rank).",
           "default": "Rank",
           "data": [

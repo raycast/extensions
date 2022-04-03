@@ -1,7 +1,14 @@
 import { Action, ActionPanel, Form, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
 import { DirectoryInfo, DirectoryType } from "./directory-info";
 import React, { useEffect, useState } from "react";
-import { checkPathValid, getDirectoryName, getFinderPath, getSelectedDirectory, isDirectoryOrFile } from "./utils";
+import {
+  checkPathValid,
+  getChooseFolder,
+  getDirectoryName,
+  getFinderInsertLocation,
+  getSelectedDirectory,
+  isDirectoryOrFile,
+} from "./utils";
 
 export default function AddDirectory(props: {
   updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
@@ -21,11 +28,11 @@ export default function AddDirectory(props: {
   }, []);
 
   useEffect(() => {
-    async function _SetName() {
+    async function _setName() {
       setName(getDirectoryName(path));
     }
 
-    _SetName().then();
+    _setName().then();
   }, [path]);
 
   return (
@@ -50,6 +57,17 @@ export default function AddDirectory(props: {
               await fetchDirectoryPath(setPath);
             }}
           />
+          <Action
+            title={"Choose Directory"}
+            icon={Icon.Sidebar}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            onAction={() => {
+              getChooseFolder().then((path) => {
+                console.debug(`Selected Directory: ${path}`);
+                setPath(path);
+              });
+            }}
+          />
         </ActionPanel>
       }
     >
@@ -63,7 +81,7 @@ export default function AddDirectory(props: {
 async function fetchDirectoryPath(setPath: React.Dispatch<React.SetStateAction<string>>) {
   await showToast(Toast.Style.Animated, "Fetching path...");
   const selectedDirectory = await getSelectedDirectory();
-  setPath(selectedDirectory.length === 0 ? await getFinderPath() : selectedDirectory[0].slice(0, -1));
+  setPath(selectedDirectory.length === 0 ? await getFinderInsertLocation() : selectedDirectory[0].slice(0, -1));
   await showToast(Toast.Style.Success, "Fetch path success!");
 }
 
@@ -95,6 +113,7 @@ async function addDirectory(alias: string, path: string) {
           valid: true,
           type: _type,
           rank: 1,
+          isCommon: true,
         });
         await LocalStorage.setItem(_type, JSON.stringify(_commonDirectory));
         await showToast(Toast.Style.Success, `Add ${_type} success!`);
