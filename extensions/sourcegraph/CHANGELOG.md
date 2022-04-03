@@ -1,16 +1,16 @@
 # Changelog
 
-## [Batch Changes, revamped previews, and refined behaviour](https://github.com/raycast/extensions/pull/1228) - 2022-03-27
+## [Batch Changes, revamped previews, and refined behaviour](https://github.com/raycast/extensions/pull/1228) - 2022-04-03
 
 - **batch-changes**: "Manage Batch Changes" is a new command that allows you to browse, view, publish, merge, and retry changesets for [Sourcegraph Batch Changes](https://about.sourcegraph.com/batch-changes)! This is only supported on Sourcegraph Self-Hosted. ([#11](https://github.com/bobheadxi/raycast-sourcegraph/pull/11), [#13](https://github.com/bobheadxi/raycast-sourcegraph/pull/13))
+- **search**, **notebooks**: The default action on results is now to always open a preview in Raycast, rather than opening in browser directly, for consistency. Previously, results with single matches would open in the browser directly.
 - **search**: Search results now have a new drilldown action to query within the result's repository or file using the `Cmd-S` shortcut. For example, on a repository result, `Cmd-S` will start a search with the `repo:` filter.
-- **search**: Some search result types now leverage metadata details.
-- **notebooks**: Notebook view now leverage metadata details and support the new Symbol block type.
-- **search**, **notebooks**: The default action on results is now to always open a preview in Raycast, rather than opening in browser directly, for consistency.
 - **search**: The default context is now explicitly pre-populated in the search bar, instead of being implicit.
-- **search**: Potential fix for issue with connecting to self-hosted Sourcegraph instances. ([raycast/extensions#1126](https://github.com/raycast/extensions/issues/1126))
 - **search**: You can now apply suggestions directly with an action.
 - **search**: Path result previews (e.g. from `type:path` or `select:path`) now render a preview for certain file types (currently only Markdown and Golang).
+- **search**: Some search result types now leverage metadata details.
+- **search**: Potential fix for issue with connecting to self-hosted Sourcegraph instances. ([raycast/extensions#1126](https://github.com/raycast/extensions/issues/1126))
+- **notebooks**: Notebook view now leverage metadata details and support the new Symbol block type.
 - **prefs**: Fixed issue with self-hosted instance URLs that have trailing slashes. ([#12](https://github.com/bobheadxi/raycast-sourcegraph/pull/12))
 
 ## [Bug fixes](https://github.com/raycast/extensions/pull/919) - 2022-02-15
