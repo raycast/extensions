@@ -15,18 +15,21 @@
    oauth_config:
      scopes:
        user:
+         # Command: Search & Unread Messages & Set Presence
+         - users:read
+
          # Command: Search & Unread Messages
          - channels:read
          - groups:read
          - im:read
          - mpim:read
-         - users:read
 
          # Command: Unread Messages
          - channels:history
          - groups:history
          - im:history
          - mpim:history
+
          # Command: Unread Messages (optional - needed for marking conversations as read)
          - channels:write
          - groups:write
@@ -34,7 +37,6 @@
          - mpim:write
 
          # Command: Set Presence
-         - users:read
          - users:write
 
          # Command: Set Snooze
