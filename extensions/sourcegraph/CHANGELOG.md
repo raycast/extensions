@@ -7,7 +7,7 @@
 - **search**: Search results now have a new drilldown action to query within the result's repository or file using the `Cmd-S` shortcut. For example, on a repository result, `Cmd-S` will start a search with the `repo:` filter.
 - **search**: The default context is now explicitly pre-populated in the search bar, instead of being implicit.
 - **search**: You can now apply suggestions directly with an action.
-- **search**: Path result previews (e.g. from `type:path` or `select:file`) now render a preview for certain file types.
+- **search**: Path result previews (e.g. from `type:path` or `select:file`) now render a preview of the file contents.
 - **search**: Repo result previews (e.g. from `repo:` or `type:repo`) now render the repository's `README.md`.
 - **search**: Some search result types now leverage metadata details.
 - **search**: Potential fix for issue with connecting to self-hosted Sourcegraph instances. ([raycast/extensions#1126](https://github.com/raycast/extensions/issues/1126))

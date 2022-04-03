@@ -140,8 +140,10 @@ export const GET_CHANGESETS = gql`
 
 export const BLOB_CONTENTS = gql`
   fragment BlobContents on GitBlob {
+    path
     content
     binary
+    byteSize
   }
 `;
 

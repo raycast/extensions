@@ -262,8 +262,10 @@ export interface GetChangesetsVariables {
 // ====================================================
 
 export interface GetFileContents_repository_commit_blob {
+  path: string; // The full path (relative to the repository root) of this blob.
   content: string; // The content of this blob.
   binary: boolean; // Whether or not it is binary.
+  byteSize: number; // The file size in bytes.
 }
 
 export interface GetFileContents_repository_commit {
@@ -448,8 +450,10 @@ export type ChangesetFields = ChangesetFields_HiddenExternalChangeset | Changese
 // ====================================================
 
 export interface BlobContents {
+  path: string; // The full path (relative to the repository root) of this blob.
   content: string; // The content of this blob.
   binary: boolean; // Whether or not it is binary.
+  byteSize: number; // The file size in bytes.
 }
 
 /* tslint:disable */

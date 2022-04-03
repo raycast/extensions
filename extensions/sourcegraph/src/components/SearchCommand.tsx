@@ -11,7 +11,7 @@ import ExpandableErrorToast from "./ExpandableErrorToast";
 import { copyShortcut, drilldownShortcut, tertiaryActionShortcut } from "./shortcuts";
 import { useLazyQuery } from "@apollo/client";
 import { GET_FILE_CONTENTS } from "../sourcegraph/gql/queries";
-import { GetFileContents, GetFileContentsVariables } from "../sourcegraph/gql/schema";
+import { BlobContents, GetFileContents, GetFileContentsVariables } from "../sourcegraph/gql/schema";
 import { bold, codeBlock, quoteBlock } from "../markdown";
 
 /**
@@ -314,6 +314,29 @@ function MultiResultView({ searchResult }: { searchResult: { url: string; match:
   }
 }
 
+/**
+ * Safely render the given blob as Markdown content.
+ */
+function renderBlob(blob: BlobContents | null | undefined): string {
+  if (!blob) {
+    return quoteBlock("Blob not found");
+  }
+  if (blob.binary) {
+    return quoteBlock("File preview is not yet supported for binary files.");
+  }
+
+  if (blob.content) {
+    const blobSizeKB = blob.byteSize / 1024;
+    if (blobSizeKB > 50) {
+      return quoteBlock(`File too large to render (${blobSizeKB}KB)`);
+    } else {
+      return blob.path.endsWith(".md") ? blob.content : codeBlock(blob.content);
+    }
+  }
+
+  return quoteBlock("No content found");
+}
+
 function ResultView({
   src,
   searchResult,
@@ -323,9 +346,12 @@ function ResultView({
   searchResult: SearchResult;
   icon: Image.ImageLike;
 }) {
+  const [getFileContents, fileContents] = useLazyQuery<GetFileContents, GetFileContentsVariables>(GET_FILE_CONTENTS, {
+    client: src.client,
+  });
+
   const { match } = searchResult;
   const navigationTitle = `View ${match.type} result`;
-
   const markdownTitle = bold(match.repository);
   let markdownContent = "";
   const metadata: React.ReactNode[] = [
@@ -339,10 +365,6 @@ function ResultView({
       key={nanoid()}
     />,
   ];
-
-  const [getFileContents, fileContents] = useLazyQuery<GetFileContents, GetFileContentsVariables>(GET_FILE_CONTENTS, {
-    client: src.client,
-  });
 
   switch (match.type) {
     // Match types that have multi result view
@@ -367,42 +389,24 @@ function ResultView({
           },
         });
       } else if (fileContents.data) {
-        const content = fileContents.data.repository?.commit?.blob?.content;
-        if (content) {
-          markdownContent += `\n\n---\n\n${content}`;
-        }
+        const blob = fileContents.data.repository?.commit?.blob;
+        markdownContent += `\n\n---\n\n${renderBlob(blob)}`;
       }
       break;
 
     case "path":
       markdownContent = `${codeBlock(match.path)}\n\n---\n\n`;
       if (!fileContents.called) {
-        // TODO: Certain langauges/file seem to contain characters that don't play with
-        // well with the markdown renderer. For now just allowlist a few ones that seem
-        // okay, and investigate what it might take to do proper escaping.
-        const allowedExtensions = [".md", ".go", ".sh", ".yaml", ".yml", ".json"];
-        if (allowedExtensions.filter((ext) => match.path.endsWith(ext)).length > 0) {
-          getFileContents({
-            variables: {
-              repo: match.repository,
-              rev: match.commit || "",
-              path: match.path,
-            },
-          });
-        } else {
-          markdownContent += quoteBlock(`File preview is not yet supported for this file type.`);
-        }
+        getFileContents({
+          variables: {
+            repo: match.repository,
+            rev: match.commit || "",
+            path: match.path,
+          },
+        });
       } else if (fileContents.data) {
         const blob = fileContents.data.repository?.commit?.blob;
-        if (!blob) {
-          markdownContent += quoteBlock("Blob not found");
-        } else if (blob.binary) {
-          markdownContent += quoteBlock(`File preview is not yet supported for this file type.`);
-        } else if (blob.content) {
-          markdownContent += match.path.endsWith(".md") ? blob?.content : codeBlock(blob?.content);
-        } else {
-          markdownContent += quoteBlock("No content found");
-        }
+        markdownContent += renderBlob(blob);
       } else if (fileContents.error) {
         markdownContent += quoteBlock(`Failed to fetch file: ${fileContents.error}`);
       }
