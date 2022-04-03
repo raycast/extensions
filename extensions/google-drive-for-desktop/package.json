@@ -3,7 +3,7 @@
   "name": "google-drive-for-desktop",
   "title": "google-drive-for-desktop",
   "description": "",
-  "icon": "command-icon.png",
+  "icon": "google-drive-for-desktop.png",
   "author": "nametake",
   "license": "MIT",
   "commands": [
