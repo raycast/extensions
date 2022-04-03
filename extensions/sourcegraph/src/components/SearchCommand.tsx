@@ -4,7 +4,7 @@ import { nanoid } from "nanoid";
 import { DateTime } from "luxon";
 
 import { Sourcegraph, instanceName, newURL } from "../sourcegraph";
-import { performSearch, SearchResult, Suggestion } from "../sourcegraph/stream-search";
+import { PatternType, performSearch, SearchResult, Suggestion } from "../sourcegraph/stream-search";
 import { ContentMatch, SymbolMatch } from "../sourcegraph/stream-search/stream";
 import { ColorDefault, ColorEmphasis, ColorPrivate } from "./colors";
 import ExpandableErrorToast from "./ExpandableErrorToast";
@@ -19,10 +19,17 @@ import { bold, codeBlock, quoteBlock } from "../markdown";
  */
 export default function SearchCommand({ src }: { src: Sourcegraph }) {
   const [searchText, setSearchText] = useState(src.defaultContext ? `context:${src.defaultContext} ` : "");
+  const [patternType, setPatternType] = useState<PatternType | undefined>(
+    src.featureFlags.searchPatternDropdown ? undefined : "literal"
+  );
+
   const { state, search } = useSearch(src);
   useEffect(() => {
-    search(searchText);
-  }, [searchText]);
+    if (patternType) {
+      search(searchText, patternType);
+    }
+  }, [searchText, patternType]);
+
   const srcName = instanceName(src);
   return (
     <List
@@ -31,6 +38,9 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
       searchText={searchText}
       searchBarPlaceholder={`Search ${srcName} (e.g. 'fmt.Sprintf lang:go')`}
       throttle
+      searchBarAccessory={
+        src.featureFlags.searchPatternDropdown ? <SearchDropdown setPatternType={setPatternType} /> : undefined
+      }
     >
       {/* show suggestions IFF no results */}
       {!state.isLoading && state.results.length === 0 ? (
@@ -56,7 +66,7 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
             />
             <List.Item
               title="View search query syntax reference"
-              icon={{ source: Icon.Globe }}
+              icon={{ source: Icon.QuestionMark }}
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser url={newURL(src, "/help/code_search/reference/queries")} />
@@ -82,6 +92,38 @@ export default function SearchCommand({ src }: { src: Sourcegraph }) {
         ))}
       </List.Section>
     </List>
+  );
+}
+
+/**
+ * Dropdown, currently for pattern type. I'm a bit torn on whether to place contexts or
+ * pattern type here, and the dropdown element itself is quite wide, so this is behind
+ * a feature flag for now.
+ */
+function SearchDropdown({ setPatternType }: { setPatternType: (pt: PatternType) => void }) {
+  const patternTypes: { type: PatternType; name: string; icon: Image.ImageLike }[] = [
+    {
+      type: "literal",
+      name: "Literal search",
+      icon: Icon.Bubble,
+    },
+    {
+      type: "regexp",
+      name: "Regular expression search",
+      icon: Icon.Dot,
+    },
+    {
+      type: "structural",
+      name: "Structural search",
+      icon: Icon.Terminal,
+    },
+  ];
+  return (
+    <List.Dropdown tooltip="Search pattern syntax" onChange={(v) => setPatternType(v as PatternType)} storeValue>
+      {patternTypes.map((pt) => (
+        <List.Dropdown.Item key={pt.type} title={pt.name} value={pt.type} icon={pt.icon} />
+      ))}
+    </List.Dropdown>
   );
 }
 
@@ -115,13 +157,19 @@ function getQueryURL(src: Sourcegraph, query: string) {
   return newURL(src, "/search", new URLSearchParams({ q: query }));
 }
 
+// https://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript
+// adjusted to remove the forward slash ('/') escape, because it seems we don't need it
+const regexpRe = /[-\\^$*+?.()|[\]{}]/g;
+
+function escapeRegexp(text: string) {
+  return text.replace(regexpRe, "\\$&");
+}
+
 function makeDrilldownAction(
   name: string,
   setSearchText: (text: string) => void,
   opts: { repo?: string; revision?: string; file?: string }
 ) {
-  const escapeRegexp = (text: string) => text.replace(".", "\\.");
-
   const clauses: string[] = [];
   if (opts.repo) {
     let repoQuery = `r:^${escapeRegexp(opts.repo)}$`;
@@ -508,7 +556,7 @@ function useSearch(src: Sourcegraph) {
   const cancelRef = useRef<AbortController | null>(null);
   const { push } = useNavigation();
 
-  async function search(searchText: string) {
+  async function search(searchText: string, pattern: PatternType) {
     cancelRef.current?.abort();
     cancelRef.current = new AbortController();
 
@@ -520,7 +568,7 @@ function useSearch(src: Sourcegraph) {
         summary: null,
         isLoading: true,
       }));
-      await performSearch(cancelRef.current.signal, src, searchText, {
+      await performSearch(cancelRef.current.signal, src, searchText, pattern, {
         onResults: (results) => {
           setState((oldState) => ({
             ...oldState,

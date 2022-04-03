@@ -40,6 +40,15 @@
       "description": "Required to use the Sourcegraph Self-Hosted commands - available under 'Profile' -> 'Access token' on the Sourcegraph instance",
       "required": false,
       "type": "password"
+    },
+    {
+      "name": "featureSearchPatternDropdown",
+      "title": "Experimental features",
+      "label": "Search pattern dropdown",
+      "description": "Enable the search pattern dropdown in the search command.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
     }
   ],
   "commands": [

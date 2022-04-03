@@ -10,6 +10,7 @@
 - **search**: Path result previews (e.g. from `type:path` or `select:file`) now render a preview of the file contents.
 - **search**: Repo result previews (e.g. from `repo:` or `type:repo`) now render the repository's `README.md`.
 - **search**: Some search result types now leverage metadata details.
+- **search**: An experimental dropdown for selecting the search pattern type to use can now be enabled under the extension preferences.
 - **search**: Potential fix for issue with connecting to self-hosted Sourcegraph instances. ([raycast/extensions#1126](https://github.com/raycast/extensions/issues/1126))
 - **notebooks**: Notebook view now leverage metadata details and support the new Symbol block type.
 - **prefs**: Fixed issue with self-hosted instance URLs that have trailing slashes. ([#12](https://github.com/bobheadxi/raycast-sourcegraph/pull/12))

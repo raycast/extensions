@@ -19,6 +19,11 @@ export interface Sourcegraph {
    * Client for executing GraphQL requests with.
    */
   client: ApolloClient<NormalizedCacheObject>;
+
+  /**
+   * Feature flags for the extension.
+   */
+  featureFlags: ExtensionFeatureFlags;
 }
 
 const cloudURL = "https://sourcegraph.com";
@@ -49,6 +54,10 @@ interface Preferences {
   customInstance?: string;
   customInstanceToken?: string;
   customInstanceDefaultContext?: string;
+
+  // Feature flags
+
+  featureSearchPatternDropdown?: boolean;
 }
 
 /**
@@ -64,6 +73,7 @@ export function sourcegraphCloud(): Sourcegraph {
     ...connect,
     defaultContext: prefs.cloudDefaultContext,
     client: newApolloClient(connect),
+    featureFlags: newFeatureFlags(prefs),
   };
 }
 
@@ -83,6 +93,7 @@ export function sourcegraphSelfHosted(): Sourcegraph | null {
     ...connect,
     defaultContext: prefs.customInstanceDefaultContext,
     client: newApolloClient(connect),
+    featureFlags: newFeatureFlags(prefs),
   };
 }
 
@@ -97,4 +108,14 @@ export function newURL(src: Sourcegraph, path: string, params?: URLSearchParams)
     parsed.searchParams.set(k, v);
   });
   return parsed.toString();
+}
+
+interface ExtensionFeatureFlags {
+  searchPatternDropdown: boolean;
+}
+
+function newFeatureFlags(prefs: Preferences): ExtensionFeatureFlags {
+  return {
+    searchPatternDropdown: !!prefs.featureSearchPatternDropdown,
+  };
 }

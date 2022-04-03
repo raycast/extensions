@@ -16,7 +16,7 @@ export default function SelfHostedCommand({ Command }: { Command: React.Function
     <ActionPanel>
       <Action.OpenInBrowser
         title="Open Setup Guide"
-        icon={Icon.Globe}
+        icon={Icon.QuestionMark}
         url="https://github.com/raycast/extensions/tree/main/extensions/sourcegraph#setup"
       />
     </ActionPanel>

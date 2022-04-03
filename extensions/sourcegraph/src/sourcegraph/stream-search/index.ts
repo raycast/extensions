@@ -31,10 +31,13 @@ export interface SearchHandlers {
   onProgress: (progress: Progress) => void;
 }
 
+export type PatternType = "literal" | "regexp" | "structural";
+
 export async function performSearch(
   abort: AbortSignal,
   src: Sourcegraph,
   query: string,
+  patternType: PatternType,
   handlers: SearchHandlers
 ): Promise<void> {
   if (query.length === 0) {
@@ -44,10 +47,7 @@ export async function performSearch(
   const parameters = new URLSearchParams([
     ["q", query],
     ["v", "V2"],
-    ["t", "literal"],
-    // ["dl", "0"],
-    // ['dk', (decorationKinds || ['html']).join('|')],
-    // ['dc', (decorationContextLines || '1').toString()],
+    ["t", patternType],
     ["display", "1500"],
   ]);
   const requestURL = newURL(src, "/.api/search/stream", parameters);
