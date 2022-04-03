@@ -358,6 +358,20 @@ function ResultView({
       metadata.push(
         <Detail.Metadata.Label title="Visibility" text={match.private ? "Private" : "Public"} key={nanoid()} />
       );
+      if (!fileContents.called) {
+        getFileContents({
+          variables: {
+            repo: match.repository,
+            rev: match.branches?.[0] || "",
+            path: "README.md",
+          },
+        });
+      } else if (fileContents.data) {
+        const content = fileContents.data.repository?.commit?.blob?.content;
+        if (content) {
+          markdownContent += `\n\n---\n\n${content}`;
+        }
+      }
       break;
 
     case "path":
@@ -378,22 +392,19 @@ function ResultView({
         } else {
           markdownContent += quoteBlock(`File preview is not yet supported for this file type.`);
         }
-      } else if (!fileContents.loading) {
-        if (fileContents.data) {
-          const blob = fileContents.data.repository?.commit?.blob;
-          if (!blob) {
-            markdownContent += quoteBlock("Blob not found");
-          } else if (blob.binary) {
-            markdownContent += quoteBlock(`File preview is not yet supported for this file type.`);
-          } else if (blob.content) {
-            markdownContent += match.path.endsWith(".md") ? blob?.content : codeBlock(blob?.content);
-          } else {
-            markdownContent += quoteBlock("No content found");
-          }
+      } else if (fileContents.data) {
+        const blob = fileContents.data.repository?.commit?.blob;
+        if (!blob) {
+          markdownContent += quoteBlock("Blob not found");
+        } else if (blob.binary) {
+          markdownContent += quoteBlock(`File preview is not yet supported for this file type.`);
+        } else if (blob.content) {
+          markdownContent += match.path.endsWith(".md") ? blob?.content : codeBlock(blob?.content);
+        } else {
+          markdownContent += quoteBlock("No content found");
         }
-        if (fileContents.error) {
-          markdownContent += quoteBlock(`Failed to fetch file: ${fileContents.error}`);
-        }
+      } else if (fileContents.error) {
+        markdownContent += quoteBlock(`Failed to fetch file: ${fileContents.error}`);
       }
       break;
 
