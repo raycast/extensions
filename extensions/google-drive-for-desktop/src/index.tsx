@@ -1,4 +1,4 @@
-import { getPreferenceValues, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import fs from "fs/promises";
 import path from "path";
 import { useEffect, useState } from "react";
@@ -19,7 +19,7 @@ const getFileInfo = async (rootPath: string, excludePaths: string[]): Promise<Fi
     return (
       await Promise.all(
         files
-          .filter(file => !file.startsWith("."))
+          .filter((file) => !file.startsWith("."))
           .map<Promise<FileInfo[]>>(async (file): Promise<FileInfo[]> => {
             const filePath = path.join(dir, file);
 
@@ -60,7 +60,22 @@ export default function SearchGoogleDriveForDesktopFile() {
   return (
     <List>
       {files.map((file) => (
-        <List.Item key={file.path} title={file.name} subtitle={file.path} icon={{ fileIcon: file.path }} />
+        <List.Item
+          key={file.path}
+          title={file.name}
+          subtitle={file.path}
+          icon={{ fileIcon: file.path }}
+          actions={
+            <ActionPanel>
+              <Action.ShowInFinder path={file.path} />
+              <Action.CopyToClipboard
+                title="Copy Directory Path"
+                content={`${file.path}/`}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              />
+            </ActionPanel>
+          }
+        />
       ))}
     </List>
   );
