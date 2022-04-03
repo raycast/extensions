@@ -10,6 +10,7 @@ interface Item {
 
 export interface User extends Item {
   username: string;
+  conversationId: string | undefined;
 }
 
 export type Channel = Item;
@@ -46,6 +47,11 @@ export const onApiError = async (props?: { exitExtension: boolean }): Promise<vo
 export class SlackClient {
   public static async getUsers(): Promise<User[]> {
     const userList = await slackWebClient.users.list();
+    const conversations = await slackWebClient.conversations.list({
+      exclude_archived: true,
+      types: "im",
+      limit: 1000,
+    });
 
     const users =
       userList.members
@@ -61,12 +67,15 @@ export class SlackClient {
             (x): x is string => !!x?.trim()
           );
 
+          const conversation = conversations.channels?.find((c) => c.user === id);
+
           return {
             id,
             name: displayName,
             icon: profile?.image_24,
             teamId: team_id,
             username,
+            conversationId: conversation?.id,
           };
         })
         .filter((i): i is User => (i.id && i.id.trim() && i.name?.trim() && i.teamId?.trim() ? true : false))

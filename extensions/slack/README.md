@@ -18,11 +18,12 @@
           # Command: Search
           - channels:read
           - groups:read
+          - im:read
           - mpim:read
           - users:read
 
           # Command: Set Presence
-          - users.profile:read
+          - users:read
           - users:write
 
           # Command: Set Snooze
