@@ -30,13 +30,13 @@ export default function Command() {
 function UnreadMessagesOverview() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>();
 
-  const { data: users } = useUsers();
-  const { data: channels } = useChannels();
-  const { data: groups } = useGroups();
+  const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
+  const { data: channels, error: channelsError, isValidating: isValidatingChannels } = useChannels();
+  const { data: groups, error: groupsError, isValidating: isValidatingGroups } = useGroups();
   const {
     data: unreadConversations,
     error: unreadConversationsError,
-    isValidating,
+    isValidating: isValidatingUnreadConversations,
     mutate,
   } = useUnreadConversations(selectedConversations);
 
@@ -65,7 +65,16 @@ function UnreadMessagesOverview() {
     return () => clearInterval(interval);
   }, [selectedConversations]);
 
-  if (!unreadConversations && unreadConversationsError) {
+  if (
+    unreadConversationsError &&
+    usersError &&
+    channelsError &&
+    groupsError &&
+    !isValidatingUnreadConversations &&
+    !isValidatingUsers &&
+    !isValidatingChannels &&
+    !isValidatingGroups
+  ) {
     onApiError({ exitExtension: true });
   }
 
@@ -93,7 +102,7 @@ function UnreadMessagesOverview() {
   };
 
   return (
-    <List isLoading={!selectedConversations || isValidating}>
+    <List isLoading={!selectedConversations || isValidatingUnreadConversations}>
       {selectedConversations && selectedConversations.length === 0 && (
         <List.EmptyView
           icon={Icon.Gear}
@@ -192,14 +201,14 @@ function UnreadMessagesConversation({
   conversationName: string;
   messageHistory: Message[];
 }) {
-  const { data: users, error: usersError } = useUsers();
+  const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
 
-  if (!users && usersError) {
+  if (usersError && !isValidatingUsers) {
     onApiError({ exitExtension: true });
   }
 
   return (
-    <List navigationTitle={`Unread Messages - ${conversationName}`} isLoading={!users} isShowingDetail>
+    <List navigationTitle={`Unread Messages - ${conversationName}`} isLoading={!isValidatingUsers} isShowingDetail>
       {messageHistory.map((message, index) => {
         const user = users?.find((u) => u.id === message.senderId);
         return (
@@ -226,9 +235,9 @@ function ConfigurationWrapper() {
 
 function Configuration() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>([]);
-  const { data: users, error: usersError } = useUsers();
-  const { data: channels, error: channelsError } = useChannels();
-  const { data: groups, error: groupsError } = useGroups();
+  const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
+  const { data: channels, error: channelsError, isValidating: isValidatingChannels } = useChannels();
+  const { data: groups, error: groupsError, isValidating: isValidatingGroups } = useGroups();
 
   useEffect(() => {
     LocalStorage.getItem(conversationsStorageKey).then((item) => {
@@ -272,16 +281,21 @@ function Configuration() {
     }
   };
 
-  if (!users && usersError && !channels && channelsError && !groups && groupsError) {
+  if (
+    usersError &&
+    channelsError &&
+    groupsError &&
+    !isValidatingUsers &&
+    !isValidatingChannels &&
+    !isValidatingGroups
+  ) {
     onApiError({ exitExtension: true });
   }
 
   return (
     <List
       navigationTitle="Unread Messages - Configuration"
-      isLoading={
-        !selectedConversations || (!users && !usersError) || (!channels && !channelsError) || (!groups && !groupsError)
-      }
+      isLoading={!selectedConversations || isValidatingUsers || isValidatingChannels || isValidatingGroups}
     >
       <List.Section title="Direct Messages">
         {users

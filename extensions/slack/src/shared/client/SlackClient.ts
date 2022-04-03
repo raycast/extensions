@@ -46,7 +46,7 @@ export const onApiError = async (props?: { exitExtension: boolean }): Promise<vo
   await showToast({
     style: Toast.Style.Failure,
     title: "Slack API Error",
-    message: "Your Slack token might be invalid",
+    message: "Try again after checking your Slack token and permission scopes.",
   });
 
   if (props?.exitExtension) {
