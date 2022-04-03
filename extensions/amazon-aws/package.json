@@ -9,6 +9,10 @@
     "Hodglim",
     "JonathanWbn"
   ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
