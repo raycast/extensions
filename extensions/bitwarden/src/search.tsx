@@ -11,7 +11,6 @@ import {
   Clipboard,
   Action,
   LocalStorage,
-  popToRoot,
 } from "@raycast/api";
 import { Item } from "./types";
 import React, { Fragment, useEffect, useMemo, useState } from "react";
@@ -202,7 +201,6 @@ function BitwardenItem(props: {
                 content={item.login.username}
                 icon={Icon.Person}
                 shortcut={{ modifiers: ["cmd"], key: "u" }}
-                onCopy={exit}
               />
             ) : null}
             {item.login?.totp ? (
@@ -212,7 +210,6 @@ function BitwardenItem(props: {
                 icon={Icon.Clipboard}
                 onAction={async () => {
                   await copyTotp(item.id);
-                  await exit();
                 }}
               />
             ) : null}
@@ -246,12 +243,7 @@ function BitwardenItem(props: {
                 ...uriMap,
               }).map(([title, content], index) =>
                 content ? (
-                  <Action.CopyToClipboard
-                    key={index}
-                    title={titleCase(title)}
-                    content={content as string | number}
-                    onCopy={exit}
-                  />
+                  <Action.CopyToClipboard key={index} title={titleCase(title)} content={content as string | number} />
                 ) : null
               )}
             </ActionPanel.Submenu>
@@ -277,15 +269,10 @@ function BitwardenItem(props: {
 }
 
 function PasswordActions(props: { password: string }) {
-  const copyAction = <Action.CopyToClipboard key="copy" title="Copy Password" content={props.password} onCopy={exit} />;
-  const pasteAction = <Action.Paste key="paste" title="Paste Password" content={props.password} onPaste={exit} />;
+  const copyAction = <Action.CopyToClipboard key="copy" title="Copy Password" content={props.password} />;
+  const pasteAction = <Action.Paste key="paste" title="Paste Password" content={props.password} />;
 
   return (
     <React.Fragment>{primaryAction == "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}</React.Fragment>
   );
-}
-
-async function exit() {
-  await closeMainWindow();
-  await popToRoot();
 }
