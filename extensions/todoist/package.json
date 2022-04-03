@@ -6,6 +6,9 @@
   "icon": "todoist.png",
   "author": "thomaslombart",
   "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "today",

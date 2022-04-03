@@ -12,9 +12,9 @@ import {
   Action,
 } from "@raycast/api";
 import { Item, VaultStatus } from "./types";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import treeify from "treeify";
-import { filterNullishPropertiesFromObject, codeBlock, titleCase, faviconUrl } from "./utils";
+import { filterNullishPropertiesFromObject, codeBlock, titleCase, faviconUrl, extractKeywords } from "./utils";
 import { useBitwarden } from "./hooks";
 import { TroubleshootingGuide, UnlockForm } from "./components";
 import { Bitwarden } from "./api";
@@ -45,7 +45,7 @@ function ItemList(props: {
 
   async function loadItems(sessionToken: string) {
     try {
-      const items = await bitwardenApi.listItems<Item>("items", sessionToken);
+      const items = await bitwardenApi.listItems("items", sessionToken);
       setItems(items);
     } catch (error) {
       showToast(Toast.Style.Failure, "Failed to search vault");
@@ -119,6 +119,8 @@ function ItemListItem(props: {
   const { item, refreshItems, sessionToken, copyTotp } = props;
   const { name, notes, identity, login, secureNote, fields, passwordHistory, card } = item;
 
+  const keywords = useMemo(() => extractKeywords(item), [item]);
+
   const fieldMap = Object.fromEntries(fields?.map((field) => [field.name, field.value]) || []);
   const uriMap = Object.fromEntries(
     login?.uris?.filter((uri) => uri.uri).map((uri, index) => [`uri${index + 1}`, uri.uri]) || []
@@ -141,13 +143,14 @@ function ItemListItem(props: {
     <List.Item
       id={item.id}
       title={item.name}
-      keywords={item.name.split(/\W/)}
+      keywords={keywords}
       accessoryIcon={item.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined}
       icon={getIcon(item)}
       subtitle={item.login?.username || undefined}
       actions={
         <ActionPanel>
           {item.login?.password ? <PasswordActions password={item.login.password} /> : null}
+          {item.login?.username ? <UsernameAction username={item.login.username} /> : null}
           {item.login?.totp ? (
             <ActionPanel.Item
               shortcut={{ modifiers: ["cmd"], key: "t" }}
@@ -223,5 +226,17 @@ function PasswordActions(props: { password: string }) {
 
   return (
     <React.Fragment>{primaryAction == "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}</React.Fragment>
+  );
+}
+
+function UsernameAction(props: { username: string }) {
+  return (
+    <Action.CopyToClipboard
+      title="Copy Username"
+      content={props.username}
+      icon={Icon.Person}
+      shortcut={{ modifiers: ["cmd"], key: "u" }}
+      onCopy={(content) => closeMainWindow({ clearRootSearch: true })}
+    />
   );
 }

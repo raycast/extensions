@@ -7,7 +7,8 @@
   "author": "pomdtr",
   "contributors": [
     "daniel-stoneuk",
-    "jomifepe"
+    "jomifepe",
+    "dre"
   ],
   "license": "MIT",
   "keywords": [
@@ -15,6 +16,9 @@
     "secrets",
     "security",
     "passwords"
+  ],
+  "categories": [
+    "Security"
   ],
   "commands": [
     {
