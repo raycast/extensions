@@ -2,7 +2,16 @@ import { Action, ActionPanel, Icon, Image, List, LocalStorage, showToast, Toast 
 import { isEqual } from "lodash";
 import { useEffect, useState } from "react";
 
-import { CacheProvider, onApiError, useChannels, useGroups, useUnreadConversations, useUsers } from "./shared/client";
+import {
+  CacheProvider,
+  Message,
+  onApiError,
+  useChannels,
+  useGroups,
+  useUnreadConversations,
+  useUsers,
+} from "./shared/client";
+import { openChannel, timeDifference } from "./shared/utils";
 
 const conversationsStorageKey = "$unread-messages$selected-conversations";
 
@@ -17,6 +26,9 @@ export default function Command() {
 function UnreadMessagesOverview() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>();
 
+  const { data: users } = useUsers();
+  const { data: channels } = useChannels();
+  const { data: groups } = useGroups();
   const {
     data: unreadConversations,
     error: unreadConversationsError,
@@ -81,6 +93,92 @@ function UnreadMessagesOverview() {
             description="Configure command again for observing different conversations."
           />
         )}
+
+      {unreadConversations && unreadConversations.length > 0 && (
+        <>
+          {unreadConversations.map((unreadConversation) => {
+            const conversation =
+              users?.find((user) => user.conversationId === unreadConversation.conversationId) ??
+              channels?.find((channel) => channel.id === unreadConversation.conversationId) ??
+              groups?.find((group) => group.id === unreadConversation.conversationId);
+
+            return (
+              <List.Item
+                key={unreadConversation.conversationId}
+                title={conversation?.name ?? ""}
+                subtitle={unreadConversation.messageHistory[0].message}
+                icon={conversation ? { source: conversation.icon, mask: Image.Mask.Circle } : undefined}
+                accessories={[
+                  { text: timeDifference(new Date(unreadConversation.messageHistory[0].receivedAt)) },
+                  { icon: Icon.Message, text: `${unreadConversation.messageHistory.length}` },
+                ]}
+                actions={
+                  <ActionPanel>
+                    {conversation && (
+                      <>
+                        <Action
+                          title="Open in Slack"
+                          onAction={() => {
+                            openChannel(conversation.teamId, conversation.id);
+                          }}
+                        />
+                      </>
+                    )}
+                    <Action.Push
+                      title="Show unread messages"
+                      shortcut={{ modifiers: ["cmd"], key: "m" }}
+                      target={
+                        <CacheProvider>
+                          <UnreadMessagesConversation
+                            conversationName={conversation?.name ?? ""}
+                            messageHistory={unreadConversation.messageHistory}
+                          />
+                        </CacheProvider>
+                      }
+                    />
+                    <Action.Push
+                      title="Configure Command"
+                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                      target={<ConfigurationWrapper />}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </>
+      )}
+    </List>
+  );
+}
+
+function UnreadMessagesConversation({
+  conversationName,
+  messageHistory,
+}: {
+  conversationName: string;
+  messageHistory: Message[];
+}) {
+  const { data: users, error: usersError } = useUsers();
+
+  if (!users && usersError) {
+    onApiError({ exitExtension: true });
+  }
+
+  return (
+    <List navigationTitle={`Unread Messages - ${conversationName}`} isLoading={!users} isShowingDetail>
+      {messageHistory.map((message, index) => {
+        const user = users?.find((u) => u.id === message.senderId);
+        return (
+          <List.Item
+            key={index}
+            icon={{ source: user?.icon ?? Icon.Person, mask: Image.Mask.Circle }}
+            title={user?.name ?? ""}
+            subtitle={timeDifference(new Date(message.receivedAt))}
+            detail={<List.Item.Detail markdown={message.message} />}
+          />
+        );
+      })}
     </List>
   );
 }
