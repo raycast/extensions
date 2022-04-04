@@ -1,4 +1,4 @@
-import fetch from "node-fetch";
+import fetch from "cross-fetch";
 
 import { Sourcegraph } from "..";
 
@@ -50,7 +50,8 @@ async function doGQLRequest<T>(abort: AbortSignal, src: Sourcegraph, body: strin
         } else {
           reject(`Unknown in response: ${JSON.stringify(resp)}`);
         }
-      });
+      })
+      .catch((err) => reject(err));
   });
 }
 
