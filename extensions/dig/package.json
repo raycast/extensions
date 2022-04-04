@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "dig",
-      "subtitle": "Query Hostname",
+      "title": "Query Hostname",
+      "subtitle": "dig",
       "description": "Returns NS-records from the hostname",
       "mode": "view"
     }
