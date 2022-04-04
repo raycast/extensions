@@ -1,12 +1,11 @@
 import {
   ActionPanel,
-  CopyToClipboardAction,
   Detail,
   Icon,
   List,
-  OpenInBrowserAction,
+  Action,
   showToast,
-  ToastStyle,
+  Toast,
   useNavigation,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
