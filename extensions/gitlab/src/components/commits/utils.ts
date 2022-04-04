@@ -8,6 +8,11 @@ export async function getCommitStatus(projectID: number, sha: string): Promise<C
     .fetch(`projects/${projectID}/repository/commits/${sha}/statuses`)
     .then((d) => {
       if (d && d.length > 0) {
+        for (const s of d) {
+          if (s.status !== "success") {
+            return s;
+          }
+        }
         return d[0] as CommitStatus;
       }
       return undefined;
