@@ -68,6 +68,7 @@
     {
       "name": "start-next-focus",
       "title": "Start Next Focus",
+      "subtitle": "Flow",
       "description": "Start the next focus session",
       "mode": "no-view"
     }
