@@ -1,6 +1,17 @@
 import React, { ComponentType, ReactNode } from "react";
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { getListSubtitle } from "../utils";
+
+/**
+ * Raycast provides a default EmptyView that will be displayed if the List
+ * component either has no children, or if it has children, but none of them
+ * match the query in the search bar.
+ *
+ * Note that the EmptyView is never displayed if the List’s isLoading.
+ */
+export const ListWithEmptyView = () => (
+  <List.EmptyView title="No results" description="Type something to search again." icon={{ source: Icon.Binoculars }} />
+);
 
 type ResultItem = { id: number };
 type ListProps<T extends ResultItem> = { item: T };
@@ -26,13 +37,15 @@ export const ResultsList = <T extends ResultItem, K extends ListProps<T>>({
   const listSubtitle = getListSubtitle(loading, totalCount);
 
   return (
-    <List.Section title="Results" subtitle={listSubtitle}>
-      {!loading && !data?.results.length && <List.EmptyView title="Nothing found." />}
+    <>
+      <ListWithEmptyView />
 
-      {data?.results.map((result) => {
-        // @ts-expect-error ts(2322): 'K' could be instantiated with a different subtype of constraint 'ListProps<T>'
-        return <ListView key={result.id} item={result} actions={actions} />;
-      })}
-    </List.Section>
+      <List.Section title="Results" subtitle={listSubtitle}>
+        {data?.results.map((result) => {
+          // @ts-expect-error ts(2322): 'K' could be instantiated with a different subtype of constraint 'ListProps<T>'
+          return <ListView key={result.id} item={result} actions={actions} />;
+        })}
+      </List.Section>
+    </>
   );
 };

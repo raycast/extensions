@@ -4,6 +4,7 @@ import { BASE_URL, useTags } from "./tags/useTags";
 import { TagsListItem } from "./tags/TagsListItem";
 import { getListSubtitle } from "./utils";
 import { ListActions } from "./components/Actions";
+import { ListWithEmptyView } from "./components/ResultsList";
 
 export default function Command() {
   const { data, loading, refetch } = useTags();
@@ -14,9 +15,9 @@ export default function Command() {
 
   return (
     <List isLoading={loading} enableFiltering>
-      <List.Section title="Results" subtitle={listSubtitle}>
-        {!loading && !data?.results.length && <List.EmptyView title="Nothing found." />}
+      <ListWithEmptyView />
 
+      <List.Section title="Results" subtitle={listSubtitle}>
         {data?.results.map((result) => (
           <TagsListItem
             key={result.name}
