@@ -67,4 +67,4 @@ export type ConfigT = {
   allowLan?: boolean;
   mode: ModeT;
   logLevel?: LogLevelT;
-}
+};

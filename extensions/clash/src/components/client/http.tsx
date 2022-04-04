@@ -21,7 +21,7 @@ async function GetConfigs(): Promise<ConfigT> {
   return data;
 }
 
-async function PatchConfigs(config: Record<string, string>): Promise<void>{
+async function PatchConfigs(config: Record<string, string>): Promise<void> {
   const resp = await fetchBackend({
     endpoint: "/configs",
     method: "PATCH",
@@ -37,7 +37,6 @@ async function PatchConfigs(config: Record<string, string>): Promise<void>{
   if (resp.status !== 204) {
     throw new Error(`Unexpected status code: ${resp.status}`);
   }
-
 }
 
 async function SelectProxy(name: string, proxy: string): Promise<void> {
