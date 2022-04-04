@@ -1,4 +1,5 @@
-import { showToast, Form, ActionPanel, Detail, Toast, Action } from "@raycast/api";
+import { showToast, Form, ActionPanel, Toast, Action, Detail } from "@raycast/api";
+import { OpenInBrowserAction } from "@raycast/api/types/api/components/actions/OpenInBrowserAction";
 import { Bitwarden } from "./api";
 
 export function TroubleshootingGuide(): JSX.Element {
@@ -16,23 +17,30 @@ export function TroubleshootingGuide(): JSX.Element {
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title={"Copy Homebrew Installation Command"} content="brew install bitwarden-cli" />
+          <Action.OpenInBrowser url="https://bitwarden.com/help/article/cli/#download-and-install" />
         </ActionPanel>
       }
     />
   );
 }
 
-export function UnlockForm(props: {
-  setSessionToken: (session: string) => void;
-  bitwardenApi: Bitwarden;
-}): JSX.Element {
+export function UnlockForm(props: { onUnlock: (token: string) => void; bitwardenApi: Bitwarden }): JSX.Element {
+  const { bitwardenApi, onUnlock } = props;
   async function onSubmit(values: { password: string }) {
     try {
       const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
-      const sessionToken = await props.bitwardenApi.unlock(values.password);
+      const status = await bitwardenApi.status();
+      if (status == "unauthenticated") {
+        try {
+          await bitwardenApi.login();
+        } catch (error) {
+          showToast(Toast.Style.Failure, "Failed to unlock vault.", "Please your API Key and Secret.");
+          return;
+        }
+      }
+      const sessionToken = await bitwardenApi.unlock(values.password);
       toast.hide();
-
-      props.setSessionToken(sessionToken);
+      onUnlock(sessionToken);
     } catch (error) {
       showToast(Toast.Style.Failure, "Failed to unlock vault", "Invalid credentials");
     }
