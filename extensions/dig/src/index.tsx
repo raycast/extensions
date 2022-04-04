@@ -102,7 +102,7 @@ async function digByQuery(query: string): Promise<Result[]> {
   try {
     // Prepare:
     const str = query.trim();
-    const cmd = "";
+    let cmd: string;
 
     // Check if string have options:
     if (hasWhiteSpace(str)) {
