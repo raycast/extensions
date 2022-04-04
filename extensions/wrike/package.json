@@ -4,8 +4,8 @@
   "title": "Wrike",
   "description": "Interact with Wrike",
   "icon": "wrike_logo.png",
-  "author": "Agustin Suarez",
-  "owner": "Agustin Suarez",
+  "author": "Slus",
+  "owner": "Slus",
   "license": "MIT",
   "categories": ["Productivity", "Web"],
   "preferences": [
