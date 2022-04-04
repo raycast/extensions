@@ -10,6 +10,7 @@ interface Preferences {
 
 interface FileInfo {
   name: string;
+  type: 'file' | 'directory';
   path: string;
 }
 
@@ -29,10 +30,10 @@ const getFileInfo = async (rootPath: string, excludePaths: string[]): Promise<Fi
 
             const stats = await fs.stat(filePath);
             if (stats.isDirectory()) {
-              return [{ name: file, path: filePath }, ...(await walk(filePath))];
+              return [{ name: file, type: 'directory', path: filePath }, ...(await walk(filePath))];
             }
             if (stats.isFile()) {
-              return [{ name: file, path: filePath }];
+              return [{ name: file, type: 'file', path: filePath }];
             }
 
             return [];
@@ -43,6 +44,7 @@ const getFileInfo = async (rootPath: string, excludePaths: string[]): Promise<Fi
 
   return walk(rootPath);
 };
+
 
 export default function SearchGoogleDriveForDesktopFile() {
   const preferences = getPreferenceValues<Preferences>();
@@ -68,6 +70,7 @@ export default function SearchGoogleDriveForDesktopFile() {
           icon={{ fileIcon: file.path }}
           actions={
             <ActionPanel>
+              {file.type === 'file' && <Action.Open title="Open" target={file.path} />}
               <Action.ShowInFinder path={file.path} />
               <Action.CopyToClipboard
                 title="Copy Directory Path"
