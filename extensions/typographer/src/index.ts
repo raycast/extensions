@@ -14,9 +14,13 @@ export default async function main() {
     htmlEntity: { type: HTML_ENTITIES },
   });
 
-  const selectedText = await getSelectedText();
-  const transformedText = tp.execute(selectedText);
+  try {
+    const selectedText = await getSelectedText();
+    const transformedText = tp.execute(selectedText);
 
-  await Clipboard.paste(transformedText);
-  await showHUD("✓");
+    await Clipboard.paste(transformedText);
+    await showHUD("✓");
+  } catch (error) {
+    await showHUD("No text selected");
+  }
 }
