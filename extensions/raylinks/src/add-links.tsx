@@ -84,14 +84,14 @@ export default function addLinksToRaycast(defaultValues: RLLink) {
     >
       <Form.TextField
         id="title"
-        placeholder="Title"
+        placeholder="Give your link a name"
         title="Link name"
         storeValue={false}
         defaultValue={defaultValues?.title}
       />
       <Form.TextField
         id="link"
-        placeholder="Link"
+        placeholder="Add your link"
         title="Link URL"
         storeValue={false}
         defaultValue={defaultValues?.link}
