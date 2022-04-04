@@ -1,5 +1,5 @@
-import { ProxiesT, RuleT } from "../types";
 import { fetchBackend } from "../../utils";
+import { ProxiesT, RuleT } from "../types";
 
 async function GetProviders(): Promise<ProxiesT> {
   const resp = await fetchBackend("/proxies");

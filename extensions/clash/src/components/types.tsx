@@ -1,7 +1,7 @@
-import { LocalStorageValue } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 
 // backends store in local storage
-export type BackendsT = Map<string, LocalStorageValue>;
+export type BackendsT = Map<string, LocalStorage.Value>;
 
 // "/traffic"
 export type TrafficT = { up: number; down: number };

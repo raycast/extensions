@@ -1,11 +1,11 @@
-import { ActionPanel, ImageLike, List, PushAction } from "@raycast/api";
+import { Action, ActionPanel, Image, List } from "@raycast/api";
 import Commponents from "./components";
 import { getCurrentBackendWithSecret } from "./utils";
 import { ErrorHandler } from "./utils/error";
 
 type CommponentT = {
   title: string;
-  icon?: ImageLike;
+  icon?: Image.ImageLike;
   node: JSX.Element;
 };
 
@@ -53,7 +53,7 @@ export default function Command() {
           icon={commponent.icon}
           actions={
             <ActionPanel>
-              <PushAction title={`Show ${commponent.title}`} target={commponent.node} />
+              <Action.Push title={`Show ${commponent.title}`} target={commponent.node} />
             </ActionPanel>
           }
         />

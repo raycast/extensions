@@ -1,4 +1,4 @@
-import { ActionPanel, List, PushAction } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ErrorHandler } from "../utils/error";
 import { GetProviders } from "./client/http";
@@ -47,7 +47,7 @@ export default function Proxies(): JSX.Element {
             accessoryTitle={proxy.now}
             actions={
               <ActionPanel>
-                <PushAction
+                <Action.Push
                   title="Show Proxies"
                   target={
                     <List>

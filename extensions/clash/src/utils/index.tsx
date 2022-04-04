@@ -1,4 +1,4 @@
-import { getLocalStorageItem, setLocalStorageItem, showToast, ToastStyle } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 import { URL } from "url";
 import { BackendNotExistError, NoBackendError } from "./error";
@@ -16,12 +16,12 @@ function prettyBytes(n: number) {
 }
 
 async function getCurrentBackend(): Promise<string | undefined> {
-  const backend: string | undefined = await getLocalStorageItem("current");
+  const backend: string | undefined = await LocalStorage.getItem("current");
   return backend;
 }
 
 async function getBackendSecret(backend: string): Promise<string | undefined> {
-  const secret: string | undefined = await getLocalStorageItem(backend);
+  const secret: string | undefined = await LocalStorage.getItem(backend);
   return secret;
 }
 
@@ -61,13 +61,13 @@ function trimTrailingSlash(s: string) {
 }
 
 async function setCurrentBackend(url: string) {
-  await setLocalStorageItem("current", url);
+  await LocalStorage.setItem("current", url);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function showFailureToast(title: string, error: any) {
   console.error(title, error);
-  await showToast(ToastStyle.Failure, title, error instanceof Error ? error.message : error.toString());
+  await showToast(Toast.Style.Failure, title, error instanceof Error ? error.message : error.toString());
 }
 
 function wait(duration: number): Promise<void> {
