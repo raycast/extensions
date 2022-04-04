@@ -16,6 +16,11 @@ const commponents: Array<CommponentT> = [
     node: <Commponents.Overview />,
   },
   {
+    title: "Mode",
+    icon: "mode.png",
+    node: <Commponents.Mode />,
+  },
+  {
     title: "Proxies",
     icon: "proxies.png",
     node: <Commponents.Proxies />,

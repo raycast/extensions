@@ -57,3 +57,14 @@ export type RuleT = {
   payload: string;
   proxy: string;
 };
+
+export type ModeT = "rule" | "global" | "direct" | "script";
+
+export type ConfigT = {
+  port?: number;
+  socketPort?: number;
+  redirPort?: number;
+  allowLan?: boolean;
+  mode: ModeT;
+  logLevel?: LogLevelT;
+}

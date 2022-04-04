@@ -12,6 +12,12 @@
       "title": "Dashboard",
       "description": "List Clash dashboard items",
       "mode": "view"
+    },
+    {
+      "name": "mode",
+      "title": "Mode",
+      "description": "Switch Clash Proxy Mode",
+      "mode": "view"
     }
   ],
   "dependencies": {

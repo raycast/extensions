@@ -109,6 +109,10 @@ function getFormatDateString() {
   return formatDate(new Date()).toString();
 }
 
+function upperFirst(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 export {
   wait,
   getCurrentBackend,
@@ -119,4 +123,5 @@ export {
   showFailureToast,
   getFormatDateString,
   getCurrentBackendWithSecret,
+  upperFirst,
 };
