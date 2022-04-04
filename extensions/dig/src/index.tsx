@@ -47,9 +47,9 @@ export default function DigSearchResultsList() {
           accessories={[{ text: result.summary }]}
           actions={
             <ActionPanel>
-              <CopyToClipboardAction title="Copy Destination" content={result.summary} />
-              <OpenInBrowserAction url={result.url} />
-              <ActionPanel.Item
+              <Action.CopyToClipboard title="Copy Destination" content={result.summary} />
+              <Action.OpenInBrowser url={result.url} />
+              <Action
                 title="Show NS-record Details"
                 icon={Icon.Sidebar}
                 onAction={() => push(<Details {...result} />)}
