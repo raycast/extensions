@@ -83,14 +83,6 @@ function Details(props: Result) {
   );
 }
 
-type digResponse = {
-  documents: Array<{
-    title: string;
-    mdn_url: string;
-    summary: string;
-  }>;
-};
-
 type Result = {
   title: string;
   url: string;
