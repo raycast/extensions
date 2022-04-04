@@ -80,7 +80,9 @@ export function PipelineListItem(props: {
           <ActionPanel.Section>
             <Action.Push
               title="Show Jobs"
-              target={<JobList projectFullPath={props.projectFullPath} pipelineIID={pipeline.iid} />}
+              target={
+                <JobList projectFullPath={props.projectFullPath} pipelineID={pipeline.id} pipelineIID={pipeline.iid} />
+              }
               icon={{ source: Icon.Terminal, tintColor: Color.PrimaryText }}
             />
             <GitLabOpenInBrowserAction url={pipeline.webUrl} />

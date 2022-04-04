@@ -150,8 +150,17 @@ export function JobListItem(props: { job: Job; projectFullPath: string; onRefres
   );
 }
 
-export function JobList(props: { projectFullPath: string; pipelineIID: string }): JSX.Element {
-  const { stages, error, isLoading, refresh } = useSearch("", props.projectFullPath, props.pipelineIID);
+export function JobList(props: {
+  projectFullPath: string;
+  pipelineID: string;
+  pipelineIID?: string | undefined;
+}): JSX.Element {
+  const { stages, error, isLoading, refresh } = useSearch(
+    "",
+    props.projectFullPath,
+    props.pipelineID,
+    props.pipelineIID
+  );
   useInterval(() => {
     refresh();
   }, getCIRefreshInterval());
@@ -171,10 +180,18 @@ export function JobList(props: { projectFullPath: string; pipelineIID: string })
   );
 }
 
+interface RESTJob {
+  id: number;
+  status: string;
+  stage: string;
+  name: string;
+}
+
 export function useSearch(
   query: string | undefined,
   projectFullPath: string,
-  pipelineIID: string
+  pipelineID: string,
+  pipelineIID?: string | undefined
 ): {
   stages: Record<string, Job[]>;
   error?: string;
@@ -204,22 +221,41 @@ export function useSearch(
       setError(undefined);
 
       try {
-        const data = await gitlabgql.client.query({
-          query: GET_PIPELINE_JOBS,
-          variables: { fullPath: projectFullPath, pipelineIID: pipelineIID },
-          fetchPolicy: "network-only",
-        });
-        const stages: Record<string, Job[]> = {};
-        for (const stage of data.data.project.pipeline.stages.nodes) {
-          if (!stages[stage.name]) {
-            stages[stage.name] = [];
+        if (pipelineIID) {
+          const data = await gitlabgql.client.query({
+            query: GET_PIPELINE_JOBS,
+            variables: { fullPath: projectFullPath, pipelineIID: pipelineIID },
+            fetchPolicy: "network-only",
+          });
+          const stages: Record<string, Job[]> = {};
+          for (const stage of data.data.project.pipeline.stages.nodes) {
+            if (!stages[stage.name]) {
+              stages[stage.name] = [];
+            }
+            for (const job of stage.jobs.nodes) {
+              stages[stage.name].push({ id: job.id, name: job.name, status: job.status });
+            }
           }
-          for (const job of stage.jobs.nodes) {
-            stages[stage.name].push({ id: job.id, name: job.name, status: job.status });
+          if (!didUnmount) {
+            setStages(stages);
           }
-        }
-        if (!didUnmount) {
-          setStages(stages);
+        } else if (pipelineID) {
+          const projectUE = encodeURIComponent(projectFullPath);
+          const jobs: RESTJob[] = await gitlab
+            .fetch(`projects/${projectUE}/pipelines/${pipelineID}/jobs`)
+            .then((data) => {
+              return data.map((j: any) => j as RESTJob);
+            });
+          const stages: Record<string, Job[]> = {};
+          for (const job of jobs) {
+            if (!stages[job.stage]) {
+              stages[job.stage] = [];
+            }
+            stages[job.stage].push({ id: `${job.id}`, name: job.name, status: job.status });
+          }
+          if (!didUnmount) {
+            setStages(stages);
+          }
         }
       } catch (e) {
         if (!didUnmount) {
@@ -273,7 +309,13 @@ export function PipelineJobsListByCommit(props: { project: Project; sha: string 
     return <List isLoading={isLoading} searchBarPlaceholder="Loading" />;
   } else {
     if (commit.last_pipeline) {
-      return <JobList projectFullPath={props.project.fullPath} pipelineIID={`${commit.last_pipeline.iid}`} />;
+      return (
+        <JobList
+          projectFullPath={props.project.fullPath}
+          pipelineID={`${commit.last_pipeline.id}`}
+          pipelineIID={commit.last_pipeline.iid ? `${commit.last_pipeline.iid}` : undefined}
+        />
+      );
     } else {
       return (
         <List>
