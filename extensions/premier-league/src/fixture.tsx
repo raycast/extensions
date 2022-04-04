@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import groupBy from "lodash.groupby";
-import { format, parse } from "date-fns";
 import { useFixtures, useSeasons, useTeams } from "./hooks";
+import { convertToLocalTime } from "./utils";
 
 export default function Fixture() {
   const season = useSeasons();
@@ -18,13 +18,18 @@ export default function Fixture() {
     statuses: "U,L",
   });
 
+  const fixtures = useMemo(() => {
+    return fixture.fixtures.map((f) => {
+      f.kickoff.label = convertToLocalTime(f.kickoff.label);
+      return f;
+    });
+  }, [fixture.fixtures]);
+
   const loading = [season.loading, club.loading, fixture.loading].some(
     (i) => i
   );
-  const categories = groupBy(
-    fixture.fixtures,
-    (f) => f.kickoff.label?.split(",")[0]
-  );
+
+  const categories = groupBy(fixtures, (f) => f.kickoff.label?.split(",")[0]);
 
   return (
     <List
@@ -53,15 +58,7 @@ export default function Fixture() {
             title={label === "undefined" ? "Date To Be Confirmed" : label}
           >
             {matches.map((match) => {
-              const label = match.kickoff.label
-                ?.replace("BST", "+01:00")
-                .replace("GMT", "+00:00");
-              const kickoff = label
-                ? format(
-                    parse(label, "EEE d MMM yyyy, HH:mm XXX", new Date()),
-                    "HH:mm"
-                  )
-                : "TBC";
+              const kickoff = match.kickoff.label?.split(", ")[1] || "TBC";
 
               return (
                 <List.Item

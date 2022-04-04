@@ -8,6 +8,7 @@ import { TeamTeam } from "./types";
 function ClubProfile(props: TeamTeam) {
   return (
     <Detail
+      navigationTitle={`${props.name} | Club`}
       markdown={json2md([
         { h1: props.name },
         {
@@ -89,6 +90,7 @@ export default function Club() {
               <ActionPanel>
                 <Action.Push
                   title="Club Profile"
+                  icon={Icon.Sidebar}
                   target={<ClubProfile {...team} />}
                 />
               </ActionPanel>

@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import groupBy from "lodash.groupby";
 import { useFixtures, useSeasons, useTeams } from "./hooks";
+import { convertToLocalTime } from "./utils";
 
 export default function Fixture() {
   const season = useSeasons();
@@ -17,13 +18,18 @@ export default function Fixture() {
     statuses: "C",
   });
 
+  const fixtures = useMemo(() => {
+    return fixture.fixtures.map((f) => {
+      f.kickoff.label = convertToLocalTime(f.kickoff.label);
+      return f;
+    });
+  }, [fixture.fixtures]);
+
   const loading = [season.loading, club.loading, fixture.loading].some(
     (i) => i
   );
-  const categories = groupBy(
-    fixture.fixtures,
-    (f) => f.kickoff.label?.split(",")[0]
-  );
+
+  const categories = groupBy(fixtures, (f) => f.kickoff.label?.split(",")[0]);
 
   return (
     <List

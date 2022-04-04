@@ -17,7 +17,6 @@ const usePlayers = (team: string, season: string, page: number) => {
           setLoading(false);
         });
       } else {
-        console.log("s", team, season, page);
         getStaffs(team, season).then((data) => {
           setPlayers(data);
           setLoading(false);
