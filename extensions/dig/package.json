@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dig",
-  "title": "Dig (DNS Lookup)",
+  "title": "Dig - DNS Lookup",
   "description": "DNS lookup and nameserver query using the built-in host command",
   "icon": "command-icon.png",
   "author": "danielbahl",
