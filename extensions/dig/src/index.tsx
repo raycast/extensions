@@ -111,7 +111,7 @@ async function digByQuery(query: string): Promise<Result[]> {
       const option = queryArr[1].trim();
       const cmd = "host -t " + option + " " + query;
     } else {
-      const cmd = "host " + query;
+     cmd = "host " + query;
     }
 
     // Define execOptions:
