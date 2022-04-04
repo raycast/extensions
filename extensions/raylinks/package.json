@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raylinks",
-  "title": "Raylinks - Quick access to links",
+  "title": "Raylinks - Blazing fast access to links",
   "description": "Blazing fast access to your most used links.",
   "icon": "command-icon.png",
   "author": "GLaDO8",
