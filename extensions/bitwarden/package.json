@@ -3,7 +3,7 @@
   "name": "bitwarden",
   "title": "Bitwarden Vault",
   "description": "Access a Bitwarden account. Requires installing the Bitwarden CLI.",
-  "icon": "bitwarden.png",
+  "icon": "bitwarden-512.png",
   "author": "pomdtr",
   "contributors": [
     "daniel-stoneuk",
@@ -49,13 +49,6 @@
       ]
     },
     {
-      "name": "lock-vault",
-      "title": "Lock Vault",
-      "subtitle": "Bitwarden",
-      "description": "Lock the vault.",
-      "mode": "no-view"
-    },
-    {
       "name": "generate-password",
       "title": "Generate Password",
       "subtitle": "Bitwarden",
@@ -69,7 +62,7 @@
       "type": "password",
       "required": true,
       "title": "Client ID",
-      "description": "The client_id value seen in the My Account section of a Bitwarden web vault. More info: https://bitwarden.com/help/article/personal-api-key/",
+      "description": "The client_id value seen in the My Account section of a Bitwarden web vault.",
       "placeholder": "client_id"
     },
     {
@@ -77,7 +70,7 @@
       "type": "password",
       "required": true,
       "title": "Client Secret",
-      "description": "The client_secret value seen in the My Account section of a Bitwarden web vault.\r\nMore info: https://bitwarden.com/help/article/personal-api-key/",
+      "description": "The client_secret value seen in the My Account section of a Bitwarden web vault.",
       "placeholder": "client_secret"
     },
     {
@@ -99,16 +92,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.2",
+    "@raycast/api": "^1.31.0",
     "execa": "^5.1.1",
-    "throttle-debounce": "^3.0.1",
-    "treeify": "^1.1.0"
+    "throttle-debounce": "^3.0.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@types/throttle-debounce": "^2.1.0",
-    "@types/treeify": "^1.0.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
