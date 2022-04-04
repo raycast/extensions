@@ -1,6 +1,6 @@
 # Authy Extension Changelog
 
-## [Sort codes by usage] - 2022-03-25
+## [Sort OTP by usage] - 2022-04-04
 
 - Add metadata for store
 - [#1171](https://github.com/raycast/extensions/issues/1171) Sort list by recent usage

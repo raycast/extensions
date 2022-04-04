@@ -64,9 +64,9 @@
     {
       "required": false,
       "name": "recentlyUsedOrder",
-      "label": "Pop to up codes that you recently used",
+      "label": "Sort OTP list by recent usage",
       "type": "checkbox",
-      "description": "Bring codes to top of the list one you used it",
+      "description": "This option enables different list order based on last usage of OTP",
       "default": false
     }
   ],
