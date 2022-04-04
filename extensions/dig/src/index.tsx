@@ -11,10 +11,6 @@ import {
 import { useState, useEffect } from "react";
 const { execSync } = require("child_process");
 
-//const execSync2 = require('child_process').execSync;
-//const execSync2 = execSync;
-//var execSync2 = require('execSync');
-
 export default function DigSearchResultsList() {
   const [query, setQuery] = useState<null | string>(null);
   const [state, setState] = useState<Result[]>([]);
