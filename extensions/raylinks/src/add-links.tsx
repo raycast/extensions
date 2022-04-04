@@ -11,7 +11,6 @@ export default function addLinksToRaycast(defaultValues: RLLink) {
     return Object.keys(obj).length === 0;
   }
   const isNewLinkCreation = isObjectEmpty(defaultValues);
-  console.log(isNewLinkCreation);
 
   // this is a custom hook that will fetch the currenty stored links from local storage, and store it in "links"
   useEffect(() => {
