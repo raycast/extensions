@@ -26,11 +26,13 @@ export default function PackageList() {
 
   return (
     <List isLoading={loading} searchBarPlaceholder={`Filter Jobs`} throttle>
-      {results?.length
-        ? results.map((result) => {
-            return <JobRunsListItem key={result.id} result={result} />;
-          })
-        : null}
+      {results?.length == 0 ? (
+        <List.EmptyView title="No job run found" />
+      ) : (
+        results.map((result) => {
+          return <JobRunsListItem key={result.id} result={result} />;
+        })
+      )}
     </List>
   );
 }
