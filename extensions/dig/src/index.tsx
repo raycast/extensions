@@ -143,7 +143,7 @@ async function digByQuery(query: string): Promise<Result[]> {
     // Return x arr
     return x;
   } catch (e) {
-    showToast(ToastStyle.Failure, `Could not resolve domain`);
+    showToast(Toast.Style.Failure, `Could not resolve domain`);
     return Promise.resolve([]);
   }
 }
