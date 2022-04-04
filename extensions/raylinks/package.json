@@ -13,12 +13,14 @@
     {
       "name": "browse-links",
       "title": "Browse Links",
+      "subtitle": "Raylinks",
       "description": "Quickly browse and copy links to your clipboard.",
       "mode": "view"
     },
     {
       "name": "add-links",
       "title": "Add Links",
+      "subtitle": "Raylinks",
       "description": "Add links for quick access.",
       "mode": "view"
     }
