@@ -14,7 +14,7 @@ const markdownReference = [
         description:
           "Blockquotes can contain multiple paragraphs. Add a `>` on the blank lines between the paragraphs.",
         markdown:
-          "> Dorothy followed her through many of the beautiful rooms in her castle.\n>\n> The Witch bade her clean the pots and kettles and sweep the floor and keep the fire fed with wood.\n",
+          "> Dorothy followed her through many of the beautiful rooms in her castle.\n\n>\n\n> The Witch bade her clean the pots and kettles and sweep the floor and keep the fire fed with wood.\n",
         html: "<blockquote><p>Dorothy followed her through many of the beautiful rooms in her castle.</p><p>The Witch bade her clean the pots and kettles and sweep the floor and keep the fire fed with wood.</p></blockquote>",
       },
 
@@ -22,7 +22,7 @@ const markdownReference = [
         name: "Nested Blockquotes",
         description: "Blockquotes can be nested. Add a `>>` in front of the paragraph you want to nest.",
         markdown:
-          "> Dorothy followed her through many of the beautiful rooms in her castle.\n>\n>> The Witch bade her clean the pots and kettles and sweep the floor and keep the fire fed with wood.\n",
+          "> Dorothy followed her through many of the beautiful rooms in her castle.\n\n>\n\n>> The Witch bade her clean the pots and kettles and sweep the floor and keep the fire fed with wood.\n",
         html: "<blockquote><p>Dorothy followed her through many of the beautiful rooms in her castle.</p><blockquote><p>The Witch bade her clean the pots and kettles and sweep the floor and keep the fire fed with wood.</p></blockquote></blockquote>",
       },
 
@@ -31,7 +31,7 @@ const markdownReference = [
         description:
           "Blockquotes can contain other Markdown formatted elements. Not all elements can be used — you'll need to experiment to see which ones work.",
         markdown:
-          "> ### The quarterly results look great!\n>\n> - Revenue was off the chart.\n> - Profits were higher than ever.\n>\n>  *Everything* is going according to **plan**.\n",
+          "> ### The quarterly results look great!\n\n>\n\n> - Revenue was off the chart.\n\n> - Profits were higher than ever.\n\n>\n\n>  *Everything* is going according to **plan**.\n",
         html: "<blockquote><h3>The quarterly results look great!</h3><ul><li>Revenue was off the chart.</li><li>Profits were higher than ever.</li></ul><p><em>Everything</em> is going according to <strong>plan</strong>.</p></blockquote>",
       },
     ],
@@ -79,7 +79,7 @@ const markdownReference = [
       {
         name: "Code Blocks",
         description: "To create code blocks, indent every line of the block by at least four spaces or one tab.",
-        markdown: "<html>\n  <head>\n  </head>\n</html>\n",
+        markdown: "&nbsp;<html>\n\n&nbsp;&nbsp;&nbsp;<head>\n\n&nbsp;&nbsp;&nbsp;</head>\n\n&nbsp;</html>\n",
         html: "<pre><code><html><head></head></html></code></pre>",
       },
     ],
@@ -281,6 +281,18 @@ const markdownReference = [
     additional_examples: [],
   },
   {
+    name: "Task Lists",
+    description:
+      "Task lists (also referred to as checklists and todo lists) allow you to create a list of items with checkboxes. In Markdown applications that support task lists, checkboxes will be displayed next to the content. To create a task list, add dashes (-) and brackets with a space ([ ]) in front of task list items. To select a checkbox, add an x in between the brackets ([x]).",
+    examples: [
+      {
+        markdown: "- [x] Write the press release\n- [ ] Update the website\n- [ ] Contact the media",
+        html: "",
+      },
+    ],
+    additional_examples: [],
+  },
+  {
     name: "Unordered Lists",
     description:
       "To create an unordered list, add dashes (`-`), asterisks (`*`), or plus signs (`+`) in front of line items. Indent one or more items to create a nested list.",
@@ -291,18 +303,18 @@ const markdownReference = [
       },
 
       {
-        markdown: "* First item\n* Second item\n* Third item\n* Fourth item\n",
+        markdown: "* First item\n\n* Second item\n\n* Third item\n\n* Fourth item\n",
         html: "<ul><li>First item</li><li>Second item</li><li>Third item</li><li>Fourth item</li></ul>",
       },
 
       {
-        markdown: "+ First item\n* Second item\n- Third item\n+ Fourth item\n",
+        markdown: "+ First item\n\n* Second item\n\n- Third item\n\n+ Fourth item\n",
         html: "<ul><li>First item</li><li>Second item</li><li>Third item</li><li>Fourth item</li></ul>",
       },
 
       {
         markdown:
-          "- First item\n- Second item\n- Third item\n    - Indented item\n    - Indented item\n- Fourth item\n",
+          "- First item\n- Second item\n- Third item\n\n&nbsp;&nbsp;&nbsp;&nbsp;- Indented item\n\n&nbsp;&nbsp;&nbsp;&nbsp;- Indented item\n- Fourth item\n",
         html: "<ul><li>First item</li><li>Second item</li><li>Third item<ul><li>Indented item</li><li>Indented item</li></ul></li><li>Fourth item</li></ul>",
       },
     ],
