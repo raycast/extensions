@@ -246,9 +246,8 @@ export function useSearch(
           const projectUE = encodeURIComponent(projectFullPath);
           const jobs: RESTJob[] = await gitlab
             .fetch(`projects/${projectUE}/pipelines/${pipelineID}/jobs`)
-            .then((data) => {
-              return data.map((j: any) => j as RESTJob);
-            });
+            .then((data) => data as RESTJob[]);
+          jobs.sort((a, b) => a.id - b.id);
           const stages: Record<string, Job[]> = {};
           for (const job of jobs) {
             if (!stages[job.stage]) {
