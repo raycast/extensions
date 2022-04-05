@@ -33,6 +33,12 @@ import {
  */
 export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
   const srcName = instanceName(src);
+
+  /**
+   * searchText should not be used to set the search text in the filter, because this
+   * causes a funky typing experience with throttle=false and the built-in filtering. As
+   * such, setSearchText should also never be used except by List.
+   */
   const [searchText, setSearchText] = useState("");
 
   const { loading, error, data, refetch } = useQuery<GetBatchChanges>(GET_BATCH_CHANGES, {
@@ -53,7 +59,6 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
     <List
       isLoading={loading}
       searchBarPlaceholder={`Manage batch changes on ${srcName}`}
-      searchText={searchText}
       onSearchTextChange={setSearchText}
       enableFiltering={true}
       selectedItemId={showSuggestions ? "first-result" : undefined}
