@@ -41,7 +41,7 @@ async function appendSelectedTextTo(note: Note) {
   const pref: SearchNotePreferences = getPreferenceValues();
   const appendPrefix = pref.appendPrefix;
   try {
-    let selectedText = getSelectedText();
+    const selectedText = getSelectedText();
     selectedText.then((text) => {
       if (text.trim() == "") {
         showToast({ title: "No text selected", message: "Make sure to select some text.", style: Toast.Style.Failure });
