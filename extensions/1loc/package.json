@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "1loc",
-  "title": "1loc - JavaScript Utilities in single line of code",
+  "title": "1 LOC - JavaScript Utilities in single line of code",
   "description": "Browse JavaScript Utilities from 1loc.dev",
   "icon": "command-icon.png",
   "author": "kud",
