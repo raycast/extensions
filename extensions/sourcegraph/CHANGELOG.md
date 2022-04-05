@@ -1,5 +1,9 @@
 # Changelog
 
+## [Bug fixes](https://github.com/raycast/extensions/pull/1291) - 2022-04-05
+
+- **batch-changes**: Fix an issue where typing quickly could cause missed characters.
+
 ## [Batch Changes, revamped previews, and refined behaviour](https://github.com/raycast/extensions/pull/1228) - 2022-04-03
 
 - **batch-changes**: "Manage Batch Changes" is a new command that allows you to browse, view, publish, merge, and retry changesets for [Sourcegraph Batch Changes](https://about.sourcegraph.com/batch-changes)! This is only supported on Sourcegraph Self-Hosted. ([#11](https://github.com/bobheadxi/raycast-sourcegraph/pull/11), [#13](https://github.com/bobheadxi/raycast-sourcegraph/pull/13))
