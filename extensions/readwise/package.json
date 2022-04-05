@@ -26,7 +26,7 @@
     },
     {
       "name": "highlights",
-      "title": "Search Highlights",
+      "title": "Browse Highlights",
       "subtitle": "Readwise",
       "description": "Browse highlights on Readwise",
       "keywords": [
@@ -37,7 +37,7 @@
     },
     {
       "name": "books",
-      "title": "Search Library",
+      "title": "Browse Library",
       "subtitle": "Readwise",
       "description": "Browse your Readwise Library",
       "keywords": [

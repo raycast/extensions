@@ -9,13 +9,7 @@ import { getListSubtitle } from "../utils";
  *
  * Note that the EmptyView is never displayed if the List’s isLoading.
  */
-export const ListWithEmptyView = () => (
-  <List.EmptyView
-    title="No Results"
-    description="Enter something to search again."
-    icon={{ source: "empty-view.png" }}
-  />
-);
+export const ListWithEmptyView = () => <List.EmptyView title="No Results" icon={{ source: "empty-view.png" }} />;
 
 type ResultItem = { id: number };
 type ListProps<T extends ResultItem> = { item: T };
