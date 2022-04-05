@@ -1,0 +1,65 @@
+import { Detail } from "@raycast/api";
+import json2md from "json2md";
+import { usePerson } from "../hooks";
+import { Name } from "../types";
+
+export default function Person(props: Name) {
+  const { player, loading } = usePerson(props.slugifiedFull);
+
+  return player ? (
+    <Detail
+      navigationTitle={`${props.full} | Profile & Stats`}
+      isLoading={loading}
+      markdown={json2md([
+        { h1: player.names.full },
+        {
+          img: {
+            source: player.playerImages.HALF_BODY,
+          },
+        },
+        (player.playertext || []).map((text) => {
+          return [
+            {
+              h2: text.heading || "",
+            },
+            {
+              p: text.paragraphs,
+            },
+          ];
+        }),
+      ])}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label
+            title="Nationality"
+            text={player.birth.country}
+          />
+          <Detail.Metadata.Label
+            title="Date of Birth"
+            text={player.birth.date.toString()}
+          />
+          <Detail.Metadata.Label
+            title="Height"
+            text={`${
+              player.bio.height.height
+            }${player.bio.height.unit.toLowerCase()}`}
+          />
+          <Detail.Metadata.Label
+            title="Weight"
+            text={`${
+              player.bio.weight.weight
+            }${player.bio.weight.unit.toLowerCase()}`}
+          />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Label title="Position" text={player.position} />
+          <Detail.Metadata.Label
+            title="Shirt Number"
+            text={player.shirtNumber}
+          />
+        </Detail.Metadata>
+      }
+    />
+  ) : (
+    <Detail navigationTitle={`${props.full} | Profile & Stats`} />
+  );
+}
