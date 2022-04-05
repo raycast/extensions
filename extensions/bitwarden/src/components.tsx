@@ -40,11 +40,11 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
 
   async function onSubmit(values: { password: string }) {
     if (values.password.length == 0) {
-      showToast(Toast.Style.Failure, "Failed to unlock vault", "Missing password");
+      showToast(Toast.Style.Failure, "Failed to unlock vault.", "Missing password.");
       return;
     }
     try {
-      const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
+      const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait.");
       const state = await bitwardenApi.status();
       if (state.status == "unauthenticated") {
         try {
@@ -58,7 +58,7 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
       toast.hide();
       onUnlock(sessionToken);
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to unlock vault", "Invalid credentials");
+      showToast(Toast.Style.Failure, "Failed to unlock vault.", "Invalid credentials.");
     }
   }
   return (
