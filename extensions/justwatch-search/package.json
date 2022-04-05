@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-justwatch",
+  "title": "JustWatch Search",
+  "description": "Quickly find where a movie or tv show is streaming.",
+  "icon": "command-icon.png",
+  "author": "rishabswift",
+  "license": "MIT",
+  "categories": [
+    "Media"
+  ],
+  "commands": [
+    {
+      "name": "search-justwatch",
+      "title": "Search JustWatch",
+      "description": "Search where a movie or show is streaming using JustWatch",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.27.0",
+    "node-fetch": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3",
+    "prettier": "^2.6.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  },
+  "preferences": [
+    {
+      "title": "Show Results",
+      "name": "flatrate",
+      "description": "Show streaming services when you use JustWatch Search",
+      "required": true,
+      "default": true,
+      "type": "checkbox",
+      "label": "Available for Streaming (like Netflix)"
+    },
+    {
+      "name": "free",
+      "description": "Show free services when you use JustWatch Search",
+      "required": true,
+      "default": true,
+      "type": "checkbox",
+      "label": "Available for Free"
+    },
+    {
+      "name": "buy",
+      "description": "Show available buying options when you use JustWatch Search",
+      "required": true,
+      "type": "checkbox",
+      "label": "Available for Purchase"
+    },
+    {
+      "name": "rent",
+      "description": "Show available rental options when you use JustWatch Search",
+      "required": true,
+      "type": "checkbox",
+      "label": "Available for Rental"
+    }
+  ]
+}
