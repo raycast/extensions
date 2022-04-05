@@ -1,9 +1,9 @@
 import { showHUD, Toast } from "@raycast/api";
-import { isFlowInstalled, quitFlow } from "./utils";
+import { isFlowInstalled, pauseTimer } from "./utils";
 
 export default async function () {
   const toast = new Toast({
-    title: "Quitting Flow",
+    title: "Pausing timer",
     style: Toast.Style.Animated,
   });
 
@@ -16,6 +16,6 @@ export default async function () {
     return;
   }
 
-  await quitFlow();
-  await showHUD("Flow has been closed");
+  await pauseTimer();
+  await showHUD("Timer paused");
 }
