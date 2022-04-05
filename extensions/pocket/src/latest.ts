@@ -1,7 +1,6 @@
 import { open, Toast } from "@raycast/api";
 import { fetchBookmarks } from "./utils/api";
 import { HTTPError } from "got";
-import { ReadState } from "./utils/types";
 
 export default async function () {
   const toast = new Toast({
@@ -12,13 +11,13 @@ export default async function () {
   toast.show();
 
   try {
-    const bookmarks = await fetchBookmarks({ state: ReadState.Unread });
+    const bookmarks = await fetchBookmarks({ count: 1 });
 
     if (bookmarks.length === 0) {
       toast.style = Toast.Style.Failure;
       toast.title = "No bookmarks found";
     } else {
-      const bookmark = bookmarks[Math.floor(Math.random() * bookmarks.length)];
+      const bookmark = bookmarks[0];
       await open(bookmark.pocketUrl);
     }
   } catch (error) {
