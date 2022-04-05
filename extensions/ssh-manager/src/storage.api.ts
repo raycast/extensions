@@ -1,13 +1,13 @@
-import { allLocalStorageItems, setLocalStorageItem } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { ISSHConnection } from "./types";
 
 export async function getConnections(): Promise<ISSHConnection[]> {
-  const { connections } = await allLocalStorageItems();
+  const { connections } = await LocalStorage.allItems();
   if (!connections) return [];
 
   return JSON.parse(connections);
 }
 
 export async function saveConnections(connections: ISSHConnection[]) {
-  await setLocalStorageItem("connections", JSON.stringify(connections));
+  await LocalStorage.setItem("connections", JSON.stringify(connections));
 }

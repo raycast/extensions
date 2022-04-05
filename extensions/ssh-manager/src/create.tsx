@@ -1,4 +1,5 @@
-import { ActionPanel, Form, showHUD, SubmitFormAction, useNavigation, randomId } from "@raycast/api";
+import { ActionPanel, Form, showHUD, useNavigation, Action } from "@raycast/api";
+import { nanoid } from "nanoid";
 import { ISSHConnection } from "./types";
 import { getConnections, saveConnections } from "./storage.api";
 
@@ -7,7 +8,7 @@ export default function Main() {
 
   async function saveConnection(connection: ISSHConnection) {
     const existingConnections = await getConnections();
-    existingConnections.push({ ...connection, id: randomId() });
+    existingConnections.push({ ...connection, id: nanoid() });
 
     await saveConnections(existingConnections);
     await showHUD("Saved connection ✅");
@@ -19,7 +20,7 @@ export default function Main() {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Save" onSubmit={(values) => saveConnection(values as ISSHConnection)} />
+          <Action.SubmitForm title="Save" onSubmit={(values: ISSHConnection) => saveConnection(values)} />
         </ActionPanel>
       }
     >
@@ -27,7 +28,7 @@ export default function Main() {
       <Form.TextField id="address" title="Server Address" placeholder={"A resolvable DNS name or IP"} />
       <Form.TextField id="user" title="Username" placeholder={"A username to authenticate with"} />
       <Form.TextField
-        id="key"
+        id="sshKey"
         title="SSH Key Location (optional)"
         placeholder={"An optional key path to authenticate with"}
       />
