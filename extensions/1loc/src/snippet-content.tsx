@@ -1,4 +1,4 @@
-import { Detail } from "@raycast/api"
+import { List } from "@raycast/api"
 import { useState, useEffect } from "react"
 import axios from "axios"
 import matter from "gray-matter"
@@ -24,14 +24,17 @@ const SnippetContent = ({ categoryName, name }: { categoryName: string; name: st
     fetchSnippet()
   }, [])
 
-  if (!snippet) {
-    return <Detail isLoading markdown="Loading…" />
+  // const markdown = matter(Buffer.from(snippet.content, snippet.encoding).toString("ascii"))
+  const getMarkdown = () => {
+    if (!snippet) {
+      return "Loading…"
+    }
+    const parsed = matter(Buffer.from(snippet.content, "base64").toString("ascii"))
+
+    return `# [${parsed.data.category}] ${parsed.data.title} ${parsed.content}`
   }
 
-  // const markdown = matter(Buffer.from(snippet.content, snippet.encoding).toString("ascii"))
-  const markdown = matter(Buffer.from(snippet.content, "base64").toString("ascii"))
-
-  return <Detail markdown={`# [${markdown.data.category}] ${markdown.data.title} ${markdown.content}`} />
+  return <List.Item.Detail isLoading={!snippet} markdown={getMarkdown()} />
 }
 
 export default SnippetContent

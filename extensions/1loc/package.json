@@ -5,6 +5,9 @@
   "description": "Browse JavaScript Utilities from 1loc.dev",
   "icon": "command-icon.png",
   "author": "kud",
+  "categories": [
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -16,7 +19,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.27.0",
+    "@raycast/api": "^1.31.0",
     "axios": "0.25.0",
     "change-case": "4.1.2",
     "gray-matter": "4.0.3"

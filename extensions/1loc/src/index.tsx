@@ -1,4 +1,4 @@
-import { ActionPanel, List, PushAction } from "@raycast/api"
+import { ActionPanel, List, Action } from "@raycast/api"
 import { useState, useEffect } from "react"
 import axios from "axios"
 
@@ -34,7 +34,7 @@ const Main = () => {
           title={name}
           actions={
             <ActionPanel>
-              <PushAction title={`Browse "${name}"`} target={<Snippet name={name} />} />
+              <Action.Push title={`Browse "${name}"`} target={<Snippet name={name} />} />
             </ActionPanel>
           }
         />

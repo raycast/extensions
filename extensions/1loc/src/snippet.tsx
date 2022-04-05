@@ -1,4 +1,4 @@
-import { ActionPanel, List, PushAction } from "@raycast/api"
+import { ActionPanel, List, Action } from "@raycast/api"
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { sentenceCase } from "change-case"
@@ -27,20 +27,13 @@ const Snippet = ({ name }: { name: string }) => {
   }
 
   return (
-    <List>
+    <List isShowingDetail>
       {snippets.map(({ name: snippetName }: ISnippet) => (
         <List.Item
           key={snippetName}
           icon="🗒️"
           title={sentenceCase(snippetName.replace(".md", ""))}
-          actions={
-            <ActionPanel>
-              <PushAction
-                title={`Show "${sentenceCase(snippetName.replace(".md", ""))}"`}
-                target={<SnippetContent categoryName={name} name={snippetName} />}
-              />
-            </ActionPanel>
-          }
+          detail={<SnippetContent categoryName={name} name={snippetName} />}
         />
       ))}
     </List>
