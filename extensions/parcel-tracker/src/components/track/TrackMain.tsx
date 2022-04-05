@@ -1,10 +1,15 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import React from "react";
-import { logistics } from "../../metadata/logistics";
+import React, { useEffect, useState } from "react";
 import Track from "./Track";
+import { getVendors } from "../../api/api";
+import { IVendorData } from "../../model/vendorData";
 
 export default function TrackMain() {
-  const vendors = logistics;
+  const [vendors, setVendors] = useState<IVendorData[]>();
+
+  useEffect(() => {
+    getVendors().then((response) => setVendors(response.data));
+  }, []);
 
   return (
     <List searchBarPlaceholder="Choose delivery vendor">

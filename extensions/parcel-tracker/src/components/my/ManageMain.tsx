@@ -1,5 +1,7 @@
 import { List, LocalStorage, showToast, Toast } from "@raycast/api";
 import React, { useEffect, useState } from "react";
+import { getVendors } from "../../api/api";
+import { IVendorData } from "../../model/vendorData";
 import PackageItem from "./PackageItem";
 
 export interface IItems {
@@ -8,10 +10,13 @@ export interface IItems {
 
 export default function ManageMain() {
   const [packages, setPackages] = useState<IItems>({});
+  const [vendors, setVendors] = useState<IVendorData[]>(new Array<IVendorData>());
+
   useEffect(() => {
     LocalStorage.allItems().then((response) => {
       setPackages(response);
     });
+    getVendors().then((response) => setVendors(response.data));
   }, []);
 
   const handleRemove = (itemKey: string) => {
@@ -35,6 +40,11 @@ export default function ManageMain() {
     return packages[itemKey].split("//")[1] === "true";
   };
 
+  const findVendorByCode = (itemKey: string): IVendorData | null => {
+    const code = itemKey.split("-")[0];
+    return vendors.find((v) => v.code === code) || null;
+  };
+
   return (
     <List>
       <List.Section title="Delivery NOT completed" key="notCompleted">
@@ -47,6 +57,7 @@ export default function ManageMain() {
                 itemName={getItemName(itemKey)}
                 isComplete={getIsComplete(itemKey)}
                 handleRemove={handleRemove}
+                vendor={findVendorByCode(itemKey)}
               />
             );
           })}
@@ -61,6 +72,7 @@ export default function ManageMain() {
                 itemName={getItemName(itemKey)}
                 isComplete={getIsComplete(itemKey)}
                 handleRemove={handleRemove}
+                vendor={findVendorByCode(itemKey)}
               />
             );
           })}

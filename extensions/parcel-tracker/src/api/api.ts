@@ -13,14 +13,18 @@ instance.interceptors.response.use(
   }
 );
 
-export const getSearchPage = () => {
-  return instance.get(
-    "https://m.search.naver.com/search.naver?sm=tab_hty.top&where=nexearch&query=%ED%83%9D%EB%B0%B0%EC%A1%B0%ED%9A%8C"
-  );
+// const apiServer = "http://192.168.219.110:18000/api";
+const apiServer = "http://localhost:8000/api";
+
+export const getVendors = () => {
+  return instance.get(`${apiServer}/vendors`);
 };
 
-export const getTrackData = (vendorId: string, trackId: string, passportKey: string) => {
-  return instance.get(
-    `https://m.search.naver.com/p/csearch/ocontent/util/headerjson.naver?callapi=parceltracking&t_code=${vendorId}&t_invoice=${trackId}&passportKey=${passportKey}`
-  );
+export const getVendorByCode = (code: string) => {
+  console.log(`${apiServer}/vendor/${code}`);
+  return instance.get(`${apiServer}/vendor/${code}`);
+};
+
+export const getTrackData = (vendorId: string, trackId: string) => {
+  return instance.get(`${apiServer}/tracking?vendorId=${vendorId}&invoiceNumber=${trackId}`);
 };
