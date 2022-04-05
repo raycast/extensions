@@ -3,6 +3,7 @@ import { Task } from "@doist/todoist-api-typescript";
 export enum ViewMode {
   project,
   date,
+  search,
 }
 
 export interface SectionWithTasks {
@@ -25,6 +26,13 @@ export enum TodayGroupBy {
 }
 
 export enum ProjectGroupBy {
+  default = "default",
+  priority = "priority",
+  date = "date",
+  label = "label",
+}
+
+export enum SearchGroupBy {
   default = "default",
   priority = "priority",
   date = "date",

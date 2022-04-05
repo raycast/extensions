@@ -58,9 +58,9 @@ export default function TaskDetail({ task }: TaskDetailProps): JSX.Element {
           />
           {taskLabels && taskLabels.length > 0 ? (
             <Detail.Metadata.TagList title="Labels">
-              {taskLabels.map((taskLabel) => (
+              {taskLabels.map((taskLabel, index) => (
                 <Detail.Metadata.TagList.Item
-                  key={taskLabel?.id}
+                  key={taskLabel?.id || index}
                   text={taskLabel?.name || ""}
                   color={taskLabel.color?.value}
                 />
