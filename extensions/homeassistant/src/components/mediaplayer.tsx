@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, Color, CopyToClipboardAction } from "@raycast/api";
+import { ActionPanel, Icon, Color, Action } from "@raycast/api";
 import { ha } from "../common";
 import { State } from "../haapi";
 
@@ -34,7 +34,7 @@ export function SelectSourceAction(props: { state: State }): JSX.Element | null 
         shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
       >
         {sl.map((s) => (
-          <ActionPanel.Item key={`${s}`} title={`${s}`} onAction={() => handle(`${s}`)} />
+          <Action key={`${s}`} title={`${s}`} onAction={() => handle(`${s}`)} />
         ))}
       </ActionPanel.Submenu>
     );
@@ -62,7 +62,7 @@ export function SelectVolumeAction(props: { state: State }): JSX.Element | null 
         shortcut={{ modifiers: ["cmd", "opt"], key: "v" }}
       >
         {sl.map((s) => (
-          <ActionPanel.Item key={`${s}`} title={`${s}%`} onAction={() => handle(s / 100)} />
+          <Action key={`${s}`} title={`${s}%`} onAction={() => handle(s / 100)} />
         ))}
       </ActionPanel.Submenu>
     );
@@ -75,7 +75,7 @@ export function CopyTrackToClipboard(props: { state: State }): JSX.Element | nul
   const song = getMediaPlayerTitleAndArtist(state);
   if (song) {
     return (
-      <CopyToClipboardAction title="Copy Track" content={song} shortcut={{ modifiers: ["cmd", "shift"], key: "t" }} />
+      <Action.CopyToClipboard title="Copy Track" content={song} shortcut={{ modifiers: ["cmd", "shift"], key: "t" }} />
     );
   }
   return null;
