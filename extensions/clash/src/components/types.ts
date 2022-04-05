@@ -1,7 +1,7 @@
-import { LocalStorageValue } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 
 // backends store in local storage
-export type BackendsT = Map<string, LocalStorageValue>;
+export type BackendsT = Map<string, LocalStorage.Value>;
 
 // "/traffic"
 export type TrafficT = { up: number; down: number };
@@ -56,4 +56,15 @@ export type RuleT = {
   type: string;
   payload: string;
   proxy: string;
+};
+
+export type ModeT = "rule" | "global" | "direct" | "script";
+
+export type ConfigT = {
+  port?: number;
+  socketPort?: number;
+  redirPort?: number;
+  allowLan?: boolean;
+  mode: ModeT;
+  logLevel?: LogLevelT;
 };
