@@ -39,9 +39,9 @@ export default function CommonDirectory() {
           return b.name.toUpperCase() > a.name.toUpperCase() ? 1 : -1;
         });
       }
+      if (showOpenDirectory) setOpenDirectory(await getOpenFinderWindowPath());
       setCommonDirectory(_commonDirectory);
       setLoading(false);
-      if (showOpenDirectory) setOpenDirectory(await getOpenFinderWindowPath());
     }
 
     _fetchLocalStorage().then();

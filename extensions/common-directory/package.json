@@ -25,7 +25,7 @@
           "title": "More Directory",
           "label": "Open Directory",
           "description": "There is some delay when fetching Open Directory.",
-          "default": true
+          "default": false
         },
         {
           "name": "SortBy",
