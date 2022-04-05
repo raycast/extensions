@@ -1,14 +1,5 @@
 import { useState, Fragment } from "react";
-import {
-  ActionPanel,
-  Action,
-  Form,
-  SubmitFormAction,
-  Detail,
-  copyTextToClipboard,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, Detail, showToast, Clipboard, Toast } from "@raycast/api";
 
 import { generatePassword } from "./helpers/helpers";
 
@@ -20,22 +11,18 @@ export default function Command() {
   let errorMessage = "";
 
   const handleGeneratePassword = (values: any) => {
-    // console.log(values);
-
     const length = values.lengthinput;
     const lengthNumber = parseInt(length, 10);
-    // console.log("lengthNumber", lengthNumber);
 
     const useNumbers = values.usenumbers === 1 ? true : false;
     const useChars = values.usechars === 1 ? true : false;
 
     if (Number.isFinite(lengthNumber) && lengthNumber > 4 && lengthNumber < 65) {
       const generatedPassword = generatePassword(lengthNumber, useNumbers, useChars);
-      //   console.log("generatedPassword", generatedPassword);
       setPassword(generatedPassword);
       values = {};
-      copyTextToClipboard(generatedPassword);
-      showToast(ToastStyle.Success, "Copied Password", generatedPassword);
+      Clipboard.copy(generatedPassword);
+      showToast(Toast.Style.Success, "Copied Password", generatedPassword);
     } else {
       isError(true);
       setPassword("Error");
@@ -50,12 +37,12 @@ export default function Command() {
   };
 
   return (
-    <Fragment>
+    <>
       <Form
         navigationTitle="Password Generator"
         actions={
           <ActionPanel>
-            <SubmitFormAction title="Generate Password" onSubmit={(values) => handleGeneratePassword(values)} />
+            <Action.SubmitForm title="Generate Password" onSubmit={(values) => handleGeneratePassword(values)} />
           </ActionPanel>
         }
       >
@@ -68,22 +55,16 @@ export default function Command() {
         <Form.Checkbox id="usechars" label="Use special characters?" defaultValue={true} />
       </Form>
       {password && !error && (
-        <Fragment>
-          <Detail
-            markdown={`### Generated Password copied to clipboard!`}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard content={password} />
-              </ActionPanel>
-            }
-          />
-        </Fragment>
+        <Detail
+          markdown={`### Generated Password copied to clipboard!`}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard content={password} />
+            </ActionPanel>
+          }
+        />
       )}
-      {error && (
-        <Fragment>
-          <Detail markdown={`### Error: please enter a valid number between 5 and 64`} />
-        </Fragment>
-      )}
-    </Fragment>
+      {error && <Detail markdown={`### Error: please enter a valid number between 5 and 64`} />}
+    </>
   );
 }
