@@ -17,6 +17,7 @@ import { useRepositories } from "./useRepositories";
 import { clearVisitedRepositories, useVisitedRepositories } from "./useVisitedRepositories";
 import { getAccessoryTitle, getIcon, getSubtitle } from "./utils";
 import { useRepositoryReleases } from "./useRepositoryReleases";
+import { OpenInWebIDEAction } from "./website";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
@@ -82,12 +83,8 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
     <ActionPanel title={props.repository.nameWithOwner}>
       <ActionPanel.Section>
         <Action.OpenInBrowser url={props.repository.url} onOpen={() => props.onVisit(props.repository)} />
-        <Action.OpenInBrowser
-          icon={{ source: "github-dev.png", tintColor: Color.PrimaryText }}
-          title="Open in Web Editor"
-          url={props.repository.url.replace("https://github.com", "https://github.dev")}
-          onOpen={() => props.onVisit(props.repository)}
-        />
+        <OpenInWebIDEAction repository={props.repository} onOpen={() => props.onVisit(props.repository)} />
+        <Action.OpenInBrowser icon="vscode-action-icon.png" title="Clone in VSCode" url="vscode://vscode.git/clone?url=https://github.com/" />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.OpenInBrowser
