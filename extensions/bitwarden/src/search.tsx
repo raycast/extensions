@@ -143,9 +143,11 @@ export function ItemList(props: { api: Bitwarden }) {
             title="No matching items found."
             description="Hit the refresh button to sync your vault."
             actions={
-              <ActionPanel>
-                <Action icon={Icon.ArrowClockwise} title={"Refresh Items"} onAction={refreshItems} />
-              </ActionPanel>
+              !state.isLoading && (
+                <ActionPanel>
+                  <RefreshAction refreshItems={refreshItems} />
+                </ActionPanel>
+              )
             }
           />
         </Fragment>
@@ -167,7 +169,7 @@ function getIcon(item: Item) {
 
 function BitwardenItem(props: {
   item: Item;
-  refreshItems?: () => void;
+  refreshItems: () => void;
   lockVault: () => void;
   copyTotp: (id: string) => void;
 }) {
@@ -249,14 +251,9 @@ function BitwardenItem(props: {
             </ActionPanel.Submenu>
           </ActionPanel.Section>
           <ActionPanel.Section>
+            <RefreshAction refreshItems={refreshItems} />
             <Action
-              title="Refresh Items"
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-              icon={Icon.ArrowClockwise}
-              onAction={refreshItems}
-            />
-            <Action
-              icon={Icon.XmarkCircle}
+              icon={{ source: "sf_symbols_lock.svg", tintColor: Color.PrimaryText }} // Does not immediately follow theme
               title="Lock Vault"
               shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
               onAction={lockVault}
@@ -274,5 +271,16 @@ function PasswordActions(props: { password: string }) {
 
   return (
     <React.Fragment>{primaryAction == "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}</React.Fragment>
+  );
+}
+
+function RefreshAction(props: { refreshItems: () => void }) {
+  return (
+    <Action
+      title="Refresh Items"
+      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      icon={Icon.ArrowClockwise}
+      onAction={props.refreshItems}
+    />
   );
 }
