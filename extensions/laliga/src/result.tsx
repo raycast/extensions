@@ -43,7 +43,6 @@ export default function Fixture() {
 
   return (
     <List
-      navigationTitle="Results | LaLiga"
       throttle
       isLoading={loading}
       searchBarAccessory={<CompetitionDropdown onSelect={setCompetition} />}

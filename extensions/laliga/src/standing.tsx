@@ -44,7 +44,6 @@ export default function GetTables() {
 
   return (
     <List
-      navigationTitle="Standings | LaLiga"
       throttle
       isLoading={loading}
       searchBarAccessory={<CompetitionDropdown onSelect={setCompetition} />}

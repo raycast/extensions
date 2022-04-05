@@ -24,7 +24,6 @@ export default function Club() {
 
   return (
     <List
-      navigationTitle="Clubs | LaLiga"
       throttle
       isLoading={loading}
       searchBarAccessory={<CompetitionDropdown onSelect={setCompetition} />}

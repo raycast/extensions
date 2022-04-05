@@ -19,7 +19,7 @@
     },
     {
       "name": "result",
-      "title": "Results",
+      "title": "Fixtures & Results",
       "subtitle": "LaLiga",
       "description": "Find out the results of the last round of LaLiga and the previous ones of LaLiga.",
       "mode": "view"

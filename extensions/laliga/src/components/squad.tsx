@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getSquad } from "../api";
-import { Club, Squad } from "../types";
+import { Squad, Team } from "../types";
 import Player from "./player";
 
 const getFlagEmoji = (isoCode?: string) => {
@@ -26,7 +26,7 @@ const getFlagEmoji = (isoCode?: string) => {
     .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
 };
 
-export default function ClubSquad(props: Club) {
+export default function ClubSquad(props: Team) {
   const [members, setMembers] = useState<Squad[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   useEffect(() => {
