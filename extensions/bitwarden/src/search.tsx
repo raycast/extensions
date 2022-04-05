@@ -97,9 +97,16 @@ export function ItemList(props: { api: Bitwarden }) {
   async function refreshItems() {
     if (session.token) {
       const toast = await showToast(Toast.Style.Animated, "Syncing Items...");
-      await bitwardenApi.sync(session.token);
-      await loadItems(session.token);
-      await toast.hide();
+      try {
+        await bitwardenApi.sync(session.token);
+        await loadItems(session.token);
+        await toast.hide();
+      } catch (error) {
+        await bitwardenApi.logout();
+        await session.deleteToken();
+        toast.style = Toast.Style.Failure;
+        toast.message = "Failed to sync. Please try logging in again.";
+      }
     }
   }
 
