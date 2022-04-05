@@ -1,10 +1,12 @@
 {
   "name": "obsidian",
   "title": "Obsidian",
-  "description": "Search, open, view, copy, paste and edit any note in Obsidian",
+  "description": "Control Obsidian with Raycast",
   "icon": "command-icon.png",
   "author": "marcjulian",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -47,6 +49,13 @@
           "title": "Hide Links",
           "required": false,
           "description": "Hide links for copying and viewing notes"
+        },
+        {
+          "name": "appendPrefix",
+          "type": "textfield",
+          "title": "Prefix for Append action",
+          "required": false,
+          "description": "Specify a prefix for Append action (e.g. '-')"
         },
         {
           "name": "primaryAction",

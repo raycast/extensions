@@ -20,6 +20,7 @@ export interface SearchNotePreferences extends Preferences {
   excludedFolders: string;
   removeYAML: boolean;
   removeLinks: boolean;
+  appendPrefix: string;
 }
 
 export interface Vault {
