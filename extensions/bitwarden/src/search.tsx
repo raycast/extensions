@@ -136,52 +136,41 @@ export function ItemList(props: { api: Bitwarden }) {
     );
   }
 
+  const vaultEmpty = state.items.length > 0;
+
   return (
     <List isLoading={state.isLoading}>
-      {state.items.length > 0 ? (
-        <Fragment>
-          {state.items
-            .sort((a, b) => {
-              if (a.favorite && b.favorite) return 0;
-              return a.favorite ? -1 : 1;
-            })
-            .map((item) => (
-              <BitwardenItem
-                key={item.id}
-                item={item}
-                lockVault={lockVault}
-                logoutVault={logoutVault}
-                refreshItems={refreshItems}
-                copyTotp={copyTotp}
-              />
-            ))}
-          <List.EmptyView
-            icon={{ source: "bitwarden-64.png" }}
-            title="No matching items found."
-            description="Hit the refresh button to sync your vault."
-            actions={
-              !state.isLoading && (
-                <ActionPanel>
-                  <VaultActions refreshItems={refreshItems} lockVault={lockVault} logoutVault={logoutVault} />
-                </ActionPanel>
-              )
-            }
+      {state.items
+        .sort((a, b) => {
+          if (a.favorite && b.favorite) return 0;
+          return a.favorite ? -1 : 1;
+        })
+        .map((item) => (
+          <BitwardenItem
+            key={item.id}
+            item={item}
+            lockVault={lockVault}
+            logoutVault={logoutVault}
+            refreshItems={refreshItems}
+            copyTotp={copyTotp}
           />
-        </Fragment>
-      ) : (
-        <List.EmptyView
-          icon={{ source: "bitwarden-64.png" }}
-          title="Vault empty."
-          description="Hit the refresh button to sync your vault or try logging in again."
-          actions={
-            !state.isLoading && (
-              <ActionPanel>
-                <VaultActions refreshItems={refreshItems} lockVault={lockVault} logoutVault={logoutVault} />
-              </ActionPanel>
-            )
-          }
-        />
-      )}
+        ))}
+      <List.EmptyView
+        icon={{ source: "bitwarden-64.png" }}
+        title={vaultEmpty ? "Vault empty." : "No matching items found."}
+        description={
+          vaultEmpty
+            ? "Hit the refresh button to sync your vault or try logging in again."
+            : "Hit the refresh button to sync your vault."
+        }
+        actions={
+          !state.isLoading && (
+            <ActionPanel>
+              <VaultActions refreshItems={refreshItems} lockVault={lockVault} logoutVault={logoutVault} />
+            </ActionPanel>
+          )
+        }
+      />
     </List>
   );
 }
