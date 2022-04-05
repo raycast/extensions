@@ -136,7 +136,7 @@ export function ItemList(props: { api: Bitwarden }) {
     );
   }
 
-  const vaultEmpty = state.items.length > 0;
+  const vaultEmpty = state.items.length == 0;
 
   return (
     <List isLoading={state.isLoading}>
