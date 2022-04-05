@@ -21,7 +21,6 @@ export const getVendors = () => {
 };
 
 export const getVendorByCode = (code: string) => {
-  console.log(`${apiServer}/vendor/${code}`);
   return instance.get(`${apiServer}/vendor/${code}`);
 };
 
