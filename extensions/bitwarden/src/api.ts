@@ -1,7 +1,7 @@
 import execa from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
-import { Item, PasswordGeneratorOptions, VaultStatus } from "./types";
+import { Item, PasswordGeneratorOptions, VaultState } from "./types";
 import { getPasswordGeneratingArgs } from "./utils";
 
 export class Bitwarden {
@@ -56,9 +56,9 @@ export class Bitwarden {
     await this.exec(["lock"]);
   }
 
-  async status(): Promise<VaultStatus> {
+  async status(): Promise<VaultState> {
     const { stdout } = await this.exec(["status"]);
-    return JSON.parse(stdout).status;
+    return JSON.parse(stdout);
   }
 
   async generatePassword(options?: PasswordGeneratorOptions): Promise<string> {
