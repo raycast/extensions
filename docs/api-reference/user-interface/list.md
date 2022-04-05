@@ -185,7 +185,7 @@ export default function Command() {
 {% tab title="ListWithDetail.tsx" %}
 
 ```jsx
-import { ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { usePokemons } from './utils'
 
 export default function Command() {
@@ -224,6 +224,7 @@ export default function Command() {
           );
         })}
     </List>
+  );        
 }
 ```
 
@@ -248,14 +249,11 @@ export default function CommandWithCustomEmptyView() {
         setState((previous) => ({ ...previous, searchText: newValue }))
       }
     >
-      {state.searchText === "" && state.items.length === 0 ? (
-        <List.EmptyView
-          icon={{ source: "https://placekitten.com/500/500" }}
-          title="Type something to get started"
-        />
-      ) : (
-        state.items.map((item) => <List.Item key={item} title={item} />)
-      )}
+      <List.EmptyView
+        icon={{ source: "https://placekitten.com/500/500" }}
+        title="Type something to get started"
+      />
+      state.items.map((item) => <List.Item key={item} title={item} />)
     </List>
   );
 }
@@ -484,14 +482,11 @@ export default function CommandWithCustomEmptyView() {
         setState((previous) => ({ ...previous, searchText: newValue }))
       }
     >
-      {state.searchText === "" && state.items.length === 0 ? (
-        <List.EmptyView
-          icon={{ source: "https://placekitten.com/500/500" }}
-          title="Type something to get started"
-        />
-      ) : (
-        state.items.map((item) => <List.Item key={item} title={item} />)
-      )}
+      <List.EmptyView
+        icon={{ source: "https://placekitten.com/500/500" }}
+        title="Type something to get started"
+      />
+      state.items.map((item) => <List.Item key={item} title={item} />)
     </List>
   );
 }
