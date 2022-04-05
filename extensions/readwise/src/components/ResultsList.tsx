@@ -1,5 +1,5 @@
-import React, { ComponentType, ReactNode } from "react";
-import { Icon, List } from "@raycast/api";
+import { ComponentType, ReactNode } from "react";
+import { List } from "@raycast/api";
 import { getListSubtitle } from "../utils";
 
 /**
@@ -10,7 +10,11 @@ import { getListSubtitle } from "../utils";
  * Note that the EmptyView is never displayed if the List’s isLoading.
  */
 export const ListWithEmptyView = () => (
-  <List.EmptyView title="No results" description="Type something to search again." icon={{ source: Icon.Binoculars }} />
+  <List.EmptyView
+    title="No Results"
+    description="Enter something to search again."
+    icon={{ source: "empty-view.png" }}
+  />
 );
 
 type ResultItem = { id: number };
