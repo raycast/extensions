@@ -30,6 +30,10 @@ export class Bitwarden {
     await this.exec(["login", "--apikey"]);
   }
 
+  async logout(): Promise<void> {
+    await this.exec(["logout"]);
+  }
+
   async listItems(sessionToken: string): Promise<Item[]> {
     const { stdout } = await this.exec(["list", "items", "--session", sessionToken]);
     const items = JSON.parse(stdout);
