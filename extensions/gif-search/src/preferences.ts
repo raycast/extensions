@@ -11,10 +11,11 @@ export const DEFAULT_ACTION = "defaultAction";
 
 export const CONFIG_URL = "https://cdn.joe.sh/gif-search/config.json";
 
-export type ServiceName = "giphy" | "tenor";
+export type ServiceName = "giphy" | "tenor" | "finerGifs";
 export const GIF_SERVICE: { [name: string]: ServiceName } = {
   GIPHY: "giphy",
   TENOR: "tenor",
+  FINER_GIFS: "finerGifs",
 };
 
 export type Preference = { [preferenceName: string]: any };

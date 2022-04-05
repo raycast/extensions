@@ -30,6 +30,13 @@ export interface IGif {
     | string;
 }
 
+export type APIOpt = { offset?: number; limit?: number };
+
+export interface IGifAPI {
+  search: (term: string, opt?: APIOpt) => Promise<IGif[]>;
+  trending: (opt?: APIOpt) => Promise<IGif[]>;
+}
+
 export function renderGifMarkdownDetails(gif: IGif) {
   let md = `
 ### ${gif.title}

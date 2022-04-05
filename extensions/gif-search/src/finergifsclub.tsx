@@ -1,15 +1,15 @@
 import { useEffect } from "react";
 import { List, showToast, Toast } from "@raycast/api";
 
-import { getShowPreview } from "./preferences";
-import useFinerGifsClubAPI from "./hooks/useFinerGifsClubAPI";
+import { getShowPreview, GIF_SERVICE } from "./preferences";
 import { GifList } from "./components/GifList";
+import useSearchAPI from "./hooks/useSearchAPI";
 
 import "./fetch-polyfill";
 
 export default function Command() {
   const showPreview = getShowPreview();
-  const [results, isLoading, search] = useFinerGifsClubAPI({});
+  const [results, isLoading, search] = useSearchAPI(GIF_SERVICE.FINER_GIFS, {});
 
   useEffect(() => {
     if (results?.error) {
