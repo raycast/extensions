@@ -167,7 +167,7 @@ export function JobList(props: {
   if (error) {
     showToast(Toast.Style.Failure, "Cannot search Pipelines", error);
   }
-  if (!stages || isLoading) {
+  if (!stages) {
     return <List isLoading navigationTitle="Jobs" />;
   }
   return (
