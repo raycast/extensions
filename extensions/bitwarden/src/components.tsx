@@ -27,6 +27,10 @@ export function TroubleshootingGuide(): JSX.Element {
 export function UnlockForm(props: { onUnlock: (token: string) => void; bitwardenApi: Bitwarden }): JSX.Element {
   const { bitwardenApi, onUnlock } = props;
   async function onSubmit(values: { password: string }) {
+    if (values.password.length == 0) {
+      showToast(Toast.Style.Failure, "Failed to unlock vault", "Missing password");
+      return;
+    }
     try {
       const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
       const status = await bitwardenApi.status();
@@ -34,7 +38,7 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
         try {
           await bitwardenApi.login();
         } catch (error) {
-          showToast(Toast.Style.Failure, "Failed to unlock vault.", "Please your API Key and Secret.");
+          showToast(Toast.Style.Failure, "Failed to unlock vault.", "Please check your API Key and Secret.");
           return;
         }
       }
