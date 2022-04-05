@@ -7,9 +7,3 @@ export default async () => {
     'tell application "System Events" \n tell application "QuickTime Player" to activate frontmost \n tell application "QuickTime Player" to start (new audio recording) \n end tell'
   );
 };
-
-/*
-
-tell application "System Events" \n tell application "QuickTime Player" to activate frontmost \n tell application "QuickTime Player" to start (new audio recording) \n end tell
-
-*/
