@@ -105,7 +105,7 @@ export function RecentCommitsList(): JSX.Element {
   return (
     <List isLoading={isLoading} searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}>
       {commits?.map((e) => (
-        <EventCommitListItem event={e} key={`${e.target_id}${e.project_id}`} />
+        <EventCommitListItem event={e} key={`${e.id}`} />
       ))}
     </List>
   );
