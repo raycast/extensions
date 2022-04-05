@@ -11,7 +11,7 @@
     {
       "name": "index",
       "title": "Search Token Pair in DEX Screener",
-      "description": "",
+      "description": "Search token pair in dexscreener.com",
       "mode": "view"
     }
   ],
