@@ -73,6 +73,7 @@
 /extensions/dockerhub                                @k8scat
 /extensions/domainr                                  @Rawnly
 /extensions/doppler-share-secrets                    @thomaspaulmann
+/extensions/dot-new                                  @natterstefan
 /extensions/elgato-key-light                         @thomaspaulmann
 /extensions/elm-search                               @NeoVier
 /extensions/emoji                                    @FezVrasta
