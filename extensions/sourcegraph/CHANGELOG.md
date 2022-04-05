@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [Bug fixes](https://github.com/raycast/extensions/pull/1291) - 2022-04-05
 
 - **batch-changes**: Fix an issue where typing quickly could cause missed characters.
 
