@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
+import { cachedDataVersionTag } from "v8";
 import { getTrackData } from "../../api/api";
 import { ITrackData } from "../../model/trackData";
 
@@ -36,7 +37,7 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
   };
 
   const handleTextChange = (input: string) => {
-    const regex = new RegExp("[0-9]{8}");
+    const regex = new RegExp("[0-9]{8,}");
     if (regex.test(input)) {
       search(input);
     }
@@ -53,7 +54,12 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
   };
 
   return (
-    <List onSearchTextChange={handleTextChange} searchBarPlaceholder="Type your invoice number.." isLoading={loading}>
+    <List
+      throttle={true}
+      onSearchTextChange={handleTextChange}
+      searchBarPlaceholder="Type your invoice number.."
+      isLoading={loading}
+    >
       {!hasError && trackData && trackData.details?.length > 0 ? (
         <List.Section title={trackData.completeYN ? "Delivery completed" : "Delivery NOT completed"}>
           <List.Item

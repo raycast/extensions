@@ -37,7 +37,7 @@ export default function ManageMain() {
   };
 
   const getIsComplete = (itemKey: string): boolean => {
-    return packages[itemKey].split("//")[1] === "true";
+    return packages[itemKey].split("//")[1] === "Y";
   };
 
   const findVendorByCode = (itemKey: string): IVendorData | null => {
