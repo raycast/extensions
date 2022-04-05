@@ -9,7 +9,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "1loc - JavaScript Utilities in single line of code",
+      "title": "Search JavaScript Utilities",
+      "subtitle": "1 LOC"
       "description": "Browse JavaScript Utilities from 1loc.dev",
       "mode": "view"
     }
