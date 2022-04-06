@@ -57,10 +57,10 @@ export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean 
   const showPreview = getShowPreview();
 
   const openInBrowser = url ? <Action.OpenInBrowser key="openInBrowser" url={url} /> : undefined;
-  const copyGif = (
+  const copyGifUrl = (
     <Action.CopyToClipboard key="copyGifUrl" title="Copy GIF URL to Clipboard" content={stripQParams(gif_url)} />
   );
-  const copyUrl = url ? (
+  const copyPageUrl = url ? (
     <Action.CopyToClipboard
       key="copyPageUrl"
       title="Copy Page URL to Clipboard"
@@ -87,7 +87,7 @@ export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean 
     />
   );
 
-  const actions = [openInBrowser, copyGif, copyFile, copyUrl];
+  const actions = [copyFile, copyGifUrl, copyPageUrl, openInBrowser];
   if (props.showViewDetails) {
     if (showPreview) {
       // Put View Details to the end if using gif preview

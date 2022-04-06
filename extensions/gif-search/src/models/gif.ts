@@ -36,9 +36,6 @@ export function renderGifMarkdownDetails(gif: IGif) {
 
 <img alt="${gif.title}" src="${gif.gif_url}" height="200" />
 
-\`\`\`
-Static preview, animated preview coming soon!
-\`\`\`
   `;
 
   if (gif.attribution) {
