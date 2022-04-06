@@ -67,8 +67,8 @@ function Project({ projectId }: ProjectProps): JSX.Element {
   return rawTasks?.length === 0 ? (
     <List isLoading={!rawTasks}>
       <List.EmptyView
-        title="No tasks in this project. How about creating one?"
-        icon="master-plan.svg"
+        title="No tasks in this project."
+        description="How about creating one?"
         actions={
           <ActionPanel>
             <Action.Push title="Create Task" target={<CreateTask />} />
