@@ -1,6 +1,3 @@
-<p align="center">
-   <img src="./metadata/logo.png" width="128">
-</p>
 <h3 align="center"> 
    <strong style="">Toggle Desktop Visible</strong>
    <br>
