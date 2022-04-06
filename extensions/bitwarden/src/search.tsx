@@ -212,7 +212,9 @@ function BitwardenItem(props: {
       id={item.id}
       title={item.name}
       keywords={keywords}
-      accessoryIcon={item.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined}
+      accessories={
+        item.favorite ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" }] : undefined
+      }
       icon={getIcon(item)}
       subtitle={item.login?.username || undefined}
       actions={
