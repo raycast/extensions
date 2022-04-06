@@ -13,17 +13,17 @@
 
 ---
 
-You can toggle Desktop file and folder Show and Hidden. sometimes we don't want see Desktop have so many files or folder,
-So the extension can help you, you can easily switch Desktop visible.
+You can toggle the Desktop file and folder Show and Hidden. sometimes we don't want to see the Desktop have so many files or folders,
+So the extension can help you, you can easily switch to Desktop visible.
 
 ### Command
-<img src="./metadata/screenshot-cmd.png">
+<img src="./metadata/Screenshot-cmd.png">
 
 ### Show Desktop
 
-<img src="./metadata/screenshot-shown.png">
+<img src="./metadata/Screenshot-shown.png">
 
 ### Hidden Desktop
 
-<img src="./metadata/screenshot-hidden.png">
+<img src="./metadata/Screenshot-hidden.png">
 
