@@ -22,7 +22,7 @@ export const renderDetails = async (torrent: Torrent, downloadStats: string) => 
 
     ## Transfer
 
-    <img src="data:image/svg+xml;base64,${encodeURIComponent(img)}" />
+    <img src="data:image/svg+xml,${encodeURIComponent(img)}" />
 
     ${torrent.errorString && `**Error**: ${torrent.errorString}`}
 
