@@ -1,13 +1,11 @@
 import { Image, List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-import { useDebounce } from "use-debounce";
 import { Actions } from "./actions";
 import { useSearch } from "./hooks/useSearch";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
-  const [debouncedSearchText] = useDebounce(searchText, 200);
-  const { result, loading, error } = useSearch(debouncedSearchText);
+  const { result, loading, error } = useSearch(searchText);
 
   if (error) {
     showToast(
@@ -18,7 +16,7 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={loading} onSearchTextChange={setSearchText}>
+    <List isLoading={loading} onSearchTextChange={setSearchText} throttle>
       {result.map((pr, index) => {
         const icon = (() => {
           if (pr.status === "success") {
@@ -37,9 +35,13 @@ export default function Command() {
             icon={icon}
             title={pr.title}
             subtitle={pr.repository ?? ""}
-            accessoryTitle={pr.updatedAt}
-            accessoryIcon={pr.authorAvatarUrl ? { source: pr.authorAvatarUrl, mask: Image.Mask.Circle } : undefined}
             actions={<Actions pr={pr} />}
+            accessories={[
+              {
+                text: pr.updatedAt,
+                icon: pr.authorAvatarUrl ? { source: pr.authorAvatarUrl, mask: Image.Mask.Circle } : undefined,
+              },
+            ]}
           />
         );
       })}

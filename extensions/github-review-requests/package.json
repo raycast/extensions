@@ -25,11 +25,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
+    "@raycast/api": "^1.32.0",
     "graphql-request": "^4.0.0",
     "graphql-tag": "^2.12.6",
-    "javascript-time-ago": "^2.3.9",
-    "use-debounce": "^7.0.0"
+    "javascript-time-ago": "^2.3.9"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "2.5.0",

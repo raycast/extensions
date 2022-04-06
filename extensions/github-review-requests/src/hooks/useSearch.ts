@@ -1,4 +1,4 @@
-import { preferences } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { GraphQLClient } from "graphql-request";
 import { useEffect, useState } from "react";
 import { StatusState } from "../schema.generated";
@@ -9,7 +9,7 @@ import { getSdk } from "./SearchReviewRequest.generated";
 const api = getSdk(
   new GraphQLClient("https://api.github.com/graphql", {
     headers: {
-      Authorization: `token ${preferences.token.value}`,
+      Authorization: `token ${getPreferenceValues().token}`,
     },
   })
 );
@@ -27,7 +27,7 @@ export type PullRequest = {
 
 export const useSearch = (searchText: string | undefined) => {
   const [result, setResult] = useState<PullRequest[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
