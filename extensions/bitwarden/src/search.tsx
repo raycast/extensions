@@ -155,22 +155,26 @@ export function ItemList(props: { api: Bitwarden }) {
             copyTotp={copyTotp}
           />
         ))}
-      <List.EmptyView
-        icon={{ source: "bitwarden-64.png" }}
-        title={vaultEmpty ? "Vault empty." : "No matching items found."}
-        description={
-          vaultEmpty
-            ? "Hit the refresh button to sync your vault or try logging in again."
-            : "Hit the refresh button to sync your vault."
-        }
-        actions={
-          !state.isLoading && (
-            <ActionPanel>
-              <VaultActions refreshItems={refreshItems} lockVault={lockVault} logoutVault={logoutVault} />
-            </ActionPanel>
-          )
-        }
-      />
+      {state.isLoading ? (
+        <List.EmptyView icon={Icon.TwoArrowsClockwise} title="Loading..." description="Please wait." />
+      ) : (
+        <List.EmptyView
+          icon={{ source: "bitwarden-64.png" }}
+          title={vaultEmpty ? "Vault empty." : "No matching items found."}
+          description={
+            vaultEmpty
+              ? "Hit the refresh button to sync your vault or try logging in again."
+              : "Hit the refresh button to sync your vault."
+          }
+          actions={
+            !state.isLoading && (
+              <ActionPanel>
+                <VaultActions refreshItems={refreshItems} lockVault={lockVault} logoutVault={logoutVault} />
+              </ActionPanel>
+            )
+          }
+        />
+      )}
     </List>
   );
 }
