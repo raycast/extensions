@@ -51,6 +51,7 @@ export default function main() {
     return (
       <ActionPanel>
         <Action.CopyToClipboard content={item.content} />
+        <Action.Paste content={item.content} />
       </ActionPanel>
     );
   }

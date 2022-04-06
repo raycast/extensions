@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "datetime-format-converter",
-  "title": "Datetime Format Converter",
+  "name": "date-format-converter",
+  "title": "Date Format Converter",
   "description": "Convert timestamps and datetime strings into various formats.",
   "icon": "command-icon.png",
   "author": "yangxy",
@@ -9,8 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "ts",
-      "subtitle": "Datetime Format",
+      "title": "Format Date",
       "description": "Convert timestamps and datetime strings into various formats.",
       "mode": "view"
     }
