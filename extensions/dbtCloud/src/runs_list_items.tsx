@@ -11,7 +11,7 @@ export const JobRunsListItem = ({ result }: JobRunsListItemProps): JSX.Element =
     <List.Item
       id={item.id.toString()}
       title={item.job.name}
-      accessoryTitle={item.finished_at_humanized}
+      accessories={[{text: item.finished_at_humanized}]}
       subtitle={`${item.status_humanized} ${
         item.status_humanized === "Success"
           ? "🎉"
