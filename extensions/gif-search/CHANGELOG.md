@@ -2,6 +2,7 @@
 
 ## [Remove static GIF preview warning 🎉] - 2022-04-06
 - Removes the warning about GIFs no longer animating, Raycast v1.32.0 supports GIFs in Details
+- Update GIF preview preference to be enabled by default
 - Reorder the default actions order based on user feedback
 
 ## [New GIF Details View with Metadata] - 2022-03-30
