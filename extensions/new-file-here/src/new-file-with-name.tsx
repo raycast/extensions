@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
-import { getFinderPath, isEmpty, preferences } from "./utils";
-import { createFileName, createNewFile, createNewFileByTemplate } from "./new-file-here";
-import { codeFileTypes, documentFileTypes, FileType, scriptFileTypes, TemplateType } from "./file-type";
+import { getFinderPath, isEmpty, preferences } from "./utils/utils";
+import { createNewFile, createNewFileByTemplate } from "./new-file-here";
+import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "./utils/file-type";
 import { runAppleScript } from "run-applescript";
 
 export default function NewFileWithName(props: {
@@ -10,11 +10,12 @@ export default function NewFileWithName(props: {
   templateFiles: TemplateType[];
 }) {
   const preference = preferences();
-
-  const [newFileType, setNewFileType] = useState<{ section: string; index: number }>(props.newFileType);
   const templateFiles = props.templateFiles;
-  const [isSimpleContent, setIsSimpleContent] = useState<boolean>(false);
+  const [newFileType, setNewFileType] = useState<{ section: string; index: number }>(props.newFileType);
+
+  const [fileExtension, setFileExtension] = useState<string>("txt");
   const [fileName, setFileName] = useState<string>("");
+  const [isSimpleContent, setIsSimpleContent] = useState<boolean>(false);
   const [fileContent, setFileContent] = useState<string>("");
 
   useEffect(() => {
@@ -26,32 +27,37 @@ export default function NewFileWithName(props: {
   }, []);
 
   useEffect(() => {
-    async function _fetchIsSimpleContent() {
+    async function _initFileType() {
       switch (newFileType.section) {
         case "Template": {
+          setFileExtension(templateFiles[newFileType.index].extension);
           setIsSimpleContent(templateFiles[newFileType.index].simpleContent);
           break;
         }
         case "Document": {
+          setFileExtension(documentFileTypes[newFileType.index].extension);
           setIsSimpleContent(documentFileTypes[newFileType.index].simpleContent);
           break;
         }
         case "Code": {
+          setFileExtension(codeFileTypes[newFileType.index].extension);
           setIsSimpleContent(codeFileTypes[newFileType.index].simpleContent);
           break;
         }
         case "Script": {
+          setFileExtension(scriptFileTypes[newFileType.index].extension);
           setIsSimpleContent(scriptFileTypes[newFileType.index].simpleContent);
           break;
         }
         default: {
-          setIsSimpleContent(false);
+          setFileExtension(documentFileTypes[0].extension);
+          setIsSimpleContent(documentFileTypes[0].simpleContent);
           break;
         }
       }
     }
 
-    _fetchIsSimpleContent().then();
+    _initFileType().then();
   }, [newFileType]);
 
   return (
@@ -63,44 +69,29 @@ export default function NewFileWithName(props: {
             title={"New File Here"}
             icon={Icon.Finder}
             onAction={async () => {
+              console.debug("fileName " + fileName);
+              console.debug("fileName " + isEmpty(fileName));
               try {
-                let _fileName = fileName;
-                const _createNewFile = async (buildFiles: FileType[], index = newFileType.index) => {
-                  if (isEmpty(_fileName)) {
-                    _fileName = createFileName(buildFiles[index].name, buildFiles[index].extension);
-                  }
-                  await createNewFile(buildFiles[index], await getFinderPath(), _fileName, fileContent);
-                };
+                const path = await getFinderPath();
                 switch (newFileType.section) {
                   case "Template": {
-                    if (isEmpty(_fileName)) {
-                      _fileName = createFileName(
-                        templateFiles[newFileType.index].name,
-                        templateFiles[newFileType.index].extension
-                      );
-                    }
-                    await createNewFileByTemplate(
-                      templateFiles[newFileType.index],
-                      await getFinderPath(),
-                      templateFiles[newFileType.index].path,
-                      _fileName
-                    );
+                    await createNewFileByTemplate(templateFiles[newFileType.index], path, fileName);
                     break;
                   }
                   case "Document": {
-                    await _createNewFile(documentFileTypes);
+                    await createNewFile(documentFileTypes[newFileType.index], path, fileName, fileContent);
                     break;
                   }
                   case "Code": {
-                    await _createNewFile(codeFileTypes);
+                    await createNewFile(codeFileTypes[newFileType.index], path, fileName, fileContent);
                     break;
                   }
                   case "Script": {
-                    await _createNewFile(scriptFileTypes);
+                    await createNewFile(scriptFileTypes[newFileType.index], path, fileName, fileContent);
                     break;
                   }
                   default: {
-                    await _createNewFile(documentFileTypes, 0);
+                    await createNewFile(documentFileTypes[0], path, fileName, fileContent);
                     break;
                   }
                 }
@@ -127,7 +118,7 @@ export default function NewFileWithName(props: {
             return (
               <Form.Dropdown.Item
                 key={template.name + index}
-                icon={{ source: Icon.TextDocument }}
+                icon={{ fileIcon: template.path }}
                 title={template.name + "." + template.extension}
                 value={JSON.stringify({ section: "Template", index: index })}
               />
@@ -183,30 +174,10 @@ export default function NewFileWithName(props: {
         title={"Name"}
         placeholder={"File name without extension (Optional)"}
         onChange={(newValue) => {
-          switch (newFileType.section) {
-            case "Template": {
-              setFileName(newValue + "." + templateFiles[newFileType.index].extension);
-              break;
-            }
-            case "Document": {
-              setFileName(newValue + "." + documentFileTypes[newFileType.index].extension);
-              break;
-            }
-            case "Code": {
-              setFileName(newValue + "." + codeFileTypes[newFileType.index].extension);
-              break;
-            }
-            case "Script": {
-              setFileName(newValue + "." + scriptFileTypes[newFileType.index].extension);
-              break;
-            }
-            default: {
-              setFileName(newValue + "." + documentFileTypes[0].extension);
-              break;
-            }
-          }
+          setFileName(newValue);
         }}
       />
+      <Form.Description title={"Extension"} text={fileExtension} />
       {isSimpleContent && (
         <Form.TextArea
           id={"FileContent"}
