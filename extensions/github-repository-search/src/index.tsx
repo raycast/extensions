@@ -84,7 +84,11 @@ function Actions(props: { repository: Repository; onVisit: (repository: Reposito
       <ActionPanel.Section>
         <Action.OpenInBrowser url={props.repository.url} onOpen={() => props.onVisit(props.repository)} />
         <OpenInWebIDEAction repository={props.repository} onOpen={() => props.onVisit(props.repository)} />
-        <Action.OpenInBrowser icon="vscode-action-icon.png" title="Clone in VSCode" url="vscode://vscode.git/clone?url=https://github.com/" />
+        <Action.OpenInBrowser
+          icon="vscode-action-icon.png"
+          title="Clone in VSCode"
+          url="vscode://vscode.git/clone?url=https://github.com/"
+        />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action.OpenInBrowser
