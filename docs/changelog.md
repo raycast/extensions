@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.32.0 – 2022-04-06
+
+### ✨ New
+
+- **List Tooltips**: List items now support tooltips for the title, subtitle, icon, and each accessory item. For titles, you can use the new type `{ value: string, tooltip: string }`, for icons `{ value: Image.ImageLike, tooltip: string }`, and for accessories you just add the new property `tooltip`.
+- **Animated Gifs**: the `Detail` component now renders animated gifs defined in markdown! 🎭
+
+### 💎 Improvements
+
+- Improved recovering the Node process after a crash and logging the error to the CLI output
+- Added support for running CLI commands through `npx @raycast/api <commandName>`
+- Improved the `Create Extension` command to add `README.md` and `CHANGELOG.md` files
+
+### 🐞 Fixes
+
+- **Detail Metadata**: Fixed toggling (showing/hiding)
+- **Detail Metadata**: Fixed only one separator item getting rendered
+- **Detail Metadata**: Fixed a crash when using primary or secondary colors for tag items
+- **List Accessories**: Fixed rendering when using `undefined` for accessory values
+- **SVG**: Fixed rendering base64 encoded SVG images
+- Fixed loading when a new command is launched by hotkey while another command is open
+
 ## 1.31.0 – 2022-03-23
 
 ### ✨ New
