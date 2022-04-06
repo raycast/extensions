@@ -20,7 +20,6 @@ const PackageItem = ({ itemKey, itemName, isComplete, handleRemove }: IProps) =>
       icon={isComplete ? Icon.Checkmark : Icon.Circle}
       title={itemName}
       subtitle={trackNumber}
-      accessoryTitle={vendor.name}
       actions={
         <ActionPanel>
           <Action.Push
@@ -30,6 +29,11 @@ const PackageItem = ({ itemKey, itemName, isComplete, handleRemove }: IProps) =>
           <Action title="Remove Item" onAction={() => handleRemove(itemKey)} />
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: vendor.name,
+        },
+      ]}
     />
   );
 };

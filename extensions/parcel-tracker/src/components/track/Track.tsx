@@ -37,7 +37,7 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
           if (defaultTrackNumber) handleSave(response.data);
         });
       })
-      .catch((error) => {
+      .catch((_error) => {
         setHasError(true);
         showToast({ style: Toast.Style.Failure, title: "Couldn't find your package information" });
       })
@@ -62,13 +62,17 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
   };
 
   return (
-    <List onSearchTextChange={handleTextChange} searchBarPlaceholder="Type your invoice number.." isLoading={loading}>
+    <List
+      navigationTitle={`Track Package: ${vendorName}`}
+      onSearchTextChange={handleTextChange}
+      searchBarPlaceholder="Type your invoice number.."
+      isLoading={loading}
+    >
       {!hasError && trackData && trackData.trackingDetails?.length > 0 ? (
         <List.Section title={trackData?.complete ? "Delivery completed" : "Delivery NOT completed"}>
           <List.Item
             title={"Item : " + (trackData.itemName || "UNKNOWN")}
             icon={trackData?.complete ? Icon.Checkmark : Icon.XmarkCircle}
-            accessoryTitle={vendorName}
             actions={
               !defaultTrackNumber && (
                 <ActionPanel>
@@ -76,6 +80,11 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
                 </ActionPanel>
               )
             }
+            accessories={[
+              {
+                text: vendorName,
+              },
+            ]}
           />
         </List.Section>
       ) : (
@@ -91,7 +100,11 @@ export default function Track({ vendorKey, vendorName, defaultTrackNumber }: IPr
                 icon={Icon.Binoculars}
                 title={tracking.kind}
                 subtitle={tracking.where}
-                accessoryTitle={convertDate(tracking.timeString)}
+                accessories={[
+                  {
+                    text: convertDate(tracking.timeString),
+                  },
+                ]}
               />
             ))}
         </List.Section>

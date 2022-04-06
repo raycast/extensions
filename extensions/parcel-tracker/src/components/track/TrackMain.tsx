@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import React from "react";
 import { logistics } from "../../metadata/logistics";
 import Track from "./Track";
 

@@ -1,5 +1,5 @@
 import { List, LocalStorage, showToast, Toast } from "@raycast/api";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import PackageItem from "./PackageItem";
 
 export interface IItems {
