@@ -1,13 +1,11 @@
 import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { Values } from "@raycast/api/types/api/app/localStorage";
-import { existsSync } from "fs";
+import fs, { existsSync } from "fs";
 import { runAppleScript } from "run-applescript";
-import fs from "fs";
 
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
-    randomWallpaperOnStart: preferencesMap.get("randomWallpaperOnStart") as boolean,
     applyTo: preferencesMap.get("applyTo") as string,
     downloadSize: preferencesMap.get("downloadSize") as string,
   };

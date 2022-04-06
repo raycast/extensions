@@ -62,18 +62,7 @@
       "icon": "bing-wallpaper-icon.png",
       "title": "Bing Wallpaper",
       "description": "Get and set Bing wallpapers within 15 days.",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "randomWallpaperOnStart",
-          "title": "Wallpaper Settings",
-          "description": "Set random wallpaper when command on start.",
-          "label": "Random Wallpaper On Start",
-          "type": "checkbox",
-          "default": true,
-          "required": true
-        }
-      ]
+      "mode": "view"
     },
     {
       "name": "random-wallpaper",

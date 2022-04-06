@@ -1,6 +1,11 @@
 import fetch from "node-fetch";
-import { BingResponseData, buildBingImageURL, buildBingWallpapersURL, getPictureName } from "./bing-wallpaper-utils";
-import { setWallpaper } from "./utils";
+import {
+  BingResponseData,
+  buildBingImageURL,
+  buildBingWallpapersURL,
+  getPictureName,
+} from "./utils/bing-wallpaper-utils";
+import { setWallpaper } from "./utils/utils";
 import { showToast, Toast } from "@raycast/api";
 
 export default async () => {

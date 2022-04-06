@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, open, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
 import {
   BingImage,
   BingResponseData,
@@ -7,16 +7,16 @@ import {
   buildCopyrightURL,
   getCopyright,
   getPictureName,
-} from "./bing-wallpaper-utils";
+} from "./utils/bing-wallpaper-utils";
 import React, { useEffect, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
 import * as fs from "fs";
 import { homedir } from "os";
-import { deleteCache, preferences, setWallpaper } from "./utils";
+import { deleteCache, preferences, setWallpaper } from "./utils/utils";
 
 export default function CommonDirectory() {
   const [bingWallpaperHD, setBingWallpaperHD] = useState<BingImage[]>([]);
-  const { randomWallpaperOnStart, downloadSize } = preferences();
+  const { downloadSize } = preferences();
 
   useEffect(() => {
     async function _fetchWallpaper() {
@@ -45,20 +45,6 @@ export default function CommonDirectory() {
 
     _fetchWallpaper().then();
   }, []);
-
-  useEffect(() => {
-    async function _randomWallpaperOnStart() {
-      if (randomWallpaperOnStart && bingWallpaperHD.length != 0) {
-        const randomImage = bingWallpaperHD[Math.floor(Math.random() * bingWallpaperHD.length)];
-        setWallpaper(
-          getPictureName(randomImage.url) + "-" + randomImage.startdate,
-          buildBingImageURL(randomImage.url, "raw")
-        ).then(() => "");
-      }
-    }
-
-    _randomWallpaperOnStart().then();
-  }, [bingWallpaperHD]);
 
   return (
     <List isShowingDetail={true} isLoading={bingWallpaperHD.length === 0} searchBarPlaceholder={"Search WallPaper"}>
