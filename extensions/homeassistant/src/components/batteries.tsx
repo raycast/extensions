@@ -1,4 +1,4 @@
-import { List, showToast, ToastStyle } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { useHAStates } from "../hooks";
 import { StateListItem, useStateSearch } from "./states";
@@ -9,7 +9,11 @@ export function BatteryList(): JSX.Element {
   const { states } = useStateSearch(searchText, "", "battery", allStates);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Home Assistant Batteries", error.message);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Cannot search Home Assistant Batteries",
+      message: error.message,
+    });
   }
 
   if (!states) {

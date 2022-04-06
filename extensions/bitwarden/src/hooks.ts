@@ -1,58 +1,8 @@
-import { showToast, LocalStorage, confirmAlert, Icon, popToRoot, Toast } from "@raycast/api";
+import { LocalStorage, confirmAlert, Icon, popToRoot } from "@raycast/api";
 import { useState, useEffect, useReducer } from "react";
 import { Bitwarden } from "./api";
-import { DEFAULT_PASSWORD_OPTIONS, LOCAL_STORAGE_KEY, SESSION_KEY } from "./const";
-import { PasswordGeneratorOptions, VaultStatus } from "./types";
-
-async function login(api: Bitwarden) {
-  try {
-    const toast = await showToast(Toast.Style.Animated, "Logging in...", "It may take some time");
-    await api.login();
-    toast.hide();
-  } catch (error) {
-    showToast(Toast.Style.Failure, "An error occurred during login!", "Please check your credentials");
-  }
-}
-
-export function useBitwarden(
-  bitwardenApi: Bitwarden
-): [{ sessionToken?: string; vaultStatus?: VaultStatus }, (sessionToken: string | null) => void] {
-  const [state, setState] = useState<{ sessionToken?: string; vaultStatus?: VaultStatus }>({});
-
-  useEffect(() => {
-    async function getSessionToken() {
-      const sessionToken = await LocalStorage.getItem<string>(SESSION_KEY);
-
-      const status = await bitwardenApi.status(sessionToken);
-
-      switch (status) {
-        case "unlocked":
-          setState({ sessionToken: sessionToken, vaultStatus: "unlocked" });
-          break;
-        case "locked":
-          setState({ vaultStatus: "locked" });
-          break;
-        case "unauthenticated":
-          await login(bitwardenApi);
-          setState({ vaultStatus: "locked" });
-      }
-    }
-    getSessionToken();
-  }, []);
-
-  return [
-    state,
-    async (sessionToken: string | null) => {
-      if (sessionToken) {
-        await LocalStorage.setItem(SESSION_KEY, sessionToken);
-        setState({ sessionToken, vaultStatus: "unlocked" });
-      } else {
-        await LocalStorage.removeItem(SESSION_KEY);
-        setState({ vaultStatus: "locked" });
-      }
-    },
-  ];
-}
+import { DEFAULT_PASSWORD_OPTIONS, LOCAL_STORAGE_KEY } from "./const";
+import { PasswordGeneratorOptions } from "./types";
 
 const initialState = {
   password: undefined as string | undefined,

@@ -1,5 +1,11 @@
 # Pipe Commands Changelog
 
+## [Fix Pipe Command Creation] - 2022-04-02
+
+- The `@raycast.icon` set by `Create Pipe Command` command was incorrect
+
+### Fixed
+
 ## Improve Development Experience (2022-03-15)
 
 - Remove buggy file argument type

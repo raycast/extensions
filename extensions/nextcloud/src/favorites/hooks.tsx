@@ -11,7 +11,7 @@ export function useFavorites() {
   };
 }
 
-export async function performListFavorites(signal: AbortSignal): Promise<Favorite[]> {
+async function performListFavorites(signal: AbortSignal): Promise<Favorite[]> {
   const { username } = getPreferences();
   const body = makeBodyForListFavorites();
   const items = await webdavRequest({ body, signal, base: `files/${encodeURIComponent(username)}`, method: "REPORT" });

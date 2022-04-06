@@ -1,18 +1,19 @@
-import { ActionPanel, Icon, List, OpenInBrowserAction, showToast, ToastStyle, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import plist from "plist";
 import fs from "fs";
 import { homedir } from "os";
-
 import expandTidle from "expand-tilde";
-
 import { useEffect, useState } from "react";
 import { Connection, Group, tintColors, Preferences } from "./interfaces";
 
 const EmptyGroupID = "__EMPTY__";
 const preferences: Preferences = getPreferenceValues();
+const appendPath = fs.existsSync(`${homedir()}/Library/Application Support/com.tinyapp.TablePlus-setapp/Data/`)
+  ? "-setapp"
+  : "";
 const directoryPath = preferences.path
   ? expandTidle(preferences.path)
-  : `${homedir()}/Library/Application Support/com.tinyapp.TablePlus/Data/`;
+  : `${homedir()}/Library/Application Support/com.tinyapp.TablePlus${appendPath}/Data/`;
 
 export default function DatabaseList() {
   const [state, setState] = useState<{ isLoading: boolean; connections?: Group[] }>({ isLoading: true });
@@ -24,7 +25,7 @@ export default function DatabaseList() {
 
       if (!fs.existsSync(tablePlusLocation)) {
         showToast(
-          ToastStyle.Failure,
+          Toast.Style.Failure,
           "Error loading connections",
           "TablePlus data directory not found, add directory path in preferences"
         );
@@ -77,6 +78,7 @@ export default function DatabaseList() {
 
   return (
     <List isLoading={state.isLoading} searchBarPlaceholder="Filter connections...">
+      <List.EmptyView icon={{ source: "no-view.png" }} title="No databases found in TablePlus, go add one!" />
       {state &&
         state.connections?.map((item) => {
           const subtitle = `${item.connections.length} ${renderPluralIfNeeded(item.connections.length)}`;
@@ -119,12 +121,11 @@ export default function DatabaseList() {
         key={connection.id}
         title={connection.name}
         subtitle={subtitle}
-        accessoryIcon={groupIcon}
-        accessoryTitle={connection.Driver}
+        accessories={[{ text: connection.Driver }, { icon: groupIcon }]}
         icon={{ source: Icon.Dot, tintColor: tintColors[connection.Environment] }}
         actions={
           <ActionPanel>
-            <OpenInBrowserAction title="Open Database" url={`tableplus://?id=${connection.id}`} />
+            <Action.OpenInBrowser title="Open Database" url={`tableplus://?id=${connection.id}`} />
           </ActionPanel>
         }
       />

@@ -1,4 +1,4 @@
-import { OpenInBrowserAction, Icon, Color, PushAction, CopyToClipboardAction } from "@raycast/api";
+import { Icon, Color, Action } from "@raycast/api";
 import { ha } from "../common";
 import { State } from "../haapi";
 import { EntityAttributesList } from "./attributes";
@@ -6,7 +6,7 @@ import { EntityAttributesList } from "./attributes";
 export function OpenEntityHistoryAction(props: { state: State }): JSX.Element {
   const historyUrl = ha.urlJoin(`history?entity_id=${props.state.entity_id}`);
   return (
-    <OpenInBrowserAction
+    <Action.OpenInBrowser
       title="Open History in Browser"
       icon={{ source: Icon.Text, tintColor: Color.PrimaryText }}
       url={historyUrl}
@@ -18,7 +18,7 @@ export function OpenEntityHistoryAction(props: { state: State }): JSX.Element {
 export function OpenEntityLogbookAction(props: { state: State }): JSX.Element {
   const historyUrl = ha.urlJoin(`logbook?entity_id=${props.state.entity_id}`);
   return (
-    <OpenInBrowserAction
+    <Action.OpenInBrowser
       title="Open Logbook in Browser"
       icon={{ source: Icon.Text, tintColor: Color.PrimaryText }}
       url={historyUrl}
@@ -30,7 +30,7 @@ export function OpenEntityLogbookAction(props: { state: State }): JSX.Element {
 export function ShowAttributesAction(props: { state: State }): JSX.Element | null {
   if (props.state.attributes) {
     return (
-      <PushAction
+      <Action.Push
         title="Show Attributes"
         target={<EntityAttributesList state={props.state} />}
         shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
@@ -44,7 +44,7 @@ export function ShowAttributesAction(props: { state: State }): JSX.Element | nul
 
 export function CopyStateValueAction(props: { state: State }): JSX.Element {
   return (
-    <CopyToClipboardAction
+    <Action.CopyToClipboard
       title="Copy State Value"
       content={props.state.state}
       shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
@@ -54,7 +54,7 @@ export function CopyStateValueAction(props: { state: State }): JSX.Element {
 
 export function CopyEntityIDAction(props: { state: State }): JSX.Element {
   return (
-    <CopyToClipboardAction
+    <Action.CopyToClipboard
       title="Copy Entity ID"
       content={props.state.entity_id}
       shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}

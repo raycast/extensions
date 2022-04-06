@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, Color } from "@raycast/api";
+import { Icon, Color, Action } from "@raycast/api";
 import { ha } from "../common";
 import { State } from "../haapi";
 
@@ -10,13 +10,7 @@ export function VacuumLocateAction(props: { state: State }): JSX.Element | null 
   const handle = async () => {
     await ha.callService("vacuum", "locate", { entity_id: s.entity_id });
   };
-  return (
-    <ActionPanel.Item
-      title="Locate"
-      onAction={handle}
-      icon={{ source: Icon.Binoculars, tintColor: Color.PrimaryText }}
-    />
-  );
+  return <Action title="Locate" onAction={handle} icon={{ source: Icon.Binoculars, tintColor: Color.PrimaryText }} />;
 }
 
 export function VacuumStartAction(props: { state: State }): JSX.Element | null {
@@ -28,7 +22,7 @@ export function VacuumStartAction(props: { state: State }): JSX.Element | null {
     await ha.callService("vacuum", "start", { entity_id: s.entity_id });
   };
   return (
-    <ActionPanel.Item
+    <Action
       title="Start"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "p" }}
@@ -46,7 +40,7 @@ export function VacuumPauseAction(props: { state: State }): JSX.Element | null {
     await ha.callService("vacuum", "pause", { entity_id: s.entity_id });
   };
   return (
-    <ActionPanel.Item
+    <Action
       title="Pause"
       onAction={handle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
@@ -64,7 +58,7 @@ export function VacuumStopAction(props: { state: State }): JSX.Element | null {
     await ha.callService("vacuum", "stop", { entity_id: s.entity_id });
   };
   return (
-    <ActionPanel.Item
+    <Action
       title="Stop"
       onAction={handle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
@@ -82,7 +76,7 @@ export function VacuumTurnOnAction(props: { state: State }): JSX.Element | null 
     await ha.callService("vacuum", "turn_on", { entity_id: s.entity_id });
   };
   return (
-    <ActionPanel.Item
+    <Action
       title="Turn On"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "o" }}
@@ -100,7 +94,7 @@ export function VacuumTurnOffAction(props: { state: State }): JSX.Element | null
     await ha.callService("vacuum", "turn_off", { entity_id: s.entity_id });
   };
   return (
-    <ActionPanel.Item
+    <Action
       title="Turn Off"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "f" }}
@@ -118,7 +112,7 @@ export function VacuumReturnToBaseAction(props: { state: State }): JSX.Element |
     await ha.callService("vacuum", "return_to_base", { entity_id: s.entity_id });
   };
   return (
-    <ActionPanel.Item
+    <Action
       title="Return to Base"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "b" }}
