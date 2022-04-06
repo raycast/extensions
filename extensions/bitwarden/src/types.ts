@@ -37,12 +37,12 @@ export interface Identity {
 }
 
 export interface Card {
-  cardholderName: string;
-  brand: string;
-  number: string;
-  expMonth: string;
-  expYear: string;
-  code: string;
+  cardholderName: string | null;
+  brand: string | null;
+  number: string | null;
+  expMonth: string | null;
+  expYear: string | null;
+  code: string | null;
 }
 
 export interface Field {
