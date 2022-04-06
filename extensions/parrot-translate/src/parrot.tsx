@@ -164,7 +164,7 @@ export default function () {
     return (
         <List
             isLoading={isLoadingState}
-            searchBarPlaceholder={"Translate to"}
+            searchBarPlaceholder={"Translate text"}
             onSearchTextChange={onInputChangeEvt}
             actions={
                 <ActionPanel>
@@ -172,6 +172,10 @@ export default function () {
                 </ActionPanel>
             }
         >
+            <List.EmptyView
+              icon={Icon.TextDocument}
+              title="Type something to translate."
+            />
             <ListDetail />
         </List>
     )
