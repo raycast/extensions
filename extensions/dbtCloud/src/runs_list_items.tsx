@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action } from "@raycast/api";
+import { List, ActionPanel, Action } from "@raycast/api";
 import { RunModel } from "./types";
 
 interface JobRunsListItemProps {
