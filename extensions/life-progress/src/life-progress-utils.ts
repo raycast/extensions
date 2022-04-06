@@ -249,3 +249,22 @@ export const getNumberCanvas = (iconTheme: string, number: number, accessIcon: s
   numberPaths.push({ icon: `${iconTheme}/${accessIcon}` });
   return numberPaths;
 };
+
+export const allTags = [
+  {
+    title: "All life progress",
+    value: "All",
+  },
+  {
+    title: "You have",
+    value: "You have",
+  },
+  {
+    title: "You may be able to",
+    value: "You may be able to",
+  },
+  {
+    title: "Time left",
+    value: "Time left",
+  },
+];

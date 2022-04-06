@@ -1,12 +1,13 @@
 import { Action, ActionPanel, Clipboard, Icon, List, showToast, Toast } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
-import { getLifeProgress, isBirthDay, LifeProgress } from "./life-progress-utils";
+import { allTags, getHourLeftThisDay, getLifeProgress, isBirthDay, LifeProgress } from "./life-progress-utils";
 import { buildBingImageURL, ShanBeiResponseData, WordOfTheDay } from "./shanbei-utils";
 import { isEmpty } from "./common-utils";
 
 export default function main() {
   const [lifeProgresses, setLifeProgresses] = useState<LifeProgress[]>([]);
+  const [tag, setTag] = useState<string>("All");
   const [refreshList, setRefreshList] = useState<boolean>(true);
   const [isEnglishWord, setIsEnglishWord] = useState<boolean>(true);
   const [cakeIndex, setCakeIndex] = useState<number>(0);
@@ -53,9 +54,16 @@ export default function main() {
   return (
     <List
       isLoading={lifeProgresses.length === 0}
-      searchBarPlaceholder={`Don't worry about the future, ${
+      searchBarPlaceholder={`${getHourLeftThisDay() <= 12 ? "Don't miss the past" : "Don't worry about the future"}, ${
         isBirthDay() ? "celebrate your birthday" : "cherish the present"
       }`}
+      searchBarAccessory={
+        <List.Dropdown tooltip={"You life progress"} storeValue={true} onChange={setTag}>
+          {allTags.map((value) => {
+            return <List.Dropdown.Item key={value.value} title={value.title} value={value.value} />;
+          })}
+        </List.Dropdown>
+      }
     >
       {isBirthDay() && (
         <List.Item
@@ -101,51 +109,57 @@ export default function main() {
         />
       )}
 
-      <List.Section title="You have">
-        {lifeProgresses.map((lifeProgress, index) => {
-          return (
-            lifeProgress.section === "Have done" && (
-              <LifeProgressListItem
-                key={index}
-                index={index}
-                cakeIndex={cakeIndex}
-                lifeProgress={lifeProgress}
-                refreshListUseState={[refreshList, setRefreshList]}
-              />
-            )
-          );
-        })}
-      </List.Section>
-      <List.Section title="You may be able to">
-        {lifeProgresses.map((lifeProgress, index) => {
-          return (
-            lifeProgress.section === "Able to" && (
-              <LifeProgressListItem
-                key={index}
-                index={index}
-                cakeIndex={cakeIndex}
-                lifeProgress={lifeProgress}
-                refreshListUseState={[refreshList, setRefreshList]}
-              />
-            )
-          );
-        })}
-      </List.Section>
-      <List.Section title="Time left">
-        {lifeProgresses.map((lifeProgress, index) => {
-          return (
-            lifeProgress.section === "Time left" && (
-              <LifeProgressListItem
-                key={index}
-                index={index}
-                cakeIndex={cakeIndex}
-                lifeProgress={lifeProgress}
-                refreshListUseState={[refreshList, setRefreshList]}
-              />
-            )
-          );
-        })}
-      </List.Section>
+      {(tag === allTags[0].value || tag === allTags[1].value) && (
+        <List.Section title="You have">
+          {lifeProgresses.map((lifeProgress, index) => {
+            return (
+              lifeProgress.section === "Have done" && (
+                <LifeProgressListItem
+                  key={index}
+                  index={index}
+                  cakeIndex={cakeIndex}
+                  lifeProgress={lifeProgress}
+                  refreshListUseState={[refreshList, setRefreshList]}
+                />
+              )
+            );
+          })}
+        </List.Section>
+      )}
+      {(tag === allTags[0].value || tag === allTags[2].value) && (
+        <List.Section title="You may be able to">
+          {lifeProgresses.map((lifeProgress, index) => {
+            return (
+              lifeProgress.section === "Able to" && (
+                <LifeProgressListItem
+                  key={index}
+                  index={index}
+                  cakeIndex={cakeIndex}
+                  lifeProgress={lifeProgress}
+                  refreshListUseState={[refreshList, setRefreshList]}
+                />
+              )
+            );
+          })}
+        </List.Section>
+      )}
+      {(tag === allTags[0].value || tag === allTags[3].value) && (
+        <List.Section title="Time left">
+          {lifeProgresses.map((lifeProgress, index) => {
+            return (
+              lifeProgress.section === "Time left" && (
+                <LifeProgressListItem
+                  key={index}
+                  index={index}
+                  cakeIndex={cakeIndex}
+                  lifeProgress={lifeProgress}
+                  refreshListUseState={[refreshList, setRefreshList]}
+                />
+              )
+            );
+          })}
+        </List.Section>
+      )}
     </List>
   );
 }
