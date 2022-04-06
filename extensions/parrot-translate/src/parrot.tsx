@@ -172,10 +172,7 @@ export default function () {
                 </ActionPanel>
             }
         >
-            <List.EmptyView
-              icon={Icon.TextDocument}
-              title="Type something to translate."
-            />
+            <List.EmptyView icon={Icon.TextDocument} title="Type something to translate." />
             <ListDetail />
         </List>
     )
