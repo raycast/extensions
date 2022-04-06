@@ -87,7 +87,8 @@ function useSearch() {
   };
 }
 
-const URL = "https://bgcdyoiyz5-dsn.algolia.net/1/indexes/*/queries?x-algolia-agent=Algolia for vanilla JavaScript (lite) 3.30.0%3Bdocsearch.js 2.6.3&x-algolia-application-id=BGCDYOIYZ5&x-algolia-api-key=37ee06fa68db6aef451a490df6df7c60";
+const URL =
+  "https://bgcdyoiyz5-dsn.algolia.net/1/indexes/*/queries?x-algolia-agent=Algolia for vanilla JavaScript (lite) 3.30.0%3Bdocsearch.js 2.6.3&x-algolia-application-id=BGCDYOIYZ5&x-algolia-api-key=37ee06fa68db6aef451a490df6df7c60";
 
 async function performSearch(searchText: string, signal: AbortSignal): Promise<SearchResult[]> {
   const response = await fetch(URL, {
@@ -105,7 +106,7 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
   if (!response.ok || "message" in json) {
     throw new Error("message" in json ? json.message : response.statusText);
   }
-  
+
   if (json.results.length === 0) {
     return [];
   }
@@ -120,28 +121,31 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
 }
 
 function parseName(hierarchy: Hierarchy) {
-  const values = Object.keys(hierarchy).sort((a, b) => a > b ? 1 : -1).filter((key: HierarchyKey) => hierarchy[key]).map((key: HierarchyKey) => unescape(hierarchy[key] || ''));
-  return values.join(' > ');
+  const values = Object.keys(hierarchy)
+    .sort((a, b) => (a > b ? 1 : -1))
+    .filter((key: HierarchyKey) => hierarchy[key])
+    .map((key: HierarchyKey) => unescape(hierarchy[key] || ""));
+  return values.join(" > ");
 }
 
 interface Hierarchy {
-  lvl0: string | null
-  lvl1: string | null
-  lvl2: string | null
-  lvl3: string | null
-  lvl4: string | null
-  lvl5: string | null
-  lvl6: string | null
-  [key: string]: string | null
+  lvl0: string | null;
+  lvl1: string | null;
+  lvl2: string | null;
+  lvl3: string | null;
+  lvl4: string | null;
+  lvl5: string | null;
+  lvl6: string | null;
+  [key: string]: string | null;
 }
 
-type HierarchyKey = keyof Hierarchy
+type HierarchyKey = keyof Hierarchy;
 
 interface RequestResult {
   hits: {
-    url: string
-    hierarchy: Hierarchy
-  }[]
+    url: string;
+    hierarchy: Hierarchy;
+  }[];
 }
 
 interface SearchState {
