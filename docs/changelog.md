@@ -19,6 +19,7 @@
 - **Detail Metadata**: Fixed only one separator item getting rendered
 - **Detail Metadata**: Fixed a crash when using primary or secondary colors for tag items
 - **List Accessories**: Fixed rendering when using `undefined` for accessory values
+- **List EmptyView**: Fixed an issue where passing a `List.EmptyView` child to a `List.Section` would treat it as a `List.Item`
 - **SVG**: Fixed rendering base64 encoded SVG images
 - Fixed loading when a new command is launched by hotkey while another command is open
 
