@@ -56,6 +56,7 @@
       "name": "showGifPreview",
       "type": "checkbox",
       "required": false,
+      "default": true,
       "label": "Show GIF Preview",
       "description": "Shows a large preview of the selected gif in search results."
     },
@@ -67,8 +68,8 @@
       "description": "Customize what happens when hitting ENTER on a Gif",
       "data": [
         {
-          "title": "Open in Browser",
-          "value": "openInBrowser"
+          "title": "Copy File to Clipboard",
+          "value": "copyFile"
         },
         {
           "title": "Copy GIF URL to Clipboard",
@@ -79,12 +80,12 @@
           "value": "copyPageUrl"
         },
         {
-          "title": "Copy File to Clipboard",
-          "value": "copyFile"
-        },
-        {
           "title": "View GIF Details",
           "value": "viewDetails"
+        },
+        {
+          "title": "Open in Browser",
+          "value": "openInBrowser"
         }
       ]
     }
