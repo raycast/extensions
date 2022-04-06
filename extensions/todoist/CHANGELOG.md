@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [More details and empty screens] - 2022-03-28
+## [More details and empty screens] - 2022-04-06
 
 - Added detailed view of a task with metadata: title, description, project, due date (with time if any), priority, labels
 - Added the ability to display many accessories of a task item in a list
