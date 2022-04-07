@@ -25,6 +25,10 @@
       "placeholder": "See tinyurl.com/raycast-slack-status"
     }
   ],
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "@slack/web-api": "^6.4.0",

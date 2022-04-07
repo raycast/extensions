@@ -181,7 +181,7 @@ function StoryListItem(props: { item: Parser.Item; index: number }) {
 
 ### Handle errors
 
-Lastly, we want to be a good citizen and also handle errors appropriately to guarantee a smooth experience. We'll show a toast whenever our network request fails:
+Lastly, we want to be a good citizen and handle errors appropriately to guarantee a smooth experience. We'll show a toast whenever our network request fails:
 
 ```typescript
 export default function Command() {

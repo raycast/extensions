@@ -69,18 +69,18 @@ export default function Command() {
 
 #### Enumeration members
 
-| Name          | Value                    |
-| :------------ | :----------------------- |
-| Blue          | "raycast-blue"           |
-| Brown         | "raycast-brown"          |
-| Green         | "raycast-green"          |
-| Magenta       | "raycast-magenta"        |
-| Orange        | "raycast-orange"         |
-| PrimaryText   | "raycast-primary-text"   |
-| Purple        | "raycast-purple"         |
-| Red           | "raycast-red"            |
-| SecondaryText | "raycast-secondary-text" |
-| Yellow        | "raycast-yellow"         |
+| Name          | Dark Theme                                               | Light Theme                                         |
+| :------------ | :------------------------------------------------------- | :-------------------------------------------------- |
+| Blue          | ![](../../.gitbook/assets/color-dark-blue.png)           | ![](../../.gitbook/assets/color-blue.png)           |
+| Brown         | ![](../../.gitbook/assets/color-dark-brown.png)          | ![](../../.gitbook/assets/color-brown.png)          |
+| Green         | ![](../../.gitbook/assets/color-dark-green.png)          | ![](../../.gitbook/assets/color-green.png)          |
+| Magenta       | ![](../../.gitbook/assets/color-dark-magenta.png)        | ![](../../.gitbook/assets/color-magenta.png)        |
+| Orange        | ![](../../.gitbook/assets/color-dark-orange.png)         | ![](../../.gitbook/assets/color-orange.png)         |
+| Purple        | ![](../../.gitbook/assets/color-dark-purple.png)         | ![](../../.gitbook/assets/color-purple.png)         |
+| Red           | ![](../../.gitbook/assets/color-dark-red.png)            | ![](../../.gitbook/assets/color-red.png)            |
+| Yellow        | ![](../../.gitbook/assets/color-dark-yellow.png)         | ![](../../.gitbook/assets/color-yellow.png)         |
+| PrimaryText   | ![](../../.gitbook/assets/color-dark-primary-text.png)   | ![](../../.gitbook/assets/color-primary-text.png)   |
+| SecondaryText | ![](../../.gitbook/assets/color-dark-secondary-text.png) | ![](../../.gitbook/assets/color-secondary-text.png) |
 
 ## Types
 

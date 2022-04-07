@@ -6,6 +6,16 @@
   "icon": "displayplacer.png",
   "author": "eluce2",
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "path",
+      "title": "Shell Path",
+      "default": "/usr/gnu/bin:/usr/local/bin:/bin:/usr/bin:.:/opt/homebrew/bin",
+      "description": "Colon-delimited list of paths to search for displayplacer and homebrew",
+      "required": false,
+      "type": "textfield"
+    }
+  ],
   "commands": [
     {
       "name": "displayplacer",
@@ -51,7 +61,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.3"
+    "@raycast/api": "^1.28.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

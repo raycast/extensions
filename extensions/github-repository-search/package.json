@@ -24,6 +24,9 @@
       "description": "Create a token with repository access"
     }
   ],
+  "categories": [
+    "Developer Tools"
+  ],
   "dependencies": {
     "@raycast/api": "^1.25.0",
     "javascript-time-ago": "^2.3.9",

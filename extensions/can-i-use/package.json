@@ -6,6 +6,9 @@
   "icon": "icon.png",
   "author": "thomaslombart",
   "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
   "commands": [
     {
       "name": "index",
@@ -33,10 +36,10 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
-    "browserslist": "^4.19.1",
+    "@raycast/api": "^1.32.0",
+    "browserslist": "^4.20.2",
     "caniuse-api": "^3.0.0",
-    "caniuse-lite": "^1.0.30001286"
+    "caniuse-lite": "^1.0.30001325"
   },
   "devDependencies": {
     "@types/browserslist": "^4.15.0",
