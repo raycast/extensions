@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useFunctions } from "./useFunctions";
 
 export default function Command() {
-  const [searchText, setSearchText] = useState<string>();
+  const [searchText, setSearchText] = useState<string>("");
   const { data, isLoading } = useFunctions(searchText);
   return (
     <List isLoading={isLoading} onSearchTextChange={setSearchText}>

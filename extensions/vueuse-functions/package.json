@@ -2,15 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vueuse-functions",
   "title": "VueUse Functions",
-  "description": "Search VueUse Functions",
+  "description": "Search VueUse functions",
   "icon": "vue-use.png",
   "author": "noopurphalak",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Search VueUse Functions",
-      "description": "VueUse Functions",
+      "title": "Search Functions",
+      "subtitle": "VueUse",
+      "description": "Search VueUse functions",
       "mode": "view"
     }
   ],
