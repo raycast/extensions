@@ -13,8 +13,7 @@ instance.interceptors.response.use(
   }
 );
 
-// const apiServer = "http://192.168.219.110:18000/api";
-const apiServer = "http://localhost:8000/api";
+const apiServer = "http://parcel-tracker.mooo.com:18000/api";
 
 export const getVendors = () => {
   return instance.get(`${apiServer}/vendors`);
