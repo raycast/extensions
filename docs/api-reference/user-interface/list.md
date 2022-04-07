@@ -535,16 +535,16 @@ export default function Command() {
 
 #### Props
 
-| Prop        | Type                                                                                                                                               | Required | Default | Description                                                                                                                                                                                         |
-| :---------- | :------------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| title       | <code>string</code> or <code>{ value: string; tooltip: string }</code>                                                                             | Yes      | -       | The main title displayed for that item.                                                                                                                                                             |
-| actions     | <code>null</code> or <code>[ActionPanel](./action-panel.md#actionpanel)</code>                                                                     | No       | -       | An [ActionPanel](./action-panel.md#actionpanel) that will be shown when the item is selected.                                                                                                       |
-| icon        | <code>[ImageLike](./icons-and-images.md#imagelike)</code> or <code>{ value: [ImageLike](./icons-and-images.md#imagelike); tooltip: string }</code> | No       | -       | A optional icon displayed for the list item.                                                                                                                                                        |
-| id          | <code>string</code>                                                                                                                                | No       | -       | ID of the item. Make sure to assign each item a unique ID or a UUID will be auto generated.                                                                                                         |
-| keywords    | <code>string[]</code>                                                                                                                              | No       | -       | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. |
-| subtitle    | <code>string</code> or <code>{ value: string; tooltip: string }</code>                                                                             | No       | -       | An optional subtitle displayed next to the main title.                                                                                                                                              |
-| accessories | <code>[List.Item.Accessory](#list.item.accessory)</code>                                                                                           | No       | -       | An optional array of accessory items displayed on the right side in the list item.                                                                                                                  |
-| detail      | <code>null</code> or <code>[List.Item.Detail](#list.item.detail)</code>                                                                            | No       | -       | The `List.Item.Detail` to be rendered in the right side area when the parent `List` is showing detail and the item is selected.                                                                     |
+| Prop        | Type                                                                           | Required | Default | Description                                                                                                                                                                                         |
+| :---------- | :----------------------------------------------------------------------------- | :------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| title       | <code>string</code>                                                            | Yes      | -       | The main title displayed for that item.                                                                                                                                                             |
+| actions     | <code>null</code> or <code>[ActionPanel](./action-panel.md#actionpanel)</code> | No       | -       | An [ActionPanel](./action-panel.md#actionpanel) that will be shown when the item is selected.                                                                                                       |
+| icon        | <code>[ImageLike](./icons-and-images.md#imagelike)</code>                      | No       | -       | A optional icon displayed for the list item.                                                                                                                                                        |
+| id          | <code>string</code>                                                            | No       | -       | ID of the item. Make sure to assign each item a unique ID or a UUID will be auto generated.                                                                                                         |
+| keywords    | <code>string[]</code>                                                          | No       | -       | An optional property used for providing additional indexable strings for search. When filtering the list in Raycast through the search bar, the keywords will be searched in addition to the title. |
+| subtitle    | <code>string</code>                                                            | No       | -       | An optional subtitle displayed next to the main title.                                                                                                                                              |
+| accessories | <code>[List.Item.Accessory](#list.item.accessory)</code>                       | No       | -       | An optional array of accessory items displayed on the right side in the list item.                                                                                                                  |
+| detail      | <code>null</code> or <code>[List.Item.Detail](#list.item.detail)</code>        | No       | -       | The `List.Item.Detail` to be rendered in the right side area when the parent `List` is showing detail and the item is selected.                                                                     |
 
 ### List.Item.Accessory
 
@@ -554,11 +554,10 @@ An interface describing an accessory view in a `List.Item`.
 
 #### Props
 
-| Prop    | Type                                                      | Required | Default            | Description                                                                                                               |
-| :------ | :-------------------------------------------------------- | :------- | :----------------- | :------------------------------------------------------------------------------------------------------------------------ |
-| text    | <code>string</code>                                       | No       | <code>null</code>  | An optional text that will be used as the label.                                                                          |
-| icon    | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | <code>false</code> | An optional image that will be used as the icon. **The image will be shown in front of the text if `text` is specified.** |
-| tooltip | <code>string</code>                                       | No       | <code>null</code>  | An optional tooltip shown when the accessory is hovered.                                                                  |
+| Prop | Type                                                      | Required | Default            | Description                                                                                                               |
+| :--- | :-------------------------------------------------------- | :------- | :----------------- | :------------------------------------------------------------------------------------------------------------------------ |
+| text | <code>string</code>                                       | No       | <code>null</code>  | An optional text that will be used as the label.                                                                          |
+| icon | <code>[ImageLike](./icons-and-images.md#imagelike)</code> | No       | <code>false</code> | An optional image that will be used as the icon. **The image will be shown in front of the text if `text` is specified.** |
 
 #### Example
 
@@ -572,7 +571,7 @@ export default function Command() {
         title="An Item with Accessories"
         accessories={[
           { text: `An Accessory Text`, icon: Icon.Hammer },
-          { icon: Icon.Person, tooltip: "A person" },
+          { icon: Icon.Person },
           { text: "Just Do It!" },
         ]}
       />
