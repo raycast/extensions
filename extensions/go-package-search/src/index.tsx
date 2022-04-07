@@ -24,8 +24,9 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       key={searchResult.fullPath}
       title={searchResult.name}
       subtitle={searchResult.description}
-      accessoryTitle={searchResult.fullPath}
-      accessoryIcon={searchResult.standardLibrary ? Icon.Pin : undefined}
+      accessories={[
+        {text: searchResult.fullPath, icon: searchResult.standardLibrary ? Icon.Pin : undefined}
+      ]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
