@@ -14,8 +14,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Go Packages",
-      "subtitle": "pkg.go.dev",
+      "title": "Search Packages",
+      "subtitle": "Go",
       "description": "Search for packages on pkg.go.dev.",
       "mode": "view"
     }
