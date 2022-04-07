@@ -3,10 +3,20 @@ import * as R from "ramda";
 import dayjs from "dayjs";
 import fs from "fs";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+export const noop = () => {}
 export const prependStr = (leading: string) => (val: string) => leading + val;
 export const appendStr = (toAppend: string) => (val: string) => val + toAppend;
 
 export const generateContentToAppend = R.compose(prependStr("\n- "), R.replace(/\n/g, "\n- "));
+
+export const validateUerConfigGraphPath = () => {
+  return fs.promises.lstat(getPreferenceValues().graphPath).then((stats) => {
+    if (!stats.isDirectory) {
+      throw 'invalid'
+    }
+  });
+};
 
 const buildJournalPath = (graphPath: string) => {
   const addEndingSlashIfNeed = R.ifElse(R.endsWith("/"), R.identity, appendStr("/"));
