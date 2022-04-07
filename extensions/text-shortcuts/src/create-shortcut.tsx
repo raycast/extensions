@@ -122,7 +122,7 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
             <Form.TextField
               id={"delete" + index}
               key={"delete" + index}
-              title={TactionType.DELETE}
+              title={TactionType.DELETE + " " + (index + 1)}
               placeholder={"Delete word"}
               value={array[index].content[0]}
               onChange={(newValue) => {
@@ -141,7 +141,7 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
             <Form.TextField
               id={"replace" + index}
               key={"replace" + index}
-              title={TactionType.REPLACE}
+              title={TactionType.REPLACE + " " + (index + 1)}
               placeholder={"Replace"}
               value={array[index].content[0]}
               onChange={(newValue) => {
@@ -168,7 +168,7 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
             <Form.TextArea
               id={"affix" + index}
               key={"affix" + index}
-              title={TactionType.AFFIX}
+              title={TactionType.AFFIX + " " + (index + 1)}
               value={array[index].content[0]}
               placeholder={'Such as Prefix$VARIABLE$Suffix\n\nTemplate can only have a maximum of one "Input" variable'}
               onChange={(newValue) => {
@@ -199,7 +199,7 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
             <Form.Dropdown
               id={"case" + index}
               key={"case" + index}
-              title={TactionType.CASE}
+              title={TactionType.CASE + " " + (index + 1)}
               defaultValue={array[index].content[0]}
               onChange={async (newValue) => {
                 updateTactionContent(newValue, index, [...array], setTactions);
@@ -219,7 +219,7 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
             <Form.Dropdown
               id={"coder" + index}
               key={"coder" + index}
-              title={TactionType.CODER}
+              title={TactionType.CODER + " " + (index + 1)}
               defaultValue={array[index].content[0]}
               onChange={async (newValue) => {
                 updateTactionContent(newValue, index, [...array], setTactions);
@@ -239,7 +239,7 @@ export function tactionForms(tactions: Taction[], setTactions: React.Dispatch<Re
             <Form.Dropdown
               id={"transform" + index}
               key={"transform" + index}
-              title={TactionType.TRANSFORM}
+              title={TactionType.TRANSFORM + " " + (index + 1)}
               defaultValue={array[index].content[0]}
               onChange={async (newValue) => {
                 updateTactionContent(newValue, index, [...array], setTactions);
@@ -289,18 +289,20 @@ function CreateShortcutActions(props: {
           const _checkInfo = checkInfo(info.name, tactions);
           const _checkAffix = checkAffix(tactions);
           if (!_checkInfo.nameValid) {
-            await showToast(Toast.Style.Failure, `Name of shortcut cannot be empty`);
+            await showToast(Toast.Style.Failure, `Shortcut name can't be empty.`);
           } else if (!_checkInfo.tactionCountValid) {
-            await showToast(Toast.Style.Failure, `Shortcut requires at least one action`);
+            await showToast(Toast.Style.Failure, `Shortcut requires at least one action.`);
           } else if (!_checkInfo.tactionContentValid.valid) {
             await showToast(
               Toast.Style.Failure,
-              `Shortcut has empty actions, check${_checkInfo.tactionContentValid.actionIndex} action`
+              `Shortcut has empty actions.`,
+              `Check action${_checkInfo.tactionContentValid.actionIndex}.`
             );
           } else if (!_checkAffix.valid) {
             await showToast(
               Toast.Style.Failure,
-              `Affix has more than one "Input" variable, check${_checkAffix.affixIndex} action`
+              `Affix has more than one "Input" variable.`,
+              `Check action${_checkAffix.affixIndex}.`
             );
           } else {
             await createShortcut(info, tactions, localShortcuts);
@@ -308,7 +310,7 @@ function CreateShortcutActions(props: {
             const _updateList = [...updateList];
             _updateList[0]++;
             setUpdateList(_updateList);
-            await showToast(Toast.Style.Success, `Shortcut Created`);
+            await showToast(Toast.Style.Success, `Create shortcut success!`);
           }
         }}
       />

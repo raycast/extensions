@@ -31,7 +31,7 @@ function RunShortcutActions(props: {
           const _inputItem = await fetchItemInput();
           const _runShortcut = runShortcut(_inputItem.content, handleLiveTemplate(tactions));
           await Clipboard.paste(_runShortcut);
-          await showToast(Toast.Style.Success, "Paste Shortcut's Text");
+          await showToast(Toast.Style.Success, "Paste shortcut's text!");
         }}
       />
 

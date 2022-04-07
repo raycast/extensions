@@ -28,6 +28,7 @@ export default function SearchShortcut() {
   const [detail, setDetail] = useState<string>("");
   const [tag, setTag] = useState<string>("All");
   const [updateList, setUpdateList] = useState<number[]>([0]);
+  const [selectId, setSelectId] = useState<number>(0);
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -37,7 +38,7 @@ export default function SearchShortcut() {
       let _userShortcuts = [];
       if (typeof _localStorage == "string") {
         _userShortcuts = JSON.parse(_localStorage);
-        // setUserShortcuts(_userShortcuts);
+        setUserShortcuts(_userShortcuts);
       }
       //build-in
       let _buildInShortcuts: Shortcut[] = [];
@@ -65,14 +66,24 @@ export default function SearchShortcut() {
     _fetchBuildInShortcut().then();
   }, [updateList]);
 
+  useEffect(() => {
+    async function _fetchDetail() {
+      if (allShortcuts.length > 0) {
+        const _inputItem = await fetchItemInput();
+        setDetail(runShortcut(_inputItem.content, allShortcuts[selectId].tactions));
+      }
+    }
+
+    _fetchDetail().then();
+  }, [selectId, allShortcuts]);
+
   return (
     <List
       isShowingDetail={preferences().detail}
       isLoading={allShortcuts.length == 0}
       searchBarPlaceholder={"Search shortcut"}
       onSelectionChange={async (id) => {
-        const _inputItem = await fetchItemInput();
-        setDetail(runShortcut(_inputItem.content, allShortcuts[Number(id)].tactions));
+        setSelectId(Number(id));
       }}
       searchBarAccessory={
         <List.Dropdown
@@ -109,7 +120,17 @@ export default function SearchShortcut() {
                           const _inputItem = await fetchItemInput();
                           const _runShortcut = runShortcut(_inputItem.content, value.tactions);
                           await Clipboard.paste(_runShortcut);
-                          await showToast(Toast.Style.Success, "Paste Shortcut's Text");
+                          await showToast(Toast.Style.Success, "Paste shortcut's text");
+                        }}
+                      />
+                      <Action
+                        title={"Create Shortcut"}
+                        icon={Icon.Download}
+                        shortcut={{ modifiers: ["cmd"], key: "n" }}
+                        onAction={async () => {
+                          push(
+                            <CreateShortcut shortcut={undefined} updateListUseState={[updateList, setUpdateList]} />
+                          );
                         }}
                       />
                     </ActionPanel>
@@ -125,7 +146,7 @@ export default function SearchShortcut() {
                             const _inputItem = await fetchItemInput();
                             const _runShortcut = runShortcut(_inputItem.content, value.tactions);
                             await Clipboard.paste(_runShortcut);
-                            await showToast(Toast.Style.Success, "Paste Shortcut's Text");
+                            await showToast(Toast.Style.Success, "Paste shortcut's text!");
                           }}
                         />
                         <Action
@@ -152,9 +173,11 @@ export default function SearchShortcut() {
                           onAction={async () => {
                             const newShortCuts = [...userShortcuts];
                             newShortCuts.splice(index, 1);
-                            setUserShortcuts(newShortCuts);
-                            await showToast(Toast.Style.Success, "Remove Shortcut");
+                            await showToast(Toast.Style.Success, "Remove shortcut success!");
                             await LocalStorage.setItem("shortcuts", JSON.stringify(newShortCuts));
+                            const _updateList = [...updateList];
+                            _updateList[0]++;
+                            setUpdateList(_updateList);
                           }}
                         />
                         <Action
@@ -165,9 +188,11 @@ export default function SearchShortcut() {
                             if (
                               await confirmAlert({ title: "Are you sure?", message: "Remove all custom shortcuts" })
                             ) {
-                              setUserShortcuts([]);
-                              await showToast(Toast.Style.Success, "Remove All Shortcuts");
+                              await showToast(Toast.Style.Success, "Remove all success!");
                               await LocalStorage.clear();
+                              const _updateList = [...updateList];
+                              _updateList[0]++;
+                              setUpdateList(_updateList);
                             }
                           }}
                         />
