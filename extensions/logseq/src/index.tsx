@@ -5,7 +5,7 @@ import {
   generateContentToAppend,
   getTodayJournalPath,
   noop,
-  validateUerConfigGraphPath,
+  validateUserConfigGraphPath,
 } from "./utils";
 
 interface CommandForm {
@@ -18,18 +18,21 @@ export default function Command() {
   async function handleSubmit(values: CommandForm) {
     const filePath = getTodayJournalPath();
 
-    validateUerConfigGraphPath()
+    validateUserConfigGraphPath()
       .catch((e) => {
-        showToast({ style: Toast.Style.Failure, title: "The path of logseq graph is invalid, please check and retry later." })
-        throw e
+        showToast({
+          style: Toast.Style.Failure,
+          title: "logseq graph path is invalid. Update it in Raycast Preferences and retry.",
+        });
+        throw e;
       })
       .then(() => showToast({ style: Toast.Style.Animated, title: "Adding notes" }))
       .then(() => createFileIfNotExist(filePath))
       .then(() => fs.promises.appendFile(filePath, generateContentToAppend(values.content)))
-      .then(() => showHUD("✅ Notes added"))
+      .then(() => showHUD("✅ Note added"))
       .then(pop)
       .catch((e) => showToast({ style: Toast.Style.Failure, title: "Failed", message: e }))
-      .catch(noop)
+      .catch(noop);
   }
 
   return (
