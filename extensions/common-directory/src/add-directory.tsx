@@ -50,24 +50,27 @@ export default function AddDirectory(props: {
               setUpdateList(_updateList);
             }}
           />
-          <Action
-            title={"Fetch Directory"}
-            icon={Icon.TwoArrowsClockwise}
-            onAction={async () => {
-              await fetchDirectoryPath(setPath);
-            }}
-          />
-          <Action
-            title={"Choose Directory"}
-            icon={Icon.Sidebar}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            onAction={() => {
-              getChooseFolder().then((path) => {
-                console.debug(`Selected Directory: ${path}`);
-                setPath(path);
-              });
-            }}
-          />
+
+          <ActionPanel.Section title="Fill Directory">
+            <Action
+              title={"Fetch Directory"}
+              icon={Icon.TwoArrowsClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              onAction={async () => {
+                await fetchDirectoryPath(setPath);
+              }}
+            />
+            <Action
+              title={"Select Directory"}
+              icon={Icon.Sidebar}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              onAction={() => {
+                getChooseFolder().then((path) => {
+                  setPath(path);
+                });
+              }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -116,7 +119,7 @@ async function addDirectory(alias: string, path: string) {
           isCommon: true,
         });
         await LocalStorage.setItem(_type, JSON.stringify(_commonDirectory));
-        await showToast(Toast.Style.Success, `Add ${_type} success!`);
+        await showToast(Toast.Style.Success, `Add ${_type.toLowerCase()} success!`);
       }
     }
   } else {

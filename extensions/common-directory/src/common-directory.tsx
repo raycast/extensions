@@ -15,7 +15,7 @@ import { DirectoryInfo, DirectoryType, SortBy } from "./directory-info";
 import React, { useEffect, useState } from "react";
 import AddDirectory from "./add-directory";
 import { checkPathValid, getOpenFinderWindowPath, preferences } from "./utils";
-import { runAppleScript } from "run-applescript";
+import { homedir } from "os";
 
 export default function CommonDirectory() {
   const [searchValue, setSearchValue] = useState<string>("");
@@ -25,6 +25,7 @@ export default function CommonDirectory() {
   const [loading, setLoading] = useState<boolean>(true);
   const { sortBy, showOpenDirectory } = preferences();
   const { push } = useNavigation();
+  const homeDirectory = homedir();
 
   useEffect(() => {
     async function _fetchLocalStorage() {
@@ -50,7 +51,7 @@ export default function CommonDirectory() {
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder={"Search Common Directory"}
+      searchBarPlaceholder={"Search directory"}
       onSearchTextChange={(newValue) => {
         setSearchValue(newValue);
       }}
@@ -82,6 +83,7 @@ export default function CommonDirectory() {
                 return (
                   <DirectoryItem
                     key={directory.id}
+                    homeDirectory={homeDirectory}
                     directory={directory}
                     setCommonDirectory={setCommonDirectory}
                     index={index}
@@ -97,6 +99,7 @@ export default function CommonDirectory() {
                 return (
                   <DirectoryItem
                     key={directory.id}
+                    homeDirectory={homeDirectory}
                     directory={directory}
                     setCommonDirectory={setCommonDirectory}
                     index={index}
@@ -113,16 +116,14 @@ export default function CommonDirectory() {
 }
 
 function DirectoryItem(props: {
+  homeDirectory: string;
   directory: DirectoryInfo;
   setCommonDirectory: React.Dispatch<React.SetStateAction<DirectoryInfo[]>>;
   index: number;
   commonDirectory: DirectoryInfo[];
   updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
 }) {
-  const directory = props.directory;
-  const setCommonDirectory = props.setCommonDirectory;
-  const index = props.index;
-  const commonDirectory = props.commonDirectory;
+  const { homeDirectory, directory, setCommonDirectory, index, commonDirectory } = props;
   const [updateList, setUpdateList] = props.updateListUseState;
   const { push } = useNavigation();
   const { sortBy } = preferences();
@@ -131,11 +132,14 @@ function DirectoryItem(props: {
       icon={{ fileIcon: directory.path }}
       title={directory.name}
       subtitle={directory.alias}
-      accessories={[{ text: directory.path }, { icon: directory.valid ? "✅" : "⚠️" }]}
+      accessories={[
+        { text: "~" + directory.path.substring(homeDirectory.length) },
+        directory.valid ? {} : { icon: "⚠️" },
+      ]}
       actions={
         <ActionPanel>
           <Action
-            title={"Reveal in Finder"}
+            title={"Open in Finder"}
             icon={Icon.Finder}
             onAction={async () => {
               try {
@@ -144,7 +148,7 @@ function DirectoryItem(props: {
                   let _commonDirectory = [...commonDirectory];
                   if (pathValid) {
                     await open(directory.path);
-                    await showHUD("Reveal in Finder");
+                    await showHUD("Open in Finder");
                     _commonDirectory[index].valid = true;
                     if (sortBy === SortBy.Rank) {
                       _commonDirectory = await upRank([..._commonDirectory], index);
@@ -157,7 +161,7 @@ function DirectoryItem(props: {
                   await LocalStorage.setItem(DirectoryType.DIRECTORY, JSON.stringify(_commonDirectory));
                 } else {
                   await open(directory.path);
-                  await showHUD("Reveal in Finder");
+                  await showHUD("Open in Finder");
                 }
               } catch (e) {
                 await showToast(Toast.Style.Failure, "Path has expired." + String(e));
@@ -165,7 +169,7 @@ function DirectoryItem(props: {
             }}
           />
           <Action
-            title={"Copy Directory Path"}
+            title={"Copy Directory"}
             icon={Icon.Clipboard}
             onAction={async () => {
               await Clipboard.copy(directory.path);
@@ -176,7 +180,7 @@ function DirectoryItem(props: {
             title={"Add Directory"}
             icon={Icon.Download}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
-            onAction={async () => {
+            onAction={() => {
               push(<AddDirectory updateListUseState={[updateList, setUpdateList]} />);
             }}
           />
