@@ -78,7 +78,7 @@ export default function CreateGist(props: { gist: Gist }) {
                     const options: Toast.Options = {
                       style: Toast.Style.Success,
                       title: isEdit ? "Update Gist Success" : "Create Gist Success",
-                      message: "Click to copy gist link",
+                      message: "Click to copy Gist link",
                       primaryAction: {
                         title: "Copy Gist Link",
                         onAction: (toast) => {
