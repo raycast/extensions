@@ -9,7 +9,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Generate random password",
+      "title": "Generate Random Password",
       "description": "Generate random password of different length and strength",
       "mode": "view"
     }
