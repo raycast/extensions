@@ -124,7 +124,7 @@ function cachePicture(wallpaper: { title: string; url: string }) {
       const picturePath = buildCachePath(wallpaper);
       fs.writeFile(picturePath, Buffer.from(buffer), async (error) => {
         if (error != null) {
-          console.log("error " + error);
+          console.error("error " + error);
         }
       });
     });

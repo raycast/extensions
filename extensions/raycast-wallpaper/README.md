@@ -1,11 +1,18 @@
 ## Raycast Wallpaper
 
+Set Raycast official wallpapers and capture for Raycast extension's metadata.
+
 **Commands**
 
 - **Raycast Wallpaper**
   - Get and set Raycast wallpapers to desktop.
 - **Random Wallpaper**
   - Set random Raycast wallpapers to desktop.
+- **Capture Raycast Metadata**
+  - Capture a screenshot for Raycast Extension's metadata.
+  - 🌟🌟🌟How to use: 
+    Set a shortcut for this command, open Raycast, and run the command with the shortcut to take a screenshot. Screenshots will be saved in the Download directory.
+
 
 **Actions**
 

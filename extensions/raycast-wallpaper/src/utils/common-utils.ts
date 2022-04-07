@@ -1,8 +1,8 @@
-import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { Values } from "@raycast/api/types/api/app/localStorage";
+import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import fs, { existsSync } from "fs";
 import { runAppleScript } from "run-applescript";
 import { buildImageURL, RaycastWallpaper } from "./raycast-wallpaper-utils";
+import Values = LocalStorage.Values;
 
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
@@ -33,14 +33,11 @@ export const setWallpaper = async (wallpaper: RaycastWallpaper) => {
 
   try {
     const actualPath = fixedPathName;
-    console.debug(actualPath);
 
     const command = !existsSync(actualPath)
       ? `set cmd to "curl -o " & q_temp_folder & " " & "${buildImageURL(wallpaper.url)}"
         do shell script cmd`
       : "";
-
-    console.debug(command);
 
     const result = await runAppleScript(`
       set temp_folder to (POSIX path of "${actualPath}")
