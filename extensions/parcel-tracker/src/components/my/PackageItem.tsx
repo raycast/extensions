@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import React, { useState } from "react";
+import { useState } from "react";
 import { IVendorData } from "../../model/vendorData";
 import Track from "../track/Track";
 
@@ -12,7 +12,7 @@ interface IProps {
 }
 
 const PackageItem = ({ itemKey, itemName, vendor, isComplete, handleRemove }: IProps) => {
-  const [trackNumber, setTrackNumber] = useState<string>(itemKey.split("-")[1]);
+  const [trackNumber] = useState<string>(itemKey.split("-")[1]);
 
   return (
     <>

@@ -1,8 +1,6 @@
 import axios from "axios";
 
-const instance = axios.create({
-  timeout: 10000,
-});
+const instance = axios.create({ timeout: 10000 });
 
 instance.interceptors.response.use(
   function (response) {
@@ -20,9 +18,11 @@ export const getVendors = () => {
 };
 
 export const getVendorByCode = (code: string) => {
-  return instance.get(`${apiServer}/vendor/${code}`);
+  return instance.get(`${apiServer}/vendor/${encodeURIComponent(code)}`);
 };
 
 export const getTrackData = (vendorId: string, trackId: string) => {
-  return instance.get(`${apiServer}/tracking?vendorId=${vendorId}&invoiceNumber=${trackId}`);
+  return instance.get(
+    `${apiServer}/tracking?vendorId=${encodeURIComponent(vendorId)}&invoiceNumber=${encodeURIComponent(trackId)}`
+  );
 };
