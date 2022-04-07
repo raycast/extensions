@@ -79,7 +79,7 @@ export default function Command() {
           }
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Open in browser" url={item.link} />
+              <Action.OpenInBrowser title="Open in Browser" url={item.link} />
             </ActionPanel>
           }
         />
