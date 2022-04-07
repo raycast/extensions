@@ -22,7 +22,7 @@ export default function Command() {
       .catch((e) => {
         showToast({
           style: Toast.Style.Failure,
-          title: "logseq graph path is invalid. Update it in Raycast Preferences and retry.",
+          title: "Logseq graph path is invalid. Update it in Raycast Preferences and retry.",
         });
         throw e;
       })
