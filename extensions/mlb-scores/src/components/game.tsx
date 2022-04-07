@@ -51,11 +51,13 @@ const Game = React.memo(
       d.getHours() >= 12 ? "pm" : "am"
     } ${tzName}`;
     const md_string = `
-# ${aw ? "*" : ""}${game.gameData.teams.away.name} (${linescore.teams.away.runs ? linescore.teams.away.runs : '0'})${aw ? "*" : ""} <img src="${
-      "file://" + resolve(CACHE_DIR, `${game.gameData.teams.away.id}.svg`).replace(" ", "%20")
-    }" height="20" /> @ ${hw ? "*" : ""}${game.gameData.teams.home.name} (${linescore.teams.home.runs ? linescore.teams.home.runs : '0'})${
-      hw ? "*" : ""
+# ${aw ? "*" : ""}${game.gameData.teams.away.name} (${linescore.teams.away.runs ? linescore.teams.away.runs : "0"})${
+      aw ? "*" : ""
     } <img src="${
+      "file://" + resolve(CACHE_DIR, `${game.gameData.teams.away.id}.svg`).replace(" ", "%20")
+    }" height="20" /> @ ${hw ? "*" : ""}${game.gameData.teams.home.name} (${
+      linescore.teams.home.runs ? linescore.teams.home.runs : "0"
+    })${hw ? "*" : ""} <img src="${
       "file://" + resolve(CACHE_DIR, `${game.gameData.teams.home.id}.svg`).replace(" ", "%20")
     }" height="20" />
 
