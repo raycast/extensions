@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Logout] - 2022-04-06
+
+- Added `Logout` action
+- Vault Status shown while unlocking vault
+
 ## [Login Fix] - 2022-04-01
 
 - Fix vault constantly locking
@@ -49,7 +54,7 @@
 
 - Add `Lock Vault` command
 - Show favorites at the top
-- Automatically find Brew CLI in multiple brew directories (support Apple Silicon)
+- Automatically find Bitwarden CLI in multiple brew directories (support Apple Silicon)
 
 ## [Added Bitwarden] - 2021-10-25
 

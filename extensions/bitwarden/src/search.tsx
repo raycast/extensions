@@ -13,7 +13,7 @@ import {
   LocalStorage,
 } from "@raycast/api";
 import { Item } from "./types";
-import React, { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { codeBlock, titleCase, faviconUrl, extractKeywords } from "./utils";
 import { Bitwarden } from "./api";
 import { SESSION_KEY } from "./const";
@@ -94,13 +94,34 @@ export function ItemList(props: { api: Bitwarden }) {
     }
   }, [session.token, session.active]);
 
-  async function refreshItems() {
+  async function syncItems() {
     if (session.token) {
       const toast = await showToast(Toast.Style.Animated, "Syncing Items...");
-      await bitwardenApi.sync(session.token);
-      await loadItems(session.token);
-      await toast.hide();
+      try {
+        await bitwardenApi.sync(session.token);
+        await loadItems(session.token);
+        await toast.hide();
+      } catch (error) {
+        await bitwardenApi.logout();
+        await session.deleteToken();
+        toast.style = Toast.Style.Failure;
+        toast.message = "Failed to sync. Please try logging in again.";
+      }
     }
+  }
+
+  async function lockVault() {
+    const toast = await showToast({ title: "Locking Vault...", style: Toast.Style.Animated });
+    await bitwardenApi.lock();
+    await session.deleteToken();
+    await toast.hide();
+  }
+
+  async function logoutVault() {
+    const toast = await showToast({ title: "Logging Out...", style: Toast.Style.Animated });
+    await bitwardenApi.logout();
+    await session.deleteToken();
+    await toast.hide();
   }
 
   if (state.isLocked) {
@@ -115,41 +136,45 @@ export function ItemList(props: { api: Bitwarden }) {
     );
   }
 
+  const vaultEmpty = state.items.length == 0;
+
   return (
     <List isLoading={state.isLoading}>
-      {state.items ? (
-        <Fragment>
-          {state.items
-            .sort((a, b) => {
-              if (a.favorite && b.favorite) return 0;
-              return a.favorite ? -1 : 1;
-            })
-            .map((item) => (
-              <BitwardenItem
-                key={item.id}
-                item={item}
-                lockVault={async () => {
-                  const toast = await showToast({ title: "Locking Vault...", style: Toast.Style.Animated });
-                  await bitwardenApi.lock();
-                  await session.deleteToken();
-                  await toast.hide();
-                }}
-                refreshItems={refreshItems}
-                copyTotp={copyTotp}
-              />
-            ))}
-          <List.EmptyView
-            icon={{ source: "bitwarden-64.png" }}
-            title="No matching items found."
-            description="Hit the refresh button to sync your vault."
-            actions={
-              <ActionPanel>
-                <Action icon={Icon.ArrowClockwise} title={"Refresh Items"} onAction={refreshItems} />
-              </ActionPanel>
-            }
+      {state.items
+        .sort((a, b) => {
+          if (a.favorite && b.favorite) return 0;
+          return a.favorite ? -1 : 1;
+        })
+        .map((item) => (
+          <BitwardenItem
+            key={item.id}
+            item={item}
+            lockVault={lockVault}
+            logoutVault={logoutVault}
+            syncItems={syncItems}
+            copyTotp={copyTotp}
           />
-        </Fragment>
-      ) : undefined}
+        ))}
+      {state.isLoading ? (
+        <List.EmptyView icon={Icon.TwoArrowsClockwise} title="Loading..." description="Please wait." />
+      ) : (
+        <List.EmptyView
+          icon={{ source: "bitwarden-64.png" }}
+          title={vaultEmpty ? "Vault empty." : "No matching items found."}
+          description={
+            vaultEmpty
+              ? "Hit the sync button to sync your vault or try logging in again."
+              : "Hit the sync button to sync your vault."
+          }
+          actions={
+            !state.isLoading && (
+              <ActionPanel>
+                <VaultActions syncItems={syncItems} lockVault={lockVault} logoutVault={logoutVault} />
+              </ActionPanel>
+            )
+          }
+        />
+      )}
     </List>
   );
 }
@@ -167,11 +192,12 @@ function getIcon(item: Item) {
 
 function BitwardenItem(props: {
   item: Item;
-  refreshItems?: () => void;
+  syncItems: () => void;
   lockVault: () => void;
+  logoutVault: () => void;
   copyTotp: (id: string) => void;
 }) {
-  const { item, refreshItems, copyTotp, lockVault } = props;
+  const { item, syncItems, lockVault, logoutVault, copyTotp } = props;
   const { notes, identity, login, fields, card } = item;
 
   const keywords = useMemo(() => extractKeywords(item), [item]);
@@ -186,7 +212,9 @@ function BitwardenItem(props: {
       id={item.id}
       title={item.name}
       keywords={keywords}
-      accessoryIcon={item.favorite ? { source: Icon.Star, tintColor: Color.Yellow } : undefined}
+      accessories={
+        item.favorite ? [{ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Favorite" }] : undefined
+      }
       icon={getIcon(item)}
       subtitle={item.login?.username || undefined}
       actions={
@@ -249,18 +277,7 @@ function BitwardenItem(props: {
             </ActionPanel.Submenu>
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action
-              title="Refresh Items"
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-              icon={Icon.ArrowClockwise}
-              onAction={refreshItems}
-            />
-            <Action
-              icon={Icon.XmarkCircle}
-              title="Lock Vault"
-              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-              onAction={lockVault}
-            />
+            <VaultActions syncItems={syncItems} lockVault={lockVault} logoutVault={logoutVault} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -272,7 +289,25 @@ function PasswordActions(props: { password: string }) {
   const copyAction = <Action.CopyToClipboard key="copy" title="Copy Password" content={props.password} />;
   const pasteAction = <Action.Paste key="paste" title="Paste Password" content={props.password} />;
 
+  return <Fragment>{primaryAction == "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}</Fragment>;
+}
+
+function VaultActions(props: { syncItems: () => void; lockVault: () => void; logoutVault: () => void }) {
   return (
-    <React.Fragment>{primaryAction == "copy" ? [copyAction, pasteAction] : [pasteAction, copyAction]}</React.Fragment>
+    <Fragment>
+      <Action
+        title="Sync Vault"
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        icon={Icon.ArrowClockwise}
+        onAction={props.syncItems}
+      />
+      <Action
+        icon={{ source: "sf_symbols_lock.svg", tintColor: Color.PrimaryText }} // Does not immediately follow theme
+        title="Lock Vault"
+        shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+        onAction={props.lockVault}
+      />
+      <Action title="Logout Vault" icon={Icon.XmarkCircle} onAction={props.logoutVault} />
+    </Fragment>
   );
 }
