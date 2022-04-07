@@ -13,6 +13,12 @@
   ],
   "commands": [
     {
+      "name": "search",
+      "title": "Search for GIFs",
+      "description": "Search for GIFs across multiple services...",
+      "mode": "view"
+    },
+    {
       "name": "giphy",
       "title": "Search Giphy",
       "description": "Search for animated gifs on Giphy.com",
@@ -92,7 +98,6 @@
   ],
   "dependencies": {
     "@giphy/js-fetch-api": "^4.1.2",
-    "date-fns": "^2.28.0",
     "@raycast/api": "^1.31.0",
     "@saekitominaga/file-size-format": "^1.0.2",
     "date-fns": "^2.28.0",

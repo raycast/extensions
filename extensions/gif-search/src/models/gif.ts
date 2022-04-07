@@ -30,7 +30,7 @@ export interface IGif {
     | string;
 }
 
-export type APIOpt = { offset?: number; limit?: number };
+export type APIOpt = { offset?: number; limit?: number; abort?: AbortController };
 
 export interface IGifAPI {
   search: (term: string, opt?: APIOpt) => Promise<IGif[]>;

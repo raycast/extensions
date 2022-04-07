@@ -11,11 +11,11 @@ export const DEFAULT_ACTION = "defaultAction";
 
 export const CONFIG_URL = "https://cdn.joe.sh/gif-search/config.json";
 
-export type ServiceName = "giphy" | "tenor" | "finerGifs";
+export type ServiceName = "giphy" | "tenor" | "finergifs";
 export const GIF_SERVICE: { [name: string]: ServiceName } = {
   GIPHY: "giphy",
   TENOR: "tenor",
-  FINER_GIFS: "finerGifs",
+  FINER_GIFS: "finergifs",
 };
 
 export type Preference = { [preferenceName: string]: any };
@@ -40,11 +40,11 @@ export async function getAPIKey(serviceName: ServiceName, forceRefresh?: boolean
   return apiKey;
 }
 
-export function getShowPreview() {
+export function getShowPreview(): boolean {
   return getPrefs()[SHOW_PREVIEW];
 }
 
-export function getDefaultAction() {
+export function getDefaultAction(): string {
   return getPrefs()[DEFAULT_ACTION];
 }
 

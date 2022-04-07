@@ -9,7 +9,11 @@ import "./fetch-polyfill";
 
 export default function Command() {
   const showPreview = getShowPreview();
-  const [results, isLoading, search] = useSearchAPI(GIF_SERVICE.GIPHY, {});
+  const [results, isLoading, setSearchService, setSearchTerm] = useSearchAPI({});
+
+  useEffect(() => {
+    setSearchService(GIF_SERVICE.GIPHY);
+  }, []);
 
   useEffect(() => {
     if (results?.error) {
@@ -26,7 +30,7 @@ export default function Command() {
       isLoading={isLoading}
       throttle={true}
       searchBarPlaceholder="Search for gifs on Giphy..."
-      onSearchTextChange={search}
+      onSearchTextChange={setSearchTerm}
       isShowingDetail={showPreview && results?.items?.length != 0}
     >
       <GifList term={results?.term} results={results?.items} />

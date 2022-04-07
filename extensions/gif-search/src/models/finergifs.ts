@@ -37,7 +37,7 @@ export default function finergifs() {
 const API_BASE_URL = "https://api.thefinergifs.club/";
 
 export class FinerGifsClubAPI {
-  async search(term: string, options: { offset: number; limit?: number }) {
+  async search(term: string, options: { offset: number; limit?: number; abort?: AbortController }) {
     const reqUrl = new URL("/search", API_BASE_URL);
     reqUrl.searchParams.set("q", term);
     reqUrl.searchParams.set("q.parser", "simple");
@@ -48,7 +48,7 @@ export class FinerGifsClubAPI {
       reqUrl.searchParams.set("start", options.offset.toString());
     }
 
-    const resp = await fetch(reqUrl.toString());
+    const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
     return (await resp.json()) as FinerGifsClubResults;
   }
 }

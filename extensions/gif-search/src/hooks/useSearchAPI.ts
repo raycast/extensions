@@ -14,6 +14,8 @@ interface FetchState {
   error?: Error;
 }
 
+const DEFAULT_RESULT_COUNT = 10;
+
 export async function getAPIByServiceName(service: ServiceName, force?: boolean) {
   switch (service) {
     case GIF_SERVICE.GIPHY:
@@ -27,25 +29,26 @@ export async function getAPIByServiceName(service: ServiceName, force?: boolean)
   throw new Error(`Unable to find API for service "${service}"`);
 }
 
-export default function useSearchAPI(service: ServiceName, { offset = 0 }) {
+export default function useSearchAPI({ offset = 0 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [results, setResults] = useState<FetchState>();
+  const [searchService, setSearchService] = useState<ServiceName>();
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const cancelRef = useRef<AbortController | null>(null);
 
   const search = useCallback(
-    async function search(term?: string) {
-      const api = await getAPIByServiceName(service);
-
+    async function search(term: string, service: ServiceName) {
       cancelRef.current?.abort();
       cancelRef.current = new AbortController();
       setIsLoading(true);
 
       let items: IGif[];
       try {
+        const api = await getAPIByServiceName(service);
         if (term) {
-          items = await api.search(term, { offset });
+          items = dedupe(await api.search(term, { offset }));
         } else {
-          items = await api.trending({ offset, limit: 10 });
+          items = dedupe(await api.trending({ offset, limit: DEFAULT_RESULT_COUNT }));
         }
         setResults({ items, term });
       } catch (e) {
@@ -61,15 +64,32 @@ export default function useSearchAPI(service: ServiceName, { offset = 0 }) {
         setIsLoading(false);
       }
     },
-    [cancelRef, setIsLoading, setResults]
+    [cancelRef, setIsLoading, setResults, searchTerm]
   );
 
   useEffect(() => {
-    search();
+    if (searchService) {
+      search(searchTerm, searchService);
+    }
     return () => {
       cancelRef.current?.abort();
     };
-  }, []);
+  }, [searchTerm, searchService]);
 
-  return [results, isLoading, search] as const;
+  return [results, isLoading, setSearchService, setSearchTerm, searchTerm] as const;
+}
+
+function dedupe(values: Array<IGif>) {
+  return Array.from(
+    values
+      .reduce((uniq, val: IGif) => {
+        if (uniq.get(val.id.toString())) {
+          return uniq;
+        }
+
+        uniq.set(val.id.toString(), val);
+        return uniq;
+      }, new Map<string, IGif>())
+      .values()
+  );
 }

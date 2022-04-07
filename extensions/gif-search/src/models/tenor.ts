@@ -49,13 +49,13 @@ export default async function tenor(force?: boolean) {
 
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {
-      const { offset = 0 } = opt || {};
-      return (await api.search(term, { offset })).results.map(mapTenorResponse);
+      const { offset = 0, abort } = opt || {};
+      return (await api.search(term, { offset, abort })).results.map(mapTenorResponse);
     },
 
     async trending(opt?: APIOpt) {
-      const { offset = 0, limit = 10 } = opt || {};
-      return (await api.trending({ offset, limit })).results.map(mapTenorResponse);
+      const { offset = 0, limit = 10, abort } = opt || {};
+      return (await api.trending({ offset, limit, abort })).results.map(mapTenorResponse);
     },
   };
 }
@@ -72,7 +72,7 @@ export class TenorAPI {
     this.apiKey = apiKey;
   }
 
-  async trending(options: { offset: number; limit: number }) {
+  async trending(options: { offset?: number; limit?: number; abort?: AbortController }) {
     const reqUrl = new URL("/v1/trending", API_BASE_URL);
     reqUrl.searchParams.set("key", this.apiKey);
     reqUrl.searchParams.set("locale", TenorAPI.locale);
@@ -83,11 +83,11 @@ export class TenorAPI {
       reqUrl.searchParams.set("pos", options.offset.toString());
     }
 
-    const resp = await fetch(reqUrl.toString());
+    const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
     return (await resp.json()) as TenorResults;
   }
 
-  async search(term: string, options: { offset: number; limit?: number }) {
+  async search(term: string, options: { offset?: number; limit?: number; abort?: AbortController }) {
     const reqUrl = new URL("/v1/search", API_BASE_URL);
     reqUrl.searchParams.set("key", this.apiKey);
     reqUrl.searchParams.set("q", term);
@@ -99,7 +99,7 @@ export class TenorAPI {
       reqUrl.searchParams.set("pos", options.offset.toString());
     }
 
-    const resp = await fetch(reqUrl.toString());
+    const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
     return (await resp.json()) as TenorResults;
   }
 }
