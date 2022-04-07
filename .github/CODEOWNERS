@@ -98,6 +98,7 @@
 /extensions/git-repos                                @moored
 /extensions/gitfox                                   @L3K0V
 /extensions/github-for-enterprise                    @Kinbaum
+/extensions/github-gist                              @CheatGZ
 /extensions/github-repository-search                 @thomaspaulmann
 /extensions/github-review-requests                   @resessh
 /extensions/github-stars                             @mrmartineau
