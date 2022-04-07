@@ -1,3 +1,9 @@
+export type Preferences = {
+  cliPath: string;
+  clientId: string;
+  clientSecret: string;
+};
+
 export type VaultStatus = "unauthenticated" | "locked" | "unlocked";
 export type VaultState = {
   userEmail?: string;
@@ -120,3 +126,8 @@ export interface PasswordOptionField {
 }
 
 export type PasswordOptionsToFieldEntries = [keyof PasswordGeneratorOptions, PasswordOptionField];
+
+export type PasswordHistoryItem = {
+  password: string;
+  timestamp: number;
+};

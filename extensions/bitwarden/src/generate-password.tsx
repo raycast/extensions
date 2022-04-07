@@ -8,19 +8,33 @@ import {
   LocalStorage,
   Detail,
   getPreferenceValues,
+  List,
 } from "@raycast/api";
-import { useOneTimePasswordHistoryWarning, usePasswordGenerator, usePasswordOptions } from "./hooks";
+import {
+  useOneTimePasswordHistoryWarning,
+  usePasswordGenerator,
+  usePasswordHistory,
+  usePasswordOptions,
+} from "./hooks";
 import { Bitwarden } from "./api";
 import { LOCAL_STORAGE_KEY, PASSWORD_OPTIONS_MAP } from "./const";
 import { capitalise, objectEntries } from "./utils";
-import { PasswordGeneratorOptions, PasswordOptionField, PasswordOptionsToFieldEntries, PasswordType } from "./types";
+import {
+  PasswordGeneratorOptions,
+  PasswordHistoryItem,
+  PasswordOptionField,
+  PasswordOptionsToFieldEntries,
+  PasswordType,
+  Preferences,
+} from "./types";
 import { debounce } from "throttle-debounce";
 import { TroubleshootingGuide } from "./components";
+import { useEffect, useState } from "react";
 
 const FormSpace = () => <Form.Description text="" />;
 
 export default function GeneratePassword() {
-  const { cliPath, clientId, clientSecret } = getPreferenceValues();
+  const { cliPath, clientId, clientSecret } = getPreferenceValues<Preferences>();
   try {
     const bitwardenApi = new Bitwarden(clientId, clientSecret, cliPath);
     return <PasswordGenerator bitwardenApi={bitwardenApi} />;
@@ -88,6 +102,12 @@ function PasswordGenerator(props: { bitwardenApi: Bitwarden }) {
             icon={Icon.ArrowClockwise}
             onAction={regenerate}
             shortcut={{ key: "backspace", modifiers: ["cmd"] }}
+          />
+          <Action.Push
+            title="Password history"
+            icon={Icon.List}
+            target={<PasswordHistory />}
+            shortcut={{ key: "h", modifiers: ["cmd"] }}
           />
           {process.env.NODE_ENV === "development" && (
             <Action title="Clear storage" icon={Icon.Trash} onAction={clearStorage} />
@@ -167,5 +187,24 @@ function OptionField({ option, currentOptions, handleFieldChange, field }: Optio
       value={String(currentOptions?.[option] ?? "")}
       onChange={handleFieldChange}
     />
+  );
+}
+
+function PasswordHistory() {
+  const [items, setItems] = useState<PasswordHistoryItem[]>([]);
+  const { getAll } = usePasswordHistory();
+
+  useEffect(() => {
+    const historyItems = getAll();
+    if (!historyItems) return;
+    setItems(historyItems);
+  }, []);
+
+  return (
+    <List>
+      {items.map(({ password, timestamp }) => (
+        <List.Item key={password} title={password} subtitle={new Date(timestamp).toISOString()} />
+      ))}
+    </List>
   );
 }
