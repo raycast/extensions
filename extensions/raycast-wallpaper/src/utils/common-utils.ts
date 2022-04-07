@@ -1,7 +1,7 @@
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import fs, { existsSync } from "fs";
 import { runAppleScript } from "run-applescript";
-import { buildImageURL, RaycastWallpaper } from "./raycast-wallpaper-utils";
+import { RaycastWallpaper } from "./raycast-wallpaper-utils";
 import Values = LocalStorage.Values;
 
 export const preferences = () => {
@@ -35,7 +35,7 @@ export const setWallpaper = async (wallpaper: RaycastWallpaper) => {
     const actualPath = fixedPathName;
 
     const command = !existsSync(actualPath)
-      ? `set cmd to "curl -o " & q_temp_folder & " " & "${buildImageURL(wallpaper.url)}"
+      ? `set cmd to "curl -o " & q_temp_folder & " " & "${wallpaper.url}"
         do shell script cmd`
       : "";
 
@@ -84,10 +84,21 @@ export const setWallpaper = async (wallpaper: RaycastWallpaper) => {
 };
 
 export const buildCachePath = (wallpaper: RaycastWallpaper) => {
-  return cachePath.endsWith("/") ? `${cachePath}${wallpaper.url}.png` : `${cachePath}/${wallpaper.url}`;
+  return cachePath.endsWith("/") ? `${cachePath}${wallpaper.title}.png` : `${cachePath}/${wallpaper.title}.png`;
 };
 
 export const checkCache = (wallpaper: RaycastWallpaper) => {
   const fixedPathName = buildCachePath(wallpaper);
   return checkDirectoryExists(fixedPathName);
 };
+
+export function deleteCache() {
+  const pathName = environment.supportPath;
+  if (fs.existsSync(pathName)) {
+    const files = fs.readdirSync(pathName);
+    files.forEach(function (file) {
+      const curPath = pathName + "/" + file;
+      fs.unlinkSync(curPath);
+    });
+  }
+}

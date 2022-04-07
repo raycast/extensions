@@ -6,14 +6,14 @@ export default async () => {
   const _raycastLocation = await getRaycastLocation();
   const _raycastSize = await getRaycastSize();
   if (_raycastLocation[0] === -1) {
-    await showNotification("Capture Error!", "Raycast not found!", "Funk");
+    await showNotification("Capture Failure!", "Raycast not found!", "Funk");
     return;
   } else {
     if (_raycastSize[0] / _raycastSize[1] != 750 / 474) {
-      await showNotification("Capture Error!", "Please close other Raycast windows!", "Funk");
+      await showNotification("Capture Failure!", "Please close other Raycast windows!", "Funk");
     } else {
       await captureRaycastMetadata({ x: _raycastLocation[0], y: _raycastLocation[1] }, await getScreenResolution());
-      await showNotification("Capture Success!", "Image are saved in Download folder.");
+      await showNotification("Capture Success!", "Image is saved in Download folder.");
     }
   }
 };

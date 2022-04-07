@@ -1,38 +1,57 @@
-import { Action, ActionPanel, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
-import { buildImageURL, raycastWallpaper } from "./utils/raycast-wallpaper-utils";
-import React, { useEffect } from "react";
-import fetch from "node-fetch";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
+import { RaycastWallpaper, raycastWallpaperListURL } from "./utils/raycast-wallpaper-utils";
+import React, { useEffect, useState } from "react";
+import fetch, { AbortError } from "node-fetch";
 import * as fs from "fs";
 import { homedir } from "os";
-import { buildCachePath, checkCache, setWallpaper } from "./utils/common-utils";
+import { buildCachePath, checkCache, deleteCache, setWallpaper } from "./utils/common-utils";
 import fileUrl from "file-url";
 
 export default function CommonDirectory() {
+  const [raycastWallpaper, setRaycastWallpaper] = useState<RaycastWallpaper[]>([]);
+
   useEffect(() => {
     async function _fetchWallpaper() {
-      raycastWallpaper.forEach((value) => {
-        if (!checkCache(value)) {
-          cachePicture(value);
+      //get wallpaper list
+      try {
+        fetch(raycastWallpaperListURL)
+          .then((first_res) => first_res.json())
+          .then((first_data) => {
+            //cache wallpaper list
+            const _raycastWallpaper = first_data as RaycastWallpaper[];
+            setRaycastWallpaper(_raycastWallpaper);
+            _raycastWallpaper.forEach((value) => {
+              if (!checkCache(value)) {
+                cachePicture(value);
+              }
+            });
+          });
+      } catch (e) {
+        if (e instanceof AbortError) {
+          console.log("Abort");
+        } else {
+          console.log(e);
         }
-      });
+        return;
+      }
     }
 
     _fetchWallpaper().then();
   }, []);
 
   return (
-    <List isShowingDetail={true} isLoading={false} searchBarPlaceholder={"Search WallPaper"}>
+    <List isShowingDetail={true} isLoading={raycastWallpaper.length === 0} searchBarPlaceholder={"Search WallPaper"}>
       {raycastWallpaper.map((value, index) => {
         return (
           <List.Item
             id={index + ""}
             key={index + value.title}
-            icon={{ source: checkCache(value) ? buildCachePath(value) : buildImageURL(value.url) }}
+            icon={{ source: checkCache(value) ? buildCachePath(value) : value.url }}
             title={value.title}
             detail={
               <List.Item.Detail
                 isLoading={false}
-                markdown={`![](${checkCache(value) ? fileUrl(buildCachePath(value)) : buildImageURL(value.url)})`}
+                markdown={`![](${checkCache(value) ? fileUrl(buildCachePath(value)) : value.url})`}
               />
             }
             actions={
@@ -69,6 +88,25 @@ export default function CommonDirectory() {
                     await showHUD("Go to Raycast Wallpaper");
                   }}
                 />
+                <Action
+                  icon={Icon.Trash}
+                  title={"Clear Wallpaper Cache"}
+                  shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
+                  onAction={async () => {
+                    const options: Alert.Options = {
+                      title: "Are you sure?",
+                      message: "The next time the command is used, the images will be re-cached.",
+                      primaryAction: {
+                        title: "Confirm",
+                        onAction: () => {
+                          deleteCache();
+                          showToast(Toast.Style.Success, "Clear cache success!");
+                        },
+                      },
+                    };
+                    await confirmAlert(options);
+                  }}
+                />
               </ActionPanel>
             }
           />
@@ -80,7 +118,7 @@ export default function CommonDirectory() {
 
 async function downloadPicture(wallpaper: { title: string; url: string }) {
   await showToast(Toast.Style.Animated, "Downloading...");
-  fetch(buildImageURL(wallpaper.url))
+  fetch(wallpaper.url)
     .then(function (res) {
       return res.arrayBuffer();
     })
@@ -116,7 +154,7 @@ async function downloadPicture(wallpaper: { title: string; url: string }) {
 }
 
 function cachePicture(wallpaper: { title: string; url: string }) {
-  fetch(buildImageURL(wallpaper.url))
+  fetch(wallpaper.url)
     .then(function (res) {
       return res.arrayBuffer();
     })
