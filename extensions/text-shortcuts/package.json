@@ -102,7 +102,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.32.0",
     "run-applescript": "^6.0.0",
     "ts-md5": "^1.2.11"
   },

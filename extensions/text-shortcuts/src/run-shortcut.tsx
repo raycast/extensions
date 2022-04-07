@@ -9,9 +9,9 @@ export default function CreateShortcut() {
 
   return (
     <Form actions={<RunShortcutActions tactions={tactions} setTactions={setTactions} />}>
-      <Form.Description text={"Shortcut Key:   ⌘D     ⌘E     ⌘N     ⌘R     ⌘T     ⌘L"} />
-      <Form.Description text={"Delete | Coder | Case | Replace | Transform | Template"} />
       {tactionForms(tactions, setTactions)}
+      <Form.Description text={"  ⌘D       ⌘E       ⌘N        ⌘R            ⌘T              ⌘L"} />
+      <Form.Description text={"Delete | Coder | Case | Replace | Transform | Template"} />
     </Form>
   );
 }

@@ -27,7 +27,7 @@ export default function SearchShortcut() {
   const [allShortcuts, setAllShortcuts] = useState<Shortcut[]>([]);
   const [detail, setDetail] = useState<string>("");
   const [tag, setTag] = useState<string>("All");
-  const [updateList, setUpdateList] = useState<boolean>(false);
+  const [updateList, setUpdateList] = useState<number[]>([0]);
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -37,15 +37,8 @@ export default function SearchShortcut() {
       let _userShortcuts = [];
       if (typeof _localStorage == "string") {
         _userShortcuts = JSON.parse(_localStorage);
-        setUserShortcuts(_userShortcuts);
+        // setUserShortcuts(_userShortcuts);
       }
-    }
-
-    _fetchBuildInShortcut().then();
-  }, [updateList]);
-
-  useEffect(() => {
-    async function _fetchBuildInShortcut() {
       //build-in
       let _buildInShortcuts: Shortcut[] = [];
       if (preferences().annotation) {
@@ -66,11 +59,11 @@ export default function SearchShortcut() {
       if (preferences().time) {
         _buildInShortcuts = [..._buildInShortcuts, ...JSON.parse(TIMES_SHORTCUTS)];
       }
-      setAllShortcuts([...userShortcuts].concat(_buildInShortcuts));
+      setAllShortcuts([..._userShortcuts.concat(_buildInShortcuts)]);
     }
 
     _fetchBuildInShortcut().then();
-  }, [userShortcuts]);
+  }, [updateList]);
 
   return (
     <List
@@ -140,6 +133,16 @@ export default function SearchShortcut() {
                           icon={Icon.Pencil}
                           onAction={async () => {
                             push(<CreateShortcut shortcut={value} updateListUseState={[updateList, setUpdateList]} />);
+                          }}
+                        />
+                        <Action
+                          title={"Create Shortcut"}
+                          icon={Icon.Download}
+                          shortcut={{ modifiers: ["cmd"], key: "n" }}
+                          onAction={async () => {
+                            push(
+                              <CreateShortcut shortcut={undefined} updateListUseState={[updateList, setUpdateList]} />
+                            );
                           }}
                         />
                         <Action

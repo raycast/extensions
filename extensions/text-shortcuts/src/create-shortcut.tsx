@@ -20,12 +20,12 @@ import { runAppleScript } from "run-applescript";
 import { variables } from "./util/variable";
 
 export default function CreateShortcut(props: {
-  shortcut: Shortcut;
-  updateListUseState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
+  shortcut: Shortcut | undefined;
+  updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
 }) {
   const _editShortcut = props.shortcut;
   const [updateList, setUpdateList] =
-    typeof _editShortcut == "undefined" ? useState<boolean>(false) : props.updateListUseState;
+    typeof props.updateListUseState == "undefined" ? useState<number[]>([0]) : props.updateListUseState;
   const editShortcut = typeof _editShortcut == "undefined" ? new Shortcut() : _editShortcut;
   const [localShortcuts, setLocalShortcuts] = useState<Shortcut[]>([]);
   const [info, setInfo] = useState<ShortcutInfo>({
@@ -104,10 +104,10 @@ export default function CreateShortcut(props: {
         })}
       </Form.TagPicker>
 
-      <Form.Description text={"Shortcut Key:   ⌘D     ⌘E     ⌘N     ⌘R     ⌘T     ⌘L"} />
-      <Form.Description text={"Delete | Coder | Case | Replace | Transform | Template"} />
-
       {tactionForms(tactions, setTactions)}
+
+      <Form.Description text={"  ⌘D       ⌘E       ⌘N        ⌘R            ⌘T              ⌘L"} />
+      <Form.Description text={"Delete | Coder | Case | Replace | Transform | Template"} />
     </Form>
   );
 }
@@ -261,7 +261,7 @@ function CreateShortcutActions(props: {
   tactions: Taction[];
   localShortcuts: Shortcut[];
   setTactions: React.Dispatch<React.SetStateAction<Taction[]>>;
-  updateListUseState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
+  updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
 }) {
   const info = props.info;
   const tactions = props.tactions;
@@ -305,7 +305,9 @@ function CreateShortcutActions(props: {
           } else {
             await createShortcut(info, tactions, localShortcuts);
             pop();
-            setUpdateList(!updateList);
+            const _updateList = [...updateList];
+            _updateList[0]++;
+            setUpdateList(_updateList);
             await showToast(Toast.Style.Success, `Shortcut Created`);
           }
         }}
