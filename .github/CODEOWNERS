@@ -256,6 +256,7 @@
 /extensions/switchhosts                              @tiancheng92
 /extensions/system-monitor                           @hossammourad
 /extensions/tableplus                                @pernielsentikaer
+/extensions/tailscale                                @samlinville
 /extensions/tailwindcss                              @vimtor
 /extensions/temporary-email                          @natterstefan
 /extensions/terminalfinder                           @yedongze
