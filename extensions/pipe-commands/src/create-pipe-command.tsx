@@ -110,7 +110,7 @@ export default function PipeCommandForm(): JSX.Element {
       <Form.TextField title="Title" placeholder="Command Title" id="title" />
       <Form.Dropdown title="Icon" id="icon" defaultValue="text-alignleft-16">
         {Object.entries(Icon).map(([key, value]) => (
-          <Form.Dropdown.Item icon={value} key={key} title={key} value={value} />
+          <Form.Dropdown.Item icon={value} key={key} title={key} value={key} />
         ))}
       </Form.Dropdown>
       <Form.TextField title="Package Name" placeholder="E. g., Developer Utils" id="packageName" />
