@@ -2,11 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "parcel-tracker",
   "title": "Parcel Tracker",
-<<<<<<< HEAD
-  "description": "for track packages (only available for South Korea)",
-=======
   "description": "Track packages (only available in South Korea)",
->>>>>>> fd15f1875e1ac440633d4a65ab41f390d5c44e35
   "icon": "command-icon-parcel.png",
   "author": "junhyukjin",
   "license": "MIT",
@@ -15,11 +11,7 @@
       "name": "track",
       "title": "Track Packages",
       "subtitle": "Parcel Tracker",
-<<<<<<< HEAD
-      "description": "tracking packages by tracking number",
-=======
       "description": "Tracking packages by tracking number",
->>>>>>> fd15f1875e1ac440633d4a65ab41f390d5c44e35
       "mode": "view"
     },
     {
@@ -31,11 +23,7 @@
     }
   ],
   "dependencies": {
-<<<<<<< HEAD
-    "@raycast/api": "^1.28.0",
-=======
     "@raycast/api": "^1.32.0",
->>>>>>> fd15f1875e1ac440633d4a65ab41f390d5c44e35
     "axios": "^0.26.0",
     "moment": "^2.29.1"
   },
