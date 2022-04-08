@@ -23,6 +23,7 @@ import {
 } from "./util/gist-utils";
 import { isEmpty, preference } from "./util/utils";
 import CreateGist from "./create-gist";
+import { parse } from "path";
 
 export default function main() {
   const [route, setRoute] = useState<string>("");
@@ -96,7 +97,11 @@ export default function main() {
                   detail={
                     <List.Item.Detail
                       isLoading={gistFileContent.length === 0}
-                      markdown={`\`\`\`\n${gistFileContent}`}
+                      markdown={
+                        [".svg", ".gif", ".jpg", ".jpeg", ".png"].includes(parse(gistFile.filename).ext)
+                          ? `![](${gistFile.raw_url})`
+                          : "```\n" + gistFileContent + "\n```"
+                      }
                     />
                   }
                   actions={
