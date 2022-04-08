@@ -39,19 +39,25 @@ function getNoteContent(note: Note) {
 
 async function appendSelectedTextTo(note: Note) {
   const pref: SearchNotePreferences = getPreferenceValues();
-  const appendPrefix = pref.appendPrefix;
+  let appendPrefix = pref.appendPrefix;
+  if (appendPrefix === undefined) {
+    appendPrefix = "";
+  }
+
   try {
-    const selectedText = getSelectedText();
-    selectedText.then((text) => {
-      if (text.trim() == "") {
-        showToast({ title: "No text selected", message: "Make sure to select some text.", style: Toast.Style.Failure });
-      } else {
-        fs.appendFileSync(note.path, "\n" + appendPrefix + text);
-        showToast({ title: "Added selected text to note", style: Toast.Style.Success });
-      }
-    });
+    const selectedText = await getSelectedText();
+    if (selectedText.trim() == "") {
+      showToast({ title: "No text selected", message: "Make sure to select some text.", style: Toast.Style.Failure });
+    } else {
+      fs.appendFileSync(note.path, "\n" + appendPrefix + selectedText);
+      showToast({ title: "Added selected text to note", style: Toast.Style.Success });
+    }
   } catch {
-    showToast({ title: "Couldn't copy selected text", style: Toast.Style.Failure });
+    showToast({
+      title: "Couldn't copy selected text",
+      message: "Maybe you didn't select anything.",
+      style: Toast.Style.Failure,
+    });
   }
 }
 
