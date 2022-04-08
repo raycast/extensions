@@ -1,0 +1,23 @@
+export const path = `${process.env.HOME}/Library/Application Support/Code/user/snippets/raycast.code-snippets`;
+export const languages = [
+  "javascript",
+  "typescript",
+  "javascriptreact",
+  "typescriptreact",
+  "markdown",
+  "json",
+  "prisma",
+  "css",
+  "scss",
+  "less",
+  "dockerfile",
+  "go",
+  "java",
+  "php",
+  "python3",
+  "ruby",
+  "rust",
+  "swift",
+  "dart",
+  "svelte",
+];
