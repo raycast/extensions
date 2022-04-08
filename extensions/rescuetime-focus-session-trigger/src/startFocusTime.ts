@@ -18,7 +18,8 @@ export default async () => {
   if (isNaN(parseInt(preferences.duration, 10))) {
     showToast({
       style: Toast.Style.Failure,
-      title: "Default Focus Session Durration Preferences needs to be a number",
+      title: "Failed to start Focus Session",
+      message: "Default focus session duration needs to be a number",
     });
     return;
   }
