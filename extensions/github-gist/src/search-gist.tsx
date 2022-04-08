@@ -93,7 +93,7 @@ export default function main() {
                   key={"gistFile" + gistIndex + gistFileIndex}
                   icon={Icon.TextDocument}
                   title={gistFile.filename}
-                  accessories={[{ text: gistFile.language }]}
+                  accessories={[{ text: gistFile.language == "null" ? "Binary" : gistFile.language }]}
                   detail={
                     <List.Item.Detail
                       isLoading={gistFileContent.length === 0}
