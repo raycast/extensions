@@ -13,7 +13,7 @@
     "commands": [{
         "name": "index",
         "title": "Show Periodic Table",
-        "subtitle": "Browse Through Periodic Table",
+        "subtitle": "Element",
         "description": "Search and get information about an element.",
         "mode": "view"
     }],
