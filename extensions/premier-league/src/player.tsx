@@ -124,8 +124,9 @@ export default function Player(props: { club: Club }) {
   const teams = useTeams(seasonId);
 
   const [page, setPage] = useState<number>(0);
+  const [terms, setTerms] = useState<string>("");
 
-  const players = usePlayers(teamId, seasonId, page);
+  const players = usePlayers(teamId, seasonId, page, terms);
 
   return (
     <List
@@ -134,8 +135,10 @@ export default function Player(props: { club: Club }) {
         props.club ? `Squad | ${props.club.name} | Club` : "Players"
       }
       isLoading={!players}
+      searchText={terms}
+      onSearchTextChange={setTerms}
       searchBarAccessory={
-        props.club ? undefined : (
+        props.club || terms ? undefined : (
           <List.Dropdown tooltip="Filter by Club" onChange={setTeam}>
             {teams?.map((s) => {
               return (
@@ -156,45 +159,52 @@ export default function Player(props: { club: Club }) {
           title="We don't have any data on this club."
         />
       )}
-      {players?.map((p) => {
-        return (
-          <List.Item
-            key={p.id}
-            title={p.name.display}
-            subtitle={p.info.positionInfo}
-            icon={{
-              source: `https://resources.premierleague.com/premierleague/photos/players/40x40/${p.altIds.opta}.png`,
-              fallback: "player-missing.png",
-            }}
-            accessories={[
-              {
-                text: p.nationalTeam?.country || p.birth.country.country,
-              },
-              {
-                icon: getFlagEmoji(
-                  p.nationalTeam?.isoCode || p.birth.country.isoCode
-                ),
-              },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="View Player"
-                  icon={Icon.Sidebar}
-                  target={<PlayerProfile {...p} />}
-                />
-                <Action
-                  title="Next Page"
-                  icon={Icon.ArrowRight}
-                  onAction={() => {
-                    setPage(page + 1);
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+      {terms.length < 3 && (
+        <List.EmptyView
+          icon="player-missing.png"
+          title="Search terms length must be at least 3 characters long."
+        />
+      )}
+      {(!terms || terms.length >= 3) &&
+        players?.map((p) => {
+          return (
+            <List.Item
+              key={p.id}
+              title={p.name.display}
+              subtitle={p.info.positionInfo}
+              icon={{
+                source: `https://resources.premierleague.com/premierleague/photos/players/40x40/${p.altIds.opta}.png`,
+                fallback: "player-missing.png",
+              }}
+              accessories={[
+                {
+                  text: p.nationalTeam?.country || p.birth.country.country,
+                },
+                {
+                  icon: getFlagEmoji(
+                    p.nationalTeam?.isoCode || p.birth.country.isoCode
+                  ),
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="View Player"
+                    icon={Icon.Sidebar}
+                    target={<PlayerProfile {...p} />}
+                  />
+                  <Action
+                    title="Next Page"
+                    icon={Icon.ArrowRight}
+                    onAction={() => {
+                      setPage(page + 1);
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
     </List>
   );
 }

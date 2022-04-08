@@ -10,6 +10,7 @@ import {
   EPLClub,
   EPLStaff,
   PlayerContent,
+  EPLPlayerSearch,
 } from "../types";
 
 const endpoint = "https://footballapi.pulselive.com/football";
@@ -233,6 +234,31 @@ export const getManagers = async (compSeasons: string) => {
     const { data }: AxiosResponse<EPLPlayer> = await axios(config);
 
     return data.content;
+  } catch (e) {
+    showFailureToast();
+
+    return [];
+  }
+};
+
+export const getPlayersWithTerms = async (terms: string) => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url: `https://footballapi.pulselive.com/search/PremierLeague`,
+    params: {
+      terms: `${terms},${terms}*`,
+      type: "player",
+      size: 30,
+      start: 0,
+      fullObjectResponse: true,
+    },
+    headers,
+  };
+
+  try {
+    const { data }: AxiosResponse<EPLPlayerSearch> = await axios(config);
+
+    return data.hits.hit.map((h) => h.response);
   } catch (e) {
     showFailureToast();
 

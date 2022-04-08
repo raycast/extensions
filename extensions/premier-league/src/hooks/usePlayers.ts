@@ -1,13 +1,22 @@
 import { useEffect, useState } from "react";
-import { getPlayers, getStaffs } from "../api";
+import { getPlayers, getPlayersWithTerms, getStaffs } from "../api";
 import { PlayerContent } from "../types";
 
-const usePlayers = (team: string, season: string, page: number) => {
+const usePlayers = (
+  team: string,
+  season: string,
+  page: number,
+  terms: string
+) => {
   const [players, setPlayers] = useState<PlayerContent[]>();
 
   useEffect(() => {
-    if (team && season) {
-      setPlayers(undefined);
+    setPlayers(undefined);
+    if (terms.length >= 3) {
+      getPlayersWithTerms(terms).then((data) => {
+        setPlayers(data);
+      });
+    } else if (team && season) {
       if (team === "-1") {
         getPlayers(team, season, page).then((data) => {
           setPlayers(data);
@@ -18,7 +27,7 @@ const usePlayers = (team: string, season: string, page: number) => {
         });
       }
     }
-  }, [team, season, page]);
+  }, [team, season, page, terms]);
 
   return players;
 };

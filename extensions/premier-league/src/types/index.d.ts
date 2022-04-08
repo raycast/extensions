@@ -241,30 +241,35 @@ export interface Timestamp {
 }
 
 export interface PlayerContent {
-  playerId: number;
-  info: Info;
-  nationalTeam?: NationalTeam;
-  currentTeam?: TeamTeam;
-  previousTeam?: TeamTeam;
-  height?: number;
-  weight?: number;
-  latestPosition: LatestPosition;
-  appearances: number;
-  cleanSheets: number;
-  saves?: number;
-  goalsConceded?: number;
-  awards?: Awards;
-  joinDate?: Timestamp;
-  birth: Birth;
+  // active: null;
   age: string;
-  name: Name;
-  id: number;
   altIds: AltIDS;
-  goals?: number;
+  appearances: number;
   assists?: number;
-  tackles?: number;
-  shots?: number;
+  awards?: Awards;
+  birth: Birth;
+  cleanSheets: number;
+  currentTeam?: TeamTeam;
+  // debut: Timestamp;
+  goals?: number;
+  goalsConceded?: number;
+  height?: number;
+  id: number;
+  info: Info;
+  joinDate?: Timestamp;
   keyPasses?: number;
+  latestPosition: LatestPosition;
+  // leaveDate: null;
+  // metadata: null;
+  name: Name;
+  nationalTeam?: NationalTeam;
+  playerId: number;
+  previousTeam?: TeamTeam;
+  saves?: number;
+  shots?: number;
+  tackles?: number;
+  // teamHistory: null;
+  weight?: number;
 }
 
 export interface Birth {
@@ -331,4 +336,22 @@ export enum LatestPosition {
   Forward = "FORWARD",
   Goalkeeper = "GOALKEEPER",
   Midfielder = "MIDFIELDER",
+}
+
+export interface EPLPlayerSearch {
+  status: Status;
+  hits: Hits;
+}
+
+export interface Hits {
+  cursor: null;
+  found: number;
+  hit: Hit[];
+  start: number;
+}
+
+export interface Hit {
+  id: string;
+  contentType: string;
+  response: PlayerContent;
 }
