@@ -80,7 +80,11 @@ export async function deleteGist(gist_id: string) {
   });
 }
 
-export async function createGist(description: string, isPublic = false, files: { [p: string]: { content: string } }) {
+export async function createGist(description: string, isPublic = false, gistFiles: GistFile[]) {
+  const files: { [p: string]: { content: string } } = {};
+  gistFiles.forEach((value) => {
+    files[value.filename] = { content: value.content };
+  });
   return await octokit.request("POST /gists", {
     description: description,
     public: isPublic,
@@ -88,15 +92,24 @@ export async function createGist(description: string, isPublic = false, files: {
   });
 }
 
-export async function updateGist(gistId: string, description: string, files: { [p: string]: { content: string } }) {
-  return await octokit.request("PATCH /gists/{gist_id}", {
-    gist_id: gistId,
+export async function updateGist(gistId: string, description: string, oldFiles: GistFile[], newFiles: GistFile[]) {
+  const files: { [p: string]: { content: string } } = {};
+  const oldFileName = oldFiles.map((value) => value.filename);
+  const newFileName = newFiles.map((value) => value.filename);
+  const deleteFiles = oldFileName.filter((value) => !newFileName.includes(value));
+  newFiles.forEach((value) => {
+    files[value.filename] = { content: value.content };
+  });
+  deleteFiles.forEach((value) => {
+    files[value] = { content: "" };
+  });
+  return await octokit.request("PATCH /gists/" + gistId, {
     description: description,
     files: files,
   });
 }
 
-export function checkGistFile(gistFiles: GistFile[]) {
+export function checkGistFileContent(gistFiles: GistFile[]) {
   const isValid = { valid: true, contentIndex: "" };
   gistFiles.forEach((value, index) => {
     if (isEmpty(value.content)) {
@@ -105,4 +118,15 @@ export function checkGistFile(gistFiles: GistFile[]) {
     }
   });
   return isValid;
+}
+export function checkGistFileName(gistFiles: GistFile[]) {
+  const nameSet = new Set();
+  const nameList = [];
+  gistFiles.forEach((value) => {
+    if (!isEmpty(value.filename)) {
+      nameSet.add(value.filename);
+      nameList.push(value.filename);
+    }
+  });
+  return nameSet.size === nameList.length;
 }
