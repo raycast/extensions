@@ -6,7 +6,7 @@ global.window = {};
 // @ts-ignore
 global.window.requestAnimationFrame = setTimeout;
 
-import { Form, FormValue, ActionPanel, showToast, Toast, showHUD, useNavigation, Action } from "@raycast/api";
+import { Form, ActionPanel, showToast, Toast, showHUD, useNavigation, Action } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
 import { HarvestProjectAssignment, HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseTypes";
@@ -32,7 +32,7 @@ export default function Command({
   const [taskId, setTaskId] = useState<string>();
   const [notes, setNotes] = useState<string>();
   const [hours, setHours] = useState<string>();
-  const [spentDate, setSpentDate] = useState<Date>();
+  const [spentDate, setSpentDate] = useState<Date>(viewDate);
 
   useEffect(() => {
     if (error) {
@@ -81,7 +81,7 @@ export default function Command({
     // setSpentDate(new Date(entry.spent_date));
   }, [entry]);
 
-  async function handleSubmit(values: Record<string, FormValue>) {
+  async function handleSubmit(values: Record<string, Form.Value>) {
     if (values.project_id === null) {
       return showToast({
         style: Toast.Style.Failure,
@@ -98,16 +98,18 @@ export default function Command({
     await toast.show();
 
     setTimeFormat(hours);
-
     const spentDate = _.isDate(values.spent_date) ? values.spent_date : viewDate;
 
     const data = _.omitBy(values, _.isEmpty);
-    const timeEntry = await newTimeEntry({
-      ...data,
-      project_id: parseInt(values.project_id.toString()),
-      task_id: parseInt(values.task_id.toString()),
-      spent_date: dayjs(spentDate).format("YYYY-MM-DD"),
-    }).catch(async (error) => {
+    const timeEntry = await newTimeEntry(
+      {
+        ...data,
+        project_id: parseInt(values.project_id.toString()),
+        task_id: parseInt(values.task_id.toString()),
+        spent_date: dayjs(spentDate).format("YYYY-MM-DD"),
+      },
+      entry?.id.toString()
+    ).catch(async (error) => {
       console.error(error.response.data);
       await showToast({
         style: Toast.Style.Failure,
@@ -119,7 +121,7 @@ export default function Command({
     if (timeEntry) {
       toast.hide();
       await onSave();
-      await showHUD(timeEntry.is_running ? "Timer Started" : "Time Entry Created");
+      await showHUD(entry?.id ? "Time Entry Updated" : timeEntry.is_running ? "Timer Started" : "Time Entry Created");
       pop();
     }
   }
@@ -177,7 +179,10 @@ export default function Command({
       navigationTitle={entry ? "Edit Time Entry" : "New Time Entry"}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            onSubmit={handleSubmit}
+            title={entry ? "Update Time Entry" : hours ? "Create Time Entry" : "Start Timer"}
+          />
         </ActionPanel>
       }
     >

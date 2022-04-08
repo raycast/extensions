@@ -105,8 +105,10 @@ export async function getMyTimeEntries({ from = new Date(), to = new Date() }: {
   return time_entries;
 }
 
-export async function newTimeEntry(param: NewTimeEntryDuration | NewTimeEntryStartEnd) {
-  const resp = await harvestAPI<HarvestTimeEntryCreatedResponse>({ method: "POST", url: "/time_entries", data: param });
+export async function newTimeEntry(param: NewTimeEntryDuration | NewTimeEntryStartEnd, id?: string) {
+  const url = id ? `/time_entries/${id}` : "/time_entries";
+  console.log({ url });
+  const resp = await harvestAPI<HarvestTimeEntryCreatedResponse>({ method: id ? "PATCH" : "POST", url, data: param });
   return resp.data;
 }
 
