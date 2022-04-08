@@ -42,4 +42,4 @@ export const showGraphPathInvalidToast = () => {
     style: Toast.Style.Failure,
     title: "Logseq graph path is invalid. Update it in Raycast Preferences and retry.",
   });
-}
+};

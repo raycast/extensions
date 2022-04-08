@@ -17,16 +17,18 @@ export default function Command() {
   const { pop } = useNavigation();
 
   async function handleSubmit(values: CommandForm) {
-    const filePath = getTodayJournalPath();
-
     validateUserConfigGraphPath()
       .catch((e) => {
-        showGraphPathInvalidToast()
+        showGraphPathInvalidToast();
         throw e;
       })
       .then(() => showToast({ style: Toast.Style.Animated, title: "Adding notes" }))
-      .then(() => createFileIfNotExist(filePath))
-      .then(() => fs.promises.appendFile(filePath, generateContentToAppend(values.content)))
+      .then(() => {
+        const filePath = getTodayJournalPath();
+        return createFileIfNotExist(filePath).then(() =>
+          fs.promises.appendFile(filePath, generateContentToAppend(values.content))
+        );
+      })
       .then(() => showHUD("✅ Note added"))
       .then(pop)
       .catch((e) => showToast({ style: Toast.Style.Failure, title: "Failed", message: e }))
