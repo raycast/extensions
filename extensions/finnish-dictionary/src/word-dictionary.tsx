@@ -12,10 +12,12 @@ interface Suggestion {
 export default function WordDictionary(props: { from: string; to: string }) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   let currentQuery = "";
 
   async function search(query: string) {
+    setSearchQuery(query);
     if (!query) return;
     setIsLoading(true);
     currentQuery = query;
@@ -37,6 +39,7 @@ export default function WordDictionary(props: { from: string; to: string }) {
       if (currentQuery !== query) return;
       setSuggestions(sugg);
     }
+    if (currentQuery !== query) return;
     setSuggestions(sugg);
     setIsLoading(false);
   }
@@ -45,30 +48,34 @@ export default function WordDictionary(props: { from: string; to: string }) {
     <List
       isLoading={isLoading}
       throttle={true}
-      searchBarPlaceholder="Search perkle..."
+      searchBarPlaceholder="Search..."
       onSearchTextChange={search}
       isShowingDetail={suggestions.length > 0}
       navigationTitle={`Define ${props.from} word in ${props.to}`}
     >
-      {suggestions.map((x, index) => (
-        <List.Item
-          key={x.title}
-          title={x.title}
-          accessories={x.detail ? [{ icon: Icon.MagnifyingGlass }] : []}
-          id={index.toString()}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser key="openInBrowser" url={x.url} />
-              <Action.CopyToClipboard
-                key="copyToClipboard"
-                content={x.title}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-              />
-            </ActionPanel>
-          }
-          detail={<List.Item.Detail markdown={x.detail} />}
-        />
-      ))}
+      {searchQuery === "" && suggestions.length === 0 ? (
+        <List.EmptyView icon={Icon.Text} title="Type a word to define" />
+      ) : (
+        suggestions.map((x, index) => (
+          <List.Item
+            key={x.title}
+            title={x.title}
+            accessories={x.detail ? [{ icon: Icon.MagnifyingGlass }] : []}
+            id={index.toString()}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser key="openInBrowser" url={x.url} />
+                <Action.CopyToClipboard
+                  key="copyToClipboard"
+                  content={x.title}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
+              </ActionPanel>
+            }
+            detail={<List.Item.Detail markdown={x.detail} />}
+          />
+        ))
+      )}
     </List>
   );
 }
