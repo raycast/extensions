@@ -1,7 +1,7 @@
-import { environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { Values } from "@raycast/api/types/api/app/localStorage";
+import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import fs, { existsSync } from "fs";
 import { runAppleScript } from "run-applescript";
+import Values = LocalStorage.Values;
 
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));

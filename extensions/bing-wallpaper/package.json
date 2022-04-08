@@ -3,7 +3,7 @@
   "name": "bing-wallpaper",
   "title": "Bing Wallpaper",
   "description": "Get and set Bing wallpapers within 15 days.",
-  "icon": "wallpaper-icon.png",
+  "icon": "extension-icon.png",
   "author": "koinzhang",
   "categories": [
     "Media",
@@ -73,7 +73,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0",
+    "@raycast/api": "^1.32.1",
     "node-fetch": "^3.2.3",
     "run-applescript": "^6.0.0"
   },
