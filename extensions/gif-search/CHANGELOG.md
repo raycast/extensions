@@ -1,5 +1,10 @@
 # GIF Search Changelog
 
+## [Remove static GIF preview warning 🎉] - 2022-04-06
+- Removes the warning about GIFs no longer animating, Raycast v1.32.0 supports GIFs in Details
+- Update GIF preview preference to be enabled by default
+- Reorder the default actions order based on user feedback
+
 ## [New GIF Details View with Metadata] - 2022-03-30
 - Adds a GIF Details page that displays GIF metadata
 - Fixes the jumpiness when jumping between GIF previews by giving all gifs a static 200px height

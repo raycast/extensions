@@ -11,10 +11,15 @@ import { SWRKeys } from "./types";
 export default function CreateTask() {
   const { push } = useNavigation();
   const { data: projects, error: getProjectsError } = useSWR(SWRKeys.projects, () => todoist.getProjects());
+  const { data: sections, error: getSectionsError } = useSWR(SWRKeys.sections, () => todoist.getSections());
   const { data: labels, error: getLabelsError } = useSWR(SWRKeys.labels, () => todoist.getLabels());
 
   if (getProjectsError) {
     handleError({ error: getProjectsError, title: "Unable to get projects" });
+  }
+
+  if (getSectionsError) {
+    handleError({ error: getSectionsError, title: "Unable to get sections" });
   }
 
   if (getLabelsError) {
@@ -30,6 +35,7 @@ export default function CreateTask() {
   const [dueDate, setDueDate] = useState<Date | undefined>();
   const [priority, setPriority] = useState<string>(String(lowestPriority.value));
   const [projectId, setProjectId] = useState<string>();
+  const [sectionId, setSectionId] = useState<string>();
   const [labelIds, setLabelIds] = useState<string[]>();
 
   function clear() {
@@ -37,6 +43,14 @@ export default function CreateTask() {
     setDescription("");
     setDueDate(undefined);
     setPriority(String(lowestPriority.value));
+
+    if (projects) {
+      setProjectId(String(projects[0].id));
+    }
+
+    if (labelIds) {
+      setLabelIds([]);
+    }
   }
 
   async function submit() {
@@ -57,6 +71,10 @@ export default function CreateTask() {
 
     if (projectId) {
       body.projectId = parseInt(projectId);
+    }
+
+    if (sectionId) {
+      body.sectionId = parseInt(sectionId);
     }
 
     if (labelIds && labelIds.length > 0) {
@@ -86,12 +104,14 @@ export default function CreateTask() {
     }
   }
 
+  const projectSections = sections?.filter((section) => String(section.projectId) === projectId);
+
   return (
     <Form
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create task" onSubmit={submit} icon={Icon.Plus} />
+          <Action.SubmitForm title="Create Task" onSubmit={submit} icon={Icon.Plus} />
         </ActionPanel>
       }
     >
@@ -107,7 +127,13 @@ export default function CreateTask() {
 
       <Form.Separator />
 
-      <Form.DatePicker id="due_date" title="Due date" value={dueDate} onChange={setDueDate} />
+      <Form.DatePicker
+        id="due_date"
+        title="Due date"
+        value={dueDate}
+        onChange={setDueDate}
+        type={Form.DatePicker.Type.Date}
+      />
 
       <Form.Dropdown id="priority" title="Priority" value={priority} onChange={setPriority}>
         {priorities.map(({ value, name }) => (
@@ -116,15 +142,24 @@ export default function CreateTask() {
       </Form.Dropdown>
 
       {projects && projects.length > 0 ? (
-        <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId} storeValue>
+        <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId}>
           {projects.map(({ id, name }) => (
             <Form.Dropdown.Item value={String(id)} title={name} key={id} />
           ))}
         </Form.Dropdown>
       ) : null}
 
+      {projectSections && projectSections.length > 0 ? (
+        <Form.Dropdown id="section_id" title="Section" value={sectionId} onChange={setSectionId}>
+          <Form.Dropdown.Item value="" title="No section" />
+          {projectSections.map(({ id, name }) => (
+            <Form.Dropdown.Item value={String(id)} title={name} key={id} />
+          ))}
+        </Form.Dropdown>
+      ) : null}
+
       {labels && labels.length > 0 ? (
-        <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds} storeValue>
+        <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds}>
           {labels.map(({ id, name }) => (
             <Form.TagPicker.Item value={String(id)} title={name} key={id} />
           ))}

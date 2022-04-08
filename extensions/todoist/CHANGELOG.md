@@ -1,5 +1,19 @@
 # Todoist Changelog
 
+## [More details and empty screens] - 2022-04-06
+
+- Added detailed view of a task with metadata: title, description, project, due date (with time if any), priority, labels
+- Added the ability to display many accessories of a task item in a list
+- Added support for tasks due for a particular time
+- Added empty screen when there are no tasks left for today
+- Added empty screen when there are no tasks in a project. The user is prompted to create one.
+- Added the possibility to edit a task's title and description
+- Added support for sections in task creation. The sections change based on the selected project.
+- Added the project info in the upcoming view
+- Added the possibility to copy to clipboard a project or a task URL
+- Fixed the date picker by allowing to pick only plain dates
+- Improved the getting started documentation
+
 ## [Metadata] - 2022-03-23
 
 - Add screenshots, categories, and changelog for the Raycast store
@@ -26,7 +40,7 @@
 - Remember the color value in "Create project" form
 - Upgrade the dependencies
 
-## [Create and delete projects] - 2022-12-22
+## [Create and delete projects] - 2021-12-22
 
 - New command to create a Todoist project
 - New action panel item to delete a project in the project's search with confirmation alert

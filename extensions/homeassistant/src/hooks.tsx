@@ -51,10 +51,6 @@ export function useHAStates(): {
           const err = e instanceof Error ? e : new Error(e);
           setError(err);
         }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
       }
     }
 

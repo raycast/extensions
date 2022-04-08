@@ -13,29 +13,20 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import {
-  assembleItemSource,
-  assembleItemType,
-  fetchDetectedItem,
-  ItemInput,
-  ItemSource,
-  ItemType,
-  preferences,
-  SurfApplication,
-  urlBuilder,
-} from "./utils";
+import { preferences, SurfApplication, urlBuilder } from "./utils";
 import { SEARCH_ENGINE } from "./constants";
 import ApplicationsList from "./surfbrowser";
+import { fetchItemInput, ItemInput, ItemSource, ItemType } from "./input";
 
 //main view
 export default function SurfWithSpecificBrowser() {
   const [browsers, setBrowsers] = useState<SurfApplication[]>([]);
   const [searchBarText, setSearchBarText] = useState<string>("");
-  const [itemInput, setItemInput] = useState<ItemInput>({ type: ItemType.NULL, source: ItemSource.NULL, content: "" });
+  const [itemInput, setItemInput] = useState<ItemInput>(new ItemInput());
 
   useEffect(() => {
     async function fetchSelectedText() {
-      const inputItem = await fetchDetectedItem();
+      const inputItem = await fetchItemInput();
       if (inputItem.type == ItemType.NULL) {
         await showToast(Toast.Style.Failure, "Nothing is detected from Selected or Clipboard!");
       } else {
@@ -76,7 +67,8 @@ export default function SurfWithSpecificBrowser() {
         return browsers[0].name;
       })()}
       onSearchTextChange={(input) => {
-        setItemInput(assembleItemType(assembleItemSource(input, ItemSource.ENTER)));
+        const itemInput = new ItemInput();
+        setItemInput(itemInput.setContent(input.substring(0, 9999)).setSource(ItemSource.ENTER).setType());
       }}
     >
       <List.Section title={"Type: " + itemInput.type + "  Source: " + itemInput.source}>
@@ -84,7 +76,7 @@ export default function SurfWithSpecificBrowser() {
           id="Type"
           title={itemInput.content}
           icon={Icon.Text}
-          accessoryTitle={"WordCount  " + itemInput.content.length}
+          accessories={[{ text: "WordCount  " + itemInput.content.length }]}
           actions={
             <ActionPanel>
               <Action
@@ -92,7 +84,7 @@ export default function SurfWithSpecificBrowser() {
                 icon={actionIcon(itemInput)}
                 onAction={async () => {
                   if (itemInput.type == ItemType.NULL) {
-                    const selectedItem = await fetchDetectedItem();
+                    const selectedItem = await fetchItemInput();
                     if (selectedItem.type == ItemType.NULL) {
                       await showToast(Toast.Style.Failure, "Nothing is detected from Selected or Clipboard!");
                     } else {
@@ -146,7 +138,7 @@ function MoreBoards(props: { setBrowsers: any }) {
       id="MoreBoards"
       title={"More Boards"}
       icon={{ source: { light: "more-board.png", dark: "more-board@dark.png" }, mask: Image.Mask.RoundedRectangle }}
-      accessoryIcon={Icon.ArrowRight}
+      accessories={[{ icon: Icon.ArrowRight }]}
       actions={
         <ActionPanel>
           <Action
@@ -185,9 +177,13 @@ function ApplicationsListItem(props: {
       key={application.bundleId}
       title={application.name}
       icon={{ fileIcon: application.path }}
-      accessoryTitle={(function (index: number): string {
-        return "⌘ " + (index + 2);
-      })(index)}
+      accessories={[
+        {
+          text: (function (index: number): string {
+            return "⌘ " + (index + 2);
+          })(index),
+        },
+      ]}
       actions={
         <ActionPanel>
           <Action
@@ -276,7 +272,7 @@ async function actionOnApplicationItem(
     await openSurfboard(searchEngineURLBuilder(inputText), app.path);
     await popToRoot({ clearSearchBar: true });
   } else {
-    const selectedItem = await fetchDetectedItem();
+    const selectedItem = await fetchItemInput();
     if (selectedItem.type == ItemType.NULL) {
       await showToast(Toast.Style.Failure, "Nothing is detected from Selected or Clipboard!");
     } else {

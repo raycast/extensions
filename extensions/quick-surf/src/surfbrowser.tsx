@@ -10,8 +10,9 @@ import {
   Icon,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { ItemType, SurfApplication } from "./utils";
+import { SurfApplication } from "./utils";
 import { SUGGEST_APP_SUPPORT_TYPE } from "./constants";
+import { ItemType } from "./input";
 
 export default function ApplicationsList(props: { setSurfBrowsers: any }) {
   const _setSurfBrowsers = props.setSurfBrowsers;
@@ -65,7 +66,11 @@ export default function ApplicationsList(props: { setSurfBrowsers: any }) {
   }, [surfBrowsers]);
 
   return (
-    <List isLoading={allBrowsers.length === 0} searchBarPlaceholder={"Search browser, email client..."}>
+    <List
+      isLoading={allBrowsers.length === 0}
+      searchBarPlaceholder={"Search browser, email client..."}
+      navigationTitle={"More Boards"}
+    >
       <List.Section title="SurfBoard">
         {allBrowsers.map((application) => {
           if (application.add) {
@@ -125,15 +130,11 @@ function ApplicationsListItem(props: {
     <List.Item
       key={application.bundleId}
       title={application.name}
-      accessoryTitle={application.support.toString().replace(",", " , ")}
       icon={{ fileIcon: application.path }}
-      accessoryIcon={(function () {
-        if (application.add) {
-          return Icon.Star;
-        } else {
-          return "";
-        }
-      })()}
+      subtitle={application.add ? "🌟" : ""}
+      accessories={[
+        { text: application.support.length > 0 ? application.support.toString().replace(",", " , ") : " " },
+      ]}
       actions={
         <ActionPanel>
           <Action

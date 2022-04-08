@@ -44,42 +44,30 @@ export default function DescribeInstances() {
 
   useEffect(() => {
     if (!preferences.region) return;
-    async function fetch() {
-      pipeline.listPipelines({}, async (err, data) => {
-        if (err) {
-          setState({
-            hasError: true,
-            loaded: false,
-            pipelines: [],
-          });
-        } else {
-          const _pipelines: PipelineSummary[] = [];
-          for (const p of data?.pipelines ?? []) {
-            if (!p.name) {
-              continue;
-            }
-            _pipelines.push(p);
-          }
-          setState({
-            hasError: false,
-            loaded: true,
-            pipelines: _pipelines ?? [],
-          });
+    async function fetch(token?: string, accPipelines?: PipelineSummary[]): Promise<PipelineSummary[]> {
+      const { nextToken, pipelines } = await pipeline.listPipelines({ nextToken: token }).promise();
+      const combinedPipelines = [...(accPipelines || []), ...(pipelines || [])];
 
-          for (const p of data?.pipelines ?? []) {
-            if (!p.name) {
-              continue;
-            }
-            const execution = await getExecutionState(pipeline, p.name);
-            setState((state) => ({
-              ...state,
-              pipelines: state.pipelines.map((el) => (el.name === p.name ? { ...p, execution } : el)),
-            }));
-          }
-        }
-      });
+      if (nextToken) {
+        return fetch(nextToken, combinedPipelines);
+      }
+
+      return combinedPipelines.filter((p) => !!p.name);
     }
-    fetch();
+
+    fetch()
+      .then((pipelines) => {
+        setState({ hasError: false, loaded: true, pipelines });
+
+        pipelines.forEach(async (p) => {
+          const execution = await getExecutionState(pipeline, p.name as string);
+          setState((state) => ({
+            ...state,
+            pipelines: state.pipelines.map((el) => (el.name === p.name ? { ...p, execution } : el)),
+          }));
+        });
+      })
+      .catch(() => setState({ hasError: true, loaded: false, pipelines: [] }));
   }, []);
 
   if (state.hasError) {

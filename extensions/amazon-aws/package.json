@@ -10,6 +10,10 @@
     "JonathanWbn",
     "gebeto"
   ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
