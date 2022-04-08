@@ -41,12 +41,14 @@ export default function main() {
                   {quote && (
                     <Action.Push
                       title="View Details"
+                      icon={Icon.Text}
                       target={<DescriptionPane quotes={quotes} quote={quote} index={index} />}
                       shortcut={{ modifiers: ["cmd"], key: "," }}
                     />
                   )}
                   <Action
                     title="Shuffle Quotes"
+                    icon={Icon.TwoArrowsClockwise}
                     onAction={() => {
                       setLoading(true);
                       const newlyShuffledQuotes: any = shuffle(quotes);
