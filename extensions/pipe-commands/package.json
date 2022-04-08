@@ -5,7 +5,7 @@
   "description": "Pipe your selection or clipboard to custom scripts defined in any language.",
   "icon": "command-icon.png",
   "author": "pomdtr",
-  "contributors": [
+    "contributors": [
     "gasolin"
   ],
   "license": "MIT",
