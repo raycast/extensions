@@ -7,7 +7,12 @@
   "author": "Falcon",
   "contributors": [
     "Hodglim",
-    "JonathanWbn"
+    "JonathanWbn",
+    "gebeto"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [

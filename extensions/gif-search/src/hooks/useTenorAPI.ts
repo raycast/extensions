@@ -1,6 +1,10 @@
+import formatRelative from "date-fns/formatRelative";
+import fromUnixTime from "date-fns/fromUnixTime";
 import path from "path";
 import { AbortError, FetchError } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { environment } from "@raycast/api";
 
 import { getAPIKey, GIF_SERVICE } from "../preferences";
 
@@ -78,6 +82,13 @@ export function mapTenorResponse(tenorResp: TenorGif) {
     slug: path.basename(tenorResp.itemurl),
     preview_gif_url: mediaItem.tinygif.preview,
     gif_url: mediaItem.tinygif.url,
-    attribution: "poweredby_tenor.png",
+    metadata: {
+      width: mediaItem.gif.dims[0],
+      height: mediaItem.gif.dims[1],
+      size: mediaItem.gif.size,
+      labels: [{ title: "Created", text: formatRelative(fromUnixTime(tenorResp.created), new Date()) }],
+      tags: tenorResp.tags,
+    },
+    attribution: environment.theme === "light" ? "PB_tenor_logo_grey_vertical.png" : "PB_tenor_logo_blue_vertical.png",
   };
 }

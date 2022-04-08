@@ -32,6 +32,7 @@ export interface RemoteRepo {
 }
 
 export class Cache {
+  version = 2;
   repos: GitRepo[];
 
   constructor() {
@@ -45,7 +46,9 @@ export class Cache {
     const jsonData = fs.readFileSync(CacheFile).toString();
     if (jsonData.length > 0) {
       const cache: Cache = JSON.parse(jsonData);
-      this.repos = cache.repos;
+      if (cache.version && cache.version === this.version) {
+        this.repos = cache.repos;
+      }
     }
   }
 

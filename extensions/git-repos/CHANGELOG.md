@@ -1,5 +1,8 @@
 # Git Repos Changelog
 
+## Bug Fix (2022-03-31)
+- Resolved issue due to cache schema changes
+
 ## New Additions (2022-03-30)
 - Open the action's app with the repo remote URL if it has one and the app's bundle id matches the system default browser's bundle id; otherwise, use the repo path.
 - Update to latest Raycast API

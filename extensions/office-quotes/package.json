@@ -3,8 +3,13 @@
   "name": "office-quotes",
   "title": "office-quotes",
   "description": "Search, view, and copy/paste quotes from 'The Office' TV series",
-  "icon": "quote.png",
-  "author": "sandypockets",
+  "title": "Office Quotes",
+  "description": "An extensions that requests quotes, facts and information on NBC’s beloved mockumentary series The Office.",
+  "icon": "office-api-icon.png",
+  "author": "braydoncoyer",
+  "contributors": [
+    "sandypockets"
+  ],
   "categories": [
     "Fun"
   ],

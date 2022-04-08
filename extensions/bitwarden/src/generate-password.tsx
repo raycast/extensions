@@ -1,17 +1,37 @@
-import { ActionPanel, Icon, Action, Form, showToast, Toast, LocalStorage, Detail } from "@raycast/api";
+import {
+  ActionPanel,
+  Icon,
+  Action,
+  Form,
+  showToast,
+  Toast,
+  LocalStorage,
+  Detail,
+  getPreferenceValues,
+} from "@raycast/api";
 import { useOneTimePasswordHistoryWarning, usePasswordGenerator, usePasswordOptions } from "./hooks";
 import { Bitwarden } from "./api";
 import { LOCAL_STORAGE_KEY, PASSWORD_OPTIONS_MAP } from "./const";
 import { capitalise, objectEntries } from "./utils";
 import { PasswordGeneratorOptions, PasswordOptionField, PasswordOptionsToFieldEntries, PasswordType } from "./types";
 import { debounce } from "throttle-debounce";
+import { TroubleshootingGuide } from "./components";
 
 const FormSpace = () => <Form.Description text="" />;
 
-const GeneratePassword = () => {
-  const bitwardenApi = new Bitwarden();
+export default function GeneratePassword() {
+  const { cliPath, clientId, clientSecret } = getPreferenceValues();
+  try {
+    const bitwardenApi = new Bitwarden(clientId, clientSecret, cliPath);
+    return <PasswordGenerator bitwardenApi={bitwardenApi} />;
+  } catch (e) {
+    return <TroubleshootingGuide />;
+  }
+}
+
+function PasswordGenerator(props: { bitwardenApi: Bitwarden }) {
   const { options, setOption } = usePasswordOptions();
-  const { password, regeneratePassword, isGenerating } = usePasswordGenerator(bitwardenApi, options);
+  const { password, regeneratePassword, isGenerating } = usePasswordGenerator(props.bitwardenApi, options);
 
   useOneTimePasswordHistoryWarning();
 
@@ -100,7 +120,7 @@ const GeneratePassword = () => {
       ))}
     </Form>
   );
-};
+}
 
 async function clearStorage() {
   for (const key of Object.values(LOCAL_STORAGE_KEY)) {
@@ -149,5 +169,3 @@ function OptionField({ option, currentOptions, handleFieldChange, field }: Optio
     />
   );
 }
-
-export default GeneratePassword;

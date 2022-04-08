@@ -12,8 +12,11 @@ export type State =
   | "BLOCKED"
   | "NOT_RUN";
 
-export function getStateIcon(state: State): Image | undefined {
+export function getStateIcon(state: State): Image.ImageLike | undefined {
   switch (state) {
+    case "SCHEDULED":
+      return Icon.Circle;
+
     case "CREATING":
     case "RUNNING":
       return { tintColor: Color.Yellow, source: Icon.Circle };

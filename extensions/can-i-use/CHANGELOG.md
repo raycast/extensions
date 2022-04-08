@@ -1,5 +1,10 @@
 # Can I Use Changelog
 
+## [Update dependencies] - 2022-04-06
+
+- Update Raycast and Can I Use packages
+- Migrate the codebase
+
 ## [Metadata] - 2022-03-23
 
 - Add screenshots, categories, and changelog for the Raycast store
