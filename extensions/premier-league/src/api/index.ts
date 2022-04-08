@@ -258,7 +258,7 @@ export const getPlayersWithTerms = async (terms: string) => {
   try {
     const { data }: AxiosResponse<EPLPlayerSearch> = await axios(config);
 
-    return data.hits.hit.map((h) => h.response);
+    return data.hits.hit.map((h) => h.response).filter((p) => !!p);
   } catch (e) {
     showFailureToast();
 
