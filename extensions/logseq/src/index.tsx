@@ -1,8 +1,6 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation, showHUD } from "@raycast/api";
-import fs from "fs";
 import {
-  createFileIfNotExist,
-  generateContentToAppend,
+  appendContentToFile,
   getTodayJournalPath,
   noop,
   showGraphPathInvalidToast,
@@ -23,12 +21,8 @@ export default function Command() {
         throw e;
       })
       .then(() => showToast({ style: Toast.Style.Animated, title: "Adding notes" }))
-      .then(() => {
-        const filePath = getTodayJournalPath();
-        return createFileIfNotExist(filePath).then(() =>
-          fs.promises.appendFile(filePath, generateContentToAppend(values.content))
-        );
-      })
+      .then(getTodayJournalPath)
+      .then((filePath) => appendContentToFile(values.content, filePath))
       .then(() => showHUD("✅ Note added"))
       .then(pop)
       .catch((e) => showToast({ style: Toast.Style.Failure, title: "Failed", message: e }))
