@@ -1,5 +1,4 @@
 import { Form, getPreferenceValues } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
 import Values = Form.Values;
 
 export const regexPunctuation = /\p{Z}|\p{P}|\p{S}/gu;
@@ -20,14 +19,6 @@ export const preferences = () => {
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
 };
-
-export async function simulatePressKeyboard(key: number, modifier: string) {
-  const script = `tell application "System Events"
-    key code ${key} using {${modifier} down}
-end tell
-`;
-  await runAppleScript(script);
-}
 
 export function calculateCharacter(input: string) {
   let iTotal = 0;

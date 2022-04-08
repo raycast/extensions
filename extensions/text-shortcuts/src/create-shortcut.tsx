@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Action, ActionPanel, Form, Icon, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
-import { simulatePressKeyboard } from "./util/utils";
 import {
   cases,
   checkAffix,
@@ -16,7 +15,6 @@ import {
   tags,
   transforms,
 } from "./util/shortcut";
-import { runAppleScript } from "run-applescript";
 import { variables } from "./util/variable";
 
 export default function CreateShortcut(props: {
@@ -46,7 +44,6 @@ export default function CreateShortcut(props: {
       if (typeof _localShortcut == "string") {
         setLocalShortcuts(JSON.parse(_localShortcut));
       }
-      await runAppleScript("");
     }
 
     _fetchLocalShortcut().then();
@@ -271,17 +268,6 @@ function CreateShortcutActions(props: {
   const { pop } = useNavigation();
   return (
     <ActionPanel>
-      <Action
-        title="More Actions"
-        icon={Icon.Terminal}
-        onAction={async () => {
-          try {
-            await simulatePressKeyboard(40, "command");
-          } catch (e) {
-            await showToast(Toast.Style.Failure, String(e));
-          }
-        }}
-      />
       <Action
         title="Create Shortcut"
         icon={Icon.Download}
