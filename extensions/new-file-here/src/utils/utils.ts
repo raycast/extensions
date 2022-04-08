@@ -1,7 +1,7 @@
 import { runAppleScript } from "run-applescript";
-import { getPreferenceValues, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
-import { Values } from "@raycast/api/types/api/app/localStorage";
+import { getPreferenceValues, getSelectedFinderItems, LocalStorage, showToast, Toast } from "@raycast/api";
 import fs from "fs";
+import Values = LocalStorage.Values;
 
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
@@ -52,7 +52,7 @@ export const getChooseFile = async () => {
   }
 };
 
-export const checkDirectoryExists = async (filePath: string) => {
+export const checkDirectoryExists = (filePath: string) => {
   try {
     fs.accessSync(filePath);
     return true;
@@ -61,12 +61,11 @@ export const checkDirectoryExists = async (filePath: string) => {
   }
 };
 
-export const checkIsFile = async (path: string) => {
+export const checkIsFile = (path: string) => {
   try {
     const stat = fs.lstatSync(path);
     return stat.isFile();
   } catch (e) {
-    await showToast(Toast.Style.Failure, String(e));
     return false;
   }
 };

@@ -36,26 +36,30 @@ export default function AddFileTemplate(props: {
               setUpdateList(_updateList);
             }}
           />
-          <Action
-            title={"Fetch Selected File"}
-            icon={Icon.TwoArrowsClockwise}
-            onAction={async () => {
-              const _path = await fetchFilePath();
-              setPath(_path);
-              setName(getFileInfo(_path).nameWithoutExtension);
-            }}
-          />
-          <Action
-            title={"Choose Directory"}
-            icon={Icon.Sidebar}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            onAction={() => {
-              getChooseFile().then((path) => {
-                setPath(path);
-                setName(getFileInfo(path).nameWithoutExtension);
-              });
-            }}
-          />
+
+          <ActionPanel.Section title="Fill File Path">
+            <Action
+              title={"Fetch File"}
+              icon={Icon.TwoArrowsClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              onAction={async () => {
+                const _path = await fetchFilePath();
+                setPath(_path);
+                setName(getFileInfo(_path).nameWithoutExtension);
+              }}
+            />
+            <Action
+              title={"Select File"}
+              icon={Icon.Sidebar}
+              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              onAction={() => {
+                getChooseFile().then((path) => {
+                  setPath(path);
+                  setName(getFileInfo(path).nameWithoutExtension);
+                });
+              }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
@@ -84,16 +88,16 @@ const fetchFilePath = async () => {
   }
 };
 const addFileTemplate = async (name: string, path: string) => {
-  if (await checkDirectoryExists(path)) {
-    if (await checkIsFile(path)) {
+  if (checkDirectoryExists(path)) {
+    if (checkIsFile(path)) {
       await showToast(Toast.Style.Animated, "Adding template...");
       const templateFolderPath = environment.supportPath + "/templates";
       const desPath = templateFolderPath + "/" + name + "." + getFileInfo(path).extension;
-      if (await checkDirectoryExists(desPath)) {
+      if (checkDirectoryExists(desPath)) {
         await showToast(Toast.Style.Failure, "File already exists.\nPlease rename.");
         return;
       }
-      if (await checkDirectoryExists(templateFolderPath)) {
+      if (checkDirectoryExists(templateFolderPath)) {
         fs.copyFileSync(path, desPath);
       } else {
         fs.mkdir(templateFolderPath, function (error) {

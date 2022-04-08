@@ -210,15 +210,15 @@ function FileTypeItem(props: {
   );
 }
 
-export async function createFileName(path: string, name: string, extension: string) {
-  const directoryExists = await checkDirectoryExists(path + name + "." + extension);
+export function createFileName(path: string, name: string, extension: string) {
+  const directoryExists = checkDirectoryExists(path + name + "." + extension);
   if (!directoryExists) {
     return name + "." + extension;
   } else {
-    let index = 1;
+    let index = 2;
     while (directoryExists) {
-      const newName = name + "-" + index + "." + extension;
-      const directoryExists = await checkDirectoryExists(path + newName);
+      const newName = name + " " + index + "." + extension;
+      const directoryExists = checkDirectoryExists(path + newName);
       if (!directoryExists) {
         return newName;
       }
@@ -244,10 +244,10 @@ export async function createFileName(path: string, name: string, extension: stri
 export async function createNewFile(fileType: FileType, desPath: string, fileName = "", fileContent = "") {
   await showToast(Toast.Style.Animated, "Creating file...");
   isEmpty(fileName)
-    ? (fileName = await createFileName(desPath, fileType.name, fileType.extension))
+    ? (fileName = createFileName(desPath, fileType.name, fileType.extension))
     : (fileName = fileName + "." + fileType.extension);
   const filePath = desPath + fileName;
-  const isExist = await checkDirectoryExists(filePath);
+  const isExist = checkDirectoryExists(filePath);
   if (!isExist) {
     if (fileType.name === "Excel") {
       const workbook = XLSX.utils.book_new();
@@ -264,10 +264,10 @@ export async function createNewFile(fileType: FileType, desPath: string, fileNam
 export async function createNewFileByTemplate(template: TemplateType, desPath: string, fileName = "") {
   await showToast(Toast.Style.Animated, "Creating file...");
   isEmpty(fileName)
-    ? (fileName = await createFileName(desPath, template.name, template.extension))
+    ? (fileName = createFileName(desPath, template.name, template.extension))
     : (fileName = fileName + "." + template.extension);
   const filePath = desPath + fileName;
-  const isExist = await checkDirectoryExists(filePath);
+  const isExist = checkDirectoryExists(filePath);
   if (!isExist) {
     fs.copyFileSync(template.path, filePath);
   }
