@@ -1,13 +1,11 @@
-import fs from "fs";
-import fetch from "node-fetch";
-import { runAppleScript } from "run-applescript";
-import tempy from "tempy";
-
 import { Action, ActionPanel, Icon, Detail, showHUD } from "@raycast/api";
 import FileSizeFormat from "@saekitominaga/file-size-format";
 
 import { getShowPreview, getDefaultAction } from "../preferences";
 import { IGif, renderGifMarkdownDetails } from "../models/gif";
+
+import copyFileToClipboard from "../lib/copyFileToClipboard";
+import stripQParams from "../lib/stripQParams";
 
 export function GifDetails(props: { item: IGif }) {
   const { metadata } = props.item;
@@ -52,9 +50,15 @@ export function GifDetails(props: { item: IGif }) {
 }
 
 export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean }) {
-  const { title, url, gif_url } = props.item;
+  const { title, url, gif_url, slug } = props.item;
 
   const showPreview = getShowPreview();
+
+  const copyFileAction = () =>
+    showHUD("Copying...")
+      .then(() => copyFileToClipboard(gif_url, `${slug}.gif`))
+      .catch(() => showHUD("Error copying file, please try again"))
+      .then((file) => showHUD(`Copied GIF "${file}" to clipboard`));
 
   const openInBrowser = url ? <Action.OpenInBrowser key="openInBrowser" url={url} /> : undefined;
   const copyGifUrl = (
@@ -73,7 +77,7 @@ export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean 
       icon={Icon.Clipboard}
       key="copyFile"
       title="Copy File to Clipboard"
-      onAction={() => copyFileToClipboard(gif_url)}
+      onAction={copyFileAction}
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
     />
   );
@@ -110,29 +114,4 @@ export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean 
   }
 
   return <ActionPanel title={title}>{actions}</ActionPanel>;
-}
-
-async function copyFileToClipboard(url: string) {
-  await showHUD("Copying...");
-
-  const response = await fetch(url);
-
-  if (response.status !== 200) {
-    await showHUD(`GIF file download failed. Server responded with ${response.status}`);
-    return;
-  }
-
-  if (response.body !== null) {
-    const file = tempy.file({ extension: ".gif" });
-    response.body.pipe(fs.createWriteStream(file));
-
-    await runAppleScript(`tell app "Finder" to set the clipboard to ( POSIX file "${file}" )`);
-    await showHUD("Copied GIF to clipboard");
-  }
-}
-
-function stripQParams(url: string) {
-  const earl = new URL(url);
-  earl.search = "";
-  return earl.toString();
 }
