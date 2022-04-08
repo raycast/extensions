@@ -5,7 +5,7 @@
   "description": "Search on defiscan.live",
   "icon": "command-icon.png",
   "categories": ["Blockchain"],
-  "author": "codaboor",
+  "author": "adrian-schnell",
   "license": "MIT",
   "commands": [
     {
