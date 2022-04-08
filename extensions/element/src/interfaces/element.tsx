@@ -15,7 +15,7 @@ export interface SingleElement {
   named_by: null | string;
   number: number;
   period: number;
-  phase: Phase;
+  phase: string;
   source: string;
   spectral_img: null | string;
   summary: string;
