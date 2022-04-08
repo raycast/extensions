@@ -24,12 +24,17 @@ export default function finergifs() {
 
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {
-      const { offset = 0 } = opt || {};
-      return (await api.search(term, { offset })).results.map(mapFinerGifsResponse);
+      const { offset = 0, abort } = opt || {};
+      return (await api.search(term, { offset, abort })).results.map(mapFinerGifsResponse);
     },
 
     async trending(opt?: APIOpt) {
       return [];
+    },
+
+    async gifs(ids: string[], opt?: APIOpt) {
+      const { abort } = opt || {};
+      return (await api.gifs(ids, { abort })).results.map(mapFinerGifsResponse);
     },
   };
 }
@@ -51,6 +56,17 @@ export class FinerGifsClubAPI {
     const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
     return (await resp.json()) as FinerGifsClubResults;
   }
+
+  async gifs(ids: string[], options: { limit?: number; abort?: AbortController }) {
+    const reqUrl = new URL("/search", API_BASE_URL);
+    reqUrl.searchParams.set("q", ids.join("|"));
+    reqUrl.searchParams.set("q.parser", "simple");
+    reqUrl.searchParams.set("q.options", JSON.stringify({ fields: ["fileid"] }));
+    reqUrl.searchParams.set("size", options?.limit?.toString() ?? "10");
+
+    const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
+    return (await resp.json()) as FinerGifsClubResults;
+  }
 }
 
 const EPISODE_NUM_REGEX = /^(\d{2})x(\d{2})-.+/i;
@@ -61,7 +77,7 @@ export function mapFinerGifsResponse(finerGifsResp: FinerGif) {
   const epInt = parseInt(season, 10);
 
   return <IGif>{
-    id: finerGifsResp.id,
+    id: finerGifsResp.fields.fileid,
     title: finerGifsResp.fields.text,
     slug: finerGifsResp.fields.fileid,
     preview_gif_url: gifUrl.toString(),

@@ -57,6 +57,11 @@ export default async function tenor(force?: boolean) {
       const { offset = 0, limit = 10, abort } = opt || {};
       return (await api.trending({ offset, limit, abort })).results.map(mapTenorResponse);
     },
+
+    async gifs(ids: string[], opt?: APIOpt) {
+      const { abort } = opt || {};
+      return (await api.gifs(ids, { abort })).results.map(mapTenorResponse);
+    },
   };
 }
 
@@ -98,6 +103,16 @@ export class TenorAPI {
     if (options?.offset) {
       reqUrl.searchParams.set("pos", options.offset.toString());
     }
+
+    const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
+    return (await resp.json()) as TenorResults;
+  }
+
+  async gifs(ids: string[], options: { limit?: number; abort?: AbortController }) {
+    const reqUrl = new URL("/v1/gifs", API_BASE_URL);
+    reqUrl.searchParams.set("key", this.apiKey);
+    reqUrl.searchParams.set("ids", ids.join(","));
+    reqUrl.searchParams.set("limit", options?.limit?.toString() ?? "10");
 
     const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
     return (await resp.json()) as TenorResults;

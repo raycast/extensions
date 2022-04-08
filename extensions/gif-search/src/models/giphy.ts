@@ -30,6 +30,11 @@ export default async function giphy(force?: boolean) {
       const { offset = 0, limit = 10 } = opt || {};
       return (await api.trending({ offset, limit })).data.map(mapGiphyResponse);
     },
+
+    async gifs(ids: string[]) {
+      const { data } = await api.gifs(ids);
+      return data.map(mapGiphyResponse);
+    },
   };
 }
 
