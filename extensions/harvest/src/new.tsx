@@ -1,9 +1,22 @@
-import { Form, ActionPanel, showToast, Toast, showHUD, useNavigation, Action } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  showToast,
+  Toast,
+  showHUD,
+  useNavigation,
+  Action,
+  Alert,
+  confirmAlert,
+  Icon,
+} from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
 import { HarvestProjectAssignment, HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseTypes";
 import _ from "lodash";
 import dayjs from "dayjs";
+import isToday from "dayjs/plugin/isToday";
+dayjs.extend(isToday);
 
 export default function Command({
   onSave = async () => {
@@ -69,7 +82,7 @@ export default function Command({
     setTaskAssignments();
 
     // const myDate = dayjs(entry.spent_date);
-    console.log("new date", new Date(entry.spent_date ?? ""));
+    // console.log("new date", new Date(entry.spent_date ?? ""));
     // setSpentDate(new Date(entry.spent_date));
   }, [entry]);
 
@@ -86,11 +99,25 @@ export default function Command({
         title: "No Task Selected",
       });
     }
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Loading..." });
-    await toast.show();
 
     setTimeFormat(hours);
     const spentDate = _.isDate(values.spent_date) ? values.spent_date : viewDate;
+
+    if (!dayjs(spentDate).isToday() && !hours)
+      if (
+        !(await confirmAlert({
+          icon: Icon.ExclamationMark,
+          title: "Warning",
+          message:
+            "You are about to start a timer on a different day (not today). Maybe you meant to enter some time on that day instead?",
+          primaryAction: { title: "Start Timer", style: Alert.ActionStyle.Destructive },
+        }))
+      ) {
+        return; // user canceled
+      }
+
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Loading..." });
+    await toast.show();
 
     const data = _.omitBy(values, _.isEmpty);
     const timeEntry = await newTimeEntry(
