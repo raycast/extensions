@@ -1,8 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "office-quotes",
-  "title": "office-quotes",
-  "description": "Search, view, and copy/paste quotes from 'The Office' TV series",
   "title": "Office Quotes",
   "description": "An extensions that requests quotes, facts and information on NBC’s beloved mockumentary series The Office.",
   "icon": "office-api-icon.png",
