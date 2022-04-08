@@ -55,7 +55,7 @@ export default function CreateProject() {
       };
       clear();
     } catch (error) {
-      handleError({ error, title: "Unable to create task" });
+      handleError({ error, title: "Unable to create project" });
     }
   }
 
@@ -70,7 +70,7 @@ export default function CreateProject() {
     >
       <Form.TextField id="name" title="Name" placeholder="My project" value={name} onChange={setName} />
 
-      <Form.Dropdown id="color" title="Color" value={colorId} onChange={setColorId} storeValue>
+      <Form.Dropdown id="color" title="Color" value={colorId} onChange={setColorId}>
         {colors.map(({ name, id }) => (
           <Form.Dropdown.Item value={String(id)} title={name} key={id} />
         ))}

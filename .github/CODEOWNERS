@@ -80,6 +80,7 @@
 /extensions/doppler-share-secrets                    @thomaspaulmann
 /extensions/dot-new                                  @natterstefan
 /extensions/dribbble                                 @gebeto
+/extensions/element                                  @Aayush9029
 /extensions/elgato-key-light                         @thomaspaulmann
 /extensions/elm-search                               @NeoVier
 /extensions/emoji                                    @FezVrasta
@@ -179,10 +180,11 @@
 /extensions/notion                                   @HenriChabrand
 /extensions/nsis-reference                           @idleberg
 /extensions/obsidian                                 @marcjulianschwarz
-/extensions/office-quotes                            @braydoncoyer
+/extensions/office-quotes                            @braydoncoyer @sandypockets
 /extensions/ones                                     @k8scat
 /extensions/open-with-app                            @fturcheti
 /extensions/opsgenie                                 @ricoberger
+/extensions/parcel-tracker                           @jjhok
 /extensions/parrot-translate                         @Haojen
 /extensions/party-parrot                             @thomaspaulmann
 /extensions/password-generator                       @joshuaiz
@@ -220,6 +222,7 @@
 /extensions/reddit-search                            @ewlcheng
 /extensions/remove-background                        @maantje @FezVrasta
 /extensions/render                                   @Destiner
+/extensions/rescuetime-focus-session-trigger         @tuortheblessed
 /extensions/ricescore                                @tonka3000
 /extensions/roblox-games                             @TayIorRobinson
 /extensions/rss-reader                               @fuksman
