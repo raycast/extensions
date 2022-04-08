@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 import { homedir } from "os";
 import { runAppleScript } from "run-applescript";
+import { checkDirectoryExists, isEmpty, preferences } from "./utils/common-utils";
 
 export default async () => {
   const _raycastLocation = await getRaycastLocation();
@@ -76,13 +77,51 @@ return screenWidth`;
 }
 
 async function captureRaycastMetadata(raycastLocation: RaycastLocation, resolution: Resolution) {
-  const picturePath = `${homedir()}/Downloads/${createPictureName()}.png`;
+  const { screenshotName, screenshotFormat } = preferences();
+  const finalScreenshotName = isEmpty(screenshotName) ? "Metadata" : screenshotName;
+
+  const picturePath = `${homedir()}/Downloads/${await createFileName(
+    `${homedir()}/Downloads/`,
+    finalScreenshotName,
+    screenshotFormat
+  )}`;
   const viewX = `${raycastLocation.x - 250 / (resolution.realWidth / resolution.viewWidth)}`;
   const viewY = `${raycastLocation.y - 150 / (resolution.realHeight / resolution.viewHeight)}`;
   const viewW = `${2000 * (resolution.viewWidth / resolution.realWidth)}`;
   const viewH = `${1250 * (resolution.viewHeight / resolution.realHeight)}`;
-  const command = `/usr/sbin/screencapture -x -R ${viewX},${viewY},${viewW},${viewH} ${picturePath}`;
-  exec(command, {});
+  const command = `/usr/sbin/screencapture -x -t ${screenshotFormat} -R ${viewX},${viewY},${viewW},${viewH} ${picturePath}`;
+  exec(command);
+}
+
+export async function createFileName(path: string, name: string, extension: string) {
+  const directoryExists = await checkDirectoryExists(path + name + "." + extension);
+  if (!directoryExists) {
+    return name + "." + extension;
+  } else {
+    let index = 2;
+    while (directoryExists) {
+      const newName = name + "-" + index + "." + extension;
+      const directoryExists = await checkDirectoryExists(path + newName);
+      if (!directoryExists) {
+        return newName;
+      }
+      index++;
+    }
+    const date = new Date();
+    const time =
+      date.getFullYear() +
+      "" +
+      (date.getMonth() + 1) +
+      "" +
+      date.getDate() +
+      "" +
+      date.getHours() +
+      "" +
+      date.getMinutes() +
+      "" +
+      date.getSeconds();
+    return name + "-" + time + "." + extension;
+  }
 }
 
 function createPictureName() {
