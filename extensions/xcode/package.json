@@ -89,8 +89,8 @@
       "mode": "no-view"
     },
     {
-      "name": "delete-unavailable-simulators.command",
-      "title": "Delete Unavailable Simulators",
+      "name": "delete-unsupported-simulators.command",
+      "title": "Delete Unsupported Simulators",
       "subtitle": "Xcode",
       "description": "Deletes old simulators that are not supported.",
       "mode": "no-view"

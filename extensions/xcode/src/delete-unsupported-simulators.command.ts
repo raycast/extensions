@@ -11,7 +11,7 @@ export default async () => {
   const loadingToast = await showToast(ToastStyle.Animated, "Please wait");
   try {
     // Clear Swift Package Manager cache
-    await xcodeCleanupService.deleteUnavailableSimulators();
+    await xcodeCleanupService.deleteUnsupportedSimulators();
     // Hide loading Toast
     await loadingToast.hide();
     // Show success Toast
