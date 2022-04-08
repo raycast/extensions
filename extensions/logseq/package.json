@@ -25,6 +25,9 @@
       "mode": "view"
     }
   ],
+  "engines": {
+    "node": ">=16.10"
+  },
   "dependencies": {
     "@raycast/api": "^1.31.0",
     "dayjs": "^1.11.0",
