@@ -29,7 +29,11 @@ export default function main() {
   const [gists, setGists] = useState<Gist[]>([]);
   const [rawURL, setRawURL] = useState<string>("");
   const [gistFileContent, setGistFileContent] = useState<string>("");
+<<<<<<< HEAD
   const [refresh, setRefresh] = useState<number[]>([0]);
+=======
+  const [refresh, setRefresh] = useState<boolean>(false);
+>>>>>>> parent of 63b86dd5 (Add GitHub Gist extension)
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -107,7 +111,11 @@ export default function main() {
                         onAction={async () => {
                           if (preference.primaryAction === "copy") {
                             await Clipboard.copy(gistFileContent);
+<<<<<<< HEAD
                             await showToast(Toast.Style.Success, "Copy gist to clipboard!");
+=======
+                            await showToast(Toast.Style.Success, "Copy Gist to Clipboard");
+>>>>>>> parent of 63b86dd5 (Add GitHub Gist extension)
                           } else {
                             await Clipboard.paste(gistFileContent);
                             await showHUD("Paste to Active App");
@@ -123,7 +131,11 @@ export default function main() {
                             await showHUD("Paste to Active App");
                           } else {
                             await Clipboard.copy(gistFileContent);
+<<<<<<< HEAD
                             await showToast(Toast.Style.Success, "Copy gist to clipboard!");
+=======
+                            await showToast(Toast.Style.Success, "Copy Gist to Clipboard");
+>>>>>>> parent of 63b86dd5 (Add GitHub Gist extension)
                           }
                         }}
                       />
@@ -134,7 +146,11 @@ export default function main() {
                         shortcut={{ modifiers: ["cmd"], key: "l" }}
                         onAction={async () => {
                           await Clipboard.copy(gistArray[gistIndex].html_url);
+<<<<<<< HEAD
                           await showToast(Toast.Style.Success, "Copy gist link to clipboard!");
+=======
+                          await showToast(Toast.Style.Success, "Copy Gist Link");
+>>>>>>> parent of 63b86dd5 (Add GitHub Gist extension)
                         }}
                       />
                       <Action
@@ -167,6 +183,7 @@ export default function main() {
                                     }}
                                   />
                                   <Action
+<<<<<<< HEAD
                                     title={"Create Gist"}
                                     icon={Icon.Plus}
                                     shortcut={{ modifiers: ["cmd"], key: "n" }}
@@ -175,16 +192,22 @@ export default function main() {
                                     }}
                                   />
                                   <Action
+=======
+>>>>>>> parent of 63b86dd5 (Add GitHub Gist extension)
                                     title={"Edit Gist"}
                                     icon={Icon.Pencil}
                                     shortcut={{ modifiers: ["cmd"], key: "e" }}
                                     onAction={async () => {
+<<<<<<< HEAD
                                       push(
                                         <CreateGist
                                           gist={gistArray[gistIndex]}
                                           refreshUseState={[refresh, setRefresh]}
                                         />
                                       );
+=======
+                                      push(<CreateGist gist={gistArray[gistIndex]} />);
+>>>>>>> parent of 63b86dd5 (Add GitHub Gist extension)
                                     }}
                                   />
                                   <Action

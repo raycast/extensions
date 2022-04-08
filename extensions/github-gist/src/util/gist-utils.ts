@@ -80,11 +80,15 @@ export async function deleteGist(gist_id: string) {
   });
 }
 
+<<<<<<< HEAD
 export async function createGist(description: string, isPublic = false, gistFiles: GistFile[]) {
   const files: { [p: string]: { content: string } } = {};
   gistFiles.forEach((value) => {
     files[value.filename] = { content: value.content };
   });
+=======
+export async function createGist(description: string, isPublic = false, files: { [p: string]: { content: string } }) {
+>>>>>>> parent of 63b86dd5 (Add GitHub Gist extension)
   return await octokit.request("POST /gists", {
     description: description,
     public: isPublic,
@@ -92,6 +96,7 @@ export async function createGist(description: string, isPublic = false, gistFile
   });
 }
 
+<<<<<<< HEAD
 export async function updateGist(gistId: string, description: string, oldFiles: GistFile[], newFiles: GistFile[]) {
   const files: { [p: string]: { content: string } } = {};
   const oldFileName = oldFiles.map((value) => value.filename);
@@ -104,12 +109,21 @@ export async function updateGist(gistId: string, description: string, oldFiles: 
     files[value] = { content: "" };
   });
   return await octokit.request("PATCH /gists/" + gistId, {
+=======
+export async function updateGist(gistId: string, description: string, files: { [p: string]: { content: string } }) {
+  return await octokit.request("PATCH /gists/{gist_id}", {
+    gist_id: gistId,
+>>>>>>> parent of 63b86dd5 (Add GitHub Gist extension)
     description: description,
     files: files,
   });
 }
 
+<<<<<<< HEAD
 export function checkGistFileContent(gistFiles: GistFile[]) {
+=======
+export function checkGistFile(gistFiles: GistFile[]) {
+>>>>>>> parent of 63b86dd5 (Add GitHub Gist extension)
   const isValid = { valid: true, contentIndex: "" };
   gistFiles.forEach((value, index) => {
     if (isEmpty(value.content)) {
@@ -119,6 +133,7 @@ export function checkGistFileContent(gistFiles: GistFile[]) {
   });
   return isValid;
 }
+<<<<<<< HEAD
 export function checkGistFileName(gistFiles: GistFile[]) {
   const nameSet = new Set();
   const nameList = [];
@@ -130,3 +145,5 @@ export function checkGistFileName(gistFiles: GistFile[]) {
   });
   return nameSet.size === nameList.length;
 }
+=======
+>>>>>>> parent of 63b86dd5 (Add GitHub Gist extension)

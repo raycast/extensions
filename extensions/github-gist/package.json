@@ -2,7 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "github-gist",
   "title": "GitHub Gist",
+<<<<<<< HEAD
   "description": "Create, search and display GitHub Gist.",
+=======
+  "description": "Create, search and display GitHub Gist",
+>>>>>>> parent of 63b86dd5 (Add GitHub Gist extension)
   "icon": "github.png",
   "author": "koinzhang",
   "categories": [
