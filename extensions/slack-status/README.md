@@ -24,7 +24,9 @@ Extension for quickly changing your Slack status. Set up presets for common stat
             "user": [
                 "emoji:read",
                 "users.profile:write",
-                "users.profile:read"
+                "users.profile:read",
+                "dnd:read",
+                "dnd:write"
             ]
         }
     },

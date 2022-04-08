@@ -15,7 +15,6 @@ export function SetCustomStatusForm(props: {
 }) {
   const { pop } = useNavigation();
   function handleSubmit(values: FormValues) {
-    console.log(values);
     if (!validateForm(values)) {
       return;
     }
@@ -24,6 +23,7 @@ export function SetCustomStatusForm(props: {
         title: values.statusText,
         emojiCode: values.emoji,
         defaultDuration: 0,
+        dnd: values.dnd,
       },
       props.currentStatusResponseState,
       parseInt(values.clearAfter),
@@ -46,6 +46,7 @@ export function CreateStatusPresetForm(props: { onCompletion: (preset: SlackStat
       title: values.statusText,
       emojiCode: values.emoji,
       defaultDuration: parseInt(values.clearAfter),
+      dnd: values.dnd,
     });
   }
 
@@ -64,6 +65,7 @@ export function EditStatusPresetForm(props: {
       title: values.statusText,
       emojiCode: values.emoji,
       defaultDuration: parseInt(values.clearAfter),
+      dnd: values.dnd,
     });
   }
 
@@ -131,6 +133,12 @@ function StatusForm(props: {
         <Form.Dropdown.Item key={"120m"} title="2 hours" value="120" />
         <Form.Dropdown.Item key={"180m"} title="3 hours" value="180" />
       </Form.Dropdown>
+      <Form.Checkbox
+        id="dnd"
+        label="Pause notifications"
+        defaultValue={props.preset?.dnd}
+        storeValue={props.preset ? false : true}
+      />
     </Form>
   );
 }

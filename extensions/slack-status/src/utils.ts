@@ -1,7 +1,10 @@
 import moment from "moment";
 import { SlackStatusPreset } from "./interfaces";
 
-export function statusExpirationText(expirationTimestamp: number): string {
+export function statusExpirationText(expirationTimestamp?: number): string {
+  if (!expirationTimestamp) {
+    return "";
+  }
   const expirationDate = moment(expirationTimestamp);
 
   const isTomorrow = isTomorrowOrAlmostTomorrow(expirationDate);

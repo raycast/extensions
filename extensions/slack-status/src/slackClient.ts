@@ -11,15 +11,14 @@ export class SlackClient {
 
   getCurrentStatus(currentStatusResponseState: SlackStatusResponseState) {
     const setCurrentStatusResponse = currentStatusResponseState[1];
-    this.apiClient.users.profile
-      .get()
-      .then((response) => {
-        if (response.ok) {
-          const statusEmoji = response.profile?.status_emoji;
-          const statusText = response.profile?.status_text;
+    Promise.all([this.apiClient.users.profile.get(), this.apiClient.dnd.info()])
+      .then(([responseStatus, responseDnd]) => {
+        if (responseStatus.ok && responseDnd.ok) {
+          const statusEmoji = responseStatus.profile?.status_emoji;
+          const statusText = responseStatus.profile?.status_text;
 
           if (statusText) {
-            let expirationTimestamp = response.profile?.status_expiration;
+            let expirationTimestamp = responseStatus.profile?.status_expiration;
             if (expirationTimestamp) {
               expirationTimestamp *= 1000;
             }
@@ -28,6 +27,7 @@ export class SlackClient {
                 emojiCode: statusEmoji ?? ":speech_balloon:",
                 title: statusText,
                 expiration: expirationTimestamp,
+                dnd: (responseDnd.snooze_enabled as boolean) ?? false,
               },
             });
           } else {
@@ -51,11 +51,16 @@ export class SlackClient {
     };
     const setCurrentStatusResponse = currentStatusResponseState[1];
     showToast(ToastStyle.Animated, "Clearing status...");
-    this.apiClient.users.profile
-      .set({
+    Promise.all([
+      this.apiClient.users.profile.set({
         profile: JSON.stringify(profile),
-      })
-      .then((response) => {
+      }),
+      this.apiClient.dnd.endSnooze().catch((err) => {
+        // Slack throws if you call endSnooze when notification aren't paused
+        if (err.data.error != "snooze_not_active") throw err;
+      }),
+    ])
+      .then(([response]) => {
         if (response.ok) {
           showToast(ToastStyle.Success, "Status cleared");
           setCurrentStatusResponse({});
@@ -86,11 +91,22 @@ export class SlackClient {
       status_emoji: statusPreset.emojiCode,
     };
     showToast(ToastStyle.Animated, "Setting status...");
-    this.apiClient.users.profile
-      .set({
+
+    const queries = [
+      this.apiClient.users.profile.set({
         profile: JSON.stringify(profile),
-      })
-      .then((response) => {
+      }),
+    ];
+    if (statusPreset.dnd) {
+      queries.push(
+        this.apiClient.dnd.setSnooze({
+          num_minutes: durationInMinutes > 0 ? durationInMinutes : 1440, // max 24h
+        })
+      );
+    }
+
+    Promise.all(queries)
+      .then(([response]) => {
         if (response.ok) {
           const emoji = slackEmojiCodeMap[statusPreset.emojiCode] ?? "💬";
           const message = `${emoji} ${statusPreset.title}`;
@@ -100,6 +116,7 @@ export class SlackClient {
               emojiCode: statusPreset.emojiCode,
               title: statusPreset.title,
               expiration: expirationTimestamp * 1000,
+              dnd: statusPreset.dnd,
             },
           });
           if (onCompletion) {

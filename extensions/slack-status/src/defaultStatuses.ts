@@ -5,11 +5,13 @@ export const defaultStatuses: SlackStatusPreset[] = [
     title: "Focus Mode",
     emojiCode: ":technologist:",
     defaultDuration: 120,
+    dnd: true,
   },
   {
     title: "In a Meeting",
     emojiCode: ":spiral_calendar_pad:",
     defaultDuration: 30,
+    dnd: true,
   },
   {
     title: "Eating",

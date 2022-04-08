@@ -88,11 +88,12 @@ function CurrentStatusItem(props: {
       });
     } else if (currentStatusResponse?.status) {
       const status = currentStatusResponse?.status;
-      const subtitle = status.expiration ? statusExpirationText(status.expiration) : "";
       setListItemState({
         status: status,
         title: status.title,
-        subtitle: subtitle,
+        subtitle: [statusExpirationText(status.expiration), status.dnd ? "notifications paused" : null]
+          .filter((t) => t)
+          .join(" • "),
         icon: slackEmojiCodeMap[status.emojiCode] ?? "💬",
         isError: false,
       });
@@ -160,7 +161,9 @@ function SetStatusPresetListItem(props: {
       id={keyForStatusPreset(status)}
       icon={slackEmojiCodeMap[status.emojiCode] ?? "💬"}
       title={status.title}
-      subtitle={durationToString(status.defaultDuration)}
+      subtitle={[durationToString(status.defaultDuration), status.dnd ? "pause notifications" : null]
+        .filter((t) => t)
+        .join(" • ")}
       actions={
         <ActionPanel>
           <ActionPanel.Section key="main">

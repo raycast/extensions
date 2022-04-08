@@ -5,6 +5,7 @@ export interface SlackStatus {
   emojiCode: string;
   title: string;
   expiration?: number; // timestamp in milliseconds
+  dnd?: boolean;
 }
 
 export interface SlackStatusResponse {
@@ -24,6 +25,7 @@ export interface SlackStatusPreset {
   emojiCode: string;
   title: string;
   defaultDuration: number; // 0 means "don't clear"
+  dnd?: boolean;
 }
 
 export type SlackStatusResponseState = [
