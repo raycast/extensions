@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "github-gist",
   "title": "GitHub Gist",
-  "description": "Create, search and display GitHub Gist",
+  "description": "Create, search and display GitHub Gist.",
   "icon": "github.png",
   "author": "koinzhang",
   "categories": [

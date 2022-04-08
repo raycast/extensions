@@ -29,11 +29,11 @@ export default function main() {
   const [gists, setGists] = useState<Gist[]>([]);
   const [rawURL, setRawURL] = useState<string>("");
   const [gistFileContent, setGistFileContent] = useState<string>("");
-  const [refresh, setRefresh] = useState<boolean>(false);
+  const [refresh, setRefresh] = useState<number[]>([0]);
   const { push } = useNavigation();
 
   useEffect(() => {
-    async function _fetchBuildInShortcut() {
+    async function _fetchGists() {
       try {
         setGists([]);
         const _gists = await requestGist(route);
@@ -43,11 +43,11 @@ export default function main() {
       }
     }
 
-    _fetchBuildInShortcut().then();
+    _fetchGists().then();
   }, [route, refresh]);
 
   useEffect(() => {
-    async function _fetchBuildInShortcut() {
+    async function _fetchGistContent() {
       if (!isEmpty(rawURL)) {
         setGistFileContent("");
         const { data } = await octokit.request(`GET ${rawURL}`);
@@ -55,7 +55,7 @@ export default function main() {
       }
     }
 
-    _fetchBuildInShortcut().then();
+    _fetchGistContent().then();
   }, [rawURL]);
 
   return (
@@ -107,7 +107,7 @@ export default function main() {
                         onAction={async () => {
                           if (preference.primaryAction === "copy") {
                             await Clipboard.copy(gistFileContent);
-                            await showToast(Toast.Style.Success, "Copy Gist to Clipboard");
+                            await showToast(Toast.Style.Success, "Copy gist to clipboard!");
                           } else {
                             await Clipboard.paste(gistFileContent);
                             await showHUD("Paste to Active App");
@@ -123,7 +123,7 @@ export default function main() {
                             await showHUD("Paste to Active App");
                           } else {
                             await Clipboard.copy(gistFileContent);
-                            await showToast(Toast.Style.Success, "Copy Gist to Clipboard");
+                            await showToast(Toast.Style.Success, "Copy gist to clipboard!");
                           }
                         }}
                       />
@@ -134,7 +134,7 @@ export default function main() {
                         shortcut={{ modifiers: ["cmd"], key: "l" }}
                         onAction={async () => {
                           await Clipboard.copy(gistArray[gistIndex].html_url);
-                          await showToast(Toast.Style.Success, "Copy Gist Link");
+                          await showToast(Toast.Style.Success, "Copy gist link to clipboard!");
                         }}
                       />
                       <Action
@@ -160,10 +160,18 @@ export default function main() {
                                     onAction={async () => {
                                       const response = await starGist(gistArray[gistIndex].gist_id);
                                       if (response.status == 204) {
-                                        await showToast(Toast.Style.Success, "Star Gist Success");
+                                        await showToast(Toast.Style.Success, "Star gist success!");
                                       } else {
-                                        await showToast(Toast.Style.Failure, "Star Gist Failure");
+                                        await showToast(Toast.Style.Failure, "Star gist failure.");
                                       }
+                                    }}
+                                  />
+                                  <Action
+                                    title={"Create Gist"}
+                                    icon={Icon.Plus}
+                                    shortcut={{ modifiers: ["cmd"], key: "n" }}
+                                    onAction={async () => {
+                                      push(<CreateGist gist={undefined} refreshUseState={undefined} />);
                                     }}
                                   />
                                   <Action
@@ -171,7 +179,12 @@ export default function main() {
                                     icon={Icon.Pencil}
                                     shortcut={{ modifiers: ["cmd"], key: "e" }}
                                     onAction={async () => {
-                                      push(<CreateGist gist={gistArray[gistIndex]} />);
+                                      push(
+                                        <CreateGist
+                                          gist={gistArray[gistIndex]}
+                                          refreshUseState={[refresh, setRefresh]}
+                                        />
+                                      );
                                     }}
                                   />
                                   <Action
@@ -181,10 +194,12 @@ export default function main() {
                                     onAction={async () => {
                                       const response = await deleteGist(gistArray[gistIndex].gist_id);
                                       if (response.status == 204) {
-                                        setRefresh(!refresh);
-                                        await showToast(Toast.Style.Success, "Delete Gist Success");
+                                        const _refresh = [...refresh];
+                                        _refresh[0]++;
+                                        setRefresh(_refresh);
+                                        await showToast(Toast.Style.Success, "Delete gist success!");
                                       } else {
-                                        await showToast(Toast.Style.Failure, "Delete Gist Failure");
+                                        await showToast(Toast.Style.Failure, "Delete gist failure.");
                                       }
                                     }}
                                   />
@@ -200,9 +215,9 @@ export default function main() {
                                   onAction={async () => {
                                     const response = await starGist(gistArray[gistIndex].gist_id);
                                     if (response.status == 204) {
-                                      await showToast(Toast.Style.Success, "Star Gist Success");
+                                      await showToast(Toast.Style.Success, "Star gist success!");
                                     } else {
-                                      await showToast(Toast.Style.Failure, "Star Gist Failure");
+                                      await showToast(Toast.Style.Failure, "Star gist failure.");
                                     }
                                   }}
                                 />
@@ -217,10 +232,12 @@ export default function main() {
                                   onAction={async () => {
                                     const response = await unStarGist(gistArray[gistIndex].gist_id);
                                     if (response.status == 204) {
-                                      setRefresh(!refresh);
-                                      await showToast(Toast.Style.Success, "Unstar Gist Success");
+                                      const _refresh = [...refresh];
+                                      _refresh[0]++;
+                                      setRefresh(_refresh);
+                                      await showToast(Toast.Style.Success, "Unstar gist success!");
                                     } else {
-                                      await showToast(Toast.Style.Failure, "Unstar Gist Failure");
+                                      await showToast(Toast.Style.Failure, "Unstar gist failure.");
                                     }
                                   }}
                                 />
