@@ -23,6 +23,8 @@ export const statusToLabel = (status: TorrentStatus, percentDone: number) => {
 };
 
 export const statusIconSource = (torrent: Torrent): string => {
+  if (torrent.errorString) return Icon.ExclamationMark;
+
   switch (torrent.status) {
     case TorrentStatus.Stopped:
       return torrent.percentDone === 1 ? Icon.Checkmark : "status-stopped.png";
@@ -84,6 +86,8 @@ export const formatStatus = (torrent: Torrent): string => {
 };
 
 export const statusIconColor = (torrent: Torrent): string => {
+  if (torrent.errorString) return Color.Red;
+
   switch (torrent.status) {
     case TorrentStatus.Downloading:
       return torrent.metadataPercentComplete < 1 ? Color.Red : Color.Green;

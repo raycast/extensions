@@ -1,17 +1,35 @@
-import { ActionPanel, List, Action } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import Parser from "rss-parser";
 
 export function StoryListItem(props: { item: Parser.Item; index: number }) {
-  const icon = getIcon(props.index + 1);
-  const points = getPoints(props.item);
-  const comments = getComments(props.item);
+  const [state, setState] = useState<{ icon: string; accessories: List.Item.Accessory[] }>({
+    icon: getIcon(100),
+    accessories: [],
+  });
+
+  useEffect(() => {
+    const icon = getIcon(props.index + 1);
+    const accessories = [];
+
+    const points = getPoints(props.item);
+    const comments = getComments(props.item);
+    if (comments !== null) {
+      accessories.push({ icon: Icon.Bubble, text: comments });
+    }
+    if (points !== null) {
+      accessories.push({ icon: "👍", text: points });
+    }
+
+    setState({ icon, accessories });
+  }, [props.item, props.index]);
 
   return (
     <List.Item
-      icon={icon}
+      icon={state.icon}
       title={props.item.title ?? "No title"}
       subtitle={props.item.creator}
-      accessoryTitle={`👍  ${points}    💬  ${comments}`}
+      accessories={state.accessories}
       actions={<Actions item={props.item} />}
     />
   );
@@ -55,9 +73,9 @@ function getIcon(index: number) {
 
 function getPoints(item: Parser.Item) {
   const matches = item.contentSnippet?.match(/(?<=Points:\s*)(\d+)/g);
-  return matches?.[0];
+  return matches?.[0] || null;
 }
 function getComments(item: Parser.Item) {
   const matches = item.contentSnippet?.match(/(?<=Comments:\s*)(\d+)/g);
-  return matches?.[0];
+  return matches?.[0] || null;
 }

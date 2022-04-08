@@ -28,6 +28,7 @@ export type Torrent = {
   percentDone: number;
   metadataPercentComplete: number;
   status: TorrentStatus;
+  errorString: string | null;
   rateDownload: number;
   rateUpload: number;
   files: { name: string; bytesCompleted: number; length: number }[];
@@ -57,6 +58,7 @@ export type Torrent = {
     lastAnnounceTime: number;
     downloadCount: number;
   }[];
+  addedDate: number;
 };
 
 export type SessionStats = {

@@ -2,10 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gif-search",
   "title": "GIF Search",
-  "description": "Search for animated GIFs from giphy.com or tenor.com",
+  "description": "Search the Internet for animated GIFs",
   "icon": "command-icon.png",
   "author": "josephschmitt",
   "license": "MIT",
+  "categories": [
+    "Media",
+    "Fun",
+    "Web"
+  ],
   "commands": [
     {
       "name": "giphy",
@@ -15,8 +20,8 @@
       "preferences": [
         {
           "name": "giphy-apiKey",
-          "type": "textfield",
-          "required": true,
+          "type": "password",
+          "required": false,
           "title": "Giphy API Key",
           "placeholder": "Giphy API Key",
           "description": "API Key used to perform searches on Giphy. You can get one for free at https://developers.giphy.com"
@@ -31,13 +36,19 @@
       "preferences": [
         {
           "name": "tenor-apiKey",
-          "type": "textfield",
-          "required": true,
+          "type": "password",
+          "required": false,
           "title": "Tenor API Key",
           "placeholder": "Tenor API Key",
           "description": "API Key used to perform searches on Tenor. You can get one for free at https://tenor.com/gifapi"
         }
       ]
+    },
+    {
+      "name": "finergifsclub",
+      "title": "Search The Finer Gifs Club",
+      "description": "Search quotes from The Office on TheFinerGifs.club",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -45,6 +56,7 @@
       "name": "showGifPreview",
       "type": "checkbox",
       "required": false,
+      "default": true,
       "label": "Show GIF Preview",
       "description": "Shows a large preview of the selected gif in search results."
     },
@@ -56,8 +68,8 @@
       "description": "Customize what happens when hitting ENTER on a Gif",
       "data": [
         {
-          "title": "Open in Browser",
-          "value": "openInBrowser"
+          "title": "Copy File to Clipboard",
+          "value": "copyFile"
         },
         {
           "title": "Copy GIF URL to Clipboard",
@@ -66,14 +78,27 @@
         {
           "title": "Copy Page URL to Clipboard",
           "value": "copyPageUrl"
+        },
+        {
+          "title": "View GIF Details",
+          "value": "viewDetails"
+        },
+        {
+          "title": "Open in Browser",
+          "value": "openInBrowser"
         }
       ]
     }
   ],
   "dependencies": {
     "@giphy/js-fetch-api": "^4.1.2",
-    "@raycast/api": "^1.30.0",
-    "node-fetch": "^3.2.1"
+    "date-fns": "^2.28.0",
+    "@raycast/api": "^1.31.0",
+    "@saekitominaga/file-size-format": "^1.0.2",
+    "date-fns": "^2.28.0",
+    "node-fetch": "^3.2.1",
+    "run-applescript": "^6.0.0",
+    "tempy": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
