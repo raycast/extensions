@@ -1,16 +1,20 @@
 # Pipe Commands Changelog
 
-## [Fix Pipe Command Creation] - 2022-04-02
+## Add `Read the Content` Command (2022.04.07)
 
-- The `@raycast.icon` set by `Create Pipe Command` command was incorrect
+## Fixes (2022.03.08)
 
-### Fixed
-
-## Improve Development Experience (2022-03-15)
-
-- Remove buggy file argument type
+- Remove buggy file arguments
 - Fix text input from clipboard
 - Use List Details to preview commands content from the management view
 - Add JSON schema for Pipe Commands and show parsing errors in UI
 - Add a link to the README in the command templates
 - Add better error reporting when running scripts
+
+## Improvements (2022.03.08)
+
+- Instead of presenting each output types for each pipe commands, this PR allows the developper to set the desired output using the @raycast.mode directive.
+- Simplifies the update of built-in pipe commands distributed with the assets folder.
+- A bug in the Create Pipe Command command was also corrected (outdated @raycast.input directive)
+
+## Added Pipe Commands (2022.02.28)
