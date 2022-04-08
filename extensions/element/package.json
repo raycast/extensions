@@ -2,7 +2,7 @@
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "element",
     "title": "Element",
-    "description": "Show information about an element.",
+    "description": "Show information about an element of the periodic table.",
     "icon": "command-icon.png",
     "author": "Aayush9029",
     "categories": [
