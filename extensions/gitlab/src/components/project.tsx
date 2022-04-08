@@ -101,7 +101,7 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
     showToast(Toast.Style.Failure, "Cannot search Project", error);
   }
 
-  if (!data) {
+  if (isLoading === undefined) {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 

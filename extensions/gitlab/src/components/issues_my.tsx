@@ -22,7 +22,7 @@ function MyIssueList(props: {
 }): JSX.Element {
   const issues = props.issues;
 
-  if (!issues) {
+  if (props.isLoading === undefined) {
     return <List isLoading={true} searchBarPlaceholder="Loading" />;
   }
 

@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Color, Icon, showToast, Toast } from "@raycast/api";
-import React from "react";
 import { gitlab } from "../common";
 import { jsonDataToIssue, jsonDataToMergeRequest as jsonDataToMergeRequest, Todo } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
