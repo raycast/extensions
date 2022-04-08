@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Quick Copy] - 2022-04-08
+
+- allow copying item properties without using a dropdown
+
 ## [Logout] - 2022-04-06
 
 - Added `Logout` action
