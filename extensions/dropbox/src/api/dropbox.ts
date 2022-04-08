@@ -14,7 +14,6 @@ export interface ListFileResp {
 }
 
 export async function dbxListAnyFiles(req: { path: string; query: string; cursor: string }): Promise<ListFileResp> {
-  console.log("get-any-files", req);
   if (req.cursor) {
     if (req.query) {
       return await dbxSearchFilesContinue(req.cursor);

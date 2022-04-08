@@ -23,7 +23,6 @@ export default function Directory(props: IDirectoryProps) {
       try {
         setLoading(true);
         const res = await dbxListAnyFiles({ path: path, query: query, cursor: cursor });
-        console.log("get-any-files-resp", res);
         setFiles(cursor ? [...files, ...res.entries] : res.entries);
         setCursor(res.cursor);
         setHasMore(res.has_more);
@@ -45,29 +44,35 @@ export default function Directory(props: IDirectoryProps) {
       }}
       isLoading={loading}
     >
-      <List.Section title={"files"}>
-        {files.map((v) => {
-          const isFolder = v[".tag"] === "folder";
-          return isFolder ? <DirectoryItem key={v.id} file={v} /> : <FileItem key={v.id} file={v} />;
-        })}
-      </List.Section>
-      {hasMore && cursor ? (
-        <List.Section title={"page"}>
-          <List.Item
-            title={"Next Page"}
-            actions={
-              <ActionPanel>
-                <Action
-                  title={"Next Page"}
-                  onAction={() => {
-                    setFetchCursor(fetchCursor + 1);
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        </List.Section>
-      ) : null}
+      {query === "" && files.length === 0 ? (
+        <List.EmptyView title="Type input something" />
+      ) : (
+        <>
+          <List.Section title={"files"}>
+            {files.map((v) => {
+              const isFolder = v[".tag"] === "folder";
+              return isFolder ? <DirectoryItem key={v.id} file={v} /> : <FileItem key={v.id} file={v} />;
+            })}
+          </List.Section>
+          {hasMore && cursor ? (
+            <List.Section title={"page"}>
+              <List.Item
+                title={"Next Page"}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title={"Next Page"}
+                      onAction={() => {
+                        setFetchCursor(fetchCursor + 1);
+                      }}
+                    />
+                  </ActionPanel>
+                }
+              />
+            </List.Section>
+          ) : null}
+        </>
+      )}
     </List>
   );
 }
