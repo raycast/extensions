@@ -8,27 +8,23 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import ClubDetails from "./components/club";
 
 export default function Club() {
-  const [clubs, setClubs] = useState<Team[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [clubs, setClubs] = useState<Team[]>();
   const [competition, setCompetition] = useState<string>(competitions[0].value);
 
   useEffect(() => {
-    setLoading(true);
-    setClubs([]);
-
+    setClubs(undefined);
     getTeams(competition).then((data) => {
       setClubs(data);
-      setLoading(false);
     });
   }, [competition]);
 
   return (
     <List
       throttle
-      isLoading={loading}
+      isLoading={!clubs}
       searchBarAccessory={<CompetitionDropdown onSelect={setCompetition} />}
     >
-      {clubs.map((club) => {
+      {clubs?.map((club) => {
         return (
           <List.Item
             key={club.id}

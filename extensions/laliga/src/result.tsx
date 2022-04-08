@@ -12,15 +12,13 @@ interface Matchday {
 }
 
 export default function Fixture() {
-  const [matches, setMatches] = useState<Matchday>({});
+  const [matches, setMatches] = useState<Matchday>();
   const [competition, setCompetition] = useState<string>(competitions[0].value);
   const [matchday, setMatchday] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     setMatchday(0);
-    setMatches({});
-    setLoading(true);
+    setMatches(undefined);
 
     getCurrentGameWeek(competition).then((gameweek) => {
       setMatchday(gameweek.week);
@@ -29,14 +27,11 @@ export default function Fixture() {
 
   useEffect(() => {
     if (matchday) {
-      setLoading(true);
-
       getMatches(competition, matchday).then((data) => {
         setMatches({
           ...matches,
           [`Matchday ${matchday}`]: data,
         });
-        setLoading(false);
       });
     }
   }, [matchday]);
@@ -44,10 +39,10 @@ export default function Fixture() {
   return (
     <List
       throttle
-      isLoading={loading}
+      isLoading={!matches}
       searchBarAccessory={<CompetitionDropdown onSelect={setCompetition} />}
     >
-      {Object.entries(matches).map(([label, results]) => {
+      {Object.entries(matches || {}).map(([label, results]) => {
         return (
           <List.Section key={label} title={label}>
             {results.map((match) => {

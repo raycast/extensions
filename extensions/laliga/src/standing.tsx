@@ -8,18 +8,14 @@ import { getStandings } from "./api";
 import { Standing } from "./types";
 
 export default function GetTables() {
-  const [standing, setStandings] = useState<Standing[]>([]);
+  const [standing, setStandings] = useState<Standing[]>();
   const [competition, setCompetition] = useState<string>(competitions[0].value);
-  const [loading, setLoading] = useState<boolean>(false);
   const [showStats, setShowStats] = useState<boolean>(false);
 
   useEffect(() => {
-    setStandings([]);
-    setLoading(true);
-
+    setStandings(undefined);
     getStandings(competition).then((data) => {
       setStandings(data);
-      setLoading(false);
     });
   }, [competition]);
 
@@ -45,11 +41,11 @@ export default function GetTables() {
   return (
     <List
       throttle
-      isLoading={loading}
+      isLoading={!standing}
       searchBarAccessory={<CompetitionDropdown onSelect={setCompetition} />}
       isShowingDetail={showStats}
     >
-      {standing.map((team) => {
+      {standing?.map((team) => {
         let icon: Image.ImageLike = {
           source: Icon.Dot,
           tintColor: Color.SecondaryText,
