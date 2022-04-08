@@ -3,18 +3,15 @@ import { getResults } from "../api";
 import { Matchday } from "../types/firebase";
 
 export const useFixtures = (competition: string) => {
-  const [fixtures, setFixtures] = useState<Matchday[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [fixtures, setFixtures] = useState<Matchday[]>();
 
   useEffect(() => {
-    setLoading(true);
-    setFixtures([]);
+    setFixtures(undefined);
 
     getResults(competition).then((data) => {
       setFixtures(data);
-      setLoading(false);
     });
   }, [competition]);
 
-  return { fixtures, loading };
+  return fixtures;
 };

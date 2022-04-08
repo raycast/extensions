@@ -6,7 +6,7 @@ import { Entry } from "./types/firebase";
 
 export default function Table() {
   const [competition, setCompetition] = useState<string>("bundesliga");
-  const { table, loading } = useTable(competition);
+  const table = useTable(competition);
   const [showStats, setShowStats] = useState<boolean>(false);
 
   const clubStats = (entry: Entry): json2md.DataObject => {
@@ -30,7 +30,7 @@ export default function Table() {
   return (
     <List
       throttle
-      isLoading={loading}
+      isLoading={!table}
       isShowingDetail={showStats}
       searchBarAccessory={
         <List.Dropdown
@@ -42,7 +42,7 @@ export default function Table() {
         </List.Dropdown>
       }
     >
-      {table.map((entry) => {
+      {table?.map((entry) => {
         let icon: Image.ImageLike = {
           source: Icon.Dot,
           tintColor: Color.SecondaryText,

@@ -97,12 +97,12 @@ function ClubDetails(props: { team: Club; competition: string }) {
 
 export default function Club() {
   const [competition, setCompetition] = useState<string>("bundesliga");
-  const club = useClubs();
+  const clubs = useClubs();
 
   return (
     <List
       throttle
-      isLoading={club.loading}
+      isLoading={!clubs}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by Competition"
@@ -113,7 +113,7 @@ export default function Club() {
         </List.Dropdown>
       }
     >
-      {(club.clubs[competition] || []).map((team) => {
+      {((clubs && clubs[competition]) || []).map((team) => {
         return (
           <List.Item
             key={team.id}

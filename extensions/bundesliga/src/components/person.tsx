@@ -4,12 +4,12 @@ import { usePerson } from "../hooks";
 import { Name } from "../types";
 
 export default function Person(props: Name) {
-  const { player, loading } = usePerson(props.slugifiedFull);
+  const player = usePerson(props.slugifiedFull);
 
   return player ? (
     <Detail
       navigationTitle={`${props.full} | Profile & Stats`}
-      isLoading={loading}
+      isLoading={!player}
       markdown={json2md([
         { h1: player.names.full },
         {

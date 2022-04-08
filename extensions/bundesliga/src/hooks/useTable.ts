@@ -3,18 +3,15 @@ import { getTable } from "../api";
 import { Entry } from "../types/firebase";
 
 export const useTable = (competition: string) => {
-  const [table, setTable] = useState<Entry[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [table, setTable] = useState<Entry[]>();
 
   useEffect(() => {
-    setLoading(true);
-    setTable([]);
+    setTable(undefined);
 
     getTable(competition).then((data) => {
       setTable(data);
-      setLoading(false);
     });
   }, [competition]);
 
-  return { table, loading };
+  return table;
 };

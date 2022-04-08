@@ -4,12 +4,12 @@ import { useFixtures } from "./hooks";
 
 export default function Fixture() {
   const [competition, setCompetition] = useState<string>("bundesliga");
-  const { fixtures, loading } = useFixtures(competition);
+  const fixtures = useFixtures(competition);
 
   return (
     <List
       throttle
-      isLoading={loading}
+      isLoading={!fixtures}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by Competition"
@@ -20,8 +20,8 @@ export default function Fixture() {
         </List.Dropdown>
       }
     >
-      <List.Section title={fixtures[0]?.matchdayLabel}>
-        {fixtures.map((fixture) => {
+      <List.Section title={fixtures && fixtures[0]?.matchdayLabel}>
+        {fixtures?.map((fixture) => {
           const { teams, score } = fixture;
 
           return (
