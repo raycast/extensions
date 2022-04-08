@@ -4,6 +4,9 @@
   "description": "Access Harvest Time Entries",
   "icon": "harvest-logo-icon.png",
   "author": "eluce2",
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
