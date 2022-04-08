@@ -6,10 +6,16 @@ global.window = {};
 // @ts-ignore
 global.window.requestAnimationFrame = setTimeout;
 
-import { clearLocalStorage, showToast, ToastStyle } from "@raycast/api";
+import { showToast, LocalStorage, Toast } from "@raycast/api";
 
 export default async function main() {
-  showToast(ToastStyle.Animated, "Loading...");
-  await clearLocalStorage();
-  showToast(ToastStyle.Success, "Done");
+  showToast({
+    style: Toast.Style.Animated,
+    title: "Loading...",
+  });
+  await LocalStorage.clear();
+  showToast({
+    style: Toast.Style.Success,
+    title: "Done",
+  });
 }

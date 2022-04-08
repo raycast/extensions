@@ -11,7 +11,7 @@ import {
   HarvestProjectAssignment,
   HarvestUserResponse,
 } from "./responseTypes";
-import { getLocalStorageItem, getPreferenceValues, setLocalStorageItem } from "@raycast/api";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { NewTimeEntryDuration, NewTimeEntryStartEnd } from "./requestTypes";
 import dayjs from "dayjs";
@@ -74,12 +74,12 @@ export function useMyProjects() {
 }
 
 export async function getMyId() {
-  const id = await getLocalStorageItem("myId");
+  const id = await LocalStorage.getItem("myId");
   if (id) return id;
 
   const resp = await harvestAPI<HarvestUserResponse>({ url: "/users/me" });
 
-  await setLocalStorageItem("myId", resp.data.id);
+  await LocalStorage.setItem("myId", resp.data.id);
   return resp.data.id;
 }
 

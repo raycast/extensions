@@ -6,17 +6,7 @@ global.window = {};
 // @ts-ignore
 global.window.requestAnimationFrame = setTimeout;
 
-import {
-  Form,
-  FormValue,
-  ActionPanel,
-  SubmitFormAction,
-  showToast,
-  ToastStyle,
-  Toast,
-  showHUD,
-  useNavigation,
-} from "@raycast/api";
+import { Form, FormValue, ActionPanel, showToast, Toast, showHUD, useNavigation, Action } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
 import { HarvestProjectAssignment, HarvestTaskAssignment, HarvestTimeEntry } from "./services/responseTypes";
@@ -47,13 +37,17 @@ export default function Command({
   useEffect(() => {
     if (error) {
       if (error.isAxiosError && error.response?.status === 401) {
-        showToast(
-          ToastStyle.Failure,
-          "Invalid Token",
-          "Your API token or Account ID is invalid. Go to Raycast Preferences to update it."
-        );
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Token",
+          message: "Your API token or Account ID is invalid. Go to Raycast Preferences to update it.",
+        });
       } else {
-        showToast(ToastStyle.Failure, "Unknown Error", "Could not get your company data");
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Unknown Error",
+          message: "Could not get your company data",
+        });
       }
     }
   }, [error]);
@@ -89,12 +83,18 @@ export default function Command({
 
   async function handleSubmit(values: Record<string, FormValue>) {
     if (values.project_id === null) {
-      return showToast(ToastStyle.Failure, "No Project Selected");
+      return showToast({
+        style: Toast.Style.Failure,
+        title: "No Project Selected",
+      });
     }
     if (values.task_id === null) {
-      return showToast(ToastStyle.Failure, "No Task Selected");
+      return showToast({
+        style: Toast.Style.Failure,
+        title: "No Task Selected",
+      });
     }
-    const toast = new Toast({ style: ToastStyle.Animated, title: "Loading..." });
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Loading..." });
     await toast.show();
 
     setTimeFormat(hours);
@@ -109,7 +109,11 @@ export default function Command({
       spent_date: dayjs(spentDate).format("YYYY-MM-DD"),
     }).catch(async (error) => {
       console.error(error.response.data);
-      await showToast(ToastStyle.Failure, "Error", error.response.data.message);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: error.response.data.message,
+      });
     });
 
     if (timeEntry) {
@@ -173,7 +177,7 @@ export default function Command({
       navigationTitle={entry ? "Edit Time Entry" : "New Time Entry"}
       actions={
         <ActionPanel>
-          <SubmitFormAction onSubmit={handleSubmit} />
+          <Action.SubmitForm onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -189,24 +193,24 @@ export default function Command({
         {groupedProjects?.map((groupedProject) => {
           const client = groupedProject[0].client;
           return (
-            <Form.DropdownSection title={client.name} key={client.id}>
+            <Form.Dropdown.Section title={client.name} key={client.id}>
               {groupedProject.map((project) => {
                 const code = project.project.code;
                 return (
-                  <Form.DropdownItem
+                  <Form.Dropdown.Item
                     value={project.project.id.toString()}
                     title={`${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
                     key={project.id}
                   />
                 );
               })}
-            </Form.DropdownSection>
+            </Form.Dropdown.Section>
           );
         })}
       </Form.Dropdown>
       <Form.Dropdown id="task_id" title="Task" value={taskId}>
         {tasks?.map((task) => {
-          return <Form.DropdownItem value={task.task.id.toString()} title={task.task.name} key={task.id} />;
+          return <Form.Dropdown.Item value={task.task.id.toString()} title={task.task.name} key={task.id} />;
         })}
       </Form.Dropdown>
 
