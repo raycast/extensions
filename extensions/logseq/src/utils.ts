@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import * as R from "ramda";
 import dayjs from "dayjs";
 import fs from "fs";
@@ -36,3 +36,10 @@ export const createFileIfNotExist = (filePath: string) => {
     throw e;
   });
 };
+
+export const showGraphPathInvalidToast = () => {
+  showToast({
+    style: Toast.Style.Failure,
+    title: "Logseq graph path is invalid. Update it in Raycast Preferences and retry.",
+  });
+}
