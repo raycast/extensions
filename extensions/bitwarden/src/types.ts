@@ -1,4 +1,8 @@
 export type VaultStatus = "unauthenticated" | "locked" | "unlocked";
+export type VaultState = {
+  userEmail?: string;
+  status: VaultStatus;
+};
 
 export interface Item {
   object: "item";

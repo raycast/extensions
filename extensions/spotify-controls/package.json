@@ -54,6 +54,20 @@
       "mode": "no-view"
     },
     {
+      "name": "increaseVolume",
+      "title": "Increase Volume",
+      "subtitle": "Spotify",
+      "description": "Increase volume in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "decreaseVolume",
+      "title": "Decrease Volume",
+      "subtitle": "Spotify",
+      "description": "Decrease volume in Spotify.",
+      "mode": "no-view"
+    },
+    {
       "name": "copyUrl",
       "title": "Copy Current Track URL",
       "subtitle": "Spotify",
