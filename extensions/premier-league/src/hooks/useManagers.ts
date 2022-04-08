@@ -3,20 +3,17 @@ import { getManagers } from "../api";
 import { PlayerContent } from "../types";
 
 const useManagers = (season: string) => {
-  const [managers, setManagers] = useState<PlayerContent[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [managers, setManagers] = useState<PlayerContent[]>();
 
   useEffect(() => {
     if (season) {
-      setLoading(true);
       getManagers(season).then((data) => {
         setManagers(data);
-        setLoading(false);
       });
     }
   }, [season]);
 
-  return { managers, loading };
+  return managers;
 };
 
 export default useManagers;

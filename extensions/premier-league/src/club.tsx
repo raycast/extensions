@@ -46,20 +46,20 @@ function ClubProfile(props: TeamTeam) {
 }
 
 export default function Club() {
-  const season = useSeasons();
+  const seasons = useSeasons();
   const [selectedSeason, setSeason] = useState<string>(
-    season.seasons[0]?.id.toString()
+    seasons[0]?.id.toString()
   );
-  const club = useClubs(selectedSeason);
+  const clubs = useClubs(selectedSeason);
 
   return (
     <List
       throttle
-      isLoading={season.loading || club.loading}
+      isLoading={!clubs}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by Season" onChange={setSeason}>
           <List.Dropdown.Section>
-            {season.seasons.map((season) => {
+            {seasons.map((season) => {
               return (
                 <List.Dropdown.Item
                   key={season.id}
@@ -72,7 +72,7 @@ export default function Club() {
         </List.Dropdown>
       }
     >
-      {club.clubs.map((team) => {
+      {clubs?.map((team) => {
         return (
           <List.Item
             key={team.id}

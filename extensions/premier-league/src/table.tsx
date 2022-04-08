@@ -6,16 +6,14 @@ import { Entry } from "./types";
 import { useSeasons, useTables } from "./hooks";
 
 export default function GetTables() {
-  const season = useSeasons();
+  const seasons = useSeasons();
 
   const [selectedSeason, setSeason] = useState<string>(
-    season.seasons[0]?.id.toString()
+    seasons[0]?.id.toString()
   );
   const [showStats, setShowStats] = useState<boolean>(false);
 
-  const table = useTables(selectedSeason);
-
-  const loading = [season.loading, table.loading].some((i) => i);
+  const tables = useTables(selectedSeason);
 
   const club = (entry: Entry): json2md.DataObject => {
     const { overall, team, ground, form, next, startingPosition } = entry;
@@ -77,7 +75,7 @@ export default function GetTables() {
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by Season" onChange={setSeason}>
           <List.Dropdown.Section>
-            {season.seasons.map((season) => {
+            {seasons.map((season) => {
               return (
                 <List.Dropdown.Item
                   key={season.id}
@@ -89,10 +87,10 @@ export default function GetTables() {
           </List.Dropdown.Section>
         </List.Dropdown>
       }
-      isLoading={loading}
+      isLoading={!tables}
       isShowingDetail={showStats}
     >
-      {table.tables.map((table) => {
+      {tables?.map((table) => {
         return (
           <List.Section key={table.gameWeek}>
             {table.entries.map((entry) => {
@@ -149,6 +147,7 @@ export default function GetTables() {
                     source: `https://resources.premierleague.com/premierleague/badges/${nextTeam.team.altIds.opta}.svg`,
                     fallback: "default.png",
                   },
+                  tooltip: "Next",
                 });
               }
 
@@ -168,12 +167,6 @@ export default function GetTables() {
                         icon={Icon.Sidebar}
                         onAction={() => setShowStats(!showStats)}
                       />
-                      {/* <Action.OpenInBrowser
-                        title="Visit Club Page"
-                        url={`https://www.premierleague.com/clubs/${
-                          team.id
-                        }/${team.name.replace(/ /g, "-")}/overview`}
-                      /> */}
                     </ActionPanel>
                   }
                 />

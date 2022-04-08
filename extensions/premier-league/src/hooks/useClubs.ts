@@ -3,20 +3,18 @@ import { getClubs } from "../api";
 import { TeamTeam } from "../types";
 
 const useClubs = (season: string) => {
-  const [clubs, setClubs] = useState<TeamTeam[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [clubs, setClubs] = useState<TeamTeam[]>();
 
   useEffect(() => {
     if (season) {
-      setLoading(true);
+      setClubs(undefined);
       getClubs(season).then((data) => {
         setClubs(data);
-        setLoading(false);
       });
     }
   }, [season]);
 
-  return { clubs, loading };
+  return clubs;
 };
 
 export default useClubs;

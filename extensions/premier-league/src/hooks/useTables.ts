@@ -3,20 +3,19 @@ import { getTables } from "../api";
 import { Table } from "../types";
 
 const useTables = (season: string) => {
-  const [tables, setTables] = useState<Table[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [tables, setTables] = useState<Table[]>();
 
   useEffect(() => {
     if (season) {
-      setLoading(true);
+      setTables(undefined);
+
       getTables(season).then((data) => {
         setTables(data);
-        setLoading(false);
       });
     }
   }, [season]);
 
-  return { tables, loading };
+  return tables;
 };
 
 export default useTables;

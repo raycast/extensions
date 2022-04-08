@@ -38,12 +38,12 @@ function PlayerProfile(props: PlayerContent) {
 }
 
 export default function Manager() {
-  const season = useSeasons();
-  const manager = useManagers(season.seasons[0]?.id.toString());
+  const seasons = useSeasons();
+  const managers = useManagers(seasons[0]?.id.toString());
 
   return (
-    <List throttle isLoading={season.loading || manager.loading}>
-      {manager.managers.map((p) => {
+    <List throttle isLoading={!managers}>
+      {managers?.map((p) => {
         return (
           <List.Item
             key={p.id}
@@ -54,17 +54,13 @@ export default function Manager() {
               fallback: "player-missing.png",
             }}
             accessories={[
-              {
-                text: p.birth.country.country,
-              },
-              {
-                icon: getFlagEmoji(p.birth.country.isoCode),
-              },
+              { text: p.birth.country.country },
+              { icon: getFlagEmoji(p.birth.country.isoCode) },
             ]}
             actions={
               <ActionPanel>
                 <Action.Push
-                  title="View Manager"
+                  title="Manager Profile"
                   icon={Icon.Sidebar}
                   target={<PlayerProfile {...p} />}
                 />

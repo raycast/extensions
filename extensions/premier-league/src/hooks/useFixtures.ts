@@ -10,34 +10,28 @@ interface PropsType {
 }
 
 const useFixtures = (props: PropsType) => {
-  const [fixtures, setFixtures] = useState<Content[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [fixtures, setFixtures] = useState<Content[]>();
   const [lastPage, setLastPage] = useState<boolean>(false);
 
   useEffect(() => {
     props.page = 0;
-    setLoading(true);
-    setFixtures([]);
+    setFixtures(undefined);
 
     getFixtures(props).then(([data, lastPage]) => {
       setFixtures(data);
       setLastPage(lastPage);
-      setLoading(false);
     });
   }, [props.teams]);
 
   useEffect(() => {
-    setLoading(true);
-
     getFixtures(props).then(([data, lastPage]) => {
-      const matches = fixtures.concat(data);
+      const matches = (fixtures || []).concat(data);
       setFixtures(matches);
       setLastPage(lastPage);
-      setLoading(false);
     });
   }, [props.page]);
 
-  return { fixtures, loading, lastPage };
+  return { fixtures, lastPage };
 };
 
 export default useFixtures;

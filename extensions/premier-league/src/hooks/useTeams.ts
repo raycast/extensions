@@ -7,12 +7,10 @@ interface Club {
 }
 
 const useTeams = (season: string) => {
-  const [clubs, setClubs] = useState<Club[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [clubs, setClubs] = useState<Club[]>();
 
   useEffect(() => {
     if (season) {
-      setLoading(true);
       getTeams(season).then((data) => {
         const teams: Club[] = data.map((team) => ({
           title: team.name,
@@ -25,12 +23,11 @@ const useTeams = (season: string) => {
         });
 
         setClubs(teams);
-        setLoading(false);
       });
     }
   }, [season]);
 
-  return { clubs, loading };
+  return clubs;
 };
 
 export default useTeams;
