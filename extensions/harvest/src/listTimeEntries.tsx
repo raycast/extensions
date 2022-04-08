@@ -344,7 +344,6 @@ function DuplicateEntryAction({
     return;
   },
   entry,
-  viewDate,
 }: {
   onSave: () => Promise<void>;
   entry: HarvestTimeEntry;
@@ -352,7 +351,7 @@ function DuplicateEntryAction({
 }) {
   return (
     <Action.Push
-      target={<New onSave={onSave} entry={{ ...entry, id: null }} viewDate={viewDate} />}
+      target={<New onSave={onSave} entry={{ ...entry, id: null }} />}
       title="Duplicate Time Entry"
       shortcut={{ key: "d", modifiers: ["cmd"] }}
       icon={Icon.Clipboard}

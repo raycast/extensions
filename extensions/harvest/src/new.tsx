@@ -9,6 +9,8 @@ import {
   Alert,
   confirmAlert,
   Icon,
+  LocalStorage,
+  Detail,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
@@ -27,7 +29,7 @@ export default function Command({
 }: {
   onSave: () => Promise<void>;
   entry?: HarvestTimeEntry;
-  viewDate: Date;
+  viewDate?: Date;
 }) {
   const { pop } = useNavigation();
   const { data: company, error } = useCompany();
@@ -73,17 +75,24 @@ export default function Command({
   }, [projects]);
 
   useEffect(() => {
-    if (!entry) return;
+    if (!entry) {
+      // no entry was passed, recall last submitted project/task
+      LocalStorage.getItem("lastProject").then((value) => {
+        if (value) {
+          const { projectId, taskId } = JSON.parse(value.toString());
+          setProjectId(projectId);
+          setTaskId(taskId);
+          setTaskAssignments(projectId);
+        }
+      });
+      return;
+    }
 
     setProjectId(entry.project.id.toString());
     setTaskId(entry.task.id.toString());
     setNotes(entry.notes);
     setHours(entry.hours.toString());
     setTaskAssignments();
-
-    // const myDate = dayjs(entry.spent_date);
-    // console.log("new date", new Date(entry.spent_date ?? ""));
-    // setSpentDate(new Date(entry.spent_date));
   }, [entry]);
 
   async function handleSubmit(values: Record<string, Form.Value>) {
@@ -103,7 +112,7 @@ export default function Command({
     setTimeFormat(hours);
     const spentDate = _.isDate(values.spent_date) ? values.spent_date : viewDate;
 
-    if (!dayjs(spentDate).isToday() && !hours)
+    if (!company?.wants_timestamp_timers && !dayjs(spentDate).isToday() && !hours)
       if (
         !(await confirmAlert({
           icon: Icon.ExclamationMark,
@@ -137,6 +146,8 @@ export default function Command({
       });
     });
 
+    await LocalStorage.setItem("lastProject", JSON.stringify({ projectId: values.project_id, taskId: values.task_id }));
+
     if (timeEntry) {
       toast.hide();
       await onSave();
@@ -153,10 +164,18 @@ export default function Command({
     });
     if (typeof project === "object") {
       setTasks(project.task_assignments);
-      setTaskId(project.task_assignments[0].id.toString());
+
+      let defaultAssignment = project.task_assignments[0].id.toString();
+      if (taskId) {
+        const assignment = _.find(project.task_assignments, (o) => o.task.id.toString() === taskId);
+        console.log({ assignment });
+        if (assignment) {
+          defaultAssignment = assignment.task.id.toString();
+        }
+      }
+      setTaskId(defaultAssignment);
     } else {
       setTasks([]);
-      setTaskId(undefined);
     }
   }
 
