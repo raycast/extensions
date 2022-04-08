@@ -232,7 +232,13 @@ export default function Command({
           onChange={setHours}
         />
       )}
-      <Form.DatePicker id="spent_date" title="Date" value={spentDate} onChange={setSpentDate} />
+      <Form.DatePicker
+        id="spent_date"
+        title="Date"
+        type={Form.DatePicker.Type.Date}
+        value={spentDate}
+        onChange={setSpentDate}
+      />
     </Form>
   );
 }
