@@ -55,7 +55,7 @@ export default function CreateProject() {
       };
       clear();
     } catch (error) {
-      handleError({ error, title: "Unable to create task" });
+      handleError({ error, title: "Unable to create project" });
     }
   }
 
