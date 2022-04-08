@@ -25,16 +25,12 @@ export default function Fixture() {
     });
   }, [fixture.fixtures]);
 
-  const loading = [!clubs, !fixture.fixtures].some(
-    (i) => i
-  );
-
   const categories = groupBy(fixtures, (f) => f.kickoff.label?.split(",")[0]);
 
   return (
     <List
       throttle
-      isLoading={loading}
+      isLoading={!fixture.fixtures}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by Club" onChange={setTeams}>
           <List.Dropdown.Section>
