@@ -1,8 +1,6 @@
 import Editor from "./components/Editor";
 
 const Command = () => {
-  return (
-    <Editor />
-  );
+  return <Editor />;
 };
 export default Command;
