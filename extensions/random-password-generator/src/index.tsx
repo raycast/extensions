@@ -42,7 +42,7 @@ export default function Command() {
       isShowingDetail={showingDetails}
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Select Todo List"
+          tooltip="Select Password Length"
           onChange={(value) => setPasswordLength(Number(value))}
           storeValue={true}
         >
