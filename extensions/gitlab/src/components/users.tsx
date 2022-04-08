@@ -15,7 +15,7 @@ export function UserList(): JSX.Element {
 
   return (
     <List searchBarPlaceholder="Filter Users by name..." onSearchTextChange={setSearchText} isLoading={isLoading}>
-      {users.map((user) => (
+      {users?.map((user) => (
         <UserListItem key={user.id} user={user} />
       ))}
     </List>
@@ -43,11 +43,11 @@ export function UserListItem(props: { user: User }): JSX.Element {
 }
 
 export function useSearch(query: string | undefined): {
-  users: User[];
+  users?: User[];
   error?: string;
   isLoading: boolean;
 } {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
