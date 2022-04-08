@@ -5,6 +5,7 @@ import {
   generateContentToAppend,
   getTodayJournalPath,
   noop,
+  showGraphPathInvalidToast,
   validateUserConfigGraphPath,
 } from "./utils";
 
@@ -20,10 +21,7 @@ export default function Command() {
 
     validateUserConfigGraphPath()
       .catch((e) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Logseq graph path is invalid. Update it in Raycast Preferences and retry.",
-        });
+        showGraphPathInvalidToast()
         throw e;
       })
       .then(() => showToast({ style: Toast.Style.Animated, title: "Adding notes" }))
