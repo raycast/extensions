@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { StoryListItemProps, Utils } from "./interface";
+import { Utils } from "./interface";
 import { StoryListItem } from "./StoryListItem";
 import { generatePasswords } from "./util";
 

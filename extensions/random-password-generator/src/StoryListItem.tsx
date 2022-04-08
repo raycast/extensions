@@ -4,8 +4,6 @@ import { Details } from "./Details";
 import { StoryListItemProps } from "./interface";
 
 export function StoryListItem(item: StoryListItemProps) {
-  const icon = item.icon;
-
   const itemProps = item.showingDetails
     ? {
         detail: <Details {...item} />,
@@ -14,7 +12,7 @@ export function StoryListItem(item: StoryListItemProps) {
 
   return (
     <List.Item
-      icon={icon}
+      icon={item.icon}
       title={item.password}
       actions={<Actions password={item.password} setShowingDetails={item.setShowingDetails} />}
       {...itemProps}
