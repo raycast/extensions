@@ -12,7 +12,7 @@
     "license": "MIT",
     "commands": [{
         "name": "index",
-        "title": "Element",
+        "title": "Show Periodic Table",
         "subtitle": "Browse Through Periodic Table",
         "description": "Search and get information about an element.",
         "mode": "view"
