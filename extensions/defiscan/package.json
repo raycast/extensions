@@ -4,7 +4,7 @@
   "title": "DefiScan.live",
   "description": "Search on defiscan.live",
   "icon": "command-icon.png",
-  "categories": ["Blockchain"],
+  "categories": ["Finance"],
   "author": "adrian-schnell",
   "license": "MIT",
   "commands": [
