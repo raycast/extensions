@@ -30,10 +30,6 @@ export function MyEpicList(props: { scope: EpicScope; state: EpicState }): JSX.E
     showToast(Toast.Style.Failure, "Cannot search epics", error);
   }
 
-  if (isLoading === undefined) {
-    return <List isLoading={true} searchBarPlaceholder="Loading" />;
-  }
-
   return (
     <List
       searchBarPlaceholder="Filter Epics by name..."
