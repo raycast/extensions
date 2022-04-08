@@ -87,6 +87,13 @@
       "subtitle": "Xcode",
       "description": "Removes the ~/Library/Caches/org.swift.swiftpm/repositories directory",
       "mode": "no-view"
+    },
+    {
+      "name": "delete-unavailable-simulators.command",
+      "title": "Delete Unavailable Simulators",
+      "subtitle": "Xcode",
+      "description": "Deletes old simulators that are not supported.",
+      "mode": "no-view"
     }
   ],
   "keywords": [
