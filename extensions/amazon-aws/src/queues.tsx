@@ -46,25 +46,23 @@ export default function ListSQSQueues() {
   };
 
   useEffect(() => {
-    async function fetch() {
-      await sqs.listQueues({}, function (err, data) {
-        if (err) {
-          setState((o) => ({
-            ...o,
-            hasError: true,
-          }));
-        } else {
-          setState((o) => ({
-            ...o,
-            loaded: true,
-            queues: data.QueueUrls || [],
-            showingQueues: data.QueueUrls || [],
-          }));
-          loadItems(data.QueueUrls || []);
-        }
-      });
+    async function fetch(token?: string, queues?: string[]): Promise<string[]> {
+      const { NextToken, QueueUrls } = await sqs.listQueues({ NextToken: token }).promise();
+      const combinedQueues = [...(queues ?? []), ...(QueueUrls ?? [])];
+
+      if (NextToken) {
+        fetch(NextToken, combinedQueues);
+      }
+
+      return combinedQueues;
     }
-    fetch();
+
+    fetch()
+      .then((queues) => {
+        setState((o) => ({ ...o, loaded: true, queues, showingQueues: queues }));
+        loadItems(queues);
+      })
+      .catch(() => setState((o) => ({ ...o, hasError: true })));
   }, []);
 
   if (state.hasError) {

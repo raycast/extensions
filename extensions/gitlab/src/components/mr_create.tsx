@@ -231,8 +231,7 @@ function SourceBranchDropdown(props: {
       value = branches.length > 0 ? branches[0].name : "";
     }
     return (
-      <Form.Dropdown id="source_branch" title="Source Branch" value={value}>
-        <Form.Dropdown.Item key="_empty" value="" title="-" />
+      <Form.Dropdown id="source_branch" title="Source Branch" defaultValue={value}>
         {branches.map((branch) => (
           <Form.Dropdown.Item key={branch.name} value={branch.name} title={branch.name} />
         ))}
@@ -255,9 +254,8 @@ function TargetBranchDropdown(props: {
     const pro = props.project;
     const defaultBranch =
       pro.default_branch && pro.default_branch.length > 0 ? props.project.default_branch : undefined;
-    console.log(defaultBranch);
     return (
-      <Form.Dropdown id="target_branch" title="Target branch" value={defaultBranch}>
+      <Form.Dropdown id="target_branch" title="Target branch" defaultValue={defaultBranch}>
         {props.info?.branches.map((branch) => (
           <Form.Dropdown.Item key={branch.name} value={branch.name} title={branch.name} />
         ))}
