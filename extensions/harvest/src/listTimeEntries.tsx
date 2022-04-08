@@ -278,8 +278,8 @@ export default function Command() {
                 <ActionPanel>
                   <ActionPanel.Section title={`${entry.project.name} | ${entry.client.name}`}>
                     <ToggleTimerAction onComplete={init} entry={entry} />
-                    {/* Disabling Edit Action for now so we can ship something a useable extension faster */}
                     <EditEntryAction onSave={init} entry={entry} viewDate={viewDate} />
+                    <DuplicateEntryAction onSave={init} entry={entry} viewDate={viewDate} />
                     <DeleteEntryAction onComplete={init} entry={entry} />
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Harvest">
@@ -335,6 +335,27 @@ function EditEntryAction({
       title="Edit Time Entry"
       shortcut={{ key: "e", modifiers: ["cmd"] }}
       icon={Icon.Pencil}
+    />
+  );
+}
+
+function DuplicateEntryAction({
+  onSave = async () => {
+    return;
+  },
+  entry,
+  viewDate,
+}: {
+  onSave: () => Promise<void>;
+  entry: HarvestTimeEntry;
+  viewDate: Date;
+}) {
+  return (
+    <Action.Push
+      target={<New onSave={onSave} entry={{ ...entry, id: null }} viewDate={viewDate} />}
+      title="Duplicate Time Entry"
+      shortcut={{ key: "d", modifiers: ["cmd"] }}
+      icon={Icon.Clipboard}
     />
   );
 }

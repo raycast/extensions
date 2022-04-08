@@ -195,12 +195,12 @@ export default function Command({
 
   return (
     <Form
-      navigationTitle={entry ? "Edit Time Entry" : "New Time Entry"}
+      navigationTitle={entry?.id ? "Edit Time Entry" : "New Time Entry"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
             onSubmit={handleSubmit}
-            title={entry ? "Update Time Entry" : hours ? "Create Time Entry" : "Start Timer"}
+            title={entry?.id ? "Update Time Entry" : hours ? "Create Time Entry" : "Start Timer"}
           />
         </ActionPanel>
       }
