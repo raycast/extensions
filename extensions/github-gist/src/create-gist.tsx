@@ -32,7 +32,7 @@ export default function CreateGist(props: {
   const [description, setDescription] = useState<string>("");
   const [isPublic, setIsPublic] = useState<boolean>(false);
   const [gistFiles, setGistFiles] = useState<GistFile[]>([]);
-  const [oldGistFiles, setOldGistFiles] = useState<GistFile[]>([]);
+  const oldGistFiles = gist.file.map((value) => value.filename);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -48,7 +48,6 @@ export default function CreateGist(props: {
         }
         setDescription(gist.description);
         setGistFiles(_gistFiles);
-        setOldGistFiles(_gistFiles);
       } else {
         const inputItem = await fetchItemInput();
         if (inputItem.source === ItemSource.NULL) {

@@ -92,11 +92,10 @@ export async function createGist(description: string, isPublic = false, gistFile
   });
 }
 
-export async function updateGist(gistId: string, description: string, oldFiles: GistFile[], newFiles: GistFile[]) {
+export async function updateGist(gistId: string, description: string, oldFileNames: string[], newFiles: GistFile[]) {
   const files: { [p: string]: { content: string } } = {};
-  const oldFileName = oldFiles.map((value) => value.filename);
   const newFileName = newFiles.map((value) => value.filename);
-  const deleteFiles = oldFileName.filter((value) => !newFileName.includes(value));
+  const deleteFiles = oldFileNames.filter((value) => !newFileName.includes(value));
   newFiles.forEach((value) => {
     files[value.filename] = { content: value.content };
   });
