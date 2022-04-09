@@ -10,12 +10,7 @@ import {
   getPreferenceValues,
   List,
 } from "@raycast/api";
-import {
-  useOneTimePasswordHistoryWarning,
-  usePasswordGenerator,
-  usePasswordHistory,
-  usePasswordOptions,
-} from "./hooks";
+import { usePasswordGenerator, usePasswordHistory, usePasswordOptions } from "./hooks";
 import { Bitwarden } from "./api";
 import { LOCAL_STORAGE_KEY, PASSWORD_OPTIONS_MAP } from "./const";
 import { capitalise, objectEntries } from "./utils";
@@ -47,8 +42,6 @@ export default function GeneratePassword() {
 function PasswordGenerator(props: { bitwardenApi: Bitwarden }) {
   const { options, setOption } = usePasswordOptions();
   const { password, regeneratePassword, isGenerating } = usePasswordGenerator(props.bitwardenApi, options);
-
-  useOneTimePasswordHistoryWarning();
 
   if (!options) return <Detail isLoading={true} />;
 
@@ -193,13 +186,18 @@ function OptionField({ option, currentOptions, handleFieldChange, field }: Optio
 
 function PasswordHistory() {
   const [items, setItems] = useState<PasswordHistoryItem[]>([]);
-  const { getAll } = usePasswordHistory();
+  const { getAll, clear } = usePasswordHistory();
 
   useEffect(() => {
     const historyItems = getAll();
     if (!historyItems) return;
     setItems(historyItems);
   }, []);
+
+  const handleClear = () => {
+    clear();
+    setItems([]);
+  };
 
   return (
     <List navigationTitle="Generate Password - History">
@@ -217,6 +215,12 @@ function PasswordHistory() {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard title="Copy to clipboard" icon={Icon.Clipboard} content={password} />
+              <Action
+                title="Clear history"
+                icon={Icon.Trash}
+                onAction={handleClear}
+                shortcut={{ key: "backspace", modifiers: ["cmd", "shift"] }}
+              />
             </ActionPanel>
           }
         />

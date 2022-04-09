@@ -1,9 +1,9 @@
-import { LocalStorage, confirmAlert, Icon, popToRoot, getPreferenceValues, environment } from "@raycast/api";
+import { LocalStorage, getPreferenceValues, environment } from "@raycast/api";
 import { useState, useEffect, useReducer, useMemo } from "react";
 import { Bitwarden } from "./api";
 import { DEFAULT_PASSWORD_OPTIONS, LOCAL_STORAGE_KEY } from "./const";
 import { PasswordGeneratorOptions, PasswordHistoryItem, Preferences } from "./types";
-import { existsSync, mkdirSync, appendFileSync, readFileSync, readFile, writeFile, writeFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 import { createCipheriv, createHash, randomBytes, createDecipheriv } from "crypto";
 import { join as pathJoin } from "path/posix";
 import { generateMd5Hash } from "./utils";
@@ -32,7 +32,6 @@ export const usePasswordHistory = () => {
   };
 
   const save = (password: string) => {
-    if (!clientId) throw "Missing client_id";
     const fileData = [getEncryptedEntry(password)];
     if (existsSync(historyFile.path)) {
       try {
@@ -48,7 +47,6 @@ export const usePasswordHistory = () => {
 
   const getAll = () => {
     try {
-      if (!clientId) throw "Missing client_id";
       const fileContent = JSON.parse(readFileSync(historyFile.path, { encoding: "utf-8" })) as string[];
       const decryptedEntries = fileContent.reduce((acc, entry) => {
         if (!entry) return acc;
@@ -63,7 +61,15 @@ export const usePasswordHistory = () => {
     }
   };
 
-  return { save, getAll };
+  const clear = () => {
+    try {
+      writeFileSync(historyFile.path, JSON.stringify([]), { encoding: "utf-8" });
+    } catch (error) {
+      console.error("Failed clear password history file", error);
+    }
+  };
+
+  return { save, getAll, clear };
 };
 
 const initialState = {
@@ -145,35 +151,6 @@ export const usePasswordOptions = () => {
   }, []);
 
   return { options, setOption };
-};
-
-export const useOneTimePasswordHistoryWarning = async () => {
-  const handleDismissAction = () => popToRoot({ clearSearchBar: false });
-
-  const handlePrimaryAction = () => LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_ONE_TIME_WARNING, true);
-
-  const displayWarning = async () => {
-    const alertWasShown = await LocalStorage.getItem<boolean>(LOCAL_STORAGE_KEY.PASSWORD_ONE_TIME_WARNING);
-    if (alertWasShown) return;
-
-    await confirmAlert({
-      title: "Warning",
-      message: "Password history is not available yet, so make sure to store the password after generating it!",
-      icon: Icon.ExclamationMark,
-      dismissAction: {
-        title: "Go back",
-        onAction: handleDismissAction,
-      },
-      primaryAction: {
-        title: "I understand",
-        onAction: handlePrimaryAction,
-      },
-    });
-  };
-
-  useEffect(() => {
-    displayWarning();
-  }, []);
 };
 
 type EncryptedContent = { iv: string; content: string };
