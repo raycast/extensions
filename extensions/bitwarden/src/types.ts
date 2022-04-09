@@ -128,6 +128,7 @@ export interface PasswordOptionField {
 export type PasswordOptionsToFieldEntries = [keyof PasswordGeneratorOptions, PasswordOptionField];
 
 export type PasswordHistoryItem = {
+  type: PasswordType;
   password: string;
   datetime: string;
 };

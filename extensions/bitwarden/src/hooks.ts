@@ -2,7 +2,7 @@ import { LocalStorage, getPreferenceValues, environment } from "@raycast/api";
 import { useState, useEffect, useReducer, useMemo } from "react";
 import { Bitwarden } from "./api";
 import { DEFAULT_PASSWORD_OPTIONS, LOCAL_STORAGE_KEY } from "./const";
-import { PasswordGeneratorOptions, PasswordHistoryItem, Preferences } from "./types";
+import { PasswordGeneratorOptions, PasswordHistoryItem, PasswordType, Preferences } from "./types";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { createCipheriv, createHash, randomBytes, createDecipheriv } from "crypto";
 import { join as pathJoin } from "path/posix";
@@ -20,19 +20,21 @@ export const usePasswordHistory = () => {
     return { name, path };
   }, [clientId]);
 
-  const getEncryptedEntry = (password: string) => {
+  const getEncryptedEntry = (password: string, type?: PasswordType) => {
     const encryptedData = encrypt(password);
-    return `${encryptedData.content},${encryptedData.iv},${new Date().toISOString()}`;
+    const typeNumber = type === "passphrase" ? 1 : 0;
+    return `${typeNumber},${encryptedData.content},${encryptedData.iv},${new Date().toISOString()}`;
   };
 
   const getDecryptedEntry = (entry: string): PasswordHistoryItem | null => {
-    const [content, iv, datetime] = entry.split(",");
+    const [typeNumber, content, iv, datetime] = entry.split(",");
+    const type = typeNumber === "1" ? "passphrase" : "password";
     if (!content || !iv || !datetime) return null;
-    return { password: decrypt({ content, iv }), datetime };
+    return { type, password: decrypt({ content, iv }), datetime };
   };
 
-  const save = (password: string) => {
-    const fileData = [getEncryptedEntry(password)];
+  const save = (password: string, type?: PasswordType) => {
+    const fileData = [getEncryptedEntry(password, type)];
     if (existsSync(historyFile.path)) {
       try {
         const fileContents = JSON.parse(readFileSync(historyFile.path, { encoding: "utf-8" })) as string[];
@@ -113,7 +115,7 @@ export function usePasswordGenerator(
       dispatch({ type: "generate" });
       const password = await bitwardenApi.generatePassword(options);
       dispatch({ type: "setPassword", password });
-      save(password);
+      save(password, options?.passphrase ? "passphrase" : "password");
     } catch (error) {
       dispatch({ type: "fail" });
     }

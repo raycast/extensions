@@ -201,11 +201,12 @@ function PasswordHistory() {
 
   return (
     <List navigationTitle="Generate Password - History">
-      {items.map(({ password, datetime }) => (
+      {items.map(({ type, password, datetime }) => (
         <List.Item
           key={password}
           title={password}
           icon={Icon.Clipboard}
+          keywords={[type]}
           accessories={[
             {
               text: format(parseISO(datetime), "d MMM yyyy, HH:mm:ss"),
