@@ -16,7 +16,7 @@ export async function getTorrents(param: string): Promise<Torrent[]> {
     const seeds = $(elem).find("td").eq(1).text();
     const leeches = $(elem).find("td").eq(2).text();
     let size = $(elem).find("td").eq(4).text();
-    // remove last charrs until we get a letter (hacky filter)
+    // remove last chars until we get a letter (hacky filter)
     while (!isNaN(parseInt(size[size.length - 1])) && size.length > 0) {
       size = size.slice(0, size.length - 1);
     }
