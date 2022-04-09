@@ -9,8 +9,3 @@ export interface Torrent {
   magnet: string | undefined | null;
   color: Color;
 }
-
-// health:
-// color:red = Dead
-// color:orange = Unhealthy
-// color:green = Healthy

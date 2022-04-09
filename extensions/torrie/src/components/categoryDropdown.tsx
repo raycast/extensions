@@ -16,7 +16,12 @@ export function CategoryDropdown(props: {
     >
       <List.Dropdown.Section title="Torrent Categories">
         {categories.map((category: Category) => (
-          <List.Dropdown.Item key={category.title} title={category.title} value={category.value} icon={category.icon} />
+          <List.Dropdown.Item
+            key={category.title}
+            title={category.title}
+            value={category.value}
+            icon={category.icon}
+          />
         ))}
       </List.Dropdown.Section>
     </List.Dropdown>

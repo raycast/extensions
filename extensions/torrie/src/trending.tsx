@@ -1,10 +1,10 @@
 import { List } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getTorrents } from "./api/topTorrents";
-import { Torrent } from "./interface/torrent";
+import { CategoryDropdown } from "./components/categoryDropdown";
 import { SearchListItem } from "./components/searchListItem";
 import { categories } from "./interface/topCategories";
-import { CategoryDropdown } from "./components/categoryDropdown";
+import { Torrent } from "./interface/torrent";
 
 export default function Command() {
   const [torrents, setTorrents] = useState<Torrent[]>([]);
@@ -30,7 +30,12 @@ export default function Command() {
       isLoading={isLoading}
       searchBarPlaceholder="Top 100 torrents..."
       throttle
-      searchBarAccessory={<CategoryDropdown categories={categories} onCategoryTypeChange={onCategoryTypeChange} />}
+      searchBarAccessory={
+        <CategoryDropdown
+          categories={categories}
+          onCategoryTypeChange={onCategoryTypeChange}
+        />
+      }
     >
       <List.Section title="Results" subtitle={torrents.length + ""}>
         {torrents.map((torrent: Torrent) => (

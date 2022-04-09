@@ -1,4 +1,12 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, Clipboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { extractMagnetLink } from "../api/topTorrents";
 import { Torrent } from "../interface/torrent";
 
@@ -16,24 +24,43 @@ export function SearchListItem({ searchResult }: { searchResult: Torrent }) {
               title="Copy Magnet Link"
               icon={Icon.Link}
               onAction={() => {
-                showToast({ title: "Fetching Magnet Link", style: Toast.Style.Animated });
+                showToast({
+                  title: "Fetching Magnet Link",
+                  style: Toast.Style.Animated,
+                });
                 console.log(searchResult.pageLink);
                 extractMagnetLink(searchResult.pageLink)
                   .then((magnet) => {
                     if (magnet && magnet !== "") {
                       Clipboard.copy(magnet);
-                      console.log("Copied magnet link to clipboard:", `|${magnet}|`);
-                      showToast({ title: "Copied Magnet Link", style: Toast.Style.Success });
+                      console.log(
+                        "Copied magnet link to clipboard:",
+                        `|${magnet}|`
+                      );
+                      showToast({
+                        title: "Copied Magnet Link",
+                        style: Toast.Style.Success,
+                      });
                     } else {
-                      showToast({ title: "Failed to get magnet link", style: Toast.Style.Failure });
+                      showToast({
+                        title: "Failed to get magnet link",
+                        style: Toast.Style.Failure,
+                      });
                     }
                   })
                   .catch((err: Error) => {
-                    showToast({ title: "Failed to fetch magnet link", message: err.name, style: Toast.Style.Failure });
+                    showToast({
+                      title: "Failed to fetch magnet link",
+                      message: err.name,
+                      style: Toast.Style.Failure,
+                    });
                   });
               }}
             />
-            <Action.OpenInBrowser title="Open in Browser" url={searchResult.pageLink} />
+            <Action.OpenInBrowser
+              title="Open in Browser"
+              url={searchResult.pageLink}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }

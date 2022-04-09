@@ -1,8 +1,8 @@
 import { List } from "@raycast/api";
 import { useState } from "react";
 import { getTorrents } from "./api/topTorrents";
-import { Torrent } from "./interface/torrent";
 import { SearchListItem } from "./components/searchListItem";
+import { Torrent } from "./interface/torrent";
 
 export default function Command() {
   const [torrents, setTorrents] = useState<Torrent[]>([]);

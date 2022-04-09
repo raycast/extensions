@@ -10,17 +10,15 @@
     ],
     "license": "MIT",
     "commands": [{
-            "name": "searchTorrents",
+            "name": "search",
             "title": "Search Torrent",
-            "subtitle": "torrie",
-            "description": "Search for a torrent file on P2P network",
+            "description": "Search for various torrent files on peer to peer network.",
             "mode": "view"
         },
         {
-            "name": "trendingTorrents",
-            "title": "Trending Torrents",
-            "subtitle": "torrie",
-            "description": "Browse through top 100 torrents",
+            "name": "trending",
+            "title": "Discover Torrents",
+            "description": "Browse through the most trending torrents on the peer to peer network.",
             "mode": "view"
         }
     ],
