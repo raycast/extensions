@@ -54,7 +54,10 @@ interface IconResponse {
 }
 
 interface Icon {
-  setId: string;
+  set: {
+    id: string;
+    title: string;
+  };
   id: string;
   width: number;
   height: number;
@@ -99,13 +102,16 @@ class Service {
       });
   }
 
-  async listIcons(set: string): Promise<Icon[]> {
-    const response = await githubClient.get<IconResponse>(`/json/${set}.json`);
+  async listIcons(setId: string, setTitle: string): Promise<Icon[]> {
+    const response = await githubClient.get<IconResponse>(`/json/${setId}.json`);
     const ids = Object.keys(response.data.icons);
     return ids.map((id) => {
       const icon = response.data.icons[id];
       return {
-        setId: set,
+        set: {
+          id: setId,
+          title: setTitle,
+        },
         id,
         width: response.data.width,
         height: response.data.height,
@@ -114,8 +120,8 @@ class Service {
     });
   }
 
-  async getIcons(set: string, ids: string[]): Promise<Icon[]> {
-    const response = await iconifyClient.get<IconResponse>(`${set}.json`, {
+  async getIcons(setId: string, setTitle: string, ids: string[]): Promise<Icon[]> {
+    const response = await iconifyClient.get<IconResponse>(`${setId}.json`, {
       params: {
         icons: ids.join(','),
       },
@@ -123,7 +129,10 @@ class Service {
     return ids.map((id) => {
       const icon = response.data.icons[id];
       return {
-        setId: set,
+        set: {
+          id: setId,
+          title: setTitle,
+        },
         id,
         width: response.data.width,
         height: response.data.height,
@@ -140,7 +149,7 @@ class Service {
     const response = await iconifyClient.get<QueryResponse>(`/search`, {
       params: {
         query,
-        limit: 100,
+        limit: 1000,
       },
     });
     // group by set
@@ -154,9 +163,10 @@ class Service {
     }
     // fetch icons of each set
     const icons: Icon[] = [];
-    for (const set in setMap) {
-      const ids = setMap[set];
-      const setIcons = await this.getIcons(set, ids);
+    for (const setId in setMap) {
+      const ids = setMap[setId];
+      const set = response.data.collections[setId];
+      const setIcons = await this.getIcons(setId, set.name, ids);
       for (const setIcon of setIcons) {
         icons.push(setIcon);
       }

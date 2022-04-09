@@ -21,7 +21,8 @@ function Command() {
   return (
     <List throttle isLoading={isLoading} onSearchTextChange={queryIcons}>
       {icons.map((icon) => {
-        const { setId, id, body, width, height } = icon;
+        const { set, id, body, width, height } = icon;
+        const { id: setId, title: setName } = set;
         const svgIcon = toSvg(body, width, height);
         const base64Icon = toBase64(svgIcon);
         return (
@@ -29,6 +30,9 @@ function Command() {
             icon={{ source: base64Icon, tintColor: Color.PrimaryText }}
             key={`${setId}:${id}`}
             title={id}
+            accessories={[{
+              text: setName,
+            }]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={svgIcon} />
