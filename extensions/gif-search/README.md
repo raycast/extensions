@@ -1,19 +1,10 @@
 # GIF Search
 
-This extension searches for animated GIFs from the internet using [giphy.com](https://giphy.com) or [tenor.com](https://tenor.com).
+This extension searches for animated GIFs from the internet using [giphy.com](https://giphy.com), [tenor.com](https://tenor.com), or [thefinergifs.club](https://thefinergifs.club). Each GIF search service has its own command, or you can use the unified GIF Search command and switch between them using the search bar dropdown.
 
 ## Preferences
 
 By default, this extension will download shared API keys for both services. If you wish to use your own API keys, you can sign up for a free developer account for Giphy at [https://developers.giphy.com](https://developers.giphy.com), or Tenor at [https://tenor.com/developer/keyregistration](https://tenor.com/developer/keyregistration), and provide those keys in the Command Preferences.
-
-### GIF Preview
-
-If you go into the extension's settings, you can enable the GIF Preview feature (disabled by default).
-
-![Enable GIF Preview](./media/gif-preview-setting.png)
-![GIF Preview](./media/gif-preview.png)
-
-The GIF Preview is currently limited to showing just the first frame of the GIF due to limitations in Raycast. Once Raycast is able to render animated GIFs in Detail views, this setting will become enabled by default.
 
 ### Changing the Default Action
 
