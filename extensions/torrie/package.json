@@ -18,7 +18,7 @@
         },
         {
             "name": "trendingTorrents",
-            "title": "Top 100 Torrents",
+            "title": "Trending Torrents",
             "subtitle": "torrie",
             "description": "Browse through top 100 torrents",
             "mode": "view"
