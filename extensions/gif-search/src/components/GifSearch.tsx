@@ -45,9 +45,7 @@ export function GifSearch(props: { service?: ServiceName }) {
   const [state, dispatch] = useReducer(reduceAppState, initialState);
 
   const shouldShowDetails = () => showPreview && (results?.items?.length ?? 0) + (favItems?.items?.length ?? 0) != 0;
-  const shouldShowFavs = () => {
-    return !!favItems?.items?.length && !results?.term;
-  };
+  const shouldShowFavs = () => !!favItems?.items?.length && !results?.term;
 
   // Load saved favorite GIF id's from LocalStorage
   useEffect(() => {

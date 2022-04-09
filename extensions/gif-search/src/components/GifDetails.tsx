@@ -104,7 +104,7 @@ export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean 
         icon={Icon.Star}
         key="rmFromFavs"
         title="Remove from Favorites"
-        onAction={() => dispatch({ type: "remove", ids: [props.item.id], service })}
+        onAction={() => dispatch({ type: "remove", save: true, ids: [props.item.id], service })}
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
       />
     ) : (
@@ -112,7 +112,7 @@ export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean 
         icon={Icon.Star}
         key="addToFavs"
         title="Add to Favorites"
-        onAction={() => dispatch({ type: "add", ids: [props.item.id], service })}
+        onAction={() => dispatch({ type: "add", save: true, ids: [props.item.id], service })}
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
       />
     );

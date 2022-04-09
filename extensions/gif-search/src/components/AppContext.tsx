@@ -18,6 +18,7 @@ export interface AppStateAction {
   type?: AppStateActionType;
   ids?: Array<string | number>;
   service?: ServiceName;
+  save?: boolean;
 }
 
 export const initialState: AppState = {
@@ -51,6 +52,9 @@ export function reduceAppState(state: AppState, action: AppStateAction) {
       break;
   }
 
-  state.service && LocalStorage.setItem(getKey(state.service), JSON.stringify([...(favIds || [])]));
+  if (action.save && state.service) {
+    LocalStorage.setItem(getKey(state.service), JSON.stringify([...(favIds || [])]));
+  }
+
   return { ...state, favIds, service: state.service } as AppState;
 }
