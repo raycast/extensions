@@ -2,7 +2,6 @@ import {ActionPanel, Action, List, Icon, Color} from "@raycast/api";
 import {useState} from "react";
 
 const baseUrl = "https://defiscan.live/";
-// const apiBaseUrl = "https://ocean.defichain.com/v0.33/mainnet/";
 
 export default function Command() {
     const [valueText, setValueText] = useState("");
@@ -15,15 +14,12 @@ export default function Command() {
     </List.Section>);
 
     return (
-        <List
-            enableFiltering={false}
-            navigationTitle="Search on DeFiScan.live"
-            searchBarPlaceholder="Search by block id/hash, address, trx id or vault id"
-            onSearchTextChange={setValueText}
-            searchText={valueText}
-        >
+        <List enableFiltering={false}
+              navigationTitle="Search on DeFiScan.live"
+              searchBarPlaceholder="Search by block id/hash, address, trx id or vault id"
+              onSearchTextChange={setValueText}
+              searchText={valueText}>
             {items}
-
             <List.Section title="Quicklinks">
                 <List.Item
                     title="DEX"
