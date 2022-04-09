@@ -103,7 +103,9 @@ class Service {
   }
 
   async listIcons(setId: string, setTitle: string): Promise<Icon[]> {
-    const response = await githubClient.get<IconResponse>(`/json/${setId}.json`);
+    const response = await githubClient.get<IconResponse>(
+      `/json/${setId}.json`,
+    );
     const ids = Object.keys(response.data.icons);
     return ids.map((id) => {
       const icon = response.data.icons[id];
@@ -120,7 +122,11 @@ class Service {
     });
   }
 
-  async getIcons(setId: string, setTitle: string, ids: string[]): Promise<Icon[]> {
+  async getIcons(
+    setId: string,
+    setTitle: string,
+    ids: string[],
+  ): Promise<Icon[]> {
     const response = await iconifyClient.get<IconResponse>(`${setId}.json`, {
       params: {
         icons: ids.join(','),

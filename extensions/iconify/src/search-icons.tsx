@@ -30,9 +30,11 @@ function Command() {
             icon={{ source: base64Icon, tintColor: Color.PrimaryText }}
             key={`${setId}:${id}`}
             title={id}
-            accessories={[{
-              text: setName,
-            }]}
+            accessories={[
+              {
+                text: setName,
+              },
+            ]}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard content={svgIcon} />
