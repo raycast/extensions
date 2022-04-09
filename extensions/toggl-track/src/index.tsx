@@ -12,14 +12,14 @@ import {
   SubmitFormAction,
   ToastStyle,
   getPreferenceValues,
-  Detail
+  Detail, 
+  Color
 } from "@raycast/api";
 import { TimeEntry } from "./toggl/types";
 import toggl from "./toggl";
 import { storage } from "./storage";
 import ProjectListItem from "./components/ProjectListItem";
 import StartTimeEntryForm from "./components/StartTimeEntryForm";
-import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
 import TimeEntryForm from "./components/TimeEntryForm";
 
 interface Preferences {
@@ -113,7 +113,7 @@ function ListView() {
                       key={timeEntry.id}
                       keywords={[timeEntry.description, getProjectById(timeEntry.pid)?.name || ""]}
                       title={timeEntry.description || "No description"}
-                      accessoryTitle={timeEntry.billable ? "$ " : "" & getProjectById(timeEntry?.pid)?.name}
+                      accessoryTitle={timeEntry.billable ? "$ " : String(getProjectById(timeEntry?.pid)?.name)}
                       accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}
                       icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.pid)?.hex_color }}
                       actions={
@@ -136,7 +136,8 @@ function ListView() {
                             <ActionPanel.Item
                               title="Delete Time Entry"
                               onAction={() => deleteTimeEntry(timeEntry)}
-                              icon={{ source: Icon.Clock }}
+                              icon={{ source: Icon.Trash , tintColor: Color.Red}}
+                              shortcut={{ modifiers: ["cmd"], key: "t" }}
                             /> : undefined
                           }
                         </ActionPanel>

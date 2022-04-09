@@ -24,7 +24,7 @@ const preferences: Preferences = getPreferenceValues();
 function TimeEntryForm({ entry }: { entry?: TimeEntry }) {
   const navigation = useNavigation();
   const { projects, tags, isLoading, projectGroups } = useAppContext();
-  const getProjectById = (id: number) => projects.find((p) => p.id === id);
+  const getProjectById = (id?: number) => projects.find((p) => p.id === id);
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(getProjectById(entry?.pid)); 
 
   async function handleSubmit(values: { 
@@ -86,9 +86,10 @@ function TimeEntryForm({ entry }: { entry?: TimeEntry }) {
 
       { entry ? (
         <>
-        <Form.DatePicker id="start" title="Start Time" defaultValue={ new Date(entry?.start).toISOString().replace("T", " ").substring(0, 16) + " UTC" } />
+        <Form.DatePicker id="start" title="Start Time" defaultValue={ new Date(entry?.start) } />
+
         {"stop" in entry ?
-          <Form.DatePicker id="end" title="End Time" defaultValue={ new Date(entry?.stop).toISOString().replace("T", " ").substring(0, 16) + " UTC" } /> : undefined
+          <Form.DatePicker id="end" title="End Time" defaultValue={ new Date(entry?.stop) } /> : undefined
         }
         </>
         ) : (
@@ -111,7 +112,7 @@ function TimeEntryForm({ entry }: { entry?: TimeEntry }) {
           >
             {group.projects.map((project) => (
               <Form.Dropdown.Item
-                key={entry?.pid}
+                key={project.id}
                 value={project.id.toString()}
                 title={project.name}
                 icon={{ source: Icon.Circle, tintColor: project.hex_color }}

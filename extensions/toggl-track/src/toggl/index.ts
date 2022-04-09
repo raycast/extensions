@@ -60,13 +60,13 @@ const TogglAPI = function (apiToken: string) {
       duration,
       billable,
     }: {
-      id: number;
+      id?: number;
       projectId?: number;
       description: string;
       tags: string[];
       start: string;
       duration?: number;
-      billable;
+      billable: boolean;
     }) => {
       return api.post<{ data: TimeEntry }>(`/time_entries${ id ? `/${id}` : ``}`, {
         time_entry: {

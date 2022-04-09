@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, SubmitFormAction, showToast, ToastStyle, PushAction} from "@raycast/api";
+import { List, Icon, ActionPanel, SubmitFormAction, showToast, ToastStyle, PushAction, Color} from "@raycast/api";
 import dayjs from "dayjs";
 import { TimeEntry } from "../toggl/types";
 import useCurrentTime from "../hooks/useCurrentTime";
@@ -24,6 +24,18 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry })
     }
   };
 
+  const deleteTimeEntry = async () => {
+    await showToast(ToastStyle.Animated, "Deleting time entry...");
+    try {
+      await toggl.deleteTimeEntry({id: runningTimeEntry.id });
+      await storage.runningTimeEntry.refresh();
+      await storage.timeEntries.refresh();
+      await showToast(ToastStyle.Success, "Time entry deleted");
+    } catch (e) {
+      await showToast(ToastStyle.Failure, "Failed to delete time entry");
+    }
+}
+
   return (
     <List.Section title="Running time entry" key="running-time-entry">
       <List.Item
@@ -43,6 +55,12 @@ function RunningTimeEntry({ runningTimeEntry }: { runningTimeEntry: TimeEntry })
                   <TimeEntryForm entry={runningTimeEntry}/>
                 </AppContextProvider>
               }
+            />
+            <ActionPanel.Item
+              title="Delete Time Entry"
+              onAction={() => deleteTimeEntry()}
+              icon={{ source: Icon.Trash , tintColor: Color.Red}}
+              shortcut={{ modifiers: ["cmd"], key: "t" }}
             />
           </ActionPanel>
         }
