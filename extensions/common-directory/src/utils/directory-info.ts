@@ -6,6 +6,7 @@ export interface DirectoryInfo {
   type: DirectoryType;
   valid: boolean;
   rank: number;
+  rankSendFile: number;
   isCommon: boolean;
 }
 
@@ -13,6 +14,12 @@ export enum DirectoryType {
   DIRECTORY = "Directory",
   FILE = "File",
 }
+
+export enum LocalDirectoryKey {
+  OPEN_COMMON_DIRECTORY = "open_common_directory",
+  SEND_COMMON_DIRECTORY = "send_common_directory",
+}
+
 export enum SortBy {
   Rank = "Rank",
   NameUp = "Name+",

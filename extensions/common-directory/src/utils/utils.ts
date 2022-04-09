@@ -1,14 +1,17 @@
-import fs from "fs";
+import fs from "fs-extra";
 import { runAppleScript } from "run-applescript";
-import { getPreferenceValues, getSelectedFinderItems } from "@raycast/api";
-import { Values } from "@raycast/api/types/api/app/localStorage";
+import { getPreferenceValues, getSelectedFinderItems, LocalStorage } from "@raycast/api";
 import { DirectoryInfo, DirectoryType } from "./directory-info";
+import Values = LocalStorage.Values;
 
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
     sortBy: preferencesMap.get("SortBy"),
     showOpenDirectory: preferencesMap.get("showOpenDirectory"),
+    primaryAction: preferencesMap.get("primaryAction"),
+    openDestDirectory: preferencesMap.get("openDestDirectory"),
+    disableWarning: preferencesMap.get("disableWarning"),
   };
 };
 
@@ -35,7 +38,7 @@ export const getFinderInsertLocation = async () => {
   }
 };
 
-const scriptFinderWindowPath = `
+export const scriptFinderWindowPath = `
 if application "Finder" is not running then
     return "Not running"
 end if
@@ -67,6 +70,7 @@ export const getOpenFinderWindowPath = async () => {
         type: DirectoryType.DIRECTORY,
         valid: true,
         rank: 1,
+        rankSendFile: 1,
         isCommon: false,
       });
     });
@@ -110,7 +114,7 @@ export const getSelectedDirectory = async () => {
   }
 };
 
-export const checkPathValid = (path: string) => {
+export const checkPathAccessValid = (path: string) => {
   try {
     fs.accessSync(path);
     return true;

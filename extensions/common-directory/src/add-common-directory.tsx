@@ -1,16 +1,16 @@
 import { Action, ActionPanel, Form, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
-import { DirectoryInfo, DirectoryType } from "./directory-info";
+import { DirectoryInfo, DirectoryType, LocalDirectoryKey } from "./utils/directory-info";
 import React, { useEffect, useState } from "react";
 import {
-  checkPathValid,
+  checkPathAccessValid,
   getChooseFolder,
   getDirectoryName,
   getFinderInsertLocation,
   getSelectedDirectory,
   isDirectoryOrFile,
-} from "./utils";
+} from "./utils/utils";
 
-export default function AddDirectory(props: {
+export default function AddCommonDirectory(props: {
   updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
 }) {
   const [updateList, setUpdateList] =
@@ -42,7 +42,7 @@ export default function AddDirectory(props: {
         <ActionPanel>
           <Action
             title={"Add Directory"}
-            icon={Icon.Download}
+            icon={Icon.Plus}
             onAction={async () => {
               await addDirectory(alias, path);
               const _updateList = [...updateList];
@@ -61,9 +61,9 @@ export default function AddDirectory(props: {
               }}
             />
             <Action
-              title={"Select Directory"}
+              title={"Choose Directory"}
               icon={Icon.Sidebar}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
               onAction={() => {
                 getChooseFolder().then((path) => {
                   setPath(path);
@@ -89,17 +89,21 @@ async function fetchDirectoryPath(setPath: React.Dispatch<React.SetStateAction<s
 }
 
 async function addDirectory(alias: string, path: string) {
-  const isValid = await checkPathValid(path);
+  const isValid = await checkPathAccessValid(path);
   if (isValid) {
     const _type = isDirectoryOrFile(path);
     if (_type === DirectoryType.FILE) {
       await showToast(Toast.Style.Failure, `File path not supported.`);
     } else {
-      const _localStorage = await LocalStorage.getItem(_type);
-      const _commonDirectory: DirectoryInfo[] = typeof _localStorage == "string" ? JSON.parse(_localStorage) : [];
+      const _localStorageOpen = await LocalStorage.getItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY);
+      const _localStorageSend = await LocalStorage.getItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY);
+      const _OpenCommonDirectory: DirectoryInfo[] =
+        typeof _localStorageOpen == "string" ? JSON.parse(_localStorageOpen) : [];
+      const _SendCommonDirectory: DirectoryInfo[] =
+        typeof _localStorageSend == "string" ? JSON.parse(_localStorageSend) : [];
       //check duplicate
       let duplicatePath = false;
-      _commonDirectory.forEach((value) => {
+      _OpenCommonDirectory.forEach((value) => {
         if (value.path === path) {
           duplicatePath = true;
           return;
@@ -108,7 +112,7 @@ async function addDirectory(alias: string, path: string) {
       if (duplicatePath) {
         await showToast(Toast.Style.Failure, "Directory already exists.");
       } else {
-        _commonDirectory.push({
+        const newItem = {
           id: _type + "_" + new Date().getTime(),
           alias: alias,
           name: getDirectoryName(path),
@@ -116,9 +120,13 @@ async function addDirectory(alias: string, path: string) {
           valid: true,
           type: _type,
           rank: 1,
+          rankSendFile: 1,
           isCommon: true,
-        });
-        await LocalStorage.setItem(_type, JSON.stringify(_commonDirectory));
+        };
+        _OpenCommonDirectory.push(newItem);
+        _SendCommonDirectory.push(newItem);
+        await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify(_OpenCommonDirectory));
+        await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify(_SendCommonDirectory));
         await showToast(Toast.Style.Success, `Add ${_type.toLowerCase()} success!`);
       }
     }
