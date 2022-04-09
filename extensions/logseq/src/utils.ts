@@ -4,6 +4,7 @@ import path from "path";
 import * as R from "ramda";
 import dayjs from "dayjs";
 import fs from "fs";
+import untildify from "untildify";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const noop = () => {};
@@ -11,9 +12,12 @@ export const prependStr = (leading: string) => (val: string) => leading + val;
 export const appendStr = (toAppend: string) => (val: string) => val + toAppend;
 
 export const generateContentToAppend = R.compose(prependStr("\n- "), R.replace(/\n/g, "\n- "));
+const getUserConfiguredGraphPath = () => {
+  return untildify(getPreferenceValues().graphPath);
+};
 
 export const validateUserConfigGraphPath = () => {
-  return fs.promises.lstat(getPreferenceValues().graphPath).then((stats) => {
+  return fs.promises.lstat(getUserConfiguredGraphPath()).then((stats) => {
     if (!stats.isDirectory()) {
       throw "invalid";
     }
@@ -21,7 +25,7 @@ export const validateUserConfigGraphPath = () => {
 };
 
 const parseJournalFileNameFromLogseqConfig = () => {
-  const logseqConfigPath = path.join(getPreferenceValues().graphPath, "/logseq/config.edn");
+  const logseqConfigPath = path.join(getUserConfiguredGraphPath(), "/logseq/config.edn");
   return (
     fs.promises
       .readFile(logseqConfigPath, { encoding: "utf8" })
@@ -38,7 +42,7 @@ const buildJournalPath = (graphPath: string) => {
 };
 
 export const getTodayJournalPath = () => {
-  return buildJournalPath(getPreferenceValues().graphPath);
+  return buildJournalPath(getUserConfiguredGraphPath());
 };
 
 const createFileIfNotExist = (filePath: string) => {
