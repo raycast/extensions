@@ -1,9 +1,12 @@
+import { useContext } from "react";
+
 import { Action, ActionPanel, Icon, Detail, showHUD } from "@raycast/api";
 import FileSizeFormat from "@saekitominaga/file-size-format";
 
 import { getShowPreview, getDefaultAction } from "../preferences";
-import { IGif, renderGifMarkdownDetails } from "../models/gif";
 
+import AppContext from "../components/AppContext";
+import { IGif, renderGifMarkdownDetails } from "../models/gif";
 import copyFileToClipboard from "../lib/copyFileToClipboard";
 import stripQParams from "../lib/stripQParams";
 
@@ -52,6 +55,9 @@ export function GifDetails(props: { item: IGif }) {
 export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean }) {
   const { title, url, gif_url, slug } = props.item;
 
+  const { state, dispatch } = useContext(AppContext);
+  const { favIds, service } = state;
+
   const showPreview = getShowPreview();
 
   const copyFileAction = () =>
@@ -91,7 +97,28 @@ export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean 
     />
   );
 
-  const actions = [copyFile, copyGifUrl, copyPageUrl, openInBrowser];
+  let toggleFave: JSX.Element | undefined;
+  if (service && favIds) {
+    toggleFave = favIds?.has(props.item.id.toString()) ? (
+      <Action
+        icon={Icon.Star}
+        key="rmFromFavs"
+        title="Remove from Favorites"
+        onAction={() => dispatch({ type: "remove", ids: [props.item.id], service })}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+      />
+    ) : (
+      <Action
+        icon={Icon.Star}
+        key="addToFavs"
+        title="Add to Favorites"
+        onAction={() => dispatch({ type: "add", ids: [props.item.id], service })}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+      />
+    );
+  }
+
+  const actions = [copyFile, copyGifUrl, toggleFave, copyPageUrl, openInBrowser];
   if (props.showViewDetails) {
     if (showPreview) {
       // Put View Details to the end if using gif preview

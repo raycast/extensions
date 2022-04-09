@@ -1,8 +1,9 @@
 # GIF Search Changelog
 
-## [Add unified GIF search command] - 2022-04-07
+## [Add unified GIF search command & adding to favorites] - 2022-04-07
 - Adds a unified "Search for GIFs" command that searches across GIF services
 - Use gif slug as file name when copying file to clipboard
+- Add action for adding a gif to your favorites
 
 ## [Remove static GIF preview warning 🎉] - 2022-04-06
 - Removes the warning about GIFs no longer animating, Raycast v1.32.0 supports GIFs in Details

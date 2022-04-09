@@ -6,6 +6,8 @@ import giphy from "../models/giphy";
 import tenor from "../models/tenor";
 import finergifs from "../models/finergifs";
 
+import dedupe from "../lib/dedupe";
+
 import type { IGif } from "../models/gif";
 
 interface FetchState {
@@ -64,7 +66,7 @@ export default function useSearchAPI({ offset = 0 }) {
         setIsLoading(false);
       }
     },
-    [cancelRef, setIsLoading, setResults, searchTerm]
+    [cancelRef, setIsLoading, setResults, searchTerm, results]
   );
 
   useEffect(() => {
@@ -76,20 +78,5 @@ export default function useSearchAPI({ offset = 0 }) {
     };
   }, [searchTerm, searchService]);
 
-  return [results, isLoading, setSearchService, setSearchTerm, searchTerm] as const;
-}
-
-function dedupe(values: Array<IGif>) {
-  return Array.from(
-    values
-      .reduce((uniq, val: IGif) => {
-        if (uniq.get(val.id.toString())) {
-          return uniq;
-        }
-
-        uniq.set(val.id.toString(), val);
-        return uniq;
-      }, new Map<string, IGif>())
-      .values()
-  );
+  return [results, isLoading, setSearchService, setSearchTerm, searchTerm, searchService] as const;
 }
