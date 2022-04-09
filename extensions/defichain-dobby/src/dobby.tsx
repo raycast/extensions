@@ -1,4 +1,4 @@
-import { Detail } from "@raycast/api";
+import { ActionPanel, Action, Detail } from "@raycast/api";
 import { transformVaultsToMarkdown } from "./models/vault";
 import { getVaults } from "./api";
 import { useEffect, useState } from "react";
@@ -20,5 +20,19 @@ export default function Command() {
     fetchVaults();
   }, [markdownString]);
 
-  return <Detail isLoading={status === "loading"} markdown={markdownString} />;
+  return (
+    <Detail
+      isLoading={status === "loading"}
+      markdown={markdownString}
+      actions={
+        <ActionPanel title="Dobby">
+          <Action.OpenInBrowser
+            title="Open Dashboard"
+            url="https://defichain-dobby.com"
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
 }
