@@ -34,7 +34,6 @@ export async function getAPIByServiceName(service: ServiceName, force?: boolean)
 export default function useSearchAPI({ offset = 0 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [results, setResults] = useState<FetchState>();
-  const [searchService, setSearchService] = useState<ServiceName>();
   const [searchTerm, setSearchTerm] = useState<string>("");
   const cancelRef = useRef<AbortController | null>(null);
 
@@ -52,6 +51,7 @@ export default function useSearchAPI({ offset = 0 }) {
         } else {
           items = dedupe(await api.trending({ offset, limit: DEFAULT_RESULT_COUNT }));
         }
+
         setResults({ items, term });
       } catch (e) {
         const error = e as FetchError;
@@ -65,18 +65,21 @@ export default function useSearchAPI({ offset = 0 }) {
       } finally {
         setIsLoading(false);
       }
+
+      return () => {
+        cancelRef.current?.abort();
+      };
     },
     [cancelRef, setIsLoading, setResults, searchTerm, results]
   );
 
-  useEffect(() => {
-    if (searchService) {
-      search(searchTerm, searchService);
-    }
-    return () => {
-      cancelRef.current?.abort();
-    };
-  }, [searchTerm, searchService]);
+  const markfavs = useCallback(
+    function markfavs(results: FetchState, favs: Set<string>) {
+      results.items?.forEach((item) => (item.is_fav = !!favs.has(item.id.toString())));
+      setResults({ ...results, items: results.items });
+    },
+    [setResults]
+  );
 
-  return [results, isLoading, setSearchService, setSearchTerm, searchTerm, searchService] as const;
+  return [results, isLoading, setSearchTerm, searchTerm, search, markfavs] as const;
 }

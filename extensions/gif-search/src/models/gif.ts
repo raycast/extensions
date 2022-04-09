@@ -7,6 +7,7 @@ export interface IGif {
   slug: string;
   preview_gif_url: string;
   gif_url: string;
+  is_fav: boolean;
   metadata?: {
     width?: number;
     height?: number;

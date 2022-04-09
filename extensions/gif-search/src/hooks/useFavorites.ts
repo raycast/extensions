@@ -59,7 +59,8 @@ export default function useFavorites({ offset = 0, limit = DEFAULT_RESULT_COUNT 
 
       let items: IGif[];
       try {
-        items = dedupe(await api.gifs(Array.from(ids))).slice(0, limit);
+        items = dedupe(await api.gifs([...ids])).slice(0, limit);
+        items?.forEach((item) => (item.is_fav = !!ids?.has(item.id.toString())));
 
         setFavItems({ items });
       } catch (e) {
