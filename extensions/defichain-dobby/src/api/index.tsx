@@ -18,7 +18,7 @@ export const getVaults = async () => {
       response.data.vaults.forEach((vault) => {
         vaults.push({
           vaultId: vault.vaultId,
-          name: vault.name,
+          name: vault.name ?? "",
           ownerAddress: vault.ownerAddress,
           loanScheme: vault.loanScheme.minCollateral,
           state: vault.state,
