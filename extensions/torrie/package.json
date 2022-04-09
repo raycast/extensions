@@ -12,14 +12,14 @@
     "commands": [{
             "name": "searchTorrents",
             "title": "Search Torrent",
-            "subtitle": "Torrie",
+            "subtitle": "torrie",
             "description": "Search for a torrent file on P2P network",
             "mode": "view"
         },
         {
             "name": "trendingTorrents",
             "title": "Top 100 Torrents",
-            "subtitle": "Torrie",
+            "subtitle": "torrie",
             "description": "Browse through top 100 torrents",
             "mode": "view"
         }
