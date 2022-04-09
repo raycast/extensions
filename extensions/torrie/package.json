@@ -1,0 +1,49 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "torrie",
+    "title": "Torrie - Peer2Peer  Explorer",
+    "description": "View / Download Files from various P2P networks",
+    "icon": "command-icon.png",
+    "author": "Aayush9029",
+    "categories": [
+        "Other"
+    ],
+    "license": "MIT",
+    "commands": [{
+            "name": "searchTorrents",
+            "title": "Search Torrent",
+            "subtitle": "Torrie",
+            "description": "Search for a torrent file on P2P network",
+            "mode": "view"
+        },
+        {
+            "name": "trendingTorrents",
+            "title": "Top 100 Torrents",
+            "subtitle": "Torrie",
+            "description": "Browse through top 100 torrents",
+            "mode": "view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.32.1",
+        "cheerio": "^1.0.0-rc.10",
+        "node-fetch": "^3.0.0"
+    },
+    "devDependencies": {
+        "@types/node": "~16.10.0",
+        "@types/react": "^17.0.28",
+        "@typescript-eslint/eslint-plugin": "^5.0.0",
+        "@typescript-eslint/parser": "^5.0.0",
+        "eslint": "^7.32.0",
+        "eslint-config-prettier": "^8.3.0",
+        "prettier": "^2.5.1",
+        "react-devtools": "^4.19.2",
+        "typescript": "^4.4.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint"
+    }
+}
