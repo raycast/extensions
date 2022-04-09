@@ -4,6 +4,7 @@ import { LocalStorage } from "@raycast/api";
 
 import type { ServiceName } from "../preferences";
 import type { IGif } from "../models/gif";
+import { getKey } from "../lib/favorites";
 
 export interface AppState {
   service?: ServiceName;
@@ -50,6 +51,6 @@ export function reduceAppState(state: AppState, action: AppStateAction) {
       break;
   }
 
-  state.service && LocalStorage.setItem(state.service, JSON.stringify([...(favIds || [])]));
+  state.service && LocalStorage.setItem(getKey(state.service), JSON.stringify([...(favIds || [])]));
   return { ...state, favIds, service: state.service } as AppState;
 }

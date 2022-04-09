@@ -32,6 +32,10 @@ export default async function giphy(force?: boolean) {
     },
 
     async gifs(ids: string[]) {
+      if (!ids.length) {
+        return [];
+      }
+
       const { data } = await api.gifs(ids);
       return data.map(mapGiphyResponse);
     },

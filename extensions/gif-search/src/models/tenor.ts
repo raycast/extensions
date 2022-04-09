@@ -9,7 +9,9 @@ import { getAPIKey, GIF_SERVICE } from "../preferences";
 import type { APIOpt, IGif, IGifAPI } from "../models/gif";
 
 export interface TenorResults {
-  results: TenorGif[];
+  results?: TenorGif[];
+  error?: string;
+  code?: number;
 }
 
 export interface TenorGif {
@@ -50,17 +52,21 @@ export default async function tenor(force?: boolean) {
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {
       const { offset = 0, abort } = opt || {};
-      return (await api.search(term, { offset, abort })).results.map(mapTenorResponse);
+      return (await api.search(term, { offset, abort })).results?.map(mapTenorResponse) ?? [];
     },
 
     async trending(opt?: APIOpt) {
       const { offset = 0, limit = 10, abort } = opt || {};
-      return (await api.trending({ offset, limit, abort })).results.map(mapTenorResponse);
+      return (await api.trending({ offset, limit, abort })).results?.map(mapTenorResponse) ?? [];
     },
 
     async gifs(ids: string[], opt?: APIOpt) {
+      if (!ids.length) {
+        return [];
+      }
+
       const { abort } = opt || {};
-      return (await api.gifs(ids, { abort })).results.map(mapTenorResponse);
+      return (await api.gifs(ids, { abort })).results?.map(mapTenorResponse) ?? [];
     },
   };
 }
@@ -83,6 +89,7 @@ export class TenorAPI {
     reqUrl.searchParams.set("locale", TenorAPI.locale);
     reqUrl.searchParams.set("media_filter", TenorAPI.mediaFilter);
     reqUrl.searchParams.set("limit", options?.limit?.toString() ?? "10");
+    reqUrl.searchParams.set("media_filter", "minimal");
 
     if (options?.offset) {
       reqUrl.searchParams.set("pos", options.offset.toString());
@@ -99,6 +106,7 @@ export class TenorAPI {
     reqUrl.searchParams.set("locale", TenorAPI.locale);
     reqUrl.searchParams.set("media_filter", TenorAPI.mediaFilter);
     reqUrl.searchParams.set("limit", options?.limit?.toString() ?? "10");
+    reqUrl.searchParams.set("media_filter", "minimal");
 
     if (options?.offset) {
       reqUrl.searchParams.set("pos", options.offset.toString());
@@ -113,6 +121,7 @@ export class TenorAPI {
     reqUrl.searchParams.set("key", this.apiKey);
     reqUrl.searchParams.set("ids", ids.join(","));
     reqUrl.searchParams.set("limit", options?.limit?.toString() ?? "10");
+    reqUrl.searchParams.set("media_filter", "minimal");
 
     const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
     return (await resp.json()) as TenorResults;

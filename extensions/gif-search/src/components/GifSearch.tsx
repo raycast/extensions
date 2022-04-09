@@ -45,7 +45,9 @@ export function GifSearch(props: { service?: ServiceName }) {
   const [state, dispatch] = useReducer(reduceAppState, initialState);
 
   const shouldShowDetails = () => showPreview && (results?.items?.length ?? 0) + (favItems?.items?.length ?? 0) != 0;
-  const shouldShowFavs = () => !!favItems?.items?.length && !results?.term;
+  const shouldShowFavs = () => {
+    return !!favItems?.items?.length && !results?.term;
+  };
 
   // Load saved favorite GIF id's from LocalStorage
   useEffect(() => {
@@ -67,6 +69,16 @@ export function GifSearch(props: { service?: ServiceName }) {
       populate(state.favIds, searchService);
     }
   }, [state, searchService]);
+
+  useEffect(() => {
+    if (favIds?.error || favItems?.error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed loading favorites",
+        message: favIds?.error?.message || favItems?.error?.message,
+      });
+    }
+  }, [favItems?.error]);
 
   // Update fav status of GIF results
   useEffect(() => {

@@ -54,6 +54,7 @@ export default function useSearchAPI({ offset = 0 }) {
 
         setResults({ items, term });
       } catch (e) {
+        console.error(e);
         const error = e as FetchError;
         if (e instanceof AbortError) {
           return;

@@ -33,6 +33,10 @@ export default function finergifs() {
     },
 
     async gifs(ids: string[], opt?: APIOpt) {
+      if (!ids.length) {
+        return [];
+      }
+
       const { abort } = opt || {};
       return (await api.gifs(ids, { abort })).results.map(mapFinerGifsResponse);
     },

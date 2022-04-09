@@ -38,6 +38,7 @@ export default function useFavorites({ offset = 0, limit = DEFAULT_RESULT_COUNT 
         const faveIds = await getFavorites(service);
         setFavIds({ ids: faveIds });
       } catch (e) {
+        console.error(e);
         const error = e as Error;
         setFavIds({ error });
       } finally {
@@ -64,6 +65,7 @@ export default function useFavorites({ offset = 0, limit = DEFAULT_RESULT_COUNT 
 
         setFavItems({ items });
       } catch (e) {
+        console.error(e);
         const error = e as FetchError;
         if (e instanceof AbortError) {
           return;
