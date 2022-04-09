@@ -15,16 +15,14 @@ export type DobbyVault = {
 };
 
 export function transformVaultsToMarkdown(vaults: DobbyVault[]): string {
-  let markdownString = `## Dobby vaults:
----
-`;
+  let markdownString = "";
   vaults.forEach((vault) => {
     markdownString += `
 ### vault [${vault.name ?? vault.vaultId}](https://defiscan.live/vaults/${vault.vaultId}):
     
-- state: ${vault.state} at loan scheme ${vault.loanScheme} %
+- next ratio: ***${parseFloat(Number(vault.nextCollateralRatio)).toFixed(1)} %***
 - current ratio: ${vault.collateralRatio} %
-- next ratio: ${parseFloat(Number(vault.nextCollateralRatio)).toFixed(1)} %
+- state: ${vault.state} at loan scheme ${vault.loanScheme} %
 - collateral value: ${parseFloat(Number(vault.collateralValue)).toFixed(2)} $
 - loan value: ${parseFloat(Number(vault.loanValue)).toFixed(2)} $
 
@@ -32,6 +30,5 @@ export function transformVaultsToMarkdown(vaults: DobbyVault[]): string {
 ---    
 `;
   });
-  console.log(markdownString);
   return markdownString;
 }
