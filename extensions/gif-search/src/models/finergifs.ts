@@ -58,6 +58,9 @@ export class FinerGifsClubAPI {
     }
 
     const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
+    if (!resp.ok) {
+      throw new Error(resp.statusText);
+    }
     return (await resp.json()) as FinerGifsClubResults;
   }
 
@@ -69,6 +72,9 @@ export class FinerGifsClubAPI {
     reqUrl.searchParams.set("size", options?.limit?.toString() ?? "10");
 
     const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
+    if (!resp.ok) {
+      throw new Error(resp.statusText);
+    }
     return (await resp.json()) as FinerGifsClubResults;
   }
 }

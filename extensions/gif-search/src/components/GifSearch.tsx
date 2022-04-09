@@ -41,11 +41,11 @@ export function GifSearch(props: { service?: ServiceName }) {
     }
   }, [results?.error]);
 
-  const [favIds, favItems, isFavsLoading, loadFavs, populate] = useFavorites({});
+  const [favIds, favItems, isLoadingFavIds, isLoadingFavs, loadFavs, populate] = useFavorites({});
   const [state, dispatch] = useReducer(reduceAppState, initialState);
 
   const shouldShowDetails = () => showPreview && (results?.items?.length ?? 0) + (favItems?.items?.length ?? 0) != 0;
-  const shouldShowFavs = () => !!favItems?.items?.length && !results?.term;
+  const shouldShowFavs = () => !isLoadingFavIds && !isLoadingFavs && !!favItems?.items?.length && !results?.term;
 
   // Load saved favorite GIF id's from LocalStorage
   useEffect(() => {
@@ -56,17 +56,17 @@ export function GifSearch(props: { service?: ServiceName }) {
 
   // Hydrate global state with fav GIF id's
   useEffect(() => {
-    if (favIds?.ids && searchService) {
-      dispatch({ type: "add", ids: [...favIds?.ids], service: searchService });
+    if (!isLoadingFavIds) {
+      dispatch({ type: "replace", ids: [...(favIds?.ids || [])], service: searchService });
+    } else {
+      dispatch({ type: "clear", service: searchService });
     }
-  }, [favIds, searchService]);
+  }, [isLoadingFavIds]);
 
   // Populate favorite gifs from GIF API service using saved GIF ID's
   useEffect(() => {
-    if (state.favIds && searchService) {
-      populate(state.favIds, searchService);
-    }
-  }, [state, searchService]);
+    populate(state.favIds || new Set(), searchService);
+  }, [state]);
 
   useEffect(() => {
     if (favIds?.error || favItems?.error) {
@@ -98,7 +98,7 @@ export function GifSearch(props: { service?: ServiceName }) {
           )
         }
         enableFiltering={false}
-        isLoading={isLoading || isFavsLoading}
+        isLoading={isLoading || isLoadingFavIds || isLoadingFavs}
         throttle={true}
         searchBarPlaceholder="Search for gifs..."
         onSearchTextChange={setSearchTerm}

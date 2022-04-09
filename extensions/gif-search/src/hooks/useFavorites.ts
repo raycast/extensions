@@ -5,7 +5,7 @@ import { ServiceName } from "../preferences";
 import { getAPIByServiceName } from "./useSearchAPI";
 
 import dedupe from "../lib/dedupe";
-import { getFavorites } from "../lib/favorites";
+import { clearFavorites, getFavorites } from "../lib/favorites";
 
 import type { IGif } from "../models/gif";
 
@@ -22,8 +22,10 @@ export interface FavItemsState {
 const DEFAULT_RESULT_COUNT = 10;
 
 export default function useFavorites({ offset = 0, limit = DEFAULT_RESULT_COUNT }) {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingIds, setIsLoadingIds] = useState(true);
   const [favIds, setFavIds] = useState<FavIdsState>();
+
+  const [isLoadingFavs, setIsLoadingFavs] = useState(true);
   const [favItems, setFavItems] = useState<FavItemsState>();
 
   const loadFavs = useCallback(
@@ -32,7 +34,7 @@ export default function useFavorites({ offset = 0, limit = DEFAULT_RESULT_COUNT 
         return;
       }
 
-      setIsLoading(true);
+      setIsLoadingIds(true);
 
       try {
         const faveIds = await getFavorites(service);
@@ -40,21 +42,25 @@ export default function useFavorites({ offset = 0, limit = DEFAULT_RESULT_COUNT 
       } catch (e) {
         console.error(e);
         const error = e as Error;
+
+        await clearFavorites(service);
         setFavIds({ error });
       } finally {
-        setIsLoading(false);
+        setIsLoadingIds(false);
       }
     },
-    [setFavIds, setIsLoading]
+    [setFavIds, setIsLoadingIds]
   );
 
   const populate = useCallback(
     async function populate(ids: Set<string>, service?: ServiceName) {
-      if (!service) {
+      setIsLoadingFavs(true);
+
+      if (!service || !ids.size) {
+        setFavItems({ items: [] });
+        setIsLoadingFavs(false);
         return;
       }
-
-      setIsLoading(true);
 
       const api = await getAPIByServiceName(service);
 
@@ -65,21 +71,22 @@ export default function useFavorites({ offset = 0, limit = DEFAULT_RESULT_COUNT 
 
         setFavItems({ items });
       } catch (e) {
-        console.error(e);
         const error = e as FetchError;
         if (e instanceof AbortError) {
           return;
         } else if (error.message.toLowerCase().includes("invalid authentication credentials")) {
           error.message = "Invalid credentials, please try again.";
           await getAPIByServiceName(service, true);
+        } else {
+          await clearFavorites(service);
         }
         setFavItems({ error });
       }
 
-      setIsLoading(false);
+      setIsLoadingFavs(false);
     },
-    [setIsLoading, setFavItems]
+    [setIsLoadingFavs, setFavItems]
   );
 
-  return [favIds, favItems, isLoading, loadFavs, populate] as const;
+  return [favIds, favItems, isLoadingIds, isLoadingFavs, loadFavs, populate] as const;
 }

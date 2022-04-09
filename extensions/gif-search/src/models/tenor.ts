@@ -96,6 +96,9 @@ export class TenorAPI {
     }
 
     const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
+    if (!resp.ok) {
+      throw new Error(resp.statusText);
+    }
     return (await resp.json()) as TenorResults;
   }
 
@@ -113,6 +116,9 @@ export class TenorAPI {
     }
 
     const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
+    if (!resp.ok) {
+      throw new Error(resp.statusText);
+    }
     return (await resp.json()) as TenorResults;
   }
 
@@ -124,6 +130,9 @@ export class TenorAPI {
     reqUrl.searchParams.set("media_filter", "minimal");
 
     const resp = await fetch(reqUrl.toString(), { signal: options.abort?.signal });
+    if (!resp.ok) {
+      throw new Error(resp.statusText);
+    }
     return (await resp.json()) as TenorResults;
   }
 }

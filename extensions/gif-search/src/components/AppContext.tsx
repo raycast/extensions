@@ -1,18 +1,15 @@
 import React from "react";
 
-import { LocalStorage } from "@raycast/api";
-
 import type { ServiceName } from "../preferences";
 import type { IGif } from "../models/gif";
-import { getKey } from "../lib/favorites";
+import { getFavorites, setFavorites } from "../lib/favorites";
 
 export interface AppState {
   service?: ServiceName;
   favIds?: Set<string>;
-  favItems?: IGif[];
 }
 
-export type AppStateActionType = "add" | "remove";
+export type AppStateActionType = "add" | "remove" | "replace" | "clear";
 
 export interface AppStateAction {
   type?: AppStateActionType;
@@ -23,7 +20,6 @@ export interface AppStateAction {
 
 export const initialState: AppState = {
   favIds: new Set<string>(),
-  favItems: [],
 };
 
 const AppContext = React.createContext({
@@ -36,14 +32,19 @@ const AppContext = React.createContext({
 export default AppContext;
 
 export function reduceAppState(state: AppState, action: AppStateAction) {
-  const { favIds } = state;
+  let { favIds } = state;
   const { type, ids } = action;
 
   if (action.service) {
     state.service = action.service;
   }
 
+  if (type == "replace" || type == "clear") {
+    favIds = new Set();
+  }
+
   switch (type) {
+    case "replace":
     case "add":
       ids?.forEach((id) => favIds?.add(id.toString()));
       break;
@@ -52,8 +53,8 @@ export function reduceAppState(state: AppState, action: AppStateAction) {
       break;
   }
 
-  if (action.save && state.service) {
-    LocalStorage.setItem(getKey(state.service), JSON.stringify([...(favIds || [])]));
+  if (action.save && state.service && favIds) {
+    setFavorites(favIds, state.service);
   }
 
   return { ...state, favIds, service: state.service } as AppState;
