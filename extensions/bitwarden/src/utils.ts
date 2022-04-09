@@ -1,4 +1,5 @@
 import { Icon } from "@raycast/api";
+import { createHash } from "crypto";
 import { URL } from "url";
 import { Item, PasswordGeneratorOptions } from "./types";
 
@@ -58,3 +59,7 @@ export function extractKeywords(item: Item): string[] {
   const uniqueKeywords = new Set(keywords.filter((keyword): keyword is string => !!keyword));
   return [...uniqueKeywords];
 }
+
+export const generateMd5Hash = (value: string) => {
+  return createHash("md5").update(value).digest("hex");
+};

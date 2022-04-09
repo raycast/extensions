@@ -30,6 +30,7 @@ import {
 import { debounce } from "throttle-debounce";
 import { TroubleshootingGuide } from "./components";
 import { useEffect, useState } from "react";
+import { format, parseISO } from "date-fns";
 
 const FormSpace = () => <Form.Description text="" />;
 
@@ -201,9 +202,24 @@ function PasswordHistory() {
   }, []);
 
   return (
-    <List>
-      {items.map(({ password, timestamp }) => (
-        <List.Item key={password} title={password} subtitle={new Date(timestamp).toISOString()} />
+    <List navigationTitle="Generate Password - History">
+      {items.map(({ password, datetime }) => (
+        <List.Item
+          key={password}
+          title={password}
+          icon={Icon.Clipboard}
+          accessories={[
+            {
+              text: format(parseISO(datetime), "d MMM yyyy, HH:mm:ss"),
+              tooltip: datetime,
+            },
+          ]}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard title="Copy to clipboard" icon={Icon.Clipboard} content={password} />
+            </ActionPanel>
+          }
+        />
       ))}
     </List>
   );

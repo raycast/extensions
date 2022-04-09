@@ -129,5 +129,5 @@ export type PasswordOptionsToFieldEntries = [keyof PasswordGeneratorOptions, Pas
 
 export type PasswordHistoryItem = {
   password: string;
-  timestamp: number;
+  datetime: string;
 };

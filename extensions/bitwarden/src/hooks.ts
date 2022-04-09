@@ -1,49 +1,60 @@
 import { LocalStorage, confirmAlert, Icon, popToRoot, getPreferenceValues, environment } from "@raycast/api";
-import { useState, useEffect, useRef, useReducer } from "react";
+import { useState, useEffect, useReducer, useMemo } from "react";
 import { Bitwarden } from "./api";
 import { DEFAULT_PASSWORD_OPTIONS, LOCAL_STORAGE_KEY } from "./const";
 import { PasswordGeneratorOptions, PasswordHistoryItem, Preferences } from "./types";
-import { existsSync, mkdirSync, appendFileSync, readFileSync } from "fs";
+import { existsSync, mkdirSync, appendFileSync, readFileSync, readFile, writeFile, writeFileSync } from "fs";
 import { createCipheriv, createHash, randomBytes, createDecipheriv } from "crypto";
 import { join as pathJoin } from "path/posix";
-import { EOL } from "os";
+import { generateMd5Hash } from "./utils";
+
+const MAX_HISTORY_ITEMS = 100;
 
 export const usePasswordHistory = () => {
   const { clientId } = getPreferenceValues<Preferences>();
   const { encrypt, decrypt } = useContentEncryptor();
 
+  const historyFile = useMemo(() => {
+    const name = generateMd5Hash(clientId.trim());
+    const path = pathJoin(environment.supportPath, `password-history-${name}.json`);
+    return { name, path };
+  }, [clientId]);
+
   const getEncryptedEntry = (password: string) => {
     const encryptedData = encrypt(password);
-    return `${encryptedData.content},${encryptedData.iv},${Date.now()}${EOL}`;
+    return `${encryptedData.content},${encryptedData.iv},${new Date().toISOString()}`;
   };
 
   const getDecryptedEntry = (entry: string): PasswordHistoryItem | null => {
-    const [content, iv, timestamp] = entry.split(",");
-    if (!content || !iv || !timestamp) return null;
-    return { password: decrypt({ content, iv }), timestamp: Number(timestamp) };
+    const [content, iv, datetime] = entry.split(",");
+    if (!content || !iv || !datetime) return null;
+    return { password: decrypt({ content, iv }), datetime };
   };
 
   const save = (password: string) => {
-    try {
-      if (!clientId) throw "Missing client_id";
-      const directoryPath = pathJoin(environment.supportPath, "history");
-      const filePath = pathJoin(directoryPath, clientId.trim());
-      if (!existsSync(directoryPath)) mkdirSync(directoryPath, { recursive: true });
-      appendFileSync(filePath, getEncryptedEntry(password), { encoding: "utf-8" });
-    } catch (error) {
-      console.error("Failed save password to history file", error);
+    if (!clientId) throw "Missing client_id";
+    const fileData = [getEncryptedEntry(password)];
+    if (existsSync(historyFile.path)) {
+      try {
+        const fileContents = JSON.parse(readFileSync(historyFile.path, { encoding: "utf-8" })) as string[];
+        Array.prototype.push.apply(fileData, fileContents);
+        if (fileData.length >= MAX_HISTORY_ITEMS) fileData.pop();
+      } catch (error) {
+        // ignore, the write below will overwrite the file
+      }
     }
+    writeFileSync(historyFile.path, JSON.stringify(fileData), { encoding: "utf-8" });
   };
 
   const getAll = () => {
     try {
       if (!clientId) throw "Missing client_id";
-      const filePath = pathJoin(environment.supportPath, "history", clientId.trim());
-      const fileContent = readFileSync(filePath, { encoding: "utf-8" });
-      const decryptedEntries = fileContent.split(/\r?\n/).reduce((acc, entry) => {
+      const fileContent = JSON.parse(readFileSync(historyFile.path, { encoding: "utf-8" })) as string[];
+      const decryptedEntries = fileContent.reduce((acc, entry) => {
         if (!entry) return acc;
         const decryptedEntry = getDecryptedEntry(entry);
         if (decryptedEntry) acc.push(decryptedEntry);
+
         return acc;
       }, [] as PasswordHistoryItem[]);
       return decryptedEntries;
@@ -96,7 +107,7 @@ export function usePasswordGenerator(
       dispatch({ type: "generate" });
       const password = await bitwardenApi.generatePassword(options);
       dispatch({ type: "setPassword", password });
-      await save(password);
+      save(password);
     } catch (error) {
       dispatch({ type: "fail" });
     }
@@ -172,24 +183,20 @@ const get32BitSecretKeyBuffer = (key: string) =>
 
 export const useContentEncryptor = () => {
   const { clientSecret } = getPreferenceValues<Preferences>();
-  const cipherKeyBuffer = useRef<Buffer>(get32BitSecretKeyBuffer(clientSecret.trim()));
+  const cipherKeyBuffer = useMemo(() => get32BitSecretKeyBuffer(clientSecret.trim()), [clientSecret]);
 
-  useEffect(() => {
-    cipherKeyBuffer.current = get32BitSecretKeyBuffer(clientSecret.trim());
-  }, [clientSecret]);
-
-  function encrypt(data: string): EncryptedContent {
+  const encrypt = (data: string): EncryptedContent => {
     const ivBuffer = randomBytes(16);
-    const cipher = createCipheriv("aes-256-cbc", cipherKeyBuffer.current, ivBuffer);
+    const cipher = createCipheriv("aes-256-cbc", cipherKeyBuffer, ivBuffer);
     const encryptedContentBuffer = Buffer.concat([cipher.update(data), cipher.final()]);
     return { iv: ivBuffer.toString("hex"), content: encryptedContentBuffer.toString("hex") };
-  }
+  };
 
-  function decrypt(data: EncryptedContent) {
-    const decipher = createDecipheriv("aes-256-cbc", cipherKeyBuffer.current, Buffer.from(data.iv, "hex"));
+  const decrypt = (data: EncryptedContent): string => {
+    const decipher = createDecipheriv("aes-256-cbc", cipherKeyBuffer, Buffer.from(data.iv, "hex"));
     const decryptedContentBuffer = Buffer.concat([decipher.update(Buffer.from(data.content, "hex")), decipher.final()]);
     return decryptedContentBuffer.toString();
-  }
+  };
 
   return { encrypt, decrypt };
 };
