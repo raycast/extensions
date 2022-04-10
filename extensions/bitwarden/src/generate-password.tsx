@@ -245,6 +245,12 @@ function PasswordHistory() {
                   onAction={handleClear}
                   shortcut={{ key: "backspace", modifiers: ["cmd", "shift"] }}
                 />
+                <Action.Paste
+                  title="Paste password to active app"
+                  icon={Icon.Text}
+                  content={password}
+                  shortcut={{ key: "enter", modifiers: ["cmd", "shift"] }}
+                />
               </ActionPanel>
             }
           />
