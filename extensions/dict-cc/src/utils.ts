@@ -1,10 +1,16 @@
 import { Languages } from "dictcc";
 import { TranslationInput } from "dictcc";
 
-import { getPreferences } from "./preferences";
+import { getPreferences, supportedLanguages } from "./preferences";
 
-export const getListSubtitle = (loading: boolean, totalCount: number) =>
-  loading ? "Loading..." : totalCount.toString();
+export const getListSubtitle = (loading: boolean, languages: [Languages, Languages] | undefined, totalCount = 0) => {
+  const lang1 = supportedLanguages.find((l) => l.value === languages?.[0]);
+  const lang2 = supportedLanguages.find((l) => l.value === languages?.[1]);
+
+  return loading
+    ? "Loading..."
+    : `${lang1?.title} ${lang1?.flag} -> ${lang2?.title} ${lang2?.flag} | ${totalCount.toString()} results`;
+};
 
 export const joinStringsWithDelimiter: (values: (string | null | undefined)[], delimiter?: string) => string = (
   values,

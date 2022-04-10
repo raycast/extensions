@@ -28,31 +28,35 @@
       "default": "de",
       "data": [
         {
-          "title": "Bulgarian (bg)",
-          "value": "bg"
+          "title": "Albanian (sq) 🇦🇱",
+          "value": "sq"
         },
         {
-          "title": "Bosnian (bs)",
+          "title": "Bosnian (bs) 🇧🇦",
           "value": "bs"
         },
         {
-          "title": "Czech (cs)",
+          "title": "Bulgarian (bg) 🇧🇬",
+          "value": "bg"
+        },
+        {
+          "title": "Croatian (hr) 🇭🇷",
+          "value": "hr"
+        },
+        {
+          "title": "Czech (cs) 🇨🇿",
           "value": "cs"
         },
         {
-          "title": "Danish (da)",
+          "title": "Danish (da) 🇩🇰",
           "value": "da"
         },
         {
-          "title": "German (de)",
-          "value": "de"
+          "title": "Dutch (nl) 🇳🇱",
+          "value": "nl"
         },
         {
-          "title": "Greek (el)",
-          "value": "el"
-        },
-        {
-          "title": "English (en)",
+          "title": "English (en) 🇬🇧",
           "value": "en"
         },
         {
@@ -60,31 +64,31 @@
           "value": "eo"
         },
         {
-          "title": "Spanish (es)",
-          "value": "es"
-        },
-        {
-          "title": "Finnish (fi)",
+          "title": "Finnish (fi) 🇫🇮",
           "value": "fi"
         },
         {
-          "title": "French (fr)",
+          "title": "French (fr) 🇫🇷",
           "value": "fr"
         },
         {
-          "title": "Croatian (hr)",
-          "value": "hr"
+          "title": "German (de) 🇩🇪",
+          "value": "de"
         },
         {
-          "title": "Hungarian (hu)",
+          "title": "Greek (el) 🇬🇷",
+          "value": "el"
+        },
+        {
+          "title": "Hungarian (hu) 🇭🇺",
           "value": "hu"
         },
         {
-          "title": "Icelandic (is)",
+          "title": "Icelandic (is) 🇮🇸",
           "value": "is"
         },
         {
-          "title": "Italian (it)",
+          "title": "Italian (it) 🇮🇹",
           "value": "it"
         },
         {
@@ -92,47 +96,43 @@
           "value": "la"
         },
         {
-          "title": "Dutch (nl)",
-          "value": "nl"
-        },
-        {
-          "title": "Norwegian (no)",
+          "title": "Norwegian (no) 🇳🇴",
           "value": "no"
         },
         {
-          "title": "Polish (pl)",
+          "title": "Polish (pl) 🇵🇱",
           "value": "pl"
         },
         {
-          "title": "Portuguese (pt)",
+          "title": "Portuguese (pt) 🇵🇹",
           "value": "pt"
         },
         {
-          "title": "Romanian (ro)",
+          "title": "Romanian (ro) 🇷🇴",
           "value": "ro"
         },
         {
-          "title": "Russian (ru)",
+          "title": "Russian (ru) 🇷🇺",
           "value": "ru"
         },
         {
-          "title": "Slovakian (sk)",
-          "value": "sk"
-        },
-        {
-          "title": "Albanian (sq)",
-          "value": "sq"
-        },
-        {
-          "title": "Serbian (sr)",
+          "title": "Serbian (sr) 🇷🇸",
           "value": "sr"
         },
         {
-          "title": "Swedish (sv)",
+          "title": "Slovakian (sk) 🇸🇰",
+          "value": "sk"
+        },
+        {
+          "title": "Spanish (es) 🇪🇸",
+          "value": "es"
+        },
+        {
+          "title": "Swedish (sv) 🇸🇪",
           "value": "sv"
         },
         {
-          "title": "Turkish (tr)",
+          "title": "Turkish (tr) 🇹🇷",
           "value": "tr"
         }
       ]
@@ -146,31 +146,35 @@
       "default": "en",
       "data": [
         {
-          "title": "Bulgarian (bg)",
-          "value": "bg"
+          "title": "Albanian (sq) 🇦🇱",
+          "value": "sq"
         },
         {
-          "title": "Bosnian (bs)",
+          "title": "Bosnian (bs) 🇧🇦",
           "value": "bs"
         },
         {
-          "title": "Czech (cs)",
+          "title": "Bulgarian (bg) 🇧🇬",
+          "value": "bg"
+        },
+        {
+          "title": "Croatian (hr) 🇭🇷",
+          "value": "hr"
+        },
+        {
+          "title": "Czech (cs) 🇨🇿",
           "value": "cs"
         },
         {
-          "title": "Danish (da)",
+          "title": "Danish (da) 🇩🇰",
           "value": "da"
         },
         {
-          "title": "German (de)",
-          "value": "de"
+          "title": "Dutch (nl) 🇳🇱",
+          "value": "nl"
         },
         {
-          "title": "Greek (el)",
-          "value": "el"
-        },
-        {
-          "title": "English (en)",
+          "title": "English (en) 🇬🇧",
           "value": "en"
         },
         {
@@ -178,31 +182,31 @@
           "value": "eo"
         },
         {
-          "title": "Spanish (es)",
-          "value": "es"
-        },
-        {
-          "title": "Finnish (fi)",
+          "title": "Finnish (fi) 🇫🇮",
           "value": "fi"
         },
         {
-          "title": "French (fr)",
+          "title": "French (fr) 🇫🇷",
           "value": "fr"
         },
         {
-          "title": "Croatian (hr)",
-          "value": "hr"
+          "title": "German (de) 🇩🇪",
+          "value": "de"
         },
         {
-          "title": "Hungarian (hu)",
+          "title": "Greek (el) 🇬🇷",
+          "value": "el"
+        },
+        {
+          "title": "Hungarian (hu) 🇭🇺",
           "value": "hu"
         },
         {
-          "title": "Icelandic (is)",
+          "title": "Icelandic (is) 🇮🇸",
           "value": "is"
         },
         {
-          "title": "Italian (it)",
+          "title": "Italian (it) 🇮🇹",
           "value": "it"
         },
         {
@@ -210,47 +214,43 @@
           "value": "la"
         },
         {
-          "title": "Dutch (nl)",
-          "value": "nl"
-        },
-        {
-          "title": "Norwegian (no)",
+          "title": "Norwegian (no) 🇳🇴",
           "value": "no"
         },
         {
-          "title": "Polish (pl)",
+          "title": "Polish (pl) 🇵🇱",
           "value": "pl"
         },
         {
-          "title": "Portuguese (pt)",
+          "title": "Portuguese (pt) 🇵🇹",
           "value": "pt"
         },
         {
-          "title": "Romanian (ro)",
+          "title": "Romanian (ro) 🇷🇴",
           "value": "ro"
         },
         {
-          "title": "Russian (ru)",
+          "title": "Russian (ru) 🇷🇺",
           "value": "ru"
         },
         {
-          "title": "Slovakian (sk)",
-          "value": "sk"
-        },
-        {
-          "title": "Albanian (sq)",
-          "value": "sq"
-        },
-        {
-          "title": "Serbian (sr)",
+          "title": "Serbian (sr) 🇷🇸",
           "value": "sr"
         },
         {
-          "title": "Swedish (sv)",
+          "title": "Slovakian (sk) 🇸🇰",
+          "value": "sk"
+        },
+        {
+          "title": "Spanish (es) 🇪🇸",
+          "value": "es"
+        },
+        {
+          "title": "Swedish (sv) 🇸🇪",
           "value": "sv"
         },
         {
-          "title": "Turkish (tr)",
+          "title": "Turkish (tr) 🇹🇷",
           "value": "tr"
         }
       ]

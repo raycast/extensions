@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Action, ActionPanel, List, showToast } from "@raycast/api";
 
 import { createInputFromSearchTerm, getListSubtitle, joinStringsWithDelimiter } from "./utils";
-import translate, { Translations } from "dictcc";
+import translate, { Languages, Translations } from "dictcc";
 
 export const ListWithEmptyView = () => <List.EmptyView title="No Results" icon={{ source: "icon-small.png" }} />;
 
 export default function Command() {
   const [translations, setTranslations] = useState<Translations[] | undefined>();
   const [url, setUrl] = useState<string | undefined>();
+  const [languages, setLanguages] = useState<[/* source */ Languages, /* target */ Languages] | undefined>();
   const [loading, setLoading] = useState(false);
 
   const onSearchTextChange = async (searchTerm: string) => {
@@ -24,6 +25,7 @@ export default function Command() {
 
       setTranslations(data);
       setUrl(url);
+      setLanguages([input.sourceLanguage, input.targetLanguage]);
     } catch (error) {
       if (error instanceof Error) {
         showToast({
@@ -45,7 +47,7 @@ export default function Command() {
     >
       <ListWithEmptyView />
 
-      <List.Section title="Results" subtitle={getListSubtitle(loading, translations?.length || 0)}>
+      <List.Section title="Results" subtitle={getListSubtitle(loading, languages, translations?.length)}>
         {translations?.map((translation, index) => (
           <List.Item
             key={index}
