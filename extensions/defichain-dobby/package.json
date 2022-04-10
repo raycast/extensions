@@ -13,9 +13,9 @@
   "commands": [
     {
       "name": "dobby",
-      "title": "Show Dobby vaults",
-      "subtitle": "Defichain Vault",
-      "description": "Load current vault details",
+      "title": "Show vaults",
+      "subtitle": "Defichain Dobby",
+      "description": "Show current vault details",
       "mode": "view"
     }
   ],
