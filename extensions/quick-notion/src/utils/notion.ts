@@ -38,11 +38,9 @@ export const postContents = async (values: PostContents) => {
       ...(values.tags &&
         values.tags?.length > 0 && {
           tags: {
-            multi_select: [
-              {
-                name: values.tags,
-              },
-            ],
+            multi_select: values.tags.map((tagName) => ({
+              name: tagName,
+            })),
           },
         }),
       ...(values.date && {

@@ -1,16 +1,19 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "notion-ctrl",
+  "name": "quick-notion",
   "version": "1.0.0",
-  "title": "notion-ctrl",
-  "description": "特定のNotionデータベースへ素早くデータを保存する",
+  "title": "Quick Notion",
+  "description": "指定されたNotionデータベースへ素早くデータを保存する",
+  "categories": [
+    "Productivity"
+  ],
   "icon": "command-icon.png",
   "author": "nbr41to",
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Post Content",
+      "title": "Quick Post",
       "subtitle": "データベースにメモする",
       "description": "特定のNotionデータベースへ素早くデータを保存する",
       "mode": "view"

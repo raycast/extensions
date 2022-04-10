@@ -6,7 +6,7 @@ export type PostContents = {
   title: string;
   content: string;
   category?: string;
-  tags?: string;
+  tags?: string[];
   date?: Date | null;
 };
 export type Database = {
