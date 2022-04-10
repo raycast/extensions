@@ -1,5 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
-import { Values } from "@raycast/api/types/api/app/localStorage";
+import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import Values = LocalStorage.Values;
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
