@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "find-it",
-  "title": "Find out",
-  "description": "A casual game, find out the different icons in 30s.",
+  "title": "Hidden Icons",
+  "description": "A casual game, find out the hidden icons in 30s.",
   "icon": "find-out-icon.png",
   "author": "koinzhang",
   "categories": [
@@ -12,13 +12,14 @@
   "commands": [
     {
       "name": "find-out",
-      "title": "Find Out",
-      "description": "A casual game, find out the different icons in 30s.",
+      "title": "Find out Hidden Icon",
+      "description": "A casual game, find out the hidden icons in 30s.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0"
+    "@raycast/api": "^1.32.1",
+    "file-url": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",

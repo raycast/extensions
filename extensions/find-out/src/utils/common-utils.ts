@@ -1,4 +1,5 @@
 import { environment } from "@raycast/api";
+import fileUrl from "file-url";
 
 export const countDownTimer = (countDown: number) => {
   const interval = setInterval(() => {
@@ -45,7 +46,7 @@ export const getNumberCanvas = (iconTheme: string, number: number) => {
   for (const _number of _numberList) {
     _numberPathList.forEach((numberPathValue) => {
       if (numberPathValue.value === _number) {
-        numberPaths.push(`![](file://${numberPathValue.path})`);
+        numberPaths.push(`![](${fileUrl(numberPathValue.path)})`);
         return;
       }
     });

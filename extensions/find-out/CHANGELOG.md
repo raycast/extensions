@@ -1,5 +1,5 @@
-# Find Out Changelog
+# Hidden Icons Changelog
 
-## [Added Find Out] - 2022-04-12
-- Release of Find Out version 1.0
-- **Find Out**: Find out the different icon in 30 seconds.
+## [Added Hidden Icons] - 2022-04-18
+- Release of Hidden Icons version 1.0
+- **Find out Hidden Icon**: Find out the hidden icon in 30 seconds.

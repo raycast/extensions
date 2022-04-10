@@ -72,7 +72,7 @@ export default function Command() {
     <List
       isLoading={false}
       enableFiltering={false}
-      searchBarPlaceholder="Find the different icon in 30 seconds"
+      searchBarPlaceholder="Find the hidden icon in 30 seconds"
       searchBarAccessory={
         <List.Dropdown
           tooltip={"Difficulty mode"}
