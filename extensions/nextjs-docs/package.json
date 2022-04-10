@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nextjs-docs",
+  "title": "nextjs-docs",
+  "description": "Efficiently search NextJS documentation from RayCast.",
+  "icon": "command-icon.png",
+  "author": "PrasadChinwal",
+  "categories": [
+    "Productivity", "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "NextJS Docs",
+      "description": "Search NextJS docs in Ray",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "github_personal_access_token",
+          "type": "textfield",
+          "required": true,
+          "title": "Github Personal Access Token",
+          "description": "You can find your Personal Access Token at https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@octokit/core": "^3.6.0",
+    "@raycast/api": "^1.32.0"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3",
+    "yaml-front-matter": "^4.1.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
