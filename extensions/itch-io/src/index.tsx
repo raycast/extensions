@@ -4,7 +4,7 @@ import { getGames } from "./api/getgames";
 import { CategoryDropdown } from "./components/categoryDropdown";
 import { SearchListItem } from "./components/searchListItem";
 import { categories } from "./interface/gameCategories";
-import { ItchModel } from "./interfaces/itchModel";
+import { ItchModel } from "./interface/itchModel";
 
 export default function Command() {
   const [games, setGames] = useState<ItchModel[]>([]);
