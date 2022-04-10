@@ -9,9 +9,9 @@ export function getVaultStateColor(vaultState: VaultState): Color {
       return Color.Blue;
     case "inactive":
       return Color.PrimaryText;
-    case "mayLiquidate":
+    case "may_liquidate":
       return Color.Orange;
-    case "inLiquidation":
+    case "in_liquidation":
       return Color.Red;
   }
 }

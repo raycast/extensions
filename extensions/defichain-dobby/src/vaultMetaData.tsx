@@ -9,7 +9,10 @@ export default function VaultMetadata({ vault, no }: Props) {
     <>
       {no > 0 && <Detail.Metadata.Separator />}
       <Detail.Metadata.TagList title={""}>
-        <Detail.Metadata.TagList.Item text={vault.state.toUpperCase()} color={getVaultStateColor(vault.state)} />
+        <Detail.Metadata.TagList.Item
+          text={vault.state.toUpperCase().replace("_", " ")}
+          color={getVaultStateColor(vault.state)}
+        />
       </Detail.Metadata.TagList>
       <Detail.Metadata.Link
         title="Vault id"

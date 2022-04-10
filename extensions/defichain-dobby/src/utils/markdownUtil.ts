@@ -4,8 +4,8 @@ export function getVaultsSummary(vaults: DobbyVault[] | null): string {
   const activeVaults = vaults?.filter((x) => x.state === "active") ?? [];
   const frozenVaults = vaults?.filter((x) => x.state === "frozen") ?? [];
   const inactiveVaults = vaults?.filter((x) => x.state === "inactive") ?? [];
-  const mayLiquidateVaults = vaults?.filter((x) => x.state === "mayLiquidate") ?? [];
-  const inLiquidationVaults = vaults?.filter((x) => x.state === "inLiquidation") ?? [];
+  const mayLiquidateVaults = vaults?.filter((x) => x.state === "may_liquidate") ?? [];
+  const inLiquidationVaults = vaults?.filter((x) => x.state === "in_liquidation") ?? [];
 
   return `# My Dobby vaults  
   
