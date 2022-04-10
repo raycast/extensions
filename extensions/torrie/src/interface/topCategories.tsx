@@ -9,6 +9,7 @@ export const categories: Category[] = [
   { title: "Documentary", value: "top-100-documentaries", icon: Icon.Video },
   { title: "Anime", value: "top-100-anime", icon: Icon.Video },
   { title: "Other", value: "top-100-other", icon: Icon.Document },
+  { title: "Trending", value: "trending", icon: Icon.TwoArrowsClockwise },
   { title: "XXX", value: "top-100-xxx", icon: Icon.EyeSlash },
 ];
 
