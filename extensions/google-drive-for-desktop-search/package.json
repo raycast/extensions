@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-drive-for-desktop-search",
   "title": "google-drive-for-desktop-search",
-  "description": "",
+  "description": "Search for files from Google Drive for Desktop virtual drive",
   "icon": "google-drive-for-desktop-search.png",
   "author": "nametake",
   "license": "MIT",
@@ -28,12 +28,15 @@
     {
       "name": "excludePaths",
       "title": "Exclude Paths",
-      "description": "Full paths to exclude from search",
+      "description": "Comma-separated full paths to exclude from search",
       "required": false,
-      "placeholder": "/Volumes/GoogleDrive/MyDrive/Secrets, /Volumes/GoogleDrive/MyDrive/Priavte, ...",
+      "placeholder": "/Volumes/GoogleDrive/My Drive/Secrets, /Volumes/GoogleDrive/My Drive/Priavte, ...",
       "default": "",
       "type": "textfield"
     }
+  ],
+  "categories": [
+    "Productivity"
   ],
   "dependencies": {
     "@raycast/api": "^1.32.1"
