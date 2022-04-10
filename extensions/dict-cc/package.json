@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "dict.cc",
+  "name": "dict-cc",
   "title": "dict.cc",
   "description": "Simple translation using dict.cc",
   "icon": "icon.png",
