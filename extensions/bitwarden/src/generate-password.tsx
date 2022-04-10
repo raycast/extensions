@@ -9,6 +9,8 @@ import {
   Detail,
   getPreferenceValues,
   List,
+  confirmAlert,
+  Alert,
 } from "@raycast/api";
 import { usePasswordGenerator, usePasswordHistory } from "./hooks";
 import { Bitwarden } from "./api";
@@ -25,7 +27,7 @@ import {
 import { debounce } from "throttle-debounce";
 import { TroubleshootingGuide } from "./components";
 import { useEffect, useState } from "react";
-import { format, parseISO } from "date-fns";
+import { format, isThisMonth, isThisWeek, isToday, isYesterday, parseISO } from "date-fns";
 
 const FormSpace = () => <Form.Description text="" />;
 
@@ -45,24 +47,20 @@ function PasswordGenerator(props: { bitwardenApi: Bitwarden }) {
   if (!options) return <Detail isLoading={true} />;
 
   const showDebouncedToast = debounce(1000, showToast);
+  const handlePasswordTypeChange = (type: string) => setOption("passphrase", type === "passphrase");
 
-  const handlePasswordTypeChange = (type: string) => {
-    setOption("passphrase", type === "passphrase");
-  };
-
-  const handleFieldChange =
-    <O extends keyof PasswordGeneratorOptions>(field: O, errorMessage?: string) =>
-    async (value: PasswordGeneratorOptions[O]) => {
+  const handleFieldChange = <O extends keyof PasswordGeneratorOptions>(field: O, errorMessage?: string) => {
+    return async (value: PasswordGeneratorOptions[O]) => {
       if (isValidFieldValue(field, value)) {
         showDebouncedToast.cancel();
         setOption(field, value);
         return;
       }
-
       if (errorMessage) {
         showDebouncedToast(Toast.Style.Failure, errorMessage);
       }
     };
+  };
 
   const passwordType: PasswordType = options?.passphrase ? "passphrase" : "password";
 
@@ -183,8 +181,29 @@ function OptionField({ option, currentOptions, handleFieldChange, field }: Optio
   );
 }
 
+const clearHistoryConfirmAlertOptions = {
+  title: "Clear history",
+  message: "Are you sure you want to clear your password history?",
+  icon: Icon.Trash,
+  primaryAction: {
+    title: "Confirm",
+    style: Alert.ActionStyle.Destructive,
+  },
+} as Alert.ActionOptions;
+
+const getPasswordHistoryItemKeywords = (entry: PasswordHistoryItem) => {
+  const keywords: string[] = [entry.type];
+  const parsedDate = parseISO(entry.datetime);
+  if (isToday(parsedDate)) keywords.push("today");
+  if (isYesterday(parsedDate)) keywords.push("yesterday");
+  if (isThisWeek(parsedDate)) keywords.push("this week");
+  if (isThisMonth(parsedDate)) keywords.push("this month");
+
+  return keywords;
+};
+
 function PasswordHistory() {
-  const [items, setItems] = useState<PasswordHistoryItem[]>([]);
+  const [items, setItems] = useState<PasswordHistoryItem[]>();
   const { getAll, clear } = usePasswordHistory();
 
   useEffect(() => {
@@ -193,33 +212,44 @@ function PasswordHistory() {
     setItems(historyItems);
   }, []);
 
-  const handleClear = () => {
+  const handleClear = async () => {
+    if (!(await confirmAlert(clearHistoryConfirmAlertOptions))) return;
     clear();
     setItems([]);
   };
 
+  if (!items) return null;
+
   return (
-    <List navigationTitle="Generate Password - History">
-      {items.map(({ type, password, datetime }) => (
-        <List.Item
-          key={password}
-          title={password}
-          icon={Icon.Clipboard}
-          keywords={[type]}
-          accessories={[{ text: format(parseISO(datetime), "d MMM yyyy, HH:mm:ss"), tooltip: datetime }]}
-          actions={
-            <ActionPanel>
-              <Action.CopyToClipboard title="Copy to clipboard" icon={Icon.Clipboard} content={password} />
-              <Action
-                title="Clear history"
-                icon={Icon.Trash}
-                onAction={handleClear}
-                shortcut={{ key: "backspace", modifiers: ["cmd", "shift"] }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+    <List
+      searchBarPlaceholder="Try searching for 'passphrase' or 'yesterday'"
+      navigationTitle="Generate Password - History"
+    >
+      {items.map((entry) => {
+        const { password, datetime } = entry;
+        const formattedDate = format(parseISO(datetime), "d MMM yyyy, HH:mm:ss");
+
+        return (
+          <List.Item
+            key={`${password}-${datetime}`}
+            title={password}
+            icon={Icon.Clipboard}
+            keywords={[formattedDate, ...getPasswordHistoryItemKeywords(entry)]}
+            accessories={[{ text: formattedDate, tooltip: datetime }]}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard title="Copy to clipboard" icon={Icon.Clipboard} content={password} />
+                <Action
+                  title="Clear history"
+                  icon={Icon.Trash}
+                  onAction={handleClear}
+                  shortcut={{ key: "backspace", modifiers: ["cmd", "shift"] }}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
