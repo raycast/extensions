@@ -1,6 +1,7 @@
-import { ActionType } from "./move-file-utils";
-import { commonAction } from "./move-file-out";
+import { ActionType, getItemAndSend } from "./send-file-utils";
+import { showToast, Toast } from "@raycast/api";
 
 export default async () => {
-  await commonAction(ActionType.copy);
+  await showToast(Toast.Style.Animated, `Copying... Don't quit.`);
+  await getItemAndSend(ActionType.COPY);
 };

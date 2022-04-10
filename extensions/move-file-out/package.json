@@ -30,26 +30,18 @@
     {
       "name": "openDestDirectory",
       "type": "checkbox",
-      "required": false,
+      "required": true,
       "title": "Advanced Operations",
       "label": "Open Destination Directory",
       "description": "After successfully moving out the files, open the destination folder.",
-      "default": true
+      "default": false
     },
     {
       "name": "deleteEmptyDirectory",
       "type": "checkbox",
-      "required": false,
+      "required": true,
       "label": "Delete Empty Directory",
       "description": "After successfully moving out the files, delete the original folder if the folder is empty.",
-      "default": false
-    },
-    {
-      "name": "disableWarning",
-      "type": "checkbox",
-      "required": false,
-      "label": "Disable Duplicate Warnings",
-      "description": "Disable duplicate file and folder warnings, rename or overwrite directly.",
       "default": false
     }
   ],
