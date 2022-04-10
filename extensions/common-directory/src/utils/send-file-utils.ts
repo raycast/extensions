@@ -1,96 +1,21 @@
-import { Alert, confirmAlert, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
-import fs from "fs-extra";
+import { Alert, confirmAlert, getSelectedFinderItems, open, showHUD, showToast, Toast } from "@raycast/api";
+import fse from "fs-extra";
 import path, { ParsedPath } from "path";
-import { preferences } from "./utils";
+import { checkDirectoryEmpty, preferences } from "./utils";
 
 export enum ActionType {
   MOVE = "move",
   COPY = "copy",
 }
 
-export const getItemAndSend = async (destPath: string, action: ActionType): Promise<boolean> => {
-  const { selectedFile, selectedFolder } = await getSelectedItemPath();
-  if (selectedFile.length === 0 && selectedFolder.length === 0) {
-    await showToast(Toast.Style.Failure, "Nothing is selected.");
-    return false;
-  }
-  const parentFolderPath = selectedFile.length === 0 ? selectedFolder[0].dir : selectedFile[0].dir;
-
-  if (preferences().disableWarning) {
-    const moveResult = sendFileTo(selectedFile, selectedFolder, parentFolderPath, destPath, true, action);
-    if (await showParentSameFolderTips(moveResult, parentFolderPath, selectedFile, selectedFolder, action)) {
-      return moveResult.isMoved;
-    }
-    await followUpWork(moveResult, parentFolderPath, destPath, action);
-    return moveResult.isMoved;
-  } else {
-    const moveResult = await sendFileShowAlert(selectedFile, selectedFolder, parentFolderPath, destPath, action);
-    if (await showParentSameFolderTips(moveResult, parentFolderPath, selectedFile, selectedFolder, action)) {
-      return moveResult.isMoved;
-    }
-    if (moveResult.isMoved) {
-      await followUpWork(moveResult, parentFolderPath, destPath, action);
-    } else {
-      await showToast(Toast.Style.Failure, "Operation is canceled.");
-    }
-    return moveResult.isMoved;
-  }
-};
-
-const showParentSameFolderTips = async (
-  moveResult: { isMoved: boolean; isParentSameFolder: boolean },
-  parentFolderPath: string,
-  selectedFile: ParsedPath[],
-  selectedFolder: ParsedPath[],
-  action: ActionType
-) => {
-  if (moveResult.isParentSameFolder && selectedFile.length + selectedFolder.length == 1) {
-    await showToast(
-      Toast.Style.Failure,
-      `Nothing is ${action == ActionType.MOVE ? "moved" : "copied"}.`,
-      `${path.parse(parentFolderPath).base} is ignored.`
-    );
-    return true;
-  }
-  return false;
-};
-
-//end work
-const followUpWork = async (
-  moveResult: { isMoved: boolean; isParentSameFolder: boolean },
-  parentFolderPath: string,
-  destPath: string,
-  action: ActionType
-) => {
-  try {
-    if (moveResult.isParentSameFolder) {
-      await showToast(
-        Toast.Style.Success,
-        `Files are ${action == ActionType.MOVE ? "moved" : "copied"} to ${path.parse(destPath).base}`,
-        `${path.parse(parentFolderPath).base} is ignored`
-      );
-    } else {
-      await showToast(
-        Toast.Style.Success,
-        `Files are ${action == ActionType.MOVE ? "moved" : "copied"} to ${path.parse(destPath).base}`
-      );
-    }
-    if (preferences().openDestDirectory) {
-      await open(destPath);
-    }
-  } catch (e) {
-    console.error(String(e));
-  }
-};
-
-//start work
+//fetch selected item
 export const getSelectedItemPath = async () => {
   const selectedFile: ParsedPath[] = [];
   const selectedFolder: ParsedPath[] = [];
   try {
     const selectedFinderItem = await getSelectedFinderItems();
     selectedFinderItem.forEach((value) => {
-      const stat = fs.lstatSync(value.path);
+      const stat = fse.lstatSync(value.path);
       if (stat.isDirectory()) {
         selectedFolder.push(path.parse(value.path));
       }
@@ -105,134 +30,239 @@ export const getSelectedItemPath = async () => {
   }
 };
 
+//pre check
+export function checkExistsSameFiles(toPath: string, parsedSrcPaths: ParsedPath[]) {
+  for (const srcParsePath of parsedSrcPaths) {
+    if (checkExistsSameFile(srcParsePath, toPath)) return true;
+  }
+  return false;
+}
+
+function checkExistsSameFile(srcPath: ParsedPath, toPath: string) {
+  return fse.pathExistsSync(toPath + "/" + srcPath.base) && !checkParentSameName(srcPath, toPath);
+}
+
+function checkParentSameName(srcPath: ParsedPath, toPath: string) {
+  return srcPath.dir === toPath + "/" + srcPath.base;
+}
+
+function checkMoveToItself(srcPath: ParsedPath, toPath: string) {
+  return srcPath.dir === toPath;
+}
+
+function checkMoveToSubdirectory(srcPath: ParsedPath, toPath: string) {
+  return (
+    toPath.includes(srcPath.dir + "/" + srcPath.base) ||
+    path.resolve(toPath).includes(path.resolve(srcPath.dir + srcPath.base))
+  );
+}
+
+//start send file
+export const getItemAndSend = async (toPath: string, action: ActionType): Promise<boolean> => {
+  const { selectedFile, selectedFolder } = await getSelectedItemPath();
+
+  //pre check
+  if (selectedFile.length === 0 && selectedFolder.length === 0) {
+    await showToast(Toast.Style.Failure, "Error!", "Nothing is selected.");
+    return false;
+  }
+  const parentFolderPath = selectedFile.length === 0 ? selectedFolder[0].dir : selectedFile[0].dir;
+
+  if (toPath === parentFolderPath || path.resolve(parentFolderPath) === path.resolve(toPath)) {
+    await showToast(Toast.Style.Failure, "Error!", `Cannot ${action} a directory to itself.`);
+    return false;
+  }
+
+  if (selectedFolder.length === 1 && selectedFile.length === 0 && checkMoveToSubdirectory(selectedFolder[0], toPath)) {
+    await showToast(Toast.Style.Failure, "Error!", `Cannot ${action} folder to a subdirectory of itself.`);
+    return false;
+  }
+
+  if (selectedFolder.length === 1 && selectedFile.length === 0 && checkParentSameName(selectedFolder[0], toPath)) {
+    await showToast(Toast.Style.Failure, "Error!", `Cannot replace folder by the items it contains.`);
+    return false;
+  }
+
+  // move or copy
+  const operationResult = await sendFileShowAlert(selectedFile, selectedFolder, toPath, action);
+  if (!operationResult.isCancel) {
+    try {
+      if (preferences().deleteEmptyDirectory && checkDirectoryEmpty(parentFolderPath)) {
+        fse.removeSync(parentFolderPath);
+      }
+    } catch (e) {
+      console.error(String(e));
+    }
+    await followUpWork(operationResult.sendResult, toPath, action);
+    return true;
+  } else {
+    await showToast(Toast.Style.Failure, "Error!", "Operation is canceled.");
+    return false;
+  }
+};
+
+//show alert
 export async function sendFileShowAlert(
   selectedFile: ParsedPath[],
   selectedFolder: ParsedPath[],
-  parentFolderPath: string,
   destPath: string,
   action: ActionType
 ) {
-  let isMoved = true;
-
-  //check if parent folder with same name exists
-  let moveResult = { isMoved: true, isParentSameFolder: false };
-
+  let sendResult: { isSuccess: boolean; srcPath: ParsedPath }[] = [];
+  let isCancel = false;
   //check if file and folder exists
-  if (
-    checkExistsSameNameFile(parentFolderPath, destPath, selectedFile) ||
-    checkExistsSameNameFile(parentFolderPath, destPath, selectedFolder)
-  ) {
+  if (checkExistsSameFiles(destPath, selectedFile) || checkExistsSameFiles(destPath, selectedFolder)) {
     const options: Alert.Options = {
       title: "⚠️ Overwrite",
       message: "Files or folders already exist in the destination path. Do you want to overwrite?",
       primaryAction: {
         title: "Overwrite All",
         onAction: () => {
-          moveResult = sendFileTo(selectedFile, selectedFolder, parentFolderPath, destPath, true, action);
+          sendResult = sendFileTo(selectedFile, selectedFolder, destPath, action);
         },
       },
       dismissAction: {
         title: "Cancel",
         onAction: () => {
-          isMoved = false;
+          isCancel = true;
         },
       },
     };
     await confirmAlert(options);
   } else {
     // move file
-    moveResult = sendFileTo(selectedFile, selectedFolder, parentFolderPath, destPath, true, action);
+    sendResult = sendFileTo(selectedFile, selectedFolder, destPath, action);
   }
 
-  return { isMoved: isMoved, isParentSameFolder: moveResult.isParentSameFolder };
-}
-
-export function checkExistsSameNameFile(parentFolderPath: string, destPath: string, parsedPaths: ParsedPath[]) {
-  for (const parsedPath of parsedPaths) {
-    if (fs.pathExistsSync(destPath + "/" + parsedPath.base)) {
-      if (parentFolderPath != destPath + "/" + parsedPath.base) return true;
-    }
-  }
-  return false;
+  return { isCancel: isCancel, sendResult: sendResult };
 }
 
 export function sendFileTo(
   selectedFile: ParsedPath[],
   selectedFolder: ParsedPath[],
-  parentFolderPath: string,
   destPath: string,
-  overwrite: boolean,
-  action: ActionType
+  action: ActionType,
+  overwrite = true
 ) {
-  const isParentSameFolder: boolean[] = [];
+  const sendResult: { isSuccess: boolean; srcPath: ParsedPath }[] = [];
   switch (action) {
     case ActionType.COPY: {
-      // copy file
       selectedFile.forEach((value) => {
-        fsCopyFile(value.dir + "/" + value.base, destPath + "/" + value.base, overwrite);
+        sendResult.push(fseCopyItem(value.dir + "/" + value.base, destPath + "/" + value.base, overwrite));
       });
       selectedFolder.forEach((value) => {
-        isParentSameFolder.push(
-          fsCopyFolder(parentFolderPath, value.dir + "/" + value.base, destPath + "/" + value.base, overwrite)
-        );
+        sendResult.push(fseCopyItem(value.dir + "/" + value.base, destPath + "/" + value.base, overwrite));
       });
-      return { isMoved: true, isParentSameFolder: isParentSameFolder.includes(true) };
+      return sendResult;
     }
     case ActionType.MOVE: {
-      // move file
       selectedFile.forEach((value) => {
-        fsMoveFile(value.dir + "/" + value.base, destPath + "/" + value.base, overwrite);
+        sendResult.push(fseMoveItem(value.dir + "/" + value.base, destPath + "/" + value.base, overwrite));
       });
       for (const value of selectedFolder) {
-        isParentSameFolder.push(
-          fsMoveFolder(parentFolderPath, value.dir + "/" + value.base, destPath + "/" + value.base, overwrite)
-        );
+        sendResult.push(fseMoveItem(value.dir + "/" + value.base, destPath + "/" + value.base, overwrite));
       }
-      return { isMoved: true, isParentSameFolder: isParentSameFolder.includes(true) };
+      return sendResult;
     }
   }
 }
 
-export function fsCopyFile(src: string, dest: string, overwrite: boolean) {
+//end work
+const followUpWork = async (
+  moveResult: { isSuccess: boolean; srcPath: ParsedPath }[],
+  destPath: string,
+  action: ActionType
+) => {
   try {
-    fs.copySync(src, dest, { overwrite: overwrite });
+    const successResult = moveResult.filter((item) => item.isSuccess);
+    const failedResult = moveResult.filter((item) => !item.isSuccess);
+    const options: Toast.Options = {
+      style: Toast.Style.Success,
+      title: `${action == ActionType.MOVE ? "Move" : "Copy"} success!`,
+      message: `${successResult.length} item${successResult.length > 1 ? "s" : ""} success, ${
+        failedResult.length
+      } item${failedResult.length > 1 ? "s" : ""} failure.`,
+      primaryAction: {
+        title: "Open Folder",
+        onAction: (toast) => {
+          open(destPath);
+          toast.hide();
+        },
+      },
+      secondaryAction: {
+        title: "Reveal Folder",
+        onAction: (toast) => {
+          open(path.parse(destPath).dir);
+          toast.hide();
+        },
+      },
+    };
+
+    await showToast(options);
+
+    if (preferences().openDestDirectory) {
+      await showHUD(`${action == ActionType.MOVE ? "Move" : "Copy"} success! Open ${path.parse(destPath).base}.`);
+      await open(destPath);
+    }
   } catch (e) {
     console.error(String(e));
   }
-}
-export function fsCopyFolder(parentFolderPath: string, src: string, dest: string, overwrite: boolean) {
-  let isParentSameFolder = false;
+};
+
+//utils
+export function fseCopyItem(src: string, dest: string, overwrite: boolean) {
+  const parseSrc = path.parse(src);
+  const parseDest = path.parse(dest);
   try {
-    if (parentFolderPath == dest) {
-      isParentSameFolder = true;
-    } else {
-      fs.copySync(src, dest, { overwrite: overwrite });
+    if (
+      checkParentSameName(parseSrc, parseDest.dir) ||
+      checkMoveToSubdirectory(parseSrc, parseDest.dir) ||
+      checkMoveToItself(parseSrc, parseDest.dir)
+    ) {
+      return { isSuccess: false, srcPath: parseSrc };
     }
-    return isParentSameFolder;
+
+    // SOLUTION for Error: Cannot copy. solution for a subdirectory of itself,
+    if (fse.pathExistsSync(dest)) {
+      fseCopySyncFix(src, dest);
+    } else {
+      fse.copySync(src, dest, { overwrite: overwrite, recursive: true });
+    }
+
+    return { isSuccess: true, srcPath: parseSrc };
   } catch (e) {
     console.error(String(e));
-    return isParentSameFolder;
+    return { isSuccess: false, srcPath: parseSrc };
   }
 }
 
-export function fsMoveFile(src: string, dest: string, overwrite: boolean) {
+export function fseMoveItem(src: string, dest: string, overwrite: boolean) {
   try {
-    fs.moveSync(src, dest, { overwrite: overwrite });
+    if (
+      checkParentSameName(path.parse(src), path.dirname(dest)) ||
+      checkMoveToSubdirectory(path.parse(src), path.dirname(dest)) ||
+      checkMoveToItself(path.parse(src), path.dirname(dest))
+    ) {
+      return { isSuccess: false, srcPath: path.parse(src) };
+    }
+    fse.moveSync(src, dest, { overwrite: overwrite });
+    return { isSuccess: true, srcPath: path.parse(src) };
+  } catch (e) {
+    console.error(String(e));
+    return { isSuccess: false, srcPath: path.parse(src) };
+  }
+}
+
+// SOLUTION for Error: Cannot copy. solution for a subdirectory of itself,
+export function fseCopySyncFix(sourceDir: string, destinationDir: string) {
+  try {
+    fse.rmSync(destinationDir, { recursive: true });
   } catch (e) {
     console.error(String(e));
   }
-}
-export function fsMoveFolder(parentFolderPath: string, src: string, dest: string, overwrite: boolean) {
-  let isParentSameFolder = false;
   try {
-    if (parentFolderPath == dest) {
-      isParentSameFolder = true;
-    } else {
-      fs.moveSync(src, dest, { overwrite: overwrite });
-    }
-    return isParentSameFolder;
+    fse.copySync(sourceDir, destinationDir, { overwrite: true, recursive: true });
   } catch (e) {
     console.error(String(e));
-    return isParentSameFolder;
   }
 }

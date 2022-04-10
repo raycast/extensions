@@ -14,15 +14,20 @@ import {
 import { DirectoryInfo, LocalDirectoryKey, SortBy } from "./utils/directory-info";
 import React, { useEffect, useState } from "react";
 import AddCommonDirectory from "./add-common-directory";
-import { getOpenFinderWindowPath, preferences } from "./utils/utils";
+import { getOpenFinderWindowPath, isEmpty, preferences } from "./utils/utils";
 import { homedir } from "os";
 import path from "path";
 import fs from "fs-extra";
+import { DetailKey, getDirectoryContent, getShowDetailLocalStorage, setShowDetailLocalStorage } from "./utils/ui-utils";
 
 export default function OpenCommonDirectory() {
   const [searchValue, setSearchValue] = useState<string>("");
   const [commonDirectory, setCommonDirectory] = useState<DirectoryInfo[]>([]);
   const [openDirectory, setOpenDirectory] = useState<DirectoryInfo[]>([]);
+  const [directoryPath, setDirectoryPath] = useState<string>("");
+  const [directoryContent, setDirectoryContent] = useState<string>("");
+
+  const [showDetail, setShowDetail] = useState<boolean>(false);
   const [updateList, setUpdateList] = useState<number[]>([0]);
   const [loading, setLoading] = useState<boolean>(true);
   const { sortBy, showOpenDirectory } = preferences();
@@ -31,6 +36,7 @@ export default function OpenCommonDirectory() {
 
   useEffect(() => {
     async function _fetchLocalStorage() {
+      setShowDetail(await getShowDetailLocalStorage(DetailKey.OPEN_COMMON_DIRECTORY));
       setCommonDirectory(await getDirectory(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, sortBy));
       if (showOpenDirectory) {
         setOpenDirectory(await getOpenFinderWindowPath());
@@ -41,12 +47,29 @@ export default function OpenCommonDirectory() {
     _fetchLocalStorage().then();
   }, [updateList]);
 
+  useEffect(() => {
+    async function _fetchDetailContent() {
+      setDirectoryContent(getDirectoryContent(directoryPath));
+    }
+
+    _fetchDetailContent().then();
+  }, [directoryPath]);
+
   return (
     <List
       isLoading={loading}
+      isShowingDetail={showDetail}
       searchBarPlaceholder={"Search and open"}
       onSearchTextChange={(newValue) => {
         setSearchValue(newValue);
+      }}
+      onSelectionChange={(id) => {
+        if (typeof id === "string") {
+          const idContent = JSON.parse(id);
+          setDirectoryPath(idContent.path);
+        } else {
+          setDirectoryPath("");
+        }
       }}
     >
       {(commonDirectory.length === 0 && showOpenDirectory && openDirectory.length === 0) ||
@@ -79,10 +102,12 @@ export default function OpenCommonDirectory() {
                     key={directory.id}
                     homeDirectory={homeDirectory}
                     directory={directory}
-                    setCommonDirectory={setCommonDirectory}
                     index={index}
                     commonDirectory={commonDirectory}
+                    directoryContent={directoryContent}
+                    setCommonDirectory={setCommonDirectory}
                     updateListUseState={[updateList, setUpdateList]}
+                    showDetailUseState={[showDetail, setShowDetail]}
                   />
                 );
             })}
@@ -95,10 +120,12 @@ export default function OpenCommonDirectory() {
                     key={directory.id}
                     homeDirectory={homeDirectory}
                     directory={directory}
-                    setCommonDirectory={setCommonDirectory}
                     index={index}
                     commonDirectory={openDirectory}
+                    directoryContent={directoryContent}
+                    setCommonDirectory={setCommonDirectory}
                     updateListUseState={[updateList, setUpdateList]}
+                    showDetailUseState={[showDetail, setShowDetail]}
                   />
                 );
             })}
@@ -112,24 +139,30 @@ export default function OpenCommonDirectory() {
 function DirectoryItem(props: {
   homeDirectory: string;
   directory: DirectoryInfo;
-  setCommonDirectory: React.Dispatch<React.SetStateAction<DirectoryInfo[]>>;
   index: number;
   commonDirectory: DirectoryInfo[];
+  directoryContent: string;
+  setCommonDirectory: React.Dispatch<React.SetStateAction<DirectoryInfo[]>>;
   updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
+  showDetailUseState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
 }) {
-  const { homeDirectory, directory, setCommonDirectory, index, commonDirectory } = props;
+  const { homeDirectory, directory, setCommonDirectory, index, commonDirectory, directoryContent } = props;
   const [updateList, setUpdateList] = props.updateListUseState;
+  const [showDetail, setShowDetail] = props.showDetailUseState;
   const { push } = useNavigation();
   const { sortBy } = preferences();
   return (
     <List.Item
+      id={JSON.stringify({ type: directory.isCommon, path: directory.path })}
       icon={{ fileIcon: directory.path }}
       title={directory.name}
-      subtitle={directory.alias}
-      accessories={[
-        { text: "~" + directory.path.substring(homeDirectory.length) },
-        directory.valid ? {} : { icon: "⚠️" },
-      ]}
+      subtitle={showDetail ? "" : directory.alias}
+      detail={<List.Item.Detail markdown={directoryContent} />}
+      accessories={
+        showDetail
+          ? [{ text: isEmpty(directory.alias) ? " " : directory.alias }]
+          : [{ text: "~" + directory.path.substring(homeDirectory.length) }, directory.valid ? {} : { icon: "⚠️" }]
+      }
       actions={
         <ActionPanel>
           <Action
@@ -194,7 +227,7 @@ function DirectoryItem(props: {
                 <Action
                   title={"Rest All Rank"}
                   icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
                   onAction={() => {
                     resetRank(commonDirectory, setCommonDirectory).then(async () => {
                       await showToast(Toast.Style.Success, "Reset success!");
@@ -203,6 +236,18 @@ function DirectoryItem(props: {
                 />
               </>
             )}
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title={"Detail Action"}>
+            <Action
+              title={"Toggle Details"}
+              icon={Icon.Sidebar}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "d" }}
+              onAction={() => {
+                setShowDetail(!showDetail);
+                setShowDetailLocalStorage(DetailKey.SEND_COMMON_DIRECTORY, !showDetail).then();
+              }}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }

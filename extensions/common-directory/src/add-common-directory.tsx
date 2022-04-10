@@ -62,8 +62,8 @@ export default function AddCommonDirectory(props: {
             />
             <Action
               title={"Choose Directory"}
-              icon={Icon.Sidebar}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              icon={Icon.Desktop}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
               onAction={() => {
                 getChooseFolder().then((path) => {
                   setPath(path);

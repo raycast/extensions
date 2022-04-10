@@ -1,4 +1,4 @@
-import fs from "fs-extra";
+import fse from "fs-extra";
 import { runAppleScript } from "run-applescript";
 import { getPreferenceValues, getSelectedFinderItems, LocalStorage } from "@raycast/api";
 import { DirectoryInfo, DirectoryType } from "./directory-info";
@@ -11,7 +11,7 @@ export const preferences = () => {
     showOpenDirectory: preferencesMap.get("showOpenDirectory"),
     primaryAction: preferencesMap.get("primaryAction"),
     openDestDirectory: preferencesMap.get("openDestDirectory"),
-    disableWarning: preferencesMap.get("disableWarning"),
+    deleteEmptyDirectory: preferencesMap.get("deleteEmptyDirectory"),
   };
 };
 
@@ -103,7 +103,7 @@ export const getSelectedDirectory = async () => {
   try {
     const selectedFinderItem = await getSelectedFinderItems();
     selectedFinderItem.forEach((value) => {
-      const stat = fs.lstatSync(value.path);
+      const stat = fse.lstatSync(value.path);
       if (stat.isDirectory()) {
         selectedFile.push(value.path);
       }
@@ -116,7 +116,7 @@ export const getSelectedDirectory = async () => {
 
 export const checkPathAccessValid = (path: string) => {
   try {
-    fs.accessSync(path);
+    fse.accessSync(path);
     return true;
   } catch (e) {
     return false;
@@ -130,7 +130,7 @@ export const getDirectoryName = (path: string) => {
 
 export const isDirectoryOrFile = (path: string) => {
   try {
-    const stat = fs.lstatSync(path);
+    const stat = fse.lstatSync(path);
     if (stat.isDirectory()) {
       return DirectoryType.DIRECTORY;
     }
@@ -141,4 +141,14 @@ export const isDirectoryOrFile = (path: string) => {
     return DirectoryType.DIRECTORY;
   }
   return DirectoryType.DIRECTORY;
+};
+
+export const checkDirectoryEmpty = (pathName: string) => {
+  try {
+    const files = fse.readdirSync(pathName);
+    const isNormalFile = files.filter((value) => value.startsWith("."));
+    return files.length == isNormalFile.length;
+  } catch (e) {
+    return false;
+  }
 };

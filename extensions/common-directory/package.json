@@ -59,8 +59,8 @@
       "mode": "view"
     },
     {
-      "name": "send-file-to",
-      "title": "Send File to",
+      "name": "send-file-to-directory",
+      "title": "Send File to Directory",
       "icon": "send-file-to.png",
       "description": "Get the files to common directory.",
       "mode": "view",
@@ -72,7 +72,7 @@
           "title": "More Directory",
           "label": "Open Directory",
           "description": "There is some delay when fetching Open Directory.",
-          "default": true
+          "default": false
         },
         {
           "name": "openDestDirectory",
@@ -81,14 +81,14 @@
           "title": "Advanced Operations",
           "label": "Open Destination Directory",
           "description": "After successfully moving out the files, open the destination folder.",
-          "default": true
+          "default": false
         },
         {
-          "name": "disableWarning",
+          "name": "deleteEmptyDirectory",
           "type": "checkbox",
           "required": true,
-          "label": "Disable Duplicate Warnings",
-          "description": "Disable duplicate file and folder warnings, rename or overwrite directly.",
+          "label": "Delete Empty Directory",
+          "description": "After successfully moving out the files, delete the original folder if the folder is empty.",
           "default": false
         },
         {
@@ -115,6 +115,7 @@
   "dependencies": {
     "@raycast/api": "^1.32.1",
     "fs-extra": "^10.0.1",
+    "file-url": "^4.0.0",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
