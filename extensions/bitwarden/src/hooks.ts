@@ -1,8 +1,8 @@
 import { LocalStorage, getPreferenceValues, environment } from "@raycast/api";
-import { useState, useEffect, useReducer, useMemo, useRef } from "react";
+import { useEffect, useReducer, useMemo, useRef } from "react";
 import { Bitwarden } from "./api";
 import { DEFAULT_PASSWORD_OPTIONS, LOCAL_STORAGE_KEY } from "./const";
-import { PasswordGeneratorOptions, PasswordHistoryItem, PasswordType, Preferences } from "./types";
+import { PasswordGeneratorOptions, PasswordHistoryItem, Preferences } from "./types";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { createCipheriv, createHash, randomBytes, createDecipheriv } from "crypto";
 import { join as pathJoin } from "path/posix";
@@ -50,13 +50,14 @@ export function usePasswordGenerator(bitwardenApi: Bitwarden, hookOptions?: UseP
   const { save: saveToHistory } = usePasswordHistory();
 
   const generatePassword = async () => {
+    if (!options) return;
     try {
       renewAbortController();
       dispatch({ type: "generate" });
       const password = await bitwardenApi.generatePassword(options, abortControllerRef?.current);
       dispatch({ type: "setPassword", password });
-      saveToHistory(password, options?.passphrase ? "passphrase" : "password");
-    } catch (error) {
+      saveToHistory(password, options);
+    } catch {
       dispatch({ type: "cancelGenerate" });
     }
   };
@@ -151,21 +152,28 @@ export function usePasswordHistory() {
     return { name, path };
   }, [clientId]);
 
-  const getEncryptedEntry = (password: string, type?: PasswordType) => {
-    const encryptedData = encrypt(password);
-    const typeNumber = type === "passphrase" ? 1 : 0;
-    return `${typeNumber},${encryptedData.content},${encryptedData.iv},${new Date().toISOString()}`;
+  const getEncryptedEntry = (password: string, options: PasswordGeneratorOptions) => {
+    const dataToEncrypt = JSON.stringify({
+      password,
+      type: options.passphrase ? "passphrase" : "password",
+      datetime: new Date().toISOString(),
+    } as PasswordHistoryItem);
+    const encryptedData = encrypt(dataToEncrypt);
+    return `${encryptedData.content}_${encryptedData.iv}`;
   };
 
-  const getDecryptedEntry = (entry: string): PasswordHistoryItem | null => {
-    const [typeNumber, content, iv, datetime] = entry.split(",");
-    const type = typeNumber === "1" ? "passphrase" : "password";
-    if (!content || !iv || !datetime) return null;
-    return { type, password: decrypt({ content, iv }), datetime };
+  const getDecryptedEntry = (encryptedEntry: string): PasswordHistoryItem | null => {
+    try {
+      const [content, iv] = encryptedEntry.split("_");
+      const decryptedContent = decrypt({ content, iv });
+      return JSON.parse(decryptedContent) as PasswordHistoryItem;
+    } catch {
+      return null;
+    }
   };
 
-  const save = (password: string, type?: PasswordType) => {
-    const fileData = [getEncryptedEntry(password, type)];
+  const save = (password: string, options: PasswordGeneratorOptions) => {
+    const fileData = [getEncryptedEntry(password, options)];
     if (existsSync(historyFile.path)) {
       try {
         const fileContents = JSON.parse(readFileSync(historyFile.path, { encoding: "utf-8" })) as string[];

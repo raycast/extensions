@@ -29,6 +29,8 @@ import { TroubleshootingGuide } from "./components";
 import { useEffect, useState } from "react";
 import { format, isThisMonth, isThisWeek, isToday, isYesterday, parseISO } from "date-fns";
 
+const TITLE = "Password Generator";
+
 const FormSpace = () => <Form.Description text="" />;
 
 function GeneratePassword() {
@@ -44,7 +46,7 @@ function GeneratePassword() {
 function PasswordGenerator(props: { bitwardenApi: Bitwarden }) {
   const { password, regeneratePassword, isGenerating, options, setOption } = usePasswordGenerator(props.bitwardenApi);
 
-  if (!options) return <Detail isLoading={true} />;
+  if (!options) return <Detail navigationTitle={TITLE} isLoading={true} />;
 
   const showDebouncedToast = debounce(1000, showToast);
   const handlePasswordTypeChange = (type: string) => setOption("passphrase", type === "passphrase");
@@ -66,6 +68,7 @@ function PasswordGenerator(props: { bitwardenApi: Bitwarden }) {
 
   return (
     <Form
+      navigationTitle={TITLE}
       isLoading={isGenerating}
       actions={
         <ActionPanel>
@@ -221,10 +224,7 @@ function PasswordHistory() {
   if (!items) return null;
 
   return (
-    <List
-      searchBarPlaceholder="Try searching for 'passphrase' or 'yesterday'"
-      navigationTitle="Generate Password - History"
-    >
+    <List navigationTitle={`${TITLE} - History`} searchBarPlaceholder="Try searching for 'passphrase' or 'yesterday'">
       {items.map((entry) => {
         const { password, datetime } = entry;
         const formattedDate = format(parseISO(datetime), "d MMM yyyy, HH:mm:ss");
