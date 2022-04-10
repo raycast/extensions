@@ -30,21 +30,3 @@ export function getVaultsSummary(vaults: DobbyVault[] | null): string {
 `;
 }
 
-export function transformVaultsToMarkdown(vaults: DobbyVault[] | null): string {
-  let markdownString = "";
-
-  vaults?.forEach((vault) => {
-    markdownString += `
-### [${vault.name?.length > 0 ? vault.name : vault.vaultId}](https://defiscan.live/vaults/${vault.vaultId})
-- next ratio: ##${vault.nextCollateralRatio.toFixed(1)} %
-- next ratio: **${vault.nextCollateralRatio.toFixed(1)} %**
-- current ratio: ${vault.collateralRatio} %
-- state: ${vault.state} at loan scheme ${vault.loanScheme.minCollateral} %
-- collateral value: ${vault.collateralValue.toFixed(2)} $
-- loan value: ${vault.loanValue.toFixed(2)} $
----    
-`;
-  });
-
-  return markdownString;
-}
