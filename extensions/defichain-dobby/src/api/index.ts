@@ -42,7 +42,7 @@ export const getVaults = async (): Promise<DobbyVault[]> => {
       } else {
         showToast({
           style: Toast.Style.Failure,
-          title: "Ocean API not available",
+          title: "Dobby API not available",
           message: "please try again later...",
         });
       }
