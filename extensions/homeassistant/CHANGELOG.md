@@ -1,5 +1,8 @@
 # Home Assistant Changelog
 
+## [Add support for update entities] - 2022-04-08
+- Add support for update entities from HA 2022.04
+
 ## [Added support for helpers and auto camera image fetching] - 2022-04-03
 - Increase max. entities to `1000`
 - Remove Initial state flickering
