@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast, useNavigation } from "@raycast/api";
-import { DirectoryInfo, LocalDirectoryKey } from "./utils/directory-info";
+import { DirectoryInfo, LocalDirectoryKey, SortBy } from "./utils/directory-info";
 import React, { useEffect, useState } from "react";
 import { getChooseFolder, getOpenFinderWindowPath, isEmpty, preferences } from "./utils/utils";
 import { homedir } from "os";
@@ -289,7 +289,7 @@ async function actionMoveOrCopy(
   manual: boolean
 ) {
   try {
-    await showToast(Toast.Style.Animated, `${action == ActionType.COPY ? "Moving" : "Copying"}... Don't quit.`);
+    await showToast(Toast.Style.Animated, `${action == ActionType.COPY ? "Copying" : "Moving"}... Don't quit.`);
     let _commonDirectory = [...commonDirectory];
     const pathValid = fse.pathExistsSync(directory.path);
     if (pathValid) {
@@ -300,7 +300,7 @@ async function actionMoveOrCopy(
         isMoved = await getItemAndSend(directory.path, action);
       }
       _commonDirectory[index].valid = true;
-      if (isMoved) {
+      if (isMoved && preferences().sortBy === SortBy.Rank) {
         _commonDirectory = await upRankSendFile(_commonDirectory, index);
       }
     } else {
@@ -321,13 +321,19 @@ async function actionByChooseFolder(action: ActionType) {
   return await getItemAndSend(destPath, action);
 }
 
-async function upRankSendFile(directory: DirectoryInfo[], index: number) {
+async function upRankSendFile(directories: DirectoryInfo[], index: number) {
+  const moreHighRank = directories.filter((value) => {
+    return value.path !== directories[index].path && value.rankSendFile >= directories[index].rankSendFile;
+  });
+  if (moreHighRank.length == 0) {
+    return directories;
+  }
   let allRank = 0;
-  directory.forEach((value) => [(allRank = allRank + value.rankSendFile)]);
-  directory[index].rankSendFile =
-    Math.floor((directory[index].rankSendFile + 1 - directory[index].rankSendFile / allRank) * 100) / 100;
-  directory.sort(function (a, b) {
+  directories.forEach((value) => [(allRank = allRank + value.rankSendFile)]);
+  directories[index].rankSendFile =
+    Math.floor((directories[index].rankSendFile + 1 - directories[index].rankSendFile / allRank) * 100) / 100;
+  directories.sort(function (a, b) {
     return b.rankSendFile - a.rankSendFile;
   });
-  return directory;
+  return directories;
 }

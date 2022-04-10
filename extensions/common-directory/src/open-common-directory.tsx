@@ -17,8 +17,8 @@ import AddCommonDirectory from "./add-common-directory";
 import { getOpenFinderWindowPath, isEmpty, preferences } from "./utils/utils";
 import { homedir } from "os";
 import path from "path";
-import fs from "fs-extra";
 import { DetailKey, getDirectoryContent, getShowDetailLocalStorage, setShowDetailLocalStorage } from "./utils/ui-utils";
+import fse from "fs-extra";
 
 export default function OpenCommonDirectory() {
   const [searchValue, setSearchValue] = useState<string>("");
@@ -150,7 +150,6 @@ function DirectoryItem(props: {
   const [updateList, setUpdateList] = props.updateListUseState;
   const [showDetail, setShowDetail] = props.showDetailUseState;
   const { push } = useNavigation();
-  const { sortBy } = preferences();
   return (
     <List.Item
       id={JSON.stringify({ type: directory.isCommon, path: directory.path })}
@@ -169,14 +168,14 @@ function DirectoryItem(props: {
             title={"Open in Finder"}
             icon={Icon.Window}
             onAction={async () => {
-              await openOrRevealInFinder(directory, index, commonDirectory, sortBy, setCommonDirectory, true);
+              await openOrRevealInFinder(directory, index, commonDirectory, setCommonDirectory, true);
             }}
           />
           <Action
             title={"Reveal in Finder"}
             icon={Icon.Finder}
             onAction={async () => {
-              await openOrRevealInFinder(directory, index, commonDirectory, sortBy, setCommonDirectory, false);
+              await openOrRevealInFinder(directory, index, commonDirectory, setCommonDirectory, false);
             }}
           />
           <Action
@@ -213,7 +212,10 @@ function DirectoryItem(props: {
                       JSON.stringify(_openCommonDirectory)
                     );
 
-                    const _sendCommonDirectory = await getDirectory(LocalDirectoryKey.SEND_COMMON_DIRECTORY, sortBy);
+                    const _sendCommonDirectory = await getDirectory(
+                      LocalDirectoryKey.SEND_COMMON_DIRECTORY,
+                      preferences().sortBy
+                    );
                     const __sendCommonDirectory = _sendCommonDirectory.filter((value) => {
                       return value.path !== directory.path;
                     });
@@ -274,50 +276,51 @@ async function openOrRevealInFinder(
   directoryPath: DirectoryInfo,
   index: number,
   commonDirectory: DirectoryInfo[],
-  sortBy: string,
   setCommonDirectory: React.Dispatch<React.SetStateAction<DirectoryInfo[]>>,
-  isOpen: boolean
+  isOpenOrReveal: boolean
 ) {
   try {
-    if (commonDirectory[index].isCommon) {
-      const actualPath = isOpen ? directoryPath.path : path.parse(directoryPath.path).dir;
-      const pathValid = fs.pathExistsSync(actualPath);
-      let _commonDirectory = [...commonDirectory];
-      if (pathValid) {
-        await open(actualPath);
-        await showHUD(isOpen ? "Open in Finder" : "Reveal in Finder");
-        if (isOpen) {
-          _commonDirectory[index].valid = true;
-        }
-        if (sortBy === SortBy.Rank) {
-          _commonDirectory = await upRank([..._commonDirectory], index);
-        }
-      } else {
-        await showToast(Toast.Style.Failure, "Path has expired.");
-        if (isOpen) {
-          _commonDirectory[index].valid = false;
-        }
+    let _commonDirectory = [...commonDirectory];
+    const actualPath = isOpenOrReveal ? directoryPath.path : path.parse(directoryPath.path).dir;
+    const pathValid = fse.pathExistsSync(actualPath);
+    if (pathValid) {
+      await open(actualPath);
+      await showHUD(isOpenOrReveal ? "Open in Finder" : "Reveal in Finder");
+      if (isOpenOrReveal) {
+        _commonDirectory[index].valid = true;
       }
+      if (preferences().sortBy === SortBy.Rank) {
+        _commonDirectory = await upRank([..._commonDirectory], index);
+      }
+    } else {
+      await showToast(Toast.Style.Failure, "Path has expired.");
+      if (isOpenOrReveal) {
+        _commonDirectory[index].valid = false;
+      }
+    }
+    if (directoryPath.isCommon) {
       setCommonDirectory(_commonDirectory);
       await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify(_commonDirectory));
-    } else {
-      const actualPath = isOpen ? directoryPath.path : path.parse(directoryPath.path).dir;
-      await open(actualPath);
-      await showHUD(isOpen ? "Open in Finder" : "Reveal in Finder");
     }
   } catch (e) {
     await showToast(Toast.Style.Failure, "Path has expired." + String(e));
   }
 }
 
-async function upRank(directory: DirectoryInfo[], index: number) {
+async function upRank(directories: DirectoryInfo[], index: number) {
+  const moreHighRank = directories.filter((value) => {
+    return value.path !== directories[index].path && value.rank >= directories[index].rank;
+  });
+  if (moreHighRank.length == 0) {
+    return directories;
+  }
   let allRank = 0;
-  directory.forEach((value) => [(allRank = allRank + value.rank)]);
-  directory[index].rank = Math.floor((directory[index].rank + 1 - directory[index].rank / allRank) * 100) / 100;
-  directory.sort(function (a, b) {
+  directories.forEach((value) => [(allRank = allRank + value.rank)]);
+  directories[index].rank = Math.floor((directories[index].rank + 1 - directories[index].rank / allRank) * 100) / 100;
+  directories.sort(function (a, b) {
     return b.rank - a.rank;
   });
-  return directory;
+  return directories;
 }
 
 export async function resetRank(

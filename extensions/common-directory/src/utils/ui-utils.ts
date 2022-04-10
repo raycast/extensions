@@ -44,8 +44,7 @@ export enum DetailKey {
 }
 export const getShowDetailLocalStorage = async (key: DetailKey) => {
   const localStorage = await LocalStorage.getItem<boolean>(key);
-  const showDetail = typeof localStorage === "undefined" ? true : localStorage;
-  return showDetail;
+  return typeof localStorage === "undefined" ? true : localStorage;
 };
 
 export const setShowDetailLocalStorage = async (key: DetailKey, value: boolean) => {
