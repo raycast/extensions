@@ -19,6 +19,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.32.0",
+    "axios": "^0.26.1",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {
