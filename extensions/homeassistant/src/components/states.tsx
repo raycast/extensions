@@ -15,6 +15,8 @@ import {
   SelectSourceAction,
   getMediaPlayerTitleAndArtist,
   CopyTrackToClipboard,
+  MediaPlayerTurnOnAction,
+  MediaPlayerTurnOffAction,
 } from "./mediaplayer";
 import {
   BrightnessControlAction,
@@ -526,6 +528,8 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               onAction={async () => await ha.previousMedia(entityID)}
               icon={{ source: "previous.png", tintColor: Color.PrimaryText }}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Volume">
             <Action
               title="Volume Up"
               shortcut={{ modifiers: ["cmd"], key: "+" }}
@@ -546,6 +550,10 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               icon={{ source: Icon.SpeakerSlash, tintColor: Color.PrimaryText }}
             />
             <SelectSourceAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Power">
+            <MediaPlayerTurnOnAction state={state} />
+            <MediaPlayerTurnOffAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={state} />
