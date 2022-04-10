@@ -29,4 +29,3 @@ export function getVaultsSummary(vaults: DobbyVault[] | null): string {
   [Dobby Dashboard](https://defichain-dobby.com)
 `;
 }
-
