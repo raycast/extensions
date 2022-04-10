@@ -3,7 +3,7 @@ import { useVaults } from "./useVaults";
 import VaultMetadata from "./vaultMetaData";
 
 export default function Command() {
-  const {status, vaults, vaultsSummaryMarkdown} = useVaults();
+  const { status, vaults, vaultsSummaryMarkdown } = useVaults();
 
   return (
     <Detail
@@ -11,9 +11,9 @@ export default function Command() {
       markdown={vaultsSummaryMarkdown}
       metadata={
         <Detail.Metadata>
-          {vaults?.map((v, index) =>
-              <VaultMetadata key={v.vaultId} vault={v} no={index}/>
-          )}
+          {vaults?.map((v, index) => (
+            <VaultMetadata key={v.vaultId} vault={v} no={index} />
+          ))}
         </Detail.Metadata>
       }
       actions={
@@ -25,7 +25,6 @@ export default function Command() {
           />
         </ActionPanel>
       }
-
     />
   );
 }

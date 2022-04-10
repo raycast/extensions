@@ -13,9 +13,9 @@ export function useVaults() {
   useEffect(() => {
     const markdown = transformVaultsToMarkdown(vaults);
     const summaryMarkdown = getVaultsSummary(vaults);
-    setVaultsSummaryMarkdown(summaryMarkdown)
+    setVaultsSummaryMarkdown(summaryMarkdown);
     setVaultsMarkdown(markdown);
-  }, [vaults])
+  }, [vaults]);
 
   useEffect(() => {
     async function fetchVaults() {
@@ -30,5 +30,5 @@ export function useVaults() {
     fetchVaults();
   }, []);
 
-  return {status, vaults, vaultsMarkdown, vaultsSummaryMarkdown}
+  return { status, vaults, vaultsMarkdown, vaultsSummaryMarkdown };
 }

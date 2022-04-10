@@ -4,7 +4,7 @@ import { Color } from "@raycast/api";
 export function getVaultStateColor(vaultState: VaultState): Color {
   switch (vaultState) {
     case "active":
-      return Color.Green
+      return Color.Green;
     case "frozen":
       return Color.Blue;
     case "inactive":

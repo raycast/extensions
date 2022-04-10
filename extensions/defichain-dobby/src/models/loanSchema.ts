@@ -1,1 +1,1 @@
-export type LoanSchema = {id: string, minCollateral: number}
+export type LoanSchema = { id: string; minCollateral: number };
