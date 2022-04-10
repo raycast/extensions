@@ -44,12 +44,15 @@ const getFileInfo = async (rootPath: string, excludePaths: string[]): Promise<Fi
   return walk(rootPath);
 };
 
-
 export default function SearchGoogleDriveForDesktopFile() {
   const preferences = getPreferenceValues<Preferences>();
 
   const rootPath = path.resolve(preferences.rootPath);
-  const exludePaths = preferences.excludePaths?.split(",").map(p => p.trim()).map((p) => path.resolve(p)) ?? [];
+  const exludePaths =
+    preferences.excludePaths
+      ?.split(",")
+      .map((p) => p.trim())
+      .map((p) => path.resolve(p)) ?? [];
 
   const [files, setFiles] = useState<FileInfo[]>([]);
 
