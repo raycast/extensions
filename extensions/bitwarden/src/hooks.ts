@@ -1,5 +1,5 @@
 import { LocalStorage, getPreferenceValues, environment } from "@raycast/api";
-import { useState, useEffect, useReducer, useMemo } from "react";
+import { useState, useEffect, useReducer, useMemo, useRef } from "react";
 import { Bitwarden } from "./api";
 import { DEFAULT_PASSWORD_OPTIONS, LOCAL_STORAGE_KEY } from "./const";
 import { PasswordGeneratorOptions, PasswordHistoryItem, PasswordType, Preferences } from "./types";
@@ -8,9 +8,140 @@ import { createCipheriv, createHash, randomBytes, createDecipheriv } from "crypt
 import { join as pathJoin } from "path/posix";
 import { generateMd5Hash } from "./utils";
 
+const initialPasswordGeneratorState = {
+  options: undefined as PasswordGeneratorOptions | undefined,
+  password: undefined as string | undefined,
+  isGenerating: true,
+};
+
+type State = typeof initialPasswordGeneratorState;
+
+type Action =
+  | { type: "generate" }
+  | { type: "setPassword"; password: string }
+  | { type: "setOptions"; options: PasswordGeneratorOptions }
+  | { type: "cancelGenerate" }
+  | { type: "clearPassword"; password: string };
+
+const passwordReducer = (state: State, action: Action): State => {
+  switch (action.type) {
+    case "generate":
+      return { ...state, isGenerating: true };
+    case "setPassword":
+      return { ...state, password: action.password, isGenerating: false };
+    case "setOptions":
+      return { ...state, options: action.options };
+    case "cancelGenerate":
+      return { ...state, isGenerating: false };
+    case "clearPassword":
+      return { ...state, isGenerating: false, password: undefined };
+  }
+};
+
+type UsePasswordGeneratorOptions = {
+  regenerateOnOptionChange?: boolean;
+};
+
+export function usePasswordGenerator(bitwardenApi: Bitwarden, hookOptions?: UsePasswordGeneratorOptions) {
+  const { regenerateOnOptionChange = true } = hookOptions ?? {};
+
+  const [{ options, ...state }, dispatch] = useReducer(passwordReducer, initialPasswordGeneratorState);
+  const { abortControllerRef, renew: renewAbortController, abort: abortPreviousGenerate } = useAbortController();
+  const { save: saveToHistory } = usePasswordHistory();
+
+  const generatePassword = async () => {
+    try {
+      renewAbortController();
+      dispatch({ type: "generate" });
+      const password = await bitwardenApi.generatePassword(options, abortControllerRef?.current);
+      dispatch({ type: "setPassword", password });
+      saveToHistory(password, options?.passphrase ? "passphrase" : "password");
+    } catch (error) {
+      dispatch({ type: "cancelGenerate" });
+    }
+  };
+
+  const regeneratePassword = () => {
+    if (state.isGenerating) return;
+    generatePassword();
+  };
+
+  const setOption = async <Option extends keyof PasswordGeneratorOptions>(
+    option: Option,
+    value: PasswordGeneratorOptions[Option]
+  ) => {
+    if (!options || options[option] === value) return;
+    if (state.isGenerating) {
+      abortPreviousGenerate();
+      dispatch({ type: "cancelGenerate" });
+    }
+
+    const newOptions = { ...options, [option]: value };
+    dispatch({ type: "setOptions", options: newOptions });
+    await LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS, JSON.stringify(newOptions));
+  };
+
+  const restoreStoredOptions = async () => {
+    const storedOptions = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS);
+    const newOptions = { ...DEFAULT_PASSWORD_OPTIONS, ...(storedOptions ? JSON.parse(storedOptions) : {}) };
+    dispatch({ type: "setOptions", options: newOptions });
+  };
+
+  useEffect(() => {
+    if (!regenerateOnOptionChange || !options) return;
+    generatePassword();
+  }, [options]);
+
+  useEffect(() => {
+    restoreStoredOptions();
+  }, []);
+
+  return { ...state, regeneratePassword, options, setOption };
+}
+
+type EncryptedContent = { iv: string; content: string };
+
+const get32BitSecretKeyBuffer = (key: string) =>
+  Buffer.from(createHash("sha256").update(key).digest("base64").slice(0, 32));
+
+export const useContentEncryptor = () => {
+  const { clientSecret } = getPreferenceValues<Preferences>();
+  const cipherKeyBuffer = useMemo(() => get32BitSecretKeyBuffer(clientSecret.trim()), [clientSecret]);
+
+  const encrypt = (data: string): EncryptedContent => {
+    const ivBuffer = randomBytes(16);
+    const cipher = createCipheriv("aes-256-cbc", cipherKeyBuffer, ivBuffer);
+    const encryptedContentBuffer = Buffer.concat([cipher.update(data), cipher.final()]);
+    return { iv: ivBuffer.toString("hex"), content: encryptedContentBuffer.toString("hex") };
+  };
+
+  const decrypt = (data: EncryptedContent): string => {
+    const decipher = createDecipheriv("aes-256-cbc", cipherKeyBuffer, Buffer.from(data.iv, "hex"));
+    const decryptedContentBuffer = Buffer.concat([decipher.update(Buffer.from(data.content, "hex")), decipher.final()]);
+    return decryptedContentBuffer.toString();
+  };
+
+  return { encrypt, decrypt };
+};
+
+export function useAbortController() {
+  const abortControllerRef = useRef(new AbortController());
+
+  const renew = () => {
+    if (!abortControllerRef.current.signal.aborted) return;
+    abortControllerRef.current = new AbortController();
+  };
+
+  const abort = () => {
+    abortControllerRef.current?.abort();
+  };
+
+  return { abortControllerRef, renew, abort };
+}
+
 const MAX_HISTORY_ITEMS = 100;
 
-export const usePasswordHistory = () => {
+export function usePasswordHistory() {
   const { clientId } = getPreferenceValues<Preferences>();
   const { encrypt, decrypt } = useContentEncryptor();
 
@@ -72,110 +203,4 @@ export const usePasswordHistory = () => {
   };
 
   return { save, getAll, clear };
-};
-
-const initialState = {
-  password: undefined as string | undefined,
-  isGenerating: false,
-};
-
-type State = typeof initialState;
-
-type Action =
-  | { type: "generate" }
-  | { type: "setPassword"; password: string }
-  | { type: "fail" }
-  | { type: "clear"; password: string };
-
-const passwordReducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case "generate":
-      return { ...state, isGenerating: true };
-    case "setPassword":
-      return { password: action.password, isGenerating: false };
-    case "fail":
-      return { ...state, isGenerating: false };
-    case "clear":
-      return { isGenerating: false, password: undefined };
-  }
-};
-
-export function usePasswordGenerator(
-  bitwardenApi: Bitwarden,
-  options: PasswordGeneratorOptions | undefined,
-  hookOptions?: { regenerateOnOptionChange: boolean }
-) {
-  const { regenerateOnOptionChange = true } = hookOptions ?? {};
-  const [state, dispatch] = useReducer(passwordReducer, initialState);
-  const { save } = usePasswordHistory();
-
-  const generatePassword = async () => {
-    try {
-      if (state.isGenerating) return;
-      dispatch({ type: "generate" });
-      const password = await bitwardenApi.generatePassword(options);
-      dispatch({ type: "setPassword", password });
-      save(password, options?.passphrase ? "passphrase" : "password");
-    } catch (error) {
-      dispatch({ type: "fail" });
-    }
-  };
-
-  useEffect(() => {
-    if (!regenerateOnOptionChange || !options) return;
-    generatePassword();
-  }, [options]);
-
-  return { ...state, regeneratePassword: generatePassword };
 }
-
-export const usePasswordOptions = () => {
-  const [options, setOptions] = useState<PasswordGeneratorOptions>();
-
-  const setOption = async <Option extends keyof PasswordGeneratorOptions>(
-    option: Option,
-    value: PasswordGeneratorOptions[Option]
-  ) => {
-    if (!options || options[option] === value) return;
-    const newOptions = { ...options, [option]: value };
-    setOptions(newOptions);
-    await LocalStorage.setItem(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS, JSON.stringify(newOptions));
-  };
-
-  const restoreStoredOptions = async () => {
-    const storedOptions = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.PASSWORD_OPTIONS);
-    const newOptions = { ...DEFAULT_PASSWORD_OPTIONS, ...(storedOptions ? JSON.parse(storedOptions) : {}) };
-    setOptions(newOptions);
-  };
-
-  useEffect(() => {
-    restoreStoredOptions();
-  }, []);
-
-  return { options, setOption };
-};
-
-type EncryptedContent = { iv: string; content: string };
-
-const get32BitSecretKeyBuffer = (key: string) =>
-  Buffer.from(createHash("sha256").update(key).digest("base64").slice(0, 32));
-
-export const useContentEncryptor = () => {
-  const { clientSecret } = getPreferenceValues<Preferences>();
-  const cipherKeyBuffer = useMemo(() => get32BitSecretKeyBuffer(clientSecret.trim()), [clientSecret]);
-
-  const encrypt = (data: string): EncryptedContent => {
-    const ivBuffer = randomBytes(16);
-    const cipher = createCipheriv("aes-256-cbc", cipherKeyBuffer, ivBuffer);
-    const encryptedContentBuffer = Buffer.concat([cipher.update(data), cipher.final()]);
-    return { iv: ivBuffer.toString("hex"), content: encryptedContentBuffer.toString("hex") };
-  };
-
-  const decrypt = (data: EncryptedContent): string => {
-    const decipher = createDecipheriv("aes-256-cbc", cipherKeyBuffer, Buffer.from(data.iv, "hex"));
-    const decryptedContentBuffer = Buffer.concat([decipher.update(Buffer.from(data.content, "hex")), decipher.final()]);
-    return decryptedContentBuffer.toString();
-  };
-
-  return { encrypt, decrypt };
-};

@@ -10,10 +10,10 @@ import {
   getPreferenceValues,
   List,
 } from "@raycast/api";
-import { usePasswordGenerator, usePasswordHistory, usePasswordOptions } from "./hooks";
+import { usePasswordGenerator, usePasswordHistory } from "./hooks";
 import { Bitwarden } from "./api";
 import { LOCAL_STORAGE_KEY, PASSWORD_OPTIONS_MAP } from "./const";
-import { capitalise, objectEntries } from "./utils";
+import { capitalise } from "./utils";
 import {
   PasswordGeneratorOptions,
   PasswordHistoryItem,
@@ -29,25 +29,22 @@ import { format, parseISO } from "date-fns";
 
 const FormSpace = () => <Form.Description text="" />;
 
-export default function GeneratePassword() {
-  const { cliPath, clientId, clientSecret } = getPreferenceValues<Preferences>();
+function GeneratePassword() {
   try {
+    const { cliPath, clientId, clientSecret } = getPreferenceValues<Preferences>();
     const bitwardenApi = new Bitwarden(clientId, clientSecret, cliPath);
     return <PasswordGenerator bitwardenApi={bitwardenApi} />;
-  } catch (e) {
+  } catch {
     return <TroubleshootingGuide />;
   }
 }
 
 function PasswordGenerator(props: { bitwardenApi: Bitwarden }) {
-  const { options, setOption } = usePasswordOptions();
-  const { password, regeneratePassword, isGenerating } = usePasswordGenerator(props.bitwardenApi, options);
+  const { password, regeneratePassword, isGenerating, options, setOption } = usePasswordGenerator(props.bitwardenApi);
 
   if (!options) return <Detail isLoading={true} />;
 
   const showDebouncedToast = debounce(1000, showToast);
-
-  const regenerate = () => regeneratePassword();
 
   const handlePasswordTypeChange = (type: string) => {
     setOption("passphrase", type === "passphrase");
@@ -94,7 +91,7 @@ function PasswordGenerator(props: { bitwardenApi: Bitwarden }) {
           <Action
             title="Regenerate password"
             icon={Icon.ArrowClockwise}
-            onAction={regenerate}
+            onAction={regeneratePassword}
             shortcut={{ key: "backspace", modifiers: ["cmd"] }}
           />
           <Action.Push
@@ -119,19 +116,21 @@ function PasswordGenerator(props: { bitwardenApi: Bitwarden }) {
         onChange={handlePasswordTypeChange}
         defaultValue="password"
       >
-        {objectEntries(PASSWORD_OPTIONS_MAP).map(([key]) => (
+        {Object.keys(PASSWORD_OPTIONS_MAP).map((key) => (
           <Form.Dropdown.Item key={key} value={key} title={capitalise(key)} />
         ))}
       </Form.Dropdown>
-      {objectEntries(PASSWORD_OPTIONS_MAP[passwordType]).map(([option, optionField]: PasswordOptionsToFieldEntries) => (
-        <OptionField
-          key={option}
-          option={option}
-          field={optionField}
-          currentOptions={options}
-          handleFieldChange={handleFieldChange(option, optionField.errorMessage)}
-        />
-      ))}
+      {Object.typedEntries(PASSWORD_OPTIONS_MAP[passwordType]).map(
+        ([option, optionField]: PasswordOptionsToFieldEntries) => (
+          <OptionField
+            key={option}
+            option={option}
+            field={optionField}
+            currentOptions={options}
+            handleFieldChange={handleFieldChange(option, optionField.errorMessage)}
+          />
+        )
+      )}
     </Form>
   );
 }
@@ -207,12 +206,7 @@ function PasswordHistory() {
           title={password}
           icon={Icon.Clipboard}
           keywords={[type]}
-          accessories={[
-            {
-              text: format(parseISO(datetime), "d MMM yyyy, HH:mm:ss"),
-              tooltip: datetime,
-            },
-          ]}
+          accessories={[{ text: format(parseISO(datetime), "d MMM yyyy, HH:mm:ss"), tooltip: datetime }]}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard title="Copy to clipboard" icon={Icon.Clipboard} content={password} />
@@ -229,3 +223,5 @@ function PasswordHistory() {
     </List>
   );
 }
+
+export default GeneratePassword;
