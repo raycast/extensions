@@ -7,7 +7,7 @@ export function getVaultsSummary(vaults: DobbyVault[] | null): string {
   const mayLiquidateVaults = vaults?.filter((x) => x.state === "mayLiquidate") ?? [];
   const inLiquidationVaults = vaults?.filter((x) => x.state === "inLiquidation") ?? [];
 
-  let markdown = `# My Dobby vaults  
+  return `# My Dobby vaults  
   
   ${activeVaults.length > 0 ? `## ${activeVaults.length} Active` : `### ${activeVaults.length} Active`}
   ${
@@ -28,8 +28,6 @@ export function getVaultsSummary(vaults: DobbyVault[] | null): string {
  **More information**  
   [Dobby Dashboard](https://defichain-dobby.com)
 `;
-
-  return markdown;
 }
 
 export function transformVaultsToMarkdown(vaults: DobbyVault[] | null): string {
