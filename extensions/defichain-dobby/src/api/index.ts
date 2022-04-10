@@ -1,9 +1,10 @@
 import axios from "axios";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { DobbyVault } from "../models/vault";
+import { DobbyVault } from "../models/dobbyVault";
 
-export const getVaults = async () => {
-  const baseUrl = "https://api.defichain-dobby.com/";
+const baseUrl = "https://api.defichain-dobby.com/";
+
+export const getVaults = async (): Promise<DobbyVault[]> => {
   const { dobbyApiKey } = getPreferenceValues<{ dobbyApiKey?: string }>();
   const vaults: DobbyVault[] = [];
 
@@ -15,12 +16,13 @@ export const getVaults = async () => {
       },
     })
     .then((response) => {
-      response.data.vaults.forEach((vault) => {
+      response.data.vaults.forEach((vault: DobbyVault) => {
+        console.log(vault);
         vaults.push({
           vaultId: vault.vaultId,
           name: vault.name ?? "",
           ownerAddress: vault.ownerAddress,
-          loanScheme: vault.loanScheme.minCollateral,
+          loanScheme: vault.loanScheme,
           state: vault.state,
           collateralValue: vault.collateralValue,
           loanValue: vault.loanValue,
@@ -44,5 +46,7 @@ export const getVaults = async () => {
           message: "please try again later...",
         });
       }
+
+      return vaults;
     });
 };
