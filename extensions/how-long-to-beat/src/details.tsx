@@ -61,13 +61,16 @@ ${result.playableOn.join(", ")}
   const url = `${baseUrl}${id}`;
 
   const mainStoryHours = state.result?.gameplayMain || 0;
-  const mainStoryText = mainStoryHours >= 1 ? `${state.result?.gameplayMain} ${pluralize(mainStoryHours, "hour")}` : '-';
+  const mainStoryText =
+    mainStoryHours >= 1 ? `${state.result?.gameplayMain} ${pluralize(mainStoryHours, "hour")}` : "-";
 
   const mainExtraHours = state.result?.gameplayMainExtra || 0;
-  const mainExtraText = mainExtraHours >= 1 ? `${state.result?.gameplayMainExtra} ${pluralize(mainExtraHours, "hour")}` : '-';
+  const mainExtraText =
+    mainExtraHours >= 1 ? `${state.result?.gameplayMainExtra} ${pluralize(mainExtraHours, "hour")}` : "-";
 
   const completionistsHours = state.result?.gameplayCompletionist || 0;
-  const completionistsText = completionistsHours >= 1 ? `${state.result?.gameplayCompletionist} ${pluralize(completionistsHours, "hour")}` : '-';
+  const completionistsText =
+    completionistsHours >= 1 ? `${state.result?.gameplayCompletionist} ${pluralize(completionistsHours, "hour")}` : "-";
 
   const metadata = !state.isLoading ? (
     <Detail.Metadata>

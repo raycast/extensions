@@ -29,7 +29,10 @@ function SearchListItem({ searchResult }: { searchResult: HowLongToBeatEntry }) 
   return (
     <List.Item
       title={searchResult.name}
-      accessoryTitle={`Main Story: ${searchResult.gameplayMain.toString()} ${pluralize(searchResult.gameplayMain, "hour")}`}
+      accessoryTitle={`Main Story: ${searchResult.gameplayMain.toString()} ${pluralize(
+        searchResult.gameplayMain,
+        "hour"
+      )}`}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
