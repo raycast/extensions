@@ -10,7 +10,6 @@ import {
   confirmAlert,
   Icon,
   LocalStorage,
-  Detail,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
@@ -168,7 +167,6 @@ export default function Command({
       let defaultAssignment = project.task_assignments[0].id.toString();
       if (taskId) {
         const assignment = _.find(project.task_assignments, (o) => o.task.id.toString() === taskId);
-        console.log({ assignment });
         if (assignment) {
           defaultAssignment = assignment.task.id.toString();
         }
@@ -251,7 +249,7 @@ export default function Command({
           );
         })}
       </Form.Dropdown>
-      <Form.Dropdown id="task_id" title="Task" value={taskId}>
+      <Form.Dropdown id="task_id" title="Task" value={taskId} onChange={setTaskId}>
         {tasks?.map((task) => {
           return <Form.Dropdown.Item value={task.task.id.toString()} title={task.task.name} key={task.id} />;
         })}
