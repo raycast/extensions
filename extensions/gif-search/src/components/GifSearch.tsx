@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useState } from "react";
 
-import { List, showToast, Toast } from "@raycast/api";
+import { List, showToast, Toast, Icon } from "@raycast/api";
 
 import { ServiceName, getShowPreview } from "../preferences";
 
@@ -46,6 +46,7 @@ export function GifSearch(props: { service?: ServiceName }) {
 
   const shouldShowDetails = () => showPreview && (results?.items?.length ?? 0) + (favItems?.items?.length ?? 0) != 0;
   const shouldShowFavs = () => !isLoadingFavIds && !isLoadingFavs && !!favItems?.items?.length && !results?.term;
+  const showEmpty = () => !favItems?.items?.length && !results?.term && !results?.items?.length;
 
   // Load saved favorite GIF id's from LocalStorage
   useEffect(() => {
@@ -104,6 +105,9 @@ export function GifSearch(props: { service?: ServiceName }) {
         onSearchTextChange={setSearchTerm}
         isShowingDetail={shouldShowDetails()}
       >
+        {showEmpty() ? (
+          <List.EmptyView title="Enter a search above to get started..." icon={Icon.MagnifyingGlass} />
+        ) : undefined}
         <FavesList results={favItems?.items} show={shouldShowFavs()} />
         <GifList term={results?.term} results={results?.items} />
       </List>
