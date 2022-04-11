@@ -32,9 +32,13 @@ export default function Command() {
     loadEntries()
       .then(setEntries)
       .catch(errorHandler)
-      .then(() => setIsLoading(false));
+      .then(() => {
+        setIsLoading(false);
+      });
   }, []);
-
+  useEffect(() => {
+    console.log(entries);
+  }, [entries]);
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Type to Search in KeepassXC" throttle={true}>
       {entries?.map((entry, i) => (

@@ -1,6 +1,6 @@
 import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
 import { format } from "date-fns";
-import { Project as TProject, Task } from "@doist/todoist-api-typescript";
+import { Project, Task } from "@doist/todoist-api-typescript";
 import { ViewMode } from "../types";
 import { isRecurring, displayDueDate, isExactTimeTask } from "../utils";
 import { priorities } from "../constants";
@@ -11,7 +11,7 @@ import TaskActions from "./TaskActions";
 interface TaskListItemProps {
   task: Task;
   mode: ViewMode;
-  projects?: TProject[];
+  projects?: Project[];
 }
 
 export default function TaskListItem({ task, mode, projects }: TaskListItemProps): JSX.Element {

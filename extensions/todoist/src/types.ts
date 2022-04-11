@@ -31,10 +31,3 @@ export enum ProjectGroupBy {
   date = "date",
   label = "label",
 }
-
-export enum SearchGroupBy {
-  default = "default",
-  priority = "priority",
-  date = "date",
-  label = "label",
-}

@@ -27,6 +27,14 @@ Checks can be run with:
 npm run lint
 ```
 
+## Changelog style
+
+See the [Raycast version history guide](https://developers.raycast.com/basics/prepare-an-extension-for-store#version-history).
+
+## Screenshots
+
+Screenshots for the Raycast store are in the [`metadata/` directory](./metadata/). See the [Raycast extension screenshots guide](https://developers.raycast.com/basics/prepare-an-extension-for-store#screenshots).
+
 ## Publishing to the Raycast store
 
 The latest release of this extension is published to [`extensions/sourcegraph` in `raycast/extensions`](https://github.com/raycast/extensions/tree/main/extensions/sourcegraph).

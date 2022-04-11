@@ -19,6 +19,7 @@ console.log(`Command name: ${environment.commandName}`);
 console.log(`Assets path: ${environment.assetsPath}`);
 console.log(`Support path: ${environment.supportPath}`);
 console.log(`Is development mode: ${environment.isDevelopment}`);
+console.log(`Theme: ${environment.theme}`);
 ```
 
 #### Properties
@@ -31,6 +32,7 @@ console.log(`Is development mode: ${environment.isDevelopment}`);
 | isDevelopment  | <code>boolean</code> | Indicates whether the command is a development command (vs. an installed command from the Store).                                 |
 | raycastVersion | <code>string</code>  | The version of the main Raycast app                                                                                               |
 | supportPath    | <code>string</code>  | The absolute path for the support directory of an extension. Use it to read and write files related to your extension or command. |
+| theme    | <code>"light" \| "dark"</code>  | The theme used by Raycast. |
 
 ### getSelectedFinderItems
 

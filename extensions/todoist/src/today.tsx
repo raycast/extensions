@@ -59,7 +59,7 @@ export default function Today() {
 
   return tasks?.length === 0 ? (
     <List>
-      <List.EmptyView title="No tasks left for today. Congratulations!" icon="well-done.svg" />
+      <List.EmptyView title="Congratulations!" description="No tasks left for today." icon="🎉" />
     </List>
   ) : (
     <TaskList

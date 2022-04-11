@@ -48,6 +48,26 @@ interface Race {
   };
   date: string;
   time: string;
+  FirstPractice?: {
+    date: string;
+    time: string;
+  };
+  SecondPractice?: {
+    date: string;
+    time: string;
+  };
+  ThirdPractice?: {
+    date: string;
+    time: string;
+  };
+  Qualifying?: {
+    date: string;
+    time: string;
+  };
+  Sprint?: {
+    date: string;
+    time: string;
+  };
 }
 
 interface RaceResult extends Race {

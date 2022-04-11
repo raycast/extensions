@@ -43,6 +43,14 @@ export default function CreateTask() {
     setDescription("");
     setDueDate(undefined);
     setPriority(String(lowestPriority.value));
+
+    if (projects) {
+      setProjectId(String(projects[0].id));
+    }
+
+    if (labelIds) {
+      setLabelIds([]);
+    }
   }
 
   async function submit() {
@@ -134,7 +142,7 @@ export default function CreateTask() {
       </Form.Dropdown>
 
       {projects && projects.length > 0 ? (
-        <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId} storeValue>
+        <Form.Dropdown id="project_id" title="Project" value={projectId} onChange={setProjectId}>
           {projects.map(({ id, name }) => (
             <Form.Dropdown.Item value={String(id)} title={name} key={id} />
           ))}
@@ -142,7 +150,7 @@ export default function CreateTask() {
       ) : null}
 
       {projectSections && projectSections.length > 0 ? (
-        <Form.Dropdown id="section_id" title="Section" value={sectionId} onChange={setSectionId} storeValue>
+        <Form.Dropdown id="section_id" title="Section" value={sectionId} onChange={setSectionId}>
           <Form.Dropdown.Item value="" title="No section" />
           {projectSections.map(({ id, name }) => (
             <Form.Dropdown.Item value={String(id)} title={name} key={id} />
@@ -151,7 +159,7 @@ export default function CreateTask() {
       ) : null}
 
       {labels && labels.length > 0 ? (
-        <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds} storeValue>
+        <Form.TagPicker id="label_ids" title="Labels" value={labelIds} onChange={setLabelIds}>
           {labels.map(({ id, name }) => (
             <Form.TagPicker.Item value={String(id)} title={name} key={id} />
           ))}
