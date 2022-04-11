@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, getPreferenceValues } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, getPreferenceValues, showHUD, popToRoot } from "@raycast/api";
 import fetch from "node-fetch";
 
 interface CommandForm {
@@ -10,7 +10,7 @@ interface CommandForm {
 export default function Command() {
   const { eventName, webhooksKey, nbValues } = getPreferenceValues<{ eventName: string; webhooksKey: string, nbValues: string }>();
   async function handleSubmit(values: CommandForm) {
-    console.log(values);
+    try {
     await fetch(`https://maker.ifttt.com/trigger/${eventName}/with/key/${webhooksKey}`, {
       method: "POST",
       headers: {
@@ -18,7 +18,12 @@ export default function Command() {
       },
       body: JSON.stringify(values),
     });
-    showToast({ title: "Submitted form", message: "See logs for submitted values" });
+    await showHUD("Sent to IFTTT 🚀");
+    await popToRoot();
+  } catch (error) {
+    await showToast({ title: "An error occurred!", message: "Please check your internet connection." });
+  }
+
   }
 
   return (
