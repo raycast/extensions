@@ -2,7 +2,7 @@ import { showToast, ToastStyle } from "@raycast/api";
 import { XcodeCleanupService } from "./services/xcode-cleanup.service";
 
 /**
- * Xcode clear Swift Package Manager (SPM) cache command
+ * Xcode delete unsupported simulators command
  */
 export default async () => {
   // Initialize XcodeCleanupService
