@@ -25,18 +25,18 @@
       "required": true,
       "type": "textfield",
       "title": "Event Name",
-      "description": "Name of the event to send to IFTTT"
+      "description": "Name of the event to send to IFTTT."
     },
     {
       "name": "webhooksKey",
       "required": true,
       "type": "textfield",
       "title": "Webhook Key",
-      "description": "Key of the webhook to send to"
+      "description": "Key of the webhook."
     },
     {
       "name": "nbValues",
-      "title": "Number of values",
+      "title": "Number of Values",
       "required": true,
       "type": "dropdown",
       "data": [
