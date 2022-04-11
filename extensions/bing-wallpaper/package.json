@@ -26,7 +26,7 @@
           "value": "every"
         }
       ],
-      "required": false,
+      "required": true,
       "default": "every"
     },
     {
@@ -52,7 +52,7 @@
           "value": "small"
         }
       ],
-      "required": false,
+      "required": true,
       "default": "raw"
     }
   ],
@@ -60,14 +60,14 @@
     {
       "name": "bing-wallpaper",
       "icon": "bing-wallpaper-icon.png",
-      "title": "Bing Wallpaper",
+      "title": "Set Bing Wallpaper",
       "description": "Get and set Bing wallpapers within 15 days.",
       "mode": "view"
     },
     {
       "name": "random-wallpaper",
       "icon": "random-wallpaper-icon.png",
-      "title": "Random Wallpaper",
+      "title": "Random Bing Wallpaper",
       "description": "Set Random Bing wallpapers to desktop.",
       "mode": "no-view"
     }

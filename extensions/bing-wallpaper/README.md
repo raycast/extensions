@@ -4,13 +4,7 @@ Get and set Bing wallpapers within 15 days.
 
 **Commands**
 
-- **Bing Wallpaper**: Get and set Bing wallpapers within 15 days
-- **Random Wallpaper**: Set random Bing wallpapers within 15 days to desktop
-
-**Actions**
-
-- **Bing Wallpaper**
-
+- **Set Bing Wallpaper**: Get and set Bing wallpapers within 15 days
   - Set Desktop Wallpaper(↩︎): Set the current picture as desktop wallpaper
 
   - Download Picture(⌘↩︎): Download Pictures, directory is `/Users/xxxx/Downloads`
@@ -21,6 +15,7 @@ Get and set Bing wallpapers within 15 days.
 
   - Clear Wallpaper Cache(⇧⌘⌫): Clear picture cache created when the “**Set Desktop Wallpaper**” action is used
 
+- **Random Bing Wallpaper**: Set random Bing wallpapers within 15 days to desktop
 
 **Preferences**
 
