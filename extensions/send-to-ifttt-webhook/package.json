@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "send-to-ifttt-webhooks",
+  "title": "Send to IFTTT Webhooks",
+  "description": "Send an HTTP POST request to an IFTTT webhook.",
+  "icon": "logo.png",
+  "author": "pomdtr",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Send to Webhooks",
+      "description": "Send an HTTP POST request to an IFTTT webhook.",
+      "subtitle": "IFTTT",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "eventName",
+      "required": true,
+      "type": "textfield",
+      "title": "Event Name",
+      "description": "Name of the event to send to IFTTT"
+    },
+    {
+      "name": "webhooksKey",
+      "required": true,
+      "type": "textfield",
+      "title": "Webhook Key",
+      "description": "Key of the webhook to send to"
+    },
+    {
+      "name": "nbValues",
+      "title": "Number of values",
+      "required": true,
+      "type": "dropdown",
+      "data": [
+        {"title": "1", "value": "1"},
+        {"title": "2", "value": "2"},
+        {"title": "3", "value": "3"}
+      ],
+      "description": "Number of values to send in the JSON payload."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.32.1",
+    "node-fetch": "^3.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
