@@ -2,21 +2,74 @@ import { exec } from "child_process";
 import { homedir } from "os";
 import { runAppleScript } from "run-applescript";
 import { checkDirectoryExists, isEmpty, preferences } from "./utils/common-utils";
+import { Alert, confirmAlert, open, showHUD, showToast, Toast } from "@raycast/api";
 
 export default async () => {
   const _raycastLocation = await getRaycastLocation();
   const _raycastSize = await getRaycastSize();
+  const optionsAlert: Alert.Options = {
+    title: "⚠️ Capture Failure!",
+    message: "Files or folders already exist in the destination path. Do you want to overwrite?",
+  };
+
   if (_raycastLocation[0] === -1) {
-    await showNotification("Capture Failure!", "Raycast not found!", "Funk");
+    optionsAlert.message = "Raycast main window not found!";
+    await confirmAlert(optionsAlert);
     return;
   } else {
     if (_raycastSize[0] / _raycastSize[1] != 750 / 474) {
-      await showNotification("Capture Failure!", "Please close other Raycast windows!", "Funk");
+      optionsAlert.message = "Please close other Raycast windows and open Raycast main window only!";
+      await confirmAlert(optionsAlert);
     } else {
-      await captureRaycastMetadata({ x: _raycastLocation[0], y: _raycastLocation[1] }, await getScreenResolution());
-      await showNotification("Capture Success!", "Image is saved in Download folder.");
+      const captureResult = await captureRaycastMetadata(
+        { x: _raycastLocation[0], y: _raycastLocation[1] },
+        await getScreenResolution()
+      );
+      const currentTime = new Date().getTime();
+      while (new Date().getTime() - currentTime < 100) {
+        //To prevent capture success toast from overwriting the toast the user wants to show
+        // wait for 1 second
+      }
+      await captureResultToast(captureResult);
     }
   }
+};
+
+async function captureResultToast(captureResult: CaptureResult) {
+  if (captureResult.captureSuccess) {
+    const optionsToast: Toast.Options = {
+      title: "Capture Success!",
+      style: Toast.Style.Success,
+      message: "Screenshot saved in Download folder.",
+      primaryAction: {
+        title: "Open in Finder",
+        onAction: async () => {
+          await open(captureResult.picturePath);
+          await showHUD("Open Screenshot in default app");
+        },
+      },
+      secondaryAction: {
+        title: "Reveal in Finder",
+        onAction: async () => {
+          await open(homedir() + "/Downloads/");
+          await showHUD("Reveal Screenshot in Finder");
+        },
+      },
+    };
+    await showToast(optionsToast);
+  } else {
+    await showToast({
+      title: "Capture Failure!",
+      style: Toast.Style.Failure,
+      message: captureResult.errorMassage,
+    });
+  }
+}
+
+type CaptureResult = {
+  captureSuccess: boolean;
+  picturePath: string;
+  errorMassage: string;
 };
 
 type Resolution = {
@@ -77,20 +130,26 @@ return screenWidth`;
 }
 
 async function captureRaycastMetadata(raycastLocation: RaycastLocation, resolution: Resolution) {
-  const { screenshotName, screenshotFormat } = preferences();
-  const finalScreenshotName = isEmpty(screenshotName) ? "Metadata" : screenshotName;
+  try {
+    const { screenshotName, screenshotFormat } = preferences();
+    const finalScreenshotName = isEmpty(screenshotName) ? "Metadata" : screenshotName;
 
-  const picturePath = `${homedir()}/Downloads/${await createFileName(
-    `${homedir()}/Downloads/`,
-    finalScreenshotName,
-    screenshotFormat
-  )}`;
-  const viewX = `${raycastLocation.x - 250 / (resolution.realWidth / resolution.viewWidth)}`;
-  const viewY = `${raycastLocation.y - 150 / (resolution.realHeight / resolution.viewHeight)}`;
-  const viewW = `${2000 * (resolution.viewWidth / resolution.realWidth)}`;
-  const viewH = `${1250 * (resolution.viewHeight / resolution.realHeight)}`;
-  const command = `/usr/sbin/screencapture -x -t ${screenshotFormat} -R ${viewX},${viewY},${viewW},${viewH} ${picturePath}`;
-  exec(command);
+    const picturePath = `${homedir()}/Downloads/${await createFileName(
+      `${homedir()}/Downloads/`,
+      finalScreenshotName,
+      screenshotFormat
+    )}`;
+    const viewX = `${raycastLocation.x - 250 / (resolution.realWidth / resolution.viewWidth)}`;
+    const viewY = `${raycastLocation.y - 150 / (resolution.realHeight / resolution.viewHeight)}`;
+    const viewW = `${2000 * (resolution.viewWidth / resolution.realWidth)}`;
+    const viewH = `${1250 * (resolution.viewHeight / resolution.realHeight)}`;
+    const command = `/usr/sbin/screencapture -x -t ${screenshotFormat} -R ${viewX},${viewY},${viewW},${viewH} ${picturePath}`;
+    exec(command);
+    return { captureSuccess: true, picturePath: picturePath, errorMassage: "" };
+  } catch (e) {
+    console.error(String(e));
+    return { captureSuccess: false, picturePath: homedir() + "/Downloads/", errorMassage: String(e) };
+  }
 }
 
 export async function createFileName(path: string, name: string, extension: string) {
@@ -121,32 +180,5 @@ export async function createFileName(path: string, name: string, extension: stri
       "" +
       date.getSeconds();
     return name + "-" + time + "." + extension;
-  }
-}
-
-function createPictureName() {
-  const date = new Date();
-  const time =
-    date.getFullYear() +
-    "" +
-    (date.getMonth() + 1) +
-    "" +
-    date.getDate() +
-    "" +
-    date.getHours() +
-    "" +
-    date.getMinutes() +
-    "" +
-    date.getSeconds();
-
-  return "Raycast-" + time;
-}
-
-async function showNotification(title: string, message: string, sound = "Frog") {
-  const script = `display notification "${message}" with title "${title}" sound name "${sound}"`;
-  try {
-    await runAppleScript(script);
-  } catch (e) {
-    return [-1, -1];
   }
 }

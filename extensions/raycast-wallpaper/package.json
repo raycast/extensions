@@ -13,16 +13,16 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "raycast-wallpaper",
+      "name": "set-raycast-wallpaper",
       "icon": "raycast-icon.png",
-      "title": "Raycast Wallpaper",
+      "title": "Set Raycast Wallpaper",
       "description": "Set Raycast official wallpapers and capture for Raycast extension's metadata.",
       "mode": "view"
     },
     {
-      "name": "random-wallpaper",
+      "name": "roll-raycast-wallpaper",
       "icon": "random-icon.png",
-      "title": "Random Wallpaper",
+      "title": "Roll Raycast Wallpaper",
       "description": "Set random Raycast wallpapers to desktop.",
       "mode": "no-view"
     },
@@ -38,7 +38,7 @@
           "title": "Screenshot Name",
           "description": "Set the screenshot name.",
           "type": "textfield",
-          "required": false,
+          "required": true,
           "default": "Metadata"
         },
         {
@@ -64,7 +64,7 @@
               "value": "tiff"
             }
           ],
-          "required": false,
+          "required": true,
           "default": "png"
         }
       ]
