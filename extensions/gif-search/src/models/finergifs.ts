@@ -24,8 +24,8 @@ export default function finergifs() {
 
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {
-      const { offset = 0, abort } = opt || {};
-      return (await api.search(term, { offset, abort })).results.map(mapFinerGifsResponse);
+      const { offset = 0, limit, abort } = opt || {};
+      return (await api.search(term, { offset, limit, abort })).results.map(mapFinerGifsResponse);
     },
 
     async trending(opt?: APIOpt) {

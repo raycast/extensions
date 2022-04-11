@@ -2,7 +2,7 @@ import { useEffect, useReducer, useState } from "react";
 
 import { List, showToast, Toast, Icon } from "@raycast/api";
 
-import { ServiceName, getShowPreview } from "../preferences";
+import { ServiceName, getShowPreview, getMaxResults } from "../preferences";
 
 import AppContext, { initialState, reduceAppState } from "./AppContext";
 import { GifList } from "./GifList";
@@ -16,7 +16,7 @@ export function GifSearch(props: { service?: ServiceName }) {
   const showPreview = getShowPreview();
 
   const [searchService, setSearchService] = useState(props.service);
-  const [results, isLoading, setSearchTerm, searchTerm, search, markfavs] = useSearchAPI({});
+  const [results, isLoading, setSearchTerm, searchTerm, search, markfavs] = useSearchAPI({ limit: getMaxResults() });
 
   const onServiceChange = (service: string) => {
     setSearchService(service as ServiceName);

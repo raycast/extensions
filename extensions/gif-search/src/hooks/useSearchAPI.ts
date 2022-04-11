@@ -16,8 +16,6 @@ interface FetchState {
   error?: Error;
 }
 
-const DEFAULT_RESULT_COUNT = 10;
-
 export async function getAPIByServiceName(service: ServiceName, force?: boolean) {
   switch (service) {
     case GIF_SERVICE.GIPHY:
@@ -31,7 +29,7 @@ export async function getAPIByServiceName(service: ServiceName, force?: boolean)
   throw new Error(`Unable to find API for service "${service}"`);
 }
 
-export default function useSearchAPI({ offset = 0 }) {
+export default function useSearchAPI({ offset = 0, limit }: { offset?: number; limit?: number }) {
   const [isLoading, setIsLoading] = useState(true);
   const [results, setResults] = useState<FetchState>();
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -47,9 +45,9 @@ export default function useSearchAPI({ offset = 0 }) {
       try {
         const api = await getAPIByServiceName(service);
         if (term) {
-          items = dedupe(await api.search(term, { offset }));
+          items = dedupe(await api.search(term, { offset, limit }));
         } else {
-          items = dedupe(await api.trending({ offset, limit: DEFAULT_RESULT_COUNT }));
+          items = dedupe(await api.trending({ offset, limit }));
         }
 
         setResults({ items, term });

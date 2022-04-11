@@ -22,8 +22,8 @@ export default async function giphy(force?: boolean) {
 
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {
-      const { offset = 0 } = opt || {};
-      return (await api.search(term, { offset })).data.map(mapGiphyResponse);
+      const { offset = 0, limit } = opt || {};
+      return (await api.search(term, { offset, limit })).data.map(mapGiphyResponse);
     },
 
     async trending(opt?: APIOpt) {

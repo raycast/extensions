@@ -51,8 +51,8 @@ export default async function tenor(force?: boolean) {
 
   return <IGifAPI>{
     async search(term: string, opt?: APIOpt) {
-      const { offset = 0, abort } = opt || {};
-      return (await api.search(term, { offset, abort })).results?.map(mapTenorResponse) ?? [];
+      const { offset = 0, limit, abort } = opt || {};
+      return (await api.search(term, { offset, limit, abort })).results?.map(mapTenorResponse) ?? [];
     },
 
     async trending(opt?: APIOpt) {

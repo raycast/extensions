@@ -7,6 +7,7 @@ import { getPreferenceValues, environment } from "@raycast/api";
 
 export const API_KEY = "apiKey";
 export const SHOW_PREVIEW = "showGifPreview";
+export const MAX_RESULTS = "maxResults";
 export const DEFAULT_ACTION = "defaultAction";
 
 export const CONFIG_URL = "https://cdn.joe.sh/gif-search/config.json";
@@ -46,6 +47,10 @@ export function getShowPreview(): boolean {
 
 export function getDefaultAction(): string {
   return getPrefs()[DEFAULT_ACTION];
+}
+
+export function getMaxResults(): number {
+  return parseInt(getPrefs()[MAX_RESULTS], 10) ?? 10;
 }
 
 export type Config = {

@@ -67,6 +67,14 @@
       "description": "Shows a large preview of the selected gif in search results."
     },
     {
+      "name": "maxResults",
+      "type": "textfield",
+      "required": false,
+      "default": "10",
+      "title": "Max Results",
+      "description": "Max number of results to return for a search"
+    },
+    {
       "name": "defaultAction",
       "type": "dropdown",
       "required": false,

@@ -8,6 +8,7 @@
 - Add "Add or Remove from Favorites" to Default Action preferences list
 - Add section dividers to GIF Details Actions
 - Add custom Empty State
+- Add preference for max number of search results (defaults to 10)
 
 ## [Remove static GIF preview warning 🎉] - 2022-04-06
 - Removes the warning about GIFs no longer animating, Raycast v1.32.0 supports GIFs in Details
