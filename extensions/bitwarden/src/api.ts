@@ -68,6 +68,6 @@ export class Bitwarden {
   }
 
   private async exec(args: string[], abortController?: AbortController): Promise<ExecaChildProcess> {
-    return execa(this.cliPath, args, { env: this.env, signal: abortController?.signal });
+    return execa(this.cliPath, args, { env: this.env, input: "", signal: abortController?.signal });
   }
 }
