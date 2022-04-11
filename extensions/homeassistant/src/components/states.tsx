@@ -1,4 +1,4 @@
-import { ActionPanel, Color, ColorLike, Icon, ImageLike, List, popToRoot, showToast, ToastStyle } from "@raycast/api";
+import { ActionPanel, Color, Icon, List, popToRoot, showToast, Action, Image, Toast } from "@raycast/api";
 import { State } from "../haapi";
 import { useState, useEffect } from "react";
 import { ha, shouldDisplayEntityID } from "../common";
@@ -41,11 +41,19 @@ import { CameraShowImage, CameraTurnOffAction, CameraTurnOnAction } from "./came
 import { ScriptRunAction } from "./scripts";
 import { ButtonPressAction } from "./buttons";
 import { SceneActivateAction } from "./scenes";
+import { ensureCleanAccessories } from "../utils";
+import { InputBooleanOffAction, InputBooleanOnAction, InputBooleanToggleAction } from "./input_boolean";
+import { InputNumberDecrementAction, InputNumberIncrementAction } from "./input_number";
+import { TimerCancelAction, TimerPauseAction, TimerStartAction } from "./timer";
+import { InputSelectOptionSelectAction } from "./input_select";
+import { InputButtonPressAction } from "./input_button";
+import { InputTextSetValueAction } from "./input_text";
+import { InputDateTimeSetValueAction } from "./input_datetime";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
 
-const lightColor: Record<string, ColorLike> = {
+const lightColor: Record<string, Color.ColorLike> = {
   on: Color.Yellow,
   off: Color.Blue,
 };
@@ -81,7 +89,7 @@ const batterLevelIcons: string[] = [
   "battery-100.png",
 ];
 
-function getDeviceClassIcon(state: State): ImageLike | undefined {
+function getDeviceClassIcon(state: State): Image.ImageLike | undefined {
   if (state.attributes.device_class) {
     const dc = state.attributes.device_class;
     if (dc === "battery") {
@@ -125,7 +133,7 @@ function getLightIconSource(state: State): string {
   return attr.icon && attr.icon === "mdi:lightbulb-group" ? "lightbulb-group.png" : "lightbulb.png";
 }
 
-function getLightTintColor(state: State): ColorLike {
+function getLightTintColor(state: State): Color.ColorLike {
   const sl = state.state.toLocaleLowerCase();
   if (sl === "unavailable") {
     return UnavailableColor;
@@ -137,7 +145,7 @@ function getLightTintColor(state: State): ColorLike {
   return lightColor[sl] || PrimaryIconColor;
 }
 
-function getIcon(state: State): ImageLike | undefined {
+function getIcon(state: State): Image.ImageLike | undefined {
   const e = state.entity_id;
   if (e.startsWith("light")) {
     const color = getLightTintColor(state);
@@ -177,6 +185,30 @@ function getIcon(state: State): ImageLike | undefined {
   } else if (e.startsWith("switch")) {
     const wallSwitch = state.state === "on" ? { source: "on.png" } : { source: "off.png", tintColor: PrimaryIconColor };
     return wallSwitch;
+  } else if (e.startsWith("input_boolean")) {
+    const wallSwitch = state.state === "on" ? { source: "on.png" } : { source: "off.png", tintColor: PrimaryIconColor };
+    return wallSwitch;
+  } else if (e.startsWith("timer")) {
+    const color = state.state === "active" ? Color.Yellow : PrimaryIconColor;
+    return { source: "av-timer.png", tintColor: color };
+  } else if (e.startsWith("input_select")) {
+    return { source: "format-list-bulleted.png", tintColor: PrimaryIconColor };
+  } else if (e.startsWith("input_button")) {
+    return { source: "gesture-tap-button.png", tintColor: PrimaryIconColor };
+  } else if (e.startsWith("input_text")) {
+    return { source: "form-textbox.png", tintColor: PrimaryIconColor };
+  } else if (e.startsWith("input_datetime")) {
+    let source = "calendar-clock.png";
+    const hasDate: boolean = state.attributes.has_date || false;
+    const hasTime: boolean = state.attributes.has_time || false;
+    if (hasDate && hasTime) {
+      source = "calendar-clock.png";
+    } else if (hasDate) {
+      source = "calendar.png";
+    } else if (hasTime) {
+      source = "clock-time-four.png";
+    }
+    return { source: source, tintColor: PrimaryIconColor };
   } else {
     const di = getDeviceClassIcon(state);
     return di ? di : { source: "entity.png", tintColor: PrimaryIconColor };
@@ -189,7 +221,11 @@ export function StatesList(props: { domain: string; deviceClass?: string | undef
   const { states } = useStateSearch(searchText, props.domain, props.deviceClass, allStates);
 
   if (error) {
-    showToast(ToastStyle.Failure, "Cannot search Home Assistant states.", error.message);
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Cannot search Home Assistant states.",
+      message: error.message,
+    });
   }
 
   if (!states) {
@@ -287,11 +323,13 @@ export function StateListItem(props: { state: State }): JSX.Element {
         }
       }
       return state.state;
+    } else if (state.entity_id.startsWith("input_button")) {
+      return new Date(state.state).toISOString().replace("T", " ").replace("Z", "");
     }
     return state.state;
   };
 
-  let icon: ImageLike | undefined;
+  let icon: Image.ImageLike | undefined;
   const subtitle = (state: State): string | undefined => {
     let extra: string | undefined;
     if (state.entity_id.startsWith("media_player")) {
@@ -325,9 +363,13 @@ export function StateListItem(props: { state: State }): JSX.Element {
       key={state.entity_id}
       title={state.attributes.friendly_name || state.entity_id}
       subtitle={subtitle(state)}
-      accessoryTitle={extraTitle(state) + stateValue(state)}
       actions={<StateActionPanel state={state} />}
       icon={icon || getIcon(state)}
+      accessories={ensureCleanAccessories([
+        {
+          text: extraTitle(state) + stateValue(state),
+        },
+      ])}
     />
   );
 }
@@ -342,24 +384,24 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
       return (
         <ActionPanel>
           <ActionPanel.Section title="Controls">
-            <ActionPanel.Item
+            <Action
               title="Toggle"
               onAction={async () => await ha.toggleCover(props.state.entity_id)}
               icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
             />
-            <ActionPanel.Item
+            <Action
               title="Open"
               shortcut={{ modifiers: ["cmd"], key: "o" }}
               onAction={async () => await ha.openCover(props.state.entity_id)}
               icon={{ source: Icon.ChevronUp, tintColor: Color.PrimaryText }}
             />
-            <ActionPanel.Item
+            <Action
               title="Close"
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               onAction={async () => await ha.closeCover(props.state.entity_id)}
               icon={{ source: Icon.ChevronDown, tintColor: Color.PrimaryText }}
             />
-            <ActionPanel.Item
+            <Action
               title="Stop"
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={async () => await ha.stopCover(props.state.entity_id)}
@@ -384,18 +426,18 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
       return (
         <ActionPanel>
           <ActionPanel.Section title="Controls">
-            <ActionPanel.Item
+            <Action
               title="Toggle"
               onAction={async () => await ha.toggleLight(props.state.entity_id)}
               icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
             />
-            <ActionPanel.Item
+            <Action
               title="Turn On"
               shortcut={{ modifiers: ["cmd"], key: "o" }}
               onAction={async () => await ha.turnOnLight(props.state.entity_id)}
               icon={{ source: "power-btn.png", tintColor: Color.Green }}
             />
-            <ActionPanel.Item
+            <Action
               title="Turn Off"
               shortcut={{ modifiers: ["cmd"], key: "f" }}
               onAction={async () => await ha.turnOffLight(props.state.entity_id)}
@@ -431,54 +473,54 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
       return (
         <ActionPanel>
           <ActionPanel.Section title="Controls">
-            <ActionPanel.Item
+            <Action
               title="Play/Pause"
               onAction={async () => await ha.playPauseMedia(entityID)}
               icon={{ source: "play-pause.jpg", tintColor: Color.PrimaryText }}
             />
-            <ActionPanel.Item
+            <Action
               title="Play"
               onAction={async () => await ha.playMedia(entityID)}
               icon={{ source: "play.png", tintColor: Color.PrimaryText }}
             />
-            <ActionPanel.Item
+            <Action
               title="Pause"
               shortcut={{ modifiers: ["cmd"], key: "p" }}
               onAction={async () => await ha.pauseMedia(entityID)}
               icon={{ source: "pause.png", tintColor: Color.PrimaryText }}
             />
-            <ActionPanel.Item
+            <Action
               title="Stop"
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={async () => await ha.stopMedia(entityID)}
               icon={{ source: Icon.XmarkCircle, tintColor: Color.PrimaryText }}
             />
-            <ActionPanel.Item
+            <Action
               title="Next"
               shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
               onAction={async () => await ha.nextMedia(entityID)}
               icon={{ source: "next.png", tintColor: Color.PrimaryText }}
             />
-            <ActionPanel.Item
+            <Action
               title="Previous"
               shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
               onAction={async () => await ha.previousMedia(entityID)}
               icon={{ source: "previous.png", tintColor: Color.PrimaryText }}
             />
-            <ActionPanel.Item
+            <Action
               title="Volume Up"
               shortcut={{ modifiers: ["cmd"], key: "+" }}
               onAction={async () => await ha.volumeUpMedia(entityID)}
               icon={{ source: Icon.SpeakerArrowUp, tintColor: Color.PrimaryText }}
             />
-            <ActionPanel.Item
+            <Action
               title="Volume Down"
               shortcut={{ modifiers: ["cmd"], key: "-" }}
               onAction={async () => await ha.volumeDownMedia(entityID)}
               icon={{ source: Icon.SpeakerArrowDown, tintColor: Color.PrimaryText }}
             />
             <SelectVolumeAction state={state} />
-            <ActionPanel.Item
+            <Action
               title="Mute"
               shortcut={{ modifiers: ["cmd"], key: "m" }}
               onAction={async () => await ha.muteMedia(entityID)}
@@ -529,7 +571,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
                 icon={{ source: "temperature.png", tintColor: Color.PrimaryText }}
               >
                 {temps.map((t) => (
-                  <ActionPanel.Item
+                  <Action
                     key={t.toString()}
                     title={t.toString()}
                     onAction={async () => {
@@ -547,7 +589,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
                 icon={{ source: Icon.Gear, tintColor: Color.PrimaryText }}
               >
                 {state.attributes.hvac_modes?.map((o: string) => (
-                  <ActionPanel.Item
+                  <Action
                     key={o}
                     title={o}
                     onAction={async () => {
@@ -566,7 +608,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
                 icon={{ source: Icon.List, tintColor: Color.PrimaryText }}
               >
                 {preset_modes?.map((o: string) => (
-                  <ActionPanel.Item
+                  <Action
                     key={o}
                     title={o}
                     onAction={async () => {
@@ -579,7 +621,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
             )}
 
             {upperTemp && changeTempAllowed && (
-              <ActionPanel.Item
+              <Action
                 title={`Increase Temp. 0.5`}
                 shortcut={{ modifiers: ["cmd"], key: "+" }}
                 onAction={async () => {
@@ -590,7 +632,7 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               />
             )}
             {lowerTemp && changeTempAllowed && (
-              <ActionPanel.Item
+              <Action
                 title={`Decrease Temp. 0.5`}
                 shortcut={{ modifiers: ["cmd"], key: "-" }}
                 onAction={async () => {
@@ -750,23 +792,170 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
       return (
         <ActionPanel>
           <ActionPanel.Section title="Controls">
-            <ActionPanel.Item
+            <Action
               title="Toggle"
               onAction={async () => await ha.toggleSwitch(props.state.entity_id)}
               icon={{ source: "toggle.png", tintColor: Color.PrimaryText }}
             />
-            <ActionPanel.Item
+            <Action
               title="Turn On"
               shortcut={{ modifiers: ["cmd"], key: "o" }}
               onAction={async () => await ha.turnOnSwitch(props.state.entity_id)}
               icon={{ source: "power-btn.png", tintColor: Color.Green }}
             />
-            <ActionPanel.Item
+            <Action
               title="Turn Off"
               shortcut={{ modifiers: ["cmd"], key: "f" }}
               onAction={async () => await ha.turnOffSwitch(props.state.entity_id)}
               icon={{ source: "power-btn.png", tintColor: Color.Red }}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "input_boolean": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section>
+            <InputBooleanToggleAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Controls">
+            <InputBooleanOnAction state={state} />
+            <InputBooleanOffAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "input_number": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <InputNumberIncrementAction state={state} />
+            <InputNumberDecrementAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "timer": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <TimerStartAction state={state} />
+            <TimerPauseAction state={state} />
+            <TimerCancelAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "input_select": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <InputSelectOptionSelectAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "input_button": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <InputButtonPressAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "input_text": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <InputTextSetValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "input_datetime": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <InputDateTimeSetValueAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />
@@ -828,7 +1017,7 @@ export function useStateSearch(
             (e.attributes.friendly_name || "").toLowerCase().includes(query.toLowerCase())
         );
       }
-      haStates = haStates.slice(0, 100);
+      haStates = haStates.slice(0, 1000);
       setStates(haStates);
     } else {
       setStates([]);
