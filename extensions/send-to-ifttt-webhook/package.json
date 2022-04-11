@@ -30,9 +30,9 @@
     {
       "name": "webhooksKey",
       "required": true,
-      "type": "textfield",
-      "title": "Webhook Key",
-      "description": "Key of the webhook."
+      "type": "password",
+      "title": "Webhooks Key",
+      "description": "Key of the webhooks."
     }
   ],
   "dependencies": {
