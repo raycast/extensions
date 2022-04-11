@@ -8,6 +8,6 @@ export default async () => {
   } else {
     const textWithoutFormat = String(text);
     await Clipboard.paste(textWithoutFormat);
-    await showHUD("Paste as Plain Text");
+    await showHUD("Paste without formatting");
   }
 };
