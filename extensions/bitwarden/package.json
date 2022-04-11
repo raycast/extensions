@@ -92,8 +92,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.32.0",
-    "execa": "^5.1.1",
+    "@raycast/api": "^1.32.1",
+    "execa": "^6.1.0",
     "throttle-debounce": "^3.0.1"
   },
   "devDependencies": {

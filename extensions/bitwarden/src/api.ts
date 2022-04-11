@@ -1,4 +1,4 @@
-import execa from "execa";
+import { execa, ExecaChildProcess } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
 import { Item, PasswordGeneratorOptions, VaultState } from "./types";
@@ -61,13 +61,13 @@ export class Bitwarden {
     return JSON.parse(stdout);
   }
 
-  async generatePassword(options?: PasswordGeneratorOptions): Promise<string> {
+  async generatePassword(options?: PasswordGeneratorOptions, abortController?: AbortController): Promise<string> {
     const args = options ? getPasswordGeneratingArgs(options) : [];
-    const { stdout } = await this.exec(["generate", ...args]);
+    const { stdout } = await this.exec(["generate", ...args], abortController);
     return stdout;
   }
 
-  private async exec(args: string[]): Promise<execa.ExecaChildProcess> {
-    return execa(this.cliPath, args, { env: this.env, input: "" });
+  private async exec(args: string[], abortController?: AbortController): Promise<ExecaChildProcess> {
+    return execa(this.cliPath, args, { env: this.env, signal: abortController?.signal });
   }
 }
