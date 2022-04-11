@@ -41,7 +41,7 @@ export function composeMessage(url: string, name = "Send Message") {
       });
     }
 
-    showToast({ title: "Submitted form", message: "See logs for submitted values" });
+    showToast({ title: "Message Sent" });
   };
 
   return (
