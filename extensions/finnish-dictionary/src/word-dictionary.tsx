@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { resToDetail } from "./common";
 
@@ -14,13 +14,10 @@ export default function WordDictionary(props: { from: string; to: string }) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  let currentQuery = "";
-
   async function search(query: string) {
     setSearchQuery(query);
     if (!query) return;
     setIsLoading(true);
-    currentQuery = query;
     const res = await axios.get(
       encodeURI(`https://api.redfoxsanakirja.fi/redfox-api/api/basic/autocomplete/${props.from}/${query}`)
     );
@@ -29,17 +26,6 @@ export default function WordDictionary(props: { from: string; to: string }) {
       url: `https://redfoxsanakirja.fi/fi/sanakirja/-/s/${props.from}/${props.to}/${item}`,
       detail: null,
     }));
-    for (let i = 0; i < sugg.length; i++) {
-      const tran = await axios.get(
-        encodeURI(
-          `https://api.redfoxsanakirja.fi/redfox-api/api/basic/query/${props.from}/${props.to}/${sugg[i].title}`
-        )
-      );
-      sugg[i].detail = resToDetail(sugg[i].title, props.from, props.to, tran.data);
-      if (currentQuery !== query) return;
-      setSuggestions(sugg);
-    }
-    if (currentQuery !== query) return;
     setSuggestions(sugg);
     setIsLoading(false);
   }
@@ -47,35 +33,69 @@ export default function WordDictionary(props: { from: string; to: string }) {
   return (
     <List
       isLoading={isLoading}
-      throttle={true}
+      throttle
       searchBarPlaceholder="Search..."
       onSearchTextChange={search}
       isShowingDetail={suggestions.length > 0}
       navigationTitle={`Define ${props.from} word in ${props.to}`}
     >
-      {searchQuery === "" && suggestions.length === 0 ? (
+      {(searchQuery === "" || isLoading) && suggestions.length === 0 ? (
         <List.EmptyView icon={Icon.Text} title="Type a word to define" />
       ) : (
-        suggestions.map((x, index) => (
+        suggestions.map((result) => (
           <List.Item
-            key={x.title}
-            title={x.title}
-            accessories={x.detail ? [{ icon: Icon.MagnifyingGlass }] : []}
-            id={index.toString()}
+            id={result.title}
+            key={result.title}
+            title={result.title}
+            accessories={[{ icon: Icon.MagnifyingGlass }]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser key="openInBrowser" url={x.url} />
+                <Action.OpenInBrowser key="openInBrowser" url={result.url} />
                 <Action.CopyToClipboard
                   key="copyToClipboard"
-                  content={x.title}
+                  content={result.title}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 />
               </ActionPanel>
             }
-            detail={<List.Item.Detail markdown={x.detail} />}
+            detail={<ResultDetail res={result} from={props.from} to={props.to} />}
           />
         ))
       )}
     </List>
   );
 }
+
+interface ResultDetailProps {
+  res: any;
+  from: string;
+  to: string;
+}
+
+const ResultDetail = ({ res, from, to }: ResultDetailProps) => {
+  const [state, setState] = useState<{ isLoading: boolean; content: string }>({
+    isLoading: true,
+    content: "",
+  });
+  const isMounted = useRef(true);
+  useEffect(() => {
+    (async () => {
+      try {
+        const translation = await axios.get(
+          encodeURI(`https://api.redfoxsanakirja.fi/redfox-api/api/basic/query/${from}/${to}/${res.title}`)
+        );
+        if (isMounted.current) {
+          setState({ isLoading: false, content: resToDetail(res.title, from, to, translation.data) });
+        }
+      } catch (_e) {
+        if (isMounted.current) {
+          setState({ isLoading: false, content: "Error fetching definition. Please try again." });
+        }
+      }
+    })();
+    return function cleanup() {
+      isMounted.current = false;
+    };
+  }, []);
+  return <List.Item.Detail isLoading={state.isLoading} markdown={state.content} />;
+};
