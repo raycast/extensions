@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "new-file-here",
+  "name": "easy-new-file",
   "title": "Easy New File",
   "description": "Quickly create file in the current Finder window or on the desktop.",
   "icon": "easy-new-file-icon.png",
@@ -12,9 +12,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "new-file-here",
+      "name": "create-file-here",
       "icon": "new-file-here-icon.png",
-      "title": "New File Here",
+      "title": "Create File Here",
       "description": "Create a new file in the current Finder window or on the desktop.",
       "mode": "view",
       "preferences": [

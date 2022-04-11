@@ -2,10 +2,15 @@
 
 **Command**
 
-- **New File Here**: Create a new file in the current Finder window or on the desktop.
-  - New File with Name: Create a new file with name.
+- **Create File Here**: Create a new file in the current Finder window or on the desktop.
+  
+  - Create File Here
+  - Create File with Name: Create a new file with name.
+  - Add File Template
+  
+- **Add File Template**: Add a file template that you can use in the "Create File Here" command.
 
-- **Add File Template**: Add a file template that you can use in the "New File Here" command.
+  
 
 **Preferences**
 

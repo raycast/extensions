@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { checkDirectoryExists, getFileInfo, getFinderPath, isEmpty, preferences } from "./utils/utils";
 import { codeFileTypes, documentFileTypes, FileType, scriptFileTypes, TemplateType } from "./utils/file-type";
 import { runAppleScript } from "run-applescript";
-import NewFileWithName from "./new-file-with-name";
+import CreateFileWithName from "./create-file-with-name";
 import AddFileTemplate from "./add-file-template";
 
 export default function main() {
@@ -51,7 +51,7 @@ export default function main() {
     <List
       isShowingDetail={false}
       isLoading={isLoading}
-      searchBarPlaceholder={"Search File"}
+      searchBarPlaceholder={"Search and create file"}
       selectedItemId={templateFiles.length > 0 ? templateFiles[0].path : ""}
     >
       <List.Section title={"Template"}>
@@ -66,7 +66,7 @@ export default function main() {
               actions={
                 <ActionPanel>
                   <Action
-                    title={"New File Here"}
+                    title={"Create File Here"}
                     icon={Icon.Finder}
                     onAction={async () => {
                       try {
@@ -77,11 +77,11 @@ export default function main() {
                     }}
                   />
                   <Action
-                    title={"New File with Name"}
+                    title={"Create File with Name"}
                     icon={Icon.TextDocument}
                     onAction={() => {
                       push(
-                        <NewFileWithName newFileType={{ section: "Template", index: index }} templateFiles={array} />
+                        <CreateFileWithName newFileType={{ section: "Template", index: index }} templateFiles={array} />
                       );
                     }}
                   />
@@ -179,7 +179,7 @@ function FileTypeItem(props: {
       actions={
         <ActionPanel>
           <Action
-            title={"New File Here"}
+            title={"Create File Here"}
             icon={Icon.Finder}
             onAction={async () => {
               try {
@@ -190,10 +190,10 @@ function FileTypeItem(props: {
             }}
           />
           <Action
-            title={"New File with Name"}
+            title={"Create File with Name"}
             icon={Icon.TextDocument}
             onAction={() => {
-              push(<NewFileWithName newFileType={newFileType} templateFiles={templateFiles} />);
+              push(<CreateFileWithName newFileType={newFileType} templateFiles={templateFiles} />);
             }}
           />
           <Action
