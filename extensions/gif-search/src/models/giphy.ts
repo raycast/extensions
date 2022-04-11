@@ -45,7 +45,7 @@ export default async function giphy(force?: boolean) {
 export function mapGiphyResponse(giphyResp: GiphyGif) {
   return <IGif>{
     id: giphyResp.id,
-    title: giphyResp.title,
+    title: giphyResp.title || giphyResp.slug,
     url: giphyResp.url,
     slug: giphyResp.slug,
     preview_gif_url: giphyResp.images.preview_gif.url,
