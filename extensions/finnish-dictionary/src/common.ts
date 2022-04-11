@@ -1,4 +1,4 @@
-const regexWord = /\[\[([A-Za-zäöëå ]+)#(Finnish|English)\|\1\]\]/gmi;
+const regexWord = /\[\[([A-Za-zäöëå ]+)#(Finnish|English)\|\1\]\]/gim;
 const regexWords = /\[\[w:(.*?)\|.*?\]\]/gm;
 const regexCategory = /\(\[\[.*#([a-zäöëå]+)\|\1.*?\]\]\)/gm;
 const regexLinks =
