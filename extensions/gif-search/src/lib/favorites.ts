@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 
-import { ServiceName } from "../preferences";
+import { getServices, ServiceName } from "../preferences";
 import { IGif } from "../models/gif";
 
 export function getKey(service: ServiceName) {
@@ -15,11 +15,29 @@ export async function clearFavorites(service: ServiceName) {
   return await LocalStorage.removeItem(getKey(service));
 }
 
+export async function clearAllFavorites() {
+  for (const service of (await getAllFavorites()).keys()) {
+    await LocalStorage.removeItem(getKey(service));
+  }
+}
+
 export async function getFavorites(service: ServiceName) {
   const favs = await LocalStorage.getItem<string>(getKey(service));
   const favsArr: string[] = JSON.parse(favs || "[]");
 
   return new Set(favsArr);
+}
+
+export async function getAllFavorites() {
+  const allFavs: Map<ServiceName, Set<string>> = new Map();
+
+  for (const service of getServices()) {
+    const favs = await LocalStorage.getItem<string>(getKey(service));
+    const favsArr: string[] = JSON.parse(favs || "[]");
+    allFavs.set(service, new Set(favsArr));
+  }
+
+  return allFavs;
 }
 
 export async function saveToFavorites(gif: IGif, service: ServiceName) {

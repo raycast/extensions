@@ -2,7 +2,7 @@ import { useContext } from "react";
 
 import { Action, ActionPanel, Icon, showHUD } from "@raycast/api";
 
-import { getDefaultAction } from "../preferences";
+import { getDefaultAction, ServiceName } from "../preferences";
 
 import AppContext from "../components/AppContext";
 import { GifDetails } from "./GifDetails";
@@ -11,8 +11,8 @@ import { IGif } from "../models/gif";
 import copyFileToClipboard from "../lib/copyFileToClipboard";
 import stripQParams from "../lib/stripQParams";
 
-export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean }) {
-  const actions = getActions(props.item, props.showViewDetails);
+export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean; service?: ServiceName }) {
+  const actions = getActions(props.item, props.showViewDetails, props.service);
 
   return (
     <ActionPanel title={props.item.title}>
@@ -23,10 +23,10 @@ export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean 
   );
 }
 
-export function getActions(item: IGif, showViewDetails: boolean) {
+export function getActions(item: IGif, showViewDetails: boolean, service?: ServiceName) {
   const { id, url, gif_url, slug } = item;
   const { state, dispatch } = useContext(AppContext);
-  const { favIds, service } = state;
+  const { favIds } = state;
 
   const copyFileAction = () =>
     showHUD("Copying...")
@@ -67,12 +67,13 @@ export function getActions(item: IGif, showViewDetails: boolean) {
 
   let toggleFav: JSX.Element | undefined;
   if (service && favIds) {
-    toggleFav = favIds?.has(id.toString()) ? (
+    const actionIds = new Map([[service, new Set([id.toString()])]]);
+    toggleFav = favIds?.get(service)?.has(id.toString()) ? (
       <Action
         icon={Icon.Star}
         key="toggleFav"
         title="Remove from Favorites"
-        onAction={() => dispatch({ type: "remove", save: true, ids: [id], service })}
+        onAction={() => dispatch({ type: "remove", save: true, ids: actionIds, service })}
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
       />
     ) : (
@@ -80,7 +81,7 @@ export function getActions(item: IGif, showViewDetails: boolean) {
         icon={Icon.Star}
         key="toggleFav"
         title="Add to Favorites"
-        onAction={() => dispatch({ type: "add", save: true, ids: [id], service })}
+        onAction={() => dispatch({ type: "add", save: true, ids: actionIds, service })}
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
       />
     );
@@ -88,7 +89,7 @@ export function getActions(item: IGif, showViewDetails: boolean) {
 
   const actions: Array<(JSX.Element | undefined)[]> = [
     [copyFile, copyGifUrl],
-    [toggleFav, viewDetails],
+    [toggleFav, showViewDetails ? viewDetails : undefined],
     [copyPageUrl, openInBrowser],
   ];
 

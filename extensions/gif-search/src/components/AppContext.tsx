@@ -1,25 +1,24 @@
 import React from "react";
 
-import type { ServiceName } from "../preferences";
-import type { IGif } from "../models/gif";
-import { getFavorites, setFavorites } from "../lib/favorites";
+import { GIF_SERVICE, ServiceName } from "../preferences";
+import { setFavorites } from "../lib/favorites";
 
 export interface AppState {
   service?: ServiceName;
-  favIds?: Set<string>;
+  favIds?: Map<ServiceName, Set<string>>;
 }
 
 export type AppStateActionType = "add" | "remove" | "replace" | "clear";
 
 export interface AppStateAction {
   type?: AppStateActionType;
-  ids?: Array<string | number>;
+  ids?: Map<ServiceName, Set<string>>;
   service?: ServiceName;
   save?: boolean;
 }
 
 export const initialState: AppState = {
-  favIds: new Set<string>(),
+  favIds: new Map<ServiceName, Set<string>>(),
 };
 
 const AppContext = React.createContext({
@@ -35,26 +34,32 @@ export function reduceAppState(state: AppState, action: AppStateAction) {
   let { favIds } = state;
   const { type, ids } = action;
 
-  if (action.service) {
-    state.service = action.service;
-  }
+  const service = action.service as ServiceName;
 
   if (type == "replace" || type == "clear") {
-    favIds = new Set();
+    if (service === GIF_SERVICE.FAVORITES) {
+      favIds = ids;
+    } else {
+      favIds = new Map([[service, new Set<string>()]]);
+    }
   }
 
-  switch (type) {
-    case "replace":
-    case "add":
-      ids?.forEach((id) => favIds?.add(id.toString()));
-      break;
-    case "remove":
-      ids?.forEach((id) => favIds?.delete(id.toString()));
-      break;
+  const serviceIds = ids?.get(service);
+  if (serviceIds) {
+    switch (type) {
+      case "replace":
+      case "add":
+        serviceIds.forEach((id) => favIds?.get(service)?.add(id));
+        break;
+      case "remove":
+        serviceIds.forEach((id) => favIds?.get(service)?.delete(id));
+        break;
+    }
   }
 
-  if (action.save && state.service && favIds) {
-    setFavorites(favIds, state.service);
+  const newFavs = favIds?.get(service);
+  if (action.save && service && newFavs) {
+    setFavorites(newFavs, service);
   }
 
   return { ...state, favIds, service: state.service } as AppState;

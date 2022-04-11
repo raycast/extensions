@@ -1,5 +1,5 @@
 import { AbortError, FetchError } from "node-fetch";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { ServiceName, GIF_SERVICE } from "../preferences";
 import giphy from "../models/giphy";
@@ -24,6 +24,8 @@ export async function getAPIByServiceName(service: ServiceName, force?: boolean)
       return await tenor(force);
     case GIF_SERVICE.FINER_GIFS:
       return finergifs();
+    case GIF_SERVICE.FAVORITES:
+      return null;
   }
 
   throw new Error(`Unable to find API for service "${service}"`);
@@ -44,6 +46,12 @@ export default function useSearchAPI({ offset = 0, limit }: { offset?: number; l
       let items: IGif[];
       try {
         const api = await getAPIByServiceName(service);
+        if (api === null) {
+          setResults({ items: [] });
+          setIsLoading(false);
+          return;
+        }
+
         if (term) {
           items = dedupe(await api.search(term, { offset, limit }));
         } else {
@@ -73,8 +81,8 @@ export default function useSearchAPI({ offset = 0, limit }: { offset?: number; l
   );
 
   const markfavs = useCallback(
-    function markfavs(results: FetchState, favs: Set<string>) {
-      results.items?.forEach((item) => (item.is_fav = !!favs.has(item.id.toString())));
+    function markfavs(results: FetchState, favs: Map<ServiceName | undefined, Set<string>>) {
+      favs.forEach((ids) => results.items?.forEach((item) => (item.is_fav = !!ids.has(item.id.toString()))));
       setResults({ ...results, items: results.items });
     },
     [setResults]

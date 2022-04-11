@@ -18,7 +18,7 @@ export function GifResult(props: { item: IGif; index: number; service?: ServiceN
       title={title}
       icon={{ source: preview_gif_url }}
       detail={showPreview && <List.Item.Detail markdown={renderGifMarkdownDetails(props.item)} />}
-      actions={<GifDetailsActions item={props.item} showViewDetails={true} />}
+      actions={<GifDetailsActions item={props.item} showViewDetails={true} service={props.service} />}
       accessories={accessories}
     />
   );

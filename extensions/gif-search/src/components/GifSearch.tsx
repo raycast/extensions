@@ -1,8 +1,8 @@
 import { useEffect, useReducer, useState } from "react";
 
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, Icon } from "@raycast/api";
 
-import { ServiceName, getShowPreview, getMaxResults } from "../preferences";
+import { ServiceName, getShowPreview, getMaxResults, GIF_SERVICE, getServiceTitle } from "../preferences";
 
 import AppContext, { initialState, reduceAppState } from "./AppContext";
 
@@ -40,24 +40,27 @@ export function GifSearch(props: { service?: ServiceName }) {
     }
   }, [results?.error]);
 
-  const [favIds, favItems, isLoadingFavIds, isLoadingFavs, loadFavs, populate] = useFavorites({});
+  const [favIds, favItems, isLoadingFavIds, isLoadingFavs, loadFavs, populate, loadAllFavs, populateAll] = useFavorites(
+    {}
+  );
   const [state, dispatch] = useReducer(reduceAppState, initialState);
 
-  const shouldShowDetails = () => showPreview && (results?.items?.length ?? 0) + (favItems?.items?.length ?? 0) != 0;
-  const hasFavsToShow = () => !isLoadingFavIds && !isLoadingFavs && !!favItems?.items?.length && !results?.term;
-  const showEmpty = () => !favItems?.items?.length && !results?.term && !results?.items?.length;
+  const hasFavsToShow = () => !isLoadingFavIds && !isLoadingFavs && !!favItems?.items && !results?.term;
+  const showAllFavs = () => searchService === GIF_SERVICE.FAVORITES;
 
   // Load saved favorite GIF id's from LocalStorage
   useEffect(() => {
-    if (searchService) {
+    if (showAllFavs()) {
+      loadAllFavs();
+    } else if (searchService) {
       loadFavs(searchService);
     }
-  }, [loadFavs, searchService]);
+  }, [loadFavs, loadAllFavs, searchService]);
 
   // Hydrate global state with fav GIF id's
   useEffect(() => {
     if (!isLoadingFavIds) {
-      dispatch({ type: "replace", ids: [...(favIds?.ids || [])], service: searchService });
+      dispatch({ type: "replace", ids: favIds?.ids, service: searchService });
     } else {
       dispatch({ type: "clear", service: searchService });
     }
@@ -65,18 +68,23 @@ export function GifSearch(props: { service?: ServiceName }) {
 
   // Populate favorite gifs from GIF API service using saved GIF ID's
   useEffect(() => {
-    populate(state.favIds || new Set(), searchService);
+    if (showAllFavs()) {
+      populateAll(state.favIds || new Map<ServiceName, Set<string>>());
+    } else {
+      populate(state.favIds?.get(searchService as ServiceName) || new Set(), searchService);
+    }
   }, [state]);
 
   useEffect(() => {
-    if (favIds?.error || favItems?.error) {
+    if (favIds?.error || favItems?.errors) {
+      const combinedErrorMessage = favItems?.errors?.map(({ message }) => message).join(". ");
       showToast({
         style: Toast.Style.Failure,
         title: "Failed loading favorites",
-        message: favIds?.error?.message || favItems?.error?.message,
+        message: favIds?.error?.message || combinedErrorMessage,
       });
     }
-  }, [favItems?.error]);
+  }, [favIds?.error, favItems?.errors]);
 
   // Update fav status of GIF results
   useEffect(() => {
@@ -87,18 +95,43 @@ export function GifSearch(props: { service?: ServiceName }) {
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>
-      <GifSearchList
-        isLoading={isLoading || isLoadingFavIds || isLoadingFavs}
-        showDropdown={showServiceDropdown}
-        showDetail={shouldShowDetails()}
-        showEmpty={showEmpty()}
-        onDropdownChange={onServiceChange}
-        onSearchTextChange={setSearchTerm}
-        sections={[
-          { title: "Favorites", results: favItems?.items, hide: !hasFavsToShow() },
-          { title: "Trending", term: results?.term, results: results?.items },
-        ]}
-      />
+      {showAllFavs() ? (
+        <GifSearchList
+          isLoading={isLoadingFavIds || isLoadingFavs}
+          showDropdown={showServiceDropdown}
+          showDetail={showPreview && (favItems?.items?.size ?? 0) !== 0}
+          showEmpty={!favItems?.items?.size && !results?.term}
+          onDropdownChange={onServiceChange}
+          enableFiltering={true}
+          searchBarPlaceholder="Search favorites..."
+          emptyStateText="Add some GIFs to your Favorites first!"
+          emptyStateIcon={Icon.Star}
+          sections={Array.from(favItems?.items || []).map(([service, gifs]) => {
+            return { title: getServiceTitle(service), results: gifs, service };
+          })}
+        />
+      ) : (
+        <GifSearchList
+          isLoading={isLoading || isLoadingFavIds || isLoadingFavs}
+          showDropdown={showServiceDropdown}
+          showDetail={showPreview && (results?.items?.length ?? 0) + (favItems?.items?.size ?? 0) != 0}
+          showEmpty={!favItems?.items?.size && !results?.term && !results?.items?.length}
+          searchBarPlaceholder="Search for gifs..."
+          emptyStateText="Enter a search above to get started..."
+          emptyStateIcon={Icon.MagnifyingGlass}
+          onDropdownChange={onServiceChange}
+          onSearchTextChange={setSearchTerm}
+          sections={[
+            {
+              title: "Favorites",
+              results: favItems?.items?.get(searchService as ServiceName),
+              service: searchService,
+              hide: !hasFavsToShow(),
+            },
+            { title: "Trending", term: results?.term, results: results?.items, service: searchService },
+          ]}
+        />
+      )}
     </AppContext.Provider>
   );
 }

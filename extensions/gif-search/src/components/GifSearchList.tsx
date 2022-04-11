@@ -1,4 +1,5 @@
-import { List, Icon } from "@raycast/api";
+import { List, Image } from "@raycast/api";
+import { GIF_SERVICE } from "../preferences";
 import { GifListSection, GifListSectionProps } from "./GifListSection";
 
 export interface GifListProps {
@@ -6,34 +7,41 @@ export interface GifListProps {
   showDropdown?: boolean;
   showDetail?: boolean;
   showEmpty?: boolean;
+  enableFiltering?: boolean;
   onDropdownChange?: (newValue: string) => void;
   onSearchTextChange?: (text: string) => void;
+  searchBarPlaceholder?: string;
+  emptyStateText?: string;
+  emptyStateIcon?: Image.ImageLike;
   sections: GifListSectionProps[];
 }
 
 export function GifSearchList(props: GifListProps) {
-  const { isLoading, showDropdown, showDetail, showEmpty, onDropdownChange, onSearchTextChange } = props;
-
   return (
     <List
       searchBarAccessory={
-        showDropdown && (
-          <List.Dropdown tooltip="" storeValue={true} onChange={onDropdownChange}>
-            <List.Dropdown.Item title="Giphy" value="giphy" />
-            <List.Dropdown.Item title="Tenor" value="tenor" />
-            <List.Dropdown.Item title="Finer Gifs Club" value="finergifs" />
+        props.showDropdown && (
+          <List.Dropdown tooltip="" storeValue={true} onChange={props.onDropdownChange}>
+            <List.Dropdown.Section>
+              <List.Dropdown.Item title="Giphy" value={GIF_SERVICE.GIPHY} />
+              <List.Dropdown.Item title="Tenor" value={GIF_SERVICE.TENOR} />
+              <List.Dropdown.Item title="Finer Gifs Club" value={GIF_SERVICE.FINER_GIFS} />
+            </List.Dropdown.Section>
+            <List.Dropdown.Section>
+              <List.Dropdown.Item title="Favorites" value={GIF_SERVICE.FAVORITES} />
+            </List.Dropdown.Section>
           </List.Dropdown>
         )
       }
-      enableFiltering={false}
-      isLoading={isLoading}
+      enableFiltering={props.enableFiltering}
+      isLoading={props.isLoading}
       throttle={true}
-      searchBarPlaceholder="Search for gifs..."
-      onSearchTextChange={onSearchTextChange}
-      isShowingDetail={showDetail}
+      searchBarPlaceholder={props.searchBarPlaceholder}
+      onSearchTextChange={props.onSearchTextChange}
+      isShowingDetail={props.showDetail}
     >
-      {showEmpty ? (
-        <List.EmptyView title="Enter a search above to get started..." icon={Icon.MagnifyingGlass} />
+      {props.showEmpty ? (
+        <List.EmptyView title={props.emptyStateText} icon={props.emptyStateIcon} />
       ) : (
         props.sections.map((sProps) => (
           <GifListSection
@@ -42,6 +50,7 @@ export function GifSearchList(props: GifListProps) {
             results={sProps.results}
             term={sProps.term}
             hide={sProps.hide}
+            service={sProps.service}
           />
         ))
       )}
