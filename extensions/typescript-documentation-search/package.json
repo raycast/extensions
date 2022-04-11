@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "typescript-documentation-search",
-  "title": "Typescript Documentation Search",
+  "title": "TypeScript Documentation Search",
   "description": "Search in TypeScript Documentation",
   "icon": "command-icon.png",
   "author": "chezhe",
@@ -14,7 +14,7 @@
     {
       "name": "index",
       "title": "Search Documentation",
-      "subtitle": "Search in TypeScript Documentation",
+      "subtitle": "TypeScript",
       "description": "Search in TypeScript Documentation",
       "mode": "view"
     }

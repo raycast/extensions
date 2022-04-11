@@ -13,7 +13,7 @@ export default function Command() {
       searchBarPlaceholder="Search npm packages..."
       throttle
     >
-      <List.Section title="Results" subtitle={state.results.length + ""}>
+      <List.Section title="Results">
         {state.results.map((searchResult) => (
           <SearchListItem key={searchResult.name} searchResult={searchResult} />
         ))}
@@ -94,7 +94,9 @@ async function performSearch(searchText: string, signal: AbortSignal): Promise<S
   const response = await fetch(URL, {
     method: "post",
     signal: signal,
-    body: `{"requests":[{"indexName":"typescriptlang","params":"query=${searchText}&hitsPerPage=5"}]}`,
+    body: `{"requests":[{"indexName":"typescriptlang","params":"query=${encodeURIComponent(
+      searchText
+    )}&hitsPerPage=1000"}]}`,
   });
 
   const json = (await response.json()) as
