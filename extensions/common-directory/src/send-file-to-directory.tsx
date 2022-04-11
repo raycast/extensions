@@ -8,6 +8,7 @@ import { getDirectory, resetRank } from "./open-common-directory";
 import fse from "fs-extra";
 import AddCommonDirectory from "./add-common-directory";
 import { DetailKey, getDirectoryContent, getShowDetailLocalStorage, setShowDetailLocalStorage } from "./utils/ui-utils";
+import path from "path";
 
 export default function CommonDirectory() {
   const [searchValue, setSearchValue] = useState<string>("");
@@ -21,7 +22,6 @@ export default function CommonDirectory() {
   const [updateList, setUpdateList] = useState<number[]>([0]);
   const [loading, setLoading] = useState<boolean>(true);
   const { sortBy, showOpenDirectory } = preferences();
-  const homeDirectory = homedir();
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -88,7 +88,6 @@ export default function CommonDirectory() {
                 return (
                   <SendToDirectoryItem
                     key={directory.id}
-                    homeDirectory={homeDirectory}
                     directory={directory}
                     index={index}
                     commonDirectory={commonDirectory}
@@ -107,7 +106,6 @@ export default function CommonDirectory() {
                 return (
                   <SendToDirectoryItem
                     key={directory.id}
-                    homeDirectory={homeDirectory}
                     directory={directory}
                     index={index}
                     commonDirectory={openDirectory}
@@ -127,7 +125,6 @@ export default function CommonDirectory() {
 }
 
 function SendToDirectoryItem(props: {
-  homeDirectory: string;
   directory: DirectoryInfo;
   index: number;
   commonDirectory: DirectoryInfo[];
@@ -137,7 +134,7 @@ function SendToDirectoryItem(props: {
   updateDetailUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
   showDetailUseState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
 }) {
-  const { homeDirectory, directory, setCommonDirectory, index, commonDirectory, directoryContent } = props;
+  const { directory, setCommonDirectory, index, commonDirectory, directoryContent } = props;
   const [updateList, setUpdateList] = props.updateListUseState;
   const [updateDetail, setUpdateDetail] = props.updateDetailUseState;
   const [showDetail, setShowDetail] = props.showDetailUseState;
@@ -151,8 +148,8 @@ function SendToDirectoryItem(props: {
       subtitle={showDetail ? "" : directory.alias}
       accessories={
         showDetail
-          ? [{ text: isEmpty(directory.alias) ? " " : directory.alias }]
-          : [{ text: "~" + directory.path.substring(homeDirectory.length) }, directory.valid ? {} : { icon: "⚠️" }]
+          ? [{ text: isEmpty(directory.alias) ? " " : directory.alias }, directory.valid ? {} : { icon: "⚠️" }]
+          : [{ text: path.parse(directory.path).dir }, directory.valid ? {} : { icon: "⚠️" }]
       }
       detail={<List.Item.Detail markdown={directoryContent} />}
       actions={
@@ -188,7 +185,7 @@ function SendToDirectoryItem(props: {
                 primaryAction === ActionType.COPY ? "Copy to Folder Chosen Manually" : "Move to Folder Chosen Manually"
               }
               icon={primaryAction === ActionType.COPY ? Icon.Clipboard : Icon.Download}
-              shortcut={{ modifiers: ["ctrl"], key: "m" }}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "m" }}
               onAction={async () => {
                 await actionMoveOrCopy(directory, commonDirectory, index, setCommonDirectory, primaryAction, true);
 
@@ -202,7 +199,7 @@ function SendToDirectoryItem(props: {
                 primaryAction === ActionType.COPY ? "Move to Folder Chosen Manually" : "Copy to Folder Chosen Manually"
               }
               icon={primaryAction === ActionType.COPY ? Icon.Download : Icon.Clipboard}
-              shortcut={{ modifiers: ["ctrl"], key: "c" }}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
               onAction={async () => {
                 if (primaryAction === ActionType.COPY) {
                   await actionMoveOrCopy(directory, commonDirectory, index, setCommonDirectory, ActionType.MOVE, true);
@@ -267,7 +264,7 @@ function SendToDirectoryItem(props: {
             <Action
               title={"Toggle Details"}
               icon={Icon.Sidebar}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "d" }}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "t" }}
               onAction={() => {
                 setShowDetail(!showDetail);
                 setShowDetailLocalStorage(DetailKey.SEND_COMMON_DIRECTORY, !showDetail).then();

@@ -32,7 +32,6 @@ export default function OpenCommonDirectory() {
   const [loading, setLoading] = useState<boolean>(true);
   const { sortBy, showOpenDirectory } = preferences();
   const { push } = useNavigation();
-  const homeDirectory = homedir();
 
   useEffect(() => {
     async function _fetchLocalStorage() {
@@ -100,7 +99,6 @@ export default function OpenCommonDirectory() {
                 return (
                   <DirectoryItem
                     key={directory.id}
-                    homeDirectory={homeDirectory}
                     directory={directory}
                     index={index}
                     commonDirectory={commonDirectory}
@@ -118,7 +116,6 @@ export default function OpenCommonDirectory() {
                 return (
                   <DirectoryItem
                     key={directory.id}
-                    homeDirectory={homeDirectory}
                     directory={directory}
                     index={index}
                     commonDirectory={openDirectory}
@@ -137,7 +134,6 @@ export default function OpenCommonDirectory() {
 }
 
 function DirectoryItem(props: {
-  homeDirectory: string;
   directory: DirectoryInfo;
   index: number;
   commonDirectory: DirectoryInfo[];
@@ -146,7 +142,7 @@ function DirectoryItem(props: {
   updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
   showDetailUseState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
 }) {
-  const { homeDirectory, directory, setCommonDirectory, index, commonDirectory, directoryContent } = props;
+  const { directory, setCommonDirectory, index, commonDirectory, directoryContent } = props;
   const [updateList, setUpdateList] = props.updateListUseState;
   const [showDetail, setShowDetail] = props.showDetailUseState;
   const { push } = useNavigation();
@@ -159,8 +155,8 @@ function DirectoryItem(props: {
       detail={<List.Item.Detail markdown={directoryContent} />}
       accessories={
         showDetail
-          ? [{ text: isEmpty(directory.alias) ? " " : directory.alias }]
-          : [{ text: "~" + directory.path.substring(homeDirectory.length) }, directory.valid ? {} : { icon: "⚠️" }]
+          ? [{ text: isEmpty(directory.alias) ? " " : directory.alias }, directory.valid ? {} : { icon: "⚠️" }]
+          : [{ text: path.parse(directory.path).dir }, directory.valid ? {} : { icon: "⚠️" }]
       }
       actions={
         <ActionPanel>
@@ -181,7 +177,7 @@ function DirectoryItem(props: {
           <Action
             title={"Copy Directory Path"}
             icon={Icon.Clipboard}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            shortcut={{ modifiers: ["ctrl"], key: "c" }}
             onAction={async () => {
               await Clipboard.copy(directory.path);
               await showToast(Toast.Style.Success, "Directory path copied!");
@@ -244,10 +240,10 @@ function DirectoryItem(props: {
             <Action
               title={"Toggle Details"}
               icon={Icon.Sidebar}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "d" }}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "t" }}
               onAction={() => {
                 setShowDetail(!showDetail);
-                setShowDetailLocalStorage(DetailKey.SEND_COMMON_DIRECTORY, !showDetail).then();
+                setShowDetailLocalStorage(DetailKey.OPEN_COMMON_DIRECTORY, !showDetail).then();
               }}
             />
           </ActionPanel.Section>
