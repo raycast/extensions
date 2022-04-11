@@ -6,7 +6,6 @@ import { ServiceName, getShowPreview, getMaxResults } from "../preferences";
 
 import AppContext, { initialState, reduceAppState } from "./AppContext";
 import { GifList } from "./GifList";
-import { FavesList } from "./FavesList";
 
 import useFavorites from "../hooks/useFavorites";
 import useSearchAPI from "../hooks/useSearchAPI";
@@ -45,7 +44,7 @@ export function GifSearch(props: { service?: ServiceName }) {
   const [state, dispatch] = useReducer(reduceAppState, initialState);
 
   const shouldShowDetails = () => showPreview && (results?.items?.length ?? 0) + (favItems?.items?.length ?? 0) != 0;
-  const shouldShowFavs = () => !isLoadingFavIds && !isLoadingFavs && !!favItems?.items?.length && !results?.term;
+  const hasFavsToShow = () => !isLoadingFavIds && !isLoadingFavs && !!favItems?.items?.length && !results?.term;
   const showEmpty = () => !favItems?.items?.length && !results?.term && !results?.items?.length;
 
   // Load saved favorite GIF id's from LocalStorage
@@ -108,7 +107,7 @@ export function GifSearch(props: { service?: ServiceName }) {
         {showEmpty() ? (
           <List.EmptyView title="Enter a search above to get started..." icon={Icon.MagnifyingGlass} />
         ) : undefined}
-        <FavesList results={favItems?.items} show={shouldShowFavs()} />
+        <GifList title="Favorites" results={favItems?.items} hide={!hasFavsToShow()} />
         <GifList term={results?.term} results={results?.items} />
       </List>
     </AppContext.Provider>
