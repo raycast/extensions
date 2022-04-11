@@ -20,7 +20,7 @@
             "name": "addWebhook",
             "title": "Add Webhook",
             "subtitle": "Discord",
-            "description": "Add, Edit and Delete discord webhooks.",
+            "description": "Add discord webhooks.",
             "mode": "view"
         }
     ],
