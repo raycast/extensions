@@ -2,6 +2,10 @@
 
 This extension searches for animated GIFs from the internet using [giphy.com](https://giphy.com), [tenor.com](https://tenor.com), or [thefinergifs.club](https://thefinergifs.club). Each GIF search service has its own command, or you can use the unified GIF Search command and switch between them using the search bar dropdown.
 
+## Issues or Feature Requests
+
+Find a bug? Want to see something new in this extension? Let me know by [submitting a feature request](https://github.com/raycast/extensions/issues/new?assignees=&labels=extension%2C+feature+request&template=extension_feature_request.md)! Make sure to either mention `@josephschmitt` in your ticket or set me as the assignee so I get notified.
+
 ## Preferences
 
 By default, this extension will download shared API keys for both services. If you wish to use your own API keys, you can sign up for a free developer account for Giphy at [https://developers.giphy.com](https://developers.giphy.com), or Tenor at [https://tenor.com/developer/keyregistration](https://tenor.com/developer/keyregistration), and provide those keys in the Command Preferences.
