@@ -6,7 +6,7 @@ const VISITED_REPOSITORIES_KEY = "VISITED_REPOSITORIES";
 const VISITED_REPOSITORIES_LENGTH = 25;
 
 async function loadVisitedRepositories() {
-  const item = await LocalStorage.getItem(VISITED_REPOSITORIES_KEY);
+  const item = await LocalStorage.getItem<string>(VISITED_REPOSITORIES_KEY);
   if (item) {
     const parsed = JSON.parse(item);
     return parsed as Repository[];
