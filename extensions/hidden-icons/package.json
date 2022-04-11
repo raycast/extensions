@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "find-it",
+  "name": "hidden-icons",
   "title": "Hidden Icons",
   "description": "A casual game, find out the hidden icons in 30s.",
   "icon": "find-out-icon.png",
@@ -13,6 +13,7 @@
     {
       "name": "find-out",
       "title": "Find out Hidden Icon",
+      "subtitle": "Hidden Icons",
       "description": "A casual game, find out the hidden icons in 30s.",
       "mode": "view"
     }
