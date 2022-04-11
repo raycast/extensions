@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "move-file-out",
+  "name": "folder-bomb",
   "title": "Folder Bomb",
   "description": "Quickly take files out and move them to directory where parent folder is located.",
   "icon": "extension-icon.png",
