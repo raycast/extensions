@@ -16,58 +16,15 @@
       "name": "set-raycast-wallpaper",
       "icon": "raycast-icon.png",
       "title": "Set Raycast Wallpaper",
-      "description": "Set Raycast official wallpapers and capture for Raycast extension's metadata.",
+      "description": "Set Raycast official wallpapers as desktop wallpaper.",
       "mode": "view"
     },
     {
       "name": "roll-raycast-wallpaper",
       "icon": "random-icon.png",
-      "title": "Roll Raycast Wallpaper",
-      "description": "Set random Raycast wallpapers to desktop.",
+      "title": "Random Raycast Wallpaper",
+      "description": "Set random Raycast wallpapers as desktop wallpaper.",
       "mode": "no-view"
-    },
-    {
-      "name": "capture-raycast-metadata",
-      "icon": "capture-icon.png",
-      "title": "Capture Raycast Metadata",
-      "description": "Capture a screenshot for Raycast extension's metadata.",
-      "mode": "no-view",
-      "preferences": [
-        {
-          "name": "screenshotName",
-          "title": "Screenshot Name",
-          "description": "Set the screenshot name.",
-          "type": "textfield",
-          "required": true,
-          "default": "Metadata"
-        },
-        {
-          "name": "screenshotFormat",
-          "title": "Screenshot Format",
-          "description": "Set the screenshot format.",
-          "type": "dropdown",
-          "data": [
-            {
-              "title": "PNG",
-              "value": "png"
-            },
-            {
-              "title": "JPEG",
-              "value": "jpg"
-            },
-            {
-              "title": "PDF",
-              "value": "pdf"
-            },
-            {
-              "title": "TIFF",
-              "value": "tiff"
-            }
-          ],
-          "required": true,
-          "default": "png"
-        }
-      ]
     }
   ],
   "preferences": [

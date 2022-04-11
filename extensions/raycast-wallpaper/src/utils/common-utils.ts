@@ -14,10 +14,6 @@ export const preferences = () => {
 };
 export const cachePath = environment.supportPath;
 
-export const isEmpty = (string: string | null | undefined) => {
-  return !(string != null && String(string).length > 0);
-};
-
 export const checkDirectoryExists = (filePath: string) => {
   try {
     fs.accessSync(filePath);
