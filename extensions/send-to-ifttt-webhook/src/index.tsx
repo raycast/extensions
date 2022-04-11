@@ -8,22 +8,25 @@ interface CommandForm {
 }
 
 export default function Command() {
-  const { eventName, webhooksKey, nbValues } = getPreferenceValues<{ eventName: string; webhooksKey: string, nbValues: string }>();
+  const { eventName, webhooksKey, nbValues } = getPreferenceValues<{
+    eventName: string;
+    webhooksKey: string;
+    nbValues: string;
+  }>();
   async function handleSubmit(values: CommandForm) {
     try {
-    await fetch(`https://maker.ifttt.com/trigger/${eventName}/with/key/${webhooksKey}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(values),
-    });
-    await showHUD("Sent to IFTTT 🚀");
-    await popToRoot();
-  } catch (error) {
-    await showToast({ title: "An error occurred!", message: "Please check your internet connection." });
-  }
-
+      await fetch(`https://maker.ifttt.com/trigger/${eventName}/with/key/${webhooksKey}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+      await showHUD("Sent to IFTTT 🚀");
+      await popToRoot();
+    } catch (error) {
+      await showToast({ title: "An error occurred!", message: "Please check your internet connection." });
+    }
   }
 
   return (
@@ -34,12 +37,14 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Description title="Event Name" text={eventName}/>
-      { range(parseInt(nbValues), 1).map(i =>  <Form.TextArea key={i} id={`value${i}`} title={`Value ${i}`} placeholder="Enter text" /> ) }
+      <Form.Description title="Event Name" text={eventName} />
+      {range(parseInt(nbValues), 1).map((i) => (
+        <Form.TextArea key={i} id={`value${i}`} title={`Value ${i}`} placeholder="Enter text" />
+      ))}
     </Form>
   );
 }
 
 function range(size: number, startAt = 0) {
-  return [...Array(size).keys()].map(i => i + startAt);
+  return [...Array(size).keys()].map((i) => i + startAt);
 }
