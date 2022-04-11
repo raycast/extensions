@@ -5,6 +5,8 @@
 - Use gif slug as file name when copying file to clipboard
 - Add action for adding a gif to your favorites
 - Mark favorite GIFs with Star Icon in results list
+- Add "Add or Remove from Favorites" to Default Action preferences list
+- Add section dividers to GIF Details Actions
 
 ## [Remove static GIF preview warning 🎉] - 2022-04-06
 - Removes the warning about GIFs no longer animating, Raycast v1.32.0 supports GIFs in Details

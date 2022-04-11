@@ -74,20 +74,24 @@
       "description": "Customize what happens when hitting ENTER on a Gif",
       "data": [
         {
-          "title": "Copy File to Clipboard",
+          "title": "Copy File",
           "value": "copyFile"
         },
         {
-          "title": "Copy GIF URL to Clipboard",
+          "title": "Copy GIF Link",
           "value": "copyGifUrl"
         },
         {
-          "title": "Copy Page URL to Clipboard",
-          "value": "copyPageUrl"
+          "title": "Add or Remove from Favorites",
+          "value": "toggleFav"
         },
         {
           "title": "View GIF Details",
           "value": "viewDetails"
+        },
+        {
+          "title": "Copy Page Link",
+          "value": "copyPageUrl"
         },
         {
           "title": "Open in Browser",

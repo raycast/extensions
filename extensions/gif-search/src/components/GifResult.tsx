@@ -1,6 +1,6 @@
 import { List, Icon, Color } from "@raycast/api";
 
-import { GifDetailsActions } from "./GifDetails";
+import { GifDetailsActions } from "./GifDetailsActions";
 import { IGif, renderGifMarkdownDetails } from "../models/gif";
 import { getShowPreview, ServiceName } from "../preferences";
 
