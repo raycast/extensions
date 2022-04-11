@@ -1,14 +1,14 @@
 import { useEffect, useReducer, useState } from "react";
 
-import { List, showToast, Toast, Icon } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 
 import { ServiceName, getShowPreview, getMaxResults } from "../preferences";
 
 import AppContext, { initialState, reduceAppState } from "./AppContext";
-import { GifList } from "./GifList";
 
 import useFavorites from "../hooks/useFavorites";
 import useSearchAPI from "../hooks/useSearchAPI";
+import { GifSearchList } from "./GifSearchList";
 
 export function GifSearch(props: { service?: ServiceName }) {
   const showServiceDropdown = !props.service;
@@ -87,29 +87,18 @@ export function GifSearch(props: { service?: ServiceName }) {
 
   return (
     <AppContext.Provider value={{ state, dispatch }}>
-      <List
-        searchBarAccessory={
-          showServiceDropdown && (
-            <List.Dropdown tooltip="" storeValue={true} onChange={onServiceChange}>
-              <List.Dropdown.Item title="Giphy" value="giphy" />
-              <List.Dropdown.Item title="Tenor" value="tenor" />
-              <List.Dropdown.Item title="Finer Gifs Club" value="finergifs" />
-            </List.Dropdown>
-          )
-        }
-        enableFiltering={false}
+      <GifSearchList
         isLoading={isLoading || isLoadingFavIds || isLoadingFavs}
-        throttle={true}
-        searchBarPlaceholder="Search for gifs..."
+        showDropdown={showServiceDropdown}
+        showDetail={shouldShowDetails()}
+        showEmpty={showEmpty()}
+        onDropdownChange={onServiceChange}
         onSearchTextChange={setSearchTerm}
-        isShowingDetail={shouldShowDetails()}
-      >
-        {showEmpty() ? (
-          <List.EmptyView title="Enter a search above to get started..." icon={Icon.MagnifyingGlass} />
-        ) : undefined}
-        <GifList title="Favorites" results={favItems?.items} hide={!hasFavsToShow()} />
-        <GifList term={results?.term} results={results?.items} />
-      </List>
+        sections={[
+          { title: "Favorites", results: favItems?.items, hide: !hasFavsToShow() },
+          { title: "Trending", term: results?.term, results: results?.items },
+        ]}
+      />
     </AppContext.Provider>
   );
 }
