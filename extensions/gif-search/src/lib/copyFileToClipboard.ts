@@ -23,7 +23,8 @@ export default async function copyFileToClipboard(url: string, name?: string) {
   }
 
   const file = tempy.file(tempyOpt);
-  response.body.pipe(fs.createWriteStream(file)).on("error", (e) => {
+  response.body.pipe(fs.createWriteStream(file));
+  response.body.on("error", (e) => {
     throw new Error(`Failed to download GIF: "${e.message}". Please try again`);
   });
 
