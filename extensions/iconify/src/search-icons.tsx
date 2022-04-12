@@ -9,8 +9,10 @@ const service = new Service();
 function Command() {
   const [icons, setIcons] = useState<Icon[]>([]);
   const [isLoading, setLoading] = useState(false);
+  const [query, setQuery] = useState('');
 
   async function queryIcons(text: string) {
+    setQuery(text);
     setLoading(true);
     setIcons([]);
     const icons = await service.queryIcons(text);
@@ -18,8 +20,19 @@ function Command() {
     setLoading(false);
   }
 
+  function getEmptyViewDescription(query: string) {
+    if (query.length === 0) {
+      return 'Type something to get started';
+    }
+    return 'Try another query';
+  }
+
   return (
     <List throttle isLoading={isLoading} onSearchTextChange={queryIcons}>
+      <List.EmptyView
+        title="No results"
+        description={getEmptyViewDescription(query)}
+      />
       {icons.map((icon) => {
         const { set, id, body, width, height } = icon;
         const { id: setId, title: setName } = set;
