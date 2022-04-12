@@ -11,6 +11,15 @@
   "license": "MIT",
   "preferences": [
     {
+      "name": "timeLeftFirst",
+      "type": "checkbox",
+      "required": true,
+      "title": "UI Preference",
+      "label": "Time Left First",
+      "description": "Show Time Left first.",
+      "default": true
+    },
+    {
       "name": "birthday",
       "type": "textfield",
       "required": true,
@@ -33,7 +42,7 @@
           "value": "Sunday"
         }
       ],
-      "required": false,
+      "required": true,
       "default": "Monday"
     },
     {
@@ -63,7 +72,7 @@
           "value": "rainbow"
         }
       ],
-      "required": false,
+      "required": true,
       "default": "random"
     }
   ],

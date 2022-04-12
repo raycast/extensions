@@ -116,21 +116,21 @@ export const getLifeProgress = () => {
   };
 
   lifeProgresses.push({
-    section: "Have done",
+    section: SectionTitle.YOU_HAVE,
     icon: meaningfulDaysIcon(getSpendDays()),
     title: `spent ${getSpendDays()} meaningful days`,
     number: getSpendDays(),
     accessUnit: getNumberCanvas(_iconTheme, getSpendDays(), "day.png"),
   });
   lifeProgresses.push({
-    section: "Have done",
+    section: SectionTitle.YOU_HAVE,
     icon: "🎊",
     title: `celebrated ${getSpendYears()} New Year's Days`,
     number: getSpendYears(),
     accessUnit: getNumberCanvas(_iconTheme, getSpendYears(), "year.png"),
   });
   lifeProgresses.push({
-    section: "Have done",
+    section: SectionTitle.YOU_HAVE,
     icon: getSpendCentury() == 1 ? "✈️" : "🚀",
     title: `witnessed ${getSpendCentury()} great centuries`,
     number: getSpendCentury(),
@@ -138,21 +138,21 @@ export const getLifeProgress = () => {
   });
 
   lifeProgresses.push({
-    section: "Able to",
+    section: SectionTitle.YOU_MAY_BE_ABLE_TO,
     icon: "💰",
     title: `receive ${getLeftPaychecks()} generous paychecks`,
     number: getLeftPaychecks(),
     accessUnit: getNumberCanvas(_iconTheme, getLeftPaychecks(), "month.png"),
   });
   lifeProgresses.push({
-    section: "Able to",
+    section: SectionTitle.YOU_MAY_BE_ABLE_TO,
     icon: "🎡",
     title: `spend ${getLeftWeeks()} pleasant weekends`,
     number: getLeftWeeks(),
     accessUnit: getNumberCanvas(_iconTheme, getLeftWeeks(), "week.png"),
   });
   lifeProgresses.push({
-    section: "Able to",
+    section: SectionTitle.YOU_MAY_BE_ABLE_TO,
     icon: "🌙",
     title: `enjoy ${getLeftNights()} wonderful nights`,
     number: getLeftNights(),
@@ -160,28 +160,28 @@ export const getLifeProgress = () => {
   });
 
   lifeProgresses.push({
-    section: "Time left",
+    section: SectionTitle.TIME_LEFT,
     icon: timeIcon24[getHourLeftThisDay() - 1],
     title: `${getHourLeftThisDay()} hours left in the day`,
     number: getHourLeftThisDay(),
     accessUnit: getNumberCanvas(_iconTheme, getHourLeftThisDay(), "hour.png"),
   });
   lifeProgresses.push({
-    section: "Time left",
+    section: SectionTitle.TIME_LEFT,
     icon: getDaysLeftThisWeek() <= 2 ? "🏝" : "💼",
     title: `${getDaysLeftThisWeek()} days left in the week`,
     number: getDaysLeftThisWeek(),
     accessUnit: getNumberCanvas(_iconTheme, getDaysLeftThisWeek(), "day.png"),
   });
   lifeProgresses.push({
-    section: "Time left",
+    section: SectionTitle.TIME_LEFT,
     icon: getDaysLeftThisMonth() <= 15 ? "⌛️" : "⏳",
     title: `${getDaysLeftThisMonth()} days left in the month`,
     number: getDaysLeftThisMonth(),
     accessUnit: getNumberCanvas(_iconTheme, getDaysLeftThisMonth(), "day.png"),
   });
   lifeProgresses.push({
-    section: "Time left",
+    section: SectionTitle.TIME_LEFT,
     icon: getDaysLeftThisYear() < 182 ? "🎇" : "🎆",
     title: `${getDaysLeftThisYear()} days left in the year`,
     number: getDaysLeftThisYear(),
@@ -250,21 +250,16 @@ export const getNumberCanvas = (iconTheme: string, number: number, accessIcon: s
   return numberPaths;
 };
 
-export const allTags = [
-  {
-    title: "All life progress",
-    value: "All",
-  },
-  {
-    title: "You have",
-    value: "You have",
-  },
-  {
-    title: "You may be able to",
-    value: "You may be able to",
-  },
-  {
-    title: "Time left",
-    value: "Time left",
-  },
-];
+export enum SectionTitle {
+  ALL_LIFE_PROGRESS = "All life progress",
+  YOU_HAVE = "You have",
+  YOU_MAY_BE_ABLE_TO = "You may be able to",
+  TIME_LEFT = "Time Left",
+}
+
+export const timeLeftFirstList = [SectionTitle.TIME_LEFT, SectionTitle.YOU_HAVE, SectionTitle.YOU_MAY_BE_ABLE_TO];
+export const timeLeftLastList = [SectionTitle.YOU_HAVE, SectionTitle.YOU_MAY_BE_ABLE_TO, SectionTitle.TIME_LEFT];
+
+export const tagsTimeLeftFirst = [SectionTitle.ALL_LIFE_PROGRESS].concat(timeLeftFirstList);
+
+export const tagsTimeLeftLast = [SectionTitle.ALL_LIFE_PROGRESS].concat(timeLeftLastList);

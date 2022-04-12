@@ -1,9 +1,18 @@
 import { Action, ActionPanel, Clipboard, Icon, List, showToast, Toast } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
-import { allTags, getHourLeftThisDay, getLifeProgress, isBirthDay, LifeProgress } from "./life-progress-utils";
+import {
+  tagsTimeLeftFirst,
+  getHourLeftThisDay,
+  getLifeProgress,
+  isBirthDay,
+  LifeProgress,
+  timeLeftFirstList,
+  timeLeftLastList,
+  tagsTimeLeftLast,
+} from "./life-progress-utils";
 import { buildBingImageURL, ShanBeiResponseData, WordOfTheDay } from "./shanbei-utils";
-import { isEmpty } from "./common-utils";
+import { isEmpty, preferences } from "./common-utils";
 
 export default function main() {
   const [lifeProgresses, setLifeProgresses] = useState<LifeProgress[]>([]);
@@ -16,6 +25,10 @@ export default function main() {
     author: "",
     translation: "",
   });
+  const { timeLeftFirst } = preferences();
+
+  const sectionList = timeLeftFirst ? timeLeftFirstList : timeLeftLastList;
+  const tagList = timeLeftFirst ? tagsTimeLeftFirst : tagsTimeLeftLast;
 
   useEffect(() => {
     async function _fetchLifeProgress() {
@@ -59,8 +72,8 @@ export default function main() {
       }`}
       searchBarAccessory={
         <List.Dropdown tooltip={"You life progress"} storeValue={true} onChange={setTag}>
-          {allTags.map((value) => {
-            return <List.Dropdown.Item key={value.value} title={value.title} value={value.value} />;
+          {tagList.map((value) => {
+            return <List.Dropdown.Item key={value} title={value} value={value} />;
           })}
         </List.Dropdown>
       }
@@ -109,11 +122,11 @@ export default function main() {
         />
       )}
 
-      {(tag === allTags[0].value || tag === allTags[1].value) && (
-        <List.Section title="You have">
+      {(tag === tagList[0] || tag === tagList[1]) && (
+        <List.Section title={sectionList[0]}>
           {lifeProgresses.map((lifeProgress, index) => {
             return (
-              lifeProgress.section === "Have done" && (
+              lifeProgress.section === sectionList[0] && (
                 <LifeProgressListItem
                   key={index}
                   index={index}
@@ -126,11 +139,11 @@ export default function main() {
           })}
         </List.Section>
       )}
-      {(tag === allTags[0].value || tag === allTags[2].value) && (
-        <List.Section title="You may be able to">
+      {(tag === tagList[0] || tag === tagList[2]) && (
+        <List.Section title={sectionList[1]}>
           {lifeProgresses.map((lifeProgress, index) => {
             return (
-              lifeProgress.section === "Able to" && (
+              lifeProgress.section === sectionList[1] && (
                 <LifeProgressListItem
                   key={index}
                   index={index}
@@ -143,11 +156,11 @@ export default function main() {
           })}
         </List.Section>
       )}
-      {(tag === allTags[0].value || tag === allTags[3].value) && (
-        <List.Section title="Time left">
+      {(tag === tagList[0] || tag === tagList[3]) && (
+        <List.Section title={sectionList[2]}>
           {lifeProgresses.map((lifeProgress, index) => {
             return (
-              lifeProgress.section === "Time left" && (
+              lifeProgress.section === sectionList[2] && (
                 <LifeProgressListItem
                   key={index}
                   index={index}
