@@ -25,8 +25,8 @@ export default function Command() {
             key={app.id}
             accessories={[
               {
-                text: app.updated_at ? new Date(app.updated_at).toLocaleString() : ""
-              }
+                text: app.updated_at ? new Date(app.updated_at).toLocaleString() : "",
+              },
             ]}
             subtitle={app.web_url}
             actions={
