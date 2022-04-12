@@ -11,7 +11,7 @@ export default function Command() {
   const items = (
     <List.Section title="Search">
       {valueText.length >= 1 &&
-        valueText.length < 10 &&
+        (valueText.length < 10 || valueText.length == 64) &&
         searchOption("Block ID / Hash", Color.Magenta, "blocks", valueText, statsSummaryMarkdown)}
       {valueText.length == 64 && searchOption("Vault", Color.Magenta, "vaults", valueText, statsSummaryMarkdown)}
       {valueText.length >= 30 && searchOption("Address", Color.Magenta, "address", valueText, statsSummaryMarkdown)}
