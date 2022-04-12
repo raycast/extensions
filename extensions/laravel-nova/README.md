@@ -5,7 +5,7 @@ Search through Laravel Nova documentation directly from raycast.
 Relies on a mix of static sections seen for each version of nova on the site
 as well as searching against their algolia index.
 
-![Raycast Laravel Nova](media/raycast-laravel-nova.png)
+![Raycast Laravel Nova](metadata/raycast-laravel-nova-01.png)
 
 ## Developer Instructions
 
