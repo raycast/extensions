@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vim-bro",
   "title": "Vim Bro - Search Vim Commands",
-  "description": "Search vim commands",
+  "description": "Search Vim commands",
   "icon": "vim.png",
   "author": "ajaypremshankar",
   "license": "MIT",
@@ -14,8 +14,9 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Vim Commands",
-      "description": "Search vim commands",
+      "title": "Search Commands",
+      "subtitle": "Vim",
+      "description": "Search Vim commands",
       "mode": "view"
     }
   ],
