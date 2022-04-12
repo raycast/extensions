@@ -14,7 +14,7 @@
         "name": "index",
         "title": "Browse Games",
         "subtitle": "itch.io",
-        "description": "Explore current most popular game in itch.io",
+        "description": "Explore the most popular games in itch.io",
         "mode": "view"
     }],
     "dependencies": {
