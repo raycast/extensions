@@ -1,30 +1,33 @@
 import * as React from "react";
 import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { ReferenceSearchResult, search } from "./bibleGatewayApi";
-import axios from "axios";
 import { versions as bibleVersions } from "../assets/bible-versions.json";
+
+const DEFAULT_BIBLE_VERSION_ABBR = "NLT";
+const SEARCH_DELAY_MS = 450;
 
 type Preferences = { enterToSearch: boolean; oneVersePerLine: boolean; includeVerseNumbers: boolean };
 const prefs = getPreferenceValues<Preferences>();
 
 export default function Command() {
-  const [query, setQuery] = React.useState({ search: "", version: "NLT" });
+  const [query, setQuery] = React.useState({ search: "", version: DEFAULT_BIBLE_VERSION_ABBR });
   const debounceSearchTimeout = React.useRef<NodeJS.Timeout | null>(null);
 
-  const [isLoadingPassages, setIsLoadingPassages] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [searchResult, setSearchResult] = React.useState<ReferenceSearchResult | undefined>(undefined);
 
-  const performSearch = React.useCallback(() => {
-    setIsLoadingPassages(true);
-    search(query.search, query.version, { includeVerseNumbers: prefs.includeVerseNumbers })
-      .then((result) => setSearchResult(result))
-      .catch((error) => {
-        if (error instanceof axios.Cancel) return; // ignore cancelled requests
-        if (error instanceof Error) {
-          showToast({ title: "Error", message: error.message, style: Toast.Style.Failure });
-        }
-      })
-      .finally(() => setIsLoadingPassages(false));
+  const performSearch = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const result = await search(query.search, query.version, { includeVerseNumbers: prefs.includeVerseNumbers });
+      setSearchResult(result);
+    } catch (error) {
+      if (error instanceof Error) {
+        showToast({ title: "Error", message: error.message, style: Toast.Style.Failure });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }, [query.search, query.version]);
 
   React.useEffect(() => {
@@ -43,13 +46,13 @@ export default function Command() {
 
   return (
     <List
-      isLoading={isLoadingPassages}
+      isLoading={isLoading}
       isShowingDetail={searchResult && searchResult.passages.length > 0}
       searchText={query.search}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Bible Version"
-          onChange={(version) => setQuery(({ search }) => ({ search, version }))}
+          onChange={(version) => setQuery((old) => ({ ...old, version }))}
           storeValue
           defaultValue={query.version}
         >
@@ -60,21 +63,17 @@ export default function Command() {
       }
       onSearchTextChange={(newQuery) => {
         if (prefs.enterToSearch) {
-          setQuery(({ version }) => ({ search: newQuery.trim(), version }));
+          setQuery((old) => ({ ...old, search: newQuery.trim() }));
         } else {
           // debounce updating query text. `throttle` prop is too short
           if (debounceSearchTimeout.current) clearTimeout(debounceSearchTimeout.current);
           debounceSearchTimeout.current = setTimeout(
-            () => setQuery(({ version }) => ({ search: newQuery.trim(), version })),
-            450
+            () => setQuery((old) => ({ ...old, search: newQuery.trim() })),
+            SEARCH_DELAY_MS
           );
         }
       }}
-      actions={
-        prefs.enterToSearch ? (
-          <ActionPanel>{<Action title="Search" onAction={performSearch} />}</ActionPanel>
-        ) : undefined
-      }
+      actions={prefs.enterToSearch && <ActionPanel>{<Action title="Search" onAction={performSearch} />}</ActionPanel>}
     >
       {searchResult && detailContent ? (
         <List.Item
