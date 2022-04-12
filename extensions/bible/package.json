@@ -22,6 +22,7 @@
           "label": "Press Enter to search",
           "description": "Press Enter key to perform search, as opposed to searching while typing. Saves network calls.",
           "type": "checkbox",
+          "required": false,
           "default": false
         },
         {
@@ -29,6 +30,7 @@
           "label": "Include verse numbers",
           "description": "Include individual verse numbers in the results.",
           "type": "checkbox",
+          "required": false,
           "default": false
         },
         {
@@ -36,6 +38,7 @@
           "label": "Show one verse per line",
           "description": "Display each verse on a separate line. Might separate verses into multiple lines, for ex. see Psalm 1 (ESV)",
           "type": "checkbox",
+          "required": false,
           "default": false
         }
       ]
