@@ -4,7 +4,6 @@ import { GIF_SERVICE, ServiceName } from "../preferences";
 import { setFavorites } from "../lib/favorites";
 
 export interface AppState {
-  service?: ServiceName;
   favIds?: Map<ServiceName, Set<string>>;
 }
 
@@ -18,7 +17,12 @@ export interface AppStateAction {
 }
 
 export const initialState: AppState = {
-  favIds: new Map<ServiceName, Set<string>>(),
+  favIds: Object.values(GIF_SERVICE).reduce((map, service) => {
+    if (service !== GIF_SERVICE.FAVORITES) {
+      map.set(service, new Set());
+    }
+    return map;
+  }, new Map<ServiceName, Set<string>>()),
 };
 
 const AppContext = React.createContext({
@@ -39,8 +43,6 @@ export function reduceAppState(state: AppState, action: AppStateAction) {
   if (type == "replace" || type == "clear") {
     if (service === GIF_SERVICE.FAVORITES) {
       favIds = ids;
-    } else {
-      favIds = new Map([[service, new Set<string>()]]);
     }
   }
 
@@ -48,6 +50,9 @@ export function reduceAppState(state: AppState, action: AppStateAction) {
   if (serviceIds) {
     switch (type) {
       case "replace":
+        favIds?.get(service)?.clear();
+        serviceIds.forEach((id) => favIds?.get(service)?.add(id));
+        break;
       case "add":
         serviceIds.forEach((id) => favIds?.get(service)?.add(id));
         break;
@@ -62,5 +67,5 @@ export function reduceAppState(state: AppState, action: AppStateAction) {
     setFavorites(newFavs, service);
   }
 
-  return { ...state, favIds, service: state.service } as AppState;
+  return { ...state, favIds } as AppState;
 }

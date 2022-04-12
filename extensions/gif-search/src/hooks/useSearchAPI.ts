@@ -80,13 +80,5 @@ export default function useSearchAPI({ offset = 0, limit }: { offset?: number; l
     [cancelRef, setIsLoading, setResults, searchTerm, results]
   );
 
-  const markfavs = useCallback(
-    function markfavs(results: FetchState, favs: Map<ServiceName | undefined, Set<string>>) {
-      favs.forEach((ids) => results.items?.forEach((item) => (item.is_fav = !!ids.has(item.id.toString()))));
-      setResults({ ...results, items: results.items });
-    },
-    [setResults]
-  );
-
-  return [results, isLoading, setSearchTerm, searchTerm, search, markfavs] as const;
+  return [results, isLoading, setSearchTerm, searchTerm, search] as const;
 }

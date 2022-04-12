@@ -76,13 +76,13 @@ export default function useFavorites({ offset = 0, limit = DEFAULT_RESULT_COUNT 
 
   const populate = useCallback(
     async function populate(ids: GifIds, service?: ServiceName) {
-      setIsLoadingFavs(true);
-
       if (!service || !ids.size) {
-        setFavItems({ items: new Map() });
         setIsLoadingFavs(false);
+        setFavItems({ items: new Map() });
         return;
       }
+
+      setIsLoadingFavs(true);
 
       const api = await getAPIByServiceName(service);
       if (!api) {
@@ -94,12 +94,12 @@ export default function useFavorites({ offset = 0, limit = DEFAULT_RESULT_COUNT 
       let items: IGif[];
       try {
         items = dedupe(await api.gifs([...ids])).slice(0, limit);
-        items?.forEach((item) => (item.is_fav = !!ids?.has(item.id.toString())));
 
         items.length && setFavItems({ items: new Map([[service, items]]) });
       } catch (e) {
         const error = e as FetchError;
         if (e instanceof AbortError) {
+          setIsLoadingFavs(false);
           return;
         } else if (error.message.toLowerCase().includes("invalid authentication credentials")) {
           error.message = "Invalid credentials, please try again.";
@@ -117,13 +117,13 @@ export default function useFavorites({ offset = 0, limit = DEFAULT_RESULT_COUNT 
 
   const populateAll = useCallback(
     async function populateAll(allIds: Map<ServiceName, GifIds>) {
-      setIsLoadingFavs(true);
-
       if (!allIds.size) {
-        setFavItems({ items: new Map() });
         setIsLoadingFavs(false);
+        setFavItems({ items: new Map() });
         return;
       }
+
+      setIsLoadingFavs(true);
 
       const allItems = new Map<ServiceName, IGif[]>();
       const errors: Error[] = [];
@@ -138,13 +138,12 @@ export default function useFavorites({ offset = 0, limit = DEFAULT_RESULT_COUNT 
         try {
           const ids = allIds.get(service) || new Set<string>();
           items = dedupe(await api.gifs([...ids])).slice(0, limit);
-          items?.forEach((item) => (item.is_fav = !!ids?.has(item.id.toString())));
 
           items.length && allItems.set(service, items);
         } catch (e) {
           const error = e as FetchError;
           if (e instanceof AbortError) {
-            return;
+            break;
           } else if (error.message.toLowerCase().includes("invalid authentication credentials")) {
             error.message = "Invalid credentials, please try again.";
             await getAPIByServiceName(service, true);
