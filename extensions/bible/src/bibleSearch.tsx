@@ -1,10 +1,10 @@
 import * as React from "react";
 import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
-import { ReferenceSearchResult, search, SearchOptions } from "./bibleGatewayApi";
+import { ReferenceSearchResult, search } from "./bibleGatewayApi";
 import axios from "axios";
 import { versions as bibleVersions } from "../assets/bible-versions.json";
 
-type Preferences = SearchOptions & { enterToSearch: boolean; oneVersePerLine: boolean };
+type Preferences = { enterToSearch: boolean; oneVersePerLine: boolean; includeVerseNumbers: boolean };
 const prefs = getPreferenceValues<Preferences>();
 
 export default function Command() {
@@ -16,7 +16,7 @@ export default function Command() {
 
   const performSearch = React.useCallback(() => {
     setIsLoadingPassages(true);
-    search(query.search, query.version, prefs)
+    search(query.search, query.version, { includeVerseNumbers: prefs.includeVerseNumbers })
       .then((result) => setSearchResult(result))
       .catch((error) => {
         if (error instanceof axios.Cancel) return; // ignore cancelled requests

@@ -9,12 +9,12 @@ export interface ReferenceSearchResult {
   copyright: string;
 }
 
-export interface BiblePassage {
+interface BiblePassage {
   verses: string[];
   reference: string;
 }
 
-export interface SearchOptions {
+interface SearchOptions {
   includeVerseNumbers?: boolean;
 }
 
