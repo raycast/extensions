@@ -1,6 +1,9 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
 import fs from "fs";
 import Values = LocalStorage.Values;
+import { homedir } from "os";
+import { runAppleScript } from "run-applescript";
+import { exec } from "child_process";
 
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
@@ -21,3 +24,122 @@ export const checkDirectoryExists = (filePath: string) => {
     return false;
   }
 };
+
+type CaptureResult = {
+  captureSuccess: boolean;
+  picturePath: string;
+  errorMassage: string;
+};
+
+type RaycastLocation = {
+  x: number;
+  y: number;
+};
+
+export async function getRaycastLocation() {
+  const script = `
+tell application "System Events"
+    tell process "Raycast"
+        set b to position of back window  
+    end tell
+end tell`;
+  try {
+    const result = await runAppleScript(script);
+    const raycastLocation = result.split(", ");
+    return [parseInt(raycastLocation[0]), parseInt(raycastLocation[1])];
+  } catch (e) {
+    return [-1, -1];
+  }
+}
+
+export async function getRaycastSize() {
+  const script = `
+tell application "System Events"
+    tell process "Raycast"
+        set b to size of back window  
+    end tell
+end tell`;
+  try {
+    const result = await runAppleScript(script);
+    const raycastSize = result.split(", ");
+    return [parseInt(raycastSize[0]), parseInt(raycastSize[1])];
+  } catch (e) {
+    return [-1, -1];
+  }
+}
+
+export async function captureRaycastMetadata(raycastLocation: RaycastLocation) {
+  try {
+    return await captureWithInternalMonitor(raycastLocation);
+  } catch (e) {
+    console.error(String(e));
+    return { captureSuccess: false, picturePath: homedir() + "/Downloads/", errorMassage: String(e) };
+  }
+}
+
+export async function captureWithInternalMonitor(raycastLocation: RaycastLocation) {
+  const { screenshotName, screenshotFormat } = preferences();
+  const finalScreenshotName = isEmpty(screenshotName) ? "Metadata" : screenshotName;
+
+  const picturePath = `${homedir()}/Downloads/${await checkFileExists(
+    `${homedir()}/Downloads/`,
+    finalScreenshotName,
+    screenshotFormat
+  )}`;
+  const viewX = `${raycastLocation.x - 250 / 2}`;
+  const viewY = `${raycastLocation.y - 150 / 2}`;
+  const viewW = `${2000 / 2}`;
+  const viewH = `${1250 / 2}`;
+  const command = `/usr/sbin/screencapture -x -t ${screenshotFormat} -R ${viewX},${viewY},${viewW},${viewH} ${picturePath}`;
+  exec(command);
+  return { captureSuccess: true, picturePath: picturePath, errorMassage: "" };
+}
+
+export async function captureResultToast(captureResult: CaptureResult) {
+  if (captureResult.captureSuccess) {
+    const optionsToast: Toast.Options = {
+      title: "Capture Success!",
+      style: Toast.Style.Success,
+      message: "Screenshot saved in Download folder.",
+      primaryAction: {
+        title: "Open in Finder",
+        onAction: async () => {
+          await open(captureResult.picturePath);
+          await showHUD("Open Screenshot in default app");
+        },
+      },
+      secondaryAction: {
+        title: "Reveal in Finder",
+        onAction: async () => {
+          await open(homedir() + "/Downloads/");
+          await showHUD("Reveal Screenshot in Finder");
+        },
+      },
+    };
+    await showToast(optionsToast);
+  } else {
+    await showToast({
+      title: "Capture Failure!",
+      style: Toast.Style.Failure,
+      message: captureResult.errorMassage,
+    });
+  }
+}
+
+export async function checkFileExists(path: string, name: string, extension: string) {
+  const directoryExists = await checkDirectoryExists(path + name + "." + extension);
+  if (!directoryExists) {
+    return name + "." + extension;
+  } else {
+    let index = 2;
+    while (directoryExists) {
+      const newName = name + "-" + index + "." + extension;
+      const directoryExists = await checkDirectoryExists(path + newName);
+      if (!directoryExists) {
+        return newName;
+      }
+      index++;
+    }
+    return name;
+  }
+}
