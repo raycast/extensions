@@ -14,7 +14,6 @@ function Command() {
   async function queryIcons(text: string) {
     setQuery(text);
     setLoading(true);
-    setIcons([]);
     const icons = await service.queryIcons(text);
     setIcons(icons);
     setLoading(false);
