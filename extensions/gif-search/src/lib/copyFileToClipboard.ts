@@ -10,8 +10,7 @@ export default async function copyFileToClipboard(url: string, name?: string) {
   const response = await fetch(url);
 
   if (response.status !== 200) {
-    await showHUD(`GIF file download failed. Server responded with ${response.status}`);
-    return;
+    throw new Error(`GIF file download failed. Server responded with ${response.status}`);
   }
 
   if (response.body === null) {
@@ -28,6 +27,11 @@ export default async function copyFileToClipboard(url: string, name?: string) {
   const file = tempy.file(tempyOpt);
   response.body.pipe(fs.createWriteStream(file));
 
-  await runAppleScript(`tell app "Finder" to set the clipboard to ( POSIX file "${file}" )`);
+  try {
+    await runAppleScript(`tell app "Finder" to set the clipboard to ( POSIX file "${file}" )`);
+  } catch (e) {
+    throw new Error(`Failed to copy to clipboard, please try again`);
+  }
+
   return path.basename(file);
 }
