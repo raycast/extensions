@@ -34,8 +34,8 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
       .catch(() => showHUD("Error copying file, please try again"))
       .then((file) => showHUD(`Copied GIF "${file}" to clipboard`));
 
-  const openInBrowser = url ? (
-    <Action.OpenInBrowser key="openInBrowser" url={url} shortcut={{ modifiers: ["cmd", "shift"], key: "b" }} />
+  const openUrlInBrowser = url ? (
+    <Action.OpenInBrowser key="openUrlInBrowser" url={url} shortcut={{ modifiers: ["cmd", "shift"], key: "b" }} />
   ) : undefined;
   const copyGifUrl = <Action.CopyToClipboard key="copyGifUrl" title="Copy GIF Link" content={stripQParams(gif_url)} />;
   const copyPageUrl = url ? (
@@ -90,7 +90,7 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
   const actions: Array<(JSX.Element | undefined)[]> = [
     [copyFile, copyGifUrl],
     [toggleFav, showViewDetails ? viewDetails : undefined],
-    [copyPageUrl, openInBrowser],
+    [copyPageUrl, openUrlInBrowser],
   ];
 
   const defaultAction = actions[0]?.[0];
