@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import { Action, ActionPanel, Icon, showToast, Toast, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Icon, showToast, Toast, showHUD, Clipboard } from "@raycast/api";
 
 import { getDefaultAction, ServiceName } from "../preferences";
 
@@ -44,6 +44,11 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
           style: Toast.Style.Failure,
           title: "Error, please try again",
           message: e?.message,
+          primaryAction: {
+            title: "Copy Error Message",
+            onAction: (toast) => Clipboard.copy(toast.message ?? ""),
+            shortcut: { modifiers: ["cmd"], key: "c" },
+          },
         })
       );
 
