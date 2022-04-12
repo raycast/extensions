@@ -11,7 +11,7 @@
       "name": "nova",
       "title": "Search Documentation",
       "subtitle": "Laravel Nova",
-      "description": "Search Laravel Nova docs directly from raycast.",
+      "description": "Search Laravel Nova docs directly from Raycast.",
       "mode": "view",
       "preferences": [
         {
