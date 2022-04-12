@@ -12,7 +12,7 @@
     "license": "MIT",
     "commands": [{
         "name": "index",
-        "title": "Browse Games",
+        "title": "Search Games",
         "subtitle": "itch.io",
         "description": "Explore the most popular games in itch.io",
         "mode": "view"
