@@ -53,8 +53,8 @@ export default function Command() {
           storeValue
           defaultValue={query.version}
         >
-          {bibleVersions.map((bible) => (
-            <List.Dropdown.Item title={bible.name} value={bible.abbreviation} key={bible.abbreviation} />
+          {bibleVersions.map((v) => (
+            <List.Dropdown.Item title={v[0]} value={v[1]} key={v[1]} />
           ))}
         </List.Dropdown>
       }
