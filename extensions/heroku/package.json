@@ -30,8 +30,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.30.3",
-    "@youri-kane/heroku-client": "^0.1.5",
+    "@raycast/api": "^1.32.1",
+    "@youri-kane/heroku-client": "^0.1.15",
     "axios": "^0.26.1",
     "gravatar": "^1.8.2",
     "swr": "^1.2.2"

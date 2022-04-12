@@ -23,9 +23,12 @@ export default function Command() {
           <List.Item
             title={app.name}
             key={app.id}
-            icon={Icon.Desktop}
-            accessoryTitle={app.updated_at ? new Date(app.updated_at).toLocaleString() : ""}
-            subtitle={app.stack.name}
+            accessories={[
+              {
+                text: app.updated_at ? new Date(app.updated_at).toLocaleString() : ""
+              }
+            ]}
+            subtitle={app.web_url}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser
