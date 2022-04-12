@@ -13,7 +13,7 @@
     "commands": [{
         "name": "index",
         "title": "Browse Games",
-        "subtitle": "Browse Popular Games",
+        "subtitle": "itch.io",
         "description": "Explore current most popular game in itch.io",
         "mode": "view"
     }],
