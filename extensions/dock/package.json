@@ -14,6 +14,7 @@
       "name": "move-dock-to-the-left",
       "title": "Move Dock To The Left",
       "subtitle": "Dock",
+      "icon": "dock-left.png",
       "description": "Change the dock's position to the left",
       "mode": "no-view"
     },
@@ -21,6 +22,7 @@
       "name": "move-dock-to-the-right",
       "title": "Move Dock To The Right",
       "subtitle": "Dock",
+      "icon": "dock-right.png",
       "description": "Change the dock's position to the right",
       "mode": "no-view"
     },
@@ -28,6 +30,7 @@
       "name": "move-dock-to-the-bottom",
       "title": "Move Dock To The Bottom",
       "subtitle": "Dock",
+      "icon": "dock-bottom.png",
       "description": "Change the dock's position to the bottom",
       "mode": "no-view"
     }
