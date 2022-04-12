@@ -44,7 +44,7 @@
       "description": "Customize what happens when hitting ENTER on a Gif",
       "data": [
         {
-          "title": "Copy File",
+          "title": "Copy GIF",
           "value": "copyFile"
         },
         {

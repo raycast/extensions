@@ -50,7 +50,7 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
     <Action
       icon={Icon.Clipboard}
       key="copyFile"
-      title="Copy File"
+      title="Copy GIF"
       onAction={copyFileAction}
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
     />
