@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import { Action, ActionPanel, Icon, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Icon, showToast, Toast, showHUD, Clipboard } from "@raycast/api";
 
 import { getDefaultAction, ServiceName } from "../preferences";
 
@@ -29,10 +29,28 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
   const { favIds } = state;
 
   const copyFileAction = () =>
-    showHUD("Copying...")
-      .then(() => copyFileToClipboard(gif_url, `${slug}.gif`))
-      .then((file) => showHUD(`Copied GIF "${file}" to clipboard`))
-      .catch((e) => showHUD(e.message));
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Copying...",
+    })
+      .then((toast) => {
+        return copyFileToClipboard(gif_url, `${slug}.gif`).then((file) => {
+          toast.hide();
+          showHUD(`Copied GIF "${file}" to clipboard`);
+        });
+      })
+      .catch((e: Error) =>
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error, please try again",
+          message: e?.message,
+          primaryAction: {
+            title: "Copy Error Message",
+            onAction: (toast) => Clipboard.copy(toast.message ?? ""),
+            shortcut: { modifiers: ["cmd"], key: "c" },
+          },
+        })
+      );
 
   const openUrlInBrowser = url ? (
     <Action.OpenInBrowser key="openUrlInBrowser" url={url} shortcut={{ modifiers: ["cmd", "shift"], key: "b" }} />
