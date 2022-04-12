@@ -17,44 +17,6 @@
       "title": "Search for GIFs",
       "description": "Search for GIFs across multiple services...",
       "mode": "view"
-    },
-    {
-      "name": "giphy",
-      "title": "Search Giphy",
-      "description": "Search for animated gifs on Giphy.com",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "giphy-apiKey",
-          "type": "password",
-          "required": false,
-          "title": "Giphy API Key",
-          "placeholder": "Giphy API Key",
-          "description": "API Key used to perform searches on Giphy. You can get one for free at https://developers.giphy.com"
-        }
-      ]
-    },
-    {
-      "name": "tenor",
-      "title": "Search Tenor",
-      "description": "Search for animated gifs on Tenor.com",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "tenor-apiKey",
-          "type": "password",
-          "required": false,
-          "title": "Tenor API Key",
-          "placeholder": "Tenor API Key",
-          "description": "API Key used to perform searches on Tenor. You can get one for free at https://tenor.com/gifapi"
-        }
-      ]
-    },
-    {
-      "name": "finergifsclub",
-      "title": "Search The Finer Gifs Club",
-      "description": "Search quotes from The Office on TheFinerGifs.club",
-      "mode": "view"
     }
   ],
   "preferences": [
@@ -106,6 +68,22 @@
           "value": "openInBrowser"
         }
       ]
+    },
+    {
+      "name": "giphy-apiKey",
+      "type": "password",
+      "required": false,
+      "title": "Giphy API Key",
+      "placeholder": "Giphy API Key (optional)",
+      "description": "API Key used to perform searches on Giphy. You can get one for free at https://developers.giphy.com"
+    },
+    {
+      "name": "tenor-apiKey",
+      "type": "password",
+      "required": false,
+      "title": "Tenor API Key",
+      "placeholder": "Tenor API Key (optional)",
+      "description": "API Key used to perform searches on Tenor. You can get one for free at https://tenor.com/gifapi"
     }
   ],
   "dependencies": {

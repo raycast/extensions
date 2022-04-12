@@ -10,11 +10,10 @@ import useFavorites from "../hooks/useFavorites";
 import useSearchAPI from "../hooks/useSearchAPI";
 import { GifSearchList } from "./GifSearchList";
 
-export function GifSearch(props: { service?: ServiceName }) {
-  const showServiceDropdown = !props.service;
+export function GifSearch() {
   const showPreview = getShowPreview();
 
-  const [searchService, setSearchService] = useState(props.service);
+  const [searchService, setSearchService] = useState<ServiceName>();
   const [results, isLoading, setSearchTerm, searchTerm, search] = useSearchAPI({ limit: getMaxResults() });
 
   const onServiceChange = (service: string) => {
@@ -96,7 +95,7 @@ export function GifSearch(props: { service?: ServiceName }) {
       {showAllFavs() ? (
         <GifSearchList
           isLoading={isLoadingFavIds || isLoadingFavs}
-          showDropdown={showServiceDropdown}
+          showDropdown={true}
           showDetail={showPreview && (favItems?.items?.size ?? 0) !== 0}
           showEmpty={!favItems?.items?.size && !results?.term}
           onDropdownChange={onServiceChange}
@@ -111,7 +110,7 @@ export function GifSearch(props: { service?: ServiceName }) {
       ) : (
         <GifSearchList
           isLoading={isLoading || isLoadingFavIds || isLoadingFavs}
-          showDropdown={showServiceDropdown}
+          showDropdown={true}
           showDetail={showPreview && (results?.items?.length ?? 0) + (favItems?.items?.size ?? 0) != 0}
           showEmpty={!favItems?.items?.size && !results?.term && !results?.items?.length}
           searchBarPlaceholder="Search for gifs..."
