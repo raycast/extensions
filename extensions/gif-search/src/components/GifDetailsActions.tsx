@@ -31,8 +31,8 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
   const copyFileAction = () =>
     showHUD("Copying...")
       .then(() => copyFileToClipboard(gif_url, `${slug}.gif`))
-      .catch(() => showHUD("Error copying file, please try again"))
-      .then((file) => showHUD(`Copied GIF "${file}" to clipboard`));
+      .then((file) => showHUD(`Copied GIF "${file}" to clipboard`))
+      .catch((e) => showHUD(e.message));
 
   const openUrlInBrowser = url ? (
     <Action.OpenInBrowser key="openUrlInBrowser" url={url} shortcut={{ modifiers: ["cmd", "shift"], key: "b" }} />
