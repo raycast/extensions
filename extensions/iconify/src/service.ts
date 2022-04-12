@@ -155,7 +155,7 @@ class Service {
     const response = await iconifyClient.get<QueryResponse>(`/search`, {
       params: {
         query,
-        limit: 1000,
+        limit: 100,
       },
     });
     // group by set
