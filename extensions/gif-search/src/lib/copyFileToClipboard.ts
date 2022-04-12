@@ -4,8 +4,6 @@ import path from "path";
 import { runAppleScript } from "run-applescript";
 import tempy, { FileOptions } from "tempy";
 
-import { showHUD } from "@raycast/api";
-
 export default async function copyFileToClipboard(url: string, name?: string) {
   const response = await fetch(url);
 
@@ -25,12 +23,15 @@ export default async function copyFileToClipboard(url: string, name?: string) {
   }
 
   const file = tempy.file(tempyOpt);
-  response.body.pipe(fs.createWriteStream(file));
+  response.body.pipe(fs.createWriteStream(file)).on("error", (e) => {
+    throw new Error(`Failed to download GIF: "${e.message}". Please try again`);
+  });
 
   try {
     await runAppleScript(`tell app "Finder" to set the clipboard to ( POSIX file "${file}" )`);
   } catch (e) {
-    throw new Error(`Failed to copy to clipboard, please try again`);
+    const error = e as Error;
+    throw new Error(`Failed to copy GIF: "${error.message}". Please try again`);
   }
 
   return path.basename(file);
