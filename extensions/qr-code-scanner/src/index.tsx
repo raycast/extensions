@@ -16,6 +16,7 @@ import jsQR from "jsqr";
 
 interface Preferences {
   captureMode: "area" | "fullscreen";
+  silence: boolean;
 }
 
 function qrDecode(filepath: string, callback: (data: string | boolean) => void) {
@@ -42,15 +43,17 @@ function qrDecode(filepath: string, callback: (data: string | boolean) => void) 
   });
 }
 
-function trigger(randName: string, mode: Preferences["captureMode"], displayNumber = 1) {
+function trigger(randName: string, preferences: Preferences, displayNumber = 1) {
   closeMainWindow();
 
   function captureScreenCommand(): string {
-    switch (mode) {
+    switch (preferences.captureMode) {
       case "fullscreen":
-        return `/usr/sbin/screencapture -D ${displayNumber.toString()} /tmp/shotTemp${randName}.jpg`;
+        return `/usr/sbin/screencapture ${
+          preferences.silence ? "-x" : ""
+        } -D ${displayNumber.toString()} /tmp/shotTemp${randName}.jpg`;
       default:
-        return `/usr/sbin/screencapture -i /tmp/shotTemp${randName}.jpg`;
+        return `/usr/sbin/screencapture ${preferences.silence ? "-x" : ""} -i /tmp/shotTemp${randName}.jpg`;
     }
   }
 
@@ -60,8 +63,8 @@ function trigger(randName: string, mode: Preferences["captureMode"], displayNumb
       popToRoot();
     }
     qrDecode("/tmp/shotTemp" + randName + ".jpg", (data: string | boolean) => {
-      if (!data && mode === "fullscreen") {
-        trigger(randName, mode, displayNumber + 1);
+      if (!data && preferences.captureMode === "fullscreen") {
+        trigger(randName, preferences, displayNumber + 1);
       } else if (!data) {
         showHUD("No QR Code Found :(");
         popToRoot();
@@ -97,5 +100,5 @@ function trigger(randName: string, mode: Preferences["captureMode"], displayNumb
 export default async function main() {
   const randName = randomInt(100, 999).toString();
   const preferences = getPreferenceValues<Preferences>();
-  trigger(randName, preferences.captureMode);
+  trigger(randName, preferences);
 }

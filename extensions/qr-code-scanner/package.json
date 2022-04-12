@@ -17,7 +17,7 @@
   "preferences": [
     {
       "name": "captureMode",
-      "title": "Capture mode",
+      "title": "Capture Mode",
       "description": "Select screen capture mode. Select \"Selection\" for more precise recognition.",
       "type": "dropdown",
       "required": false,
@@ -32,6 +32,15 @@
           "value": "fullscreen"
         }
       ]
+    },
+    {
+      "name": "silence",
+      "title": "Silence Mode",
+      "label": "Do Not Play Sound",
+      "description": "Do not play sound when capturing screen.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {
