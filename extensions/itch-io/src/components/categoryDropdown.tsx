@@ -15,7 +15,7 @@ export function CategoryDropdown(props: {
     >
       <List.Dropdown.Section title="Game Categories">
         {categories.map((category: string) => (
-          <List.Dropdown.Item key={category + ""} title={category + ""} value={"/tag-" + category} />
+          <List.Dropdown.Item key={category} title={category} value={"/tag-" + category} />
         ))}
       </List.Dropdown.Section>
     </List.Dropdown>
