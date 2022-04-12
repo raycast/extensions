@@ -1,10 +1,9 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation, showHUD } from "@raycast/api";
-import fs from "fs";
 import {
-  createFileIfNotExist,
-  generateContentToAppend,
+  appendContentToFile,
   getTodayJournalPath,
   noop,
+  showGraphPathInvalidToast,
   validateUserConfigGraphPath,
 } from "./utils";
 
@@ -16,19 +15,14 @@ export default function Command() {
   const { pop } = useNavigation();
 
   async function handleSubmit(values: CommandForm) {
-    const filePath = getTodayJournalPath();
-
     validateUserConfigGraphPath()
       .catch((e) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Logseq graph path is invalid. Update it in Raycast Preferences and retry.",
-        });
+        showGraphPathInvalidToast();
         throw e;
       })
       .then(() => showToast({ style: Toast.Style.Animated, title: "Adding notes" }))
-      .then(() => createFileIfNotExist(filePath))
-      .then(() => fs.promises.appendFile(filePath, generateContentToAppend(values.content)))
+      .then(getTodayJournalPath)
+      .then((filePath) => appendContentToFile(values.content, filePath))
       .then(() => showHUD("✅ Note added"))
       .then(pop)
       .catch((e) => showToast({ style: Toast.Style.Failure, title: "Failed", message: e }))

@@ -219,62 +219,63 @@ function BitwardenItem(props: {
       subtitle={item.login?.username || undefined}
       actions={
         <ActionPanel>
+          {login ? (
+            <ActionPanel.Section>
+              {login.password ? <PasswordActions password={login.password} /> : null}
+              {login.totp ? (
+                <Action
+                  shortcut={{ modifiers: ["cmd"], key: "t" }}
+                  title="Copy TOTP"
+                  icon={Icon.Clipboard}
+                  onAction={async () => {
+                    await copyTotp(item.id);
+                  }}
+                />
+              ) : null}
+              {login.username ? (
+                <Action.CopyToClipboard
+                  title="Copy Username"
+                  content={login.username}
+                  icon={Icon.Person}
+                  shortcut={{ modifiers: ["cmd"], key: "u" }}
+                />
+              ) : null}
+            </ActionPanel.Section>
+          ) : null}
           <ActionPanel.Section>
-            {item.login?.password ? <PasswordActions password={item.login.password} /> : null}
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            {item.login?.username ? (
-              <Action.CopyToClipboard
-                title="Copy Username"
-                content={item.login.username}
-                icon={Icon.Person}
-                shortcut={{ modifiers: ["cmd"], key: "u" }}
-              />
-            ) : null}
-            {item.login?.totp ? (
-              <Action
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
-                title="Copy TOTP"
-                icon={Icon.Clipboard}
-                onAction={async () => {
-                  await copyTotp(item.id);
-                }}
-              />
-            ) : null}
-            {item.notes ? (
+            {notes ? (
               <Action.Push
                 title="Show Secure Note"
                 icon={Icon.TextDocument}
                 target={
                   <Detail
-                    markdown={codeBlock(item.notes)}
+                    markdown={codeBlock(notes)}
                     actions={
                       <ActionPanel>
-                        <Action.CopyToClipboard title="Copy Secure Notes" content={item.notes} />
+                        <Action.CopyToClipboard title="Copy Secure Notes" content={notes} />
                       </ActionPanel>
                     }
                   />
                 }
               />
             ) : null}
-            <ActionPanel.Submenu
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-              icon={Icon.Clipboard}
-              title="Copy Property"
-            >
-              {Object.entries({
-                username: login?.username,
-                notes,
-                ...card,
-                ...identity,
-                ...fieldMap,
-                ...uriMap,
-              }).map(([title, content], index) =>
-                content ? (
-                  <Action.CopyToClipboard key={index} title={titleCase(title)} content={content as string | number} />
-                ) : null
-              )}
-            </ActionPanel.Submenu>
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {Object.entries({
+              notes,
+              ...card,
+              ...identity,
+              ...fieldMap,
+              ...uriMap,
+            }).map(([title, content], index) =>
+              content ? (
+                <Action.CopyToClipboard
+                  key={index}
+                  title={`Copy ${titleCase(title)}`}
+                  content={content as string | number}
+                />
+              ) : null
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <VaultActions syncItems={syncItems} lockVault={lockVault} logoutVault={logoutVault} />
