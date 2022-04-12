@@ -6,7 +6,7 @@ import {
   popToRoot,
   showHUD,
   showToast,
-  ToastStyle
+  ToastStyle,
 } from "@raycast/api";
 import { exec } from "child_process";
 import open from "open";
@@ -29,7 +29,7 @@ function qrDecode(filepath: string, callback: (data: string | boolean) => void) 
       return;
     }
     const result = jsQR(new Uint8ClampedArray(image.bitmap.data.buffer), image.bitmap.width, image.bitmap.height, {
-      inversionAttempts: "attemptBoth"
+      inversionAttempts: "attemptBoth",
     });
     exec(`rm ${filepath}`);
     if (result) {
@@ -54,7 +54,7 @@ function trigger(randName: string, mode: Preferences["captureMode"], displayNumb
     }
   }
 
-  exec(captureScreenCommand(), function(exception) {
+  exec(captureScreenCommand(), function (exception) {
     if (exception && exception.message.indexOf("Invalid display specified") > -1) {
       showHUD("No QR Code Found on Any Screen :(");
       popToRoot();
@@ -78,12 +78,12 @@ function trigger(randName: string, mode: Preferences["captureMode"], displayNumb
                   closeMainWindow();
                   popToRoot();
                 });
-              }
+              },
             },
             dismissAction: {
               title: "Cancel",
-              onAction: () => popToRoot()
-            }
+              onAction: () => popToRoot(),
+            },
           });
         } else {
           showHUD("Copied: " + (data.length > 20 ? data.substring(0, 30) + "..." : data));
