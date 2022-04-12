@@ -22,17 +22,19 @@ export default async function copyFileToClipboard(url: string, name?: string) {
     tempyOpt = { extension: ".gif" };
   }
 
-  const file = tempy.file(tempyOpt);
-  response.body.pipe(fs.createWriteStream(file));
-  response.body.on("error", (e) => {
-    throw new Error(`Failed to download GIF: "${e.message}". Please try again`);
-  });
+  let file: string;
+  try {
+    file = await tempy.write(await response.body, tempyOpt);
+  } catch (e) {
+    const error = e as Error;
+    throw new Error(`Failed to download GIF: "${error.message}"`);
+  }
 
   try {
     await runAppleScript(`tell app "Finder" to set the clipboard to ( POSIX file "${file}" )`);
   } catch (e) {
     const error = e as Error;
-    throw new Error(`Failed to copy GIF: "${error.message}". Please try again`);
+    throw new Error(`Failed to copy GIF: "${error.message}"`);
   }
 
   return path.basename(file);
