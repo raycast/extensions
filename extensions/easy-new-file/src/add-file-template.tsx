@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, Form, showToast, Toast, environment } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { checkDirectoryExists, checkIsFile, getChooseFile, getFileInfo, getSelectedFile } from "./utils/utils";
-import fs from "fs";
+import { checkIsFile, getChooseFile, getFileInfo, getSelectedFile } from "./utils/common-utils";
+import fse from "fs-extra";
 
 export default function AddFileTemplate(props: {
   updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
@@ -49,9 +49,9 @@ export default function AddFileTemplate(props: {
               }}
             />
             <Action
-              title={"Select File"}
+              title={"Choose File"}
               icon={Icon.Sidebar}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
               onAction={() => {
                 getChooseFile().then((path) => {
                   setPath(path);
@@ -88,24 +88,24 @@ const fetchFilePath = async () => {
   }
 };
 const addFileTemplate = async (name: string, path: string) => {
-  if (checkDirectoryExists(path)) {
+  if (fse.existsSync(path)) {
     if (checkIsFile(path)) {
       await showToast(Toast.Style.Animated, "Adding template...");
       const templateFolderPath = environment.supportPath + "/templates";
       const desPath = templateFolderPath + "/" + name + "." + getFileInfo(path).extension;
-      if (checkDirectoryExists(desPath)) {
+      if (fse.existsSync(desPath)) {
         await showToast(Toast.Style.Failure, "File already exists.\nPlease rename.");
         return;
       }
-      if (checkDirectoryExists(templateFolderPath)) {
-        fs.copyFileSync(path, desPath);
+      if (fse.existsSync(templateFolderPath)) {
+        fse.copyFileSync(path, desPath);
       } else {
-        fs.mkdir(templateFolderPath, function (error) {
+        fse.mkdir(templateFolderPath, function (error) {
           if (error) {
-            showToast(Toast.Style.Success, String(error) + ".");
+            showToast(Toast.Style.Failure, String(error) + ".");
             return false;
           }
-          fs.copyFileSync(path, desPath);
+          fse.copyFileSync(path, desPath);
         });
       }
       await showToast(Toast.Style.Success, "Add template success!");

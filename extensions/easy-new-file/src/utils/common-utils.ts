@@ -1,7 +1,7 @@
 import { runAppleScript } from "run-applescript";
 import { getPreferenceValues, getSelectedFinderItems, LocalStorage, showToast, Toast } from "@raycast/api";
-import fs from "fs";
 import Values = LocalStorage.Values;
+import fse from "fs-extra";
 
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
@@ -52,9 +52,15 @@ export const getChooseFile = async () => {
   }
 };
 
-export const checkDirectoryExists = (filePath: string) => {
+const scriptCopyFile = (path: string) => {
+  return `tell application "Finder" to set theItems to "${path}"
+set the clipboard to (POSIX file (POSIX path of (theItems as string)))
+`;
+};
+
+export const copyFileByPath = async (path: string) => {
   try {
-    fs.accessSync(filePath);
+    await runAppleScript(scriptCopyFile(path));
     return true;
   } catch (e) {
     return false;
@@ -63,7 +69,7 @@ export const checkDirectoryExists = (filePath: string) => {
 
 export const checkIsFile = (path: string) => {
   try {
-    const stat = fs.lstatSync(path);
+    const stat = fse.lstatSync(path);
     return stat.isFile();
   } catch (e) {
     return false;
@@ -81,7 +87,7 @@ export const getSelectedFile = async () => {
   try {
     const selectedFinderItem = await getSelectedFinderItems();
     selectedFinderItem.forEach((value) => {
-      const stat = fs.lstatSync(value.path);
+      const stat = fse.lstatSync(value.path);
       if (stat.isFile()) {
         selectedFile.push(value.path);
       }

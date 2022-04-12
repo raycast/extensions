@@ -3,14 +3,13 @@
 **Command**
 
 - **Create File Here**: Create a new file in the current Finder window or on the desktop.
-  
+
   - Create File Here
   - Create File with Name: Create a new file with name.
+  - Copy File to Clipboard: Create the file to clipboard.
   - Add File Template
-  
-- **Add File Template**: Add a file template that you can use in the "Create File Here" command.
 
-  
+- **Add File Template**: Add a file template that you can use in the "Create File Here" command.
 
 **Preferences**
 
@@ -18,8 +17,6 @@
   - [x] Document
   - [x] Code
   - [x] Script
-
-
 
 🌟**Important Tips**:
 
@@ -36,11 +33,9 @@
   2. Select a file. (Folders will not be detected for now)
   3. Optional: You can also choose and fill in the file directory manually.
 
-
-
 ⚠️**Caution**: This extension does not create a file when a file with the same name exists.
 
-------
+---
 
 **Build-in File Type**
 
@@ -65,4 +60,3 @@
   - Python
   - Ruby
   - Shell
-

@@ -15,6 +15,7 @@
       "name": "create-file-here",
       "icon": "new-file-here-icon.png",
       "title": "Create File Here",
+      "subtitle": "Easy New File",
       "description": "Create a new file in the current Finder window or on the desktop.",
       "mode": "view",
       "preferences": [
@@ -49,16 +50,19 @@
       "name": "add-file-template",
       "icon": "add-file-template-icon.png",
       "title": "Add File Template",
+      "subtitle": "Easy New File",
       "description": "Add a file template that you can use in the \"New File Here\" command.",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.32.1",
+    "fs-extra": "^10.0.1",
     "run-applescript": "^6.0.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
     "@types/node": "~16.10.0",
     "@types/react": "^17.0.28",
     "@typescript-eslint/eslint-plugin": "^5.0.0",

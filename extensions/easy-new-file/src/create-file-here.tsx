@@ -1,8 +1,8 @@
-import fs from "fs";
+import fse from "fs-extra";
 import * as XLSX from "xlsx";
 import { Action, ActionPanel, environment, Icon, List, open, showToast, Toast, useNavigation } from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { checkDirectoryExists, getFileInfo, getFinderPath, isEmpty, preferences } from "./utils/utils";
+import { copyFileByPath, getFileInfo, getFinderPath, isEmpty, preferences } from "./utils/common-utils";
 import { codeFileTypes, documentFileTypes, FileType, scriptFileTypes, TemplateType } from "./utils/file-type";
 import { runAppleScript } from "run-applescript";
 import CreateFileWithName from "./create-file-with-name";
@@ -20,8 +20,8 @@ export default function main() {
     async function _initRunAppleScript() {
       const _templateFiles: TemplateType[] = [];
       try {
-        if (await checkDirectoryExists(templateFolderPath)) {
-          fs.readdirSync(templateFolderPath).forEach((file) => {
+        if (fse.existsSync(templateFolderPath)) {
+          fse.readdirSync(templateFolderPath).forEach((file) => {
             if (!file.startsWith(".")) {
               const filePath = templateFolderPath + "/" + file;
               const { nameWithoutExtension, extension } = getFileInfo(filePath);
@@ -35,7 +35,7 @@ export default function main() {
           });
           setIsLoading(false);
         } else {
-          fs.mkdirSync(templateFolderPath);
+          fse.mkdirSync(templateFolderPath);
         }
       } catch (e) {
         await showToast(Toast.Style.Failure, String(e));
@@ -86,26 +86,40 @@ export default function main() {
                     }}
                   />
                   <Action
-                    title={"Add File Template"}
-                    icon={Icon.Document}
-                    shortcut={{ modifiers: ["cmd"], key: "n" }}
-                    onAction={() => {
-                      push(<AddFileTemplate updateListUseState={[updateList, setUpdateList]} />);
-                    }}
-                  />
-                  <Action
-                    title={"Delete File Template"}
-                    icon={Icon.Trash}
-                    shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
+                    title={"Copy File to Clipboard"}
+                    icon={Icon.Clipboard}
+                    shortcut={{ modifiers: ["ctrl"], key: "c" }}
                     onAction={async () => {
-                      await showToast(Toast.Style.Animated, "Deleting template...");
-                      fs.unlinkSync(template.path);
-                      const _templateFiles = [...templateFiles];
-                      _templateFiles.splice(index, 1);
-                      setTemplateFiles(_templateFiles);
-                      await showToast(Toast.Style.Success, "Delete template success!");
+                      if (await copyFileByPath(template.path)) {
+                        await showToast(Toast.Style.Success, `Copy file success!`);
+                      } else {
+                        await showToast(Toast.Style.Failure, `Copy file failure.`);
+                      }
                     }}
                   />
+                  <ActionPanel.Section title={"Template Action"}>
+                    <Action
+                      title={"Add File Template"}
+                      icon={Icon.Document}
+                      shortcut={{ modifiers: ["cmd"], key: "n" }}
+                      onAction={() => {
+                        push(<AddFileTemplate updateListUseState={[updateList, setUpdateList]} />);
+                      }}
+                    />
+                    <Action
+                      title={"Delete File Template"}
+                      icon={Icon.Trash}
+                      shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                      onAction={async () => {
+                        await showToast(Toast.Style.Animated, "Deleting template...");
+                        fse.unlinkSync(template.path);
+                        const _templateFiles = [...templateFiles];
+                        _templateFiles.splice(index, 1);
+                        setTemplateFiles(_templateFiles);
+                        await showToast(Toast.Style.Success, "Delete template success!");
+                      }}
+                    />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
@@ -196,14 +210,16 @@ function FileTypeItem(props: {
               push(<CreateFileWithName newFileType={newFileType} templateFiles={templateFiles} />);
             }}
           />
-          <Action
-            title={"Add File Template"}
-            icon={Icon.Document}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            onAction={() => {
-              push(<AddFileTemplate updateListUseState={[updateList, setUpdateList]} />);
-            }}
-          />
+          <ActionPanel.Section title={"Template Action"}>
+            <Action
+              title={"Add File Template"}
+              icon={Icon.Document}
+              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              onAction={() => {
+                push(<AddFileTemplate updateListUseState={[updateList, setUpdateList]} />);
+              }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -211,14 +227,14 @@ function FileTypeItem(props: {
 }
 
 export function createFileName(path: string, name: string, extension: string) {
-  const directoryExists = checkDirectoryExists(path + name + "." + extension);
+  const directoryExists = fse.existsSync(path + name + "." + extension);
   if (!directoryExists) {
     return name + "." + extension;
   } else {
     let index = 2;
     while (directoryExists) {
       const newName = name + " " + index + "." + extension;
-      const directoryExists = checkDirectoryExists(path + newName);
+      const directoryExists = fse.existsSync(path + newName);
       if (!directoryExists) {
         return newName;
       }
@@ -247,7 +263,7 @@ export async function createNewFile(fileType: FileType, desPath: string, fileNam
     ? (fileName = createFileName(desPath, fileType.name, fileType.extension))
     : (fileName = fileName + "." + fileType.extension);
   const filePath = desPath + fileName;
-  const isExist = checkDirectoryExists(filePath);
+  const isExist = fse.existsSync(filePath);
   if (!isExist) {
     if (fileType.name === "Excel") {
       const workbook = XLSX.utils.book_new();
@@ -255,7 +271,7 @@ export async function createNewFile(fileType: FileType, desPath: string, fileNam
       XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
       XLSX.writeFile(workbook, filePath);
     } else {
-      fs.writeFileSync(filePath, fileContent);
+      fse.writeFileSync(filePath, fileContent);
     }
   }
   await showCreateToast(isExist, filePath, desPath);
@@ -267,9 +283,9 @@ export async function createNewFileByTemplate(template: TemplateType, desPath: s
     ? (fileName = createFileName(desPath, template.name, template.extension))
     : (fileName = fileName + "." + template.extension);
   const filePath = desPath + fileName;
-  const isExist = checkDirectoryExists(filePath);
+  const isExist = fse.existsSync(filePath);
   if (!isExist) {
-    fs.copyFileSync(template.path, filePath);
+    fse.copyFileSync(template.path, filePath);
   }
   await showCreateToast(isExist, filePath, desPath);
 }
