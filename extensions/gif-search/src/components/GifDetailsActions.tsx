@@ -26,11 +26,12 @@ export function GifDetailsActions(props: { item: IGif; showViewDetails: boolean;
 export function getActions(item: IGif, showViewDetails: boolean, service?: ServiceName) {
   const { id, url, gif_url, slug } = item;
   const { state, dispatch } = useContext(AppContext);
-  const { favIds } = state;
+  const { favIds, recentIds } = state;
 
   const actionIds = new Map([[service as ServiceName, new Set([id.toString()])]]);
 
   const trackUsage = () => dispatch({ type: "add", save: true, recentIds: actionIds, service });
+  const removeFromRecents = () => dispatch({ type: "remove", save: true, recentIds: actionIds, service });
 
   const addToFav = () => dispatch({ type: "add", save: true, favIds: actionIds, service });
 
@@ -94,8 +95,9 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
   );
 
   let toggleFav: JSX.Element | undefined;
-  if (service && favIds) {
-    toggleFav = favIds?.get(service)?.has(id.toString()) ? (
+  const isFav = favIds?.get(service as ServiceName)?.has(id.toString());
+  if (favIds) {
+    toggleFav = isFav ? (
       <Action
         icon={Icon.Star}
         key="toggleFav"
@@ -114,9 +116,14 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
     );
   }
 
+  const isRecent = recentIds?.get(service as ServiceName)?.has(id.toString());
+  const removeRecent = isRecent ? (
+    <Action icon={Icon.Clock} key="removeRecent" title="Remove from Recents" onAction={removeFromRecents} />
+  ) : undefined;
+
   const actions: Array<(JSX.Element | undefined)[]> = [
     [copyFile, copyGifUrl],
-    [toggleFav, showViewDetails ? viewDetails : undefined],
+    [toggleFav, removeRecent, showViewDetails ? viewDetails : undefined],
     [copyPageUrl, openUrlInBrowser],
   ];
 
