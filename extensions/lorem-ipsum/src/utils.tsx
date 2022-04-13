@@ -30,12 +30,12 @@ export const notify = () => {
 export const preformAction = async (action: string, output: string) => {
 
   switch (action) {
-    case 'clipboard':
+    case "clipboard":
       await copyTextToClipboard(output);
       await notify();
       break;
 
-    case 'paste':
+    case "paste":
         await pasteText(output);
         break;
   }
