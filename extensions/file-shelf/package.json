@@ -21,9 +21,9 @@
       "mode": "no-view"
     },
     {
-      "name": "get-file-off-shelf",
-      "icon": "get-file-off-shelf.png",
-      "title": "Get File off Shelf",
+      "name": "get-file-on-shelf",
+      "icon": "get-file-on-shelf.png",
+      "title": "Get File on Shelf",
       "subtitle": "File Shelf",
       "description": "Search and get files or folders that have been put on the shelf.",
       "mode": "view",
