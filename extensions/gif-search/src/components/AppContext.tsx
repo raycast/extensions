@@ -70,6 +70,10 @@ export function reduceAppState(state: AppState, action: AppStateAction) {
       if (favIds) {
         state.favIds = favIds;
       }
+
+      if (recentIds) {
+        state.recentIds = recentIds;
+      }
     }
   }
 
