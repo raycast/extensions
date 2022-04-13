@@ -2,7 +2,7 @@ import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
 import { format } from "date-fns";
 import { Project, Task } from "@doist/todoist-api-typescript";
 import { ViewMode } from "../types";
-import { isRecurring, displayDueDate, isExactTimeTask } from "../utils";
+import { isRecurring, displayDueDate, isExactTimeTask } from "../helpers";
 import { priorities } from "../constants";
 import TaskDetail from "./TaskDetail";
 
