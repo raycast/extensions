@@ -11,7 +11,11 @@ export const noop = () => {};
 export const prependStr = (leading: string) => (val: string) => leading + val;
 export const appendStr = (toAppend: string) => (val: string) => val + toAppend;
 
-export const generateContentToAppend = R.compose(prependStr("\n- "), R.replace(/\n/g, "\n- "));
+export const generateContentToAppend = (content: string, isOrgMode: boolean) => {
+  const leadingStr = isOrgMode ? "\n* " : "\n- ";
+  return R.compose(prependStr(leadingStr), R.replace(/\n/g, leadingStr))(content);
+};
+
 const getUserConfiguredGraphPath = () => {
   return untildify(getPreferenceValues().graphPath);
 };
@@ -32,15 +36,16 @@ const parseJournalFileNameFromLogseqConfig = () => {
       .then((content) => parseEDNString(content.toString(), { mapAs: "object", keywordAs: "string" }))
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then((v: any) => ({
-        journalsDirectory: "journals",
+        fileFormat: v["preferred-format"] === "org" ? ".org" : ".md",
+        journalsDirectory: v["journals-directory"] || "journals",
         dateFormat: (v["journal/file-name-format"] || "YYYY_MM_DD").toUpperCase(),
       }))
   );
 };
 
 const buildJournalPath = (graphPath: string) => {
-  return parseJournalFileNameFromLogseqConfig().then(({ dateFormat, journalsDirectory }) =>
-    path.join(graphPath, journalsDirectory, `${dayjs().format(dateFormat)}.md`)
+  return parseJournalFileNameFromLogseqConfig().then(({ dateFormat, journalsDirectory, fileFormat }) =>
+    path.join(graphPath, journalsDirectory, `${dayjs().format(dateFormat)}${fileFormat}`)
   );
 };
 
@@ -66,5 +71,8 @@ export const showGraphPathInvalidToast = () => {
 };
 
 export const appendContentToFile = (content: string, filePath: string) => {
-  return createFileIfNotExist(filePath).then(() => fs.promises.appendFile(filePath, generateContentToAppend(content)));
+  const isOrgMode = filePath.endsWith(".org");
+  return createFileIfNotExist(filePath).then(() =>
+    fs.promises.appendFile(filePath, generateContentToAppend(content, isOrgMode))
+  );
 };
