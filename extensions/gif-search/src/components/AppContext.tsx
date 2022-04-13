@@ -2,16 +2,16 @@ import React from "react";
 
 import { GIF_SERVICE, ServiceName } from "../preferences";
 import { setFavorites } from "../lib/favorites";
-
+import { GifIds } from "../hooks/useLocalGifs";
 export interface AppState {
-  favIds?: Map<ServiceName, Set<string>>;
+  favIds?: Map<ServiceName, GifIds>;
 }
 
 export type AppStateActionType = "add" | "remove" | "replace" | "clear";
 
 export interface AppStateAction {
   type?: AppStateActionType;
-  ids?: Map<ServiceName, Set<string>>;
+  ids?: Map<ServiceName, GifIds>;
   service?: ServiceName;
   save?: boolean;
 }
@@ -22,7 +22,7 @@ export const initialState: AppState = {
       map.set(service, new Set());
     }
     return map;
-  }, new Map<ServiceName, Set<string>>()),
+  }, new Map<ServiceName, GifIds>()),
 };
 
 const AppContext = React.createContext({

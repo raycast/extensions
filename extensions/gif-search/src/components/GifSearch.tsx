@@ -9,12 +9,14 @@ import AppContext, { initialState, reduceAppState } from "./AppContext";
 import useFavorites from "../hooks/useFavorites";
 import useSearchAPI from "../hooks/useSearchAPI";
 import { GifSearchList } from "./GifSearchList";
+import useLocalGifs, { GifIds } from "../hooks/useLocalGifs";
 
 export function GifSearch() {
   const showPreview = getShowPreview();
+  const limit = getMaxResults();
 
   const [searchService, setSearchService] = useState<ServiceName>();
-  const [results, isLoading, setSearchTerm, searchTerm, search] = useSearchAPI({ limit: getMaxResults() });
+  const [results, isLoading, setSearchTerm, searchTerm, search] = useSearchAPI({ limit });
 
   const onServiceChange = (service: string) => {
     setSearchService(service as ServiceName);
@@ -41,10 +43,10 @@ export function GifSearch() {
     }
   }, [results?.error]);
 
-  const [favIds, favItems, isLoadingFavIds, isLoadingFavs, loadFavs, populate, loadAllFavs, populateAll] = useFavorites(
-    {}
-  );
   const [state, dispatch] = useReducer(reduceAppState, initialState);
+
+  const [favIds, isLoadingFavIds, loadFavs, loadAllFavs] = useFavorites();
+  const [favItems, isLoadingFavs, populate, populateAll] = useLocalGifs();
 
   const showAllFavs = () => searchService === GIF_SERVICE.FAVORITES;
 
@@ -73,9 +75,9 @@ export function GifSearch() {
   // Populate favorite gifs from GIF API service using saved GIF ID's
   useEffect(() => {
     if (showAllFavs()) {
-      populateAll(state.favIds || new Map<ServiceName, Set<string>>());
+      populateAll(state.favIds || new Map<ServiceName, GifIds>(), { reverse: true });
     } else {
-      populate(state.favIds?.get(searchService as ServiceName) || new Set(), searchService);
+      populate(state.favIds?.get(searchService as ServiceName) || new Set(), searchService, { limit: limit/2, reverse: true });
     }
   }, [state]);
 
@@ -120,7 +122,7 @@ export function GifSearch() {
           onSearchTextChange={setSearchTerm}
           sections={[
             {
-              title: "Favorites",
+              title: "Recent Favorites",
               results: favItems?.items?.get(searchService as ServiceName),
               service: searchService,
               hide: !favItems?.items || !!results?.term,
