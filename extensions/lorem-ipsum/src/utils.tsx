@@ -1,4 +1,4 @@
-import { showHUD } from "@raycast/api";
+import { closeMainWindow, copyTextToClipboard, pasteText, showHUD } from "@raycast/api";
 import { LoremIpsum } from "lorem-ipsum";
 
 const generator = new LoremIpsum({
@@ -26,3 +26,20 @@ export const generateSentence = () => {
 export const notify = () => {
   showHUD("Copied to clipboard");
 };
+
+export const preformAction = async (action: string, output: string) => {
+
+  switch (action) {
+    case 'clipboard':
+      await copyTextToClipboard(output);
+      await notify();
+      break;
+
+    case 'paste':
+        await pasteText(output);
+        break;
+  }
+
+  await closeMainWindow();
+
+}
