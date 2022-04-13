@@ -1,11 +1,11 @@
 # Move File out
 
-Quickly take files out and move them to directory where parent folder is located.
+Takes selected content from Finder and moves it to the directory where parent folder is located.
 
 **Command**:
 
-- **Move File out**: Move File out of the parent folder.
-- **Copy File out**: Copy File out of the parent folder.
+- **Move File out**: Takes selected content and moves it to the parent directory.
+- **Copy File out**: Copies selected content to the parent directory.
 
 
 
