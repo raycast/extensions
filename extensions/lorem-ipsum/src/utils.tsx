@@ -28,7 +28,6 @@ export const notify = () => {
 };
 
 export const preformAction = async (action: string, output: string) => {
-
   switch (action) {
     case "clipboard":
       await copyTextToClipboard(output);
@@ -36,10 +35,9 @@ export const preformAction = async (action: string, output: string) => {
       break;
 
     case "paste":
-        await pasteText(output);
-        break;
+      await pasteText(output);
+      break;
   }
 
   await closeMainWindow();
-
-}
+};
