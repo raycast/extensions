@@ -28,6 +28,14 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
   const { state, dispatch } = useContext(AppContext);
   const { favIds } = state;
 
+  const actionIds = new Map([[service as ServiceName, new Set([id.toString()])]]);
+
+  const trackUsage = () => dispatch({ type: "add", save: true, recentIds: actionIds, service });
+
+  const addToFav = () => dispatch({ type: "add", save: true, favIds: actionIds, service });
+
+  const removeFav = () => dispatch({ type: "remove", save: true, favIds: actionIds, service });
+
   const copyFileAction = () =>
     showToast({
       style: Toast.Style.Animated,
@@ -62,6 +70,7 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
       title="Copy Page Link"
       content={url}
       shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      onCopy={trackUsage}
     />
   ) : undefined;
   const copyFile = (
@@ -69,7 +78,7 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
       icon={Icon.Clipboard}
       key="copyFile"
       title="Copy GIF"
-      onAction={copyFileAction}
+      onAction={() => copyFileAction().then(trackUsage)}
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
     />
   );
@@ -80,18 +89,18 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
       title="View GIF Details"
       target={<GifDetails item={item} />}
       shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      onPush={trackUsage}
     />
   );
 
   let toggleFav: JSX.Element | undefined;
   if (service && favIds) {
-    const actionIds = new Map([[service, new Set([id.toString()])]]);
     toggleFav = favIds?.get(service)?.has(id.toString()) ? (
       <Action
         icon={Icon.Star}
         key="toggleFav"
         title="Remove from Favorites"
-        onAction={() => dispatch({ type: "remove", save: true, ids: actionIds, service })}
+        onAction={removeFav}
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
       />
     ) : (
@@ -99,7 +108,7 @@ export function getActions(item: IGif, showViewDetails: boolean, service?: Servi
         icon={Icon.Star}
         key="toggleFav"
         title="Add to Favorites"
-        onAction={() => dispatch({ type: "add", save: true, ids: actionIds, service })}
+        onAction={addToFav}
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
       />
     );

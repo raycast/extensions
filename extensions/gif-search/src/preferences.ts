@@ -12,12 +12,13 @@ export const DEFAULT_ACTION = "defaultAction";
 
 export const CONFIG_URL = "https://cdn.joe.sh/gif-search/config.json";
 
-export type ServiceName = "giphy" | "tenor" | "finergifs" | "favorites";
+export type ServiceName = "giphy" | "tenor" | "finergifs" | "favorites" | "recents";
 export const GIF_SERVICE: { [name: string]: ServiceName } = {
   GIPHY: "giphy",
   TENOR: "tenor",
   FINER_GIFS: "finergifs",
   FAVORITES: "favorites",
+  RECENTS: "recents",
 };
 
 export function getServices() {

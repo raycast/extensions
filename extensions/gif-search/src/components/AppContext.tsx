@@ -1,28 +1,36 @@
 import React from "react";
 
 import { GIF_SERVICE, ServiceName } from "../preferences";
-import { setFavorites } from "../lib/favorites";
-import { GifIds } from "../hooks/useLocalGifs";
+import { set } from "../lib/localGifs";
+import { GifIds, StoredGifIds } from "../hooks/useGifPopulator";
 export interface AppState {
-  favIds?: Map<ServiceName, GifIds>;
+  favIds?: StoredGifIds;
+  recentIds?: StoredGifIds;
 }
 
 export type AppStateActionType = "add" | "remove" | "replace" | "clear";
 
 export interface AppStateAction {
-  type?: AppStateActionType;
-  ids?: Map<ServiceName, GifIds>;
+  favIds?: StoredGifIds;
+  recentIds?: StoredGifIds;
+
+  type: AppStateActionType;
   service?: ServiceName;
   save?: boolean;
 }
 
-export const initialState: AppState = {
-  favIds: Object.values(GIF_SERVICE).reduce((map, service) => {
-    if (service !== GIF_SERVICE.FAVORITES) {
+function createLocalIdsByService(initial = new Map<ServiceName, GifIds>()) {
+  return Object.values(GIF_SERVICE).reduce((map, service) => {
+    if (service !== GIF_SERVICE.FAVORITES && service !== GIF_SERVICE.RECENTS) {
       map.set(service, new Set());
     }
     return map;
-  }, new Map<ServiceName, GifIds>()),
+  }, initial);
+}
+
+export const initialState: AppState = {
+  favIds: createLocalIdsByService(),
+  recentIds: createLocalIdsByService(),
 };
 
 const AppContext = React.createContext({
@@ -35,37 +43,67 @@ const AppContext = React.createContext({
 export default AppContext;
 
 export function reduceAppState(state: AppState, action: AppStateAction) {
-  let { favIds } = state;
-  const { type, ids } = action;
+  const { type, favIds, recentIds } = action;
 
   const service = action.service as ServiceName;
 
-  if (type == "replace" || type == "clear") {
-    if (service === GIF_SERVICE.FAVORITES) {
-      favIds = ids;
-    }
-  }
-
-  const serviceIds = ids?.get(service);
-  if (serviceIds) {
+  const favServiceIds = favIds?.get(service);
+  if (favServiceIds) {
     switch (type) {
       case "replace":
-        favIds?.get(service)?.clear();
-        serviceIds.forEach((id) => favIds?.get(service)?.add(id));
+        state.favIds?.get(service)?.clear();
+        favServiceIds.forEach((id) => state.favIds?.get(service)?.add(id));
         break;
       case "add":
-        serviceIds.forEach((id) => favIds?.get(service)?.add(id));
+        favServiceIds.forEach((id) => state.favIds?.get(service)?.add(id));
         break;
       case "remove":
-        serviceIds.forEach((id) => favIds?.get(service)?.delete(id));
+        favServiceIds.forEach((id) => state.favIds?.get(service)?.delete(id));
         break;
+    }
+  } else {
+    if (type == "replace" || type == "clear") {
+      if (favIds) {
+        state.favIds = favIds;
+      }
     }
   }
 
-  const newFavs = favIds?.get(service);
+  const newFavs = state.favIds?.get(service);
   if (action.save && service && newFavs) {
-    setFavorites(newFavs, service);
+    set(newFavs, service, "favs");
   }
 
-  return { ...state, favIds } as AppState;
+  const recentServiceIds = recentIds?.get(service);
+  if (recentServiceIds) {
+    switch (type) {
+      case "replace":
+        state.recentIds?.get(service)?.clear();
+        recentServiceIds.forEach(
+          (id) => !state.favIds?.get(service)?.has(id) && state.recentIds?.get(service)?.add(id)
+        );
+        break;
+      case "add":
+        recentServiceIds.forEach(
+          (id) => !state.favIds?.get(service)?.has(id) && state.recentIds?.get(service)?.add(id)
+        );
+        break;
+      case "remove":
+        recentServiceIds.forEach((id) => state.recentIds?.get(service)?.delete(id));
+        break;
+    }
+  } else {
+    if (type == "replace" || type == "clear") {
+      if (recentIds) {
+        state.recentIds = favIds;
+      }
+    }
+  }
+
+  const newRecents = state.recentIds?.get(service);
+  if (action.save && service && newRecents) {
+    set(newRecents, service, "recent");
+  }
+
+  return { ...state, favIds: state.favIds, recentIds: state.recentIds } as AppState;
 }
