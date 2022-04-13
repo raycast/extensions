@@ -215,6 +215,7 @@ export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsRe
         title: trimTagsAndDecodeEntities(objEntity.title),
         preview: trimTagsAndDecodeEntities(objEntity.preview),
         url: computeRedirectedUrl(objEntity),
+        type: computeType(objEntity),
       };
     });
     return data;
@@ -246,6 +247,14 @@ const computeRedirectedUrl = (objEntity: ObjEntity) => {
     .replace(/\/space\/bitable\//, '/base/')
     .replace(/\/space\/mindnote\//, '/mindnotes/')
     .replace(/\/space\//, '/');
+};
+
+const computeType = (objEntity: ObjEntity) => {
+  if (objEntity.wiki_infos) {
+    return NodeType.Wik;
+  }
+
+  return objEntity.type;
 };
 
 const CACHE_DOCS_RECENT_LIST = 'CACHE_DOCS_RECENT_LIST';
