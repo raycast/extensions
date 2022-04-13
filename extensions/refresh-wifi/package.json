@@ -20,6 +20,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.32.1",
+    "fix-path": "^4.0.0",
     "manage-wifi": "^2.1.0"
   },
   "devDependencies": {
