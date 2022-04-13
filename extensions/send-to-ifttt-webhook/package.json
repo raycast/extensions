@@ -21,15 +21,43 @@
   ],
   "preferences": [
     {
-      "name": "eventName",
+      "name": "eventName1",
       "required": true,
       "type": "textfield",
       "title": "Event Name",
-      "description": "Name of the event to send to IFTTT."
+      "description": "Name of the first event to send to IFTTT."
+    },
+    {
+      "name": "eventName2",
+      "required": false,
+      "type": "textfield",
+      "title": "Event Name 2",
+      "description": "Name of the second event to send to IFTTT."
+    },
+    {
+      "name": "eventName3",
+      "required": false,
+      "type": "textfield",
+      "title": "Event Name 3",
+      "description": "Name of the third event to send to IFTTT."
+    },
+    {
+      "name": "eventName4",
+      "required": false,
+      "type": "textfield",
+      "title": "Event Name 4",
+      "description": "Name of the fourth event to send to IFTTT."
+    },
+    {
+      "name": "eventName5",
+      "required": false,
+      "type": "textfield",
+      "title": "Event Name 5",
+      "description": "Name of the fifth event to send to IFTTT."
     },
     {
       "name": "webhooksKey",
-      "required": true,
+      "required": false,
       "type": "password",
       "title": "Webhooks Key",
       "description": "Key of the webhooks."
