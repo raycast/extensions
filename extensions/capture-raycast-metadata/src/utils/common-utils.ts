@@ -4,6 +4,13 @@ import Values = LocalStorage.Values;
 import { homedir } from "os";
 import { runAppleScript } from "run-applescript";
 import { exec } from "child_process";
+import {
+  DESIRED_RAYCAST_WIDTH_IN_METADATA_PX,
+  METADATA_HEIGHT_PX,
+  METADATA_PADDING_X_PX,
+  METADATA_PADDING_Y_PX,
+  METADATA_WIDTH_PX,
+} from "./constants";
 
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
@@ -85,17 +92,17 @@ export async function captureRaycastMetadata(raycastLocation: RaycastLocation, r
 export async function captureWithInternalMonitor(raycastLocation: RaycastLocation, raycastSize: RaycastSize) {
   const { screenshotName, screenshotFormat } = preferences();
   const finalScreenshotName = isEmpty(screenshotName) ? "Metadata" : screenshotName;
-  const scale = 1500 / raycastSize.w;
+  const scale = DESIRED_RAYCAST_WIDTH_IN_METADATA_PX / raycastSize.w;
 
   const picturePath = `${homedir()}/Downloads/${await checkFileExists(
     `${homedir()}/Downloads/`,
     finalScreenshotName,
     screenshotFormat
   )}`;
-  const viewX = `${raycastLocation.x - 250 / scale}`;
-  const viewY = `${raycastLocation.y - 150 / scale}`;
-  const viewW = `${2000 / scale}`;
-  const viewH = `${1250 / scale}`;
+  const viewX = `${raycastLocation.x - METADATA_PADDING_X_PX / scale}`;
+  const viewY = `${raycastLocation.y - METADATA_PADDING_Y_PX / scale}`;
+  const viewW = `${METADATA_WIDTH_PX / scale}`;
+  const viewH = `${METADATA_HEIGHT_PX / scale}`;
   const command = `/usr/sbin/screencapture -x -t ${screenshotFormat} -R ${viewX},${viewY},${viewW},${viewH} ${picturePath}`;
   exec(command);
   return { captureSuccess: true, picturePath: picturePath, errorMassage: "" };
