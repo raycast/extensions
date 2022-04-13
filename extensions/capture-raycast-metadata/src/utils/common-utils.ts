@@ -36,6 +36,11 @@ type RaycastLocation = {
   y: number;
 };
 
+type RaycastSize = {
+  w: number;
+  h: number;
+};
+
 export async function getRaycastLocation() {
   const script = `
 tell application "System Events"
@@ -68,28 +73,29 @@ end tell`;
   }
 }
 
-export async function captureRaycastMetadata(raycastLocation: RaycastLocation) {
+export async function captureRaycastMetadata(raycastLocation: RaycastLocation, raycastSize: RaycastSize) {
   try {
-    return await captureWithInternalMonitor(raycastLocation);
+    return await captureWithInternalMonitor(raycastLocation, raycastSize);
   } catch (e) {
     console.error(String(e));
     return { captureSuccess: false, picturePath: homedir() + "/Downloads/", errorMassage: String(e) };
   }
 }
 
-export async function captureWithInternalMonitor(raycastLocation: RaycastLocation) {
+export async function captureWithInternalMonitor(raycastLocation: RaycastLocation, raycastSize: RaycastSize) {
   const { screenshotName, screenshotFormat } = preferences();
   const finalScreenshotName = isEmpty(screenshotName) ? "Metadata" : screenshotName;
+  const scale = 1500 / raycastSize.w;
 
   const picturePath = `${homedir()}/Downloads/${await checkFileExists(
     `${homedir()}/Downloads/`,
     finalScreenshotName,
     screenshotFormat
   )}`;
-  const viewX = `${raycastLocation.x - 250 / 2}`;
-  const viewY = `${raycastLocation.y - 150 / 2}`;
-  const viewW = `${2000 / 2}`;
-  const viewH = `${1250 / 2}`;
+  const viewX = `${raycastLocation.x - 250 / scale}`;
+  const viewY = `${raycastLocation.y - 150 / scale}`;
+  const viewW = `${2000 / scale}`;
+  const viewH = `${1250 / scale}`;
   const command = `/usr/sbin/screencapture -x -t ${screenshotFormat} -R ${viewX},${viewY},${viewW},${viewH} ${picturePath}`;
   exec(command);
   return { captureSuccess: true, picturePath: picturePath, errorMassage: "" };
@@ -100,19 +106,19 @@ export async function captureResultToast(captureResult: CaptureResult) {
     const optionsToast: Toast.Options = {
       title: "Capture Success!",
       style: Toast.Style.Success,
-      message: "Screenshot saved in Download folder.",
+      message: "Metadata saved in Download.",
       primaryAction: {
         title: "Open in Finder",
         onAction: async () => {
           await open(captureResult.picturePath);
-          await showHUD("Open Screenshot in default app");
+          await showHUD("Open metadata in default app");
         },
       },
       secondaryAction: {
         title: "Reveal in Finder",
         onAction: async () => {
           await open(homedir() + "/Downloads/");
-          await showHUD("Reveal Screenshot in Finder");
+          await showHUD("Reveal metadata in Finder");
         },
       },
     };

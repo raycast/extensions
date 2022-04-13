@@ -18,11 +18,14 @@ export default async () => {
       optionsAlert.message = "Please close other Raycast windows and open Raycast main window only!";
       await confirmAlert(optionsAlert);
     } else {
-      const captureResult = await captureRaycastMetadata({ x: _raycastLocation[0], y: _raycastLocation[1] });
+      const captureResult = await captureRaycastMetadata(
+        { x: _raycastLocation[0], y: _raycastLocation[1] },
+        { w: _raycastSize[0], h: _raycastSize[1] }
+      );
       const currentTime = new Date().getTime();
-      while (new Date().getTime() - currentTime < 50) {
+      while (new Date().getTime() - currentTime < 100) {
         //To prevent capture success toast from overwriting the toast the user wants to show
-        // wait for 0.5 second
+        // wait for 1 second
       }
       await captureResultToast(captureResult);
     }
