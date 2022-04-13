@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "file-shelf",
+  "title": "File Shelf",
+  "description": "Keep your files and folders on the shelf, ready to be copied, opened or revealed in Finder.",
+  "icon": "file-shelf.png",
+  "author": "koinzhang",
+  "categories": [
+    "Design Tools",
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "put-file-on-shelf",
+      "icon": "put-file-on-shelf.png",
+      "title": "Put File on Shelf",
+      "subtitle": "File Shelf",
+      "description": "Put file or folder on shelf, if the original item is deleted, the item will not be available.",
+      "mode": "no-view"
+    },
+    {
+      "name": "get-file-off-shelf",
+      "icon": "get-file-off-shelf.png",
+      "title": "Get File off Shelf",
+      "subtitle": "File Shelf",
+      "description": "Search and get files or folders that have been put on the shelf.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "copyAndClose",
+          "type": "checkbox",
+          "required": true,
+          "title": "Advance Preferences",
+          "label": "Close Raycast after Copy",
+          "description": "Close Raycast main window after copying files.",
+          "default": true
+        },
+        {
+          "name": "folderFirst",
+          "type": "checkbox",
+          "required": true,
+          "label": "Folder First",
+          "description": "Show folders first.",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.32.1",
+    "fs-extra": "^10.0.1",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.13",
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
