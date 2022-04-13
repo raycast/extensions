@@ -65,16 +65,8 @@ export function reduceAppState(state: AppState, action: AppStateAction) {
         favServiceIds.forEach((id) => state.favIds?.get(service)?.delete(id));
         break;
     }
-  } else {
-    if (type == "replace" || type == "clear") {
-      if (favIds) {
-        state.favIds = favIds;
-      }
-
-      if (recentIds) {
-        state.recentIds = recentIds;
-      }
-    }
+  } else if ((favIds && type == "replace") || type == "clear") {
+    state.favIds = favIds;
   }
 
   const recentServiceIds = recentIds?.get(service);
@@ -95,12 +87,8 @@ export function reduceAppState(state: AppState, action: AppStateAction) {
         recentServiceIds.forEach((id) => state.recentIds?.get(service)?.delete(id));
         break;
     }
-  } else {
-    if (type == "replace" || type == "clear") {
-      if (recentIds) {
-        state.recentIds = favIds;
-      }
-    }
+  } else if ((recentIds && type == "replace") || type == "clear") {
+    state.recentIds = recentIds;
   }
 
   const newFavs = state.favIds?.get(service);

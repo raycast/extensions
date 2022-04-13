@@ -5,7 +5,7 @@ import { ServiceName } from "../preferences";
 import { clearAll, clear, getAll, get, LocalType } from "../lib/localGifs";
 
 import type { StoredGifIds } from "./useGifPopulator";
-export interface FavIdsState {
+export interface LocalIdsState {
   ids?: StoredGifIds;
   error?: Error;
 }
@@ -16,7 +16,7 @@ export interface LoadFavOpt {
 
 export default function useLocalGifs(type: LocalType) {
   const [isLoadingIds, setIsLoadingIds] = useState(true);
-  const [favIds, setFavIds] = useState<FavIdsState>();
+  const [localIds, setLocalIds] = useState<LocalIdsState>();
 
   const loadRecents = useCallback(
     async function loadFavs(service?: ServiceName, opt?: LoadFavOpt) {
@@ -28,19 +28,19 @@ export default function useLocalGifs(type: LocalType) {
       setIsLoadingIds(true);
 
       try {
-        const favIds = await get(service, type);
-        setFavIds({ ids: new Map([[service, favIds]]) });
+        const localIds = await get(service, type);
+        setLocalIds({ ids: new Map([[service, localIds]]) });
       } catch (e) {
         console.error(e);
         const error = e as Error;
 
         await clear(service, type);
-        setFavIds({ error });
+        setLocalIds({ error });
       } finally {
         setIsLoadingIds(false);
       }
     },
-    [setFavIds, setIsLoadingIds]
+    [setLocalIds, setIsLoadingIds]
   );
 
   const loadAllRecents = useCallback(
@@ -50,19 +50,19 @@ export default function useLocalGifs(type: LocalType) {
 
       try {
         const allFavs = await getAll(type);
-        setFavIds({ ids: allFavs });
+        setLocalIds({ ids: allFavs });
       } catch (e) {
         console.error(e);
         const error = e as Error;
 
         await clearAll(type);
-        setFavIds({ error });
+        setLocalIds({ error });
       } finally {
         setIsLoadingIds(false);
       }
     },
-    [setFavIds]
+    [setLocalIds]
   );
 
-  return [favIds, isLoadingIds, loadRecents, loadAllRecents] as const;
+  return [localIds, isLoadingIds, loadRecents, loadAllRecents] as const;
 }

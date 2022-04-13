@@ -22,7 +22,9 @@ export const GIF_SERVICE: { [name: string]: ServiceName } = {
 };
 
 export function getServices() {
-  return Object.values(GIF_SERVICE).filter((service) => service != GIF_SERVICE.FAVORITES);
+  return Object.values(GIF_SERVICE).filter((service) => {
+    return service != GIF_SERVICE.FAVORITES && service != GIF_SERVICE.RECENTS;
+  });
 }
 
 export function getServiceTitle(service: ServiceName) {

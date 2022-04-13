@@ -71,7 +71,7 @@ export function GifSearch() {
     } else {
       loadRecents(searchService);
     }
-  }, [loadFavs, loadAllFavs, searchService]);
+  }, [loadFavs, loadAllFavs, loadRecents, loadAllRecents, searchService]);
 
   // Hydrate global state with fav GIF id's
   useEffect(() => {
