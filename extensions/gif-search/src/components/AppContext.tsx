@@ -55,7 +55,11 @@ export function reduceAppState(state: AppState, action: AppStateAction) {
         favServiceIds.forEach((id) => state.favIds?.get(service)?.add(id));
         break;
       case "add":
-        favServiceIds.forEach((id) => state.favIds?.get(service)?.add(id));
+        favServiceIds.forEach((id) => {
+          state.favIds?.get(service)?.add(id);
+          // Remove from recents if present, we don't want the same GIF in both
+          state.recentIds?.get(service)?.delete(id);
+        });
         break;
       case "remove":
         favServiceIds.forEach((id) => state.favIds?.get(service)?.delete(id));
@@ -67,11 +71,6 @@ export function reduceAppState(state: AppState, action: AppStateAction) {
         state.favIds = favIds;
       }
     }
-  }
-
-  const newFavs = state.favIds?.get(service);
-  if (action.save && service && newFavs) {
-    set(newFavs, service, "favs");
   }
 
   const recentServiceIds = recentIds?.get(service);
@@ -100,9 +99,11 @@ export function reduceAppState(state: AppState, action: AppStateAction) {
     }
   }
 
+  const newFavs = state.favIds?.get(service);
   const newRecents = state.recentIds?.get(service);
-  if (action.save && service && newRecents) {
-    set(newRecents, service, "recent");
+  if (action.save && service) {
+    newFavs && set(newFavs, service, "favs");
+    newRecents && set(newRecents, service, "recent");
   }
 
   return { ...state, favIds: state.favIds, recentIds: state.recentIds } as AppState;
