@@ -113,9 +113,17 @@ export interface ObjEntity {
   subtype: string;
   user_edit_time: number;
   share_version: number;
-  wiki_infos: null;
+  wiki_infos: null | WikiEntity[];
   owner_type: number;
   container_type: number;
+}
+
+export interface WikiEntity {
+  main_path: string;
+  space_id: string;
+  wiki_token: string;
+  wiki_url: string;
+  wiki_version: string;
 }
 
 export interface RecentListResponse {
@@ -240,6 +248,14 @@ export async function searchDocs(params: SearchDocsParams): Promise<SearchDocsRe
 }
 
 const computeRedirectedUrl = (objEntity: ObjEntity) => {
+  if (!objEntity.url) {
+    if (!objEntity.wiki_infos) {
+      return '';
+    }
+
+    return objEntity.wiki_infos[0].wiki_url;
+  }
+
   return objEntity.url
     .replace(/\/space\/doc\//, '/docs/')
     .replace(/\/space\/sheet\//, '/sheets/')
