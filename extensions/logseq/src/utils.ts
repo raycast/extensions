@@ -31,13 +31,16 @@ const parseJournalFileNameFromLogseqConfig = () => {
       .readFile(logseqConfigPath, { encoding: "utf8" })
       .then((content) => parseEDNString(content.toString(), { mapAs: "object", keywordAs: "string" }))
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .then((v: any) => (v["journal/file-name-format"] || "YYYY_MM_DD").toUpperCase())
+      .then((v: any) => ({
+        journalsDirectory: "journals",
+        dateFormat: (v["journal/file-name-format"] || "YYYY_MM_DD").toUpperCase(),
+      }))
   );
 };
 
 const buildJournalPath = (graphPath: string) => {
-  return parseJournalFileNameFromLogseqConfig().then((dateFormat) =>
-    path.join(graphPath, "/journals/", `${dayjs().format(dateFormat)}.md`)
+  return parseJournalFileNameFromLogseqConfig().then(({ dateFormat, journalsDirectory }) =>
+    path.join(graphPath, journalsDirectory, `${dayjs().format(dateFormat)}.md`)
   );
 };
 
