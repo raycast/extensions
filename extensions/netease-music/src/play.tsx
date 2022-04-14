@@ -1,6 +1,6 @@
-import {controlMusic} from "./util";
+import { controlMusic } from "./util";
 import NeteaseMusicController from "@chyroc/netease-music-controller";
 
 export default async () => {
-    await controlMusic(NeteaseMusicController.play)
-}
+  await controlMusic(NeteaseMusicController.play);
+};
