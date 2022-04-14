@@ -1,6 +1,7 @@
 import { zxcvbn, zxcvbnOptions } from "@zxcvbn-ts/core";
 import zxcvbnCommonPackage from "@zxcvbn-ts/language-common";
 import zxcvbnEnPackage from "@zxcvbn-ts/language-en";
+import { PasswordDetails } from "./interface";
 
 const options = {
   translations: zxcvbnEnPackage.translations,
@@ -13,7 +14,7 @@ const options = {
 
 zxcvbnOptions.setOptions(options);
 
-export function getPasswordDetails(password: string) {
+export function getPasswordDetails(password: string): PasswordDetails {
   const result = zxcvbn(password);
   const sequence = result.sequence;
 

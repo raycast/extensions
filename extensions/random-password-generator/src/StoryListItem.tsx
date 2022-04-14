@@ -1,18 +1,31 @@
 import { List } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { Actions } from "./Action";
 import { Details } from "./Details";
-import { StoryListItemProps } from "./interface";
+import { PasswordDetails, StoryListItemProps } from "./interface";
+import { getPasswordDetails } from "./passwordDetails";
+import { getIcon } from "./util";
 
 export function StoryListItem(item: StoryListItemProps) {
+  const [details, setDetails] = useState<PasswordDetails>();
+
+  useEffect(() => {
+    const details = getPasswordDetails(item.password);
+    setDetails(details);
+  }, [item.password]);
+
   const itemProps = item.showingDetails
     ? {
-        detail: <Details {...item} />,
+        detail: <Details data={details} />,
       }
-    : { accessoryTitle: item.accessoryTitle, subtitle: item.subtitle };
+    : {
+        accessoryTitle: details?.crackTime ? `guessed in ${details.crackTime}` : "",
+        subtitle: details?.warning ?? "",
+      };
 
   return (
     <List.Item
-      icon={item.icon}
+      icon={getIcon(details?.score)}
       title={item.password}
       actions={<Actions password={item.password} setShowingDetails={item.setShowingDetails} />}
       {...itemProps}

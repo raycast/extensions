@@ -1,19 +1,26 @@
 import { List } from "@raycast/api";
-import { StoryListItemProps } from "./interface";
+import { PasswordDetails } from "./interface";
 
-export function Details({ sequence, accessoryTitle, subtitle }: StoryListItemProps) {
-  const sequencesText = sequence
-    .map((item) =>
-      Object.entries(item)
-        .filter(([key]) => ["i", "j", "guessesLog10"].indexOf(key) === -1)
-        .map(([key, value]) => `${key}: _${value}_\n`)
-        .join("\n")
-    )
-    .join("\n---\n");
+interface Props {
+  data: PasswordDetails | undefined;
+}
 
-  let markdown = subtitle ? `# ${subtitle}\n` : "";
-  markdown += accessoryTitle ? `## ${accessoryTitle}\n` : "";
-  markdown += sequencesText ? `\n---\n${sequencesText}` : "";
+export function Details({ data }: Props) {
+  let markdown = "Loading...";
+  if (data) {
+    const sequencesText = data.sequence
+      .map((item) =>
+        Object.entries(item)
+          .filter(([key]) => ["i", "j", "guessesLog10"].indexOf(key) === -1)
+          .map(([key, value]) => `${key}: _${value}_\n`)
+          .join("\n")
+      )
+      .join("\n---\n");
+    const accessoryTitle = `guessed in ${data.crackTime}`;
 
-  return <List.Item.Detail markdown={markdown} />;
+    markdown = data.warning ? `# ${data.warning}\n` : "";
+    markdown += accessoryTitle ? `## ${accessoryTitle}\n` : "";
+    markdown += sequencesText ? `\n---\n${sequencesText}` : "";
+  }
+  return <List.Item.Detail isLoading={!data} markdown={markdown} />;
 }
