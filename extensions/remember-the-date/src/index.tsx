@@ -6,11 +6,10 @@ import { validateItem } from "./utils";
 
 export default function Command() {
   async function handleSubmit(item: Item) {
-    
-    if(validateItem(item)) {
+    if (validateItem(item)) {
       const existingItems = await getItems();
       existingItems.push({ ...item, id: nanoid() });
-  
+
       popToRoot();
       saveItems(existingItems);
       showToast({ title: "Success", message: "Successfully added item" });

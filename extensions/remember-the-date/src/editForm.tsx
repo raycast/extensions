@@ -7,14 +7,12 @@ export function EditForm(props: { item: Item; onEdit: (item: Item) => void }) {
   const item: Item = props.item;
 
   async function handleSubmit(values: Item) {
-
-    if(validateItem(values)) {
+    if (validateItem(values)) {
       props.onEdit({ ...values, id: item.id });
 
-      showToast({ style: Toast.Style.Success, title: "Successfully updated item",});
+      showToast({ style: Toast.Style.Success, title: "Successfully updated item" });
       pop();
     }
-    
   }
 
   return (
