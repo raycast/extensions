@@ -12,11 +12,13 @@ interface PasswordGroup {
 }
 
 export default function Command() {
+  const [loading, setLoading] = useState(true);
   const [passwordLength, setPasswordLength] = useState<number>(16);
   const [showingDetails, setShowingDetails] = useState(false);
   const [passwordGroups, setPasswordGroups] = useState<PasswordGroup[]>();
 
   useEffect(() => {
+    setLoading(true);
     const passwords = generatePasswords(passwordLength);
     const passwordGroups = new Map<string, PasswordGroup>();
 
@@ -35,11 +37,13 @@ export default function Command() {
     const values: PasswordGroup[] = Array.from(passwordGroups.values());
 
     setPasswordGroups(values);
+    setLoading(false);
   }, [passwordLength]);
 
   return (
     <List
       isShowingDetail={showingDetails}
+      isLoading={loading}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Password Length"
