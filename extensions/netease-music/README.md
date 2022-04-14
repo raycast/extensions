@@ -1,3 +1,3 @@
 # Netease-Music
 
-![](./metadata/use.png)
+![](./metadata/metadata.png)
