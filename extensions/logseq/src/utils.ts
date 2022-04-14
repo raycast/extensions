@@ -16,16 +16,29 @@ export const generateContentToAppend = (content: string, isOrgMode: boolean) => 
   return R.compose(prependStr(leadingStr), R.replace(/\n/g, leadingStr))(content);
 };
 
+const validateFolderPath = (folder: string) => {
+  return fs.promises
+    .lstat(folder)
+    .then((stats) => {
+      if (!stats.isDirectory()) {
+        throw `Folder does not exist: ${folder}`;
+      }
+    })
+    .catch((e) => {
+      if (e.code === "ENOENT") {
+        throw `Folder does not exist: ${folder}`;
+      } else {
+        throw `Error`;
+      }
+    });
+};
+
 const getUserConfiguredGraphPath = () => {
   return untildify(getPreferenceValues().graphPath);
 };
 
 export const validateUserConfigGraphPath = () => {
-  return fs.promises.lstat(getUserConfiguredGraphPath()).then((stats) => {
-    if (!stats.isDirectory()) {
-      throw "invalid";
-    }
-  });
+  return validateFolderPath(getUserConfiguredGraphPath());
 };
 
 const parseJournalFileNameFromLogseqConfig = () => {
@@ -72,7 +85,7 @@ export const showGraphPathInvalidToast = () => {
 
 export const appendContentToFile = (content: string, filePath: string) => {
   const isOrgMode = filePath.endsWith(".org");
-  return createFileIfNotExist(filePath).then(() =>
-    fs.promises.appendFile(filePath, generateContentToAppend(content, isOrgMode))
-  );
+  return validateFolderPath(path.dirname(filePath))
+    .then(() => createFileIfNotExist(filePath))
+    .then(() => fs.promises.appendFile(filePath, generateContentToAppend(content, isOrgMode)));
 };
