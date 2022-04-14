@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "social-network-trends",
+  "title": "Social Network Trends",
+  "description": "Show popular trends on WeiBo, ZhiHu, and DouYin.",
+  "icon": "extension-icon/trend-social-networks.png",
+  "author": "koinzhang",
+  "categories": [
+    "Fun",
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "trend-of-weibo",
+      "title": "Trend of WeiBo",
+      "icon": "extension-icon/trend-weibo.png",
+      "subtitle": "Social Network Trends",
+      "description": "Show the popular trends of WeiBo.",
+      "mode": "view"
+    },
+    {
+      "name": "trend-of-zhihu",
+      "title": "Trend of ZhiHu",
+      "icon": "extension-icon/trend-zhihu.png",
+      "subtitle": "Social Network Trends",
+      "description": "Show the popular trends of ZhiHu.",
+      "mode": "view"
+    },
+    {
+      "name": "trend-of-douyin",
+      "title": "Trend of DouYin",
+      "icon": "extension-icon/trend-douyin.png",
+      "subtitle": "Social Network Trends",
+      "description": "Show the popular trends of DouYin.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.32.1",
+    "node-fetch": "^3.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
