@@ -1,6 +1,6 @@
-import SearchCommand from "./components/search";
-import { sourcegraphCloud } from "./sourcegraph";
+import CloudCommand from "./components/CloudCommand";
+import SearchCommand from "./components/SearchCommand";
 
 export default function SearchCloud() {
-  return SearchCommand(sourcegraphCloud());
+  return <CloudCommand Command={SearchCommand} />;
 }

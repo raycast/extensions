@@ -8,7 +8,7 @@ export function isRecurring(task: Task): boolean {
 }
 
 export function isExactTimeTask(task: Task): boolean {
-  return !!task.due?.timezone;
+  return !!task.due?.datetime;
 }
 
 /**

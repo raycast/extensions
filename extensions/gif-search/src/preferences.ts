@@ -7,15 +7,35 @@ import { getPreferenceValues, environment } from "@raycast/api";
 
 export const API_KEY = "apiKey";
 export const SHOW_PREVIEW = "showGifPreview";
+export const MAX_RESULTS = "maxResults";
 export const DEFAULT_ACTION = "defaultAction";
 
 export const CONFIG_URL = "https://cdn.joe.sh/gif-search/config.json";
 
-export type ServiceName = "giphy" | "tenor";
+export type ServiceName = "giphy" | "tenor" | "finergifs" | "favorites";
 export const GIF_SERVICE: { [name: string]: ServiceName } = {
   GIPHY: "giphy",
   TENOR: "tenor",
+  FINER_GIFS: "finergifs",
+  FAVORITES: "favorites",
 };
+
+export function getServices() {
+  return Object.values(GIF_SERVICE).filter((service) => service != GIF_SERVICE.FAVORITES);
+}
+
+export function getServiceTitle(service: ServiceName) {
+  switch (service) {
+    case GIF_SERVICE.GIPHY:
+      return "Giphy";
+    case GIF_SERVICE.TENOR:
+      return "Tenor";
+    case GIF_SERVICE.FINER_GIFS:
+      return "Finer Gifs Club";
+  }
+
+  return "";
+}
 
 export type Preference = { [preferenceName: string]: any };
 
@@ -39,12 +59,16 @@ export async function getAPIKey(serviceName: ServiceName, forceRefresh?: boolean
   return apiKey;
 }
 
-export function getShowPreview() {
+export function getShowPreview(): boolean {
   return getPrefs()[SHOW_PREVIEW];
 }
 
-export function getDefaultAction() {
+export function getDefaultAction(): string {
   return getPrefs()[DEFAULT_ACTION];
+}
+
+export function getMaxResults(): number {
+  return parseInt(getPrefs()[MAX_RESULTS], 10) ?? 10;
 }
 
 export type Config = {
