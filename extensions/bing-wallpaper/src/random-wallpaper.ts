@@ -5,7 +5,7 @@ import {
   buildBingWallpapersURL,
   getPictureName,
 } from "./utils/bing-wallpaper-utils";
-import { setWallpaper } from "./utils/utils";
+import { setWallpaper } from "./utils/common-utils";
 import { showToast, Toast } from "@raycast/api";
 
 export default async () => {

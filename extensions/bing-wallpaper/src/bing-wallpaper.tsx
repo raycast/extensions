@@ -10,13 +10,13 @@ import {
 } from "./utils/bing-wallpaper-utils";
 import React, { useEffect, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
-import * as fs from "fs";
 import { homedir } from "os";
-import { deleteCache, preferences, setWallpaper } from "./utils/utils";
+import { deleteCache, getScreenshotDirectory, preferences, setWallpaper } from "./utils/common-utils";
+import fse from "fs-extra";
 
 export default function CommonDirectory() {
   const [bingWallpaperHD, setBingWallpaperHD] = useState<BingImage[]>([]);
-  const { downloadSize } = preferences();
+  const { downloadSize, autoDownload } = preferences();
 
   useEffect(() => {
     async function _fetchWallpaper() {
@@ -45,6 +45,23 @@ export default function CommonDirectory() {
 
     _fetchWallpaper().then();
   }, []);
+
+  useEffect(() => {
+    async function _downloadWallpaper() {
+      try {
+        //delete wallpaper Cache
+        deleteCache();
+        //auto download wallpaper
+        if (autoDownload) {
+          await autoDownloadPictures(downloadSize, bingWallpaperHD);
+        }
+      } catch (e) {
+        console.error(String(e));
+      }
+    }
+
+    _downloadWallpaper().then();
+  }, [bingWallpaperHD]);
 
   return (
     <List isShowingDetail={true} isLoading={bingWallpaperHD.length === 0} searchBarPlaceholder={"Search WallPaper"}>
@@ -104,12 +121,12 @@ ${getCopyright(bingImage.copyright).copyright}`}
                   }}
                 />
                 <Action
-                  icon={Icon.Trash}
-                  title={"Clear Wallpaper Cache"}
-                  shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
+                  icon={Icon.Binoculars}
+                  title={"More Bing Wallpaper"}
+                  shortcut={{ modifiers: ["shift", "cmd"], key: "m" }}
                   onAction={async () => {
-                    deleteCache();
-                    await showToast(Toast.Style.Success, "Clear cache success!");
+                    await open("https://github.com/niumoo/bing-wallpaper");
+                    await showHUD("Get more bing wallpaper");
                   }}
                 />
               </ActionPanel>
@@ -128,10 +145,10 @@ async function downloadPicture(downSize: string, bingImage: BingImage) {
       return res.arrayBuffer();
     })
     .then(function (buffer) {
-      const picturePath = `${homedir()}/Downloads/${getPictureName(bingImage.url)}-${
+      const picturePath = `${getScreenshotDirectory()}/${getPictureName(bingImage.url)}-${
         bingImage.startdate
       }-${downSize}.png`;
-      fs.writeFile(picturePath, Buffer.from(buffer), async (error) => {
+      fse.writeFile(picturePath, Buffer.from(buffer), async (error) => {
         if (error != null) {
           await showToast(Toast.Style.Failure, String(error));
         } else {
@@ -158,4 +175,23 @@ async function downloadPicture(downSize: string, bingImage: BingImage) {
         }
       });
     });
+}
+
+async function autoDownloadPictures(downSize: string, bingImages: BingImage[]) {
+  bingImages.forEach((value) => {
+    const picturePath = `${getScreenshotDirectory()}/${getPictureName(value.url)}-${value.startdate}-${downSize}.png`;
+    if (!fse.existsSync(picturePath)) {
+      fetch(buildBingImageURL(value.url, downSize))
+        .then(function (res) {
+          return res.arrayBuffer();
+        })
+        .then(function (buffer) {
+          fse.writeFile(picturePath, Buffer.from(buffer), async (error) => {
+            if (error != null) {
+              console.error(String(error));
+            }
+          });
+        });
+    }
+  });
 }

@@ -1,18 +1,29 @@
 import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
-import fs, { existsSync } from "fs";
+import fse from "fs-extra";
 import { runAppleScript } from "run-applescript";
 import Values = LocalStorage.Values;
+import { homedir } from "os";
 
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
     applyTo: preferencesMap.get("applyTo") as string,
     downloadSize: preferencesMap.get("downloadSize") as string,
+    downloadDirectory: preferencesMap.get("downloadDirectory") as string,
+    autoDownload: preferencesMap.get("autoDownload") as boolean,
   };
 };
 
 export const isEmpty = (string: string | null | undefined) => {
   return !(string != null && String(string).length > 0);
+};
+
+export const getScreenshotDirectory = () => {
+  const directoryPreference = preferences().downloadDirectory;
+  if (isEmpty(directoryPreference) || !fse.pathExistsSync(directoryPreference)) {
+    return homedir() + "/Downloads";
+  }
+  return directoryPreference.endsWith("/") ? directoryPreference.substring(0, -1) : directoryPreference;
 };
 
 export const setWallpaper = async (title: string, url: string) => {
@@ -25,7 +36,7 @@ export const setWallpaper = async (title: string, url: string) => {
   try {
     const actualPath = fixedPathName;
 
-    const command = !existsSync(actualPath)
+    const command = !fse.existsSync(actualPath)
       ? `set cmd to "curl -o " & q_temp_folder & " " & "${url}"
         do shell script cmd`
       : "";
@@ -76,11 +87,11 @@ export const setWallpaper = async (title: string, url: string) => {
 
 export function deleteCache() {
   const pathName = environment.supportPath;
-  if (fs.existsSync(pathName)) {
-    const files = fs.readdirSync(pathName);
+  if (fse.existsSync(pathName)) {
+    const files = fse.readdirSync(pathName);
     files.forEach(function (file) {
       const curPath = pathName + "/" + file;
-      fs.unlinkSync(curPath);
+      fse.unlinkSync(curPath);
     });
   }
 }
