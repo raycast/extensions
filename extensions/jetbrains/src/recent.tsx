@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ActionPanel, Application, Detail, getApplications, List } from "@raycast/api";
+import { ActionPanel, Application, getApplications, List } from "@raycast/api";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import { dirname, resolve } from "path";
@@ -124,7 +124,7 @@ export default function ProjectList(): JSX.Element {
   }, []);
 
   if (loading) {
-    return <Detail isLoading />;
+    return <List searchBarPlaceholder={`Search recent projects…`} isLoading={true} />;
   } else if (toolboxApp === undefined) {
     const message = [
       "# Unable to find JetBrains Toolbox",
