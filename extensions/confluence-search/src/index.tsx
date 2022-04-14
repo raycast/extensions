@@ -12,7 +12,7 @@ import {
 import fetch, { AbortError, RequestInit, Response } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const prefs: { instance: string; user: string; token: string } = getPreferenceValues();
+const prefs: { instance: string; token: string } = getPreferenceValues();
 export const confluenceUrl = `https://${prefs.instance}`;
 
 const headers = {

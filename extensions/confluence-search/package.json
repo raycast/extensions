@@ -25,14 +25,6 @@
       "placeholder": "my.atlassian.net"
     },
     {
-      "name": "user",
-      "type": "textfield",
-      "required": true,
-      "title": "Username",
-      "description": "Your Account",
-      "placeholder": "me@company.com"
-    },
-    {
       "name": "token",
       "type": "password",
       "required": true,
