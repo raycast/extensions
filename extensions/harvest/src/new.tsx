@@ -33,12 +33,14 @@ export default function Command({
   const { pop } = useNavigation();
   const { data: company, error } = useCompany();
   const { data: projects } = useMyProjects();
-  const [projectId, setProjectId] = useState<string>();
+  const [projectId, setProjectId] = useState<string | undefined>(entry?.project.id.toString());
   const [tasks, setTasks] = useState<HarvestTaskAssignment[]>([]);
-  const [taskId, setTaskId] = useState<string>();
-  const [notes, setNotes] = useState<string>();
-  const [hours, setHours] = useState<string>();
+  const [taskId, setTaskId] = useState<string | undefined>(entry?.task.id.toString());
+  const [notes, setNotes] = useState<string | undefined>(entry?.notes);
+  const [hours, setHours] = useState<string | undefined>(entry?.hours.toString());
   const [spentDate, setSpentDate] = useState<Date>(viewDate);
+
+  // console.log(projectId);
 
   useEffect(() => {
     if (error) {
@@ -77,6 +79,7 @@ export default function Command({
     if (!entry) {
       // no entry was passed, recall last submitted project/task
       LocalStorage.getItem("lastProject").then((value) => {
+        console.log("restoring last used entry...", { value });
         if (value) {
           const { projectId, taskId } = JSON.parse(value.toString());
           setProjectId(projectId);
@@ -84,14 +87,13 @@ export default function Command({
           setTaskAssignments(projectId);
         }
       });
-      return;
+    } else {
+      // setTaskAssignments();
     }
 
-    setProjectId(entry.project.id.toString());
-    setTaskId(entry.task.id.toString());
-    setNotes(entry.notes);
-    setHours(entry.hours.toString());
-    setTaskAssignments();
+    return () => {
+      setProjectId(undefined);
+    };
   }, [entry]);
 
   async function handleSubmit(values: Record<string, Form.Value>) {
@@ -155,17 +157,16 @@ export default function Command({
     }
   }
 
-  function setTaskAssignments(projectId?: string) {
-    if (!projectId) return;
-
+  function setTaskAssignments(projectId: string) {
     const project = _.find(projects, (o) => {
       return o.project.id === parseInt(projectId);
     });
     if (typeof project === "object") {
       setTasks(project.task_assignments);
 
-      let defaultAssignment = project.task_assignments[0].id.toString();
+      let defaultAssignment = project.task_assignments[0].task.id.toString();
       if (taskId) {
+        // if there is already a taskId set, and it's a valid task for the selected project, leave it be
         const assignment = _.find(project.task_assignments, (o) => o.task.id.toString() === taskId);
         if (assignment) {
           defaultAssignment = assignment.task.id.toString();
@@ -173,8 +174,10 @@ export default function Command({
       }
       setTaskId(defaultAssignment);
     } else {
+      // no projects found
       setTasks([]);
     }
+    console.log("finished setTaskAssignments. taskId:", taskId);
   }
 
   function setTimeFormat(value?: string) {
