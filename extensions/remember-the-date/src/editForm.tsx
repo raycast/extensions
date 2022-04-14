@@ -1,19 +1,19 @@
-import { Item } from "./types"
-import { ActionPanel, Action, Form, Icon, Color, showToast, Toast, useNavigation } from "@raycast/api"
+import { Item } from "./types";
+import { ActionPanel, Action, Form, Icon, Color, showToast, Toast, useNavigation } from "@raycast/api";
 
-export function EditForm(props: { item: Item, onEdit: (item: Item) => void }) {
-  const { pop } = useNavigation()
-  const item: Item = props.item
+export function EditForm(props: { item: Item; onEdit: (item: Item) => void }) {
+  const { pop } = useNavigation();
+  const item: Item = props.item;
 
   async function handleSubmit(values: Item) {
-    props.onEdit({ ...values, id: item.id })
+    props.onEdit({ ...values, id: item.id });
 
     await showToast({
       style: Toast.Style.Success,
       title: "Successfully updated item",
-    })
+    });
 
-    pop()
+    pop();
   }
 
   return (
@@ -45,5 +45,5 @@ export function EditForm(props: { item: Item, onEdit: (item: Item) => void }) {
         ))}
       </Form.Dropdown>
     </Form>
-  )
+  );
 }

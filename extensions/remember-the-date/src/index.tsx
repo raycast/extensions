@@ -1,29 +1,29 @@
-import { Form, ActionPanel, Action, showToast, Icon, Color, Toast, popToRoot } from "@raycast/api"
-import { Item } from "./types"
-import { getItems, saveItems } from "./storage"
-import { nanoid } from "nanoid"
+import { Form, ActionPanel, Action, showToast, Icon, Color, Toast, popToRoot } from "@raycast/api";
+import { Item } from "./types";
+import { getItems, saveItems } from "./storage";
+import { nanoid } from "nanoid";
 
 export default function Command() {
   async function handleSubmit(item: Item) {
-    validateItem(item)
+    validateItem(item);
 
-    const existingItems = await getItems()
-    existingItems.push({ ...item, id: nanoid() })
+    const existingItems = await getItems();
+    existingItems.push({ ...item, id: nanoid() });
 
-    popToRoot()
-    saveItems(existingItems)
-    showToast({ title: "Success", message: "Successfully added item" })
+    popToRoot();
+    saveItems(existingItems);
+    showToast({ title: "Success", message: "Successfully added item" });
   }
 
   function validateItem(item: Item) {
     if (item.name === "") {
-      showToast(Toast.Style.Failure, "An error occurred", "Name can not be empty")
-      return false
+      showToast(Toast.Style.Failure, "An error occurred", "Name can not be empty");
+      return false;
     }
 
     if (item.date === null) {
-      showToast(Toast.Style.Failure, "An error occurred", "Please select a date")
-      return false
+      showToast(Toast.Style.Failure, "An error occurred", "Please select a date");
+      return false;
     }
   }
 
@@ -51,5 +51,5 @@ export default function Command() {
         ))}
       </Form.Dropdown>
     </Form>
-  )
+  );
 }
