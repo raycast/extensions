@@ -36,7 +36,7 @@ export const getLeftWeeks = () => {
 //Time left
 export const getHourLeftThisDay = () => {
   const now = new Date();
-  return 24 - now.getHours();
+  return 24 - now.getHours() - 1;
 };
 
 export const getDaysLeftThisWeek = () => {
@@ -44,21 +44,21 @@ export const getDaysLeftThisWeek = () => {
   switch (weekStart) {
     case "Monday":
       if (now.getDay() === 0) {
-        return 1;
+        return 0;
       } else {
-        return 8 - now.getDay();
+        return 7 - now.getDay();
       }
     case "Sunday":
-      return 7 - now.getDay();
+      return 6 - now.getDay();
     default:
-      return 7 - now.getDay();
+      return 6 - now.getDay();
   }
 };
 
 export const getDaysLeftThisMonth = () => {
   const now = new Date();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  return daysInMonth - now.getDate() + 1;
+  return daysInMonth - now.getDate();
 };
 
 export const getDaysLeftThisYear = () => {
@@ -70,7 +70,7 @@ export const getDaysLeftThisYear = () => {
     (new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0).getTime() -
       new Date(now.getFullYear(), 0, 0).getTime()) /
     (1000 * 60 * 60 * 24);
-  return dayAllYear - daySpendThisYear + 1;
+  return dayAllYear - daySpendThisYear;
 };
 
 export interface LifeProgress {
@@ -90,7 +90,7 @@ export const getLifeProgress = () => {
   const lifeProgresses: LifeProgress[] = [];
   const { iconTheme } = preferences();
 
-  const timeIcon12 = ["🕚", "🕙", "🕘", "🕗", "🕖", "🕕", "🕔", "🕓", "🕒", "🕑", "🕐", "🕛"];
+  const timeIcon12 = ["🕙", "🕘", "🕗", "🕖", "🕕", "🕔", "🕓", "🕒", "🕑", "🕐", "🕛", "🕚"];
   const timeIcon24 = [...timeIcon12, ...timeIcon12];
   let _iconTheme = iconTheme;
   if (iconTheme == "random") {
@@ -168,14 +168,14 @@ export const getLifeProgress = () => {
   });
   lifeProgresses.push({
     section: SectionTitle.TIME_LEFT,
-    icon: getDaysLeftThisWeek() <= 2 ? "🏝" : "💼",
+    icon: getDaysLeftThisWeek() <= 1 ? "🏝" : "💼",
     title: `${getDaysLeftThisWeek()} days left in the week`,
     number: getDaysLeftThisWeek(),
     accessUnit: getNumberCanvas(_iconTheme, getDaysLeftThisWeek(), "day.png"),
   });
   lifeProgresses.push({
     section: SectionTitle.TIME_LEFT,
-    icon: getDaysLeftThisMonth() <= 15 ? "⌛️" : "⏳",
+    icon: getDaysLeftThisMonth() < 15 ? "⌛️" : "⏳",
     title: `${getDaysLeftThisMonth()} days left in the month`,
     number: getDaysLeftThisMonth(),
     accessUnit: getNumberCanvas(_iconTheme, getDaysLeftThisMonth(), "day.png"),
