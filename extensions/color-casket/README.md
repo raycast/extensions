@@ -1,4 +1,4 @@
-[![Support Me](./metadata/donate-banner.png)](https://www.paypal.com/donate/?hosted_button_id=AH5HZ8GD3DK4S)
+[![Support Me](./metadata/donate-banner.png)](https://ko-fi.com/slavarazum)
 
 <p align="center">
   <img width="200" height="200" src="./assets/command-icon.png">

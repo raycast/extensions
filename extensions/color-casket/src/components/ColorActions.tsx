@@ -73,11 +73,7 @@ export default function ColorActions({ color, storageMode }: { color: AvailableC
           icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
           onAction={() => history.clear()}
         />
-        <Action.OpenInBrowser
-          title="Support Me"
-          icon={{ source: "heart.png" }}
-          url="https://www.paypal.com/donate/?hosted_button_id=AH5HZ8GD3DK4S"
-        />
+        <Action.OpenInBrowser title="Support Me" icon={{ source: "heart.png" }} url="https://ko-fi.com/slavarazum" />
       </ActionPanel.Section>
     </ActionPanel>
   );
