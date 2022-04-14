@@ -1,4 +1,5 @@
 import { Item } from "./types";
+import { validateItem } from "./utils";
 import { ActionPanel, Action, Form, Icon, Color, showToast, Toast, useNavigation } from "@raycast/api";
 
 export function EditForm(props: { item: Item; onEdit: (item: Item) => void }) {
@@ -6,14 +7,14 @@ export function EditForm(props: { item: Item; onEdit: (item: Item) => void }) {
   const item: Item = props.item;
 
   async function handleSubmit(values: Item) {
-    props.onEdit({ ...values, id: item.id });
 
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Successfully updated item",
-    });
+    if(validateItem(values)) {
+      props.onEdit({ ...values, id: item.id });
 
-    pop();
+      showToast({ style: Toast.Style.Success, title: "Successfully updated item",});
+      pop();
+    }
+    
   }
 
   return (
@@ -33,7 +34,6 @@ export function EditForm(props: { item: Item; onEdit: (item: Item) => void }) {
       />
       <Form.DatePicker id="date" defaultValue={new Date(item.date)} title="Date" />
       <Form.Dropdown id="icon" title="Icon" defaultValue={item.icon}>
-        <Form.Dropdown.Item value="" title="No Icon" />
         {Object.entries(Icon).map(([key, value]) => (
           <Form.Dropdown.Item value={value} key={key} title={key} icon={value} />
         ))}

@@ -37,6 +37,7 @@ export default function Command() {
 
   return (
     <List isLoading={loading}>
+      <List.EmptyView title="No dates added" description="Add a date to get started" />
       {connectionsList.map((section) => {
         return (
           <List.Section
