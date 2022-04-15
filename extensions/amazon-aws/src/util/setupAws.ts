@@ -4,7 +4,6 @@ import { Preferences } from "../types";
 
 export default function setupAws() {
   const preferences: Preferences = getPreferenceValues();
-  const credentials = new AWS.SharedIniFileCredentials({profile: preferences.aws_profile});
-  AWS.config.credentials = credentials;
-  AWS.config.update({  region: preferences.region });
+  AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: preferences.aws_profile });
+  AWS.config.update({ region: preferences.region });
 }

@@ -1,10 +1,10 @@
 import {
-   getPreferenceValues,
+  getPreferenceValues,
   ActionPanel,
   CopyToClipboardAction,
   List,
   OpenInBrowserAction,
-  Detail
+  Detail,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import AWS from "aws-sdk";
