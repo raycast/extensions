@@ -23,14 +23,6 @@ In the video, use "Opt+S" as a shortcut to invoke the Quick Surf command. Using 
 
 https://user-images.githubusercontent.com/36128970/157411385-33a83ac7-f6ae-4390-ab09-871d25c7c2d3.mp4
 
-**Suggest App:**
-
-Not all, just recommended.
-
-![SuggestApp](./media/SuggestApp.png)
-
-
-
 
 **Preference:**
 
@@ -41,28 +33,6 @@ Not all, just recommended.
 **Known issues:**
 
 If the application in Surfboard is uninstalled, it will not be automatically removed from Surfboard, please press the "cmd+enter" shortcut on the "More Boards" screen to remove the invalid application.
-
-# Screencast
-
-
-
-First, "More Boards", add the application you want to use.
-
-<img src="./media/More Boards-1.png" alt="More Boards-1" style="zoom:25%;" />
-
-<img src="./media/More Boards-2.png" alt="More Boards-2" style="zoom:25%;" />
-
-Quick search ***Text*** that is selected, on the clipboard or from the input using a specified browser
-
-<img src="./media/Search Text.png" alt="Search Text" style="zoom:25%;" />
-
-Quick open ***URL*** that is selected, on the clipboard or from the input using a specified browser
-
-<img src="./media/Open URL.png" alt="Open URL" style="zoom:25%;" />
-
-Quick open ***"mailto"*** link that is selected, on the clipboard or from the input using a specified browser
-
-<img src="./media/mailto.png" alt="mailto" style="zoom:25%;" />
 
 # More details
 

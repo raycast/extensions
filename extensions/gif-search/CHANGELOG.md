@@ -1,5 +1,15 @@
 # GIF Search Changelog
 
+## [Add unified GIF search command & adding to favorites] - 2022-04-09
+- Breaking: Remove separate service commands in favor of the one unified "Search for GIFs" command
+- New: Unified "Search for GIFs" command that searches across GIF services
+- New: Save GIFs as Favorites
+- New: Favorites view to see and search favorite gifs across all services
+- New: Preference for max number of search results (defaults to 10)
+- Fix: Use gif slug as file name when copying file to clipboard
+- Fix: Add section dividers to GIF Details Actions
+- Fix: Add custom Empty States for Finer GIFs Club and Favorites view
+
 ## [Remove static GIF preview warning 🎉] - 2022-04-06
 - Removes the warning about GIFs no longer animating, Raycast v1.32.0 supports GIFs in Details
 - Update GIF preview preference to be enabled by default
