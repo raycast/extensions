@@ -4,13 +4,22 @@ import { Action, ActionPanel, List, showToast } from "@raycast/api";
 import { createInputFromSearchTerm, getListSubtitle, joinStringsWithDelimiter } from "./utils";
 import translate, { Languages, Translations } from "dictcc";
 
-export const ListWithEmptyView = () => <List.EmptyView title="No Results" icon={{ source: "icon-small.png" }} />;
+interface IListWithEmptyViewProps {
+  showNoResultsFound: boolean;
+}
+
+export const ListWithEmptyView = ({ showNoResultsFound }: IListWithEmptyViewProps) => {
+  return (
+    <List.EmptyView title={!showNoResultsFound ? "Type to search" : "No Results"} icon={{ source: "icon-small.png" }} />
+  );
+};
 
 export default function Command() {
   const [translations, setTranslations] = useState<Translations[] | undefined>();
   const [url, setUrl] = useState<string | undefined>();
   const [languages, setLanguages] = useState<[/* source */ Languages, /* target */ Languages] | undefined>();
   const [loading, setLoading] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
   const onSearchTextChange = async (searchTerm: string) => {
     setLoading(true);
@@ -26,6 +35,7 @@ export default function Command() {
       setTranslations(data);
       setUrl(url);
       setLanguages([input.sourceLanguage, input.targetLanguage]);
+      setSearchText(searchTerm);
     } catch (error) {
       if (error instanceof Error) {
         showToast({
@@ -41,11 +51,12 @@ export default function Command() {
     <List
       isLoading={loading}
       navigationTitle="Search dict.cc"
-      searchBarPlaceholder="Search term (e.g. 'en de Home', or 'Home')"
-      throttle
       onSearchTextChange={onSearchTextChange}
+      searchBarPlaceholder="Search term (e.g. 'en de Home', or 'Home')"
+      searchText={searchText}
+      throttle
     >
-      <ListWithEmptyView />
+      <ListWithEmptyView showNoResultsFound={!!searchText.length} />
 
       <List.Section title="Results" subtitle={getListSubtitle(loading, languages, translations?.length)}>
         {translations?.map((translation, index) => (

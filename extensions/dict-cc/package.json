@@ -22,7 +22,7 @@
     {
       "name": "sourceLanguage",
       "type": "dropdown",
-      "required": false,
+      "required": true,
       "title": "Source Language",
       "description": "Source Language to translate a term from",
       "default": "de",
@@ -140,7 +140,7 @@
     {
       "name": "targetLanguage",
       "type": "dropdown",
-      "required": false,
+      "required": true,
       "title": "Target Language",
       "description": "Target Language to translate a term into",
       "default": "en",
