@@ -12,12 +12,16 @@ import {
 import fetch, { AbortError, RequestInit, Response } from "node-fetch";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const prefs: { instance: string; token: string } = getPreferenceValues();
-export const confluenceUrl = `https://${prefs.instance}`;
+const prefs: { instanceType: string; user: string; instance: string; token: string } = getPreferenceValues();
+export const confluenceUrl =
+  prefs.instanceType == "cloud" ? `https://${prefs.instance}/wiki` : `https://${prefs.instance}`;
 
 const headers = {
   Accept: "application/json",
-  Authorization: `Bearer ${prefs.token}`,
+  Authorization:
+    prefs.instanceType == "cloud"
+      ? "Basic " + Buffer.from(`${prefs.user}:${prefs.token}`).toString("base64")
+      : `Bearer ${prefs.token}`,
 };
 
 export default function Command() {
