@@ -1,11 +1,12 @@
 import { Action, ActionPanel, Clipboard, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
-import { ResponseDataZhiHu, TrendZhiHu, zhihuTrendApi } from "./utils/trend-utils";
-import { listIcon, listIconDark } from "./utils/common-utils";
+import { douyinSearchUrl, ResponseDataZhiHu, TrendZhiHu, zhihuSearchUrl, zhihuTrendApi } from "./utils/trend-utils";
+import { isEmpty, listIcon, listIconDark } from "./utils/common-utils";
 
 export default function TrendOfZhihu() {
   const [trends, setTrends] = useState<TrendZhiHu[]>([]);
+  const [searchContent, setSearchContent] = useState<string>("");
 
   useEffect(() => {
     async function _fetch() {
@@ -27,7 +28,11 @@ export default function TrendOfZhihu() {
   }, []);
 
   return (
-    <List isLoading={trends.length === 0} searchBarPlaceholder={"Search trends"}>
+    <List
+      isLoading={trends.length === 0}
+      searchBarPlaceholder={"Search by ZhiHu"}
+      onSearchTextChange={setSearchContent}
+    >
       {trends?.map((value, index) => {
         return (
           <List.Item
@@ -39,12 +44,25 @@ export default function TrendOfZhihu() {
             actions={
               <ActionPanel>
                 <Action
-                  icon={Icon.Globe}
-                  title={"Search In Browser"}
+                  icon={Icon.Desktop}
+                  title={"View in Browser"}
                   onAction={async () => {
                     try {
                       await open(value.url);
-                      await showHUD(`Search ${value.name} in browser`);
+                      await showHUD(`View ${value.name} in browser`);
+                    } catch (e) {
+                      console.error(String(e));
+                    }
+                  }}
+                />
+                <Action
+                  icon={Icon.MagnifyingGlass}
+                  title={"Search by ZhiHu"}
+                  onAction={async () => {
+                    try {
+                      const _searchContent = isEmpty(searchContent) ? value.name : searchContent;
+                      await open(zhihuSearchUrl + encodeURIComponent(_searchContent));
+                      await showHUD(`Search ${_searchContent} by ZhiHu`);
                     } catch (e) {
                       console.error(String(e));
                     }
@@ -53,6 +71,7 @@ export default function TrendOfZhihu() {
                 <Action
                   icon={Icon.Link}
                   title={"Copy Trend Link"}
+                  shortcut={{ modifiers: ["cmd"], key: "l" }}
                   onAction={async () => {
                     await Clipboard.copy(value.url);
                     await showToast(Toast.Style.Success, "Trend link copied!");
@@ -60,8 +79,8 @@ export default function TrendOfZhihu() {
                 />
                 <Action
                   icon={Icon.Clipboard}
-                  title={"Copy Trend Name"}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  title={"Copy Trend Title"}
+                  shortcut={{ modifiers: ["cmd"], key: "t" }}
                   onAction={async () => {
                     await Clipboard.copy(value.name);
                     await showToast(Toast.Style.Success, "Trend name copied!");

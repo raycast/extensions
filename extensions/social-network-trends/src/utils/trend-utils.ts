@@ -2,7 +2,9 @@ export const weiboTrendApi = "https://tenapi.cn/resou/";
 export const zhihuTrendApi = "https://tenapi.cn/zhihuresou/";
 export const douyinTrendApi = "https://tenapi.cn/douyinresou/";
 
-export const douyinUrl = "https://www.douyin.com";
+export const weiboSearchUrl = "https://s.weibo.com/weibo?q=";
+export const zhihuSearchUrl = "https://www.zhihu.com/search?type=content&q=";
+export const douyinSearchUrl = "https://www.douyin.com/search/";
 
 export type ResponseDataWeiBo = { data: number; list: TrendWeiBo[] };
 export type TrendWeiBo = { name: string; hot: number; url: string };

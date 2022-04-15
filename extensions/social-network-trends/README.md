@@ -1,3 +1,3 @@
 # Social Network Trends
 
-Show popular trends on WeiBo, ZhiHu, and DouYin.
+Show popular trends or Search something on WeiBo, ZhiHu, and DouYin.

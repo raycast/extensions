@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "social-network-trends",
   "title": "Social Network Trends",
-  "description": "Show popular trends on WeiBo, ZhiHu, and DouYin.",
+  "description": "Show popular trends or Search something on WeiBo, ZhiHu, and DouYin.",
   "icon": "extension-icon/trend-social-networks.png",
   "author": "koinzhang",
   "categories": [
