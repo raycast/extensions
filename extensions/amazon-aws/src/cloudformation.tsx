@@ -5,9 +5,10 @@ import { Preferences } from "./types";
 import { StackSummary } from "aws-sdk/clients/cloudformation";
 import setupAws from "./util/setupAws";
 
+setupAws();
+
 export default function ListStacks() {
   const preferences: Preferences = getPreferenceValues();
-  setupAws();
   const cloudformation = new AWS.CloudFormation({ apiVersion: "2016-11-15" });
 
   const [state, setState] = useState<{

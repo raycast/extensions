@@ -4,6 +4,8 @@ import * as AWS from "aws-sdk";
 import { Preferences } from "./types";
 import setupAws from "./util/setupAws";
 
+setupAws();
+
 const getExecutionState = (client: AWS.CodePipeline, pipelineName: string) =>
   new Promise<AWS.CodePipeline.PipelineExecutionSummary | null>((resolve, reject) => {
     return client.listPipelineExecutions(
@@ -30,7 +32,6 @@ type PipelineSummary = AWS.CodePipeline.PipelineSummary & {
 
 export default function DescribeInstances() {
   const preferences: Preferences = getPreferenceValues();
-  setupAws();
   const pipeline = new AWS.CodePipeline({ apiVersion: "2016-11-15" });
 
   const [state, setState] = useState<{

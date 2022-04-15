@@ -10,6 +10,8 @@ import { useState, useEffect } from "react";
 import AWS from "aws-sdk";
 import setupAws from "./util/setupAws";
 
+setupAws();
+
 interface Preferences {
   region: string;
 }
@@ -19,7 +21,6 @@ function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
 }
 
 export default function DescribeInstances() {
-  setupAws();
   const ec2 = new AWS.EC2({ apiVersion: "2016-11-15" });
 
   const [state, setState] = useState<{ instances: AWS.EC2.Instance[]; loaded: boolean; hasError: boolean }>({
