@@ -1,5 +1,10 @@
 # GIF Search Changelog
 
+## [Show "Recent" GIFs] -2022-04-13
+- Adds a new "Recent" section that shows GIFs you recently performed an action on (excluding Favorites)
+- Sorts Recents and Favorites by most recently used or fav'd
+- Limits "Recents" and "Favorites" in initial views to 1/2 of the max result count
+
 ## [Add unified GIF search command & adding to favorites] - 2022-04-09
 - Breaking: Remove separate service commands in favor of the one unified "Search for GIFs" command
 - New: Unified "Search for GIFs" command that searches across GIF services

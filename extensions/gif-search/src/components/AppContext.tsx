@@ -1,28 +1,36 @@
 import React from "react";
 
 import { GIF_SERVICE, ServiceName } from "../preferences";
-import { setFavorites } from "../lib/favorites";
-
+import { set } from "../lib/localGifs";
+import { GifIds, StoredGifIds } from "../hooks/useGifPopulator";
 export interface AppState {
-  favIds?: Map<ServiceName, Set<string>>;
+  favIds?: StoredGifIds;
+  recentIds?: StoredGifIds;
 }
 
 export type AppStateActionType = "add" | "remove" | "replace" | "clear";
 
 export interface AppStateAction {
-  type?: AppStateActionType;
-  ids?: Map<ServiceName, Set<string>>;
+  favIds?: StoredGifIds;
+  recentIds?: StoredGifIds;
+
+  type: AppStateActionType;
   service?: ServiceName;
   save?: boolean;
 }
 
-export const initialState: AppState = {
-  favIds: Object.values(GIF_SERVICE).reduce((map, service) => {
-    if (service !== GIF_SERVICE.FAVORITES) {
+function createLocalIdsByService(initial = new Map<ServiceName, GifIds>()) {
+  return Object.values(GIF_SERVICE).reduce((map, service) => {
+    if (service !== GIF_SERVICE.FAVORITES && service !== GIF_SERVICE.RECENTS) {
       map.set(service, new Set());
     }
     return map;
-  }, new Map<ServiceName, Set<string>>()),
+  }, initial);
+}
+
+export const initialState: AppState = {
+  favIds: createLocalIdsByService(),
+  recentIds: createLocalIdsByService(),
 };
 
 const AppContext = React.createContext({
@@ -35,37 +43,60 @@ const AppContext = React.createContext({
 export default AppContext;
 
 export function reduceAppState(state: AppState, action: AppStateAction) {
-  let { favIds } = state;
-  const { type, ids } = action;
+  const { type, favIds, recentIds } = action;
 
   const service = action.service as ServiceName;
 
-  if (type == "replace" || type == "clear") {
-    if (service === GIF_SERVICE.FAVORITES) {
-      favIds = ids;
-    }
-  }
-
-  const serviceIds = ids?.get(service);
-  if (serviceIds) {
+  const favServiceIds = favIds?.get(service);
+  if (favServiceIds) {
     switch (type) {
       case "replace":
-        favIds?.get(service)?.clear();
-        serviceIds.forEach((id) => favIds?.get(service)?.add(id));
+        state.favIds?.get(service)?.clear();
+        favServiceIds.forEach((id) => state.favIds?.get(service)?.add(id));
         break;
       case "add":
-        serviceIds.forEach((id) => favIds?.get(service)?.add(id));
+        favServiceIds.forEach((id) => {
+          state.favIds?.get(service)?.add(id);
+          // Remove from recents if present, we don't want the same GIF in both
+          state.recentIds?.get(service)?.delete(id);
+        });
         break;
       case "remove":
-        serviceIds.forEach((id) => favIds?.get(service)?.delete(id));
+        favServiceIds.forEach((id) => state.favIds?.get(service)?.delete(id));
         break;
     }
+  } else if ((favIds && type == "replace") || type == "clear") {
+    state.favIds = favIds;
   }
 
-  const newFavs = favIds?.get(service);
-  if (action.save && service && newFavs) {
-    setFavorites(newFavs, service);
+  const recentServiceIds = recentIds?.get(service);
+  if (recentServiceIds) {
+    switch (type) {
+      case "replace":
+        state.recentIds?.get(service)?.clear();
+        recentServiceIds.forEach(
+          (id) => !state.favIds?.get(service)?.has(id) && state.recentIds?.get(service)?.add(id)
+        );
+        break;
+      case "add":
+        recentServiceIds.forEach(
+          (id) => !state.favIds?.get(service)?.has(id) && state.recentIds?.get(service)?.add(id)
+        );
+        break;
+      case "remove":
+        recentServiceIds.forEach((id) => state.recentIds?.get(service)?.delete(id));
+        break;
+    }
+  } else if ((recentIds && type == "replace") || type == "clear") {
+    state.recentIds = recentIds;
   }
 
-  return { ...state, favIds } as AppState;
+  const newFavs = state.favIds?.get(service);
+  const newRecents = state.recentIds?.get(service);
+  if (action.save && service) {
+    newFavs && set(newFavs, service, "favs");
+    newRecents && set(newRecents, service, "recent");
+  }
+
+  return { ...state, favIds: state.favIds, recentIds: state.recentIds } as AppState;
 }

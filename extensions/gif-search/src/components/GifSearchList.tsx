@@ -45,6 +45,7 @@ export function GifSearchList(props: GifListProps) {
                 value={GIF_SERVICE.FAVORITES}
                 icon={{ source: Icon.Star, tintColor: Color.Yellow }}
               />
+              <List.Dropdown.Item title="Recent" value={GIF_SERVICE.RECENTS} icon={{ source: Icon.Clock }} />
             </List.Dropdown.Section>
           </List.Dropdown>
         )

@@ -25,6 +25,7 @@ export async function getAPIByServiceName(service: ServiceName, force?: boolean)
     case GIF_SERVICE.FINER_GIFS:
       return finergifs();
     case GIF_SERVICE.FAVORITES:
+    case GIF_SERVICE.RECENTS:
       return null;
   }
 
