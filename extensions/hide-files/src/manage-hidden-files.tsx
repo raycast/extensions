@@ -2,14 +2,9 @@ import { Action, ActionPanel, Icon, List, LocalStorage, open, showHUD, showToast
 import { useEffect, useState } from "react";
 import { checkDirectoryValid, extensionPreferences, getLocalStorage, isEmpty, isImage } from "./utils/common-utils";
 import { parse } from "path";
-import {
-  DirectoryInfo,
-  DirectoryType,
-  LocalStorageKey,
-  tagDirectoryPath,
-  tagDirectoryType,
-} from "./utils/directory-info";
+import { DirectoryInfo, DirectoryType, tagDirectoryPath, tagDirectoryType } from "./utils/directory-info";
 import { showHiddenFiles } from "./utils/hide-files-utils";
+import { LocalStorageKey } from "./utils/constants";
 
 export default function Command() {
   const [localDirectory, setLocalDirectory] = useState<DirectoryInfo[]>([]);

@@ -4,7 +4,7 @@ import { showHUD } from "@raycast/api";
 import { removeFilesFromPanel } from "./utils/hide-files-utils";
 
 export default async () => {
-  await showHUD("Desktop files shown");
+  await showHUD("Desktop files are shown");
   const desktopPath = homedir() + "/Desktop/";
   const hideDesktopFilesCommand = `chflags nohidden ${desktopPath.replace(" ", `" "`)}*`;
   exec(hideDesktopFilesCommand);

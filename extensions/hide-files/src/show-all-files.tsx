@@ -4,7 +4,7 @@ import { getFocusFinderPath } from "./utils/common-utils";
 import { removeFilesFromPanel } from "./utils/hide-files-utils";
 
 export default async () => {
-  await showHUD("All files shown");
+  await showHUD("Current window files are shown");
   const finderPath = await getFocusFinderPath();
   const hideDesktopFilesCommand = `chflags nohidden ${finderPath.replace(" ", `" "`)}*`;
   exec(hideDesktopFilesCommand);

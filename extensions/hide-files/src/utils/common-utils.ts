@@ -1,5 +1,5 @@
 import { getPreferenceValues, getSelectedFinderItems, LocalStorage } from "@raycast/api";
-import { imgExt, scriptFinderPath } from "./constants";
+import { imgExt, scriptFinderPath, scriptToggleFinderFileVisibility } from "./constants";
 import { DirectoryInfo, DirectoryType } from "./directory-info";
 import fse from "fs-extra";
 import { runAppleScript } from "run-applescript";
@@ -25,6 +25,15 @@ export const isEmpty = (string: string | null | undefined) => {
 export const getFocusFinderPath = async () => {
   try {
     return await runAppleScript(scriptFinderPath);
+  } catch (e) {
+    return "Finder not running";
+  }
+};
+
+//with / at the end
+export const toggleFinderFilesVisibility = async (visibility: boolean) => {
+  try {
+    return await runAppleScript(scriptToggleFinderFileVisibility(visibility));
   } catch (e) {
     return "Finder not running";
   }
@@ -59,12 +68,7 @@ export const isDirectoryOrFile = (path: string) => {
 };
 
 export const checkDirectoryValid = (localDirectory: DirectoryInfo[]) => {
-  localDirectory.forEach((value, index) => {
-    if (!fse.existsSync(value.path)) {
-      localDirectory.splice(index, 1);
-    }
-  });
-  return localDirectory;
+  return localDirectory.filter((value) => fse.existsSync(value.path));
 };
 
 export const checkDuplicatePath = (path: string, localDirectory: DirectoryInfo[]) => {

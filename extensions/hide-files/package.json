@@ -36,8 +36,16 @@
       "mode": "no-view"
     },
     {
-      "name": "show-hidden-files",
-      "title": "Show All Files",
+      "name": "show-select-files",
+      "title": "show Selected Files",
+      "icon": "show-selected-files.png",
+      "subtitle": "Hide Files",
+      "description": "Show selected files in the current window of the Finder.",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-all-files",
+      "title": "Show Files in Current Window",
       "icon": "show-all-files.png",
       "subtitle": "Hide Files",
       "description": "Show all hidden files in the current window of the Finder.",
@@ -45,7 +53,7 @@
     },
     {
       "name": "hide-all-files",
-      "title": "Hide All Files",
+      "title": "Hide Files in Current Window",
       "icon": "hide-all-files.png",
       "subtitle": "Hide Files",
       "description": "Hide all files in the current window of the Finder.",
@@ -69,6 +77,14 @@
           "default": false
         }
       ]
+    },
+    {
+      "name": "toggle-system-files-visibility",
+      "title": "Toggle System Hidden Files",
+      "icon": "extension-icon.png",
+      "subtitle": "Hide Files",
+      "description": "Hide or show all system hidden files.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

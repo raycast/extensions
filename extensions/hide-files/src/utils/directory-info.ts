@@ -25,7 +25,3 @@ export const tagDirectoryPath = [
   { title: "Pictures", value: `${homedir()}/Pictures` },
   { title: "Downloads", value: `${homedir()}/Downloads` },
 ];
-
-export enum LocalStorageKey {
-  LOCAL_HIDE_DIRECTORY = "localHideDirectory",
-}
