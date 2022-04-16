@@ -46,6 +46,7 @@ export function Details(props: DetailsProps) {
     const description = result.description.split("\t").shift();
 
     return `
+<img src="https://howlongtobeat.com${result.imageUrl}" width="150" />
 # ${result.name}
 ${description}
 
