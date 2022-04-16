@@ -1,6 +1,6 @@
 # Refresh WiFi
 
-Quickly turn your WiFi on and off again.
+Quickly turn your WiFi off and on again.
 
 ## Resources
 
