@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "refresh-wifi",
   "title": "Refresh WiFi",
-  "description": "Quickly turn your WiFi on and off again.",
+  "description": "Quickly turn your WiFi off and on again.",
   "icon": "command-icon.png",
   "author": "natterstefan",
   "categories": [
@@ -14,7 +14,7 @@
       "name": "index",
       "title": "Refresh WiFi",
       "subtitle": "System",
-      "description": "Quickly turn your WiFi on and off again.",
+      "description": "Quickly turn your WiFi off and on again.",
       "mode": "no-view"
     }
   ],
