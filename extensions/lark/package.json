@@ -13,6 +13,12 @@
       "title": "Search Documents",
       "subtitle": "Lark",
       "description": "Search and open documents in browser",
+      "keywords": [
+        "lark",
+        "feishu",
+        "docs",
+        "document"
+      ],
       "mode": "view"
     }
   ],

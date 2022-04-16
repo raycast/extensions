@@ -7,7 +7,8 @@
   "author": "thomas",
   "contributors": [
     "altrdev",
-    "ron-myers"
+    "ron-myers",
+    "sandypockets"
   ],
   "license": "MIT",
   "commands": [
@@ -65,6 +66,34 @@
       "title": "Decrease Volume",
       "subtitle": "Spotify",
       "description": "Decrease volume in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "quarterVolume",
+      "title": "Set Volume to 25%",
+      "subtitle": "Spotify",
+      "description": "Sets volume to 25% in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "halfVolume",
+      "title": "Set Volume to 50%",
+      "subtitle": "Spotify",
+      "description": "Sets volume to 50% in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "threeQuartersVolume",
+      "title": "Set Volume to 75%",
+      "subtitle": "Spotify",
+      "description": "Sets volume to 75% in Spotify.",
+      "mode": "no-view"
+    },
+    {
+      "name": "fullVolume",
+      "title": "Set Volume to 100%",
+      "subtitle": "Spotify",
+      "description": "Sets volume to 100% in Spotify.",
       "mode": "no-view"
     },
     {

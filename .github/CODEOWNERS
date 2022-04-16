@@ -92,6 +92,7 @@
 /extensions/facetime                                 @ron-myers
 /extensions/figma-files                              @michaelwschultz
 /extensions/file-manager                             @es183923
+/extensions/finnish-dictionary                       @albertoxamin
 /extensions/flow                                     @vimtor
 /extensions/flutter-documentation-search             @MattisBrizard
 /extensions/flutter-pub-dev-search                   @prasadsunny1
@@ -133,6 +134,7 @@
 /extensions/iconify                                  @Destiner
 /extensions/imdb                                     @ryan-exe
 /extensions/inertiajs-documentation                  @danyelkeddah
+/extensions/itch-io                                  @Aayush9029
 /extensions/jetbrains                                @gdsmith
 /extensions/jira-search                              @svenwiegand
 /extensions/jisho                                    @dmacdermott
@@ -155,6 +157,7 @@
 /extensions/laravel-docs                             @indykoning @indykoning @indykoning
 /extensions/laravel-forge                            @KevinBatdorf @macbookandrew
 /extensions/laravel-livewire                         @tafhyseni
+/extensions/laravel-nova                             @a-drew
 /extensions/large-type                               @gon250 @FezVrasta
 /extensions/lark                                     @tmkx
 /extensions/lastfm                                   @eggsy
@@ -215,6 +218,7 @@
 /extensions/raindrop                                 @lardissone
 /extensions/random-data-generator                    @loris
 /extensions/random-email                             @rkjaer
+/extensions/random-password-generator                @textnav
 /extensions/ray-so                                   @gt-codes @RSO
 /extensions/raycast-wallpaper                        @CheatGZ
 /extensions/raynab                                   @gogocharli
@@ -251,7 +255,7 @@
 /extensions/sourcegraph                              @bobheadxi
 /extensions/spatie-documentation                     @danyelkeddah
 /extensions/speedtest                                @tonka3000
-/extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers
+/extensions/spotify-controls                         @thomaspaulmann @altrdev @ron-myers @sandypockets
 /extensions/spotify-player                           @mattisssa
 /extensions/ssh-manager                              @scopsy
 /extensions/stackoverflow                            @sadanand-singh
