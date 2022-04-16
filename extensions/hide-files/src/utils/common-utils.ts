@@ -1,0 +1,100 @@
+import { getPreferenceValues, getSelectedFinderItems, LocalStorage } from "@raycast/api";
+import { imgExt, scriptFinderPath } from "./constants";
+import { DirectoryInfo, DirectoryType } from "./directory-info";
+import fse from "fs-extra";
+import { runAppleScript } from "run-applescript";
+import Values = LocalStorage.Values;
+
+export const extensionPreferences = () => {
+  const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
+  return {
+    folderFirst: preferencesMap.get("folderFirst") as boolean,
+  };
+};
+
+export const getLocalStorage = async (key: string) => {
+  const localStorage = await LocalStorage.getItem<string>(key);
+  return typeof localStorage === "undefined" ? "" : localStorage;
+};
+
+export const isEmpty = (string: string | null | undefined) => {
+  return !(string != null && String(string).length > 0);
+};
+
+//with / at the end
+export const getFocusFinderPath = async () => {
+  try {
+    return await runAppleScript(scriptFinderPath);
+  } catch (e) {
+    return "Finder not running";
+  }
+};
+
+export const fetchSelectedFileSystemItem = async () => {
+  const _finderItems = await getSelectedFinderItems();
+  if (_finderItems.length > 0) {
+    return _finderItems;
+  } else {
+    return [];
+  }
+};
+
+export const isImage = (ext: string) => {
+  return imgExt.includes(ext);
+};
+
+export const isDirectoryOrFile = (path: string) => {
+  try {
+    const stat = fse.lstatSync(path);
+    if (stat.isDirectory()) {
+      return DirectoryType.DIRECTORY;
+    }
+    if (stat.isFile()) {
+      return DirectoryType.FILE;
+    }
+  } catch (e) {
+    return DirectoryType.FILE;
+  }
+  return DirectoryType.FILE;
+};
+
+export const checkDirectoryValid = (localDirectory: DirectoryInfo[]) => {
+  localDirectory.forEach((value, index) => {
+    if (!fse.existsSync(value.path)) {
+      localDirectory.splice(index, 1);
+    }
+  });
+  return localDirectory;
+};
+
+export const checkDuplicatePath = (path: string, localDirectory: DirectoryInfo[]) => {
+  //check duplicate
+  let duplicatePath = false;
+  localDirectory.forEach((value) => {
+    if (value.path === path) {
+      duplicatePath = true;
+      return;
+    }
+  });
+  return duplicatePath;
+};
+
+/**
+ *
+ * @param pathName with "/"
+ * @return fileSystemItems:string[]
+ */
+export const getFilesInDirectory = (pathName: string) => {
+  const fileSystemItems: string[] = [];
+  try {
+    const files = fse.readdirSync(pathName);
+    files.forEach((value) => {
+      if (!value.startsWith(".")) {
+        fileSystemItems.push(pathName + value);
+      }
+    });
+    return fileSystemItems;
+  } catch (e) {
+    return fileSystemItems;
+  }
+};
