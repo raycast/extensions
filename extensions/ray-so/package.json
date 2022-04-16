@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "Garrett",
   "contributors": [
-    "RSO"
+    "RSO",
+    "vette"
   ],
   "license": "MIT",
   "commands": [
@@ -41,8 +42,24 @@
               "value": "breeze"
             },
             {
+              "title": "Crimson",
+              "value": "crimson"
+            },
+            {
+              "title": "Falcon",
+              "value": "falcon"
+            },
+            {
+              "title": "Meadow",
+              "value": "meadow"
+            },
+            {
               "title": "Midnight",
               "value": "midnight"
+            },
+            {
+              "title": "Raindrop",
+              "value": "raindrop"
             },
             {
               "title": "Sunset",
