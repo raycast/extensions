@@ -26,13 +26,14 @@ function SearchListItem({ searchResult }: { searchResult: HowLongToBeatEntry }) 
   const url = `${baseUrl}${searchResult.id}`;
   const { push } = useNavigation();
 
+  const mainStoryHours = searchResult.gameplayMain || 0;
+  const mainStoryText =
+    mainStoryHours >= 1 ? `${searchResult.gameplayMain} ${pluralize(mainStoryHours, "hour")}` : "-";
+
   return (
     <List.Item
       title={searchResult.name}
-      accessoryTitle={`Main Story: ${searchResult.gameplayMain.toString()} ${pluralize(
-        searchResult.gameplayMain,
-        "hour"
-      )}`}
+      accessoryTitle={`Main Story: ${mainStoryText}`}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
