@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "create-a-snippet",
-      "title": "Create Image from Code",
+      "title": "Create Image From Code",
       "subtitle": "ray.so",
       "description": "Use Ray.so to create beautiful images of your code",
       "mode": "view"
