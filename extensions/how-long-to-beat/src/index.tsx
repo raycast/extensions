@@ -27,8 +27,7 @@ function SearchListItem({ searchResult }: { searchResult: HowLongToBeatEntry }) 
   const { push } = useNavigation();
 
   const mainStoryHours = searchResult.gameplayMain || 0;
-  const mainStoryText =
-    mainStoryHours >= 1 ? `${searchResult.gameplayMain} ${pluralize(mainStoryHours, "hour")}` : "-";
+  const mainStoryText = mainStoryHours >= 1 ? `${searchResult.gameplayMain} ${pluralize(mainStoryHours, "hour")}` : "-";
 
   return (
     <List.Item
