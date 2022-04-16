@@ -3,8 +3,9 @@
   "name": "choose-a-license",
   "title": "Choose a License",
   "description": "Read, copy, and paste Markdown licenses from choosealicense.com",
-  "icon": "term-sheet.png",
+  "icon": "icon.png",
   "author": "sandypockets",
+  "contributors": ["Aayush9029"],
   "categories": [
     "Developer Tools",
     "Productivity"
