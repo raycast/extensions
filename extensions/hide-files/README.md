@@ -1,6 +1,6 @@
 # Hide Files
 
-Hide files from any directory, including desktop, downloads, texts, etc.
+Hide and show files in any Finder directory, including Desktop, Downloads, Documents, etc.
 
 **Command**
 
@@ -15,8 +15,10 @@ Hide files from any directory, including desktop, downloads, texts, etc.
   - Show File
   - Show All Files
 
+**⚠️⚠️Warning**
 
-You can use the system shortcut "⇧+⌘+." to see all system hidden files.
+- If you move the parent folder of the hidden file, it will disappear from the Manage Hidden Files page.
+- 🌟🌟But you can use the shortcut "⇧+⌘+." to see all system hidden files.
 
 **Screencast**
 
