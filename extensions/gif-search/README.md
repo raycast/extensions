@@ -4,7 +4,7 @@ This extension searches for animated GIFs from the internet using [giphy.com](ht
 
 ## Issues or Feature Requests
 
-Find a bug? Want to see something new in this extension? Let me know by [submitting a feature request](https://github.com/raycast/extensions/issues/new?assignees=&labels=extension%2C+feature+request&template=extension_feature_request.md)! Make sure to either mention `@josephschmitt` in your ticket or set me as the assignee so I get notified.
+Find a bug? Want to see something new in this extension? Let me know by [submitting a feature request](https://github.com/raycast/extensions/issues/new?body=%23%20Extension%20–%20%5BGIF%20Search%5D(https://github.com/raycast/extensions/tree/cf8ba2cb37e703024a506584bc1f853a2de3c16c/extensions/gif-search/)%0AAuthor:%20@josephschmitt%0A%0A%3C!--%0A%20%20Please%20provide%20a%20clear%20and%20concise%20description%20for%20your%20idea.%0A--%3E%0A%0A**Describe%20the%20feature%20and%20the%20current%20behavior/state.**%0A%0A**Who%20will%20benefit%20with%20this%20feature?**%0A%0A**Any%20Other%20info.**%0A&title=%5BGIF%20Search%5D%20...&template=extension_feature_request.md&labels=extension,feature+request)! Make sure to either mention `@josephschmitt` in your ticket or set me as the assignee so I get notified.
 
 ## Preferences
 
