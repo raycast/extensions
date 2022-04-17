@@ -52,21 +52,6 @@ export const getChooseFile = async () => {
   }
 };
 
-const scriptCopyFile = (path: string) => {
-  return `tell application "Finder" to set theItems to "${path}"
-set the clipboard to (POSIX file (POSIX path of (theItems as string)))
-`;
-};
-
-export const copyFileByPath = async (path: string) => {
-  try {
-    await runAppleScript(scriptCopyFile(path));
-    return true;
-  } catch (e) {
-    return false;
-  }
-};
-
 export const checkIsFile = (path: string) => {
   try {
     const stat = fse.lstatSync(path);
