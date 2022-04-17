@@ -72,6 +72,7 @@ export const getOpenFinderWindowPath = async () => {
         rank: 1,
         rankSendFile: 1,
         isCommon: false,
+        date: new Date().getTime(),
       });
     });
     return finderPath;
