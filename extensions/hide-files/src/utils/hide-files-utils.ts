@@ -19,20 +19,25 @@ export const putFileOnHidePanel = async (fileSystemItems: string[]) => {
       : (JSON.parse(_localstorage) as DirectoryInfo[]);
 
     const timeStamp = new Date().getTime();
-    fileSystemItems.forEach((value, index) => {
-      const parsedPath = parse(value);
-      if (!checkDuplicatePath(parsedPath.dir + "/" + parsedPath.base, localDirectory)) {
-        localDirectory.push({
-          id: "directory_" + (timeStamp + index),
-          name: parsedPath.base,
-          path: parsedPath.dir + "/" + parsedPath.base,
-          type: isDirectoryOrFile(value),
-          valid: true,
-        });
-      }
-    });
+    const directoryInfos: DirectoryInfo[] = [];
+    fileSystemItems
+      .sort((a, b) => a.localeCompare(b))
+      .map((value, index) => {
+        const parsedPath = parse(value);
+        if (!checkDuplicatePath(parsedPath.dir + "/" + parsedPath.base, localDirectory)) {
+          directoryInfos.push({
+            id: "directory_" + (timeStamp + index),
+            name: parsedPath.base,
+            path: parsedPath.dir + "/" + parsedPath.base,
+            type: isDirectoryOrFile(value),
+            valid: true,
+            date: timeStamp + index,
+          });
+        }
+      });
 
-    await LocalStorage.setItem(LocalStorageKey.LOCAL_HIDE_DIRECTORY, JSON.stringify(localDirectory));
+    const newLocalDirectory = [...directoryInfos, ...localDirectory].sort((a, b) => b.date - a.date);
+    await LocalStorage.setItem(LocalStorageKey.LOCAL_HIDE_DIRECTORY, JSON.stringify(newLocalDirectory));
   } catch (e) {
     console.error(String(e));
   }

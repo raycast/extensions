@@ -12,8 +12,6 @@ export default function Command() {
   const [tag, setTag] = useState<string>("All");
   const { folderFirst } = extensionPreferences();
 
-  const [checkStart, setCheckStart] = useState<number[]>([0]);
-
   useEffect(() => {
     async function _initRunAppleScript() {
       const _localstorage = await getLocalStorage(LocalStorageKey.LOCAL_HIDE_DIRECTORY);
@@ -24,25 +22,18 @@ export default function Command() {
       const localDirectoryReverse = localDirectory;
       const localFolder = localDirectoryReverse.filter((value) => value.type === DirectoryType.DIRECTORY);
       const localFile = localDirectoryReverse.filter((value) => value.type === DirectoryType.FILE);
-      setLocalDirectory(folderFirst ? [...localFolder, ...localFile] : [...localFile, ...localFolder]);
-      const _checkStart = [...checkStart];
-      _checkStart[0] = _checkStart[0]++;
-      setCheckStart(_checkStart);
+
+      //check invalid directory
+      const _validDirectory = checkDirectoryValid(
+        folderFirst ? [...localFolder, ...localFile] : [...localFile, ...localFolder]
+      );
+      setLocalDirectory(_validDirectory);
       setLoading(false);
+      await LocalStorage.setItem(LocalStorageKey.LOCAL_HIDE_DIRECTORY, JSON.stringify(_validDirectory));
     }
 
     _initRunAppleScript().then();
   }, []);
-
-  useEffect(() => {
-    async function _checkDirectoryValid() {
-      const _validDirectory = checkDirectoryValid(localDirectory);
-      setLocalDirectory(_validDirectory);
-      await LocalStorage.setItem(LocalStorageKey.LOCAL_HIDE_DIRECTORY, JSON.stringify(_validDirectory));
-    }
-
-    _checkDirectoryValid().then();
-  }, [checkStart]);
 
   return (
     <List
@@ -86,7 +77,7 @@ export default function Command() {
                   key={value.id}
                   icon={isImage(parse(value.path).ext) ? { source: value.path } : { fileIcon: value.path }}
                   title={value.name}
-                  accessories={[{ text: parse(value.path).dir }, value.valid ? {} : { icon: "⚠️" }]}
+                  accessories={[{ text: parse(value.path).dir }]}
                   actions={
                     <ActionPanel>
                       <Action

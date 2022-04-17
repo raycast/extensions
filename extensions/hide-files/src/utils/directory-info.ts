@@ -6,6 +6,7 @@ export interface DirectoryInfo {
   path: string;
   valid: boolean;
   type: DirectoryType;
+  date: number;
 }
 
 export enum DirectoryType {
