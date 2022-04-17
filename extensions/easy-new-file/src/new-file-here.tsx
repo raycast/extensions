@@ -5,8 +5,9 @@ import React, { useEffect, useState } from "react";
 import { getFileInfo, getFinderPath, isEmpty, preferences } from "./utils/common-utils";
 import { codeFileTypes, documentFileTypes, FileType, scriptFileTypes, TemplateType } from "./utils/file-type";
 import { runAppleScript } from "run-applescript";
-import CreateFileWithName from "./create-file-with-name";
+import NewFileWithName from "./new-file-with-name";
 import AddFileTemplate from "./add-file-template";
+import { homedir } from "os";
 
 export default function main() {
   const preference = preferences();
@@ -81,8 +82,20 @@ export default function main() {
                     icon={Icon.TextDocument}
                     onAction={() => {
                       push(
-                        <CreateFileWithName newFileType={{ section: "Template", index: index }} templateFiles={array} />
+                        <NewFileWithName newFileType={{ section: "Template", index: index }} templateFiles={array} />
                       );
+                    }}
+                  />
+                  <Action
+                    title={"New File in Desktop"}
+                    icon={Icon.Desktop}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    onAction={async () => {
+                      try {
+                        await createNewFileByTemplate(template, `${homedir()}/Desktop/`);
+                      } catch (e) {
+                        await showToast(Toast.Style.Failure, "Create file failure.", String(e));
+                      }
                     }}
                   />
                   <ActionPanel.Section title={"Template Action"}>
@@ -195,7 +208,19 @@ function FileTypeItem(props: {
             title={"New File with Name"}
             icon={Icon.TextDocument}
             onAction={() => {
-              push(<CreateFileWithName newFileType={newFileType} templateFiles={templateFiles} />);
+              push(<NewFileWithName newFileType={newFileType} templateFiles={templateFiles} />);
+            }}
+          />
+          <Action
+            title={"New File in Desktop"}
+            icon={Icon.Desktop}
+            shortcut={{ modifiers: ["cmd"], key: "d" }}
+            onAction={async () => {
+              try {
+                await createNewFile(fileType, `${homedir()}/Desktop/`);
+              } catch (e) {
+                await showToast(Toast.Style.Failure, "Create file failure.", String(e));
+              }
             }}
           />
           <ActionPanel.Section title={"Template Action"}>

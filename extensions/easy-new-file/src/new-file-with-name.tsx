@@ -5,7 +5,7 @@ import { createNewFile, createNewFileByTemplate } from "./new-file-here";
 import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "./utils/file-type";
 import { runAppleScript } from "run-applescript";
 
-export default function CreateFileWithName(props: {
+export default function NewFileWithName(props: {
   newFileType: { section: string; index: number };
   templateFiles: TemplateType[];
 }) {
@@ -69,8 +69,6 @@ export default function CreateFileWithName(props: {
             title={"New File Here"}
             icon={Icon.Finder}
             onAction={async () => {
-              console.debug("fileName " + fileName);
-              console.debug("fileName " + isEmpty(fileName));
               try {
                 const path = await getFinderPath();
                 switch (newFileType.section) {
