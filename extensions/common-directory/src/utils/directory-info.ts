@@ -8,6 +8,7 @@ export interface DirectoryInfo {
   rank: number;
   rankSendFile: number;
   isCommon: boolean;
+  date: number;
 }
 
 export enum DirectoryType {

@@ -15,8 +15,8 @@
 
 ***Warning***: 
 
-- ⚠️You can hide the Raycast interface. Bug don't quit the extension when using it to move/copy files (Quitting the extension will cause the interruption of moving/copying files to fail)
-- ⚠️Do not use shortcut keys to call other commands or extensions, this behavior will lead to quit this extension. (This will result in quitting this extension)
+- ⚠️You can hide the Raycast interface. Bug don't quit the extension when using it to move/copy files (Quitting the extension will cause the interruption of moving/copying files to fail and loss of files)
+- ⚠️Do not use shortcut keys to call other commands or extensions when using it to move/copy files, this behavior will lead to quit this extension.
 - ⚠️The operation of moving files with this extension cannot be reversed, so please operate with caution.
 
 ------

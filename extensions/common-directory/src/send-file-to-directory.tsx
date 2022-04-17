@@ -2,7 +2,6 @@ import { Action, ActionPanel, Icon, List, LocalStorage, showToast, Toast, useNav
 import { DirectoryInfo, LocalDirectoryKey, SortBy } from "./utils/directory-info";
 import React, { useEffect, useState } from "react";
 import { getChooseFolder, getOpenFinderWindowPath, isEmpty, preferences } from "./utils/utils";
-import { homedir } from "os";
 import { ActionType, getItemAndSend } from "./utils/send-file-utils";
 import { getDirectory, resetRank } from "./open-common-directory";
 import fse from "fs-extra";

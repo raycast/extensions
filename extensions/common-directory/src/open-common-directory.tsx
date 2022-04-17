@@ -15,7 +15,6 @@ import { DirectoryInfo, LocalDirectoryKey, SortBy } from "./utils/directory-info
 import React, { useEffect, useState } from "react";
 import AddCommonDirectory from "./add-common-directory";
 import { getOpenFinderWindowPath, isEmpty, preferences } from "./utils/utils";
-import { homedir } from "os";
 import path from "path";
 import { DetailKey, getDirectoryContent, getShowDetailLocalStorage, setShowDetailLocalStorage } from "./utils/ui-utils";
 import fse from "fs-extra";

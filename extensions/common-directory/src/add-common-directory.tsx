@@ -122,6 +122,7 @@ async function addDirectory(alias: string, path: string) {
           rank: 1,
           rankSendFile: 1,
           isCommon: true,
+          date: new Date().getTime(),
         };
         _OpenCommonDirectory.push(newItem);
         _SendCommonDirectory.push(newItem);
