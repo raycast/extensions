@@ -7,6 +7,8 @@ import dedent from "dedent";
 import { XcodeSwiftPlaygroundTemplate } from "../models/swift-playground/xcode-swift-playground-template.model";
 import { existsAsync, makeDirectoryAsync, removeDirectoryAsync, writeFileAsync } from "../shared/fs-async";
 import { joinPathComponents } from "../shared/join-path-components";
+import { getPreferenceValues } from "@raycast/api";
+import { Preferences } from "../models/utils/preferences.model";
 
 /**
  * XcodeSwiftPlaygroundService

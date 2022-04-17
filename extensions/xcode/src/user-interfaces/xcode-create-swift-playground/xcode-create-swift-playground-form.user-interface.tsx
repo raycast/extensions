@@ -1,10 +1,11 @@
-import { ActionPanel, Form, Navigation, showHUD, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
+import { ActionPanel, Form, getPreferenceValues, Navigation, showHUD, showToast, SubmitFormAction, ToastStyle } from "@raycast/api";
 import { XcodeSwiftPlaygroundService } from "../../services/xcode-swift-playground.service";
 import { XcodeSwiftPlaygroundPlatform } from "../../models/swift-playground/xcode-swift-playground-platform.model";
 import { XcodeSwiftPlayground } from "../../models/swift-playground/xcode-swift-playground.model";
 import { XcodeSwiftPlaygroundCreationParameters } from "../../models/swift-playground/xcode-swift-playground-creation-parameters.model";
 import { XcodeSwiftPlaygroundTemplate } from "../../models/swift-playground/xcode-swift-playground-template.model";
 import tildify from "tildify";
+import { Preferences } from "../../models/utils/preferences.model";
 
 /**
  * Xcode create Swift Playground Form
@@ -15,6 +16,7 @@ export function xcodeCreateSwiftPlaygroundForm(
   xcodeSwiftPlaygroundService: XcodeSwiftPlaygroundService,
   navigation: Navigation
 ): JSX.Element {
+  const preferences = getPreferenceValues<Preferences>();
   return (
     <Form
       actions={
@@ -29,7 +31,7 @@ export function xcodeCreateSwiftPlaygroundForm(
       }
     >
       <Form.TextField id="name" title={"Name"} defaultValue="MyPlayground" />
-      <Form.TextField id="location" title="Location" defaultValue="~/Desktop" />
+      <Form.TextField id="location" title="Location" defaultValue={preferences.playgroundDefaultLocation} />
       <Form.Dropdown id="platform" title="Platform" defaultValue={XcodeSwiftPlaygroundPlatform.iOS}>
         {Object.keys(XcodeSwiftPlaygroundPlatform)
           .map((platform) => platform.toLocaleLowerCase())
