@@ -1,7 +1,11 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import React, { useState } from "react";
 
-const BASE_FONT_PIXELS = 16;
+interface Preferences {
+  basePixel?: number;
+}
+
+const BASE_FONT_PIXELS = getPreferenceValues<Preferences>().basePixel || 16;
 
 const toREM = (px: number): string => px / BASE_FONT_PIXELS + "rem";
 

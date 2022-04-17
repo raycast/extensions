@@ -18,7 +18,17 @@
       "title": "px2rem",
       "subtitle": "PX to REM converter",
       "description": "Conversions between PX and REM",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "basePixel",
+          "type": "textfield",
+          "required": false,
+          "title": "base px value",
+          "description": "The conversion will be calculated based on this property. Default 16px",
+          "placeholder": "16"
+        }
+      ]
     }
   ],
   "dependencies": {
