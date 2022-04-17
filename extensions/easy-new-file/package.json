@@ -20,9 +20,18 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "createAndOpen",
+          "type": "checkbox",
+          "required": true,
+          "title": "Advanced Preference",
+          "description": "After creating a new file, it is automatically opened with the default app.",
+          "default": true,
+          "label": "Auto-open after file created"
+        },
+        {
           "name": "show_document",
           "type": "checkbox",
-          "required": false,
+          "required": true,
           "title": "Show File Template",
           "description": "Show file templates for document types.",
           "default": true,
@@ -31,7 +40,7 @@
         {
           "name": "show_code",
           "type": "checkbox",
-          "required": false,
+          "required": true,
           "description": "Show file templates for code types.",
           "default": true,
           "label": "Code"
@@ -39,7 +48,7 @@
         {
           "name": "show_script",
           "type": "checkbox",
-          "required": false,
+          "required": true,
           "description": "Show file templates for script types.",
           "default": true,
           "label": "Script"

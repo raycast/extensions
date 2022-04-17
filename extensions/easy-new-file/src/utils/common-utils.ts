@@ -6,9 +6,10 @@ import fse from "fs-extra";
 export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
-    showDocument: preferencesMap.get("show_document"),
-    showCode: preferencesMap.get("show_code"),
-    showScript: preferencesMap.get("show_script"),
+    createAndOpen: preferencesMap.get("createAndOpen") as boolean,
+    showDocument: preferencesMap.get("show_document") as boolean,
+    showCode: preferencesMap.get("show_code") as boolean,
+    showScript: preferencesMap.get("show_script") as boolean,
   };
 };
 
@@ -49,6 +50,19 @@ export const getChooseFile = async () => {
     return finderPath;
   } catch (e) {
     return finderPath;
+  }
+};
+
+const scriptCopyFile = (path: string) => {
+  return `tell app "Finder" to set the clipboard to (POSIX file "${path}")`;
+};
+
+export const copyFileByPath = async (path: string) => {
+  try {
+    await runAppleScript(scriptCopyFile(path));
+    return "";
+  } catch (e) {
+    return String(e);
   }
 };
 

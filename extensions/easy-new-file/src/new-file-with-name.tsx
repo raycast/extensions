@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
-import { getFinderPath, isEmpty, preferences } from "./utils/common-utils";
+import { getFinderPath, preferences } from "./utils/common-utils";
 import { createNewFile, createNewFileByTemplate } from "./new-file-here";
 import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "./utils/file-type";
 import { runAppleScript } from "run-applescript";

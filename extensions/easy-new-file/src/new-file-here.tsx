@@ -1,8 +1,19 @@
 import fse from "fs-extra";
 import * as XLSX from "xlsx";
-import { Action, ActionPanel, environment, Icon, List, open, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  environment,
+  Icon,
+  List,
+  open,
+  showHUD,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import React, { useEffect, useState } from "react";
-import { getFileInfo, getFinderPath, isEmpty, preferences } from "./utils/common-utils";
+import { copyFileByPath, getFileInfo, getFinderPath, isEmpty, preferences } from "./utils/common-utils";
 import { codeFileTypes, documentFileTypes, FileType, scriptFileTypes, TemplateType } from "./utils/file-type";
 import { runAppleScript } from "run-applescript";
 import NewFileWithName from "./new-file-with-name";
@@ -84,6 +95,15 @@ export default function main() {
                       push(
                         <NewFileWithName newFileType={{ section: "Template", index: index }} templateFiles={array} />
                       );
+                    }}
+                  />
+                  <Action
+                    title={"Copy File to Clipboard"}
+                    icon={Icon.Clipboard}
+                    shortcut={{ modifiers: ["ctrl"], key: "c" }}
+                    onAction={async () => {
+                      await copyFileByPath(template.path);
+                      await showHUD(`${template.name} is copied to clipboard.`);
                     }}
                   />
                   <Action
@@ -258,7 +278,6 @@ export function buildFileName(path: string, name: string, extension: string) {
 }
 
 export async function createNewFile(fileType: FileType, desPath: string, fileName = "", fileContent = "") {
-  await showToast(Toast.Style.Animated, "Creating file...");
   isEmpty(fileName)
     ? (fileName = buildFileName(desPath, fileType.name, fileType.extension))
     : (fileName = fileName + "." + fileType.extension);
@@ -274,11 +293,10 @@ export async function createNewFile(fileType: FileType, desPath: string, fileNam
       fse.writeFileSync(filePath, fileContent);
     }
   }
-  await showCreateToast(isExist, filePath, desPath);
+  await showCreateToast(isExist, fileName, filePath, desPath);
 }
 
 export async function createNewFileByTemplate(template: TemplateType, desPath: string, fileName = "") {
-  await showToast(Toast.Style.Animated, "Creating file...");
   isEmpty(fileName)
     ? (fileName = buildFileName(desPath, template.name, template.extension))
     : (fileName = fileName + "." + template.extension);
@@ -287,28 +305,35 @@ export async function createNewFileByTemplate(template: TemplateType, desPath: s
   if (!isExist) {
     fse.copyFileSync(template.path, filePath);
   }
-  await showCreateToast(isExist, filePath, desPath);
+  await showCreateToast(isExist, fileName, filePath, desPath);
 }
 
-const showCreateToast = async (isExist: boolean, filePath: string, folderPath: string) => {
-  const options: Toast.Options = {
-    style: isExist ? Toast.Style.Failure : Toast.Style.Success,
-    title: isExist ? "File already exists." : "Create file success!",
-    message: "Click to open file.",
-    primaryAction: {
-      title: "Open file",
-      onAction: async (toast) => {
-        await open(filePath);
-        await toast.hide();
+const showCreateToast = async (isExist: boolean, fileName: string, filePath: string, folderPath: string) => {
+  if (isExist) {
+    const options: Toast.Options = {
+      style: Toast.Style.Failure,
+      title: "File already exists.",
+      message: "Click to open file.",
+      primaryAction: {
+        title: "Open file",
+        onAction: async (toast) => {
+          await open(filePath);
+          await toast.hide();
+        },
       },
-    },
-    secondaryAction: {
-      title: "Reveal in finder",
-      onAction: async (toast) => {
-        await open(folderPath);
-        await toast.hide();
+      secondaryAction: {
+        title: "Reveal in finder",
+        onAction: async (toast) => {
+          await open(folderPath);
+          await toast.hide();
+        },
       },
-    },
-  };
-  await showToast(options);
+    };
+    await showToast(options);
+  } else {
+    await showHUD(`${fileName} is created in ${folderPath.slice(0, -1)}`);
+  }
+  if (preferences().createAndOpen) {
+    await open(filePath);
+  }
 };

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Form, showToast, Toast, environment } from "@raycast/api";
+import { Action, ActionPanel, Icon, Form, showToast, Toast, environment, showHUD } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import { checkIsFile, getChooseFile, getFileInfo, getSelectedFile } from "./utils/common-utils";
 import fse from "fs-extra";
@@ -108,7 +108,7 @@ const addFileTemplate = async (name: string, path: string) => {
           fse.copyFileSync(path, desPath);
         });
       }
-      await showToast(Toast.Style.Success, "Add template success!");
+      await showHUD("Template is added");
     } else {
       await showToast(Toast.Style.Failure, "Folder path not supported.");
     }

@@ -1,5 +1,7 @@
 ## Easy New File
 
+Quickly create file in the current Finder window or on the desktop.
+
 **Command**
 
 - **New File Here**: Create a new file in the current Finder window or on the desktop.
@@ -29,7 +31,7 @@
 
   When using **Add File Template** command, how to get the file path automatically?
 
-  1. Keep your Finder window at the frontmost
+  1. Keep your Finder window at the front-most
   2. Select a file. (Folders will not be detected for now)
   3. Optional: You can also choose and fill in the file directory manually.
 
