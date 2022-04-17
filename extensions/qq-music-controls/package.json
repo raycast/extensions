@@ -78,10 +78,10 @@
       "mode": "no-view"
     },
     {
-      "name": "sequencial",
-      "title": "Toggle Sequencial",
+      "name": "sequential",
+      "title": "Toggle Sequential",
       "subtitle": "QQ Music",
-      "description": "Toggles sequencial mode in QQ Music and play.",
+      "description": "Toggles sequential mode in QQ Music and play.",
       "mode": "no-view"
     },
     {
