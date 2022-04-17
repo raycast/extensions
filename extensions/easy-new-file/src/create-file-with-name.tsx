@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
 import { getFinderPath, isEmpty, preferences } from "./utils/common-utils";
-import { createNewFile, createNewFileByTemplate } from "./create-file-here";
+import { createNewFile, createNewFileByTemplate } from "./new-file-here";
 import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "./utils/file-type";
 import { runAppleScript } from "run-applescript";
 
@@ -62,11 +62,11 @@ export default function CreateFileWithName(props: {
 
   return (
     <Form
-      navigationTitle={"Create File with Name"}
+      navigationTitle={"New File with Name"}
       actions={
         <ActionPanel>
           <Action
-            title={"Create File Here"}
+            title={"New File Here"}
             icon={Icon.Finder}
             onAction={async () => {
               console.debug("fileName " + fileName);

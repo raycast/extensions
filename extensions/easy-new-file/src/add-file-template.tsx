@@ -37,9 +37,9 @@ export default function AddFileTemplate(props: {
             }}
           />
 
-          <ActionPanel.Section title="Fill File Path">
+          <ActionPanel.Section title="File Path Action">
             <Action
-              title={"Fetch File"}
+              title={"Fetch File Path"}
               icon={Icon.TwoArrowsClockwise}
               shortcut={{ modifiers: ["cmd"], key: "f" }}
               onAction={async () => {
@@ -49,7 +49,7 @@ export default function AddFileTemplate(props: {
               }}
             />
             <Action
-              title={"Choose File"}
+              title={"Choose File Path"}
               icon={Icon.Sidebar}
               shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
               onAction={() => {

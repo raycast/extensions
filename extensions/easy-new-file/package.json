@@ -12,9 +12,9 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "create-file-here",
+      "name": "new-file-here",
       "icon": "new-file-here-icon.png",
-      "title": "Create File Here",
+      "title": "New File Here",
       "subtitle": "Easy New File",
       "description": "Create a new file in the current Finder window or on the desktop.",
       "mode": "view",

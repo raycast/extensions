@@ -17,7 +17,7 @@ export default function main() {
   const { push } = useNavigation();
 
   useEffect(() => {
-    async function _initRunAppleScript() {
+    async function _fetchTemplateFile() {
       const _templateFiles: TemplateType[] = [];
       try {
         if (fse.existsSync(templateFolderPath)) {
@@ -44,7 +44,7 @@ export default function main() {
       await runAppleScript("");
     }
 
-    _initRunAppleScript().then();
+    _fetchTemplateFile().then();
   }, [updateList]);
 
   return (
@@ -66,7 +66,7 @@ export default function main() {
               actions={
                 <ActionPanel>
                   <Action
-                    title={"Create File Here"}
+                    title={"New File Here"}
                     icon={Icon.Finder}
                     onAction={async () => {
                       try {
@@ -77,7 +77,7 @@ export default function main() {
                     }}
                   />
                   <Action
-                    title={"Create File with Name"}
+                    title={"New File with Name"}
                     icon={Icon.TextDocument}
                     onAction={() => {
                       push(
@@ -181,7 +181,7 @@ function FileTypeItem(props: {
       actions={
         <ActionPanel>
           <Action
-            title={"Create File Here"}
+            title={"New File Here"}
             icon={Icon.Finder}
             onAction={async () => {
               try {
@@ -192,7 +192,7 @@ function FileTypeItem(props: {
             }}
           />
           <Action
-            title={"Create File with Name"}
+            title={"New File with Name"}
             icon={Icon.TextDocument}
             onAction={() => {
               push(<CreateFileWithName newFileType={newFileType} templateFiles={templateFiles} />);
