@@ -166,6 +166,24 @@ export class XcodeSwiftPlaygroundService {
         PlaygroundPage.current.liveView = UIHostingController(rootView: ContentView())
         `;
         break;
+      case XcodeSwiftPlaygroundTemplate.UIKit:
+        contents = `
+        import Foundation
+        import PlaygroundSupport
+        import UIKit
+
+        class ViewController : UIViewController {
+          override func viewDidLoad() {
+            super.viewDidLoad()
+          }
+        }
+
+        let viewController = ViewController()
+        viewController.view.frame = CGRect(x: 0, y: 0, width: 300, height: 600)
+        PlaygroundPage.current.liveView = viewController
+        PlaygroundPage.current.needsIndefiniteExecution = true
+        `;
+        break;
     }
     return {
       name: "Contents",
