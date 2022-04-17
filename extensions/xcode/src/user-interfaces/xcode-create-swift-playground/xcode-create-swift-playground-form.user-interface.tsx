@@ -24,7 +24,13 @@ export function xcodeCreateSwiftPlaygroundForm(
           <SubmitFormAction
             title={"Create Swift Playground"}
             onSubmit={(formValues) => {
-              onFormSubmit(formValues, xcodeSwiftPlaygroundService, navigation);
+              onFormSubmit(formValues, xcodeSwiftPlaygroundService, navigation, true);
+            }}
+          />
+          <SubmitFormAction
+            title={"Open or create Swift Playground"}
+            onSubmit={(formValues) => {
+              onFormSubmit(formValues, xcodeSwiftPlaygroundService, navigation, false);
             }}
           />
         </ActionPanel>
@@ -64,14 +70,16 @@ export function xcodeCreateSwiftPlaygroundForm(
 async function onFormSubmit(
   formValues: any,
   xcodeSwiftPlaygroundService: XcodeSwiftPlaygroundService,
-  navigation: Navigation
+  navigation: Navigation,
+  forceCreate: boolean
 ) {
   // Declare Swift Playground
   let swiftPlayground: XcodeSwiftPlayground;
   try {
     // Create Swift Playground with parameters
     swiftPlayground = await xcodeSwiftPlaygroundService.createSwiftPlayground(
-      formValues as XcodeSwiftPlaygroundCreationParameters
+      formValues as XcodeSwiftPlaygroundCreationParameters,
+      forceCreate
     );
   } catch (error) {
     // Log error

@@ -7,8 +7,6 @@ import dedent from "dedent";
 import { XcodeSwiftPlaygroundTemplate } from "../models/swift-playground/xcode-swift-playground-template.model";
 import { existsAsync, makeDirectoryAsync, removeDirectoryAsync, writeFileAsync } from "../shared/fs-async";
 import { joinPathComponents } from "../shared/join-path-components";
-import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "../models/utils/preferences.model";
 
 /**
  * XcodeSwiftPlaygroundService
@@ -47,9 +45,9 @@ export class XcodeSwiftPlaygroundService {
    * Create a new Swift Playground
    * @param parameters The XcodeSwiftPlaygroundCreationParameters
    */
-  async createSwiftPlayground(parameters: XcodeSwiftPlaygroundCreationParameters): Promise<XcodeSwiftPlayground> {
+  async createSwiftPlayground(parameters: XcodeSwiftPlaygroundCreationParameters, forceCreate: boolean): Promise<XcodeSwiftPlayground> {
     // Initialize Playground Path
-    const playgroundPath = joinPathComponents(
+    let playgroundPath = joinPathComponents(
       // Replace tilde (~) with home directory
       parameters.location.replace(/^~/, os.homedir()),
       `${parameters.name}.playground`
@@ -57,14 +55,23 @@ export class XcodeSwiftPlaygroundService {
     // Check if Playground already exists
     if (await existsAsync(playgroundPath)) {
       // Return existing Swift Playground
-      return {
-        name: parameters.name,
-        path: playgroundPath,
-        alreadyExists: true,
-        open: () => {
-          return execAsync(`open ${playgroundPath}`).then();
-        },
-      };
+      if (forceCreate) {
+        const dateString = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, -3)
+        playgroundPath = joinPathComponents(
+          // Replace tilde (~) with home directory
+          parameters.location.replace(/^~/, os.homedir()),
+          `${parameters.name}${dateString}.playground`
+        );
+      } else {
+        return {
+          name: parameters.name,
+          path: playgroundPath,
+          alreadyExists: true,
+          open: () => {
+            return execAsync(`open ${playgroundPath}`).then();
+          },
+        };
+      }
     }
     // Make playground directory
     await makeDirectoryAsync(playgroundPath);
