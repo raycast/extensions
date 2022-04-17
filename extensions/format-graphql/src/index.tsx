@@ -27,7 +27,16 @@ export default function Command() {
       tabWidth,
     };
 
-    const output = prettier.format(input, options);
+    let output;
+    try {
+      output = prettier.format(input, options);
+    } catch (e) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid GraphQL",
+      });
+      return;
+    }
 
     Clipboard.copy(output);
     showHUD("Copied to clipboard");
