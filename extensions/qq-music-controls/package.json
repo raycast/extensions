@@ -3,6 +3,10 @@
   "name": "qq-music-controls",
   "title": "QQ Music Controls",
   "description": "Control the QQ Music app for macOS with your keyboard.",
+  "categories": [
+    "Media",
+    "Other"
+  ],
   "icon": "icon.png",
   "author": "jwickers",
   "license": "MIT",
