@@ -56,7 +56,9 @@ export default function OpenCommonDirectory() {
   return (
     <List
       isLoading={loading}
-      isShowingDetail={showDetail}
+      isShowingDetail={
+        showDetail && (commonDirectory.length !== 0 || (showOpenDirectory && openDirectory.length !== 0))
+      }
       searchBarPlaceholder={"Search and open"}
       onSearchTextChange={(newValue) => {
         setSearchValue(newValue);
@@ -82,6 +84,15 @@ export default function OpenCommonDirectory() {
                 icon={Icon.Download}
                 onAction={async () => {
                   push(<AddCommonDirectory updateListUseState={[updateList, setUpdateList]} />);
+                }}
+              />
+              <Action
+                title={"Toggle Details"}
+                icon={Icon.Sidebar}
+                shortcut={{ modifiers: ["shift", "cmd"], key: "t" }}
+                onAction={() => {
+                  setShowDetail(!showDetail);
+                  setShowDetailLocalStorage(DetailKey.OPEN_COMMON_DIRECTORY, !showDetail).then();
                 }}
               />
             </ActionPanel>
@@ -179,7 +190,7 @@ function DirectoryItem(props: {
             shortcut={{ modifiers: ["ctrl"], key: "c" }}
             onAction={async () => {
               await Clipboard.copy(directory.path);
-              await showToast(Toast.Style.Success, "Directory path copied!");
+              await showToast(Toast.Style.Success, "Directory path copied!", directory.path);
             }}
           />
 
@@ -222,17 +233,28 @@ function DirectoryItem(props: {
                   }}
                 />
                 <Action
-                  title={"Rest All Rank"}
-                  icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
-                  onAction={() => {
-                    resetRank(commonDirectory, setCommonDirectory).then(async () => {
-                      await showToast(Toast.Style.Success, "Reset success!");
-                    });
+                  title={"Remove All Directory"}
+                  icon={Icon.ExclamationMark}
+                  shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
+                  onAction={async () => {
+                    setCommonDirectory([]);
+                    await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify([]));
+                    await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify([]));
+                    await showToast(Toast.Style.Success, "Remove All success!");
                   }}
                 />
               </>
             )}
+            <Action
+              title={"Rest All Rank"}
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
+              onAction={() => {
+                resetRank(commonDirectory, setCommonDirectory).then(async () => {
+                  await showToast(Toast.Style.Success, "Reset success!");
+                });
+              }}
+            />
           </ActionPanel.Section>
 
           <ActionPanel.Section title={"Detail Action"}>
