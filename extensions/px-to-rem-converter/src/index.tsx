@@ -5,7 +5,15 @@ interface Preferences {
   basePixel?: number;
 }
 
-const BASE_FONT_PIXELS = getPreferenceValues<Preferences>().basePixel || 16;
+const loadBasePixelsFromPreferences = () => {
+  const basePixel = Number(getPreferenceValues<Preferences>().basePixel);
+  if (isNaN(basePixel)) {
+    return 16;
+  }
+  return basePixel;
+};
+
+const BASE_FONT_PIXELS = loadBasePixelsFromPreferences();
 
 const toREM = (px: number): string => px / BASE_FONT_PIXELS + "rem";
 
