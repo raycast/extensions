@@ -5,7 +5,9 @@
   "icon": "icon.png",
   "author": "Kinbaum",
   "license": "MIT",
-  "contributors": ["emanguy"],
+  "contributors": [
+    "emanguy"
+  ],
   "commands": [
     {
       "name": "issues-create",
