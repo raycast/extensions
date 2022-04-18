@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { Action, ActionPanel, List, showToast } from "@raycast/api";
-
-import { createInputFromSearchTerm, getListSubtitle, joinStringsWithDelimiter } from "./utils";
 import translate, { Languages, Translations } from "dictcc";
 
+import { createInputFromSearchTerm, getListSubtitle, joinStringsWithDelimiter } from "./utils";
+
 interface IListWithEmptyViewProps {
+  loading: boolean;
   showNoResultsFound: boolean;
 }
 
-export const ListWithEmptyView = ({ showNoResultsFound }: IListWithEmptyViewProps) => {
+export const ListWithEmptyView = ({ loading, showNoResultsFound }: IListWithEmptyViewProps) => {
+  if (loading) {
+    return <List.EmptyView title={"Loading..."} icon={{ source: "icon-small.png" }} />;
+  }
+
   return (
     <List.EmptyView title={!showNoResultsFound ? "Type to search" : "No Results"} icon={{ source: "icon-small.png" }} />
   );
@@ -53,10 +58,9 @@ export default function Command() {
       navigationTitle="Search dict.cc"
       onSearchTextChange={onSearchTextChange}
       searchBarPlaceholder="Search term (e.g. 'en de Home', or 'Home')"
-      searchText={searchText}
       throttle
     >
-      <ListWithEmptyView showNoResultsFound={!!searchText.length} />
+      <ListWithEmptyView loading={loading} showNoResultsFound={!!searchText.length} />
 
       <List.Section title="Results" subtitle={getListSubtitle(loading, languages, translations?.length)}>
         {translations?.map((translation, index) => (
