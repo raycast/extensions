@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pwgen",
+  "title": "Random Password Generator",
+  "description": "Generates a set of random passwords using different generators.",
+  "icon": "command-icon.png",
+  "author": "omBratteng",
+  "categories": [
+    "Developer Tools",
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "strength",
+      "title": "Generate password of given strength",
+      "description": "Generate password of given strength",
+      "mode": "view"
+    },
+    {
+      "name": "length",
+      "title": "Generate password of given length",
+      "description": "Generate password of given length",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "length",
+      "title": "Default password length",
+      "description": "Default length of password",
+      "type": "textfield",
+      "default": "20"
+    },
+    {
+      "name": "strength",
+      "title": "Default password strength",
+      "description": "Default strength of password",
+      "type": "textfield",
+      "default": "3"
+    },
+    {
+      "name": "delimiter",
+      "title": "Word delimiter",
+      "description": "Word delimiter",
+      "type": "textfield",
+      "default": "-"
+    },
+    {
+      "name": "maxWordLength",
+      "title": "Max word length",
+      "description": "Max length of words from dictionary",
+      "type": "textfield",
+      "default": "8"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.32.1",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.29.4",
+    "eslint-plugin-react-hooks": "^4.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^16.x",
+    "@types/react": "^17.0.x",
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
+    "eslint": "^8.13.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.6.2",
+    "react-devtools": "^4.24.4",
+    "typescript": "^4.6.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
