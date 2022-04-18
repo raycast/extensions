@@ -13,13 +13,13 @@
   "commands": [
     {
       "name": "strength",
-      "title": "Generate password of given strength",
+      "title": "Generate Password Of Given Strength",
       "description": "Generate password of given strength",
       "mode": "view"
     },
     {
       "name": "length",
-      "title": "Generate password of given length",
+      "title": "Generate Password Of Given Length",
       "description": "Generate password of given length",
       "mode": "view"
     }
@@ -30,28 +30,32 @@
       "title": "Default password length",
       "description": "Default length of password",
       "type": "textfield",
-      "default": "20"
+      "default": "20",
+      "required": true
     },
     {
       "name": "strength",
       "title": "Default password strength",
       "description": "Default strength of password",
       "type": "textfield",
-      "default": "3"
+      "default": "3",
+      "required": true
     },
     {
       "name": "delimiter",
       "title": "Word delimiter",
       "description": "Word delimiter",
       "type": "textfield",
-      "default": "-"
+      "default": "-",
+      "required": true
     },
     {
       "name": "maxWordLength",
       "title": "Max word length",
       "description": "Max length of words from dictionary",
       "type": "textfield",
-      "default": "8"
+      "default": "8",
+      "required": true
     }
   ],
   "dependencies": {
