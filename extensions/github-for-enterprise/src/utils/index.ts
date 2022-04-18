@@ -1,11 +1,14 @@
 import { getPreferenceValues } from "@raycast/api";
-import { request } from "graphql-request";
+import { request, GraphQLClient } from "graphql-request";
+import https from 'https';
 
 export async function fetcher({ document, variables = {}, headers = {} }: any) {
-  const { graphqlEndpoint, username, token } = getPreferenceValues();
+  const { graphqlEndpoint, username, token, unsafeHttps } = getPreferenceValues();
 
-  return request(
-    graphqlEndpoint,
+  const agent  = new https.Agent({rejectUnauthorized: !unsafeHttps});
+  // @ts-ignore
+  const client = new GraphQLClient(graphqlEndpoint, { agent });
+  return client.request(
     document,
     {
       username,
