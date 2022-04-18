@@ -1,6 +1,6 @@
 import client from "./client";
 import useSWR from "swr";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, Toast } from "@raycast/api";
 
 const preferences = getPreferenceValues();
 
@@ -14,13 +14,11 @@ export function useToken() {
 
 export function usePastes() {
   const token = useToken();
-  const {
-    data: pastes,
-    error,
-    mutate,
-  } = useSWR(token ? ["/pastes", token] : null, async (url, token) => {
+  const { data, error, mutate } = useSWR(token ? ["/pastes", token] : null, async (url, token) => {
     return client.getPastesByUser({ userKey: token });
   });
+
+  const pastes = (data ?? []).sort((a, b) => b.paste_date - a.paste_date);
 
   async function removePasting(id: string) {
     const toast = new Toast({
@@ -53,8 +51,8 @@ export function usePastes() {
   }
 
   return {
-    pastes: pastes ?? [],
-    loading: !pastes && !error,
+    pastes,
+    loading: !data && !error,
     removePasting,
   };
 }
