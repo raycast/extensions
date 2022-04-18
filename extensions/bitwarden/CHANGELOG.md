@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Isolate Extension]
+## [Isolate Extension] - 2022-04-18
 
 - Stop the bitwarden extension from interfering with the bitwarden CLI
 
