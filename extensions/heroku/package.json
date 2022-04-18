@@ -12,7 +12,7 @@
   "commands": [
     {
       "name": "apps",
-      "title": "List Apps",
+      "title": "Apps List",
       "description": "List your Apps",
       "subtitle": "Heroku",
       "mode": "view"
