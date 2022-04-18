@@ -111,6 +111,7 @@
 /extensions/gitignore                                @daniel-stoneuk
 /extensions/gitlab                                   @tonka3000 @Loskir @immint023
 /extensions/gitmoji                                  @ricoberger
+/extensions/go-package-search                        @bstncartwright
 /extensions/google-books                             @Ali-Parandeh
 /extensions/google-chrome                            @rgomezcasas @bromanko
 /extensions/google-chrome-profiles                   @frouo
