@@ -18,7 +18,7 @@
       "name": "list",
       "title": "List Days",
       "subtitle": "Remember the Date",
-      "description": "Create a new until element",
+      "description": "List of all dates to remember",
       "mode": "view"
     }
   ],
