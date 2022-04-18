@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, showToast, Toast, List, confirmAlert, Action } from "@raycast/api";
+import { ActionPanel, Icon, showToast, Toast, List, confirmAlert, Action, Color } from "@raycast/api";
 import useSWR, { mutate } from "swr";
 import { todoist, handleError } from "./api";
 import Project from "./components/Project";
@@ -35,17 +35,27 @@ export default function Projects() {
           key={project.id}
           icon={project.inboxProject ? Icon.Envelope : Icon.List}
           title={project.name}
-          {...(project.favorite ? { accessoryIcon: Icon.Star } : {})}
+          {...(project.favorite ? { accessoryIcon: { source: Icon.Star, tintColor: Color.Yellow } } : {})}
           actions={
             <ActionPanel>
               <Action.Push icon={Icon.TextDocument} title="Show Details" target={<Project projectId={project.id} />} />
+
               <Action.OpenInBrowser url={project.url} />
-              <Action
-                title="Delete Project"
-                icon={Icon.Trash}
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                onAction={() => deleteProject(project.id)}
+
+              <Action.CopyToClipboard
+                title="Copy Project URL"
+                content={project.url}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               />
+
+              <ActionPanel.Section>
+                <Action
+                  title="Delete Project"
+                  icon={Icon.Trash}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  onAction={() => deleteProject(project.id)}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />
