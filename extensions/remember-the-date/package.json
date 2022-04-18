@@ -16,7 +16,7 @@
     },
     {
       "name": "list",
-      "title": "List Days",
+      "title": "Days List",
       "subtitle": "Remember the Date",
       "description": "List of all dates to remember",
       "mode": "view"
