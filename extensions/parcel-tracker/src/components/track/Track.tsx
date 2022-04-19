@@ -3,7 +3,6 @@ import moment from "moment";
 import { useEffect, useState } from "react";
 import { getTrackData } from "../../api/api";
 import { ITrackData, TrackingDetail } from "../../model/trackData";
-import { replaceAll } from "../../../../gitlab/src/utils";
 
 interface IProps {
   vendorKey: string;
