@@ -1,10 +1,10 @@
-//for refresh useState
 import { useCallback, useEffect, useState } from "react";
 import { getDirectoryContent, getShowDetailLocalStorage, ShowDetailKey } from "../utils/ui-utils";
 import { DirectoryInfo, LocalDirectoryKey } from "../utils/directory-info";
 import { getOpenFinderWindowPath } from "../utils/common-utils";
 import { getDirectory } from "../open-common-directory";
 
+//for refresh useState
 export const refreshNumber = () => {
   return new Date().getTime();
 };
