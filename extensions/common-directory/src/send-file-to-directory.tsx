@@ -10,47 +10,35 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { DirectoryInfo, LocalDirectoryKey, SortBy } from "./utils/directory-info";
-import React, { useEffect, useState } from "react";
-import { getChooseFolder, getOpenFinderWindowPath, isEmpty, preferences } from "./utils/utils";
+import React, { useState } from "react";
+import { commonPreferences, getChooseFolder, isEmpty } from "./utils/common-utils";
 import { ActionType, getItemAndSend } from "./utils/send-file-utils";
 import { getDirectory, resetRank } from "./open-common-directory";
 import fse from "fs-extra";
 import AddCommonDirectory from "./add-common-directory";
-import { DetailKey, getDirectoryContent, getShowDetailLocalStorage, setShowDetailLocalStorage } from "./utils/ui-utils";
+import { setShowDetailLocalStorage, ShowDetailKey } from "./utils/ui-utils";
 import path from "path";
+import { getCommonDirectory, getDirectoryInfo, getIsShowDetail, refreshNumber } from "./hooks/hooks";
 
 export default function CommonDirectory() {
-  const [searchValue, setSearchValue] = useState<string>("");
-  const [commonDirectory, setCommonDirectory] = useState<DirectoryInfo[]>([]);
-  const [openDirectory, setOpenDirectory] = useState<DirectoryInfo[]>([]);
-  const [detailDirectoryPath, setDetailDirectoryPath] = useState<string>("");
-  const [directoryContent, setDirectoryContent] = useState<string>("");
-
-  const [showDetail, setShowDetail] = useState<boolean>(false);
-  const [updateDetail, setUpdateDetail] = useState<number[]>([0]);
-  const [updateList, setUpdateList] = useState<number[]>([0]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const { sortBy, showOpenDirectory } = preferences();
+  const { sortBy, showOpenDirectory } = commonPreferences();
   const { push } = useNavigation();
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [directoryPath, setDirectoryPath] = useState<string>("");
 
-  useEffect(() => {
-    async function _fetchLocalStorage() {
-      setShowDetail(await getShowDetailLocalStorage(DetailKey.SEND_COMMON_DIRECTORY));
-      setCommonDirectory(await getDirectory(LocalDirectoryKey.SEND_COMMON_DIRECTORY, sortBy));
-      if (showOpenDirectory) setOpenDirectory(await getOpenFinderWindowPath());
-      setLoading(false);
-    }
+  const [updateDetail, setUpdateDetail] = useState<number>(0);
+  const [refresh, setRefresh] = useState<number>(0);
+  const [refreshDetail, setRefreshDetail] = useState<number>(0);
 
-    _fetchLocalStorage().then();
-  }, [updateList]);
-
-  useEffect(() => {
-    async function _fetchDetailContent() {
-      setDirectoryContent(getDirectoryContent(detailDirectoryPath));
-    }
-
-    _fetchDetailContent().then();
-  }, [detailDirectoryPath, updateDetail]);
+  //hooks
+  const showDetail = getIsShowDetail(refreshDetail, ShowDetailKey.SEND_COMMON_DIRECTORY);
+  const { commonDirectory, openDirectory, loading } = getCommonDirectory(
+    refresh,
+    sortBy,
+    showOpenDirectory,
+    LocalDirectoryKey.SEND_COMMON_DIRECTORY
+  );
+  const directoryInfo = getDirectoryInfo(directoryPath, updateDetail);
 
   return (
     <List
@@ -65,9 +53,9 @@ export default function CommonDirectory() {
       onSelectionChange={(id) => {
         if (typeof id === "string") {
           const idContent = JSON.parse(id);
-          setDetailDirectoryPath(idContent.path);
+          setDirectoryPath(idContent.path);
         } else {
-          setDetailDirectoryPath("");
+          setDirectoryPath("");
         }
       }}
     >
@@ -82,16 +70,16 @@ export default function CommonDirectory() {
                 title={"Add Directory"}
                 icon={Icon.Download}
                 onAction={async () => {
-                  push(<AddCommonDirectory updateListUseState={[updateList, setUpdateList]} />);
+                  push(<AddCommonDirectory setRefresh={setRefresh} />);
                 }}
               />
               <Action
                 title={"Toggle Details"}
                 icon={Icon.Sidebar}
-                shortcut={{ modifiers: ["shift", "cmd"], key: "t" }}
+                shortcut={{ modifiers: ["shift", "cmd"], key: "d" }}
                 onAction={() => {
-                  setShowDetail(!showDetail);
-                  setShowDetailLocalStorage(DetailKey.OPEN_COMMON_DIRECTORY, !showDetail).then();
+                  setShowDetailLocalStorage(ShowDetailKey.OPEN_COMMON_DIRECTORY, !showDetail).then();
+                  setRefreshDetail(refreshDetail);
                 }}
               />
             </ActionPanel>
@@ -111,11 +99,11 @@ export default function CommonDirectory() {
                     directory={directory}
                     index={index}
                     commonDirectory={commonDirectory}
-                    directoryContent={directoryContent}
-                    setCommonDirectory={setCommonDirectory}
-                    updateListUseState={[updateList, setUpdateList]}
-                    updateDetailUseState={[updateDetail, setUpdateDetail]}
-                    showDetailUseState={[showDetail, setShowDetail]}
+                    directoryContent={directoryInfo}
+                    showDetail={showDetail}
+                    setRefresh={setRefresh}
+                    setRefreshDetail={setRefreshDetail}
+                    setUpdateDetail={setUpdateDetail}
                   />
                 );
             })}
@@ -129,11 +117,11 @@ export default function CommonDirectory() {
                     directory={directory}
                     index={index}
                     commonDirectory={openDirectory}
-                    directoryContent={directoryContent}
-                    setCommonDirectory={setCommonDirectory}
-                    updateListUseState={[updateList, setUpdateList]}
-                    updateDetailUseState={[updateDetail, setUpdateDetail]}
-                    showDetailUseState={[showDetail, setShowDetail]}
+                    directoryContent={directoryInfo}
+                    showDetail={showDetail}
+                    setRefresh={setRefresh}
+                    setRefreshDetail={setRefreshDetail}
+                    setUpdateDetail={setUpdateDetail}
                   />
                 );
             })}
@@ -149,16 +137,22 @@ function SendToDirectoryItem(props: {
   index: number;
   commonDirectory: DirectoryInfo[];
   directoryContent: string;
-  setCommonDirectory: React.Dispatch<React.SetStateAction<DirectoryInfo[]>>;
-  updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
-  updateDetailUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
-  showDetailUseState: [boolean, React.Dispatch<React.SetStateAction<boolean>>];
+  showDetail: boolean;
+  setRefresh: React.Dispatch<React.SetStateAction<number>>;
+  setRefreshDetail: React.Dispatch<React.SetStateAction<number>>;
+  setUpdateDetail: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const { directory, setCommonDirectory, index, commonDirectory, directoryContent } = props;
-  const [updateList, setUpdateList] = props.updateListUseState;
-  const [updateDetail, setUpdateDetail] = props.updateDetailUseState;
-  const [showDetail, setShowDetail] = props.showDetailUseState;
-  const { primaryAction } = preferences();
+  const {
+    directory,
+    showDetail,
+    setRefresh,
+    setRefreshDetail,
+    setUpdateDetail,
+    index,
+    commonDirectory,
+    directoryContent,
+  } = props;
+  const { primaryAction } = commonPreferences();
   const { push } = useNavigation();
   return (
     <List.Item
@@ -178,11 +172,8 @@ function SendToDirectoryItem(props: {
             title={primaryAction === ActionType.COPY ? "Copy File to Directory" : "Move File to Directory"}
             icon={primaryAction === ActionType.COPY ? Icon.Clipboard : Icon.Download}
             onAction={async () => {
-              await actionMoveOrCopy(directory, commonDirectory, index, setCommonDirectory, primaryAction, false);
-
-              const _updateDetail = [...updateDetail];
-              _updateDetail[0]++;
-              setUpdateDetail(_updateDetail);
+              await actionMoveOrCopy(directory, commonDirectory, index, primaryAction, false);
+              setUpdateDetail(refreshNumber());
             }}
           />
           <Action
@@ -190,13 +181,11 @@ function SendToDirectoryItem(props: {
             icon={primaryAction === ActionType.COPY ? Icon.Download : Icon.Clipboard}
             onAction={async () => {
               if (primaryAction === ActionType.COPY) {
-                await actionMoveOrCopy(directory, commonDirectory, index, setCommonDirectory, ActionType.MOVE, false);
+                await actionMoveOrCopy(directory, commonDirectory, index, ActionType.MOVE, false);
               } else {
-                await actionMoveOrCopy(directory, commonDirectory, index, setCommonDirectory, ActionType.COPY, false);
+                await actionMoveOrCopy(directory, commonDirectory, index, ActionType.COPY, false);
               }
-              const _updateDetail = [...updateDetail];
-              _updateDetail[0]++;
-              setUpdateDetail(_updateDetail);
+              setUpdateDetail(refreshNumber());
             }}
           />
           <Action
@@ -217,11 +206,8 @@ function SendToDirectoryItem(props: {
               icon={primaryAction === ActionType.COPY ? Icon.Clipboard : Icon.Download}
               shortcut={{ modifiers: ["shift", "cmd"], key: "m" }}
               onAction={async () => {
-                await actionMoveOrCopy(directory, commonDirectory, index, setCommonDirectory, primaryAction, true);
-
-                const _updateDetail = [...updateDetail];
-                _updateDetail[0]++;
-                setUpdateDetail(_updateDetail);
+                await actionMoveOrCopy(directory, commonDirectory, index, primaryAction, true);
+                setUpdateDetail(refreshNumber());
               }}
             />
             <Action
@@ -232,13 +218,11 @@ function SendToDirectoryItem(props: {
               shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
               onAction={async () => {
                 if (primaryAction === ActionType.COPY) {
-                  await actionMoveOrCopy(directory, commonDirectory, index, setCommonDirectory, ActionType.MOVE, true);
+                  await actionMoveOrCopy(directory, commonDirectory, index, ActionType.MOVE, true);
                 } else {
-                  await actionMoveOrCopy(directory, commonDirectory, index, setCommonDirectory, ActionType.COPY, true);
+                  await actionMoveOrCopy(directory, commonDirectory, index, ActionType.COPY, true);
                 }
-                const _updateDetail = [...updateDetail];
-                _updateDetail[0]++;
-                setUpdateDetail(_updateDetail);
+                setUpdateDetail(refreshNumber());
               }}
             />
           </ActionPanel.Section>
@@ -249,7 +233,7 @@ function SendToDirectoryItem(props: {
               icon={Icon.Plus}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
               onAction={() => {
-                push(<AddCommonDirectory updateListUseState={[updateList, setUpdateList]} />);
+                push(<AddCommonDirectory setRefresh={setRefresh} />);
               }}
             />
             {directory.isCommon && (
@@ -261,11 +245,11 @@ function SendToDirectoryItem(props: {
                   onAction={async () => {
                     const _sendCommonDirectory = [...commonDirectory];
                     _sendCommonDirectory.splice(index, 1);
-                    setCommonDirectory(_sendCommonDirectory);
                     await LocalStorage.setItem(
                       LocalDirectoryKey.SEND_COMMON_DIRECTORY,
                       JSON.stringify(_sendCommonDirectory)
                     );
+                    setRefresh(refreshNumber());
 
                     const _openCommonDirectory = await getDirectory(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, "Rank");
                     const __openCommonDirectory = _openCommonDirectory.filter((value) => {
@@ -283,9 +267,9 @@ function SendToDirectoryItem(props: {
                   icon={Icon.ExclamationMark}
                   shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
                   onAction={async () => {
-                    setCommonDirectory([]);
                     await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify([]));
                     await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify([]));
+                    setRefresh(refreshNumber());
                     await showToast(Toast.Style.Success, "Remove All success!");
                   }}
                 />
@@ -296,7 +280,7 @@ function SendToDirectoryItem(props: {
               icon={Icon.ArrowClockwise}
               shortcut={{ modifiers: ["shift", "cmd"], key: "r" }}
               onAction={() => {
-                resetRank(commonDirectory, setCommonDirectory).then(async () => {
+                resetRank(commonDirectory, setRefresh).then(async () => {
                   await showToast(Toast.Style.Success, "Reset success!");
                 });
               }}
@@ -307,10 +291,10 @@ function SendToDirectoryItem(props: {
             <Action
               title={"Toggle Details"}
               icon={Icon.Sidebar}
-              shortcut={{ modifiers: ["shift", "cmd"], key: "t" }}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "d" }}
               onAction={() => {
-                setShowDetail(!showDetail);
-                setShowDetailLocalStorage(DetailKey.SEND_COMMON_DIRECTORY, !showDetail).then();
+                setShowDetailLocalStorage(ShowDetailKey.SEND_COMMON_DIRECTORY, !showDetail).then();
+                setRefreshDetail(refreshNumber());
               }}
             />
           </ActionPanel.Section>
@@ -324,7 +308,6 @@ async function actionMoveOrCopy(
   directory: DirectoryInfo,
   commonDirectory: DirectoryInfo[],
   index: number,
-  setCommonDirectory: React.Dispatch<React.SetStateAction<DirectoryInfo[]>>,
   action: ActionType,
   manual: boolean
 ) {
@@ -340,7 +323,7 @@ async function actionMoveOrCopy(
         isMoved = await getItemAndSend(directory.path, action);
       }
       _commonDirectory[index].valid = true;
-      if (isMoved && preferences().sortBy === SortBy.Rank) {
+      if (isMoved && commonPreferences().sortBy === SortBy.Rank) {
         _commonDirectory = await upRankSendFile(_commonDirectory, index);
       }
     } else {
@@ -348,7 +331,6 @@ async function actionMoveOrCopy(
       _commonDirectory[index].valid = false;
     }
     if (directory.isCommon) {
-      setCommonDirectory(_commonDirectory);
       await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify(_commonDirectory));
     }
   } catch (e) {

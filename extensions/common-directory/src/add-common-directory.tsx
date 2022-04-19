@@ -8,13 +8,16 @@ import {
   getFinderInsertLocation,
   getSelectedDirectory,
   isDirectoryOrFile,
-} from "./utils/utils";
+} from "./utils/common-utils";
+import { refreshNumber } from "./hooks/hooks";
 
-export default function AddCommonDirectory(props: {
-  updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
-}) {
-  const [updateList, setUpdateList] =
-    typeof props.updateListUseState == "undefined" ? useState<number[]>([0]) : props.updateListUseState;
+export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {
+  const setRefresh =
+    typeof props.setRefresh == "undefined"
+      ? () => {
+          return;
+        }
+      : props.setRefresh;
   const [path, setPath] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [alias, setAlias] = useState<string>("");
@@ -23,7 +26,6 @@ export default function AddCommonDirectory(props: {
     async function _fetchPath() {
       await fetchDirectoryPath(setPath);
     }
-
     _fetchPath().then();
   }, []);
 
@@ -31,7 +33,6 @@ export default function AddCommonDirectory(props: {
     async function _setName() {
       setName(getDirectoryName(path));
     }
-
     _setName().then();
   }, [path]);
 
@@ -45,9 +46,7 @@ export default function AddCommonDirectory(props: {
             icon={Icon.Plus}
             onAction={async () => {
               await addDirectory(alias, path);
-              const _updateList = [...updateList];
-              _updateList[0]++;
-              setUpdateList(_updateList);
+              setRefresh(refreshNumber());
             }}
           />
 

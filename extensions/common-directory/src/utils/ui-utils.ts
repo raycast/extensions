@@ -1,4 +1,4 @@
-import { isEmpty } from "./utils";
+import { isEmpty } from "./common-utils";
 import fse from "fs-extra";
 import fileUrl from "file-url";
 import path from "path";
@@ -38,15 +38,16 @@ export const getDirectoryContent = (directoryPath: string) => {
   return detailContent;
 };
 
-export enum DetailKey {
+export enum ShowDetailKey {
   OPEN_COMMON_DIRECTORY = "open_detail",
   SEND_COMMON_DIRECTORY = "send_detail",
 }
-export const getShowDetailLocalStorage = async (key: DetailKey) => {
+
+export const getShowDetailLocalStorage = async (key: ShowDetailKey) => {
   const localStorage = await LocalStorage.getItem<boolean>(key);
   return typeof localStorage === "undefined" ? true : localStorage;
 };
 
-export const setShowDetailLocalStorage = async (key: DetailKey, value: boolean) => {
+export const setShowDetailLocalStorage = async (key: ShowDetailKey, value: boolean) => {
   await LocalStorage.setItem(key, value);
 };

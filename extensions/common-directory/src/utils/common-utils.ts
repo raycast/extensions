@@ -4,7 +4,7 @@ import { getPreferenceValues, getSelectedFinderItems, LocalStorage } from "@rayc
 import { DirectoryInfo, DirectoryType } from "./directory-info";
 import Values = LocalStorage.Values;
 
-export const preferences = () => {
+export const commonPreferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
     sortBy: preferencesMap.get("SortBy"),

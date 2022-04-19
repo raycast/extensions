@@ -1,7 +1,7 @@
 import { Alert, confirmAlert, getSelectedFinderItems, open, showHUD, showToast, Toast } from "@raycast/api";
 import fse from "fs-extra";
 import path, { ParsedPath } from "path";
-import { checkDirectoryEmpty, preferences } from "./utils";
+import { checkDirectoryEmpty, commonPreferences } from "./common-utils";
 
 export enum ActionType {
   MOVE = "move",
@@ -87,7 +87,7 @@ export const getItemAndSend = async (toPath: string, action: ActionType): Promis
   const operationResult = await sendFileShowAlert(selectedFile, selectedFolder, toPath, action);
   if (!operationResult.isCancel) {
     try {
-      if (preferences().deleteEmptyDirectory && checkDirectoryEmpty(parentFolderPath)) {
+      if (commonPreferences().deleteEmptyDirectory && checkDirectoryEmpty(parentFolderPath)) {
         fse.removeSync(parentFolderPath);
       }
     } catch (e) {
@@ -200,7 +200,7 @@ const followUpWork = async (
 
     await showToast(options);
 
-    if (preferences().openDestDirectory) {
+    if (commonPreferences().openDestDirectory) {
       await showHUD(`${action == ActionType.MOVE ? "Move" : "Copy"} success! Open ${path.parse(destPath).base}.`);
       await open(destPath);
     }
