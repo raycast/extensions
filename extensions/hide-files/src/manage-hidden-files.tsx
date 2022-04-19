@@ -1,46 +1,25 @@
 import { Action, ActionPanel, Icon, List, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { checkDirectoryValid, extensionPreferences, getLocalStorage, isEmpty, isImage } from "./utils/common-utils";
+import { useState } from "react";
+import { extensionPreferences, isImage } from "./utils/common-utils";
 import { parse } from "path";
-import { DirectoryInfo, DirectoryType, tagDirectoryPath, tagDirectoryType } from "./utils/directory-info";
+import { DirectoryType, tagDirectoryPath, tagDirectoryType } from "./utils/directory-info";
 import { showHiddenFiles } from "./utils/hide-files-utils";
 import { LocalStorageKey } from "./utils/constants";
+import { getHiddenFiles, refreshNumber } from "./hooks/hooks";
 
 export default function Command() {
-  const [localDirectory, setLocalDirectory] = useState<DirectoryInfo[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [tag, setTag] = useState<string>("All");
   const { folderFirst } = extensionPreferences();
+  const [refresh, setRefresh] = useState<number>(0);
 
-  useEffect(() => {
-    async function _initRunAppleScript() {
-      const _localstorage = await getLocalStorage(LocalStorageKey.LOCAL_HIDE_DIRECTORY);
-      let localDirectory: DirectoryInfo[] = [];
-      if (!isEmpty(_localstorage)) {
-        localDirectory = JSON.parse(_localstorage) as DirectoryInfo[];
-      }
-      const localDirectoryReverse = localDirectory;
-      const localFolder = localDirectoryReverse.filter((value) => value.type === DirectoryType.DIRECTORY);
-      const localFile = localDirectoryReverse.filter((value) => value.type === DirectoryType.FILE);
-
-      //check invalid directory
-      const _validDirectory = checkDirectoryValid(
-        folderFirst ? [...localFolder, ...localFile] : [...localFile, ...localFolder]
-      );
-      setLocalDirectory(_validDirectory);
-      setLoading(false);
-      await LocalStorage.setItem(LocalStorageKey.LOCAL_HIDE_DIRECTORY, JSON.stringify(_validDirectory));
-    }
-
-    _initRunAppleScript().then();
-  }, []);
+  const { localHiddenDirectory, loading } = getHiddenFiles(folderFirst, refresh);
 
   return (
     <List
       isLoading={loading}
       searchBarPlaceholder="Search hidden files"
       searchBarAccessory={
-        localDirectory.length !== 0 && (
+        localHiddenDirectory.length !== 0 && (
           <List.Dropdown onChange={setTag} tooltip={"Directory type"}>
             <List.Dropdown.Item key={"All"} title={"All"} value={"All"} />
             {
@@ -61,7 +40,7 @@ export default function Command() {
         )
       }
     >
-      {localDirectory.length === 0 ? (
+      {localHiddenDirectory.length === 0 ? (
         <List.EmptyView
           key={`empty-localDirectory`}
           title={"No hidden files."}
@@ -70,7 +49,7 @@ export default function Command() {
         />
       ) : (
         <>
-          {localDirectory.map(
+          {localHiddenDirectory.map(
             (value, index) =>
               (tag === "All" || value.type === tag || value.path.includes(tag)) && (
                 <List.Item
@@ -111,13 +90,13 @@ export default function Command() {
                           title={`Show File`}
                           shortcut={{ modifiers: ["cmd"], key: "s" }}
                           onAction={async () => {
-                            const _localDirectory = [...localDirectory];
+                            const _localDirectory = [...localHiddenDirectory];
                             _localDirectory.splice(index, 1);
-                            setLocalDirectory(_localDirectory);
                             await LocalStorage.setItem(
                               LocalStorageKey.LOCAL_HIDE_DIRECTORY,
                               JSON.stringify(_localDirectory)
                             );
+                            setRefresh(refreshNumber());
                             showHiddenFiles(value.path.replace(" ", `" "`));
 
                             const options: Toast.Options = {
@@ -147,10 +126,10 @@ export default function Command() {
                           title={"Show All Files"}
                           shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
                           onAction={async () => {
-                            const filePaths = localDirectory.map((file) => file.path.replace(" ", `" "`));
+                            const filePaths = localHiddenDirectory.map((file) => file.path.replace(" ", `" "`));
                             showHiddenFiles(filePaths.join(" "));
                             await LocalStorage.clear();
-                            setLocalDirectory([]);
+                            setRefresh(refreshNumber());
                             await showToast(Toast.Style.Success, "Success!", "All Files have been shown.");
                           }}
                         />
