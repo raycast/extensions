@@ -65,7 +65,7 @@ export default function ProcessList() {
     return process.path == null ? null : <CopyToClipboardAction title="Copy Path" content={process.path} />;
   };
 
-  const subtitleStr = (process: Process) => {
+  const subtitleString = (process: Process) => {
     let subtitle = undefined;
 
     if (shouldShowPID) {
@@ -116,7 +116,7 @@ export default function ProcessList() {
             <List.Item
               key={index}
               title={process.name}
-              subtitle={subtitleStr(process)}
+              subtitle={subtitleString(process)}
               icon={icon}
               accessoryTitle={`${process.cpu}%`}
               actions={
