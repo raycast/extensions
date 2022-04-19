@@ -70,7 +70,7 @@ export default function Command() {
                           />
                           <ActionPanel.Section title="Directory Action">
                             <Action
-                              icon={Icon.Plus}
+                              icon={Icon.Pin}
                               title={`Pin Directory`}
                               shortcut={{ modifiers: ["cmd"], key: "d" }}
                               onAction={async () => {
