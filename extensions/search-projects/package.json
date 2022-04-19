@@ -9,7 +9,7 @@
   "private": true,
   "commands": [
     {
-      "name": "list-node-projects",
+      "name": "search-node-projects",
       "title": "Search Node projects",
       "description": "Quickly access your local node projects and open them in your favorite editor or any app",
       "mode": "view"
