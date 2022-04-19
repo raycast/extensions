@@ -127,7 +127,7 @@ export async function findRepos(paths: string[], maxDepth: number): Promise<Sour
   let foundRepos: SourceRepo[] = [];
   await Promise.allSettled(
     paths.map(async (path) => {
-      const findCmd = `find -L ${path} -maxdepth ${maxDepth} -name package.json -type f -not -path "*/node_modules/*" | head -20`;
+      const findCmd = `find -L ${path} -maxdepth ${maxDepth} -name package.json -type f -not -path "*/node_modules/*"`;
       const { stdout, stderr } = await execp(findCmd);
       if (stderr) {
         showToast(Toast.Style.Failure, "Find Failed", stderr);
