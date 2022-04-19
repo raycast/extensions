@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, Color } from "@raycast/api";
+import { Icon, Color, Action } from "@raycast/api";
 import { ha } from "../common";
 import { State } from "../haapi";
 
@@ -12,7 +12,5 @@ export function ScriptRunAction(props: { state: State }): JSX.Element | null {
   const handle = async () => {
     await ha.callService("script", "turn_on", { entity_id: s.entity_id });
   };
-  return (
-    <ActionPanel.Item title="Run" onAction={handle} icon={{ source: Icon.Binoculars, tintColor: Color.PrimaryText }} />
-  );
+  return <Action title="Run" onAction={handle} icon={{ source: Icon.Binoculars, tintColor: Color.PrimaryText }} />;
 }

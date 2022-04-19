@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rescuetime-focus-session-trigger",
+  "title": "RescueTime Focus Session Trigger",
+  "description": "Commands to start and stop a Focus Session on the RescueTime desktop or web apps",
+  "icon": "rescueTime-logo.png",
+  "author": "TuorTheBlessed",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "APIkey",
+      "description": "Generated API key from RescueTime website",
+      "type": "password",
+      "required": true,
+      "title": "RescueTime API key",
+      "placeholder": "https://www.rescuetime.com/anapi/manage"
+    }
+  ],
+  "commands": [
+    {
+      "name": "startFocusTime",
+      "title": "Start Focus Session",
+      "subtitle": "RescueTime",
+      "description": "Starts a Focus Session for RescueTime. Enter default value for duration of Focus Session in preferences if you prefer a value other than 25",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "duration",
+          "description": "Length of the Focus Session in minutes",
+          "type": "textfield",
+          "required": true,
+          "title": "Default Focus Session Duration",
+          "default": "25"
+        }
+      ]
+    },
+    {
+      "name": "endFocusTime",
+      "title": "End Focus Session",
+      "subtitle": "RescueTime",
+      "description": "Ends a Focus Session for RescueTime",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.30.3",
+    "got": "^12.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "~16.10.0",
+    "@types/react": "^17.0.28",
+    "@typescript-eslint/eslint-plugin": "^5.15.0",
+    "@typescript-eslint/parser": "^5.15.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-react": "^7.29.4",
+    "prettier": "^2.5.1",
+    "react-devtools": "^4.19.2",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
