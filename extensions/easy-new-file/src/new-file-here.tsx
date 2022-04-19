@@ -12,52 +12,23 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import React, { useEffect, useState } from "react";
-import { copyFileByPath, getFileInfo, getFinderPath, isEmpty, preferences } from "./utils/common-utils";
+import React, { useState } from "react";
+import { copyFileByPath, getFinderPath, isEmpty, isImage, preferences } from "./utils/common-utils";
 import { codeFileTypes, documentFileTypes, FileType, scriptFileTypes, TemplateType } from "./utils/file-type";
-import { runAppleScript } from "run-applescript";
 import NewFileWithName from "./new-file-with-name";
 import AddFileTemplate from "./add-file-template";
 import { homedir } from "os";
+import { getTemplateFile, refreshNumber } from "./hooks/hooks";
+import { parse } from "path";
 
 export default function main() {
   const preference = preferences();
-  const templateFolderPath = environment.supportPath + "/templates";
-  const [templateFiles, setTemplateFiles] = useState<TemplateType[]>([]);
-  const [updateList, setUpdateList] = useState<number[]>([0]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const { push } = useNavigation();
+  const templateFolderPath = environment.supportPath + "/templates";
+  const [refresh, setRefresh] = useState<number>(0);
 
-  useEffect(() => {
-    async function _fetchTemplateFile() {
-      const _templateFiles: TemplateType[] = [];
-      try {
-        if (fse.existsSync(templateFolderPath)) {
-          fse.readdirSync(templateFolderPath).forEach((file) => {
-            if (!file.startsWith(".")) {
-              const filePath = templateFolderPath + "/" + file;
-              const { nameWithoutExtension, extension } = getFileInfo(filePath);
-              _templateFiles.push({
-                path: filePath,
-                name: nameWithoutExtension,
-                extension: extension,
-                simpleContent: false,
-              });
-            }
-          });
-          setIsLoading(false);
-        } else {
-          fse.mkdirSync(templateFolderPath);
-        }
-      } catch (e) {
-        await showToast(Toast.Style.Failure, String(e));
-      }
-      setTemplateFiles(_templateFiles);
-      await runAppleScript("");
-    }
-
-    _fetchTemplateFile().then();
-  }, [updateList]);
+  //hooks
+  const { templateFiles, isLoading } = getTemplateFile(templateFolderPath, refresh);
 
   return (
     <List
@@ -72,7 +43,7 @@ export default function main() {
             <List.Item
               id={template.path}
               key={template.path}
-              icon={{ fileIcon: template.path }}
+              icon={isImage(parse(template.path).ext) ? { source: template.path } : { fileIcon: template.path }}
               title={template.name}
               subtitle={template.extension}
               actions={
@@ -124,7 +95,7 @@ export default function main() {
                       icon={Icon.Document}
                       shortcut={{ modifiers: ["cmd"], key: "t" }}
                       onAction={() => {
-                        push(<AddFileTemplate updateListUseState={[updateList, setUpdateList]} />);
+                        push(<AddFileTemplate setRefresh={setRefresh} />);
                       }}
                     />
                     <Action
@@ -134,9 +105,7 @@ export default function main() {
                       onAction={async () => {
                         await showToast(Toast.Style.Animated, "Deleting template...");
                         fse.unlinkSync(template.path);
-                        const _templateFiles = [...templateFiles];
-                        _templateFiles.splice(index, 1);
-                        setTemplateFiles(_templateFiles);
+                        setRefresh(refreshNumber());
                         await showToast(Toast.Style.Success, "Delete template success!");
                       }}
                     />
@@ -156,7 +125,7 @@ export default function main() {
                 fileType={fileType}
                 newFileType={{ section: "Document", index: index }}
                 templateFiles={templateFiles}
-                updateListUseState={[updateList, setUpdateList]}
+                setRefresh={setRefresh}
               />
             );
           })}
@@ -171,7 +140,7 @@ export default function main() {
                 fileType={fileType}
                 newFileType={{ section: "Code", index: index }}
                 templateFiles={templateFiles}
-                updateListUseState={[updateList, setUpdateList]}
+                setRefresh={setRefresh}
               />
             );
           })}
@@ -186,7 +155,7 @@ export default function main() {
                 fileType={fileType}
                 newFileType={{ section: "Script", index: index }}
                 templateFiles={templateFiles}
-                updateListUseState={[updateList, setUpdateList]}
+                setRefresh={setRefresh}
               />
             );
           })}
@@ -200,13 +169,10 @@ function FileTypeItem(props: {
   fileType: FileType;
   newFileType: { section: string; index: number };
   templateFiles: TemplateType[];
-  updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
+  setRefresh: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const { push } = useNavigation();
-  const fileType = props.fileType;
-  const newFileType = props.newFileType;
-  const templateFiles = props.templateFiles;
-  const [updateList, setUpdateList] = props.updateListUseState;
+  const { fileType, newFileType, templateFiles, setRefresh } = props;
   return (
     <List.Item
       icon={{ source: fileType.icon }}
@@ -249,7 +215,7 @@ function FileTypeItem(props: {
               icon={Icon.Document}
               shortcut={{ modifiers: ["cmd"], key: "t" }}
               onAction={() => {
-                push(<AddFileTemplate updateListUseState={[updateList, setUpdateList]} />);
+                push(<AddFileTemplate setRefresh={setRefresh} />);
               }}
             />
           </ActionPanel.Section>

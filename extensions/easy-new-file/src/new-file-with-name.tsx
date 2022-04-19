@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
-import { getFinderPath, preferences } from "./utils/common-utils";
+import { getFinderPath, isImage, preferences } from "./utils/common-utils";
 import { createNewFile, createNewFileByTemplate } from "./new-file-here";
 import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from "./utils/file-type";
-import { runAppleScript } from "run-applescript";
+import { getFileType, initRunApplescript } from "./hooks/hooks";
+import { parse } from "path";
 
 export default function NewFileWithName(props: {
   newFileType: { section: string; index: number };
@@ -12,53 +13,12 @@ export default function NewFileWithName(props: {
   const preference = preferences();
   const templateFiles = props.templateFiles;
   const [newFileType, setNewFileType] = useState<{ section: string; index: number }>(props.newFileType);
-
-  const [fileExtension, setFileExtension] = useState<string>("txt");
   const [fileName, setFileName] = useState<string>("");
-  const [isSimpleContent, setIsSimpleContent] = useState<boolean>(false);
   const [fileContent, setFileContent] = useState<string>("");
+  //hooks
+  const { isSimpleContent, fileExtension } = getFileType(newFileType, templateFiles);
 
-  useEffect(() => {
-    async function _initAppleScript() {
-      await runAppleScript("");
-    }
-
-    _initAppleScript().then();
-  }, []);
-
-  useEffect(() => {
-    async function _initFileType() {
-      switch (newFileType.section) {
-        case "Template": {
-          setFileExtension(templateFiles[newFileType.index].extension);
-          setIsSimpleContent(templateFiles[newFileType.index].simpleContent);
-          break;
-        }
-        case "Document": {
-          setFileExtension(documentFileTypes[newFileType.index].extension);
-          setIsSimpleContent(documentFileTypes[newFileType.index].simpleContent);
-          break;
-        }
-        case "Code": {
-          setFileExtension(codeFileTypes[newFileType.index].extension);
-          setIsSimpleContent(codeFileTypes[newFileType.index].simpleContent);
-          break;
-        }
-        case "Script": {
-          setFileExtension(scriptFileTypes[newFileType.index].extension);
-          setIsSimpleContent(scriptFileTypes[newFileType.index].simpleContent);
-          break;
-        }
-        default: {
-          setFileExtension(documentFileTypes[0].extension);
-          setIsSimpleContent(documentFileTypes[0].simpleContent);
-          break;
-        }
-      }
-    }
-
-    _initFileType().then();
-  }, [newFileType]);
+  initRunApplescript();
 
   return (
     <Form
@@ -116,7 +76,7 @@ export default function NewFileWithName(props: {
             return (
               <Form.Dropdown.Item
                 key={template.name + index}
-                icon={{ fileIcon: template.path }}
+                icon={isImage(parse(template.path).ext) ? { source: template.path } : { fileIcon: template.path }}
                 title={template.name + "." + template.extension}
                 value={JSON.stringify({ section: "Template", index: index })}
               />

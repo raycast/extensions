@@ -31,6 +31,7 @@ export const codeFileTypes: FileType[] = [
   { name: "CSS", extension: "css", languageId: "css", icon: "css.png", simpleContent: true },
   { name: "Html", extension: "html", languageId: "html", icon: "html.png", simpleContent: true },
 ];
+
 export const scriptFileTypes: FileType[] = [
   { name: "Apple", extension: "applescript", languageId: "applescript", icon: "applescript.png", simpleContent: true },
   { name: "Perl", extension: "pl", languageId: "perl", icon: "perl.png", simpleContent: true },
