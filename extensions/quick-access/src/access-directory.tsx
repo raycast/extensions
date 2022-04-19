@@ -1,16 +1,18 @@
 import { Action, ActionPanel, Icon, List, LocalStorage, open, showHUD, showToast, Toast } from "@raycast/api";
 import React, { useState } from "react";
-import { isEmpty, isImage } from "./utils/common-utils";
+import { commonPreferences, isEmpty, isImage } from "./utils/common-utils";
 import { DirectoryInfo, DirectoryType, FileInfo } from "./utils/directory-info";
 import { parse } from "path";
 import { pinDirectory } from "./pin-directory";
 import { LocalStorageKey } from "./utils/constants";
 import { copyFileByPath } from "./utils/applescript-utils";
-import { localDirectoryWithFiles, refreshNumber } from "./hooks/hooks";
+import { alertDialog, localDirectoryWithFiles, refreshNumber } from "./hooks/hooks";
+import fse from "fs-extra";
 
 export default function Command() {
   const [tag, setTag] = useState<string>("All");
   const [refresh, setRefresh] = useState<number>(0);
+  const { showDeleteAction } = commonPreferences();
 
   const { pinnedDirectory, directoryWithFiles, directoryTags, loading } = localDirectoryWithFiles(refresh);
 
@@ -63,10 +65,11 @@ export default function Command() {
                       actions={
                         <ActionPanel>
                           <ActionsOnFile
-                            directory={value}
+                            fileInfo={value}
                             directories={pinnedDirectory}
                             index={directoryIndex}
                             setRefresh={setRefresh}
+                            showDeleteAction={showDeleteAction}
                           />
                           <ActionPanel.Section title="Directory Action">
                             <Action
@@ -147,21 +150,22 @@ export default function Command() {
 }
 
 function ActionsOnFile(props: {
-  directory: FileInfo;
+  fileInfo: FileInfo;
   directories: DirectoryInfo[];
   index: number;
   setRefresh: React.Dispatch<React.SetStateAction<number>>;
+  showDeleteAction: boolean;
 }) {
-  const { directory, directories, index, setRefresh } = props;
+  const { fileInfo, directories, index, setRefresh, showDeleteAction } = props;
   return (
     <>
       <Action
         icon={Icon.Clipboard}
         title={"Copy to Clipboard"}
         onAction={async () => {
-          const copyResult = await copyFileByPath(directory.path);
+          const copyResult = await copyFileByPath(fileInfo.path);
           if (isEmpty(copyResult)) {
-            await showHUD(`${directory.name} is copied to clipboard`);
+            await showHUD(`${fileInfo.name} is copied to clipboard`);
           } else {
             await showHUD(copyResult);
           }
@@ -170,14 +174,14 @@ function ActionsOnFile(props: {
       />
       <Action
         icon={Icon.Window}
-        title={directory.type === DirectoryType.FILE ? "Open in Default App" : "Open in Finder"}
+        title={fileInfo.type === DirectoryType.FILE ? "Open in Default App" : "Open in Finder"}
         onAction={async () => {
           try {
-            await open(directory.path);
+            await open(fileInfo.path);
             await showHUD("Open in Default App");
             await upRank(directories, index, setRefresh);
           } catch (e) {
-            await showToast(Toast.Style.Failure, "Error.", "Path has expired.");
+            await showToast(Toast.Style.Failure, "Error.", String(e));
           }
         }}
       />
@@ -186,16 +190,38 @@ function ActionsOnFile(props: {
         title={"Reveal in Finder"}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
         onAction={async () => {
-          await open(parse(directory.path).dir);
           try {
-            await open(parse(directory.path).dir);
+            await open(parse(fileInfo.path).dir);
             await showHUD("Reveal in Finder");
             await upRank(directories, index, setRefresh);
           } catch (e) {
-            await showToast(Toast.Style.Failure, "Error.", "Path has expired.");
+            await showToast(Toast.Style.Failure, "Error.", String(e));
           }
         }}
       />
+      {showDeleteAction && (
+        <Action
+          icon={Icon.Trash}
+          title={"Delete File Permanently"}
+          shortcut={{ modifiers: ["shift", "ctrl"], key: "backspace" }}
+          onAction={async () => {
+            try {
+              await alertDialog(
+                async () => {
+                  fse.removeSync(fileInfo.path);
+                  setRefresh(refreshNumber());
+                  await showToast(Toast.Style.Success, "Success!", `${fileInfo.name} was deleted.`);
+                },
+                async () => {
+                  await showToast(Toast.Style.Failure, "Error!", `Operation is canceled.`);
+                }
+              );
+            } catch (e) {
+              await showToast(Toast.Style.Failure, "Error.", String(e));
+            }
+          }}
+        />
+      )}
     </>
   );
 }

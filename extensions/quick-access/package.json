@@ -24,6 +24,15 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "showDeleteAction",
+          "type": "checkbox",
+          "required": true,
+          "title": "Advanced Preference",
+          "label": "Show Delete File Action",
+          "description": "Show permanent file deletion action, please check carefully.",
+          "default": false
+        },
+        {
           "name": "fileShowNumber",
           "type": "dropdown",
           "required": true,

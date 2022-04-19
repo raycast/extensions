@@ -9,7 +9,7 @@ import {
   isEmpty,
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
-import { LocalStorage } from "@raycast/api";
+import { Alert, confirmAlert, LocalStorage } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 //for refresh useState
@@ -76,4 +76,20 @@ export const localDirectoryWithFiles = (refresh: number) => {
     directoryTags: directoryTags,
     loading: loading,
   };
+};
+
+export const alertDialog = async (confirmAction: () => void, cancelAction: () => void) => {
+  const options: Alert.Options = {
+    title: "⚠️Warning",
+    message: "Deleted files cannot be recovered. Do you want to Delete?",
+    primaryAction: {
+      title: "Delete",
+      onAction: confirmAction,
+    },
+    dismissAction: {
+      title: "Cancel",
+      onAction: () => cancelAction,
+    },
+  };
+  await confirmAlert(options);
 };

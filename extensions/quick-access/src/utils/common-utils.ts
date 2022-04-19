@@ -9,6 +9,7 @@ import { getFinderInsertLocation } from "./applescript-utils";
 export const commonPreferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
+    showDeleteAction: preferencesMap.get("showDeleteAction") as boolean,
     fileShowNumber: preferencesMap.get("fileShowNumber") as string,
     sortBy: preferencesMap.get("sortBy") as string,
   };
