@@ -4,6 +4,7 @@ import json2md from "json2md";
 import { format, parse } from "date-fns";
 import { Entry } from "./types";
 import { useSeasons, useTables } from "./hooks";
+import { convertToLocalTime } from "./utils";
 
 export default function GetTables() {
   const seasons = useSeasons();
@@ -44,22 +45,14 @@ export default function GetTables() {
     ];
 
     if (next) {
-      const label = next.kickoff.label
-        ?.replace("BST", "+01:00")
-        .replace("GMT", "+00:00");
-      const kickoff = label
-        ? format(
-            parse(label, "EEE d MMM yyyy, HH:mm XXX", new Date()),
-            "EEE d MMM yyyy, HH:mm"
-          )
-        : "";
+      const time = convertToLocalTime(next.kickoff.label);
 
       dataObject.push(
         { h2: "Next Fixture" },
         {
           p: [
             `**${next.teams[0].team.name} - ${next.teams[1].team.name}**`,
-            `Time: ${kickoff}`,
+            `Time: ${time}`,
             `Stadium: ${next.ground.name}, **${next.ground.city}**`,
           ],
         }
@@ -147,7 +140,7 @@ export default function GetTables() {
                     source: `https://resources.premierleague.com/premierleague/badges/${nextTeam.team.altIds.opta}.svg`,
                     fallback: "default.png",
                   },
-                  tooltip: "Next",
+                  tooltip: `${next.teams[0].team.shortName} - ${next.teams[1].team.shortName}`,
                 });
               }
 
