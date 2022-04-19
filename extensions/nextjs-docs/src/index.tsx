@@ -1,54 +1,23 @@
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
-import GithubOcto from "./Octokit";
-import { useEffect, useState } from "react";
-import type TopicType from "./types/Topic";
+import { ActionPanel, Action, Icon, List, showToast, Toast } from "@raycast/api";
 import TopicDetail from "./TopicDetail";
-import path from "path";
-import GithubTreeType from "./types/GithubTree";
+import { Topic } from "./types/GithubType";
+import { useEffect, useState } from "react";
+import { getTopicsFromCache as getTopics } from "./services/Github";
 
 export default function main() {
-  const [topics, setTopics] = useState<TopicType[]>();
+  const [topics, setTopics] = useState<Topic[]>();
 
   useEffect(() => {
-    const fetchDocFiles = async () => {
-      const octokit = new GithubOcto();
-      const { data } = await octokit.request(
-        "GET /repos/vercel/next.js/git/trees/86651d4c4f53e8a2882e22339fb78d0aa2879562",
-        {
-          recursive: true,
-        }
-      );
-
-      const results = data.tree
-        .filter((file: GithubTreeType) => file.type == "blob")
-        .map((file: TopicType) => {
-          const item: TopicType = {
-            type: "",
-            path: "",
-            sha: "",
-            name: "",
-            title: "",
-            filepath: "",
-          };
-          item.type = file.type;
-          item.path = file.path;
-          item.sha = file.sha;
-
-          item.name = path.parse(file.path).name;
-
-          const finalTitle = item.name
-            .split("-")
-            .join(" ")
-            .replace(/(^\w{1})|(\s+\w{1})/g, (letter) => letter.toUpperCase());
-          item.title = finalTitle;
-
-          item.filepath = path.parse(file.path).dir;
-          return item;
+    getTopics()
+      .then((results: string) => {
+        setTopics(JSON.parse(results));
+      })
+      .catch((err: string) => {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Sorry, something went wrong! " + err,
         });
-
-      setTopics(results);
-    };
-    fetchDocFiles();
+      });
   }, []);
 
   if (!topics) {

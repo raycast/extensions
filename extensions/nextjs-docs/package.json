@@ -7,7 +7,8 @@
   "author": "PrasadChinwal",
   "categories": [
     "Productivity",
-    "Documentation"
+    "Documentation",
+    "Developer Tools"
   ],
   "license": "MIT",
   "commands": [
@@ -15,16 +16,7 @@
       "name": "index",
       "title": "NextJS Docs",
       "description": "Search NextJS docs in Ray",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "github_personal_access_token",
-          "type": "textfield",
-          "required": true,
-          "title": "Github Personal Access Token",
-          "description": "You can find your Personal Access Token at https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token"
-        }
-      ]
+      "mode": "view"
     }
   ],
   "dependencies": {

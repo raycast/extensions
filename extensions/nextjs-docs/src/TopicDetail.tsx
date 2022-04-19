@@ -1,27 +1,25 @@
-import { Detail, Action, ActionPanel } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { Octokit } from "@octokit/core";
-import Topic from "./types/Topic";
+import { Detail, Action, ActionPanel, showToast, Toast } from "@raycast/api";
 import Home from "./index";
-
+import { Topic } from "./types/GithubType";
 import YamlFront from "./yaml-front-matter";
+import { useEffect, useState } from "react";
+import { getTopicFromCache } from "./services/Github";
 
 const TopicDetail = (props: { topic: Topic }) => {
   const [mark, setMark] = useState("");
   useEffect(() => {
-    const fetchDocFiles = async () => {
-      const octokit = new Octokit();
-
-      const { data } = await octokit.request(`GET /repos/vercel/next.js/contents/docs/${props.topic.path}`, {
-        headers: {
-          accept: " application/vnd.github.v3.raw",
-        },
+    getTopicFromCache(props.topic)
+      .then((result: string) => {
+        const parsed = YamlFront.loadFront(result);
+        setMark(parsed.__content);
+      })
+      .catch((err: string) => {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to fetch data! " + err,
+        });
       });
-      const parsed = YamlFront.loadFront(data);
-      setMark(parsed.__content);
-    };
-    fetchDocFiles();
-  }, [mark, setMark]);
+  }, []);
 
   if (!mark) return <Detail navigationTitle={props.topic.title} isLoading />;
 

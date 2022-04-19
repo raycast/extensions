@@ -1,4 +1,4 @@
-interface Topic {
+export interface Topic {
   name: string;
   sha: string;
   type: string;
@@ -6,4 +6,9 @@ interface Topic {
   filepath: string;
   title: string;
 }
-export default Topic;
+
+export interface Tree {
+  path: string;
+  type: string;
+  sha: string;
+}
