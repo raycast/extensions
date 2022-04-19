@@ -7,7 +7,7 @@ const service = new Service();
 
 function Command() {
   const [sets, setSets] = useState<Set[]>([]);
-  const [activeSet, setActiveSet] = useState<string>();
+  const [activeSetId, setActiveSetId] = useState<string>();
   const [icons, setIcons] = useState<Icon[]>([]);
   const [isLoading, setLoading] = useState(true);
 
@@ -22,18 +22,23 @@ function Command() {
 
   useEffect(() => {
     async function fetchIcons() {
-      if (!activeSet) {
+      if (!activeSetId) {
         return;
       }
       setLoading(true);
       setIcons([]);
-      const icons = await service.listIcons(activeSet);
+      const activeSet = sets.find((set) => set.id === activeSetId);
+      if (!activeSet) {
+        setLoading(false);
+        return;
+      }
+      const icons = await service.listIcons(activeSetId, activeSet.name);
       setIcons(icons);
       setLoading(false);
     }
 
     fetchIcons();
-  }, [activeSet]);
+  }, [activeSetId]);
 
   return (
     <List
@@ -42,7 +47,7 @@ function Command() {
         <List.Dropdown
           tooltip="Select an icon set"
           storeValue={true}
-          onChange={setActiveSet}
+          onChange={setActiveSetId}
         >
           {sets.map((set) => (
             <List.Dropdown.Item key={set.id} title={set.name} value={set.id} />
