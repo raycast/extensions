@@ -137,7 +137,7 @@ export default function Command({
         task_id: parseInt(values.task_id.toString()),
         spent_date: dayjs(spentDate).format("YYYY-MM-DD"),
       },
-      entry?.id.toString()
+      entry?.id?.toString()
     ).catch(async (error) => {
       console.error(error.response.data);
       await showToast({
