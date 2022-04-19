@@ -120,7 +120,6 @@ function parseRepoPaths(repoPaths: string[]): SourceRepo[] {
     const name = fullPath.split("/").pop() ?? "unknown";
     return { name: name, icon: "node-js.png", fullPath: fullPath };
   });
-
 }
 
 export async function findRepos(paths: string[], maxDepth: number): Promise<SourceRepo[]> {
@@ -192,10 +191,7 @@ export function useRepoCache(query: string | undefined): {
         if (unresolvedPaths.length > 0) {
           setError(`Director${unresolvedPaths.length === 1 ? "y" : "ies"} not found: ${unresolvedPaths}`);
         }
-        const repos = await findRepos(
-          repoPaths,
-          preferences.repoScanDepth ?? 3,
-        );
+        const repos = await findRepos(repoPaths, preferences.repoScanDepth ?? 3);
 
         if (!cancel) {
           let filteredRepos = repos;

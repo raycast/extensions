@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 
 import { useState, ReactElement } from "react";
 import { Preferences, tildifyPath, useRepoCache } from "./utils";
