@@ -54,8 +54,8 @@ async function getTopicsFromGithub() {
  * Get the topics from cache or make an api call
  * @returns Promise
  */
-export async function getTopicsFromCache(): Promise {
-  const last_updated = await LocalStorage.getItem("updated_at");
+export async function getTopicsFromCache(): Promise<string> {
+  const last_updated:string = await LocalStorage.getItem("updated_at");
 
   const last_updated_date = new Date(last_updated).setHours(0, 0, 0, 0);
   const today = new Date().setHours(0, 0, 0, 0);
@@ -65,7 +65,7 @@ export async function getTopicsFromCache(): Promise {
     await getTopicsFromGithub();
   }
 
-  const topics = await LocalStorage.getItem("topics");
+  const topics:string = await LocalStorage.getItem("topics") || '';
   if (!topics) throw new Error("Cached results not loaded!");
   return topics;
 }
@@ -115,6 +115,7 @@ function writeToFile(name: string, content: string) {
     fs.writeFileSync(`${data_path}/${name}.md`, content);
     return true;
   } catch (err) {
+    clearStorageItem(`${name}_updated_at`);
     throw new Error("Failed to write to file!");
   }
 }
@@ -129,6 +130,7 @@ function readFromFile(name: string) {
     const data = fs.readFileSync(`${data_path}/${name}.md`, "utf8");
     return data;
   } catch (err) {
+    clearStorageItem(`${name}_updated_at`);
     throw new Error("Failed to read from file!");
   }
 }
@@ -138,11 +140,11 @@ function readFromFile(name: string) {
  * @param topic
  * @returns
  */
-export async function getTopicFromCache(topic: Topic): Promise {
+export async function getTopicFromCache(topic: Topic): Promise<string> {
   const data_folder = createDataFolder();
   if (!data_folder) throw new Error("Failed to create folder!");
-  const last_updated = await LocalStorage.getItem(`${topic.name}_updated_at`);
 
+  const last_updated:string = await LocalStorage.getItem(`${topic.name}_updated_at`);
   const last_updated_date = new Date(last_updated).setHours(0, 0, 0, 0);
   const today = new Date().setHours(0, 0, 0, 0);
 
@@ -151,7 +153,16 @@ export async function getTopicFromCache(topic: Topic): Promise {
     await getTopicFromGithub(topic);
   }
 
-  const topicData = readFromFile(topic.name);
+  const topicData:string = readFromFile(topic.name);
   if (!topicData) throw new Error("Cached results not loaded!");
   return topicData;
+}
+
+
+/**
+ * Remove the value for the given key from the local storage.
+ * @param key
+ */
+async function clearStorageItem(key:string) {
+  await LocalStorage.removeItem(key);
 }
