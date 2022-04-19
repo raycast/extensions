@@ -18,7 +18,7 @@ export default function CommandSearch() {
     <List
       enableFiltering={false}
       onSearchTextChange={setSearchText}
-      navigationTitle="Search vim commands"
+      navigationTitle="Search Vim Commands"
       searchBarPlaceholder="Learn new command by searching it here."
     >
       {filteredList.map((commandGroup: CommandGroup) => {

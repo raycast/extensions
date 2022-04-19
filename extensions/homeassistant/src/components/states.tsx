@@ -15,6 +15,8 @@ import {
   SelectSourceAction,
   getMediaPlayerTitleAndArtist,
   CopyTrackToClipboard,
+  MediaPlayerTurnOnAction,
+  MediaPlayerTurnOffAction,
 } from "./mediaplayer";
 import {
   BrightnessControlAction,
@@ -49,6 +51,7 @@ import { InputSelectOptionSelectAction } from "./input_select";
 import { InputButtonPressAction } from "./input_button";
 import { InputTextSetValueAction } from "./input_text";
 import { InputDateTimeSetValueAction } from "./input_datetime";
+import { UpdateInstallAction, UpdateOpenInBrowser, UpdateShowChangelog, UpdateSkipVersionAction } from "./updates";
 
 const PrimaryIconColor = Color.Blue;
 const UnavailableColor = "#bdbdbd";
@@ -153,6 +156,12 @@ function getIcon(state: State): Image.ImageLike | undefined {
     return { source: source, tintColor: color };
   } else if (e.startsWith("person")) {
     return { source: "person.png", tintColor: PrimaryIconColor };
+  } else if (e.startsWith("update")) {
+    const ep = (state.attributes.entity_picture as string) || undefined;
+    if (ep) {
+      return ep.startsWith("/") ? ha.urlJoin(ep) : ep;
+    }
+    return { source: "update.png", tintColor: state.state === "on" ? Color.Yellow : PrimaryIconColor };
   } else if (e.startsWith("cover")) {
     const source = coverStateIconSource[`${state.state}`] || coverStateIconSource.open;
     return { source: source, tintColor: PrimaryIconColor };
@@ -325,6 +334,18 @@ export function StateListItem(props: { state: State }): JSX.Element {
       return state.state;
     } else if (state.entity_id.startsWith("input_button")) {
       return new Date(state.state).toISOString().replace("T", " ").replace("Z", "");
+    } else if (state.entity_id.startsWith("update")) {
+      const iv = state.attributes.installed_version;
+      const lv = state.attributes.latest_version;
+      if (state.state === "on" && lv) {
+        if (iv) {
+          return `${iv} => ${lv}`;
+        }
+        return lv;
+      } else if (state.state === "off") {
+        return "✅";
+      }
+      return state.state;
     }
     return state.state;
   };
@@ -507,6 +528,8 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               onAction={async () => await ha.previousMedia(entityID)}
               icon={{ source: "previous.png", tintColor: Color.PrimaryText }}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Volume">
             <Action
               title="Volume Up"
               shortcut={{ modifiers: ["cmd"], key: "+" }}
@@ -527,6 +550,10 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
               icon={{ source: Icon.SpeakerSlash, tintColor: Color.PrimaryText }}
             />
             <SelectSourceAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Power">
+            <MediaPlayerTurnOnAction state={state} />
+            <MediaPlayerTurnOffAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={state} />
@@ -956,6 +983,31 @@ export function StateActionPanel(props: { state: State }): JSX.Element {
         <ActionPanel>
           <ActionPanel.Section title="Controls">
             <InputDateTimeSetValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Attributes">
+            <ShowAttributesAction state={props.state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Values">
+            <CopyEntityIDAction state={state} />
+            <CopyStateValueAction state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="History">
+            <OpenEntityHistoryAction state={state} />
+            <OpenEntityLogbookAction state={state} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      );
+    }
+    case "update": {
+      return (
+        <ActionPanel>
+          <ActionPanel.Section title="Controls">
+            <UpdateShowChangelog state={state} />
+            <UpdateOpenInBrowser state={state} />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Install">
+            <UpdateInstallAction state={state} />
+            <UpdateSkipVersionAction state={state} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Attributes">
             <ShowAttributesAction state={props.state} />

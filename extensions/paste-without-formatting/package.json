@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "paste-without-formatting",
-  "title": "Paste without Formatting",
-  "description": "Paste text from the clipboard without formatting.",
+  "name": "paste-as-plain-text",
+  "title": "Paste as Plain Text",
+  "description": "Paste text from the clipboard as plain text.",
   "icon": "paste-icon.png",
   "author": "koinzhang",
   "categories": [
@@ -12,14 +12,14 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "paste-without-formatting",
-      "title": "Paste without Formatting",
-      "description": "Paste text from the clipboard without formatting.",
+      "name": "paste-as-plain-text",
+      "title": "Paste as Plain Text",
+      "description": "Paste text from the clipboard as plain text.",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.31.0"
+    "@raycast/api": "^1.32.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
