@@ -42,8 +42,8 @@ function UnreadMessagesOverview() {
 
   const setConversations = async () => {
     const item = await LocalStorage.getItem(conversationsStorageKey);
-    const conversations = item ? JSON.parse(item as string) : undefined;
-    if (!!conversations && (!selectedConversations || !isEqual(selectedConversations, conversations))) {
+    const conversations = item ? JSON.parse(item as string) : [];
+    if (!selectedConversations || !isEqual(selectedConversations, conversations)) {
       setSelectedConversations(conversations);
     }
   };
