@@ -86,6 +86,10 @@ async function fetchTokens(
     method: "POST",
     body: params,
   });
+  if (!response.ok) {
+    console.error("fetch tokens error:", await response.text());
+    throw new Error(response.statusText);
+  }
   return (await response.json()) as OAuth.TokenResponse;
 }
 ```
@@ -120,6 +124,7 @@ if (tokenSet?.accessToken) {
   }
   return;
 }
+// authorize...
 ```
 
 This code would run before starting the authorization flow. It checks the presence of a token set to see whether the user is logged in and then checks whether there is a refresh token and the token set is expired (through the convenience method `isExpired()` on the `TokenSet`). If it is expired, the token is refreshed and updated in the token set. Example using `node-fetch`:
@@ -129,7 +134,7 @@ async function refreshTokens(
   refreshToken: string
 ): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
-  params.append("client_id", clientId);
+  params.append("client_id", "YourClientId");
   params.append("refresh_token", refreshToken);
   params.append("grant_type", "refresh_token");
 
@@ -137,6 +142,11 @@ async function refreshTokens(
     method: "POST",
     body: params,
   });
+  if (!response.ok) {
+    console.error("refresh tokens error:", await response.text());
+    throw new Error(response.statusText);
+  }
+
   const tokenResponse = (await response.json()) as OAuth.TokenResponse;
   tokenResponse.refresh_token = tokenResponse.refresh_token ?? refreshToken;
   return tokenResponse;
