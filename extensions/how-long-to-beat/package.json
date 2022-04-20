@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "howlongtobeat",
   "title": "HowLongToBeat",
-  "description": "Discover how many time you need to beat a game.",
+  "description": "Discover how many hours you need to beat a game.",
   "icon": "icon.png",
   "author": "Cronos87",
   "categories": [
@@ -13,8 +13,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search How Long To Beat a Game",
-      "description": "Search games and discover how many times you need to beat them.",
+      "title": "How Long To Beat a Game",
+      "description": "Search games and discover how many hours you need to beat them.",
       "mode": "view"
     }
   ],
