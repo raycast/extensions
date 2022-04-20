@@ -145,7 +145,7 @@ async function refreshTokens(
 
 ## Examples
 
-We've provided [OAuth example integrations for Google and Twitter](https://github.com/raycast/extensions/tree/main/examples) that use a Raycast client ID and demonstrate the entire flow shown above.
+We've provided [OAuth example integrations for Google, Twitter, and Dropbox](https://github.com/raycast/extensions/tree/main/examples/api-examples) that demonstrate the entire flow shown above.
 
 ## API Reference
 
