@@ -105,21 +105,6 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
             />
           )}
           <List.Item
-            id="open-in-ssh"
-            key="open-in-ssh"
-            title={`Open SSH connection (${site.username})`}
-            icon={Icon.Terminal}
-            accessoryTitle={`ssh://${site.username}@${server.ipAddress}`}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser
-                  title={`Open SSH Connection (${site.username})`}
-                  url={`ssh://${site.username}@${server.ipAddress}`}
-                />
-              </ActionPanel>
-            }
-          />
-          <List.Item
             id="site-env"
             key="site-env"
             title="View .env file"
@@ -151,6 +136,21 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
                   title="Open Nginx Config"
                   icon={Icon.TextDocument}
                   target={<NginxFile site={site} server={server} />}
+                />
+              </ActionPanel>
+            }
+          />
+          <List.Item
+            id="open-in-ssh"
+            key="open-in-ssh"
+            title={`Open SSH connection (${site.username})`}
+            icon={Icon.Terminal}
+            accessoryTitle={`ssh://${site.username}@${server.ipAddress}`}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  title={`Open SSH Connection (${site.username})`}
+                  url={`ssh://${site.username}@${server.ipAddress}`}
                 />
               </ActionPanel>
             }
