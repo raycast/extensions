@@ -64,6 +64,9 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
         </ActionPanel>
       }
     >
+      <Form.Description
+        text={`The template file is equivalent to the file snippets, which you can use it to create new files directly, or just copy it.`}
+      />
       <Form.TextArea id={"path"} title={"Path"} placeholder={"/xxx/xxx"} value={path} onChange={setPath} />
       <Form.TextField
         id={"name"}
