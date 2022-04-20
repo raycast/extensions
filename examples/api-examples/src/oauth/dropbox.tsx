@@ -1,7 +1,11 @@
 import { OAuth } from "@raycast/api";
 import fetch from "node-fetch";
 
+// Create an OAuth app via https://www.dropbox.com/developers/apps
+// As redirect URL add: https://raycast.com/redirect?packageName=Extension
+// Make sure to select and save the permissions that you add via the scope request parameter
 const clientId = "YourClientId";
+
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Dropbox",
