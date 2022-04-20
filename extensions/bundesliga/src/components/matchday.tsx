@@ -77,44 +77,6 @@ function convert(entry: LiveBlogEntryItem) {
               ),
             },
           ];
-        // case "player":
-        //   return [
-        //     {
-        //       h2: entry.detail.headline
-        //         ? `${time} - ${entry.detail.headline}`
-        //         : time,
-        //     },
-        //     { p: entry.detail.text || "" },
-        //     { h3: entry.detail.title },
-        //     {
-        //       ul: [
-        //         `**Home:** ${entry.detail.home.person.name}`,
-        //         `**Away:** ${entry.detail.away.person.name}`,
-        //       ],
-        //     },
-        //   ];
-        // case "clubProgressRanking":
-        //   return [
-        //     { h2: `${time} - ${entry.detail.headline}` },
-        //     { p: entry.detail.text },
-        //   ];
-        // case "playerProgressRanking":
-        //   return [
-        //     {
-        //       h2: entry.detail.headline
-        //         ? `${time} - ${entry.detail.headline}`
-        //         : time,
-        //     },
-        //     { p: entry.detail.text || "" },
-        //     ...Object.entries(groupBy(entry.detail.ranking, "side")).map(
-        //       ([side, players]) => {
-        //         return [
-        //           { h3: side },
-        //           { p: players.map((p) => `${p.person.name}: ${p.value}`) },
-        //         ];
-        //       }
-        //     ),
-        //   ];
         default:
           return [];
       }

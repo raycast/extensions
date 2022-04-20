@@ -87,6 +87,7 @@ export default function Table() {
               <ActionPanel>
                 <Action
                   title="Show Stats"
+                  icon={Icon.Sidebar}
                   onAction={() => setShowStats(!showStats)}
                 />
               </ActionPanel>

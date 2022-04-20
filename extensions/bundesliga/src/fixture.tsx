@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, List, Icon } from "@raycast/api";
 import { useState } from "react";
 import Matchday from "./components/matchday";
 import { useFixtures } from "./hooks";
@@ -49,6 +49,7 @@ export default function Fixture() {
                 <ActionPanel>
                   <Action.Push
                     title="Match Details"
+                    icon={Icon.Sidebar}
                     target={<Matchday {...fixture} />}
                   />
                 </ActionPanel>
