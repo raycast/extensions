@@ -75,9 +75,6 @@ function ClubDetails(props: { team: Club; competition: string }) {
       actions={
         team && (
           <ActionPanel>
-            <Action.OpenInBrowser
-              url={`https://www.bundesliga.com/en/${competition}/clubs/${team.name.slugifiedFull}`}
-            />
             <Action.Push
               title="Squad"
               icon={Icon.Person}
@@ -87,6 +84,9 @@ function ClubDetails(props: { team: Club; competition: string }) {
                   club={team.id}
                 />
               }
+            />
+            <Action.OpenInBrowser
+              url={`https://www.bundesliga.com/en/${competition}/clubs/${team.name.slugifiedFull}`}
             />
           </ActionPanel>
         )
