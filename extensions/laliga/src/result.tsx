@@ -1,4 +1,11 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import CompetitionDropdown, {
@@ -27,10 +34,18 @@ export default function Fixture() {
 
   useEffect(() => {
     if (matchday) {
+      showToast({
+        title: `Getting Matchday ${matchday}`,
+        style: Toast.Style.Animated,
+      });
       getMatches(competition, matchday).then((data) => {
         setMatches({
           ...matches,
           [`Matchday ${matchday}`]: data,
+        });
+        showToast({
+          title: `Matchday ${matchday} Added`,
+          style: Toast.Style.Success,
         });
       });
     }
