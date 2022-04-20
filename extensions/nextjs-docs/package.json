@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nextjs-docs",
-  "title": "nextjs-docs",
+  "title": "Nextjs-docs",
   "description": "Efficiently search NextJS documentation from RayCast.",
   "icon": "command-icon.png",
   "author": "PrasadChinwal",
