@@ -1,7 +1,13 @@
 import { OAuth } from "@raycast/api";
 import fetch from "node-fetch";
 
+// Register a new OAuth app via https://developer.twitter.com/en/portal/dashboard
+// Select OAuth 2.0
+// As type of app choose: Native App
+// For the redirect URL enter: https://raycast.com/redirect
+// For the website URL enter: https://raycast.com
 const clientId = "YourClientId";
+
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Twitter",

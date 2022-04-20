@@ -4,6 +4,7 @@ import * as google from "./oauth/google";
 import * as twitter from "./oauth/twitter";
 import * as dropbox from "./oauth/dropbox";
 
+// Update the service name here for testing different providers
 const serviceName = "twitter";
 
 export default function Command() {
@@ -44,11 +45,11 @@ export default function Command() {
 function getService(serviceName: string): Service {
   switch (serviceName) {
     case "google":
-      return google as unknown as Service;
+      return google as Service;
     case "twitter":
-      return twitter as unknown as Service;
+      return twitter as Service;
     case "dropbox":
-      return dropbox as unknown as Service;
+      return dropbox as Service;
     default:
       throw new Error("Unsupported service: " + serviceName);
   }
@@ -57,5 +58,4 @@ function getService(serviceName: string): Service {
 interface Service {
   authorize(): Promise<void>;
   fetchItems(): Promise<{ id: string; title: string }[]>;
-  logout(): void;
 }
