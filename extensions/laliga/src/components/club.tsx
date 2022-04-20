@@ -78,13 +78,13 @@ export default function ClubDetails(team: Team) {
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            url={`https://www.laliga.com/en-GB/clubs/${team.slug}`}
-          />
           <Action.Push
             title="Squad"
             icon={Icon.Person}
             target={<ClubSquad {...team} />}
+          />
+          <Action.OpenInBrowser
+            url={`https://www.laliga.com/en-GB/clubs/${team.slug}`}
           />
         </ActionPanel>
       }
