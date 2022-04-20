@@ -1,6 +1,6 @@
 import { Action, ActionPanel, List, Icon } from "@raycast/api";
 import { usePersons } from "../hooks";
-import { getFlagEmoji } from "../utils";
+import { getFlagEmoji, positionMap } from "../utils";
 import Person from "./person";
 
 type PropsType = {
@@ -16,7 +16,7 @@ export default function ClubPersons(props: PropsType) {
       {players &&
         Object.entries(players).map(([position, persons]) => {
           return (
-            <List.Section key={position} title={position}>
+            <List.Section key={position} title={positionMap.get(position)}>
               {persons.map((person, idx) => {
                 const props: Partial<List.Item.Props> = {
                   accessories: [

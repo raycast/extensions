@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { showToast, Toast } from "@raycast/api";
 import * as cheerio from "cheerio";
 import { ClubPerson, CompetitionClub, Player, Players } from "../types";
-import { Entry, Matchday } from "../types/firebase";
+import { Entry, LiveBlogEntries, Matchday } from "../types/firebase";
 
 function showFailureToast() {
   showToast(
@@ -127,5 +127,25 @@ export const getResults = async (competition: string): Promise<Matchday[]> => {
     showFailureToast();
 
     return [];
+  }
+};
+
+export const getMatchday = async (
+  url: string
+): Promise<LiveBlogEntries | undefined> => {
+  const config: AxiosRequestConfig = {
+    method: "get",
+    url,
+  };
+
+  try {
+    const resp = await axios(config);
+    const data: Matchday = load(resp.data);
+
+    return data.liveBlogEntries;
+  } catch (e) {
+    showFailureToast();
+
+    return undefined;
   }
 };

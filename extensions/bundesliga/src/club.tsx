@@ -106,6 +106,7 @@ export default function Club() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by Competition"
+          value={competition}
           onChange={setCompetition}
         >
           <List.Dropdown.Item title="Bundesliga" value="bundesliga" />

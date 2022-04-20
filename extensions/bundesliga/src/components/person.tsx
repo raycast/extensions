@@ -2,6 +2,7 @@ import { Detail } from "@raycast/api";
 import json2md from "json2md";
 import { usePerson } from "../hooks";
 import { Name } from "../types";
+import { positionMap } from "../utils";
 
 export default function Person(props: Name) {
   const player = usePerson(props.slugifiedFull);
@@ -51,7 +52,10 @@ export default function Person(props: Name) {
             }${player.bio.weight.unit.toLowerCase()}`}
           />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Position" text={player.position} />
+          <Detail.Metadata.Label
+            title="Position"
+            text={positionMap.get(player.position)}
+          />
           <Detail.Metadata.Label
             title="Shirt Number"
             text={player.shirtNumber}
