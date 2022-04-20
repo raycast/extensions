@@ -45,6 +45,7 @@ export default function ClubPersons(props: PropsType) {
                     key={position + idx}
                     title={person.shirtNumber}
                     subtitle={person.name.full}
+                    keywords={[person.name.full]}
                     icon={{
                       source: person.playerImages.FACE_CIRCLE,
                       fallback: "player-circle-default.png",
