@@ -16,10 +16,15 @@ export const competitions = [
 ];
 
 export default function CompetitionDropdown(props: {
+  selected: string;
   onSelect: React.Dispatch<React.SetStateAction<string>>;
 }) {
   return (
-    <List.Dropdown tooltip="Filter by Competition" onChange={props.onSelect}>
+    <List.Dropdown
+      tooltip="Filter by Competition"
+      value={props.selected}
+      onChange={props.onSelect}
+    >
       <List.Dropdown.Section>
         {competitions.map((competition) => {
           return (

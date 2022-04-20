@@ -40,7 +40,9 @@ export default function Fixture() {
     <List
       throttle
       isLoading={!matches}
-      searchBarAccessory={<CompetitionDropdown onSelect={setCompetition} />}
+      searchBarAccessory={
+        <CompetitionDropdown selected={competition} onSelect={setCompetition} />
+      }
     >
       {Object.entries(matches || {}).map(([label, results]) => {
         return (

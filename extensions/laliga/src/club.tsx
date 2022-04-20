@@ -22,7 +22,9 @@ export default function Club() {
     <List
       throttle
       isLoading={!clubs}
-      searchBarAccessory={<CompetitionDropdown onSelect={setCompetition} />}
+      searchBarAccessory={
+        <CompetitionDropdown selected={competition} onSelect={setCompetition} />
+      }
     >
       {clubs?.map((club) => {
         return (

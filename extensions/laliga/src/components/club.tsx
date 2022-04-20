@@ -12,7 +12,7 @@ export default function ClubDetails(team: Team) {
       navigationTitle={`${club.nickname} | Club`}
       markdown={json2md([
         { h1: club.name },
-        { p: club.address },
+        { p: club.address ?? "" },
         venue.image
           ? {
               img: {

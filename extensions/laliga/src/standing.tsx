@@ -42,7 +42,9 @@ export default function GetTables() {
     <List
       throttle
       isLoading={!standing}
-      searchBarAccessory={<CompetitionDropdown onSelect={setCompetition} />}
+      searchBarAccessory={
+        <CompetitionDropdown selected={competition} onSelect={setCompetition} />
+      }
       isShowingDetail={showStats}
     >
       {standing?.map((team) => {
