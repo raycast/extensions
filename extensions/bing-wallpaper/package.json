@@ -32,11 +32,11 @@
     {
       "name": "downloadDirectory",
       "title": "Download Directory",
-      "description": "The directory of wallpaper to download. Default is Downloads.",
+      "description": "The directory of wallpaper to download. Path format: /Users/Username/Downloads or ~/Downloads.",
       "type": "textfield",
       "required": true,
-      "placeholder": "Path format: /Users/Username/Downloads",
-      "default": "Default: /Users/Username/Downloads"
+      "placeholder": "~/Downloads",
+      "default": "~/Downloads"
     },
     {
       "name": "downloadSize",

@@ -20,14 +20,14 @@ export const isEmpty = (string: string | null | undefined) => {
 
 export const getScreenshotDirectory = () => {
   const directoryPreference = preferences().downloadDirectory;
-  if (
-    isEmpty(directoryPreference) ||
-    !fse.pathExistsSync(directoryPreference) ||
-    directoryPreference == "Default is /Users/Username/Downloads"
-  ) {
+  let actualDirectory = directoryPreference;
+  if (directoryPreference.startsWith("~")) {
+    actualDirectory = directoryPreference.replace("~", `${homedir()}`);
+  }
+  if (isEmpty(actualDirectory) || !fse.pathExistsSync(actualDirectory)) {
     return homedir() + "/Downloads";
   }
-  return directoryPreference.endsWith("/") ? directoryPreference.substring(0, -1) : directoryPreference;
+  return actualDirectory.endsWith("/") ? actualDirectory.substring(0, -1) : actualDirectory;
 };
 
 export const setWallpaper = async (title: string, url: string) => {
