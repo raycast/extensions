@@ -20,7 +20,11 @@ export const isEmpty = (string: string | null | undefined) => {
 
 export const getScreenshotDirectory = () => {
   const directoryPreference = preferences().downloadDirectory;
-  if (isEmpty(directoryPreference) || !fse.pathExistsSync(directoryPreference)) {
+  if (
+    isEmpty(directoryPreference) ||
+    !fse.pathExistsSync(directoryPreference) ||
+    directoryPreference == "Default is /Users/Username/Downloads"
+  ) {
     return homedir() + "/Downloads";
   }
   return directoryPreference.endsWith("/") ? directoryPreference.substring(0, -1) : directoryPreference;

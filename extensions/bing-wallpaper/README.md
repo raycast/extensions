@@ -13,17 +13,18 @@ Get and set Bing wallpapers within 15 days.
 
   - Search Picture(⇧⌘S): Search current picture with bing
 
-  - Clear Wallpaper Cache(⇧⌘⌫): Clear picture cache created when the “**Set Desktop Wallpaper**” action is used
+  - More Bing Wallpaper(⇧⌘M): Get more Bing wallpaper.
 
 - **Random Bing Wallpaper**: Set random Bing wallpapers within 15 days to desktop
 
 **Preferences**
 
 - *Apply Wallpaper To*
-  - Current Desktop
-  - Every Desktop
+  - Current Monitor
+  - Every Monitor
 - *Download Size*
   - Original: Raw
   - Full: 4K (3840×2160)
   - Regular: 2K (2560x1440)
   - Small: 1K (1920x1080)
+- *Auto Download Wallpapers*

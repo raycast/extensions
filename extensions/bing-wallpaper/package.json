@@ -14,15 +14,15 @@
     {
       "name": "applyTo",
       "title": "Apply Wallpaper To",
-      "description": "Apply the wallpaper to which screen.",
+      "description": "Apply the wallpaper to which Monitor. Valid only when you are using an extended monitor.",
       "type": "dropdown",
       "data": [
         {
-          "title": "Current Desktop",
+          "title": "Current Monitor",
           "value": "current"
         },
         {
-          "title": "Every Desktop",
+          "title": "Every Monitor",
           "value": "every"
         }
       ],
@@ -35,7 +35,8 @@
       "description": "The directory of wallpaper to download. Default is Downloads.",
       "type": "textfield",
       "required": true,
-      "default": ""
+      "placeholder": "Path format: /Users/Username/Downloads",
+      "default": "Default: /Users/Username/Downloads"
     },
     {
       "name": "downloadSize",
@@ -67,10 +68,10 @@
       "name": "autoDownload",
       "title": "Advance Options",
       "label": "Auto Download Wallpapers",
-      "description": "Automatically download wallpapers when you enter the extension.",
+      "description": "Automatically download all wallpapers to directory (default is /Users/Username/Downloads) when you enter the extension.",
       "type": "checkbox",
       "required": true,
-      "default": true
+      "default": false
     }
   ],
   "commands": [
