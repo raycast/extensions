@@ -24,6 +24,7 @@
     {
       "name": "search-gist",
       "title": "Search Gist",
+      "subtitle": "GitHub",
       "description": "Search and display GitHub Gist.",
       "mode": "view",
       "preferences": [
@@ -67,13 +68,14 @@
     {
       "name": "create-gist",
       "title": "Create Gist",
+      "subtitle": "GitHub",
       "description": "Create GitHub Gist from selection or clipboard.",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@octokit/core": "^3.6.0",
-    "@raycast/api": "^1.31.0"
+    "@raycast/api": "^1.32.1"
   },
   "devDependencies": {
     "@types/node": "~16.10.0",
