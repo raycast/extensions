@@ -4,7 +4,7 @@ import { AddTaskArgs } from "@doist/todoist-api-typescript";
 import useSWR from "swr";
 import { handleError, todoist } from "./api";
 import { priorities } from "./constants";
-import { getAPIDate } from "./utils";
+import { getAPIDate } from "./helpers";
 import Project from "./components/Project";
 import { SWRKeys } from "./types";
 

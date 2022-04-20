@@ -8,13 +8,11 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import AWS from "aws-sdk";
+import setupAws from "./util/setupAws";
+import { Preferences } from "./types";
 
-interface Preferences {
-  region: string;
-}
-
+setupAws();
 const preferences: Preferences = getPreferenceValues();
-AWS.config.update({ region: preferences.region });
 const sqs = new AWS.SQS({ apiVersion: "2012-11-05" });
 
 export default function ListSQSQueues() {
