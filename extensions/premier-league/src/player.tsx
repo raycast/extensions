@@ -45,8 +45,8 @@ function PlayerProfile(props: PlayerContent) {
         },
         {
           p: [
-            `Appearances: ${props.appearances}`,
-            `Clean sheets: ${props.cleanSheets}`,
+            `Appearances: ${props.appearances || 0}`,
+            `Clean sheets: ${props.cleanSheets || 0}`,
             `Goals: ${props.goals || 0}`,
             `Assists: ${props.assists || 0}`,
           ],
@@ -128,17 +128,13 @@ export default function Player(props: { club: Club }) {
 
   const players = usePlayers(teamId, seasonId, page, terms);
 
-  return (
-    <List
-      throttle
-      navigationTitle={
-        props.club ? `Squad | ${props.club.name} | Club` : "Players"
+  const listProps: Partial<List.Props> = props.club
+    ? {
+        navigationTitle: `Squad | ${props.club.name} | Club`,
       }
-      isLoading={!players}
-      searchText={terms}
-      onSearchTextChange={setTerms}
-      searchBarAccessory={
-        props.club || terms ? undefined : (
+    : {
+        navigationTitle: "Players",
+        searchBarAccessory: (
           <List.Dropdown
             tooltip="Filter by Club"
             value={teamId}
@@ -154,16 +150,23 @@ export default function Player(props: { club: Club }) {
               );
             })}
           </List.Dropdown>
-        )
-      }
-    >
+        ),
+      };
+
+  if (teamId === "-1") {
+    listProps.searchText = terms;
+    listProps.onSearchTextChange = setTerms;
+  }
+
+  return (
+    <List throttle isLoading={!players} {...listProps}>
       {props.club && (
         <List.EmptyView
           icon="empty.png"
           title="We don't have any data on this club."
         />
       )}
-      {terms.length < 3 && (
+      {!props.club && terms.length < 3 && (
         <List.EmptyView
           icon="player-missing.png"
           title="Search terms length must be at least 3 characters long."
@@ -176,6 +179,7 @@ export default function Player(props: { club: Club }) {
               key={p.id}
               title={p.name.display}
               subtitle={p.info.positionInfo}
+              keywords={[p.info.positionInfo]}
               icon={{
                 source: `https://resources.premierleague.com/premierleague/photos/players/40x40/${p.altIds.opta}.png`,
                 fallback: "player-missing.png",

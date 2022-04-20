@@ -20,13 +20,13 @@ export const getFlagEmoji = (isoCode: string) => {
     .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
 };
 
-export const convertToLocalTime = (label?: string) => {
+export const convertToLocalTime = (label?: string, outputFormat?: string) => {
   if (!label) return undefined;
 
   const time = label.replace("BST", "+01:00").replace("GMT", "+00:00");
 
   return format(
     parse(time, "EEE d MMM yyyy, HH:mm XXX", new Date()),
-    "EEE d MMM yyyy, HH:mm"
+    outputFormat || "EEE d MMM yyyy, HH:mm"
   );
 };

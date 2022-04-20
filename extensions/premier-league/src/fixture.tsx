@@ -18,7 +18,9 @@ export default function Fixture() {
     statuses: "U,L",
   });
 
-  const categories = groupBy(fixtures, (f) => f.kickoff.label?.split(",")[0]);
+  const categories = groupBy(fixtures, (f) =>
+    convertToLocalTime(f.kickoff.label, "EEE d MMM yyyy")
+  );
 
   return (
     <List
@@ -51,13 +53,12 @@ export default function Fixture() {
             title={label === "undefined" ? "Date To Be Confirmed" : label}
           >
             {matches.map((match) => {
-              const time = convertToLocalTime(match.kickoff.label);
-              const kickoff = time?.split(", ")[1] ?? "TBC";
+              const time = convertToLocalTime(match.kickoff.label, "HH:mm");
 
               return (
                 <List.Item
                   key={match.id}
-                  title={kickoff}
+                  title={time || "TBC"}
                   subtitle={`${match.teams[0].team.name} - ${match.teams[1].team.name}`}
                   icon={Icon.Clock}
                   accessories={[

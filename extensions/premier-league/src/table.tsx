@@ -1,7 +1,6 @@
 import { Action, ActionPanel, List, Icon, Image, Color } from "@raycast/api";
 import { useState } from "react";
 import json2md from "json2md";
-import { format, parse } from "date-fns";
 import { Entry } from "./types";
 import { useSeasons, useTables } from "./hooks";
 import { convertToLocalTime } from "./utils";

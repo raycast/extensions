@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import groupBy from "lodash.groupby";
 import { useFixtures, useSeasons, useTeams } from "./hooks";
 import { convertToLocalTime } from "./utils";
@@ -11,26 +11,21 @@ export default function Fixture() {
   const [page, setPage] = useState<number>(0);
   const [teams, setTeams] = useState<string>("-1");
 
-  const fixture = useFixtures({
+  const { fixtures, lastPage } = useFixtures({
     teams,
     page,
     sort: "desc",
     statuses: "C",
   });
 
-  const fixtures = useMemo(() => {
-    return fixture.fixtures?.map((f) => {
-      f.kickoff.label = convertToLocalTime(f.kickoff.label);
-      return f;
-    });
-  }, [fixture.fixtures]);
-
-  const categories = groupBy(fixtures, (f) => f.kickoff.label?.split(",")[0]);
+  const categories = groupBy(fixtures, (f) =>
+    convertToLocalTime(f.kickoff.label, "EEE d MMM yyyy")
+  );
 
   return (
     <List
       throttle
-      isLoading={!clubs || !fixture.fixtures}
+      isLoading={!clubs || !fixtures}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by Club"
@@ -68,7 +63,7 @@ export default function Fixture() {
                       <Action.OpenInBrowser
                         url={`https://www.premierleague.com/match/${match.id}`}
                       />
-                      {!fixture.lastPage && (
+                      {!lastPage && (
                         <Action
                           title="Load More"
                           icon={Icon.MagnifyingGlass}
