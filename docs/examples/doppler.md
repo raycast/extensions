@@ -10,7 +10,7 @@ The full source code of the example can be found [here](https://github.com/rayca
 
 In this example we use a form to collect inputs from a user. To make it interesting, we use [Doppler](http://share.doppler.com) which is a service to make it easy to securely share sensitive information such as API keys or passwords.
 
-![Example: Safely share secrets with Doppler](<../.gitbook/assets/example-doppler-share-secrets (1).png>)
+![Example: Safely share secrets with Doppler](<../.gitbook/assets/example-doppler-share-secrets.png>)
 
 The extension has one command. The command is a simple form with a textfield for the secret, a dropdown for an expiration after views and a second dropdown for an alternate expiration after a maximum of days.
 
