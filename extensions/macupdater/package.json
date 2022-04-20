@@ -14,7 +14,7 @@
       "name": "index",
       "icon": "update-command-icon.png",
       "title": "Daily macOS App Updates",
-      "subtitle": "Yesterday",
+      "subtitle": "macupdater.net",
       "description": "View a list of all macOS apps updated yesterday",
       "mode": "view"
     },
