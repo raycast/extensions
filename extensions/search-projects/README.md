@@ -14,5 +14,6 @@ Quickly access your local projects and open them in your favorite editor or any 
 - [x] Search maven projects.
 - [x] Search any projects.
 - [x] Search gradle projects.
+- [ ] Advanced search for projects.
 
 Connect with on slack @ajaypremshankar or [Ajay Prem Shankar on Linkedin](https://www.linkedin.com/in/ajaypremshankar/) for suggestions and contributions.
