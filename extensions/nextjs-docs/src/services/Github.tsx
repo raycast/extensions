@@ -55,7 +55,7 @@ async function getTopicsFromGithub() {
  * @returns Promise
  */
 export async function getTopicsFromCache(): Promise<string> {
-  const last_updated:string = await LocalStorage.getItem("updated_at");
+  const last_updated: string = await LocalStorage.getItem("updated_at");
 
   const last_updated_date = new Date(last_updated).setHours(0, 0, 0, 0);
   const today = new Date().setHours(0, 0, 0, 0);
@@ -65,7 +65,7 @@ export async function getTopicsFromCache(): Promise<string> {
     await getTopicsFromGithub();
   }
 
-  const topics:string = await LocalStorage.getItem("topics") || '';
+  const topics: string = (await LocalStorage.getItem("topics")) || "";
   if (!topics) throw new Error("Cached results not loaded!");
   return topics;
 }
@@ -144,7 +144,7 @@ export async function getTopicFromCache(topic: Topic): Promise<string> {
   const data_folder = createDataFolder();
   if (!data_folder) throw new Error("Failed to create folder!");
 
-  const last_updated:string = await LocalStorage.getItem(`${topic.name}_updated_at`);
+  const last_updated: string = await LocalStorage.getItem(`${topic.name}_updated_at`);
   const last_updated_date = new Date(last_updated).setHours(0, 0, 0, 0);
   const today = new Date().setHours(0, 0, 0, 0);
 
@@ -153,16 +153,15 @@ export async function getTopicFromCache(topic: Topic): Promise<string> {
     await getTopicFromGithub(topic);
   }
 
-  const topicData:string = readFromFile(topic.name);
+  const topicData: string = readFromFile(topic.name);
   if (!topicData) throw new Error("Cached results not loaded!");
   return topicData;
 }
-
 
 /**
  * Remove the value for the given key from the local storage.
  * @param key
  */
-async function clearStorageItem(key:string) {
+async function clearStorageItem(key: string) {
   await LocalStorage.removeItem(key);
 }
