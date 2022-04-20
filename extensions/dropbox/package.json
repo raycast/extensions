@@ -19,7 +19,7 @@
       "name": "dropbox_access_token",
       "title": "Dropbox Access Token",
       "description": "dropbox access token",
-      "type": "textfield",
+      "type": "password",
       "required": true
     }
   ],
