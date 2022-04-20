@@ -9,27 +9,31 @@ const usePlayers = (
   terms: string
 ) => {
   const [players, setPlayers] = useState<PlayerContent[]>();
+  const [lastPage, setLastPage] = useState<boolean>(false);
 
   useEffect(() => {
     setPlayers(undefined);
     if (terms.length >= 3) {
-      getPlayersWithTerms(terms).then((data) => {
-        setPlayers(data);
+      getPlayersWithTerms(terms, page).then((data) => {
+        setPlayers(data.players);
+        setLastPage(data.lastPage);
       });
     } else if (team && season) {
       if (team === "-1") {
         getPlayers(team, season, page).then((data) => {
-          setPlayers(data);
+          setPlayers(data.players);
+          setLastPage(data.lastPage);
         });
       } else {
         getStaffs(team, season).then((data) => {
-          setPlayers(data);
+          setPlayers(data.players);
+          setLastPage(data.lastPage);
         });
       }
     }
   }, [team, season, page, terms]);
 
-  return players;
+  return { players, lastPage };
 };
 
 export default usePlayers;

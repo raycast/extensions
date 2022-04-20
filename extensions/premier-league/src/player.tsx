@@ -126,7 +126,7 @@ export default function Player(props: { club: Club }) {
   const [page, setPage] = useState<number>(0);
   const [terms, setTerms] = useState<string>("");
 
-  const players = usePlayers(teamId, seasonId, page, terms);
+  const { players, lastPage } = usePlayers(teamId, seasonId, page, terms);
 
   const listProps: Partial<List.Props> = props.club
     ? {
@@ -201,13 +201,15 @@ export default function Player(props: { club: Club }) {
                     icon={Icon.Sidebar}
                     target={<PlayerProfile {...p} />}
                   />
-                  <Action
-                    title="Next Page"
-                    icon={Icon.ArrowRight}
-                    onAction={() => {
-                      setPage(page + 1);
-                    }}
-                  />
+                  {!lastPage && (
+                    <Action
+                      title="Next Page"
+                      icon={Icon.ArrowRight}
+                      onAction={() => {
+                        setPage(page + 1);
+                      }}
+                    />
+                  )}
                 </ActionPanel>
               }
             />

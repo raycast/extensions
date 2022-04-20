@@ -18,6 +18,13 @@ const headers = {
   Origin: "https://www.premierleague.com",
 };
 
+const pageSize = 50;
+
+interface PlayerResult {
+  players: PlayerContent[];
+  lastPage: boolean;
+}
+
 function showFailureToast() {
   showToast(
     Toast.Style.Failure,
@@ -153,9 +160,9 @@ export const getPlayers = async (
   teams: string,
   season: string,
   page: number
-): Promise<PlayerContent[]> => {
+): Promise<PlayerResult> => {
   const params: { [key: string]: string | number | boolean } = {
-    pageSize: 50,
+    pageSize,
     compSeasons: season,
     altIds: true,
     page,
@@ -177,24 +184,25 @@ export const getPlayers = async (
 
   try {
     const { data }: AxiosResponse<EPLPlayer> = await axios(config);
+    const lastPage = data.pageInfo.page === data.pageInfo.numPages - 1;
 
-    return data.content;
+    return { players: data.content, lastPage };
   } catch (e) {
     showFailureToast();
 
-    return [];
+    return { players: [], lastPage: true };
   }
 };
 
 export const getStaffs = async (
   team: string,
   season: string
-): Promise<PlayerContent[]> => {
+): Promise<PlayerResult> => {
   const config: AxiosRequestConfig = {
     method: "get",
     url: `${endpoint}/teams/${team}/compseasons/${season}/staff`,
     params: {
-      pageSize: 50,
+      pageSize: 100,
       // compSeasons: season,
       altIds: true,
       page: 0,
@@ -206,11 +214,11 @@ export const getStaffs = async (
   try {
     const { data }: AxiosResponse<EPLStaff> = await axios(config);
 
-    return data.players;
+    return { players: data.players, lastPage: true };
   } catch (e) {
     showFailureToast();
 
-    return [];
+    return { players: [], lastPage: true };
   }
 };
 
@@ -241,15 +249,18 @@ export const getManagers = async (compSeasons: string) => {
   }
 };
 
-export const getPlayersWithTerms = async (terms: string) => {
+export const getPlayersWithTerms = async (
+  terms: string,
+  page: number
+): Promise<PlayerResult> => {
   const config: AxiosRequestConfig = {
     method: "get",
     url: `https://footballapi.pulselive.com/search/PremierLeague`,
     params: {
       terms: `${terms},${terms}*`,
       type: "player",
-      size: 30,
-      start: 0,
+      size: pageSize,
+      start: page * pageSize,
       fullObjectResponse: true,
     },
     headers,
@@ -257,11 +268,13 @@ export const getPlayersWithTerms = async (terms: string) => {
 
   try {
     const { data }: AxiosResponse<EPLPlayerSearch> = await axios(config);
+    const lastPage = data.hits.found === data.hits.start + data.hits.hit.length;
+    const players = data.hits.hit.map((h) => h.response).filter((p) => !!p);
 
-    return data.hits.hit.map((h) => h.response).filter((p) => !!p);
+    return { players, lastPage };
   } catch (e) {
     showFailureToast();
 
-    return [];
+    return { players: [], lastPage: true };
   }
 };
