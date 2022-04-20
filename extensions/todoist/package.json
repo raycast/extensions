@@ -25,10 +25,10 @@
       "mode": "view"
     },
     {
-      "name": "projects",
-      "title": "Search Projects",
+      "name": "search",
+      "title": "Search Tasks",
       "subtitle": "Todoist",
-      "description": "See your Todoist projects and tasks by project.",
+      "description": "Search across all your Todoist tasks.",
       "mode": "view"
     },
     {
@@ -36,6 +36,13 @@
       "title": "Create Task",
       "subtitle": "Todoist",
       "description": "Create a Todoist task.",
+      "mode": "view"
+    },
+    {
+      "name": "projects",
+      "title": "Search Projects",
+      "subtitle": "Todoist",
+      "description": "See your Todoist projects and tasks by project.",
       "mode": "view"
     },
     {

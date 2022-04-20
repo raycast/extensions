@@ -4,7 +4,7 @@ import useSWR from "swr";
 import { partition } from "lodash";
 import { ViewMode, SWRKeys, ProjectGroupBy, SectionWithTasks } from "../types";
 import { todoist, handleError } from "../api";
-import { getSectionsWithPriorities, getSectionsWithDueDates, getSectionsWithLabels } from "../utils";
+import { getSectionsWithPriorities, getSectionsWithDueDates, getSectionsWithLabels } from "../helpers";
 import CreateTask from "../create-task";
 
 interface ProjectProps {
