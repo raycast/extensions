@@ -139,7 +139,11 @@ export default function Player(props: { club: Club }) {
       onSearchTextChange={setTerms}
       searchBarAccessory={
         props.club || terms ? undefined : (
-          <List.Dropdown tooltip="Filter by Club" onChange={setTeam}>
+          <List.Dropdown
+            tooltip="Filter by Club"
+            value={teamId}
+            onChange={setTeam}
+          >
             {teams?.map((s) => {
               return (
                 <List.Dropdown.Item

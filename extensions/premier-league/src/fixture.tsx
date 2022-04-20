@@ -25,7 +25,11 @@ export default function Fixture() {
       throttle
       isLoading={!fixtures}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Club" onChange={setTeams}>
+        <List.Dropdown
+          tooltip="Filter by Club"
+          value={teams}
+          onChange={setTeams}
+        >
           <List.Dropdown.Section>
             {clubs?.map((club) => {
               return (

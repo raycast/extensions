@@ -66,7 +66,11 @@ export default function GetTables() {
     <List
       throttle
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter by Season" onChange={setSeason}>
+        <List.Dropdown
+          tooltip="Filter by Season"
+          value={selectedSeason}
+          onChange={setSeason}
+        >
           <List.Dropdown.Section>
             {seasons.map((season) => {
               return (

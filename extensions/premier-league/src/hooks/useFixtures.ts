@@ -1,3 +1,4 @@
+import { showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getFixtures } from "../api";
 import { Content } from "../types";
@@ -24,10 +25,18 @@ const useFixtures = (props: PropsType) => {
   }, [props.teams]);
 
   useEffect(() => {
+    showToast({
+      title: "Loading Content",
+      style: Toast.Style.Animated,
+    });
     getFixtures(props).then(([data, lastPage]) => {
       const matches = (fixtures || []).concat(data);
       setFixtures(matches);
       setLastPage(lastPage);
+      showToast({
+        title: "Completed",
+        style: Toast.Style.Success,
+      });
     });
   }, [props.page]);
 
