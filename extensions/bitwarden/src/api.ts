@@ -1,3 +1,4 @@
+import { environment } from "@raycast/api";
 import execa from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
@@ -16,6 +17,7 @@ export class Bitwarden {
     }
     this.cliPath = cliPath;
     this.env = {
+      BITWARDENCLI_APPDATA_DIR: environment.supportPath,
       BW_CLIENTSECRET: clientSecret.trim(),
       BW_CLIENTID: clientId.trim(),
       PATH: dirname(process.execPath),
