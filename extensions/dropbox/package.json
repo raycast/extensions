@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dropbox",
-  "title": "dropbox",
+  "title": "Dropbox",
   "description": "Dropbox Extension, List Files, Search Files, and more",
   "icon": "dropbox.png",
   "author": "chyroc",
