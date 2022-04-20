@@ -70,7 +70,7 @@ export const getDaysLeftThisYear = () => {
     (new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0).getTime() -
       new Date(now.getFullYear(), 0, 0).getTime()) /
     (1000 * 60 * 60 * 24);
-  return dayAllYear - daySpendThisYear;
+  return parseInt(dayAllYear - daySpendThisYear + ".0001");
 };
 
 export interface LifeProgress {
@@ -90,7 +90,7 @@ export const getLifeProgress = () => {
   const lifeProgresses: LifeProgress[] = [];
   const { iconTheme } = preferences();
 
-  const timeIcon12 = ["🕙", "🕘", "🕗", "🕖", "🕕", "🕔", "🕓", "🕒", "🕑", "🕐", "🕛", "🕚"];
+  const timeIcon12 = ["🕚", "🕙", "🕘", "🕗", "🕖", "🕕", "🕔", "🕓", "🕒", "🕑", "🕐", "🕛"];
   const timeIcon24 = [...timeIcon12, ...timeIcon12];
   let _iconTheme = iconTheme;
   if (iconTheme == "random") {
@@ -118,74 +118,74 @@ export const getLifeProgress = () => {
   lifeProgresses.push({
     section: SectionTitle.YOU_HAVE,
     icon: meaningfulDaysIcon(getSpendDays()),
-    title: `spent ${getSpendDays()} meaningful days`,
+    title: `Spent ${getSpendDays()} meaningful days`,
     number: getSpendDays(),
-    accessUnit: getNumberCanvas(_iconTheme, getSpendDays(), "day.png"),
+    accessUnit: getNumberCanvas(_iconTheme, getSpendDays()),
   });
   lifeProgresses.push({
     section: SectionTitle.YOU_HAVE,
     icon: "🎊",
-    title: `celebrated ${getSpendYears()} New Year's Days`,
+    title: `Celebrated ${getSpendYears()} New Year's Days`,
     number: getSpendYears(),
-    accessUnit: getNumberCanvas(_iconTheme, getSpendYears(), "year.png"),
+    accessUnit: getNumberCanvas(_iconTheme, getSpendYears()),
   });
   lifeProgresses.push({
     section: SectionTitle.YOU_HAVE,
     icon: getSpendCentury() == 1 ? "✈️" : "🚀",
-    title: `witnessed ${getSpendCentury()} great centuries`,
+    title: `Witnessed ${getSpendCentury()} great centuries`,
     number: getSpendCentury(),
-    accessUnit: getNumberCanvas(_iconTheme, getSpendCentury(), "century.png"),
+    accessUnit: getNumberCanvas(_iconTheme, getSpendCentury()),
   });
 
   lifeProgresses.push({
     section: SectionTitle.YOU_MAY_BE_ABLE_TO,
     icon: "💰",
-    title: `receive ${getLeftPaychecks()} generous paychecks`,
+    title: `Receive ${getLeftPaychecks()} generous paychecks`,
     number: getLeftPaychecks(),
-    accessUnit: getNumberCanvas(_iconTheme, getLeftPaychecks(), "month.png"),
+    accessUnit: getNumberCanvas(_iconTheme, getLeftPaychecks()),
   });
   lifeProgresses.push({
     section: SectionTitle.YOU_MAY_BE_ABLE_TO,
     icon: "🎡",
-    title: `spend ${getLeftWeeks()} pleasant weekends`,
+    title: `Spend ${getLeftWeeks()} pleasant weekends`,
     number: getLeftWeeks(),
-    accessUnit: getNumberCanvas(_iconTheme, getLeftWeeks(), "week.png"),
+    accessUnit: getNumberCanvas(_iconTheme, getLeftWeeks()),
   });
   lifeProgresses.push({
     section: SectionTitle.YOU_MAY_BE_ABLE_TO,
     icon: "🌙",
-    title: `enjoy ${getLeftNights()} wonderful nights`,
+    title: `Enjoy ${getLeftNights()} wonderful nights`,
     number: getLeftNights(),
-    accessUnit: getNumberCanvas(_iconTheme, getLeftNights(), "night.png"),
+    accessUnit: getNumberCanvas(_iconTheme, getLeftNights()),
   });
 
   lifeProgresses.push({
     section: SectionTitle.TIME_LEFT,
-    icon: timeIcon24[getHourLeftThisDay() - 1],
+    icon: timeIcon24[getHourLeftThisDay()],
     title: `${getHourLeftThisDay()} hours left in the day`,
     number: getHourLeftThisDay(),
-    accessUnit: getNumberCanvas(_iconTheme, getHourLeftThisDay(), "hour.png"),
+    accessUnit: getNumberCanvas(_iconTheme, getHourLeftThisDay()),
   });
   lifeProgresses.push({
     section: SectionTitle.TIME_LEFT,
     icon: getDaysLeftThisWeek() <= 1 ? "🏝" : "💼",
     title: `${getDaysLeftThisWeek()} days left in the week`,
     number: getDaysLeftThisWeek(),
-    accessUnit: getNumberCanvas(_iconTheme, getDaysLeftThisWeek(), "day.png"),
+    accessUnit: getNumberCanvas(_iconTheme, getDaysLeftThisWeek()),
   });
   lifeProgresses.push({
     section: SectionTitle.TIME_LEFT,
     icon: getDaysLeftThisMonth() < 15 ? "⌛️" : "⏳",
     title: `${getDaysLeftThisMonth()} days left in the month`,
     number: getDaysLeftThisMonth(),
-    accessUnit: getNumberCanvas(_iconTheme, getDaysLeftThisMonth(), "day.png"),
+    accessUnit: getNumberCanvas(_iconTheme, getDaysLeftThisMonth()),
   });
   lifeProgresses.push({
     section: SectionTitle.TIME_LEFT,
     icon: getDaysLeftThisYear() < 182 ? "🎇" : "🎆",
     title: `${getDaysLeftThisYear()} days left in the year`,
     number: getDaysLeftThisYear(),
-    accessUnit: getNumberCanvas(_iconTheme, getDaysLeftThisYear(), "day.png"),
+    accessUnit: getNumberCanvas(_iconTheme, getDaysLeftThisYear()),
   });
 
   if (isBirthDay()) {
@@ -222,18 +222,11 @@ const numberPathList = (theme: string) => {
     { value: "7", path: `${theme}/7.png` },
     { value: "8", path: `${theme}/8.png` },
     { value: "9", path: `${theme}/9.png` },
-    { value: "day", path: `${theme}/day.png` },
-    { value: "hour", path: `${theme}/hour.png` },
-    { value: "month", path: `${theme}/month.png` },
-    { value: "night", path: `${theme}/night.png` },
-    { value: "week", path: `${theme}/week.png` },
-    { value: "year", path: `${theme}/year.png` },
-    { value: "century", path: `${theme}/century.png` },
   ];
 };
 export const allTheme = ["bird", "pixel", "simple", "rainbow"];
 
-export const getNumberCanvas = (iconTheme: string, number: number, accessIcon: string) => {
+export const getNumberCanvas = (iconTheme: string, number: number) => {
   const _numberPathList = numberPathList(iconTheme);
 
   const _numberList = (number + "").split("");
@@ -246,7 +239,6 @@ export const getNumberCanvas = (iconTheme: string, number: number, accessIcon: s
       }
     });
   }
-  numberPaths.push({ icon: `${iconTheme}/${accessIcon}` });
   return numberPaths;
 };
 

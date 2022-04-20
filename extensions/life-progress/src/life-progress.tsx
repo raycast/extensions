@@ -25,7 +25,7 @@ export default function main() {
     author: "",
     translation: "",
   });
-  const { timeLeftFirst } = preferences();
+  const { showDailyWord, timeLeftFirst } = preferences();
 
   const sectionList = timeLeftFirst ? timeLeftFirstList : timeLeftLastList;
   const tagList = timeLeftFirst ? tagsTimeLeftFirst : tagsTimeLeftLast;
@@ -95,7 +95,7 @@ export default function main() {
           }
         />
       )}
-      {!isBirthDay() && (
+      {!isBirthDay() && showDailyWord && (
         <List.Item
           icon={{ source: isEnglishWord ? "word-icon.png" : "word-icon@chinese.png" }}
           title={isEnglishWord ? wordOfTheDay.content : wordOfTheDay.translation}

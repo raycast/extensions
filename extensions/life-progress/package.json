@@ -11,10 +11,18 @@
   "license": "MIT",
   "preferences": [
     {
-      "name": "timeLeftFirst",
+      "name": "showDailyWord",
       "type": "checkbox",
       "required": true,
       "title": "UI Preference",
+      "label": "Show Daily Word",
+      "description": "Display the sentence of the day. There may be some delay, so if you can't stand it, you can choose to turn this option off.",
+      "default": true
+    },
+    {
+      "name": "timeLeftFirst",
+      "type": "checkbox",
+      "required": true,
       "label": "Time Left First",
       "description": "Show Time Left first.",
       "default": true
