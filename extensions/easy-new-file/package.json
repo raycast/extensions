@@ -60,7 +60,7 @@
       "icon": "add-file-template-icon.png",
       "title": "Add File Template",
       "subtitle": "Easy New File",
-      "description": "Add a file template that you can use in the \"New File Here\" command.",
+      "description": "Add a file template that you can use in the \"New File Here\" command. It will automatically fetch the file you selected as a template.",
       "mode": "view"
     }
   ],

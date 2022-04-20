@@ -16,7 +16,7 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
 
   useEffect(() => {
     async function _initRunAppleScript() {
-      const _path = await fetchFilePath();
+      const _path = await fetchFilePath(true);
       setPath(_path);
       setName(getFileInfo(_path).nameWithoutExtension);
     }
@@ -80,14 +80,18 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
   );
 }
 
-const fetchFilePath = async () => {
-  await showToast(Toast.Style.Animated, "Fetching selected file...");
+const fetchFilePath = async (enterCommand = false) => {
+  if (!enterCommand) {
+    await showToast(Toast.Style.Animated, "Fetching selected file...");
+  }
   const _finderItems = await getSelectedFile();
   if (_finderItems.length > 0) {
     await showToast(Toast.Style.Success, "Fetch path success!");
     return _finderItems[0];
   } else {
-    await showToast(Toast.Style.Failure, "Fetch nothing.", "Please select a file or input manually.");
+    if (!enterCommand) {
+      await showToast(Toast.Style.Failure, "Fetch nothing.", "Please select a file or input manually.");
+    }
     return "";
   }
 };

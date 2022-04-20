@@ -41,7 +41,6 @@ export const getTemplateFile = (templateFolderPath: string, refresh: number) => 
             });
           }
         });
-        setIsLoading(false);
       } else {
         fse.mkdirSync(templateFolderPath);
       }
@@ -49,6 +48,7 @@ export const getTemplateFile = (templateFolderPath: string, refresh: number) => 
       await showToast(Toast.Style.Failure, String(e));
     }
     setTemplateFiles(_templateFiles);
+    setIsLoading(false);
     await runAppleScript("");
   }, [refresh]);
 

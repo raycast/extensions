@@ -116,7 +116,7 @@ export default function main() {
           );
         })}
       </List.Section>
-      {preference.showDocument && (
+      {!isLoading && preference.showDocument && (
         <List.Section title={"Document"}>
           {documentFileTypes.map((fileType, index) => {
             return (
@@ -131,7 +131,7 @@ export default function main() {
           })}
         </List.Section>
       )}
-      {preference.showCode && (
+      {!isLoading && preference.showCode && (
         <List.Section title={"Code"}>
           {codeFileTypes.map((fileType, index) => {
             return (
@@ -146,7 +146,7 @@ export default function main() {
           })}
         </List.Section>
       )}
-      {preference.showScript && (
+      {!isLoading && preference.showScript && (
         <List.Section title={"Script"}>
           {scriptFileTypes.map((fileType, index) => {
             return (
