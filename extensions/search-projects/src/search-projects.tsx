@@ -1,7 +1,20 @@
 import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 
 import { useState, ReactElement } from "react";
-import { Preferences, tildifyPath, useRepoCache } from "./utils";
+import { OpenWith, Preferences, ProjectType } from "./types";
+import { tildifyPath, useRepoCache } from "./utils";
+
+function getOpenWith(projectType: ProjectType, preferences: Preferences): OpenWith {
+  if (projectType === ProjectType.NODE) {
+    return preferences.openNodeWith;
+  } else if (projectType === ProjectType.MAVEN) {
+    return preferences.openMavenWith;
+  } else if (projectType === ProjectType.GRADLE) {
+    return preferences.openGradleWith;
+  }
+
+  return preferences.openWith1;
+}
 
 export default function Main(): ReactElement {
   const preferences = getPreferenceValues<Preferences>();
@@ -18,7 +31,7 @@ export default function Main(): ReactElement {
         {response?.repos?.map((repo) => (
           <List.Item
             key={repo.fullPath}
-            id={repo.fullPath}
+            id={repo.fullPath + repo.type}
             title={repo.name}
             icon={repo.icon}
             accessoryTitle={tildifyPath(repo.fullPath)}
@@ -27,41 +40,35 @@ export default function Main(): ReactElement {
               <ActionPanel>
                 <ActionPanel.Section>
                   <Action.Open
-                    title={`Open in ${preferences.openWith1.name}`}
-                    icon={{ fileIcon: preferences.openWith1.path }}
+                    title={`Open in ${getOpenWith(repo.type, preferences).name}`}
+                    icon={{ fileIcon: getOpenWith(repo.type, preferences).path }}
                     target={repo.fullPath}
-                    application={preferences.openWith1.bundleId}
+                    application={getOpenWith(repo.type, preferences).bundleId}
                   />
-                  <Action.Open
-                    title={`Open in ${preferences.openWith2.name}`}
-                    icon={{ fileIcon: preferences.openWith2.path }}
-                    target={repo.fullPath}
-                    application={preferences.openWith2.bundleId}
-                  />
+                  {preferences.openWith1 && (
+                    <Action.Open
+                      title={`Open in ${preferences.openWith1.name}`}
+                      icon={{ fileIcon: preferences.openWith1.path }}
+                      target={repo.fullPath}
+                      application={preferences.openWith1.bundleId}
+                      shortcut={{ modifiers: ["opt"], key: "return" }}
+                    />
+                  )}
+                  {preferences.openWith2 && (
+                    <Action.Open
+                      title={`Open in ${preferences.openWith2.name}`}
+                      icon={{ fileIcon: preferences.openWith2.path }}
+                      target={repo.fullPath}
+                      application={preferences.openWith2.bundleId}
+                      shortcut={{ modifiers: ["ctrl"], key: "return" }}
+                    />
+                  )}
                   {preferences.openWith3 && (
                     <Action.Open
                       title={`Open in ${preferences.openWith3.name}`}
                       icon={{ fileIcon: preferences.openWith3.path }}
                       target={repo.fullPath}
                       application={preferences.openWith3.bundleId}
-                      shortcut={{ modifiers: ["opt"], key: "return" }}
-                    />
-                  )}
-                  {preferences.openWith4 && (
-                    <Action.Open
-                      title={`Open in ${preferences.openWith4.name}`}
-                      icon={{ fileIcon: preferences.openWith4.path }}
-                      target={repo.fullPath}
-                      application={preferences.openWith4.bundleId}
-                      shortcut={{ modifiers: ["ctrl"], key: "return" }}
-                    />
-                  )}
-                  {preferences.openWith5 && (
-                    <Action.Open
-                      title={`Open in ${preferences.openWith5.name}`}
-                      icon={{ fileIcon: preferences.openWith5.path }}
-                      target={repo.fullPath}
-                      application={preferences.openWith5.bundleId}
                       shortcut={{ modifiers: ["shift"], key: "return" }}
                     />
                   )}

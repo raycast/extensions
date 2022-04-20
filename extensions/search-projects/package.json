@@ -2,16 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-projects",
   "title": "Search Projects",
-  "description": "Quickly access your local projects and open them in your favorite editor or any app",
+  "description": "Quickly access your local projects and open them in your favorite editor or any app. Supports maven, gradle, and node projects.",
   "icon": "coding-folder.png",
   "author": "ajaypremshankar",
   "license": "MIT",
   "private": true,
   "commands": [
     {
-      "name": "search-node-projects",
-      "title": "Search Node projects",
-      "description": "Quickly access your local node projects and open them in your favorite editor or any app",
+      "name": "search-projects",
+      "title": "Search Projects",
+      "description": "Quickly access your local projects and open them in your favorite editor or any app. Supports maven, gradle, and node projects.",
       "mode": "view"
     }
   ],
@@ -55,31 +55,39 @@
       "default": "3"
     },
     {
-      "name": "openWith1",
+      "name": "openNodeWith",
       "type": "appPicker",
       "required": true,
-      "title": "Open with (required), shortcut: ⏎",
+      "title": "Open node projects with (required), shortcut: ⏎",
+      "description": "Open node projects with",
+      "default": "Visual Studio Code"
+    },
+    {
+      "name": "openMavenWith",
+      "type": "appPicker",
+      "required": true,
+      "title": "Open maven projects with (required), shortcut: ⏎",
+      "description": "Open maven projects with",
+      "default": "Visual Studio Code"
+    },
+    {
+      "name": "openGradleWith",
+      "type": "appPicker",
+      "required": true,
+      "title": "Open gradle projects with (required), shortcut: ⏎",
+      "description": "Open gradle projects with",
+      "default": "Visual Studio Code"
+    },
+    {
+      "name": "openWith1",
+      "type": "appPicker",
+      "required": false,
+      "title": "Open with (default), shortcut: ⌥⏎",
       "description": "Open with",
       "default": "Visual Studio Code"
     },
     {
       "name": "openWith2",
-      "type": "appPicker",
-      "required": true,
-      "title": "Open with (required), shortcut: ⌘⏎",
-      "description": "Open with",
-      "default": "Finder"
-    },
-    {
-      "name": "openWith3",
-      "type": "appPicker",
-      "required": false,
-      "title": "Open with (optional), shortcut: ⌥⏎",
-      "description": "Open with",
-      "default": ""
-    },
-    {
-      "name": "openWith4",
       "type": "appPicker",
       "required": false,
       "title": "Open with (optional), shortcut: ＾⏎",
@@ -87,7 +95,7 @@
       "default": ""
     },
     {
-      "name": "openWith5",
+      "name": "openWith3",
       "type": "appPicker",
       "required": false,
       "title": "Open with (optional), shortcut: ⇧⏎",

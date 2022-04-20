@@ -11,8 +11,8 @@ Quickly access your local projects and open them in your favorite editor or any 
 ## Roadmap
 
 - [x] Search node projects.
-- [ ] Search maven projects.
-- [ ] Search any projects.
-- [ ] Search gradle projects.
+- [x] Search maven projects.
+- [x] Search any projects.
+- [x] Search gradle projects.
 
 Connect with on slack @ajaypremshankar or [Ajay Prem Shankar on Linkedin](https://www.linkedin.com/in/ajaypremshankar/) for suggestions and contributions.
