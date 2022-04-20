@@ -29,15 +29,15 @@ function ClubProfile(props: TeamTeam) {
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            url={`https://www.premierleague.com/clubs/${
-              props.id
-            }/${props.name.replace(/ /g, "-")}/overview`}
-          />
           <Action.Push
             title="Squad"
             icon={Icon.Person}
             target={<Player club={props.club} />}
+          />
+          <Action.OpenInBrowser
+            url={`https://www.premierleague.com/clubs/${
+              props.id
+            }/${props.name.replace(/ /g, "-")}/overview`}
           />
         </ActionPanel>
       }
