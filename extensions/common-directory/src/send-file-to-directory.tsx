@@ -88,43 +88,45 @@ export default function CommonDirectory() {
       ) : (
         <>
           <List.Section title={"Common Directory"}>
-            {commonDirectory.map((directory, index) => {
-              if (
-                directory.alias.toLowerCase().includes(searchValue.toLowerCase()) ||
-                directory.name.toLowerCase().includes(searchValue.toLowerCase())
-              )
-                return (
-                  <SendToDirectoryItem
-                    key={directory.id}
-                    directory={directory}
-                    index={index}
-                    commonDirectory={commonDirectory}
-                    directoryContent={directoryInfo}
-                    showDetail={showDetail}
-                    setRefresh={setRefresh}
-                    setRefreshDetail={setRefreshDetail}
-                    setUpdateDetail={setUpdateDetail}
-                  />
-                );
-            })}
+            {!loading &&
+              commonDirectory.map((directory, index) => {
+                if (
+                  directory.alias.toLowerCase().includes(searchValue.toLowerCase()) ||
+                  directory.name.toLowerCase().includes(searchValue.toLowerCase())
+                )
+                  return (
+                    <SendToDirectoryItem
+                      key={directory.id}
+                      directory={directory}
+                      index={index}
+                      commonDirectory={commonDirectory}
+                      directoryContent={directoryInfo}
+                      showDetail={showDetail}
+                      setRefresh={setRefresh}
+                      setRefreshDetail={setRefreshDetail}
+                      setUpdateDetail={setUpdateDetail}
+                    />
+                  );
+              })}
           </List.Section>
           <List.Section title={"Open Directory"}>
-            {openDirectory.map((directory, index) => {
-              if (directory.name.toLowerCase().includes(searchValue.toLowerCase()))
-                return (
-                  <SendToDirectoryItem
-                    key={directory.id}
-                    directory={directory}
-                    index={index}
-                    commonDirectory={openDirectory}
-                    directoryContent={directoryInfo}
-                    showDetail={showDetail}
-                    setRefresh={setRefresh}
-                    setRefreshDetail={setRefreshDetail}
-                    setUpdateDetail={setUpdateDetail}
-                  />
-                );
-            })}
+            {!loading &&
+              openDirectory.map((directory, index) => {
+                if (directory.name.toLowerCase().includes(searchValue.toLowerCase()))
+                  return (
+                    <SendToDirectoryItem
+                      key={directory.id}
+                      directory={directory}
+                      index={index}
+                      commonDirectory={openDirectory}
+                      directoryContent={directoryInfo}
+                      showDetail={showDetail}
+                      setRefresh={setRefresh}
+                      setRefreshDetail={setRefreshDetail}
+                      setUpdateDetail={setUpdateDetail}
+                    />
+                  );
+              })}
           </List.Section>
         </>
       )}

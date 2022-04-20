@@ -39,6 +39,7 @@ export const getCommonDirectory = (
     if (showOpenDirectory) {
       setOpenDirectory(await getOpenFinderWindowPath());
     }
+
     setLoading(false);
   }, [refresh]);
 

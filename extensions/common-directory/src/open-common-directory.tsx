@@ -86,43 +86,45 @@ export default function OpenCommonDirectory() {
       ) : (
         <>
           <List.Section title={"Common Directory"}>
-            {commonDirectory.map((directory, index) => {
-              if (
-                directory.alias.toLowerCase().includes(searchValue.toLowerCase()) ||
-                directory.name.toLowerCase().includes(searchValue.toLowerCase())
-              )
-                return (
-                  <DirectoryItem
-                    key={directory.id}
-                    push={push}
-                    directory={directory}
-                    index={index}
-                    commonDirectory={commonDirectory}
-                    directoryInfo={directoryInfo}
-                    showDetail={showDetail}
-                    setRefresh={setRefresh}
-                    setRefreshDetail={setRefreshDetail}
-                  />
-                );
-            })}
+            {!loading &&
+              commonDirectory.map((directory, index) => {
+                if (
+                  directory.alias.toLowerCase().includes(searchValue.toLowerCase()) ||
+                  directory.name.toLowerCase().includes(searchValue.toLowerCase())
+                )
+                  return (
+                    <DirectoryItem
+                      key={directory.id}
+                      push={push}
+                      directory={directory}
+                      index={index}
+                      commonDirectory={commonDirectory}
+                      directoryInfo={directoryInfo}
+                      showDetail={showDetail}
+                      setRefresh={setRefresh}
+                      setRefreshDetail={setRefreshDetail}
+                    />
+                  );
+              })}
           </List.Section>
           <List.Section title={"Open Directory"}>
-            {openDirectory.map((directory, index) => {
-              if (directory.name.toLowerCase().includes(searchValue.toLowerCase()))
-                return (
-                  <DirectoryItem
-                    key={directory.id}
-                    push={push}
-                    directory={directory}
-                    index={index}
-                    commonDirectory={openDirectory}
-                    directoryInfo={directoryInfo}
-                    showDetail={showDetail}
-                    setRefresh={setRefresh}
-                    setRefreshDetail={setRefreshDetail}
-                  />
-                );
-            })}
+            {!loading &&
+              openDirectory.map((directory, index) => {
+                if (directory.name.toLowerCase().includes(searchValue.toLowerCase()))
+                  return (
+                    <DirectoryItem
+                      key={directory.id}
+                      push={push}
+                      directory={directory}
+                      index={index}
+                      commonDirectory={openDirectory}
+                      directoryInfo={directoryInfo}
+                      showDetail={showDetail}
+                      setRefresh={setRefresh}
+                      setRefreshDetail={setRefreshDetail}
+                    />
+                  );
+              })}
           </List.Section>
         </>
       )}
