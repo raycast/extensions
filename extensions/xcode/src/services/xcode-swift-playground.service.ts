@@ -45,7 +45,10 @@ export class XcodeSwiftPlaygroundService {
    * Create a new Swift Playground
    * @param parameters The XcodeSwiftPlaygroundCreationParameters
    */
-  async createSwiftPlayground(parameters: XcodeSwiftPlaygroundCreationParameters, forceCreate: boolean): Promise<XcodeSwiftPlayground> {
+  async createSwiftPlayground(
+    parameters: XcodeSwiftPlaygroundCreationParameters,
+    forceCreate: boolean
+  ): Promise<XcodeSwiftPlayground> {
     // Initialize Playground Path
     let playgroundPath = joinPathComponents(
       // Replace tilde (~) with home directory
@@ -56,7 +59,10 @@ export class XcodeSwiftPlaygroundService {
     if (await existsAsync(playgroundPath)) {
       // Return existing Swift Playground
       if (forceCreate) {
-        const dateString = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, -3)
+        const dateString = new Date()
+          .toISOString()
+          .replace(/[^0-9]/g, "")
+          .slice(0, -3);
         playgroundPath = joinPathComponents(
           // Replace tilde (~) with home directory
           parameters.location.replace(/^~/, os.homedir()),

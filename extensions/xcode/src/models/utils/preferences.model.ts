@@ -1,3 +1,3 @@
 export interface Preferences {
-    playgroundDefaultLocation: string;
+  playgroundDefaultLocation: string;
 }
