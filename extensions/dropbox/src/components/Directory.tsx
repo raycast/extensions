@@ -11,7 +11,7 @@ export interface IDirectoryProps {
 
 export default function Directory(props: IDirectoryProps) {
   const [files, setFiles] = useState<Array<files.FileMetadataReference | files.FolderMetadataReference>>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [path, setPath] = useState(props.path);
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState("");
@@ -48,9 +48,7 @@ export default function Directory(props: IDirectoryProps) {
       }}
       isLoading={loading}
     >
-      {query === "" && files.length === 0 ? (
-        <List.EmptyView title="Type input something" />
-      ) : (
+      {files.length > 0 && (
         <>
           <List.Section title={"files"}>
             {files.map((v) => {
