@@ -8,6 +8,13 @@ import {
 import { setWallpaper } from "./utils/common-utils";
 import { showToast, Toast } from "@raycast/api";
 
+/**
+ *
+ *@user koinzhang
+ *@email koinzhang@gmail.com
+ *@date 2022-04-21
+ *
+ **/
 export default async () => {
   const firstResponse = await fetch(buildBingWallpapersURL(0, 8));
   const secondResponse = await fetch(buildBingWallpapersURL(8, 8));

@@ -14,6 +14,13 @@ import { homedir } from "os";
 import { deleteCache, getScreenshotDirectory, preferences, setWallpaper } from "./utils/common-utils";
 import fse from "fs-extra";
 
+/**
+ *
+ *@user koinzhang
+ *@email koinzhang@gmail.com
+ *@date 2022-04-21
+ *
+ **/
 export default function CommonDirectory() {
   const [bingWallpaperHD, setBingWallpaperHD] = useState<BingImage[]>([]);
   const { downloadSize, autoDownload } = preferences();
