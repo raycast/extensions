@@ -3,6 +3,7 @@ import { getDirectoryContent, getShowDetailLocalStorage, ShowDetailKey } from ".
 import { DirectoryInfo, LocalDirectoryKey } from "../utils/directory-info";
 import { getOpenFinderWindowPath } from "../utils/common-utils";
 import { getDirectory } from "../open-common-directory";
+import { Alert, confirmAlert } from "@raycast/api";
 
 //for refresh useState
 export const refreshNumber = () => {
@@ -61,4 +62,26 @@ export const getDirectoryInfo = (directoryPath: string, updateDetail = 0) => {
   }, [fetchData]);
 
   return directoryInfo;
+};
+
+export const alertDialog = async (
+  title: string,
+  message: string,
+  confirmTitle: string,
+  confirmAction: () => void,
+  cancelAction: () => void
+) => {
+  const options: Alert.Options = {
+    title: title,
+    message: message,
+    primaryAction: {
+      title: confirmTitle,
+      onAction: confirmAction,
+    },
+    dismissAction: {
+      title: "Cancel",
+      onAction: () => cancelAction,
+    },
+  };
+  await confirmAlert(options);
 };

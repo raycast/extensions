@@ -18,7 +18,7 @@ import { commonPreferences, isEmpty } from "./utils/common-utils";
 import path from "path";
 import { setShowDetailLocalStorage, ShowDetailKey } from "./utils/ui-utils";
 import fse from "fs-extra";
-import { getCommonDirectory, getDirectoryInfo, getIsShowDetail, refreshNumber } from "./hooks/hooks";
+import { alertDialog, getCommonDirectory, getDirectoryInfo, getIsShowDetail, refreshNumber } from "./hooks/hooks";
 
 export default function OpenCommonDirectory() {
   const { sortBy, showOpenDirectory } = commonPreferences();
@@ -223,10 +223,20 @@ function DirectoryItem(props: {
                   icon={Icon.ExclamationMark}
                   shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
                   onAction={async () => {
-                    await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify([]));
-                    await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify([]));
-                    setRefresh(refreshNumber);
-                    await showToast(Toast.Style.Success, "Remove All success!");
+                    await alertDialog(
+                      "⚠️Warning",
+                      "Do you want to remove all directories?",
+                      "Remove All",
+                      async () => {
+                        await LocalStorage.setItem(LocalDirectoryKey.OPEN_COMMON_DIRECTORY, JSON.stringify([]));
+                        await LocalStorage.setItem(LocalDirectoryKey.SEND_COMMON_DIRECTORY, JSON.stringify([]));
+                        setRefresh(refreshNumber);
+                        await showToast(Toast.Style.Success, "Remove All success!");
+                      },
+                      async () => {
+                        await showToast(Toast.Style.Failure, "Error!", `Operation is canceled.`);
+                      }
+                    );
                   }}
                 />
               </>
