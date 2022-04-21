@@ -11,13 +11,6 @@ import {
 } from "./utils/common-utils";
 import { refreshNumber } from "./hooks/hooks";
 
-/**
- *
- *@user koinzhang
- *@email koinzhang@gmail.com
- *@date 2022-04-21
- *
- **/
 export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {
   const setRefresh =
     typeof props.setRefresh == "undefined"
