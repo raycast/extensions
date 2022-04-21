@@ -12,7 +12,7 @@ export default function useAppExists() {
   useEffect(() => {
     getApplications()
       .then((apps) => apps.find((app) => app.name === "Craft"))
-      .then((app) => setState({ appExistsLoading: false, appExists: app !== null }));
+      .then((app) => setState({ appExistsLoading: false, appExists: app !== undefined }));
   }, []);
 
   return state;

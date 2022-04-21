@@ -4,6 +4,7 @@ import ListBlocks from "./components/ListBlocks";
 import useAppExists from "./hooks/useAppExists";
 import useConfig from "./hooks/useConfig";
 import useDB from "./hooks/useDB";
+import AppNotInstalled from "./components/AppNotInstalled";
 
 // noinspection JSUnusedGlobalSymbols
 export default function search() {
@@ -14,5 +15,10 @@ export default function search() {
   const [query, setQuery] = useState("");
   const { resultsLoading, results } = useSearch(db, query);
 
-  return <ListBlocks isLoading={resultsLoading} onSearchTextChange={setQuery} blocks={results} />;
+  const listBlocks = <ListBlocks isLoading={resultsLoading} onSearchTextChange={setQuery} blocks={results} />;
+  return appExists.appExistsLoading
+      ? listBlocks
+      : appExists.appExists
+          ? listBlocks
+          : <AppNotInstalled />;
 }
