@@ -1,5 +1,5 @@
 import { showToast, Form, ActionPanel, Toast, Action, Detail } from "@raycast/api";
-import { OpenInBrowserAction } from "@raycast/api/types/api/components/actions/OpenInBrowserAction";
+import { useEffect, useState } from "react";
 import { Bitwarden } from "./api";
 
 export function TroubleshootingGuide(): JSX.Element {
@@ -26,15 +26,31 @@ export function TroubleshootingGuide(): JSX.Element {
 
 export function UnlockForm(props: { onUnlock: (token: string) => void; bitwardenApi: Bitwarden }): JSX.Element {
   const { bitwardenApi, onUnlock } = props;
+  const [vaultStatus, setVaultStatus] = useState("...");
+
+  useEffect(() => {
+    bitwardenApi.status().then((vaultState) => {
+      if (vaultState.status == "unauthenticated") {
+        setVaultStatus("Logged out");
+      } else {
+        setVaultStatus(`Locked (${vaultState.userEmail})`);
+      }
+    });
+  }, []);
+
   async function onSubmit(values: { password: string }) {
+    if (values.password.length == 0) {
+      showToast(Toast.Style.Failure, "Failed to unlock vault.", "Missing password.");
+      return;
+    }
     try {
-      const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait");
-      const status = await bitwardenApi.status();
-      if (status == "unauthenticated") {
+      const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait.");
+      const state = await bitwardenApi.status();
+      if (state.status == "unauthenticated") {
         try {
           await bitwardenApi.login();
         } catch (error) {
-          showToast(Toast.Style.Failure, "Failed to unlock vault.", "Please your API Key and Secret.");
+          showToast(Toast.Style.Failure, "Failed to unlock vault.", "Please check your API Key and Secret.");
           return;
         }
       }
@@ -42,7 +58,7 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
       toast.hide();
       onUnlock(sessionToken);
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed to unlock vault", "Invalid credentials");
+      showToast(Toast.Style.Failure, "Failed to unlock vault.", "Invalid credentials.");
     }
   }
   return (
@@ -53,6 +69,7 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
         </ActionPanel>
       }
     >
+      <Form.Description title="Vault Status" text={vaultStatus} />
       <Form.PasswordField id="password" title="Master Password" />
     </Form>
   );

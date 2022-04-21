@@ -1,6 +1,6 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, List } from "@raycast/api";
 import useSWR from "swr";
-import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./utils";
+import { partitionTasksWithOverdue, getSectionsWithPriorities, getSectionsWithLabels } from "./helpers";
 import { todoist, handleError } from "./api";
 import { SectionWithTasks, SWRKeys, TodayGroupBy } from "./types";
 import TaskList from "./components/TaskList";
@@ -57,7 +57,11 @@ export default function Today() {
     sections = getSectionsWithLabels({ tasks: tasks || [], labels: labels || [] });
   }
 
-  return (
+  return tasks?.length === 0 ? (
+    <List>
+      <List.EmptyView title="Congratulations!" description="No tasks left for today." icon="🎉" />
+    </List>
+  ) : (
     <TaskList
       sections={sections}
       isLoading={(!tasks && !getTasksError) || (!projects && !getProjectsError)}

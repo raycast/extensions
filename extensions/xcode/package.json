@@ -87,6 +87,13 @@
       "subtitle": "Xcode",
       "description": "Removes the ~/Library/Caches/org.swift.swiftpm/repositories directory",
       "mode": "no-view"
+    },
+    {
+      "name": "delete-unsupported-simulators.command",
+      "title": "Delete Unsupported Simulators",
+      "subtitle": "Xcode",
+      "description": "Deletes devices that are not supported by the current Xcode SDK.",
+      "mode": "no-view"
     }
   ],
   "keywords": [

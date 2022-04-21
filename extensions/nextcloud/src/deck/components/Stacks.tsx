@@ -10,7 +10,7 @@ export function Stacks({ boardId, boardName }: { boardId: number; boardName: str
     <List isLoading={isLoading} navigationTitle={`Board: ${boardName}`}>
       {stacks.map((stack) => (
         <List.Section key={stack.id} title={stack.title} subtitle={String(stacks.length)}>
-          {stack.cards.map((card) => (
+          {stack.cards?.map((card) => (
             <Card key={card.id} card={card} boardId={boardId} />
           ))}
         </List.Section>
