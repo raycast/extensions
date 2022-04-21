@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { checkDirectoryValid, getLocalStorage, isEmpty } from "../utils/common-utils";
 import { LocalStorageKey } from "../utils/constants";
 import { DirectoryInfo, DirectoryType } from "../utils/directory-info";
-import { LocalStorage } from "@raycast/api";
+import { Alert, confirmAlert, LocalStorage } from "@raycast/api";
 
 //for refresh useState
 export const refreshNumber = () => {
@@ -37,4 +37,26 @@ export const getHiddenFiles = (folderFirst: boolean, refresh: number) => {
   }, [fetchData]);
 
   return { localHiddenDirectory: localHiddenDirectory, loading: loading };
+};
+
+export const alertDialog = async (
+  title: string,
+  message: string,
+  confirmTitle: string,
+  confirmAction: () => void,
+  cancelAction: () => void
+) => {
+  const options: Alert.Options = {
+    title: title,
+    message: message,
+    primaryAction: {
+      title: confirmTitle,
+      onAction: confirmAction,
+    },
+    dismissAction: {
+      title: "Cancel",
+      onAction: () => cancelAction,
+    },
+  };
+  await confirmAlert(options);
 };

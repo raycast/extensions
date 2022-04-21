@@ -5,7 +5,7 @@ import { parse } from "path";
 import { DirectoryType, tagDirectoryPath, tagDirectoryType } from "./utils/directory-info";
 import { showHiddenFiles } from "./utils/hide-files-utils";
 import { LocalStorageKey } from "./utils/constants";
-import { getHiddenFiles, refreshNumber } from "./hooks/hooks";
+import { alertDialog, getHiddenFiles, refreshNumber } from "./hooks/hooks";
 
 export default function Command() {
   const [tag, setTag] = useState<string>("All");
@@ -126,11 +126,21 @@ export default function Command() {
                           title={"Show All Files"}
                           shortcut={{ modifiers: ["shift", "cmd"], key: "s" }}
                           onAction={async () => {
-                            const filePaths = localHiddenDirectory.map((file) => file.path.replace(" ", `" "`));
-                            showHiddenFiles(filePaths.join(" "));
-                            await LocalStorage.clear();
-                            setRefresh(refreshNumber());
-                            await showToast(Toast.Style.Success, "Success!", "All Files have been shown.");
+                            await alertDialog(
+                              "⚠️Warning",
+                              "Do you want to show all files?",
+                              "Show All",
+                              async () => {
+                                const filePaths = localHiddenDirectory.map((file) => file.path.replace(" ", `" "`));
+                                showHiddenFiles(filePaths.join(" "));
+                                await LocalStorage.clear();
+                                setRefresh(refreshNumber());
+                                await showToast(Toast.Style.Success, "Success!", "All Files have been shown.");
+                              },
+                              async () => {
+                                await showToast(Toast.Style.Failure, "Error!", `Operation is canceled.`);
+                              }
+                            );
                           }}
                         />
                       </ActionPanel.Section>
