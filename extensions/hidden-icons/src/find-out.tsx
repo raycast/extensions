@@ -4,13 +4,6 @@ import { allCountDownTime, getHistoryScore, getRandomFindOutIcon, modes } from "
 import ScorePage from "./score-page";
 import { clearInterval } from "timers";
 
-/**
- *
- *@user koinzhang
- *@email koinzhang@gmail.com
- *@date 2022-04-21
- *
- **/
 export default function Command() {
   const [difficultyMode, setDifficultyMode] = useState<string>("easy");
   const [findOutIcons, setFindOutIcons] = useState<string[]>([]);
