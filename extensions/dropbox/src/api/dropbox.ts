@@ -27,7 +27,7 @@ export async function dbxListAnyFiles(req: { path: string; query: string; cursor
       return await dbxListFiles(req.path);
     }
   } catch (e) {
-    throw convertError(e);
+    throw new Error(convertError(e));
   }
 }
 
@@ -93,14 +93,22 @@ export function getFilePreviewURL(path: string): string {
   return `https://www.dropbox.com/preview${path}`;
 }
 
-function convertError(e: any): Error {
-  let msg = "";
+function convertError(e: any): string {
   try {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    msg = e.error;
+    if ("error" in e.error && ".tag" in e.error["error"]) {
+      return e.error["error"][".tag"];
+    }
   } catch (_) {
-    msg = `${e}`;
+    //
   }
-  return new Error(msg);
+
+  try {
+    if ("message" in e && e["message"]) {
+      return e["message"];
+    }
+  } catch (_) {
+    //
+  }
+
+  return `${e}`;
 }
