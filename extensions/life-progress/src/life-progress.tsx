@@ -206,9 +206,9 @@ function LifeProgressListItem(props: {
               icon={"🎂"}
               onAction={async () => {
                 if (cakeIndex == index) {
-                  await showToast(Toast.Style.Success, "Find the 🎂, enjoy it!");
+                  await showToast(Toast.Style.Success, "You found the 🎂, enjoy it!");
                 } else {
-                  await showToast(Toast.Style.Failure, "🎂 is not here.");
+                  await showToast(Toast.Style.Failure, "The 🎂 is not here. Look again.");
                 }
               }}
             />
