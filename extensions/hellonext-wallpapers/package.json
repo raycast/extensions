@@ -21,7 +21,7 @@
       "name": "random-hellonext-wallpaper",
       "title": "Random Hellonext Wallpaper",
       "description": "Set a random wallpaper from Hellonext as your desktop wallpaper.",
-      "mode": "view"
+      "mode": "no-view"
     }
   ],
   "preferences": [
