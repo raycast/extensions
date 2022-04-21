@@ -32,7 +32,7 @@ export class Bitwarden {
 
     // Check the CLI has been set to the preference
     this.initPromise = LocalStorage.getItem<string>("cliServer").then(async (cliServer) => {
-      if ((cliServer || null) !== serverUrl) {
+      if ((cliServer || "") !== serverUrl) {
         await this.setServerUrl(serverUrl);
       }
     });

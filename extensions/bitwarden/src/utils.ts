@@ -9,10 +9,10 @@ export function codeBlock(content: string): string {
   return "```\n" + content + "\n```";
 }
 
-export function getServerUrlPreference(): string | null {
+export function getServerUrlPreference(): string {
   const { serverUrl } = getPreferenceValues<Preferences>();
   if (serverUrl === "" || serverUrl === "bitwarden.com" || serverUrl === "https://bitwarden.com") {
-    return null;
+    return "";
   }
   return serverUrl;
 }

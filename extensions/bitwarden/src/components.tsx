@@ -62,7 +62,7 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
       confirmAlert({
         icon: Icon.ExclamationMark,
         title: "Restart Required",
-        message: "Self hosted server URL has been changed since the extension was opened.",
+        message: "Self hosted server URL preference has been changed since the extension was opened.",
         primaryAction: {
           title: "Close Extension",
         },
