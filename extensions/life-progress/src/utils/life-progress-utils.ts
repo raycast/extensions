@@ -1,7 +1,17 @@
 import { environment } from "@raycast/api";
 import { preferences } from "./common-utils";
 
-const birthTime = new Date(preferences().birthday);
+export const getBirthDay = () => {
+  if (new Date(preferences().birthday).getTime() > new Date().getTime()) {
+    return { isValid: false, birthTime: new Date("1995-01-01") };
+  }
+  if (new Date(preferences().birthday).getTime() < new Date("1950-01-01").getTime()) {
+    return { isValid: false, birthTime: new Date("1995-01-01") };
+  }
+  return { isValid: true, birthTime: new Date(preferences().birthday) };
+};
+
+const birthTime = getBirthDay().birthTime;
 const deathTime = new Date(birthTime.getFullYear() + 80, birthTime.getMonth(), birthTime.getDate());
 const now = new Date();
 const { weekStart } = preferences();

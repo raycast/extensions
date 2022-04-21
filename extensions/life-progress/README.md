@@ -7,8 +7,9 @@
 
 **Preference:**
 
+- Show Quote of the Day: Show quote of the day
+- Time Left First: Show Time Left first
 - Birthday: Your birthday
   - If you want to **Find Cake** right away, you can set the month and day of your birthday to today
 - Week Start: Weekly start date
 - Icon Theme: Date icon style theme
-

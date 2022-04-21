@@ -15,8 +15,8 @@
       "type": "checkbox",
       "required": true,
       "title": "UI Preference",
-      "label": "Show Daily Word",
-      "description": "Display the sentence of the day. There may be some delay, so if you can't stand it, you can choose to turn this option off.",
+      "label": "Show Quote of the Day",
+      "description": "Show quote of the day.",
       "default": true
     },
     {
@@ -33,6 +33,7 @@
       "required": true,
       "title": "Birthday",
       "description": "For calculating life progress, the birthday's format is 1995-01-01.",
+      "placeholder": "1995-01-01",
       "default": "1995-01-01"
     },
     {

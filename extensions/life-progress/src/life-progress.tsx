@@ -10,9 +10,10 @@ import {
   timeLeftFirstList,
   timeLeftLastList,
   tagsTimeLeftLast,
-} from "./life-progress-utils";
-import { buildBingImageURL, ShanBeiResponseData, WordOfTheDay } from "./shanbei-utils";
-import { isEmpty, preferences } from "./common-utils";
+  getBirthDay,
+} from "./utils/life-progress-utils";
+import { buildBingImageURL, ShanBeiResponseData, WordOfTheDay } from "./utils/shanbei-utils";
+import { isEmpty, preferences } from "./utils/common-utils";
 
 export default function main() {
   const [lifeProgresses, setLifeProgresses] = useState<LifeProgress[]>([]);
@@ -32,6 +33,9 @@ export default function main() {
 
   useEffect(() => {
     async function _fetchLifeProgress() {
+      if (!getBirthDay().isValid) {
+        await showToast(Toast.Style.Failure, "Your birthday was reset to the default: 1995-01-01");
+      }
       const { lifeProgresses, cakeIndex } = getLifeProgress();
       setLifeProgresses(lifeProgresses);
       setCakeIndex(cakeIndex);
@@ -84,13 +88,15 @@ export default function main() {
           title={"🎉🎉🎉 Happy Birthday! Go find your birthday cake! 🎉🎉🎉"}
           actions={
             <ActionPanel>
-              <Action
-                title={"Hide 🎂"}
-                icon={"🎂"}
-                onAction={() => {
-                  setRefreshList(!refreshList);
-                }}
-              />
+              {isBirthDay() && (
+                <Action
+                  title={"Rummage Here"}
+                  icon={"🎂"}
+                  onAction={async () => {
+                    await showToast(Toast.Style.Failure, "🎂 is not here.");
+                  }}
+                />
+              )}
             </ActionPanel>
           }
         />
@@ -201,7 +207,6 @@ function LifeProgressListItem(props: {
               onAction={async () => {
                 if (cakeIndex == index) {
                   await showToast(Toast.Style.Success, "Find the 🎂, enjoy it!");
-                  setRefreshList(!refreshList);
                 } else {
                   await showToast(Toast.Style.Failure, "🎂 is not here.");
                 }
