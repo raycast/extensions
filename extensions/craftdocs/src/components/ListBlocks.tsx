@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import {Action, ActionPanel, List } from "@raycast/api";
 import { Block } from "../hooks/useSearch";
 
 type ListBlocksParams = {
@@ -22,5 +22,10 @@ const BlockItem = ({ block }: { block: Block }) => (
     icon={block.entityType === "document" ? "📄" : "📑"}
     title={block.content}
     accessoryTitle={block.documentName}
+    actions={
+    <ActionPanel>
+      <Action.OpenInBrowser url={`craftdocs://open?blockId=${block.id}&spaceId=${block.spaceID}`} />
+    </ActionPanel>
+  }
   />
 );
