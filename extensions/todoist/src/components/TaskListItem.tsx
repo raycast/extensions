@@ -2,7 +2,7 @@ import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
 import { format } from "date-fns";
 import { Project, Task } from "@doist/todoist-api-typescript";
 import { ViewMode } from "../types";
-import { isRecurring, displayDueDate, isExactTimeTask } from "../utils";
+import { isRecurring, displayDueDate, isExactTimeTask } from "../helpers";
 import { priorities } from "../constants";
 import TaskDetail from "./TaskDetail";
 
@@ -18,20 +18,21 @@ export default function TaskListItem({ task, mode, projects }: TaskListItemProps
   const additionalListItemProps: Partial<List.Item.Props> & { keywords: string[]; accessories: List.Item.Accessory[] } =
     { keywords: [], accessories: [] };
 
-  switch (mode) {
-    case ViewMode.project:
-      if (task.due?.date) {
-        additionalListItemProps.accessories.push({ text: displayDueDate(task.due.date) });
+  if (mode === ViewMode.date || mode === ViewMode.search) {
+    if (projects && projects.length > 0) {
+      const project = projects.find((project) => project.id === task.projectId);
+
+      if (project) {
+        additionalListItemProps.accessories.push({ text: project.name });
+        additionalListItemProps.keywords.push(project.name);
       }
-      break;
-    case ViewMode.date:
-      if (projects && projects.length > 0) {
-        const project = projects.find((project) => project.id === task.projectId);
-        if (project) {
-          additionalListItemProps.accessories.push({ text: project.name });
-          additionalListItemProps.keywords.push(project.name);
-        }
-      }
+    }
+  }
+
+  if (mode === ViewMode.project || mode === ViewMode.search) {
+    if (task.due?.date) {
+      additionalListItemProps.accessories.push({ text: displayDueDate(task.due.date) });
+    }
   }
 
   if (isExactTimeTask(task)) {

@@ -8,8 +8,6 @@ export const preferences = () => {
   const preferencesMap = new Map(Object.entries(getPreferenceValues<Values>()));
   return {
     applyTo: preferencesMap.get("applyTo") as string,
-    screenshotName: preferencesMap.get("screenshotName") as string,
-    screenshotFormat: preferencesMap.get("screenshotFormat") as string,
   };
 };
 export const cachePath = environment.supportPath;

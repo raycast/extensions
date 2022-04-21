@@ -140,6 +140,21 @@ export const SitesSingleView = ({ site, server }: { site: ISite; server: IServer
               </ActionPanel>
             }
           />
+          <List.Item
+            id="open-in-ssh"
+            key="open-in-ssh"
+            title={`Open SSH connection (${site.username})`}
+            icon={Icon.Terminal}
+            accessoryTitle={`ssh://${site.username}@${server.ipAddress}`}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser
+                  title={`Open SSH Connection (${site.username})`}
+                  url={`ssh://${site.username}@${server.ipAddress}`}
+                />
+              </ActionPanel>
+            }
+          />
         </List.Section>
         <List.Section title="Site Additonal Information">
           {Object.entries({

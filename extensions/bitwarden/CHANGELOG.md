@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Isolate Extension] - 2022-04-18
+
+- Stop the bitwarden extension from interfering with the bitwarden CLI
+
 ## [Quick Copy] - 2022-04-08
 
 - allow copying item properties without using a dropdown

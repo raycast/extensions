@@ -1,5 +1,10 @@
 # Todoist Changelog
 
+## [New command for searching tasks] - 2022-04-13
+
+- Added a new command to search across all your tasks with the ability to filter by project
+- Added new scheduling options: "in two days" and "no due date"
+
 ## [More details and empty screens] - 2022-04-06
 
 - Added detailed view of a task with metadata: title, description, project, due date (with time if any), priority, labels
