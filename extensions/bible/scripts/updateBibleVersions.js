@@ -45,6 +45,7 @@ async function main() {
   const bibleVersionsFileLocation = path.join(__dirname, "../assets/bible-versions.json");
   const bibleVersions = await versions();
   await fs.writeFile(bibleVersionsFileLocation, JSON.stringify({ versions: bibleVersions }));
+  console.log(`[bible] Wrote ${bibleVersions.length} bible versions to ${bibleVersionsFileLocation}`);
 }
 
 if (require.main === module) {
