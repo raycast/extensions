@@ -1,6 +1,7 @@
 import { showToast, Form, ActionPanel, Toast, Action, Detail } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Bitwarden } from "./api";
+import { VaultState } from "./types";
 
 export function TroubleshootingGuide(): JSX.Element {
   showToast(Toast.Style.Failure, "Bitwarden CLI not found");
@@ -26,17 +27,21 @@ export function TroubleshootingGuide(): JSX.Element {
 
 export function UnlockForm(props: { onUnlock: (token: string) => void; bitwardenApi: Bitwarden }): JSX.Element {
   const { bitwardenApi, onUnlock } = props;
-  const [vaultStatus, setVaultStatus] = useState("...");
+  const [vaultState, setVaultState] = useState<VaultState | null>(null);
 
   useEffect(() => {
     bitwardenApi.status().then((vaultState) => {
-      if (vaultState.status == "unauthenticated") {
-        setVaultStatus("Logged out");
-      } else {
-        setVaultStatus(`Locked (${vaultState.userEmail})`);
-      }
+      setVaultState(vaultState);
     });
   }, []);
+
+  let userMessage = "...";
+  let serverMessage = "...";
+  if (vaultState) {
+    const { status, userEmail, serverUrl } = vaultState;
+    userMessage = status == "unauthenticated" ? "Logged out" : `Locked (${userEmail})`;
+    serverMessage = serverUrl || "Bitwarden Hosted";
+  }
 
   async function onSubmit(values: { password: string }) {
     if (values.password.length == 0) {
@@ -69,8 +74,9 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
         </ActionPanel>
       }
     >
-      <Form.Description title="Vault Status" text={vaultStatus} />
-      <Form.PasswordField id="password" title="Master Password" />
+      <Form.Description title="Server" text={serverMessage} />
+      <Form.Description title="Vault Status" text={userMessage} />
+      <Form.PasswordField autoFocus id="password" title="Master Password" />
     </Form>
   );
 }

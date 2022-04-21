@@ -89,6 +89,23 @@
       "title": "Privacy",
       "label": "Fetch Vault Items Icons",
       "description": "Whether to use a remote service owned by Bitwarden to fetch icons for vault items. If unchecked, built-in icons will be used."
+    },
+    {
+      "name": "serverUrl",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "title": "Bitwarden Server URL",
+      "description": "Optional: URL to use for self hosted servers.",
+      "placeholder": "https://bitwarden.com"
+    },
+    {
+      "name": "serverCertsPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Self-signed Certificates Path",
+      "description": "Self Hosted Server: Path to self-signed TLS certificate.",
+      "placeholder": "absolute/path/to/your/certs.pem"
     }
   ],
   "dependencies": {

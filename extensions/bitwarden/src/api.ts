@@ -1,27 +1,45 @@
-import { environment } from "@raycast/api";
+import { environment, getPreferenceValues, LocalStorage } from "@raycast/api";
 import { execa, ExecaChildProcess } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
-import { Item, PasswordGeneratorOptions, VaultState } from "./types";
+import { Item, PasswordGeneratorOptions, Preferences, VaultState } from "./types";
 import { getPasswordGeneratingArgs } from "./utils";
 
 export class Bitwarden {
   private env: Record<string, string>;
   cliPath: string;
-  constructor(clientId: string, clientSecret: string, cliPath: string) {
-    if (!cliPath) {
-      cliPath = process.arch == "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw";
+  initPromise: Promise<void>;
+
+  constructor() {
+    const { cliPath, clientId, clientSecret, serverUrl, serverCertsPath } = getPreferenceValues<Preferences>();
+    this.cliPath = cliPath || (process.arch == "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw");
+    if (!existsSync(this.cliPath)) {
+      throw new Error(`Bitwarden CLI not found at ${this.cliPath}`);
     }
-    if (!existsSync(cliPath)) {
-      throw new Error(`Bitwarden CLI not found at ${cliPath}`);
-    }
-    this.cliPath = cliPath;
+
     this.env = {
       BITWARDENCLI_APPDATA_DIR: environment.supportPath,
       BW_CLIENTSECRET: clientSecret.trim(),
       BW_CLIENTID: clientId.trim(),
       PATH: dirname(process.execPath),
     };
+
+    if (serverUrl && serverCertsPath) {
+      this.env["NODE_EXTRA_CA_CERTS"] = serverCertsPath;
+    }
+
+    // Check the CLI has been set to the preference
+    this.initPromise = LocalStorage.getItem<string>("cliServer").then(async (cliServer) => {
+      if ((cliServer || "") !== serverUrl) {
+        await this.setServerUrl(serverUrl);
+      }
+    });
+  }
+
+  async setServerUrl(url: string): Promise<void> {
+    // If URL is empty, set it to the default
+    await this.exec(["config", "server", url || "https://bitwarden.com"], undefined, false);
+    await LocalStorage.setItem("cliServer", url);
   }
 
   async sync(sessionToken: string): Promise<void> {
@@ -69,7 +87,12 @@ export class Bitwarden {
     return stdout;
   }
 
-  private async exec(args: string[], abortController?: AbortController): Promise<ExecaChildProcess> {
+  private async exec(
+    args: string[],
+    abortController?: AbortController,
+    waitForInit = true
+  ): Promise<ExecaChildProcess> {
+    if (waitForInit) await this.initPromise;
     return execa(this.cliPath, args, { env: this.env, input: "", signal: abortController?.signal });
   }
 }

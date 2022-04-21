@@ -43,9 +43,8 @@ function useSession() {
 }
 
 export default function Search() {
-  const { cliPath, clientId, clientSecret } = getPreferenceValues();
   try {
-    const api = new Bitwarden(clientId, clientSecret, cliPath);
+    const api = new Bitwarden();
     return <ItemList api={api} />;
   } catch (e) {
     return <TroubleshootingGuide />;
