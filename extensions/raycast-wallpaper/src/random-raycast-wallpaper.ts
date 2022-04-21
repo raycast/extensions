@@ -2,13 +2,6 @@ import { RaycastWallpaper, raycastWallpaperListURL } from "./utils/raycast-wallp
 import { setWallpaper } from "./utils/common-utils";
 import fetch, { AbortError } from "node-fetch";
 
-/**
- *
- *@user koinzhang
- *@email koinzhang@gmail.com
- *@date 2022-04-21
- *
- **/
 export default async () => {
   //get wallpaper list
   try {
