@@ -28,6 +28,7 @@ export function TroubleshootingGuide(): JSX.Element {
 export function UnlockForm(props: { onUnlock: (token: string) => void; bitwardenApi: Bitwarden }): JSX.Element {
   const { bitwardenApi, onUnlock } = props;
   const [vaultState, setVaultState] = useState<VaultState | null>(null);
+  const [isLoading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     bitwardenApi.status().then((vaultState) => {
@@ -49,6 +50,7 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
       return;
     }
     try {
+      setLoading(true);
       const toast = await showToast(Toast.Style.Animated, "Unlocking Vault...", "Please wait.");
       const state = await bitwardenApi.status();
       if (state.status == "unauthenticated") {
@@ -64,13 +66,16 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
       onUnlock(sessionToken);
     } catch (error) {
       showToast(Toast.Style.Failure, "Failed to unlock vault.", "Invalid credentials.");
+      setLoading(false);
     }
   }
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Unlock" onSubmit={onSubmit} shortcut={{ key: "enter", modifiers: [] }} />
+          {!isLoading && (
+            <Action.SubmitForm title="Unlock" onSubmit={onSubmit} shortcut={{ key: "enter", modifiers: [] }} />
+          )}
         </ActionPanel>
       }
     >
