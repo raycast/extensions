@@ -7,13 +7,6 @@ import { showHiddenFiles } from "./utils/hide-files-utils";
 import { LocalStorageKey } from "./utils/constants";
 import { alertDialog, getHiddenFiles, refreshNumber } from "./hooks/hooks";
 
-/**
- *
- *@user koinzhang
- *@email koinzhang@gmail.com
- *@date 2022-04-21
- *
- **/
 export default function Command() {
   const [tag, setTag] = useState<string>("All");
   const { folderFirst } = extensionPreferences();
