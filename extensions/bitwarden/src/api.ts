@@ -2,8 +2,9 @@ import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from
 import { execa, ExecaChildProcess } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
+import { DEFAULT_SERVER_URL } from "./const";
 import { Item, PasswordGeneratorOptions, Preferences, VaultState } from "./types";
-import { getPasswordGeneratingArgs } from "./utils";
+import { getPasswordGeneratingArgs, getServerUrlPreference } from "./utils";
 
 export class Bitwarden {
   private env: Record<string, string>;
@@ -11,7 +12,8 @@ export class Bitwarden {
   initPromise: Promise<void>;
 
   constructor() {
-    const { cliPath, clientId, clientSecret, serverUrl, serverCertsPath } = getPreferenceValues<Preferences>();
+    const { cliPath, clientId, clientSecret, serverCertsPath } = getPreferenceValues<Preferences>();
+    const serverUrl = getServerUrlPreference();
     this.cliPath = cliPath || (process.arch == "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw");
     if (!existsSync(this.cliPath)) {
       throw new Error(`Bitwarden CLI not found at ${this.cliPath}`);
@@ -30,7 +32,7 @@ export class Bitwarden {
 
     // Check the CLI has been set to the preference
     this.initPromise = LocalStorage.getItem<string>("cliServer").then(async (cliServer) => {
-      if ((cliServer || "") !== serverUrl) {
+      if ((cliServer || null) !== serverUrl) {
         await this.setServerUrl(serverUrl);
       }
     });
@@ -49,7 +51,7 @@ export class Bitwarden {
       } catch (error) {
         // Doesn't matter if we weren't logged in.
       }
-      await this.exec(["config", "server", url || "https://bitwarden.com"], { waitForInit: false });
+      await this.exec(["config", "server", url || DEFAULT_SERVER_URL], { waitForInit: false });
       await LocalStorage.setItem("cliServer", url);
 
       toast.style = Toast.Style.Success;
