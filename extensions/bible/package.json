@@ -63,9 +63,10 @@
     "typescript": "^4.4.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "yarn update-bible-versions && ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "update-bible-versions": "node ./scripts/updateBibleVersions.js"
   }
 }
