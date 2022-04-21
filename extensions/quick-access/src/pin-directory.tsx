@@ -4,13 +4,6 @@ import { DirectoryInfo, DirectoryType } from "./utils/directory-info";
 import { parse } from "path";
 import { LocalStorageKey } from "./utils/constants";
 
-/**
- *
- *@user koinzhang
- *@email koinzhang@gmail.com
- *@date 2022-04-21
- *
- **/
 export default async () => {
   await pinDirectory();
 };
