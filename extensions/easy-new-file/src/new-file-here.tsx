@@ -21,6 +21,13 @@ import { homedir } from "os";
 import { getTemplateFile, refreshNumber } from "./hooks/hooks";
 import { parse } from "path";
 
+/**
+ *
+ *@user koinzhang
+ *@email koinzhang@gmail.com
+ *@date 2022-04-21
+ *
+ **/
 export default function main() {
   const preference = preferences();
   const { push } = useNavigation();
