@@ -20,6 +20,13 @@ import { setShowDetailLocalStorage, ShowDetailKey } from "./utils/ui-utils";
 import path from "path";
 import { alertDialog, getCommonDirectory, getDirectoryInfo, getIsShowDetail, refreshNumber } from "./hooks/hooks";
 
+/**
+ *
+ *@user koinzhang
+ *@email koinzhang@gmail.com
+ *@date 2022-04-21
+ *
+ **/
 export default function CommonDirectory() {
   const { sortBy, showOpenDirectory } = commonPreferences();
   const { push } = useNavigation();
