@@ -102,7 +102,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.32.0",
+    "@raycast/api": "^1.33.1",
     "ts-md5": "^1.2.11"
   },
   "devDependencies": {
