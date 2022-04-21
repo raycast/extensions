@@ -15,13 +15,6 @@ import {
 import { buildBingImageURL, ShanBeiResponseData, WordOfTheDay } from "./utils/shanbei-utils";
 import { isEmpty, preferences } from "./utils/common-utils";
 
-/**
- *
- *@user koinzhang
- *@email koinzhang@gmail.com
- *@date 2022-04-21
- *
- **/
 export default function main() {
   const [lifeProgresses, setLifeProgresses] = useState<LifeProgress[]>([]);
   const [tag, setTag] = useState<string>("All");
@@ -104,7 +97,7 @@ export default function main() {
                       title={"Rummage Here"}
                       icon={"🎂"}
                       onAction={async () => {
-                        await showToast(Toast.Style.Failure, "🎂 is not here.");
+                        await showToast(Toast.Style.Failure, "The 🎂 is not here.", "Try again somewhere else.");
                       }}
                     />
                   )}
@@ -194,9 +187,9 @@ function LifeProgressListItem(props: { cakeIndex: number; index: number; lifePro
               icon={"🎂"}
               onAction={async () => {
                 if (cakeIndex == index) {
-                  await showToast(Toast.Style.Success, "You found the 🎂, enjoy it!");
+                  await showToast(Toast.Style.Success, "You found the 🎂", "Enjoy it!");
                 } else {
-                  await showToast(Toast.Style.Failure, "The 🎂 is not here. Look again.");
+                  await showToast(Toast.Style.Failure, "The 🎂 is not here.", "Try again somewhere else.");
                 }
               }}
             />
