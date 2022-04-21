@@ -69,12 +69,10 @@ export default function Command() {
   };
 
   const cleanUp = () => {
-    setSelectedIssue(undefined);
     setDescription("");
     setHours("0");
     setMinutes("0");
     setSeconds("0");
-    setStartedAt(new Date());
   };
 
   return (
@@ -87,7 +85,7 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="projectId" title="Project Id" onChange={setSelectedProject} storeValue>
+      <Form.Dropdown id="projectId" title="Project Id" onChange={setSelectedProject}>
         {projects?.map((item) => (
           <Form.DropdownItem key={item.key} value={item.key} title={item.name} />
         ))}
