@@ -78,7 +78,7 @@ export default function Command() {
       }}
       actions={prefs.enterToSearch && <ActionPanel>{<Action title="Search" onAction={performSearch} />}</ActionPanel>}
     >
-      {searchResult && detailContent ? (
+      {searchResult && searchResult.passages.length > 0 && detailContent ? (
         <List.Item
           title={createReferenceList(searchResult)}
           detail={<List.Item.Detail markdown={detailContent.markdown} />}
