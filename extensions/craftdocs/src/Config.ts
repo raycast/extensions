@@ -1,31 +1,32 @@
-import {homedir} from "os";
-import {readdirSync} from "fs";
+import { homedir } from "os";
+import { readdirSync } from "fs";
 import path from "path";
 
-const indexPath = '~/Library/Containers/com.lukilabs.lukiapp/Data/Library/Application Support/com.lukilabs.lukiapp/Search';
+const indexPath =
+  "~/Library/Containers/com.lukilabs.lukiapp/Data/Library/Application Support/com.lukilabs.lukiapp/Search";
 
 type SpaceSQLite = {
-    path: string;
-    spaceID: string;
-    primary: boolean;
-}
+  path: string;
+  spaceID: string;
+  primary: boolean;
+};
 
 export default class Config {
-    spaces: SpaceSQLite[];
+  spaces: SpaceSQLite[];
 
-    constructor() {
-        console.debug("config constructor");
+  constructor() {
+    console.debug("config constructor");
 
-        const pwd = indexPath.replace('~', homedir());
+    const pwd = indexPath.replace("~", homedir());
 
-        this.spaces = readdirSync(pwd)
-            .filter(str => str.match(/sqlite$/))
-            .map(str => this.makeSpaceFromStr(pwd, str));
-    }
+    this.spaces = readdirSync(pwd)
+      .filter((str) => str.match(/sqlite$/))
+      .map((str) => this.makeSpaceFromStr(pwd, str));
+  }
 
-    private makeSpaceFromStr = (pwd: string, str: string): SpaceSQLite => ({
-        primary: !str.includes('||'),
-        path: path.join(pwd, str),
-        spaceID: str.match(/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/g)?.pop() || ''
-    })
+  private makeSpaceFromStr = (pwd: string, str: string): SpaceSQLite => ({
+    primary: !str.includes("||"),
+    path: path.join(pwd, str),
+    spaceID: str.match(/\w{8}-\w{4}-\w{4}-\w{4}-\w{12}/g)?.pop() || "",
+  });
 }

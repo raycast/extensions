@@ -1,21 +1,26 @@
-import {List} from "@raycast/api";
-import {Block} from "../hooks/useSearch";
+import { List } from "@raycast/api";
+import { Block } from "../hooks/useSearch";
 
 type ListBlocksParams = {
-    isLoading: boolean;
-    onSearchTextChange: (text: string) => void;
-    blocks: Block[];
+  isLoading: boolean;
+  onSearchTextChange: (text: string) => void;
+  blocks: Block[];
 };
 
-export default function ListBlocks({isLoading, onSearchTextChange, blocks}: ListBlocksParams) {
-    return <List isLoading={isLoading} throttle={true} onSearchTextChange={onSearchTextChange}>
-        {blocks.map((block) => <BlockItem key={block.id} block={block}/>)}
+export default function ListBlocks({ isLoading, onSearchTextChange, blocks }: ListBlocksParams) {
+  return (
+    <List isLoading={isLoading} throttle={true} onSearchTextChange={onSearchTextChange}>
+      {blocks.map((block) => (
+        <BlockItem key={block.id} block={block} />
+      ))}
     </List>
+  );
 }
 
-const BlockItem = ({block}: { block: Block }) =>
-    <List.Item
-        icon={block.entityType === 'document' ? '📄' : '📑'}
-        title={block.content}
-        accessoryTitle={block.documentName}
-    />
+const BlockItem = ({ block }: { block: Block }) => (
+  <List.Item
+    icon={block.entityType === "document" ? "📄" : "📑"}
+    title={block.content}
+    accessoryTitle={block.documentName}
+  />
+);
