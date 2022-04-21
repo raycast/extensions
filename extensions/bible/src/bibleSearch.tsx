@@ -17,6 +17,11 @@ export default function Command() {
   const [searchResult, setSearchResult] = React.useState<ReferenceSearchResult | undefined>(undefined);
 
   const performSearch = React.useCallback(async () => {
+    if (query.search === "") {
+      setSearchResult(undefined);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const result = await search(query.search, query.version, { includeVerseNumbers: prefs.includeVerseNumbers });
@@ -32,15 +37,13 @@ export default function Command() {
 
   React.useEffect(() => {
     // Don't search when query changes if the user only wants to search when they press enter.
-    // Also don't search if the query is too short.
-    if (prefs.enterToSearch || query.search.length <= 2) {
-      return;
+    if (!prefs.enterToSearch) {
+      performSearch();
     }
-    performSearch();
-  }, [performSearch, query.search.length]);
+  }, [performSearch]);
 
   const detailContent = React.useMemo(() => {
-    if (!searchResult || searchResult.passages.length === 0) return null;
+    if (!searchResult?.passages.length) return null;
     return { markdown: createMarkdown(searchResult), clipboardText: createClipboardText(searchResult) };
   }, [searchResult]);
 
@@ -95,7 +98,12 @@ export default function Command() {
             </ActionPanel>
           }
         />
-      ) : null}
+      ) : (
+        <List.EmptyView
+          title={query.search === "" ? "Type To Search" : isLoading ? "Searching..." : "No Results"}
+          icon="../assets/extension-icon-64.png"
+        />
+      )}
     </List>
   );
 }
