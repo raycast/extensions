@@ -93,7 +93,6 @@ export const getSelectedFile = async () => {
     });
     return selectedFile;
   } catch (e) {
-    await showToast(Toast.Style.Failure, "Fetch nothing.");
     return selectedFile;
   }
 };
