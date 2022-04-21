@@ -28,3 +28,6 @@ Get and set Bing wallpapers within 15 days.
   - Regular: 2K (2560x1440)
   - Small: 1K (1920x1080)
 - *Auto Download Wallpapers*
+
+I would like to thank [EGGSY](https://www.raycast.com/eggsy).
+Part of the code borrowed from his extension [Unsplash](https://www.raycast.com/eggsy/unsplash).
