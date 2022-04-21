@@ -17,13 +17,6 @@ import {
 } from "./util/shortcut";
 import { variables } from "./util/variable";
 
-/**
- *
- *@user koinzhang
- *@email koinzhang@gmail.com
- *@date 2022-04-21
- *
- **/
 export default function CreateShortcut(props: {
   shortcut: Shortcut | undefined;
   updateListUseState: [number[], React.Dispatch<React.SetStateAction<number[]>>];
