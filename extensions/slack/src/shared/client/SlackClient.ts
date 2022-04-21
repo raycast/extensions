@@ -198,7 +198,10 @@ export class SlackClient {
       conversationInfos.map((conversationInfo) =>
         slackWebClient.conversations.history({
           channel: conversationInfo.channel!.id!,
-          oldest: conversationInfo.channel!.last_read,
+          oldest:
+            parseFloat(conversationInfo.channel!.last_read || "0") !== 0
+              ? conversationInfo.channel!.last_read
+              : undefined,
         })
       )
     );

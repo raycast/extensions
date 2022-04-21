@@ -118,8 +118,7 @@ function UnreadMessagesOverview() {
 
       {selectedConversations &&
         selectedConversations.length > 0 &&
-        !!unreadConversations &&
-        unreadConversations.length === 0 && (
+        (!unreadConversations || unreadConversations.length === 0) && (
           <List.EmptyView
             actions={
               <ActionPanel>
