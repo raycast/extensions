@@ -1,16 +1,16 @@
 import { Action, ActionPanel, Clipboard, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
-import { ResponseDataWeiBo, TrendWeiBo, weiboSearchUrl, weiboTrendApi } from "./utils/trend-utils";
+import {
+  douyinSearchUrl,
+  ResponseDataWeiBo,
+  TrendWeiBo,
+  weiboSearchUrl,
+  weiboTrendApi,
+  zhihuSearchUrl,
+} from "./utils/trend-utils";
 import { isEmpty, listIcon, listIconDark } from "./utils/common-utils";
 
-/**
- *
- *@user koinzhang
- *@email koinzhang@gmail.com
- *@date 2022-04-21
- *
- **/
 export default function TrendOfWeibo() {
   const [trends, setTrends] = useState<TrendWeiBo[]>([]);
   const [searchContent, setSearchContent] = useState<string>("");

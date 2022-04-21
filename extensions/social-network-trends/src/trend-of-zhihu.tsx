@@ -1,16 +1,9 @@
 import { Action, ActionPanel, Clipboard, Icon, List, open, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import fetch, { AbortError } from "node-fetch";
-import { ResponseDataZhiHu, TrendZhiHu, zhihuSearchUrl, zhihuTrendApi } from "./utils/trend-utils";
+import { douyinSearchUrl, ResponseDataZhiHu, TrendZhiHu, zhihuSearchUrl, zhihuTrendApi } from "./utils/trend-utils";
 import { isEmpty, listIcon, listIconDark } from "./utils/common-utils";
 
-/**
- *
- *@user koinzhang
- *@email koinzhang@gmail.com
- *@date 2022-04-21
- *
- **/
 export default function TrendOfZhihu() {
   const [trends, setTrends] = useState<TrendZhiHu[]>([]);
   const [searchContent, setSearchContent] = useState<string>("");
