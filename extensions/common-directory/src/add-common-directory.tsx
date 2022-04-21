@@ -73,7 +73,14 @@ export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<R
         </ActionPanel>
       }
     >
-      <Form.TextArea id={"path"} title={"Path"} placeholder={"/xxx/xxx"} value={path} onChange={setPath} />
+      <Form.TextArea
+        id={"path"}
+        title={"Path"}
+        placeholder={"/xxx/xxx"}
+        value={path}
+        onChange={setPath}
+        info={"The selected directory path is automatically fetched when entering the extension."}
+      />
       <Form.TextField id={"alias"} title={"Alias"} placeholder={"Optional"} value={alias} onChange={setAlias} />
       <Form.Description title={"Name"} text={name} />
     </Form>
