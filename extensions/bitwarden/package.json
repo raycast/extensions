@@ -76,7 +76,7 @@
     {
       "name": "fetchFavicons",
       "type": "checkbox",
-      "required": false,
+      "required": true,
       "default": true,
       "title": "Privacy",
       "label": "Fetch Vault Items Icons",
