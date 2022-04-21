@@ -21,7 +21,8 @@
 /extensions/betterdiscord-search                     @TheCommieAxolotl
 /extensions/biaodian                                 @gasolin
 /extensions/binance                                  @grzegorzkrukowski
-/extensions/bitbucket                                @Lp-Francois
+/extensions/bing-wallpaper                           @CheatGZ
+/extensions/bitbucket                                @Lp-Francois @esarmstrong
 /extensions/bitly-url-shortener                      @blessanm86
 /extensions/bitrise                                  @ubuntudroid
 /extensions/bitwarden                                @pomdtr @daniel-stoneuk @jomifepe @andreaselia
@@ -31,11 +32,13 @@
 /extensions/bttv-emote                               @Aayush9029
 /extensions/bugmenot                                 @Yukaii
 /extensions/buildkite                                @mskelton
+/extensions/bundesliga                               @anhthang
 /extensions/cache-control-builder                    @rkusa
 /extensions/calendar                                 @fuksman
 /extensions/calendly                                 @eluce2
 /extensions/can-i-use                                @thomaslombart
 /extensions/canvascast                               @YodaLightsabr
+/extensions/capture-raycast-metadata                 @CheatGZ
 /extensions/chakra-ui-docs                           @pgvr
 /extensions/change-case                              @es183923
 /extensions/change-scroll-direction                  @gregoralbrecht
@@ -57,6 +60,7 @@
 /extensions/consoledev                               @Rawnly
 /extensions/conventional-comments                    @krzysztofzuraw
 /extensions/copy-gcp-icons                           @pomdtr
+/extensions/copy-path                                @CheatGZ
 /extensions/cpf-cnpj-generator                       @gstvds
 /extensions/cratecast                                @gleich
 /extensions/cricketcast                              @sampoder
@@ -129,10 +133,12 @@
 /extensions/harvest                                  @eluce2
 /extensions/hashnode                                 @dpnick
 /extensions/hazeover                                 @ratoru
+/extensions/hellonext-wallpapers                     @imkarthikk
 /extensions/helm-docs                                @tiagomichaelsousa
 /extensions/heroku                                   @Yukaii
 /extensions/hexlify                                  @gkpln3
 /extensions/homeassistant                            @tonka3000 @altrdev
+/extensions/how-long-to-beat                         @Cronos87
 /extensions/http-status-codes                        @AlexVanderbist
 /extensions/huggingcast                              @ragnorc
 /extensions/iata-code-decoder                        @timrogers
@@ -140,7 +146,7 @@
 /extensions/imdb                                     @ryan-exe
 /extensions/inertiajs-documentation                  @danyelkeddah
 /extensions/itch-io                                  @Aayush9029
-/extensions/jetbrains                                @gdsmith
+/extensions/jetbrains                                @gdsmith @gdsmith
 /extensions/jira-search                              @svenwiegand
 /extensions/jisho                                    @dmacdermott
 /extensions/json-format                              @Destiner
@@ -158,6 +164,7 @@
 /extensions/kinopoisk                                @mattisssa
 /extensions/kubectx                                  @oktaysenkan
 /extensions/kubernetes-docs                          @rpvsilva
+/extensions/laliga                                   @anhthang
 /extensions/laracasts                                @danyelkeddah
 /extensions/laravel-docs                             @indykoning @indykoning @indykoning
 /extensions/laravel-forge                            @KevinBatdorf @macbookandrew
@@ -165,12 +172,15 @@
 /extensions/laravel-nova                             @a-drew
 /extensions/large-type                               @gon250 @FezVrasta
 /extensions/lark                                     @tmkx
+/extensions/lark-applink                             @chyroc
 /extensions/lastfm                                   @eggsy
+/extensions/life-progress                            @CheatGZ
 /extensions/linguee                                  @geekdada
 /extensions/linux-command                            @jaywcjlove
 /extensions/lobsters                                 @dev99problems
 /extensions/logseq                                   @futantan
 /extensions/lorem-ipsum                              @AntonNiklasson
+/extensions/macupdater                               @karlsander
 /extensions/markdown-reference                       @codedbyjordan
 /extensions/microsoft-edge                           @KartikKumarSahoo @bromanko
 /extensions/mlb-scores                               @jso8910
@@ -209,6 +219,7 @@
 /extensions/pokedex                                  @anhthang
 /extensions/polished                                 @LekoArts
 /extensions/port-manager                             @lucaschultz
+/extensions/premier-league                           @anhthang
 /extensions/productboard                             @honzatmn
 /extensions/producthunt                              @ragnorc
 /extensions/qr-code-scanner                          @StevenRCE0

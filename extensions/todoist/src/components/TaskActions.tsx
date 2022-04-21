@@ -3,7 +3,7 @@ import { addDays } from "date-fns";
 import { Task, UpdateTaskArgs } from "@doist/todoist-api-typescript";
 import { mutate } from "swr";
 import { SWRKeys } from "../types";
-import { getAPIDate, getToday } from "../utils";
+import { getAPIDate, getToday } from "../helpers";
 import { priorities } from "../constants";
 import { todoist, handleError } from "../api";
 import TaskEdit from "./TaskEdit";
@@ -11,7 +11,8 @@ import TaskEdit from "./TaskEdit";
 const schedules = [
   { name: "Today", amount: 0 },
   { name: "Tomorrow", amount: 1 },
-  { name: "Next Week", amount: 7 },
+  { name: "In two days", amount: 2 },
+  { name: "In a week", amount: 7 },
 ];
 
 interface TaskActionsProps {
@@ -84,6 +85,8 @@ export default function TaskActions({ task }: TaskActionsProps): JSX.Element {
               onAction={() => updateTask(task, { dueDate: getAPIDate(addDays(getToday(), amount)) })}
             />
           ))}
+
+          <Action title="No due date" onAction={() => updateTask(task, { dueString: "no due date" })} />
         </ActionPanel.Submenu>
 
         <ActionPanel.Submenu
