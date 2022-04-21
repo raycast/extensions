@@ -2,13 +2,15 @@ import { environment } from "@raycast/api";
 import { preferences } from "./common-utils";
 
 export const getBirthDay = () => {
-  if (new Date(preferences().birthday).getTime() > new Date().getTime()) {
+  const nowDate = new Date();
+  const preferencesBirthday = preferences().birthday.replace(" ", "");
+  if (new Date(preferencesBirthday).getTime() > nowDate.getTime()) {
     return { isValid: false, birthTime: new Date("1995-01-01") };
   }
-  if (new Date(preferences().birthday).getTime() < new Date("1950-01-01").getTime()) {
+  if (new Date(preferencesBirthday).getTime() < new Date(`${nowDate.getFullYear() - 110}-01-01`).getTime()) {
     return { isValid: false, birthTime: new Date("1995-01-01") };
   }
-  return { isValid: true, birthTime: new Date(preferences().birthday) };
+  return { isValid: true, birthTime: new Date(preferencesBirthday) };
 };
 
 const birthTime = getBirthDay().birthTime;
