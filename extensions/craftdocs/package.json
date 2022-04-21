@@ -6,10 +6,11 @@
   "icon": "command-icon.png",
   "author": "bgnfu7re",
   "license": "MIT",
+  "categories": ["Productivity"],
   "commands": [
     {
       "name": "search",
-      "title": "Search Craft Docs",
+      "title": "Craft Document Search",
       "description": "Search documents in Craft",
       "mode": "view"
     }
