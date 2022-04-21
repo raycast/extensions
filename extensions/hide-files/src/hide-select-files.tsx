@@ -2,6 +2,13 @@ import { showHUD } from "@raycast/api";
 import { exec } from "child_process";
 import { getSelectedHiddenFiles, putFileOnHidePanel } from "./utils/hide-files-utils";
 
+/**
+ *
+ *@user koinzhang
+ *@email koinzhang@gmail.com
+ *@date 2022-04-21
+ *
+ **/
 export default async () => {
   const { fileSystemItems, hiddenFiles } = await getSelectedHiddenFiles();
   if (fileSystemItems.length === 0) {
