@@ -7,6 +7,13 @@ import { homedir } from "os";
 import { buildCachePath, checkCache, deleteCache, setWallpaper } from "./utils/common-utils";
 import fileUrl from "file-url";
 
+/**
+ *
+ *@user koinzhang
+ *@email koinzhang@gmail.com
+ *@date 2022-04-21
+ *
+ **/
 export default function CommonDirectory() {
   const [raycastWallpaper, setRaycastWallpaper] = useState<RaycastWallpaper[]>([]);
 
