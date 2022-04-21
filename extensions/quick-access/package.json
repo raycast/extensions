@@ -24,13 +24,21 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "showDeleteAction",
+          "name": "autoCopyLatestFile",
           "type": "checkbox",
           "required": true,
           "title": "Advanced Preference",
+          "label": "Auto Copy Latest File",
+          "description": "Automatically copy the latest files in the topmost directory.",
+          "default": true
+        },
+        {
+          "name": "showDeleteAction",
+          "type": "checkbox",
+          "required": true,
           "label": "Show Delete File Action",
           "description": "Show permanent file deletion action, please check carefully.",
-          "default": false
+          "default": true
         },
         {
           "name": "fileShowNumber",

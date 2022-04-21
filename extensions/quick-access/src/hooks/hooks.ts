@@ -9,8 +9,9 @@ import {
   isEmpty,
 } from "../utils/common-utils";
 import { LocalStorageKey, SortBy } from "../utils/constants";
-import { Alert, confirmAlert, LocalStorage } from "@raycast/api";
+import { Alert, confirmAlert, LocalStorage, showHUD, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
+import { copyFileByPath } from "../utils/applescript-utils";
 
 //for refresh useState
 export const refreshNumber = () => {
@@ -18,7 +19,7 @@ export const refreshNumber = () => {
 };
 
 //get local directory with files
-export const localDirectoryWithFiles = (refresh: number) => {
+export const localDirectoryWithFiles = (autoCopyLatestFile: boolean, refresh: number) => {
   const [pinnedDirectory, setPinnedDirectory] = useState<DirectoryInfo[]>([]);
   const [directoryWithFiles, setDirectoryWithFiles] = useState<DirectoryWithFileInfo[]>([]);
   const [directoryTags, setDirectoryTags] = useState<string[]>([]);
@@ -61,6 +62,19 @@ export const localDirectoryWithFiles = (refresh: number) => {
     setDirectoryWithFiles(_pinnedDirectoryContent);
 
     setLoading(false);
+    if (autoCopyLatestFile && _pinnedDirectoryContent.length > 0) {
+      const noEmptyDirectoryContent = _pinnedDirectoryContent.filter((value) => {
+        return value.files.length != 0;
+      });
+      if (noEmptyDirectoryContent.length > 0) {
+        const copyResult = await copyFileByPath(noEmptyDirectoryContent[0].files[0].path);
+        if (isEmpty(copyResult)) {
+          await showToast(Toast.Style.Success, `${noEmptyDirectoryContent[0].files[0].name} is copied to clipboard!`);
+        } else {
+          await showToast(Toast.Style.Failure, copyResult + ".");
+        }
+      }
+    }
     await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify(validDirectory));
     //init applescript
     await runAppleScript("");
@@ -78,12 +92,18 @@ export const localDirectoryWithFiles = (refresh: number) => {
   };
 };
 
-export const alertDialog = async (confirmAction: () => void, cancelAction: () => void) => {
+export const alertDialog = async (
+  title: string,
+  message: string,
+  confirmTitle: string,
+  confirmAction: () => void,
+  cancelAction: () => void
+) => {
   const options: Alert.Options = {
-    title: "⚠️Warning",
-    message: "Deleted files cannot be recovered. Do you want to Delete?",
+    title: title,
+    message: message,
     primaryAction: {
-      title: "Delete",
+      title: confirmTitle,
       onAction: confirmAction,
     },
     dismissAction: {

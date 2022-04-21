@@ -12,9 +12,12 @@ import fse from "fs-extra";
 export default function Command() {
   const [tag, setTag] = useState<string>("All");
   const [refresh, setRefresh] = useState<number>(0);
-  const { showDeleteAction } = commonPreferences();
+  const { autoCopyLatestFile, showDeleteAction } = commonPreferences();
 
-  const { pinnedDirectory, directoryWithFiles, directoryTags, loading } = localDirectoryWithFiles(refresh);
+  const { pinnedDirectory, directoryWithFiles, directoryTags, loading } = localDirectoryWithFiles(
+    autoCopyLatestFile,
+    refresh
+  );
 
   return (
     <List
@@ -105,12 +108,22 @@ export default function Command() {
                               title={`Remove All Directory`}
                               shortcut={{ modifiers: ["shift", "cmd"], key: "backspace" }}
                               onAction={async () => {
-                                await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify([]));
-                                setRefresh(refreshNumber());
-                                await showToast(
-                                  Toast.Style.Success,
-                                  "Success!",
-                                  `${pinnedDirectory[directoryIndex].name} is removed.`
+                                await alertDialog(
+                                  "⚠️Warning",
+                                  "Do you want to remove all directories?",
+                                  "Remove All",
+                                  async () => {
+                                    await LocalStorage.setItem(LocalStorageKey.LOCAL_PIN_DIRECTORY, JSON.stringify([]));
+                                    setRefresh(refreshNumber());
+                                    await showToast(
+                                      Toast.Style.Success,
+                                      "Success!",
+                                      `${pinnedDirectory[directoryIndex].name} is removed.`
+                                    );
+                                  },
+                                  async () => {
+                                    await showToast(Toast.Style.Failure, "Error!", `Operation is canceled.`);
+                                  }
                                 );
                               }}
                             />
@@ -203,10 +216,13 @@ function ActionsOnFile(props: {
         <Action
           icon={Icon.Trash}
           title={"Delete File Permanently"}
-          shortcut={{ modifiers: ["shift", "ctrl"], key: "backspace" }}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onAction={async () => {
             try {
               await alertDialog(
+                "⚠️Warning",
+                "Deleted files cannot be recovered. Do you want to Delete?",
+                "Delete",
                 async () => {
                   fse.removeSync(fileInfo.path);
                   setRefresh(refreshNumber());
