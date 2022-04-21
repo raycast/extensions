@@ -14,16 +14,20 @@ export interface ListFileResp {
 }
 
 export async function dbxListAnyFiles(req: { path: string; query: string; cursor: string }): Promise<ListFileResp> {
-  if (req.cursor) {
-    if (req.query) {
-      return await dbxSearchFilesContinue(req.cursor);
+  try {
+    if (req.cursor) {
+      if (req.query) {
+        return await dbxSearchFilesContinue(req.cursor);
+      }
+      return await dbxListFilesContinue(req.cursor);
+    } else {
+      if (req.query) {
+        return await dbxSearchFiles(req.query);
+      }
+      return await dbxListFiles(req.path);
     }
-    return await dbxListFilesContinue(req.cursor);
-  } else {
-    if (req.query) {
-      return await dbxSearchFiles(req.query);
-    }
-    return await dbxListFiles(req.path);
+  } catch (e) {
+    throw convertError(e);
   }
 }
 
@@ -87,4 +91,16 @@ function convertSearchResult(res: files.SearchV2Result): ListFileResp {
 
 export function getFilePreviewURL(path: string): string {
   return `https://www.dropbox.com/preview${path}`;
+}
+
+function convertError(e: any): Error {
+  let msg = "";
+  try {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    msg = e.error;
+  } catch (_) {
+    msg = `${e}`;
+  }
+  return new Error(msg);
 }

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { files } from "dropbox";
 import { useEffect, useState } from "react";
 import { dbxListAnyFiles } from "../api";
@@ -29,6 +29,10 @@ export default function Directory(props: IDirectoryProps) {
         setLoading(false);
       } catch (e) {
         setLoading(false);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `${e}`,
+        });
       }
     };
     f();
