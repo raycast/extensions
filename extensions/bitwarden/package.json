@@ -74,14 +74,6 @@
       "placeholder": "client_secret"
     },
     {
-      "name": "cliPath",
-      "type": "textfield",
-      "required": false,
-      "title": "Bitwarden CLI Installation Path",
-      "description": "Location of the local Bitwarden CLI installation. Defaults to '/usr/local/bin/bw' on Intel and '/opt/homebrew/bin/bw' on M1.",
-      "placeholder": "CLI Installation Path"
-    },
-    {
       "name": "fetchFavicons",
       "type": "checkbox",
       "required": false,
@@ -89,6 +81,14 @@
       "title": "Privacy",
       "label": "Fetch Vault Items Icons",
       "description": "Whether to use a remote service owned by Bitwarden to fetch icons for vault items. If unchecked, built-in icons will be used."
+    },
+    {
+      "name": "cliPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Bitwarden CLI Installation Path",
+      "description": "Location of the local Bitwarden CLI installation. Defaults to '/usr/local/bin/bw' on Intel and '/opt/homebrew/bin/bw' on M1.",
+      "placeholder": "CLI Installation Path"
     },
     {
       "name": "serverUrl",
