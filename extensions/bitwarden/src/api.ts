@@ -45,11 +45,11 @@ export class Bitwarden {
     // If URL is empty, set it to the default
     try {
       try {
-        await this.exec(["logout"], undefined, false);
+        await this.exec(["logout"], { waitForInit: false });
       } catch (error) {
         // Doesn't matter if we weren't logged in.
       }
-      await this.exec(["config", "server", url || "https://bitwarden.com"], undefined, false);
+      await this.exec(["config", "server", url || "https://bitwarden.com"], { waitForInit: false });
       await LocalStorage.setItem("cliServer", url);
 
       toast.style = Toast.Style.Success;
@@ -107,15 +107,15 @@ export class Bitwarden {
 
   async generatePassword(options?: PasswordGeneratorOptions, abortController?: AbortController): Promise<string> {
     const args = options ? getPasswordGeneratingArgs(options) : [];
-    const { stdout } = await this.exec(["generate", ...args], abortController);
+    const { stdout } = await this.exec(["generate", ...args], { abortController });
     return stdout;
   }
 
   private async exec(
     args: string[],
-    abortController?: AbortController,
-    waitForInit = true
+    options: { abortController?: AbortController; waitForInit?: boolean } = {}
   ): Promise<ExecaChildProcess> {
+    const { abortController, waitForInit = true } = options;
     if (waitForInit) await this.initPromise;
     return execa(this.cliPath, args, { env: this.env, input: "", signal: abortController?.signal });
   }
