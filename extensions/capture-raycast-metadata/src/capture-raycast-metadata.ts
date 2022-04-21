@@ -2,13 +2,6 @@ import { Alert, confirmAlert } from "@raycast/api";
 import { captureRaycastMetadata, captureResultToast, getRaycastLocation, getRaycastSize } from "./utils/common-utils";
 import { RAYCAST_WINDOW_HEIGHT, RAYCAST_WINDOW_WIDTH } from "./utils/constants";
 
-/**
- *
- *@user koinzhang
- *@email koinzhang@gmail.com
- *@date 2022-04-21
- *
- **/
 export default async () => {
   const _raycastLocation = await getRaycastLocation();
   const _raycastSize = await getRaycastSize();
