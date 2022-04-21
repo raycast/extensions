@@ -1,4 +1,4 @@
-import { environment, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { environment, getPreferenceValues, LocalStorage, showToast, Toast } from "@raycast/api";
 import { execa, ExecaChildProcess } from "execa";
 import { existsSync } from "fs";
 import { dirname } from "path/posix";
@@ -37,9 +37,33 @@ export class Bitwarden {
   }
 
   async setServerUrl(url: string): Promise<void> {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Switching server...",
+      message: "Bitwarden server preference changed.",
+    });
     // If URL is empty, set it to the default
-    await this.exec(["config", "server", url || "https://bitwarden.com"], undefined, false);
-    await LocalStorage.setItem("cliServer", url);
+    try {
+      try {
+        await this.exec(["logout"], undefined, false);
+      } catch (error) {
+        // Doesn't matter if we weren't logged in.
+      }
+      await this.exec(["config", "server", url || "https://bitwarden.com"], undefined, false);
+      await LocalStorage.setItem("cliServer", url);
+
+      toast.style = Toast.Style.Success;
+      toast.title = "Success!";
+      toast.message = "Bitwarden server changed.";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Unable to switch server.";
+      if (error instanceof Error) {
+        toast.message = error.message;
+      } else {
+        toast.message = "Unknown error occurred";
+      }
+    }
   }
 
   async sync(sessionToken: string): Promise<void> {
