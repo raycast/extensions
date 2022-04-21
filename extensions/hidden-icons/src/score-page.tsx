@@ -3,6 +3,13 @@ import { useEffect, useState } from "react";
 import { getNumberCanvas } from "./utils/common-utils";
 import { HistoryScore } from "./utils/find-out-utils";
 
+/**
+ *
+ *@user koinzhang
+ *@email koinzhang@gmail.com
+ *@date 2022-04-21
+ *
+ **/
 export default function ScorePage(props: { myScore: HistoryScore; historyScore: HistoryScore[] }) {
   const { mode, score } = props.myScore;
   const historyScore = props.historyScore;
