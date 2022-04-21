@@ -1,7 +1,7 @@
-import { showToast, Form, ActionPanel, Toast, Action, Detail } from "@raycast/api";
+import { showToast, Form, ActionPanel, Toast, Action, Detail, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Bitwarden } from "./api";
-import { VaultState } from "./types";
+import { Preferences, VaultState } from "./types";
 
 export function TroubleshootingGuide(): JSX.Element {
   showToast(Toast.Style.Failure, "Bitwarden CLI not found");
@@ -26,6 +26,7 @@ export function TroubleshootingGuide(): JSX.Element {
 }
 
 export function UnlockForm(props: { onUnlock: (token: string) => void; bitwardenApi: Bitwarden }): JSX.Element {
+  const { serverUrl: serverUrlPreference } = getPreferenceValues<Preferences>();
   const { bitwardenApi, onUnlock } = props;
   const [vaultState, setVaultState] = useState<VaultState | null>(null);
   const [isLoading, setLoading] = useState<boolean>(false);
@@ -41,8 +42,11 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
   if (vaultState) {
     const { status, userEmail, serverUrl } = vaultState;
     userMessage = status == "unauthenticated" ? "Logged out" : `Locked (${userEmail})`;
-    serverMessage = serverUrl || "Bitwarden Hosted";
+    serverMessage = serverUrl || "...";
   }
+
+  // Show server field if preference set OR server URL is not the default (something wrong)
+  const shouldShowServer = !!(serverUrlPreference || vaultState?.serverUrl);
 
   async function onSubmit(values: { password: string }) {
     if (values.password.length == 0) {
@@ -57,7 +61,11 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
         try {
           await bitwardenApi.login();
         } catch (error) {
-          showToast(Toast.Style.Failure, "Failed to unlock vault.", "Please check your API Key and Secret.");
+          showToast(
+            Toast.Style.Failure,
+            "Failed to unlock vault.",
+            `Please check your ${shouldShowServer && "Server URL, "}API Key and Secret.`
+          );
           return;
         }
       }
@@ -69,6 +77,7 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
       setLoading(false);
     }
   }
+
   return (
     <Form
       actions={
@@ -79,7 +88,7 @@ export function UnlockForm(props: { onUnlock: (token: string) => void; bitwarden
         </ActionPanel>
       }
     >
-      <Form.Description title="Server" text={serverMessage} />
+      {shouldShowServer && <Form.Description title="Server URL" text={serverMessage} />}
       <Form.Description title="Vault Status" text={userMessage} />
       <Form.PasswordField autoFocus id="password" title="Master Password" />
     </Form>
