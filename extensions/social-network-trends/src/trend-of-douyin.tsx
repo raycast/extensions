@@ -4,6 +4,13 @@ import fetch, { AbortError } from "node-fetch";
 import { douyinSearchUrl, douyinTrendApi, ResponseDataDouYin, TrendDouYin } from "./utils/trend-utils";
 import { isEmpty, listIcon, listIconDark } from "./utils/common-utils";
 
+/**
+ *
+ *@user koinzhang
+ *@email koinzhang@gmail.com
+ *@date 2022-04-21
+ *
+ **/
 export default function TrendOfDouyin() {
   const [trends, setTrends] = useState<TrendDouYin[]>([]);
   const [searchContent, setSearchContent] = useState<string>("");
