@@ -1,3 +1,9 @@
+export type Preferences = {
+  cliPath: string;
+  clientId: string;
+  clientSecret: string;
+};
+
 export type VaultStatus = "unauthenticated" | "locked" | "unlocked";
 export type VaultState = {
   userEmail?: string;
