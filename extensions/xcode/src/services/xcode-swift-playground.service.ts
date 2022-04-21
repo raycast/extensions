@@ -7,6 +7,7 @@ import dedent from "dedent";
 import { XcodeSwiftPlaygroundTemplate } from "../models/swift-playground/xcode-swift-playground-template.model";
 import { existsAsync, makeDirectoryAsync, removeDirectoryAsync, writeFileAsync } from "../shared/fs-async";
 import { joinPathComponents } from "../shared/join-path-components";
+import { getValidPath } from "../shared/check-path-or-increment";
 
 /**
  * XcodeSwiftPlaygroundService
@@ -50,34 +51,21 @@ export class XcodeSwiftPlaygroundService {
     forceCreate: boolean
   ): Promise<XcodeSwiftPlayground> {
     // Initialize Playground Path
-    let playgroundPath = joinPathComponents(
-      // Replace tilde (~) with home directory
+    const playgroundPath = await getValidPath(
       parameters.location.replace(/^~/, os.homedir()),
-      `${parameters.name}.playground`
+      parameters.name,
+      forceCreate
     );
-    // Check if Playground already exists
-    if (await existsAsync(playgroundPath)) {
-      // Return existing Swift Playground
-      if (forceCreate) {
-        const dateString = new Date()
-          .toISOString()
-          .replace(/[^0-9]/g, "")
-          .slice(0, -3);
-        playgroundPath = joinPathComponents(
-          // Replace tilde (~) with home directory
-          parameters.location.replace(/^~/, os.homedir()),
-          `${parameters.name}${dateString}.playground`
-        );
-      } else {
-        return {
-          name: parameters.name,
-          path: playgroundPath,
-          alreadyExists: true,
-          open: () => {
-            return execAsync(`open ${playgroundPath}`).then();
-          },
-        };
-      }
+
+    if (!forceCreate && (await existsAsync(playgroundPath))) {
+      return {
+        name: parameters.name,
+        path: playgroundPath,
+        alreadyExists: true,
+        open: () => {
+          return execAsync(`open ${playgroundPath}`).then();
+        },
+      };
     }
     // Make playground directory
     await makeDirectoryAsync(playgroundPath);

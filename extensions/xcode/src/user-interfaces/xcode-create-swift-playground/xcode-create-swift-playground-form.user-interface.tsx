@@ -31,15 +31,15 @@ export function xcodeCreateSwiftPlaygroundForm(
       actions={
         <ActionPanel>
           <SubmitFormAction
-            title={"Create Swift Playground"}
-            onSubmit={(formValues) => {
-              onFormSubmit(formValues, xcodeSwiftPlaygroundService, navigation, true);
-            }}
-          />
-          <SubmitFormAction
             title={"Open or create Swift Playground"}
             onSubmit={(formValues) => {
               onFormSubmit(formValues, xcodeSwiftPlaygroundService, navigation, false);
+            }}
+          />
+          <SubmitFormAction
+            title={"Create Swift Playground"}
+            onSubmit={(formValues) => {
+              onFormSubmit(formValues, xcodeSwiftPlaygroundService, navigation, true);
             }}
           />
         </ActionPanel>

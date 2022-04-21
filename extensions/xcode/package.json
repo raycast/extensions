@@ -81,7 +81,7 @@
           "name": "playgroundDefaultLocation",
           "type": "textfield",
           "required": true,
-          "placeholder": "/tmp",
+          "placeholder": "~/Desktop",
           "default": "~/Desktop",
           "title": "Default location",
           "description": "Set the default location in which you want to save your Playgrounds. Ensure to provide an existing path or you will get an error on create."
