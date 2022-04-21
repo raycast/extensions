@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import Config from "../Config";
-import useAppExists from "./useAppExists";
+import {UseAppExists} from "./useAppExists";
 
-export default function useConfig() {
-  const [state, setState] = useState({ configLoading: true, config: null as Config | null });
-  const { appExists, appExistsLoading } = useAppExists();
+export type UseConfig = {
+  configLoading: boolean;
+  config: Config | null;
+};
+
+export default function useConfig({appExistsLoading, appExists}: UseAppExists) {
+  const [state, setState] = useState<UseConfig>({ configLoading: true, config: null as Config | null });
 
   useEffect(() => {
     if (appExistsLoading) return;

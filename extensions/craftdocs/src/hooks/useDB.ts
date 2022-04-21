@@ -1,18 +1,22 @@
-import useConfig from "./useConfig";
+import {UseConfig} from "./useConfig";
 import initSqlJs, { Database } from "../../assets/sql-wasm-fts5.js";
 import { join } from "path";
 import { readFileSync } from "fs";
 import { environment } from "@raycast/api";
 import { useEffect, useState } from "react";
 
+export type UseDB = {
+  databasesLoading: boolean;
+  databases: DatabaseWrap[];
+};
+
 type DatabaseWrap = {
   spaceID: string;
   database: Database;
 };
 
-export default function useDB() {
-  const { config, configLoading } = useConfig();
-  const [{ databases, databasesLoading }, setState] = useState({
+export default function useDB({config, configLoading}: UseConfig) {
+  const [{ databases, databasesLoading }, setState] = useState<UseDB>({
     databasesLoading: true,
     databases: [] as DatabaseWrap[],
   });
