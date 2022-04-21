@@ -9,6 +9,13 @@ import { copyFileByPath } from "./utils/applescript-utils";
 import { alertDialog, localDirectoryWithFiles, refreshNumber } from "./hooks/hooks";
 import fse from "fs-extra";
 
+/**
+ *
+ *@user koinzhang
+ *@email koinzhang@gmail.com
+ *@date 2022-04-21
+ *
+ **/
 export default function Command() {
   const [tag, setTag] = useState<string>("All");
   const [refresh, setRefresh] = useState<number>(0);
