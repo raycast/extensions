@@ -64,7 +64,7 @@ export default function CommonDirectory() {
   }, [bingWallpaperHD]);
 
   return (
-    <List isShowingDetail={true} isLoading={bingWallpaperHD.length === 0} searchBarPlaceholder={"Search WallPaper"}>
+    <List isShowingDetail={true} isLoading={bingWallpaperHD.length === 0} searchBarPlaceholder={"Search wallpaper"}>
       {bingWallpaperHD?.map((bingImage, index) => {
         return (
           <List.Item
