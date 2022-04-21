@@ -32,7 +32,7 @@
       "type": "dropdown",
       "data": [
         {
-          "title": "Active Desktop",
+          "title": "Active Monitor",
           "value": "current"
         },
         {
