@@ -22,6 +22,13 @@ import { CODERS_SHORTCUTS } from "./build-in/coder";
 import { TIMES_SHORTCUTS } from "./build-in/time";
 import { FORMAT_SHORTCUTS } from "./build-in/format";
 
+/**
+ *
+ *@user koinzhang
+ *@email koinzhang@gmail.com
+ *@date 2022-04-21
+ *
+ **/
 export default function SearchShortcut() {
   const [userShortcuts, setUserShortcuts] = useState<Shortcut[]>([]);
   const [allShortcuts, setAllShortcuts] = useState<Shortcut[]>([]);

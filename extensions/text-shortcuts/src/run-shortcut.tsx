@@ -4,6 +4,13 @@ import { handleLiveTemplate, runShortcut, Taction } from "./util/shortcut";
 import { fetchItemInput } from "./util/input";
 import { TactionActions, tactionForms } from "./create-shortcut";
 
+/**
+ *
+ *@user koinzhang
+ *@email koinzhang@gmail.com
+ *@date 2022-04-21
+ *
+ **/
 export default function CreateShortcut() {
   const [tactions, setTactions] = useState<Taction[]>([]);
 
