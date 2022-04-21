@@ -6,13 +6,6 @@ import { codeFileTypes, documentFileTypes, scriptFileTypes, TemplateType } from 
 import { getFileType, initRunApplescript } from "./hooks/hooks";
 import { parse } from "path";
 
-/**
- *
- *@user koinzhang
- *@email koinzhang@gmail.com
- *@date 2022-04-21
- *
- **/
 export default function NewFileWithName(props: {
   newFileType: { section: string; index: number };
   templateFiles: TemplateType[];

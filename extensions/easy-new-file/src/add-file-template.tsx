@@ -4,13 +4,6 @@ import { checkIsFile, getChooseFile, getFileInfo, getSelectedFile } from "./util
 import fse from "fs-extra";
 import { refreshNumber } from "./hooks/hooks";
 
-/**
- *
- *@user koinzhang
- *@email koinzhang@gmail.com
- *@date 2022-04-21
- *
- **/
 export default function AddFileTemplate(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {
   const setRefresh =
     typeof props.setRefresh == "undefined"
