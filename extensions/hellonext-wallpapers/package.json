@@ -28,7 +28,7 @@
     {
       "name": "applyTo",
       "title": "Set Wallpaper To",
-      "description": "Set the wallpaper to which screen.",
+      "description": "Set the wallpaper to which monitor.",
       "type": "dropdown",
       "data": [
         {
