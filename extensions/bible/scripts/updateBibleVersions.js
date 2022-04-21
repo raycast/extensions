@@ -6,7 +6,7 @@ const cheerio = require("cheerio");
 
 /**
  * Fetches the bible versions from the biblegateway.com website
- * @returns {Promise<[string, string}[]>}
+ * @returns {Promise<[string, string][]>} An array of [version full name, version abbreviation] tuples
  */
 async function versions() {
   const response = await axios.get("https://biblegateway.com/passage?interface=print");
