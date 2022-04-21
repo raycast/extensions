@@ -36,7 +36,7 @@ export default function main() {
               <Action.Push title={`Browse ${topic.title}`} target={<TopicDetail topic={topic} />} />
             </ActionPanel>
           }
-          accessories={[{ text: topic.filepath, icon: Icon.Finder }]}
+          accessories={[{ text: topic.filepath }]}
         />
       ))}
     </List>
