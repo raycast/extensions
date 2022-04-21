@@ -40,7 +40,7 @@ export default function CommonDirectory() {
   }, []);
 
   return (
-    <List isShowingDetail={true} isLoading={raycastWallpaper.length === 0} searchBarPlaceholder={"Search WallPaper"}>
+    <List isShowingDetail={true} isLoading={raycastWallpaper.length === 0} searchBarPlaceholder={"Search wallpaper"}>
       {raycastWallpaper.map((value, index) => {
         return (
           <List.Item
