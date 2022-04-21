@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import {UseDB} from "./useDB";
+import { UseDB } from "./useDB";
 
 export type Block = {
   id: string;
@@ -26,7 +26,7 @@ ORDER BY customRank
 LIMIT ?
 `;
 
-export default function useSearch({databasesLoading, databases}: UseDB, text: string) {
+export default function useSearch({ databasesLoading, databases }: UseDB, text: string) {
   const [state, setState] = useState({ resultsLoading: true, results: [] as Block[] });
 
   useEffect(() => {

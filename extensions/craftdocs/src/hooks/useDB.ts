@@ -1,4 +1,4 @@
-import {UseConfig} from "./useConfig";
+import { UseConfig } from "./useConfig";
 import initSqlJs, { Database } from "../../assets/sql-wasm-fts5.js";
 import { join } from "path";
 import { readFileSync } from "fs";
@@ -15,7 +15,7 @@ type DatabaseWrap = {
   database: Database;
 };
 
-export default function useDB({config, configLoading}: UseConfig) {
+export default function useDB({ config, configLoading }: UseConfig) {
   const [{ databases, databasesLoading }, setState] = useState<UseDB>({
     databasesLoading: true,
     databases: [] as DatabaseWrap[],
