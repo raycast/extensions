@@ -1,6 +1,6 @@
-import {List} from "@raycast/api";
 import {useState} from "react";
 import useSearch from "./hooks/useSearch";
+import ListBlocks from "./components/ListBlocks";
 
 // noinspection JSUnusedGlobalSymbols
 export default function search() {
@@ -8,7 +8,9 @@ export default function search() {
 
     const {resultsLoading, results} = useSearch(query);
 
-    return <List isLoading={resultsLoading} throttle={true} onSearchTextChange={setQuery}>
-        {results.map((block) => <List.Item key={block.id} title={block.content}/>)}
-    </List>;
+    return <ListBlocks
+        isLoading={resultsLoading}
+        onSearchTextChange={setQuery}
+        blocks={results}
+    />;
 }

@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import useDB from "./useDB";
 
-type Block = {
+export type Block = {
     id: string;
     spaceID: string;
     content: string;
@@ -36,16 +36,45 @@ export default function useSearch(text: string) {
         setState(prev => ({...prev, resultsLoading: true}))
 
         const matchQuery = buildMatchQuery(text);
-        const databasesResponse = matchQuery && matchQuery.length > 0
-            ? databases.map(db => db.exec(searchQuery, [matchQuery, limit]))
-            : databases.map(db => db.exec(searchQueryOnEmptyParams, [limit]));
+        const [query, params] = matchQuery.length > 0
+            ? [searchQuery, [matchQuery, limit]]
+            : [searchQueryOnEmptyParams, [limit]];
 
-        const blocks = databasesResponse
-            .map(databaseResponse => databaseResponse.map(row => row.values))
-            .flat(2)
-            .map(([id, content, entityType, documentID]) => ({id, content, entityType, documentID} as Block));
+        const blocksOfSpaces = databases.map(({database, spaceID}) => {
+                const blocks = database
+                    .exec(query, params)
+                    .map(res => res.values)
+                    .flat()
+                    .map(([id, content, entityType, documentID]) => ({
+                        id,
+                        content,
+                        entityType,
+                        documentID,
+                        spaceID
+                    } as Block));
 
-        setState({resultsLoading: false, results: blocks});
+                const documentIDs = [
+                    ...new Set(
+                        blocks
+                            .filter(block => block.entityType !== 'document')
+                            .map(block => block.documentID)
+                    )
+                ];
+
+                const placeholders = new Array(documentIDs.length).fill('?').join(', ');
+
+                const sql = `select documentId, content from BlockSearch where entityType = 'document' and documentId in (${placeholders})`;
+                database
+                    .exec(sql, documentIDs)
+                    .map(res => res.values)
+                    .flat()
+                    .map(([documentID, content]) => blocks.filter(block => block.documentID === documentID).forEach(block => block.documentName = content as string))
+
+                return blocks;
+            }
+        );
+
+        setState({resultsLoading: false, results: blocksOfSpaces.flat()});
     }, [databasesLoading, text]);
 
     return state;

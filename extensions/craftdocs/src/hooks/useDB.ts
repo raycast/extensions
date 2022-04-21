@@ -5,9 +5,17 @@ import {readFileSync} from "fs";
 import {environment} from "@raycast/api";
 import {useEffect, useState} from "react";
 
+type DatabaseWrap = {
+    spaceID: string;
+    database: Database;
+};
+
 export default function useDB() {
     const {config, configLoading} = useConfig();
-    const [state, setState] = useState({databasesLoading: true, databases: [] as Database[]});
+    const [{databases, databasesLoading}, setState] = useState({
+        databasesLoading: true,
+        databases: [] as DatabaseWrap[]
+    });
 
     useEffect(() => {
         if (configLoading) return;
@@ -16,11 +24,14 @@ export default function useDB() {
         console.debug('init dbs')
 
         Promise
-            .all(config.spaces.map(space => loadDb(space.path)))
-            .then(databases => setState({databases, databasesLoading: false}));
+            .all(config.spaces.map(space => loadDb(space.path).then(db => ({db, space}))))
+            .then(wraps => setState({
+                databases: wraps.map(wrap => ({database: wrap.db, spaceID: wrap.space.spaceID})),
+                databasesLoading: false
+            }));
     }, [configLoading]);
 
-    return state;
+    return {databases, databasesLoading, spaces: config?.spaces};
 }
 
 const loadDb = (path: string): Promise<Database> =>
