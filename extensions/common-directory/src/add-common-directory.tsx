@@ -38,7 +38,7 @@ export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<R
 
   return (
     <Form
-      navigationTitle={"Add Directory"}
+      navigationTitle={"Add Common Directory"}
       actions={
         <ActionPanel>
           <Action
@@ -73,13 +73,19 @@ export default function AddCommonDirectory(props: { setRefresh: React.Dispatch<R
         </ActionPanel>
       }
     >
+      <Form.Description
+        title="Information"
+        text={`Directory added will automatically be available in the Open Common Directory and Send File to Directory commands.`}
+      />
       <Form.TextArea
         id={"path"}
         title={"Path"}
         placeholder={"/xxx/xxx"}
         value={path}
         onChange={setPath}
-        info={"The selected directory path is automatically fetched when entering the extension."}
+        info={
+          "Insert the full path of the directory. If you select a directory before opening this command, its path is automatically added."
+        }
       />
       <Form.TextField id={"alias"} title={"Alias"} placeholder={"Optional"} value={alias} onChange={setAlias} />
       <Form.Description title={"Name"} text={name} />
