@@ -5,6 +5,9 @@
   "description": "Search MDN Web Docs",
   "icon": "icon.png",
   "author": "krzysztofzuraw",
+  "contributors": [
+    "OBQun"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -13,6 +16,62 @@
       "subtitle": "MDN",
       "description": "Search MDN Web Docs",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "locale",
+      "description": "Search result language.",
+      "type": "dropdown",
+      "required": true,
+      "title": "Locale",
+      "data": [
+        {
+          "value": "de",
+          "title": "Deutsch"
+        },
+        {
+          "value": "en-US",
+          "title": "English (US)"
+        },
+        {
+          "value": "es",
+          "title": "Español"
+        },
+        {
+          "value": "fr",
+          "title": "Français"
+        },
+        {
+          "value": "ja",
+          "title": "日本語"
+        },
+        {
+          "value": "ko",
+          "title": "한국어"
+        },
+        {
+          "value": "pl",
+          "title": "Polski"
+        },
+        {
+          "value": "pt-BR",
+          "title": "Português (do Brasil)"
+        },
+        {
+          "value": "ru",
+          "title": "Русский"
+        },
+        {
+          "value": "zh-CN",
+          "title": "中文(简体)"
+        },
+        {
+          "value": "zh-TW",
+          "title": "正體中文 (繁體)"
+        }
+      ],
+      "default": "en-US"
     }
   ],
   "dependencies": {
